@@ -69,13 +69,7 @@ void Disks::init()
 
   SP::TimeDiscretisation timedisc_;
   SP::Simulation simulation_;
-  SP::NonSmoothDynamicalSystem nsds_;
   SP::FrictionContact osnspb_;
-
-  DynamicalSystemsSet allDS_;
-  InteractionsSet allInteractions_;
-
-
 
   // User-defined main parameters
 
@@ -172,6 +166,13 @@ void Disks::init()
     SP::SiconosMatrix Disks;
     Disks.reset(new SimpleMatrix("disks.dat", true));
 
+    // -- OneStepIntegrators --
+    SP::OneStepIntegrator osi;
+    osi.reset(new Moreau(theta));
+
+    // -- Model --
+    _model.reset(new Model(t0, T));
+
     for (unsigned int i = 0; i < Disks->size(0); i++)
     {
       R = Disks->getValue(i, 2);
@@ -199,22 +200,17 @@ void Disks::init()
       FExt->setValue(1, -m * g);
       body->setFExtPtr(FExt);
 
-      allDS_.insert(body);
+      // add the dynamical system to the one step integrator
+      osi->insertDynamicalSystem(body);
+
+      // add the dynamical system in the non smooth dynamical system
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
 
     }
 
 
 
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    nsds_.reset(new NonSmoothDynamicalSystem(allDS_, allInteractions_));
 
-    // -------------
-    // --- Model ---
-    // -------------
-    _model.reset(new Model(t0, T));
-    _model->setNonSmoothDynamicalSystemPtr(nsds_); // set NonSmoothDynamicalSystem of this model
 
     // ------------------
     // --- Simulation ---
@@ -222,12 +218,6 @@ void Disks::init()
 
     // -- Time discretisation --
     timedisc_.reset(new TimeDiscretisation(t0, h));
-
-    simulation_.reset(new TimeStepping(timedisc_));
-
-    // -- OneStepIntegrators --
-    SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(allDS_, theta));
 
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
@@ -245,8 +235,11 @@ void Disks::init()
 
     osnspb_->setKeepLambdaAndYState(true);  // inject previous solution
 
+    // -- Simulation --
+    simulation_.reset(new TimeStepping(timedisc_));
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
+
     //simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
@@ -255,9 +248,7 @@ void Disks::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.9, 2));
 
-    _playground.reset(new SpaceFilter(3, 6, nsds_, nslaw, _plans, _moving_plans));
-
-    nsds_->topology()->initialize();
+    _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
 
     _model->initialize(simulation_);
 
