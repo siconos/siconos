@@ -133,21 +133,19 @@ protected:
   std::ofstream statOut;
 
   /**
-   * bool, option specifying if a critere of relative convergence is used. Default value is false.
-   *
-   *
+   * bool, option specifying if a critere of relative convergence is
+   * used. Default value is false.
    */
   bool mUseRelativeConvergenceCriterion;
   /**
-   * bool used to remind if the relative convergence held(useful for the newton-check-convergence). Modified only if mUseRelativeConvergenceCriterion is true.
-   *
-   *
+   * bool used to remind if the relative convergence held(useful for
+   * the newton-check-convergence). Modified only if
+   * mUseRelativeConvergenceCriterion is true.
    */
   bool mRelativeConvergenceCriterionHeld;
   /**
-   *double, relative tolerence. Used only if mUseRelativeConvergenceCriterion is true.
-   *
-   *
+   *double, relative tolerence. Used only if
+   *mUseRelativeConvergenceCriterion is true.
    */
   double mRelativeConvergenceTol;
 
@@ -541,7 +539,8 @@ public:
 
 
   /**
-   * set the option to specify if a relative convergence citeron must be used to stop the Newton iterations.
+   * set the option to specify if a relative convergence citeron must
+   * be used to stop the Newton iterations.
    *
    */
   inline void setUseRelativeConvergenceCriteron(bool use)

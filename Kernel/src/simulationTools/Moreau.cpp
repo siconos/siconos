@@ -116,6 +116,14 @@ Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta):
   _theta = newTheta;
 }
 
+// --- constructor from a set of data ---
+Moreau::Moreau(double newTheta):
+  OneStepIntegrator(OSI::MOREAU)
+{
+  _theta = newTheta;
+}
+
+
 // Note: OSIDynamicalSystems and thetaMap must disappear
 void Moreau::insertDynamicalSystem(SP::DynamicalSystem ds)
 {

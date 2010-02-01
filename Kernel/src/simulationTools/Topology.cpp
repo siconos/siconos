@@ -374,14 +374,9 @@ void Topology::computeRelativeDegrees()
 
     for (boost::tie(uv, uend) = _URG[0]->vertices(); uv != uend; ++uv)
     {
-
-
-
       setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
                                               _URG[0]->bundle(*uv)->interaction()));
-
       _URG[0]->bundle(*uv)->interaction()->nonSmoothLaw()->accept(*(setupFromNslaw.get()));
-
     }
   }
   else

@@ -66,7 +66,8 @@ protected:
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
-  /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
+  /** Stl map that associates a theta parameter for the integration
+   *  scheme to each DynamicalSystem of the OSI */
   double _theta;
 
   /** Default constructor
@@ -93,6 +94,11 @@ public:
    */
   Moreau(DynamicalSystemsSet&, double);
 
+  /** constructor from theta value only
+   *  \param theta value for all these DS.
+   */
+  Moreau(double);
+
   /** destructor
    */
   virtual ~Moreau() {};
@@ -114,13 +120,15 @@ public:
   void setWMap(const MapOfDSMatrices&);
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
+   * \param a pointer to DynamicalSystem, optional, default =
+   * NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
+   * \param a pointer to DynamicalSystem, optional, default =
+   * NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix W(SP::DynamicalSystem ds);
@@ -151,7 +159,9 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the Moreau integrator; for linear time invariant systems, we compute time invariant operator (example : W)
+  /** initialization of the Moreau integrator; for linear time
+      invariant systems, we compute time invariant operator (example :
+      W)
       \param the simulation, owner of this OSI
    */
   void initialize(SP::Simulation);
@@ -173,7 +183,8 @@ public:
    */
   double computeResidu();
 
-  /** integrates the Dynamical System linked to this integrator without boring the constraints
+  /** integrates the Dynamical System linked to this integrator
+   *  without boring the constraints
    */
   virtual void computeFreeState();
 
