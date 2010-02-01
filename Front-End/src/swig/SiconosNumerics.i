@@ -19,7 +19,7 @@
 //	
 
 // Siconos.i - SWIG interface
-%module Siconos
+%module SiconosNumerics
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -27,7 +27,7 @@
 #include "SiconosNumerics.h"
 %} 
 
-%rename (LCP) LinearComplementarity_Problem;
+%rename (LCP) LinearComplementarityProblem;
 
 // numpy macros
 %include numpy.i 	
@@ -220,24 +220,24 @@ static int convert_darray(PyObject *input, double *ptr) {
 %feature("autodoc", "1");
 
 %include "NumericsMatrix.h"
-%include "LinearComplementarity_Problem.h"
+%include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
-%include "Solver_Options.h"
-%include "Numerics_Options.h"
+%include "SolverOptions.h"
+%include "NumericsOptions.h"
 
 
 
-%extend LinearComplementarity_Problem
+%extend LinearComplementarityProblem
 {
-  LinearComplementarity_Problem(PyObject *o1, PyObject *o2)
+  LinearComplementarityProblem(PyObject *o1, PyObject *o2)
     {
 
       int is_new_object1, is_new_object2;
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
-      LinearComplementarity_Problem *LC;
+      LinearComplementarityProblem *LC;
       // free in std swig destructor
-      LC = (LinearComplementarity_Problem *) malloc(sizeof(LinearComplementarity_Problem));
+      LC = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
       NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
 
       M->storageType = 0;
@@ -255,7 +255,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     }
 
 
-  ~LinearComplementarity_Problem()
+  ~LinearComplementarityProblem()
     {
       // fail?
       //free(self->M);
@@ -266,12 +266,12 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 
 
-%extend Solver_Options
+%extend SolverOptions
 {
-  Solver_Options(char solverName[64], int sizei, int *iparam, int sized, double *dparam, bool filterOn)
+  SolverOptions(char solverName[64], int sizei, int *iparam, int sized, double *dparam, bool filterOn)
     {
-      Solver_Options *SO;
-      SO = (Solver_Options *) malloc(sizeof(Solver_Options));
+      SolverOptions *SO;
+      SO = (SolverOptions *) malloc(sizeof(SolverOptions));
 
       // copy (allocated args are free with freearg)
       int *niparam = (int *) malloc(sizeof(int)*sizei);
@@ -288,12 +288,13 @@ static int convert_darray(PyObject *input, double *ptr) {
       return SO;
     }
 
-  ~Solver_Options() 
+  ~SolverOptions() 
     { 
       free(self->iparam); 
       free(self->dparam);
      }
 };
+
 
 // some extensions but numpy arrays should be used instead 
 %extend NumericsMatrix

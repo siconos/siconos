@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-# basic interface
-
+#import unittest
 from numpy import *
+from SiconosNumerics import *
 
-from Siconos import *
-
-
+# basic interface
 # Murty88, p2
 M = array([[2., 1.],
            [1., 2.]])
@@ -21,7 +19,9 @@ W = array([0., 0.])
 Zsol = array([4./3., 7./3.])
 Wsol = array([0. , 0.])
 
-SO = Solver_Options("", [1000, 0], [0.001, 0.],1)
+
+
+SO = SolverOptions("", [1000, 0], [0.001, 0.],1)
 
 setNumericsVerbose(2)
 
@@ -41,4 +41,3 @@ info = lcp_lexicolemke(LCP(M,Q), Z, W, SO)
 
 print Z-Zsol
 print W
-

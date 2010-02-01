@@ -11,10 +11,10 @@ Siconos_module = Extension('_Siconos',
                            sources=[@SICONOS_SWIG_SRCS@],
                            )
 
-setup (name = 'Siconos',
+setup (name = 'SiconosNumerics',
        version = '0.1',
-       author      = "Siconos Development team",
-       description = """Simple swig example from docs""",
+       author      = "Siconos Developement team",
+       description = """Siconos Numerics""",
        ext_modules = [Siconos_module],
-       py_modules = ["Siconos"],
+       py_modules = ["SiconosNumerics"],
        )
