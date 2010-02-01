@@ -26,6 +26,7 @@
 
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */
 typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
+TYPEDEF_SPTR(FrictionContactProblem);
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
@@ -76,6 +77,8 @@ protected:
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   Driver _frictionContact_driver;
 
+  SP::FrictionContactProblem _numerics_problem;
+
 public:
 
   /** xml constructor
@@ -90,8 +93,7 @@ public:
    *  \param string id of the problem (optional)
    */
   FrictionContact(int dimPb, const std::string& newNumericsSolverName = "NSGS" ,
-                  const std::string& newId = "unamed_friction_contact_problem"):
-    LinearOSNS(newNumericsSolverName, "FrictionContact", newId), _contactProblemDim(dimPb) {};
+                  const std::string& newId = "unamed_friction_contact_problem");
 
   /** destructor
    */

@@ -27,6 +27,24 @@
 using namespace std;
 using namespace RELATION;
 
+
+FrictionContact::FrictionContact(int dimPb, const std::string& newNumericsSolverName,
+                                 const std::string& newId):
+  LinearOSNS(newNumericsSolverName, "FrictionContact", newId), _contactProblemDim(dimPb)
+{
+  _numerics_problem.reset(new  FrictionContactProblem);
+
+  size_t size = _numerics_solver_name.size() + 1;
+  char * solvername = new char[ size ];
+  strncpy(solvername, _numerics_solver_name.c_str(), size);
+  if (dimPb == 2)
+    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+  else if (dimPb == 3)
+    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+  else
+    RuntimeException::selfThrow("cannot set defaults solver options for other problem dimension than 2 or 3");
+}
+
 // xml constructor
 FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
   LinearOSNS(osNsPbXml, "FrictionContact"), _contactProblemDim(3)

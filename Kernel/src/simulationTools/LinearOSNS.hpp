@@ -31,8 +31,6 @@
 
 #include "SiconosPointers.hpp"
 
-class OneStepNSProblem;
-
 /** stl vector of double */
 typedef std::vector<double> MuStorage;
 TYPEDEF_SPTR(MuStorage);
