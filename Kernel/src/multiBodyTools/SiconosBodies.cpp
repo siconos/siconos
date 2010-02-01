@@ -26,13 +26,13 @@ void SiconosBodies::compute()
   try
   {
 
-    playground_->buildInteractions(model_->currentTime());
+    _playground->buildInteractions(_model->currentTime());
 
-    model_->simulation()->updateInteractions();
+    _model->simulation()->updateInteractions();
 
-    model_->simulation()->advanceToEvent();
+    _model->simulation()->advanceToEvent();
 
-    model_->simulation()->processEvents();
+    _model->simulation()->processEvents();
 
   }
 

@@ -33,11 +33,11 @@ void FrictionContact2D_nlgs(FrictionContactProblem* problem , double *reaction ,
 
   int i, j, k, iter;
   int n = 2 * nc;
-  int it_end;
+  int it_end = 0;
   int  incx, incy;
 
   double alpha, beta;
-  double *y, res;
+  double *y, res = INFINITY;
   double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
 

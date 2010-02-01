@@ -77,7 +77,10 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
 {
   int n = 0;
   int i;
-  fscanf(file, "%d\n", &n);
+
+  int nread;
+
+  nread = fscanf(file, "%d\n", &n);
   problem->size = n;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -86,7 +89,7 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->q[i]));
+    nread = fscanf(file, "%lf ", &(problem->q[i]));
   }
   return 1;
 }
