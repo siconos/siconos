@@ -73,7 +73,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
     printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", name);
 
   /****** Gauss Seidel block solver ******/
-  if (strcmp(name , LCP_NSGS_SBM) == 0)
+  if (strcmp(name , SICONOS_LCP_NSGS_SBM) == 0)
     lcp_nsgs_SBM(problem, z , w , &info , options);
   else
   {
@@ -151,31 +151,31 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   /****** Lemke algorithm ******/
   /* IN: itermax
      OUT: iter */
-  if (strcmp(name , LCP_LEMKE) == 0 || strcmp(name , "LexicoLemke") == 0)
+  if (strcmp(name , SICONOS_LCP_LEMKE) == 0 || strcmp(name , "LexicoLemke") == 0)
     lcp_lexicolemke(problem, z , w , &info , options);
 
   /****** PGS Solver ******/
   /* IN: itermax, tolerance
      OUT: iter, error */
-  else   if (strcmp(name , LCP_PGS) == 0)
+  else   if (strcmp(name , SICONOS_LCP_PGS) == 0)
     lcp_pgs(problem, z , w , &info , options);
 
   /****** CPG Solver ******/
   /* IN: itermax, tolerance
      OUT: iter, error */
-  else   if (strcmp(name , LCP_CPG) == 0)
+  else   if (strcmp(name , SICONOS_LCP_CPG) == 0)
     lcp_cpg(problem, z , w , &info , options);
 
   /****** Latin Solver ******/
   /* IN: itermax, tolerance, k_latin
      OUT: iter, error */
-  else   if (strcmp(name , LCP_LATIN) == 0)
+  else   if (strcmp(name , SICONOS_LCP_LATIN) == 0)
     lcp_latin(problem, z , w , &info , options);
 
   /****** Latin_w Solver ******/
   /* IN: itermax, tolerance, k_latin, relax
      OUT: iter, error */
-  else   if (strcmp(name , LCP_LATIN_W) == 0)
+  else   if (strcmp(name , SICONOS_LCP_LATIN_W) == 0)
     lcp_latin_w(problem, z , w , &info , options);
 
   /****** QP Solver ******/
@@ -183,56 +183,56 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
      OUT:
   */
   /* We assume that the LCP matrix M is symmetric*/
-  else   if (strcmp(name , LCP_QP) == 0)
+  else   if (strcmp(name , SICONOS_LCP_QP) == 0)
     lcp_qp(problem, z , w , &info , options);
 
   /****** NSQP Solver ******/
   /* IN: tolerance
      OUT:
   */
-  else   if (strcmp(name , LCP_NSQP) == 0)
+  else   if (strcmp(name , SICONOS_LCP_NSQP) == 0)
     lcp_nsqp(problem, z , w , &info , options);
 
   /****** Newton min ******/
   /* IN: itermax, tolerance
      OUT: iter, error
   */
-  else   if (strcmp(name , LCP_NEWTONMIN) == 0)
+  else   if (strcmp(name , SICONOS_LCP_NEWTONMIN) == 0)
     lcp_newton_min(problem, z , w , &info , options);
 
   /****** Newton Fischer-Burmeister ******/
   /* IN: itermax, tolerance
      OUT: iter, error
   */
-  else   if (strcmp(name , LCP_NEWTONFB) == 0)
+  else   if (strcmp(name , SICONOS_LCP_NEWTONFB) == 0)
     lcp_newton_FB(problem, z , w , &info , options);
 
   /****** PSOR Solver ******/
   /* IN: itermax, tolerance, relax
      OUT: iter, error
   */
-  else   if (strcmp(name , LCP_PSOR) == 0)
+  else   if (strcmp(name , SICONOS_LCP_PSOR) == 0)
     lcp_psor(problem, z , w , &info , options);
 
   /****** RPGS (Regularized Projected Gauss-Seidel) Solver ******/
   /* IN: itermax, tolerance, rho
      OUT: iter, error
   */
-  else   if (strcmp(name , LCP_RPGS) == 0)
+  else   if (strcmp(name , SICONOS_LCP_RPGS) == 0)
     lcp_rpgs(problem, z , w , &info , options);
 
   /****** PATH (Ferris) Solver ******/
   /* IN: itermax, tolerance, rho
      OUT: iter, error
   */
-  else   if (strcmp(name , LCP_PATH) == 0)
+  else   if (strcmp(name , SICONOS_LCP_PATH) == 0)
     lcp_path(problem, z , w , &info , options);
 
   /****** Enumeratif Solver ******/
   /* IN:  tolerance,
      OUT: key
   */
-  else   if (strcmp(name , LCP_ENUM) == 0)
+  else   if (strcmp(name , SICONOS_LCP_ENUM) == 0)
     lcp_enum(problem, z , w , &info , options);
 
   /*error */

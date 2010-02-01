@@ -28,7 +28,7 @@
 
 #include "NonSmoothDrivers.h"
 
-#include "odepack.h"
+#include "LA.h"
 
 #endif // SICONOSNUMERICS_H
 

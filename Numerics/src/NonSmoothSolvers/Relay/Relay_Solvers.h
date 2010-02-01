@@ -69,7 +69,6 @@ extern "C"
 {
 #endif
 
-
   /** General interface to solver for primal-relay problems
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
