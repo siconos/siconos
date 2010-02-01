@@ -42,12 +42,7 @@ void Spheres::init()
 
   SP::TimeDiscretisation timedisc_;
   SP::Simulation simulation_;
-  SP::NonSmoothDynamicalSystem nsds_;
   SP::FrictionContact osnspb_;
-
-  DynamicalSystemsSet allDS_;
-  InteractionsSet allInteractions_;
-
 
 
   // User-defined main parameters
@@ -82,10 +77,17 @@ void Spheres::init()
 
     std::cout << "====> Model loading ..." << std::endl << std::endl;
 
-    plans_.reset(new SimpleMatrix("plans.dat", true));
+    _plans.reset(new SimpleMatrix("plans.dat", true));
 
     SP::SiconosMatrix Spheres;
     Spheres.reset(new SimpleMatrix("spheres.dat", true));
+
+    // -- OneStepIntegrators --
+    SP::OneStepIntegrator osi;
+    osi.reset(new Moreau(theta));
+
+    // -- Model --
+    _model.reset(new Model(t0, T));
 
     for (unsigned int i = 0; i < Spheres->size(0); i++)
     {
@@ -126,22 +128,13 @@ void Spheres::init()
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);
 
-      allDS_.insert(body);
+      // add the dynamical system to the one step integrator
+      osi->insertDynamicalSystem(body);
+
+      // add the dynamical system in the non smooth dynamical system
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
 
     }
-
-
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    nsds_.reset(new NonSmoothDynamicalSystem(allDS_, allInteractions_));
-
-    // -------------
-    // --- Model ---
-    // -------------
-    model_.reset(new Model(t0, T));
-    model_->setNonSmoothDynamicalSystemPtr(nsds_); // set NonSmoothDynamicalSystem of this model
 
     // ------------------
     // --- Simulation ---
@@ -150,31 +143,26 @@ void Spheres::init()
     // -- Time discretisation --
     timedisc_.reset(new TimeDiscretisation(t0, h));
 
-    simulation_.reset(new TimeStepping(timedisc_));
-
-    // -- OneStepIntegrators --
-    SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(allDS_, theta));
-
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 100;// Max number of iterations
-    iparam[1] = 20; // compute error iterations
-    iparam[4] = 1; // compute error iterations
+    osnspb_.reset(new FrictionContact(3));
 
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-6; // Tolerance
-    dparam[2] = 1e-8; // Local Tolerance
+    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    // iterations
+    osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
+    // iterations
+
+    osnspb_->numericsSolverOptions()->iparam[4] = 1; // projection
+
+    osnspb_->numericsSolverOptions()->dparam[0] = 1e-6; // Tolerance
+    osnspb_->numericsSolverOptions()->dparam[2] = 1e-8; // Local tolerance
 
 
-    SP::NonSmoothSolver mySolver;
-    mySolver.reset(new NonSmoothSolver(solverName, iparam, dparam));
-    osnspb_.reset(new FrictionContact(3, mySolver));
+    osnspb_->setMaxSize(16384);       // max number of interactions
+    osnspb_->setMStorageType(1);      // Sparse storage
+    osnspb_->setNumericsVerboseMode(0); // 0 silent, 1 verbose
+    osnspb_->setKeepLambdaAndYState(true); // inject previous solution
 
-    osnspb_->setMaxSize(16384);
-    osnspb_->setMStorageType(1);
-    osnspb_->setNumericsVerboseMode(0);
-    osnspb_->setKeepLambdaAndYState(true);
+    simulation_.reset(new TimeStepping(timedisc_));
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
     //     simulation_->setCheckSolverFunction(localCheckSolverOuput);
@@ -185,12 +173,9 @@ void Spheres::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 3));
 
-    playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_));
-    playground_->buildInteractions();
+    _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
 
-    nsds_->topology()->initialize();
-
-    model_->initialize(simulation_);
+    _model->initialize(simulation_);
 
   }
 

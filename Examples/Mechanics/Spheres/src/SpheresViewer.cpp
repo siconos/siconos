@@ -110,12 +110,12 @@ void SpheresViewer::draw()
   glColor3f(0, 0, 1);
   glLineWidth(4.);
 
-  for (unsigned int i = 0 ; i < Siconos_->getPlansPtr()->size(0) ; ++i)
+  for (unsigned int i = 0 ; i < Siconos_->plans()->size(0) ; ++i)
   {
-    double A = (*Siconos_->getPlansPtr())(i, 0);
-    double B = (*Siconos_->getPlansPtr())(i, 1);
-    double C = (*Siconos_->getPlansPtr())(i, 2);
-    double D = (*Siconos_->getPlansPtr())(i, 3);
+    double A = (*Siconos_->plans())(i, 0);
+    double B = (*Siconos_->plans())(i, 1);
+    double C = (*Siconos_->plans())(i, 2);
+    double D = (*Siconos_->plans())(i, 3);
 
     double N2 = A * A + B * B + C * C;
 
