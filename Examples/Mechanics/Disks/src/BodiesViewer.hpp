@@ -394,13 +394,33 @@ class LambdaFirst : public SiconosVisitor,
   public boost::enable_shared_from_this<LambdaFirst>
 {
 
-
 public:
+  SP::LagrangianR relation;
   float x;
   float y;
   float z;
   float r;
 
+
+  void visit(SP::DiskPlanR rel)
+  {
+    relation = rel;
+  }
+
+  void visit(SP::CircleCircleR rel)
+  {
+    relation = rel;
+  }
+
+  void visit(SP::DiskDiskR rel)
+  {
+    relation = rel;
+  }
+
+  void visit(SP::DiskMovingPlanR rel)
+  {
+    relation = rel;
+  }
 
   void visit(SP::Circle circle)
   {
@@ -438,6 +458,7 @@ private:
   float y1;
   float z1;
   float r1;
+  SP::LagrangianR relation1;
   BodiesViewer* viewer_;
 
 public:
@@ -452,6 +473,7 @@ public:
     y1 = lambdastart->y;
     z1 = lambdastart->z;
     r1 = lambdastart->r;
+    relation1 = lambdastart->relation;
   };
 
 
@@ -475,7 +497,16 @@ public:
     float d = hypotf(x1 - x2, y1 - y2);
 
     glColor3f(.0f, .0f, .0f);
-    viewer_->drawRec(x1, y1, x1 + (x2 - x1)*r / d, y1 + (y2 - y1)*r / d, _w);
+
+    if (d > 0)
+      viewer_->drawRec(x1, y1, x1 + (x2 - x1)*r / d, y1 + (y2 - y1)*r / d, _w);
+    else
+    {
+      double jx = relation1->jachq()->getValue(0, 0);
+      double jy = relation1->jachq()->getValue(0, 1);
+      double dj = 2 * hypot(jx, jy);
+      viewer_->drawRec(x1, y1, x1 - r * jx / dj, y1 - r * jy / dj, _w);
+    }
 
   };
 

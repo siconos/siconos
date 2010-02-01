@@ -47,8 +47,8 @@ double B(double t)
 }
 double C(double t)
 {
-  return 0. ;
-} //1.1*cos(32.*M_PI*t) ;}
+  return 1.1 * cos(32.*M_PI * t) ;
+}
 double DA(double t)
 {
   return 0. ;
@@ -59,8 +59,8 @@ double DB(double t)
 }
 double DC(double t)
 {
-  return 0. ;
-} //-1.1*32.*M_PI*sin(32.*M_PI*t) ;}
+  return -1.1 * 32.*M_PI * sin(32.*M_PI * t) ;
+}
 
 
 // ================= Creation of the model =======================
@@ -109,8 +109,8 @@ void Disks::init()
 
     std::cout << "====> Model loading ..." << std::endl << std::endl;
 
-    plans_.reset(new SimpleMatrix("plans.dat", true));
-    if (plans_->size(0) == 0)
+    _plans.reset(new SimpleMatrix("plans.dat", true));
+    if (_plans->size(0) == 0)
     {
       /* default plans */
       double A1 = P1A;
@@ -121,42 +121,42 @@ void Disks::init()
       double B2 = P2B;
       double C2 = P2C;
 
-      plans_.reset(new SimpleMatrix(6, 6));
-      plans_->zero();
-      (*plans_)(0, 0) = 0;
-      (*plans_)(0, 1) = 1;
-      (*plans_)(0, 2) = -GROUND;
+      _plans.reset(new SimpleMatrix(6, 6));
+      _plans->zero();
+      (*_plans)(0, 0) = 0;
+      (*_plans)(0, 1) = 1;
+      (*_plans)(0, 2) = -GROUND;
 
-      (*plans_)(1, 0) = 1;
-      (*plans_)(1, 1) = 0;
-      (*plans_)(1, 2) = WALL;
+      (*_plans)(1, 0) = 1;
+      (*_plans)(1, 1) = 0;
+      (*_plans)(1, 2) = WALL;
 
-      (*plans_)(2, 0) = 1;
-      (*plans_)(2, 1) = 0;
-      (*plans_)(2, 2) = -WALL;
+      (*_plans)(2, 0) = 1;
+      (*_plans)(2, 1) = 0;
+      (*_plans)(2, 2) = -WALL;
 
-      (*plans_)(3, 0) = 0;
-      (*plans_)(3, 1) = 1;
-      (*plans_)(3, 2) = -TOP;
+      (*_plans)(3, 0) = 0;
+      (*_plans)(3, 1) = 1;
+      (*_plans)(3, 2) = -TOP;
 
-      (*plans_)(4, 0) = A1;
-      (*plans_)(4, 1) = B1;
-      (*plans_)(4, 2) = C1;
+      (*_plans)(4, 0) = A1;
+      (*_plans)(4, 1) = B1;
+      (*_plans)(4, 2) = C1;
 
-      (*plans_)(5, 0) = A2;
-      (*plans_)(5, 1) = B2;
-      (*plans_)(5, 2) = C2;
+      (*_plans)(5, 0) = A2;
+      (*_plans)(5, 1) = B2;
+      (*_plans)(5, 2) = C2;
 
     }
 
     /* set center positions */
-    for (unsigned int i = 0 ; i < plans_->size(0); ++i)
+    for (unsigned int i = 0 ; i < _plans->size(0); ++i)
     {
       SP::DiskPlanR tmpr;
-      tmpr.reset(new DiskPlanR(1, (*plans_)(i, 0), (*plans_)(i, 1), (*plans_)(i, 2),
-                               (*plans_)(i, 3), (*plans_)(i, 4), (*plans_)(i, 5)));
-      (*plans_)(i, 3) = tmpr->getXCenter();
-      (*plans_)(i, 4) = tmpr->getYCenter();
+      tmpr.reset(new DiskPlanR(1, (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
+                               (*_plans)(i, 3), (*_plans)(i, 4), (*_plans)(i, 5)));
+      (*_plans)(i, 3) = tmpr->getXCenter();
+      (*_plans)(i, 4) = tmpr->getYCenter();
     }
 
     _moving_plans.reset(new FMatrix(1, 6));
@@ -213,8 +213,8 @@ void Disks::init()
     // -------------
     // --- Model ---
     // -------------
-    model_.reset(new Model(t0, T));
-    model_->setNonSmoothDynamicalSystemPtr(nsds_); // set NonSmoothDynamicalSystem of this model
+    _model.reset(new Model(t0, T));
+    _model->setNonSmoothDynamicalSystemPtr(nsds_); // set NonSmoothDynamicalSystem of this model
 
     // ------------------
     // --- Simulation ---
@@ -230,20 +230,21 @@ void Disks::init()
     osi.reset(new Moreau(allDS_, theta));
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 100;// Max number of iterations
-    iparam[1] = 20; // compute error iterations
+    osnspb_.reset(new FrictionContact(2));
 
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-2; // Tolerance
-    SP::NonSmoothSolver mySolver;
-    mySolver.reset(new NonSmoothSolver(solverName, iparam, dparam));
-    osnspb_.reset(new FrictionContact(2, mySolver));
+    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    // iterations
+    osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
+    // iterations
+    osnspb_->numericsSolverOptions()->dparam[0] = 1e-3; // Tolerance
+
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb_->setMStorageType(1);
+    osnspb_->setMStorageType(1);            // Sparse storage
     osnspb_->setNumericsVerboseMode(0);
-    osnspb_->setKeepLambdaAndYState(true);
+
+    osnspb_->setKeepLambdaAndYState(true);  // inject previous solution
+
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
     //simulation_->setCheckSolverFunction(localCheckSolverOuput);
@@ -252,13 +253,13 @@ void Disks::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0., 2));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.9, 2));
 
-    playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, nsds_, nslaw, _plans, _moving_plans));
 
     nsds_->topology()->initialize();
 
-    model_->initialize(simulation_);
+    _model->initialize(simulation_);
 
   }
 
@@ -282,38 +283,18 @@ void Disks::init()
 
 // ================================= Computation =================================
 
-struct Disks::_Vibration : public SiconosVisitor
-{
-  SP::Disks parent;
-  bool flag;
-
-  _Vibration(SP::Disk d) : parent(d), flag(false) {};
-
-  void visit(SP::DiskPlanR r)
-  {
-
-    if (r->getA() == 0. && r->getB() == 1.)
-    {
-      flag = true;
-    }
-  }
-  void visit(SP::DiskDiskR) {};
-  void visit(SP::CircleCircleR) {};
-
-};
-
 void Disks::compute()
 {
   try
   {
 
-    playground_->buildInteractions(model_->currentTime());
+    _playground->buildInteractions(_model->currentTime());
 
-    model_->simulation()->updateInteractions();
+    _model->simulation()->updateInteractions();
 
-    model_->simulation()->advanceToEvent();
+    _model->simulation()->advanceToEvent();
 
-    model_->simulation()->processEvents();
+    _model->simulation()->processEvents();
 
   }
 

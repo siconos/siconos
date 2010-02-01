@@ -63,10 +63,12 @@
 
 #include "SiconosBodies.hpp"
 
-class Disks : public SiconosBodies
+class Disks : public SiconosBodies, public boost::enable_shared_from_this<Disks>
 {
   void init();
+  void compute();
 };
 
+TYPEDEF_SPTR(Disks);
 
 #endif //Disks_h

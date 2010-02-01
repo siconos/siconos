@@ -22,7 +22,6 @@
 
 int main(int argc, char* argv[])
 {
-
   QApplication application(argc, argv);
 
 #ifdef QT_INTERFACE

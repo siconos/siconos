@@ -117,54 +117,57 @@ void DisksViewer::draw()
 
     involvedDS = interaction->dynamicalSystems();
 
+    // disk/disk
+    itDS = involvedDS->begin();
+
+    SP::DynamicalSystem d1 = *itDS;
+    SP::DynamicalSystem d2;
     if (involvedDS->size() == 2)
-    {
+      d2 = *++itDS;
+    else
+      d2 = d1;
 
-      // disk/disk
-      itDS = involvedDS->begin();
+    boost::shared_ptr<LambdaFirst> lambda1(new LambdaFirst());
 
-      SP::DynamicalSystem d1 = *itDS;
-      SP::DynamicalSystem d2 = *++itDS;
+    boost::shared_ptr<LambdaSecond> lambda2(new LambdaSecond(*this, w));
 
-      boost::shared_ptr<LambdaFirst> lambda1(new LambdaFirst());
-
-      boost::shared_ptr<LambdaSecond> lambda2(new LambdaSecond(*this, w));
-
-      d1->accept(lambda1);
-      lambda1->accept(lambda2);
-      d2->accept(lambda2);
+    relation->accept(lambda1);
+    d1->accept(lambda1);
+    lambda1->accept(lambda2);
+    d2->accept(lambda2);
 
 
-    } /*else
-        if (involvedDS->size() == 1) {
+    /*else
+      }
+      if (involvedDS->size() == 1) {
 
-          lbd=interaction->getLambdaOldPtr(1)->getValue(0);
+         lbd=interaction->getLambdaOldPtr(1)->getValue(0);
 
-          itDS=involvedDS->begin();
+         itDS=involvedDS->begin();
 
-          x1 = AS(LagrangianDS )(*itDS)->q()->getValue(0);
-          y1 = AS(LagrangianDS )(*itDS)->q()->getValue(1);
-          r =  AS(Disk )(*itDS)->getRadius();
+         x1 = AS(LagrangianDS )(*itDS)->q()->getValue(0);
+         y1 = AS(LagrangianDS )(*itDS)->q()->getValue(1);
+         r =  AS(Disk )(*itDS)->getRadius();
 
-          if ( relation->getSubType() == RELATION::ScleronomousR ) {
+         if ( relation->getSubType() == RELATION::ScleronomousR ) {
 
-            // disk/plan
-            x2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,0);
-            y2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,1);
-          } else {
+           // disk/plan
+           x2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,0);
+           y2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,1);
+         } else {
 
-            // unknown relation, do nothing
-            x2 = x1;
-            y2 = y1;
-          }
+           // unknown relation, do nothing
+           x2 = x1;
+           y2 = y1;
+         }
 
-          glColor3f(0.,0.,0.);
-          d = sqrt(x2*x2+y2*y2);
-          if (AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::DISK)
-          drawRec(x1,y1,x1-r*x2/d,y1-r*y2/d,w);
-          else if ((AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::CIRCLE))
-            drawRec(x1-r*x2/d,y1-r*y2/d,x1-r*x2/d,y1-r*y2/d,w);
-            }*/
+         glColor3f(0.,0.,0.);
+         d = sqrt(x2*x2+y2*y2);
+         if (AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::DISK)
+         drawRec(x1,y1,x1-r*x2/d,y1-r*y2/d,w);
+         else if ((AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::CIRCLE))
+           drawRec(x1-r*x2/d,y1-r*y2/d,x1-r*x2/d,y1-r*y2/d,w);
+           }*/
   }
 
   for (i = 0; i < GETNDS(Siconos_); i++)
@@ -191,24 +194,66 @@ void DisksViewer::draw()
   glColor3f(0, 0, 1);
   glLineWidth(4.);
 
-  for (unsigned int i = 0 ; i < Siconos_->plans()->size(0) ; ++i)
+  if (Siconos_->plans())
   {
-    double A = (*Siconos_->plans())(i, 0);
-    double B = (*Siconos_->plans())(i, 1);
-    double C = (*Siconos_->plans())(i, 2);
-    double xc = (*Siconos_->plans())(i, 3);
-    double yc = (*Siconos_->plans())(i, 4);
-    double w = fmin(1e10, (*Siconos_->plans())(i, 5));
-    double H = hypot(A, B);
+    for (unsigned int i = 0 ; i < Siconos_->plans()->size(0) ; ++i)
+    {
+      double A = (*Siconos_->plans())(i, 0);
+      double B = (*Siconos_->plans())(i, 1);
+      double C = (*Siconos_->plans())(i, 2);
+      double xc = (*Siconos_->plans())(i, 3);
+      double yc = (*Siconos_->plans())(i, 4);
+      double w = fmin(1e10, (*Siconos_->plans())(i, 5));
+      double H = hypot(A, B);
 
-    if (w == 0) w = 1e10;
+      if (w == 0) w = 1e10;
 
-    //      assert ( fabs(A*xc + B*yc + C) <= std::numeric_limits<double>::epsilon() );
+      //      assert ( fabs(A*xc + B*yc + C) <= std::numeric_limits<double>::epsilon() );
 
-    drawVec(xc, yc, xc - 0.5 * w * B / H, yc + 0.5 * w * A / H);
-    drawVec(xc, yc, xc + 0.5 * w * B / H, yc - 0.5 * w * A / H);
+      drawVec(xc, yc, xc - 0.5 * w * B / H, yc + 0.5 * w * A / H);
+      drawVec(xc, yc, xc + 0.5 * w * B / H, yc - 0.5 * w * A / H);
+    }
   }
 
+
+  if (Siconos_->movingPlans())
+  {
+    double time = Siconos_->model()->currentTime();
+    for (unsigned int i = 0 ; i < Siconos_->movingPlans()->size1() ; ++i)
+    {
+      double A = (*Siconos_->movingPlans())(i, 0)(time);
+      double B = (*Siconos_->movingPlans())(i, 1)(time);
+      double C = (*Siconos_->movingPlans())(i, 2)(time);
+      double w = 1e10;
+      double H = hypot(A, B);
+      double xc, yc;
+
+      if (fabs(C) > std::numeric_limits<double>::epsilon())
+      {
+        if (A == 0)
+          // By+C=0
+        {
+          yc = -C / B;
+        }
+        else if (B == 0)
+          // Ax+C=0
+        {
+          xc = -C / A;
+        }
+        else
+          // Ax+By+C=0
+        {
+          if (xc != 0)
+            yc = - (A * xc + C) / B;
+          else
+            xc = - (B * yc + C) / A;
+        }
+      }
+
+      drawVec(xc, yc, xc - 0.5 * w * B / H, yc + 0.5 * w * A / H);
+      drawVec(xc, yc, xc + 0.5 * w * B / H, yc - 0.5 * w * A / H);
+    }
+  }
   glColor3f(.1, .1, .1);
   glLineWidth(4.);
   QGLViewer::drawArrow(qglviewer::Vec(0, 0, .1), qglviewer::Vec(1, 0, .1), .01, 3);

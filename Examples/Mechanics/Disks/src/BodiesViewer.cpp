@@ -23,8 +23,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#define AS(X) boost::static_pointer_cast<X>
-
 
 using namespace qglviewer;
 using namespace std;
