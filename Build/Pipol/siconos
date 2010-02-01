@@ -14,7 +14,7 @@
 #PIPOL mac 01:30
 
 set -x
-set -e
+#set -e
 mode=${1:-Nightly}
 
 export LC_ALL=C
