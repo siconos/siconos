@@ -44,11 +44,12 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
   {
     if (foldsxml->isAPlugin())
     {
-      _A.reset(new SimpleMatrix(
-                 setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      plugin = foldsxml->getAPlugin();
+      _A.reset(new SimpleMatrix(_n, _n));
+      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
-               else
-                 _A.reset(new SimpleMatrix(foldsxml->getA()));
+    else
+      _A.reset(new SimpleMatrix(foldsxml->getA()));
   }
 
   // b
@@ -56,6 +57,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
   {
     if (foldsxml->isBPlugin())
     {
+      _b.reset(new SimpleVector(_n));
       plugin = foldsxml->getBPlugin();
       setComputebFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }

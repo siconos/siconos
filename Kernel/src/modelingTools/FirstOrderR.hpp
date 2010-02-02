@@ -193,12 +193,12 @@ public:
   /** default function to compute h
    *  \param double : current time
    */
-  void computeh(double) = 0;
+  virtual void computeh(double) = 0;
 
   /** default function to compute g
    *  \param double : current time
    */
-  void computeg(double) = 0;
+  virtual void computeg(double) = 0;
 
   /** default function to compute jacobianH
    *  \param double : current time
@@ -217,7 +217,7 @@ public:
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void computeJacglambda(double);
+  virtual void computeJacglambda(double);
 
   virtual void computeJacg(double t)
   {
