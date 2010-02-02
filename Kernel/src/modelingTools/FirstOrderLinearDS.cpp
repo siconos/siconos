@@ -21,6 +21,7 @@
 #include "Plugin.hpp"
 
 using namespace std;
+typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 
 // --- Constructors ---
 
@@ -220,7 +221,9 @@ void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
 void FirstOrderLinearDS::computeA(const double time)
 {
   if (_A && _pluginA->fPtr)
-    ((LDSPtrFunction)_pluginA->fPtr)(time, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
+  {
+    ((computeAfct)_pluginA->fPtr)(time, _n, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
+  }
 }
 
 void FirstOrderLinearDS::computeb(const double time)
