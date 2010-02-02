@@ -67,9 +67,6 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
   setComputehDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
   _pluginJachq->setComputeFunction(strcomputeJachq);
 
-  unsigned int sizeY = interaction()->getSizeOfY();
-  unsigned int sizeQ = _workX->size();
-  _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
 }
 
 void LagrangianRheonomousR::initComponents()
@@ -82,6 +79,12 @@ void LagrangianRheonomousR::initComponents()
     _hDot.reset(new SimpleVector(sizeY));
   else
     _hDot->resize(sizeY);
+  if (_pluginJachq->fPtr && !_jachq)
+  {
+    unsigned int sizeY = interaction()->getSizeOfY();
+    unsigned int sizeQ = _workX->size();
+    _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
+  }
 }
 // void LagrangianRheonomousR::setComputehFunction(const string& pluginPath, const string& functionName){
 //   Plugin::setFunction(&hPtr, pluginPath, functionName);
