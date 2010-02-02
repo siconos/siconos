@@ -86,8 +86,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1E : ", ds->getX0() == *x0, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1F : ", ds->getB()==*b0, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1G : ", ds->getA()==*A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1F : ", *(ds->b()) == *b0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1G : ", *(ds->A()) == *A0, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1H : ", ds->A()->isPlugged(),false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1I : ", ds->b()->isPlugged(),false);
   cout << "--> Constructor xml test ended with success." << endl;
@@ -107,16 +107,16 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 
   double time = 1.5;
   ds->initialize("TimeStepping", time);
-  //   ds->computeb(time);
-  //   ds->computeA(time);
+  ds->computeb(time);
+  ds->computeA(time);
   SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
   ds->b()->display();
 
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2I : ", ds->getB()== time* *x01, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2J : ", ds->getA()== 2**A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2I : ", *(ds->b()) == time* *x01, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2J : ", *(ds->A()) == 2 * *A0, true);
 
   SP::SimpleVector u0(new SimpleVector(2));
   (*u0)(0) = 3;
@@ -125,7 +125,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 
   ds->computeRhs(time);
 
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", (*(ds->rhsPtr()))==prod(*(ds->getA()), 2**x0) + ds->getB() , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", (*(ds->rhs())) == prod(*(ds->A()), 2 * *x0) + * (ds->b()) , true);
 
   cout << "--> Constructor xml 2 test ended with success." << endl;
 }
@@ -135,29 +135,30 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeB"));
+  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", ds->getType() == DS::FOLDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getN() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3D : ", ds->getX0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3B : ", ds->getN() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getX0() == *x0, true);
 
   double time = 1.5;
   ds->initialize("TimeStepping", time);
-  //   ds->computeA(time);
-  //   ds->computeb(time);
+  ds->computeA(time);
+  ds->computeb(time);
   ds->computeRhs(time);
   SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
 
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3I : ", ds->getB()== time* *x01, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3J : ", ds->getA()== 2**A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3D : ", *(ds->b()) == time* *x01, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3E : ", *(ds->A()) == 2 * *A0, true);
   //  ds->rhs()->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * prod(*A0, *x0)) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3F : ", *(ds->rhs()) == (time* *x01 + 2 * prod(*A0, *x0)) , true);
 
   ds->computeRhs(time);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", *(ds->rhs())==(2*prod(*A0 , *x0) + ds->getB() ), true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", *(ds->rhs()) == (2 * prod(*A0 , *x0) + * (ds->b())), true);
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 

@@ -25,7 +25,8 @@ using namespace std;
 // --- Constructors ---
 
 // From xml file
-FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrderNonLinearDS(dsXML)
+FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
+  : FirstOrderNonLinearDS(dsXML)
 {
 
   // pointer to xml
@@ -43,11 +44,11 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
   {
     if (foldsxml->isAPlugin())
     {
-      plugin = foldsxml->getAPlugin();
-      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      _A.reset(new SimpleMatrix(
+                 setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
-    else
-      _A.reset(new SimpleMatrix(foldsxml->getA()));
+               else
+                 _A.reset(new SimpleMatrix(foldsxml->getA()));
   }
 
   // b
@@ -77,7 +78,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& AP
   _pluginb->setComputeFunction(bPlugin);
 
   _f.reset(new SimpleVector(getDim()));
-
+  _A.reset(new SimpleMatrix(getDim(), getDim()));
+  _b.reset(new SimpleVector(getDim()));
 
   checkDynamicalSystem();
 }

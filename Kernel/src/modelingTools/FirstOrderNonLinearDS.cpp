@@ -27,7 +27,8 @@ using namespace std;
 // ===== CONSTRUCTORS =====
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0): DynamicalSystem(DS::FONLDS, newX0->size())
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
+  DynamicalSystem(DS::FONLDS, newX0->size())
 {
   zeroPlugin();
   // == Initial conditions ==
@@ -54,7 +55,8 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0): Dynamical
 
   checkDynamicalSystem();
 }
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0): DynamicalSystem(DS::FONLDS, newX0.size())
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
+  DynamicalSystem(DS::FONLDS, newX0.size())
 {
   zeroPlugin();
   // == Initial conditions ==

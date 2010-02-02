@@ -42,7 +42,7 @@
 				<x0 vectorSize='3'>
 					2.0 4.0 6.0
 				</x0>
-				<b vectorPlugin="TestPlugin:computeB"/>
+				<b vectorPlugin="TestPlugin:computeb"/>
 				<A matrixPlugin="TestPlugin:computeA"/>	
  			</FirstOrderLinearDS>
 		</DS_Definition>
