@@ -1,10 +1,19 @@
 #!/bin/sh
 
+set -e
+
+ok()
+{
+    exit 0
+}
+
+trap ok 0
+
 # get local and head revision numbers
 cd src/nightly/siconos ;{ 
     
-    local=`svn info -r '{00:00}' | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
-    head=`svn info -r HEAD | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
+    local=`svn info -r '{00:00}' | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d' `
+    head=`svn info -r HEAD | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d' `
     
     echo $local > local_revision
     echo $head > head_revision
@@ -19,7 +28,7 @@ cd src/nightly/siconos/trunk/Build/Pipol ;{
 
 
 # do nothing if nothing change in svn
-if [ $local = $head ]; then
+if [ "$local" = "$head" ]; then
     exit 1
 else
     exit 0

@@ -1,9 +1,9 @@
 #!/bin/sh
 
 
-#PRE-PIPOL  /home/admin/bremond/src/nightly/siconos/trunk/Build/Pipol/pre-siconos
+#PRE-PIPOL  src/nightly/siconos/trunk/Build/Pipol/pre-siconos
 
-#POST-PIPOL /home/admin/bremond/src/nightly/siconos/trunk/Build/Pipol/post-siconos
+#POST-PIPOL src/nightly/siconos/trunk/Build/Pipol/post-siconos
 
 #PIPOL fedora 01:30
 
@@ -32,14 +32,14 @@ echo LOCAL : $local_revision
 env
 
 case $PIPOL_IMAGE in 
-    *windows*) cp -r /home/admin/bremond/.ssh /home/root/.ssh;;
+    *windows*) cp -r $HOME/.ssh /home/root/.ssh;;
 esac
 
 # a local copy because make Nightly will update this sources.
 src_setup() {
     pushd $PIPOL_WDIR; { 
         for mod in Numerics Kernel Examples ; do 
-            [ -d $mod ] || svn co svn+ssh://bremond@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
+            [ -d $mod ] || svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
             pushd $mod; { 
                 svn update -r $local_revision
             }; popd
@@ -76,7 +76,7 @@ configure_1() {
     mkdir -p $PIPOL_WDIR/build/$mod/$btype
     cd $PIPOL_WDIR/build/$mod/$btype; {
         rm -f CMakeCache.txt
-        eval cmake $PIPOL_WDIR/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+        eval cmake $PIPOL_WDIR/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
     }; cd -
 
 }
