@@ -37,14 +37,15 @@ esac
 
 # a local copy because make Nightly will update this sources.
 src_setup() {
-    pushd $PIPOL_WDIR; { 
+    current_dir=$PWD
+    cd $PIPOL_WDIR; { 
         for mod in Numerics Kernel Examples ; do 
             [ -d $mod ] || svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
-            pushd $mod; { 
+             cd $mod; { 
                 svn update -r $local_revision
-            }; popd
+            }; cd ..
         done
-    }; popd
+    }; cd $current_dir
 }
 
 make_1() {
@@ -76,7 +77,7 @@ configure_1() {
     mkdir -p $PIPOL_WDIR/build/$mod/$btype
     cd $PIPOL_WDIR/build/$mod/$btype; {
         rm -f CMakeCache.txt
-        eval cmake $PIPOL_WDIR/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+        eval cmake --debug-trycompile $PIPOL_WDIR/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
     }; cd -
 
 }
