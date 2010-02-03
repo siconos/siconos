@@ -113,8 +113,8 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) Non smooth problem --
-    SP::OneStepNSProblem impact(new LCP("impact"));
-    SP::OneStepNSProblem acceleration(new LCP("acceleration"));
+    SP::OneStepNSProblem impact(new LCP("Lemke", "impact"));
+    SP::OneStepNSProblem acceleration(new LCP("Lemke", "acceleration"));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::EventDriven s(new EventDriven(t));
