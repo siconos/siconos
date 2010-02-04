@@ -162,7 +162,7 @@ install_1 Numerics Release
 configure_1 Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
-nightly_submit Numerics Release
+nightly_submit Kernel Release
 nightly_memcheck Kernel Release
 nightly_submit Kernel Release
 install_1 Kernel Release
