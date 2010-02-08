@@ -51,6 +51,8 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 {
   SP::FrictionContactXML xmlFC = boost::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
+  _numerics_problem.reset(new  FrictionContactProblem);
+
   // Read dimension of the problem (required parameter)
   if (!xmlFC->hasProblemDim())
     RuntimeException::selfThrow("FrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");

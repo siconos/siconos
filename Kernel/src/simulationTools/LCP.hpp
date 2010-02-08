@@ -24,6 +24,8 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
+#include "OneStepNSProblemXML.hpp"
+
 TYPEDEF_SPTR(LinearComplementarityProblem);
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
@@ -81,8 +83,7 @@ public:
   /** xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
-  LCP(SP::OneStepNSProblemXML onestepnspbxml):
-    LinearOSNS(onestepnspbxml, "LCP") {};
+  LCP(SP::OneStepNSProblemXML onestepnspbxml);
 
   /** constructor from data
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n

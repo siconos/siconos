@@ -21,6 +21,19 @@
 using namespace std;
 using namespace RELATION;
 
+LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
+  LinearOSNS(onestepnspbxml, "LCP")
+{
+
+  if (onestepnspbxml->hasNumericsSolverName())
+    _numerics_solver_name = onestepnspbxml->getNumericsSolverName();
+
+  _numerics_problem.reset(new LinearComplementarityProblem);
+  size_t size = _numerics_solver_name.size() + 1;
+  char * solvername = new char[ size ];
+  strncpy(solvername, _numerics_solver_name.c_str(), size);
+  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
+};
 
 LCP::LCP(const std::string& newNewNumericsSolverName , const std::string& newId):
   LinearOSNS(newNewNumericsSolverName, "LCP", newId)

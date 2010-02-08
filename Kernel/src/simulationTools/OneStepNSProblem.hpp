@@ -79,7 +79,7 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  URrow.
  *
  */
-class OneStepNSProblem : public boost::enable_shared_from_this<OneStepNSProblem>
+class OneStepNSProblem
 {
 
 protected:
