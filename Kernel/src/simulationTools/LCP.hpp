@@ -26,6 +26,8 @@
 #include "LinearOSNS.hpp"
 #include "OneStepNSProblemXML.hpp"
 
+#define SICONOS_LCP_DEFAULT_SOLVER "Lemke"
+
 TYPEDEF_SPTR(LinearComplementarityProblem);
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
@@ -90,7 +92,8 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  LCP(const std::string& newNewNumericsSolverName = "Lemke", const std::string& newId = "unamed_lcp");
+  LCP(const std::string& newNewNumericsSolverName = SICONOS_LCP_DEFAULT_SOLVER,
+      const std::string& newId = "unamed_lcp");
 
   /** destructor
    */

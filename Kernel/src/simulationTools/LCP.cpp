@@ -27,6 +27,8 @@ LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
 
   if (onestepnspbxml->hasNumericsSolverName())
     _numerics_solver_name = onestepnspbxml->getNumericsSolverName();
+  else
+    _numerics_solver_name = SICONOS_LCP_DEFAULT_SOLVER;
 
   _numerics_problem.reset(new LinearComplementarityProblem);
   size_t size = _numerics_solver_name.size() + 1;
