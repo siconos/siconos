@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     SP::EventDriven s = boost::static_pointer_cast<EventDriven>
                         (bouncingBall->simulation());
     SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
-                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
+                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
