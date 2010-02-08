@@ -52,7 +52,7 @@ int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, char
   }
   else
   {
-    numericsError("primalFrictionContact3D_setDefaultSolverOptions", "Unknow Solver");
+    numericsError("primalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");
 
   }
 

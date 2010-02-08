@@ -96,7 +96,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
 
 
     /****** NLGS algorithm ******/
-    if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0)
+    if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0 || strcmp(name , "NSGS") == 0)
     {
       if (verbose)
         printf(" ========================== Call NLGS solver for Friction-Contact 2D problem ==========================\n");

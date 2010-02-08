@@ -48,7 +48,7 @@ int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options,
   }
   else
   {
-    numericsError("Relay_setDefaultSolverOptions", "Unknow Solver");
+    numericsError("Relay_setDefaultSolverOptions", "Unknown Solver");
 
   }
 

@@ -142,7 +142,7 @@ int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarit
   }
   else
   {
-    numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknow Solver");
+    numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
 

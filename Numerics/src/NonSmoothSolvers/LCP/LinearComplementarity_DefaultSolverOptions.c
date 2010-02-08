@@ -88,7 +88,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   }
   else
   {
-    numericsError("linearComplementarity_setDefaultSolverOptions", "   Unknow Solver");
+    numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
 

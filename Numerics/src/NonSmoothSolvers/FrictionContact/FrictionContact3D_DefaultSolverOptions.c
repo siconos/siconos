@@ -51,7 +51,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *solv
   }
   else
   {
-    numericsError("frictionContact3D_setDefaultSolverOptions", "Unknow Solver");
+    numericsError("frictionContact3D_setDefaultSolverOptions", "Unknown Solver");
 
   }
 
