@@ -100,10 +100,6 @@
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
 		 	<FrictionContact Type='2'>
-  			   <NonSmoothSolver Name="NLGS">
-			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
-			      <dparam  vectorSize='5'>1e-4 0 0 0 0</dparam>
-			   </NonSmoothSolver>
 		 	</FrictionContact>
 		 </OneStepNSProblems_List>
 	</Simulation>	

@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     // Velocity for the Follower
     DataPlot(k, 2) = ((*Follower->velocity()))(0);
     // Reaction
-    DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+    DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
     // External Forcing
     DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
       //  DataPlot(k, 3) = (bouncingBall.nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
       DataPlot(k, 1) = ((*Follower->q()))(0);
       DataPlot(k, 2) = ((*Follower->velocity()))(0);
-      DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
       DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
       CamEqForce = CamState(S->nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);

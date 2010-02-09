@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
 
 
     // -- OneStepNSProblems --
-    SP::OneStepNSProblem impact(new LCP("impact"));
-    SP::OneStepNSProblem acceleration(new LCP("acceleration"));
+    SP::OneStepNSProblem impact(new LCP("Lemke", "impact"));
+    SP::OneStepNSProblem acceleration(new LCP("Lemke", "acceleration"));
 
     SP::EventDriven s(new EventDriven(t));
 

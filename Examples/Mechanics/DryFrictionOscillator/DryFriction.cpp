@@ -58,8 +58,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 1) = ((*oscillo->q()))(0);
     // velocity for the oscillo
     dataPlot(k, 2) = ((*oscillo->velocity()))(0);
-    dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
-    dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(1);
+    dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
+    dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(1);
 
     // --- Compute elapsed time ---
     boost::timer tt;
@@ -80,8 +80,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = ((*oscillo->q()))(0);
       // Oscillo: velocity
       dataPlot(k, 2) = ((*oscillo->velocity()))(0);
-      dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
-      dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(1);
+
+      dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(0);
+      dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(1)->lambda(1))(1);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }

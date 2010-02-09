@@ -90,18 +90,14 @@
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-				<Theta vectorSize='1'> 0.5</Theta>
+				<Theta all="0.5"></Theta>
 			</Moreau>					
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
 		 	<LCP>
-			   <NonSmoothSolver Name="Lemke">
-			      <iparam  vectorSize='5'>101 0 0 0 0</iparam>
-			      <dparam  vectorSize='5'>1e-5 0 0 0 0</dparam>
-			   </NonSmoothSolver>
-	                 </LCP>
+	                </LCP>
 		 </OneStepNSProblems_List>
 		 </Simulation>	
 </SiconosModel>
