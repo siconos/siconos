@@ -100,26 +100,37 @@ int main()
 
   //****BUILD THE INTERACTION
   SP::Interaction aI(new Interaction("MLCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
+  //  aI->insert(LSDiodeBridge);
   //****BUILD THE SYSTEM
-  SP::NonSmoothDynamicalSystem  aNSDS(new NonSmoothDynamicalSystem(aDS, aI));
 
   SP::Model  aM(new Model(0, sTf));
-  aM->setNonSmoothDynamicalSystemPtr(aNSDS);
-  SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
-  SP::TimeStepping aS(new TimeStepping(aTD));
-  aS->setComputeResiduY(true);
-  aS->setUseRelativeConvergenceCriteron(false);
-  //*****BUILD THE STEP INTEGRATOR
+  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
+  aM->nonSmoothDynamicalSystem()->link(aI, aDS);
+
+
+  // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aMoreau ;
   aMoreau.reset(new Moreau(aDS, 0.5));
-  aS->insertIntegrator(aMoreau);
-  //  SP::NonSmoothSolver  mySolver( new NonSmoothSolver((*solverName),iparam,dparam,floatWorkingMem,intWorkingMem));
 
-  //**** BUILD THE STEP NS PROBLEM
+  // -- (2) Time discretisation --
+  SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
+
+  // -- (3) Non smooth problem
   SP::MLCP  aMLCP ;
   aMLCP.reset(new MLCP());
-  aS->insertNonSmoothProblem(aMLCP);
+
+
+  // -- (4) Simulation setup with (1) (2) (3)
+  SP::TimeStepping aS(new TimeStepping(aTD, aMoreau, aMLCP));
+  aS->setComputeResiduY(true);
+  aS->setUseRelativeConvergenceCriteron(false);
+
+
+  // Initialization
+  cout << "====> Initialisation ..." << endl << endl;
   aM->initialize(aS);
+  cout << " ---> End of initialization." << endl;
+  //  aS->insertNonSmoothProblem(aMLCP);
   SP::SolverOptions numSolOptions = aMLCP->numericsSolverOptions();
   //  Alloc working mem for the solver
   int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
@@ -131,6 +142,12 @@ int main()
   //  numSolOptions->dparams[0]=1e-12;
 
   mlcp_driver_init(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
+
+  //*****BUILD THE STEP INTEGRATOR
+  //  SP::NonSmoothSolver  mySolver( new NonSmoothSolver((*solverName),iparam,dparam,floatWorkingMem,intWorkingMem));
+
+  //**** BUILD THE STEP NS PROBLEM
+
   //      setNumericsVerbose(1);
 
 
