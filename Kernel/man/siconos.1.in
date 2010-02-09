@@ -40,6 +40,9 @@ siconos \- Siconos C++ Compilation.
 .B \-noexec
 ]
 [
+.B \-nocomp
+]
+[
 .B \-opt 
 .I C++ COMPILER OPTION
 ]
@@ -125,6 +128,9 @@ The following command-line options are recognized by
 .BI \-noexec
  Do not run executable after compilation.
 .TP
+.BI \-nocomp
+ Do not compile executable before run.
+.TP
 .BI \-opt 
 .I COMPILER OPTION
  Add option to compiler.
@@ -154,6 +160,7 @@ The following command-line options are recognized by
  Print 
 .BR make (1) 
 commands as they are executed.
+
 
 .SH EXAMPLES
 

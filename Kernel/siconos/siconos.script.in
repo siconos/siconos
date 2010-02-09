@@ -1,5 +1,5 @@
 #!/bin/sh
-# Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.
+# Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -15,19 +15,20 @@
 # along with Siconos; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 
 NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
 KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
 
 exec=true
+comp=true
 myname=`basename $0`
 call_pwd=`pwd`
 
 cartridge() {
     echo;
     echo "|=============================================================================|";
-    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.           |";
+    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2010.           |";
     echo "|                                                                             |";
     echo "|                 Free software under GNU General Public License.             |";
     echo "|=============================================================================|"; 
@@ -42,7 +43,7 @@ The siconos command compiles, links and runs a Siconos program.
 Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
  
 
- --> To use other source files (*.c, *.cpp, *.f), put themin ./src or
+ --> To use other source files (*.c, *.cpp, *.f), put them in ./src or
      -see option src_dir below
 
  --> To create a library and link it with the siconos program, create
@@ -77,6 +78,8 @@ Options are:
  -l<lib> : link with library <lib>.
  
  -noexec : compile only.
+
+ -nocomp : execute only.
 
  -O<n> : set compiler optimization.
  
@@ -120,7 +123,7 @@ cartridge
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
  -o acghO:I:l:L:D:P:v \
- -l build_dir:,clean_build,clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
+ -l build_dir:,clean_build,clean,help,noexec,nocomp,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
         usage
@@ -150,7 +153,7 @@ clean_build=false
 while test $# -gt 0 ; do
     case "$1" in
         -a) all_srcs=true;;
-        --build_dir) with_args $@; shift;
+        --build_dir) with_arg $@; shift;
             case :$1 in 
                 :/tmp) tmp_directory=true; build_directory=$1;;
                 :*) build_directory=$1;;
@@ -161,6 +164,7 @@ while test $# -gt 0 ; do
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
         -h|-help) usage; exit 0;;
         --noexec) exec=false;;
+        --nocomp) comp=false;; 
         -I) with_arg $@; shift; 
             case :$1,:$include_directories in
                 :*,:) include_directories=$1;;
@@ -280,32 +284,37 @@ if test ! "$make_args" = "clean"; then
         esac
     done
 
-    if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
-        -DCALL_PWD=$call_pwd \
-        -DMAIN_SOURCE=$main_source \
-        -DPLUGINS_SOURCES=$plugins_sources \
-        -DPLUGINS_DIRECTORIES=$plugins_directories \
-        -DPLUGIN_DIRECTORIES=$plugin_directories \
-        -DSOURCES_DIRECTORIES=$sources_directories \
-        -DCOMPILER_OPTIONS=$compiler_options \
-        -DLINKER_OPTIONS=$linker_options \
-        -DLINKER_DIRECTORIES=$linker_directories \
-        -DLINKER_LIBRARIES=$linker_libraries \
-        -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
-        $extra_defs; then
-        echo "$myname: $exe build configuration failed" >&2
-        exit 1
+    if [ $comp = true ]; then
+        
+        if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
+            -DCALL_PWD=$call_pwd \
+            -DMAIN_SOURCE=$main_source \
+            -DPLUGINS_SOURCES=$plugins_sources \
+            -DPLUGINS_DIRECTORIES=$plugins_directories \
+            -DPLUGIN_DIRECTORIES=$plugin_directories \
+            -DSOURCES_DIRECTORIES=$sources_directories \
+            -DCOMPILER_OPTIONS=$compiler_options \
+            -DLINKER_OPTIONS=$linker_options \
+            -DLINKER_DIRECTORIES=$linker_directories \
+            -DLINKER_LIBRARIES=$linker_libraries \
+            -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
+            $extra_defs; then
+            echo "$myname: $exe build configuration failed" >&2
+            exit 1
+        fi
     fi
 fi
 
-if test -f ./Makefile; then
-    make $make_args || exit 1
-    case $make_args in 
-        clean);;
-        *) make install || exit 1;;
-    esac
-else
-    echo "$myname: nothing to clean" 
+if [ $comp = true ]; then
+    if test -f ./Makefile; then
+        make $make_args || exit 1
+        case $make_args in 
+            clean);;
+            *) make install || exit 1;;
+        esac
+    else
+        echo "$myname: nothing to clean" 
+    fi
 fi
 
 if test $clean_build = true; then
