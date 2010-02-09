@@ -22,6 +22,8 @@
 #ifndef FrictionContact_H
 #define FrictionContact_H
 
+#define SICONOS_FRICTION_CONTACT_DEFAULT_SOLVER "NSGS"
+
 #include "LinearOSNS.hpp"
 
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */

@@ -51,6 +51,12 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 {
   SP::FrictionContactXML xmlFC = boost::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
+
+  if (osNsPbXml->hasNumericsSolverName())
+    _numerics_solver_name = osNsPbXml->getNumericsSolverName();
+  else
+    _numerics_solver_name = SICONOS_FRICTION_CONTACT_DEFAULT_SOLVER;
+
   _numerics_problem.reset(new  FrictionContactProblem);
 
   // Read dimension of the problem (required parameter)
