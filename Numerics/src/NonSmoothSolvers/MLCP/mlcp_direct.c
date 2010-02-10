@@ -260,6 +260,13 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
   int INCX = 1;
   int INCY = 1;
   double * solTest = 0;
+  /*  printf("cur config ");
+  for (int i=0;i<sM;i++)
+    if (spCurCC->zw[i])
+      printf("1");
+    else
+      printf("0");
+      printf("\n");*/
   if (sProblemChanged)
     internalPrecompute(problem);
   if (!spCurCC->Usable)
@@ -290,7 +297,7 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
       if (solTest[sN + lin] < - sTolneg)
       {
         if (verbose)
-          printf("solveWithCurConfig Sol not in the positive cone\n");
+          printf("solveWithCurConfig Sol not in the positive cone because %lf\n", solTest[sN + lin]);
         return 0;
       }
     }
@@ -311,6 +318,20 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
  * double *w : size n+m
  * info : output. info == 0 if success
  */
+int nbConfig(struct dataComplementarityConf * pC)
+{
+  struct dataComplementarityConf * paux = pC;
+  int nb = 0;
+  while (paux)
+  {
+    nb++;
+    paux = paux->next;
+  }
+  printf("number of conf :%d\n", nb);
+  return nb;
+
+}
+
 void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int find = 0;
@@ -339,11 +360,17 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
         /*Current becomes first for the next step.*/
         if (spCurCC != spFirstCC)
         {
+          /*    nbConfig(spFirstCC);
+          nbConfig(spCurCC);
+          printf("bidouille pour devenir 1\n");*/
           spCurCC->prev->next = spCurCC->next;
+          if (spCurCC->next)
+            spCurCC->next->prev = spCurCC->prev;
           spFirstCC->prev = spCurCC;
           spCurCC->next = spFirstCC;
           spFirstCC = spCurCC;
           spFirstCC->prev = 0;
+          /*    nbConfig(spFirstCC);*/
         }
       }
       else
