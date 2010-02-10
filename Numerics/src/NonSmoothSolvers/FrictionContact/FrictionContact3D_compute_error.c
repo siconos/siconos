@@ -61,7 +61,7 @@ int FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z ,
 
   /* Computes error */
   double normq = DNRM2(n , problem->q , incx);
-  *error = *error / normq;
+  *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
     /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
@@ -111,7 +111,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, do
 
   /* Computes error */
   double normq = DNRM2(n , problem->q , incx);
-  *error = *error / normq;
+  *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
     /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error_velocity failed: error = %g > tolerance = %g.\n",*error, tolerance); */

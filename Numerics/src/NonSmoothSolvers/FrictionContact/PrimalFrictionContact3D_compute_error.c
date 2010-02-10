@@ -109,7 +109,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
 
   /* Computes error */
   double normq = DNRM2(n , problem->q , incx);
-  *error = *error / normq;
+  *error = *error / (normq + 1.0);
 
   if (*error > tolerance)
   {

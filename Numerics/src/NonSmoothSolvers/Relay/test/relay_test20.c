@@ -24,11 +24,11 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/relay1.dat\n");
+  printf("Test on ./data/relay_simple2.dat\n");
 
-  FILE * finput  =  fopen("./data/relay1.dat", "r");
+  FILE * finput  =  fopen("./data/relay_simple2.dat", "r");
 
-  char solvername[10] = "PGS";
+  char solvername[10] = "Lemke";
   info = relay_test_function(finput, solvername);
 
   fclose(finput);

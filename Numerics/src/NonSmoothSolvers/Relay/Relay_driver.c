@@ -60,6 +60,8 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   /*************************************************
    *  2 - Call specific solver (if no trivial sol.)
    *************************************************/
+  if (verbose > 0)
+    printSolverOptions(options);
 
   /* Solver name */
   char * name = options->solverName;
@@ -75,6 +77,12 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
   else if ((strcmp(name , "Lemke") == 0))
   {
+
+    char filename[20] = "relay_simple.dat";
+
+    FILE *FP = fopen(filename, "w");
+    relay_printInFile(problem, FP);
+    fclose(FP);
     relay_lexicolemke(problem, z , w , &info , options, global_options);
   }
   else if ((strcmp(name , "ENUM") == 0))

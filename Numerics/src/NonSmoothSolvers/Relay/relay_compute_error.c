@@ -58,7 +58,7 @@ int relay_compute_error(RelayProblem* problem, double *z , double *w, double tol
 
   /* Computes error */
   double normq = DNRM2(n , problem->q , 1);
-  *error = *error / normq;
+  *error = *error / (normq + 1.0);
   free(ztmp);
   if (*error > tolerance)
   {

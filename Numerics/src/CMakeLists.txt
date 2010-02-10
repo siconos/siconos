@@ -229,6 +229,7 @@ IF(WITH_TESTING)
   NEW_TEST(Relaytest10 relay_test10.c)
   NEW_TEST(Relaytest11 relay_test11.c)
   NEW_TEST(Relaytest12 relay_test12.c)
+  NEW_TEST(Relaytest20 relay_test20.c)
   END_TEST()
   
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)

@@ -38,14 +38,25 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
   double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
 
+  for (i = 0; i < lcp_problem->size; i++)
+  {
+    zlcp[i] = 0.0;
+    wlcp[i] = 0.0;
+  }
+
+
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
 
   // Call the lcp_solver
 
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
+  SolverOptions * lcp_options = options->internalSolvers;
+
+
+
+  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options, global_options);
   if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
+    lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
 
   /*       printf("\n"); */
 
@@ -82,10 +93,10 @@ int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the Lemke Solver\n");
+    printf("Set the Default SolverOptions for the Lemke Solver for Relay\n");
   }
   strcpy(options->solverName, "Lemke");
-  options->numberOfInternalSolvers = 0;
+  options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
   options->iSize = 5;
@@ -100,7 +111,8 @@ int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
     options->dparam[i] = 0.0;
   }
   options->dparam[0] = 1e-6;
-
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  linearComplementarity_lexicolemke_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

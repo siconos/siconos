@@ -79,7 +79,7 @@ int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z ,
   }
 
   *error = sqrt(*error);
-  *error /= DNRM2(n, problem->q, 1);
+  *error /= (DNRM2(n, problem->q, 1) + 1.0);
 
   if (*error > tolerance)
   {
