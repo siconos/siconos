@@ -178,7 +178,6 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
 void FirstOrderType1R::computeJachx(double)
 {
   //
-  assert(index == 0 && "FirstOrderType1R::computeJacobianH(index): index is out of range");
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -197,7 +196,6 @@ void FirstOrderType1R::computeJachx(double)
 
 void FirstOrderType1R::computeJacglambda(double)
 {
-  assert(index == 0 && "FirstOrderType1R::computeJacobiang(index): index is out of range");
   assert(_pluginJacLg && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
 
   SP::SiconosVector lambda = interaction()->lambda(0);
