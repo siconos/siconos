@@ -151,7 +151,7 @@ To solve these systems, at each time, i.e. to known the configuration after each
 
 \f$ I_2 = \{ ur_\alpha\in I_{1} , \dot y_{\alpha} = 0 \} \f$ (or if the UR is in \f$ I_2 \f$, contact remains, no take off). \n
 
-This results in the new writing of the <b>"Bilateral Smooth Dynamics</b>: 
+This results in the new writing of the <b>Bilateral Smooth Dynamics</b>: 
 
 \f{eqnarray*}
 M(q) \ddot q^{+} + F_{int}(t, q, v)= F_{ext} +  \nabla_q h(q)^T F^+\\ \\
@@ -215,7 +215,7 @@ In the same way, we denote \f$ \lambda[i] \f$ the variable that is linked with y
 Finally to each \f$ \lambda[i] \f$ corresponds a p[i]. \n
 To make things clearer, let us rewrite the previous defined systems with Siconos notations: 
 
-- <b>"Bilateral Smooth Dynamics</b>: \n
+- <b>Bilateral Smooth Dynamics</b>: \n
 \f{eqnarray*}
 M(q) \ddot q + F_{int}(t, q, \dot q)= F_{ext} +  \nabla_q h(q)^T \lambda[2] \\ \\
 y[2] = \nabla_q h(q) \ddot q + \dot{ \nabla_q h(q)} \dot q    \\ \\
