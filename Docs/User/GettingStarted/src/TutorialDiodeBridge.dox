@@ -99,7 +99,9 @@ double Cvalue = 1e-6;   // capacitance
 double Rvalue = 1e3;    // resistance 
 
 // DynamicalSystem(s)
-SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); // All components of A are automatically set to 0.
+
+// All components of A are automatically set to 0.
+SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); 
 (*A)(0,1) = -1.0/Cvalue;
 (*A)(1,0) = 1.0/Lvalue;
 \endcode
@@ -205,7 +207,7 @@ SP::Siconos C(new SimpleMatrix(ninter,ndof));
 (*C)(3,0) = 1.0;
 
 // the Relation:
-SP::LinearTIR myRelation(new LinearTIR(*C,*B));
+SP::FirstOrderLinearTIR myRelation(new FirstOrderLinearTIR(C,B));   
 \endcode
 
 If we stop here, all other potential components of the relation (D, F
@@ -266,23 +268,16 @@ pointers, a set of DynamicalSystems, the interaction size and some ids
 (a string and a number).\n
 
 \code
-SP::Interaction myInteraction(new Interaction(ninter, myNslaw, myRelation));
-\endcode
-
-Then, you have to insert in myInteraction all dynamical systems concerned
-by the interaction :
-
-\code
-myInteraction->insert(oscillator);
+SP::Interaction myInteraction(new Interaction(ninter, myNslaw, myRelation));        
 \endcode
 
 This is the end of the first step, you have now a dynamical system and
 an interaction. Before dealing with the Simulation, first create the
 Model, the object that handles the NonSmoothDynamicalSystem and the
 Simulation. Building a Model is an easy thing: just give some time
-boundaries for the future simulation and then insert in the
-NonSmoothDynamicalSystem held by the Model the dynamical systems and
-the interactions.
+boundaries for the future simulation and insert in the
+NonSmoothDynamicalSystem held by the Model the dynamical systems, then
+link together interactions and dynamical systems.
 
 \code
 // Model
@@ -290,7 +285,7 @@ double t0 = 0; // Initial time
 double T = 10; // Total simulation time
 SP::Model diodeBridge(new Model(t0,T));
 diodebridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(oscillator);
-diodebridge->nonSmoothDynamicalSystem()->insertInteraction(myInteraction);
+diodebridge->nonSmoothDynamicalSystem()->link(myInteraction,oscillator);
 \endcode
 
 \section tut1Simu The Simulation
@@ -334,16 +329,30 @@ double h_step =  1.0e-6;  // Time step
 SP::TimeDiscretisation td(new TimeDiscretisation(h_step));
 \endcode
 
-
-
-
-After the integration of the Dynamics, the system is written as a Linear Complementarity Problem (see \ref docSimuLCP), and solved thanks to a solver algorithm of type NSQP (Non Smooth Quadratic Programming).
+After the integration of the Dynamics, the system is written as a
+Linear Complementarity Problem (see \ref docSimuLCP), and solved
+thanks to a solver algorithm of type NSQP (Non Smooth Quadratic
+Programming).
 
 \code
 // One Step non smooth problem
-string solverName = "NLGS"; // non smooth problem solver algo name.
-OneStepNSProblem* myLCP = new LCP(s, "LCP", solverName, 101, 0.0001, "max", 0.6 );
+OneStepNSProblem* myLCP = new LCP("NSQP");
 \endcode
+
+The default solver options may be modified this way :
+
+\code
+\\ max number of iteration
+myLCP->numericsSolverOptions()->iparam[0]=101;
+\endcode
+
+
+\code
+\\ tolerance
+myLCP->numericsSolverOptions()->dparam[0]=1e-4;
+\endcode
+
+See the solvers documentation.
 
 
 Finaly, we create the Simulation object with the Model the
@@ -359,8 +368,10 @@ computed. This is the end of the second step.
 
 \section tut1leadingSimu Leading the Simulation Process
 
-From now on, you will work on the NonSmoothDynamicalSystem by calling some specific functions of the Simulation. \n
-The first and compulsory step of any simulation process in Siconos is the initialization of the Simulation: 
+From now on, you will work on the NonSmoothDynamicalSystem by calling
+some specific functions of the Simulation. \n The first and compulsory
+step of any simulation process in Siconos is the initialization of the
+Simulation:
 
 \code
 diodeBridge->initialize(s);
@@ -375,8 +386,9 @@ Then the easiest way to run your simulation is to call
 s->run()
 \endcode
 
-But after that you only have access to values computed at the last time step, which might not be enough ...
-So that may be better to write a complete time loop like:
+But after that you only have access to values computed at the last
+time step, which might not be enough ...  So that may be better to
+write a complete time loop like:
 
 \code
 int k = 0; // Current step 
@@ -495,32 +507,32 @@ Results are given on the figure below:
 
 /*! \page GSDiodeBridgeEx DiodeBridge.cpp
 \code
-// Header files
 #include "SiconosKernel.hpp"
-
-using namespace std;
 
 // main program
 int main(int argc, char* argv[])
 {
   // Exception handling
-  try{
+  try
+  {
     // == User-defined parameters ==
-    unsigned int ndof = 2;  // number of degrees of freedom of your system 
+    unsigned int ndof = 2;  // number of degrees of freedom of your
+                            // system
     double Lvalue = 1e-2;   // inductance
     double Cvalue = 1e-6;   // capacitance
-    double Rvalue = 1e3;    // resistance 
+    double Rvalue = 1e3;    // resistance
     double Vinit = 10.0;    // initial voltage
     double t0 = 0.0;
     double T = 5e-3;        // Total simulation time
     double h_step = 1.0e-6;      // Time step
-    string solverName = "Lemke"; // non smooth problem solver algo name.
-	
+
     // ================= Creation of the model =======================
 
     // == Creation of the NonSmoothDynamicalSystem ==
     // DynamicalSystem(s)
-    SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); // All components of A are automatically set to 0.
+
+    // All components of A are automatically set to 0.
+    SP::SiconosMatrix A(new SimpleMatrix(ndof,ndof)); 
     (*A)(0,1) = -1.0/Cvalue;
     (*A)(1,0) = 1.0/Lvalue;
     SP::SiconosVector x0(new SimpleVector(ndof));
@@ -528,63 +540,64 @@ int main(int argc, char* argv[])
     SP::DynamicalSystem oscillator(new FirstOrderLinearTIDS(x0,A));
 
     // Relations
-    unsigned int ninter = 4; // dimension of your Interaction = size of y and lambda vectors
+    unsigned int ninter = 4; // dimension of your Interaction = size
+                             // of y and lambda vectors
     SP::SiconosMatrix B(new SimpleMatrix(ndof,ninter));
-    (*B)(0,2) = -1.0/Cvalue ; 
+    (*B)(0,2) = -1.0/Cvalue ;
     (*B)(0,3) = 1.0/Cvalue;
     SP::SiconosMatrix C(new SimpleMatrix(ninter,ndof));
     (*C)(2,0) = -1.0;
     (*C)(3,0) = 1.0;
-    SP::FirstOrderLinearTIR myRelation(new FirstOrderLinearTIR(*C,*B));
+    SP::FirstOrderLinearTIR myRelation(new FirstOrderLinearTIR(C,B));
     SP::SiconosMatrix D(new SimpleMatrix(ninter,ninter));
-    (*D)(0,0) = 1.0/Rvalue;  (*D)(0,1) = 1.0/Rvalue; (*D)(0,2) = -1.0; 
-    (*D)(1,0) = 1.0/Rvalue;  (*D)(1,1) = 1.0/Rvalue; (*D)(1,3) = -1.0;  
-    (*D)(2,0) = 1.0; 
-    (*D)(3,1) = 1.0; 
-    myRelation->setDPtr(D); 
+    (*D)(0,0) = 1.0/Rvalue;
+    (*D)(0,1) = 1.0/Rvalue;
+    (*D)(0,2) = -1.0;
+    (*D)(1,0) = 1.0/Rvalue;
+    (*D)(1,1) = 1.0/Rvalue;
+    (*D)(1,3) = -1.0;
+    (*D)(2,0) = 1.0;
+    (*D)(3,1) = 1.0;
+    myRelation->setDPtr(D);
 
     // NonSmoothLaw
-    unsigned int nslawSize = 4; 
+    unsigned int nslawSize = 4;
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
     SP::Interaction myInteraction(new Interaction(ninter, myNslaw, myRelation));
-    myInteraction->insert(oscillator);
 
     // Model
     SP::Model DiodeBridge(new Model(t0,T));
     DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(oscillator);
-    DiodeBridge->nonSmoothDynamicalSystem()->insertInteraction(myInteraction);
+    DiodeBridge->nonSmoothDynamicalSystem()->link(myInteraction,oscillator);
 
     // == Creation of the Simulation ==
 
-    // OneStepIntegrator
+    // -- (1) OneStepIntegrators --
     double theta = 0.5;
     SP::Moreau myIntegrator(new Moreau(oscillator,theta));
 
-    // TimeDiscretisation
+    // -- (2) Time discretisation --
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h_step));
 
-    // One Step non smooth problem
-    IntParameters iparam(5);
-    iparam[0] = 1001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.0001; // Tolerance
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName,iparam,dparam));
-    SP::OneStepNSProblem myLCP(new LCP(mySolver));
+    // -- (3) one step non smooth problem
+    SP::OneStepNSProblem myLCP(new LCP());
 
+    // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(td,myIntegrator,myLCP));
 
-    // ================================= Computation =================================
+
+    // ====================== Computation ============================
 
     // --- Initialisation of the simulation ---
-    DiodeBridge->initialize(s);    
-    
-     cout << " ---> End of initialization." << endl;
-    
+    DiodeBridge->initialize(s);
+
+    std::cout << " ---> End of initialization." << std::endl;
+
     int k = 0;
     double h = s->timeStep();
     int N = (int)((T-t0)/h); // Number of time steps
-    
+
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);
@@ -592,81 +605,85 @@ int main(int argc, char* argv[])
     SP::SiconosVector x = oscillator->x();
     SP::SiconosVector y = myInteraction->y(0);
     SP::SiconosVector lambda = myInteraction->lambda(0);
-    
-    // For the initial time step: 
+
+    // For the initial time step:
     // time
     dataPlot(k, 0) = t0;
-    
+
     // inductor voltage
     dataPlot(k, 1) = (*x)(0);
-    
+
     // inductor current
     dataPlot(k, 2) = (*x)(1);
-    
+
     // diode R1 current
     dataPlot(k, 3) = (*y)(0);
-    
+
     // diode R1 voltage
     dataPlot(k, 4) = -(*lambda)(0);
-    
-    // diode F2 voltage 
+
+    // diode F2 voltage
     dataPlot(k, 5) = -(*lambda)(1);
-    
+
     // diode F1 current
     dataPlot(k, 6) = (*lambda)(2);
-   
+
     boost::timer t;
     t.restart();
-  
+
     // --- Time loop  ---
-    for(k = 1 ; k < N ; ++k)
-      {
-	// solve ... 
-	s->computeOneStep();
+    for (k = 1 ; k < N ; ++k)
+    {
+      // solve ...
+      s->computeOneStep();
 
-	// --- Get values to be plotted ---
-	// time
-    	dataPlot(k, 0) = s->nextTime();
-    
-    	// inductor voltage
-    	dataPlot(k, 1) = (*x)(0);
+      // --- Get values to be plotted ---
+      // time
+      dataPlot(k, 0) = s->nextTime();
 
-    	// inductor current
-    	dataPlot(k, 2) = (*x)(1);
-    
-    	// diode R1 current
-    	dataPlot(k, 3) = (*y)(0);
+      // inductor voltage
+      dataPlot(k, 1) = (*x)(0);
 
-    	// diode R1 voltage
-    	dataPlot(k, 4) = -(*lambda)(0);
+      // inductor current
+      dataPlot(k, 2) = (*x)(1);
 
-	// diode F2 voltage 
-   	dataPlot(k, 5) = -(*lambda)(1);
-	
-    	// diode F1 current
-    	dataPlot(k, 6) = (*lambda)(2);
+      // diode R1 current
+      dataPlot(k, 3) = (*y)(0);
 
-	s->nextStep();
-	
-      }    
+      // diode R1 voltage
+      dataPlot(k, 4) = -(*lambda)(0);
 
-	
+      // diode F2 voltage
+      dataPlot(k, 5) = -(*lambda)(1);
+
+      // diode F1 current
+      dataPlot(k, 6) = (*lambda)(2);
+
+      s->nextStep();
+
+    }
+
+
     // --- elapsed time computing ---
-    cout<<"time = "<<t.elapsed()<<endl;
+    std::cout<<"time = "<<t.elapsed()<<std::endl;
 
     // Number of time iterations
-    cout<<"Number of iterations done: "<<k<<endl;	
-    
-    // dataPlot (ascii) output 
+    std::cout<<"Number of iterations done: "<<k<<std::endl;
+
+    // dataPlot (ascii) output
     ioMatrix io("DiodeBridge.dat", "ascii");
     io.write(dataPlot,"noDim");
   }
- 	
+
   // --- Exceptions handling ---
-  catch(SiconosException e)
-    {cout << e.report() << endl;}
-  catch(...)
-    {cout << "Exception caught " << endl;}
+  catch (SiconosException e)
+  {
+    std::cout << e.report() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "Exception caught " << std::endl;
+  }
 }
 \endcode
 */
