@@ -31,11 +31,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-
-
   try
   {
-
 
     // ================= Creation of the model =======================
 
@@ -114,7 +111,7 @@ int main(int argc, char* argv[])
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    // --- (3) one step non smooth problem
+    // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
