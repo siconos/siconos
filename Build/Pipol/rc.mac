@@ -1,4 +1,5 @@
 #!/bin/sh
 
 port install rsync
+port install cppunit
 port uninstall cmake

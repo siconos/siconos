@@ -188,7 +188,6 @@ save_packed_1 Examples Release
 src_setup
 configure_1 Numerics Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Numerics Debug
-nightly_test Numerics Debug
 nightly_coverage Numerics Debug
 nightly_memcheck Numerics Debug
 nightly_submit Numerics Debug 
@@ -196,7 +195,6 @@ nightly_submit Numerics Debug
 src_setup
 configure_1 Kernel Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Kernel Debug
-nightly_test Kernel Debug
 nightly_coverage Kernel Debug
 nightly_memcheck Kernel Debug
 nightly_submit Kernel Debug

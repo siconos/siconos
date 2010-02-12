@@ -2,4 +2,4 @@
 
 apt-get update
 
-apt-get -y install gfortran gcc doxygen libboost-graph-dev libatlas-base-dev libatlas-headers libblas-dev libxml2 libxml2-dev libgmp3-dev
+apt-get -y install gfortran gcc doxygen libboost-graph-dev libatlas-base-dev libatlas-headers libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev
