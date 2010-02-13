@@ -127,6 +127,9 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
   double* qtmp = (double*)malloc(n * sizeof(double));
+  for (int i = 0; i < n; i++) qtmp[i] = 0.0;
+
+
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {

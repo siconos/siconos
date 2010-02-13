@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
+//#define VERBOSE_DEBUG
 /*Static variables */
 
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
@@ -400,7 +400,7 @@ void frictionContact3D_AC_free()
 }
 
 
-int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam)
+int OldAlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam)
 {
 
   int ITMAX = iparam[0];
@@ -410,7 +410,7 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
   double TOL = dparam[0];
   double RVN, RVT, RVS, RV, RV1, RV3;
   double PhiT4, PhiS4, Phi3;
-  double Treshold, DET, DET1;
+  double Threshold, DET, DET1;
   double d1, d2, d3, AA, BB, CC;
   double ERW, WREF;
 
@@ -431,8 +431,19 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
   W[0][2] =  MLocal[1 + 0 * 3];
   W[0][1] =  MLocal[1 + 2 * 3];
   W[0][0] =  MLocal[1 + 1 * 3];
+#ifdef VERBOSE_DEBUG
+  printf("Initial conditions \n");
+  printf("RN = %le\n", Rloc[2]);
+  printf("RT = %le\n", Rloc[0]);
+  printf("RS = %le\n", Rloc[1]);
 
-
+  printf("WNN = %le\n", W[2][2]);
+  printf("WNT = %le\n", W[2][0]);
+  printf("WNS = %le\n", W[2][1]);
+  printf("WTT = %le\n", W[0][0]);
+  printf("WTS = %le\n", W[0][1]);
+  printf("WSS = %le\n", W[1][1]);
+#endif
 
   double RhoN;
   double RhoT;
@@ -454,7 +465,9 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
 
   for (inew = 0 ; inew < ITMAX ; ++inew)
   {
-
+#ifdef VERBOSE_DEBUG
+    printf("-----------------------------------    AlartCurnierNewton iteration = %i \n", inew);
+#endif
     for (i = 0 ; i < 3 ; ++i)
     {
       WRloci[i] =  WRloc[i];
@@ -494,15 +507,18 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
       AWB[2][0] = 0.0;
       STATUS = 0;
     }
-
+#ifdef VERBOSE_DEBUG
+    printf("STATUS =%i\n", STATUS);
+    printf("Phi3 =%le\n", Phi3);
+#endif
     RVT = Rloc[1] - RhoT * (WRloc[1] + S[1]);
     RVS = Rloc[0] - RhoT * (WRloc[0] + S[0]);
 
     RV = sqrt(RVT * RVT + RVS * RVS);
 
-    Treshold = MU * Rloc[2];
+    Threshold = MU * Rloc[2];
 
-    if ((RV < Treshold) || (RV < 1.e-20))
+    if ((RV < Threshold) || (RV < 1.e-20))
     {
 
       PhiT4 = RhoT * (WRloc[1] + S[1]);
@@ -517,18 +533,18 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
     {
 
       RV1 = 1.0 / RV;
-      PhiT4 = Rloc[1] - Treshold * RVT * RV1;
-      PhiS4 = Rloc[0] - Treshold * RVS * RV1;
+      PhiT4 = Rloc[1] - Threshold * RVT * RV1;
+      PhiS4 = Rloc[0] - Threshold * RVS * RV1;
 
       AWB[0][2] = -MU * RVS * RV1;
       AWB[1][2] = -MU * RVT * RV1;
 
-      RV3 = Treshold * RV1 * RV1 * RV1;
+      RV3 = RV1 * RV1 * RV1;
 
-      A[1][1] = RV3 * RVS * RVS;
-      A[1][0] = -RV3 * RVT * RVS;
+      A[1][1] = Threshold * (RV - RVS * RVS) * RV3;
+      A[1][0] = -Threshold * RV3 * RVT * RVS;
       A[0][1] = A[1][0];
-      A[0][0] = RV3 * RVT * RVT;
+      A[0][0] = Threshold * (RV - RVT * RVT) * RV3;
 
       for (i = 0 ; i < 2 ; ++i) AWB[i][i] = 1.0 - A[i][i];
       AWB[1][0] = - A[1][0];
@@ -542,7 +558,13 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
         for (j = 0 ; j < 2 ; ++j) AWB[i][j] += A[i][0] * W[0][j] + A[i][1] * W[1][j];
       STATUS = 2;
     }
+#ifdef VERBOSE_DEBUG
+    printf("STATUS =%i\n", STATUS);
+    printf("PhiT4 =%le\n", PhiT4);
+    printf("PhiS4 =%le\n", PhiS4);
+#endif
 
+    //
     d1 = AWB[1][1] * AWB[2][2] - AWB[1][2] * AWB[2][1];
     d2 = AWB[1][0] * AWB[2][2] - AWB[2][0] * AWB[1][2];
     d3 = AWB[1][0] * AWB[2][1] - AWB[2][0] * AWB[1][1];
@@ -553,7 +575,20 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
     {
       printf("DET NULL\n");
     }
-
+#ifdef VERBOSE_DEBUG
+    printf("AWB[%i][%i] = %le\t", 0, 0, AWB[2][2]);
+    printf("AWB[%i][%i] = %le\t", 0, 1, AWB[2][0]);
+    printf("AWB[%i][%i] = %le\t", 0, 2, AWB[2][1]);
+    printf("\n");
+    printf("AWB[%i][%i] = %le\t", 1, 0, AWB[0][2]);
+    printf("AWB[%i][%i] = %le\t", 1, 1, AWB[0][0]);
+    printf("AWB[%i][%i] = %le\t", 1, 2, AWB[0][1]);
+    printf("\n");
+    printf("AWB[%i][%i] = %le\t", 2, 0, AWB[1][2]);
+    printf("AWB[%i][%i] = %le\t", 2, 1, AWB[1][0]);
+    printf("AWB[%i][%i] = %le\t", 2, 2, AWB[1][1]);
+    printf("\n");
+#endif
     DET1 = 1.0 / DET;
 
     AA
@@ -561,7 +596,8 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
         - (AWB[0][0] * AWB[1][2] - AWB[1][0] * AWB[0][2]) * PhiT4
         + (AWB[0][0] * AWB[1][1] - AWB[1][0] * AWB[0][1]) * Phi3;
 
-    Rloc[2] = fmax(0.0 , Rloc[2] - AA * DET1);
+    //  Rloc[2] = fmax(0.0 , Rloc[2] - AA*DET1);
+    Rloc[2] =  Rloc[2] - AA * DET1;
 
     BB
       = -(AWB[0][1] * AWB[2][2] - AWB[2][1] * AWB[0][2]) * PhiS4
@@ -573,7 +609,11 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
     CC = d1 * PhiS4 - d2 * PhiT4 + d3 * Phi3;
 
     Rloc[0] = Rloc[0] - CC * DET1;
-
+#ifdef VERBOSE_DEBUG
+    printf("RN = %le\n", Rloc[2]);
+    printf("RT = %le\n", Rloc[0]);
+    printf("RS = %le\n", Rloc[1]);
+#endif
     for (i = 0 ; i < 3 ; ++i) WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
 
     WREF = 0.0;
@@ -591,7 +631,7 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
     ERW = ERW / WREF;
 
     INEWTON = inew + 1;
-    if (fabs(ERW) < TOL * TOL)  break;
+    if (fabs(ERW) < TOL)  break;
   }
   if (verbose > 1)
   {
@@ -631,6 +671,613 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 10;
-  options->dparam[0] = 1e-6;
+  options->dparam[0] = 1e-16;
   return 0;
+}
+
+int TruncatedCylinderAlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam)
+{
+
+  double mu = mu_i;
+  double Tol = dparam[0];
+  double itermax = iparam[0];
+  int i, j, k, inew;
+  double velocity[3];
+  double A[3][3];
+  A[0][1] = 0.0;
+  A[0][2] = 0.0;
+  A[1][0] = 0.0;
+  A[2][0] = 0.0;
+  double B[3][3];
+  B[0][1] = 0.0;
+  B[0][2] = 0.0;
+
+  double AWplusB[3][3];
+
+
+  double RhoN = 1.0;
+  double RhoT = 1.0;
+
+  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
+
+  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+
+  if (dw > 0.0) dw = sqrt(dw);
+  else dw = 0.0;
+
+  RhoN = 1.0 / MLocal[0 + 0 * 3];
+  RhoT = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+
+#ifdef VERBOSE_DEBUG
+  printf("sw=%le = ", sw);
+  printf("dw=%le = ", dw);
+  printf("RhoN=%le = ", RhoN);
+  printf("RhoT=%le = ", RhoT);
+#endif
+
+  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                          + MLocal[i + 1 * 3] * R[1]
+                                          + MLocal[i + 2 * 3] * R[2] ;
+
+
+  double RVN, RVT, RVS, RV, RV1, RV3, DET, DET1;
+  double ResN, ResT, ResS, Radius;
+  double d1, d2, d3, AA, BB, CC;
+  double GammaTT, GammaTS, GammaST, GammaSS;
+
+  RVN = R[0] - RhoN * velocity[0];
+  RVT = R[1] - RhoT * velocity[1];
+  RVS = R[2] - RhoT * velocity[2];
+  RV = sqrt(RVT * RVT + RVS * RVS);
+  Radius = mu * R[0];
+#ifdef VERBOSE_DEBUG
+  printf("RN = %le\n", R[0]);
+  printf("RT = %le\n", R[1]);
+  printf("RS = %le\n", R[2]);
+#endif
+  d1 = MLocal[1 + 1 * 3] * MLocal[2 + 2 * 3] - MLocal[1 + 2 * 3] * MLocal[2 + 1 * 3];
+  d2 = MLocal[1 + 0 * 3] * MLocal[2 + 2 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 2 * 3];
+  d3 = MLocal[1 + 0 * 3] * MLocal[2 + 1 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 1 * 3];
+
+  DET = MLocal[0 + 0 * 3] * d1 - MLocal[0 + 1 * 3] * d2 + MLocal[0 + 2 * 3] * d3;
+#ifdef VERBOSE_DEBUG
+  printf("DET = %le\n", DET);
+#endif
+  if (fabs(DET) < 1.e-20)
+  {
+    printf("DET NULL\n");
+    exit(EXIT_FAILURE);
+  }
+
+  for (inew = 0 ; inew < itermax ; ++inew)
+  {
+
+
+
+    // Compute the value of the Alart--Curnier Function and its gradient for the normal part
+
+    if (RVN >= 0.0)
+    {
+      ResN = RhoN * (velocity[0]);
+      A[0][0] =  RhoN;
+      B[0][0] = 0.0;
+    }
+    else
+    {
+      ResN = R[0];
+      A[0][0] = 0.0;
+      B[0][0] = 1.0;
+    }
+
+    // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
+
+
+#ifdef VERBOSE_DEBUG
+    printf("Radius=%le\n", Radius);
+    printf("RV=%le\n", RV);
+#endif
+    if (RV < Radius) // We are in the disk and Radius is postive
+    {
+#ifdef VERBOSE_DEBUG
+      printf("We are in the disk and Radius is postive\n");
+#endif
+      ResT = RhoT * (velocity[1]);
+      ResS = RhoT * (velocity[2]);
+      A[1][1] = RhoT;
+      A[1][2] = 0.0;
+      A[2][1] = 0.0;
+      A[2][2] = RhoT;
+      B[1][0] = 0.0;
+      B[1][1] = 0.0;
+      B[1][2] = 0.0;
+      B[2][0] = 0.0;
+      B[2][1] = 0.0;
+      B[2][2] = 0.0;
+    }
+    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
+    {
+#ifdef VERBOSE_DEBUG
+      printf("We are out the disk and Radius is postive\n");
+#endif
+      RV1 = 1.0 / RV;
+      ResT = R[1] - Radius * RVT * RV1;
+      ResS = R[2] - Radius * RVS * RV1;
+
+
+
+
+
+      RV3 = RV1 * RV1 * RV1;
+      GammaTT = (RV - RVT * RVT) * RV3;
+      GammaTS =  - RVT * RVS * RV3;
+      GammaST =  GammaTS;
+      GammaSS = (RV - RVS * RVS) * RV3;
+
+
+
+      A[1][1] = GammaTT * RhoT * Radius;
+
+      A[1][2] = GammaTS * RhoT * Radius;
+
+      A[2][1] = GammaST * RhoT * Radius;
+      A[2][2] = GammaSS * RhoT * Radius;
+
+      B[1][0] = -mu * RVT * RV1;
+
+      B[1][1] = 1.0 - GammaTT * RhoT * Radius ;
+      B[1][2] = - GammaTS * RhoT * Radius ;
+
+      B[2][0] = -mu * RVS * RV1;
+
+      B[2][1] = - GammaST * RhoT * Radius;
+      B[2][2] = 1.0 - GammaSS * RhoT * Radius;
+    }
+    else // We are out the disk and Radius is negative
+    {
+#ifdef VERBOSE_DEBUG
+      printf("We are out the disk and Radius is negative\n");
+#endif
+      ResT = R[1] ;
+      ResS = R[2] ;
+      A[1][1] = 0.0;
+      A[1][2] = 0.0;
+      A[2][1] = 0.0;
+      A[2][2] = 0.0;
+
+      B[1][0] = 0.0;
+      B[1][1] = 1.0;
+      B[1][2] = 0.0;
+      B[2][0] = 0.0;
+      B[2][1] = 0.0;
+      B[2][2] = 1.0;
+
+    }
+
+    for (i = 0; i < 3; i++)
+    {
+      for (j = 0; j < 3; j++)
+      {
+        AWplusB[i][j] = 0.0;
+        for (k = 0; k < 3; k++)
+        {
+          AWplusB[i][j] += A[i][k] * MLocal[k + j * 3];
+        }
+        AWplusB[i][j] += B[i][j];
+      }
+    }
+#ifdef VERBOSE_DEBUG
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("A[%i][%i] = %le\t", l, k, A[l][k]);
+      }
+      printf("\n");
+    }
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("B[%i][%i] = %le\t", l, k, B[l][k]);
+      }
+      printf("\n");
+    }
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("AWplusB[%i][%i] = %le\t", l, k, AWplusB[l][k]);
+      }
+      printf("\n");
+    }
+    printf("ResN = %le\n", ResN);
+    printf("ResT = %le\n", ResT);
+    printf("ResS = %le\n", ResS);
+#endif
+    d1 = AWplusB[1][1] * AWplusB[2][2] - AWplusB[1][2] * AWplusB[2][1];
+    d2 = AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2];
+    d3 = AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1];
+
+    DET = AWplusB[0][0] * d1 - AWplusB[0][1] * d2 + AWplusB[0][2] * d3;
+#ifdef VERBOSE_DEBUG
+    printf("DET = %le\n", DET);
+#endif
+    if (fabs(DET) < 1.e-20)
+    {
+      printf("DET NULL\n");
+      exit(EXIT_FAILURE);
+    }
+
+    DET1 = 1.0 / DET;
+    AA = +(AWplusB[1][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[1][2]) * ResN
+         - (AWplusB[0][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[0][2]) * ResT
+         + (AWplusB[0][1] * AWplusB[1][2] - AWplusB[1][1] * AWplusB[0][2]) * ResS ;
+
+    BB = -(AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2]) * ResN
+         + (AWplusB[0][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[0][2]) * ResT
+         - (AWplusB[0][0] * AWplusB[1][2] - AWplusB[1][0] * AWplusB[0][2]) * ResS ;
+
+
+    CC = +(AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1]) * ResN
+         - (AWplusB[0][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[0][1]) * ResT
+         + (AWplusB[0][0] * AWplusB[1][1] - AWplusB[1][0] * AWplusB[0][1]) * ResS ;
+
+    R[0] = R[0] - AA * DET1;
+    R[1] = R[1] - BB * DET1;
+    R[2] = R[2] - CC * DET1;
+#ifdef VERBOSE_DEBUG
+    printf("RN = %le\n", R[0]);
+    printf("RT = %le\n", R[1]);
+    printf("RS = %le\n", R[2]);
+#endif
+    // compute new residue
+
+    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                            + MLocal[i + 1 * 3] * R[1] +
+                                            + MLocal[i + 2 * 3] * R[2] ;
+
+
+    RVN = R[0] - RhoN * velocity[0];
+    RVT = R[1] - RhoT * velocity[1];
+    RVS = R[2] - RhoT * velocity[2];
+    RV = sqrt(RVT * RVT + RVS * RVS);
+    Radius = mu * R[0];
+    if (RVN >= 0.0)
+    {
+      ResN = RhoN * (velocity[0]);
+    }
+    else
+    {
+      ResN = R[0];
+    }
+    if (RV < Radius) // We are in the disk and Radius is postive
+    {
+      ResT = RhoT * (velocity[1]);
+      ResS = RhoT * (velocity[2]);
+    }
+    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
+    {
+      RV1 = 1.0 / RV;
+      ResT = R[1] - Radius * RVT * RV1;
+      ResS = R[2] - Radius * RVS * RV1;
+    }
+    else // We are out the disk and Radius is negative
+    {
+      ResT = R[1] ;
+      ResS = R[2] ;
+    }
+
+    dparam[1] = 0.5 * (ResN * ResN + ResT * ResT + ResS * ResS);
+
+
+    if (verbose > 1)
+    {
+      printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    }
+    if (dparam[1] < Tol)
+    {
+      return 0;
+
+    }
+
+
+  }
+
+
+  return 1;
+
+
+
+}
+
+int AlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam)
+{
+
+  double mu = mu_i;
+  double Tol = dparam[0];
+  double itermax = iparam[0];
+  int i, j, k, inew;
+  double velocity[3];
+  double A[3][3];
+  A[0][1] = 0.0;
+  A[0][2] = 0.0;
+  A[1][0] = 0.0;
+  A[2][0] = 0.0;
+  double B[3][3];
+  B[0][1] = 0.0;
+  B[0][2] = 0.0;
+
+  double AWplusB[3][3];
+
+
+  double RhoN = 1.0;
+  double RhoT = 1.0;
+
+  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
+
+  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+
+  if (dw > 0.0) dw = sqrt(dw);
+  else dw = 0.0;
+
+  RhoN = 1.0 / MLocal[0 + 0 * 3];
+  RhoT = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+#ifdef VERBOSE_DEBUG
+  printf("sw=%le = ", sw);
+  printf("dw=%le = ", dw);
+  printf("RhoN=%le = ", RhoN);
+  printf("RhoT=%le = ", RhoT);
+#endif
+
+  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                          + MLocal[i + 1 * 3] * R[1]
+                                          + MLocal[i + 2 * 3] * R[2] ;
+
+
+  double RVN, RVT, RVS, RV, RV1, RV3, DET, DET1;
+  double ResN, ResT, ResS, Radius;
+  double d1, d2, d3, AA, BB, CC;
+  double GammaTT, GammaTS, GammaST, GammaSS;
+
+  RVN = R[0] - RhoN * velocity[0];
+  RVT = R[1] - RhoT * velocity[1];
+  RVS = R[2] - RhoT * velocity[2];
+  RV = sqrt(RVT * RVT + RVS * RVS);
+  Radius = mu * R[0];
+#ifdef VERBOSE_DEBUG
+  printf("RN = %le\n", R[0]);
+  printf("RT = %le\n", R[1]);
+  printf("RS = %le\n", R[2]);
+#endif
+  d1 = MLocal[1 + 1 * 3] * MLocal[2 + 2 * 3] - MLocal[1 + 2 * 3] * MLocal[2 + 1 * 3];
+  d2 = MLocal[1 + 0 * 3] * MLocal[2 + 2 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 2 * 3];
+  d3 = MLocal[1 + 0 * 3] * MLocal[2 + 1 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 1 * 3];
+
+  DET = MLocal[0 + 0 * 3] * d1 - MLocal[0 + 1 * 3] * d2 + MLocal[0 + 2 * 3] * d3;
+#ifdef VERBOSE_DEBUG
+  printf("DET = %le\n", DET);
+#endif
+  if (fabs(DET) < 1.e-20)
+  {
+    printf("DET NULL\n");
+    exit(EXIT_FAILURE);
+  }
+
+  for (inew = 0 ; inew < itermax ; ++inew)
+  {
+
+
+
+    // Compute the value of the Alart--Curnier Function and its gradient for the normal part
+
+    if (RVN >= 0.0)
+    {
+      ResN = RhoN * (velocity[0]);
+      A[0][0] =  RhoN;
+      B[0][0] = 0.0;
+    }
+    else
+    {
+      ResN = R[0];
+      A[0][0] = 0.0;
+      B[0][0] = 1.0;
+    }
+
+    // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
+
+
+#ifdef VERBOSE_DEBUG
+    printf("Radius=%le\n", Radius);
+    printf("RV=%le\n", RV);
+#endif
+    if (RV < Radius || RV < 1e-20)  // We are in the disk
+    {
+#ifdef VERBOSE_DEBUG
+      printf("We are in the disk \n");
+#endif
+      ResT = RhoT * (velocity[1]);
+      ResS = RhoT * (velocity[2]);
+      A[1][1] = RhoT;
+      A[1][2] = 0.0;
+      A[2][1] = 0.0;
+      A[2][2] = RhoT;
+      B[1][0] = 0.0;
+      B[1][1] = 0.0;
+      B[1][2] = 0.0;
+      B[2][0] = 0.0;
+      B[2][1] = 0.0;
+      B[2][2] = 0.0;
+    }
+    else  // We are out the disk
+    {
+#ifdef VERBOSE_DEBUG
+      printf("We are out the disk\n");
+#endif
+      RV1 = 1.0 / RV;
+      ResT = R[1] - Radius * RVT * RV1;
+      ResS = R[2] - Radius * RVS * RV1;
+
+
+      RV3 = RV1 * RV1 * RV1;
+      GammaTT = (RV - RVT * RVT) * RV3;
+      GammaTS =  - RVT * RVS * RV3;
+      GammaST =  GammaTS;
+      GammaSS = (RV - RVS * RVS) * RV3;
+
+
+
+      A[1][1] = GammaTT * RhoT * Radius;
+
+      A[1][2] = GammaTS * RhoT * Radius;
+
+      A[2][1] = GammaST * RhoT * Radius;
+      A[2][2] = GammaSS * RhoT * Radius;
+
+      B[1][0] = -mu * RVT * RV1;
+
+      B[1][1] = 1.0 - GammaTT * RhoT * Radius ;
+      B[1][2] = - GammaTS * RhoT * Radius ;
+
+      B[2][0] = -mu * RVS * RV1;
+
+      B[2][1] = - GammaST * RhoT * Radius;
+      B[2][2] = 1.0 - GammaSS * RhoT * Radius;
+    }
+
+
+    for (i = 0; i < 3; i++)
+    {
+      for (j = 0; j < 3; j++)
+      {
+        AWplusB[i][j] = 0.0;
+        for (k = 0; k < 3; k++)
+        {
+          AWplusB[i][j] += A[i][k] * MLocal[k + j * 3];
+        }
+        AWplusB[i][j] += B[i][j];
+      }
+    }
+#ifdef VERBOSE_DEBUG
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("A[%i][%i] = %le\t", l, k, A[l][k]);
+      }
+      printf("\n");
+    }
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("B[%i][%i] = %le\t", l, k, B[l][k]);
+      }
+      printf("\n");
+    }
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("AWplusB[%i][%i] = %le\t", l, k, AWplusB[l][k]);
+      }
+      printf("\n");
+    }
+    printf("ResN = %le\n", ResN);
+    printf("ResT = %le\n", ResT);
+    printf("ResS = %le\n", ResS);
+#endif
+    d1 = AWplusB[1][1] * AWplusB[2][2] - AWplusB[1][2] * AWplusB[2][1];
+    d2 = AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2];
+    d3 = AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1];
+
+    DET = AWplusB[0][0] * d1 - AWplusB[0][1] * d2 + AWplusB[0][2] * d3;
+#ifdef VERBOSE_DEBUG
+    printf("DET = %le\n", DET);
+#endif
+    if (fabs(DET) < 1.e-20)
+    {
+      printf("DET NULL\n");
+      exit(EXIT_FAILURE);
+    }
+
+    DET1 = 1.0 / DET;
+    AA = +(AWplusB[1][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[1][2]) * ResN
+         - (AWplusB[0][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[0][2]) * ResT
+         + (AWplusB[0][1] * AWplusB[1][2] - AWplusB[1][1] * AWplusB[0][2]) * ResS ;
+
+    BB = -(AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2]) * ResN
+         + (AWplusB[0][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[0][2]) * ResT
+         - (AWplusB[0][0] * AWplusB[1][2] - AWplusB[1][0] * AWplusB[0][2]) * ResS ;
+
+
+    CC = +(AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1]) * ResN
+         - (AWplusB[0][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[0][1]) * ResT
+         + (AWplusB[0][0] * AWplusB[1][1] - AWplusB[1][0] * AWplusB[0][1]) * ResS ;
+
+    R[0] = R[0] - AA * DET1;
+    R[1] = R[1] - BB * DET1;
+    R[2] = R[2] - CC * DET1;
+#ifdef VERBOSE_DEBUG
+    printf("RN = %le\n", R[0]);
+    printf("RT = %le\n", R[1]);
+    printf("RS = %le\n", R[2]);
+#endif
+    // compute new residue
+
+    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                            + MLocal[i + 1 * 3] * R[1] +
+                                            + MLocal[i + 2 * 3] * R[2] ;
+
+
+    RVN = R[0] - RhoN * velocity[0];
+    RVT = R[1] - RhoT * velocity[1];
+    RVS = R[2] - RhoT * velocity[2];
+    RV = sqrt(RVT * RVT + RVS * RVS);
+    Radius = mu * R[0];
+    if (RVN >= 0.0)
+    {
+      ResN = RhoN * (velocity[0]);
+    }
+    else
+    {
+      ResN = R[0];
+    }
+    if (RV < Radius) // We are in the disk and Radius is postive
+    {
+      ResT = RhoT * (velocity[1]);
+      ResS = RhoT * (velocity[2]);
+    }
+    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
+    {
+      RV1 = 1.0 / RV;
+      ResT = R[1] - Radius * RVT * RV1;
+      ResS = R[2] - Radius * RVS * RV1;
+    }
+    else // We are out the disk and Radius is negative
+    {
+      ResT = R[1] ;
+      ResS = R[2] ;
+    }
+
+    dparam[1] = 0.5 * (ResN * ResN + ResT * ResT + ResS * ResS);
+
+
+    if (verbose > 1)
+    {
+      printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    }
+    if (dparam[1] < Tol)
+    {
+      return 0;
+
+    }
+
+
+  }
+
+
+  return 1;
+
+
+
 }

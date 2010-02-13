@@ -35,7 +35,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
 
   NumericsOptions global_options;
-  global_options.verboseMode = 1; // turn verbose mode to off by default
+  global_options.verboseMode = 2; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;

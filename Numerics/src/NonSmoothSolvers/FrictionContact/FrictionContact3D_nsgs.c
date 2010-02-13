@@ -225,7 +225,9 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       /* Loop through the contact points */
       //DCOPY( n , q , incx , velocity , incy );
       for (contact = 0 ; contact < nc ; ++contact)
+      {
         (*local_solver)(contact, n, reaction, localsolver_options);
+      }
 
       /* **** Criterium convergence **** */
       (*computeError)(problem, reaction , velocity, tolerance, &error);

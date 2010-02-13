@@ -34,7 +34,7 @@ int main(void)
   options->iparam[0] = 10000;
   strcpy(options->internalSolvers->solverName, "AlartCurnierNewton");
   options->internalSolvers->iparam[0] = 10;
-  options->internalSolvers->dparam[0] = 1e-8;
+  options->internalSolvers->dparam[0] = 1e-18;
 
   info = frictionContact_test_function(finput, options);
 

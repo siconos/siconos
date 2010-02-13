@@ -31,7 +31,7 @@
 #include "cond.h"
 #include "pinv.h"
 #include <string.h>
-#define TEST_COND
+//#define TEST_COND
 
 extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
@@ -176,6 +176,11 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
+
+    /*     printf("Display W\n"); */
+    /*    printSBM(W); */
+
+
 #ifdef TEST_COND
     NumericsMatrix *WnumInverse = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
     WnumInverse->storageType = 0;
@@ -241,6 +246,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     DCOPY(m, problem->b  , 1, localproblem->q, 1);
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)malloc(n * sizeof(double));
+    for (int i = 0; i < n; i++) qtmp[i] = 0.0;
     double beta2 = 0.0;
     prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
     prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
@@ -413,6 +419,8 @@ void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* pro
 }
 int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
 {
+
+
 
 
   if (verbose > 0)
