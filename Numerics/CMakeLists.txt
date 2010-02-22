@@ -34,7 +34,7 @@ IF(PIPOL_IMAGE MATCHES "lenny|ubuntu")
 ENDIF(PIPOL_IMAGE MATCHES "lenny|ubuntu")  
 
 
-SICONOS_PROJECT(Numerics 3 1 0)
+SICONOS_PROJECT(Numerics 3 2 0)
 
 
   
