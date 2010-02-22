@@ -227,6 +227,13 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t*));
 
   for (i = 0 ; i < C->nbblocks; i++)  C->block[i] = Cblocktmp[i];
+  /*   for (i =0 ; i <C->nbblocks; i++)   */
+  /*       { */
+  /*    C->block[i] =  (double*)malloc(C->blocksize0[i]*C->blocksize1[i]*sizeof(double)); */
+  /*    for (j = 0; j<C->blocksize0[i]*C->blocksize1[i]; j++) C->block[i][j]=0.0; */
+  /*       } */
+
+
   for (i = 0 ; i < C->nbblocks; i++)  C->index2_data[i] = Cindex2_datatmp[i];
   free(Cblocktmp);
   free(Cindex2_datatmp);

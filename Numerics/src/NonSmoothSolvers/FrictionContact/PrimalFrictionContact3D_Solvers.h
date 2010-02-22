@@ -121,7 +121,8 @@ extern "C"
   void primalFrictionContact3D_proximal_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* options);
-  /** Projected Gradient solver with reformulation for friction-contact 3D problem
+
+  /** Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
      \param problem, the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -134,7 +135,24 @@ extern "C"
      dparam[1] : (out) error
   */
   void primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
   int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
+
+  /** Fied Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
+     \param problem, the friction-contact 3D problem to solve
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param globalVelocity global vector (m), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options :
+     iparam[0] : Maximum iteration number
+     dparam[0] : tolerance
+     dparam[2] : localtolerance
+     dparam[1] : (out) error
+  */
+  void primalFrictionContact3D_TrescaFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
         \param problem, the friction-contact 3D problem to solve

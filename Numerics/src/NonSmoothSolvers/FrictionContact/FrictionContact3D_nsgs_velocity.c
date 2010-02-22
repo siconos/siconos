@@ -135,7 +135,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
 
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, &error);
+    (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS_VELOCITY - Iteration %i Error = %14.7e\n", iter, error);

@@ -28,7 +28,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, double* error)
+
+void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
 {
   int n = 3 * problem->numberOfContacts;
   *error = 0.;
@@ -115,7 +116,7 @@ void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolv
   {
     *solve = &frictionContact3D_projectionOnCylinder_solve;
     *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *computeError = &FrictionContact3D_Tresca_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
 
@@ -207,7 +208,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
     if (iparam[1] == 1) /* Full criterium */
     {
       double absolute_error;
-      (*computeError)(problem, reaction , velocity, tolerance, &absolute_error);
+      (*computeError)(problem, reaction , velocity, tolerance, options, &absolute_error);
       if (verbose > 0)
       {
         if (absolute_error > error)
@@ -230,7 +231,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       }
 
       /* **** Criterium convergence **** */
-      (*computeError)(problem, reaction , velocity, tolerance, &error);
+      (*computeError)(problem, reaction , velocity, tolerance, options, &error);
 
       if (verbose > 0)
         printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);

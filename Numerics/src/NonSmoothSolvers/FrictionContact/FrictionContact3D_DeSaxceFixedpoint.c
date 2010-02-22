@@ -133,7 +133,7 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
 
 
     /* **** Criterium convergence **** */
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
+    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
       printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);

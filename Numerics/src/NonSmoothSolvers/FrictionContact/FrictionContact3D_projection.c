@@ -609,11 +609,11 @@ void frictionContact3D_projectionOnCylinder_solve(int contact, int dimReaction, 
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double an = 1. / (MLocal[0] + mu_i);
+  double an = 1. / (MLocal[0]);
 
   int incx = 1, incy = 1;
   double worktmp[3];
-
+  double R = (options->dWork[contact]);
 
   DCOPY(nLocal , qLocal, incx , worktmp , incy);
   DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy);
@@ -621,6 +621,7 @@ void frictionContact3D_projectionOnCylinder_solve(int contact, int dimReaction, 
   reaction[pos + 1] -= an * worktmp[1];
   reaction[pos + 2] -= an * worktmp[2];
 
-  projectionOnCylinder(&reaction[pos], mu_i);
+  projectionOnCylinder(&reaction[pos], R);
 
 }
+

@@ -15,47 +15,35 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-#include <math.h>
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "primalFrictionContact_test_function.h"
 
-void projectionOnCylinder(double* r, double  R)
+
+
+int main(void)
 {
+  int info = 0 ;
 
-  double normTsquare = r[1] * r[1] + r[2] * r[2];
+  char filename[50] = "./data/problem-check.dat";
 
-  if (r[0] >= 0)
-  {
-    if (normTsquare <= R * R)
-    {
-      return ;
-    }
-    else
-    {
-      normTsquare = sqrt(normTsquare);
-      r[1] = R * r[1] / normTsquare;
-      r[2] = R * r[2] / normTsquare;
-      return;
-    }
-  }
-  else
-  {
-    r[0] = 0.0;
-    if (0 < normTsquare)
-    {
+  printf("Test on %s\n", filename);
 
-      normTsquare = sqrt(normTsquare);
-      r[1] = R * r[1] / normTsquare;
-      r[2] = R * r[2] / normTsquare;
-      /*    r[1]=0.0; */
-      /*    r[2]=0.0; */
-      return;
-    }
-    else
-    {
-      r[1] = 0.0;
-      r[2] = 0.0;
-      return;
-    }
+  FILE * finput  =  fopen(filename, "r");
 
-  }
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
+
+  primalFrictionContact3D_setDefaultSolverOptions(options, "NSGS_WR");
+
+  options->internalSolvers->internalSolvers->iparam[0] = 2000;
+  info = primalFrictionContact_test_function(finput, options);
+  deleteSolverOptions(options);
+  free(options);
+  fclose(finput);
+  printf("End of test on %s\n", filename);
+
+
+  return info;
 }

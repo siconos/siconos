@@ -50,6 +50,10 @@ int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, char
   {
     info =    primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
   }
+  else if (strcmp(solvername, "TFP_WR") == 0)
+  {
+    info =    primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
+  }
   else
   {
     numericsError("primalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");

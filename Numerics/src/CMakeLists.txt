@@ -286,12 +286,13 @@ IF(WITH_TESTING)
 
 
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
-  SET(FC3Dtest110_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
   SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c)
-  SET(FC3Dtest130_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)
+
+  NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
+  NEW_TEST(FC3Dtest210 FrictionContact3D_test210.c)
 
 
   ## test 2D dense on two differents files
@@ -318,8 +319,14 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
   NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)
   NEW_TEST(PFC3D_test5 PrimalFrictionContact3D_test5.c)
+
+
   SET(PFC3D_test6_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(PFC3D_test6 PrimalFrictionContact3D_test6.c)
+
+  NEW_TEST(PFC3D_test7 PrimalFrictionContact3D_test7.c)
+
+  NEW_TEST(PFC3D_test10 PrimalFrictionContact3D_test10.c)
 
 
   END_TEST()

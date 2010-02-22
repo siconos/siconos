@@ -523,3 +523,43 @@ int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOpti
   frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
+
+void  primalFrictionContact3D_TrescaFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+{
+
+  // Reformulation
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+
+  reformulationIntoLocalProblem(problem, localproblem);
+
+  frictionContact3D_TrescaFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
+
+  computeGlobalVelocity(problem, reaction, globalVelocity);
+  freeLocalProblem(localproblem);
+
+
+}
+int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+{
+
+
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
+  }
+
+  strcpy(options->solverName, "TFP_WR");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
+}

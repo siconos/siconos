@@ -125,7 +125,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
       }
     }
 
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
+    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
       printf("------------------------ FC3D - PROXIMAL - Iteration %i Error = %14.7e\n", iter, error);

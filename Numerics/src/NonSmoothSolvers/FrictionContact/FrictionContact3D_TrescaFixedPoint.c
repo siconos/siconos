@@ -1,3 +1,4 @@
+
 /* Siconos-Numerics, Copyright INRIA 2005-2010.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -23,7 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <math.h>
+//#define VERBOSE_DEBUG
 
 void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -67,16 +69,24 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double * reactionold = malloc(n * sizeof(double));
-  DCOPY(n , reaction , 1 , reactionold , 1);
-
   internalSolverPtr internalsolver;
+  options->dWork = (double *) malloc(nc * sizeof(double));
+  double * mu = options->dWork;
+  internalsolver_options->dWork = options->dWork;
+
 
   if (strcmp(internalsolver_options->solverName, "NSGS") == 0)
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     internalsolver = &frictionContact3D_nsgs;
+    internalsolver_options->internalSolvers->dWork = options->dWork;
+  }
+  else if (strcmp(internalsolver_options->solverName, "PGoC") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call PGoC solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver = &frictionContact3D_ProjectedGradientOnCylinder;
   }
   else
   {
@@ -88,30 +98,24 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
 
 
-
-  double * mu = (double *) malloc(nc * sizeof(double));
-
-
-  for (int ic = 0 ; ic < nc ; ic++) mu[ic] = problem->mu[ic];
-
-
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
 
-    DCOPY(n , reaction , 1 , reactionold , 1);
-
     // internal solver for the regularized problem
 
     /* Compute the value of the initial value friction threshold*/
-    for (int ic = 0 ; ic < nc ; ic++) problem->mu[ic] = mu[ic] *  reaction [ic * 3];
+    for (int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
+
+#ifdef VERBOSE_DEBUG
+    for (int ic = 0 ; ic < nc ; ic++) printf("problem->mu[%i] = %le\n", ic, problem->mu[ic]);
+    for (int ic = 0 ; ic < nc ; ic++) printf("mu[%i] = %le \n", ic, mu[ic]);
+#endif
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
     /* **** Criterium convergence **** */
 
-
-    for (int ic = 0 ; ic < nc ; ic++) problem->mu[ic] = mu[ic];
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
+    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
       printf("------------------------ FC3D - TFP - Iteration %i Error = %14.7e\n", iter, error);
@@ -120,11 +124,14 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     *info = hasNotConverged;
   }
   printf("----------------------------------- FC3D - TFP - # Iteration %i Final Error = %14.7e\n", iter, error);
+  free(options->dWork);
+  options->dWork = NULL;
+  internalsolver_options->dWork = NULL;
+
+  if (internalsolver_options->internalSolvers != NULL)
+    internalsolver_options->internalSolvers->dWork = NULL;
   dparam[0] = tolerance;
   dparam[1] = error;
-
-  free(reactionold);
-  free(mu);
 }
 
 

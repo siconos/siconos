@@ -96,6 +96,16 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     primalFrictionContact3D_DeSaxceFixedPoint_wr(problem, reaction , velocity, globalVelocity, &info, options);
 
   }
+  else if (strcmp(name, "TFP_WR") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call TFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+    Primal_ipiv = NULL;
+    Primal_MisInverse = 0;
+    Primal_MisLU = 0;
+    primalFrictionContact3D_TrescaFixedPoint_wr(problem, reaction , velocity, globalVelocity, &info, options);
+
+  }
   else if (strcmp(name, "NSGS") == 0)
   {
     Primal_ipiv = NULL;

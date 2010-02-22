@@ -58,7 +58,7 @@ typedef void (*SolverPtr)(int, int, double*, SolverOptions *);
 typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double, double*);
+typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double, SolverOptions*,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();
@@ -150,7 +150,7 @@ extern "C"
     \param info return 0 if the solution is found
     \param options the solver options :
     iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the SolverOptions options[1]
+    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
   */
   void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
@@ -160,6 +160,25 @@ extern "C"
   */
   int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Projected Gradient on Cylinder solver for  Friction-contact 3D problem
+    \param problem, the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    if dparam[3] >0 = rho
+    if dparam[3] <= 0 then  a line-search is performed. iparam[2] is the maximum number of iteration is the line--search.
+    The internal (local) solver must set by the SolverOptions options->internalsolvers.
+  */
+
+  void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for NSGS
+      \param SolverOptions ** the pointer to the array of options to set
+  */
+  int frictionContact3D_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options);
+
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem, the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -167,6 +186,7 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
+      dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
