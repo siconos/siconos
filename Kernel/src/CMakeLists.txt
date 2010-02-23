@@ -187,7 +187,6 @@ ENDIF(WITH_TESTING)
 
 # standard export macros
 EXPORT_LIBRARY_DEPENDENCIES(LibraryDependencies.cmake)
-CMAKE_EXPORT_BUILD_SETTINGS(BuildSettings.cmake)
 
 # installation of exported files
 CHECK_INSTALL_INCLUDE_DIRECTORIES()
@@ -199,7 +198,6 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/Settings.cmake.in
 # generated cmake macros
 INSTALL(FILES 
   ${CMAKE_BINARY_DIR}/LibraryDependencies.cmake 
-  ${CMAKE_BINARY_DIR}/BuildSettings.cmake 
   ${CMAKE_BINARY_DIR}/Settings.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 

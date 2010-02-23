@@ -66,12 +66,6 @@ MACRO(LINK_SETUP _TARGET)
   ENDFOREACH(_L ${PROJECT_FORTRAN_LIBRARIES})
 ENDMACRO(LINK_SETUP _TARGET)
 
-# Build settings are not mandatory (failure on cmake versions mismatch)
-IF(IMPORT_BUILD_SETTINGS)
-  INCLUDE(CMakeImportBuildSettings)
-  CMAKE_IMPORT_BUILD_SETTINGS(BuildSettings)
-ENDIF(IMPORT_BUILD_SETTINGS)
-
 # Siconos settings
 INCLUDE(LibraryDependencies)
 INCLUDE(Settings)
