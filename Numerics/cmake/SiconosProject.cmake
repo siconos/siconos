@@ -55,7 +55,7 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_SVN "Consider SVN is online" OFF)
   OPTION(WITH_DEFAULT_BUILD_TYPE "Use a default build type (Release)" ON)
   OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" OFF)
-  OPTION(WITH_TESTING "Enable 'make test' target" ON)
+  OPTION(WITH_TESTING "Enable 'make test' target" OFF)
 
 
   # Build type
