@@ -54,6 +54,16 @@ void displayMLCP(MixedLinearComplementarityProblem* p)
   printf("MLCP DISPLAY:\n-------------\n");
   printf("n :%d m: %d\n", p->n, p->m);
   printf(p->problemType ? "using (ABCD)\n" : "using (M)\n");
+  if (p->blocksLine)
+  {
+    printf("blocks are:\n");
+    int NumBlock = 0;
+    while (p->blocksLine[NumBlock] < n + m)
+    {
+      printf("->block of complementarity type %d, from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksLine[NumBlock], p->blocksLine[NumBlock + 1]);
+      NumBlock++;
+    }
+  }
 
   if (p->M)
   {

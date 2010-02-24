@@ -87,36 +87,77 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   }
 
   /* Error on equalities part */
-  double error_e = DNRM2(NbLines - m , w , incx);;
-
+  double error_e = 0;
   /* Checks complementarity (only for rows number n to size) */
   double error_i = 0.;
   double zi, wi;
-  for (int i = 0 ; i < m ; i++)
-  {
-    zi = z[n + i];
-    wi = w[(NbLines - m) + i];
-    if (zi < 0.0)
-    {
-      error_i += -zi;
-      if (wi < 0.0) error_i += zi * wi;
-    }
-    if (wi < 0.0) error_i += -wi;
-    if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
-  }
-
-  /* Computes error */
   double *q = problem->q;
-  double normb = DNRM2(m , q + NbLines - m , incx);
-  double norma = DNRM2(NbLines - m , q , incx);
-
-  if (error_i / normb >= error_e / norma)
+  double norm_e = 1;
+  double norm_i = 1;
+  if (problem->blocksLine)
   {
-    *error = error_i / (1.0 + normb);
+    int numBlock = 0;
+    while (problem->blocksLine[numBlock] < n + m)
+    {
+      if (!problem->blocksIsComp[numBlock])
+      {
+        error_e += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], w + problem->blocksLine[numBlock] , incx);
+        norm_e += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], q + problem->blocksLine[numBlock] , incx);
+      }
+      else
+      {
+        for (int numLine = problem->blocksLine[numBlock]; numLine < problem->blocksLine[numBlock + 1] ; numLine++)
+        {
+          zi = z[numLine];
+          wi = w[numLine];
+          if (zi < 0.0)
+          {
+            error_i += -zi;
+            if (wi < 0.0) error_i += zi * wi;
+          }
+          if (wi < 0.0) error_i += -wi;
+          if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
+        }
+        norm_i += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], w + problem->blocksLine[numBlock] , incx);
+      }
+      numBlock++;
+    }
   }
   else
   {
-    *error = error_e / (1.0 + norma);
+    printf("WARNING, DEPRECETED MLCP API\n");
+    /* Error on equalities part */
+    error_e = DNRM2(NbLines - m , w , incx);;
+
+    /* Checks complementarity (only for rows number n to size) */
+    error_i = 0.;
+
+    for (int i = 0 ; i < m ; i++)
+    {
+      zi = z[n + i];
+      wi = w[(NbLines - m) + i];
+      if (zi < 0.0)
+      {
+        error_i += -zi;
+        if (wi < 0.0) error_i += zi * wi;
+      }
+      if (wi < 0.0) error_i += -wi;
+      if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
+    }
+
+
+    /* Computes error */
+    norm_i += DNRM2(m , q + NbLines - m , incx);
+    norm_e += DNRM2(NbLines - m , q , incx);
+  }
+
+  if (error_i / norm_i >= error_e / norm_e)
+  {
+    *error = error_i / (1.0 + norm_i);
+  }
+  else
+  {
+    *error = error_e / (1.0 + norm_e);
   }
 
   if (*error > tolerance)

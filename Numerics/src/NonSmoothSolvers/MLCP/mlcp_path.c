@@ -50,7 +50,7 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   double * M = problem->M->matrix0;
   double * q = problem->q;
-  int nnz, i, j, n, m, dim;
+  int nnz, i, j, n, m, dim, numLine;
   n = problem->n;
   m = problem->m;
   dim = m + n;
@@ -76,15 +76,43 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
 
   FortranToPathSparse(dim, M, 1.0e-18, m_i, m_j, m_ij);
-  for (i = 0; i < n; i++)
+  if (problem->blocksLine)
   {
-    lb[i] = -1e20;
-    ub[i] = 1e20;
+    int numBlock = 0;
+    while (problem->blocksLine[numBlock] < n + m)
+    {
+      if (!problem->blocksIsComp[numBlock])
+      {
+        for (numLine = problem->blocksLine[numBlock] ; numLine < problem->blocksLine[numBlock + 1]; numLine++)
+        {
+          lb[numLine] = -1e20;
+          ub[numLine] = 1e20;
+        }
+      }
+      else
+      {
+        for (numLine = problem->blocksLine[numBlock] ; numLine < problem->blocksLine[numBlock + 1]; numLine++)
+        {
+          lb[numLine] = 0;
+          ub[numLine] = 1e20;
+        }
+      }
+      numBlock++;
+    }
   }
-  for (i = n; i < n + m; i++)
+  else
   {
-    lb[i] = 0;
-    ub[i] = 1e20;
+    printf("DEPRECED MLCP INTERFACE\n");
+    for (i = 0; i < n; i++)
+    {
+      lb[i] = -1e20;
+      ub[i] = 1e20;
+    }
+    for (i = n; i < n + m; i++)
+    {
+      lb[i] = 0;
+      ub[i] = 1e20;
+    }
   }
   if (verbose)
     printLCP(dim, nnz, m_i, m_j, m_ij, q, lb, ub);
@@ -102,16 +130,46 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w,
     /*     for (i=0;i<n;i++){ */
     /*       u[i]=z[i]; */
     /*     } */
-    for (i = 0; i < n; i++)
-      w[i] = 0;
-    for (i = n; i < n + m; i++)
+    if (problem->blocksLine)
     {
-      w[i] = -q[i];
-      for (j = 0; j < n + m; j++)
+      int numBlock = 0;
+      while (problem->blocksLine[numBlock] < n + m)
       {
-        w[i] += M[i + dim * j] * z[j];
+        if (!problem->blocksIsComp[numBlock])
+        {
+          for (numLine = problem->blocksLine[numBlock] ; numLine < problem->blocksLine[numBlock + 1]; numLine++)
+          {
+            w[numLine] = 0;
+          }
+        }
+        else
+        {
+          for (numLine = problem->blocksLine[numBlock] ; numLine < problem->blocksLine[numBlock + 1]; numLine++)
+          {
+            w[numLine] = -q[numLine];
+            for (int jj = 0; jj < n + m; jj++)
+            {
+              w[numLine] += M[numLine + dim * jj] * z[jj];
+            }
+          }
+        }
+        numBlock++;
       }
     }
+    else
+    {
+      for (i = 0; i < n; i++)
+        w[i] = 0;
+      for (i = n; i < n + m; i++)
+      {
+        w[i] = -q[i];
+        for (j = 0; j < n + m; j++)
+        {
+          w[i] += M[i + dim * j] * z[j];
+        }
+      }
+    }
+
 
 
     /*1e-7 because it is the default tol of path.*/
@@ -121,12 +179,30 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w,
       printf("PATH : MLCP Solved, error %10.7f.\n", err);
       //*info = 1;
     }
-    for (i = 0; i < m; i++)
+    if (problem->blocksLine)
     {
-      if (z[n + i] > w[n + i])
-        w[n + i] = 0;
+      int numBlock = 0;
+      while (problem->blocksLine[numBlock] < n + m)
+      {
+        if (problem->blocksIsComp[numBlock])
+        {
+          for (numLine = problem->blocksLine[numBlock] ; numLine < problem->blocksLine[numBlock + 1]; numLine++)
+          {
+            if (z[numLine] > w[numLine])
+              w[numLine] = 0;
+          }
+        }
+        numBlock++;
+      }
     }
-
+    else
+    {
+      for (i = 0; i < m; i++)
+      {
+        if (z[n + i] > w[n + i])
+          w[n + i] = 0;
+      }
+    }
 
     if (verbose)
       printf("PATH : MLCP Solved, error %10.7f.\n", err);

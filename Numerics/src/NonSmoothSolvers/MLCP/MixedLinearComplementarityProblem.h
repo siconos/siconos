@@ -113,11 +113,15 @@
     \param a vector
     \param b vector
     \param problemType 0 if the problem is saved using (M) and 1 if (A,B,C,D)
+    \param blocksLine The lines blocksLine[i] to blocksLine[i+1] are equalities iif !bloksIsComp[i], else is a complementarity block.
+    blocksLine[0]=0 ... blocksLine[last] = n+m
  */
 typedef struct
 {
   int n;
   int m;
+  int * blocksLine;
+  int * blocksIsComp;
   NumericsMatrix* M;
   NumericsMatrix* Bblock;
   double * q;
