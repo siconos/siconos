@@ -5,13 +5,13 @@
 
 #POST-PIPOL src/nightly/siconos/trunk/Build/Pipol/post-siconos
 
-#PIPOL fedora 01:30
+#PIPOL fedora 02:00
 
-#PIPOL debian 01:30
+#PIPOL debian 02:00
 
-#PIPOL ubuntu 01:30
+#PIPOL ubuntu 02:00
 
-#PIPOL mac 01:30
+#PIPOL mac 02:00
 
 set -x
 #set -e
@@ -41,7 +41,7 @@ setup_trunk() {
     mkdir -p $PIPOL_WDIR/siconos/trunk
     cd $PIPOL_WDIR/siconos/trunk; { 
         for mod in Numerics Kernel Examples ; do 
-            [ -d $mod ] || svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
+            [ -d $mod ] || svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
             cd $mod; { 
                 svn update -r $local_revision
             }; cd ..
@@ -54,7 +54,7 @@ setup_3_1() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.1.0
     cd $PIPOL_WDIR/siconos/branches/3.1.0; { 
         for mod in Numerics Kernel Examples ; do 
-            svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/branches/3.1.0/$mod <&-
+            svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/branches/3.1.0/$mod </dev/null
         done
     }; cd $current_dir
 }
@@ -106,19 +106,27 @@ configure_3_1() {
 
 }
 
-pack_1() {
+pack_trunk() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
-        cmake $PIPOL_WDIR/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
+        cmake $PIPOL_WDIR/siconos/trunk/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
         cpack -G $PIPOL_CPACK_G 
     }; cd -
     
 }
 
-gforge_upload() { 
-    cd $PIPOL_HOMEDIR/gforge ;{
+pack_3_1() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        cmake $PIPOL_WDIR/siconos/branches/3.1.0/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
+        cpack -G $PIPOL_CPACK_G 
+    }; cd -
+    
+}
+
+gforge_upload_stable() { 
+    cd $PIPOL_HOMEDIR/src/gforge ;{
         export GFORGE_WSDL=https://gforge.inria.fr/soap/index.php?wsdl 
         ./gforge.php -v login --username=sicupload --password='UPLOADplp!' --project=siconos
-        ./gforge.php frs addfile --package=1115 --release=2142 --file=$1 
+        ./gforge.php frs addfile --package=3058 --release=4922 --file=$1 
     }; cd -
 }
 
@@ -180,38 +188,38 @@ configure_3_1 Numerics Release
 nightly_build Numerics Release
 nightly_test Numerics Release
 nightly_submit Numerics Release
-nightly_memcheck Numerics Release
-nightly_submit Numerics Release
+#nightly_memcheck Numerics Release
+#nightly_submit Numerics Release
 install_1 Numerics Release
 
 configure_3_1 Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_submit Kernel Release
-nightly_memcheck Kernel Release
-nightly_submit Kernel Release
+#nightly_memcheck Kernel Release
+#nightly_submit Kernel Release
 install_1 Kernel Release
 
 # Examples
 configure_3_1 Examples Release
 nightly_build Examples Release
 nightly_test Examples Release
-nightly_memcheck Examples Release
+#nightly_memcheck Examples Release
 nightly_submit Examples Release
 
 # Stable Packages
-pack_1 Numerics Release
+pack_3_1 Numerics Release
 save_packed_1 Numerics Release
 
-pack_1 Kernel Release
+pack_3_1 Kernel Release
 save_packed_1 Kernel Release
 
-pack_1 Examples Release
+pack_3_1 Examples Release
 save_packed_1 Examples Release
 
 # trunk tests
 setup_trunk
-configure_1 Numerics Release
+configure_trunk Numerics Release
 nightly_build Numerics Release
 nightly_test Numerics Release
 nightly_submit Numerics Release
@@ -219,7 +227,7 @@ nightly_memcheck Numerics Release
 nightly_submit Numerics Release
 install_1 Numerics Release
 
-configure_1 Kernel Release
+configure_trunk Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_submit Kernel Release
@@ -228,32 +236,32 @@ nightly_submit Kernel Release
 install_1 Kernel Release
 
 # Examples
-configure_1 Examples Release
+configure_trunk Examples Release
 nightly_build Examples Release
 nightly_test Examples Release
 nightly_memcheck Examples Release
 nightly_submit Examples Release
 
 # Snapshot packages
-pack_1 Numerics Release
+pack_trunk Numerics Release
 save_packed_1 Numerics Release
 
-pack_1 Kernel Release
+pack_trunk Kernel Release
 save_packed_1 Kernel Release
 
-pack_1 Examples Release
+pack_trunk Examples Release
 save_packed_1 Examples Release
 
 # Coverage
 setup_trunk
-configure_1 Numerics Debug -DWITH_TESTS_COVERAGE=ON
+configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Numerics Debug
 nightly_coverage Numerics Debug
 nightly_memcheck Numerics Debug
 nightly_submit Numerics Debug 
 
 setup_trunk
-configure_1 Kernel Debug -DWITH_TESTS_COVERAGE=ON
+configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Kernel Debug
 nightly_coverage Kernel Debug
 nightly_memcheck Kernel Debug
