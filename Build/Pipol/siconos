@@ -88,7 +88,7 @@ configure_trunk() {
     mkdir -p $PIPOL_WDIR/build/$mod/$btype
     cd $PIPOL_WDIR/build/$mod/$btype; {
         rm -f CMakeCache.txt
-        eval cmake --debug-trycompile $PIPOL_WDIR/siconos/trunk/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+        eval cmake $PIPOL_WDIR/siconos/trunk/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
     }; cd -
 
 }
