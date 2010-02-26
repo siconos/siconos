@@ -32,6 +32,7 @@ static int sN = 0;
 static int sM = 0;
 static MixedLinearComplementarityProblem* sProblem;
 static double* sFz = 0;
+static double sMaxError = 0;
 int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
@@ -139,8 +140,10 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
       w[sN + i] = 0;
   }
 
-  if (verbose)
-    printf("FB : MLCP Solved, error %10.7f.\n", err);
+  if (err > sMaxError)
+    sMaxError = err;
+  if (verbose || 1)
+    printf("FB : MLCP Solved, error %10.10f   and max error  %10.10f \n", err, sMaxError);
 
   return;
 }
