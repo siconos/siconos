@@ -29,16 +29,20 @@
 // =================================================
 BlockVector::BlockVector(): SiconosVector(0)
 {
+  _sizeV = 0;
   _tabIndex.reset(new Index());
 }
 
 BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0)
 {
+  _sizeV = 0;
+
   SiconosVectorException::selfThrow(" BlockVector::constructor from a file : read BlockVector is not implemented");
 }
 
 BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
 {
+  _sizeV = 0;
   unsigned int nbBlocks = v.getNumberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
@@ -50,13 +54,15 @@ BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
       vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(**it))) ;
     else
       vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
-    sizeV += (*it)->size();
-    _tabIndex->push_back(sizeV);
+    _sizeV += (*it)->size();
+    _tabIndex->push_back(_sizeV);
   }
 }
 
 BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
 {
+  _sizeV = 0;
+
   unsigned int nbBlocks = v.getNumberOfBlocks();
   _tabIndex.reset(new Index());
 
@@ -73,21 +79,23 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
         vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(**it))) ;
       else
         vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
-      sizeV += (*it)->size();
-      _tabIndex->push_back(sizeV);
+      _sizeV += (*it)->size();
+      _tabIndex->push_back(_sizeV);
     }
   }
   else
   {
     // Call copy-constructor of SimpleVector
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v)));
-    sizeV = v.size();
-    _tabIndex->push_back(sizeV);
+    _sizeV = v.size();
+    _tabIndex->push_back(_sizeV);
   }
 }
 
 BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVector(0)
 {
+  _sizeV = 0;
+
   // Insert the two vectors in the container
   // NO COPY !!
   if (! v1  && ! v2)
@@ -101,25 +109,25 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
   if (v1)
   {
     vect.push_back(v1);
-    sizeV = v1->size();
-    _tabIndex->push_back(sizeV);
+    _sizeV = v1->size();
+    _tabIndex->push_back(_sizeV);
 
   }
   else
     // If first parameter is a NULL pointer, then set this(1) to a SimpleVector of the same size as v2, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
-    sizeV = v2->size();
+    _sizeV = v2->size();
 
-    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(sizeV)));
-    _tabIndex->push_back(sizeV);
+    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(_sizeV)));
+    _tabIndex->push_back(_sizeV);
 
   }
   if (v2)
   {
     vect.push_back(v2);
-    sizeV += v2->size();
-    _tabIndex->push_back(sizeV);
+    _sizeV += v2->size();
+    _tabIndex->push_back(_sizeV);
 
   }
   else // If second parameter is a NULL pointer, then set this(2) to a SimpleVector of the same size as v1, and equal to 0.
@@ -127,13 +135,15 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
     // This case is usefull to set xDot in LagrangianDS.
 
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v1->size())));
-    sizeV += v1->size();
-    _tabIndex->push_back(sizeV);
+    _sizeV += v1->size();
+    _tabIndex->push_back(_sizeV);
   }
 }
 
 BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0)
 {
+  _sizeV = 0;
+
   _tabIndex.reset(new Index());
   _tabIndex->reserve(numberOfBlocks);
   vect.reserve(numberOfBlocks);
@@ -142,7 +152,7 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): Siconos
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(dim)));
     _tabIndex->push_back(dim * (i + 1));
   }
-  sizeV = dim * numberOfBlocks;
+  _sizeV = dim * numberOfBlocks;
 }
 
 BlockVector::~BlockVector()
@@ -237,11 +247,8 @@ const double BlockVector::norm2() const
   VectorOfVectors::const_iterator it;
   for (it = vect.begin(); it != vect.end(); ++it)
   {
-    if ((*it))
-      d += pow((*it)->norm2(), 2);
-
-    else
-      SiconosVectorException::selfThrow("BlockVector::norm, one of the blocks is equal to NULL pointer.");
+    assert(*it);
+    d += pow((*it)->norm2(), 2);
   }
   return sqrt(d);
 }
@@ -393,7 +400,7 @@ void BlockVector::addSimple(unsigned int& index, const SiconosVector& vIn)
   // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
 
   unsigned int dim = vIn.size() - index; // size of the block to be added.
-  if (dim > sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+  if (dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
 
   VectorOfVectors::const_iterator it;
   unsigned int numVIn = vIn.getNum();
@@ -425,7 +432,7 @@ void BlockVector::subSimple(unsigned int& index, const SiconosVector& vIn)
   // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
 
   unsigned int dim = vIn.size() - index; // size of the block to be added.
-  if (dim > sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+  if (dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
 
   VectorOfVectors::const_iterator it;
   unsigned int numVIn = vIn.getNum();
@@ -457,7 +464,7 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
 {
   if (&vIn == this) return *this;
 
-  if (vIn.size() != sizeV)
+  if (vIn.size() != _sizeV)
     SiconosVectorException::selfThrow("BlockVector:operator = vIn, inconsistent size between this and vIn.");
 
   if (vIn.isBlock())
@@ -480,14 +487,14 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
       //    *this = *tmp;
 
       // component by component copy ...
-      for (unsigned int i = 0; i < sizeV; ++i)
+      for (unsigned int i = 0; i < _sizeV; ++i)
         (*this)(i) = vIn(i);
 
     }
   }
   else // if vIn is a SimpleVector
   {
-    setBlock(vIn, shared_from_this(), sizeV, 0, 0);
+    setBlock(vIn, shared_from_this(), _sizeV, 0, 0);
 
     //       unsigned int pos = 0;
     //       VectorOfVectors::iterator it1;
@@ -505,7 +512,7 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
 {
   if (&vIn == this) return *this;
 
-  if (vIn.size() != sizeV)
+  if (vIn.size() != _sizeV)
     SiconosVectorException::selfThrow("BlockVector:operator = vIn, inconsistent size between this and vIn.");
 
   if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
@@ -526,7 +533,7 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
     //       *this = *tmp;
 
     // component by component copy ...
-    for (unsigned int i = 0; i < sizeV; ++i)
+    for (unsigned int i = 0; i < _sizeV; ++i)
       (*this)(i) = vIn(i);
 
   }
@@ -561,7 +568,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
     return *this;
   }
 
-  if (vIn.size() != sizeV)
+  if (vIn.size() != _sizeV)
     SiconosVectorException::selfThrow("BlockVector:operator += vIn, inconsistent size between this and vIn.");
 
   if (vIn.isBlock())
@@ -581,7 +588,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
     {
       //      SiconosVector * tmp = new SimpleVector(vIn);
       //      *this += *tmp;
-      for (unsigned int i = 0; i < sizeV; ++i)
+      for (unsigned int i = 0; i < _sizeV; ++i)
         (*this)(i) += vIn(i);
     }
   }
@@ -603,7 +610,7 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     this->zero();
     return *this;
   }
-  if (vIn.size() != sizeV)
+  if (vIn.size() != _sizeV)
     SiconosVectorException::selfThrow("BlockVector:operator -= vIn, inconsistent size between this and vIn.");
   if (vIn.isBlock())
   {
@@ -619,7 +626,7 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     {
       //    SiconosVector * tmp = new SimpleVector(vIn);
       //    *this -= *tmp;
-      for (unsigned int i = 0; i < sizeV; ++i)
+      for (unsigned int i = 0; i < _sizeV; ++i)
         (*this)(i) -= vIn(i);
     }
   }
@@ -633,14 +640,14 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
 
 void BlockVector::insert(const  SiconosVector& v)
 {
-  sizeV += v.size();
+  _sizeV += v.size();
 
   if (!v.isBlock())
     vect.push_back(boost::shared_ptr<SiconosVector>(new SimpleVector(v))); // Copy
   else
     vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(v))); // Copy
 
-  _tabIndex->push_back(sizeV);
+  _tabIndex->push_back(_sizeV);
 }
 
 void BlockVector::insertPtr(SP::SiconosVector v)
@@ -648,7 +655,7 @@ void BlockVector::insertPtr(SP::SiconosVector v)
   if (!v)
     SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a NULL vector.");
 
-  sizeV += v->size();
+  _sizeV += v->size();
   vect.push_back(v);
-  _tabIndex->push_back(sizeV);
+  _tabIndex->push_back(_sizeV);
 }

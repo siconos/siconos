@@ -31,13 +31,13 @@
 // =================================================
 
 // Default
-SimpleVector::SimpleVector(): SiconosVector(1, 0)
+SimpleVector::SimpleVector(): SiconosVector(1)
 {
   vect.Dense = new DenseVect(ublas::zero_vector<double>());
 }
 
 // parameters: dimension and type.
-SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1, row)
+SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1)
 {
   if (typ == SPARSE)
   {
@@ -56,7 +56,7 @@ SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1, r
 }
 
 // parameters: dimension, default value for all components and type.
-SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): SiconosVector(1, row)
+SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): SiconosVector(1)
 {
   if (typ == SPARSE)
   {
@@ -76,7 +76,7 @@ SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): Sicono
 }
 
 // parameters: a vector (stl) of double and the type.
-SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): SiconosVector(1, v.size())
+SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): SiconosVector(1)
 {
   if (typ != DENSE)
     SiconosVectorException::selfThrow("SimpleVector::constructor(UBLAS_TYPE, std::vector<double>, unsigned int) : invalid type given");
@@ -86,7 +86,7 @@ SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): Sicono
 }
 
 // Copy
-SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(svect.getNum(), svect.size())
+SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(svect.getNum())
 {
   if (num == 1) // dense
   {
@@ -106,13 +106,13 @@ SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(svect.getNu
 }
 
 // Copy
-SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1, v.size()) // Dense by default
+SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1) // Dense by default
 {
   unsigned int numV = v.getNum();
   if (numV == 0) // ie if v is a BlockVector, "this" is set to dense.
   {
     // num = 1; default value
-    vect.Dense = new DenseVect(sizeV);
+    vect.Dense = new DenseVect(v.size());
 
     VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
@@ -137,14 +137,14 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1, v.size()) /
   }
 }
 
-SimpleVector::SimpleVector(const DenseVect& m): SiconosVector(1, m.size())
+SimpleVector::SimpleVector(const DenseVect& m): SiconosVector(1)
 {
   vect.Dense = new DenseVect(m.size());
   noalias(*vect.Dense) = m;
 
 }
 
-SimpleVector::SimpleVector(const SparseVect& m): SiconosVector(4, m.size())
+SimpleVector::SimpleVector(const SparseVect& m): SiconosVector(4)
 {
   vect.Sparse = new SparseVect(m.size());
   noalias(*vect.Sparse) = m;
@@ -163,7 +163,6 @@ SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector(1
     ioVector io(file, "binary");
     io.read(*this);
   }
-  sizeV = (vect.Dense)->size();
 }
 
 SimpleVector::~SimpleVector()
@@ -230,7 +229,7 @@ void SimpleVector::zero()
 
 void SimpleVector::setVector(unsigned int, const SiconosVector& newV)
 {
-  if (newV.size() != sizeV)
+  if (newV.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::setVector(num,v), unconsistent sizes.");
 
   *this = newV ;
@@ -253,7 +252,6 @@ void SimpleVector::fill(double value)
 
 void SimpleVector::resize(unsigned int n, bool preserve)
 {
-  sizeV = n;
   if (num == 1)
     (vect.Dense)->resize(n, preserve);
   if (num == 4)
@@ -318,7 +316,7 @@ const std::string SimpleVector::toString() const
 
 const double SimpleVector::getValue(unsigned int row) const
 {
-  if (row >= sizeV)
+  if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::getValue(index) : Index out of range");
 
   if (num == 1)
@@ -329,7 +327,7 @@ const double SimpleVector::getValue(unsigned int row) const
 
 void SimpleVector::setValue(unsigned int row, double value)
 {
-  if (row >= sizeV)
+  if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::setValue(index, value) : Index out of range");
   if (num == 1)
     (*vect.Dense)(row) = value ;
@@ -339,7 +337,7 @@ void SimpleVector::setValue(unsigned int row, double value)
 
 double& SimpleVector::operator()(unsigned int row)
 {
-  if (row >= sizeV)
+  if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::operator ( index ): Index out of range");
 
   if (num == 1)
@@ -350,7 +348,7 @@ double& SimpleVector::operator()(unsigned int row)
 
 const double SimpleVector::operator()(unsigned int row) const
 {
-  if (row >= sizeV)
+  if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::operator ( index ): Index out of range");
 
   if (num == 1)
@@ -372,11 +370,11 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   if (&vIn == this)
     SiconosVectorException::selfThrow("SimpleVector::this->setBlock(pos,vIn): vIn = this.");
 
-  if (index > sizeV)
+  if (index > size())
     SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
 
   unsigned int end = vIn.size() + index;
-  if (end > sizeV)
+  if (end > size())
     SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
 
   unsigned int numVin = vIn.getNum();
@@ -580,7 +578,7 @@ void SimpleVector::addBlock(unsigned int index, const SiconosVector& vIn)
     SiconosVectorException::selfThrow("SimpleVector::this->addBlock(pos,vIn): vIn = this.");
 
   unsigned int end = vIn.size();
-  if ((index + end) > sizeV) SiconosVectorException::selfThrow("SimpleVector::addBlock : invalid ranges");
+  if ((index + end) > size()) SiconosVectorException::selfThrow("SimpleVector::addBlock : invalid ranges");
 
   unsigned int numVin = vIn.getNum();
   if (numVin == 0) // if vIn is a BlockVector
@@ -644,7 +642,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
 {
   if (&vIn == this) return *this; // auto-assignment.
 
-  if (sizeV != vIn.size())
+  if (size() != vIn.size())
     SiconosVectorException::selfThrow("SimpleVector::operator = failed: inconsistent sizes.");
 
   unsigned int vInNum = vIn.getNum();
@@ -696,7 +694,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
 {
   if (&vIn == this) return *this; // auto-assignment.
 
-  if (sizeV != vIn.size())
+  if (size() != vIn.size())
     SiconosVectorException::selfThrow("SimpleVector::operator = failed: inconsistent sizes.");
 
   unsigned int vInNum = vIn.getNum();
@@ -732,7 +730,7 @@ SimpleVector& SimpleVector::operator = (const DenseVect& d)
 {
   if (num != 1)
     SiconosVectorException::selfThrow("SimpleVector::operator = DenseVect : forbidden: the current vector is not dense.");
-  if (d.size() != sizeV)
+  if (d.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::operator = DenseVect : inconsistent size.");
 
   atlas::copy(d, *vect.Dense);
@@ -743,7 +741,7 @@ SimpleVector& SimpleVector::operator = (const SparseVect& sp)
 {
   if (num != 4)
     SiconosVectorException::selfThrow("SimpleVector::operator = SparseVect : current vector is not sparse.");
-  if (sp.size() != sizeV)
+  if (sp.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::operator = SparseVect : inconsistent size.");
 
   noalias(*vect.Sparse) = sp;
@@ -778,7 +776,7 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
   unsigned int vInNum = vIn.getNum();
   if (vInNum == 0) // vIn block
   {
-    if (sizeV != vIn.size())
+    if (size() != vIn.size())
       SiconosVectorException::selfThrow("SimpleVector::operator += failed: inconsistent sizes.");
 
     VectorOfVectors::const_iterator it;
@@ -831,7 +829,7 @@ SimpleVector& SimpleVector::operator -= (const SiconosVector& vIn)
   unsigned int vInNum = vIn.getNum();
   if (vInNum == 0) // vIn block
   {
-    if (sizeV != vIn.size())
+    if (size() != vIn.size())
       SiconosVectorException::selfThrow("SimpleVector::operator -= failed: inconsistent sizes.");
 
     VectorOfVectors::const_iterator it;

@@ -58,9 +58,6 @@ class SiconosVector
 
 protected:
 
-  /** Size (ie total number of scalar elements, not number of blocks) */
-  unsigned int sizeV;
-
   /** A number to specify the type of the vector: (block or ublas-type)
    * 0 -> BlockVector, 1 -> DenseVect, 4 -> SparseVect
    * Note: 4 for sparse to keep the same num as for matrices.
@@ -74,11 +71,6 @@ protected:
       \param unsigned int, type-number of the vector
   */
   SiconosVector(unsigned int);
-
-  /** basic constructor
-      \param unsigned int, type-number of the vector
-      \param size of the vector */
-  SiconosVector(unsigned int, unsigned int);
 
 public:
 
@@ -98,10 +90,7 @@ public:
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  inline const unsigned int size() const
-  {
-    return sizeV;
-  };
+  virtual const unsigned int size() const PURE_DEF;
 
   /** Get the type number of the current vector.
    * \return an unsigned int

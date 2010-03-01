@@ -42,6 +42,9 @@ class BlockVector : public SiconosVector , public boost::enable_shared_from_this
 {
 private:
 
+  /** Size (ie total number of scalar elements, not number of blocks) */
+  unsigned int _sizeV;
+
   /** A container of pointers on SiconosVector. */
   VectorOfVectors vect;
 
@@ -85,6 +88,14 @@ public:
   /** destructor
    */
   ~BlockVector();
+
+
+  const unsigned int size() const
+  {
+    return _sizeV;
+  };
+
+
 
   /** iterator equal to vect.begin
       \return a VectorOfVectors::iterator

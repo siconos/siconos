@@ -20,11 +20,7 @@
 #include "SiconosVector.hpp"
 
 // Default (protected) constructor
-SiconosVector::SiconosVector(unsigned int newNum): sizeV(0), num(newNum)
-{}
-
-// Basic (protected) constructor
-SiconosVector::SiconosVector(unsigned int newNum, unsigned int size): sizeV(size), num(newNum)
+SiconosVector::SiconosVector(unsigned int newNum): num(newNum)
 {}
 
 Index SiconosVector::getTabIndex() const

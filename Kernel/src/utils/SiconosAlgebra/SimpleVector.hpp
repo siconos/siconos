@@ -104,6 +104,23 @@ public:
    */
   ~SimpleVector();
 
+  /** get the vector size, ie the total number of (double) elements in the vector
+   *  \return unsigned int
+   */
+  const unsigned int size() const
+  {
+    if (num == SPARSE)
+    {
+      assert(vect.Sparse);
+      return (vect.Sparse->size());
+    }
+    else if (num == DENSE)
+    {
+      assert(vect.Dense);
+      return (vect.Dense->size());
+    }
+  }
+
   /** get the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect

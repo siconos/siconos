@@ -208,14 +208,27 @@ void BlockVectorTest::testFill()
 void BlockVectorTest::testNorm()
 {
   cout << "--> Test: norm." << endl;
-  SP::SiconosVector w(new SimpleVector(3, 2));
-  SP::SiconosVector z(new SimpleVector(5, 3));
+  SP::SiconosVector w(new SimpleVector(3));
+  SP::SiconosVector z(new SimpleVector(5));
+
+  (*w)(0) = 1;
+  (*w)(1) = 2;
+  (*w)(2) = 3;
+
+  (*z)(0) = 1;
+  (*z)(1) = 2;
+  (*z)(2) = 3;
+  (*z)(3) = 4;
+  (*z)(4) = 5;
+
+
   SP::BlockVector v(new BlockVector(w, z));
   double n2 = v->norm2();
   v->insertPtr(ref);
   double ni = v->normInf();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", n2 == sqrt(57), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", ni == ref->normInf(), true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", n2 - sqrt(69) < std::numeric_limits<double>::epsilon(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", ni == 5, true);
   cout << "--> norm test ended with success." << endl;
 }
 
