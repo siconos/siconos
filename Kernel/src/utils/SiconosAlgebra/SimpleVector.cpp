@@ -31,23 +31,24 @@
 // =================================================
 
 // Default
-SimpleVector::SimpleVector(): SiconosVector(1)
+SimpleVector::SimpleVector(): SiconosVector()
 {
+  _dense = true;
   vect.Dense = new DenseVect(ublas::zero_vector<double>());
 }
 
 // parameters: dimension and type.
-SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1)
+SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector()
 {
   if (typ == SPARSE)
   {
+    _dense = false;
     vect.Sparse = new SparseVect(ublas::zero_vector<double>(row));
-    num = 4;
   }
   else if (typ == DENSE)
   {
+    _dense = true;
     vect.Dense = new DenseVect(ublas::zero_vector<double>(row));
-    // num = 1; // set by default
   }
   else
   {
@@ -56,18 +57,18 @@ SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1)
 }
 
 // parameters: dimension, default value for all components and type.
-SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): SiconosVector(1)
+SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): SiconosVector()
 {
   if (typ == SPARSE)
   {
+    _dense = false;
     vect.Sparse = new SparseVect(row);
-    num = 4;
     fill(val);
   }
   else if (typ == DENSE)
   {
+    _dense = true;
     vect.Dense = new DenseVect(ublas::scalar_vector<double>(row, val));
-    // num = 1; // set by default
   }
   else
   {
@@ -76,42 +77,47 @@ SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): Sicono
 }
 
 // parameters: a vector (stl) of double and the type.
-SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): SiconosVector(1)
+SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): SiconosVector()
 {
   if (typ != DENSE)
     SiconosVectorException::selfThrow("SimpleVector::constructor(UBLAS_TYPE, std::vector<double>, unsigned int) : invalid type given");
 
+  _dense = true;
   vect.Dense = new DenseVect(v.size());
   std::copy(v.begin(), v.end(), (vect.Dense)->begin());
 }
 
 // Copy
-SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(svect.getNum())
+SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector()
 {
-  if (num == 1) // dense
+  if (ask<IsDense, bool>(svect)) // dense
   {
+    _dense = true;
     vect.Dense = new DenseVect(svect.size());
     noalias(*vect.Dense) = (*svect.dense());
     // std::copy((vect.Dense)->begin(), (vect.Dense)->end(), (svect.dense())->begin());
   }
   else //sparse
   {
+    _dense = false;
     vect.Sparse = new SparseVect(svect.size());
     noalias(*vect.Sparse) = (*svect.sparse());
     //std::copy((vect.Sparse)->begin(), (vect.Sparse)->end(), (svect.sparse())->begin());
   }
 
-  // Note FP: using constructor + noalias = (or std::copy) is more efficient than a call to ublas::vector copy constructor,
-  // this for large or small vectors.
+  // Note FP: using constructor + noalias = (or std::copy) is more
+  // efficient than a call to ublas::vector copy constructor, this for
+  // large or small vectors.
 }
 
 // Copy
-SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1) // Dense by default
+SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector() // Dense by default
 {
   unsigned int numV = v.getNum();
   if (numV == 0) // ie if v is a BlockVector, "this" is set to dense.
   {
     // num = 1; default value
+    _dense = true;
     vect.Dense = new DenseVect(v.size());
 
     VectorOfVectors::const_iterator it;
@@ -124,34 +130,37 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1) // Dense by
   }
   else if (numV == 1) // dense
   {
-    // num = 1; default value
+    _dense = true;
     vect.Dense = new DenseVect(v.size());
     noalias(*vect.Dense) = (*v.dense());
     //std::copy((v.dense())->begin(), (v.dense())->end(), (vect.Dense)->begin());
   }
   else // sparse
   {
-    num = 4;
+    _dense = false;
     vect.Sparse = new SparseVect(v.size());
     std::copy((v.sparse())->begin(), (v.sparse())->end(), (vect.Sparse)->begin());
   }
 }
 
-SimpleVector::SimpleVector(const DenseVect& m): SiconosVector(1)
+SimpleVector::SimpleVector(const DenseVect& m): SiconosVector()
 {
+  _dense = true;
   vect.Dense = new DenseVect(m.size());
   noalias(*vect.Dense) = m;
 
 }
 
-SimpleVector::SimpleVector(const SparseVect& m): SiconosVector(4)
+SimpleVector::SimpleVector(const SparseVect& m): SiconosVector()
 {
+  _dense = false;
   vect.Sparse = new SparseVect(m.size());
   noalias(*vect.Sparse) = m;
 }
 
-SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector(1)
+SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector()
 {
+  _dense = true;
   vect.Dense = new DenseVect();
   if (ascii)
   {
@@ -167,14 +176,11 @@ SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector(1
 
 SimpleVector::~SimpleVector()
 {
-  if (num == 1)
-  {
+  if (_dense)
     delete(vect.Dense);
-  }
-
-  else if (num == 4)
-    delete(vect.Sparse);
+  else delete(vect.Sparse);
 }
+
 
 // =================================================
 //        get Ublas component (dense or sparse)
@@ -182,7 +188,7 @@ SimpleVector::~SimpleVector()
 
 const DenseVect SimpleVector::getDense(unsigned int) const
 {
-  if (num != 1)
+  if (!_dense)
     SiconosVectorException::selfThrow("SimpleVector::getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return *vect.Dense;
@@ -191,7 +197,7 @@ const DenseVect SimpleVector::getDense(unsigned int) const
 const SparseVect SimpleVector::getSparse(unsigned int)const
 {
 
-  if (num != 4)
+  if (_dense)
     SiconosVectorException::selfThrow("SimpleVector::getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return *vect.Sparse;
@@ -200,7 +206,7 @@ const SparseVect SimpleVector::getSparse(unsigned int)const
 SparseVect* SimpleVector::sparse(unsigned int)const
 {
 
-  if (num != 4)
+  if (_dense)
     SiconosVectorException::selfThrow("SimpleVector::sparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return vect.Sparse;
@@ -208,8 +214,10 @@ SparseVect* SimpleVector::sparse(unsigned int)const
 
 double* SimpleVector::getArray(unsigned int) const
 {
-  if (num == 4)
+  if (!_dense)
     SiconosVectorException::selfThrow("SimpleVector::getArray() : not yet implemented for sparse vector.");
+
+  assert(vect.Dense);
 
   return &(((*vect.Dense).data())[0]);
 }
@@ -220,11 +228,15 @@ double* SimpleVector::getArray(unsigned int) const
 
 void SimpleVector::zero()
 {
-  if (num == 1)
+  if (_dense)
     atlas::set(0.0, *vect.Dense);
 
-  else //if(num==4)
+  else
+  {
+    assert(vect.Sparse);
     *vect.Sparse *= 0.0;
+  }
+
 }
 
 void SimpleVector::setVector(unsigned int, const SiconosVector& newV)
@@ -237,7 +249,7 @@ void SimpleVector::setVector(unsigned int, const SiconosVector& newV)
 
 void SimpleVector::fill(double value)
 {
-  if (num == 4)
+  if (!_dense)
   {
     for (unsigned int i = 0; i < (vect.Sparse)->size(); ++i)
       (vect.Sparse)->push_back(i, value);
@@ -252,9 +264,9 @@ void SimpleVector::fill(double value)
 
 void SimpleVector::resize(unsigned int n, bool preserve)
 {
-  if (num == 1)
+  if (_dense)
     (vect.Dense)->resize(n, preserve);
-  if (num == 4)
+  else
     (vect.Sparse)->resize(n, preserve);
 }
 
@@ -264,7 +276,7 @@ void SimpleVector::resize(unsigned int n, bool preserve)
 
 const double SimpleVector::normInf() const
 {
-  if (num == 1)
+  if (_dense)
     return norm_inf(*vect.Dense);
   else //if(num==4)
     return norm_inf(*vect.Sparse);
@@ -272,7 +284,7 @@ const double SimpleVector::normInf() const
 
 const double SimpleVector::norm2() const
 {
-  if (num == 1)
+  if (_dense)
     return ublas::norm_2(*vect.Dense);
   else //if(num==4)
     return ublas::norm_2(*vect.Sparse);
@@ -284,9 +296,9 @@ const double SimpleVector::norm2() const
 
 void SimpleVector::display()const
 {
-  if (num == 1)
+  if (_dense)
     std::cout << *vect.Dense << std::endl;
-  else if (num == 4)
+  else if (vect.Sparse)
     std::cout << *vect.Sparse << std::endl;
 }
 
@@ -298,7 +310,7 @@ const std::string SimpleVector::toString() const
 {
   std::stringstream sstr;
   std::string s;
-  if (num == 1)
+  if (_dense)
     sstr << *vect.Dense;
   else
     sstr << *vect.Sparse;
@@ -319,7 +331,7 @@ const double SimpleVector::getValue(unsigned int row) const
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::getValue(index) : Index out of range");
 
-  if (num == 1)
+  if (_dense)
     return (*vect.Dense)(row);
   else
     return (*vect.Sparse)(row);
@@ -329,7 +341,7 @@ void SimpleVector::setValue(unsigned int row, double value)
 {
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::setValue(index, value) : Index out of range");
-  if (num == 1)
+  if (_dense)
     (*vect.Dense)(row) = value ;
   else
     (*vect.Sparse)(row) = value;
@@ -340,7 +352,7 @@ double& SimpleVector::operator()(unsigned int row)
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::operator ( index ): Index out of range");
 
-  if (num == 1)
+  if (_dense)
     return (*vect.Dense)(row);
   else
     return (*vect.Sparse)(row).ref();
@@ -351,7 +363,7 @@ const double SimpleVector::operator()(unsigned int row) const
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::operator ( index ): Index out of range");
 
-  if (num == 1)
+  if (_dense)
     return (*vect.Dense)(row);
   else
     return ((*vect.Sparse)(row)).ref();
@@ -390,9 +402,9 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   }
   else // vIn a SimpleVector ...
   {
-    if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::setBlock: inconsistent types.");
+    if (numVin != getNum()) SiconosVectorException::selfThrow("SimpleVector::setBlock: inconsistent types.");
 
-    if (num == 1)
+    if (_dense)
       noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
     else
       noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn.sparse();
@@ -593,9 +605,9 @@ void SimpleVector::addBlock(unsigned int index, const SiconosVector& vIn)
   }
   else // vIn is a SimpleVector ...
   {
-    if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::addBlock : inconsistent types.");
+    if (numVin != getNum()) SiconosVectorException::selfThrow("SimpleVector::addBlock : inconsistent types.");
 
-    if (num == 1)
+    if (_dense)
       noalias(ublas::subrange(*vect.Dense, index, index + end)) += *vIn.dense();
     else
       noalias(ublas::subrange(*vect.Sparse, index, index + end)) += *vIn.sparse();
@@ -625,9 +637,9 @@ void SimpleVector::subBlock(unsigned int index, const SiconosVector& vIn)
   }
   else //  vIn a SimpleVector ...
   {
-    if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::subBlock : inconsistent types.");
+    if (numVin != getNum()) SiconosVectorException::selfThrow("SimpleVector::subBlock : inconsistent types.");
 
-    if (num == 1)
+    if (_dense)
       noalias(ublas::subrange(*vect.Dense, index, index + end)) -= *vIn.dense();
     else
       noalias(ublas::subrange(*vect.Sparse, index, index + end)) -= *vIn.sparse();
@@ -659,7 +671,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
   }
   else // vIn is a SimpleVector
   {
-    switch (num)
+    switch (getNum())
     {
     case 1:
       switch (vInNum)
@@ -698,7 +710,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
     SiconosVectorException::selfThrow("SimpleVector::operator = failed: inconsistent sizes.");
 
   unsigned int vInNum = vIn.getNum();
-  switch (num)
+  switch (getNum())
   {
   case 1:
     switch (vInNum)
@@ -728,7 +740,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
 
 SimpleVector& SimpleVector::operator = (const DenseVect& d)
 {
-  if (num != 1)
+  if (!_dense)
     SiconosVectorException::selfThrow("SimpleVector::operator = DenseVect : forbidden: the current vector is not dense.");
   if (d.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::operator = DenseVect : inconsistent size.");
@@ -739,7 +751,7 @@ SimpleVector& SimpleVector::operator = (const DenseVect& d)
 
 SimpleVector& SimpleVector::operator = (const SparseVect& sp)
 {
-  if (num != 4)
+  if (_dense)
     SiconosVectorException::selfThrow("SimpleVector::operator = SparseVect : current vector is not sparse.");
   if (sp.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::operator = SparseVect : inconsistent size.");
@@ -758,7 +770,7 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
   if (&vIn == this) // alias
   {
     // Note: using this *= 2.0 is much more time-consuming.
-    switch (num)
+    switch (getNum())
     {
     case 1:
       *vect.Dense += *vect.Dense;
@@ -789,7 +801,7 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
   }
   else  // vIn Simple
   {
-    switch (num)
+    switch (getNum())
     {
     case 1:
       switch (vInNum)
@@ -843,7 +855,7 @@ SimpleVector& SimpleVector::operator -= (const SiconosVector& vIn)
   else // if vIn is not a BlockVector
   {
     unsigned int vInNum = vIn.getNum();
-    switch (num)
+    switch (getNum())
     {
     case 1:
       switch (vInNum)

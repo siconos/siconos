@@ -27,20 +27,20 @@
 // =================================================
 //                CONSTRUCTORS
 // =================================================
-BlockVector::BlockVector(): SiconosVector(0)
+BlockVector::BlockVector(): SiconosVector()
 {
   _sizeV = 0;
   _tabIndex.reset(new Index());
 }
 
-BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0)
+BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector()
 {
   _sizeV = 0;
 
   SiconosVectorException::selfThrow(" BlockVector::constructor from a file : read BlockVector is not implemented");
 }
 
-BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
+BlockVector::BlockVector(const BlockVector &v): SiconosVector()
 {
   _sizeV = 0;
   unsigned int nbBlocks = v.getNumberOfBlocks();
@@ -59,7 +59,7 @@ BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
   }
 }
 
-BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
+BlockVector::BlockVector(const SiconosVector &v): SiconosVector()
 {
   _sizeV = 0;
 
@@ -92,7 +92,7 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
   }
 }
 
-BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVector(0)
+BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVector()
 {
   _sizeV = 0;
 
@@ -140,7 +140,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
   }
 }
 
-BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0)
+BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector()
 {
   _sizeV = 0;
 

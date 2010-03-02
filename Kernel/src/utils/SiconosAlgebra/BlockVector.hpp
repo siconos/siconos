@@ -25,6 +25,7 @@
 #define BLOCKVECTOR_H
 
 #include "SiconosVector.hpp"
+#include "SimpleVector.hpp"
 
 class SimpleVector;
 
@@ -89,13 +90,31 @@ public:
    */
   ~BlockVector();
 
-
+  /** get the vector size, ie the total number of (double) elements in
+     *  the vector
+   *  \return unsigned int
+   */
   const unsigned int size() const
   {
     return _sizeV;
   };
 
+  /** true if the vector is block else false.
+    * \return a bool.
+    */
+  virtual const bool isBlock() const
+  {
+    return true;
+  };
 
+
+  /** Get the type number of the current vector.
+   * \return an unsigned int
+   */
+  const unsigned int getNum() const
+  {
+    return 0;
+  };
 
   /** iterator equal to vect.begin
       \return a VectorOfVectors::iterator
@@ -377,15 +396,32 @@ public:
    */
   BlockVector& operator -=(const SiconosVector&);
 
+
+  SiconosVector& operator *= (double s)
+  {
+    VectorOfVectors::iterator it;
+    for (it = begin(); it != end(); ++it)
+      (**it) *= s;
+  }
+
+  SiconosVector& operator /= (double s)
+  {
+    VectorOfVectors::iterator it;
+    for (it = begin(); it != end(); ++it)
+      (**it) /= s;
+  }
+
   /** Insert a subvector in this vector: allocation and copy
-   *  \param SiconosVector& v : the vector to be inserted
-   */
+  *  \param SiconosVector& v : the vector to be inserted
+  */
   void insert(const SiconosVector&) ;
 
   /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
    *  \param a pointer to SP::SiconosVector
    */
   void insertPtr(SP::SiconosVector) ;
+
+  ACCEPT_VISITORS();
 
 };
 

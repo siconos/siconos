@@ -74,6 +74,8 @@ class LCP;
 class FrictionContact;
 class Lmgc2DDSK;
 
+class SimpleVector;
+class BlockVector;
 
 //namespace Siconos
 //{
@@ -96,7 +98,7 @@ class Lmgc2DDSK;
 
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
-  virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
+  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
  
 #define ACCEPT_SP_VISITORS()                                            \
   virtual void accept(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
@@ -108,7 +110,7 @@ class Lmgc2DDSK;
 
 #define VISIT(X)                                                    \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
-  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);
+  virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
 class SiconosVisitor
 {
@@ -143,6 +145,11 @@ public:
   VISIT(FrictionContact);
 
   VISIT(Lmgc2DDSK);
+
+  VISIT(SimpleVector);
+
+  VISIT(BlockVector);
+
 };
 
 //}

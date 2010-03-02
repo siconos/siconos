@@ -25,6 +25,8 @@
 
 #include "SiconosVector.hpp"
 
+class VectorNum;
+
 class SimpleMatrix;
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
@@ -43,6 +45,9 @@ class SimpleMatrix;
 class SimpleVector: public SiconosVector , public boost::enable_shared_from_this<SimpleVector>
 {
 protected:
+
+  bool _dense;
+
   /**
    * Union of pointers to the ublas vector type (dense or sparse)
    */
@@ -109,16 +114,32 @@ public:
    */
   const unsigned int size() const
   {
-    if (num == SPARSE)
+    if (!_dense)
     {
-      assert(vect.Sparse);
       return (vect.Sparse->size());
     }
-    else if (num == DENSE)
+    else
     {
-      assert(vect.Dense);
       return (vect.Dense->size());
     }
+  }
+
+  /** true if the vector is block else false.
+    * \return a bool.
+    */
+  const bool isBlock() const
+  {
+    return false;
+  };
+
+
+  /** Get the type number of the current vector.
+     * \return an unsigned int
+     */
+  const unsigned int getNum() const
+  {
+    if (_dense) return 1;
+    else return 4;
   }
 
   /** get the ublas embedded vector if it's type is Dense
@@ -315,6 +336,28 @@ public:
    */
   SimpleVector& operator -=(const SiconosVector&);
 
+
+  SiconosVector& operator *= (double s)
+  {
+    if (_dense)
+      //atlas::scal((double)m,*vect.Dense);
+      *dense() *= s;
+    else
+      *sparse() *= s;
+    return *this;
+  }
+
+
+  SiconosVector& operator /= (double s)
+  {
+    if (_dense)
+      //atlas::scal((double)m,*vect.Dense);
+      *dense() /= s;
+    else
+      *sparse() /= s;
+    return *this;
+  }
+
   /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
    *  of vOut (from index startOut)
    * \param vIn, a SP::SiconosVector
@@ -434,6 +477,89 @@ public:
    */
   friend void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
+  friend class VectorNum;
+
+  friend class IsDense;
+
+  friend class IsSparse;
+
+  friend class IsBlock;
+
+
+
+  ACCEPT_VISITORS();
+
+};
+
+
+struct VectorNum : public SiconosVisitor
+{
+
+  unsigned int _answer;
+
+  void visit(const SimpleVector& v)
+  {
+    if (v._dense) _answer = 1;
+    else _answer = 4;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    _answer = 0;
+  }
+
+};
+
+
+struct IsDense : public SiconosVisitor
+{
+
+  bool _answer;
+
+  void visit(const BlockVector& v)
+  {
+    _answer = false;
+  }
+
+  void visit(const SimpleVector& v)
+  {
+    _answer = v._dense;
+  }
+
+};
+
+struct IsSparse : public SiconosVisitor
+{
+
+  bool _answer;
+
+  void visit(const BlockVector& v)
+  {
+    _answer = false;
+  }
+
+  void visit(const SimpleVector& v)
+  {
+    _answer = !v._dense;
+  }
+
+
+};
+
+struct IsBlock : public SiconosVisitor
+{
+
+  bool _answer;
+
+  void visit(const BlockVector& v)
+  {
+    _answer = true;
+  }
+
+  void visit(const SimpleVector& v)
+  {
+    _answer = false;
+  }
 };
 
 DEFINE_SPTR(SimpleVector);

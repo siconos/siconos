@@ -45,12 +45,15 @@ union VECTOR_UBLAS_TYPE
  *  \date (creation) 07/21/2006
  *  \version 3.0.0.
  *
- *  In Siconos, a "vector" can be either a SimpleVector or a BlockVector, ie a container of several pointers to SiconosVector.
+ *  In Siconos, a "vector" can be either a SimpleVector or a
+ *  BlockVector, ie a container of several pointers to SiconosVector.
  *
- * Remark: a lot of functions in the interface are "reserved to ..." Block or Simple.
- * See the documentation in these classes for more details.
+ * Remark: a lot of functions in the interface are "reserved to ..."
+ * Block or Simple.  See the documentation in these classes for more
+ * details.
  *
- * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
+ * You can find an overview on how to build and use vectors and
+ * matrices in \ref GS_SicAlgebra .
  *
  */
 class SiconosVector
@@ -58,19 +61,8 @@ class SiconosVector
 
 protected:
 
-  /** A number to specify the type of the vector: (block or ublas-type)
-   * 0 -> BlockVector, 1 -> DenseVect, 4 -> SparseVect
-   * Note: 4 for sparse to keep the same num as for matrices.
-   */
-  unsigned int num;
-
   /** default constructor */
   SiconosVector() {};
-
-  /** constructor with type-number
-      \param unsigned int, type-number of the vector
-  */
-  SiconosVector(unsigned int);
 
 public:
 
@@ -81,13 +73,13 @@ public:
   /** true if the vector is block else false.
    * \return a bool.
    */
-  inline const bool isBlock() const
+  virtual const bool isBlock() const
   {
-    if (num == 0) return true ;
-    else return false;
-  }
+    return false;
+  };
 
-  /** get the vector size, ie the total number of (double) elements in the vector
+  /** get the vector size, ie the total number of (double) elements in
+   *  the vector
    *  \return unsigned int
    */
   virtual const unsigned int size() const PURE_DEF;
@@ -95,10 +87,7 @@ public:
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  inline const unsigned int getNum() const
-  {
-    return num;
-  };
+  virtual const unsigned int getNum() const PURE_DEF;
 
   /** get the number of SimpleVector-Blocks - only usefull for BlockVector.
    *  \return unsigned int
@@ -109,12 +98,12 @@ public:
   };
 
   /** reserved to BlockVector
-      \return a VectorOfVectors::iterator
+   * \return a VectorOfVectors::iterator
   */
   virtual VectorOfVectors::iterator begin();
 
   /** reserved to BlockVector
-      \return a VectorOfVectors::iterator
+   * \return a VectorOfVectors::iterator
   */
   virtual VectorOfVectors::iterator end();
 
@@ -129,25 +118,30 @@ public:
   virtual VectorOfVectors::const_iterator end() const;
 
   /** get the ublas embedded vector if it's type is Dense
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+   *  \param unsigned int: position of the required vector (useless for
+   *  SimpleVector, default = 0)
    *  \return a DenseVect
    */
   virtual const DenseVect getDense(unsigned int = 0) const PURE_DEF;
 
   /** get the ublas embedded vector if it's type is Sparse
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+   *  \param unsigned int: position of the required vector (useless
+   *  for SimpleVector, default = 0)
    *  \return a SparseVect
    */
   virtual const SparseVect getSparse(unsigned int = 0) const PURE_DEF;
 
   /** get a pointer to the ublas embedded vector if it's type is Dense
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+   *  \param unsigned int: position of the required vector (useless
+   *  for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
   virtual DenseVect* dense(unsigned int = 0) const PURE_DEF;
 
-  /** get a pointer to the ublas embedded vector if it's type is Sparse
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  /** get a pointer to the ublas embedded vector if it's type is
+   *  Sparse
+   *  \param unsigned int: position of the required vector
+   *  (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
   virtual SparseVect* sparse(unsigned int = 0) const PURE_DEF;
@@ -183,7 +177,7 @@ public:
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  virtual const double norm2() const = 0 ;
+  virtual const double norm2() const PURE_DEF ;
 
   /** display data on standard output
    */
@@ -256,7 +250,7 @@ public:
    *  \param an unsigned int i
    *  \param the value
    */
-  virtual void setValue(unsigned int, double) =  0;
+  virtual void setValue(unsigned int, double) PURE_DEF;
 
   /** get the element at position i in the vector
    *  \param an integer i
@@ -308,43 +302,15 @@ public:
    */
   virtual SiconosVector& operator -=(const SiconosVector&) PURE_DEF;
 
-  /** multiply the current vector with a scalar
-   *  \param template, double, int ...
+  /** multiply the current vector with a double scalar
+   *  \param a double
    */
-  template <class T> SiconosVector& operator *= (const T& s)
-  {
-    if (num == 0)
-    {
-      VectorOfVectors::iterator it;
-      for (it = begin(); it != end(); ++it)
-        (**it) *= s;
-    }
-    else if (num == 1)
-      //atlas::scal((double)m,*vect.Dense);
-      *dense() *= s;
-    else
-      *sparse() *= s;
-    return *this;
-  }
+  virtual SiconosVector& operator *= (double s) PURE_DEF;
 
-  /** divide the current vector with a scalar
-   *  \param template, double, int ...
+  /** divide the current vector with a double scalar
+   *  \param a double
    */
-  template <class T> SiconosVector& operator /= (const T& s)
-  {
-    if (num == 0)
-    {
-      VectorOfVectors::iterator it;
-      for (it = begin(); it != end(); ++it)
-        (**it) /= s;
-    }
-    else if (num == 1)
-      //atlas::scal((double)m,*vect.Dense);
-      *dense() /= s;
-    else
-      *sparse() /= s;
-    return *this;
-  }
+  virtual SiconosVector& operator /= (double s) PURE_DEF;
 
   /** reserved to BlockVector - Insert a subvector in this vector: allocation and copy
    *  \param SiconosVector& v : the vector to be inserted
@@ -372,6 +338,21 @@ public:
 
   /** Swap x and y contents, using atlas swap.*/
   friend void swap(SiconosVector&, SiconosVector&);
+
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(SiconosVector);
+
+};
+
+template <class Visitor, class T, class Vector>
+T ask(Vector& v)
+{
+  Visitor t;
+
+  v.accept(t);
+
+  return t._answer;
 
 };
 

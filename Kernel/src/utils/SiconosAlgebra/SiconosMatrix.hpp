@@ -407,7 +407,7 @@ public:
    */
   template <class T> SiconosMatrix& operator *=(const T& s)
   {
-    if (num == 0) // BlockMatrix
+    if (num == 0)// BlockMatrix
     {
       BlocksMat::iterator1 it;
       BlocksMat::iterator2 it2;
@@ -439,7 +439,7 @@ public:
    */
   template <class T> SiconosMatrix& operator /=(const T& s)
   {
-    if (num == 0) // BlockMatrix
+    if (num == 0)// BlockMatrix
     {
       BlocksMat::iterator1 it;
       BlocksMat::iterator2 it2;

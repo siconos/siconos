@@ -19,10 +19,6 @@
 
 #include "SiconosVector.hpp"
 
-// Default (protected) constructor
-SiconosVector::SiconosVector(unsigned int newNum): num(newNum)
-{}
-
 Index SiconosVector::getTabIndex() const
 {
   SiconosVectorException::selfThrow("SiconosVector::getTabIndex() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");

@@ -41,6 +41,8 @@
 #include "Tools.hpp"
 #include <deque>
 
+#include "SiconosVisitor.hpp"
+
 namespace ublas = boost::numeric::ublas;
 namespace atlas = boost::numeric::bindings::atlas;
 
