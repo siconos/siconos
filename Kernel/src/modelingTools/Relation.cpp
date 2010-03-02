@@ -134,7 +134,10 @@ void Relation::computeResiduY(double t)
 }
 void Relation::computeg(double t)
 {
-  computeInput(t);
+  unsigned int i = interaction()->getRelativeDegree();
+  if (i)
+    i--;
+  computeInput(t, i);
 }
 
 void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName)

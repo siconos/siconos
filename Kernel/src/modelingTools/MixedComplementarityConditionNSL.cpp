@@ -21,12 +21,15 @@ using namespace std;
 
 MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(newSize + equalitySize)
 {
+  _type = SICONOS_NSL_MLCP;
   EqualitySize = equalitySize;
 }
 
 MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml)
-{}
+{
+  _type = SICONOS_NSL_MLCP;
+}
 
 MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()
 {}

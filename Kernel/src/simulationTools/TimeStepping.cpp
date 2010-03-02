@@ -139,7 +139,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // indexSet1 scan
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
-
+  //Remove interactions from the indexSet1
   for (v1next = ui1 ;
        ui1 != ui1end; ui1 = v1next)
   {
@@ -154,17 +154,19 @@ void TimeStepping::updateIndexSet(unsigned int i)
               == boost::white_color));
 
       indexSet0->color(ur1_descr0) = boost::gray_color;
-
-      y = ur1->getYRef(i - 1);
-      yDot = ur1->getYRef(1);
-      y += 0.5 * h * yDot;
-      if (y > 0)
+      if (ur1->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
       {
-        // Unitary relation is not active
-        // ui1 becomes invalid
-        indexSet0->color(ur1_descr0) = boost::black_color;
-        indexSet1->remove_vertex(ur1);
-        ur1->lambda(1)->zero();
+        y = ur1->getYRef(i - 1);
+        yDot = ur1->getYRef(1);
+        y += 0.5 * h * yDot;
+        if (y > 0)
+        {
+          // Unitary relation is not active
+          // ui1 becomes invalid
+          indexSet0->color(ur1_descr0) = boost::black_color;
+          indexSet1->remove_vertex(ur1);
+          ur1->lambda(1)->zero();
+        }
       }
     }
     else
@@ -177,7 +179,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   // indexSet0\indexSet1 scan
   UnitaryRelationsGraph::VIterator ui0, ui0end;
-
+  //Add interaction in indexSet1
   for (boost::tie(ui0, ui0end) = indexSet0->vertices();
        ui0 != ui0end; ++ui0)
   {
@@ -198,7 +200,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         assert( { y = indexSet0->bundle(*ui0)->getYRef(i - 1);
                   yDot = indexSet0->bundle(*ui0)->getYRef(1);
                   y += 0.5 * h*yDot;
-                  y <= 0;
+                  y <= 0 || indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw()->type() == SICONOS_NSL_EQUALITY ;
                 });
       }
 
@@ -209,13 +211,22 @@ void TimeStepping::updateIndexSet(unsigned int i)
         SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(ur0));
 
-
-        y = ur0->getYRef(i - 1);
-        yDot = ur0->getYRef(1);
-        y += 0.5 * h * yDot;
+        if (ur0->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
+        {
+          y = ur0->getYRef(i - 1);
+          yDot = ur0->getYRef(1);
+          y += 0.5 * h * yDot;
+        }
+        else
+          y = -1;
         if (y <= 0)
         {
           assert(!indexSet1->is_vertex(ur0));
+          if (ur0->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
+          {
+            printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------> ADD UR\n");
+            printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------> ADD UR\n");
+          }
 
           // vertex and edges insertion in indexSet1
           indexSet1->copy_vertex(ur0, *indexSet0);

@@ -41,12 +41,15 @@ class Interaction;
  *
  *
  */
+#define SICONOS_NSL_NOTYPE -1
+#define SICONOS_NSL_EQUALITY 1
+#define SICONOS_NSL_MLCP 2
 class NonSmoothLaw
 {
 protected:
 
-  /** type of the NonSmoothLaw */
-  std::string _nsLawType;
+  /** ID of the type of NSLAW*/
+  int _type;
 
   /** "size" of the NonSmoothLaw */
   unsigned int _size;
@@ -128,6 +131,13 @@ public:
   *  \exception RuntimeException
   */
   virtual void display() const = 0;
+
+  /** get the type of the NonSmoothLaw
+   */
+  int type() const
+  {
+    return _type;
+  }
 
   /** visitors hook
    */

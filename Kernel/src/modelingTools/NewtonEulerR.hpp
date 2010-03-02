@@ -75,6 +75,9 @@ protected:
   SP::SiconosMatrix _jachqDot;
   SP::SiconosMatrix _jachlambda;
 
+  /**vector e*/
+  SP::SiconosVector _e;
+
   /*updated in UR*/
   SP::SiconosMatrix _jachqT;
 
@@ -125,6 +128,10 @@ public:
   inline SP::SiconosMatrix jachlambda() const
   {
     return _jachlambda;
+  }
+  inline void setE(SP::SiconosVector newE)
+  {
+    _e = newE;
   }
 
   inline SP::SiconosMatrix jachqT() const

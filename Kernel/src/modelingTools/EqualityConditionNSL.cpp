@@ -20,11 +20,15 @@
 using namespace std;
 
 EqualityConditionNSL::EqualityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)
-{}
+{
+  _type = SICONOS_NSL_EQUALITY;
+}
 
 EqualityConditionNSL::EqualityConditionNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml)
-{}
+{
+  _type = SICONOS_NSL_EQUALITY;
+}
 
 EqualityConditionNSL::~EqualityConditionNSL()
 {}

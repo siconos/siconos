@@ -304,9 +304,9 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   };
   void visit(EqualityConditionNSL&)
   {
-    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(0);
+    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
+    interaction->setRelativeDegree(2);
   };
 
   void visit(MixedComplementarityConditionNSL&)

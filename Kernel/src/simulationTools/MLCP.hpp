@@ -86,6 +86,8 @@ protected:
   /** m is the size of the complementarity conditions */
   int _m;
 
+  int _curBlock;
+
   /** The MLCP instance */
   MixedLinearComplementarityProblem _numerics_problem;
 
@@ -110,7 +112,8 @@ public:
   /** destructor
   */
   ~MLCP() {};
-
+  virtual void updateUnitaryBlocks();
+  virtual void computeAllUnitaryBlocks();
   // --- n ---
   /** get the value of n,
   *  \return int

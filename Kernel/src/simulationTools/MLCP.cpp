@@ -18,10 +18,12 @@
  */
 #include "MLCP.hpp"
 #include "MixedComplementarityConditionNSL.hpp"
+#include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
 
 using namespace std;
 using namespace RELATION;
+#define MLCP_NB_BLOCKS 30
 
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
@@ -34,6 +36,10 @@ MLCP::MLCP(const string& newNumericsSolvername, const string& newId):
   strcpy(_numerics_solver_options->solverName, newNumericsSolvername.c_str());
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
 
+  _numerics_problem.blocksLine = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem.blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem.blocksLine[0] = 0;
+  _curBlock = 0;
 
 }
 
@@ -68,6 +74,12 @@ void MLCP::updateM()
 
 void  MLCP::reset()
 {
+  if (_numerics_problem.blocksLine)
+    free(_numerics_problem.blocksLine);
+  _numerics_problem.blocksLine = 0;
+  if (_numerics_problem.blocksIsComp)
+    free(_numerics_problem.blocksIsComp);
+  _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
 }
 
@@ -80,8 +92,6 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
-  _m = 0;
-  _n = 0;
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
     DSIterator itDS;
@@ -90,11 +100,18 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
     unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
     unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-    unsigned int equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-    unsigned int equalitySize2 = MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
 
+    unsigned int equalitySize1 =  0;
+    unsigned int equalitySize2 =  0;
+    if ((UR1->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_MLCP)
+      equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+    else if ((UR1->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_EQUALITY)
+      equalitySize1 = nslawSize1;
 
-
+    if ((UR2->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_MLCP)
+      equalitySize2 = MixedComplementarityConditionNSL::convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
+    else if ((UR2->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_EQUALITY)
+      equalitySize2 = nslawSize2;
     // Check allocation
     if (! _unitaryBlocks[UR1][UR2])
     {
@@ -128,6 +145,22 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
       UR1->getExtraUnitaryBlock(currentUnitaryBlock);
       _m += nslawSize1 - equalitySize1;
       _n += equalitySize1;
+      if (_curBlock > MLCP_NB_BLOCKS - 2)
+        printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
+      /*add an equality block.*/
+      if (equalitySize1 > 0)
+      {
+        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+        _numerics_problem.blocksIsComp[_curBlock] = 0;
+        _curBlock++;
+      }
+      /*add a complementarity block.*/
+      if (nslawSize1 - equalitySize1 > 0)
+      {
+        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
+        _numerics_problem.blocksIsComp[_curBlock] = 1;
+        _curBlock++;
+      }
     }
     else
       currentUnitaryBlock->zero();
@@ -172,6 +205,40 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         //          currentUnitaryBlock->display();
 
       }
+      else if (relationType1 == NewtonEuler || relationType2 == NewtonEuler || relationType1 == Lagrangian || relationType2 == Lagrangian)
+      {
+        if (UR1 == UR2)
+        {
+          SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
+          //
+          //        cout<<"LinearOSNS : leftUBlock\n";
+          //        work->display();
+          work->trans();
+          //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
+          //        leftUnitaryBlock->display();
+          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
+          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+          prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
+          //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
+          //*currentUnitaryBlock *=h;
+          //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
+          //        currentUnitaryBlock->display();
+
+        }
+        else
+        {
+          rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+          UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+          // Warning: we use getLeft for Right unitaryBlock
+          // because right = transpose(left) and because of
+          // size checking inside the getBlock function, a
+          // getRight call will fail.
+          rightUnitaryBlock->trans();
+          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+          prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+        }
+      }
       else RuntimeException::selfThrow("MLCP::computeBlock not yet implemented for relation of type " + relationType1);
 
     }
@@ -208,7 +275,8 @@ int MLCP::compute(double time)
 {
   // --- Prepare data for MLCP computing ---
   preCompute(time);
-
+  _numerics_problem.n = _n;
+  _numerics_problem.m = _m;
   int info = 0;
   // --- Call Numerics driver ---
   // Inputs:
@@ -227,7 +295,7 @@ int MLCP::compute(double time)
     //displayNM(_numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
-    //      displayMLCP(&_numerics_problem);
+    //displayMLCP(&_numerics_problem);
     try
     {
       //  display();
@@ -257,8 +325,8 @@ void MLCP::display() const
 
 MLCP* MLCP::convert(OneStepNSProblem* osnsp)
 {
-  MLCP* lcp = dynamic_cast<MLCP*>(osnsp);
-  return lcp;
+  MLCP* mlcp = dynamic_cast<MLCP*>(osnsp);
+  return mlcp;
 }
 
 void MLCP::initialize(SP::Simulation sim)
@@ -268,4 +336,18 @@ void MLCP::initialize(SP::Simulation sim)
 
 
 
+}
+void  MLCP::updateUnitaryBlocks()
+{
+  _curBlock = 0;
+  _m = 0;
+  _n = 0;
+  LinearOSNS::updateUnitaryBlocks();
+}
+void  MLCP::computeAllUnitaryBlocks()
+{
+  _curBlock = 0;
+  _m = 0;
+  _n = 0;
+  LinearOSNS::computeAllUnitaryBlocks();
 }

@@ -101,6 +101,10 @@ void NewtonEulerR::computeh(double)
   *_workQ = *data[q0];
   //prod(*_jachq,*data[q0],*y);
   prod(*_jachq, *_workQ, *y);
+  if (_e)
+    *y += *_e;
+  //  printf("NewtonEulerR::computeh() :");
+  //  y->display();
 }
 
 //  void NewtonEulerR::computeJachx(double)
@@ -155,6 +159,8 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
+  //    cout<<"xxxxx NewtonEulerR: computeInput lambda: ";
+  //    lambda->display();
   // data[name] += trans(G) * lambda
   prod(*lambda, *_jachqT, *data[p0 + level], false);
 }

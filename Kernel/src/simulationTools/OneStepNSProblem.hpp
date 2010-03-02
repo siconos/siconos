@@ -476,11 +476,11 @@ public:
 
   /** compute unitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
    */
-  void updateUnitaryBlocks();
+  virtual void updateUnitaryBlocks();
 
   /** computes all diagonal and extra-diagonal unitaryBlock-matrices
    */
-  void computeAllUnitaryBlocks();
+  virtual void computeAllUnitaryBlocks();
 
   /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
    *  Move this to Unitary Relation class?

@@ -330,6 +330,10 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
   {
     ;
   }
+  void visit(MixedComplementarityConditionNSL& nslaw)
+  {
+    ;
+  }
 };
 
 struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
