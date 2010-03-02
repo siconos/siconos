@@ -41,6 +41,11 @@ Main Changes:
 
 [...]
 
+2009 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add FirsrtOrderType2R, a type of first order relation.
+	* Add NewtonEulerDS, NewtonEulerR and a bouncing ball example based on the NewtonEuler.
+	* Add an electrical example using ideal switch. 
+	
 2009 March Maurice Bremond <maurice.bremond@inrialpes.fr>
 	* Add SiconosGraph, to replace maps of DynamicalSystems and maps
 	of UnitaryRelations.
