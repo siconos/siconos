@@ -32,6 +32,10 @@ Changes:
 	* Start  Relay solver with ENUM and Lemke scheme
 
 
+2008-01-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* NonSmoothSolvers Add MLCP solvers. 
+
+
 2008-January Franck Perignon <Franck.Perignon@inrialpes.fr>
 
 	* NSSpack: split into several dir (one for each solver/formulation)
