@@ -24,8 +24,6 @@
 
 #include "NonSmoothLaw.hpp"
 
-class NonSmoothLaw;
-
 /** Relay NonSmoothLaw
  *
  *  \author SICONOS Development Team - copyright INRIA

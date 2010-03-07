@@ -48,9 +48,6 @@ class NonSmoothLaw
 {
 protected:
 
-  /** ID of the type of NSLAW*/
-  int _type;
-
   /** "size" of the NonSmoothLaw */
   unsigned int _size;
 
