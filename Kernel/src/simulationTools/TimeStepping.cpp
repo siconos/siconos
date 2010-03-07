@@ -47,7 +47,7 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td, "TimeStepping")
+  : Simulation(td)
 {
 
   mComputeResiduY = false;
@@ -62,7 +62,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            double T, SP::DynamicalSystemsSet dsList,
                            SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
+  Simulation(strxml, t0, T, dsList, interList)
 {
   mComputeResiduY = false;
   // === One Step NS Problem === For time stepping, only one non
@@ -154,7 +154,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
               == boost::white_color));
 
       indexSet0->color(ur1_descr0) = boost::gray_color;
-      if (ur1->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
+      if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
         y = ur1->getYRef(i - 1);
         yDot = ur1->getYRef(1);
@@ -200,7 +200,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         assert( { y = indexSet0->bundle(*ui0)->getYRef(i - 1);
                   yDot = indexSet0->bundle(*ui0)->getYRef(1);
                   y += 0.5 * h*yDot;
-                  y <= 0 || indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw()->type() == SICONOS_NSL_EQUALITY ;
+                  y <= 0 || Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
                 });
       }
 
@@ -211,7 +211,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(ur0));
 
-        if (ur0->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
+        if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
           y = ur0->getYRef(i - 1);
           yDot = ur0->getYRef(1);
@@ -222,7 +222,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         if (y <= 0)
         {
           assert(!indexSet1->is_vertex(ur0));
-          if (ur0->interaction()->nonSmoothLaw()->type() != SICONOS_NSL_EQUALITY)
+          if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
             printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------> ADD UR\n");
             printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------> ADD UR\n");
@@ -552,7 +552,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of
   // events manager.
-  cout << " ==== Start of " << _simulationType << " simulation - This may take a while ... ====" << endl;
+  cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
   while (_eventsManager->hasNextEvent())
   {
     if (opt == "linear")
@@ -567,7 +567,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
     _eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of " << _simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+  cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 TimeStepping* TimeStepping::convert(Simulation *str)

@@ -39,8 +39,8 @@ using namespace std;
 
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
 // --- id ---
-Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
-  _name("unnamed"), _simulationType(id), _timeDiscretisation(td),
+Simulation::Simulation(SP::TimeDiscretisation td):
+  _name("unnamed"), _timeDiscretisation(td),
   _tinit(0.0), _tend(0.0), _tout(0.0), _levelMin(0), _levelMax(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
@@ -59,8 +59,8 @@ Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
 
 // --- xml constructor ---
 Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList,
-                       SP::InteractionsSet interactionsList, const string& id):
-  _name("unnamed"), _simulationType(id), _tinit(0.0), _tend(0.0), _tout(0.0),
+                       SP::InteractionsSet interactionsList):
+  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
   _simulationxml(strxml), _levelMin(0), _levelMax(0), _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
   if (!_simulationxml)
@@ -320,7 +320,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   {
     statOut.open("simulationStat.dat", std::ofstream::out);
     statOut << "============================================" << endl;
-    statOut << " Siconos Simulation of type " << _simulationType << "." << endl;
+    statOut << " Siconos Simulation of type " << typeName() << "." << endl;
     statOut << endl;
     statOut << "The tolerance parameter is equal to: " << _tolerance << endl;
     statOut << endl << endl;
@@ -433,14 +433,14 @@ void Simulation::run(const std::string&, double, unsigned int)
   // timeStepping.
 
   unsigned int count = 0; // events counter.
-  cout << " ==== Start of " << _simulationType << " simulation - This may take a while ... ====" << endl;
+  cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" << endl;
   while (nextTime() <= model()->finalT())
   {
     advanceToEvent();
     _eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of " << _simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+  cout << "===== End of " << typeName() << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 void Simulation::processEvents()

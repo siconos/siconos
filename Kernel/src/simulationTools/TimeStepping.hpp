@@ -82,9 +82,15 @@ public:
    */
   ~TimeStepping();
 
+  /* type name because parent class needs it */
+  inline std::string typeName()
+  {
+    return Type::name(*this);
+  };
+
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
-  *  \param a pointer to OneStepNSProblem
-  */
+   *  \param a pointer to OneStepNSProblem
+   */
   void insertNonSmoothProblem(SP::OneStepNSProblem);
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.

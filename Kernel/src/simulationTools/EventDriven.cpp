@@ -37,7 +37,7 @@ using namespace std;
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
                          SP::DynamicalSystemsSet dsList,
                          SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList, "EventDriven"), istate(1)
+  Simulation(strxml, t0, T, dsList, interList), istate(1)
 {
   // === One Step NS Problem === We read data in the xml output
   // (mainly Interactions concerned and solver) and assign them to

@@ -507,6 +507,9 @@ public:
    */
   static FirstOrderNonLinearDS* convert(DynamicalSystem* ds);
 
+
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(FirstOrderNonLinearDS);

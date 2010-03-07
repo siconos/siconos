@@ -943,6 +943,9 @@ public:
    */
   void computePostImpactVelocity();
 
+
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(LagrangianDS);

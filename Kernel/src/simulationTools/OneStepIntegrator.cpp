@@ -122,7 +122,7 @@ void OneStepIntegrator::initialize(SP::Simulation sim)
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // Initialization of the dynamical systems belonging to this OSI
-    (*it)->initialize(simulationLink->getType(), t0, sizeMem);
+    (*it)->initialize(Type::name(*simulationLink), t0, sizeMem);
 
     // Register this DS and the OSI into OSIMap of the Simulation
     simulationLink->addInOSIMap(*it, shared_from_this());

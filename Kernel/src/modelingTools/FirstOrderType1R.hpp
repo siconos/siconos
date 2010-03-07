@@ -132,6 +132,9 @@ public:
   }
 
   static FirstOrderType1R* convert(Relation *r);
+
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(FirstOrderType1R);

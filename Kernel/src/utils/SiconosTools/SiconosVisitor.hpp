@@ -41,45 +41,25 @@
 
    A_visitable_Siconos_Object->accept(Siconos::Visitor myvisitor)
 
+   SiconosVisitor also define a type visitor object under the
+   namespace Type:: and some functions to access type of visitables
+   classes:
+
+   Type::value(c) : the type of the visitable object c as an enum.
+
+   Type::name(c)  : the name of the Type::value as a std::string
+
+
+
 */
 
+#include "SiconosPointers.hpp"
 #include "RuntimeException.hpp"
 
-/* objects that may be visited (1) */
-class DynamicalSystem;
-class SphereLDS;
-class Disk;
-class Circle;
-class CircleCircleR;
-class DiskDiskR;
-class DiskMovingPlanR;
-class DiskPlanR;
-class SphereLDS;
-class SphereLDSSphereLDSR;
-class SphereLDSPlanR;
-class ExternalBody;
-class NonSmoothLaw;
-class EqualityConditionNSL;
-class MixedComplementarityConditionNSL;
-class ComplementarityConditionNSL;
-class RelayNSL;
-class NewtonImpactNSL;
-class NewtonImpactFrictionNSL;
+/* all Siconos classes that may be visited are defined there */
+#include "SiconosVisitables.hpp"
 
-class Simulation;
-class TimeStepping;
-class EventDriven;
-
-class LCP;
-class FrictionContact;
-class Lmgc2DDSK;
-
-class SimpleVector;
-class BlockVector;
-
-//namespace Siconos
-//{
-
+/* convenient macros */
 #define SICONOS_VISITOR_QUOTE(M) #M
 
 #define SICONOS_VISITOR_FAIL(X)                                                         \
@@ -89,74 +69,115 @@ class BlockVector;
 
 /** hook to be inserted in a virtual class definiton */
 #define VIRTUAL_ACCEPT_VISITORS(FROMCLASS)                              \
-  virtual void accept(SP::SiconosVisitor)                               \
+  virtual void acceptSP(SP::SiconosVisitor)                               \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
   virtual void accept(SiconosVisitor&)                                  \
   { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor)); }
-
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor)); } \
+  virtual Type::Siconos acceptType(FindType& ft) const                  \
+  { RuntimeException::selfThrow                                         \
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor));} \
+ 
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
  
 #define ACCEPT_SP_VISITORS()                                            \
-  virtual void accept(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
+  virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS() \
   ACCEPT_SP_VISITORS();   \
-  ACCEPT_STD_VISITORS()
+  ACCEPT_STD_VISITORS()   \
+ 
 
 
-#define VISIT(X)                                                    \
+
+
+/* objects that may be visited (1) */
+#undef REGISTER
+#define REGISTER(X) class X;
+SICONOS_VISITABLES()
+
+/* associated types */
+#undef REGISTER
+#define REGISTER(X) X,
+
+namespace Type
+{
+enum Siconos
+{
+  SICONOS_VISITABLES()
+};
+}
+
+//namespace Siconos
+//{
+
+
+/* the type visitor */
+#undef REGISTER
+#define REGISTER(X) \
+  virtual Type::Siconos visit(const X&) const { return Type::X; }; \
+ 
+struct FindType
+{
+  SICONOS_VISITABLES()
+};
+
+/* the base visitor */
+#undef REGISTER
+#define REGISTER(X) \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
-class SiconosVisitor
+struct SiconosVisitor
 {
-public:
-
-  /* idem (1) */
-  VISIT(DynamicalSystem);
-  VISIT(Disk);
-  VISIT(Circle);
-  VISIT(DiskPlanR);
-  VISIT(DiskMovingPlanR);
-  VISIT(CircleCircleR);
-  VISIT(DiskDiskR);
-  VISIT(SphereLDS);
-  VISIT(SphereLDSSphereLDSR);
-  VISIT(SphereLDSPlanR);
-  VISIT(ExternalBody);
-  VISIT(NonSmoothLaw);
-  VISIT(MixedComplementarityConditionNSL);
-  VISIT(EqualityConditionNSL);
-  VISIT(ComplementarityConditionNSL);
-  VISIT(RelayNSL);
-  VISIT(NewtonImpactNSL);
-  VISIT(NewtonImpactFrictionNSL);
-
-  VISIT(Simulation);
-  VISIT(TimeStepping);
-  VISIT(EventDriven);
-  VISIT(OneStepNSProblem);
-
-  VISIT(LCP);
-  VISIT(FrictionContact);
-
-  VISIT(Lmgc2DDSK);
-
-  VISIT(SimpleVector);
-
-  VISIT(BlockVector);
-
+  SICONOS_VISITABLES()
 };
 
-//}
+
+
+/* some functions in Type namespace */
+namespace Type
+{
+static FindType find;
+
+template <typename C>
+Siconos value(const C& c)
+{
+  return c.acceptType(find);
+}
+
+#undef REGISTER
+#define REGISTER(X) case X : return std::string(#X); break;
+
+namespace
+{
+std::string str(const Siconos& X)
+{
+  switch (X)
+  {
+    SICONOS_VISITABLES()
+  default:
+    assert(false);
+  }
+}
+}
+
+
+template <class C>
+std::string name(const C& c)
+{
+  str(value(c));
+}
+
+}
 
 
 TYPEDEF_SPTR(SiconosVisitor);
 
-#undef VISIT
+#undef REGISTER
 
 #endif /* SiconosVisitor_hpp */

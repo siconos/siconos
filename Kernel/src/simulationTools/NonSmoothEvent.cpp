@@ -36,7 +36,7 @@ NonSmoothEvent::~NonSmoothEvent()
 
 void NonSmoothEvent::process(SP::Simulation simulation)
 {
-  if (simulation->getType() != "EventDriven")
+  if (Type::value(*simulation) != Type::EventDriven)
     RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
   if (!(simulation->oneStepNSProblems()->empty()))

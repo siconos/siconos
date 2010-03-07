@@ -71,10 +71,6 @@ protected:
   /** name or id of the Simulation */
   std::string _name;
 
-  /** the type of the Simulation, ie the derived class type
-      (TimeStepping, EventDriven ...) */
-  std::string _simulationType;
-
   /** the default time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
 
@@ -176,10 +172,8 @@ public:
   /** default constructor
    *  \param a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
-   *  \param string: simulation type, default = undefined
    */
-  Simulation(SP::TimeDiscretisation,
-             const std::string& = "undefined");
+  Simulation(SP::TimeDiscretisation);
 
   /** constructor with XML object of the Simulation
       \param SimulationXML* : the XML object corresponding
@@ -187,16 +181,18 @@ public:
       \param final time
       \param the set of all DS in the NSDS
       \param the set of all interactions in the NSDS
-      \param string: simulation type, default = undefined
   */
   Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet,
-             SP::InteractionsSet, const std::string& = "undefined");
+             SP::InteractionsSet);
 
   /** destructor
    */
   virtual ~Simulation();
 
   // GETTERS/SETTERS
+
+  /* type name of the instance */
+  virtual std::string typeName() PURE_DEF;
 
   /** get the name of the Simulation
    *  \return string : the name of the Simulation
@@ -211,21 +207,6 @@ public:
   inline void setName(const std::string& newName)
   {
     _name = newName;
-  }
-
-  /** get the type of the Simulation
-   *  \return string : the type of the Simulation
-   */
-  inline const std::string getType() const
-  {
-    return _simulationType;
-  }
-
-  /** set the type of the Simulation
-   */
-  inline void setType(const std::string& newType)
-  {
-    _simulationType = newType;
   }
 
   /** get the TimeDiscretisation of the Simulation

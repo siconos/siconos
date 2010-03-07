@@ -56,7 +56,7 @@ public:
   /** defaut constructor
    *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
    */
-  EventDriven(SP::TimeDiscretisation td): Simulation(td, "EventDriven"), istate(1) {};
+  EventDriven(SP::TimeDiscretisation td): Simulation(td), istate(1) {};
 
   /** constructor with XML object of the EventDriven
        \param SimulationXML* : the XML object corresponding
@@ -74,6 +74,12 @@ public:
   /** destructor
    */
   ~EventDriven() {};
+
+  /* type name because parent class needs it */
+  inline std::string typeName()
+  {
+    return Type::name(*this);
+  };
 
   /* Getters and setters */
 

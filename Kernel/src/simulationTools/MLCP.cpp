@@ -103,14 +103,19 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 
     unsigned int equalitySize1 =  0;
     unsigned int equalitySize2 =  0;
-    if ((UR1->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_MLCP)
+    if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+        != Type::MixedComplementarityConditionNSL)
       equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if ((UR1->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_EQUALITY)
+    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+             == Type::EqualityConditionNSL)
       equalitySize1 = nslawSize1;
 
-    if ((UR2->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_MLCP)
-      equalitySize2 = MixedComplementarityConditionNSL::convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if ((UR2->interaction()->nonSmoothLaw())->type() == SICONOS_NSL_EQUALITY)
+    if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+        == Type::MixedComplementarityConditionNSL)
+      equalitySize2 = MixedComplementarityConditionNSL::
+                      convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
+    else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+             == Type::EqualityConditionNSL)
       equalitySize2 = nslawSize2;
     // Check allocation
     if (! _unitaryBlocks[UR1][UR2])

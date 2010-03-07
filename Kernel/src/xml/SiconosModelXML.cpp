@@ -259,7 +259,7 @@ void SiconosModelXML::loadModel(SP::Model model)
 
       // creation of the nodes of the Simulation with the right data
       node = xmlNewChild(rootNode, NULL, (xmlChar*)SIMULATION_TAG.c_str(), NULL);
-      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->simulation()->getType().c_str());
+      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*) Type::name(*(model->simulation())).c_str());
       simulationXML->saveSimulation2XML(node, model->simulation());
     }
   }

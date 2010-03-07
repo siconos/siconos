@@ -202,9 +202,9 @@ void Model::savePlatformToXML()
   {
     _strat->timeDiscretisation()->saveTimeDiscretisationToXML();
 
-    if (_strat->getType() == "TimeStepping")
+    if (Type::value(*_strat) == Type::TimeStepping)
       (boost::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();
-    else if (_strat->getType() == "EventDriven")
+    else if (Type::value(*_strat) == Type::EventDriven)
       (boost::static_pointer_cast<EventDriven>(_strat))->saveSimulationToXML();
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Simulation");
   }
@@ -318,7 +318,7 @@ void Model::display() const
   cout << " Current time is " << _t << endl;
   cout << endl;
   if (!_nsds) cout << "No NSDS linked to the Model" << endl;
-  if (_strat) cout << "The simulation (name: " << _strat->name() << ") is a " << _strat->getType() << "." << endl;
+  if (_strat) cout << "The simulation (name: " << _strat->name() << ") is a " << Type::name(*_strat) << "." << endl;
   else cout << "No simulation attached to this model." << endl;
   cout << endl;
   cout << " ============================" << endl;

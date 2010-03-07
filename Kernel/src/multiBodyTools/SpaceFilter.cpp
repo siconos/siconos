@@ -470,7 +470,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameDiskPlanR);
+      ->relation()->acceptSP(isSameDiskPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR->flag)
       {
@@ -498,7 +498,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameDiskPlanR);
+      ->relation()->acceptSP(isSameDiskPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR->flag)
@@ -549,7 +549,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameDiskMovingPlanR);
+      ->relation()->acceptSP(isSameDiskMovingPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR->flag)
       {
@@ -577,7 +577,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameDiskMovingPlanR);
+      ->relation()->acceptSP(isSameDiskMovingPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR->flag)
@@ -620,7 +620,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSphereLDSPlanR);
+      ->relation()->acceptSP(isSameSphereLDSPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSphereLDSPlanR->flag)
       {
@@ -648,7 +648,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSphereLDSPlanR);
+      ->relation()->acceptSP(isSameSphereLDSPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSphereLDSPlanR->flag)
@@ -768,7 +768,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
         {
           // no, check proximity
           declaredInteractions.insert(interpair);
-          ds2->accept(circularFilter);
+          ds2->acceptSP(circularFilter);
         }
 
       }
@@ -834,7 +834,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
         {
           // no, check proximity
           declaredInteractions.insert(interpair);
-          ds2->accept(sphereFilter);
+          ds2->acceptSP(sphereFilter);
         }
 
       }
@@ -873,14 +873,14 @@ void SpaceFilter::buildInteractions(double time)
        vi != viend; ++vi)
   {
     // to avoid cast see dual dispatch, visitor pattern
-    DSG0->bundle(*vi)->accept(hasher);
+    DSG0->bundle(*vi)->acceptSP(hasher);
   }
 
   // 2: prox detection
   for (boost::tie(vi, viend) = DSG0->vertices();
        vi != viend; ++vi)
   {
-    DSG0->bundle(*vi)->accept(findInteractions);
+    DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
 
   // should be done on the fly. Linear time anyway.

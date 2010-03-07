@@ -132,13 +132,6 @@ public:
   */
   virtual void display() const = 0;
 
-  /** get the type of the NonSmoothLaw
-   */
-  int type() const
-  {
-    return _type;
-  }
-
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);

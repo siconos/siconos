@@ -309,6 +309,8 @@ public:
    */
   static FirstOrderLinearDS* convert(DynamicalSystem* ds);
 
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(FirstOrderLinearDS);
