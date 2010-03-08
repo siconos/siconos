@@ -485,8 +485,6 @@ public:
 
   friend class IsBlock;
 
-
-
   ACCEPT_VISITORS();
 
 };

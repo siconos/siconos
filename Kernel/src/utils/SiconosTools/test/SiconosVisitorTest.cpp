@@ -32,15 +32,22 @@ void SiconosVisitorTest::tearDown()
 
 struct DynamicalSystem
 {
+  VIRTUAL_ACCEPT_VISITORS();
+};
+
+struct LagrangianDS : public DynamicalSystem
+{
   ACCEPT_STD_VISITORS();
 };
 
 /* TypeOf */
 void SiconosVisitorTest::t1()
 {
-  DynamicalSystem ds;
+  DynamicalSystem *ds = new LagrangianDS();
 
-  CPPUNIT_ASSERT(Type::value(ds) == Type::DynamicalSystem);
+  CPPUNIT_ASSERT(Type::value(*ds) == Type::LagrangianDS);
+
+  delete(ds);
 
 }
 
@@ -51,29 +58,38 @@ void SiconosVisitorTest::t2()
   struct MyVisitor : SiconosVisitor
   {
 
-    void visit(const DynamicalSystem&)
+    void visit(const LagrangianDS&)
     {
     }
 
   };
 
+  DynamicalSystem *ds = new LagrangianDS();
 
   try
   {
     MyVisitor myvisitor;
 
-    DynamicalSystem ds;
+    ds->accept(myvisitor);
 
-    ds.accept(myvisitor);
-
+    delete(ds);
   }
 
   catch (...)
   {
     CPPUNIT_ASSERT(false);
+    delete(ds);
   }
 
 
 }
 
+void SiconosVisitorTest::t3()
+{
+
+  DynamicalSystem *ds = new LagrangianDS();
+
+  CPPUNIT_ASSERT(Type::name(*ds) == "LagrangianDS");
+
+}
 

@@ -72,9 +72,7 @@
   virtual void acceptSP(SP::SiconosVisitor)                               \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
-  virtual void accept(SiconosVisitor&)                                  \
-  { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor)); } \
+  virtual void accept(SiconosVisitor&) const = 0;                       \
   virtual Type::Siconos acceptType(FindType& ft) const                  \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor));} \
@@ -151,18 +149,22 @@ Siconos value(const C& c)
 }
 
 #undef REGISTER
-#define REGISTER(X) case X : return std::string(#X); break;
+#define REGISTER(X) case Type:: X : r.reset(new std::string(#X)); break;
 
 namespace
 {
-std::string str(const Siconos& X)
+boost::shared_ptr<std::string> str(const Siconos& X)
 {
+  boost::shared_ptr<std::string> r;
+
   switch (X)
   {
     SICONOS_VISITABLES()
   default:
-    assert(false);
+    assert(0);
   }
+
+  return(r);
 }
 }
 
@@ -170,7 +172,7 @@ std::string str(const Siconos& X)
 template <class C>
 std::string name(const C& c)
 {
-  str(value(c));
+  return *(Type::str(Type::value(c)));
 }
 
 }

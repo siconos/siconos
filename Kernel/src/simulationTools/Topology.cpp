@@ -296,34 +296,34 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   SetupFromNslaw(SP::Topology p, SP::Interaction inter) :
     parent(p), interaction(inter) {};
 
-  void visit(ComplementarityConditionNSL&)
+  void visit(const ComplementarityConditionNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
-  void visit(EqualityConditionNSL&)
+  void visit(const EqualityConditionNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(2);
   };
 
-  void visit(MixedComplementarityConditionNSL&)
+  void visit(const MixedComplementarityConditionNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
 
-  void visit(RelayNSL&)
+  void visit(const RelayNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
 
-  void visit(NewtonImpactNSL&)
+  void visit(const NewtonImpactNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
@@ -331,7 +331,7 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
     interaction->setRelativeDegree(2);
   };
 
-  void visit(NewtonImpactFrictionNSL&)
+  void visit(const NewtonImpactFrictionNSL&)
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);

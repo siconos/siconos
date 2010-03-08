@@ -53,7 +53,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   _BoundsNSLEffect(Relay *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
-  void visit(RelayNSL& nslaw)
+  void visit(const RelayNSL& nslaw)
   {
 
     // cout << "Relay::_BoundsNSLEffect visit"  << endl;
@@ -66,7 +66,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
     }
   }
 
-  void visit(ComplementarityConditionNSL& nslaw)
+  void visit(const ComplementarityConditionNSL& nslaw)
   {
     for (int i = 0; i <  UR->getNonSmoothLawSize(); i++)
     {

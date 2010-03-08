@@ -306,7 +306,7 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
   _TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
-  void visit(NewtonImpactNSL& nslaw)
+  void visit(const NewtonImpactNSL& nslaw)
   {
     double e;
     e = nslaw.e();
@@ -318,7 +318,7 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
     subscal(e, *UR->yOld(parent->levelMin()), *(parent->_q), subCoord, false);
   }
 
-  void visit(NewtonImpactFrictionNSL& nslaw)
+  void visit(const NewtonImpactFrictionNSL& nslaw)
   {
     double e;
     e = nslaw.en();
@@ -326,11 +326,11 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
     (*(parent->_q))(pos) +=  e * (*UR->yOld(parent->levelMin()))(0);
 
   }
-  void visit(EqualityConditionNSL& nslaw)
+  void visit(const EqualityConditionNSL& nslaw)
   {
     ;
   }
-  void visit(MixedComplementarityConditionNSL& nslaw)
+  void visit(const MixedComplementarityConditionNSL& nslaw)
   {
     ;
   }
@@ -345,7 +345,7 @@ struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
   _EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
-  void visit(NewtonImpactNSL& nslaw)
+  void visit(const NewtonImpactNSL& nslaw)
   {
     double e;
     e = nslaw.e();
@@ -376,13 +376,13 @@ struct LinearOSNS::_NSLEffectOnSim : public SiconosVisitor
   _NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
-  void visit(TimeStepping& sim)
+  void visit(const TimeStepping& sim)
   {
     SP::SiconosVisitor NSLEffect(new _TimeSteppingNSLEffect(parent, UR, pos));
     UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
 
-  void visit(EventDriven& sim)
+  void visit(const EventDriven& sim)
   {
     SP::SiconosVisitor NSLEffect(new _EventDrivenNSLEffect(parent, UR, pos));
     UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
