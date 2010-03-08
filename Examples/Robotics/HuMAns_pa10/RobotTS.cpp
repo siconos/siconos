@@ -54,8 +54,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: robot arm ---
 
     // The dof are angles between ground and arm and between differents parts of the arm. (See Robot.fig for more details)
@@ -75,8 +73,6 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianNNLqDotFunction("RobotPlugin.so", "jacobianVNNL");
     arm->setComputeJacobianNNLqFunction("RobotPlugin.so", "jacobianNNLq");
 
-    allDS.insert(arm);
-
     // -------------------
     // --- Interactions---
     // -------------------
@@ -86,15 +82,13 @@ int main(int argc, char* argv[])
     //  - the other to define angles limitations (articular stops), with lagrangian linear relation
     //  Both with newton impact ns laws.
 
-    InteractionsSet allInteractions; // The set of all interactions.
-
     // -- relations --
 
     // => arm-floor relation
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G2";
     SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h2", G));
-    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Interaction inter(new Interaction(2, nslaw, relation, 0));
 
     // => angular stops
 
@@ -132,16 +126,20 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter2(new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2));
-
-    allInteractions.insert(inter);
-    allInteractions.insert(inter2);
+    SP::Interaction inter2(new Interaction(4, nslaw2, relation2, 1));
 
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
+    SP::Model Robot(new Model(t0, T));
+
+    // add the dynamical system in the non smooth dynamical system
+    Robot->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+
+    // link the interactions and the dynamical system
+    Robot->nonSmoothDynamicalSystem()->link(inter, arm);
+    Robot->nonSmoothDynamicalSystem()->link(inter2, arm);
 
     // ----------------
     // --- Simulation ---
