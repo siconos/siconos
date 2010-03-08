@@ -63,17 +63,17 @@ int main(int argc, char* argv[])
 
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
-    q0(0) = 0.05;
-    q0(1) = 0.05;
+    SP::SimpleVector q0(new SimpleVector(nDof)), v0(new SimpleVector(nDof));
+    (*q0)(0) = 0.05;
+    (*q0)(1) = 0.05;
 
     SP::LagrangianDS arm(new LagrangianDS(q0, v0));
 
     // external plug-in
     arm->setComputeMassFunction("RobotPlugin.so", "mass");
     arm->setComputeNNLFunction("RobotPlugin.so", "NNL");
-    arm->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianNNLq");
+    arm->setComputeJacobianNNLqDotFunction("RobotPlugin.so", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("RobotPlugin.so", "jacobianNNLq");
 
     allDS.insert(arm);
 
@@ -116,19 +116,19 @@ int main(int argc, char* argv[])
     //     b(5) = 3.14;
     double lim0 = 1.6;
     double lim1 = 3.1;  // -lim <= q[1] <= lim
-    SimpleMatrix H(4, 3);
-    SimpleVector b(4);
-    H.zero();
+    SP::SimpleMatrix H(new SimpleMatrix(4, 3));
+    SP::SimpleVector b(new SimpleVector(4));
+    H->zero();
 
-    H(0, 0) = -1;
-    H(1, 0) = 1;
-    H(2, 1) = -1;
-    H(3, 1) = 1;
+    (*H)(0, 0) = -1;
+    (*H)(1, 0) = 1;
+    (*H)(2, 1) = -1;
+    (*H)(3, 1) = 1;
 
-    b(0) = lim0;
-    b(1) = lim0;
-    b(2) = lim1;
-    b(3) = lim1;
+    (*b)(0) = lim0;
+    (*b)(1) = lim0;
+    (*b)(2) = lim1;
+    (*b)(3) = lim1;
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianLinearTIR(H, b));
@@ -156,14 +156,12 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
     s->insertIntegrator(OSI);
 
-    // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 30001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.005; // Tolerance
-    string solverName = "PGS" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    SP::OneStepNSProblem osnspb(new LCP("PGS"));
+
+    osnspb->numericsSolverOptions()->iparam[0] = 30001;
+    osnspb->numericsSolverOptions()->dparam[0] = 0.005;
+
+
     s->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
