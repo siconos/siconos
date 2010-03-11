@@ -7,13 +7,14 @@
 #  QGLVIEWER_DEFINITIONS - Compiler switches required for using QGLViewer
 #
 
-
-FIND_PATH(QGLVIEWER_INCLUDE_DIR NAMES QGLViewer/qglviewer.h
-  PATHS
-  $ENV{QGLVIEWER_INCLUDE_DIR}
-  /usr/include
-  /usr/local/include
-)
+FOREACH(_D QGLViewer;qglviewer-qt4)
+  FIND_PATH(QGLVIEWER_INCLUDE_DIR NAMES qglviewer.h
+    PATHS
+    $ENV{QGLVIEWER_INCLUDE_DIR}
+    /usr/include/${_D}
+    /usr/local/include/${_D}
+    )
+ENDFOREACH(_D QGLViewer;qglviewer-qt4)
 
 FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES QGLViewer
   PATHS
@@ -24,6 +25,15 @@ FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES QGLViewer
 
 IF(NOT QGLVIEWER_LIBRARY)
   FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES 3dviewer
+    PATHS
+    $ENV{QLGLVIEWER_LIB_DIR}
+    /usr/lib
+    /usr/local/lib
+  )
+ENDIF(NOT QGLVIEWER_LIBRARY)
+
+IF(NOT QGLVIEWER_LIBRARY)
+  FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES qglviewer-qt4
     PATHS
     $ENV{QLGLVIEWER_LIB_DIR}
     /usr/lib
