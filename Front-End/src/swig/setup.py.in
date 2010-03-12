@@ -1,20 +1,151 @@
 #!/usr/bin/env python
 
-"""
-setup.py file for Siconos 
+"""Distutils based setup script for Siconos.
+
+This uses Distutils (http://python.org/sigs/distutils-sig/) the standard
+python mechanism for installing packages. For the easiest installation
+just type the command (you'll probably need root privileges for that):
+
+    python setup.py install
+
+This will install the library in the default location. For instructions on
+how to customize the install procedure read the output of:
+
+    python setup.py --help install
+
+In addition, there are some other commands:
+
+    python setup.py clean -> will clean all trash (*.pyc and stuff)
+    python setup.py test  -> will run the complete test suite
+    python setup.py bench -> will run the complete benchmark suite
+
+To get a full list of avaiable commands, read the output of:
+
+    python setup.py --help-commands
+
 """
 
 from distutils.core import setup, Extension
+from distutils.core import Command
+import sys
 
+import Siconos.Numerics
+
+# Make sure I have the right Python version.
+if sys.version_info[:2] < (2,6):
+    print "Siconos requires Python 2.6 or newer. Python %d.%d detected" % \
+          sys.version_info[:2]
+    sys.exit(-1)
+
+# Check that this list is uptodate against the result of the command (you can
+# omit the thirdparty/ dir):
+# $ find * -name __init__.py |sort
+modules = [
+    
+    ]
+
+class clean(Command):
+    """Cleans *.pyc and debian trashs, so you should get the same copy as
+    is in the VCS.
+    """
+
+    description = "remove build files"
+    user_options = [("all","a","the same")]
+
+    def initialize_options(self):
+        self.all = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import os
+        os.system("py.cleanup")
+        os.system("rm -f python-build-stamp-2.4")
+        os.system("rm -f MANIFEST")
+        os.system("rm -rf build")
+        os.system("rm -rf dist")
+        os.system("rm -rf doc/_build")
+
+
+class test_Siconos(Command):
+    """Runs all tests under the tests/ folder
+    """
+
+    description = "run all tests and doctests; also see bin/test and bin/doctest"
+    user_options = []  # distutils complains if this is not here.
+
+    def __init__(self, *args):
+        self.args = args[0] # so we can pass it to other classes
+        Command.__init__(self, *args)
+
+    def initialize_options(self):  # distutils wants this
+        pass
+
+    def finalize_options(self):    # this too
+        pass
+
+    def run(self):
+        import os
+        # hu?
+        os.putenv("PYTHONPATH","Siconos")
+        os.system("py.test Siconos/tests")
+
+
+class run_benchmarks(Command):
+    """Runs all SymPy benchmarks"""
+
+    description = "run all benchmarks"
+    user_options = []  # distutils complains if this is not here.
+
+    def __init__(self, *args):
+        self.args = args[0] # so we can pass it to other classes
+        Command.__init__(self, *args)
+
+    def initialize_options(self):  # distutils wants this
+        pass
+
+    def finalize_options(self):    # this too
+        pass
+
+    # we use py.test like architecture:
+    #
+    # o collector   -- collects benchmarks
+    # o runner      -- executes benchmarks
+    # o presenter   -- displays benchmarks results
+    #
+    # this is done in sympy.utilities.benchmarking on top of py.test
+    def run(self):
+        from sympy.utilities import benchmarking
+        benchmarking.main(['sympy'])
+
+
+# Check that this list is uptodate against the result of the command:
+# $ python bin/generate_test_list.py
+tests = [ 'Siconos/tests' ]
 
 Siconos_module = Extension('_Siconos',
                            sources=[@SICONOS_SWIG_SRCS@],
                            )
 
-setup (name = 'SiconosNumerics',
-       version = '0.1',
-       author      = "Siconos Developement team",
-       description = """Siconos Numerics""",
-       ext_modules = [Siconos_module],
-       py_modules = ["SiconosNumerics"],
-       )
+setup(
+      name = 'Siconos',
+      version = Siconos.__version__,
+      description = '...',
+      author = 'Siconos team',
+      author_email = 'siconos-team@lists.gforge.fr',
+      license = '',
+      url = 'http://siconos.gforge.inria.fr',
+      packages = ['Siconos'] + modules + tests,
+      scripts = [],
+      ext_modules = [Siconos_module],
+      py_modules = ["Siconos.Numerics"],
+      package_data = { },
+      data_files = [],
+      cmdclass    = {'test': test_Siconos,
+                     'bench': run_benchmarks,
+                     'clean': clean,
+                     },
+      )
+
+

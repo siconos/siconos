@@ -19,7 +19,7 @@
 //	
 
 // Siconos.i - SWIG interface
-%module SiconosNumerics
+%module Numerics
 
 %{
 #define SWIG_FILE_WITH_INIT
