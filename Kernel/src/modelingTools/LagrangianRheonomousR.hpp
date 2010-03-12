@@ -50,9 +50,13 @@
  * \f]
  *
  *
- * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are connected to user-defined functions.\n
-  * G0 and h are connected to plug-in functions.\n
- * The plugin function to compute h(q,t,z) needs the following parameters:\n
+ * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are
+  * connected to user-defined functions.\n G0 and h are connected to
+  * plug-in functions.\n
+ *
+ * The plugin function to compute h(q,t,z) needs the following
+ * parameters:\n
+ *
  * --> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction\n
  * --> q : pointer to the first element of q \n
  * --> time : current time \n
@@ -134,7 +138,10 @@ protected:
 
   /** default constructor
    */
-  LagrangianRheonomousR(): LagrangianR(RELATION::RheonomousR) {  };
+  LagrangianRheonomousR(): LagrangianR(RELATION::RheonomousR)
+  {
+    zeroPlugin();
+  };
   void zeroPlugin();
 public:
 
