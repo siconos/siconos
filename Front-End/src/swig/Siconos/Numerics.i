@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// Siconos-Front-End version 3.0.0, Copyright INRIA 2005-2008.
+// Siconos-Front-End version 3.2.0, Copyright INRIA 2005-2010.
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.	
 // Siconos is a free software; you can redistribute it and/or modify
@@ -15,10 +15,10 @@
 // along with Siconos; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-// Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+// Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
 //	
 
-// Siconos.i - SWIG interface
+// Siconos.i - SWIG interface for Siconos
 %module Numerics
 
 %{
@@ -36,6 +36,7 @@
 #include "SiconosNumerics.h"
 %} 
 
+// more convenient
 %rename (LCP) LinearComplementarityProblem;
 
 // numpy macros
@@ -179,7 +180,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   $result = PyInt_FromLong(*$1);
  }
 
-// vectors
+// numpy array to vector, the size is already known
 %typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
@@ -191,12 +192,16 @@ static int convert_darray(PyObject *input, double *ptr) {
 
  }
 
+// other names that must be transormed this way
 %apply (double *z) { (double *w) }; 
 
 %apply (double *z) { (double *zlem) };
 
 %apply (double *z) { (double *wlem) };
 
+%apply (double *z) { (double *reaction) };
+
+%apply (double *z) { (double *velocity) };
 
 // Numpy array -> NumericsMatrix (dense storage only!)
 %typemap(in) 
@@ -228,13 +233,41 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 %feature("autodoc", "1");
 
+// LCP
 %include "NumericsMatrix.h"
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
 %include "SolverOptions.h"
 %include "NumericsOptions.h"
 
+%extend NumericsOptions
+{
+  NumericsOptions()
+  {
+    NumericsOptions *numerics_options;
+    numerics_options = (NumericsOptions *) malloc(sizeof(NumericsOptions));
+    return numerics_options;
+  }
 
+  ~NumericsOptions()
+  {
+  }
+}
+
+%extend SolverOptions
+{
+  SolverOptions()
+    {
+      SolverOptions *SO;
+      SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+      return SO;
+    }
+
+  ~SolverOptions() 
+    { 
+      deleteSolverOptions(self);
+    }
+};
 
 %extend LinearComplementarityProblem
 {
@@ -245,7 +278,7 @@ static int convert_darray(PyObject *input, double *ptr) {
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
       LinearComplementarityProblem *LC;
-      // free in std swig destructor
+      // return pointer : free by std swig destructor
       LC = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
       NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
 
@@ -259,50 +292,61 @@ static int convert_darray(PyObject *input, double *ptr) {
 
       return LC;
 
-
-
     }
 
 
   ~LinearComplementarityProblem()
     {
-      // fail?
-      //free(self->M);
-      //free(self->q);
+        //    free(self->M);
+        //    free(self->q);
      }
 
 };
 
 
+ // FrictionContact
+%include "FrictionContactProblem.h"
+%include "FrictionContact2D_Solvers.h"
+%include "FrictionContact3D_Solvers.h"
 
-%extend SolverOptions
+%extend FrictionContactProblem
 {
-  SolverOptions(char solverName[64], int sizei, int *iparam, int sized, double *dparam, bool filterOn)
+  FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
-      SolverOptions *SO;
-      SO = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-      // copy (allocated args are free with freearg)
-      int *niparam = (int *) malloc(sizeof(int)*sizei);
-      double *ndparam = (double *) malloc(sizeof(double)*sized);
-      memmove(niparam,iparam,sizeof(int)*sizei);
-      memmove(ndparam,dparam,sizeof(double)*sized);
+      int is_new_object1, is_new_object2, is_new_object3; // useless here ?
 
-      SO->isSet = 1;
-      SO->iSize = sizei;
-      SO->iparam = niparam;
-      SO->dSize = sized;
-      SO->dparam = ndparam;
-      SO->filterOn = filterOn;
-      return SO;
+      PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
+      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
+      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3); 
+      FrictionContactProblem *FC;
+      // return pointer : free by std swig destructor
+      FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+      NumericsMatrix *M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
+
+      M->storageType = 0;
+      M->size0 = array_size(array,0);
+      M->size1 = array_size(array,1);
+      M->matrix0 = (double *) array_data(array);
+      FC->dimension = (int) PyInt_AsLong(dim);
+      FC->numberOfContacts = M->size0 / FC->dimension;
+      FC->M = M;
+      FC->q = (double *) array_data(vector);
+      FC->mu = (double *) array_data(mu_vector);
+
+      return FC;
     }
 
-  ~SolverOptions() 
-    { 
-      free(self->iparam); 
-      free(self->dparam);
+  ~FrictionContactProblem()
+    {
+//      free(self->M);
+        //    free(self->q);
+        //free(self->mu);
      }
+
 };
+
+
 
 
 // some extensions but numpy arrays should be used instead 
@@ -313,7 +357,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     {
       NumericsMatrix *M;
       
-      // free in std swig destructor
+      // return pointer : free by std swig destructor
       M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
       M->storageType=0;
       M->size0 = nrows;

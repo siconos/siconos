@@ -124,9 +124,13 @@ class run_benchmarks(Command):
 # $ python bin/generate_test_list.py
 tests = [ 'Siconos/tests' ]
 
-Siconos_module = Extension('_Siconos',
-                           sources=[@SICONOS_SWIG_SRCS@],
+Numerics_module = Extension('_Numerics',
+                           sources=[],
                            )
+
+# Python v2.6.4 documentation: 
+# ** SWIG support is rough around the edges and largely untested! **
+# so we use cmake swig
 
 setup(
       name = 'Siconos',
@@ -138,7 +142,7 @@ setup(
       url = 'http://siconos.gforge.inria.fr',
       packages = ['Siconos'] + modules + tests,
       scripts = [],
-      ext_modules = [Siconos_module],
+      ext_modules = [Numerics_module],
       py_modules = ["Siconos.Numerics"],
       package_data = { },
       data_files = [],
