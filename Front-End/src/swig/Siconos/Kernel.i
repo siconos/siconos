@@ -151,46 +151,55 @@
 
 // 2. try to hide SP::Type on python side
 
-%define SP_TYPE(TYPE)
-%typecheck(SWIG_TYPECHECK_POINTER)
-(SP::##TYPE)
-{
-  void *p;
-  int r=0;
-  r=SWIG_ConvertPtr($input, &p, SWIGTYPE_p_##TYPE, 0 | 0);
-  if(!SWIG_IsOK(r))
-  {
-    r=SWIG_ConvertPtr($input, &p, SWIGTYPE_p_boost__shared_ptrT_##TYPE##_t, 0 | 0);
-    if(!SWIG_IsOK(r)) SWIG_exception_fail(SWIG_ArgError(r), "not a TYPE or SP:: TYPE");
-  }
-};
+%define SP_TYPE(TYPE, BASE)
+  
+DEFINE_SPTR(TYPE);
 
-%typemap(in) SP::##TYPE (PyObject* obj, void *p, int r)
-{
-  r = SWIG_ConvertPtr($input, &p, SWIGTYPE_p_##TYPE, 0 | 0);
-  if(!SWIG_IsOK(r))
-  {
-    r=SWIG_ConvertPtr($input, &p, SWIGTYPE_p_boost__shared_ptrT_##TYPE##_t, 0 | 0);
-    if(!SWIG_IsOK(r)) SWIG_exception_fail(SWIG_ArgError(r), "not a TYPE or SP:: TYPE");
-    SP::##TYPE * ptmp = reinterpret_cast< SP::##TYPE * >(p);
-    $1 = *ptmp;
-  }
-  else
-  {
-    TYPE *pr;
-    pr = reinterpret_cast< TYPE * > (p);
-    
-    SP::##TYPE tmp = createSPtr##TYPE(*pr);
-    $1 = tmp;
-    
-  }
-};
+typedef SP::##TYPE XSPtr##TYPE;
+
+SWIG_SHARED_PTR_DERIVED(XSPtr##TYPE, BASE, TYPE);
+
 %enddef
 
+%include "SiconosPointers.hpp"
 
-SP_TYPE(NonSmoothLaw);
-SP_TYPE(Relation);
+%define REGISTER(X,B)
+SP_TYPE(X,B)
+%include("X##.hpp")
+%enddef
 
+%import <boost/enable_shared_from_this.hpp>
+%template (sharedModel) boost::enable_shared_from_this<Model>;
+
+SP_TYPE(NonSmoothLaw,NonSmoothLaw);
+SP_TYPE(NewtonImpactNSL,NonSmoothLaw);
+
+
+SP_TYPE(NonSmoothDynamicalSystem,NonSmoothDynamicalSystem);
+
+SP_TYPE(DynamicalSystem,DynamicalSystem);
+SP_TYPE(LagrangianDS,DynamicalSystem);
+SP_TYPE(LagrangianLinearTIDS,LagrangianDS);
+
+SP_TYPE(Relation,Relation);
+SP_TYPE(LagrangianR,Relation);
+SP_TYPE(LagrangianLinearTIR,LagrangianR);
+
+SP_TYPE(Interaction,Interaction)
+
+SP_TYPE(TimeDiscretisation,TimeDiscretisation);
+
+SP_TYPE(OneStepNSProblem,OneStepNSProblem);
+SP_TYPE(LinearOSNS, OneStepNSProblem);
+SP_TYPE(LCP,LinearOSNS);
+
+SP_TYPE(OneStepIntegrator, OneStepIntegrator);
+SP_TYPE(Moreau, OneStepIntegrator);
+
+SP_TYPE(Simulation,Simulation);
+SP_TYPE(TimeStepping, Simulation);
+
+SP_TYPE(Model, Model);
 
 // dummy namespaces to make swig happy
 namespace boost 
@@ -225,6 +234,8 @@ namespace SP
 %ignore nullDeleter;
 
 %ignore DynamicalSystem;
+%ignore OneStepIntegrator;
+
 
 // defined in SimpleVector.cpp
 %ignore setBlock;
@@ -255,32 +266,38 @@ namespace SP
 %ignore gemv;
 %ignore gemm;
 
-
-
-%include "SiconosPointers.hpp"
 %include "SiconosGraph.hpp"
-
+%include "Tools.hpp"
 
 DEFINE_SPTR(SiconosVector);
 DEFINE_SPTR(SiconosMatrix);
 
-DEFINE_SPTR(NonSmoothLaw);
-DEFINE_SPTR(Interaction);
-DEFINE_SPTR(Relation);
-
 %include "SimpleVector.hpp"
 %include "SimpleMatrix.hpp"
 %include "DynamicalSystem.hpp"
+%include "NonSmoothDynamicalSystem.hpp"
 %include "LagrangianDS.hpp"
 %include "LagrangianLinearTIDS.hpp"
-%include "NewtonImpactNSL.hpp"
+
 %include "Relation.hpp"
 %include "LagrangianR.hpp"
 %include "LagrangianLinearTIR.hpp"
 %include "Interaction.hpp"
 %include "Model.hpp"
+
 %include "OneStepIntegrator.hpp"
 %include "Moreau.hpp"
+
+%include "OneStepNSProblem.hpp"
+%include "LinearOSNS.hpp"
 %include "LCP.hpp"
+
+%include "Simulation.hpp"
 %include "TimeStepping.hpp"
+
+%include "NonSmoothLaw.hpp"
+%include "NewtonImpactNSL.hpp"
+
+%include "TimeDiscretisation.hpp"
+
 
