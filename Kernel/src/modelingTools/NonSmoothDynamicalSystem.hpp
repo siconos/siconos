@@ -145,18 +145,6 @@ public:
     return topology()->dSG(0);
   }
 
-  /** check if DynamicalSystem number N exists
-   *  \param the identifier of the DynamicalSystem to get
-   *  \return bool
-   */
-  const bool hasDynamicalSystemNumber(const int&) const ;
-
-  /** check if DynamicalSystem ds is in the set
-   *  \param a pointer to DynamicalSystem
-   *  \return a bool
-   */
-  const bool hasDynamicalSystem(SP::DynamicalSystem) const;
-
   // === Interactions management ===
 
   /** get the number of Interactions present in the NSDS (ie in allInteractions set)

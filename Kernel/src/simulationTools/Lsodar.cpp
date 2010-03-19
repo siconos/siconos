@@ -155,9 +155,9 @@ void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integ
   boost::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
-void Lsodar::initialize(SP::Simulation sim)
+void Lsodar::initialize()
 {
-  OneStepIntegrator::initialize(sim);
+  OneStepIntegrator::initialize();
   xWork.reset(new BlockVector());
   DSIterator it;
   string type;

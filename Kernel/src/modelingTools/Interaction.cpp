@@ -145,7 +145,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
 Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   _involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -154,7 +154,7 @@ Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
 Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   _involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -164,7 +164,7 @@ Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -175,7 +175,7 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
-  _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -186,7 +186,7 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
 /* initialisation with empty set */
 Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel, int newNumber):
   _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
-  _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
 }

@@ -266,9 +266,25 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   if (withOSI)
   {
     // === OneStepIntegrators initialization ===
-    std::for_each(_allOSI->begin(), _allOSI->end(),
-                  boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
-  };
+
+    for (OSIIterator itosi = _allOSI->begin();
+         itosi != _allOSI->end(); ++itosi)
+    {
+      (*itosi)->setSimulationPtr(shared_from_this());
+      (*itosi)->initialize();
+
+
+      for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
+           itds != (*itosi)->dynamicalSystems()->end();
+           ++itds)
+      {
+        (*itds)->initialize(Type::name(*shared_from_this()), model()->t0(),
+                            (*itosi)->getSizeMem());
+        addInOSIMap(*itds, *itosi);
+      }
+    }
+
+  }
 
   // === IndexSets building ===
 

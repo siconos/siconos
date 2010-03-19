@@ -111,22 +111,8 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 //   return workX[ds];
 // }
 
-void OneStepIntegrator::initialize(SP::Simulation sim)
+void OneStepIntegrator::initialize()
 {
-  // Connection to the simulation owner of this OSI
-  assert(sim && "OneStepIntegrator::initialize(sim) error: sim is null.");
-  simulationLink = sim;
-
-  double t0 = simulationLink->model()->t0();
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    // Initialization of the dynamical systems belonging to this OSI
-    (*it)->initialize(Type::name(*simulationLink), t0, sizeMem);
-
-    // Register this DS and the OSI into OSIMap of the Simulation
-    simulationLink->addInOSIMap(*it, shared_from_this());
-  }
 }
 
 void OneStepIntegrator::saveInMemory()

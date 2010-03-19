@@ -53,11 +53,11 @@ protected:
    */
   VECTOR_UBLAS_TYPE vect;
 
+public:
   /** Default constructor
    */
   SimpleVector();
 
-public:
   /***************************** CONSTRUCTORS ****************************/
 
   /** constructor with the type and the dimension of the Boost vector

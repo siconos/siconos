@@ -471,7 +471,8 @@ public:
 
   /** visitors hook
    */
-  VIRTUAL_ACCEPT_VISITORS(Relation)
+  VIRTUAL_ACCEPT_VISITORS(Relation);
+
 };
 
 #endif // RELATION_H

@@ -162,9 +162,8 @@ public:
   /** initialization of the Moreau integrator; for linear time
       invariant systems, we compute time invariant operator (example :
       W)
-      \param the simulation, owner of this OSI
    */
-  void initialize(SP::Simulation);
+  void initialize();
 
   /** init WMap[ds] Moreau matrix at time t
    *  \param the time (double)

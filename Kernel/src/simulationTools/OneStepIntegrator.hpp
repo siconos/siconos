@@ -41,7 +41,7 @@ Basic class to handle with dynamical system integrators over a time step.
  * At the time, available integrators are: Moreau and Lsodar
  *
  */
-class OneStepIntegrator : public boost::enable_shared_from_this<OneStepIntegrator>
+class OneStepIntegrator
 {
 protected:
 
@@ -246,7 +246,7 @@ public:
   /** initialise the integrator
       \param the simulation that owns this OSI
    */
-  virtual void initialize(SP::Simulation) = 0;
+  virtual void initialize() = 0;
 
   /** Save Dynamical Systems data into memory.
    */

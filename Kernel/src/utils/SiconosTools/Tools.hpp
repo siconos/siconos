@@ -114,20 +114,6 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
     *obj = val;
 }
 
-#ifndef __APPLE__
-#include <malloc.h>
-static struct mallinfo malloc_info1, malloc_info2;
-static int malldelta;
-/** Tool to compute the increase of memory alloc */
-static int TRM()
-{
-  malloc_info1 = malloc_info2;
-  malloc_info2 = mallinfo();
-  malldelta = malloc_info2.uordblks - malloc_info1.uordblks;
-  return(malldelta);
-}
-#endif /* __APPLE__ */
-
 /* a modifiable pure virtual definition to solve problems with boost
    python and pure virtual operators */
 #ifndef PURE_DEF

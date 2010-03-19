@@ -47,7 +47,7 @@ class BlockVector;
  *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
  *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
-class Lsodar : public OneStepIntegrator
+class Lsodar : public OneStepIntegrator, public boost::enable_shared_from_this<Lsodar>
 {
 private:
 
@@ -191,9 +191,8 @@ public:
   void jacobianfx(integer*, doublereal*, doublereal*, integer*, integer*,  doublereal*, integer*);
 
   /** initialization of the integrator
-      \param the simulation, owner of this OSI
    */
-  void initialize(SP::Simulation);
+  void initialize();
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time

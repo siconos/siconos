@@ -217,7 +217,7 @@ void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
   WMap[ds] = newPtr;                  // link with new pointer
 }
 
-inline const double Moreau::theta()
+const double Moreau::theta()
 {
   return _theta;
 }
@@ -227,9 +227,9 @@ void Moreau::setTheta(double newTheta)
   _theta = newTheta;
 }
 
-void Moreau::initialize(SP::Simulation sim)
+void Moreau::initialize()
 {
-  OneStepIntegrator::initialize(sim);
+  OneStepIntegrator::initialize();
   // Get initial time
   double t0 = simulationLink->model()->t0();
   // Compute W(t0) for all ds
