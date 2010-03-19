@@ -30,6 +30,7 @@ from distutils.core import Command
 import sys
 
 import Siconos.Numerics
+import Siconos.Kernel
 
 # Make sure I have the right Python version.
 if sys.version_info[:2] < (2,6):
@@ -143,7 +144,7 @@ setup(
       packages = ['Siconos'] + modules + tests,
       scripts = [],
       ext_modules = [Numerics_module],
-      py_modules = ["Siconos.Numerics"],
+      py_modules = ["Siconos.Numerics", "Siconos.Kernel"],
       package_data = { },
       data_files = [],
       cmdclass    = {'test': test_Siconos,
