@@ -104,7 +104,7 @@ protected:
 
   /** default constructor
    */
-  FirstOrderLinearDS(): FirstOrderNonLinearDS(DS::FOLDS) {};
+  FirstOrderLinearDS(): FirstOrderNonLinearDS() {};
 
 public:
 

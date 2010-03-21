@@ -830,7 +830,7 @@ public:
     return _dotq;
   }
 
-
+  ACCEPT_STD_VISITORS();
 
 };
 

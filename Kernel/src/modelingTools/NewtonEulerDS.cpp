@@ -52,7 +52,7 @@ Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0
 Velocity0 : contains the initial velocity of center of mass and the omega initial. (dim(Velocity0)=6)
 */
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix):
-  DynamicalSystem(DS::NENLDS, 6)
+  DynamicalSystem(6)
 {
   _p.resize(3);
   zeroPlugin();

@@ -156,19 +156,11 @@ private:
   /** used to set ds number */
   static unsigned int count;
 
-  /** Default constructor => private, no copy nor pass-by-value.
-   */
-  DynamicalSystem();
-
   /** copy constructor => private, no copy nor pass-by-value.
    */
   DynamicalSystem(const DynamicalSystem &);
 
 protected:
-
-  /** Dynamical System type - See possible types in the enum _DSTypes
-      above.*/
-  DS::TYPES _DSType;
 
   /** An id number for the DynamicalSystem */
   int _number;
@@ -254,9 +246,8 @@ protected:
   // ===== CONSTRUCTORS =====
 
   /** default constructors/destructor
-   * \param DS::TYPES the type of the system, default=FONLDS, non-linear first order system.
    */
-  DynamicalSystem(DS::TYPES = DS::FONLDS);
+  DynamicalSystem();
   virtual void zeroPlugin();
 
 protected:
@@ -277,7 +268,7 @@ public:
    *  \param type of the system
    *  \param int : size of the system (n)
    */
-  DynamicalSystem(DS::TYPES, unsigned int newN);
+  DynamicalSystem(unsigned int newN);
 
   // ===== DESTRUCTOR =====
 
@@ -294,24 +285,6 @@ public:
 
   /*! @name Members access */
   //@{
-
-  // --- type of DS ---
-
-  /** get the type of a DynamicalSystem
-   *  \return the type of the DynamicalSystem
-   */
-  inline const DS::TYPES getType() const
-  {
-    return _DSType;
-  }
-
-  /** set the type of a DynamicalSystem
-   *  \param the type of the DynamicalSystem
-   */
-  inline void setType(DS::TYPES newType)
-  {
-    _DSType = newType;
-  }
 
   // --- Number ---
 

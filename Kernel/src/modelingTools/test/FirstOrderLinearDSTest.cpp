@@ -81,7 +81,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   cout << "======================================" << endl;
   cout << "--> Test: constructor xml." << endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", ds->getType() == DS::FOLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->number() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getN() == 3, true);
@@ -98,7 +98,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 {
   cout << "--> Test: constructor xml 2." << endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml2));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2A : ", ds->getType() == DS::FOLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2B : ", ds->number() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2E : ", ds->getX0() == 2 * *x0, true);
@@ -137,7 +137,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   cout << "--> Test: constructor 3." << endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", ds->getType() == DS::FOLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3B : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getX0() == *x0, true);
 

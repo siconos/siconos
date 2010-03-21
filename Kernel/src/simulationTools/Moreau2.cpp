@@ -27,7 +27,6 @@
 
 using namespace std;
 using namespace RELATION;
-using namespace DS;
 
 // --- constructor from a minimum set of data ---
 Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newTheta)
@@ -69,14 +68,14 @@ void Moreau2::computeFreeState()
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix  W; // W Moreau matrix of the current DS.
   SP::SiconosMatrix  M; // W Moreau matrix of the current DS.
-  DS::TYPES dsType ; // Type of the current DS.
+  Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    dsType = ds->getType(); // Its type
+    dsType = Type::value(*ds); // Its type
     W = WMap[ds]; // Its W Moreau matrix of iteration.
 
-    if (dsType == FOLDS)
+    if (dsType == Type::FirstOrderLinearDS)
     {
       // fFree = h(1-theta)Ax_i +Mx_i +h*theta*b_i+1 + h(1-theta)*b_i
 
@@ -121,7 +120,7 @@ void Moreau2::computeFreeState()
       computeW(t, d);
     }
     // 2bis - First Order Linear Systems with Time Invariant coefficients
-    else if (dsType == FOLTIDS)
+    else if (dsType == Type::FirstOrderLinearTIDS)
     {
       // fFree = h(1-theta)Ax_i + Mx_i +hbt(i+1)
 
@@ -147,7 +146,7 @@ void Moreau2::computeFreeState()
         prod(*M, *xold, *ffree, false); // ffree += M*xi
     }
     // 3 - Lagrangian Non Linear Systems
-    else if (dsType == LNLDS)
+    else if (dsType == Type::LagrangianDS)
     {
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
@@ -200,7 +199,7 @@ void Moreau2::computeFreeState()
       *ffree += *ftmp;
     }
     // 4 - Lagrangian Linear Systems
-    else if (dsType == LLTIDS)
+    else if (dsType == Type::LagrangianLinearTIDS)
     {
       // IN to be updated at current time: Fext
       // IN at told: qi,vi, fext

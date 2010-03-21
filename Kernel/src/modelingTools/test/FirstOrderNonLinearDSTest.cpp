@@ -79,7 +79,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   cout << "======================================" << endl;
   cout << "--> Test: constructor xml." << endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml1));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1A : ", ds->getType() == DS::FONLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getX0() == *x0, true);
@@ -96,7 +96,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
 {
   cout << "--> Test: constructor xml 2." << endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml2));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2A : ", ds->getType() == DS::FONLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2E : ", ds->getX0() == 2 * *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->F()->isPlugged(), true);
@@ -115,7 +115,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   cout << "--> Test: constructor 3." << endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*x0, "TestPlugin:computeF", "TestPlugin:computeJacobianfx"));
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3A : ", ds->getType() == DS::FONLDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3C : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3D : ", ds->getX0() == *x0, true);
   double time = 1.5;

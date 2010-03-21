@@ -28,7 +28,7 @@ using namespace std;
 
 // From a minimum set of data
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
-  DynamicalSystem(DS::FONLDS, newX0->size())
+  DynamicalSystem(newX0->size())
 {
   zeroPlugin();
   // == Initial conditions ==
@@ -56,7 +56,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   checkDynamicalSystem();
 }
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
-  DynamicalSystem(DS::FONLDS, newX0.size())
+  DynamicalSystem(newX0.size())
 {
   zeroPlugin();
   // == Initial conditions ==
@@ -90,7 +90,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   DynamicalSystem(dsXML)
 {
   zeroPlugin();
-  // -- FONLDS xml object --
+  // -- Type::FirstOrderNonLinearDS xml object --
   SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
 
   // === Initial conditions ===
@@ -174,7 +174,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 
 // From a minimum set of data
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const string& fPlugin, const string& jacobianfxPlugin):
-  DynamicalSystem(DS::FONLDS, newX0.size())
+  DynamicalSystem(newX0.size())
 {
   zeroPlugin();
   // == Initial conditions ==

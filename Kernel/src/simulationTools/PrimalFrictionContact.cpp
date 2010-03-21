@@ -528,7 +528,7 @@ void PrimalFrictionContact::postCompute()
   //   for(itDS = allDS->begin(); itDS!=  allDS->end(); ++itDS)
   //     {
   //       dsType = (*itDS) -> getType();
-  //       if(dsType!=LNLDS && dsType!=LLTIDS)
+  //       if(dsType!=Type::LagrangianDS && dsType!=Type::LagrangianLinearTIDS)
   //      RuntimeException::selfThrow("PrimalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
 
   //       pos = M->getPositionOfDSBlock(*itDS);

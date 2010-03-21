@@ -26,7 +26,6 @@
 #include "FirstOrderLinearTIDS.hpp"
 
 using namespace std;
-using namespace DS;
 using namespace RELATION;
 
 // --- xml constructor ---
@@ -242,7 +241,7 @@ void Moreau::initialize()
     // W initialization
     initW(t0, *itDS);
 
-    //      if ((*itDS)->getType() == LNLDS || (*itDS)->getType() == FONLDS)
+    //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
 
   }
@@ -269,10 +268,10 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
   SP::SiconosMatrix W = WMap[ds];
   double h = simulationLink->timeStep();
-  DS::TYPES dsType = ds->getType();
+  Type::Siconos dsType = Type::value(*ds);
 
   // 1 - First order non linear systems
-  if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)
+  if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
@@ -290,7 +289,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
   // 2 - First order linear systems
-  //   else if (dsType == FOLDS || dsType == FOLTIDS)
+  //   else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   //     {
   //       SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
   //       if( d->M() )
@@ -301,7 +300,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   //       scal(-h*_theta, *d->A(),*W,false);
   //     }
   // 3 - Lagrangian non linear systems
-  else if (dsType == LNLDS)
+  else if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
@@ -316,7 +315,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
       scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
   }
   // 4 - Lagrangian linear systems
-  else if (dsType == LLTIDS)
+  else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
@@ -332,7 +331,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   }
 
   // === ===
-  else if (dsType == NENLDS)
+  else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
 
@@ -362,12 +361,12 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
          "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->timeStep();
-  DS::TYPES dsType = ds->getType();
+  Type::Siconos dsType = Type::value(*ds);
 
   SP::SiconosMatrix W = WMap[ds];
 
   // 1 - First order non linear systems
-  if (dsType == FONLDS)
+  if (dsType == Type::FirstOrderNonLinearDS)
   {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
@@ -383,10 +382,10 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
   // 2 - First order linear systems
-  else if (dsType == FOLDS || dsType == FOLTIDS)
+  else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
-    if (dsType == FOLDS)
+    if (dsType == Type::FirstOrderLinearDS)
       d->computeA(t);
 
     if (d->M())
@@ -396,7 +395,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     scal(-h * _theta, *d->A(), *W, false);
   }
   // 3 - Lagrangian non linear systems
-  else if (dsType == LNLDS)
+  else if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
@@ -418,13 +417,13 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     }
   }
   // 4 - Lagrangian linear systems
-  else if (dsType == LLTIDS)
+  else if (dsType == Type::LagrangianLinearTIDS)
   {
     // Nothing: W does not depend on time.
   }
 
   // === ===
-  else if (dsType == NENLDS)
+  else if (dsType == Type::NewtonEulerDS)
     ;
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
 
@@ -456,7 +455,7 @@ double Moreau::computeResidu()
   //
   DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
-  DS::TYPES dsType ; // Type of the current DS.
+  Type::Siconos dsType ; // Type of the current DS.
 
   double maxResidu = 0;
   double normResidu = maxResidu;
@@ -464,10 +463,10 @@ double Moreau::computeResidu()
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    dsType = ds->getType(); // Its type
+    dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->residuFree();
     // 1 - First Order Non Linear Systems
-    if (dsType == FONLDS || dsType == FOLDS)
+    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS)
     {
       // ResiduFree = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
       // Residu = Residu - h*r^k_i+1
@@ -518,11 +517,11 @@ double Moreau::computeResidu()
 
       (*d->residur()) = (*d->r()) - (*d->gAlpha());
 
-      //      cout<<"Moreau FONLDS: residu r"<<endl;
+      //      cout<<"Moreau Type::FirstOrderNonLinearDS: residu r"<<endl;
       //      (*d->residur()).display();
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
-    else if (dsType == FOLTIDS)
+    else if (dsType == Type::FirstOrderLinearTIDS)
     {
       SP::FirstOrderLinearTIDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       //Don't use W because it is LU factorized
@@ -575,7 +574,7 @@ double Moreau::computeResidu()
       normResidu = (workX[d])->norm2();*/
     }
     // 3 - Lagrangian Non Linear Systems
-    else if (dsType == LNLDS)
+    else if (dsType == Type::LagrangianDS)
     {
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi) - pi+1
 
@@ -614,7 +613,7 @@ double Moreau::computeResidu()
       normResidu = d->workFree()->norm2();
     }
     // 4 - Lagrangian Linear Systems
-    else if (dsType == LLTIDS)
+    else if (dsType == Type::LagrangianLinearTIDS)
     {
       // ResiduFree = M(vi+1 - v_i) - h*theta*( Fext_i+1 - Kqi+1 - Cvi+1) - h*(1-theta)*(Fext_i -Cvi -kqi) - pi+1
 
@@ -659,7 +658,7 @@ double Moreau::computeResidu()
       normResidu = d->workFree()->norm2();
 
     }
-    else if (dsType == NENLDS)
+    else if (dsType == Type::NewtonEulerDS)
     {
       // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*fL(ti,vi,qi) - pi+1
 
@@ -728,15 +727,15 @@ void Moreau::computeFreeState()
 
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix W; // W Moreau matrix of the current DS.
-  DS::TYPES dsType ; // Type of the current DS.
+  Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    dsType = ds->getType(); // Its type
+    dsType = Type::value(*ds); // Its type
     W = WMap[ds]; // Its W Moreau matrix of iteration.
 
     // 1 - First Order Non Linear Systems
-    if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)
+    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
       // xFree = x_k,i+1  - [W_k,i+1]^{-1} * ResiduFree_k,i+1
       // with ResiduFree_k,i+1 = = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
@@ -769,7 +768,7 @@ void Moreau::computeFreeState()
       // At this point xfree = residuFree
       // -> Solve WX = xfree and set xfree = X
       // -- Update W --
-      if (dsType != FOLTIDS)
+      if (dsType != Type::FirstOrderLinearTIDS)
         computeW(t, d);
 
       W->PLUForwardBackwardInPlace(*xfree);
@@ -800,7 +799,7 @@ void Moreau::computeFreeState()
 
 
     // 3 - Lagrangian Non Linear Systems
-    else if (dsType == LNLDS)
+    else if (dsType == Type::LagrangianDS)
     {
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
@@ -845,7 +844,7 @@ void Moreau::computeFreeState()
 
     }
     // 4 - Lagrangian Linear Systems
-    else if (dsType == LLTIDS)
+    else if (dsType == Type::LagrangianLinearTIDS)
     {
       // IN to be updated at current time: Fext
       // IN at told: qi,vi, fext
@@ -877,7 +876,7 @@ void Moreau::computeFreeState()
 
       *vfree += *vold;
     }
-    else if (dsType == NENLDS)
+    else if (dsType == Type::NewtonEulerDS)
     {
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
@@ -944,9 +943,9 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
   {
     SP::DynamicalSystem ds = *it;
     W = WMap[ds];
-    DS::TYPES dsType = ds->getType();
+    Type::Siconos dsType = Type::value(*ds);
 
-    if (dsType == LLTIDS)
+    if (dsType == Type::LagrangianLinearTIDS)
     {
       // get the ds
       SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
@@ -1016,14 +1015,14 @@ void Moreau::updateState(unsigned int level)
     W = WMap[ds];
     // Get the DS type
 
-    DS::TYPES dsType = ds->getType();
+    Type::Siconos dsType = Type::value(*ds);
 
     // 1 - First Order Systems
-    if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)
+    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
       SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       SP::SiconosVector x = ds->x();
-      bool baux = (useRCC && dsType == FONLDS && simulationLink->getRelativeConvergenceCriterionHeld());
+      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->getRelativeConvergenceCriterionHeld());
       //    SP::SiconosVector xFree = fonlds->xFree();
 
       // Save value of q in local_buffer for relative convergence computation
@@ -1043,7 +1042,7 @@ void Moreau::updateState(unsigned int level)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
 
-      //  }else if (dsType == FOLTIDS){
+      //  }else if (dsType == Type::FirstOrderLinearTIDS){
       //    SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       //    SP::SiconosVector x = ds->x();
 
@@ -1057,14 +1056,14 @@ void Moreau::updateState(unsigned int level)
       //    //    x->display();
     }
     // 3 - Lagrangian Systems
-    else if (dsType == LNLDS || dsType == LLTIDS)
+    else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // get dynamical system
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector v = d->velocity();
-      bool baux = dsType == LNLDS && useRCC && simulationLink->getRelativeConvergenceCriterionHeld();
+      bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->getRelativeConvergenceCriterionHeld();
 
       // To compute v, we solve W(v - vfree) = p
       *v = *d->p(level); // v = p
@@ -1096,7 +1095,7 @@ void Moreau::updateState(unsigned int level)
       }
 
     }
-    else if (dsType == NENLDS)
+    else if (dsType == Type::NewtonEulerDS)
     {
       // get dynamical system
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);

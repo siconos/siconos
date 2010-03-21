@@ -222,6 +222,9 @@ public:
   {
     return 0.0;
   }
+
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(LagrangianLinearTIDS);

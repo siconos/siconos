@@ -22,15 +22,14 @@
 #include "Plugin.hpp"
 
 using namespace std;
-using namespace DS;
 
 unsigned int DynamicalSystem::count = 0;
 
 // ===== CONSTRUCTORS =====
 
 // Default constructor (protected)
-DynamicalSystem::DynamicalSystem(DS::TYPES type):
-  _DSType(type), _number(count++), _n(0), _stepsInMemory(1)
+DynamicalSystem::DynamicalSystem():
+  _number(count++), _n(0), _stepsInMemory(1)
 {
   zeroPlugin();
   _normRef = 1;
@@ -40,7 +39,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type):
 
 // From XML file
 DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
-  _DSType(dsXML->getType()), _number(dsXML->number()), _n(0), _stepsInMemory(1), _dsxml(dsXML)
+  _number(dsXML->number()), _n(0), _stepsInMemory(1), _dsxml(dsXML)
 {
   _normRef = 1;
   assert(dsXML && "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
@@ -69,8 +68,8 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
-  _DSType(type), _number(count++), _n(newN), _stepsInMemory(1)
+DynamicalSystem::DynamicalSystem(unsigned int newN):
+  _number(count++), _n(newN), _stepsInMemory(1)
 {
   zeroPlugin();
   _normRef = 1;
@@ -356,8 +355,7 @@ void DynamicalSystem::saveDSToXML()
 double DynamicalSystem::dsConvergenceIndicator()
 {
   RuntimeException::selfThrow
-  ("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :"
-   + _DSType);
+  ("DynamicalSystem:dsConvergenceIndicator - not yet implemented for this Dynamical system type");
   return 1.0;
 }
 

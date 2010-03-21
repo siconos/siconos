@@ -56,7 +56,7 @@ void LagrangianDS::zeroPlugin()
 }
 
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
-  DynamicalSystem(DS::LNLDS, 2 * newQ0->size()), _ndof(newQ0->size())
+  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size())
 {
   zeroPlugin();
   // -- Memory allocation for vector and matrix members --
@@ -81,7 +81,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
-  DynamicalSystem(DS::LNLDS), _ndof(0)
+  DynamicalSystem(Type::LagrangianDS), _ndof(0)
 {
   zeroPlugin();
   // Protected constructor - Only call from derived class(es).
@@ -239,7 +239,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
 // This constructor leads to the minimum Lagrangian System form: \f$ M\ddot q = p \f$
 /**/
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
-  DynamicalSystem(DS::LNLDS, 2 * newQ0->size()), _ndof(newQ0->size())
+  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size())
 {
   zeroPlugin();
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
@@ -266,7 +266,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const string& massName):
-  DynamicalSystem(DS::LNLDS), _ndof(newQ0->size())
+  DynamicalSystem(), _ndof(newQ0->size())
 {
   zeroPlugin();
   // Initial conditions

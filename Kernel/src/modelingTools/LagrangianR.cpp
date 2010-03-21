@@ -67,12 +67,11 @@ void LagrangianR::initialize(SP::Interaction inter)
   data[p1].reset(new BlockVector());
   data[p2].reset(new BlockVector());
   SP::LagrangianDS lds;
-  DS::TYPES type;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
-    type = (*it)->getType();
+    Type::Siconos type = Type::value(**it);
     // check dynamical system type
-    assert((type == DS::LLTIDS || type == DS::LNLDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((type == Type::LagrangianLinearTIDS || type == Type::LagrangianDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);

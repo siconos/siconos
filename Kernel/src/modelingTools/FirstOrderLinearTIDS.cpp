@@ -20,7 +20,6 @@
 #include "FirstOrderLinearDSXML.hpp"
 
 using namespace std;
-using namespace DS;
 // --- Constructors ---
 
 // From xml file
@@ -46,7 +45,6 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderLinearDS(newX0, newA)
 {
-  _DSType = FOLTIDS;
   checkDynamicalSystem();
 }
 
@@ -54,7 +52,6 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosM
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderLinearDS(newX0, newA, newB)
 {
-  _DSType = FOLTIDS;
   checkDynamicalSystem();
 }
 

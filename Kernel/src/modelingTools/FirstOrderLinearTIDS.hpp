@@ -120,6 +120,8 @@ public:
    */
   static FirstOrderLinearTIDS* convert(DynamicalSystem* ds);
 
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(FirstOrderLinearTIDS);

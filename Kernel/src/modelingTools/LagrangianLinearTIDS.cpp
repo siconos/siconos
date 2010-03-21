@@ -21,12 +21,10 @@
 #include "BlockMatrix.hpp"
 
 using namespace std;
-using namespace DS;
 
 // --- Default (private) constructor ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS()
 {
-  _DSType = LLTIDS;
 }
 
 // --- Constructor from an xml file---
@@ -71,7 +69,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVec
   _K = newK;
   _C = newC;
 
-  _DSType = LLTIDS;
 }
 
 // --- Constructor from a set of data - Mass, no K and no C ---
@@ -79,12 +76,10 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVec
     SP::SiconosMatrix newMass):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
-  _DSType = LLTIDS;
 }
 LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0, const SiconosMatrix& newMass):
   LagrangianDS(createSPtrSiconosVector((SimpleVector&)newQ0), createSPtrSiconosVector((SimpleVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass))
 {
-  _DSType = LLTIDS;
 }
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {}

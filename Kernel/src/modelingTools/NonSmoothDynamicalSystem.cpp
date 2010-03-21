@@ -25,7 +25,6 @@
 #include "FirstOrderLinearTIDS.hpp"
 
 using namespace std;
-using namespace DS;
 using namespace RELATION;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -41,7 +40,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
   SetOfDSXML::iterator it;
   CheckInsertDS checkDS;
-  DS::TYPES type;
+  Type::Siconos type;
 
   /** contains all the Dynamic Systems of the simulation */
   SP::DynamicalSystemsSet allDSLocal;
@@ -50,19 +49,19 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   for (it = dsList.begin(); it != dsList.end(); ++it)
   {
     type = (*it)->getType();
-    if (type  == LNLDS)  // LagrangianDS
+    if (type  == Type::LagrangianDS)  // LagrangianDS
       checkDS = allDSLocal->insert
                 (SP::LagrangianDS(new LagrangianDS(*it)));
-    else if (type == LLTIDS)  // Lagrangian Linear Time Invariant
+    else if (type == Type::LagrangianLinearTIDS)  // Lagrangian Linear Time Invariant
       checkDS = allDSLocal->insert
                 (SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(*it)));
-    else if (type == FOLDS)  // Linear DS
+    else if (type == Type::FirstOrderLinearDS)  // Linear DS
       checkDS = allDSLocal->insert
                 (SP::FirstOrderLinearDS(new FirstOrderLinearDS(*it)));
-    else if (type == FOLTIDS)  // Linear Time Invariant DS
+    else if (type == Type::FirstOrderLinearTIDS)  // Linear Time Invariant DS
       checkDS = allDSLocal->insert
                 (SP::FirstOrderLinearTIDS(new FirstOrderLinearTIDS(*it)));
-    else if (type == FONLDS)  // Non linear DS
+    else if (type == Type::FirstOrderNonLinearDS)  // Non linear DS
       checkDS = allDSLocal->insert
                 (SP::FirstOrderNonLinearDS(new FirstOrderNonLinearDS(*it)));
     else RuntimeException::
@@ -187,15 +186,15 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
     {
       SP::DynamicalSystem ds = dynamicalSystems()->bundle(*vi);
-      if (ds->getType() == LNLDS)
+      if (Type::value(*ds) == Type::LagrangianDS)
         (boost::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
-      else if (ds->getType() == LLTIDS)
+      else if (Type::value(*ds) == Type::LagrangianLinearTIDS)
         (boost::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
-      else if (ds->getType() == FOLDS)
+      else if (Type::value(*ds) == Type::FirstOrderLinearDS)
         (boost::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
-      else if (ds->getType() == FOLTIDS)
+      else if (Type::value(*ds) == Type::FirstOrderLinearTIDS)
         (boost::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
-      else if (ds->getType() == FONLDS)
+      else if (Type::value(*ds) == Type::FirstOrderNonLinearDS)
         ds->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
     }

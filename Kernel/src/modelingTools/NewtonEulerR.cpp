@@ -74,12 +74,11 @@ void NewtonEulerR::initialize(SP::Interaction inter)
   data[p1].reset(new BlockVector());
   data[p2].reset(new BlockVector());
   SP::NewtonEulerDS lds;
-  DS::TYPES type;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
-    type = (*it)->getType();
+    Type::Siconos type = Type::value(**it);
     // check dynamical system type
-    assert((type == DS::NENLDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((type == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = boost::static_pointer_cast<NewtonEulerDS> (*it);

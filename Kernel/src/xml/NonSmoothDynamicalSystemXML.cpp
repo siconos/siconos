@@ -152,7 +152,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //      if( it == DSXMLMap.end() )
   //        {
   //          //node = xmlNewChild( dsDefinitionNode, NULL, (xmlChar*)NSDS_DS.c_str(), NULL );
-  //          if (type == LNLDS)
+  //          if (type == Type::LagrangianDS)
   //      {
   //        node = xmlNewChild( dsDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_NON_LINEARDS_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );

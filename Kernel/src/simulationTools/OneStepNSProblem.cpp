@@ -29,7 +29,6 @@
 #include "NewtonEulerDS.hpp"
 
 using namespace std;
-using namespace DS;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
@@ -572,7 +571,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
 
   SP::OneStepIntegrator Osi;
   OSI::TYPES osiType; // type of the current one step integrator
-  DS::TYPES dsType; // type of the current Dynamical System
+  Type::Siconos dsType; // type of the current Dynamical System
   DSIterator itDS = UR->dynamicalSystemsBegin();
   while (itDS != (UR->dynamicalSystemsEnd()))
   {
@@ -580,16 +579,16 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
     osiType = Osi->getType();
     if (osiType == OSI::MOREAU)
     {
-      dsType = (*itDS)->getType();
-      if (dsType != NENLDS)
+      dsType = Type::value(**itDS);
+      if (dsType != Type::NewtonEulerDS)
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
       else
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {
-      dsType = (*itDS)->getType();
-      if (dsType != LNLDS && dsType != LLTIDS)
+      dsType = Type::value(**itDS);
+      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
       // get lu-factorized mass

@@ -74,7 +74,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& AP
   FirstOrderNonLinearDS(newX0)
 {
 
-  _DSType = DS::FOLDS;
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   _pluginA->setComputeFunction(APlugin);
@@ -92,7 +91,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
   //  SP::SiconosVector sp_aux = createSPtrSiconosVector ((SiconosVector&) newX0);
   //  FirstOrderNonLinearDS::FirstOrderNonLinearDS();
 
-  _DSType = DS::FOLDS;
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   _pluginA->setComputeFunction(APlugin);
@@ -112,7 +110,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderNonLinearDS(newX0)
 {
-  _DSType = DS::FOLDS;
   _f.reset(new SimpleVector(getDim()));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
@@ -127,7 +124,6 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderNonLinearDS(newX0)
 {
-  _DSType = DS::FOLDS;
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&

@@ -75,7 +75,7 @@ public:
   /** Return the type of the DynamicalSystem
    *   \return a string
    */
-  const DS::TYPES getType() const;
+  const Type::Siconos getType() const;
 
   /** Returns the z vector, discret state of the DynamicalSystem
    *  \return SimpleVector

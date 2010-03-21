@@ -24,28 +24,19 @@
 
 #ifndef DYNAMICALSYSTEMTYPES_HPP
 #define DYNAMICALSYSTEMTYPES_HPP
-
-/** Namespace for user-defined types related to relations */
-namespace DS
-{
-
-/** List of possible DynamicalSystems types*/
-enum TYPES
-{
-  /** First Order Non Linear DS */
-  FONLDS,
-  /** First Order Linear DS */
-  FOLDS,
-  /** First Order Linear and Time-Invariant Coefficients DS */
-  FOLTIDS,
-  /** Lagrangian, Second Order,  Non Linear DS */
-  LNLDS,
-  /** Lagrangian, Second Order,  Linear and Time-Invariant Coefficients DS */
-  LLTIDS,
-  NENLDS
-};
-
-}
+/* now use : Type::<Siconos class>
+ * Type::value(*pointer) see SiconosVisitor.hpp
+ * transformation was done with
+(tags-query-replace "FONLDS" "Type::FirstOrderNonLinearDS")
+(tags-query-replace "FOLDS" "Type::FirstOrderLinearDS")
+(tags-query-replace "FOLTIDS" "Type::FirstOrderLinearTIDS")
+(tags-query-replace "LNLDS" "Type::LagrangianDS")
+(tags-query-replace "LLTIDS" "Type::LagrangianLinearTIDS")
+(tags-query-replace "NENLDS" "Type::NewtonEulerDS")
+(tags-query-replace "ds->getType()" "Type::value(*ds)")
+(tags-query-replace "DS::TYPES dsType" "Type::Siconos dsType")
+and some manual interventions ...
+*/
 
 // Plugged objects used in Dynamical systems
 #include "PluginTypes.hpp"

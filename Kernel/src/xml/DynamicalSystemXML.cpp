@@ -18,7 +18,6 @@
  */
 #include "DynamicalSystemXML.hpp"
 using namespace std;
-using namespace DS;
 
 DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
   rootNode(DSNode), stepsInMemoryNode(NULL), zNode(NULL)
@@ -32,23 +31,23 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
     zNode = node;
 }
 
-const DS::TYPES DynamicalSystemXML::getType() const
+const Type::Siconos DynamicalSystemXML::getType() const
 {
   std::string res((char*)rootNode->name);
   if (res == "FirstOrderNonLinearDS")
-    return FONLDS;
+    return Type::FirstOrderNonLinearDS;
   else if (res == "FirstOrderLinearDS")
-    return FOLDS;
+    return Type::FirstOrderLinearDS;
   else if (res == "FirstOrderLinearTIDS")
-    return FOLTIDS;
+    return Type::FirstOrderLinearTIDS;
   else if (res == "LagrangianDS")
-    return LNLDS;
+    return Type::LagrangianDS;
   else if (res == "LagrangianLinearTIDS")
-    return LLTIDS;
+    return Type::LagrangianLinearTIDS;
   else
   {
     XMLException::selfThrow("DynamicalSystemXML - getType: unknown type of DS.");
-    return FONLDS;
+    return Type::FirstOrderNonLinearDS;
   }
 }
 

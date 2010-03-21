@@ -147,9 +147,8 @@ protected:
   SP::SiconosMatrix _invM;
 
   /** default constructor
-   * \param the type of the system
    */
-  FirstOrderNonLinearDS(DS::TYPES): DynamicalSystem(DS::FONLDS) {};
+  FirstOrderNonLinearDS(): DynamicalSystem() {};
 
   /** constructor from a set of data
       \param SiconosVector : initial state of this DynamicalSystem
