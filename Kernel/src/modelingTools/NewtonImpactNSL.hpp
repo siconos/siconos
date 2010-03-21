@@ -23,7 +23,6 @@
 #define NEWTONIMPACTNSL_H
 
 #include "NonSmoothLaw.hpp"
-class NonSmoothLaw;
 
 /** Newton impact Non Smooth Law
  *
@@ -108,5 +107,8 @@ public:
    */
   ACCEPT_STD_VISITORS();
 };
+
+DEFINE_SPTR(NewtonImpactNSL);
+
 
 #endif // NewtonImpactNSL_H

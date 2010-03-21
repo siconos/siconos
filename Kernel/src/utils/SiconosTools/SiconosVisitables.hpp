@@ -4,6 +4,7 @@
 #undef REGISTER
 #define SICONOS_VISITABLES() \
     REGISTER(DynamicalSystem)\
+    REGISTER(DynamicalSystemXML)\
     REGISTER(Disk)\
     REGISTER(Circle)\
     REGISTER(DiskPlanR)\
@@ -34,6 +35,7 @@
     REGISTER(LagrangianLinearTIDS)\
     REGISTER(FirstOrderLinearDS)\
     REGISTER(FirstOrderNonLinearDS)\
+    REGISTER(FirstOrderLinearTIDS)\
     REGISTER(FirstOrderType1R)\
     REGISTER(FirstOrderLinearR)\
     REGISTER(FirstOrderLinearTIR)\
@@ -41,6 +43,6 @@
     REGISTER(LagrangianRheonomousR)\
     REGISTER(LagrangianCompliantR)\
     REGISTER(LagrangianLinearTIR)\
+    REGISTER(NewtonEulerDS)\
  
-
 #endif
