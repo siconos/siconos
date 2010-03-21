@@ -40,6 +40,9 @@
 #include "Disk.hpp"
 %} 
 
+// mandatory !
+%rename (lambda_) lambda;
+
 // shared ptr management
 %include "boost_shared_ptr.i"
 
@@ -125,7 +128,12 @@
 {
   int this_vector_dim[1];
   this_vector_dim[0]=$1->size();
-  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+
+  $result = PyArray_SimpleNew(1,this_vector_dim,NPY_DOUBLE);
+  memcpy(PyArray_DATA($result), $1->getArray(), sizeof(double)*this_vector_dim[0]);
+
+    // without copy : we must increase the shared ptr use_count
+    //  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
 }
 
 %typemap(out) boost::shared_ptr<SiconosMatrix>
@@ -133,8 +141,15 @@
   int this_matrix_dim[2];
   this_matrix_dim[0]=$1->size(0);
   this_matrix_dim[1]=$1->size(1);
-  $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+
+  $result = PyArray_SimpleNew(2,this_matrix_dim,NPY_DOUBLE);
+  memcpy(PyArray_DATA($result), $1->getArray(), sizeof(double)*this_matrix_dim[0]*this_matrix_dim[1]);
   PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+
+    // without copy : we must increase use_count of the shared pointer
+    //$result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+
+
 }
 
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+from matplotlib.pyplot import *
 from Siconos.Kernel import *
 from numpy import *
+
 
 t0 = 0
 T = 10
@@ -13,47 +15,33 @@ theta = 0.5
 h = 0.005
 
 
-x = array([1,0,0])
+q = array([1,0,0])
 v = array([0,0,0])
 mass = eye(3)
 mass[2,2]=3./5 * r * r
 
 weight = array([-m * g, 0, 0])
 
-ball = LagrangianLinearTIDS(x,v,mass)
+def test_LagrangianLinearTIDS():
+    ball = LagrangianLinearTIDS(q,v,mass)
+    assert (ball.q().all() == q.all())
+    assert (ball.velocity().all() == v.all())
+    assert (ball.mass().all() == mass.all())
 
-ball.setFExtPtr(weight)
+    ball.setFExtPtr(weight)
 
-H = array([[0,0,1]])
 
-nslaw = NewtonImpactNSL(e)
+def test_NewtonImpactNSL():
+    nslaw = NewtonImpactNSL(e)
+    assert(nslaw.e() == e)
 
-relation = LagrangianLinearTIR(H)
+def test_LagrangianLinearTIR():
+    H = array([[1,0,0]])
+    relation = LagrangianLinearTIR(H)
+    assert(relation.H() == H)
 
-inter = Interaction(1, nslaw, relation)
+def test_Model():
+    bouncingBall = Model(t0,T)
+    assert (bouncingBall.t0() == t0)
 
-bouncingBall = Model(t0,T)
 
-bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
-
-bouncingBall.nonSmoothDynamicalSystem().link(inter,ball);
-
-OSI = Moreau(theta)
-
-OSI.insertDynamicalSystem(ball)
-
-t = TimeDiscretisation(t0,h)
-
-osnspb = LCP()
-
-s = TimeStepping(t)
-
-s.insertIntegrator(OSI)
-
-s.insertNonSmoothProblem(osnspb)
-
-bouncingBall.initialize(s)
-
-#while(s.nextTime() < T):
-#    s.computeOneStep()
-# ...    
