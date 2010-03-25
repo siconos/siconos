@@ -58,7 +58,7 @@ void SpheresViewer::init()
   {
 
     boost::shared_ptr<SetDrawing> setdrawing(new SetDrawing(*this, i));
-    GETALLDS(Siconos_)->bundle(*dsi)->accept(setdrawing);
+    GETALLDS(Siconos_)->bundle(*dsi)->acceptSP(setdrawing);
   }
 
   bodydraw_.reset(new BodyDraw(*this));
@@ -90,11 +90,11 @@ void SpheresViewer::draw()
   {
     if (drawings_[i]->selected())
     {
-      drawings_[i]->getDS()->accept(sbodydraw_);
+      drawings_[i]->getDS()->acceptSP(sbodydraw_);
     }
     else
     {
-      drawings_[i]->getDS()->accept(bodydraw_);
+      drawings_[i]->getDS()->acceptSP(bodydraw_);
     }
   }
 

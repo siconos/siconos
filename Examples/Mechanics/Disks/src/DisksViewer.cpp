@@ -60,7 +60,7 @@ void DisksViewer::init()
   {
 
     boost::shared_ptr<SetDrawing> setdrawing(new SetDrawing(*this, i));
-    GETALLDS(Siconos_)->bundle(*dsi)->accept(setdrawing);
+    GETALLDS(Siconos_)->bundle(*dsi)->acceptSP(setdrawing);
   }
 
 
@@ -131,10 +131,10 @@ void DisksViewer::draw()
 
     boost::shared_ptr<LambdaSecond> lambda2(new LambdaSecond(*this, w));
 
-    relation->accept(lambda1);
-    d1->accept(lambda1);
-    lambda1->accept(lambda2);
-    d2->accept(lambda2);
+    relation->acceptSP(lambda1);
+    d1->acceptSP(lambda1);
+    lambda1->acceptSP(lambda2);
+    d2->acceptSP(lambda2);
 
 
     /*else
@@ -174,11 +174,11 @@ void DisksViewer::draw()
   {
     if (drawings_[i]->selected())
     {
-      drawings_[i]->getDS()->accept(sbodydraw_);
+      drawings_[i]->getDS()->acceptSP(sbodydraw_);
     }
     else
     {
-      drawings_[i]->getDS()->accept(bodydraw_);
+      drawings_[i]->getDS()->acceptSP(bodydraw_);
     }
   }
 

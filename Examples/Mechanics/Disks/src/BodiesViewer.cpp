@@ -415,7 +415,7 @@ void BodiesViewer::drawWithNames()
   {
 
     glPushName(i);
-    drawings_[i]->getDS()->accept(bodydraw_);
+    drawings_[i]->getDS()->acceptSP(bodydraw_);
     glPopName();
   }
 }
@@ -438,7 +438,7 @@ void BodiesViewer::postSelection(const QPoint& point)
 
 }
 
-void LambdaFirst::accept(boost::shared_ptr<LambdaSecond> l2)
+void LambdaFirst::acceptSP(boost::shared_ptr<LambdaSecond> l2)
 {
   l2->visit(shared_from_this());
 };

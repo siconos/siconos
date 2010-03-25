@@ -30,7 +30,7 @@
 
 
 /* QGLViewer */
-#include <QGLViewer/qglviewer.h>
+#include <qglviewer.h>
 #include <qapplication.h>
 
 #include <qevent.h>
@@ -444,7 +444,7 @@ public:
     r = sphere->getRadius();
   }
 
-  void accept(boost::shared_ptr<LambdaSecond>);
+  void acceptSP(boost::shared_ptr<LambdaSecond>);
 
 };
 

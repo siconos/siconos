@@ -53,7 +53,7 @@ public:
   ~Circle();
 
   /** visitors hook */
-  ACCEPT_VISITORS();
+  ACCEPT_SP_VISITORS();
 
 };
 
