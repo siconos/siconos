@@ -284,6 +284,9 @@ public:
    */
   void display() const;
 
+
+  ACCEPT_STD_VISITORS();
+
 };
 TYPEDEF_SPTR(NewtonEulerR);
 #endif // NEWTONEULERRELATION_H

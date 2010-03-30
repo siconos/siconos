@@ -44,5 +44,6 @@
     REGISTER(LagrangianCompliantR)\
     REGISTER(LagrangianLinearTIR)\
     REGISTER(NewtonEulerDS)\
- 
+    REGISTER(NewtonEulerR)
+
 #endif
