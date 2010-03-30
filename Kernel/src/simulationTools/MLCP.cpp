@@ -104,7 +104,7 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     unsigned int equalitySize1 =  0;
     unsigned int equalitySize2 =  0;
     if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-        != Type::MixedComplementarityConditionNSL)
+        == Type::MixedComplementarityConditionNSL)
       equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
     else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
              == Type::EqualityConditionNSL)
