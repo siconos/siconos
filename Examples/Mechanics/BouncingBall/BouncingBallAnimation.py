@@ -19,10 +19,12 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-
-from matplotlib.pyplot import *
-from Siconos.Kernel import *
 from numpy import *
+
+from enthought.mayavi import mlab
+from enthought.tvtk.tools import visual
+
+from Siconos.Kernel import *
 
 t0 = 0      # start time
 T = 10      # end time
@@ -102,54 +104,28 @@ s.insertNonSmoothProblem(osnspb)
 bouncingBall.initialize(s)
 
 
-# the number of time steps
-N = (T-t0)/h
+#
+# Animation
+#
 
-# Get the values to be plotted 
-# ->saved in a matrix dataPlot
+ground = visual.box(pos=(-r, 0., 0.), 
+                    size=(0,5, 5), 
+                    color=visual.color.white )
 
-dataPlot = empty((N+1,5))
+vball = visual.sphere(radius=r, color=visual.color.red)
 
-lambda_ = inter.lambda_(1)
-
-dataPlot[0, 0] = t0
-dataPlot[0, 1] = ball.q()[0]
-dataPlot[0, 2] = ball.velocity()[0]
-dataPlot[0, 3] = ball.p(2)[0]
-dataPlot[0, 4] = inter.lambda_(1)
-
-k = 1
-
-# time loop
-while(s.nextTime() < T):
+def anime():
     s.computeOneStep()
-
-    dataPlot[k, 0] = s.nextTime()
-    dataPlot[k, 1] = ball.q()[0]
-    dataPlot[k, 2] = ball.velocity()[0]
-    dataPlot[k, 3] = ball.p(2)[0]
-    dataPlot[k, 4] = inter.lambda_(1)[0]
-
-    k += 1
+    vball.pos = ball.q()
     s.nextStep()
 
-#
-# plots
-#
-subplot(411)
-title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
-grid()
-subplot(412)
-title('velocity')
-plot(dataPlot[:,0], dataPlot[:,2])
-grid()
-subplot(413)
-plot(dataPlot[:,0], dataPlot[:,3])
-title('reaction')
-grid()
-subplot(414)
-plot(dataPlot[:,0], dataPlot[:,4])
-title('lambda')
-grid()
-show()
+iter = visual.iterate(10,anime)
+
+# Choose a view angle, and display the figure
+v = visual.get_viewer()
+v.scene.y_plus_view()
+v.scene.camera.position = 1,   1,   10
+v.scene.render()
+
+visual.show()
+
