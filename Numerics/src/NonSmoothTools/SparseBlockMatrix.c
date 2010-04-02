@@ -792,6 +792,96 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
   }
 
 }
+void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix printInFileSBM failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(file, "nbblock = %i;\n", m->nbblocks);
+  if (m->nbblocks == 0)  return;
+
+  fprintf(file, "blocknumber0 = %i;\n", m->blocknumber0);
+  fprintf(file, "blocknumber1 = %i; \n", m->blocknumber1);
+
+  assert(m->blocksize0);
+  assert(m->blocksize1);
+  assert(m->index1_data);
+  assert(m->index2_data);
+
+  fprintf(file, "blocksize0 = [ \t");
+  for (int i = 0; i < m->blocknumber0; i++)
+  {
+    fprintf(file, "%i\t", m->blocksize0[i]);
+  }
+  fprintf(file, "];\n");
+  fprintf(file, "blocksize1 = [ \t");
+  for (int i = 0; i < m->blocknumber1; i++)
+  {
+    fprintf(file, "%i\t", m->blocksize1[i]);
+  }
+  fprintf(file, "];\n");
+  fprintf(file, "filled1 = %li;\n", (long int)m->filled1);
+  fprintf(file, "filled2 = %li;\n", (long int)m->filled2);
+
+  fprintf(file, "index1_data = [ \t");
+  for (int i = 0; i < m->filled1; i++)
+  {
+    fprintf(file, "%li\t", (long int)m->index1_data[i]);
+  }
+  fprintf(file, "];\n");
+  fprintf(file, "index2_data = [ \t");
+  for (int i = 0; i < m->filled2; i++)
+  {
+    fprintf(file, "%li\t", (long int)m->index2_data[i]);
+  }
+  fprintf(file, "];\n");
+
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = m->index1_data[currentRowNumber];
+         blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < m->filled2);
+      colNumber = m->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = m->blocksize0[currentRowNumber];
+
+      if (currentRowNumber != 0)
+        nbRows -= m->blocksize0[currentRowNumber - 1];
+
+      nbColumns = m->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= m->blocksize1[colNumber - 1];
+      //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
+      fprintf(file, "block%i = [ \n", blockNum);
+
+      for (int i = 0; i < nbRows; i++)
+      {
+        fprintf(file, "[");
+        for (int j = 0; j < nbColumns; j++)
+        {
+          fprintf(file, "%32.24e\t ", m->block[blockNum][i + j * nbRows]);
+        }
+        fprintf(file, "];\n");
+      }
+      fprintf(file, "];");
+
+
+
+      /*       for (int i=0;i<nbRows*nbColumns;i++) */
+      /*       { */
+      /*         fprintf(file,"%32le\n",m->block[blockNum][i]); */
+      /*       } */
+
+    }
+  }
+
+}
 void printInFileNameSBM(const SparseBlockStructuredMatrix* const m, const char *filename)
 {
 

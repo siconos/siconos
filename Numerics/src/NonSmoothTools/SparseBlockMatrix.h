@@ -194,6 +194,12 @@ extern "C"
    */
   void newFromFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
 
+  /** print in file  of the matrix content in Scilab format for each block
+      \param M the matrix to be displayed
+      \param file the corresponding  file
+  */
+  void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const M, FILE* file);
+
 
   /** print in file  of the matrix content
    \param M the matrix to be displayed

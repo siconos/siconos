@@ -264,9 +264,9 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
     exit(EXIT_FAILURE);
   }
   int storageType = m->storageType;
-  fprintf(file, "%d\n", m->storageType);
-  fprintf(file, "%d\n", m->size0);
-  fprintf(file, "%d\n", m->size1);
+  fprintf(file, "storageType = %d ; \n", m->storageType);
+  fprintf(file, "size0 = %d; \n", m->size0);
+  fprintf(file, "size1 = %d; \n", m->size1);
 
   if (storageType == 0)
   {
@@ -284,6 +284,7 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
   }
   else if (storageType == 1)
   {
+    printInFileSBMForScilab(m->matrix1, file);
     fprintf(stderr, "Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType);
     exit(EXIT_FAILURE);
 
