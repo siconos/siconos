@@ -176,7 +176,9 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
-
+    /*   FILE * fileout = fopen("dataW.sci","w"); */
+    /*     printInFileForScilab(Wnum,fileout); */
+    /*     fclose(fileout); */
     /*     printf("Display W\n"); */
     /*    printSBM(W); */
 
@@ -253,6 +255,10 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
     localproblem->mu = problem->mu;
     localproblem->isComplete = 1;
+
+    /*     FILE * filecheck = fopen("localproblemcheck.dat","w"); */
+    /*     frictionContact_printInFile(localproblem,filecheck); */
+    /*     fclose(filecheck); */
 
     freeSBM(HtmpSBM);
     freeSBM(Htrans);
