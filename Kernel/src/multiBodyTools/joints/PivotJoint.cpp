@@ -83,6 +83,8 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVe
   *_P0 = *P0;
   _d1 = d1;
   SP::SiconosVector q1 = d1->q0();
+  printf("PivotJointR::PivotJointR q1\n");
+  q1->display();
 
 
   ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
@@ -96,10 +98,11 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVe
   _G1P0x = quatBuff.R_component_2();
   _G1P0y = quatBuff.R_component_3();
   _G1P0z = quatBuff.R_component_4();
-  _G2P0x = 0;
-  _G2P0y = 0;
-  _G2P0z = 0;
+  _G2P0x = _P0->getValue(0);
+  _G2P0y = _P0->getValue(1);
+  _G2P0z = _P0->getValue(2);
   std::cout << "PivotJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
+  std::cout << "PivotJoint 0P0=G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
   _Ax = A->getValue(0);
   _Ay = A->getValue(1);
   _Az = A->getValue(2);
@@ -156,8 +159,8 @@ void PivotJointR::buildA1A2()
   assert(fabs(_A1x * _Ax + _A1y * _Ay + _A1z * _Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
   assert(fabs(_A2x * _Ax + _A2y * _Ay + _A2z * _Az) < 1e-9 && "PivotJoint, _A2 wrong\n");
   assert(fabs(_A1x * _A2x + _A1y * _A2y + _A1z * _A2z) < 1e-9 && "PivotJoint, _A12 wrong\n");
-  std::cout << "JointKnee: _A1x _A1y _A1z :" << _A1x << " " << _A1y << " " << _A1z << std::endl;
-  std::cout << "JointKnee: _A2x _A2y _A2z :" << _A2x << " " << _A2y << " " << _A2z << std::endl;
+  std::cout << "JointPivot: _A1x _A1y _A1z :" << _A1x << " " << _A1y << " " << _A1z << std::endl;
+  std::cout << "JointPivot: _A2x _A2y _A2z :" << _A2x << " " << _A2y << " " << _A2z << std::endl;
 }
 void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
@@ -494,11 +497,10 @@ void PivotJointR::computeJachq(double t)
   }
   else
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
-
-
+  std::cout << "computeJachq:\n";
+  _jachq->display();
 
 }
-
 
 /** to compute p
  *  \param double : current time
@@ -607,6 +609,8 @@ void PivotJointR::computeh(double t)
 {
 
   SP::SiconosVector x1 = _d1->q();
+  //std::cout<<"PivotJoint computeH d1->q:\n";
+  //x1->display();
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
