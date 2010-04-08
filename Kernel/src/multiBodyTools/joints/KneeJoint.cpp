@@ -93,7 +93,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0): NewtonEulerR(
   _G2P0y = _P0->getValue(1);
   _G2P0z = _P0->getValue(2);
   std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-
+  std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
 }
 
 

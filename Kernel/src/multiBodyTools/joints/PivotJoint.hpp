@@ -23,24 +23,15 @@
 #define PivotJointRELATION_H
 
 #include "SiconosKernel.hpp"
+#include "KneeJoint.hpp"
 
-class PivotJointR : public NewtonEulerR
+
+class PivotJointR : public KneeJointR
 {
 public:
   static int _sNbEqualities;
 protected:
-  /*coodinate of the Pivot point in the frame of d1*/
-  SP::SimpleVector _P0;
-  /*coordinate of the Pivot axis in the frame of d1*/
 
-  SP::NewtonEulerDS _d1;
-  SP::NewtonEulerDS _d2;
-  double _G1P0x;
-  double _G1P0y;
-  double _G1P0z;
-  double _G2P0x;
-  double _G2P0y;
-  double _G2P0z;
   /*Axis coordonates*/
   double _Ax, _Ay, _Az;
   double _A1x, _A1y, _A1z;
@@ -60,14 +51,11 @@ public:
    */
   virtual ~PivotJointR() {};
 
-  virtual void computeJachq(double t);
+
   virtual void computeh(double t);
 protected:
-  void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
-  double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
   double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
   double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
 
