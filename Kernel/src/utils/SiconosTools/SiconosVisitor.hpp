@@ -96,12 +96,18 @@
 /* objects that may be visited (1) */
 #undef REGISTER
 #define REGISTER(X) class X;
+
+#undef REGISTER_BASE
+#define REGISTER_BASE(X,Y) REGISTER(X)
+
 SICONOS_VISITABLES()
 
 /* associated types */
 #undef REGISTER
 #define REGISTER(X) X,
 
+#undef REGISTER_BASE
+#define REGISTER_BASE(X,Y) REGISTER(X)
 namespace Type
 {
 enum Siconos
@@ -119,6 +125,10 @@ enum Siconos
 #define REGISTER(X) \
   virtual Type::Siconos visit(const X&) const { return Type::X; }; \
  
+#undef REGISTER_BASE
+#define REGISTER_BASE(X,Y)                                        \
+  virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
+ 
 struct FindType
 {
   SICONOS_VISITABLES()
@@ -129,6 +139,9 @@ struct FindType
 #define REGISTER(X) \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
+
+#undef REGISTER_BASE
+#define REGISTER_BASE(X,Y) REGISTER(X)
 
 struct SiconosVisitor
 {
@@ -150,6 +163,9 @@ inline Siconos value(const C& c)
 
 #undef REGISTER
 #define REGISTER(X) case Type:: X : r.reset(new std::string(#X)); break;
+
+#undef REGISTER_BASE
+#define REGISTER_BASE(X,Y) REGISTER(X)
 
 namespace
 {
@@ -181,5 +197,6 @@ std::string name(const C& c)
 TYPEDEF_SPTR(SiconosVisitor);
 
 #undef REGISTER
+#undef REGISTER_BASE
 
 #endif /* SiconosVisitor_hpp */

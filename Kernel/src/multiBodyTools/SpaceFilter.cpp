@@ -3,19 +3,6 @@
 
 /* hash is done with encapsulation */
 
-class Hashed : public boost::enable_shared_from_this<Hashed>
-{
-public:
-  SP::LagrangianDS body;
-  int i;
-  int j;
-  int k;
-  Hashed(SP::LagrangianDS body, int i, int j, int k = 0) :
-    body(body), i(i), j(j), k(k) {};
-
-  ~Hashed() {};
-
-};
 
 class HashedCircle : public Hashed
 {
@@ -684,6 +671,11 @@ void SpaceFilter::insert(SP::SphereLDS ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new HashedSphereLDS(ds, i, j, k));
+  _hash_table.insert(hashed);
+};
+
+void SpaceFilter::insert(SP::Hashed hashed)
+{
   _hash_table.insert(hashed);
 };
 

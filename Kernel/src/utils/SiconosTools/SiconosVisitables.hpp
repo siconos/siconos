@@ -14,7 +14,6 @@
     REGISTER(SphereLDS)\
     REGISTER(SphereLDSSphereLDSR)\
     REGISTER(SphereLDSPlanR)\
-    REGISTER(ExternalBody)\
     REGISTER(NonSmoothLaw)\
     REGISTER(MixedComplementarityConditionNSL)\
     REGISTER(EqualityConditionNSL)\
@@ -44,6 +43,7 @@
     REGISTER(LagrangianCompliantR)\
     REGISTER(LagrangianLinearTIR)\
     REGISTER(NewtonEulerDS)\
-    REGISTER(NewtonEulerR)
-
+    REGISTER(NewtonEulerR) \
+    REGISTER_BASE(ExternalBody, LagrangianDS)                \
+ 
 #endif

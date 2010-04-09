@@ -54,6 +54,22 @@
 #include <boost/throw_exception.hpp>
 #include <boost/functional/hash.hpp>
 
+/** hash container
+ */
+class Hashed : public boost::enable_shared_from_this<Hashed>
+{
+public:
+  SP::LagrangianDS body;
+  int i;
+  int j;
+  int k;
+  Hashed(SP::LagrangianDS body, int i, int j, int k = 0) :
+    body(body), i(i), j(j), k(k) {};
+
+  ~Hashed() {};
+
+};
+
 DEFINE_SPTR(Hashed);
 
 typedef std::tr1::unordered_multiset<SP::Hashed, boost::hash<SP::Hashed> > space_hash;
@@ -149,6 +165,10 @@ public:
 
   void insert(SP::SphereLDS, int, int, int);
 
+  /** general hashed object
+   */
+  void insert(SP::Hashed);
+
 
   /** get parameters
    */
@@ -162,6 +182,35 @@ public:
     return _cellsize;
   };
 
+  /** get non smooth dynamical system
+   */
+  SP::NonSmoothDynamicalSystem nsds()
+  {
+    return _nsds;
+  };
+
+
+  /** get non smooth law
+   */
+  SP::NonSmoothLaw nslaw()
+  {
+    return _nslaw;
+  };
+
+
+  /** get an interaction id
+   * */
+  unsigned int newInteractionId()
+  {
+    return _interID++;
+  };
+
+  /** get the table
+    * */
+  space_hash table()
+  {
+    return _hash_table;
+  };
 
   /** search potential interactions
    *
