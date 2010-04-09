@@ -514,12 +514,12 @@ public:
   /** set the value of \f$ z \f$ to newValue
    *  \param SiconosVector newValue
    */
-  void setZ(const SiconosVector&);
+  void setz(const SiconosVector&);
 
   /** set \f$ z \f$ to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setZPtr(SP::SiconosVector);
+  void setzPtr(SP::SiconosVector);
 
   // --- g ---
   /** get the value of g

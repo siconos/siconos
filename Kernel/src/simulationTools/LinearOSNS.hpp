@@ -167,12 +167,12 @@ public:
   /** set the value of z to newValue
    *  \param SiconosVector newValue
    */
-  void setZ(const SiconosVector&);
+  void setz(const SiconosVector&);
 
   /** set z to pointer newPtr
    *  \param SP::SiconosVector  newPtr
    */
-  inline void setZPtr(SP::SiconosVector newPtr)
+  inline void setzPtr(SP::SiconosVector newPtr)
   {
     _z = newPtr;
   }

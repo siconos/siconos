@@ -88,7 +88,7 @@ public:
   /** save z of the DynamicalSystem
    *   \param a SiconosVector
    */
-  inline void setZ(const SiconosVector& v)
+  inline void setz(const SiconosVector& v)
   {
     if (!hasz())
       zNode = SiconosDOMTreeTools::createVectorNode(rootNode, "z", v);

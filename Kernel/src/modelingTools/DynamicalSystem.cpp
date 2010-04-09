@@ -226,12 +226,12 @@ void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
   _jacxRhs = newPtr;
 }
 
-void DynamicalSystem::setZ(const SiconosVector& newValue)
+void DynamicalSystem::setz(const SiconosVector& newValue)
 {
   if (_z)
   {
     if (newValue.size() != _z->size())
-      RuntimeException::selfThrow("DynamicalSystem::setZ - inconsistent sizes between input and existing z - To change z size use setZPtr.");
+      RuntimeException::selfThrow("DynamicalSystem::setz - inconsistent sizes between input and existing z - To change z size use setzPtr.");
     *_z = newValue;
   }
   else
@@ -244,7 +244,7 @@ void DynamicalSystem::setZ(const SiconosVector& newValue)
   }
 }
 
-void DynamicalSystem::setZPtr(SP::SiconosVector newPtr)
+void DynamicalSystem::setzPtr(SP::SiconosVector newPtr)
 {
   _z = newPtr;
 }

@@ -73,14 +73,14 @@
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
   virtual void accept(SiconosVisitor&) const = 0;                       \
-  virtual Type::Siconos acceptType(FindType& ft) const                  \
+  virtual inline Type::Siconos acceptType(FindType& ft) const                  \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor));} \
  
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
-  virtual Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
+  virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
  
 #define ACCEPT_SP_VISITORS()                                            \
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
@@ -143,7 +143,7 @@ namespace Type
 static FindType find;
 
 template <typename C>
-Siconos value(const C& c)
+inline Siconos value(const C& c)
 {
   return c.acceptType(find);
 }

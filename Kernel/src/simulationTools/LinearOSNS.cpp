@@ -60,10 +60,10 @@ void LinearOSNS::setW(const SiconosVector& newValue)
   setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_w, newValue);
 }
 
-void LinearOSNS::setZ(const SiconosVector& newValue)
+void LinearOSNS::setz(const SiconosVector& newValue)
 {
   assert(_sizeOutput == newValue.size() &&
-         "LinearOSNS: setZ, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+         "LinearOSNS: setz, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
   setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_z, newValue);
 }
 

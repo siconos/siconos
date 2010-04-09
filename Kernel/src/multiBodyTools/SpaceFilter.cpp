@@ -258,6 +258,9 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
     visit_circular(circle);
   }
 
+  // do nothing (everything must be done in ExternalBody.findInteractions)
+  void visit(SP::ExternalBody)
+  {}
 
 
 };
