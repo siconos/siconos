@@ -104,7 +104,7 @@ void DiskMovingPlanR::computehDot(double time)
   (*_hDot)(0) = (-_AADot - _BBDot) * fabs(D1) / _cubsqrA2pB2 + (_ADot * x + _BDot * y + _CDot) * signD1 / _sqrA2pB2;
 }
 
-bool DiskMovingPlanR::equal(FTime pA, FTime pB, FTime pC, double pr)
+bool DiskMovingPlanR::equal(FTime pA, FTime pB, FTime pC, double pr) const
 {
   return (_AFunction->fPtr == pA && _BFunction->fPtr == pB &&
           _CFunction->fPtr == pC && _r == pr);

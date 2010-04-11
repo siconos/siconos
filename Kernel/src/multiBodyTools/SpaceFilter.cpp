@@ -351,25 +351,29 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
     parent(p), A(A), B(B), C(C), r(r), xCenter(xCenter), yCenter(yCenter), width(width), flag(false) {};
 
 
-  void visit(SP::DiskDiskR)
+  void visit(const DiskDiskR&)
   {
     flag = false;
   };
 
-  void visit(SP::CircleCircleR)
+  void visit(const CircleCircleR&)
   {
     flag = false;
   };
 
-  void visit(SP::DiskMovingPlanR)
+  void visit(const DiskMovingPlanR&)
   {
     flag = false;
   };
 
-
-  void visit(SP::DiskPlanR rel)
+  void visit(const LagrangianScleronomousR&)
   {
-    flag = rel->equal(A, B, C, r, xCenter, yCenter, width);
+    flag = false;
+  };
+
+  void visit(const DiskPlanR& rel)
+  {
+    flag = rel.equal(A, B, C, r, xCenter, yCenter, width);
   };
 
 };
@@ -384,24 +388,29 @@ struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
     parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false) {};
 
 
-  void visit(SP::DiskDiskR)
+  void visit(const DiskDiskR&)
   {
     flag = false;
   };
 
-  void visit(SP::CircleCircleR)
+  void visit(const CircleCircleR&)
   {
     flag = false;
   };
 
-  void visit(SP::DiskPlanR)
+  void visit(const DiskPlanR&)
   {
     flag = false;
   };
 
-  void visit(SP::DiskMovingPlanR rel)
+  void visit(const LagrangianScleronomousR&)
   {
-    flag = rel->equal(AF, BF, CF, r);
+    flag = false;
+  }
+
+  void visit(const DiskMovingPlanR& rel)
+  {
+    flag = rel.equal(AF, BF, CF, r);
   };
 
 };
@@ -415,14 +424,14 @@ struct SpaceFilter::_IsSameSphereLDSPlanR : public SiconosVisitor
   _IsSameSphereLDSPlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
     parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
-  void visit(SP::SphereLDSSphereLDSR)
+  void visit(const SphereLDSSphereLDSR&)
   {
     flag = false;
   };
 
-  void visit(SP::SphereLDSPlanR rel)
+  void visit(const SphereLDSPlanR& rel)
   {
-    flag = rel->equal(A, B, C, D, r);
+    flag = rel.equal(A, B, C, D, r);
   };
 };
 
@@ -439,9 +448,9 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
-  boost::shared_ptr<_IsSameDiskPlanR>
-  isSameDiskPlanR(new _IsSameDiskPlanR(shared_from_this(), A, B, C, r,
-                                       xCenter, yCenter, width));
+  _IsSameDiskPlanR
+  isSameDiskPlanR = _IsSameDiskPlanR(shared_from_this(), A, B, C, r,
+                                     xCenter, yCenter, width);
 
 
   // all DS must be in DS graph
@@ -460,9 +469,9 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameDiskPlanR);
+      ->relation()->accept(isSameDiskPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameDiskPlanR->flag)
+          && isSameDiskPlanR.flag)
       {
         found = true;
         break;
@@ -488,10 +497,10 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameDiskPlanR);
+      ->relation()->accept(isSameDiskPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameDiskPlanR->flag)
+          && isSameDiskPlanR.flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -513,12 +522,12 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
-  boost::shared_ptr<_IsSameDiskMovingPlanR>
-  isSameDiskMovingPlanR(new _IsSameDiskMovingPlanR(shared_from_this(),
-                        (*_moving_plans)(i, 0),
-                        (*_moving_plans)(i, 1),
-                        (*_moving_plans)(i, 2),
-                        r));
+  _IsSameDiskMovingPlanR
+  isSameDiskMovingPlanR = _IsSameDiskMovingPlanR(shared_from_this(),
+                          (*_moving_plans)(i, 0),
+                          (*_moving_plans)(i, 1),
+                          (*_moving_plans)(i, 2),
+                          r);
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
@@ -539,9 +548,9 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameDiskMovingPlanR);
+      ->relation()->accept(isSameDiskMovingPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameDiskMovingPlanR->flag)
+          && isSameDiskMovingPlanR.flag)
       {
         found = true;
         break;
@@ -567,10 +576,10 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameDiskMovingPlanR);
+      ->relation()->accept(isSameDiskMovingPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameDiskMovingPlanR->flag)
+          && isSameDiskMovingPlanR.flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -590,8 +599,9 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
-  boost::shared_ptr<_IsSameSphereLDSPlanR>
-  isSameSphereLDSPlanR(new _IsSameSphereLDSPlanR(shared_from_this(), A, B, C, D, r));
+  _IsSameSphereLDSPlanR
+  isSameSphereLDSPlanR =
+    _IsSameSphereLDSPlanR(shared_from_this(), A, B, C, D, r);
 
 
   // all DS must be in DS graph
@@ -610,9 +620,9 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameSphereLDSPlanR);
+      ->relation()->accept(isSameSphereLDSPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSphereLDSPlanR->flag)
+          && isSameSphereLDSPlanR.flag)
       {
         found = true;
         break;
@@ -638,10 +648,10 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->acceptSP(isSameSphereLDSPlanR);
+      ->relation()->accept(isSameSphereLDSPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSphereLDSPlanR->flag)
+          && isSameSphereLDSPlanR.flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -882,3 +892,10 @@ void SpaceFilter::buildInteractions(double time)
   _nsds->topology()->computeRelativeDegrees();
 
 }
+
+std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)
+{
+  return _hash_table.equal_range(h);
+};
+
+

@@ -68,44 +68,44 @@ public:
   DiskPlanR(double, double, double, double, double);
 
   /* distance between disk and plan */
-  double distance(double x, double y, double r);
+  double distance(double x, double y, double r) const;
 
-  double getRadius()
+  double getRadius() const
   {
     return r;
   };
 
-  double getA()
+  double getA() const
   {
     return A;
   };
 
-  double getB()
+  double getB() const
   {
     return B;
   };
 
-  double getC()
+  double getC() const
   {
     return C;
   };
 
-  double gethypotAB()
+  double gethypotAB() const
   {
     return sqrA2pB2;
   };
 
-  double getXCenter()
+  double getXCenter() const
   {
     return xCenter;
   };
 
-  double getYCenter()
+  double getYCenter() const
   {
     return yCenter;
   };
 
-  double getWidth()
+  double getWidth() const
   {
     return width;
   };
@@ -114,13 +114,13 @@ public:
 
   void computeJachq(double);
 
-  bool equal(double, double, double, double);
+  bool equal(double, double, double, double) const;
 
-  bool equal(double, double, double, double, double, double, double);
+  bool equal(double, double, double, double, double, double, double) const;
 
-  bool equal(DiskPlanR&);
+  bool equal(const DiskPlanR&) const;
 
-  bool isFinite()
+  bool isFinite() const
   {
     return finite;
   };

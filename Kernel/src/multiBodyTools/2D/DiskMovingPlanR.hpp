@@ -100,7 +100,7 @@ public:
     _CDotFunction->setComputeFunction((void*) f);
   }
 
-  bool equal(FTime, FTime, FTime, double);
+  bool equal(FTime, FTime, FTime, double) const;
 
   void computeA(double t)
   COMPUTE(A)

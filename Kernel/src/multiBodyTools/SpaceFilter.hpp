@@ -205,12 +205,9 @@ public:
     return _interID++;
   };
 
-  /** get the table
+  /** get the neighbours
     * */
-  space_hash table()
-  {
-    return _hash_table;
-  };
+  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
 
   /** search potential interactions
    *

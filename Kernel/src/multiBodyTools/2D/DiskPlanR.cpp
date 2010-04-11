@@ -90,7 +90,7 @@ DiskPlanR::DiskPlanR(double r, double xa, double ya, double xb, double yb)
   init(r, (yb - ya) / d, (xb - xa) / d, 1, (xa + xb) / 2, (ya + yb) / 2, hypot(xa - xb, ya - yb));
 }
 
-double DiskPlanR::distance(double x, double y, double rad)
+double DiskPlanR::distance(double x, double y, double rad) const
 {
   if (finite)
   {
@@ -204,13 +204,13 @@ void DiskPlanR::computeJachq(double)
   (*g)(1, 2) = -r;
 }
 
-bool DiskPlanR::equal(double pA, double pB, double pC, double pr)
+bool DiskPlanR::equal(double pA, double pB, double pC, double pr) const
 {
   return (A == pA && B == pB && C == pC && r == pr);
 }
 
 bool DiskPlanR::equal(double pA, double pB, double pC, double pr,
-                      double pXc, double pYc, double pw)
+                      double pXc, double pYc, double pw) const
 {
   if (finite)
     return (A == pA && B == pB && C == pC && r == pr &&
@@ -219,7 +219,7 @@ bool DiskPlanR::equal(double pA, double pB, double pC, double pr,
     return equal(pA, pB, pC, pr);
 }
 
-bool DiskPlanR::equal(DiskPlanR& odpr)
+bool DiskPlanR::equal(const DiskPlanR& odpr) const
 {
   if (finite)
     return (equal(odpr.getA(), odpr.getB(), odpr.getC(),

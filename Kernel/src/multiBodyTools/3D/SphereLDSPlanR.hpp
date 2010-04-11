@@ -55,7 +55,7 @@ public:
 
   void computeJachq(double);
 
-  bool equal(double _A, double _B, double _C, double _D, double _r)
+  bool equal(double _A, double _B, double _C, double _D, double _r) const
   {
     return (A == _A && B == _B && C == _C && D == _D && r == _r) ;
   }
