@@ -1,3 +1,6 @@
+
+
+
 /* Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
