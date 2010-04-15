@@ -59,9 +59,9 @@ void PivotJointR::buildA1A2()
   _Az /= normA;
   std::cout << "JointKnee: _Ax _Ay _Az :" << _Ax << " " << _Ay << " " << _Az << std::endl;
   /*build _A1*/
-  if (_Ax > _Ay)
+  if (fabs(_Ax) > fabs(_Ay))
   {
-    if (_Ax > _Az) /*_Ax is the bigest*/
+    if (fabs(_Ax) > fabs(_Az)) /*_Ax is the bigest*/
     {
       _A1x = _Ay;
       _A1y = -_Ax;
@@ -80,7 +80,7 @@ void PivotJointR::buildA1A2()
       _A2y = 0;
     }
   }
-  else if (_Ay > _Az)  /*_Ay is the bigest*/
+  else if (fabs(_Ay) > fabs(_Az))  /*_Ay is the bigest*/
   {
     _A1y = _Ax;
     _A1x = -_Ay;
