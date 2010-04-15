@@ -43,8 +43,11 @@ void NewtonEulerR::initComponents()
       _jachq->resize(_ysize, _qsize);
     }
     else
-      assert((_jachq->size(1) == _qsize && _jachq->size(0) == _ysize) &&
-             "NewtonEuler::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
+    {
+      assert((_jachq->size(1) == _qsize && _jachq->size(0) == _ysize) ||
+             (printf("NewtonEuler::initComponents _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), _qsize, _jachq->size(0), _ysize) && false) ||
+             ("NewtonEuler::initComponents inconsistent sizes between _jachq matrix and the interaction." && false));
+    }
   }
   if (! _jachqT)
     _jachqT.reset(new SimpleMatrix(_ysize, _xsize));
