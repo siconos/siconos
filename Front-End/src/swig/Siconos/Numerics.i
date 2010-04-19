@@ -34,6 +34,7 @@
 #undef c_abs
 #endif
 #include "SiconosNumerics.h"
+#include "SolverOptions.h"
 %} 
 
 // more convenient
@@ -308,6 +309,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 %include "FrictionContactProblem.h"
 %include "FrictionContact2D_Solvers.h"
 %include "FrictionContact3D_Solvers.h"
+%include "FrictionContact3D_AlartCurnier.h"
 
 %extend FrictionContactProblem
 {
@@ -419,3 +421,14 @@ static int convert_darray(PyObject *input, double *ptr) {
   
 }; 
 
+%extend SolverOptions
+{
+  void setDefault(PyObject *o1, PyObject *o2)
+  {
+      //linearComplementarity_setDefaultSolverOptions(lcp, (SolverOptions *) $self, solverName);
+  }
+}
+
+    
+  
+  

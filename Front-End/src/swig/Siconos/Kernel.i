@@ -38,6 +38,14 @@
 #endif
 #include "SiconosKernel.hpp"
 #include "Disk.hpp"
+#include "Circle.hpp"
+#include "DiskDiskR.hpp"
+#include "DiskPlanR.hpp"
+#include "DiskMovingPlanR.hpp"
+#include "CircleCircleR.hpp"
+#include "ExternalBody.hpp"
+#include "SpaceFilter.hpp"
+#include "SiconosBodies.hpp"
 %} 
 
 // mandatory !
@@ -53,7 +61,7 @@
   import_array();
 %}
 
-// Handle standard exceptions
+// handle standard exceptions
 %include "exception.i"
 %exception
 {
@@ -70,6 +78,9 @@
     SWIG_exception(SWIG_IndexError, e.what());
   }
 }
+
+// handle stl data types
+%include "stl.i"
 
 // 1. Vector and Matrix <=> numpy array (dense only)
 
@@ -128,12 +139,7 @@
 {
   int this_vector_dim[1];
   this_vector_dim[0]=$1->size();
-
-  $result = PyArray_SimpleNew(1,this_vector_dim,NPY_DOUBLE);
-  memcpy(PyArray_DATA($result), $1->getArray(), sizeof(double)*this_vector_dim[0]);
-
-    // without copy : we must increase the shared ptr use_count
-    //  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
 }
 
 %typemap(out) boost::shared_ptr<SiconosMatrix>
@@ -141,15 +147,8 @@
   int this_matrix_dim[2];
   this_matrix_dim[0]=$1->size(0);
   this_matrix_dim[1]=$1->size(1);
-
-  $result = PyArray_SimpleNew(2,this_matrix_dim,NPY_DOUBLE);
-  memcpy(PyArray_DATA($result), $1->getArray(), sizeof(double)*this_matrix_dim[0]*this_matrix_dim[1]);
+  $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
   PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
-
-    // without copy : we must increase use_count of the shared pointer
-    //$result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
-
-
 }
 
 
@@ -188,6 +187,8 @@ SP_TYPE(X,B)
 
 SP_TYPE(NonSmoothLaw,NonSmoothLaw);
 SP_TYPE(NewtonImpactNSL,NonSmoothLaw);
+SP_TYPE(NewtonImpactFrictionNSL,NonSmoothLaw);
+
 
 
 SP_TYPE(NonSmoothDynamicalSystem,NonSmoothDynamicalSystem);
@@ -199,6 +200,8 @@ SP_TYPE(LagrangianLinearTIDS,LagrangianDS);
 SP_TYPE(Relation,Relation);
 SP_TYPE(LagrangianR,Relation);
 SP_TYPE(LagrangianLinearTIR,LagrangianR);
+SP_TYPE(LagrangianRheonomousR,LagrangianR);
+SP_TYPE(LagrangianScleronomousR,LagrangianR);
 
 SP_TYPE(Interaction,Interaction)
 
@@ -207,6 +210,7 @@ SP_TYPE(TimeDiscretisation,TimeDiscretisation);
 SP_TYPE(OneStepNSProblem,OneStepNSProblem);
 SP_TYPE(LinearOSNS, OneStepNSProblem);
 SP_TYPE(LCP,LinearOSNS);
+SP_TYPE(FrictionContact,LinearOSNS);
 
 SP_TYPE(OneStepIntegrator, OneStepIntegrator);
 SP_TYPE(Moreau, OneStepIntegrator);
@@ -215,6 +219,27 @@ SP_TYPE(Simulation,Simulation);
 SP_TYPE(TimeStepping, Simulation);
 
 SP_TYPE(Model, Model);
+
+SP_TYPE(CircularDS,LagrangianDS);
+SP_TYPE(Disk,CircularDS);
+SP_TYPE(Circle,CircularDS);
+SP_TYPE(ExternalBody,LagrangianDS);
+SP_TYPE(DiskDiskR,LagrangianScleronomousR);
+SP_TYPE(DiskPlanR,LagrangianScleronomousR);
+SP_TYPE(DiskMovingPlanR,LagrangianRheonomousR);
+SP_TYPE(SiconosBodies,SiconosBodies);
+
+SP_TYPE(SpaceFilter,SpaceFilter)
+SP_TYPE(Hashed,Hashed)
+SP_TYPE(HashedDisk,Hashed)
+SP_TYPE(HashedCircle,Hashed)
+SP_TYPE(HashedSphereLDS,Hashed)
+
+SP_TYPE(SiconosMatrix,SiconosMatrix)
+SP_TYPE(SimpleMatrix,SiconosMatrix)
+SP_TYPE(SiconosVector,SiconosVector)
+SP_TYPE(SimpleVector,SiconosVector)
+
 
 // dummy namespaces to make swig happy
 namespace boost 
@@ -237,7 +262,6 @@ namespace boost
 namespace SP
 {
 };
-
 
 // note Visitor etc. => module Visitor, Type if ever needed
 
@@ -282,11 +306,14 @@ namespace SP
 %ignore gemm;
 
 %include "SiconosGraph.hpp"
+
 %include "Tools.hpp"
 
 DEFINE_SPTR(SiconosVector);
 DEFINE_SPTR(SiconosMatrix);
 
+%include "SiconosVector.hpp"
+%include "SiconosMatrix.hpp"
 %include "SimpleVector.hpp"
 %include "SimpleMatrix.hpp"
 %include "DynamicalSystem.hpp"
@@ -297,6 +324,8 @@ DEFINE_SPTR(SiconosMatrix);
 %include "Relation.hpp"
 %include "LagrangianR.hpp"
 %include "LagrangianLinearTIR.hpp"
+%include "LagrangianScleronomousR.hpp"
+%include "LagrangianRheonomousR.hpp"
 %include "Interaction.hpp"
 %include "Model.hpp"
 
@@ -306,13 +335,36 @@ DEFINE_SPTR(SiconosMatrix);
 %include "OneStepNSProblem.hpp"
 %include "LinearOSNS.hpp"
 %include "LCP.hpp"
+%include "FrictionContact.hpp"
 
 %include "Simulation.hpp"
 %include "TimeStepping.hpp"
 
 %include "NonSmoothLaw.hpp"
 %include "NewtonImpactNSL.hpp"
+%include "NewtonImpactFrictionNSL.hpp"
 
 %include "TimeDiscretisation.hpp"
 
+%include "CircularDS.hpp"
+%include "Disk.hpp"
+%include "Circle.hpp"
+%include "DiskDiskR.hpp"
+%include "DiskPlanR.hpp"
+%include "DiskMovingPlanR.hpp"
+%include "CircleCircleR.hpp"
+%include "ExternalBody.hpp"
+%include "SpaceFilter.hpp"
+%include "SiconosBodies.hpp"
+
+
+// get a Matrix and a Vector
+
+%extend SimpleMatrix
+{
+  SP::SimpleMatrix get(SP::SimpleMatrix m) 
+  {
+    return m;
+  };
+};
 
