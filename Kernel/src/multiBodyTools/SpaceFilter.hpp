@@ -66,11 +66,39 @@ public:
   Hashed(SP::LagrangianDS body, int i, int j, int k = 0) :
     body(body), i(i), j(j), k(k) {};
 
+  Hashed(int i, int j, int k = 0)
+    : i(i), j(j), k(k) {};
+
   ~Hashed() {};
 
 };
 
+class HashedCircle : public Hashed
+{
+public:
+  HashedCircle(SP::Circle c, int i, int j) : Hashed(c, i, j) {};
+
+};
+
+class HashedDisk : public Hashed
+{
+public:
+  HashedDisk(SP::Disk d, int i, int j) : Hashed(d, i, j) {};
+
+};
+
+class HashedSphereLDS : public Hashed
+{
+public:
+  HashedSphereLDS(SP::SphereLDS d, int i, int j, int k) : Hashed(d, i, j, k) {};
+
+};
+
 DEFINE_SPTR(Hashed);
+DEFINE_SPTR(HashedDisk);
+DEFINE_SPTR(HashedCircle);
+DEFINE_SPTR(HashedSphereLDS);
+
 
 typedef std::tr1::unordered_multiset<SP::Hashed, boost::hash<SP::Hashed> > space_hash;
 
@@ -137,6 +165,10 @@ protected:
   struct _IsSameDiskMovingPlanR;
   struct _IsSameSphereLDSPlanR;
 
+  /* to compute distance */
+  struct _DiskDistance;
+
+
   friend class SpaceFilter::_CircularFilter;
   friend class SpaceFilter::_SphereLDSFilter;
   friend class SpaceFilter::_BodyHash;
@@ -144,8 +176,7 @@ protected:
   friend class SpaceFilter::_IsSameDiskPlanR;
   friend class SpaceFilter::_IsSameDiskMovingPlanR;
   friend class SpaceFilter::_IsSameSphereLDSPlanR;
-
-  SpaceFilter() {};
+  friend class SpaceFilter::_DiskDistance;
 
 public:
 
@@ -155,6 +186,14 @@ public:
     _nsds(nsds), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans)
   {};
 
+  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
+              SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans) :
+    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
+    _nsds(nsds), _nslaw(nslaw), _plans(plans)
+  {};
+
+  SpaceFilter()
+  {};
 
   /** 2D/3D objects insertion
    *
@@ -208,6 +247,17 @@ public:
   /** get the neighbours
     * */
   std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
+
+
+  /** just test the presence of neighbours
+    */
+  bool haveNeighbours(SP::Hashed h);
+
+  /** give the minimal distance
+    */
+  double minDistance(SP::Hashed h);
+
+
 
   /** search potential interactions
    *

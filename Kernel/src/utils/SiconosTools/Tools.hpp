@@ -134,6 +134,15 @@ boost::shared_ptr<S> setOfGraph(boost::shared_ptr<G> g)
   return(r);
 }
 
+/* identity v=id(v) */
+template<class T>
+T id(T value)
+{
+  return value;
+}
+
+
+
 // --- CONSTRUCTORS ---
 
 #endif /* TOOLS_H */

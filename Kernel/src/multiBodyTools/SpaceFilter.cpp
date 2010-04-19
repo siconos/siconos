@@ -4,30 +4,6 @@
 /* hash is done with encapsulation */
 
 
-class HashedCircle : public Hashed
-{
-public:
-  SP::Circle body;
-  HashedCircle(SP::Circle c, int i, int j) : Hashed(c, i, j) {};
-
-};
-
-class HashedDisk : public Hashed
-{
-public:
-  SP::Disk body;
-  HashedDisk(SP::Disk d, int i, int j) : Hashed(d, i, j) {};
-
-};
-
-class HashedSphereLDS : public Hashed
-{
-public:
-  SP::SphereLDS body;
-  HashedSphereLDS(SP::SphereLDS d, int i, int j, int k) : Hashed(d, i, j, k) {};
-
-};
-
 /* needed by boost hash */
 bool operator ==(SP::Hashed const& a, SP::Hashed const& b)
 {
@@ -47,10 +23,6 @@ std::size_t hash_value(SP::Hashed const& h)
   return seed;
 };
 
-
-TYPEDEF_SPTR(HashedCircle);
-TYPEDEF_SPTR(HashedDisk);
-TYPEDEF_SPTR(HashedSphereLDS);
 
 /* the hashing is done with a visitor */
 class SpaceFilter::_BodyHash : public SiconosVisitor
@@ -898,4 +870,60 @@ std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP
   return _hash_table.equal_range(h);
 };
 
+bool SpaceFilter::haveNeighbours(SP::Hashed h)
+{
+  std::pair<space_hash::iterator, space_hash::iterator> neighbours
+    = _hash_table.equal_range(h);
+  return (neighbours.first != neighbours.second);
+};
 
+
+struct SpaceFilter::_DiskDistance : public SiconosVisitor
+{
+  double x;
+  double y;
+  double r;
+  double result;
+
+  _DiskDistance(double x, double y, double r)
+    : x(x), y(y), r(r)
+  {};
+
+  void visit(SP::Disk d)
+  {
+    double xd = d->q()->getValue(0);
+    double yd = d->q()->getValue(0);
+
+    result = (hypot(x - xd, y - yd) - (r + d->getRadius()));
+  }
+};
+
+
+
+
+/* only for disks at the moment */
+double SpaceFilter::minDistance(SP::Hashed h)
+{
+  std::pair<space_hash::iterator, space_hash::iterator> neighbours
+    = _hash_table.equal_range(h);
+
+  SP::SiconosVector q = h->body->q();
+
+  double dmin = INFINITY;
+
+  {
+    SP::Disk disk = boost::static_pointer_cast<Disk>(h->body);
+
+    boost::shared_ptr<_DiskDistance> distance(new _DiskDistance((*q)(0), (*q)(1), disk->getRadius()));
+
+    for (; neighbours.first != neighbours.second; ++neighbours.first)
+    {
+      (*neighbours.first)->body->acceptSP(distance);
+
+      dmin = (std::min)(dmin, distance->result);
+    }
+  }
+
+  return dmin;
+
+};
