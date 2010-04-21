@@ -46,6 +46,7 @@
 #include "ExternalBody.hpp"
 #include "SpaceFilter.hpp"
 #include "SiconosBodies.hpp"
+#include "addons.hpp"
 %} 
 
 // mandatory !
@@ -183,7 +184,6 @@ SP_TYPE(X,B)
 %enddef
 
 %import <boost/enable_shared_from_this.hpp>
-%template (sharedModel) boost::enable_shared_from_this<Model>;
 
 SP_TYPE(NonSmoothLaw,NonSmoothLaw);
 SP_TYPE(NewtonImpactNSL,NonSmoothLaw);
@@ -192,12 +192,14 @@ SP_TYPE(NewtonImpactFrictionNSL,NonSmoothLaw);
 
 
 SP_TYPE(NonSmoothDynamicalSystem,NonSmoothDynamicalSystem);
+SP_TYPE(Topology,Topology);
 
 SP_TYPE(DynamicalSystem,DynamicalSystem);
 SP_TYPE(LagrangianDS,DynamicalSystem);
 SP_TYPE(LagrangianLinearTIDS,LagrangianDS);
 
 SP_TYPE(Relation,Relation);
+SP_TYPE(UnitaryRelation,UnitaryRelation);
 SP_TYPE(LagrangianR,Relation);
 SP_TYPE(LagrangianLinearTIR,LagrangianR);
 SP_TYPE(LagrangianRheonomousR,LagrangianR);
@@ -239,6 +241,14 @@ SP_TYPE(SiconosMatrix,SiconosMatrix)
 SP_TYPE(SimpleMatrix,SiconosMatrix)
 SP_TYPE(SiconosVector,SiconosVector)
 SP_TYPE(SimpleVector,SiconosVector)
+
+%include "InteractionsSet.hpp"
+%include "SiconosSet.hpp"
+
+%template (InteractionsSet) SiconosSet<Interaction,double*>;
+%template (sharedModel) boost::enable_shared_from_this<Model>;
+
+SP_TYPE(InteractionsSet,InteractionsSet)
 
 
 // dummy namespaces to make swig happy
@@ -305,12 +315,13 @@ namespace SP
 %ignore gemv;
 %ignore gemm;
 
-%include "SiconosGraph.hpp"
-
 %include "Tools.hpp"
 
 DEFINE_SPTR(SiconosVector);
 DEFINE_SPTR(SiconosMatrix);
+
+%include "addons.hpp"
+
 
 %include "SiconosVector.hpp"
 %include "SiconosMatrix.hpp"
@@ -318,10 +329,12 @@ DEFINE_SPTR(SiconosMatrix);
 %include "SimpleMatrix.hpp"
 %include "DynamicalSystem.hpp"
 %include "NonSmoothDynamicalSystem.hpp"
+%include "Topology.hpp"
 %include "LagrangianDS.hpp"
 %include "LagrangianLinearTIDS.hpp"
 
 %include "Relation.hpp"
+%include "UnitaryRelation.hpp"
 %include "LagrangianR.hpp"
 %include "LagrangianLinearTIR.hpp"
 %include "LagrangianScleronomousR.hpp"
@@ -356,15 +369,43 @@ DEFINE_SPTR(SiconosMatrix);
 %include "ExternalBody.hpp"
 %include "SpaceFilter.hpp"
 %include "SiconosBodies.hpp"
+%import "SiconosGraph.hpp"
+
+%import "boost/config.hpp"
+%import "boost/graph/graph_utility.hpp"
+%import "boost/graph/adjacency_list.hpp"
+
+%fragment("StdSequenceTraits");
+
+%fragment("StdMapTraits");
+
+// this fail with swig::type_name
+//%template (VMap) std::map<boost::shared_ptr<DynamicalSystem>,
+//                          graph_traits<adjacency_list<
+//                                         listS, listS, undirectedS, 
+//                                         property <vertex_bundle_t, boost::shared_ptr<DynamicalSystem>, 
+//                                                   property < vertex_color_t , 
+//                                                              default_color_type , 
+//                                                              property < vertex_index_t, size_t > > >, 
+//                                         property <edge_bundle_t, boost::shared_ptr<UnitaryRelation>, 
+//                                                   property < edge_color_t , 
+//                                                              default_color_type , 
+//                                                              property < edge_index_t, size_t > > > > >::vertex_descriptor >;
+//
+
+%include "SimulationTypeDef.hpp"
+
+%template (dsv) std::vector<boost::shared_ptr<DynamicalSystem> >;
+
+%template (dsi) std::pair<unsigned int, unsigned int >;
+
+%template (dsp) std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> >;
+
+%template (dspv) std::vector<std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> > >;
+
+%template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
+
+%template (dsg) SiconosGraph<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<UnitaryRelation> >;
 
 
-// get a Matrix and a Vector
-
-%extend SimpleMatrix
-{
-  SP::SimpleMatrix get(SP::SimpleMatrix m) 
-  {
-    return m;
-  };
-};
-
+//%template (urv) std::vector<boost::shared_ptr<UnitaryRelation> >;
