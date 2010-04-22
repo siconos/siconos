@@ -206,7 +206,7 @@ void PrismaticJointR::computeh(double t)
   double norm = 0;
   for (int ii = 0; ii < 5; ii++)
     norm += y->getValue(ii) * y->getValue(ii);
-  std::cout << "Prismatic norm computeH: " << norm << std::endl;
+  //std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 
 
 

@@ -505,8 +505,8 @@ void KneeJointR::computeh(double t)
   y->setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y->setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y->setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  std::cout << "KneeJoint computeH:\n";
-  y->display();
+  // std::cout<<"KneeJoint computeH:\n";
+  // y->display();
 
 
 
