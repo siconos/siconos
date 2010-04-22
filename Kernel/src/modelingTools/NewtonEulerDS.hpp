@@ -302,7 +302,10 @@ public:
   {
     return _q0;
   }
-
+  inline SP::SiconosVector v0() const
+  {
+    return _v0;
+  }
   /** set the value of q0 to newValue
    *  \param SiconosVector newValue
    */
