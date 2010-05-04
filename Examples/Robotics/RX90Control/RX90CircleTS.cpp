@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     // creating Z parameter computed in Actuators and used in FInt
     SP::SimpleVector torques(new SimpleVector(nDof));
     torques->zero();
-    arm->setZPtr(torques);
+    arm->setzPtr(torques);
 
     allDS.insert(arm);
 

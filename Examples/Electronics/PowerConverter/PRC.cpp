@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
     // z[0] is used as a parameter in the plug-in.
     (*z)(0) = 1.0 / Lrvalue;
-    LSPRC->setZPtr(z);
+    LSPRC->setzPtr(z);
     LSPRC->setComputebFunction("PRCPlugin.so", "computeU");
 
     // --- Interaction between linear system and non smooth system ---

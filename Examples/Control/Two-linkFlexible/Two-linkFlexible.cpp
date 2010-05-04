@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     arm->setComputeFIntFunction("Two-linkFlexiblePlugin.so", "U");
     arm->setComputeJacobianFIntqDotFunction("Two-linkFlexiblePlugin.so", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("Two-linkFlexiblePlugin.so", "jacobFintQ");
-    arm->setZPtr(z);
+    arm->setzPtr(z);
 
     allDS.insert(arm);
 
@@ -362,7 +362,7 @@ int main(int argc, char* argv[])
 //     arm->setComputeJacobianNNLFunction(1,"Two-linkFlexiblePlugin.so","jacobianVNNL");
 //     arm->setComputeJacobianNNLFunction(0,"Two-linkFlexiblePlugin.so","jacobianNNLq");
 //     arm->setComputeFExtFunction("Two-linkFlexiblePlugin.so","U");
-//     arm->setZPtr(z);
+//     arm->setzPtr(z);
 
 //     allDS.insert(arm);
 

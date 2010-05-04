@@ -151,7 +151,7 @@ void Spheres::init()
     osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
     // iterations
 
-    osnspb_->numericsSolverOptions()->iparam[4] = 1; // projection
+    osnspb_->numericsSolverOptions()->iparam[4] = 2; // projection
 
     osnspb_->numericsSolverOptions()->dparam[0] = 1e-6; // Tolerance
     osnspb_->numericsSolverOptions()->dparam[2] = 1e-8; // Local tolerance

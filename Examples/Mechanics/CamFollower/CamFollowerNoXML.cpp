@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     //    (*param)(0) = vectorDS[0]->getNumber();
     (*param)(0) = rpm;
     // 2 - Assign this param to the function FExt
-    lds->setZPtr(param);
+    lds->setzPtr(param);
     // 2 corresponds to the position of FExt in the stl vector of possible parameters. 0 is mass, 1 FInt and so on.
     // Now the DS number will be available in FExt plugin.
 
@@ -111,10 +111,7 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(lds, theta));
 
     // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnspb(new LCP());
-
-    // solver
-    osnspb->setNumericsSolverName("QP");
+    SP::OneStepNSProblem osnspb(new LCP("QP"));
 
     // max number of iterations
     osnspb->numericsSolverOptions()->iparam[0] = 101;

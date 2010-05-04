@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U");
     arm->setComputeJacobianFIntqDotFunction("TwolinkMultiFlexPlugin.so", "jacobFintV");
     arm->setComputeJacobianFIntqFunction("TwolinkMultiFlexPlugin.so", "jacobFintQ");
-    arm->setZPtr(z);
+    arm->setzPtr(z);
 
     allDS.insert(arm);
 

@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     prod(*Int_D, *Offset_lambda, *tmp);
     *tmp -= *Offset_y;
     Int_z->setBlock(0, *tmp);
-    LSDiodeBridgePowSup->setZPtr(Int_z);
+    LSDiodeBridgePowSup->setzPtr(Int_z);
 
     SP::SimpleMatrix Int_B(new SimpleMatrix(1, 4));
     (*Int_B)(0 , 0) = 1.0 / Cfilt;

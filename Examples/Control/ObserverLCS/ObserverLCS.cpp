@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(obsX0, hatA));
     observer->setComputebFunction("ObserverLCSPlugin.so", "uObserver");
     //    SimpleVector z(new SimpleVector(1);
-    observer->setZPtr(process->x());
+    observer->setzPtr(process->x());
     // The set of all DynamicalSystems
     DynamicalSystemsSet allDS;
     allDS.insert(process);

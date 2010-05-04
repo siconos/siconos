@@ -21,7 +21,9 @@
 
 from numpy import *
 
-from enthought.mayavi import mlab
+# vpython pb on ubuntu karmic.
+# https://bugs.launchpad.net/ubuntu/karmic/+source/boost1.38/+bug/457688
+# so we use tvtk visual
 from enthought.tvtk.tools import visual
 
 from Siconos.Kernel import *
