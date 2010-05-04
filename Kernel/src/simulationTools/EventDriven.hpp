@@ -53,10 +53,13 @@ private:
 
 public:
 
+
+
+
   /** defaut constructor
    *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
    */
-  EventDriven(SP::TimeDiscretisation td): Simulation(td), istate(1) {};
+  EventDriven(SP::TimeDiscretisation td);
 
   /** constructor with XML object of the EventDriven
        \param SimulationXML* : the XML object corresponding

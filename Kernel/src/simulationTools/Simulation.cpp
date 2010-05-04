@@ -165,21 +165,21 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 }
 
 
-SP::OneStepNSProblem Simulation::oneStepNSProblem(const std::string& name)
+SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 {
-  if (!hasOneStepNSProblem(name))
-    RuntimeException::selfThrow("Simulation - oneStepNSProblem(name) - The One Step NS Problem is not in the simulation.");
+  if (!(*_allNSProblems)[Id])
+    RuntimeException::selfThrow("Simulation - oneStepNSProblem(Id) - The One Step NS Problem is not in the simulation.");
 
-  return (*_allNSProblems)[name];
+  return (*_allNSProblems)[Id];
 }
-
+/*
 void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
 {
   clearOneStepNSProblems();
 
   // Warning: pointers links between OneStepNSProblem of each map
   _allNSProblems.reset(new OneStepNSProblems());
-  for (ConstOSNSIterator itOSNS = mapOfOSNS.begin(); itOSNS != mapOfOSNS.end(); ++itOSNS)
+  for(ConstOSNSIterator itOSNS = mapOfOSNS.begin(); itOSNS != mapOfOSNS.end(); ++itOSNS)
     (*_allNSProblems)[itOSNS->first] = itOSNS->second;
 }
 
@@ -195,7 +195,7 @@ const bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
   bool val = false; // true when osns found.
 
   ConstOSNSIterator it = _allNSProblems->find(osns->getId());
-  if (it != _allNSProblems->end()) val = true;
+  if (it!= _allNSProblems->end() ) val = true;
 
   return val;
 }
@@ -204,15 +204,15 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 {
   bool val = false;
   ConstOSNSIterator it;
-  for (it = _allNSProblems->begin(); it != _allNSProblems->end(); ++it)
-    if ((it->second)->getId() == name)
-    {
-      val = true;
-      break;
-    }
+  for(it = _allNSProblems->begin(); it!= _allNSProblems->end(); ++it)
+    if( (it->second)->getId() == name)
+      {
+  val = true;
+  break;
+      }
   return val;
 }
-
+*/
 void Simulation::updateIndexSets()
 {
   // Warning, I0 is not updated and must remain unchanged !
@@ -226,13 +226,12 @@ void Simulation::updateIndexSets()
   }
 }
 
-void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns)
+void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
-  if (hasOneStepNSProblem(osns))
-    RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), the non smooth problem already exists in the Simulation. ");
+  if (((*_allNSProblems)[Id]))
+    RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
+  (*_allNSProblems)[Id] = osns;
 
-  string name = osns->getId();
-  (*_allNSProblems)[name] = osns;
 }
 
 void Simulation::updateInteractions()
@@ -363,17 +362,16 @@ void Simulation::saveInMemory()
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
   for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    (itOsns->second)->saveInMemory();
+    (*itOsns)->saveInMemory();
 }
 
-int Simulation::computeOneStepNSProblem(const std::string& name)
+int Simulation::computeOneStepNSProblem(int Id)
 {
-  if (!hasOneStepNSProblem(name))
-    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem does not exist in the simulation. Id:" + name);
-  if (!(*_allNSProblems)[name])
-    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  return (*_allNSProblems)[name]->compute(model()->currentTime());
+  if (!(*_allNSProblems)[Id])
+    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
+
+  return (*_allNSProblems)[Id]->compute(model()->currentTime());
 }
 
 void Simulation::update()

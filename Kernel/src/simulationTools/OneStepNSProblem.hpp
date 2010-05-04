@@ -95,7 +95,7 @@ protected:
 
 
   /** type of the OneStepNSProblem (LCP ...) */
-  std::string _nspbType;
+  //  std::string _nspbType;
 
   /** id/name of the problem */
   std::string _id;
@@ -184,19 +184,26 @@ private:
 
 public:
 
-  /** xml constructor
+  /** depressed xml constructor
    *  \param string: problem type
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
   OneStepNSProblem(const std::string&, SP::OneStepNSProblemXML);
-
-  /** constructor from data
+  /**  xml constructor
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   */
+  OneStepNSProblem(SP::OneStepNSProblemXML);
+  /** deressed constructor from data
    *  \param string: problem type
    *  \param string : id
    *  \param string : solvername
    */
   OneStepNSProblem(const std::string&, const std::string&, const std::string&);
-
+  /**  constructor from data
+   *  \param string : id
+   *  \param string : solvername
+   */
+  OneStepNSProblem(const std::string&, const std::string&);
   /** destructor
    */
   virtual ~OneStepNSProblem();
@@ -230,18 +237,12 @@ public:
   /** to get the type of the OneStepNSProblem
    *  \return string
    */
-  inline std::string getType() const
-  {
-    return _nspbType;
-  }
+  //  inline std::string getType() const {return _nspbType;}
 
   /** set the type of the OneStepNSProblem
    *  \param: string
    */
-  inline void setType(const std::string&  newVal)
-  {
-    _nspbType = newVal;
-  }
+  //  inline void setType(const std::string&  newVal) {_nspbType=newVal;}
 
   /** to get the id of the OneStepNSProblem
    *  \return string

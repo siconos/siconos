@@ -38,7 +38,7 @@ using namespace RELATION;
 // xml constructor
 LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
                        const string & name) :
-  OneStepNSProblem(name, onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(false)
+  OneStepNSProblem(onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(false)
 {
   // Read storage type if given (optional , default = dense)
   if (onestepnspbxml->hasStorageType())
@@ -48,7 +48,7 @@ LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
 // Constructor from a set of data
 LinearOSNS::LinearOSNS(const string& numericsSolverName,  const string& name,
                        const string& newId):
-  OneStepNSProblem(name, newId, numericsSolverName), _MStorageType(0), _keepLambdaAndYState(false)
+  OneStepNSProblem(newId, numericsSolverName), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
 // Setters
@@ -588,6 +588,9 @@ void LinearOSNS::computeq(double time)
     computeqBlock(ur, pos); // free output is saved in y
   }
 }
+
+
+
 
 void LinearOSNS::preCompute(double time)
 {

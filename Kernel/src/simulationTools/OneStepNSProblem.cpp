@@ -34,7 +34,34 @@ using namespace std;
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(const string& pbType,
                                    SP::OneStepNSProblemXML osnspbxml):
-  _nspbType(pbType), _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
+/*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+{
+  if (!_onestepnspbxml)
+    RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
+
+  // === get dimension of the problem ===
+  if (_onestepnspbxml->hasDim())
+    _sizeOutput = _onestepnspbxml->getDimNSProblem();
+
+  // === get Id ===
+
+  if (_onestepnspbxml->hasId())
+    _id = _onestepnspbxml->getId();
+
+  if (_onestepnspbxml->hasNumericsSolverName())
+    _id = _onestepnspbxml->getNumericsSolverName();
+
+
+  // Numerics general options
+  _numerics_options.reset(new NumericsOptions());
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
+
+  _numerics_solver_options.reset(new SolverOptions);
+  printf("OneStepNSProblem::OneStepNSProblem 1: Depressed inertface, first parameter ignored\n");
+}
+OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
+  _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
   _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
   if (!_onestepnspbxml)
@@ -60,10 +87,21 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
   _numerics_solver_options.reset(new SolverOptions);
 
 }
-
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const string& newNumericsSolverName):
-  _numerics_solver_name(newNumericsSolverName), _nspbType(pbType), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _numerics_solver_name(newNumericsSolverName), /*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+{
+
+  // Numerics general options
+  _numerics_options.reset(new NumericsOptions());
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
+
+  _numerics_solver_options.reset(new SolverOptions);
+  printf("OneStepNSProblem::OneStepNSProblem 2: Depressed inertface, first parameter ignored, removed it.\n");
+}
+
+OneStepNSProblem::OneStepNSProblem(const string& newId, const string& newNumericsSolverName):
+  _numerics_solver_name(newNumericsSolverName),  _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
 
   // Numerics general options
@@ -73,6 +111,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
   _numerics_solver_options.reset(new SolverOptions);
 
 }
+
 
 SP::SiconosMatrix OneStepNSProblem::unitaryBlock(SP::UnitaryRelation UR1,
     SP::UnitaryRelation UR2) const
@@ -275,7 +314,7 @@ void OneStepNSProblem::computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelat
 {
   RuntimeException::selfThrow
   ("OneStepNSProblem::computeUnitaryBlock - not yet implemented for problem type ="
-   + _nspbType);
+  );
 }
 
 void OneStepNSProblem::updateDSBlocks()
@@ -335,7 +374,7 @@ void OneStepNSProblem::computeDSBlock(SP::DynamicalSystem)
 {
   RuntimeException::selfThrow
   ("OneStepNSProblem::computeDSBlock - not yet implemented for problem type ="
-   + _nspbType);
+  );
 }
 
 
@@ -425,7 +464,7 @@ void OneStepNSProblem::computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalS
 {
   RuntimeException::selfThrow
   ("OneStepNSProblem::computeUnitaryDSBlock - not yet implemented for problem type ="
-   + _nspbType);
+  );
 }
 
 
@@ -493,15 +532,13 @@ void OneStepNSProblem::computeAllDSUnitaryBlocks()
   //  computeDSUnitaryBlock(*itDS, *itUR);
   //     }
   RuntimeException::selfThrow
-  ("OneStepNSProblem::computeALLDSUnitaryBlocks - not yet implemented for problem type ="
-   + _nspbType);
+  ("OneStepNSProblem::computeALLDSUnitaryBlocks - not yet implemented for problem type =");
 }
 
 void OneStepNSProblem::computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation)
 {
   RuntimeException::selfThrow
-  ("OneStepNSProblem::computeDSUnitaryBlock - not yet implemented for problem type ="
-   + _nspbType);
+  ("OneStepNSProblem::computeDSUnitaryBlock - not yet implemented for problem type =");
 }
 void OneStepNSProblem::initialize(SP::Simulation sim)
 {

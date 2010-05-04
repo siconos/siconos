@@ -54,7 +54,8 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 
     if (OSNSList.size() != 2)
       RuntimeException::selfThrow("EventDriven::xml constructor - Wrong number of OSNS problems: 2 are required.");
-    string id = "impact";
+    int id = SICONOS_OSNSP_ED_IMPACT;
+    (*_allNSProblems).resize(SICONOS_OSNSP_ED_NUMBER);
     for (SetOfOSNSPBXMLIt it = OSNSList.begin(); it != OSNSList.end(); ++it)
     {
       osnsXML = *it;
@@ -65,14 +66,19 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
       }
       else
         RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-      id = "acceleration";
+      id = SICONOS_OSNSP_ED_ACCELERATION;
     }
 
-    (*_allNSProblems)["acceleration"]->setId("acceleration");
-    (*_allNSProblems)["impact"]->setId("impact");
+
   }
 }
-
+/** defaut constructor
+   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   */
+EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), istate(1)
+{
+  (*_allNSProblems).resize(SICONOS_OSNSP_ED_NUMBER);
+};
 void EventDriven::updateIndexSet(unsigned int i)
 {
   assert(!_model.expired());
@@ -269,13 +275,11 @@ void EventDriven::initOSNS()
       (" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are "
        + _allNSProblems->size());
 
-    if (_allNSProblems->find("impact") ==
-        _allNSProblems->end())  // ie if the impact problem does not
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) // ie if the impact problem does not
       // exist
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (_allNSProblems->find("acceleration") ==
-        _allNSProblems->end()) // ie if the acceleration-level problem
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION])) // ie if the acceleration-level problem
       // does not exist
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
@@ -292,10 +296,10 @@ void EventDriven::initOSNS()
 
     // WARNING: only for Lagrangian systems - To be reviewed for
     // other ones.
-    (*_allNSProblems)["impact"]->setLevels(_levelMin - 1, _levelMax - 1);
-    (*_allNSProblems)["impact"]->initialize(shared_from_this());
-    (*_allNSProblems)["acceleration"]->setLevels(_levelMin, _levelMax);
-    (*_allNSProblems)["acceleration"]->initialize(shared_from_this());
+    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setLevels(_levelMin - 1, _levelMax - 1);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
+    (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->setLevels(_levelMin, _levelMax);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->initialize(shared_from_this());
   }
 }
 
@@ -331,9 +335,9 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty())
   {
-    if (!((*_allNSProblems)["acceleration"]->interactions())->isEmpty())
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->interactions())->isEmpty())
     {
-      (*_allNSProblems)["acceleration"]->compute(t);
+      (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(t);
       updateInput(2); // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the

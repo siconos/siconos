@@ -58,7 +58,6 @@ private:
 
 public:
 
-
   /** Constructor with the time-discretisation.
   *  \param a pointer to a timeDiscretisation (linked to the model
   *  that owns this simulation)
@@ -90,9 +89,9 @@ public:
 
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
    *  \param a pointer to OneStepNSProblem
-   */
-  void insertNonSmoothProblem(SP::OneStepNSProblem);
 
+  void insertNonSmoothProblem(SP::OneStepNSProblem);
+  */
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
   *  \param unsigned int: the number of the set to be updated
   */

@@ -367,7 +367,7 @@ public:
    *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem
    */
-  SP::OneStepNSProblem oneStepNSProblem(const std::string&);
+  SP::OneStepNSProblem oneStepNSProblem(int);
 
   /** set allNSProblems map - Warning: no copy between
       OneStepNSProblem of each map, pointers links!
@@ -383,19 +383,19 @@ public:
    *  \param a pointer to OneStepNSProblem
    *  \return a bool
    */
-  const bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
+  //const bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
 
   /** check if a OneStepNSProblem named id is already in the map
    *  \param a string ("id")
    *  \return a bool
    */
-  const bool hasOneStepNSProblem(const std::string&) const ;
+  //const bool hasOneStepNSProblem(const std::string&) const ;
 
   /** add a OneStepNSProblem in the Simulation (if its not the first,
       it needs to have an id clearly defined)
    *  \param a smart pointer to OneStepNSProblem
    */
-  virtual void insertNonSmoothProblem(SP::OneStepNSProblem);
+  virtual void insertNonSmoothProblem(SP::OneStepNSProblem, int Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the SimulationXML* of the Simulation
    *  \return a pointer on the SimulationXML of the Simulation
@@ -495,7 +495,7 @@ public:
    *  \param a string, the id of the OneStepNSProblem to be computed
    *  \return an int, information about the solver convergence.
    */
-  int computeOneStepNSProblem(const std::string&);
+  int computeOneStepNSProblem(int);
 
   /** update input, state of each dynamical system and output
    *  \param lambda order used to compute input

@@ -53,7 +53,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
   mComputeResiduY = false;
 
   if (osi) insertIntegrator(osi);
-
+  (*_allNSProblems).resize(SICONOS_OSNSP_TS_NUMBER);
   if (osnspb) insertNonSmoothProblem(osnspb);
 
 }
@@ -65,6 +65,7 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
   Simulation(strxml, t0, T, dsList, interList)
 {
   mComputeResiduY = false;
+  (*_allNSProblems).resize(SICONOS_OSNSP_TS_NUMBER);
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
   if (_simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
@@ -78,15 +79,15 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
     string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      (*_allNSProblems)["timeStepping"].reset(new LCP(osnsXML));
+      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new LCP(osnsXML));
     }
     else if (type == FRICTIONCONTACT_TAG)
     {
-      (*_allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML));
+      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new FrictionContact(osnsXML));
     }
     else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
-    (*_allNSProblems)["timeStepping"]->setId("timeStepping");
+    //      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setId("timeStepping");
 
     // Add QP and Relay cases when these classes will be fully
     // implemented.
@@ -239,17 +240,16 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
 }
 
-void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
-{
-  // A the time, a time stepping simulation can only have one non
-  // smooth problem.
-  if (!_allNSProblems->empty())
-    RuntimeException::selfThrow
-    ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
-  string name = "timeStepping";
-  osns->setId(name);
-  (*_allNSProblems)[name] = osns;
-}
+// void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
+// {
+//   // A the time, a time stepping simulation can only have one non
+//   // smooth problem.
+//   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
+//      RuntimeException::selfThrow
+//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
+
+//   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
+// }
 
 void TimeStepping::initOSNS()
 {
@@ -307,8 +307,8 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (itOsns->second)->setLevels(_levelMin, _levelMax);
-      (itOsns->second)->initialize(shared_from_this());
+      (*itOsns)->setLevels(_levelMin, _levelMax);
+      (*itOsns)->initialize(shared_from_this());
     }
   }
 }
@@ -400,7 +400,7 @@ void TimeStepping::advanceToEvent()
   computeFreeState();
   int info = 0;
   if (!_allNSProblems->empty())
-    info = computeOneStepNSProblem("timeStepping");
+    info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
   // Check output from solver (convergence or not ...)
   if (!checkSolverOutput)
     DefaultCheckSolverOutput(info);
@@ -458,7 +458,7 @@ void TimeStepping::saveYandLambdaInMemory()
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
   for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    (itOsns->second)->saveInMemory();
+    (*itOsns)->saveInMemory();
 
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
@@ -478,7 +478,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     if (info)
       cout << "new loop because of info\n" << endl;
     if (!_allNSProblems->empty())
-      info = computeOneStepNSProblem("timeStepping");
+      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     if (info)
       cout << "info!" << endl;
     // Check output from solver (convergence or not ...)

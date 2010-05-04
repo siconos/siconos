@@ -167,7 +167,8 @@ typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 #include "OneStepNSProblem.hpp"
 /** Map of OSNS */
-typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
+//typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
+typedef std::vector<SP::OneStepNSProblem> OneStepNSProblems;
 
 /** Iterator through OneStepNSProblems */
 typedef OneStepNSProblems::iterator OSNSIterator;
@@ -179,6 +180,22 @@ typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 /** default tolerance value, used to update index sets */
 const double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
+
+enum SICONOS_OSNSP
+{
+  SICONOS_OSNSP_DEFAULT = 0,
+};
+enum SICONOS_OSNSP_ED
+{
+  SICONOS_OSNSP_ED_ACCELERATION = 0,
+  SICONOS_OSNSP_ED_IMPACT = 1,
+  SICONOS_OSNSP_ED_NUMBER = 2
+};
+enum SICONOS_OSNSP_TS
+{
+  SICONOS_OSNSP_TS_VELOCITY = 0,
+  SICONOS_OSNSP_TS_NUMBER = 1
+};
 
 TYPEDEF_SPTR(OSISet);
 TYPEDEF_SPTR(OneStepNSProblems);
