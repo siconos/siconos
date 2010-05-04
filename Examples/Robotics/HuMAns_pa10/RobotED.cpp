@@ -160,10 +160,10 @@ int main(int argc, char* argv[])
     dparam[0] =  0.005; // Tolerance
     string solverName = "PGS" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
-    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
-    s->insertNonSmoothProblem(impact);
-    s->insertNonSmoothProblem(acceleration);
+    SP::OneStepNSProblem impact(new LCP(mySolver));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver));
+    s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
+    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
 
     cout << "=== End of model loading === " << endl;
 

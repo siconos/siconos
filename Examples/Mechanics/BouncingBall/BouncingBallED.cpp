@@ -113,14 +113,14 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) Non smooth problem --
-    SP::OneStepNSProblem impact(new LCP("Lemke", "impact"));
-    SP::OneStepNSProblem acceleration(new LCP("Lemke", "acceleration"));
+    SP::OneStepNSProblem impact(new LCP("Lemke"));
+    SP::OneStepNSProblem acceleration(new LCP("Lemke"));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::EventDriven s(new EventDriven(t));
     s->insertIntegrator(OSI);
-    s->insertNonSmoothProblem(impact);
-    s->insertNonSmoothProblem(acceleration);
+    s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
+    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
 
     // =========================== End of model definition ===========================
 

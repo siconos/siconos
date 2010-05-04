@@ -146,9 +146,10 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
-    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
-
+    SP::OneStepNSProblem impact(new LCP(mySolver));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver));
+    s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
+    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
