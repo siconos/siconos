@@ -270,8 +270,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
     {
-      (*itosi)->setSimulationPtr(shared_from_this());
-      (*itosi)->initialize();
 
 
       for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
@@ -282,8 +280,11 @@ void Simulation::initialize(SP::Model m, bool withOSI)
                             (*itosi)->getSizeMem());
         addInOSIMap(*itds, *itosi);
       }
-    }
 
+      (*itosi)->setSimulationPtr(shared_from_this());
+      (*itosi)->initialize();
+
+    }
   }
 
   // === IndexSets building ===

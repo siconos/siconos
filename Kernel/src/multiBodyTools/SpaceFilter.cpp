@@ -892,7 +892,7 @@ struct SpaceFilter::_DiskDistance : public SiconosVisitor
   void visit(SP::Disk d)
   {
     double xd = d->q()->getValue(0);
-    double yd = d->q()->getValue(0);
+    double yd = d->q()->getValue(1);
 
     result = (hypot(x - xd, y - yd) - (r + d->getRadius()));
   }

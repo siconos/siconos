@@ -106,7 +106,7 @@ protected:
 private:
 
   /** copy constructor, private => forbidden
-   *  \param a SiconosSet to be copied
+   *  \param a SiconosGraph to be copied
    */
   SiconosGraph(const SiconosGraph&);
 
@@ -597,6 +597,10 @@ public:
     g.clear();
   };
 
+  VMap vertex_descriptor_map()
+  {
+    return vertex_descriptor;
+  };
 
   void display()
   {
