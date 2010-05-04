@@ -182,40 +182,40 @@ nightly_submit() {
 #sudo rm -f /usr/local/bin/ctest
 
 # Stable 
-setup_3_1
-
-configure_3_1 Numerics Release
-nightly_build Numerics Release
-nightly_test Numerics Release
-nightly_submit Numerics Release
-#nightly_memcheck Numerics Release
+#setup_3_1
+#
+#configure_3_1 Numerics Release
+#nightly_build Numerics Release
+#nightly_test Numerics Release
 #nightly_submit Numerics Release
-install_1 Numerics Release
-
-configure_3_1 Kernel Release
-nightly_build Kernel Release
-nightly_test Kernel Release
-nightly_submit Kernel Release
-#nightly_memcheck Kernel Release
+##nightly_memcheck Numerics Release
+##nightly_submit Numerics Release
+#install_1 Numerics Release
+#
+#configure_3_1 Kernel Release
+#nightly_build Kernel Release
+#nightly_test Kernel Release
 #nightly_submit Kernel Release
-install_1 Kernel Release
-
-# Examples
-configure_3_1 Examples Release
-nightly_build Examples Release
-nightly_test Examples Release
-#nightly_memcheck Examples Release
-nightly_submit Examples Release
-
-# Stable Packages
-pack_3_1 Numerics Release
-save_packed_1 Numerics Release
-
-pack_3_1 Kernel Release
-save_packed_1 Kernel Release
-
-pack_3_1 Examples Release
-save_packed_1 Examples Release
+##nightly_memcheck Kernel Release
+##nightly_submit Kernel Release
+#install_1 Kernel Release
+#
+## Examples
+#configure_3_1 Examples Release
+#nightly_build Examples Release
+#nightly_test Examples Release
+##nightly_memcheck Examples Release
+#nightly_submit Examples Release
+#
+## Stable Packages
+#pack_3_1 Numerics Release
+#save_packed_1 Numerics Release
+#
+#pack_3_1 Kernel Release
+#save_packed_1 Kernel Release
+#
+#pack_3_1 Examples Release
+#save_packed_1 Examples Release
 
 # trunk tests
 setup_trunk
