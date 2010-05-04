@@ -139,6 +139,9 @@ public:
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
   static FirstOrderType2R* convert(Relation *r);
+
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(FirstOrderType2R);
