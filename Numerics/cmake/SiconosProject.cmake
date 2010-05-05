@@ -107,19 +107,13 @@ MACRO(SICONOS_PROJECT
   # Some http://pipol.inria.fr configurations
   INCLUDE(Pipol)
 
-  PIPOL_TARGET(amd64-linux-debian-testing ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386-linux-debian-testing ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386-linux-fedora-core9 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386-linux-fedora-core10 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386-linux-fedora-core11 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386-linux-fedora-core12 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(amd64-linux-fedora-core9 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(amd64-linux-fedora-core10 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(amd64-linux-fedora-core11 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(amd64-linux-fedora-core12 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(x86_64_mac-mac-osx-server-snow-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(x86_mac-mac-osx-server-snow-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-  PIPOL_TARGET(i386_mac-mac-osx-server-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  # add a target for each pipol system
+  IF(PIPOL_SYSTEMS)
+    FOREACH(SYSTEM ${PIPOL_SYSTEMS})
+      # target with rc-dir
+      PIPOL_TARGET(${SYSTEM} ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+    ENDFOREACH(SYSTEM ${PIPOL_SYSTEMS})
+  ENDIF(PIPOL_SYSTEMS)
 
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
