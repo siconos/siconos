@@ -10,7 +10,7 @@ ok()
 trap ok 0
 
 # get local and head revision numbers
-cd src/nightly/siconos ;{ 
+cd src/siconos ;{ 
     
     local=`svn info -r '{00:00}' | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d' `
     head=`svn info -r HEAD | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d' `
@@ -22,7 +22,7 @@ cd src/nightly/siconos ;{
 
 
 # only update build scripts
-cd src/nightly/siconos/trunk/Build/Pipol ;{
+cd src/siconos/trunk/Build/Pipol ;{
     svn update
 }; cd $HOME
 

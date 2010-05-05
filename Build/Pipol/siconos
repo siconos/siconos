@@ -1,9 +1,7 @@
 #!/bin/sh
 
 
-#PRE-PIPOL  src/nightly/siconos/trunk/Build/Pipol/pre-siconos
-
-#POST-PIPOL src/nightly/siconos/trunk/Build/Pipol/post-siconos
+#PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
 #PIPOL fedora 02:00
 

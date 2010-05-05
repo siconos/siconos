@@ -1,22 +1,25 @@
 #!/bin/sh
 
+if [ ! -f $PIPOL_WDIR/rc.done ]; then
+
 # upload on CDash fails with cmake 2.8.0 and mac os x Leopard
 # package generation fails with cmake 2.6.4 on fedora >=10
-case $PIPOL_IMAGE in
-    *mac*) cmake_version=2.6.4;;
+    case $PIPOL_IMAGE in
+        *mac*) cmake_version=2.6.4;;
         *) cmake_version=2.8.0;;
-esac
-
-env
-
-cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
-gunzip cmake-${cmake_version}.tar.gz
-tar xvf cmake-${cmake_version}.tar
-
-cd cmake-${cmake_version}; {
-    ./bootstrap
-    make
-    sudo make install
-}; cd -
-
-
+    esac
+    
+    env
+    
+    cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
+    gunzip cmake-${cmake_version}.tar.gz
+    tar xvf cmake-${cmake_version}.tar
+    
+    cd cmake-${cmake_version}; {
+        ./bootstrap
+        make
+        sudo make install
+    }; cd -
+    
+    touch $PIPOL_WDIR/rc.done
+fi
