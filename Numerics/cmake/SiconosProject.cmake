@@ -104,6 +104,23 @@ MACRO(SICONOS_PROJECT
     INCLUDE(FortranLibraries)
   ENDIF(CMAKE_Fortran_COMPILER)
 
+  # Some http://pipol.inria.fr configurations
+  INCLUDE(Pipol)
+
+  PIPOL_TARGET(amd64-linux-debian-testing ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386-linux-debian-testing ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386-linux-fedora-core9 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386-linux-fedora-core10 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386-linux-fedora-core11 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386-linux-fedora-core12 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(amd64-linux-fedora-core9 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(amd64-linux-fedora-core10 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(amd64-linux-fedora-core11 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(amd64-linux-fedora-core12 ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(x86_64_mac-mac-osx-server-snow-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(x86_mac-mac-osx-server-snow-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+  PIPOL_TARGET(i386_mac-mac-osx-server-leopard ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
     ENABLE_TESTING()
@@ -119,7 +136,6 @@ MACRO(SICONOS_PROJECT
       FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
       FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
     ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
-    INCLUDE(Pipol)
 
     IF(BUILDNAME_OPTIONS)
       SET(BUILDNAME "${_PROJECT_NAME}-${BUILDNAME_OPTIONS}")
