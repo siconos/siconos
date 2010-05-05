@@ -10,7 +10,11 @@
 # SiconosNumerics_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosNumerics)
 
 IF(SiconosNumerics_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics PATHS "${SiconosNumerics_LIBRARY_DIRECTORY}")
+  MESSAGE(STATUS "Looking for Numerics library in ${SiconosNumerics_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics PATHS "${SiconosNumerics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(SiconosNumerics_FOUND)
+    MESSAGE(STATUS "Found : ${SiconosNumerics_FOUND}")
+  ENDIF(SiconosNumerics_FOUND)
 ELSE(SiconosNumerics_LIBRARY_DIRECTORY)
   FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics)
 ENDIF(SiconosNumerics_LIBRARY_DIRECTORY)
