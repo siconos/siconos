@@ -24,12 +24,19 @@
 #ifndef SiconosGraph_H
 #define SiconosGraph_H
 
-#include <boost/shared_ptr.hpp>
-
 #include <boost/config.hpp>
+#include <boost/version.hpp>
+
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
+
+
+#if (BOOST_VERSION >= 104000)
+#include <boost/property_map/property_map.hpp>
+#else
 #include <boost/property_map.hpp>
+#endif
+
 #include <boost/static_assert.hpp>
 
 using namespace boost;
