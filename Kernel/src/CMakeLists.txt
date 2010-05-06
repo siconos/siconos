@@ -107,6 +107,21 @@ INSTALL(TARGETS TestPlugin
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
 
+
+# do not skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# don't add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 LIBRARY_PROJECT_SETUP()
 
 # wrappers for tests are needed
@@ -208,21 +223,6 @@ INSTALL(FILES
 INSTALL(FILES 
   ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
-
-# skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, use the install RPATH already
-# (so it doesn't need to relink when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-
-# the RPATH to be used when installing
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_PACKAGE_NAME}")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 #
 # Log 
