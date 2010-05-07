@@ -82,7 +82,7 @@ public:
   /** getter of en
    *  \return the value of en
    */
-  inline const double en() const
+  inline double en() const
   {
     return _en;
   };
@@ -98,7 +98,7 @@ public:
   /** getter of et
    *  \return the value of et
    */
-  inline const double et() const
+  inline double et() const
   {
     return _et;
   };
@@ -114,7 +114,7 @@ public:
   /** getter of mu
    *  \return the value of mu
    */
-  inline const double mu() const
+  inline double mu() const
   {
     return _mu;
   };

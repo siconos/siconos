@@ -128,7 +128,7 @@ protected:
   /** Creates and adds a new Event in the allEvents list
    *  \return false if Event already exists
    */
-  const bool createAndInsertEvent(int, double);
+  bool createAndInsertEvent(int, double);
 
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
@@ -224,27 +224,27 @@ public:
   /** check if event is present in allEvents list
    *  \return a bool
    */
-  const bool hasEvent(SP::Event) const ;
+  bool hasEvent(SP::Event) const ;
 
   /** check if some events remain in allEvents list
    *  \return a bool
    */
-  const bool hasNextEvent() const ;
+  bool hasNextEvent() const ;
 
   /** get the time (double format) of an event
    *  \return a double
    */
-  const double getTimeOfEvent(SP::Event) const;
+  double getTimeOfEvent(SP::Event) const;
 
   /** get the time of current event, in double format
    *  \return a double
    */
-  const double startingTime() const ;
+  double startingTime() const ;
 
   /** get the time of next event, in double format
    *  \return a double
    */
-  const double nextTime() const ;
+  double nextTime() const ;
 
   /** display EventsManager data
    */

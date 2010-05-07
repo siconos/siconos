@@ -17,7 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ioVector.h
+/*! \file ioVector.hpp
+   input/output for SiconosVector
 
 */
 
@@ -25,60 +26,33 @@
 #define __ioVector__
 
 #include "ioObject.hpp"
+#include "SiconosVector.hpp"
+//class SiconosVector;
 
-class SimpleVector;
 
-/**  Interface for read/write vectors from/to a file.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
- *
- *
- *   Type of Output for write function:
- *    - "boost": boost way: \n
- *                    [row] (a0, a1,..)
- *    - "python"(default): \n
- *                    row \n
- *                    a0 a1 a2 ... \n
- *    - "noDim": \n
- *                    a0 a1 a2 ... \n
- *
- * Reading input format is the one corresponding to "python".
- *
- */
-class ioVector : public ioObject
-{
-private :
+/** io object specialization */
+typedef ioObject<SiconosVector> ioVector;
 
-  /** default constructor
-   */
-  ioVector();
+/** Specialization to read a SiconosMatrix
+    \param[in] SiconosMatrix the matrix to be read
+    \return bool true if read ok, else false ...
+*/
+template<> bool ioObject<SiconosVector>::read(SiconosVector&) const;
 
-public :
+/** Specialization to write a SiconosVector
+    \param[in] SiconosVector the vector to be read
+    \param[in] string type of output:
+    Type of Output for write function:
+    - "boost": boost way: \n
+    [row] (a0, a1,..)
+    - "python"(default): \n
+    row \n
+    a0 a1 a2 ... \n
+    - "noDim": \n
+    a0 a1 a2 ... \n
+    Reading input format is the one corresponding to "python".
+    \return bool true if read ok, else false ...
+*/
+template<> bool ioObject<SiconosVector>::write(const SiconosVector&, const std::string&) const;
 
-  /** constructor with FileName = file and Mode = mode
-   *  \param 2 std::string
-   */
-  ioVector(const std::string&, const std::string&);
-
-  /** destructor
-  */
-  ~ioVector(void);
-
-  /** read the vector in the file "Filename" and write it into vector A
-  *  \param a SiconosVector
-  *  \exception SiconosVectorException
-  *  \return true if no error
-  */
-  const bool read(SiconosVector&) const;
-
-  /** write the vector A in the file "Filename"
-  *  \param a SiconosVector
-  *  \param a string: type of output - See on top of file for details
-  *  \exception SiconosVectorException
-  *  \return true if no error
-  */
-  const bool write(const SiconosVector&, const std::string& = "python") const;
-};
 #endif

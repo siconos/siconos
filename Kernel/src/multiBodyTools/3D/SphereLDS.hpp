@@ -62,6 +62,10 @@ public:
   };
 
   void computeMass();
+  void computeMass(SP::SiconosVector)
+  {
+    RuntimeException::selfThrow("SphereLDS::computeMass(vector) - not implemented");
+  }
 
   void computeNNL(SP::SiconosVector, SP::SiconosVector);
 

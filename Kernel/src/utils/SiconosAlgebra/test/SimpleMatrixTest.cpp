@@ -2115,7 +2115,7 @@ void SimpleMatrixTest::testOperators8_5()
   // == Test subprod ==
 
   cout << "--> Test: operator8_5." << endl;
-  std::vector<unsigned int> coord(8);
+  Index coord(8);
   SP::SiconosVector x1(new SimpleVector(2));
   SP::SiconosVector x2(new SimpleVector(3));
   SP::SiconosVector x3(new SimpleVector(5));
@@ -2259,7 +2259,7 @@ void SimpleMatrixTest::testOperators8_6()
   // == Test subprod, with += ==
 
   cout << "--> Test: operator8_6." << endl;
-  std::vector<unsigned int> coord(8);
+  Index coord(8);
   SP::SiconosVector x1(new SimpleVector(2));
   SP::SiconosVector x2(new SimpleVector(3));
   SP::SiconosVector x3(new SimpleVector(5));

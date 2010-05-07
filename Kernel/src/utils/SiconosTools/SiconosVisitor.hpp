@@ -75,7 +75,8 @@
   virtual void accept(SiconosVisitor&) const = 0;                       \
   virtual inline Type::Siconos acceptType(FindType& ft) const                  \
   { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor));} \
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
+    return Type::void_type;}            \
  
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
@@ -86,7 +87,7 @@
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS() \
-  ACCEPT_SP_VISITORS();   \
+  ACCEPT_SP_VISITORS()   \
   ACCEPT_STD_VISITORS()   \
  
 
@@ -113,6 +114,7 @@ namespace Type
 enum Siconos
 {
   SICONOS_VISITABLES()
+  void_type
 };
 }
 
@@ -122,11 +124,11 @@ enum Siconos
 
 /* the type visitor */
 #undef REGISTER
-#define REGISTER(X) \
-  virtual Type::Siconos visit(const X&) const { return Type::X; }; \
+#define REGISTER(X)             \
+  virtual Type::Siconos visit(const X&) const { return Type::X; };  \
  
 #undef REGISTER_BASE
-#define REGISTER_BASE(X,Y)                                        \
+#define REGISTER_BASE(X,Y)             \
   virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
  
 struct FindType
@@ -136,7 +138,7 @@ struct FindType
 
 /* the base visitor */
 #undef REGISTER
-#define REGISTER(X) \
+#define REGISTER(X)             \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
@@ -147,8 +149,6 @@ struct SiconosVisitor
 {
   SICONOS_VISITABLES()
 };
-
-
 
 /* some functions in Type namespace */
 namespace Type

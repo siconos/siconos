@@ -126,7 +126,7 @@ public:
   /** true if set of OneStepIntegratorXML is not empty
    *   \return a bool
    */
-  inline const bool hasOneStepIntegratorXML() const
+  inline bool hasOneStepIntegratorXML() const
   {
     return !(OSIXMLSet.empty());
   }
@@ -142,7 +142,7 @@ public:
   /** true if set of OneStepNSProblemXML is not empty
    *  \return a bool
    */
-  inline const bool hasOneStepNSProblemXML() const
+  inline bool hasOneStepNSProblemXML() const
   {
     return !(OSNSPBXMLSet.empty());
   }

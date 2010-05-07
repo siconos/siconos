@@ -94,7 +94,7 @@ public:
   /** to get lb
   *  \return the value of lb
   */
-  inline const double lb() const
+  inline double lb() const
   {
     return _lb;
   };
@@ -110,7 +110,7 @@ public:
   /** to get ub
   *  \return the value of ub
   */
-  inline const double ub() const
+  inline double ub() const
   {
     return _ub;
   };

@@ -18,7 +18,7 @@
  */
 
 
-/*! \file SiconosVector.h
+/*! \file SiconosVector.hpp
   \brief Interface for vectors handling.
 
 */
@@ -73,7 +73,7 @@ public:
   /** true if the vector is block else false.
    * \return a bool.
    */
-  virtual const bool isBlock() const
+  virtual bool isBlock() const
   {
     return false;
   };
@@ -82,17 +82,17 @@ public:
    *  the vector
    *  \return unsigned int
    */
-  virtual const unsigned int size() const PURE_DEF;
+  virtual unsigned int size() const PURE_DEF;
 
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  virtual const unsigned int getNum() const PURE_DEF;
+  virtual unsigned int getNum() const PURE_DEF;
 
   /** get the number of SimpleVector-Blocks - only usefull for BlockVector.
    *  \return unsigned int
    */
-  inline virtual const unsigned int getNumberOfBlocks() const
+  inline virtual unsigned int getNumberOfBlocks() const
   {
     return 1;
   };
@@ -172,12 +172,12 @@ public:
   /** compute the infinite norm of the vector
    *  \return a double
    */
-  virtual const double normInf() const PURE_DEF;
+  virtual double normInf() const PURE_DEF;
 
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  virtual const double norm2() const PURE_DEF ;
+  virtual double norm2() const PURE_DEF ;
 
   /** display data on standard output
    */
@@ -244,7 +244,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  virtual const double getValue(unsigned int) const PURE_DEF;
+  virtual double getValue(unsigned int) const PURE_DEF;
 
   /** set the element at position i in the vector.
    *  \param an unsigned int i
@@ -262,7 +262,7 @@ public:
    *  \param an integer i
    *  \return a double
    */
-  virtual const double operator()(unsigned int) const PURE_DEF;
+  virtual double operator()(unsigned int) const PURE_DEF;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
@@ -334,7 +334,7 @@ public:
       \param a SP::SiconosVector.
       \param a SP::SiconosVector.
   */
-  friend const bool isComparableTo(const SiconosVector&, const SiconosVector&);
+  friend bool isComparableTo(const SiconosVector&, const SiconosVector&);
 
   /** Swap x and y contents, using atlas swap.*/
   friend void swap(SiconosVector&, SiconosVector&);

@@ -106,7 +106,7 @@ public:
   /** to get the size
   *  \return an unsigned int
   */
-  inline const unsigned int size() const
+  inline unsigned int size() const
   {
     return _size;
   }

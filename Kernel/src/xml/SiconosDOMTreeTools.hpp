@@ -141,7 +141,7 @@ public:
   *   \param attributeName : the attribute of the node you want to know if it exists
   *   \return true if the attribute exists, otherwise false
   */
-  static const bool hasAttributeValue(const xmlNodePtr, const std::string&);
+  static bool hasAttributeValue(const xmlNodePtr, const std::string&);
 
 
   /** Return the int value of the attribute attributeName of the node node

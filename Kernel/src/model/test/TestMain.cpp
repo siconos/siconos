@@ -64,7 +64,7 @@ CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)
 };
 
 /* Dump a unit test as a cmake test */
-int CdashDumpTest(CppUnit::Test *test, char* myname)
+void CdashDumpTest(CppUnit::Test *test, char* myname)
 {
 
   std::cout << "MESSAGE( STATUS Adding unit test : " << test->getName() << " ) "
@@ -101,7 +101,7 @@ int CdashDump(CppUnit::Test *tests, char* myname)
     CdashDumpTest(tests, myname);
   }
 
-
+  return count; // A verifier
 
 };
 

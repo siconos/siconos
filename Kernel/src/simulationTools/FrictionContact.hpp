@@ -132,7 +132,7 @@ public:
   /** get the value of the component number i of mu, the vector of the friction coefficients
    *  \return double value of mu
    */
-  inline const double getMu(unsigned int i) const
+  inline double getMu(unsigned int i) const
   {
     return (*_mu)[i];
   }

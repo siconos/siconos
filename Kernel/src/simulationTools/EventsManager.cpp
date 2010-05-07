@@ -27,7 +27,7 @@ using namespace std;
 
 
 // Creation and insertion of a new event into allEvents set.
-const bool EventsManager::createAndInsertEvent(int type, double time)
+bool EventsManager::createAndInsertEvent(int type, double time)
 {
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
@@ -124,19 +124,19 @@ SP::Event EventsManager::followingEvent(const mpz_t& inputTime) const
     return (*next);
 }
 
-const bool EventsManager::hasEvent(SP::Event event) const
+bool EventsManager::hasEvent(SP::Event event) const
 {
   if (!event) return false;
   EventsContainer::iterator it2 = _allEvents.find(event);
   return ((it2 != _allEvents.end()));
 }
 
-const bool EventsManager::hasNextEvent() const
+bool EventsManager::hasNextEvent() const
 {
   return (_nextEvent);
 }
 
-const double EventsManager::getTimeOfEvent(SP::Event event) const
+double EventsManager::getTimeOfEvent(SP::Event event) const
 {
   //  if(!hasEvent(event))
   if (!event)
@@ -144,14 +144,14 @@ const double EventsManager::getTimeOfEvent(SP::Event event) const
   return event->getDoubleTimeOfEvent();
 }
 
-const double EventsManager::startingTime() const
+double EventsManager::startingTime() const
 {
   if (!_currentEvent)
     RuntimeException::selfThrow("EventsManager startingTime, current event is NULL");
   return _currentEvent->getDoubleTimeOfEvent();
 }
 
-const double EventsManager::nextTime() const
+double EventsManager::nextTime() const
 {
   if (!_nextEvent)
     RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");

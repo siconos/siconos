@@ -228,7 +228,7 @@ public:
   }
 
   /** get the type of storage for M */
-  inline const int getMStorageType() const
+  inline int getMStorageType() const
   {
     return _MStorageType;
   };

@@ -94,7 +94,7 @@ public:
      *  the vector
    *  \return unsigned int
    */
-  const unsigned int size() const
+  unsigned int size() const
   {
     return _sizeV;
   };
@@ -102,7 +102,7 @@ public:
   /** true if the vector is block else false.
     * \return a bool.
     */
-  virtual const bool isBlock() const
+  virtual bool isBlock() const
   {
     return true;
   };
@@ -111,7 +111,7 @@ public:
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  const unsigned int getNum() const
+  unsigned int getNum() const
   {
     return 0;
   };
@@ -183,7 +183,7 @@ public:
   /** get the number of Blocks
    *  \return unsigned int
    */
-  inline const unsigned int getNumberOfBlocks() const
+  inline unsigned int getNumberOfBlocks() const
   {
     return _tabIndex->size();
   };
@@ -213,12 +213,12 @@ public:
   /** compute the infinite norm of the vector
    *  \return a double
    */
-  const double normInf() const;
+  double normInf() const;
 
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  const double norm2() const ;
+  double norm2() const ;
 
   /** display data on standard output
    */
@@ -232,7 +232,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  const double getValue(unsigned int) const;
+  double getValue(unsigned int) const;
 
   /** set the element vector[i]
    *  \param an unsigned int i
@@ -250,7 +250,7 @@ public:
    *  \param an unsigned integer i
    *  \return a double
    */
-  const double operator()(unsigned int) const;
+  double operator()(unsigned int) const;
 
   /** return i-eme SiconosVector of vect
    * \param unsigned int: block number
@@ -402,6 +402,7 @@ public:
     VectorOfVectors::iterator it;
     for (it = begin(); it != end(); ++it)
       (**it) *= s;
+    return *this;
   }
 
   SiconosVector& operator /= (double s)
@@ -409,6 +410,7 @@ public:
     VectorOfVectors::iterator it;
     for (it = begin(); it != end(); ++it)
       (**it) /= s;
+    return *this;
   }
 
   /** Insert a subvector in this vector: allocation and copy

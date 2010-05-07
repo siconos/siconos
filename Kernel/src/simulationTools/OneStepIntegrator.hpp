@@ -111,7 +111,7 @@ public:
   /** get the type of the OneStepIntegrator
    *  \return string : the type of the OneStepIntegrator
    */
-  inline const OSI::TYPES getType() const
+  inline OSI::TYPES getType() const
   {
     return integratorType;
   }
@@ -190,7 +190,7 @@ public:
   /** get sizeMem value
    *  \return an unsigned int
    */
-  inline const unsigned int getSizeMem() const
+  inline unsigned int getSizeMem() const
   {
     return sizeMem;
   };

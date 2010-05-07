@@ -31,7 +31,7 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
     zNode = node;
 }
 
-const Type::Siconos DynamicalSystemXML::getType() const
+Type::Siconos DynamicalSystemXML::getType() const
 {
   std::string res((char*)rootNode->name);
   if (res == "FirstOrderNonLinearDS")

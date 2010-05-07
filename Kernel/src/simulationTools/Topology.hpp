@@ -123,7 +123,7 @@ private:
 
   /** remove the unitary relations of the interactions from URG and
    *   DSG */
-  const bool removeInteractionFromIndexSet(SP::Interaction);
+  void removeInteractionFromIndexSet(SP::Interaction);
 
   /** default constructor
   */
@@ -176,7 +176,7 @@ public:
    *  \param a shared pointer to Interaction
    *  \return a bool
    */
-  const bool hasInteraction(SP::Interaction) const;
+  bool hasInteraction(SP::Interaction) const;
 
   /** add an Interaction in the topology. The interaction is both
    *  added in Dynamical Systems graph and Unitary Relations Graph
@@ -263,12 +263,12 @@ public:
   *  maximum value.
   \return an unsigned int
   */
-  const unsigned int maxRelativeDegree();
+  unsigned int maxRelativeDegree();
 
   /** for all relative degrees (one per Unitary Relation), find the minimum value.
   *  \return an unsigned int
   */
-  const unsigned int minRelativeDegree();
+  unsigned int minRelativeDegree();
 
   // --- isTopologyUpToDate ---
 
@@ -309,7 +309,7 @@ public:
   /** get the total number of scalar constraints
   *  \return an unsigned int
   */
-  inline const unsigned int numberOfConstraints()
+  inline unsigned int numberOfConstraints()
   {
     return _numberOfConstraints;
   };

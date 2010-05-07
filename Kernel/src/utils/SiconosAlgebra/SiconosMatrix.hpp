@@ -301,7 +301,7 @@ public:
   /** compute the infinite norm of the matrix
    *  \return a double
    */
-  virtual const double normInf() const PURE_DEF;
+  virtual double normInf() const PURE_DEF;
 
   /** display data on standard output
    */
@@ -323,14 +323,14 @@ public:
    *  \param an unsigned int j
    *  \return the element matrix[i,j]
    */
-  virtual const double operator()(unsigned int , unsigned int) const PURE_DEF;
+  virtual double operator()(unsigned int , unsigned int) const PURE_DEF;
 
   /** return the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
    *  \return a double
    */
-  virtual const double getValue(unsigned int, unsigned int) const PURE_DEF;
+  virtual double getValue(unsigned int, unsigned int) const PURE_DEF;
 
   /** set the element matrix[i,j]
    *  \param an unsigned int i
@@ -502,7 +502,7 @@ public:
       \param a SiconosMatrix
       \param a SiconosMatrix
   */
-  friend const bool isComparableTo(const SiconosMatrix&, const SiconosMatrix&);
+  friend bool isComparableTo(const SiconosMatrix&, const SiconosMatrix&);
 
 };
 

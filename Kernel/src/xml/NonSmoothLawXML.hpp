@@ -83,7 +83,7 @@ public:
   /** return true if size node is present
   *  \return a bool
   */
-  const bool hasSize() const
+  bool hasSize() const
   {
     return (sizeNode);
   };
@@ -91,7 +91,7 @@ public:
   /** Return the size of the InteractionXML
   *   \return an unsigned int
   */
-  inline const unsigned int getSize() const
+  inline unsigned int getSize() const
   {
     if (!hasSize())
       XMLException::selfThrow("NonSmoothLawXML::getSize() : sizeNode == NULL");

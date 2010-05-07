@@ -106,7 +106,7 @@ void DiskMovingPlanR::computehDot(double time)
 
 bool DiskMovingPlanR::equal(FTime pA, FTime pB, FTime pC, double pr) const
 {
-  return (_AFunction->fPtr == pA && _BFunction->fPtr == pB &&
-          _CFunction->fPtr == pC && _r == pr);
+  return ((FTime)_AFunction->fPtr == pA && (FTime)_BFunction->fPtr == pB &&
+          (FTime)_CFunction->fPtr == pC && _r == pr);
 }
 

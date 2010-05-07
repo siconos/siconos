@@ -99,7 +99,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
 }
 
 
-const bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
+bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     return true;
@@ -579,7 +579,7 @@ int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNodePtr node)
     res = -1;
   else
   {
-    n = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr) node);
+    n = SiconosDOMTreeTools::findNodeChild((xmlNodePtr) node);
     //if( n != NULL ) res++;
 
     while (n)

@@ -33,7 +33,7 @@
  *   Munich, Germany
  *   pp. 47-54
  *   November 19-21, 2003
-*/
+ */
 
 #ifndef SpaceFilter_hpp
 #define SpaceFilter_hpp
@@ -245,16 +245,16 @@ public:
   };
 
   /** get the neighbours
-    * */
+   * */
   std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
 
 
   /** just test the presence of neighbours
-    */
+   */
   bool haveNeighbours(SP::Hashed h);
 
   /** give the minimal distance
-    */
+   */
   double minDistance(SP::Hashed h);
 
 

@@ -103,7 +103,7 @@ public:
   /** get value of attribute all in theta node -> ie if one single value for all theta is given
   *   \return a double
   */
-  const double getSingleTheta() const;
+  double getSingleTheta() const;
 
   /** attribute of the theta tag - all = val if all theta have the same value, whatever the ds is.
   *  \return a bool

@@ -129,7 +129,7 @@ public:
   /** get dimension of the problem
    *  \return an unsigned ing
    */
-  inline const unsigned int getLocalSizeOutput() const
+  inline unsigned int getLocalSizeOutput() const
   {
     return _sizeLocalOutput;
   }
@@ -280,7 +280,7 @@ public:
    *  \return SimpleVector
    *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const double getMu(unsigned int i) const
+  inline double getMu(unsigned int i) const
   {
     return (*_mu)[i];
   }

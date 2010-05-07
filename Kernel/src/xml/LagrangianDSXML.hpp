@@ -496,7 +496,7 @@ public:
    *  \return a bool
    *   \return True if M is calculated from plugin
    */
-  inline const bool isMassPlugin() const
+  inline bool isMassPlugin() const
   {
     return xmlHasProp(MassNode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
@@ -504,7 +504,7 @@ public:
   /** Return true if M only given by a Matrix
    *  \return a bool
    */
-  inline const bool isMMatrix() const
+  inline bool isMMatrix() const
   {
     return !(xmlHasProp(MassNode, (xmlChar *) MATRIXPLUGIN.c_str()));
   }
@@ -512,7 +512,7 @@ public:
   /** Return true if QLNInertia is calculated from a plugin
    *  \return a bool
    */
-  inline const bool isNNLPlugin() const
+  inline bool isNNLPlugin() const
   {
     return xmlHasProp(NNLNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
@@ -520,7 +520,7 @@ public:
   /** Return true if FInt is calculated from a plugin
    *  \return a bool
    */
-  inline const bool isFIntPlugin() const
+  inline bool isFIntPlugin() const
   {
     return xmlHasProp(FIntNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
@@ -528,7 +528,7 @@ public:
   /** Return true if FExt is calculated from a plugin
    *  \return a bool
    */
-  inline const bool isFExtPlugin() const
+  inline bool isFExtPlugin() const
   {
     return xmlHasProp(FExtNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
@@ -537,7 +537,7 @@ public:
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return a bool
    */
-  inline const bool isJacobianFIntPlugin(unsigned int i) const
+  inline bool isJacobianFIntPlugin(unsigned int i) const
   {
     return xmlHasProp(jacobianFIntNode[i], (xmlChar *) MATRIXPLUGIN.c_str());
   }
@@ -546,7 +546,7 @@ public:
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return a bool
    */
-  inline const bool isJacobianNNLPlugin(unsigned int i) const
+  inline bool isJacobianNNLPlugin(unsigned int i) const
   {
     return xmlHasProp(jacobianNNLNode[i], (xmlChar *) MATRIXPLUGIN.c_str());
   }
@@ -554,7 +554,7 @@ public:
   /** determines if Mass is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasQ0() const
+  inline bool hasQ0() const
   {
     return (q0Node);
   }
@@ -562,7 +562,7 @@ public:
   /** determines if Mass is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasVelocity0() const
+  inline bool hasVelocity0() const
   {
     return (velocity0Node);
   }
@@ -570,7 +570,7 @@ public:
   /** determines if Mass is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasMass() const
+  inline bool hasMass() const
   {
     return (MassNode);
   }
@@ -578,7 +578,7 @@ public:
   /** determines if FInt is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasFInt() const
+  inline bool hasFInt() const
   {
     return (FIntNode);
   }
@@ -586,7 +586,7 @@ public:
   /** determines if FExt is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasFExt() const
+  inline bool hasFExt() const
   {
     return (FExtNode);
   }
@@ -595,7 +595,7 @@ public:
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return a bool
    */
-  inline const bool hasJacobianFInt(unsigned int i) const
+  inline bool hasJacobianFInt(unsigned int i) const
   {
     return (jacobianFIntNode[i]);
   }
@@ -605,7 +605,7 @@ public:
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return a bool
    */
-  inline const bool hasJacobianNNL(unsigned int i) const
+  inline bool hasJacobianNNL(unsigned int i) const
   {
     return (jacobianNNLNode[i]);
   }
@@ -613,7 +613,7 @@ public:
   /** determines if NNL is defined in the DOM tree
    *  \return a bool
    */
-  inline const bool hasNNL() const
+  inline bool hasNNL() const
   {
     return (NNLNode);
   }
@@ -621,7 +621,7 @@ public:
   /** returns true if qMemoryNode is defined
    *  \return a bool
    */
-  inline const bool hasQMemory() const
+  inline bool hasQMemory() const
   {
     return (qMemoryNode);
   }
@@ -629,7 +629,7 @@ public:
   /** returns true if velocityMemoryNode is defined
    *  \return a bool
    */
-  inline const bool hasVelocityMemory() const
+  inline bool hasVelocityMemory() const
   {
     return (velocityMemoryNode);
   }
@@ -637,7 +637,7 @@ public:
   /** returns true if qNode is defined
    *  \return a bool
    */
-  inline const bool hasQ() const
+  inline bool hasQ() const
   {
     return (qNode);
   }
@@ -645,7 +645,7 @@ public:
   /** returns true if velocityNode is defined
    *  \return a bool
    */
-  inline const bool hasVelocity() const
+  inline bool hasVelocity() const
   {
     return (velocityNode);
   }

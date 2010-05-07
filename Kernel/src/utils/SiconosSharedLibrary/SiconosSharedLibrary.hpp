@@ -112,9 +112,10 @@ public:
   *  \return a std::string containing the function name
   */
   static const std::string getPluginFunctionName(const std::string&);
-  static const std::string buildPluginName(std::string& fullname, const std::string& pluginPath, const std::string& functionName)
+  inline void buildPluginName(std::string& fullname, const std::string& pluginPath, const std::string& functionName)
   {
-    ;//fullname= pluginPath.substr(0, pluginPath.length()-3) + ":" + functionName;
+    std::cout << "SiconosSharedLibrary::warning, call of obsolete function buildPluginName" << std::endl;
+    //fullname= pluginPath.substr(0, pluginPath.length()-3) + ":" + functionName;
   }
 
 };

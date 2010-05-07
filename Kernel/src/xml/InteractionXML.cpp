@@ -60,7 +60,7 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
     XMLException::selfThrow("InteractionXML - xml constructor, tag " + DS_CONCERNED + " not found.");
 
   // Relation and Non Smooth Law (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)interactionNode, INTERACTION_CONTENT_TAG)))
+  if ((node = SiconosDOMTreeTools::findNodeChild((xmlNodePtr)interactionNode, INTERACTION_CONTENT_TAG)))
   {
     // the first child is the Relation
     if ((node2 = SiconosDOMTreeTools::findNodeChild(node)))

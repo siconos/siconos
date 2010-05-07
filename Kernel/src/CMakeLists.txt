@@ -18,15 +18,6 @@ SET(SiconosKernel_VERSION "${VERSION}")
 #
 SET(SiconosKernel_DIRS
   .
-  model
-  plugin
-  modelingTools
-  simulationTools
-  controlTools
-  multiBodyTools
-  multiBodyTools/2D
-  multiBodyTools/3D
-  multiBodyTools/joints
   utils
   utils/boost-bindings
   utils/contract
@@ -36,6 +27,15 @@ SET(SiconosKernel_DIRS
   utils/SiconosSharedLibrary
   utils/SiconosTools
   xml
+  model
+  plugin
+  modelingTools
+  simulationTools
+  controlTools
+  multiBodyTools
+  multiBodyTools/2D
+  multiBodyTools/3D
+  multiBodyTools/joints
 )
 
 #
@@ -43,7 +43,8 @@ SET(SiconosKernel_DIRS
 #
 SET(SiconosKernel_Unstable_SRCS 
   simulationTools/PrimalFrictionContact.cpp
-  simulationTools/MLCP2.cpp)
+  simulationTools/MLCP2.cpp
+  )
 
 
 #
@@ -69,9 +70,26 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Ker
 #
 # compilation setup 
 #
-IF(CXX_HAVE_FRIEND_INJECTION)
-  APPEND_FLAGS(CMAKE_CXX_FLAGS "-ffriend-injection")
-ENDIF(CXX_HAVE_FRIEND_INJECTION)
+#IF(CXX_HAVE_FRIEND_INJECTION)
+#  APPEND_FLAGS(CMAKE_CXX_FLAGS "-ffriend-injection")
+#ENDIF(CXX_HAVE_FRIEND_INJECTION)
+
+# Disable warnings with intel compiler due (mainly) to visitors visit function overloading
+if(CMAKE_CXX_COMPILER)
+  include(TestCXXAcceptsFlag)
+  CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" disable_warning)
+  CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" DALIGNEDERROR)
+# Disable warnings with intel compiler due (mainly) to visitors visit function overloading
+  if(disable_warning)
+    append_cxx_flags("-diag-disable 654")
+  endif(disable_warning)
+# Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
+  if(DALIGNEDERROR)
+    if(NOT CMAKE_COMPILER_IS_GNUCXX)
+      append_cxx_flags("-D__aligned__=ignored")
+    endif(NOT CMAKE_COMPILER_IS_GNUCXX)
+  endif(DALIGNEDERROR)
+endif(CMAKE_CXX_COMPILER)
 
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
@@ -92,6 +110,7 @@ COMPILE_WITH(GMP REQUIRED)
 COMPILE_WITH(CppUnit)
 
 IF(NOT CPPUNIT_FOUND)
+  message(STATUS "Warning, cppunit not found on your system; you will not be able to run make test.")
   SET(WITH_TESTING FALSE)
 ENDIF(NOT CPPUNIT_FOUND)
 

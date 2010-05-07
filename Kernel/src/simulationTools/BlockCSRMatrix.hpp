@@ -158,13 +158,13 @@ public:
   ~BlockCSRMatrix();
 
   /** get size (in block-components) */
-  inline const unsigned int getNumberOfBlocksInARow() const
+  inline unsigned int getNumberOfBlocksInARow() const
   {
     return nr;
   };
 
   /** get total number of non-null blocks */
-  inline const unsigned int getNbNonNullBlocks() const
+  inline unsigned int getNbNonNullBlocks() const
   {
     return MBlockCSR->nnz();
   };

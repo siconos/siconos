@@ -18,24 +18,23 @@
  */
 
 /*! \file ioObject.h
+  Interface for input/output of SiconosAlgebra
 */
 
 #ifndef __ioObject__
 #define __ioObject__
 
 #include <string>
-
-class SiconosMatrix;
-class SiconosVector;
+#include "RuntimeException.hpp"
 
 /** Interface for read/write objects from/to a file.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
+ *   \version 3.1.0.
  *   \date (Creation) 07/21/2006
  *
  */
-class ioObject
+template <class T> class ioObject
 {
 protected:
 
@@ -49,49 +48,41 @@ protected:
 
   /** default constructor
    */
-  ioObject(const std::string& = "ascii");
+  ioObject(const std::string& m = "ascii"): FileName("NoName.dat"), Mode(m) {}
 
 public :
 
   /** constructor
-  *  \param string: input/output file name
-  *  \param string: ascii or binary
-  */
-  ioObject(const std::string&, const std::string&);
+   *  \param string: input/output file name
+   *  \param string: ascii or binary
+   */
+  ioObject(const std::string& file, const std::string& m): FileName(file), Mode(m) {}
 
   /** destructor
-  */
-  virtual ~ioObject();
+   */
+  ~ioObject() {}
 
   /** read the matrix in the file "Filename" and write it into matrix A
-  *  \param a SiconosMatrix
-  *  \exception SiconosMatrixException
-  *  \return true if no error
-  */
-  virtual const bool read(SiconosMatrix&) const;
+   *  \param a SiconosMatrix
+   *  \exception SiconosMatrixException
+   *  \return true if no error
+   */
+  bool read(T&) const
+  {
+    RuntimeException::selfThrow("ioObject::read(T) - not implemented");
+    return false;
+  }
 
   /** write the matrix A in the file "Filename"
-  *  \param a SiconosMatrix
-  *  \param a string: type of output - See on top of file for details
-  *  \exception SiconosMatrixException
-  *  \return true if no error
-  */
-  virtual const bool write(const SiconosMatrix&, const std::string& = "python") const;
-
-  /** read the vector in the file "Filename" and write it into vector A
-  *  \param a SiconosVector
-  *  \exception SiconosVectorException
-  *  \return true if no error
-  */
-  virtual const bool read(SiconosVector&) const;
-
-  /** write the vector A in the file "Filename"
-  *  \param a SiconosVector
-  *  \param a string: type of output - See on top of file for details
-  *  \exception SiconosVectorException
-  *  \return true if no error
-  */
-  virtual const bool write(const SiconosVector&, const std::string& = "python") const ;
-
+   *  \param a SiconosMatrix
+   *  \param a string: type of output - See on top of file for details
+   *  \exception SiconosMatrixException
+   *  \return true if no error
+   */
+  bool write(const T&, const std::string& = "python") const
+  {
+    RuntimeException::selfThrow("ioObject::write(T) - not implemented");
+    return false;
+  }
 };
 #endif

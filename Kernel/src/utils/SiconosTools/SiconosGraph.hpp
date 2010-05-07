@@ -21,6 +21,10 @@
   Template class to define a graph of Siconos object.
 
 */
+#ifndef BOOST_NO_HASH
+#define BOOST_NO_HASH
+#endif
+
 #ifndef SiconosGraph_H
 #define SiconosGraph_H
 
@@ -226,17 +230,17 @@ public:
   }
 
 
-  const size_t size() const
+  size_t size() const
   {
     return num_vertices(g);
   };
 
-  const size_t vertices_number() const
+  size_t vertices_number() const
   {
     return num_vertices(g);
   };
 
-  const size_t edges_number() const
+  size_t edges_number() const
   {
     return num_edges(g);
   };
@@ -366,8 +370,7 @@ public:
     assert(false) ;
   }
 
-  template<class G>
-  VDescriptor copy_vertex(const V& vertex_bundle, G& og)
+  template<class G> void copy_vertex(const V& vertex_bundle, G& og)
   {
 
     // is G similar ?

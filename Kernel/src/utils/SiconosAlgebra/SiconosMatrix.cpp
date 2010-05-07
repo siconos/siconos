@@ -71,7 +71,7 @@ const SP::Index SiconosMatrix::tabCol() const
 //=====================
 // matrices comparison
 //=====================
-const bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
+bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
 {
   // return:
   // - true if one of the matrices is a Simple and if they have the same dimensions.

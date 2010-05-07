@@ -21,6 +21,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 
+
 #include "SimpleVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "ioVector.hpp"
@@ -274,7 +275,7 @@ void SimpleVector::resize(unsigned int n, bool preserve)
 //       get norm
 //=======================
 
-const double SimpleVector::normInf() const
+double SimpleVector::normInf() const
 {
   if (_dense)
     return norm_inf(*vect.Dense);
@@ -282,7 +283,7 @@ const double SimpleVector::normInf() const
     return norm_inf(*vect.Sparse);
 }
 
-const double SimpleVector::norm2() const
+double SimpleVector::norm2() const
 {
   if (_dense)
     return ublas::norm_2(*vect.Dense);
@@ -326,7 +327,7 @@ const std::string SimpleVector::toString() const
 // Elements access (get or set)
 //=============================
 
-const double SimpleVector::getValue(unsigned int row) const
+double SimpleVector::getValue(unsigned int row) const
 {
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::getValue(index) : Index out of range");
@@ -358,7 +359,7 @@ double& SimpleVector::operator()(unsigned int row)
     return (*vect.Sparse)(row).ref();
 }
 
-const double SimpleVector::operator()(unsigned int row) const
+double SimpleVector::operator()(unsigned int row) const
 {
   if (row >= size())
     SiconosVectorException::selfThrow("SimpleVector::operator ( index ): Index out of range");
@@ -1351,7 +1352,7 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
   }
 }
 
-const double inner_prod(const SiconosVector &x, const SiconosVector &m)
+double inner_prod(const SiconosVector &x, const SiconosVector &m)
 {
   if (x.size() != m.size())
     SiconosVectorException::selfThrow("inner_prod: inconsistent sizes");
@@ -1497,7 +1498,7 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
   }
 }
 
-void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::vector<unsigned int>& coord, bool init)
+void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
 {
   // To compute sub_y = a *sub_x (init = true) or sub_y += a*sub_x (init = false)
   // Coord  = [r0x r1x r0y r1y];
@@ -1525,12 +1526,12 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
 
       VectorOfVectors::const_iterator it;
       // Number of the subvector of x that handles element at position coord[0]
-      unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
+      std::size_t firstBlockNum = x.getNumVectorAtPos(coord[0]);
       // Number of the subvector of x that handles element at position coord[1]
-      unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
-      std::vector<unsigned int> subCoord = coord;
+      std::size_t lastBlockNum = x.getNumVectorAtPos(coord[1]);
+      Index subCoord = coord;
       SP::SiconosVector tmp = y[firstBlockNum];
-      unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
+      std::size_t subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const SP::Index xTab = x.tabIndex();
       if (firstBlockNum != 0)
         subCoord[0] -= (*xTab)[firstBlockNum - 1];
@@ -1548,7 +1549,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         for (it = x.begin(); it != x.end(); ++it)
         {
           if ((*it)->getNum() == 0)
-            SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
+            SiconosVectorException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
           if (xPos >= firstBlockNum && xPos <= lastBlockNum)
           {
             tmp = y[xPos];
@@ -1617,7 +1618,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
     {
       if (numX == 0) // ie if both are block vectors
       {
-        SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x and y block vectors");
+        SiconosVectorException::selfThrow("subscal(a,x,y) error: not yet implemented for x and y block vectors");
       }
       else if (numX == 1) // ie if both are Dense
       {
@@ -1646,14 +1647,14 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       {
         VectorOfVectors::const_iterator it;
         // Number of the subvector of x that handles element at position coord[0]
-        unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
+        std::size_t firstBlockNum = x.getNumVectorAtPos(coord[0]);
         // Number of the subvector of x that handles element at position coord[1]
-        unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
-        std::vector<unsigned int> subCoord = coord;
+        std::size_t lastBlockNum = x.getNumVectorAtPos(coord[1]);
+        Index subCoord = coord;
 
         SPC::SiconosVector tmp = x[firstBlockNum];
 
-        unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
+        std::size_t subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
         const SP::Index xTab = x.tabIndex();
         if (firstBlockNum != 0)
           subCoord[0] -= (*xTab)[firstBlockNum - 1];
@@ -1665,12 +1666,12 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         }
         else
         {
-          unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
+          std::size_t xPos = 0 ; // Position in x of the current sub-vector of x
           bool firstLoop = true;
           for (it = x.begin(); it != x.end(); ++it)
           {
             if ((*it)->getNum() == 0)
-              SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
+              SiconosVectorException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
             if (xPos >= firstBlockNum && xPos <= lastBlockNum)
             {
               tmp = x[xPos];
@@ -1698,12 +1699,12 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       {
         VectorOfVectors::const_iterator it;
         // Number of the subvector of y that handles element at position coord[2]
-        unsigned int firstBlockNum = y.getNumVectorAtPos(coord[2]);
+        std::size_t firstBlockNum = y.getNumVectorAtPos(coord[2]);
         // Number of the subvector of x that handles element at position coord[3]
-        unsigned int lastBlockNum = y.getNumVectorAtPos(coord[3]);
-        std::vector<unsigned int> subCoord = coord;
+        std::size_t lastBlockNum = y.getNumVectorAtPos(coord[3]);
+        Index subCoord = coord;
         SP::SiconosVector tmp = y[firstBlockNum];
-        unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
+        std::size_t subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
         const SP::Index yTab = y.tabIndex();
         if (firstBlockNum != 0)
           subCoord[2] -= (*yTab)[firstBlockNum - 1];
@@ -1715,12 +1716,12 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         }
         else
         {
-          unsigned int yPos = 0 ; // Position in x of the current sub-vector of x
+          std::size_t yPos = 0 ; // Position in x of the current sub-vector of x
           bool firstLoop = true;
           for (it = y.begin(); it != y.end(); ++it)
           {
             if ((*it)->getNum() == 0)
-              SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for y block of blocks ...");
+              SiconosVectorException::selfThrow("subscal(a,x,y) error: not yet implemented for y block of blocks ...");
             if (yPos >= firstBlockNum && yPos <= lastBlockNum)
             {
               tmp = y[yPos];

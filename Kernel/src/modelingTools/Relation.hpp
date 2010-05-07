@@ -222,7 +222,7 @@ public:
   /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return the type of the Relation
    */
-  inline const RELATION::TYPES  getType() const
+  inline RELATION::TYPES  getType() const
   {
     return relationType;
   }
@@ -230,7 +230,7 @@ public:
   /** To get the subType of the Relation
    *  \return the sub-type of the Relation
    */
-  inline const RELATION::SUBTYPES  getSubType() const
+  inline RELATION::SUBTYPES  getSubType() const
   {
     return subType;
   }
@@ -281,17 +281,17 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual SP::SiconosMatrix C() = 0;
+  virtual SP::SiconosMatrix C() const = 0;
   /**
    * return a SP on the D matrix.
    * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
    */
-  virtual SP::SiconosMatrix D() = 0;
+  virtual SP::SiconosMatrix D() const = 0;
   /**
    * return a SP on the B matrix.
    * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
    */
-  virtual SP::SiconosMatrix B() = 0;
+  virtual SP::SiconosMatrix B() const = 0;
 
 
 

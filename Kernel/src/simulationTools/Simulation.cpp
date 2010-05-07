@@ -189,7 +189,7 @@ void Simulation::clearOneStepNSProblems()
   _allNSProblems->clear();
 }
 
-const bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
+bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
 {
 
   bool val = false; // true when osns found.
@@ -200,7 +200,7 @@ const bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
   return val;
 }
 
-const bool Simulation::hasOneStepNSProblem(const string& name) const
+bool Simulation::hasOneStepNSProblem(const string& name) const
 {
   bool val = false;
   ConstOSNSIterator it;

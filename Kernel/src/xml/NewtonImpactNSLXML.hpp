@@ -56,7 +56,7 @@ public:
   /** Return the e of the NSLaw
   *   \return a double
   */
-  inline const double getE() const
+  inline double getE() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(ENode);
   }

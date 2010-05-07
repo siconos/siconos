@@ -277,7 +277,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   string osiType = simulation->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
-  std::vector<unsigned int> coord(8);
+  Index coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
   SP::Interaction mainInteraction = UR->interaction();
@@ -305,7 +305,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
 
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->nonSmoothLaw()))->getE();
 
-      std::vector<unsigned int> subCoord(4);
+      Index subCoord(4);
       if (simulationType == "TimeStepping")
       {
         subCoord[0] = 0;

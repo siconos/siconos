@@ -111,13 +111,13 @@ public:
   void computeC(double t)
   COMPUTE(C)
 
-  inline double computeADot(double t)
+  inline void computeADot(double t)
   COMPUTE(ADot)
 
-  inline double computeBDot(double t)
+  inline void computeBDot(double t)
   COMPUTE(BDot)
 
-  inline double computeCDot(double t)
+  inline void computeCDot(double t)
   COMPUTE(CDot)
 
   /** visitor hooks

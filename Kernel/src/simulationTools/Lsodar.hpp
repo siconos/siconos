@@ -106,7 +106,7 @@ public:
   /** get intData[i]
    *  \return an integer
    */
-  inline const integer getIntData(unsigned int i) const
+  inline integer getIntData(unsigned int i) const
   {
     return intData[i];
   }

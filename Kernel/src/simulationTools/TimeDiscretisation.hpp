@@ -133,7 +133,7 @@ public:
   /** get the time step
    *  \return the value of t[k+1] - t[k], the current time step
    */
-  const double currentTimeStep() const
+  double currentTimeStep() const
   {
     return h;
   };
@@ -149,7 +149,7 @@ public:
   /** get the value of tk at step k
    *  \return a double
    */
-  inline const double getTk(unsigned int ind) const
+  inline double getTk(unsigned int ind) const
   {
     return tk.at(ind);
   }

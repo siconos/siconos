@@ -46,7 +46,7 @@ public:
   /**
    *  \return int
    */
-  virtual const U Call() = 0;      // call using function
+  virtual U Call() = 0;      // call using function
 };
 
 /** derived template class for functors
@@ -60,7 +60,7 @@ template <class TClass, class U> class myTSpecificFunctor : public myTFunctor<U>
 {
 private:
   /** pointer to member function */
-  const U(TClass::*fpt)() const;
+  U(TClass::*fpt)() const;
   /** pointer to object */
   boost::shared_ptr<TClass> pt2Object;
 
@@ -72,7 +72,7 @@ public:
    * \param pointer to TClass
    * \param pointer to function of type const int(TClass::*_fpt)() const
    */
-  myTSpecificFunctor(boost::shared_ptr<TClass> _pt2Object, const U(TClass::*_fpt)() const)
+  myTSpecificFunctor(boost::shared_ptr<TClass> _pt2Object, U(TClass::*_fpt)() const)
   {
     pt2Object = _pt2Object;
     fpt = _fpt;
@@ -81,7 +81,7 @@ public:
   /** override function "Call" that executes member function
   *  \return int
   */
-  virtual const U Call()
+  virtual U Call()
   {
     return (*pt2Object.*fpt)();
   };
@@ -123,7 +123,7 @@ private:
   cmp_mode mode;
 
   /**  pointer to member function: return the value that will be used for sorting */
-  const U(T::*fpt)() const ;
+  U(T::*fpt)() const ;
 
 public:
 
@@ -131,7 +131,7 @@ public:
   *  default criterion uses value normal
   * \param a pointer to function of type const int(T::*_fpt)() const
   */
-  Cmp(const U(T::*_fpt)() const, cmp_mode m = normal): mode(m), fpt(_fpt) {};
+  Cmp(U(T::*_fpt)() const, cmp_mode m = normal): mode(m), fpt(_fpt) {};
 
   /** comparison of elements
   * \param two pointers to T

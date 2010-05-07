@@ -94,7 +94,7 @@ public:
   /** check if the NonSmoothDynamicalSystem is BVP or not
   *  \return a bool
   */
-  inline const bool isBVP() const
+  inline bool isBVP() const
   {
     return SiconosDOMTreeTools::hasAttributeValue(rootNode, NSDS_BVP);
   };
@@ -125,7 +125,7 @@ public:
   /** true if set of DynamicalSystemXML is not empty
   *   \return a bool
   */
-  inline const bool hasDynamicalSystemXML() const
+  inline bool hasDynamicalSystemXML() const
   {
     return !(DSXMLSet.empty());
   }
@@ -141,7 +141,7 @@ public:
   /** true if set of InteractionsXML is not empty
   *  \return a bool
   */
-  inline const bool hasInteractionsXML() const
+  inline bool hasInteractionsXML() const
   {
     return !(interactionsXMLSet.empty());
   };

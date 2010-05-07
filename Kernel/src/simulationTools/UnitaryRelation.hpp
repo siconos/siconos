@@ -143,7 +143,7 @@ public:
   /** get relative position of the Unitary Relation
   *  \return an unsigned int
   */
-  inline const unsigned int getRelativePosition() const
+  inline unsigned int getRelativePosition() const
   {
     return _relativePosition;
   } ;
@@ -159,7 +159,7 @@ public:
   /** get number of the Unitary Relation
    *  \return an unsigned int
    */
-  inline const unsigned int number() const
+  inline unsigned int number() const
   {
     return _number;
   };
@@ -187,17 +187,17 @@ public:
   /** get y[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  const double getYRef(unsigned int) const;
+  double getYRef(unsigned int) const;
 
   /** get lambda[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  const double getLambdaRef(unsigned int) const;
+  double getLambdaRef(unsigned int) const;
 
   /** returns the size of the embedded non smooth law
   *  \return an unsigned int
   */
-  const unsigned int getNonSmoothLawSize() const;
+  unsigned int getNonSmoothLawSize() const;
 
 
   /** temporary visitor to get type
@@ -207,16 +207,16 @@ public:
 
   /** returns the type of the embedded relation.
    */
-  const RELATION::TYPES getRelationType() const;
+  RELATION::TYPES getRelationType() const;
 
   /** returns the subtype of the embedded relation.
    */
-  const RELATION::SUBTYPES getRelationSubType() const;
+  RELATION::SUBTYPES getRelationSubType() const;
 
   /** function used to sort UnitaryRelation in SiconosSet<SP::UnitaryRelation>
    *  \return an int
    */
-  inline double* const getSort() const
+  inline double* getSort() const
   {
     return (double*)this;
   }

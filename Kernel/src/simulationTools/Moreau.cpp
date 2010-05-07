@@ -216,16 +216,6 @@ void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
   WMap[ds] = newPtr;                  // link with new pointer
 }
 
-const double Moreau::theta()
-{
-  return _theta;
-}
-
-void Moreau::setTheta(double newTheta)
-{
-  _theta = newTheta;
-}
-
 void Moreau::initialize()
 {
   OneStepIntegrator::initialize();

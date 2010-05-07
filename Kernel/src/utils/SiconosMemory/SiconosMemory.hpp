@@ -118,7 +118,7 @@ public:
   /** gives the size of the memory
    * \return int >= 0
    */
-  inline const unsigned int getMemorySize() const
+  inline unsigned int getMemorySize() const
   {
     return maxSize;
   };
@@ -134,7 +134,7 @@ public:
   /** gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
    */
-  inline const unsigned int getNbVectorsInMemory() const
+  inline unsigned int getNbVectorsInMemory() const
   {
     return nbVectorsInMemory;
   };

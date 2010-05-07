@@ -150,12 +150,18 @@ public:
   /** get theta
    *  \return a double
    */
-  const double theta();
+  inline double theta()
+  {
+    return _theta;
+  };
 
   /** set the value of theta
    *  \param a double
    */
-  void setTheta(double);
+  inline void setTheta(double newTheta)
+  {
+    _theta = newTheta;
+  };
 
   // --- OTHER FUNCTIONS ---
 

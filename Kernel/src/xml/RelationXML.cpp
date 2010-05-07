@@ -78,7 +78,7 @@ RelationXML::RelationXML(xmlNodePtr relationNode): rootNode(relationNode), hNode
   }
 }
 
-const RELATION::TYPES RelationXML::getType() const
+RELATION::TYPES RelationXML::getType() const
 {
   std::string type((char*)rootNode->name);
   if (type == "LagrangianRelation")
@@ -92,7 +92,7 @@ const RELATION::TYPES RelationXML::getType() const
   }
 }
 
-const RELATION::SUBTYPES RelationXML::getSubType() const
+RELATION::SUBTYPES RelationXML::getSubType() const
 {
   std::string res = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
   if (res == "NonLinear")

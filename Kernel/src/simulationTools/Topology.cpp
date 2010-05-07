@@ -238,7 +238,7 @@ struct VertexIsRemoved
 
 /* remove an interaction : remove edges (unitary relation) from _DSG if
    corresponding vertices are removed from _URG */
-const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
+void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
 
   for (DSIterator ids = inter->dynamicalSystems()->begin();
@@ -390,17 +390,17 @@ void Topology::computeRelativeDegrees()
 
 
 
-const bool Topology::hasInteraction(SP::Interaction inter) const
+bool Topology::hasInteraction(SP::Interaction inter) const
 {
   return _allInteractions->isIn(inter);
 }
 
-const unsigned int Topology::maxRelativeDegree()
+unsigned int Topology::maxRelativeDegree()
 {
   return _maxRelativeDegree;
 }
 
-const unsigned int Topology::minRelativeDegree()
+unsigned int Topology::minRelativeDegree()
 {
   assert(_minRelativeDegree != MAX_RELATIVE_DEGREE);
   return _minRelativeDegree;

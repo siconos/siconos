@@ -104,7 +104,7 @@ public:
   /** determines if K is defined in the DOM tree
   *  \return bool : true if K is defined, false otherwise
   */
-  inline const bool hasK() const
+  inline bool hasK() const
   {
     return (KNode);
   }
@@ -112,7 +112,7 @@ public:
   /** determines if C is defined in the DOM tree
   *  \return bool : true if C is defined, false otherwise
   */
-  inline const bool hasC() const
+  inline bool hasC() const
   {
     return (CNode);
   }

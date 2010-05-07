@@ -69,7 +69,7 @@ public:
 protected:
 
   /** Pointer to function used in ordering relation */
-  const U(T::*fpt)() const;
+  U(T::*fpt)() const;
 
   /** a set of T, sorted thanks to their address */
   boost::shared_ptr<TSet> setOfT;
@@ -99,7 +99,7 @@ public:
   /** return the number of Ts in the set
    *  \return an unsigned int
    */
-  const unsigned int size() const
+  unsigned int size() const
   {
     return setOfT->size();
   };
@@ -107,7 +107,7 @@ public:
   /** return true if the set is empty, else false
    *  \return a bool
    */
-  const bool isEmpty() const
+  bool isEmpty() const
   {
     return setOfT->empty();
   };
@@ -172,7 +172,7 @@ public:
    *  \param a pointer to T
    *  \return a bool
    */
-  const bool isIn(boost::shared_ptr<T> t) const
+  bool isIn(boost::shared_ptr<T> t) const
   {
     TIterator it = setOfT->find(t);
     bool out = false;
@@ -184,7 +184,7 @@ public:
    *  \param an int
    *  \return a bool
    */
-  const bool isIn(int num) const
+  bool isIn(int num) const
   {
     bool out = false;
     TIterator it;
@@ -234,8 +234,8 @@ public:
   };
 
   /** insert a range into the set
-     \param iterator to the first element to be inserted
-     \param iterator after the last element to be inserted
+      \param iterator to the first element to be inserted
+      \param iterator after the last element to be inserted
   */
   template <class InputIterator>
   void insert(InputIterator begin, InputIterator end)
@@ -285,9 +285,9 @@ public:
   };
 
   /** computes in s3 the difference betwee s1 and s2 (-> set_difference stl function)
-  \param SiconosSet, s1
-  \param SiconosSet, s2
-  \param SiconosSet, s3
+      \param SiconosSet, s1
+      \param SiconosSet, s2
+      \param SiconosSet, s3
   */
   friend void difference(const SiconosSet& s1, const SiconosSet& s2, SiconosSet& commonT)
   {

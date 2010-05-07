@@ -244,7 +244,7 @@ public:
   /** get the value of number
    *  \return the value of number
    */
-  inline const int number() const
+  inline int number() const
   {
     return _number;
   }
@@ -269,7 +269,7 @@ public:
   /** set the relative degree
    * \param an unsigned int
    */
-  inline unsigned int setRelativeDegree(const unsigned int newVal)
+  inline void setRelativeDegree(const unsigned int newVal)
   {
     _relativeDegree = newVal;
   };
@@ -278,7 +278,7 @@ public:
   /** get the dimension of the interaction (y and lambda size)
   *  \return an unsigned int
   */
-  inline const unsigned int getSizeOfY() const
+  inline unsigned int getSizeOfY() const
   {
     return _interactionSize;
   }
@@ -294,7 +294,7 @@ public:
   /** get the number of relations in the interaction
   *  \return an unsigned int
   */
-  inline const unsigned int numberOfRelations() const
+  inline unsigned int numberOfRelations() const
   {
     return _numberOfRelations;
   }
@@ -302,7 +302,7 @@ public:
   /** get the sum of DS sizes, for DS involved in interaction
    *  \return an unsigned int
    */
-  inline const unsigned int getSizeOfDS() const
+  inline unsigned int getSizeOfDS() const
   {
     return _sizeOfDS;
   }
@@ -310,7 +310,7 @@ public:
   /** get the sum of z sizes, for DS involved in interaction
    *  \return an unsigned int
    */
-  inline const unsigned int getSizez() const
+  inline unsigned int getSizez() const
   {
     return _sizeZ;
   }
@@ -602,9 +602,9 @@ public:
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
-   *  \return an int
+   *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */
-  inline double* const getSort() const
+  inline double* getSort() const
   {
     return (double*)this;
   }

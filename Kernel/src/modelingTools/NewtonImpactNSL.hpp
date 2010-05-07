@@ -76,7 +76,7 @@ public:
   /** getter of e
   *  \return the value of e
   */
-  inline const double e() const
+  inline double e() const
   {
     return _e;
   };

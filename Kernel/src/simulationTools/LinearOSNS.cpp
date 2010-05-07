@@ -310,7 +310,7 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
   {
     double e;
     e = nslaw.e();
-    std::vector<unsigned int> subCoord(4);
+    Index subCoord(4);
     subCoord[0] = 0;
     subCoord[1] = UR->getNonSmoothLawSize();
     subCoord[2] = pos;
@@ -349,7 +349,7 @@ struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
   {
     double e;
     e = nslaw.e();
-    std::vector<unsigned int> subCoord(4);
+    Index subCoord(4);
     subCoord[0] = pos;
     subCoord[1] = pos + UR->getNonSmoothLawSize();
     subCoord[2] = pos;
@@ -401,7 +401,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   OSI::TYPES osiType = simulation()->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
-  std::vector<unsigned int> coord(8);
+  Index coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
   SP::Interaction mainInteraction = UR->interaction();
@@ -497,7 +497,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
         ID->eye();
 
-        std::vector<unsigned int> xcoord(8);
+        Index xcoord(8);
         xcoord[0] = 0;
         xcoord[1] = sizeY;
         xcoord[2] = 0;

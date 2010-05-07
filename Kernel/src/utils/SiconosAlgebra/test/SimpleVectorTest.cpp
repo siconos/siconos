@@ -1061,7 +1061,7 @@ void SimpleVectorTest::testSubscal()
   SP::SiconosVector yref(new SimpleVector(*ys));
 
   double a = 3;
-  std::vector<unsigned int> coord(4) ;
+  Index coord(4) ;
   coord[0] = 1;
   coord[1] = 3;
   coord[2] = 4;

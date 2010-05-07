@@ -19,7 +19,6 @@
 
 NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
 KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
-
 exec=true
 comp=true
 myname=`basename $0`
@@ -332,5 +331,5 @@ fi
 
 if test $exec = true; then
     cd $call_pwd
-    eval LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
+    eval LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
 fi

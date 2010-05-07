@@ -67,7 +67,7 @@ public:
   /** Return the number of the DynamicalSystem
       \return an integer
   */
-  inline const int number() const
+  inline int number() const
   {
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }
@@ -75,7 +75,7 @@ public:
   /** Return the type of the DynamicalSystem
    *   \return a string
    */
-  const Type::Siconos getType() const;
+  Type::Siconos getType() const;
 
   /** Returns the z vector, discret state of the DynamicalSystem
    *  \return SimpleVector
@@ -98,7 +98,7 @@ public:
   /** Returns the steps in memory for the DynamicalSystemXML
    *   \return The integer number of steps in memory for the DynamicalSystemXML
    */
-  inline const unsigned int getStepsInMemory() const
+  inline unsigned int getStepsInMemory() const
   {
     return  SiconosDOMTreeTools::getContentValue<unsigned int>(stepsInMemoryNode);
   }

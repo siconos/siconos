@@ -48,10 +48,6 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "ioMatrix.hpp"
 
 
-
-
-
-
 // =================================================
 //                CONSTRUCTORS
 // =================================================
@@ -579,7 +575,7 @@ void SimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower
 //       get norm
 //=======================
 
-const double SimpleMatrix::normInf() const
+double SimpleMatrix::normInf() const
 {
   if (num == 1)
     return norm_inf(*mat.Dense);
@@ -647,7 +643,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
     return const_cast<double&>((*mat.Identity)(row, col));
 }
 
-const double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
+double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
 {
   if (row >= dimRow || col >= dimCol)
     SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
@@ -668,7 +664,7 @@ const double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
     return (row == col);
 }
 
-const double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
+double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
 {
   if (row >= dimRow || col >= dimCol)
     SiconosMatrixException::selfThrow("SimpleMatrix:getValue(index): Index out of range");
@@ -1398,7 +1394,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
   if (num == 7) // identity matrix
   {
     vOut->zero();
-    if (r - pos >= 0)
+    if (r >= pos)
       (*vOut)(r - pos) = 1.0;
   }
   else if (num == 6) // Zero matrix
@@ -1434,11 +1430,11 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
       }
       else if (num == 4)
       {
-#ifdef BOOST_LIMITATION
-        SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOS.");
-#else
+        // #ifdef BOOST_LIMITATION
+        //         SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
+        // #else
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
-#endif
+        // #endif
       }
       else //if(num==5){
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
@@ -1448,7 +1444,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
       if (num == 4)
       {
 #ifdef BOOST_LIMITATION
-        SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
         noalias(*(vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
 #endif
@@ -1499,7 +1495,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
     }
     else if (num == 4 && numV == 4)
 #ifdef BOOST_LIMITATION
-      SiconosMatrixException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+      SiconosMatrixException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
       ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = *vIn->sparse();
 #endif
@@ -1522,7 +1518,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
   if (num == 7) // identity matrix
   {
     vOut->zero();
-    if (r - pos >= 0)
+    if (r >= pos)
       (*vOut)(r - pos) = 1.0;
   }
   else if (num == 6) // Zero matrix
@@ -1560,7 +1556,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
       else if (num == 4)
       {
 #ifdef BOOST_LIMITATION
-        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
@@ -1573,7 +1569,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
       if (num == 4)
       {
 #ifdef BOOST_LIMITATION
-        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
         noalias(*(vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
@@ -1624,7 +1620,7 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
     }
     else if (num == 4 && numV == 4)
 #ifdef BOOST_LIMITATION
-      SiconosMatrixException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+      SiconosMatrixException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
       ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = *vIn->sparse();
 #endif
@@ -4283,9 +4279,6 @@ const SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
   if (!m.isSquare())
     SiconosMatrixException::selfThrow("pow(SimpleMatrix), matrix is not square.");
 
-  if (power < 0)
-    SiconosMatrixException::selfThrow("pow(SimpleMatrix,n) with negative value is not supported");
-
   if (power > 0)
   {
     unsigned int num = m.getNum();
@@ -4871,7 +4864,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   }
 }
 
-void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, const std::vector<unsigned int>& coord, bool init)
+void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init)
 {
   // To compute subY = subA * subX in an "optimized" way (in comparison with y = prod(A,x) )
   // or subY += subA*subX if init = false.
@@ -4935,12 +4928,12 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
     {
       VectorOfVectors::const_iterator it;
       // Number of the subvector of x that handles element at position coord[4]
-      unsigned int firstBlockNum = x.getNumVectorAtPos(coord[4]);
+      std::size_t firstBlockNum = x.getNumVectorAtPos(coord[4]);
       // Number of the subvector of x that handles element at position coord[5]
       unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
-      std::vector<unsigned int> subCoord = coord;
+      Index subCoord = coord;
       SPC::SiconosVector  tmp = x[firstBlockNum];
-      unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
+      std::size_t subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const SP::Index xTab = x.tabIndex();
       if (firstBlockNum != 0)
       {
@@ -5017,7 +5010,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
@@ -5056,7 +5049,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
 
@@ -5103,7 +5096,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
@@ -5136,7 +5129,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
@@ -5180,7 +5173,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
@@ -5219,7 +5212,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               if (numY == 1)
@@ -5265,7 +5258,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
@@ -5298,7 +5291,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef BOOST_LIMITATION
-              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);

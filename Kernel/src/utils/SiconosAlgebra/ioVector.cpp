@@ -17,21 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "ioVector.hpp"
-#include "SimpleVector.hpp"
 #include "SiconosVectorException.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include<fstream>
 
 // Default private
-ioVector::ioVector(): ioObject() {}
-
-ioVector::ioVector(const std::string& file, const std::string& mode): ioObject(file, mode) {}
-
-ioVector::~ioVector(void) {}
-
-const bool ioVector::read(SiconosVector& m) const
+template<> bool ioVector::read(SiconosVector& m) const
 {
-
   std::ifstream infile;
   if (Mode == "ascii")
     infile.open(FileName.c_str(), std::ifstream::in);
@@ -64,7 +56,7 @@ const bool ioVector::read(SiconosVector& m) const
   return true;
 }
 
-const bool ioVector::write(const SiconosVector& m, const std::string& outputType) const
+template<> bool ioVector::write(const SiconosVector& m, const std::string& outputType) const
 {
   std::ofstream outfile;
   if (Mode == "ascii")

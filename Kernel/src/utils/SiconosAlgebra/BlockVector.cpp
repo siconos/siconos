@@ -229,7 +229,7 @@ void BlockVector::resize(unsigned int, bool)
 //       get norm
 //=======================
 
-const double BlockVector::normInf() const
+double BlockVector::normInf() const
 {
   double d = 0, tmp;
   VectorOfVectors::const_iterator it;
@@ -241,7 +241,7 @@ const double BlockVector::normInf() const
   return d;
 }
 
-const double BlockVector::norm2() const
+double BlockVector::norm2() const
 {
   double d = 0;
   VectorOfVectors::const_iterator it;
@@ -279,7 +279,7 @@ const std::string BlockVector::toString() const
 // Elements access (get or set)
 //=============================
 
-const double BlockVector::getValue(unsigned int pos) const
+double BlockVector::getValue(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 
@@ -324,7 +324,7 @@ double& BlockVector::operator()(unsigned int pos)
   return (*vect[blockNum])(relativePos);
 }
 
-const double BlockVector::operator()(unsigned int pos) const
+double BlockVector::operator()(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 

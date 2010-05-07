@@ -228,7 +228,7 @@ public:
   /** get time instant k of the time discretisation
    *  \return a double.
    */
-  inline const double getTk() const
+  inline double getTk() const
   {
     return _timeDiscretisation->currentTime();
   };
@@ -238,7 +238,7 @@ public:
       non-smooth events or some sensor events are present
       \return a double.
   */
-  inline const double getTkp1() const
+  inline double getTkp1() const
   {
     return _timeDiscretisation->nextTime();
   };
@@ -255,7 +255,7 @@ public:
       time of currentEvent of eventsManager.)
    *  \return a double.
    */
-  inline const double startingTime() const
+  inline double startingTime() const
   {
     return _eventsManager->startingTime();
   };
@@ -264,7 +264,7 @@ public:
       of nextEvent of eventsManager.)
    *  \return a double.
    */
-  inline const double nextTime() const
+  inline double nextTime() const
   {
     return _eventsManager->nextTime();
   };
@@ -272,7 +272,7 @@ public:
   /** get the current time step size ("next time"-"current time")
    *  \return a double.
    */
-  inline const double timeStep() const
+  inline double timeStep() const
   {
     return (nextTime() - startingTime());
   };
@@ -281,7 +281,7 @@ public:
       events remain in the eventsManager).
    *  \return a bool.
    */
-  inline const bool hasNextEvent() const
+  inline bool hasNextEvent() const
   {
     return _eventsManager->hasNextEvent();
   };
@@ -312,7 +312,7 @@ public:
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
    */
-  inline const unsigned int numberOfOSI() const
+  inline unsigned int numberOfOSI() const
   {
     return _allOSI->size();
   }
@@ -350,7 +350,7 @@ public:
   /** get levelMin
    *  \return the value of LevelMin
    */
-  inline const int levelMin() const
+  inline int levelMin() const
   {
     return _levelMin;
   };
@@ -358,7 +358,7 @@ public:
   /** get levelMax
    *  \return the value of LevelMax
    */
-  inline const int levelMax() const
+  inline int levelMax() const
   {
     return _levelMax;
   };
@@ -383,13 +383,13 @@ public:
    *  \param a pointer to OneStepNSProblem
    *  \return a bool
    */
-  //const bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
+  //bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
 
   /** check if a OneStepNSProblem named id is already in the map
    *  \param a string ("id")
    *  \return a bool
    */
-  //const bool hasOneStepNSProblem(const std::string&) const ;
+  //bool hasOneStepNSProblem(const std::string&) const ;
 
   /** add a OneStepNSProblem in the Simulation (if its not the first,
       it needs to have an id clearly defined)
@@ -432,7 +432,7 @@ public:
   /** get tolerance
    *  \return a double
    */
-  const double tolerance() const
+  double tolerance() const
   {
     return _tolerance;
   };
@@ -456,7 +456,7 @@ public:
 
   /** get printStat value
    */
-  inline const bool getPrintStat() const
+  inline bool getPrintStat() const
   {
     return _printStat;
   };

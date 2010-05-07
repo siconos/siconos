@@ -259,7 +259,7 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual SP::SiconosMatrix C()
+  virtual SP::SiconosMatrix C() const
   {
     return jachq();
   }
@@ -267,7 +267,7 @@ public:
    * return a SP on the D matrix.
    * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
    */
-  virtual SP::SiconosMatrix D()
+  virtual SP::SiconosMatrix D() const
   {
     return jachlambda();
   }
@@ -275,7 +275,7 @@ public:
    * return a SP on the B matrix.
    * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
    */
-  virtual SP::SiconosMatrix B()
+  virtual SP::SiconosMatrix B() const
   {
     return jacglambda();
   }

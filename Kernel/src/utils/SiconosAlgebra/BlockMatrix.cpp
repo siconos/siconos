@@ -455,7 +455,7 @@ void BlockMatrix::resize(unsigned int, unsigned int, unsigned int, unsigned int,
 //       get norm
 //=======================
 
-const double BlockMatrix::normInf()const
+double BlockMatrix::normInf()const
 {
   double sum = 0, norm = 0;
   for (unsigned int i = 0; i < size(0); i++)
@@ -517,7 +517,7 @@ double& BlockMatrix::operator()(unsigned int row, unsigned int col)
   return (*tmp)(posRow, posCol);
 }
 
-const double BlockMatrix::operator()(unsigned int row, unsigned int col) const
+double BlockMatrix::operator()(unsigned int row, unsigned int col) const
 {
 
   unsigned int nbRow = 0;
@@ -541,7 +541,7 @@ const double BlockMatrix::operator()(unsigned int row, unsigned int col) const
   return (*tmp)(posRow, posCol);
 }
 
-const double BlockMatrix::getValue(unsigned int row, unsigned int col) const
+double BlockMatrix::getValue(unsigned int row, unsigned int col) const
 {
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;

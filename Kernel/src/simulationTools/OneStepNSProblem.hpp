@@ -263,7 +263,7 @@ public:
   /** get dimension of the problem
    *  \return an unsigned ing
    */
-  inline const unsigned int getSizeOutput() const
+  inline unsigned int getSizeOutput() const
   {
     return _sizeOutput;
   }
@@ -384,7 +384,7 @@ public:
   /** get level min value
    *  \return an unsigned int
    */
-  inline const unsigned int levelMin() const
+  inline unsigned int levelMin() const
   {
     return _levelMin;
   }
@@ -400,7 +400,7 @@ public:
   /** get level max value
    *  \return an unsigned int
    */
-  inline const unsigned int getLevelMax() const
+  inline unsigned int getLevelMax() const
   {
     return _levelMax;
   }
@@ -426,7 +426,7 @@ public:
   /** get maximum value allowed for the dimension of the problem
    *  \return an unsigned int
    */
-  inline const unsigned int maxSize() const
+  inline unsigned int maxSize() const
   {
     return _maxSize;
   }
@@ -442,7 +442,7 @@ public:
   /** get the total (CPU) time spent in the solver
    *  \return: a double
    */
-  inline const double getCPUtime() const
+  inline double getCPUtime() const
   {
     return _CPUtime / (double)CLOCKS_PER_SEC;
   };
@@ -450,7 +450,7 @@ public:
   /** get the number of call to ns solver
    *  \return: an unsigned int
    */
-  inline const unsigned int getNumberOfIterations() const
+  inline unsigned int getNumberOfIterations() const
   {
     return _nbIter;
   };

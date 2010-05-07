@@ -222,7 +222,7 @@ public:
   /** determines if the title of the model is in the DOM tree
   *   \return bool :  true if the author of the model is in the DOM tree
   */
-  inline const bool hasTitle() const
+  inline bool hasTitle() const
   {
     return titleNode ;
   }
@@ -230,7 +230,7 @@ public:
   /** determines if the author of the model is in the DOM tree
   *   \return bool :  true if the title of the model is in the DOM tree
   */
-  inline const bool hasAuthor() const
+  inline bool hasAuthor() const
   {
     return authorNode;
   }
@@ -238,14 +238,14 @@ public:
   /** determines if the description of the model is in the DOM tree
   *   \return bool :  true if T is in the DOM tree
   */
-  inline const bool hasDescription() const
+  inline bool hasDescription() const
   {
     return descriptionNode;
   }
   /** determines if the date of the model is in the DOM tree
   *   \return bool :  true if date of the model is in the DOM tree
   */
-  inline const bool hasDate() const
+  inline bool hasDate() const
   {
     return dateNode;
   }
@@ -253,7 +253,7 @@ public:
   /** determines if the xml schema of the model is in the DOM tree
   *   \return bool :  true if the xml schema of the model is in the DOM tree
   */
-  inline const bool hasXMLSchema() const
+  inline bool hasXMLSchema() const
   {
     return xmlSchemaNode;
   }
@@ -261,7 +261,7 @@ public:
   /** determines if the current time T is in the DOM tree
   *   \return bool :  true if T is in the DOM tree
   */
-  inline const bool hasT() const
+  inline bool hasT() const
   {
     return (TNode);
   }
@@ -269,7 +269,7 @@ public:
   /** determines if the current time t is in the DOM tree
   *   \return bool :  true if t is in the DOM tree
   */
-  inline const bool hasTCurrent() const
+  inline bool hasTCurrent() const
   {
     return (tNode);
   }
@@ -277,7 +277,7 @@ public:
   /** Gets the value of t
   *   \return t value
   */
-  inline const double getTCurrent() const
+  inline double getTCurrent() const
   {
     return SiconosDOMTreeTools::getContentValue<double>(tNode);
   }
@@ -285,7 +285,7 @@ public:
   /** Gets the value of t0
   *   \return t0 value
   */
-  inline const double t0() const
+  inline double t0() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(t0Node);
   }
@@ -293,7 +293,7 @@ public:
   /** Gets the value of T
   *   \return T value
   */
-  inline const double getT() const
+  inline double getT() const
   {
     return SiconosDOMTreeTools::getContentValue<double>(TNode);
   }
@@ -347,7 +347,7 @@ public:
   /** determines if the Simulation is defined
   *   \return bool :  false if the simulationXML* is NULL
   */
-  inline const bool hasSimulation() const
+  inline bool hasSimulation() const
   {
     return simulationXML ;
   }

@@ -118,7 +118,7 @@ public:
   /** get the current time
    *  \return a double
    */
-  inline const double currentTime() const
+  inline double currentTime() const
   {
     return _t;
   }
@@ -134,7 +134,7 @@ public:
   /** get initial time
    *  \return a double
    */
-  inline const double t0() const
+  inline double t0() const
   {
     return _t0;
   }
@@ -150,7 +150,7 @@ public:
   /** get final time
    *  \return a double
    */
-  inline const double finalT() const
+  inline double finalT() const
   {
     return _T;
   }

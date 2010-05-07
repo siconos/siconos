@@ -17,17 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SimpleVector.h
+/*! \file SimpleVector.hpp
  */
 
 #ifndef __SimpleVector__
 #define __SimpleVector__
 
 #include "SiconosVector.hpp"
-
-class VectorNum;
-
-class SimpleMatrix;
+#include "SimpleVectorFriends.hpp"
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
@@ -112,7 +109,7 @@ public:
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  const unsigned int size() const
+  unsigned int size() const
   {
     if (!_dense)
     {
@@ -125,18 +122,18 @@ public:
   }
 
   /** true if the vector is block else false.
-    * \return a bool.
-    */
-  const bool isBlock() const
+   * \return a bool.
+   */
+  bool isBlock() const
   {
     return false;
   };
 
 
   /** Get the type number of the current vector.
-     * \return an unsigned int
-     */
-  const unsigned int getNum() const
+   * \return an unsigned int
+   */
+  unsigned int getNum() const
   {
     if (_dense) return 1;
     else return 4;
@@ -193,12 +190,12 @@ public:
   /** compute the infinite norm of the vector
    *  \return a double
    */
-  const double normInf()const;
+  double normInf()const;
 
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  const double norm2() const ;
+  double norm2() const ;
 
   /** display data on standard output
    */
@@ -250,7 +247,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  const double getValue(unsigned int) const ;
+  double getValue(unsigned int) const ;
 
   /** set the element at position i in the vector.
    *  \param an unsigned int i
@@ -268,7 +265,7 @@ public:
    *  \param an integer i
    *  \return a double
    */
-  const double operator()(unsigned int)const;
+  double operator()(unsigned int)const;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
@@ -292,7 +289,7 @@ public:
    *  \param an unsigned int i
    *  \param a ref to a SiconosVector
    */
-  virtual void setBlock(unsigned int, const SiconosVector&);
+  void setBlock(unsigned int, const SiconosVector&);
 
   /** add the input vector to the elements starting from position i.
    *  \param an unsigned int i
@@ -358,123 +355,36 @@ public:
     return *this;
   }
 
-  /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
-   *  of vOut (from index startOut)
-   * \param vIn, a SP::SiconosVector
-   * \param vOut, a SP::SiconosVector
-   * \param sizeB, an unsigned int
-   * \param startIn, an unsigned int
-   * \param startOut, an unsigned int
-   */
   friend void setBlock(const SiconosVector&, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
 
-  /** A==B when (A-B).normInf()<tolerance
-   * \param 2 SiconosVector
-   * \return a boolean
-   */
   friend bool operator ==(const SiconosVector&, const SiconosVector&);
 
-  /** multiplication of a vector by a scalar
-   *  \param a double
-   *  \param a SiconosVector
-   *  \return a SimpleVector
-   */
   friend SimpleVector operator * (double, const SiconosVector&);
 
-  /** multiplication of a vector by a double
-   *  \param a SiconosVector
-   *  \param a double
-   *  \return a SimpleVector
-   */
   friend SimpleVector operator * (const SiconosVector&, double);
 
-  /** division of the vector by a double
-   *  \param a SiconosVector
-   *  \param a double
-   *  \return a SimpleVector
-   *  \exception SiconosVectorException, if the double d = 0
-   */
   friend SimpleVector operator / (const SimpleVector&, double);
 
-  /** Addition of two vectors
-   * \param a SiconosVector
-   * \param a SiconosVector
-   * \return a SimpleVector
-   */
   friend SimpleVector operator + (const SiconosVector&, const SiconosVector&);
 
-  /** computes z = x + y
-      \param x, a  SiconosVector, IN.
-      \param y, a  SiconosVector, IN.
-      \param z, a SiconosVector, IN-OUT.
-  */
   friend void add(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-  /** Subtraction of two vectors
-      \param a SiconosVector (x), IN.
-      \param a SiconosVector (y), IN.
-      \return a SimpleVector
-   */
   friend SimpleVector operator - (const SiconosVector&, const SiconosVector&);
 
-  /** computes z = x - y
-      \param a SiconosVector (x), IN.
-      \param a SiconosVector (y), IN.
-      \param a SiconosVector (z), IN-OUT.
-  */
   friend void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-  /** computes y = a*x + b*y with atlas axpy.
-      \param a, a double.
-      \param x, a SiconosVector , IN.
-      \param b, a double.
-      \param y, a SiconosVector , IN-OUT.
-  */
   friend void axpby(double, const SiconosVector&, double, SiconosVector&);
 
-  /** computes y = a*x + y with atlas axpy.
-      \param a, a double.
-      \param x, a SiconosVector , IN.
-      \param y, a SiconosVector , IN-OUT.
-  */
   friend void axpy(double, const SiconosVector&, SiconosVector&);
 
-  /** compute dot product m1.m2
-   *  \param 2 SiconosVectors
-   *  \return a double
-   */
-  friend const double inner_prod(const SiconosVector&, const SiconosVector&);
+  friend double inner_prod(const SiconosVector&, const SiconosVector&);
 
-  /** compute the product m1 * trans(m2)
-   *  \param 2 SiconosVectors
-   *  \return a SimpleMatrix
-   */
   friend SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 
-  /** multiplication of a vector by a scalar, y = a*x (init = true) or y += a*x (init = false)
-   *  \param a, a double
-   *  \param x, a SiconosVector (IN)
-   *  \param y, a SiconosVector (IN-OUT)
-   *  \param init, a bool, default = true
-   */
-  friend void scal(double, const SiconosVector&, SiconosVector&, bool = true);
+  friend void scal(double, const SiconosVector&, SiconosVector&, bool);
 
-  /** multiplication of a vector by a scalar, sub_y = a*sub_x (init = true) or sub_y += a*sub_x (init = false)
-   *  \param a, a double
-   *  \param x, a SiconosVector (IN)
-   *  \param y, a SiconosVector (IN-OUT)
-      \param a std::vector<unsigned int> = [r0x r1x r0y r1y];
-      subX is the sub-vector of x, for row numbers between r0x and r1x-1.
-      The same for y with riy.
-   *  \param init, a bool, default = true
-   */
-  friend void subscal(double, const SiconosVector&, SiconosVector&, const std::vector<unsigned int>&, bool = true);
+  friend void subscal(double, const SiconosVector&, SiconosVector&, const Index&, bool);
 
-  /** cross product
-   *  \param V1, a SimpleVector of dimention 3.
-   *  \param V2, aSimpleVector of dimention 3.
-   *  \param VOUT, aSimpleVector of dimention 3, the resulting cross product between V1 and V2.
-   */
   friend void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
   friend class VectorNum;
@@ -492,12 +402,20 @@ public:
 
 struct VectorNum : public SiconosVisitor
 {
-
+private :
   unsigned int _answer;
+
+public:
 
   void visit(const SimpleVector& v)
   {
     if (v._dense) _answer = 1;
+    else _answer = 4;
+  }
+
+  void visit(boost::shared_ptr<SimpleVector> v)
+  {
+    if (v->_dense) _answer = 1;
     else _answer = 4;
   }
 
@@ -506,22 +424,36 @@ struct VectorNum : public SiconosVisitor
     _answer = 0;
   }
 
-};
+  void visit(boost::shared_ptr<BlockVector> v)
+  {
+    _answer = 0;
+  }
 
+};
 
 struct IsDense : public SiconosVisitor
 {
 
   bool _answer;
 
+  void visit(const SimpleVector& v)
+  {
+    _answer = v._dense;
+  }
+
+  void visit(boost::shared_ptr<SimpleVector> v)
+  {
+    _answer = v->_dense;
+  }
+
   void visit(const BlockVector& v)
   {
     _answer = false;
   }
 
-  void visit(const SimpleVector& v)
+  void visit(boost::shared_ptr<BlockVector> v)
   {
-    _answer = v._dense;
+    _answer = false;
   }
 
 };
@@ -531,16 +463,25 @@ struct IsSparse : public SiconosVisitor
 
   bool _answer;
 
-  void visit(const BlockVector& v)
-  {
-    _answer = false;
-  }
-
   void visit(const SimpleVector& v)
   {
     _answer = !v._dense;
   }
 
+  void visit(boost::shared_ptr<SimpleVector> v)
+  {
+    _answer = !v->_dense;
+  }
+
+  void visit(const BlockVector& v)
+  {
+    _answer = false;
+  }
+
+  void visit(boost::shared_ptr<BlockVector> v)
+  {
+    _answer = false;
+  }
 
 };
 
@@ -549,14 +490,24 @@ struct IsBlock : public SiconosVisitor
 
   bool _answer;
 
+  void visit(const SimpleVector& v)
+  {
+    _answer = false;
+  }
+
+  void visit(boost::shared_ptr<SimpleVector> v)
+  {
+    _answer = false;
+  }
+
   void visit(const BlockVector& v)
   {
     _answer = true;
   }
 
-  void visit(const SimpleVector& v)
+  void visit(boost::shared_ptr<BlockVector> v)
   {
-    _answer = false;
+    _answer = true;
   }
 };
 

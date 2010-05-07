@@ -77,7 +77,7 @@ SP::SiconosVector UnitaryRelation::lambda(unsigned int i) const
   return ((interaction()->lambda(i))->vector(_number));
 }
 
-const double UnitaryRelation::getYRef(unsigned int i) const
+double UnitaryRelation::getYRef(unsigned int i) const
 {
   // get the single value used to build indexSets Warning: the
   // relativePosition depends on NsLawSize and/or type.  This means
@@ -88,23 +88,23 @@ const double UnitaryRelation::getYRef(unsigned int i) const
   return (*y(i))(0);
 }
 
-const double UnitaryRelation::getLambdaRef(unsigned int i) const
+double UnitaryRelation::getLambdaRef(unsigned int i) const
 {
   // get the single value used to build indexSets
   return (*lambda(i))(0);
 }
 
-const unsigned int UnitaryRelation::getNonSmoothLawSize() const
+unsigned int UnitaryRelation::getNonSmoothLawSize() const
 {
   return interaction()->nonSmoothLaw()->size();
 }
 
-const RELATION::TYPES UnitaryRelation::getRelationType() const
+RELATION::TYPES UnitaryRelation::getRelationType() const
 {
   return interaction()->relation()->getType();
 }
 
-const RELATION::SUBTYPES UnitaryRelation::getRelationSubType() const
+RELATION::SUBTYPES UnitaryRelation::getRelationSubType() const
 {
   return interaction()->relation()->getSubType();
 }

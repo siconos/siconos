@@ -21,16 +21,11 @@
 #include <iterator>
 
 #include "ioMatrix.hpp"
-#include "SimpleMatrix.hpp"
 #include "SiconosMatrixException.hpp"
+#include <boost/numeric/ublas/io.hpp>
+#include<fstream>
 
-
-// Default (private)
-ioMatrix::ioMatrix(): ioObject() {}
-
-ioMatrix::ioMatrix(const std::string& file, const std::string& mode): ioObject(file, mode) {}
-
-const bool ioMatrix::read(SiconosMatrix& m) const
+template<> bool ioMatrix::read(SiconosMatrix& m) const
 {
   std::ifstream infile;
   if (Mode == "ascii")
@@ -80,7 +75,7 @@ const bool ioMatrix::read(SiconosMatrix& m) const
   return true;
 }
 
-const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType) const
+template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType) const
 {
   // Open file and various checks
   std::ofstream outfile;

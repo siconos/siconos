@@ -105,7 +105,7 @@ public:
   /** get problem type (true if BVP)
    *  \return a bool
    */
-  inline const bool isBVP() const
+  inline bool isBVP() const
   {
     return BVP;
   }
@@ -113,7 +113,7 @@ public:
   /** get problem type (true if IVP)
    *  \return a bool
    */
-  inline const bool isIVP() const
+  inline bool isIVP() const
   {
     return !BVP;
   }
@@ -131,7 +131,7 @@ public:
   /** get the number of Dynamical Systems present in the NSDS
       \return an unsigned int
    */
-  inline const unsigned int getNumberOfDS() const
+  inline unsigned int getNumberOfDS() const
   {
     return topology()->dSG(0)->size();
   };
@@ -150,7 +150,7 @@ public:
   /** get the number of Interactions present in the NSDS (ie in allInteractions set)
    *  \return an unsigned int
    */
-  inline const unsigned int getNumberOfInteractions() const
+  inline unsigned int getNumberOfInteractions() const
   {
     return _topology->interactions()->size();
   };

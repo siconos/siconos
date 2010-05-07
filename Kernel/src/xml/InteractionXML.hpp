@@ -96,7 +96,7 @@ public:
   /** return true if id attribute is present
   *  \return a bool
   */
-  inline const bool hasId() const
+  inline bool hasId() const
   {
     return SiconosDOMTreeTools::hasAttributeValue(rootNode, ID_ATTRIBUTE);
   };
@@ -104,7 +104,7 @@ public:
   /** return true if number attribute is present
   *  \return a bool
   */
-  inline const bool hasNumber() const
+  inline bool hasNumber() const
   {
     return SiconosDOMTreeTools::hasAttributeValue(rootNode, NUMBER_ATTRIBUTE);
   };
@@ -130,7 +130,7 @@ public:
   /** Return the number of the Interaction (rootNode attribute)
   *   \return an int
   */
-  inline const int number() const
+  inline int number() const
   {
     if (!hasNumber())
       XMLException::selfThrow("InteractionXML::number(): number attribute is unset.");
@@ -148,7 +148,7 @@ public:
   /** return true if size node is present
   *  \return a bool
   */
-  const bool hasSize() const
+  bool hasSize() const
   {
     return (sizeNode);
   };
@@ -156,7 +156,7 @@ public:
   /** Return the size of the InteractionXML
   *   \return an unsigned int
   */
-  inline const unsigned int getSize() const
+  inline unsigned int getSize() const
   {
     if (!hasSize())
       XMLException::selfThrow("InteractionXML::getSize() : sizeNode == NULL");
@@ -171,7 +171,7 @@ public:
   /** return true if yNode is defined
   *  \return a bool
   */
-  inline const bool hasY() const
+  inline bool hasY() const
   {
     return (yNode);
   }
@@ -194,7 +194,7 @@ public:
   /** return true if lambdaNode is defined
   *  \return true if lambdaNode is defined
   */
-  inline const bool hasLambda() const
+  inline bool hasLambda() const
   {
     return (lambdaNode);
   };
@@ -217,7 +217,7 @@ public:
   /** true if tag DSConcerned is present
   *  \return a bool
   */
-  inline const bool hasDSList() const
+  inline bool hasDSList() const
   {
     return DSConcernedNode;
   }
@@ -253,7 +253,7 @@ public:
   /** true if tag relation is present
   *  \return a bool
   */
-  inline const bool hasRelation() const
+  inline bool hasRelation() const
   {
     return relationNode;
   };
@@ -269,7 +269,7 @@ public:
   /** true if tag nonSmoothLaw is present
   *  \return a bool
   */
-  inline const bool hasNonSmoothLaw() const
+  inline bool hasNonSmoothLaw() const
   {
     return nsLawNode;
   };

@@ -49,7 +49,7 @@ namespace atlas = boost::numeric::bindings::atlas;
 //const int MAX_SIZE = 1000;
 
 /** type of object used to save indices */
-typedef std::vector<unsigned int> Index;
+typedef std::vector<std::size_t> Index;
 TYPEDEF_SPTR(Index);
 
 /** Various matrix types available in Siconos **/

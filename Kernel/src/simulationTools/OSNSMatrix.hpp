@@ -220,19 +220,19 @@ public:
   ~OSNSMatrix();
 
   /** get dimension of the square matrix */
-  inline const unsigned int size() const
+  inline unsigned int size() const
   {
     return dimRow;
   };
 
   /** get dimension of the square matrix */
-  inline const unsigned int sizeColumn() const
+  inline unsigned int sizeColumn() const
   {
     return dimColumn;
   };
 
   /** get the type of storage for current matrix  */
-  inline const int getStorageType() const
+  inline int getStorageType() const
   {
     return storageType;
   };

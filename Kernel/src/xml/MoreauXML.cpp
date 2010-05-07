@@ -51,7 +51,7 @@ void MoreauXML::setTheta(const vector<double>& v)
   //   else SiconosDOMTreeTools::setSiconosVectorNodeValue(thetaNode, v);
 }
 
-const double MoreauXML::getSingleTheta() const
+double MoreauXML::getSingleTheta() const
 {
   if (!hasAllTheta())
     XMLException::selfThrow("MoreauXml getSingleTheta: the attribute all is not present in the tag theta");

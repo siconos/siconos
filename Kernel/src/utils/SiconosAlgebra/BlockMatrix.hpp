@@ -238,7 +238,7 @@ public:
   /** compute the infinite norm of the Block matrix
    *  \return a double
    */
-  const double normInf() const;
+  double normInf() const;
 
   /** display data on standard output
    */
@@ -258,14 +258,14 @@ public:
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  const double operator()(unsigned int, unsigned int) const;
+  double operator()(unsigned int, unsigned int) const;
 
   /** return the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
    *  \return a double
    */
-  const double getValue(unsigned int, unsigned int) const;
+  double getValue(unsigned int, unsigned int) const;
 
   /** set the element matrix[i,j]
    *  \param an unsigned int i

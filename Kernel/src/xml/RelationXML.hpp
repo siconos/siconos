@@ -94,12 +94,12 @@ public:
 
   /** Returns the type of the RelationXML
    */
-  const RELATION::TYPES getType() const ;
+  RELATION::TYPES getType() const ;
 
   /** Returns the sub-type of the Relation
    *  \return a string.
    */
-  const RELATION::SUBTYPES getSubType() const;
+  RELATION::SUBTYPES getSubType() const;
 
   /** Returns the node of the RelationXML
    *   \return an xmlNodePtr.
@@ -153,7 +153,7 @@ public:
   /** Return true if hDot is calculated with a plugin.
    *  \return a bool
    */
-  inline const bool isHDotPlugin() const
+  inline bool isHDotPlugin() const
   {
     return xmlHasProp(hDotNode, (xmlChar*)"plugin");
   };

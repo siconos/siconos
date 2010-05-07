@@ -68,7 +68,7 @@ public:
   /** \fn bool hasFailed()
    * \brief return the total number of tests
    */
-  inline const unsigned int getNumberOfTests() const
+  inline unsigned int getNumberOfTests() const
   {
     return testsList.size();
   }  ;
@@ -76,7 +76,7 @@ public:
   /** \fn bool hasFailed()
    * \brief return the number of tests that failed
    */
-  inline const unsigned int getNumberOfFailedTests() const
+  inline unsigned int getNumberOfFailedTests() const
   {
     return numberOfFailedTests;
   }  ;

@@ -163,7 +163,7 @@ public:
   /** get the type of the Actuator (ie class name)
    *  \return a string
    */
-  inline const int getType() const
+  inline int getType() const
   {
     return _type;
   };

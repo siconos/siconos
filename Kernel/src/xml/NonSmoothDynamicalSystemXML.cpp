@@ -79,7 +79,7 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 
   // rootDSNode = "DS_Definition". We look for its children node (DynamicalSystem and derived classes) and for
   // each of them add a new DynamicalSystemXML in the set of DSXML.
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootDSNode);
+  node = SiconosDOMTreeTools::findNodeChild((xmlNodePtr)rootDSNode);
   if (!node)  // At least one DynamicalSystem must be described in the xml file.
     XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
 

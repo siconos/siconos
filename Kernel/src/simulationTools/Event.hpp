@@ -106,7 +106,7 @@ public:
   /** get tick value
    *  \return a double
    */
-  inline const double getTick() const
+  inline double getTick() const
   {
     return tick ;
   };
@@ -131,7 +131,7 @@ public:
   /** get the time of the present event (double format)
    *  \return a double
    */
-  inline const double getDoubleTimeOfEvent() const
+  inline double getDoubleTimeOfEvent() const
   {
     return dTime;
   }
@@ -148,7 +148,7 @@ public:
   /** get a type of the present event
    *  \return an std::string
    */
-  inline const int getType() const
+  inline int getType() const
   {
     return type ;
   };

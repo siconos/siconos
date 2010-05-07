@@ -17,72 +17,42 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ioMatrix.h
-    \brief
+/*! \file ioMatrix.hpp
+    \brief input/output for SiconosMatrix
 
 */
 
 #ifndef __ioMatrix__
 #define __ioMatrix__
 
+#include "SiconosMatrix.hpp"
+#include "SiconosMatrixException.hpp"
 #include "ioObject.hpp"
 
-class SimpleMatrix;
+/** io object specialization */
+typedef ioObject<SiconosMatrix> ioMatrix;
 
-/** Interface for read/write matrices from/to a file.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
- *
- *
- *  Type of Output for write function:
- *    - "boost": boost way:
- *                    [row,col] ((a00,a01,...),(a10,...),...
- *    - "python"(default):
- *                    row col
- *                    a00 a01 a02 ...
- *                    a10 ...
- *    - "noDim":
- *                    a00 a01 a02 ...
- *                    a10 ...
- *
- * Reading input format is the one corresponding to "python".
- *
- */
-class ioMatrix : public ioObject
-{
-private :
+/** Specialization to read a SiconosMatrix
+    \param[in] SiconosMatrix the matrix to be read
+    \return bool true if read ok, else false ...
+*/
+template<> bool ioObject<SiconosMatrix>::read(SiconosMatrix& m) const;
 
-  /** default constructor with Mode = "ascii"
-  */
-  ioMatrix();
+/** Specialization to write a SiconosMatrix
+    \param[in] SiconosMatrix the matrix to be read
+    \param[in] string type of output:
+    - "boost": boost way:
+    [row,col] ((a00,a01,...),(a10,...),...
+    - "python"(default):
+    row col
+    a00 a01 a02 ...
+    a10 ...
+    - "noDim":
+    a00 a01 a02 ...
+    a10 ...
+    Reading input format is the one corresponding to "python".
+    \return bool true if read ok, else false ...
+*/
+template<> bool ioObject<SiconosMatrix>::write(const SiconosMatrix& m, const std::string& outputType) const;
 
-public :
-
-  /** constructor with FileName = file and Mode = mode
-   *  \param 2 std::string
-   */
-  ioMatrix(const std::string&, const std::string&);
-
-  /** destructor
-   */
-  ~ioMatrix() {};
-
-  /** read the matrix in the file "Filename" and write it into matrix A
-   *  \param a SiconosMatrix
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  const bool read(SiconosMatrix&) const;
-
-  /** write the matrix A in the file "Filename"
-   *  \param a SiconosMatrix
-   *  \param a string: type of output - See on top of file for details
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  const bool write(const SiconosMatrix&, const std::string& = "python") const;
-
-};
 #endif

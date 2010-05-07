@@ -61,7 +61,7 @@ VectorOfVectors::const_iterator SiconosVector::end() const
 //=====================
 // vectors comparison
 //=====================
-const bool isComparableTo(const SiconosVector& v1, const SiconosVector& v2)
+bool isComparableTo(const SiconosVector& v1, const SiconosVector& v2)
 {
   // return:
   // - true if one of the vectors is a Simple and if they have the same size

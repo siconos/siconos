@@ -56,7 +56,7 @@ public:
   /** return the En of the NSLaw
   *   \return a double
   */
-  inline const double getEn() const
+  inline double getEn() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(enNode);
   }
@@ -82,7 +82,7 @@ public:
   /** return the Et of the NSLaw
   *   \return a double
   */
-  inline const double getEt() const
+  inline double getEt() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(etNode);
   }
@@ -108,7 +108,7 @@ public:
   /** return mu value
   *   \return a double
   */
-  inline const double getMu() const
+  inline double getMu() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(muNode);
   }

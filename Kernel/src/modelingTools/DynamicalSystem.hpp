@@ -291,15 +291,15 @@ public:
   /** to get the number of the DynamicalSystem
    *  \return the value of number
    */
-  inline const int number() const
+  inline int number() const
   {
     return _number;
   }
 
   /** function used to sort DynamicalSystem in SiconosSet<SP::DynamicalSystem>
-   *  \return an int
+   *  \return an int (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */
-  inline const int getSort() const
+  inline int getSort() const
   {
     return _number;
   }
@@ -309,7 +309,7 @@ public:
   /** allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
-  inline const unsigned int getN() const
+  inline unsigned int getN() const
   {
     return _n;
   }
@@ -325,7 +325,7 @@ public:
   /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
    *  \return an unsigned int.
    */
-  virtual inline const unsigned int getDim() const
+  virtual inline unsigned int getDim() const
   {
     return _n;
   };
@@ -606,7 +606,7 @@ public:
   /** get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
-  inline const int getStepsInMemory() const
+  inline int getStepsInMemory() const
   {
     return _stepsInMemory;
   }
