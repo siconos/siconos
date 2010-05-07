@@ -55,7 +55,7 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_SVN "Consider SVN is online" OFF)
   OPTION(WITH_DEFAULT_BUILD_TYPE "Use a default build type (Release)" ON)
   OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" OFF)
-  OPTION(WITH_TESTING "Enable 'make test' target" OFF)
+  OPTION(WITH_TESTING "Enable 'make test' target" ON)
 
 
   # Build type
@@ -94,15 +94,15 @@ MACRO(SICONOS_PROJECT
     CHECK_C_COMPILER_FLAG("-Wall" C_HAVE_WALL)
   ENDIF(CMAKE_C_COMPILER)
 
-  IF(CMAKE_CXX_COMPILER)
-    INCLUDE(TestCXXAcceptsFlag)
-    CHECK_CXX_ACCEPTS_FLAG(-ffriend-injection CXX_HAVE_FRIEND_INJECTION)
-  ENDIF(CMAKE_CXX_COMPILER)
+ # IF(CMAKE_CXX_COMPILER)
+ #   INCLUDE(TestCXXAcceptsFlag)
+#    CHECK_CXX_ACCEPTS_FLAG(-ffriend-injection CXX_HAVE_FRIEND_INJECTION)
+ # ENDIF(CMAKE_CXX_COMPILER)
 
-  IF(CMAKE_Fortran_COMPILER)
-    INCLUDE(fortran)
-    INCLUDE(FortranLibraries)
-  ENDIF(CMAKE_Fortran_COMPILER)
+# IF(CMAKE_Fortran_COMPILER)
+#    INCLUDE(fortran)
+#    INCLUDE(FortranLibraries)
+#  ENDIF(CMAKE_Fortran_COMPILER)
 
   # Some http://pipol.inria.fr configurations
 
