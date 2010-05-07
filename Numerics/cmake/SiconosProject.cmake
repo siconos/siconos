@@ -105,15 +105,14 @@ MACRO(SICONOS_PROJECT
   ENDIF(CMAKE_Fortran_COMPILER)
 
   # Some http://pipol.inria.fr configurations
-  INCLUDE(Pipol)
 
-  # add a target for each pipol system
-  IF(PIPOL_SYSTEMS)
-    FOREACH(SYSTEM ${PIPOL_SYSTEMS})
-      # target with rc-dir
-      PIPOL_TARGET(${SYSTEM} ${CMAKE_SOURCE_DIR}/../Build/Pipol)
-    ENDFOREACH(SYSTEM ${PIPOL_SYSTEMS})
-  ENDIF(PIPOL_SYSTEMS)
+  # system configuration directory
+  SET(PIPOL_RC_DIR ${CMAKE_SOURCE_DIR}/../Build/Pipol)
+
+  # specific cmake command
+  SET(PIPOL_CONFIGURE_COMMAND cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DWITH_TESTING=True ${CMAKE_SOURCE_DIR})
+
+  INCLUDE(Pipol)
 
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
