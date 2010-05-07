@@ -15,18 +15,13 @@ set -x
 #set -e
 mode=${1:-Nightly}
 
+GFORGE_USER=${GFORGE_USER:-$USER}
+
 export LC_ALL=C
 
 id -u
 date
 df -k
-
-head_revision=`cat $PIPOL_HOMEDIR/src/nightly/siconos/head_revision`
-local_revision=`cat $PIPOL_HOMEDIR/src/nightly/siconos/local_revision`
-
-echo HEAD : $head_revision
-echo LOCAL : $local_revision
-
 env
 
 case $PIPOL_IMAGE in 
@@ -39,7 +34,7 @@ setup_trunk() {
     mkdir -p $PIPOL_WDIR/siconos/trunk
     cd $PIPOL_WDIR/siconos/trunk; { 
         for mod in Numerics Kernel Examples ; do 
-            [ -d $mod ] || svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+            [ -d $mod ] || svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
             cd $mod; { 
                 svn update -r $local_revision
             }; cd ..
@@ -52,7 +47,7 @@ setup_3_1() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.1.0
     cd $PIPOL_WDIR/siconos/branches/3.1.0; { 
         for mod in Numerics Kernel Examples ; do 
-            svn co svn+ssh://$USER@scm.gforge.inria.fr/svn/siconos/branches/3.1.0/$mod </dev/null
+            svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/branches/3.1.0/$mod </dev/null
         done
     }; cd $current_dir
 }
