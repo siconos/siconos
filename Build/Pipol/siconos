@@ -15,6 +15,13 @@ set -x
 #set -e
 mode=${1:-Nightly}
 
+# some local config
+[ -f $HOME/.pipol/siconos.conf ] && . $HOME/.pipol/siconos.conf
+
+# echo com | sudo -H -u $u -i (cf PipolBuild) does not work (system dependant?)
+. $HOME/.profile
+
+
 GFORGE_USER=${GFORGE_USER:-$USER}
 
 export LC_ALL=C
@@ -22,6 +29,13 @@ export LC_ALL=C
 id -u
 date
 df -k
+
+head_revision=`cat $PIPOL_HOMEDIR/src/siconos/head_revision`
+local_revision=`cat $PIPOL_HOMEDIR/src/siconos/local_revision`
+
+echo HEAD : $head_revision
+echo LOCAL : $local_revision
+
 env
 
 case $PIPOL_IMAGE in 
