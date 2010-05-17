@@ -3,6 +3,20 @@ SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Numerics.i Kernel.i PROPERTIES SWIG_FLAGS "-Wall;-DSWIGA")
 
+# do not skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# don't add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 SWIG_ADD_MODULE(Numerics python Numerics.i)
 SWIG_ADD_MODULE(Kernel python Kernel.i)
 

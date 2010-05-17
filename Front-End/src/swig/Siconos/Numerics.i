@@ -181,28 +181,147 @@ static int convert_darray(PyObject *input, double *ptr) {
   $result = PyInt_FromLong(*$1);
  }
 
-// numpy array to vector, the size is already known
+%typemap(in) (LinearComplementarityProblem*) (npy_intp problem_size) {
+  void *lcp;
+  int res = SWIG_ConvertPtr($input, &lcp,SWIGTYPE_p_LinearComplementarityProblem, 0 |  0 );
+  if (!SWIG_IsOK(res)) SWIG_fail;
+
+  problem_size=((LinearComplementarityProblem *) lcp)->size;
+
+  $1 = (LinearComplementarityProblem *) lcp;
+}
+
+%typemap(in, numinputs=0) (unsigned int problemSize) (npy_intp problem_size, npy_intp number_of_contacts)
+{
+  // the first array length sets problemSize
+  problem_size = -1;
+  number_of_contacts = -1;
+}
+
+%typemap(in) (FrictionContactProblem*) (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) {
+  void *fcp;
+  int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
+  if (!SWIG_IsOK(res)) SWIG_fail;
+
+  problem_dimension=((FrictionContactProblem *) fcp)->dimension;
+  number_of_contacts=((FrictionContactProblem *) fcp)->numberOfContacts;
+  problem_size=((FrictionContactProblem *) fcp)->numberOfContacts * problem_dimension;
+
+  $1 = (FrictionContactProblem*) fcp;
+}
+
+// vectors of size problem_size from given *Problem as first input
 %typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
+  
   if (!array || !require_dimensions(array,1) ||
-      !require_native(array) || !require_contiguous(array)) SWIG_fail;
+      !require_native(array) || !require_contiguous(array)
+      || !require_size(array, &problem_size1, 1)) SWIG_fail;
   
   $1 = (double *) array_data(array);
 
  }
 
-// other names that must be transormed this way
+// vectors of size problem_size from problemSize as first input
+%typemap(in) (double *vect3D) (PyArrayObject* array=NULL, int is_new_object) {
+
+  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+  if (problem_size1 < 0)
+  {
+    if (array_numdims(array) > 0)
+    {
+      problem_size1 = array_size(array,0);
+      arg1 = problem_size1;
+    }
+    
+    if (problem_size1 % 3 != 0) SWIG_fail;
+    
+    if (problem_size1 / 3 == 0) SWIG_fail;
+    
+    
+    number_of_contacts1 = problem_size1 / 3;
+    
+  }
+  
+  if (!array || !require_dimensions(array,1) ||
+      !require_native(array) || !require_contiguous(array)
+      || !require_size(array, &problem_size1, 1)) SWIG_fail;
+  
+  $1 = (double *) array_data(array);
+
+ }
+
+
+
+// vectors of size problem_size
+
+// 1 : numinputs=0 mandatory to avoid arg
+%typemap(in, numinputs=0) (double *result) (PyObject* array=NULL)
+{
+    // %typemap(in, numinputs=0)
+    // we cannot get problem_size here as numinputs=0 => before
+    // numinputs=1, how can we change this ??
+}
+
+// 2 : check must be done after in
+%typemap(check) (double *result) 
+{
+  if (problem_size1 > 0)
+  {
+    
+    npy_intp dims[1] = { problem_size1 };
+    
+    array$argnum = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array$argnum) SWIG_fail;
+    $1 = ($1_ltype) array_data(array$argnum);
+  }
+  
+}
+
+// 3 : return arg
+%typemap(argout) (double *result)
+{
+  if (problem_size1 > 0)
+  {
+     $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
+  }
+  
+}
+
+
+// vectors of size numberOfContacts
+%typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
+
+  if (number_of_contacts1 > 0)
+
+  {
+    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    
+    if (!array || !require_dimensions(array,1) ||
+        !require_native(array) || !require_contiguous(array)
+        || !require_size(array, &number_of_contacts1, 1)) SWIG_fail;
+    
+    $1 = (double *) array_data(array);
+    
+  }
+  
+    
+ }  
+
+// other names that must be transformed this way
 %apply (double *z) { (double *w) }; 
 
 %apply (double *z) { (double *zlem) };
 
 %apply (double *z) { (double *wlem) };
 
-%apply (double *z) { (double *reaction) };
+%apply (double *vect3D) { (double *reaction3D) };
 
-%apply (double *z) { (double *velocity) };
+%apply (double *vect3D) { (double *velocity3D) };
+
+%apply (double *vect3D) { (double *rho3D) };
 
 // Numpy array -> NumericsMatrix (dense storage only!)
 %typemap(in) 
@@ -307,9 +426,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
  // FrictionContact
 %include "FrictionContactProblem.h"
-%include "FrictionContact2D_Solvers.h"
-%include "FrictionContact3D_Solvers.h"
-%include "FrictionContact3D_AlartCurnier.h"
+%include "FrictionContact3D_GlobalAlartCurnier.h"
 
 %extend FrictionContactProblem
 {
@@ -428,7 +545,3 @@ static int convert_darray(PyObject *input, double *ptr) {
       //linearComplementarity_setDefaultSolverOptions(lcp, (SolverOptions *) $self, solverName);
   }
 }
-
-    
-  
-  

@@ -22,13 +22,19 @@ mass[2,2]=3./5 * r * r
 
 weight = array([-m * g, 0, 0])
 
+def equalv(v1,v2):
+    return (linalg.norm(v1-v2) <= finfo(double).eps)
+    
+
 def test_LagrangianLinearTIDS():
     ball = LagrangianLinearTIDS(q,v,mass)
-    assert (ball.q().all() == q.all())
-    assert (ball.velocity().all() == v.all())
-    assert (ball.mass().all() == mass.all())
+    assert (equalv(ball.q(),q))
+    assert (equalv(ball.velocity(),v))
+    assert (ball.mass(),mass)
 
     ball.setFExtPtr(weight)
+
+    assert(equalv(ball.fExt(),weight))
 
 
 def test_NewtonImpactNSL():
@@ -38,7 +44,7 @@ def test_NewtonImpactNSL():
 def test_LagrangianLinearTIR():
     H = array([[1,0,0]])
     relation = LagrangianLinearTIR(H)
-    assert(relation.H() == H)
+    assert(equalv(relation.jachq(),H))
 
 def test_Model():
     bouncingBall = Model(t0,T)
