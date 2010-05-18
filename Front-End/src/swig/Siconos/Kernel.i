@@ -138,14 +138,14 @@
 
 %typemap(out) boost::shared_ptr<SiconosVector>
 {
-  int this_vector_dim[1];
+  npy_intp this_vector_dim[1];
   this_vector_dim[0]=$1->size();
   $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
 }
 
 %typemap(out) boost::shared_ptr<SiconosMatrix>
 {
-  int this_matrix_dim[2];
+  npy_intp this_matrix_dim[2];
   this_matrix_dim[0]=$1->size(0);
   this_matrix_dim[1]=$1->size(1);
   $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
