@@ -291,6 +291,42 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 
+// 3x3 matrices
+
+// 1 : numinputs=0 mandatory to avoid arg
+%typemap(in, numinputs=0) (double *result3x3) (PyObject* array=NULL)
+{
+    // %typemap(in, numinputs=0)
+    // we cannot get problem_size here as numinputs=0 => before
+    // numinputs=1, how can we change this ??
+}
+
+// 2 : check must be done after in
+%typemap(check) (double *result3x3) 
+{
+  if (problem_size1 > 0)
+  {
+    
+    npy_intp dims[1] = { problem_size1 * 3 };
+    
+    array$argnum = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array$argnum) SWIG_fail;
+    $1 = ($1_ltype) array_data(array$argnum);
+  }
+  
+}
+
+// 3 : return arg
+%typemap(argout) (double *result3x3)
+{
+  if (problem_size1 > 0)
+  {
+      $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
+  }
+  
+}
+
+
 // vectors of size numberOfContacts
 %typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
 
@@ -322,6 +358,18 @@ static int convert_darray(PyObject *input, double *ptr) {
 %apply (double *vect3D) { (double *velocity3D) };
 
 %apply (double *vect3D) { (double *rho3D) };
+
+%apply (double *result) { (double *result1) };
+
+%apply (double *result) { (double *result2) };
+
+%apply (double *result) { (double *result3) };
+
+%apply (double *result) { (double *result4) };
+
+%apply (double *result3x3) { (double *result3x3_1) };
+
+%apply (double *result3x3) { (double *result3x3_2) };
 
 // Numpy array -> NumericsMatrix (dense storage only!)
 %typemap(in) 
