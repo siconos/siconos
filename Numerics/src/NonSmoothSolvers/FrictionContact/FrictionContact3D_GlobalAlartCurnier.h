@@ -57,41 +57,9 @@ extern "C"
     double *velocity3D,
     double *rho3D,
     double *mu,
-    double *result);
-
-  double frictionContact3D_GlobalAlartCurnierChooseDUnACFunT1(
-    unsigned int problemSize,
-    double *reaction3D,
-    double *velocity3D,
-    double *rho3D);
-
-  double frictionContact3D_GlobalAlartCurnierChooseDRnACFunT1(
-    unsigned int problemSize,
-    double *reaction3D,
-    double *velocity3D,
-    double *rho3D);
-
-  double frictionContact3D_GlobalAlartCurnierChooseDRnACFunT2(
-    unsigned int problemSize,
-    double *reaction3D,
-    double *velocity3D,
-    double *rho3D);
-
-  void frictionContact3D_GlobalAlartCurnierChooseDUtACFunT2(
-    unsigned int problemSize,
-    double *reaction3D,
-    double *velocity3D,
-    double *rho3D,
-    double *result2x2);
-
-  void frictionContact3D_GlobalAlartCurnierChooseDRtACFunT2(
-    unsigned int problemSize,
-    double *reaction,
-    double *velocity,
-    double *rho,
-    double *result2x2);
-
-
+    double *result,
+    double *result3x3_1,
+    double *result3x3_2);
 
 #ifdef __cplusplus
 }
