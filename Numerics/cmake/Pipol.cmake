@@ -66,8 +66,10 @@ IF(PIPOL_USER)
         SET(PIPOL_SUB_RSYNC_OPTIONS "-aC")
       ENDIF(NOT PIPOL_SUB_RSYNC_OPTIONS)
 
+      STRING(REPLACE ".dd.gz" "" SYSTEM_TARGET ${SYSTEM_PATTERN})
+
       ADD_CUSTOM_TARGET(
-        ${SYSTEM_PATTERN}
+        ${SYSTEM_TARGET}
         COMMENT "PIPOL Build : ${SYSTEM_PATTERN}"
         COMMAND rsync ${PIPOL_USER}@pipol.inria.fr:/usr/local/bin/pipol-sub . 
         COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION} --rsynco=${PIPOL_SUB_RSYNC_OPTIONS}
@@ -82,7 +84,7 @@ IF(PIPOL_USER)
         )
 
       ADD_CUSTOM_TARGET(
-        package-${SYSTEM_PATTERN}
+        package-${SYSTEM_TARGET}
         COMMENT "PIPOL Build : ${SYSTEM_PATTERN}"
         COMMAND rsync ${PIPOL_USER}@pipol.inria.fr:/usr/local/bin/pipol-sub . \;\\
         COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION}  
