@@ -183,8 +183,6 @@ SP_TYPE(X,B)
 %include("X##.hpp")
 %enddef
 
-%import <boost/enable_shared_from_this.hpp>
-
 SP_TYPE(NonSmoothLaw,NonSmoothLaw);
 SP_TYPE(NewtonImpactNSL,NonSmoothLaw);
 SP_TYPE(NewtonImpactFrictionNSL,NonSmoothLaw);
@@ -246,6 +244,9 @@ SP_TYPE(SimpleVector,SiconosVector)
 %include "SiconosSet.hpp"
 
 %template (InteractionsSet) SiconosSet<Interaction,double*>;
+
+// boost >= 1.40
+%import "boost/smart_ptr/enable_shared_from_this.hpp"
 %template (sharedModel) boost::enable_shared_from_this<Model>;
 
 SP_TYPE(InteractionsSet,InteractionsSet)
@@ -373,7 +374,9 @@ DEFINE_SPTR(SiconosMatrix);
 
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
-%import "boost/graph/adjacency_list.hpp"
+
+ // boost >= 1.40
+ //%import "boost/graph/adjacency_list.hpp"
 
 %fragment("StdSequenceTraits");
 
