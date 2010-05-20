@@ -23,13 +23,7 @@
 
 ---++ Required external libraries
 
-   * atlas
-
----++ Optional external libraries
-
-   * cppunit
-      * last tested version in Siconos: 1.12
-      * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
+   * ATLAS or BLAS/LAPACK
 
 ---++ Getting the sources
 
@@ -91,83 +85,9 @@ Some MAKE OPTIONS that may be usefull:
    * to see make command as executed : VERBOSE=1
 
       
----+++ Is the installation of the Kernel OK ?
 
-   * You can try to run : 
+---++ Note on MacOS and gfortran
 
-   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; siconos BouncingBall.cpp
+      gfortran is not packaged in Apple Xcode. You need to install it from a port system such as fink, MacPort or to download a binary version at http://hpc.sourceforge.net/.
 
----+++ Is the installation of the Front-End OK ?
-   * You can try to run : 
-
-   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; pySiconos BouncingBall.py
-
-
-
-
-
----- old notes on mac & libtool
-
-INSTALLATION ON MACOSX
-
-One Mach-O feature that hits many people by surprise is the strict
-distinction between shared libraries and dynamically loadable
-modules. On ELF systems both are the same; any piece of shared code
-can be used as a library and for dynamic loading. Use otool -hv
-some_file to see the filetype of some_file.
-
-Mach-O shared libraries have the file type MH_DYLIB and carry the
-extension .dylib. They can be linked against with the usual static
-linker flags, e.g. -lfoo for libfoo.dylib. However, they can not be
-loaded as a module. (Side note: Shared libraries can be loaded
-dynamically through an API. However, that API is different from the
-API for bundles and the semantics make it useless for an dlopen()
-emulation. Most notably, shared libraries can not be unloaded.)
-
-Loadable modules are called "bundles" in Mach-O speak. They have the
-file type MH_BUNDLE. Since no component involved cares about it, they
-can carry any extension. The extension .bundle is recommended by
-Apple, but most ported software uses .so for the sake of
-compatibility. Bundles can be dynamically loaded and unloaded via dyld
-APIs, and there is a wrapper that emulates dlopen() on top of that
-API. It is not possible to link against bundles as if they were shared
-libraries. However, it is possible that a bundle is linked against
-real shared libraries; those will be loaded automatically when the
-bundle is loaded.
-
-Note : To obtain a module you have just to add -module option to
-linker flag for libtool. For Siconos Numerics :
-
-libSiconosNumerics_la_LDFLAGS= -version-info $(SICONOSNUMERICS_SO_CURRENT):$(SICONOSNUMERICS_SO_REVISION):$(SICONOSNUMERICS_SO_AGE) -module
-
-
-For the Siconos Numerics, we have chosen to build a shared library
-(.dylib) and not a module, because you can not link a module. A way to
-link with a module is to create a dummy .cpp file wich load the
-module!!!
-
-To obtain a shared libray,  you have just to add -dynamiclib option to linker flag for libtool. For Siconos Numerics :
-
-libSiconosNumerics_la_LDFLAGS= -version-info $(SICONOSNUMERICS_SO_CURRENT):$(SICONOSNUMERICS_SO_REVISION):$(SICONOSNUMERICS_SO_AGE) -dynamiclib
-
-Note that this is the default option.
-
-
-Unfortunatly, COMMON fortran bloc in odepack precludes to obtain a right building. We need to add the -single_module option. This option is only activate for the LIBTOOL tag CXX and not for CC, i.e. it works for
-/bin/sh ../libtool --tag=CXX --mode=link gcc  -Wall -fPIC   -o libSiconosNumerics.la -rpath /usr/local/lib -version-info 1:2:0  ../src/odepack/libodepack.la ../src/NSSpack/libNSSpack.la 
-and not for
-/bin/sh ../libtool --tag=CC --mode=link gcc  -Wall -fPIC   -o libSiconosNumerics.la -rpath /usr/local/lib -version-info 1:2:0  ../src/odepack/libodepack.la ../src/NSSpack/libNSSpack.la 
-
-To overcome ths difficulty I force tha TAG og libtool to CXX thanks to a dummy.cpp file  
-
-
-We are seeking for a proper solution !!! 
-
-Perhaps it is possible to have both but i do not know exactly how for the moment. 
-
-Some Troubles with libtool cab arised. We try to fix it for the moment.
-
-
-
-
-
+      For snow leopard (MacOSX>= 10.6), the only possible compilation is in i386 mode. For a complete compilation in x86_64 mode, we strongly recommend fully comptatible gfortran of the "R" software   http://r.research.att.com/tools/
