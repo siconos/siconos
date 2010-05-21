@@ -254,7 +254,6 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
    ({int C_M = M; \
      int C_N = N; \
-     int C_LWORK = LWORK; \
      double * C_WORK = WORK; \
      int C_NRHS = NRHS; \
      int C_LDA = LDA; \
