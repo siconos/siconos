@@ -86,6 +86,13 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
       printf(" ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
   }
+  /* Global Alart Curnier */
+  else if (strcmp(name, "ACGLOBAL") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_GlobalAlartCurnier(problem, reaction , velocity , &info , options);
+  }
   else
   {
     fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");

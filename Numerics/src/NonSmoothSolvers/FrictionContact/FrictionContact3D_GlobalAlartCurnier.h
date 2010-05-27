@@ -61,6 +61,17 @@ extern "C"
     double *result3x3_1,
     double *result3x3_2);
 
+
+  void frictionContact3D_GlobalAlartCurnier(
+    FrictionContactProblem* problem,
+    double *reaction,
+    double *velocity,
+    int *info,
+    SolverOptions *options);
+
+  int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
+    SolverOptions* options);
+
 #ifdef __cplusplus
 }
 #endif
