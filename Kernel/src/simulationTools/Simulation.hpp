@@ -369,15 +369,15 @@ public:
    */
   SP::OneStepNSProblem oneStepNSProblem(int);
 
-  /** set allNSProblems map - Warning: no copy between
-      OneStepNSProblem of each map, pointers links!
-   *  \param a OneStepNSProblems object (map of SP::OneStepNSProblem)
-   */
-  void setOneStepNSProblems(const OneStepNSProblems&);
+  //   /** set allNSProblems map - Warning: no copy between
+  //       OneStepNSProblem of each map, pointers links!
+  //    *  \param a OneStepNSProblems object (map of SP::OneStepNSProblem)
+  //    */
+  //   void setOneStepNSProblems(const OneStepNSProblems&);
 
-  /** remove all OneStepNSProblem of the Simulation
-   */
-  void clearOneStepNSProblems();
+  //   /** remove all OneStepNSProblem of the Simulation
+  //    */
+  //   void clearOneStepNSProblems();
 
   /** check if a OneStepNSProblem osns is already in the map
    *  \param a pointer to OneStepNSProblem
