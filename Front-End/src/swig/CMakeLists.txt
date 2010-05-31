@@ -9,8 +9,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 COMPILE_WITH(Python_Numpy REQUIRED)
 
-message(STATUS "mlsmqslqmslms ${PYTHON_NUMPY_INCLUDE_DIR}" )
-
 # Numerics + Kernel 
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
