@@ -16,6 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
+#define VERBOSE_DEBUG
+
 
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
@@ -836,13 +838,13 @@ int TruncatedCylinderAlartCurnierNewton(int Fsize, double * R, int *iparam, doub
 
       B[1][0] = -mu * RVT * RV1;
 
-      B[1][1] = 1.0 - GammaTT * RhoT * Radius ;
-      B[1][2] = - GammaTS * RhoT * Radius ;
+      B[1][1] = 1.0 - GammaTT * Radius ;
+      B[1][2] = - GammaTS  * Radius ;
 
       B[2][0] = -mu * RVS * RV1;
 
-      B[2][1] = - GammaST * RhoT * Radius;
-      B[2][2] = 1.0 - GammaSS * RhoT * Radius;
+      B[2][1] = - GammaST  * Radius;
+      B[2][2] = 1.0 - GammaSS * Radius;
     }
     else // We are out the disk and Radius is negative
     {
@@ -1171,13 +1173,13 @@ int AlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam)
 
       B[1][0] = -mu * RVT * RV1;
 
-      B[1][1] = 1.0 - GammaTT * RhoT * Radius ;
-      B[1][2] = - GammaTS * RhoT * Radius ;
+      B[1][1] = 1.0 - GammaTT * Radius ;
+      B[1][2] = - GammaTS * Radius ;
 
       B[2][0] = -mu * RVS * RV1;
 
-      B[2][1] = - GammaST * RhoT * Radius;
-      B[2][2] = 1.0 - GammaSS * RhoT * Radius;
+      B[2][1] = - GammaST * Radius;
+      B[2][2] = 1.0 - GammaSS * Radius;
     }
 
 
