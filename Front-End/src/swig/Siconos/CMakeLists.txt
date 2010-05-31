@@ -47,6 +47,8 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Numerics.py
 INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Kernel.py 
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 
+CONFIGURE_FILE(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
+
 INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/__init__.py 
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 
@@ -59,7 +61,5 @@ ENABLE_TESTING()
 
 ADD_TEST(lcp py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
 ADD_TEST(friction_contact py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
-
-CONFIGURE_FILE(__init__.py.in __init__.py)
 
 SUBDIRS(tests)
