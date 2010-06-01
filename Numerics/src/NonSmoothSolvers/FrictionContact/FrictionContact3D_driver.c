@@ -87,7 +87,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
   }
   /* Global Alart Curnier */
-  else if (strcmp(name, "ACGLOBAL") == 0)
+  else if (strcmp(name, "GLOBALAC") == 0)
   {
     if (verbose == 1)
       printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");

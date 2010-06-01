@@ -305,6 +305,8 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
   NEW_TEST(FC3Dtest210 FrictionContact3D_test210.c)
 
+  NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
+  NEW_TEST(FC3Dtest301 FrictionContact3D_test301.c)
 
   ## test 2D dense on two differents files
   NEW_TEST(FrictionContact2D_Problemtest1 FrictionContact2D_test1.c)

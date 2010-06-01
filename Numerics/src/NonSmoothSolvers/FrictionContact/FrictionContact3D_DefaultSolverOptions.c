@@ -49,7 +49,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *solv
   {
     info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
   }
-  else if (strcmp(solvername, "ACGLOBAL") == 0)
+  else if (strcmp(solvername, "GLOBALAC") == 0)
   {
     info =    frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(options);
   }

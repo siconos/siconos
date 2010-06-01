@@ -15,29 +15,34 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-#include <math.h>
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "frictionContact_test_function.h"
 
-void projectionOnCone(double* r, double  mu)
+
+int main(void)
 {
-  double normT = hypot(r[1], r[2]);
-  if (mu * normT <= - r[0])
-  {
-    r[0] = 0.0;
-    r[1] = 0.0;
-    r[2] = 0.0;
-    return ;
-  }
-  else if (normT <= mu * r[0])
-  {
-    return ;
-  }
-  else
-  {
-    double mu2 = mu * mu;
-    r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
-    r[1] = mu * r[0] * r[1] / normT;
-    r[2] = mu * r[0] * r[2] / normT;
-    return;
-  }
+  int info = 0 ;
+  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
+
+  char *filename = "./data/Example1_Fc3D.dat";
+
+  FILE * finput  =  fopen(filename, "r");
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  options->dparam[0] = 1e-12;
+  options->iparam[0] = 10000;
+  strcpy(options->internalSolvers->solverName, "AlartCurnierNewton");
+  options->internalSolvers->iparam[0] = 10;
+  options->internalSolvers->dparam[0] = 1e-18;
+
+  info = frictionContact_test_function(finput, options);
+
+  deleteSolverOptions(options);
+  free(options);
+  fclose(finput);
+  printf("\nEnd of test on %s\n", filename);
+  return info;
 }

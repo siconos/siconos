@@ -126,10 +126,7 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
   double * q = problem->q;
 
-  /* Number of non-null blocks in blmat */
-  int nbOfNonNullBlocks = blmat->nbblocks;
-
-  assert(nbOfNonNullBlocks >= 1);
+  assert(blmat->nbblocks >= 1);
 
   /* Local problem initialization */
 
