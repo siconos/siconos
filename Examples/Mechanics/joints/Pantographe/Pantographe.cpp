@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new Equality());
+    SP::OneStepNSProblem osnspb(new MLCP("PATH"));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
@@ -561,7 +561,7 @@ int main(int argc, char* argv[])
     fprintf(pFile, "     loop TRUE\n");
     fprintf(pFile, "   }\n ]\n}");
     fclose(pFile);
-
+    system("cat Pantographe1.wrl data.wrl Pantographe2.wrl > run.wrl");
     // --- Output files ---
     //cout<<"====> Output file writing ..."<<endl;
     //ioMatrix io("result.dat", "ascii");
