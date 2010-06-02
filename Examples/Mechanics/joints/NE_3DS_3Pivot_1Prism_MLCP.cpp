@@ -29,7 +29,12 @@
 #include "../../../Kernel/src/multiBodyTools/joints/KneeJoint.hpp"
 #include "../../../Kernel/src/multiBodyTools/joints/PivotJoint.hpp"
 #include "../../../Kernel/src/multiBodyTools/joints/PrismaticJoint.hpp"
+#include <QGLViewer/qglviewer.h>
 using namespace std;
+#include "qgl.h"
+/*COMPILATION WITH SICONOS:
+siconos --opt -I/usr/include/qt4/Qt --opt -I/usr/include/qt4 --opt -I/usr/include/qt4/QtOpenGL --opt -I/usr/include/qt4/QtXml --opt -I/usr/include/qt4/QtCore --opt -I/usr/include/qt4/QtGui -L/usr/X11R6/lib -L/usr/lib -L/usr/lib -lQGLViewer -lpthread -lGLU -lGL -lQtXml -lQtOpenGL -lQtGui -lQtCore -v -g Pantographe.cpp
+*/
 
 int main(int argc, char* argv[])
 {
@@ -55,17 +60,12 @@ int main(int argc, char* argv[])
     double wx = 0.0;
     double wz = 0.0;
     double wy = 0.0;
+    int Freq = 1;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
 
-    FILE * pFile;
-    pFile = fopen("data.h", "w");
-    if (pFile == NULL)
-    {
-      printf("fopen exampleopen filed!\n");
-      fclose(pFile);
-    }
+
 
 
     cout << "====> Model loading ..." << endl << endl;
@@ -340,7 +340,6 @@ int main(int argc, char* argv[])
     int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
-    fprintf(pFile, "double sNbSteps = %d;double T[%d*%d]={", N + 1, N + 1, outputSize);
     while (s->nextTime() < T)
     {
       // solve ...
@@ -369,29 +368,85 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
-      printf("reaction0:%lf", interFloor->lambda(0)->getValue(0));
-      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
-      for (int jj = 0; jj < outputSize; jj++)
-      {
-        if ((k || jj))
-          fprintf(pFile, ",");
-        fprintf(pFile, "%f", dataPlot(k, jj));
-      }
-      fprintf(pFile, "\n");
       s->nextStep();
       ++show_progress;
       k++;
     }
-    fprintf(pFile, "};");
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
-    //cout<<"====> Output file writing ..."<<endl;
-    //ioMatrix io("result.dat", "ascii");
-    //io.write(dataPlot,"noDim");
+    cout << "====> Output file writing ..." << endl;
+
+    N = k;
+    FILE * pFile;
+    pFile = fopen("data.wrl", "w");
+    fprintf(pFile, "DEF Animation Group {\n  children [\n");
+    fprintf(pFile, "\n");
+
+    for (int num = 0; num < 3; num++)
+    {
+      fprintf(pFile, "DEF Solid%dRotInterp OrientationInterpolator {\n", num);
+      fprintf(pFile, "    key [ 0 ");
+      for (int cmp = 1; cmp < N; cmp++)
+      {
+        if (cmp % Freq)
+          continue;
+        double dcmp = cmp;
+        double dN = N;
+        fprintf(pFile, ",%e", dcmp / dN);
+      }
+      fprintf(pFile, "]\n");
+      fprintf(pFile, "    keyValue [  ");
+      for (int cmp = 0; cmp < N; cmp++)
+      {
+        if (cmp % Freq)
+          continue;
+
+        qglviewer::Quaternion Q1(dataPlot.getValue(cmp, 5 + 7 * num), dataPlot.getValue(cmp, 6 + 7 * num), dataPlot.getValue(cmp, 7 + 7 * num), dataPlot.getValue(cmp, 4 + 7 * num));
+
+        qglviewer::Vec V;
+        float A;
+        Q1.getAxisAngle(V, A);
+        //std::cout<<"V "<<V<<"\n";
+        //std::cout<<"V "<<V[0]<<" "<<V[1]<<" "<<V[2]<<"\n";
+        fprintf(pFile, "%e %e %e %e,\n", V[0], V[1], V[2], A);
+      }
+      fprintf(pFile, "  ]\n}\n");
+
+
+
+      fprintf(pFile, "DEF Solid%dPosInterp PositionInterpolator {\n", num);
+      fprintf(pFile, "    key [ 0 ");
+      for (int cmp = 1; cmp < N; cmp++)
+      {
+        if (cmp % Freq)
+          continue;
+        double dcmp = cmp;
+        double dN = N;
+        fprintf(pFile, ",%e", dcmp / dN);
+      }
+      fprintf(pFile, "]\n");
+      fprintf(pFile, "    keyValue [  ");
+      for (int cmp = 0; cmp < N; cmp++)
+      {
+        if (cmp % Freq)
+          continue;
+        fprintf(pFile, "%e %e %e,\n", dataPlot.getValue(cmp, 1 + 7 * num), dataPlot.getValue(cmp, 2 + 7 * num), dataPlot.getValue(cmp, 3 + 7 * num));
+        //fprintf(pFile,"%e %e %e,\n",dataPlot.getValue(0,1+7*num),dataPlot.getValue(0,2+7*num),dataPlot.getValue(0,3+7*num));
+      }
+      fprintf(pFile, "  ]\n}\n");
+
+    }
+    fprintf(pFile, "DEF Animation_Time TimeSensor {\n");
+    fprintf(pFile, "     cycleInterval 10.0000\n");
+    fprintf(pFile, "     startTime 0\n");
+    fprintf(pFile, "     stopTime 0\n");
+    fprintf(pFile, "     loop TRUE\n");
+    fprintf(pFile, "   }\n ]\n}");
     fclose(pFile);
+    system("cat Picker1.wrl data.wrl Picker2.wrl > run.wrl");
   }
 
   catch (SiconosException e)
