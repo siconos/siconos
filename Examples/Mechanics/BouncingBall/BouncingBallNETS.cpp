@@ -18,7 +18,8 @@
  */
 
 /*!\file BouncingBallTS.cpp
-  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version - V. Acary, F. Perignon.
+  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version -
+  V. Acary, F. Perignon.
 
   A Ball bouncing on the ground.
   Direct description of the model without XML input.
@@ -56,7 +57,6 @@ int main(int argc, char* argv[])
     // -------------------------
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // -- Initial positions and velocities --
     SP::SimpleVector q0(new SimpleVector(qDim));
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     (*v0)(3) = omega_init;
     // -- The dynamical system --
     SP::NewtonEulerDS ball(new NewtonEulerDS(q0, v0, m, I));
-    allDS.insert(ball);
+
     // -- Set external forces (weight) --
     SP::SimpleVector weight(new SimpleVector(nDof));
     (*weight)(0) = -m * g;
@@ -80,8 +80,6 @@ int main(int argc, char* argv[])
     // --------------------
     // --- Interactions ---
     // --------------------
-
-    InteractionsSet allInteractions;
 
     // -- nslaw --
     double e = 0.9;
@@ -107,8 +105,8 @@ int main(int argc, char* argv[])
     //    relation0->setJacQHT(HT_block);
     cout << "main jacQH" << endl;
     relation0->jachq()->display();
-    SP::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
-    allInteractions.insert(inter);
+    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
+
     // -------------
     // --- Model ---
     // -------------
