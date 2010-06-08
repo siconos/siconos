@@ -24,23 +24,25 @@ Finally to build a Simulation, four steps are required:
 and so, the C++ code looks like:
 \code
 // Prerequisite: 
-// a Model*, say m, that holds a NonSmoothDynamicalSystem* named nsds. 
+// a DynamicalSystem : someDS
 //
-// Step 1: choose the strategy, build the Simulation and link it to the Model
-TimeStepping * s = new TimeStepping(m); 
+// Step 1: OneStepIntegrators; applied to DynamicalSystems that belong
+// to nsds (theta for the theta scheme)
+SP::Moreau integrator(new Moreau(someDS, theta)); 
 // or
-EventDriven * s = new EventDriven(m);
+SP::Lsodar integrator(new Lsodar(someDS));
 
-// Step 2: the time discretisation, linked with the Simulation when built. 
-TimeDiscretisation * td = new TimeDiscretisation(...,s)
+// Step 2: the time discretisation, linked with the Simulation when
+// built. (t0 is the start time and h the time step)
+SP::TimeDiscretisation td(new TimeDiscretisation(t0,h))
 
-// Step 3: OneStepIntegrators; applied to DynamicalSystems that belong to nsds.
-Moreau * integrator = new Moreau(someDS,...,s) ; 
+// Step 3:  the one step non smooth problem
+SP::OneStepNSProblem osnspb(new LCP());   
+
+// Step 4: Simulation setup with 1, 2, 3
+SP::TimeStepping s(new TimeStepping(td,OSI,osnspb)); 
 // or
-Lsodar * integrator = new Lsodar(someDS,s);
-
-// Step 4: OneStepNSProblems; applied to all the Interactions of the nsds.
-OneStepNSProblem * lcp = new LCP(s, ...)
+SP::EventDriven s(new EventDriven(td,OSI,osnspb));
 \endcode
 Then, from this point the Model is complete and the simulation process can start. Its development depends strongly on the chosen strategy and will then be detailed in the corresponding sections (see \ref docSimuMoreauTS or \ref docSimuED).\n
 
