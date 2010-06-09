@@ -35,7 +35,7 @@ SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES}
 # warning python may not know cmake_install_prefix
 
 execute_process ( COMMAND 
-  python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,\"${CMAKE_INSTALL_PREFIX}\")" 
+  python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" 
   OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 

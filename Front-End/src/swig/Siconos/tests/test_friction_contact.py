@@ -124,7 +124,7 @@ def i3x3(ind,i,j):
     return ind*9 + 3*i + j
 
 def nearly_equal(x,y):
-    return abs(x-y) < 1e-2
+    return abs(x-y) < 1e-10
 
 
 def test_GlobalAlartCurnierFun():
@@ -133,7 +133,7 @@ def test_GlobalAlartCurnierFun():
     # test equivalence of two implementations (Numerics/C, python)
     # over random samples
     #
-
+    random.seed(1) # so it can be reproduced
     problem_dimension = 3000
 
     reactions = random.sample(problem_dimension) 
