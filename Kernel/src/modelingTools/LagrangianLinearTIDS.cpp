@@ -84,7 +84,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const Simp
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {}
 
-
 bool LagrangianLinearTIDS::checkDynamicalSystem()
 {
   bool output = true;

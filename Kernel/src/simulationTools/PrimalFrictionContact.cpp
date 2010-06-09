@@ -362,7 +362,7 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
 
 }
 
-void PrimalFrictionContact::preCompute(const double time)
+Uvoid PrimalFrictionContact::preCompute(const double time)
 {
   // This function is used to prepare data for the PrimalFrictionContact problem
   // - computation of M, H tildeLocalVelocity and q

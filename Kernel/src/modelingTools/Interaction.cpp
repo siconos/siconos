@@ -263,6 +263,10 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
       _yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+
+      _yOld[i]->zero();
+      _lambdaOld[i]->zero();
+
     }
   }
 

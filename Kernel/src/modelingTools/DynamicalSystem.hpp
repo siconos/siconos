@@ -753,8 +753,8 @@ public:
   /** set a specified function to compute jacobianG
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianXGFunction(FPtr6);
-  void setComputeJacobianDotXGFunction(FPtr6);
+  virtual void setComputeJacobianXGFunction(FPtr6) {};
+  virtual void setComputeJacobianDotXGFunction(FPtr6) {};
   //  void setComputeJacobianZGFunction( FPtr6);
 
   /** Default function to compute g

@@ -402,10 +402,7 @@ public:
 
 struct VectorNum : public SiconosVisitor
 {
-private :
   unsigned int _answer;
-
-public:
 
   void visit(const SimpleVector& v)
   {

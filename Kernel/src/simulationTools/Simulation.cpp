@@ -172,47 +172,7 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 
   return (*_allNSProblems)[Id];
 }
-/*
-void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
-{
-  clearOneStepNSProblems();
 
-  // Warning: pointers links between OneStepNSProblem of each map
-  _allNSProblems.reset(new OneStepNSProblems());
-  for(ConstOSNSIterator itOSNS = mapOfOSNS.begin(); itOSNS != mapOfOSNS.end(); ++itOSNS)
-    (*_allNSProblems)[itOSNS->first] = itOSNS->second;
-}
-
-
-void Simulation::clearOneStepNSProblems()
-{
-  _allNSProblems->clear();
-}
-
-bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
-{
-
-  bool val = false; // true when osns found.
-
-  ConstOSNSIterator it = _allNSProblems->find(osns->getId());
-  if (it!= _allNSProblems->end() ) val = true;
-
-  return val;
-}
-
-bool Simulation::hasOneStepNSProblem(const string& name) const
-{
-  bool val = false;
-  ConstOSNSIterator it;
-  for(it = _allNSProblems->begin(); it!= _allNSProblems->end(); ++it)
-    if( (it->second)->getId() == name)
-      {
-  val = true;
-  break;
-      }
-  return val;
-}
-*/
 void Simulation::updateIndexSets()
 {
   // Warning, I0 is not updated and must remain unchanged !
