@@ -21,11 +21,11 @@
 
 
 from matplotlib.pyplot import *
-from Siconos.Kernel import *
+from Kernel import *
 from numpy import *
 
 t0 = 0      # start time
-T = 10      # end time
+T = 5      # end time
 h = 0.005   # time step
 r = 0.1     # ball radius
 g = 9.81    # gravity
@@ -132,7 +132,7 @@ while(s.nextTime() < T):
 
     k += 1
     s.nextStep()
-
+    print s.nextTime()
 #
 # plots
 #
