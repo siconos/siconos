@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from matplotlib.pyplot import *
 from Siconos.Kernel import *
 from numpy import *
 
@@ -30,7 +29,7 @@ def test_LagrangianLinearTIDS():
     ball = LagrangianLinearTIDS(q,v,mass)
     assert (equalv(ball.q(),q))
     assert (equalv(ball.velocity(),v))
-    assert (ball.mass(),mass)
+    assert (equalv(ball.mass(),mass))
 
     ball.setFExtPtr(weight)
 
@@ -50,4 +49,11 @@ def test_Model():
     bouncingBall = Model(t0,T)
     assert (bouncingBall.t0() == t0)
 
+def test_display():
+    ball = LagrangianLinearTIDS(q,v,mass)
+    ball.display()
+
+def test_number():
+    ball = LagrangianLinearTIDS(q,v,mass)
+    print ball.number()
 

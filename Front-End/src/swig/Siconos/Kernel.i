@@ -283,10 +283,6 @@ namespace SP
 
 %ignore nullDeleter;
 
-%ignore DynamicalSystem;
-%ignore OneStepIntegrator;
-
-
 // defined in SimpleVector.cpp
 %ignore setBlock;
 %ignore add;
