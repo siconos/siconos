@@ -242,13 +242,6 @@ nightly_memcheck Kernel Release
 nightly_submit Kernel Release
 install_1 Kernel Release
 
-# Examples
-configure_trunk Examples Release
-nightly_build Examples Release
-nightly_test Examples Release
-nightly_memcheck Examples Release
-nightly_submit Examples Release
-
 # Snapshot packages
 pack_trunk Numerics Release
 save_packed_1 Numerics Release
@@ -264,15 +257,23 @@ setup_trunk
 configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Numerics Debug
 nightly_coverage Numerics Debug
-nightly_memcheck Numerics Debug
 nightly_submit Numerics Debug 
 
 setup_trunk
 configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
 nightly_build Kernel Debug
 nightly_coverage Kernel Debug
-nightly_memcheck Kernel Debug
 nightly_submit Kernel Debug
+
+
+# Examples
+rm -rf $PIPOL_WDIR/siconos/trunk/Numerics
+rm -rf $PIPOL_WDIR/siconos/trunk/Kernel
+configure_trunk Examples Release
+nightly_build Examples Release
+nightly_test Examples Release
+nightly_memcheck Examples Release
+nightly_submit Examples Release
 
 
 # end

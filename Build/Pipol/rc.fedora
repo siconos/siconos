@@ -1,3 +1,7 @@
 #!/bin/sh
 
+PIPOL_IMAGE_NAME=`expr "$PIPOL_IMAGE" : "\(.*\).dd.gz"`
+
+rpm -Uhv $PIPOL_HOMEDIR/rpm/*-$PIPOL_IMAGE_NAME.rpm
+
 yum install -y cmake gcc gcc-gfortran boost-devel atlas atlas-devel gmp gmp-devel libxml2 libxml2-devel cppunit

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# needed for sshfs
+
+[ -d /usr/libexec ] || mkdir -p /usr/libexec
+
+sftp_server=`locate sftp-server | head -1`
+
+if [ ! -z "$sftp_server" ]; then
+    ln -s $sftp_server /usr/libexec/sftp-server
+fi

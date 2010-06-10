@@ -1,6 +1,9 @@
 #!/bin/sh
 
-if [ ! -f $PIPOL_WDIR/rc.done ]; then
+
+
+#if [ ! -f $PIPOL_WDIR/rc.done ]; then
+
 
 # upload on CDash fails with cmake 2.8.0 and mac os x Leopard
 # package generation fails with cmake 2.6.4 on fedora >=10
@@ -8,18 +11,28 @@ if [ ! -f $PIPOL_WDIR/rc.done ]; then
         *mac*) cmake_version=2.6.4;;
         *) cmake_version=2.8.0;;
     esac
+
+    cmake_pipol_package=cmake-${cmake_version}-${PIPOL_IMAGE_NAME}.$PIPOL_PACK_EXT
+
+#    if [ ! -f $PIPOL_HOMEDIR/$PIPOL_PACK_EXT/$cmake_pipol_package ]; then
+        env
+        /bin/pwd
     
-    env
-    
-    cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
-    gunzip cmake-${cmake_version}.tar.gz
-    tar xvf cmake-${cmake_version}.tar
-    
-    cd cmake-${cmake_version}; {
-        ./bootstrap
-        make
-        sudo make install
-    }; cd -
-    
+        cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
+        gunzip cmake-${cmake_version}.tar.gz
+        tar xvf cmake-${cmake_version}.tar
+        
+        cd cmake-${cmake_version}; {
+            ./bootstrap
+            make
+            sudo make install
+
+            cmake . -DCMAKE_INSTALL_PREFIX=/usr
+            cpack -G $PIPOL_CPACK_G
+
+            sudo -H -u $PIPOL_USER mkdir -p $PIPOL_HOMEDIR/$PIPOL_PACK_EXT
+            sudo -H -u $PIPOL_USER cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/$PIPOL_PACK_EXT/$cmake_pipol_package
+        }; cd -
+#    fi
     touch $PIPOL_WDIR/rc.done
-fi
+#fi
