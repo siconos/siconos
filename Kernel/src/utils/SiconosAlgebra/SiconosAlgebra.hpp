@@ -147,10 +147,13 @@ typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 
 class SiconosVector;
 DEFINE_SPTR(SiconosVector);
+DEFINE_SPTR(BlockVector);
 
 /** Some containers for vectors - Used for example to handle x and its
     derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;
+
+typedef std::vector<SP::BlockVector> VectorOfBlockVectors;
 
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */

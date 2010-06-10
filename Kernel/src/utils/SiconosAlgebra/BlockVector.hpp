@@ -427,6 +427,4 @@ public:
 
 };
 
-DEFINE_SPTR(BlockVector);
-
 #endif

@@ -286,7 +286,7 @@ void Interaction::setY(const VectorOfVectors& newVector)
     _y[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
-void Interaction::setYPtr(const VectorOfVectors& newVector)
+void Interaction::setYPtr(const VectorOfBlockVectors& newVector)
 {
   _y.clear();
 
@@ -312,7 +312,7 @@ void Interaction::setY(const unsigned int  index, const BlockVector& newY)
   }
 }
 
-void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
+void Interaction::setYPtr(const unsigned int  index, SP::BlockVector newY)
 {
   assert(_y.size() > index &&
          "Interaction::setYPtr, index out of range");

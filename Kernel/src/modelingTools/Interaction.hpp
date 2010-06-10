@@ -111,7 +111,7 @@ private:
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  VectorOfVectors _y;
+  VectorOfBlockVectors _y;
 
   /** previous step values for y */
   VectorOfVectors _yOld;
@@ -337,16 +337,16 @@ public:
   /** get vector of output derivatives
   *  \return a VectorOfVectors
   */
-  inline const VectorOfVectors y() const
+  inline const VectorOfBlockVectors y() const
   {
     return _y;
   }
 
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a BlockVector
   */
-  inline SP::SiconosVector y(const unsigned int i) const
+  inline SP::BlockVector y(const unsigned int i) const
   {
     return _y[i];
   }
@@ -361,7 +361,7 @@ public:
   *  equality for the y[i]
   * \param VectorOfVectors
   */
-  void setYPtr(const VectorOfVectors&);
+  void setYPtr(const VectorOfBlockVectors&);
 
   /** set y[i] to newValue
   *  \param a BlockVector and an unsigned int
@@ -371,7 +371,7 @@ public:
   /** set y[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setYPtr(const unsigned int , SP::SiconosVector newPtr);
+  void setYPtr(const unsigned int , SP::BlockVector newPtr);
 
   // -- yOld --
 
