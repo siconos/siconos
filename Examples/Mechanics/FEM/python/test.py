@@ -4,9 +4,8 @@ FEM simulation using getfem++ and siconos.
 
 """
 
-import Kernel
+import Siconos.Kernel as Kernel
 import numpy as np
-from matplotlib.pyplot import *
 
 ndof = 24;
 t0 = 0.0      # start time
@@ -76,4 +75,5 @@ s.insertNonSmoothProblem(osnspb)
 # simulation initialization
 blockModel.initialize(s)
 
-print inter.y(0)
+# ok on ubuntu lucid
+inter.y(0).display()
