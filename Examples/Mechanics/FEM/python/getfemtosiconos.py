@@ -29,7 +29,7 @@ def import_fem(sico):
     # The geometry and the mesh
     ############################
     dimX = 10.01 ; dimY = 10.01 ; dimZ = 10.01
-    stepX = 1.0 ; stepY = 1.0 ; stepZ = 1.0
+    stepX = 10.0 ; stepY = 10.0 ; stepZ = 10.0
     x=np.arange(0,dimX,stepX)
     y=np.arange(0,dimY,stepY)
     z=np.arange(0,dimZ,stepZ)
@@ -69,6 +69,7 @@ def import_fem(sico):
     Mu = E/(2*(1+Nu))
     # Density
     Rho=7800
+    Gravity = 9.81
     ############################
     # Boundaries detection
     ############################
@@ -105,10 +106,14 @@ def import_fem(sico):
     md.add_initialized_data('source_term',[0,0,-100])
     md.add_initialized_data('push',[0,100,0])
     md.add_initialized_data('rho',Rho)
-    
+    md.add_initialized_data('gravity', Gravity)
+#    Weight = np.zeros(mfu.nbdof())
+##    Weight = []
+    md.add_initialized_data('weight',[0,0,-Rho*Gravity])
     md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
-    md.add_source_term_brick(mim,'u','source_term',TOP)
-    md.add_source_term_brick(mim,'u','push',LEFT)
+    #md.add_source_term_brick(mim,'u','source_term',TOP)
+    #md.add_source_term_brick(mim,'u','push',LEFT)
+    md.add_source_term_brick(mim,'u','weight')
     #md.add_Dirichlet_condition_with_multipliers(mim,'u',mfu,BOTTOM)
     
     md.assembly()
@@ -122,22 +127,24 @@ def import_fem(sico):
     md2.assembly()
     sico.Mass = md2.tangent_matrix()
     sico.nbdof = mfu.nbdof()
+    sico.mfu=mfu
+    sico.mesh=m
 
     # running solve...
     #md.solve()
     
     # post-processing
-    VM=md.compute_isotropic_linearized_Von_Mises_or_Tresca('u','lambda','mu',mff)
+    #VM=md.compute_isotropic_linearized_Von_Mises_or_Tresca('u','lambda','mu',mff)
     # extracted solution
-    U = md.variable('u')
+    #U = md.variable('u')
     # export U and VM in a pos file
-    sl = gf.Slice(('boundary',),mfu,1)
-    sl.export_to_vtk('toto.vtk', mfu, U, 'Displacement', mff, VM, 'Von Mises Stress')
+    #sl = gf.Slice(('boundary',),mfu,1)
+    #sl.export_to_vtk('toto.vtk', mfu, U, 'Displacement', mff, VM, 'Von Mises Stress')
     
     # H-Matrix 
     fillH(pidbot,sico,mfu.nbdof())
 
-    return m
+    return md
 
 def import_fem2(sico):
     """ Build a mesh object using getfem.
