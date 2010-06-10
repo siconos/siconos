@@ -103,7 +103,7 @@ Some CMAKE OPTIONS that may be usefull:
      of the build directory
 
    * to build the documentation some where
-     -DWITH_DOCUMENTATION=TRUE -DDOXYGEN_OUPUT=/some/where
+     -DWITH_DOCUMENTATION=TRUE -DDOXYGEN_OUTPUT=/some/where
      (you may have to create the directory /some/where/Tags)
 
    * to see cmake state : -DPRINT_ENV=1
