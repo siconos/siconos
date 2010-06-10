@@ -133,6 +133,7 @@
 // from C++ to python 
 %template() boost::shared_ptr<SiconosVector>;
 %template() boost::shared_ptr<SimpleVector>;
+%template() boost::shared_ptr<BlockVector>;
 %template() boost::shared_ptr<SiconosMatrix>;
 %template() boost::shared_ptr<SimpleMatrix>;
 
@@ -239,6 +240,7 @@ SP_TYPE(SiconosMatrix,SiconosMatrix)
 SP_TYPE(SimpleMatrix,SiconosMatrix)
 SP_TYPE(SiconosVector,SiconosVector)
 SP_TYPE(SimpleVector,SiconosVector)
+SP_TYPE(BlockVector,SiconosVector)
 
 %include "InteractionsSet.hpp"
 %include "SiconosSet.hpp"
@@ -321,6 +323,7 @@ DEFINE_SPTR(SiconosMatrix);
 
 
 %include "SiconosVector.hpp"
+%include "BlockVector.hpp"
 %include "SiconosMatrix.hpp"
 %include "SimpleVector.hpp"
 %include "SimpleMatrix.hpp"
