@@ -29,7 +29,7 @@ def import_fem(sico):
     # The geometry and the mesh
     ############################
     dimX = 10.01 ; dimY = 10.01 ; dimZ = 10.01
-    stepX = 10.0 ; stepY = 10.0 ; stepZ = 10.0
+    stepX = 2.0 ; stepY = 2.0 ; stepZ = 2.0
     x=np.arange(0,dimX,stepX)
     y=np.arange(0,dimY,stepY)
     z=np.arange(0,dimZ,stepZ)

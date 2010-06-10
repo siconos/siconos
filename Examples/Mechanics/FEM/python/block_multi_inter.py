@@ -11,7 +11,7 @@ import getfem as gf
 from matplotlib.pyplot import *
 
 t0 = 0.0      # start time
-T = 5.0      # end time
+T = 4.0      # end time
 h = 0.005   # time step
 g = 9.81    # gravity
 e = 0.9     # restitution coeficient
@@ -38,21 +38,26 @@ block.setKPtr(sico.Stiff.full())
 # =======================================
 
 dist = 3.0
+diminter = 1
+b = np.repeat([dist], diminter)
+nslaw = Kernel.NewtonImpactNSL(e)
+k=0
 dimH = sico.H.shape[0]
+relation=[]
+inter=[]
+hh = np.zeros((diminter,sico.nbdof))
+for i in range(0,dimH-1,3):
+    hh[0,:] = sico.H[i,:]
+    relation.append(Kernel.LagrangianLinearTIR(hh,b))
+    inter.append(Kernel.Interaction(diminter, nslaw, relation[k]))
+    k+=1
     
+nbInter=len(inter)
 if(with_friction):
-    diminter = dimH
+    diminter = dim0
     nslaw = Kernel.NewtonImpactFrictionNSL(e,e,mu,3)
     relation = Kernel.LagrangianLinearTIR(sico.H)
-else:
-    diminter = dimH/3
-    Hnofric = np.zeros((diminter, sico.nbdof))
-    b = np.repeat([dist], diminter)
-    Hnofric = sico.H[0:dimH-1:3,:]
-    nslaw = Kernel.NewtonImpactNSL(e)
-    relation = Kernel.LagrangianLinearTIR(Hnofric,b)
 
-inter = Kernel.Interaction(diminter, nslaw, relation)
 
 # =======================================
 # The Model
@@ -63,7 +68,8 @@ blockModel = Kernel.Model(t0,T)
 blockModel.nonSmoothDynamicalSystem().insertDynamicalSystem(block)
 
 # link the interaction and the dynamical system
-blockModel.nonSmoothDynamicalSystem().link(inter,block);
+for i in range(nbInter):
+    blockModel.nonSmoothDynamicalSystem().link(inter[i],block);
 
 # =======================================
 # The Simulation

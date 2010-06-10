@@ -4,7 +4,7 @@ FEM simulation using getfem++ and siconos.
 
 """
 
-import Siconos.Kernel as Kernel
+import Kernel as Kernel
 import numpy as np
 
 ndof = 24;
