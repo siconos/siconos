@@ -28,8 +28,8 @@ def import_fem(sico):
     ############################
     # The geometry and the mesh
     ############################
-    dimX = 10.01 ; dimY = 10.01 ; dimZ = 10.01
-    stepX = 2.0 ; stepY = 2.0 ; stepZ = 2.0
+    dimX = 10.01 ; dimY = 10.01 ; dimZ = 3.01
+    stepX = 1.0 ; stepY = 1.0 ; stepZ = 1.0
     x=np.arange(0,dimX,stepX)
     y=np.arange(0,dimY,stepY)
     z=np.arange(0,dimZ,stepZ)
@@ -68,8 +68,8 @@ def import_fem(sico):
     Lambda = E*Nu/((1+Nu)*(1-2*Nu))
     Mu = E/(2*(1+Nu))
     # Density
-    Rho=7800
-    Gravity = 9.81
+    Rho=1.0#7.800
+    Gravity = -9.81
     ############################
     # Boundaries detection
     ############################
@@ -109,7 +109,7 @@ def import_fem(sico):
     md.add_initialized_data('gravity', Gravity)
 #    Weight = np.zeros(mfu.nbdof())
 ##    Weight = []
-    md.add_initialized_data('weight',[0,0,-Rho*Gravity])
+    md.add_initialized_data('weight',[0,0,Rho*Gravity])
     md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
     #md.add_source_term_brick(mim,'u','source_term',TOP)
     #md.add_source_term_brick(mim,'u','push',LEFT)
@@ -129,7 +129,13 @@ def import_fem(sico):
     sico.nbdof = mfu.nbdof()
     sico.mfu=mfu
     sico.mesh=m
+    sico.pos = np.zeros(sico.nbdof)
 
+    sico.pos[0:sico.nbdof:3] = m.pts()[0,:]
+    sico.pos[1:sico.nbdof:3] = m.pts()[1,:]
+    sico.pos[2:sico.nbdof:3] = m.pts()[2,:]
+    sico.K0 = np.dot(sico.Stiff.full(),sico.pos)
+    sico.bot = pidbot
     # running solve...
     #md.solve()
     
@@ -244,6 +250,9 @@ def import_fem2(sico):
     sico.nbdof = mfu.nbdof()
     sico.q0 = mfu.basic_dof_from_cvid()
     
+    sico.bot = pidbot
+    
+
     # H-Matrix 
     fillH(pidbot,sico,mfu.nbdof())
     return m

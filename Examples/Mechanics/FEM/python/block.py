@@ -4,14 +4,14 @@ FEM simulation using getfem++ and siconos.
 
 """
 
-import Kernel
+import Siconos.Kernel as Kernel
 import getfemtosiconos as gts
 import numpy as np
 import getfem as gf
 from matplotlib.pyplot import *
 
 t0 = 0.0      # start time
-T = 5.0      # end time
+T = 0.1      # end time
 h = 0.005   # time step
 g = 9.81    # gravity
 e = 0.9     # restitution coeficient
@@ -29,8 +29,9 @@ fem_model = gts.import_fem(sico)
 # Initial position and velocity
 v0 = np.zeros(sico.nbdof)
 
-block = Kernel.LagrangianLinearTIDS(sico.q0,v0,sico.Mass.full())
-block.setFExtPtr(sico.RHS)
+block = Kernel.LagrangianLinearTIDS(sico.pos,v0,sico.Mass.full())
+F = sico.RHS + sico.K0
+block.setFExtPtr(F)
 block.setKPtr(sico.Stiff.full())
 
 # =======================================
