@@ -4,7 +4,7 @@ FEM simulation using getfem++ and siconos.
 
 """
 
-import Siconos.Kernel as Kernel
+import Kernel as Kernel
 import numpy as np
 import getfem as gf
 from matplotlib.pyplot import *
@@ -47,9 +47,9 @@ Mu = E/(2*(1+Nu))
 Rho=1.0#7.800
 Gravity = -9.81
 t0 = 0.0      # start time
-T = 10.0    # end time
+T = 2.0    # end time
 h = 0.005   # time step
-e = 0.1    # restitution coeficient
+e = 0.0    # restitution coeficient
 mu=0.3 # Friction coefficient
 theta = 0.5 # theta scheme
 with_friction = True
@@ -118,8 +118,8 @@ md.add_fem_variable('u',mfu)
 # Add model constants
 md.add_initialized_data('lambda',Lambda)
 md.add_initialized_data('mu',Mu)
-md.add_initialized_data('source_term',[0,0,-100])
-md.add_initialized_data('push',[0,100,0])
+md.add_initialized_data('source_term',[0,0,-10])
+md.add_initialized_data('push',[0,10,0])
 md.add_initialized_data('rho',Rho)
 md.add_initialized_data('gravity', Gravity)
 md.add_initialized_data('weight',[0,0,Rho*Gravity])
@@ -127,7 +127,7 @@ md.add_initialized_data('weight',[0,0,Rho*Gravity])
 md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
 # Add volumic/surfacic source terms
 md.add_source_term_brick(mim,'u','source_term',TOP)
-#md.add_source_term_brick(mim,'u','push',LEFT)
+md.add_source_term_brick(mim,'u','push',LEFT)
 #md.add_source_term_brick(mim,'u','weight')
 # Add boundary conditions
 #md.add_Dirichlet_condition_with_multipliers(mim,'u',mfu,BOTTOM)
@@ -253,7 +253,7 @@ t = Kernel.TimeDiscretisation(t0,h)
 # (3) one step non smooth problem
 if(with_friction):
     osnspb = Kernel.FrictionContact(3)
-#    osnspb.numericsSolverOptions().iparam[0]=100
+ #   osnspb.numericsSolverOptions().iparam[0]=100
 #    osnspb.numericsSolverOptions().iparam[1]=20
 #    osnspb.numericsSolverOptions().iparam[4]=2
 #    osnspb.numericsSolverOptions().dparam[0]=1e-6

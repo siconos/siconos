@@ -4,7 +4,7 @@ FEM simulation using getfem++ and siconos.
 
 """
 
-import Siconos.Kernel as Kernel
+import Kernel as Kernel
 import numpy as np
 import getfem as gf
 from matplotlib.pyplot import *
@@ -49,7 +49,7 @@ Gravity = -9.81
 t0 = 0.0      # start time
 T = 10.0    # end time
 h = 0.005   # time step
-e = 0.1    # restitution coeficient
+e = 0.0   # restitution coeficient
 mu=0.3 # Friction coefficient
 theta = 0.5 # theta scheme
 with_friction = False
@@ -311,10 +311,11 @@ while(s.nextTime() < T):
     dataPlot[k, 8] = block.q()[23]
     
     # Post proc for paraview
-    #fem_model.to_variables(block.q())
+    md.to_variables(block.q())
+    VM=md.compute_isotropic_linearized_Von_Mises_or_Tresca('u','lambda','mu',mff)
     #U = fem_model.variable('u')
     sl = gf.Slice(('boundary',),sico.mfu,1)
-    sl.export_to_vtk(name, sico.mfu, block.q(),'Displacement')
+    sl.export_to_vtk(name, sico.mfu, block.q(),'Displacement', mff, VM, 'Von Mises Stress')
     #print s.nextTime()
     k += 1
     s.nextStep()
