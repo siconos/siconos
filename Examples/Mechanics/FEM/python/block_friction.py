@@ -38,13 +38,13 @@ sico = SiconosFem()
 # ===============================
 # Model Parameters
 # ===============================
-E = 1e3  # Young modulus
+E = 2.1e11  # Young modulus
 Nu = 0.3 # Poisson coef.
 # Lame coeff.
 Lambda = E*Nu/((1+Nu)*(1-2*Nu))
 Mu = E/(2*(1+Nu))
 # Density
-Rho=1.0#7.800
+Rho=7800
 Gravity = -9.81
 t0 = 0.0      # start time
 T = 2.0    # end time
@@ -126,9 +126,9 @@ md.add_initialized_data('weight',[0,0,Rho*Gravity])
 # Build model (linear elasticity)
 md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
 # Add volumic/surfacic source terms
-md.add_source_term_brick(mim,'u','source_term',TOP)
+#md.add_source_term_brick(mim,'u','source_term',TOP)
 md.add_source_term_brick(mim,'u','push',LEFT)
-#md.add_source_term_brick(mim,'u','weight')
+md.add_source_term_brick(mim,'u','weight')
 # Add boundary conditions
 #md.add_Dirichlet_condition_with_multipliers(mim,'u',mfu,BOTTOM)
 
@@ -212,7 +212,7 @@ nbInter = pidbot.shape[0]
 if(with_friction):
     for i in range(nbInter):
         # hh is a submatrix of sico.H with 3 rows. 
-        hh[:,:] = sico.H[k:k+3:3,:]
+        hh[:,:] = sico.H[k:k+3,:]
         k += 3
         relation.append(Kernel.LagrangianLinearTIR(hh,b))
         inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
