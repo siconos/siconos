@@ -8,6 +8,7 @@ import Kernel as Kernel
 import numpy as np
 import getfem as gf
 from matplotlib.pyplot import *
+import math
 
 class SiconosFem:
     """ The set of matrices required by Siconos, from a Finite Element Model
@@ -33,6 +34,19 @@ def fillH(pid,sic,nbdof,BOTTOM):
         sic.H[i+2,dofbottom[i]+1] = 1.0
               
 
+def fillH2(pid, sic, nbdof, TOP,alpha,coord):
+    nb_contacts = np.size(pid)
+    rowH = 3 * nb_contacts
+    sic.H2 = np.zeros((rowH,nbdof))
+    doftop = mfu.basic_dof_on_region(TOP)
+    normH2 = 1.0/sqrt(1+alpha*alpha)
+    for i in range(0,rowH,3):
+        sic.H2[i,doftop[i]] = norm2*alpha
+        sic.H2[i,doftop[i]+1] = norm2
+        sic.H2[i+1,doftop[i]+2] = 1.0
+        sic.H2[i+2,doftop[i]] = -norm2
+        sic.H2[i+2,doftop[i]+1] = alpha*norm2
+
 sico = SiconosFem()
 
 # ===============================
@@ -48,7 +62,7 @@ Rho=7800
 Gravity = -9.81
 t0 = 0.0      # start time
 T = 0.5    # end time
-h = 0.0001   # time step
+h = 0.001   # time step
 e = 0.0    # restitution coeficient
 mu=0.3 # Friction coefficient
 theta = 0.5 # theta scheme
@@ -58,10 +72,13 @@ with_friction = True
 # Build FEM using getfem
 # ===============================
 
+
+xB = 5.0
 # ==== The geometry and the mesh ==== 
 dimX = 10.01 ; dimY = 10.01 ; dimZ = 3.01
-stepX = 2.0 ; stepY = 2.0 ; stepZ = 1.5
-x=np.arange(0,dimX,stepX)
+stepX = 1.0 ; stepY = 1.0 ; stepZ = 0.75
+alpha = math.atan(dimZ/dimX)
+x=np.arange(xB,dimX+xB,stepX)
 y=np.arange(0,dimY,stepY)
 z=np.arange(0,dimZ,stepZ)
 m = gf.Mesh('regular simplices', x,y,z)
@@ -102,11 +119,17 @@ ftop = m.faces_from_pid(pidtop)
 TOP = 2
 m.set_region(TOP,ftop)
 # Left points and faces
-cleft = (abs(allPoints[1,:]) < 1e-6)
+cleft = (abs(allPoints[1,:]) < xB + 1e-6)
 pidleft = np.compress(cleft,range(0,m.nbpts()))
 fleft= m.faces_from_pid(pidleft)
 LEFT = 3
 m.set_region(LEFT,fleft)
+# Right points and faces
+cright = (abs(allPoints[1,:]) > xB + dimX-stepX)
+pidright = np.compress(cright,range(0,m.nbpts()))
+fright= m.faces_from_pid(pidright)
+RIGHT = 4
+m.set_region(RIGHT,fright)
 
 # ==== Create getfem models ====
 # We use two identical models, one to get the stiffness matrix and the rhs
@@ -119,7 +142,7 @@ md.add_fem_variable('u',mfu)
 md.add_initialized_data('lambda',Lambda)
 md.add_initialized_data('mu',Mu)
 md.add_initialized_data('source_term',[0,0,-10])
-md.add_initialized_data('push',[0,500000,0])
+md.add_initialized_data('push',[-200000,0,0])
 md.add_initialized_data('rho',Rho)
 md.add_initialized_data('gravity', Gravity)
 md.add_initialized_data('weight',[0,0,Rho*Gravity])
@@ -224,6 +247,26 @@ else:
         k += 3
         relation.append(Kernel.LagrangianLinearTIR(hh,b))
         inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
+
+
+hh = np.zeros((diminter,sico.nbdof))
+doftop = mfu.basic_dof_on_region(TOP)
+nb_contacts = np.size(pidtop)
+qB = np.repeat([0],3)
+qB[0] = xB
+
+for i in range(nb_contacts):
+    hh = np.zeros((diminter,sico.nbdof))
+    hh[0,doftop[i]] = math.sin(alpha)*math.sin(alpha)
+    hh[0,doftop[i]+1] = -math.cos(alpha)*math.sin(alpha)
+    hh[1,doftop[i]+2] = 1.0*math.sin(alpha)
+    hh[2,doftop[i]] = -math.cos(alpha)*math.sin(alpha)
+    hh[2,doftop[i]+1] = -math.sin(alpha)*math.sin(alpha)
+    b = np.dot(hh[:,i:i+3],qB)
+    relation.append(Kernel.LagrangianLinearTIR(hh,b))
+    inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
+    
+
 
 nbInter=len(inter)
 
