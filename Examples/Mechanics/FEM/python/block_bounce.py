@@ -52,7 +52,6 @@ h = 0.005   # time step
 e = 0.0   # restitution coeficient
 mu=0.3 # Friction coefficient
 theta = 0.5 # theta scheme
-with_friction = False
 
 # ===============================
 # Build FEM using getfem
@@ -125,12 +124,7 @@ md.add_initialized_data('gravity', Gravity)
 md.add_initialized_data('weight',[0,0,Rho*Gravity])
 # Build model (linear elasticity)
 md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
-# Add volumic/surfacic source terms
-#md.add_source_term_brick(mim,'u','source_term',TOP)
-#md.add_source_term_brick(mim,'u','push',LEFT)
 md.add_source_term_brick(mim,'u','weight')
-# Add boundary conditions
-#md.add_Dirichlet_condition_with_multipliers(mim,'u',mfu,BOTTOM)
 
 # Assembly
 md.assembly()
@@ -193,13 +187,9 @@ block.setKPtr(sico.Stiff)
 # y = Hq + b
 # y = [ normal component, first tangent component, second tangent component] 
 # 
-# The friction-contact non-smooth law
-if(with_friction):
-    nslaw = Kernel.NewtonImpactFrictionNSL(e,e,mu,3)
-    diminter = 3
-else:
-    nslaw = Kernel.NewtonImpactNSL(e)
-    diminter = 1
+# The non-smooth law
+nslaw = Kernel.NewtonImpactNSL(e)
+diminter = 1
 
 hh = np.zeros((diminter,sico.nbdof))
 b = np.zeros(diminter)
@@ -209,22 +199,13 @@ relation=[]
 inter=[]
 hh = np.zeros((diminter,sico.nbdof))
 nbInter = pidbot.shape[0]
-if(with_friction):
-    for i in range(nbInter):
-        # hh is a submatrix of sico.H with 3 rows. 
-        hh[:,:] = sico.H[k:k+3:3,:]
-        k += 3
-        relation.append(Kernel.LagrangianLinearTIR(hh,b))
-        inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
+for i in range(nbInter):
+    # hh is a submatrix of sico.H with 1 row. 
+    hh[:,:]= sico.H[k,:]
+    k += 3
+    relation.append(Kernel.LagrangianLinearTIR(hh,b))
+    inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
     
-else:
-    for i in range(nbInter):
-        # hh is a submatrix of sico.H with 1 row. 
-        hh[:,:]= sico.H[k,:]
-        k += 3
-        relation.append(Kernel.LagrangianLinearTIR(hh,b))
-        inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
-
 nbInter=len(inter)
 
 # =======================================
@@ -250,20 +231,7 @@ OSI.insertDynamicalSystem(block)
 # (2) Time discretisation --
 t = Kernel.TimeDiscretisation(t0,h)
 
-# (3) one step non smooth problem
-if(with_friction):
-    osnspb = Kernel.FrictionContact(3)
-#    osnspb.numericsSolverOptions().iparam[0]=100
-#    osnspb.numericsSolverOptions().iparam[1]=20
-#    osnspb.numericsSolverOptions().iparam[4]=2
-#    osnspb.numericsSolverOptions().dparam[0]=1e-6
-#    osnspb.numericsSolverOptions().dparam[2]=1e-8
-#    osnspb.setMaxSize(1000)
-#    osnspb.setMStorageType(1)
-#    osnspb.setNumericsVerboseMode(0)
-#    osnspb.setKeepLambdaAndYState(true)
-else:
-    osnspb = Kernel.LCP()
+osnspb = Kernel.LCP()
 
 # (4) Simulation setup with (1) (2) (3)
 s = Kernel.TimeStepping(t)
@@ -284,13 +252,6 @@ dataPlot = np.empty((N+1,9))
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = block.q()[2]
 #dataPlot[0, 2] = block.velocity()[2]
-dataPlot[0, 2] = block.q()[5]
-dataPlot[0, 3] = block.q()[8]
-dataPlot[0, 4] = block.q()[11]
-dataPlot[0, 5] = block.q()[14]
-dataPlot[0, 6] = block.q()[17]
-dataPlot[0, 7] = block.q()[20]
-dataPlot[0, 8] = block.q()[23]
 
 nbNodes = sico.mesh.pts().shape[1]
 
@@ -302,13 +263,6 @@ while(s.nextTime() < T):
     dataPlot[k,0]=s.nextTime()
     dataPlot[k,1]=block.q()[2]    
     dataPlot[k,2]=block.velocity()[2]
-    dataPlot[k, 2] = block.q()[5]
-    dataPlot[k, 3] = block.q()[8]
-    dataPlot[k, 4] = block.q()[11]
-    dataPlot[k, 5] = block.q()[14]
-    dataPlot[k, 6] = block.q()[17]
-    dataPlot[k, 7] = block.q()[20]
-    dataPlot[k, 8] = block.q()[23]
     
     # Post proc for paraview
     md.to_variables(block.q())
@@ -322,21 +276,14 @@ while(s.nextTime() < T):
 
 
 
-subplot(211)
-title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
-plot(dataPlot[:,0], dataPlot[:,2])
-plot(dataPlot[:,0], dataPlot[:,3])
-plot(dataPlot[:,0], dataPlot[:,4])
-plot(dataPlot[:,0], dataPlot[:,5])
-plot(dataPlot[:,0], dataPlot[:,6])
-plot(dataPlot[:,0], dataPlot[:,7])
-plot(dataPlot[:,0], dataPlot[:,8])
+#subplot(211)
+#title('position')
+#plot(dataPlot[:,0], dataPlot[:,1])
 
-grid()
-subplot(212)
-title('velocity')
-plot(dataPlot[:,0], dataPlot[:,2])
-grid()
-show()
+#grid()
+#subplot(212)
+#title('velocity')
+#plot(dataPlot[:,0], dataPlot[:,2])
+#grid()
+#show()
 

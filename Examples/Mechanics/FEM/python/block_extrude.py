@@ -22,31 +22,6 @@ class SiconosFem:
         self.q0 = []
         self.RHS=[]
 
-def fillH(pid,sic,nbdof,BOTTOM):
-    nb_contacts = np.size(pid)
-    rowH = 3 * nb_contacts
-    sic.H = np.zeros((rowH,nbdof))
-    
-    dofbottom = mfu.basic_dof_on_region(BOTTOM)
-    for i in range(0,rowH,3):
-        sic.H[i,dofbottom[i]+2] = 1.0
-        sic.H[i+1,dofbottom[i]] = 1.0
-        sic.H[i+2,dofbottom[i]+1] = 1.0
-              
-
-def fillH2(pid, sic, nbdof, TOP,alpha,coord):
-    nb_contacts = np.size(pid)
-    rowH = 3 * nb_contacts
-    sic.H2 = np.zeros((rowH,nbdof))
-    doftop = mfu.basic_dof_on_region(TOP)
-    normH2 = 1.0/sqrt(1+alpha*alpha)
-    for i in range(0,rowH,3):
-        sic.H2[i,doftop[i]] = norm2*alpha
-        sic.H2[i,doftop[i]+1] = norm2
-        sic.H2[i+1,doftop[i]+2] = 1.0
-        sic.H2[i+2,doftop[i]] = -norm2
-        sic.H2[i+2,doftop[i]+1] = alpha*norm2
-
 sico = SiconosFem()
 
 # ===============================
@@ -58,11 +33,11 @@ Nu = 0.3 # Poisson coef.
 Lambda = E*Nu/((1+Nu)*(1-2*Nu))
 Mu = E/(2*(1+Nu))
 # Density
-Rho=7800
+Rho=100.0
 Gravity = -9.81
 t0 = 0.0      # start time
 T = 0.5    # end time
-h = 0.001   # time step
+h = 0.0005   # time step
 e = 0.0    # restitution coeficient
 mu=0.3 # Friction coefficient
 theta = 0.5 # theta scheme
@@ -73,12 +48,11 @@ with_friction = True
 # ===============================
 
 
-xB = 5.0
 # ==== The geometry and the mesh ==== 
 dimX = 10.01 ; dimY = 10.01 ; dimZ = 3.01
-stepX = 1.0 ; stepY = 1.0 ; stepZ = 0.75
-alpha = math.atan(dimZ/dimX)
-x=np.arange(xB,dimX+xB,stepX)
+stepX = 2.0 ; stepY = 2.0 ; stepZ = 1.5
+alpha = math.atan(dimZ/30.0)
+x=np.arange(0,dimX,stepX)
 y=np.arange(0,dimY,stepY)
 z=np.arange(0,dimZ,stepZ)
 m = gf.Mesh('regular simplices', x,y,z)
@@ -119,13 +93,13 @@ ftop = m.faces_from_pid(pidtop)
 TOP = 2
 m.set_region(TOP,ftop)
 # Left points and faces
-cleft = (abs(allPoints[1,:]) < xB + 1e-6)
+cleft = (abs(allPoints[0,:]) <  1e-6)
 pidleft = np.compress(cleft,range(0,m.nbpts()))
 fleft= m.faces_from_pid(pidleft)
 LEFT = 3
 m.set_region(LEFT,fleft)
 # Right points and faces
-cright = (abs(allPoints[1,:]) > xB + dimX-stepX)
+cright = (abs(allPoints[0,:]) > dimX-stepX)
 pidright = np.compress(cright,range(0,m.nbpts()))
 fright= m.faces_from_pid(pidright)
 RIGHT = 4
@@ -141,8 +115,8 @@ md.add_fem_variable('u',mfu)
 # Add model constants
 md.add_initialized_data('lambda',Lambda)
 md.add_initialized_data('mu',Mu)
-md.add_initialized_data('source_term',[0,0,-10])
-md.add_initialized_data('push',[-200000,0,0])
+md.add_initialized_data('source_term',[0.0,0.0,-10])
+md.add_initialized_data('push',[50000000.0,0.0,0.0])
 md.add_initialized_data('rho',Rho)
 md.add_initialized_data('gravity', Gravity)
 md.add_initialized_data('weight',[0,0,Rho*Gravity])
@@ -152,8 +126,6 @@ md.add_isotropic_linearized_elasticity_brick(mim,'u','lambda','mu')
 #md.add_source_term_brick(mim,'u','source_term',TOP)
 md.add_source_term_brick(mim,'u','push',LEFT)
 md.add_source_term_brick(mim,'u','weight')
-# Add boundary conditions
-#md.add_Dirichlet_condition_with_multipliers(mim,'u',mfu,BOTTOM)
 
 # Assembly
 md.assembly()
@@ -177,8 +149,6 @@ md2.assembly()
 sico.Mass = md2.tangent_matrix().full()
 # number of dof
 sico.nbdof = mfu.nbdof()
-sico.mfu=mfu
-sico.mesh=m
 
 # ===============================
 # Here starts the Siconos stuff
@@ -186,9 +156,6 @@ sico.mesh=m
 #
 # From getfem, we have Mass, Stiffness and RHS
 # saved in object sico.
-
-# H-Matrix 
-fillH(pidbot,sico,mfu.nbdof(),BOTTOM)
 
 # =======================================
 # Create the siconos Dynamical System
@@ -204,6 +171,8 @@ block = Kernel.LagrangianLinearTIDS(sico.initial_displacement,v0,sico.Mass)
 block.setFExtPtr(sico.RHS)
 block.setKPtr(sico.Stiff)
 
+print "Start Siconos process ..."
+
 # =======================================
 # The interactions
 # A contact is defined for each node at
@@ -217,58 +186,56 @@ block.setKPtr(sico.Stiff)
 # y = [ normal component, first tangent component, second tangent component] 
 # 
 # The friction-contact non-smooth law
-if(with_friction):
-    nslaw = Kernel.NewtonImpactFrictionNSL(e,e,mu,3)
-    diminter = 3
-else:
-    nslaw = Kernel.NewtonImpactNSL(e)
-    diminter = 1
 
-hh = np.zeros((diminter,sico.nbdof))
+nslaw = Kernel.NewtonImpactFrictionNSL(e,e,mu,3)
+diminter = 3
 b = np.zeros(diminter)
-b[0] = 0.0
-k = 0
 relation=[]
 inter=[]
-hh = np.zeros((diminter,sico.nbdof))
+q0 = mfu.basic_dof_nodes() 
+# We create an interaction for each point at the bottom of the block
 nbInter = pidbot.shape[0]
-if(with_friction):
-    for i in range(nbInter):
-        # hh is a submatrix of sico.H with 3 rows. 
-        hh[:,:] = sico.H[k:k+3,:]
-        k += 3
-        relation.append(Kernel.LagrangianLinearTIR(hh,b))
-        inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
-    
-else:
-    for i in range(nbInter):
-        # hh is a submatrix of sico.H with 1 row. 
-        hh[:,:]= sico.H[k,:]
-        k += 3
-        relation.append(Kernel.LagrangianLinearTIR(hh,b))
-        inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
-
-
-hh = np.zeros((diminter,sico.nbdof))
-doftop = mfu.basic_dof_on_region(TOP)
-nb_contacts = np.size(pidtop)
-qB = np.repeat([0],3)
-qB[0] = xB
-
-for i in range(nb_contacts):
+# The list of dof in bottom face
+dofbottom = mfu.basic_dof_on_region(BOTTOM)
+for i in range(nbInter):
+    index = dofbottom[i]
     hh = np.zeros((diminter,sico.nbdof))
-    hh[0,doftop[i]] = math.sin(alpha)*math.sin(alpha)
-    hh[0,doftop[i]+1] = -math.cos(alpha)*math.sin(alpha)
-    hh[1,doftop[i]+2] = 1.0*math.sin(alpha)
-    hh[2,doftop[i]] = -math.cos(alpha)*math.sin(alpha)
-    hh[2,doftop[i]+1] = -math.sin(alpha)*math.sin(alpha)
-    b = np.dot(hh[:,i:i+3],qB)
+    hh[0,index+2] = 1.0
+    hh[1,index] = 1.0
+    hh[2,index+1] = 1.0
+    qRef =np.repeat([0],3)
+    qRef[0] = q0[0,index]
+    qRef[1] = q0[1,index]
+    qRef[2] = q0[2,index]
+    b[0] = np.dot(hh[0,index:index+3],qRef)
     relation.append(Kernel.LagrangianLinearTIR(hh,b))
     inter.append(Kernel.Interaction(diminter, nslaw, relation[i]))
     
 
+# Now we treat the top face in the same way
+relationTop =[]
+qRef = np.repeat([0],3)
 
+nbInterTop = pidtop.shape[0]
+doftop = mfu.basic_dof_on_region(TOP)
+for i in range(nbInterTop):
+    index = doftop[i]
+    hh = np.zeros((diminter,sico.nbdof))
+    hh[0,index] = -math.sin(alpha)
+    hh[0,index+2] = -math.cos(alpha)
+    hh[1,index] = math.cos(alpha)
+    hh[1,index+2] = -math.sin(alpha)
+    hh[2,index+1] = -1.0
+    qRef = np.repeat([0],3)
+    qRef[0] = dimX - q0[0,index]
+    b = np.dot(hh[:,index:index+3],qRef)
+    relationTop.append(Kernel.LagrangianLinearTIR(hh,b))
+    inter.append(Kernel.Interaction(diminter, nslaw, relationTop[i]))
+
+print nbInterTop
 nbInter=len(inter)
+
+print nbInter
 
 # =======================================
 # The Model
@@ -294,19 +261,7 @@ OSI.insertDynamicalSystem(block)
 t = Kernel.TimeDiscretisation(t0,h)
 
 # (3) one step non smooth problem
-if(with_friction):
-    osnspb = Kernel.FrictionContact(3)
- #   osnspb.numericsSolverOptions().iparam[0]=100
-#    osnspb.numericsSolverOptions().iparam[1]=20
-#    osnspb.numericsSolverOptions().iparam[4]=2
-#    osnspb.numericsSolverOptions().dparam[0]=1e-6
-#    osnspb.numericsSolverOptions().dparam[2]=1e-8
-#    osnspb.setMaxSize(1000)
-#    osnspb.setMStorageType(1)
-#    osnspb.setNumericsVerboseMode(0)
-#    osnspb.setKeepLambdaAndYState(true)
-else:
-    osnspb = Kernel.LCP()
+osnspb = Kernel.FrictionContact(3)
 
 # (4) Simulation setup with (1) (2) (3)
 s = Kernel.TimeStepping(t)
@@ -322,39 +277,27 @@ N = (T-t0)/h
 # Get the values to be plotted 
 # ->saved in a matrix dataPlot
 
-dataPlot = np.empty((N+1,9))
+dataPlot = np.empty((N+1,3))
 
 dataPlot[0, 0] = t0
-dataPlot[0, 1] = block.q()[2]
-#dataPlot[0, 2] = block.velocity()[2]
-dataPlot[0, 2] = block.q()[5]
-dataPlot[0, 3] = block.q()[8]
-dataPlot[0, 4] = block.q()[11]
-dataPlot[0, 5] = block.q()[14]
-dataPlot[0, 6] = block.q()[17]
-dataPlot[0, 7] = block.q()[20]
-dataPlot[0, 8] = 0.0
-
-nbNodes = sico.mesh.pts().shape[1]
+dataPlot[0, 1] = block.q()[0]
+nbNodes = m.pts().shape[1]
 
 k = 1
 # time loop
 while(s.nextTime() < T):
     s.computeOneStep()
-    name = 'friction'+str(k)+'.vtk'
-    dataPlot[k,0]=s.nextTime()
-    dataPlot[k,1]=block.q()[2]    
-    dataPlot[k,2]=block.velocity()[2]
-    dataPlot[k, 7] = block.q()[20]
+    name = 'extr'+str(k)+'.vtk'
+    #dataPlot[k,0]=s.nextTime()
+    #dataPlot[k,1]=block.q()[0]    
     
     # Post proc for paraview
     md.to_variables(block.q())
     VM=md.compute_isotropic_linearized_Von_Mises_or_Tresca('u','lambda','mu',mff)
-    dataPlot[k, 8] = VM[0]
     
     #U = fem_model.variable('u')
-    sl = gf.Slice(('boundary',),sico.mfu,1)
-    sl.export_to_vtk(name, sico.mfu, block.q(),'Displacement', mff, VM, 'Von Mises Stress')
+    sl = gf.Slice(('boundary',),mfu,1)
+    sl.export_to_vtk(name, mfu, block.q(),'Displacement', mff, VM, 'Von Mises Stress')
 
     #print s.nextTime()
     k += 1
@@ -362,21 +305,12 @@ while(s.nextTime() < T):
 
 
 
-subplot(211)
-title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
-plot(dataPlot[:,0], dataPlot[:,2])
-plot(dataPlot[:,0], dataPlot[:,3])
-plot(dataPlot[:,0], dataPlot[:,4])
-plot(dataPlot[:,0], dataPlot[:,5])
-plot(dataPlot[:,0], dataPlot[:,6])
-plot(dataPlot[:,0], dataPlot[:,7])
-plot(dataPlot[:,0], dataPlot[:,8])
-
-grid()
-subplot(212)
-title('VM')
-plot(dataPlot[:,0], dataPlot[:,8])
-grid()
-show()
+#subplot(211)
+#title('position')
+#plot(dataPlot[:,0], dataPlot[:,1])
+#plot(dataPlot[:,0], dataPlot[:,2])
+#grid()
+#subplot(212)
+#title('VM')
+#show()
 
