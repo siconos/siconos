@@ -47,7 +47,7 @@ double B(double t)
 }
 double C(double t)
 {
-  return 1.1 * cos(32.*M_PI * t) ;
+  return 0.0;//1.1*cos(32.*M_PI*t) ;
 }
 double DA(double t)
 {
@@ -59,7 +59,7 @@ double DB(double t)
 }
 double DC(double t)
 {
-  return -1.1 * 32.*M_PI * sin(32.*M_PI * t) ;
+  return 0.0;//-1.1*32.*M_PI*sin(32.*M_PI*t) ;
 }
 
 
@@ -68,7 +68,7 @@ void Disks::init()
 {
 
   SP::TimeDiscretisation timedisc_;
-  SP::Simulation simulation_;
+  SP::TimeStepping simulation_;
   SP::FrictionContact osnspb_;
 
   // User-defined main parameters
@@ -230,7 +230,7 @@ void Disks::init()
 
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb_->setMStorageType(0);            // Sparse storage
+    osnspb_->setMStorageType(1);            // Sparse storage
     osnspb_->setNumericsVerboseMode(0);
 
     osnspb_->setKeepLambdaAndYState(true);  // inject previous solution
@@ -240,7 +240,7 @@ void Disks::init()
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
 
-    //simulation_->setCheckSolverFunction(localCheckSolverOuput);
+    simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
