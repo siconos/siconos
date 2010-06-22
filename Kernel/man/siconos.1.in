@@ -29,6 +29,9 @@ siconos \- Siconos C++ Compilation.
 .B \-h | \-help
 ]
 [
+.B \-j JOBS
+]
+[
 .B \-L  
 .I DIRECTORY
 ]
@@ -117,6 +120,10 @@ The following command-line options are recognized by
 .B \-help
  Print help.
 .TP
+.BI \-j
+.I JOBS NUMBER
+ Do parrallel compilation with JOBS NUMBER jobs
+.TP
 .BI \-L
 .I DIRECTORY
  Add a directory to the linker search list.
@@ -170,5 +177,5 @@ commands as they are executed.
 .SH SEE ALSO
 .I The Siconos Software Documentation
 .TP
-http://siconos.gforge.inria.fr/SiconosDocList.html
+http://siconos.gforge.inria.fr
 
