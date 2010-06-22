@@ -267,8 +267,8 @@ nightly_submit Kernel Debug
 
 
 # Examples
-rm -rf $PIPOL_WDIR/siconos/trunk/Numerics
-rm -rf $PIPOL_WDIR/siconos/trunk/Kernel
+rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
+rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
 configure_trunk Examples Release
 nightly_build Examples Release
 nightly_test Examples Release
