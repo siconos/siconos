@@ -115,7 +115,7 @@ configure_3_1() {
 
 pack_trunk() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
-        cmake $PIPOL_WDIR/siconos/trunk/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
+        cmake $PIPOL_WDIR/siconos/trunk/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2 -DWITH_TESTING=FALSE
         cpack -G $PIPOL_CPACK_G 
     }; cd -
     
