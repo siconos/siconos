@@ -400,111 +400,64 @@ public:
 };
 
 
-struct VectorNum : public SiconosVisitor
+struct VectorNum : public Question<unsigned int>
 {
-  unsigned int _answer;
 
   void visit(const SimpleVector& v)
   {
-    if (v._dense) _answer = 1;
-    else _answer = 4;
+    if (v._dense) answer = 1;
+    else answer = 4;
   }
 
   void visit(boost::shared_ptr<SimpleVector> v)
   {
-    if (v->_dense) _answer = 1;
-    else _answer = 4;
+    if (v->_dense) answer = 1;
+    else answer = 4;
   }
 
   void visit(const BlockVector& v)
   {
-    _answer = 0;
-  }
-
-  void visit(boost::shared_ptr<BlockVector> v)
-  {
-    _answer = 0;
+    answer = 0;
   }
 
 };
 
-struct IsDense : public SiconosVisitor
+struct IsDense : public Question<bool>
 {
-
-  bool _answer;
-
   void visit(const SimpleVector& v)
   {
-    _answer = v._dense;
-  }
-
-  void visit(boost::shared_ptr<SimpleVector> v)
-  {
-    _answer = v->_dense;
+    answer = v._dense;
   }
 
   void visit(const BlockVector& v)
   {
-    _answer = false;
+    answer = false;
   }
-
-  void visit(boost::shared_ptr<BlockVector> v)
-  {
-    _answer = false;
-  }
-
 };
 
-struct IsSparse : public SiconosVisitor
+struct IsSparse : public Question<bool>
 {
-
-  bool _answer;
-
   void visit(const SimpleVector& v)
   {
-    _answer = !v._dense;
-  }
-
-  void visit(boost::shared_ptr<SimpleVector> v)
-  {
-    _answer = !v->_dense;
+    answer = !v._dense;
   }
 
   void visit(const BlockVector& v)
   {
-    _answer = false;
+    answer = false;
   }
-
-  void visit(boost::shared_ptr<BlockVector> v)
-  {
-    _answer = false;
-  }
-
 };
 
-struct IsBlock : public SiconosVisitor
+struct IsBlock : public Question<bool>
 {
-
-  bool _answer;
-
   void visit(const SimpleVector& v)
   {
-    _answer = false;
-  }
-
-  void visit(boost::shared_ptr<SimpleVector> v)
-  {
-    _answer = false;
+    answer = false;
   }
 
   void visit(const BlockVector& v)
   {
-    _answer = true;
-  }
-
-  void visit(boost::shared_ptr<BlockVector> v)
-  {
-    _answer = true;
+    answer = true;
   }
 };
 

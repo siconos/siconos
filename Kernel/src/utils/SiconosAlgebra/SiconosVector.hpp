@@ -345,15 +345,4 @@ public:
 
 };
 
-template <class Visitor, class T, class Vector>
-T ask(Vector& v)
-{
-  Visitor t;
-
-  v.accept(t);
-
-  return t._answer;
-
-};
-
 #endif

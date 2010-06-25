@@ -91,7 +91,7 @@ SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): Sicono
 // Copy
 SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector()
 {
-  if (ask<IsDense, bool>(svect)) // dense
+  if (ask<IsDense>(svect)) // dense
   {
     _dense = true;
     vect.Dense = new DenseVect(svect.size());

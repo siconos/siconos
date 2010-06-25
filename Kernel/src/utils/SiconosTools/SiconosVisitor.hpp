@@ -194,6 +194,51 @@ std::string name(const C& c)
 }
 
 
+
+
+/* ask something to a class with a visitor */
+
+/* example :
+ *
+ * struct NeedMass : public Question<SP::SiconosMatrix>
+ * {
+ *    void visit(const LagrangianDS& ds)
+ *    {
+ *       Question::answer = ds.mass();
+ *    }
+ *
+ * }
+ * SP::DynamicalSystem ds
+ * [...]
+ *
+ * SP::SiconosMatrix mass = ask<NeedMass>(*ds);
+ */
+
+template <class GeneralQuestion, class Visitable>
+typename GeneralQuestion::type ask(const Visitable& v)
+{
+  GeneralQuestion t;
+
+  v.accept(t);
+
+  return t.answer;
+
+};
+
+
+/* a generic return value visitor */
+template <class AnswerType>
+struct Question : public SiconosVisitor
+{
+  typedef AnswerType type;
+  type answer;
+
+};
+
+
+
+
+
 TYPEDEF_SPTR(SiconosVisitor);
 
 #undef REGISTER
