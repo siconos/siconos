@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     SP::LCP osnspb1(new LCP());
 
-    SP::Relay osnspb(new Relay("PGS"));
+    SP::Relay osnspb(new Relay(SICONOS_RELAY_PGS));
     s->insertNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================
