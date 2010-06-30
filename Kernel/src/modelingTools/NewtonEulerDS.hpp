@@ -19,9 +19,7 @@
 
 /*! \file NewtonEulerDS.h
   \brief NewtonEulerDS class - Second Order Non Linear Dynamical Systems.
-
 */
-
 #ifndef NEWTONEULERNLDS_H
 #define NEWTONEULERNLDS_H
 
@@ -399,10 +397,14 @@ public:
 
   // -- Mass --
 
-  /** get mass
-   *  \return pointer on a plugged-matrix
+  /** get mass value
+   *  \return a double
    */
-  //   inline SP::SiconosMatrix mass() const { return _mass; }
+  inline double massValue() const
+  {
+    return _mass;
+  };
+
 
   //   /** set mass to pointer newPtr
   //    *  \param a plugged matrix SP

@@ -104,6 +104,35 @@ public:
 
   }
 
+  void visit(SP::SphereNEDS pds)
+  {
+    int i, j, k, imin, imax, jmin, jmax, kmin, kmax;
+
+    unsigned int _bboxfactor = parent->bboxfactor();
+    unsigned int _cellsize = parent->cellsize();
+
+    imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
+    imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    jmin = (int) floor((pds->getQ(1) - _bboxfactor * pds->getRadius()) / _cellsize);
+    jmax = (int) floor((pds->getQ(1) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    kmin = (int) floor((pds->getQ(2) - _bboxfactor * pds->getRadius()) / _cellsize);
+    kmax = (int) floor((pds->getQ(2) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    for (i = imin; i <= imax; ++i)
+    {
+      for (j = jmin; j <= jmax; ++j)
+      {
+        for (k = kmin; k <= kmax; ++k)
+        {
+          parent->insert(pds, i, j, k);
+        }
+      }
+    }
+
+  }
+
   void visit(SP::ExternalBody d)
   {
     d->selfHash(parent);
@@ -388,12 +417,12 @@ struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 };
 
 /* sphere plan relation comparison */
-struct SpaceFilter::_IsSameSphereLDSPlanR : public SiconosVisitor
+struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
 {
   double A, B, C, D, r;
   bool flag;
   SP::SpaceFilter parent;
-  _IsSameSphereLDSPlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
+  _IsSameSpherePlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
     parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
   void visit(const SphereLDSSphereLDSR&)
@@ -402,6 +431,11 @@ struct SpaceFilter::_IsSameSphereLDSPlanR : public SiconosVisitor
   };
 
   void visit(const SphereLDSPlanR& rel)
+  {
+    flag = rel.equal(A, B, C, D, r);
+  };
+
+  void visit(const SphereNEDSPlanR& rel)
   {
     flag = rel.equal(A, B, C, D, r);
   };
@@ -571,9 +605,9 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
-  _IsSameSphereLDSPlanR
-  isSameSphereLDSPlanR =
-    _IsSameSphereLDSPlanR(shared_from_this(), A, B, C, D, r);
+  _IsSameSpherePlanR
+  IsSameSpherePlanR =
+    _IsSameSpherePlanR(shared_from_this(), A, B, C, D, r);
 
 
   // all DS must be in DS graph
@@ -592,9 +626,9 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSphereLDSPlanR);
+      ->relation()->accept(IsSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSphereLDSPlanR.flag)
+          && IsSameSpherePlanR.flag)
       {
         found = true;
         break;
@@ -620,10 +654,83 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSphereLDSPlanR);
+      ->relation()->accept(IsSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSphereLDSPlanR.flag)
+          && IsSameSpherePlanR.flag)
+      {
+        _nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
+        break;
+      }
+    }
+  }
+};
+
+
+// note : all PlanObject should be merged
+void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, SP::SphereNEDS ds)
+{
+  double r = ds->getRadius();
+
+  /* tolerance */
+  double tol = r;
+
+  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
+
+  _IsSameSpherePlanR
+  isSameSpherePlanR =
+    _IsSameSpherePlanR(shared_from_this(), A, B, C, D, r);
+
+
+  // all DS must be in DS graph
+  assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
+  SP::SphereNEDSPlanR relp(new SphereNEDSPlanR(r, A, B, C, D));
+  if (relp->distance(ds->getQ(0),
+                     ds->getQ(1),
+                     ds->getQ(2),
+                     ds->getRadius()) < tol)
+
+  {
+    // is interaction in graph ?
+    bool found = false;
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+         oei != oeiend; ++oei)
+    {
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameSpherePlanR);
+      if (DSG0->bundle(DSG0->target(*oei)) == ds
+          && isSameSpherePlanR.flag)
+      {
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      // no
+    {
+      SP::Interaction inter(new Interaction(3,
+                                            _nslaw,
+                                            relp, _interID++));
+      inter->insert(ds);
+
+      _nsds->topology()->insertInteraction(inter);
+
+    }
+  }
+  else
+  {
+    // is interaction in graph ?
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+         oei != oeiend; ++oei)
+    {
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameSpherePlanR);
+
+      if (DSG0->bundle(DSG0->target(*oei)) == ds
+          && isSameSpherePlanR.flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -638,21 +745,28 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
 void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new HashedDisk(ds, i, j));
+  SP::Hashed hashed(new Hashed(ds, i, j));
   _hash_table.insert(hashed);
 };
 
 void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new HashedCircle(ds, i, j));
+  SP::Hashed hashed(new Hashed(ds, i, j));
   _hash_table.insert(hashed);
 };
 
 void SpaceFilter::insert(SP::SphereLDS ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new HashedSphereLDS(ds, i, j, k));
+  SP::Hashed hashed(new Hashed(ds, i, j, k));
+  _hash_table.insert(hashed);
+};
+
+void SpaceFilter::insert(SP::SphereNEDS ds, int i, int j, int k)
+{
+
+  SP::Hashed hashed(new Hashed(ds, i, j, k));
   _hash_table.insert(hashed);
 };
 
@@ -729,7 +843,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
-      SP::LagrangianDS ds2 = (*neighbours.first)->body;
+      SP::DynamicalSystem ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
@@ -795,7 +909,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
-      SP::LagrangianDS ds2 = (*neighbours.first)->body;
+      SP::DynamicalSystem ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
@@ -812,6 +926,61 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
           // no, check proximity
           declaredInteractions.insert(interpair);
           ds2->acceptSP(sphereFilter);
+        }
+
+      }
+    }
+  }
+
+
+  void visit(SP::SphereNEDS ds1)
+  {
+    // interactions with plans
+    for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+    {
+      parent->_PlanSphereNEDSFilter((*parent->_plans)(i, 0),
+                                    (*parent->_plans)(i, 1),
+                                    (*parent->_plans)(i, 2),
+                                    (*parent->_plans)(i, 3), ds1);
+    }
+
+    SP::SiconosVector Q1 = ds1->q();
+
+    double x1 = Q1->getValue(0);
+    double y1 = Q1->getValue(1);
+    double z1 = Q1->getValue(2);
+    SP::Hashed hds1(new Hashed(ds1, (int) floor(x1 / parent->_cellsize),
+                               (int) floor(y1 / parent->_cellsize),
+                               (int) floor(z1 / parent->_cellsize)));
+
+    // find all other systems that are in the same cells
+    std::pair<space_hash::iterator, space_hash::iterator>
+    neighbours = parent->_hash_table.equal_range(hds1);
+
+    unsigned int j;
+    interPairs declaredInteractions;
+
+    //    boost::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent,ds1));
+
+    for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
+    {
+      SP::DynamicalSystem ds2 = (*neighbours.first)->body;
+      int ids1 = ds1->number();
+      int ids2 = ds2->number();
+      int imax = (std::max)(ids1, ids2);
+      int imin = (std::min)(ids1, ids2);
+      if (ids1 != ids2)
+      {
+        // is interaction already treated ?
+        interPair interpair;
+        interpair = std::pair<int, int>(imin, imax);
+
+        if (declaredInteractions.find(interpair)
+            == declaredInteractions.end())
+        {
+          // no, check proximity
+          declaredInteractions.insert(interpair);
+          //          ds2->acceptSP(sphereFilter);
         }
 
       }
@@ -907,7 +1076,7 @@ double SpaceFilter::minDistance(SP::Hashed h)
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
     = _hash_table.equal_range(h);
 
-  SP::SiconosVector q = h->body->q();
+  SP::SiconosVector q = boost::static_pointer_cast<LagrangianDS>(h->body)->q();
 
   double dmin = INFINITY;
 

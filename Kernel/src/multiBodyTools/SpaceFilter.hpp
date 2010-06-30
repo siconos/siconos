@@ -48,6 +48,8 @@
 #include "SphereLDS.hpp"
 #include "SphereLDSSphereLDSR.hpp"
 #include "SphereLDSPlanR.hpp"
+#include "SphereNEDS.hpp"
+#include "SphereNEDSPlanR.hpp"
 #include "ExternalBody.hpp"
 
 #include <tr1/unordered_set>
@@ -59,11 +61,11 @@
 class Hashed : public boost::enable_shared_from_this<Hashed>
 {
 public:
-  SP::LagrangianDS body;
+  SP::DynamicalSystem body;
   int i;
   int j;
   int k;
-  Hashed(SP::LagrangianDS body, int i, int j, int k = 0) :
+  Hashed(SP::DynamicalSystem body, int i, int j, int k = 0) :
     body(body), i(i), j(j), k(k) {};
 
   Hashed(int i, int j, int k = 0)
@@ -73,36 +75,13 @@ public:
 
 };
 
-class HashedCircle : public Hashed
-{
-public:
-  HashedCircle(SP::Circle c, int i, int j) : Hashed(c, i, j) {};
-
-};
-
-class HashedDisk : public Hashed
-{
-public:
-  HashedDisk(SP::Disk d, int i, int j) : Hashed(d, i, j) {};
-
-};
-
-class HashedSphereLDS : public Hashed
-{
-public:
-  HashedSphereLDS(SP::SphereLDS d, int i, int j, int k) : Hashed(d, i, j, k) {};
-
-};
-
 DEFINE_SPTR(Hashed);
-DEFINE_SPTR(HashedDisk);
-DEFINE_SPTR(HashedCircle);
-DEFINE_SPTR(HashedSphereLDS);
 
+typedef std::tr1::unordered_multiset < SP::Hashed,
+        boost::hash<SP::Hashed> > space_hash;
 
-typedef std::tr1::unordered_multiset<SP::Hashed, boost::hash<SP::Hashed> > space_hash;
-
-typedef ublas::matrix<FTime, ublas::column_major, std::vector<FTime> > FMatrix;
+typedef ublas::matrix < FTime, ublas::column_major,
+        std::vector<FTime> > FMatrix;
 
 TYPEDEF_SPTR(FMatrix);
 
@@ -140,10 +119,15 @@ protected:
                            double xCenter, double yCenter, double width,
                            SP::CircularDS ds);
 
-  void _MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, double time);
+  void _MovingPlanCircularFilter(unsigned int i,
+                                 SP::CircularDS ds,
+                                 double time);
 
   void _PlanSphereLDSFilter(double A, double B, double C, double D,
                             SP::SphereLDS ds);
+
+  void _PlanSphereNEDSFilter(double A, double B, double C, double D,
+                             SP::SphereNEDS ds);
 
   /* visitors defined as Inner class */
   /* note : cf Thinking in C++, vol2, the inner class idiom. */
@@ -151,6 +135,7 @@ protected:
   /* each kind of proximity detection */
   struct _CircularFilter;
   struct _SphereLDSFilter;
+  struct _SphereNEDSFilter;
 
 
 
@@ -163,7 +148,7 @@ protected:
   /* to compare relation */
   struct _IsSameDiskPlanR;
   struct _IsSameDiskMovingPlanR;
-  struct _IsSameSphereLDSPlanR;
+  struct _IsSameSpherePlanR;
 
   /* to compute distance */
   struct _DiskDistance;
@@ -175,19 +160,26 @@ protected:
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;
   friend class SpaceFilter::_IsSameDiskMovingPlanR;
-  friend class SpaceFilter::_IsSameSphereLDSPlanR;
+  friend class SpaceFilter::_IsSameSpherePlanR;
   friend class SpaceFilter::_DiskDistance;
 
 public:
 
-  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans, SP::FMatrix moving_plans) :
+  SpaceFilter(unsigned int bboxfactor,
+              unsigned int cellsize,
+              SP::NonSmoothDynamicalSystem nsds,
+              SP::NonSmoothLaw nslaw,
+              SP::SiconosMatrix plans,
+              SP::FMatrix moving_plans) :
     _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
     _nsds(nsds), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans)
   {};
 
-  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans) :
+  SpaceFilter(unsigned int bboxfactor,
+              unsigned int cellsize,
+              SP::NonSmoothDynamicalSystem nsds,
+              SP::NonSmoothLaw nslaw,
+              SP::SiconosMatrix plans) :
     _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
     _nsds(nsds), _nslaw(nslaw), _plans(plans)
   {};
@@ -203,6 +195,8 @@ public:
   void insert(SP::Circle, int, int, int);
 
   void insert(SP::SphereLDS, int, int, int);
+
+  void insert(SP::SphereNEDS, int, int, int);
 
   /** general hashed object
    */

@@ -17,44 +17,44 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SphereLDS
-  \brief Definition of a 3D sphere as a LagrangianDS (with Euler
-         Angles)
+/*! \file SphereNEDS
+
+  \brief Definition of a 3D Sphere as a NewtonEulerDS (with
+  quaternions).
+
 */
+#ifndef SphereNEDS_h
+#define SphereNEDS_h
+
+#include "NewtonEulerDS.hpp"
 
 
-#ifndef SphereLDS_h
-#define SphereLDS_h
-
-#include "LagrangianDS.hpp"
-
-class SphereLDS : public LagrangianDS, public boost::enable_shared_from_this<SphereLDS>
+class SphereNEDS : public NewtonEulerDS, public boost::enable_shared_from_this<SphereNEDS>
 {
 protected:
   double radius;
-  double massValue;
-  double I;
 
 public:
 
-  SphereLDS(double, double, SP::SiconosVector, SP::SiconosVector);
+  SphereNEDS(double, double, SP::SiconosMatrix, SP::SiconosVector, SP::SiconosVector);
 
-  ~SphereLDS();
+  ~SphereNEDS();
 
   inline double getQ(unsigned int pos)
   {
-    assert(pos < _ndof);
-    return (*_q[0])(pos);
+    assert(pos < 7);
+    return (_q->getValue(pos));
   };
+
   inline double getVelocity(unsigned int pos)
   {
-    assert(pos < _ndof);
-    return (*_q[1])(pos);
+    assert(pos < 6);
+    return (_v->getValue(pos));
   };
 
   inline double getMassValue()
   {
-    return massValue;
+    return _mass;
   };
 
   inline double getRadius()
@@ -62,29 +62,12 @@ public:
     return radius;
   };
 
-  void computeMass();
-  void computeMass(SP::SiconosVector)
-  {
-    RuntimeException::selfThrow("SphereLDS::computeMass(vector) - not implemented");
-  }
-
-  void computeNNL(SP::SiconosVector, SP::SiconosVector);
-
-  void computeNNL();
-
-  void computeJacobianNNLq();
-  void computeJacobianNNLqDot();
-
-  void computeJacobianNNLq(SP::SiconosVector, SP::SiconosVector);
-  void computeJacobianNNLqDot(SP::SiconosVector, SP::SiconosVector);
-
-
   /** visitors hook
    */
   ACCEPT_SP_VISITORS();
 
 };
 
-TYPEDEF_SPTR(SphereLDS);
+TYPEDEF_SPTR(SphereNEDS);
 
-#endif /* SphereLDS_h */
+#endif /* SphereNEDS_h */

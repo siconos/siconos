@@ -141,6 +141,8 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
   }
   else
   {
+    computeJachq(t);
+
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
       prod(*_jachq, *data[q1], *y);
@@ -160,8 +162,7 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   /*implemented for the bouncing ball*/
 
 
-
-  //  computeJachq(time);
+  computeJachq(t);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 

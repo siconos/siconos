@@ -217,6 +217,9 @@ void TimeStepping::updateIndexSet(unsigned int i)
           y = ur0->getYRef(i - 1);
           yDot = ur0->getYRef(1);
           y += 0.5 * h * yDot;
+
+          assert(!isnan(y));
+
         }
         else
           y = -1;
