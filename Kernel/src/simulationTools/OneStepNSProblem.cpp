@@ -88,8 +88,8 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const string& newNumericsSolverName):
-  _numerics_solver_name(newNumericsSolverName), /*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const int newNumericsSolverId):
+  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
 
   // Numerics general options
@@ -97,11 +97,23 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->solverId = newNumericsSolverId;
   printf("OneStepNSProblem::OneStepNSProblem 2: Depressed inertface, first parameter ignored, removed it.\n");
 }
 
-OneStepNSProblem::OneStepNSProblem(const string& newId, const string& newNumericsSolverName):
-  _numerics_solver_name(newNumericsSolverName),  _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSolverId):
+  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+{
+
+  // Numerics general options
+  _numerics_options.reset(new NumericsOptions());
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
+
+  _numerics_solver_options.reset(new SolverOptions);
+
+}
+OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
+  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
 
   // Numerics general options

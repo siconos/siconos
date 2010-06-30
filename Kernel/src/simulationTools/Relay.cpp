@@ -30,15 +30,12 @@ using namespace std;
 using namespace RELATION;
 
 
-Relay::Relay(const std::string& newNumericsSolverName , const std::string& newId):
-  LinearOSNS(newNumericsSolverName, "Relay", newId)
+Relay::Relay(const int newNumericsSolverId , const std::string& newId):
+  LinearOSNS(newNumericsSolverId, "Relay", newId)
 {
   _numerics_problem.reset(new  RelayProblem);
 
-  size_t size = _numerics_solver_name.size() + 1;
-  char * solvername = new char[ size ];
-  strncpy(solvername, _numerics_solver_name.c_str(), size);
-  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
+  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, newNumericsSolverId);
 
 
 };

@@ -107,7 +107,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Relay(const std::string& newNumericsSolverName = "Lemke", const std::string& newId = "unamed_relay");
+  Relay(const int newNumericsSolverId = SICONOS_RELAY_LEMKE, const std::string& newId = "unamed_relay");
 
   /** destructor
    */

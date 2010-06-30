@@ -78,6 +78,9 @@ protected:
   /**vector e*/
   SP::SiconosVector _e;
 
+  /**vector of contact forces*/
+  SP::SimpleVector _contactForce;
+
   /*updated in UR*/
   SP::SiconosMatrix _jachqT;
 
@@ -278,6 +281,11 @@ public:
   virtual SP::SiconosMatrix B() const
   {
     return jacglambda();
+  }
+
+  SP::SimpleVector contactForce()
+  {
+    return _contactForce;
   }
 
   /** main relation members display

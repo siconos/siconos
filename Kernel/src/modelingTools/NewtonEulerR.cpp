@@ -77,6 +77,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
   data[p1].reset(new BlockVector());
   data[p2].reset(new BlockVector());
   SP::NewtonEulerDS lds;
+  int sizeForAllxInDs = 0;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     Type::Siconos type = Type::value(**it);
@@ -93,7 +94,10 @@ void NewtonEulerR::initialize(SP::Interaction inter)
     data[p1]->insertPtr(lds->p(1));
     data[p2]->insertPtr(lds->p(2));
     data[z]->insertPtr(lds->z());
+    sizeForAllxInDs += lds->p(1)->size();
   }
+  _contactForce.reset(new SimpleVector(sizeForAllxInDs));
+  _contactForce->zero();
 }
 
 
@@ -161,8 +165,9 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
-  //    cout<<"xxxxx NewtonEulerR: computeInput lambda: ";
-  //    lambda->display();
-  // data[name] += trans(G) * lambda
+
+  prod(*lambda, *_jachqT, *_contactForce, true);
+  /*data is a pointer of memory associated to a dynamical system*/
+  /** false because it consists in doing a sum*/
   prod(*lambda, *_jachqT, *data[p0 + level], false);
 }

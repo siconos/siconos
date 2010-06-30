@@ -92,7 +92,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  LCP(const std::string& newNewNumericsSolverName = SICONOS_LCP_DEFAULT_SOLVER,
+  LCP(const int newNewNumericsSolverId = SICONOS_LCP_LEMKE,
       const std::string& newId = "unamed_lcp");
 
   /** destructor

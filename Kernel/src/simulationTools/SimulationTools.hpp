@@ -34,6 +34,7 @@ Note that not all files from the current location are listed below, since some o
 #include "LCP.hpp"
 #include "MLCP.hpp"
 #include "MLCP2.hpp"
+#include "GenericMechanical.hpp"
 //#include "mlcpDefaultSolver.hpp"
 #include "QP.hpp"
 #include "Lsodar.hpp"

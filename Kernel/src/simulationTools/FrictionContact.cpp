@@ -28,19 +28,19 @@ using namespace std;
 using namespace RELATION;
 
 
-FrictionContact::FrictionContact(int dimPb, const std::string& newNumericsSolverName,
+FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
                                  const std::string& newId):
-  LinearOSNS(newNumericsSolverName, "FrictionContact", newId), _contactProblemDim(dimPb)
+  LinearOSNS(newNumericsSolverId, "FrictionContact", newId), _contactProblemDim(dimPb)
 {
+  if (dimPb == 2 && newNumericsSolverId == SICONOS_FRICTION_3D_NSGS)
+    _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
   _numerics_problem.reset(new  FrictionContactProblem);
 
-  size_t size = _numerics_solver_name.size() + 1;
-  char * solvername = new char[ size ];
-  strncpy(solvername, _numerics_solver_name.c_str(), size);
+
   if (dimPb == 2)
-    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else if (dimPb == 3)
-    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else
     RuntimeException::selfThrow("cannot set defaults solver options for other problem dimension than 2 or 3");
 }
@@ -53,9 +53,9 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 
 
   if (osNsPbXml->hasNumericsSolverName())
-    _numerics_solver_name = osNsPbXml->getNumericsSolverName();
+    _numerics_solver_id = nameToId((char *)osNsPbXml->getNumericsSolverName().c_str());
   else
-    _numerics_solver_name = SICONOS_FRICTION_CONTACT_DEFAULT_SOLVER;
+    _numerics_solver_id = SICONOS_FRICTION_3D_NSGS;
 
   _numerics_problem.reset(new  FrictionContactProblem);
 
@@ -64,16 +64,15 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
     RuntimeException::selfThrow("FrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
 
   _contactProblemDim = xmlFC->getProblemDim();
+  if (_contactProblemDim == 2 && _numerics_solver_id == SICONOS_FRICTION_3D_NSGS) _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
 
   // initialize the _numerics_solver_options
-  size_t size = _numerics_solver_name.size() + 1;
-  char * solvername = new char[ size ];
-  strncpy(solvername, _numerics_solver_name.c_str(), size);
+
 
   if (_contactProblemDim == 2)
-    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else // if(_contactProblemDim == 3)
-    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
 
 }
 

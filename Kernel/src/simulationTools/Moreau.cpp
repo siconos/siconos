@@ -1057,6 +1057,7 @@ void Moreau::updateState(unsigned int level)
 
       // To compute v, we solve W(v - vfree) = p
       *v = *d->p(level); // v = p
+
       W->PLUForwardBackwardInPlace(*v);
       *v +=  * ds->workFree();
 

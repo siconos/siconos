@@ -84,11 +84,15 @@ class OneStepNSProblem
 
 protected:
 
-  /** Algorithm/solver name */
-  std::string _numerics_solver_name;
+  /** Algorithm/solver name
+  std::string _numerics_solver_name;*/
 
+  int _numerics_solver_id;
   /** Numerics structure used to solve solver options */
   SP::SolverOptions _numerics_solver_options;
+
+  /** id/name of the problem */
+  std::string _id;
 
 
 
@@ -97,8 +101,6 @@ protected:
   /** type of the OneStepNSProblem (LCP ...) */
   //  std::string _nspbType;
 
-  /** id/name of the problem */
-  std::string _id;
 
   /** size of the problem to solve */
   unsigned int _sizeOutput;
@@ -183,7 +185,7 @@ private:
   OneStepNSProblem& operator=(const OneStepNSProblem&);
 
 public:
-
+  OneStepNSProblem(const int newNumericsSolverId);
   /** depressed xml constructor
    *  \param string: problem type
    *  \param SP::OneStepNSProblemXML : the XML linked-object
@@ -196,14 +198,14 @@ public:
   /** deressed constructor from data
    *  \param string: problem type
    *  \param string : id
-   *  \param string : solvername
+   *  \param int : solver identifier
    */
-  OneStepNSProblem(const std::string&, const std::string&, const std::string&);
+  OneStepNSProblem(const std::string&, const std::string&, const int);
   /**  constructor from data
    *  \param string : id
-   *  \param string : solvername
+   *  \param string : solver identifier
    */
-  OneStepNSProblem(const std::string&, const std::string&);
+  OneStepNSProblem(const std::string&, const int);
   /** destructor
    */
   virtual ~OneStepNSProblem();
@@ -213,18 +215,12 @@ public:
   /** To get the solver algorithm name
     *  \return a string
     */
-  inline const std::string numericsSolverName() const
-  {
-    return _numerics_solver_name;
-  };
+  //inline const std::string numericsSolverName() const {return _numerics_solver_name;};
 
   /** To set the solver algorithm name
    *  \param a string
    */
-  inline void setNumericsSolverName(const std::string& newVal)
-  {
-    _numerics_solver_name = newVal;
-  };
+  // inline void setNumericsSolverName(const std::string& newVal) {_numerics_solver_name = newVal;};
 
   /** To get the SolverOptions structure
    *  \return , the numerics structure used to save solver parameters

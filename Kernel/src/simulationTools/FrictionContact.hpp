@@ -94,7 +94,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  FrictionContact(int dimPb, const std::string& newNumericsSolverName = "NSGS" ,
+  FrictionContact(int dimPb, const int newNumericsSolverId = SICONOS_FRICTION_3D_NSGS ,
                   const std::string& newId = "unamed_friction_contact_problem");
 
   /** destructor

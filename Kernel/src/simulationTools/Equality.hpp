@@ -77,8 +77,8 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Equality(const std::string& newNumericsSolverName = "toto", const std::string& newId = "unamed_equality"):
-    LinearOSNS(newNumericsSolverName, "Equality", newId) {};
+  Equality(const int newNumericsSolverId = 0, const std::string& newId = "unamed_equality"):
+    LinearOSNS(newNumericsSolverId , "Equality", newId) {};
 
   /** destructor
    */

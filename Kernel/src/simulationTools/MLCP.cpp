@@ -30,10 +30,10 @@ MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
   LinearOSNS(onestepnspbxml, "MLCP") {}
 
 // Constructor from a set of data
-MLCP::MLCP(const string& newNumericsSolvername, const string& newId):
-  LinearOSNS(newNumericsSolvername, "MLCP", newId)
+MLCP::MLCP(const int newNumericsSolverId):
+  LinearOSNS(newNumericsSolverId, "MLCP", "unamed")
 {
-  strcpy(_numerics_solver_options->solverName, newNumericsSolvername.c_str());
+  _numerics_solver_options->solverId = newNumericsSolverId;
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
 
   _numerics_problem.blocksLine = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));

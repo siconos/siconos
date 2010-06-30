@@ -26,26 +26,22 @@ LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
 {
 
   if (onestepnspbxml->hasNumericsSolverName())
-    _numerics_solver_name = onestepnspbxml->getNumericsSolverName();
+    _numerics_solver_id = nameToId((char *)onestepnspbxml->getNumericsSolverName().c_str());
   else
-    _numerics_solver_name = SICONOS_LCP_DEFAULT_SOLVER;
+    _numerics_solver_id = SICONOS_LCP_LEMKE;
 
   _numerics_problem.reset(new LinearComplementarityProblem);
-  size_t size = _numerics_solver_name.size() + 1;
-  char * solvername = new char[ size ];
-  strncpy(solvername, _numerics_solver_name.c_str(), size);
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
+
+  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 };
 
-LCP::LCP(const std::string& newNewNumericsSolverName , const std::string& newId):
-  LinearOSNS(newNewNumericsSolverName, "LCP", newId)
+LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
+  LinearOSNS(newNewNumericsSolverId, "LCP", newId)
 {
   _numerics_problem.reset(new  LinearComplementarityProblem);
 
-  size_t size = _numerics_solver_name.size() + 1;
-  char * solvername = new char[ size ];
-  strncpy(solvername, _numerics_solver_name.c_str(), size);
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
+
+  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 
 };
 
@@ -70,8 +66,8 @@ int LCP::compute(double time)
     _numerics_problem->q = _q->getArray();
     _numerics_problem->size = _sizeOutput;
     int nbSolvers = 1;
-    const char * name = &*_numerics_solver_options->solverName;
-    if ((strcmp(name , "ENUM") == 0))
+    //const char * name = &*_numerics_solver_options->solverName;
+    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
     {
       lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
 
@@ -82,7 +78,7 @@ int LCP::compute(double time)
     info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
                                         &*_numerics_solver_options, &*_numerics_options);
 
-    if ((strcmp(name , "ENUM") == 0))
+    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
     {
       lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
 

@@ -107,7 +107,7 @@ public:
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP(const std::string& newNewNumericsSolverName = "ENUM", const std::string& = "unamed_mlcp");
+  MLCP(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM);
 
   /** destructor
   */

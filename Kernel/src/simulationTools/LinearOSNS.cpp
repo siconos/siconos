@@ -46,11 +46,15 @@ LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
 }
 
 // Constructor from a set of data
-LinearOSNS::LinearOSNS(const string& numericsSolverName,  const string& name,
+LinearOSNS::LinearOSNS(const int numericsSolverId,  const string& name,
                        const string& newId):
-  OneStepNSProblem(newId, numericsSolverName), _MStorageType(0), _keepLambdaAndYState(false)
+  OneStepNSProblem(newId, numericsSolverId), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
+LinearOSNS::LinearOSNS(const int numericsSolverId,
+                       const std::string& name):
+  OneStepNSProblem(numericsSolverId), _MStorageType(0), _keepLambdaAndYState(false)
+{}
 // Setters
 
 void LinearOSNS::setW(const SiconosVector& newValue)
