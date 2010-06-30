@@ -207,8 +207,8 @@ int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* option
   {
     printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
-  strcpy(options->solverName, "NSGS_SBM");
 
+  options->solverId = SICONOS_LCP_NSGS_SBM;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;

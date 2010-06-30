@@ -558,8 +558,8 @@ int frictionContact2D_latin_setDefaultSolverOptions(SolverOptions *options)
     printf("Set the Default SolverOptions for the Latin Solver\n");
   }
 
-  strcpy(options->solverName, "Latin");
-
+  /*  strcpy(options->solverName,"Latin");*/
+  options->solverId = SICONOS_FRICTION_2D_LATIN;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

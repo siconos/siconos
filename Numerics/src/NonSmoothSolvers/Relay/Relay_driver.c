@@ -26,6 +26,13 @@
 #endif
 #include <time.h>
 
+char  SICONOS_RELAY_PGS_STR[] = "RELAY_PGS";
+char  SICONOS_RELAY_PATH_STR[] = "RELAY_PATH";
+char  SICONOS_RELAY_ENUM_STR[] = "RELAY_ENUM";
+char  SICONOS_RELAY_NLGS_STR[] = "RELAY_NLGS";
+char  SICONOS_RELAY_LEMKE_STR[] = "RELAY_LEMKE";
+char  SICONOS_RELAY_LATIN_STR[] = "RELAY_LATIN";
+
 int relay_driver(RelayProblem* problem, double *z , double *w,
                  SolverOptions* options, NumericsOptions* global_options)
 {
@@ -64,18 +71,24 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     printSolverOptions(options);
 
   /* Solver name */
-  char * name = options->solverName;
+  //char * name = options->solverName;
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", idToName(options->solverId));
 
-  /****** NLGS algorithm ******/
-  if (strcmp(name , "PGS") == 0)
+  switch (options->solverId)
+  {
+  case SICONOS_RELAY_PGS:
+  {
     relay_pgs(problem, z , w , &info , options);
-
-  else if (strcmp(name , "NLGS") == 0)
+    break;
+  }
+  case SICONOS_RELAY_NLGS:
+  {
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
-  else if ((strcmp(name , "Lemke") == 0))
+    break;
+  }
+  case SICONOS_RELAY_LEMKE:
   {
 
     char filename[20] = "relay_simple.dat";
@@ -84,20 +97,24 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_printInFile(problem, FP);
     fclose(FP);
     relay_lexicolemke(problem, z , w , &info , options, global_options);
+    break;
   }
-  else if ((strcmp(name , "ENUM") == 0))
+  case SICONOS_RELAY_ENUM:
   {
     relay_enum(problem, z , w , &info , options, global_options);
+    break;
   }
-  else if (strcmp(name , "PATH") == 0)
+  case SICONOS_RELAY_PATH:
   {
     relay_path(problem, z , w , &info , options);
+    break;
   }
   /*error */
-  else
+  default:
   {
-    fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", name);
+    fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", idToName(options->solverId));
     exit(EXIT_FAILURE);
+  }
   }
   if (options[0].filterOn > 0)
     info = relay_compute_error(problem, z, w, options[0].dparam[0], &(options[0].dparam[1]));

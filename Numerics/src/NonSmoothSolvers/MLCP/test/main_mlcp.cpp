@@ -224,7 +224,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     solTozw(n, m, z, w, sol);
     printf("TRY SOLVER %s\n", "ENUM");
-    strcpy(mlcpOptions.solverName, "ENUM");
+    mlcpOptions.solverId = SICONOS_MLCP_ENUM;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     //    mlcpOptions.iSize=1;
     //    mlcpOptions.dSize=1;
@@ -259,7 +259,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     printf("TRY SOLVER %s\n", "PGS");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "PGS");
+    mlcpOptions.solverId = SICONOS_MLCP_PGS;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
     mlcpOptions.dparam[0] = tol2;
@@ -292,7 +292,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 
     printf("TRY SOLVER %s\n", "EX PGS");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "PGS");
+    mlcpOptions.solverId = SICONOS_MLCP_PGS;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
     mlcpOptions.dparam[0] = tol2;
@@ -322,7 +322,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     printf("TRY SOLVER %s\n", "RPGS");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "RPGS");
+    mlcpOptions.solverId = SICONOS_MLCP_RPGS;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.dparam[0] = tol2;
     mlcpOptions.dparam[2] = 0.5; /*rho*/
@@ -361,7 +361,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       ohmega += 0.5;
 
       solTozw(n, m, z, w, sol);
-      strcpy(mlcpOptions.solverName, "PSOR");
+      mlcpOptions.solverId = SICONOS_MLCP_PSOR;
       mlcpOptions.dparam[0] = tol2;
       mlcpOptions.dparam[2] = ohmega;
       mlcp_driver_init(problem, &mlcpOptions);
@@ -392,7 +392,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     printf("TRY SOLVER %s\n", "RPSOR");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "RPSOR");
+    mlcpOptions.solverId = SICONOS_MLCP_RPSOR;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.dparam[0] = tol2;
     mlcpOptions.dparam[2] = 0.5; /*rho*/
@@ -424,7 +424,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     printf("TRY SOLVER %s\n", "PATH");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "PATH");
+    mlcpOptions.solverId = SICONOS_MLCP_PATH;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcp_driver_init(problem, &mlcpOptions);
 
@@ -460,7 +460,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 
 
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "SIMPLEX");
+    mlcpOptions.solverId = SICONOS_MLCP_SIMPLEX;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.iparam[0] = 1000000;
     mlcpOptions.iparam[1] = 1;
@@ -499,7 +499,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   {
     printf("TRY SOLVER %s\n", "DIRECT_ENUM");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "DIRECT_ENUM");
+    mlcpOptions.solverId = SICONOS_MLCP_DIRECT_ENUM;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.dparam[0] = 1e-12;
     mlcp_driver_init(problem, &mlcpOptions);
@@ -544,7 +544,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 
     printf("TRY SOLVER %s\n", "FB");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "FB");
+    mlcpOptions.solverId = SICONOS_MLCP_FB;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.dparam[0] = 1e-10;
     mlcpOptions.dparam[1] = 0;
@@ -582,7 +582,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 
     printf("TRY SOLVER %s\n", "DIRECT_FB");
     solTozw(n, m, z, w, sol);
-    strcpy(mlcpOptions.solverName, "DIRECT_FB");
+    mlcpOptions.solverId = SICONOS_MLCP_DIRECT_FB;
     mixedLinearComplementarity_setDefaultSolverOptions(problem, &mlcpOptions);
     mlcpOptions.iparam[0] = 500;
     mlcpOptions.iparam[1] = 0;

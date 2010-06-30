@@ -31,9 +31,9 @@ int main(void)
 
   FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-16;
-  strcpy(options->internalSolvers->solverName, "NCPGlockerFBFixedPoint");
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint;
   options->internalSolvers->iparam[0] = 10;
   options->internalSolvers->dparam[0] = 0.0;
 

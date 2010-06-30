@@ -35,7 +35,7 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  primalFrictionContact3D_setDefaultSolverOptions(options, "NSGS_WR");
+  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_NSGS_WR);
 
 
   info = primalFrictionContact_test_function(finput, options);

@@ -140,8 +140,8 @@ int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "PGS");
-
+  /*  strcpy(options->solverName,"PGS");*/
+  options->solverId = SICONOS_LCP_PGS;
   options->numberOfInternalSolvers = 0;
   options->internalSolvers = NULL;
   options->isSet = 1;

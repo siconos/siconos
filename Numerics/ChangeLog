@@ -21,6 +21,9 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
+
+2010-07-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* NonSmoothSolvers replace solverNmae by solverId.
 	
 --------------------------------------------------------------------------------
   v3.0.0 - (current release)

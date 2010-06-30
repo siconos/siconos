@@ -55,24 +55,24 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
    *  2 - Call specific solver (if no trivial sol.)
    *************************************************/
 
-  /* Solver name */
-  char * name = options->solverName;
+  /* Solver name
+  char * name = options->solverName;*/
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", idToName(options->solverId));
 
   /****** NLGS algorithm ******/
-  if (strcmp(name , "NLGS") == 0)
+  if (options->solverId == SICONOS_RELAY_NLGS)
     dr_nlgs(problem, z , w , &info , options);
 
   /****** Latin algorithm ******/
-  else if (strcmp(name , "Latin") == 0)
+  else if (options->solverId == SICONOS_RELAY_LATIN)
     dr_latin(problem, z , w , &info , options);
 
   /*error */
   else
   {
-    fprintf(stderr, "dr_driver error: unknown solver named: %s\n", name);
+    fprintf(stderr, "dr_driver error: unknown solver named: %s\n", idToName(options->solverId));
     exit(EXIT_FAILURE);
   }
 

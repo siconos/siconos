@@ -263,8 +263,8 @@ int linearComplementarity_newton_FB_setDefaultSolverOptions(SolverOptions* optio
   }
 
 
-  strcpy(options->solverName, "NewtonFB");
 
+  options->solverId = SICONOS_LCP_NEWTONFB;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

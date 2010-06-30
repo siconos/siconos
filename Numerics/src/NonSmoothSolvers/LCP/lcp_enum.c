@@ -246,8 +246,8 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
     printf("Set the Default SolverOptions for the ENUM Solver\n");
   }
 
-  strcpy(options->solverName, "ENUM");
 
+  options->solverId = SICONOS_LCP_ENUM;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

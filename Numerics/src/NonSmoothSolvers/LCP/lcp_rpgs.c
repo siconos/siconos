@@ -223,8 +223,8 @@ int linearComplementarity_rpgs_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "RPGS");
-
+  /*  strcpy(options->solverName,"RPGS");*/
+  options->solverId = SICONOS_LCP_RPGS;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

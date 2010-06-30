@@ -22,7 +22,7 @@
 #include "relay_test_function.h"
 
 
-int relay_test_function(FILE * f, char * solvername)
+int relay_test_function(FILE * f, int  solverId)
 {
 
   int i, info = 0 ;
@@ -41,7 +41,7 @@ int relay_test_function(FILE * f, char * solvername)
 
   SolverOptions * options = malloc(sizeof(SolverOptions));
 
-  relay_setDefaultSolverOptions(problem, options, solvername);
+  relay_setDefaultSolverOptions(problem, options, solverId);
 
   int maxIter = 50000;
   double tolerance = 1e-8;

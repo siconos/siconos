@@ -124,8 +124,8 @@ int relay_path_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the PATH Solver\n");
   }
-  strcpy(options->solverName, "PATH");
-
+  /*  strcpy(options->solverName,"PATH");*/
+  options->solverId = SICONOS_RELAY_PATH;
   options->numberOfInternalSolvers = 0;
   options->internalSolvers = NULL;
   options->isSet = 1;

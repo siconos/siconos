@@ -46,25 +46,25 @@ int test_Series_nsgs(FrictionContactProblem* problem,
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
 
-  strcpy(numerics_solver_options.solverName, "NSGS");
+  (numerics_solver_options.solverId = SICONOS_FRICTION_3D_NSGS;
 
-  numerics_solver_options.iSize = 5;
-  numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
-  numerics_solver_options.dSize = 5;
-  numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
+   numerics_solver_options.iSize = 5;
+   numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
+   numerics_solver_options.dSize = 5;
+   numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
 
 
-  int NC = problem->numberOfContacts;
-  double *reaction = (double*)malloc(3 * NC * sizeof(double));
-  double *velocity = (double*)malloc(3 * NC * sizeof(double));
+   int NC = problem->numberOfContacts;
+   double *reaction = (double*)malloc(3 * NC * sizeof(double));
+   double *velocity = (double*)malloc(3 * NC * sizeof(double));
 
-  int nmax ; // Max number of iteration
+   int nmax ; // Max number of iteration
 
-  for (i = 0; i < nLocalSolver; i++)
-  {
-    nmax = 100;
-    // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-    for (int k = 0 ; k < 3 * NC; k++)
+   for (i = 0; i < nLocalSolver; i++)
+{
+  nmax = 100;
+  // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  for (int k = 0 ; k < 3 * NC; k++)
     {
       velocity[k] = 0.0;
       reaction[k] = 0.0;

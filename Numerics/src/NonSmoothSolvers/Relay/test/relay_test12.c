@@ -28,8 +28,8 @@ int main(void)
 
   FILE * finput  =  fopen("./data/relay_deudeu.dat", "r");
 
-  char solvername[10] = "ENUM";
-  info = relay_test_function(finput, solvername);
+  char solvername[20] = "RELAY_ENUM";
+  info = relay_test_function(finput, nameToId(solvername));
 
   fclose(finput);
 

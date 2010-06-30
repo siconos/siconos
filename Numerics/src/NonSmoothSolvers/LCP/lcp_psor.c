@@ -185,8 +185,8 @@ int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "PSOR");
-
+  /*  strcpy(options->solverName,"PSOR");*/
+  options->solverId = SICONOS_LCP_PSOR;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

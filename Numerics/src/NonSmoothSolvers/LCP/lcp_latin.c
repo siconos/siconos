@@ -417,7 +417,8 @@ int linearComplementarity_latin_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the Latin Solver\n");
   }
 
-  strcpy(options->solverName, "Latin");
+
+  options->solverId = SICONOS_LCP_LATIN;
 
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

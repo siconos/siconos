@@ -31,10 +31,10 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGSV");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGSV);
   options->dparam[0] = 1e-5;
   options->iparam[0] = 10000;
-  strcpy(options->internalSolvers->solverName, "ProjectionOnCone_velocity");
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnCone_velocity;
   options->internalSolvers->iparam[0] = 0;
   options->internalSolvers->dparam[0] = 0.0;
 

@@ -62,7 +62,7 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
   */
 
   /* Glocker formulation */
-  if (strcmp(localsolver_options->solverName, "NCPGlockerFBFixedPoint") == 0)
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);

@@ -33,7 +33,7 @@ int main(void)
 
 
   SolverOptions * options = malloc(sizeof(SolverOptions));
-  info = frictionContact2D_setDefaultSolverOptions(options, "NSGS");
+  info = frictionContact2D_setDefaultSolverOptions(options, SICONOS_FRICTION_2D_NSGS);
   options->dparam[0] = 1e-12;
   options->iparam[0] = 5000;
 

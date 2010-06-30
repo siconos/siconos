@@ -31,7 +31,7 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, "GLOBALAC");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBALAC);
   options->dparam[0] = 1e-5;
   options->iparam[0] = 100;
   options->iparam[1] = 1;

@@ -21,6 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+#include "mlcp_cst.h"
+#include "lcp_cst.h"
+#include "relay_cst.h"
+#include "Friction_cst.h"
+
+
 void readSolverOptions(int driverType, SolverOptions* options)
 {
   /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
@@ -43,6 +50,7 @@ void readSolverOptions(int driverType, SolverOptions* options)
   strcat(name, "/include/Siconos/Numerics/");
 
   char buffer[64];
+  char bufferName[64];
   /* Return value for reading */
   int nval;
 
@@ -76,7 +84,8 @@ void readSolverOptions(int driverType, SolverOptions* options)
     fgets(buffer, 64, ficin);
     fgets(buffer, 64, ficin);
     /* Solver name */
-    fgets(options->solverName, 64, ficin);
+    fgets(bufferName , 64, ficin);
+    options->solverId = nameToId(bufferName);
     fgets(buffer, 64, ficin);
     /* iparam */
     nval = fscanf(ficin, "%d%d", &(options->iparam[0]), &(options->iparam[1]));
@@ -117,7 +126,8 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
   else
   {
     printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
-    printf("%sName of the solver\t\t\t\t options->solverName = %s \n", marge, options->solverName);
+    printf("%sId of the solver\t\t\t\t options->solverId = %d \n", marge, options->solverId);
+    printf("%sName of the solver\t\t\t\t options->solverName = %s \n", marge, idToName(options->solverId));
     if (options->iparam != NULL)
     {
       printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
@@ -155,7 +165,7 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
 
 
 
-  printf("%sSee %s documentation for parameters definition)\n", marge, options->solverName);
+  printf("%sSee %s documentation for parameters definition)\n", marge, idToName(options->solverId));
 
   printf("\n");
 
@@ -219,3 +229,284 @@ void deleteSolverOptions(SolverOptions* op)
 
 }
 
+
+
+
+char * idToName(int Id)
+{
+  switch (Id)
+  {
+
+    /*MCLP*/
+  case    SICONOS_MLCP_PGS:
+    return SICONOS_MLCP_PGS_STR;
+  case   SICONOS_MLCP_RPGS:
+    return SICONOS_MLCP_RPGS_STR;
+  case   SICONOS_MLCP_PSOR :
+    return SICONOS_MLCP_PSOR_STR;
+  case   SICONOS_MLCP_RPSOR :
+    return SICONOS_MLCP_RPSOR_STR;
+  case   SICONOS_MLCP_PATH :
+    return SICONOS_MLCP_PATH_STR;
+  case   SICONOS_MLCP_ENUM :
+    return SICONOS_MLCP_ENUM_STR;
+  case   SICONOS_MLCP_SIMPLEX :
+    return SICONOS_MLCP_SIMPLEX_STR;
+  case   SICONOS_MLCP_DIRECT_ENUM :
+    return SICONOS_MLCP_DIRECT_ENUM_STR;
+  case   SICONOS_MLCP_PATH_ENUM :
+    return SICONOS_MLCP_PATH_ENUM_STR;
+  case   SICONOS_MLCP_DIRECT_SIMPLEX :
+    return SICONOS_MLCP_DIRECT_SIMPLEX_STR;
+  case   SICONOS_MLCP_DIRECT_PATH :
+    return SICONOS_MLCP_DIRECT_PATH_STR;
+  case   SICONOS_MLCP_DIRECT_PATH_ENUM :
+    return SICONOS_MLCP_DIRECT_PATH_ENUM_STR;
+  case   SICONOS_MLCP_FB :
+    return SICONOS_MLCP_FB_STR;
+  case   SICONOS_MLCP_DIRECT_FB :
+    return SICONOS_MLCP_DIRECT_FB_STR;
+    /*LCP*/
+  case   SICONOS_LCP_LEMKE:
+    return SICONOS_LCP_LEMKE_STR;
+  case    SICONOS_LCP_NSGS_SBM :
+    return SICONOS_LCP_NSGS_SBM_STR;
+  case    SICONOS_LCP_PGS:
+    return SICONOS_LCP_PGS_STR;
+  case    SICONOS_LCP_CPG :
+    return SICONOS_LCP_CPG_STR;
+  case    SICONOS_LCP_LATIN :
+    return SICONOS_LCP_LATIN_STR;
+  case    SICONOS_LCP_LATIN_W:
+    return SICONOS_LCP_LATIN_W_STR;
+  case    SICONOS_LCP_QP:
+    return SICONOS_LCP_QP_STR;
+  case    SICONOS_LCP_NSQP:
+    return SICONOS_LCP_NSQP_STR;
+  case    SICONOS_LCP_NEWTONMIN:
+    return SICONOS_LCP_NEWTONMIN_STR ;
+  case    SICONOS_LCP_NEWTONFB :
+    return SICONOS_LCP_NEWTONFB_STR;
+  case    SICONOS_LCP_PSOR :
+    return SICONOS_LCP_PSOR_STR;
+  case    SICONOS_LCP_RPGS :
+    return SICONOS_LCP_RPGS_STR;
+  case    SICONOS_LCP_PATH:
+    return SICONOS_LCP_PATH_STR;
+  case     SICONOS_LCP_ENUM :
+    return SICONOS_LCP_ENUM_STR;
+    /*RELAY*/
+  case SICONOS_RELAY_PGS:
+    return SICONOS_RELAY_PGS_STR;
+  case SICONOS_RELAY_ENUM:
+    return SICONOS_RELAY_ENUM_STR;
+  case SICONOS_RELAY_PATH:
+    return SICONOS_RELAY_PATH_STR;
+  case SICONOS_RELAY_LEMKE:
+    return SICONOS_RELAY_LEMKE_STR;
+  case SICONOS_RELAY_NLGS:
+    return SICONOS_RELAY_NLGS_STR;
+  case SICONOS_RELAY_LATIN:
+    SICONOS_RELAY_LATIN_STR;
+    /*FRICTION_2D*/
+  case SICONOS_FRICTION_2D_NSGS:
+    return SICONOS_FRICTION_2D_NSGS_STR;
+  case SICONOS_FRICTION_2D_NLGS:
+    return SICONOS_FRICTION_2D_NLGS_STR;
+  case SICONOS_FRICTION_2D_PGS:
+    return SICONOS_FRICTION_2D_PGS_STR;
+  case SICONOS_FRICTION_2D_CPG:
+    return SICONOS_FRICTION_2D_CPG_STR;
+  case SICONOS_FRICTION_2D_LATIN:
+    return SICONOS_FRICTION_2D_LATIN_STR;
+    /*FRICTION_3D*/
+  case SICONOS_FRICTION_3D_NSGS:
+    return SICONOS_FRICTION_3D_NSGS_STR;
+  case SICONOS_FRICTION_3D_NSGSV:
+    return SICONOS_FRICTION_3D_NSGSV_STR;
+  case SICONOS_FRICTION_3D_PROX:
+    return SICONOS_FRICTION_3D_PROX_STR;
+  case SICONOS_FRICTION_3D_TFP:
+    return SICONOS_FRICTION_3D_TFP_STR;
+  case SICONOS_FRICTION_3D_GLOBALAC:
+    return SICONOS_FRICTION_3D_GLOBALAC_STR;
+  case SICONOS_FRICTION_3D_DSFP:
+    return SICONOS_FRICTION_3D_DSFP_STR;
+  case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint:
+    return SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
+  case SICONOS_FRICTION_3D_AlartCurnierNewton:
+    return SICONOS_FRICTION_3D_AlartCurnierNewton_STR;
+  case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
+    return SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
+  case SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization:
+    return SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR;
+  case SICONOS_FRICTION_3D_ProjectionOnCone:
+    return SICONOS_FRICTION_3D_ProjectionOnCone_STR;
+  case SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration:
+    return SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR;
+  case SICONOS_FRICTION_3D_projectionOnConeWithRegularization:
+    return SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR;
+  case SICONOS_FRICTION_3D_NCPGlockerFBPATH:
+    return SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
+  case SICONOS_FRICTION_3D_projectionOnCylinder:
+    return SICONOS_FRICTION_3D_projectionOnCylinder_STR;
+  case SICONOS_FRICTION_3D_ProjectionOnCone_velocity:
+    return SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR;
+  case SICONOS_FRICTION_3D_PGoC:
+    return SICONOS_FRICTION_3D_PGoC_STR;
+  case SICONOS_FRICTION_3D_DeSaxceFixedPoint:
+    return SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
+    /*3D_PRIMAL*/
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_PROX_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_PROX_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_DSFP_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_DSFP_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_TFP_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_TFP_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS:
+    return SICONOS_FRICTION_3D_PRIMAL_NSGS_STR;
+    /*DEFAULT*/
+  default:
+    return SICONOS_NONAME_STR;
+
+  }
+}
+int nameToId(char * pName)
+{
+  /*MLCP*/
+  if (strcmp(SICONOS_MLCP_PGS_STR, pName) == 0)
+    return SICONOS_MLCP_PGS;
+  else if (strcmp(SICONOS_MLCP_RPGS_STR, pName) == 0)
+    return SICONOS_MLCP_RPGS;
+  else if (strcmp(SICONOS_MLCP_PSOR_STR, pName) == 0)
+    return SICONOS_MLCP_PSOR;
+  else if (strcmp(SICONOS_MLCP_RPSOR_STR, pName) == 0)
+    return SICONOS_MLCP_RPSOR;
+  else if (strcmp(SICONOS_MLCP_PATH_STR, pName) == 0)
+    return SICONOS_MLCP_PATH;
+  else if (strcmp(SICONOS_MLCP_ENUM_STR, pName) == 0)
+    return SICONOS_MLCP_ENUM;
+  else if (strcmp(SICONOS_MLCP_SIMPLEX_STR, pName) == 0)
+    return SICONOS_MLCP_SIMPLEX;
+  else if (strcmp(SICONOS_MLCP_DIRECT_ENUM_STR, pName) == 0)
+    return SICONOS_MLCP_DIRECT_ENUM;
+  else if (strcmp(SICONOS_MLCP_PATH_ENUM_STR, pName) == 0)
+    return SICONOS_MLCP_PATH_ENUM ;
+  else if (strcmp(SICONOS_MLCP_DIRECT_SIMPLEX_STR, pName) == 0)
+    return SICONOS_MLCP_DIRECT_SIMPLEX;
+  else if (strcmp(SICONOS_MLCP_DIRECT_PATH_STR, pName) == 0)
+    return SICONOS_MLCP_DIRECT_PATH;
+  else if (strcmp(SICONOS_MLCP_FB_STR, pName) == 0)
+    return SICONOS_MLCP_FB;
+  else if (strcmp(SICONOS_MLCP_DIRECT_FB_STR, pName) == 0)
+    return SICONOS_MLCP_DIRECT_FB;
+  /*LCP*/
+  else if (strcmp(SICONOS_LCP_LEMKE_STR, pName) == 0)
+    return SICONOS_LCP_LEMKE;
+  else if (strcmp(SICONOS_LCP_NSGS_SBM_STR, pName) == 0)
+    return SICONOS_LCP_NSGS_SBM;
+  else if (strcmp(SICONOS_LCP_PGS_STR, pName) == 0)
+    return SICONOS_LCP_PGS;
+  else if (strcmp(SICONOS_LCP_CPG_STR, pName) == 0)
+    return SICONOS_LCP_CPG;
+  else if (strcmp(SICONOS_LCP_LATIN_STR, pName) == 0)
+    return SICONOS_LCP_LATIN;
+  else if (strcmp(SICONOS_LCP_LATIN_W_STR, pName) == 0)
+    return SICONOS_LCP_LATIN_W;
+  else if (strcmp(SICONOS_LCP_QP_STR, pName) == 0)
+    return SICONOS_LCP_QP;
+  else if (strcmp(SICONOS_LCP_NSQP_STR, pName) == 0)
+    return SICONOS_LCP_NSQP;
+  else if (strcmp(SICONOS_LCP_NEWTONMIN_STR, pName) == 0)
+    return SICONOS_LCP_NEWTONMIN;
+  else if (strcmp(SICONOS_LCP_NEWTONFB_STR, pName) == 0)
+    return SICONOS_LCP_NEWTONFB;
+  else if (strcmp(SICONOS_LCP_PSOR_STR, pName) == 0)
+    return SICONOS_LCP_PSOR;
+  else if (strcmp(SICONOS_LCP_RPGS_STR, pName) == 0)
+    return SICONOS_LCP_RPGS;
+  else if (strcmp(SICONOS_LCP_PATH_STR, pName) == 0)
+    return SICONOS_LCP_PATH;
+  else if (strcmp(SICONOS_LCP_ENUM_STR, pName) == 0)
+    return SICONOS_LCP_ENUM;
+  /*RELAY*/
+  else if (strcmp(SICONOS_RELAY_PGS_STR, pName) == 0)
+    return SICONOS_RELAY_PGS;
+  else if (strcmp(SICONOS_RELAY_ENUM_STR, pName) == 0)
+    return SICONOS_RELAY_ENUM ;
+  else if (strcmp(SICONOS_RELAY_PATH_STR, pName) == 0)
+    return SICONOS_RELAY_PATH ;
+  else if (strcmp(SICONOS_RELAY_LEMKE_STR, pName) == 0)
+    return SICONOS_RELAY_LEMKE;
+  else if (strcmp(SICONOS_RELAY_NLGS_STR, pName) == 0)
+    return SICONOS_RELAY_NLGS;
+  /*FRICTION_2D*/
+  else if (strcmp(SICONOS_FRICTION_2D_NSGS_STR, pName) == 0)
+    return SICONOS_FRICTION_2D_NSGS;
+  else if (strcmp(SICONOS_FRICTION_2D_NLGS_STR, pName) == 0)
+    return SICONOS_FRICTION_2D_NLGS;
+  else if (strcmp(SICONOS_FRICTION_2D_PGS_STR, pName) == 0)
+    return SICONOS_FRICTION_2D_PGS;
+  else if (strcmp(SICONOS_FRICTION_2D_CPG_STR, pName) == 0)
+    return SICONOS_FRICTION_2D_CPG;
+  else if (strcmp(SICONOS_FRICTION_2D_LATIN_STR, pName) == 0)
+    return SICONOS_FRICTION_2D_LATIN;
+  else if (strcmp(SICONOS_RELAY_LATIN_STR, pName) == 0)
+    return SICONOS_RELAY_LATIN;
+  /*FRICTION_3D*/
+  else if (strcmp(SICONOS_FRICTION_3D_NSGS_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_NSGS;
+  else if (strcmp(SICONOS_FRICTION_3D_NSGSV_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_NSGSV;
+  else if (strcmp(SICONOS_FRICTION_3D_PROX_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PROX;
+  else if (strcmp(SICONOS_FRICTION_3D_TFP_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_TFP;
+  else if (strcmp(SICONOS_FRICTION_3D_GLOBALAC_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_GLOBALAC;
+  else if (strcmp(SICONOS_FRICTION_3D_DSFP_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_DSFP;
+  else if (strcmp(SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint;
+  else if (strcmp(SICONOS_FRICTION_3D_AlartCurnierNewton_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_AlartCurnierNewton;
+  else if (strcmp(SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_NCPGlockerFBNewton;
+  else if (strcmp(SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization;
+  else if (strcmp(SICONOS_FRICTION_3D_ProjectionOnCone_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_ProjectionOnCone;
+  else if (strcmp(SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration;
+  else if (strcmp(SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_projectionOnConeWithRegularization;
+  else if (strcmp(SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_NCPGlockerFBPATH;
+  else if (strcmp(SICONOS_FRICTION_3D_projectionOnCylinder_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_projectionOnCylinder;
+  else if (strcmp(SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_ProjectionOnCone_velocity;
+  else if (strcmp(SICONOS_FRICTION_3D_PGoC_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PGoC;
+  else if (strcmp(SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_DeSaxceFixedPoint;
+  /*FRICTION_3D_PRIMAL**/
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_NSGS_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_PROX_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_PROX_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_DSFP_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_DSFP_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_TFP_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_TFP_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGS_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_NSGS;
+  return 0;
+
+}

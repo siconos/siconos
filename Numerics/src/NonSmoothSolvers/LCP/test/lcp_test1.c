@@ -28,8 +28,7 @@ int main(void)
 
   FILE * finput  =  fopen("./data/lcp_mmc.dat", "r");
 
-  char solvername[10] = "PGS";
-  info = lcp_test_function(finput, solvername);
+  info = lcp_test_function(finput, SICONOS_LCP_PGS);
 
   fclose(finput);
 

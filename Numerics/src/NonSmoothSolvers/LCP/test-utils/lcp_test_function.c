@@ -22,37 +22,46 @@
 #include "lcp_test_function.h"
 
 
-void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarityProblem* problem)
+void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
   double lighttolerance = 1e-5;
 
-  if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
+  switch (solverId)
+  {
+  case SICONOS_LCP_PGS:
+  case SICONOS_LCP_CPG:
+  case SICONOS_LCP_LEMKE:
+  case SICONOS_LCP_NEWTONMIN:
   {
     options->iSize = 2;
     options->dSize = 2;
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
+    break;
   }
 
-  else if (strcmp(solvername , "RPGS") == 0)
+
+  case SICONOS_LCP_RPGS:
   {
     options->iSize = 2;
     options->dSize = 3;
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
     options->dparam[2] = 1.0;
+    break;
   }
-  else if (strcmp(solvername , "Latin") == 0)
+  case SICONOS_LCP_LATIN:
   {
     options->iSize = 2;
     options->dSize = 3;
     options->iparam[0] = maxIter;
     options->dparam[0] = lighttolerance;
     options->dparam[2] = 0.3;
+    break;
   }
-  else if (strcmp(solvername , "Latin_w") == 0)
+  case SICONOS_LCP_LATIN_W:
   {
     options->iSize = 2;
     options->dSize = 4;
@@ -60,80 +69,104 @@ void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, Lin
     options->dparam[0] = lighttolerance;
     options->dparam[2] = 0.3;
     options->dparam[3] = 1.0;
+    break;
   }
-  else if (strcmp(solvername , "PATH") == 0 || strcmp(solvername , "QP") == 0 || strcmp(solvername , "NSQP") == 0)
+  case SICONOS_LCP_PATH:
+  case SICONOS_LCP_QP:
+  case SICONOS_LCP_NSQP:
   {
     options->iSize = 0;
     options->dSize = 2;
     options->dparam[0] = tolerance;
+    break;
   }
-  else if (strcmp(solvername , "ENUM") == 0)
+  case SICONOS_LCP_ENUM:
   {
     options->iSize = 2;
     options->dSize = 2;
     options->dparam[0] = tolerance;
     options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
     options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+    break;
   }
-  else if (strcmp(solvername , "NewtonFB") == 0)
+  case SICONOS_LCP_NEWTONFB:
   {
     options->iSize = 2;
     options->dSize = 2;
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
-
+    break;
+  }
+  default:
+    ;
   }
 
 
 }
 
 
-void fillParamWithRespectToSolver_SBM(SolverOptions *options, char * solvername, LinearComplementarityProblem* problem)
+void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, LinearComplementarityProblem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
   double lighttolerance = 1e-8;
 
-  if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
+  switch (solverId)
+  {
+  case SICONOS_LCP_PGS:
+  case SICONOS_LCP_CPG:
+  case SICONOS_LCP_LEMKE:
+  case SICONOS_LCP_NEWTONMIN:
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
+    break;
   }
-
-  else if (strcmp(solvername , "RPGS") == 0)
+  case SICONOS_LCP_RPGS:
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
     options->dparam[2] = 1.0;
+    break;
   }
-  else if (strcmp(solvername , "Latin") == 0)
+  case SICONOS_LCP_LATIN :
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = lighttolerance;
     options->dparam[2] = 1.0;
+    break;
   }
-  else if (strcmp(solvername , "Latin_w") == 0)
+  case SICONOS_LCP_LATIN_W:
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = lighttolerance;
     options->dparam[2] = 0.3;
     options->dparam[3] = 1.0;
+    break;
   }
-  else if (strcmp(solvername , "PATH") == 0 || strcmp(solvername , "QP") == 0 || strcmp(solvername , "NSQP") == 0)
+  case SICONOS_LCP_PATH:
+  case SICONOS_LCP_QP:
+  case SICONOS_LCP_NSQP:
   {
     options->dparam[0] = tolerance;
+    break;
   }
-  else if (strcmp(solvername , "ENUM") == 0)
+  case SICONOS_LCP_ENUM:
   {
     options->dparam[0] = tolerance;
     options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
     options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+    break;
   }
-  else if (strcmp(solvername , "NewtonFB") == 0)
+  case SICONOS_LCP_NEWTONFB :
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = tolerance;
+    break;
 
+  }
+  default:
+    ;
   }
 
 
@@ -141,7 +174,7 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, char * solvername,
 
 
 
-int lcp_test_function(FILE * f, char * solvername)
+int lcp_test_function(FILE * f, int solverId)
 {
 
   int i, info = 0 ;
@@ -158,8 +191,8 @@ int lcp_test_function(FILE * f, char * solvername)
   SolverOptions * options ;
   options = malloc(sizeof(*options));
 
-  strcpy(options->solverName, solvername);
-  printf("solverName ==> %s\n", options->solverName);
+  options->solverId = solverId;
+  printf("solverName ==> %s\n", idToName(solverId));
   options->iSize = 10;
   options->dSize = 10;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
@@ -169,7 +202,7 @@ int lcp_test_function(FILE * f, char * solvername)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  fillParamWithRespectToSolver(options, solvername, problem);
+  fillParamWithRespectToSolver(options, solverId, problem);
 
   options->isSet = 1;
   options->filterOn = 1;
@@ -219,7 +252,7 @@ int lcp_test_function(FILE * f, char * solvername)
 
 }
 
-int lcp_test_function_SBM(FILE * f, char * solvername)
+int lcp_test_function_SBM(FILE * f, int solverId)
 {
 
   int i, info = 0 ;
@@ -238,11 +271,11 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 
 
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, "NSGS_SBM");
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
 
-  strcpy(options->internalSolvers->solverName, solvername);
+  options->internalSolvers->solverId = solverId;
 
-  fillParamWithRespectToSolver_SBM(options->internalSolvers, solvername, problem);
+  fillParamWithRespectToSolver_SBM(options->internalSolvers, solverId, problem);
 
 
 

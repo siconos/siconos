@@ -155,8 +155,8 @@ int linearComplementarity_nsqp_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "NSQP");
 
+  options->solverId = SICONOS_LCP_NSQP;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

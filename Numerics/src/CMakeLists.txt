@@ -34,6 +34,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/FrictionContact/test-utils
   NonSmoothSolvers/NCP			
   NonSmoothSolvers/MCP
+  NonSmoothSolvers/GenericMechanical
   NonSmoothTools
   NonSmoothTools/test-utils
   utils)

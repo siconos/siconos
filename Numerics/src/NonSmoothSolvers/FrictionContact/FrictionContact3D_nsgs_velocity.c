@@ -25,12 +25,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "pinv.h"
+#include "Friction_cst.h"
 
 void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, SolverOptions* localsolver_options)
 {
   /** Connect to local solver */
   /* Projection */
-  if (strcmp(localsolver_options->solverName, "ProjectionOnCone_velocity") == 0)
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_ProjectionOnCone_velocity)
   {
     *solve = &frictionContact3D_projectionOnCone_velocity_solve;
     *freeSolver = &frictionContact3D_projection_free;
@@ -39,7 +40,7 @@ void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr*
   }
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs_velocity failed. Unknown internal solver : %s.\n", localsolver_options->solverName);
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs_velocity failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
 }
@@ -159,7 +160,7 @@ int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(SolverOptions* optio
     printf("Set the Default SolverOptions for the NSGSV Solver\n");
   }
 
-  strcpy(options->solverName, "NSGSV");
+  options->solverId = SICONOS_FRICTION_3D_NSGSV;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

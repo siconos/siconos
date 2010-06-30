@@ -195,22 +195,8 @@ extern "C"
 #include "mlcp_direct_FB.h"
 #include "mlcp_FB.h"
 
+#include "mlcp_cst.h"
 
-
-#define SICONOS_MLCP_PGS "PGS"
-#define SICONOS_MLCP_RPGS "RPGS"
-#define SICONOS_MLCP_PSOR "PSOR"
-#define SICONOS_MLCP_RPSOR "RPSOR"
-#define SICONOS_MLCP_PATH "PATH"
-#define SICONOS_MLCP_ENUM "ENUM"
-#define SICONOS_MLCP_SIMPLEX "SIMPLEX"
-#define SICONOS_MLCP_DIRECT_ENUM "DIRECT_ENUM"
-#define SICONOS_MLCP_PATH_ENUM "PATH_ENUM"
-#define SICONOS_MLCP_DIRECT_SIMPLEX "DIRECT_SIMPLEX"
-#define SICONOS_MLCP_DIRECT_PATH "DIRECT_PATH"
-#define SICONOS_MLCP_DIRECT_PATH_ENUM "DIRECT_PATH_ENUM"
-#define SICONOS_MLCP_FB "FB"
-#define SICONOS_MLCP_DIRECT_FB "DIRECT_FB"
 
   /** General interface to initialize a solver.\n
       Must be call for the following solvers:\n

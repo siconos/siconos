@@ -26,32 +26,39 @@
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, char *solvername)
+int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   int info = -1;
-  if (strcmp(solvername, "NSGS") == 0)
+  switch (solverId)
+  {
+  case SICONOS_FRICTION_2D_NSGS:
   {
     info =    frictionContact2D_sparse_nsgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PGS") == 0 || strcmp(solvername , "NLGS") == 0)
+  case SICONOS_FRICTION_2D_PGS:
+  case SICONOS_FRICTION_2D_NLGS:
   {
     info =    frictionContact2D_nlgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "CPG") == 0)
+  case SICONOS_FRICTION_2D_CPG:
   {
     info =    frictionContact2D_cpg_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "Latin") == 0)
+  case SICONOS_FRICTION_2D_LATIN:
   {
     info =    frictionContact2D_latin_setDefaultSolverOptions(options);
+    break;
   }
 
-  else
+  default:
   {
     numericsError("frictionContact2D_setDefaultSolverOptions", "Unknown Solver");
 
   }
-
+  }
 
   return info;
 }

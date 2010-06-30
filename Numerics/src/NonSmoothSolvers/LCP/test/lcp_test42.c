@@ -29,7 +29,7 @@ int main(void)
   FILE * finput  =  fopen("./data/lcp_deudeu_block.dat", "r");
 
   char local_solvername[20] = "Lemke";
-  info = lcp_test_function_SBM(finput, local_solvername);
+  info = lcp_test_function_SBM(finput, nameToId(local_solvername));
 
   fclose(finput);
 

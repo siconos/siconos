@@ -63,6 +63,7 @@ LArge Time INcrements solver
 #include "RelayProblem.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
+#include "relay_cst.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -83,9 +84,9 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param SolverOptions * the pointer to options to set
-      \param char * the string which identify the solver
+      \param int the identifier of the solver
   */
-  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, char *);
+  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int);
 
 
   /** relay_nlgs is a projected Gauss-Seidel solver for relay problems.\n

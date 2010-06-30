@@ -28,8 +28,8 @@ int main(void)
 
   FILE * finput  =  fopen("./data/relay1.dat", "r");
 
-  char solvername[10] = "Lemke";
-  info = relay_test_function(finput, solvername);
+  char solvername[20] = "RELAY_LEMKE";
+  info = relay_test_function(finput, nameToId(solvername));
 
   fclose(finput);
 

@@ -183,22 +183,8 @@ This solver first build a local problem for each row of blocks and then call any
 #include "NumericsOptions.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
-
+#include "lcp_cst.h"
 /* internal at the moment */
-#define SICONOS_LCP_LEMKE "Lemke"
-#define SICONOS_LCP_NSGS_SBM "NSGS_SBM"
-#define SICONOS_LCP_PGS "PGS"
-#define SICONOS_LCP_CPG "CPG"
-#define SICONOS_LCP_LATIN "Latin"
-#define SICONOS_LCP_LATIN_W "Latin_w"
-#define SICONOS_LCP_QP "QP"
-#define SICONOS_LCP_NSQP "NSQP"
-#define SICONOS_LCP_NEWTONMIN "NewtonMin"
-#define SICONOS_LCP_NEWTONFB "NewtonFB"
-#define SICONOS_LCP_PSOR "PSOR"
-#define SICONOS_LCP_RPGS "RPGS"
-#define SICONOS_LCP_PATH "PATH"
-#define SICONOS_LCP_ENUM "ENUM"
 
 #ifdef __cplusplus
 extern "C"
@@ -222,9 +208,9 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param SolverOptions ** the pointer to the array of options to set
-      \param char * the string which identify the solver
+      \param int  the id which identify the solver
   */
-  int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, char *);
+  int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int);
 
 
 

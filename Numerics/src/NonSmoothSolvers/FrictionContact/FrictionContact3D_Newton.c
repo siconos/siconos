@@ -74,7 +74,7 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   */
 
   /* Alart-Curnier formulation */
-  if (strcmp(localsolver_options->solverName, "AlartCurnierNewton") == 0)
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
     Fsize = 3;
     frictionContact3D_AC_initialize(n0, M0, q0, mu0);
@@ -86,7 +86,7 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
 
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBNewton") == 0)
+  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBNewton)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
@@ -113,7 +113,7 @@ void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reacti
   double * dparam = options->dparam;
 
   int info;
-  if (strcmp(options->solverName, "AlartCurnierNewton") == 0)
+  if (options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
     info = AlartCurnierNewton(Fsize, reactionBlock, iparam, dparam);
   }

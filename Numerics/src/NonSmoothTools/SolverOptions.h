@@ -131,7 +131,7 @@ typedef struct _SolverOptions
 {
   int solverId;
   int isSet;
-  char solverName[64] ;
+  /*char solverName[64] ;*/
   int iSize;
   int * iparam;
   int dSize;
@@ -170,6 +170,9 @@ extern "C"
       delete iparam and dparam;
   */
   void deleteSolverOptions(SolverOptions *);
+
+  int nameToId(char * pName);
+  char * idToName(int Id);
 
 #ifdef __cplusplus
 }

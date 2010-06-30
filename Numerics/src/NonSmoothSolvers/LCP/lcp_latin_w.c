@@ -457,8 +457,8 @@ int linearComplementarity_latin_w_setDefaultSolverOptions(SolverOptions* options
     printf("Set the Default SolverOptions for the Latin_w Solver\n");
   }
 
-  strcpy(options->solverName, "Latin_w");
 
+  options->solverId = SICONOS_LCP_LATIN_W;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

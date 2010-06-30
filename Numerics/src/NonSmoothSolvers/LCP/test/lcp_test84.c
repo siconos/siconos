@@ -29,7 +29,7 @@ int main(void)
   FILE * finput  =  fopen("./data/lcp_trivial.dat", "r");
 
   char solvername[10] = "Latin";
-  info = lcp_test_function(finput, solvername);
+  info = lcp_test_function(finput, nameToId(solvername));
 
   fclose(finput);
 

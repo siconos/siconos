@@ -26,39 +26,47 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *solvername)
+int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   int info = -1;
-  if (strcmp(solvername, "NSGS") == 0)
+  switch (solverId)
+  {
+  case SICONOS_FRICTION_3D_NSGS:
   {
     info =    frictionContact3D_nsgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "NSGSV") == 0)
+  case SICONOS_FRICTION_3D_NSGSV:
   {
     info =    frictionContact3D_nsgs_velocity_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PROX") == 0)
+  case SICONOS_FRICTION_3D_PROX:
   {
     info =    frictionContact3D_proximal_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "TFP") == 0)
+  case SICONOS_FRICTION_3D_TFP:
   {
     info =    frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "DSFP") == 0)
+  case SICONOS_FRICTION_3D_DSFP:
   {
     info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "GLOBALAC") == 0)
+  case SICONOS_FRICTION_3D_GLOBALAC:
   {
     info =    frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(options);
+    break;
   }
-  else
+  default:
   {
     numericsError("frictionContact3D_setDefaultSolverOptions", "Unknown Solver");
 
   }
-
+  }
 
   return info;
 }

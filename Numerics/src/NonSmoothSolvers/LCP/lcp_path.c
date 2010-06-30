@@ -110,8 +110,8 @@ int linearComplementarity_path_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "PATH");
-
+  /* strcpy(options->solverName,"PATH");*/
+  options->solverId = SICONOS_LCP_PATH;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

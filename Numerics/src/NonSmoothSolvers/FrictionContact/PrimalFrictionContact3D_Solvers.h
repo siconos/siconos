@@ -46,7 +46,7 @@ For each solver, the input argument are:
 #include "PrimalFrictionContactProblem.h"
 #include "NumericsOptions.h"
 #include "SolverOptions.h"
-
+#include "Friction_cst.h"
 
 typedef void (*SolverPrimalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverPrimalPtr)(int, double*);
@@ -72,9 +72,9 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for PrimalFrictionContact3D
       \param SolverOptions ** the pointer to the array of options to set
-      \param char * the string which identify the solver
+      \param int identifier of the solver
   */
-  int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, char * solverName);
+  int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem

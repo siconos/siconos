@@ -27,87 +27,181 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
+#include "mlcp_cst.h"
+
+char  SICONOS_NONAME_STR[] = "NONAME";
+char  SICONOS_MLCP_PGS_STR[] = "MLCP_PGS";
+char  SICONOS_MLCP_RPGS_STR[] = "MLCP_RPGS";
+char  SICONOS_MLCP_PSOR_STR[] = "MLCP_PSOR";
+char  SICONOS_MLCP_RPSOR_STR[] = "MLCP_RPSOR";
+char  SICONOS_MLCP_PATH_STR[] = "MLCP_PATH";
+char  SICONOS_MLCP_ENUM_STR[] = "MLCP_ENUM";
+char  SICONOS_MLCP_SIMPLEX_STR[] = "MLCP_SIMPLEX";
+char  SICONOS_MLCP_DIRECT_ENUM_STR[] = "MLCP_DIRECT_ENUM";
+char  SICONOS_MLCP_PATH_ENUM_STR[] = "MLCP_PATH_ENUM";
+char  SICONOS_MLCP_DIRECT_SIMPLEX_STR[] = "MLCP_DIRECT_SIMPLEX";
+char  SICONOS_MLCP_DIRECT_PATH_STR[] = "MLCP_DIRECT_PATH";
+char  SICONOS_MLCP_DIRECT_PATH_ENUM_STR[] = "MLCP_DIRECT_PATH_ENUM";
+char  SICONOS_MLCP_FB_STR[] = "MLCP_FB";
+char  SICONOS_MLCP_DIRECT_FB_STR[] = "MLCP_DIRECT_FB";
+
 
 void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  char * name = options->solverName;
+  //char * name = options->solverName;
 
-  if (strcmp(name , "DIRECT_ENUM") == 0)
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_DIRECT_ENUM :
     mlcp_direct_enum_init(problem, options);
-  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH_ENUM :
     mlcp_direct_path_enum_init(problem, options);
-  else if (strcmp(name , "PATH_ENUM") == 0)
+    break;
+  case SICONOS_MLCP_PATH_ENUM :
     mlcp_path_enum_init(problem, options);
-  else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_SIMPLEX :
     mlcp_direct_simplex_init(problem, options);
-  else if (strcmp(name , "DIRECT_PATH") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH :
     mlcp_direct_path_init(problem, options);
-  else if (strcmp(name , "DIRECT_FB") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_FB :
     mlcp_direct_FB_init(problem, options);
-  else if (strcmp(name , "SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_SIMPLEX :
     mlcp_simplex_init(problem, options);
-  else if (strcmp(name , "FB") == 0)
+    break;
+  case SICONOS_MLCP_FB :
     mlcp_FB_init(problem, options);
+    break;
+  default:
+    ;/*Nothing to do*/
+  }
+
+
 }
 void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  char * name = options->solverName;
-  if (strcmp(name , "DIRECT_ENUM") == 0)
+
+
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_DIRECT_ENUM :
     mlcp_direct_enum_reset();
-  else if (strcmp(name , "PATH_ENUM") == 0)
-    mlcp_path_enum_reset();
-  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH_ENUM :
     mlcp_direct_path_enum_reset();
-  else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_PATH_ENUM :
+    mlcp_path_enum_reset();
+    break;
+  case SICONOS_MLCP_DIRECT_SIMPLEX :
     mlcp_direct_simplex_reset();
-  else if (strcmp(name , "DIRECT_PATH") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH :
     mlcp_direct_path_reset();
-  else if (strcmp(name , "DIRECT_FB") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_FB :
     mlcp_direct_FB_reset();
-  else if (strcmp(name , "SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_SIMPLEX :
     mlcp_simplex_reset();
+    break;
+  case SICONOS_MLCP_FB :
+    mlcp_FB_reset();
+    break;
+  default:
+    ;/*Nothing to do*/
+  }
+
 }
 int mlcp_driver_get_iwork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  char * name = options->solverName;
-  if (strcmp(name , "DIRECT_ENUM") == 0)
+
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_DIRECT_ENUM:
     return  mlcp_direct_enum_getNbIWork(problem, options);
-  else if (strcmp(name , "PATH_ENUM") == 0)
+    break;
+  case SICONOS_MLCP_PATH_ENUM:
     return  mlcp_path_enum_getNbIWork(problem, options);
-  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
-    return  mlcp_direct_path_enum_getNbIWork(problem, options);
-  else if (strcmp(name , "ENUM") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH_ENUM:
+    return mlcp_direct_path_enum_getNbIWork(problem, options);
+    break;
+  case SICONOS_MLCP_ENUM:
     return  mlcp_enum_getNbIWork(problem, options);
-  else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_SIMPLEX:
     return  mlcp_direct_simplex_getNbIWork(problem, options);
-  else if (strcmp(name , "DIRECT_PATH") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH:
     return  mlcp_direct_path_getNbIWork(problem, options);
-  else if (strcmp(name , "FB") == 0)
+    break;
+  case SICONOS_MLCP_FB:
     return  mlcp_FB_getNbIWork(problem, options);
-  else if (strcmp(name , "DIRECT_FB") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_FB:
     return  mlcp_direct_FB_getNbIWork(problem, options);
-  return 0;
+    break;
+  default :
+    return 0;
+  }
 }
 int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  char * name = options->solverName;
-  if (strcmp(name , "DIRECT_ENUM") == 0)
+
+
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_DIRECT_ENUM:
     return  mlcp_direct_enum_getNbDWork(problem, options);
-  else if (strcmp(name , "PATH_ENUM") == 0)
+    break;
+  case SICONOS_MLCP_PATH_ENUM:
     return  mlcp_path_enum_getNbDWork(problem, options);
-  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
-    return  mlcp_direct_path_enum_getNbDWork(problem, options);
-  else if (strcmp(name , "ENUM") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH_ENUM:
+    return mlcp_direct_path_enum_getNbDWork(problem, options);
+    break;
+  case SICONOS_MLCP_ENUM:
     return  mlcp_enum_getNbDWork(problem, options);
-  else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_SIMPLEX:
     return  mlcp_direct_simplex_getNbDWork(problem, options);
-  else if (strcmp(name , "DIRECT_PATH") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_PATH:
     return  mlcp_direct_path_getNbDWork(problem, options);
-  else if (strcmp(name , "FB") == 0)
+    break;
+  case SICONOS_MLCP_FB:
     return  mlcp_FB_getNbDWork(problem, options);
-  else if (strcmp(name , "DIRECT_FB") == 0)
+    break;
+  case SICONOS_MLCP_DIRECT_FB:
     return  mlcp_direct_FB_getNbDWork(problem, options);
-  return 0;
+    break;
+  default :
+    return 0;
+  }
+
+  /* char * name = options->solverName; */
+  /* if (strcmp(name , "DIRECT_ENUM") == 0) */
+  /*   return  mlcp_direct_enum_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "PATH_ENUM") == 0) */
+  /*   return  mlcp_path_enum_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "DIRECT_PATH_ENUM") == 0) */
+  /*   return  mlcp_direct_path_enum_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "ENUM") == 0) */
+  /*   return  mlcp_enum_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "DIRECT_SIMPLEX") == 0) */
+  /*   return  mlcp_direct_simplex_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "DIRECT_PATH") == 0) */
+  /*   return  mlcp_direct_path_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "FB") == 0) */
+  /*   return  mlcp_FB_getNbDWork(problem, options); */
+  /* else if (strcmp(name , "DIRECT_FB") == 0) */
+  /*   return  mlcp_direct_FB_getNbDWork(problem, options); */
+  /* return 0; */
 }
 
 int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options)
@@ -143,7 +237,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
    *************************************************/
 
   /* Solver name */
-  char * name = options->solverName;
+  //  char * name = options->solverName;
 
   /*  if(verbose==1){
     printf(" ========================== Call %s solver ==========================\n", name);
@@ -152,67 +246,81 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
       printf("z[%d]=%.32e\n",i,z[i]);
 
       }*/
-  /****** PGS algorithm ******/
-  if (strcmp(name , SICONOS_MLCP_PGS) == 0)
-    mlcp_pgs(problem, z , w , &info , options);
-
-  /****** RPGS algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_RPGS) == 0)
-    mlcp_rpgs(problem, z , w , &info , options);
-
-  /****** PSOR algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_PSOR) == 0)
-    mlcp_psor(problem, z , w , &info , options);
-
-  /****** RPSOR algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_RPSOR) == 0)
-    mlcp_rpsor(problem, z , w , &info , options);
-
-  /****** PATH algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_PATH) == 0)
-    mlcp_path(problem, z , w , &info , options);
-
-  /****** ENUM algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_ENUM) == 0)
-    mlcp_enum(problem, z , w , &info , options);
-
-  /****** SIMPLEX algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_SIMPLEX) == 0)
-    mlcp_simplex(problem, z , w , &info , options);
-
-  /****** DIRECT ENUM algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_DIRECT_ENUM) == 0)
-    mlcp_direct_enum(problem, z , w , &info , options);
-  else if (strcmp(name , SICONOS_MLCP_PATH_ENUM) == 0)
-    mlcp_path_enum(problem, z , w , &info , options);
-
-  /****** DIRECT SIMPLEX algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_DIRECT_SIMPLEX) == 0)
-    mlcp_direct_simplex(problem, z , w , &info , options);
-
-  /****** DIRECT PATH algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_DIRECT_PATH) == 0)
-    mlcp_direct_path(problem, z , w , &info , options);
-  else if (strcmp(name , SICONOS_MLCP_DIRECT_PATH_ENUM) == 0)
-    mlcp_direct_path_enum(problem, z , w , &info , options);
-
-  /****** FB algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_FB) == 0)
-    mlcp_FB(problem, z , w , &info , options);
-  /****** DIRECT FB algorithm ******/
-  else if (strcmp(name , SICONOS_MLCP_DIRECT_FB) == 0)
-    mlcp_direct_FB(problem, z , w , &info , options);
-  // need a svn add mlcp_GaussSeidel_SBM ...
-  //  else if( strcmp( name , SICONOS_MLCP_MLCP_SBM ) == 0 )
-  //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
-
-  /*error */
-  else
+  switch (options->solverId)
   {
-    fprintf(stderr, "mlcp_driver error: unknown solver named: %s\n", name);
+  case  SICONOS_MLCP_PGS:/****** PGS algorithm ******/
+    mlcp_pgs(problem, z , w , &info , options);
+    break;
+  case SICONOS_MLCP_RPGS:
+    /****** RPGS algorithm ******/
+    mlcp_rpgs(problem, z , w , &info , options);
+    break;
+
+    /****** PSOR algorithm ******/
+  case SICONOS_MLCP_PSOR:
+    mlcp_psor(problem, z , w , &info , options);
+    break;
+
+    /****** RPSOR algorithm ******/
+  case SICONOS_MLCP_RPSOR:
+    mlcp_rpsor(problem, z , w , &info , options);
+    break;
+
+    /****** PATH algorithm ******/
+  case SICONOS_MLCP_PATH:
+    mlcp_path(problem, z , w , &info , options);
+    break;
+
+    /****** ENUM algorithm ******/
+  case  SICONOS_MLCP_ENUM:
+    mlcp_enum(problem, z , w , &info , options);
+    break;
+
+    /****** SIMPLEX algorithm ******/
+  case SICONOS_MLCP_SIMPLEX:
+    mlcp_simplex(problem, z , w , &info , options);
+    break;
+
+    /****** DIRECT ENUM algorithm ******/
+  case SICONOS_MLCP_DIRECT_ENUM:
+    mlcp_direct_enum(problem, z , w , &info , options);
+    break;
+  case SICONOS_MLCP_PATH_ENUM:
+    mlcp_path_enum(problem, z , w , &info , options);
+    break;
+
+    /****** DIRECT SIMPLEX algorithm ******/
+  case SICONOS_MLCP_DIRECT_SIMPLEX:
+    mlcp_direct_simplex(problem, z , w , &info , options);
+    break;
+
+    /****** DIRECT PATH algorithm ******/
+  case SICONOS_MLCP_DIRECT_PATH:
+    mlcp_direct_path(problem, z , w , &info , options);
+    break;
+  case SICONOS_MLCP_DIRECT_PATH_ENUM:
+    mlcp_direct_path_enum(problem, z , w , &info , options);
+    break;
+
+    /****** FB algorithm ******/
+  case SICONOS_MLCP_FB :
+    mlcp_FB(problem, z , w , &info , options);
+    break;
+    /****** DIRECT FB algorithm ******/
+  case  SICONOS_MLCP_DIRECT_FB :
+    mlcp_direct_FB(problem, z , w , &info , options);
+    break;
+    // need a svn add mlcp_GaussSeidel_SBM ...
+    //  else if( strcmp( name , SICONOS_MLCP_MLCP_SBM ) == 0 )
+    //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
+
+    /*error */
+  default:
+  {
+    fprintf(stderr, "mlcp_driver error: unknown solver id: %d\n", options->solverId);
     exit(EXIT_FAILURE);
   }
-
+  }
   return info;
 }
 

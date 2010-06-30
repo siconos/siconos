@@ -138,8 +138,8 @@ int relay_pgs_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the PGS Solver\n");
   }
-  strcpy(options->solverName, "PGS");
-
+  /*  strcpy(options->solverName,"PGS");*/
+  options->solverId = SICONOS_RELAY_PGS;
   options->numberOfInternalSolvers = 0;
   options->internalSolvers = NULL;
   options->isSet = 1;

@@ -249,7 +249,8 @@ int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* opt
   }
 
 
-  strcpy(options->solverName, "Lemke");
+
+  options->solverId = SICONOS_LCP_LEMKE;
 
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

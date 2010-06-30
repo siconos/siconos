@@ -26,70 +26,87 @@
 #include "LCP_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, char *solvername)
+int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int solverId)
 {
 
   int info = -1;
-  if (strcmp(solvername , "NSGS_SBM") == 0)
+  switch (solverId)
+  {
+  case SICONOS_LCP_NSGS_SBM:
   {
     info =    linearComplementarity_nsgs_SBM_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "QP") == 0)
+  case SICONOS_LCP_QP:
   {
     info =    linearComplementarity_qp_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "NSQP") == 0)
+  case SICONOS_LCP_NSQP:
   {
     info =    linearComplementarity_nsqp_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "CPG") == 0)
+  case SICONOS_LCP_CPG:
   {
     info =    linearComplementarity_cpg_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PGS") == 0)
+  case SICONOS_LCP_PGS:
   {
     info =    linearComplementarity_pgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "RPGS") == 0)
+  case SICONOS_LCP_RPGS:
   {
     info =    linearComplementarity_rpgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PSOR") == 0)
+  case SICONOS_LCP_PSOR:
   {
     info =    linearComplementarity_psor_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "Latin") == 0)
+  case SICONOS_LCP_LATIN:
   {
     info =    linearComplementarity_latin_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "Latin_w") == 0)
+  case SICONOS_LCP_LATIN_W:
   {
     info =    linearComplementarity_latin_w_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "LexicoLemke") == 0)
+  case SICONOS_LCP_LEMKE:
   {
     info =    linearComplementarity_lexicolemke_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PATH") == 0)
+  case SICONOS_LCP_PATH:
   {
     info =    linearComplementarity_path_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "ENUM") == 0)
+  case SICONOS_LCP_ENUM:
   {
     info =    linearComplementarity_enum_setDefaultSolverOptions(problem, options);
+    break;
   }
-  else if (strcmp(solvername, "NewtonMin") == 0)
+  case SICONOS_LCP_NEWTONMIN:
   {
     info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "NewtonFB") == 0)
+  case SICONOS_LCP_NEWTONFB:
   {
     info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
+    break;
   }
-  else
+  default:
   {
     numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
+  }
   }
 
 

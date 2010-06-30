@@ -26,32 +26,37 @@
 #include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, char *solvername)
+int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId)
 {
 
   int info = -1;
-  if (strcmp(solvername , "PGS") == 0)
+  switch (solverId)
+  {
+  case SICONOS_RELAY_PGS:
   {
     info =    relay_pgs_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "LexicoLemke") == 0)
+  case SICONOS_RELAY_LEMKE:
   {
     info =    relay_lexicolemke_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "ENUM") == 0)
+  case SICONOS_RELAY_ENUM:
   {
     info =    relay_enum_setDefaultSolverOptions(problem, options);
+    break;
   }
-  else if (strcmp(solvername, "PATH") == 0)
+  case SICONOS_RELAY_PATH:
   {
     info =    relay_path_setDefaultSolverOptions(options);
+    break;
   }
-  else
+  default:
   {
     numericsError("Relay_setDefaultSolverOptions", "Unknown Solver");
-
   }
-
+  }
 
   return info;
 }

@@ -23,6 +23,7 @@
 #include "LA.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "Friction_cst.h"
 
 static FuncEvalPtr F = NULL;
 static JacEvalPtr jacobianF = NULL;
@@ -80,7 +81,7 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   */
 
   /* Glocker formulation */
-  if (strcmp(localsolver_options->solverName, "NCPGlockerFBPATH") == 0)
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);

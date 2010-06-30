@@ -26,6 +26,24 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
+char  SICONOS_FRICTION_3D_NSGS_STR [] = "F3D_NSGS";
+char  SICONOS_FRICTION_3D_NSGSV_STR [] = "F3D_NSGSV";
+char  SICONOS_FRICTION_3D_TFP_STR [] = "F3D_TFP";
+char  SICONOS_FRICTION_3D_GLOBALAC_STR [] = "F3D_GLOBALAC";
+char  SICONOS_FRICTION_3D_DSFP_STR[] = "F3D_DSFP";
+char  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR[] = "F3D_NCPGlockerFBFixedPoint";
+char  SICONOS_FRICTION_3D_AlartCurnierNewton_STR[] = "F3D_AlartCurnierNewton";
+char  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR[] = "F3D_NCPGlockerFBNewton";
+char SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR[] = "F3D_ProjectionOnConeWithDiagonalization";
+char SICONOS_FRICTION_3D_ProjectionOnCone_STR[] = "F3D_ProjectionOnCone";
+char SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR[] = "F3D_ProjectionOnConeWithLocalIteration";
+char SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR[] = "F3D_projectionOnConeWithRegularization";
+char SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR[] = "F3D_NCPGlockerFBPATH";
+char SICONOS_FRICTION_3D_projectionOnCylinder_STR[] = "F3D_projectionOnCylinder";
+char SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR[] = "F3D_ProjectionOnCone_velocity";
+char SICONOS_FRICTION_3D_PGoC_STR[] = "F3D_PGoC";
+char SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR[] = "F3D_DeSaxceFixedPoint";
+char SICONOS_FRICTION_3D_PROX_STR[] = "F3D_PROX";
 int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {
   if (options == NULL || global_options == NULL)
@@ -43,7 +61,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     printSolverOptions(options);
 
   /* Solver name */
-  char * name = options->solverName;
+  /*char * name = options->solverName;*/
 
 
   int info = -1 ;
@@ -52,54 +70,62 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     numericsError("FrictionContact3D_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
-  /* Non Smooth Gauss Seidel (NSGS) */
-  if (strcmp(name, "NSGS") == 0)
+  switch (options->solverId)
+  {
+    /* Non Smooth Gauss Seidel (NSGS) */
+  case SICONOS_FRICTION_3D_NSGS:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
+    break;
   }
-  else if (strcmp(name, "NSGSV") == 0)
+  case SICONOS_FRICTION_3D_NSGSV:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGSV solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs_velocity(problem, reaction , velocity , &info , options);
+    break;
   }
   /* Proximal point algorithm */
-  else if (strcmp(name, "PROX") == 0)
+  case SICONOS_FRICTION_3D_PROX:
   {
     if (verbose == 1)
       printf(" ========================== Call PROX (Proximal Point) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_proximal(problem, reaction , velocity , &info , options);
+    break;
   }
   /* Tresca Fixed point algorithm */
-  else if (strcmp(name, "TFP") == 0)
+  case SICONOS_FRICTION_3D_TFP:
   {
     if (verbose == 1)
       printf(" ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_TrescaFixedPoint(problem, reaction , velocity , &info , options);
+    break;
   }
   /* Projected Gradient algorithm */
-  else if (strcmp(name, "DSFP") == 0)
+  case SICONOS_FRICTION_3D_DSFP:
   {
     if (verbose == 1)
       printf(" ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
+    break;
   }
   /* Global Alart Curnier */
-  else if (strcmp(name, "GLOBALAC") == 0)
+  case SICONOS_FRICTION_3D_GLOBALAC:
   {
     if (verbose == 1)
       printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_GlobalAlartCurnier(problem, reaction , velocity , &info , options);
+    break;
   }
-  else
+  default:
   {
     fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");
     exit(EXIT_FAILURE);
 
   }
-
+  }
   return info;
 
 }

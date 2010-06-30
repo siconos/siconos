@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include "Friction_cst.h"
 
 #define GAMMA frictionContact3D_gamma
 #define FAC frictionContact3D_GlobalAlartCurnierFunction
@@ -561,8 +562,8 @@ int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
     printf("Set the default solver options for the GLOBALAC Solver\n");
   }
 
-  strcpy(options->solverName, "GLOBALAC");
-
+  /*  strcpy(options->solverName,"GLOBALAC");*/
+  options->solverId = SICONOS_FRICTION_3D_GLOBALAC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

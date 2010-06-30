@@ -24,7 +24,11 @@
 #include "NumericsOptions.h"
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
-
+char  SICONOS_FRICTION_2D_NSGS_STR [] = "F2D_NSGS";
+char  SICONOS_FRICTION_2D_NLGS_STR [] = "F2D_NLGS";
+char  SICONOS_FRICTION_2D_PGS_STR [] = "F2D_PGS";
+char  SICONOS_FRICTION_2D_CPG_STR [] = "F2D_CPG";
+char  SICONOS_FRICTION_2D_LATIN_STR [] = "F2D_LATIN";
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
@@ -65,7 +69,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
 
 
   /* Solver name */
-  char * name = options->solverName;
+  /*char * name = options->solverName;*/
 
 
   int info = -1 ;
@@ -79,7 +83,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
   if (problem->M->storageType == 1)
   {
 
-    if (strcmp(name, "NSGS") == 0)
+    if (options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
       if (verbose)
         printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================\n");
@@ -87,38 +91,45 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
     }
     else
     {
-      fprintf(stderr, "FrictionContact2D_driver error: unknown solver named: %s\n", name);
+      fprintf(stderr, "FrictionContact2D_driver error: unknown solver named: %s\n", idToName(options->solverId));
       exit(EXIT_FAILURE);
     }
   }
   else if (problem->M->storageType == 0)
   {
 
-
-    /****** NLGS algorithm ******/
-    if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0 || strcmp(name , "NSGS") == 0)
+    switch (options->solverId)
+    {
+      /****** NLGS algorithm ******/
+    case SICONOS_FRICTION_2D_NLGS:
+    case SICONOS_FRICTION_2D_PGS:
+    case SICONOS_FRICTION_2D_NSGS:
     {
       if (verbose)
         printf(" ========================== Call NLGS solver for Friction-Contact 2D problem ==========================\n");
       FrictionContact2D_nlgs(problem, reaction, velocity, &info, options);
+      break;
     }
     /****** CPG algorithm ******/
-    else if (strcmp(name , "CPG") == 0)
+    case SICONOS_FRICTION_2D_CPG:
     {
       printf(" ========================== Call CPG solver for Friction-Contact 2D problem ==========================\n");
       FrictionContact2D_cpg(problem, reaction, velocity, &info, options);
+      break;
     }
     /****** Latin algorithm ******/
-    else if (strcmp(name , "Latin") == 0)
+    case SICONOS_FRICTION_2D_LATIN:
     {
       printf(" ========================== Call Latin solver for Friction-Contact 2D problem ==========================\n");
       FrictionContact2D_latin(problem, reaction, velocity, &info, options);
+      break;
     }
     /*error */
-    else
+    default:
     {
-      fprintf(stderr, "FrictionContact2D_driver error: unknown solver named: %s\n", name);
+      fprintf(stderr, "FrictionContact2D_driver error: unknown solver named: %s\n", idToName(options->solverId));
       exit(EXIT_FAILURE);
+    }
     }
   }
   else

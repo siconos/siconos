@@ -225,8 +225,8 @@ int linearComplementarity_newton_min_setDefaultSolverOptions(SolverOptions* opti
   }
 
 
-  strcpy(options->solverName, "NewtonMin");
 
+  options->solverId = SICONOS_LCP_NEWTONMIN;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

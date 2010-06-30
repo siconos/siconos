@@ -290,8 +290,8 @@ int frictionContact2D_nlgs_setDefaultSolverOptions(SolverOptions *options)
     printf("Set the Default SolverOptions for the Latin Solver\n");
   }
 
-  strcpy(options->solverName, "NLGS");
-
+  /*  strcpy(options->solverName,"NLGS");*/
+  options->solverId = SICONOS_FRICTION_2D_NLGS;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

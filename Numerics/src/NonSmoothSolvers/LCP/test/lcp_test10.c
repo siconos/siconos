@@ -29,7 +29,7 @@ int main(void)
   FILE * finput  =  fopen("./data/lcp_mmc.dat", "r");
 
   char solvername[10] = "NewtonFB";
-  info = lcp_test_function(finput, solvername);
+  info = lcp_test_function(finput, nameToId(solvername));
 
   fclose(finput);
 

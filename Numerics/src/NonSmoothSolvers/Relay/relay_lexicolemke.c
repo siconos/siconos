@@ -95,7 +95,8 @@ int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the Lemke Solver for Relay\n");
   }
-  strcpy(options->solverName, "Lemke");
+  /*  strcpy(options->solverName,"Lemke");*/
+  options->solverId = SICONOS_RELAY_LEMKE;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;

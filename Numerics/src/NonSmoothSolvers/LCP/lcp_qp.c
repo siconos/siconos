@@ -142,8 +142,8 @@ int linearComplementarity_qp_setDefaultSolverOptions(SolverOptions* options)
   }
 
 
-  strcpy(options->solverName, "QP");
-
+  /*  strcpy(options->solverName,"QP");*/
+  options->solverId = SICONOS_LCP_QP;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

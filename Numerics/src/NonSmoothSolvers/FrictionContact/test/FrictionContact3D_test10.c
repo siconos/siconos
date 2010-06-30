@@ -29,10 +29,10 @@ int main(void)
 
   FILE * finput  =  fopen("./data/Confeti-ex13-4contact-Fc3D-SBM.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-5;
   options->iparam[0] = 10000;
-  strcpy(options->internalSolvers->solverName, "ProjectionOnCone");
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnCone;
   options->internalSolvers->iparam[0] = 0;
   options->internalSolvers->dparam[0] = 0.0;
 

@@ -76,8 +76,8 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
   internalSolverPtr internalsolver;
 
-  if (strcmp(internalsolver_options->solverName, "NSGS") == 0) internalsolver = &frictionContact3D_nsgs;
-  else if (strcmp(internalsolver_options->solverName, "DeSaxceFixedPoint") == 0)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
+  if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) internalsolver = &frictionContact3D_nsgs;
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DeSaxceFixedPoint)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
   else  internalsolver = &frictionContact3D_nsgs;
 
 
@@ -152,8 +152,8 @@ int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the PROX Solver\n");
   }
 
-  strcpy(options->solverName, "PROX");
-
+  /*  strcpy(options->solverName,"PROX");*/
+  options->solverId = SICONOS_FRICTION_3D_PROX;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;

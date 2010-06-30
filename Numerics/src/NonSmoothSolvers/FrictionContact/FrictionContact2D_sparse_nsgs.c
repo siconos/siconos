@@ -235,8 +235,8 @@ int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options
     printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
-  strcpy(options->solverName, "NSGS");
-
+  /*strcpy(options->solverName,"NSGS");*/
+  options->solverId = SICONOS_FRICTION_2D_NSGS;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

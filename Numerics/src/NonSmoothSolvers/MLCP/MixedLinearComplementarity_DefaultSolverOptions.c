@@ -83,69 +83,84 @@ int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarit
 {
   int info = -1;
 
-
-  if (strcmp(pOptions->solverName , "DIRECT_ENUM") == 0)
+  switch (pOptions->solverId)
+  {
+  case SICONOS_MLCP_DIRECT_ENUM:
   {
     info =    mixedLinearComplementarity_directEnum_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "PATH_ENUM") == 0)
+  case SICONOS_MLCP_PATH_ENUM:
   {
     info =    mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "DIRECT_PATH_ENUM") == 0)
+  case  SICONOS_MLCP_DIRECT_PATH_ENUM:
   {
     info =    mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "DIRECT_SIMPLEX") == 0)
+  case SICONOS_MLCP_DIRECT_SIMPLEX:
   {
     info =    mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "DIRECT_PATH") == 0)
+  case SICONOS_MLCP_DIRECT_PATH:
   {
     info =    mixedLinearComplementarity_directPath_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "DIRECT_FB") == 0)
+  case SICONOS_MLCP_DIRECT_FB:
   {
     info =    mixedLinearComplementarity_directFB_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "SIMPLEX") == 0)
+  case SICONOS_MLCP_SIMPLEX:
   {
     info =    mixedLinearComplementarity_simplex_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "PGS") == 0)
+  case SICONOS_MLCP_PGS:
   {
     info =    mixedLinearComplementarity_pgs_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "RPGS") == 0)
+  case SICONOS_MLCP_RPGS:
   {
     info =    mixedLinearComplementarity_rpgs_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "RPSOR") == 0)
+  case SICONOS_MLCP_RPSOR:
   {
     info =    mixedLinearComplementarity_rpsor_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "PATH") == 0)
+  case SICONOS_MLCP_PATH:
   {
     info =    mixedLinearComplementarity_path_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "ENUM") == 0)
+  case SICONOS_MLCP_ENUM:
   {
     info =    mixedLinearComplementarity_enum_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "FB") == 0)
+  case SICONOS_MLCP_FB:
   {
     info =    mixedLinearComplementarity_fb_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else if (strcmp(pOptions->solverName, "PSOR") == 0)
+  case SICONOS_MLCP_PSOR:
   {
     info = mixedLinearComplementarity_psor_setDefaultSolverOptions(problem, pOptions);
+    break;
   }
-  else
+  default:
   {
     numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
-
+  }
   return info;
 }
 

@@ -30,23 +30,23 @@ int main(void)
 
 
 
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGSV");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGSV);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(options, "PROX");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(options, "TFP");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_TFP);
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(options, "DSFP");
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_DSFP);
   printSolverOptions(options);
   deleteSolverOptions(options);
 

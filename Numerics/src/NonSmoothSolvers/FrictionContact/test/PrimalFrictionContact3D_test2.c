@@ -35,9 +35,9 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  primalFrictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_NSGS);
 
-  strcpy(options->internalSolvers->solverName, "ProjectionOnCone");
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_ProjectionOnCone;
   options->internalSolvers->iparam[0] = 0;
   options->internalSolvers->dparam[0] = 0.0;
 

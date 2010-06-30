@@ -28,6 +28,12 @@
 int * Primal_ipiv = NULL;
 int  Primal_MisInverse = 0;
 int  Primal_MisLU = 0;
+char SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR [] = "F3DP_NSGS_WR";
+char SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR_STR [] = "F3DP_NSGSV_WR";
+char SICONOS_FRICTION_3D_PRIMAL_PROX_WR_STR [] = "F3DP_PROX_WR";
+char SICONOS_FRICTION_3D_PRIMAL_DSFP_WR_STR [] = "F3DP_DSFP_WR";
+char SICONOS_FRICTION_3D_PRIMAL_TFP_WR_STR [] = "F3DP_TFP_WR";
+char SICONOS_FRICTION_3D_PRIMAL_NSGS_STR [] = "F3DP_NSGS";
 
 
 int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
@@ -46,7 +52,7 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     printSolverOptions(options);
 
   /* Solver name */
-  char * name = options->solverName;
+  /*  char * name = options->solverName;*/
 
 
   int info = -1 ;
@@ -56,7 +62,9 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
 
 
   /* Non Smooth Gauss Seidel (NSGS) */
-  if (strcmp(name, "NSGS_WR") == 0)
+  switch (options->solverId)
+  {
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -64,9 +72,10 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_nsgs_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
 
   }
-  else if (strcmp(name, "NSGSV_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call NSGSV_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -74,9 +83,9 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_nsgs_velocity_wr(problem, reaction , velocity, globalVelocity, &info, options);
-
+    break;
   }
-  else if (strcmp(name, "PROX_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_PROX_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call PROX_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -84,9 +93,10 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_proximal_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
 
   }
-  else if (strcmp(name, "DSFP_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_DSFP_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call DSFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -94,9 +104,10 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_DeSaxceFixedPoint_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
 
   }
-  else if (strcmp(name, "TFP_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_TFP_WR:
   {
     if (verbose == 1)
       printf(" ========================== Call TFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
@@ -104,23 +115,25 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_TrescaFixedPoint_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
 
   }
-  else if (strcmp(name, "NSGS") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS:
   {
     Primal_ipiv = NULL;
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_nsgs(problem, reaction , velocity, globalVelocity, &info , options);
+    break;
 
   }
-  else
+  default:
   {
     fprintf(stderr, "Numerics, PrimalFrictionContact3D_driver failed. Unknown solver.\n");
     exit(EXIT_FAILURE);
 
   }
-
+  }
 
   return info;
 

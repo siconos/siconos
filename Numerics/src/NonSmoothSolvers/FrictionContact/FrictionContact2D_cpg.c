@@ -307,8 +307,8 @@ int frictionContact2D_cpg_setDefaultSolverOptions(SolverOptions *options)
     printf("Set the Default SolverOptions for the CPG Solver\n");
   }
 
-  strcpy(options->solverName, "CPG");
-
+  /*  strcpy(options->solverName,"CPG");*/
+  options->solverId =  SICONOS_FRICTION_2D_CPG;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

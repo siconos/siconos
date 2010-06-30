@@ -377,7 +377,7 @@ int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
     printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
   }
 
-  strcpy(options->solverName, "NSGS_WR");
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGS_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -434,7 +434,7 @@ int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptio
     printf("Set the Default SolverOptions for the NSGSV_WR Solver\n");
   }
 
-  strcpy(options->solverName, "NSGSV_WR");
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -475,7 +475,7 @@ int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* o
     printf("Set the Default SolverOptions for the PROX_WR Solver\n");
   }
 
-  strcpy(options->solverName, "PROX_WR");
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_PROX_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -514,7 +514,7 @@ int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOpti
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  strcpy(options->solverName, "DSFP_WR");
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_DSFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -554,7 +554,7 @@ int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptio
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  strcpy(options->solverName, "TFP_WR");
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_TFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

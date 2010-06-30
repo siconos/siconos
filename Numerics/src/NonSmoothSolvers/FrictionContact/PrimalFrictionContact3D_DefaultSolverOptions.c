@@ -27,39 +27,48 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *solvername)
+int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   int info = -1;
-  if (strcmp(solvername, "NSGS") == 0)
+  switch (solverId)
+  {
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS:
   {
     info =    frictionContact3D_nsgs_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGS;
+    break;
   }
-  else if (strcmp(solvername, "NSGS_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
   {
     info =    primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "NSGSV_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR:
   {
     info =    primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "PROX_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_PROX_WR:
   {
     info =    primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "DSFP_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_DSFP_WR:
   {
     info =    primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
+    break;
   }
-  else if (strcmp(solvername, "TFP_WR") == 0)
+  case SICONOS_FRICTION_3D_PRIMAL_TFP_WR:
   {
     info =    primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
+    break;
   }
-  else
+  default:
   {
     numericsError("primalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");
 
   }
-
+  }
 
   return info;
 }

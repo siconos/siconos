@@ -48,82 +48,94 @@ void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolv
 
 
   /** Connect to local solver */
-  /* Projection */
-  if (strcmp(localsolver_options->solverName, "ProjectionOnConeWithDiagonalization") == 0)
+  switch (localsolver_options->solverId)
+  {
+    /* Projection */
+  case SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization:
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
+    break;
   }
-  else if (strcmp(localsolver_options->solverName, "ProjectionOnCone") == 0)
+  case SICONOS_FRICTION_3D_ProjectionOnCone:
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
+    break;
   }
-  else if (strcmp(localsolver_options->solverName, "ProjectionOnConeWithLocalIteration") == 0)
+  case SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration:
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
+    break;
   }
-  else if (strcmp(localsolver_options->solverName, "projectionOnConeWithRegularization") == 0)
+  case SICONOS_FRICTION_3D_projectionOnConeWithRegularization:
   {
     *solve = &frictionContact3D_projectionOnCone_with_regularization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize_with_regularization(n, M, q, mu);
+    break;
   }
   /* Newton solver (Alart-Curnier) */
-  else if (strcmp(localsolver_options->solverName, "AlartCurnierNewton") == 0)
+  case SICONOS_FRICTION_3D_AlartCurnierNewton:
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_Newton_initialize(n, M, q, mu, localsolver_options);
+    break;
   }
   /* Newton solver (Glocker-Fischer-Burmeister)*/
-  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBNewton") == 0)
+  case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
     *computeError = &FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
     frictionContact3D_Newton_initialize(n, M, q, mu, localsolver_options);
+    break;
   }
   /* Path solver (Glocker Formulation) */
-  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBPATH") == 0)
+  case SICONOS_FRICTION_3D_NCPGlockerFBPATH:
   {
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;
     *computeError = &FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
     frictionContact3D_Path_initialize(n, M, q, mu, localsolver_options);
+    break;
   }
   /* Fixed Point solver (Glocker Formulation) */
-  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBFixedPoint") == 0)
+  case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint:
   {
     *solve = &frictionContact3D_FixedP_solve;
     *freeSolver = &frictionContact3D_FixedP_free;
     *computeError = &fake_compute_error_nsgs;
     frictionContact3D_FixedP_initialize(n, M, q, mu, localsolver_options);
+    break;
   }
   /*iparam[4] > 10 are reserved for Tresca resolution */
-  else if (strcmp(localsolver_options->solverName, "projectionOnCylinder") == 0)
+  case SICONOS_FRICTION_3D_projectionOnCylinder:
   {
     *solve = &frictionContact3D_projectionOnCylinder_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_Tresca_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
+    break;
   }
 
-  else
+  default:
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown internal solver : %s.\n", localsolver_options->solverName);
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
     exit(EXIT_FAILURE);
+  }
   }
 }
 
@@ -256,8 +268,8 @@ int frictionContact3D_nsgs_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
-  strcpy(options->solverName, "NSGS");
-
+  /*  strcpy(options->solverName,"NSGS");*/
+  options->solverId = SICONOS_FRICTION_3D_NSGS;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;

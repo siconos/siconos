@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <math.h>
 //#define VERBOSE_DEBUG
-
+#include "Friction_cst.h"
 void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -75,14 +75,14 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
   internalsolver_options->dWork = options->dWork;
 
 
-  if (strcmp(internalsolver_options->solverName, "NSGS") == 0)
+  if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS)
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     internalsolver = &frictionContact3D_nsgs;
     internalsolver_options->internalSolvers->dWork = options->dWork;
   }
-  else if (strcmp(internalsolver_options->solverName, "PGoC") == 0)
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_PGoC)
   {
     if (verbose == 1)
       printf(" ========================== Call PGoC solver for Friction-Contact 3D problem ==========================\n");
@@ -144,8 +144,8 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* op
     printf("Set the Default SolverOptions for the TFP Solver\n");
   }
 
-  strcpy(options->solverName, "TFP");
 
+  options->solverId = SICONOS_FRICTION_3D_TFP;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
@@ -172,7 +172,7 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* op
   subsubsolver->iparam[0] = 0;
   subsubsolver->dparam[0] = 0.0;
 
-  strcpy(subsubsolver->solverName, "projectionOnCylinder");
+  subsubsolver->solverId = SICONOS_FRICTION_3D_projectionOnCylinder;
 
   return 0;
 }

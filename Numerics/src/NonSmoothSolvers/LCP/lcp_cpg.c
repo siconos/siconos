@@ -277,8 +277,8 @@ int linearComplementarity_cpg_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the CPG Solver\n");
   }
+  options->solverId = SICONOS_LCP_CPG;
 
-  strcpy(options->solverName, "CPG");
 
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

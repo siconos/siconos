@@ -49,7 +49,7 @@ For each solver, the input argument are:
 #include "FrictionContactProblem.h"
 #include "NumericsOptions.h"
 #include "SolverOptions.h"
-
+#include "Friction_cst.h"
 #ifdef __cplusplus
 extern "C"
 {
@@ -68,9 +68,9 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
       \param SolverOptions * the pointer to the options to set
-      \param char * the string which identify the solver
+      \param int  the identifier of the solver
   */
-  int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, char *solvername);
+  int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
   /**  cpg (conjugated projected gradient) solver for primal contact problems with friction (2D)
        \param[in] problem the friction-contact problem

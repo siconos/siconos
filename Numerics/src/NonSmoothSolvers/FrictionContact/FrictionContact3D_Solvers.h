@@ -51,7 +51,7 @@ For each solver, the input argument are:
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 #include "FrictionContact3D_GlobalAlartCurnier.h"
-
+#include "Friction_cst.h"
 /** pointer to function used to call local solver */
 typedef void (*SolverPtr)(int, int, double*, SolverOptions *);
 
@@ -84,9 +84,9 @@ extern "C"
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
       \param SolverOptions * the pointer to the options to set
-      \param char * the string which identify the solver
+      \param int the identifier of the solver
   */
-  int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *);
+  int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int);
 
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem

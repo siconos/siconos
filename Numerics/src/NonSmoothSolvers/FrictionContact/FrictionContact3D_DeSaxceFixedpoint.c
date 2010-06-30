@@ -162,8 +162,8 @@ int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* o
     printf("Set the Default SolverOptions for the DSFP Solver\n");
   }
 
-  strcpy(options->solverName, "DSFP");
-
+  /*strcpy(options->solverName,"DSFP");*/
+  options->solverId = SICONOS_FRICTION_3D_DSFP;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

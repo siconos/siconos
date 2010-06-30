@@ -57,7 +57,8 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 */
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
-
+#include "mlcp_cst.h"
+#include "lcp_cst.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
@@ -65,9 +66,9 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "PrimalFrictionContact3D_Solvers.h"
+#include "GenericMechanical_Solvers.h"
 
 #include "NonSmoothNewton.h"
-
 
 /** Union of specific methods (one for each type of problem)
     Deprecated. 98

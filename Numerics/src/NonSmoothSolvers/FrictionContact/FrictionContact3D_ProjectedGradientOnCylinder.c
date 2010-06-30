@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "Friction_cst.h"
 
 //#define VERBOSE_DEBUG
 
@@ -265,7 +266,7 @@ int frictionContact3D_ProjectedGradientOnCylinder_setDefaultSolverOptions(Solver
     printf("Set the Default SolverOptions for the PGoC Solver\n");
   }
 
-  strcpy(options->solverName, "PGoC");
+  options->solverId = SICONOS_FRICTION_3D_PGoC;
 
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

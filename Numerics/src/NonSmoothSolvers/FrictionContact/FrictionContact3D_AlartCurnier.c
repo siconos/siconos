@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "Friction_cst.h"
 //#define VERBOSE_DEBUG
 
 //#define OPTI_RHO
@@ -657,7 +658,7 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
     printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
-  strcpy(options->solverName, "AlartCurnierNewton");
+  options->solverId = SICONOS_FRICTION_3D_AlartCurnierNewton;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
