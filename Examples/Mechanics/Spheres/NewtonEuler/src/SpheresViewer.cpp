@@ -187,7 +187,7 @@ void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
 
     SP::Drawing selected_drawing = drawings_[selectedName()];
     SP::DynamicalSystem DS = selected_drawing->getDS();
-    double mass = (ask<NeedMass, SP::SiconosMatrix> (DS))->getValue(0, 0);
+    //double mass = ask<Mass, SP::SiconosMatrix>(*DS);
 
     QPoint pixel;
     qglviewer::Vec orig;
@@ -209,13 +209,10 @@ void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
     coor[1] = m_coor[1];
     coor[2] = m_coor[2];
 
-    // push
-    SP::Siconosvector fext = ask<NeedFext, SP::SiconosVector>(DS);
-    SP::SiconosVector q = ask<Needq, SP::SiconosVector>(DS);
-
-    DS->fExt()->setValue(0, (coor[0] - DS->q()->getValue(0))*mass * 10);
-    DS->fExt()->setValue(1, (coor[1] - DS->q()->getValue(1))*mass * 10);
-    DS->fExt()->setValue(2, (coor[2] - DS->q()->getValue(2))*mass * 10);
+    // toward camera
+    //DS->fExt()->setValue(0,(coor[0]-DS->q()->getValue(0))*mass*10);
+    //DS->fExt()->setValue(1,(coor[1]-DS->q()->getValue(1))*mass*10);
+    //DS->fExt()->setValue(2,(coor[2]-DS->q()->getValue(2))*mass*10);
   }
 
   QGLViewer::mouseMoveEvent(e);
