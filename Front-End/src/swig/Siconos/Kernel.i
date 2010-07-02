@@ -245,7 +245,13 @@ SP_TYPE(BlockVector,SiconosVector)
 %template (InteractionsSet) SiconosSet<Interaction,double*>;
 
 // boost >= 1.40
+%import "boost/version.hpp"
+#if (BOOST_VERSION >= 104000)
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
+#else
+%import "boost/enable_shared_from_this.hpp"
+#endif
+
 %template (sharedModel) boost::enable_shared_from_this<Model>;
 
 SP_TYPE(InteractionsSet,InteractionsSet)
