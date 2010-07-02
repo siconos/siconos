@@ -21,7 +21,7 @@
 
 
 from matplotlib.pyplot import *
-from Kernel import *
+from Siconos.Kernel import *
 from numpy import *
 
 t0 = 0      # start time
