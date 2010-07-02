@@ -232,9 +232,6 @@ SP_TYPE(SiconosBodies,SiconosBodies);
 
 SP_TYPE(SpaceFilter,SpaceFilter)
 SP_TYPE(Hashed,Hashed)
-SP_TYPE(HashedDisk,Hashed)
-SP_TYPE(HashedCircle,Hashed)
-SP_TYPE(HashedSphereLDS,Hashed)
 
 SP_TYPE(SiconosMatrix,SiconosMatrix)
 SP_TYPE(SimpleMatrix,SiconosMatrix)
