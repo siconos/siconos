@@ -30,7 +30,6 @@
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LCP)                                              \
   REGISTER(FrictionContact)                                  \
-  REGISTER(Lmgc2DDSK)                                        \
   REGISTER(SimpleVector)                                     \
   REGISTER(BlockVector)                                      \
   REGISTER(LagrangianDS)                                     \
@@ -49,5 +48,6 @@
   REGISTER(NewtonEulerDS)                                    \
   REGISTER(NewtonEulerR)                                     \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
+  REGISTER_BASE(Lmgc2DDSK, LagrangianDS)                     \
  
 #endif
