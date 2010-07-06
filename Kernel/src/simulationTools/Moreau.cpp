@@ -622,7 +622,6 @@ double Moreau::computeResidu()
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
-
       SP::SiconosMatrix C = d->C();
       if (C)
         prod(-h, *C, *vold, *residuFree, false); // vfree += -h*C*vi
@@ -640,13 +639,14 @@ double Moreau::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = h * (1 - _theta);
+        coeff = -h * (1 - _theta);
         scal(coeff, *Fext, *residuFree, false); // vfree += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = h * _theta;
+        coeff = -h * _theta;
         scal(coeff, *Fext, *residuFree, false); // vfree += h*_theta * fext(ti+1)
       }
+
 
       (* d->workFree()) = *residuFree;
       (* d->workFree()) -= *d->p(2);
@@ -868,7 +868,7 @@ void Moreau::computeFreeState()
 
 
       W->PLUForwardBackwardInPlace(*vfree);
-
+      *vfree *= -1.0;
       *vfree += *vold;
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -922,6 +922,7 @@ void Moreau::computeFreeState()
     else
       RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
+
 }
 
 
