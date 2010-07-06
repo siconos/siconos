@@ -618,6 +618,11 @@ double Moreau::computeResidu()
       residuFree->zero();
       double coeff;
       // -- No need to update W --
+
+      SP::SiconosMatrix M = d->mass();
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+
       SP::SiconosMatrix C = d->C();
       if (C)
         prod(-h, *C, *vold, *residuFree, false); // vfree += -h*C*vi
