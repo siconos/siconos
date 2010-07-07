@@ -52,12 +52,12 @@ public:
     return (_v->getValue(pos));
   };
 
-  inline double getMassValue()
+  inline double getMassValue() const
   {
     return _mass;
   };
 
-  inline double getRadius()
+  inline double getRadius() const
   {
     return radius;
   };
@@ -65,6 +65,7 @@ public:
   /** visitors hook
    */
   ACCEPT_SP_VISITORS();
+  ACCEPT_STD_VISITORS();
 
 };
 

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2010.
+/* Siconos-Example version 3.0.0, Copyright INRIA 2005-2010.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -12,53 +12,50 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth FLOOR, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ *
+ */
+
+/*! \file SphereNEDSSphereNEDSR.h
+  \brief Two spheres relation with the Newton Euler formalism and quaternions.
 */
 
-/*! \file Disk.h
-  \brief Definition of a 2D disk - Inherits from LagrangianDS
-*/
+#ifndef SphereNEDSSphereNEDSR_h
+#define SphereNEDSSphereNEDSR_h
 
-#ifndef Disk_H
-#define Disk_H
+#include "NewtonEulerR.hpp"
 
-#include "CircularDS.hpp"
-
-class Disk : public CircularDS, public boost::enable_shared_from_this<Disk>
+class SphereNEDSSphereNEDSR : public NewtonEulerR,
+  public boost::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:
+  double r1, r2, r1pr2;
 
-  void MassSetup();
-
-protected:
-  Disk();
+  SphereNEDSSphereNEDSR();
 
 public:
 
   /** Constructor
-      \param radius
-      \param mass
-      \param postion vector
-      \param velocity vector
+
+  \param disk1 radius
+  \param disk2 radius
   */
+  SphereNEDSSphereNEDSR(double, double);
 
-  Disk(double, double, SP::SiconosVector, SP::SiconosVector);
+  double distance(double, double, double, double, double, double, double, double);
 
-  /** destructor
-   */
-  ~Disk();
+  void computeh(double);
 
+  void computeJachq(double);
 
   /** visitors hook
    */
-  ACCEPT_SP_VISITORS();
-  ACCEPT_STD_VISITORS();
+  ACCEPT_VISITORS();
 
 };
 
-TYPEDEF_SPTR(Disk);
+TYPEDEF_SPTR(SphereNEDSSphereNEDSR);
 
-#endif /* Disk_H */
-
+#endif /* SphereNEDSSphereNEDSR_h */

@@ -47,6 +47,7 @@
 #include "DiskMovingPlanR.hpp"
 #include "SphereLDS.hpp"
 #include "SphereLDSSphereLDSR.hpp"
+#include "SphereNEDSSphereNEDSR.hpp"
 #include "SphereLDSPlanR.hpp"
 #include "SphereNEDS.hpp"
 #include "SphereNEDSPlanR.hpp"
@@ -156,6 +157,7 @@ protected:
 
   friend class SpaceFilter::_CircularFilter;
   friend class SpaceFilter::_SphereLDSFilter;
+  friend class SpaceFilter::_SphereNEDSFilter;
   friend class SpaceFilter::_BodyHash;
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;

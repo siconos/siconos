@@ -5,14 +5,10 @@
 #define SICONOS_VISITABLES()                                 \
   REGISTER(DynamicalSystem)                                  \
   REGISTER(DynamicalSystemXML)                               \
-  REGISTER(Disk)                                             \
-  REGISTER(Circle)                                           \
   REGISTER(DiskPlanR)                                        \
   REGISTER(DiskMovingPlanR)                                  \
   REGISTER(CircleCircleR)                                    \
   REGISTER(DiskDiskR)                                        \
-  REGISTER(SphereLDS)                                        \
-  REGISTER(SphereNEDS)                                       \
   REGISTER(SphereNEDSPlanR)                                  \
   REGISTER(SphereNEDSSphereNEDSR)                            \
   REGISTER(SphereLDSSphereLDSR)                              \
@@ -49,5 +45,9 @@
   REGISTER(NewtonEulerR)                                     \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
   REGISTER_BASE(Lmgc2DDSK, LagrangianDS)                     \
+  REGISTER_BASE(Disk, LagrangianDS)                          \
+  REGISTER_BASE(Circle, LagrangianDS)                        \
+  REGISTER_BASE(SphereLDS, LagrangianDS)                     \
+  REGISTER_BASE(SphereNEDS, NewtonEulerDS)                   \
  
 #endif

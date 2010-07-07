@@ -341,6 +341,94 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 };
 
 
+struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
+{
+  SP::SpaceFilter parent;
+  SP::SphereNEDS ds1;
+
+  _SphereNEDSFilter(SP::SpaceFilter p, SP::SphereNEDS s) : parent(p), ds1(s) {};
+
+  void visit(SP::SphereNEDS ds2)
+  {
+    SP::SphereNEDSSphereNEDSR rel;
+    SP::DynamicalSystemsGraph DSG0 = parent->_nsds->topology()->dSG(0);
+
+    assert(ds1 != ds2);
+    assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
+    assert(DSG0->bundle(DSG0->descriptor(ds2)) == ds2);
+
+    double r1 = ds1->getRadius();
+    double r2 = ds2->getRadius();
+    double tol = r1 + r2;
+
+    double x1 = ds1->getQ(0);
+    double y1 = ds1->getQ(1);
+    double z1 = ds1->getQ(2);
+    double x2 = ds2->getQ(0);
+    double y2 = ds2->getQ(1);
+    double z2 = ds2->getQ(2);
+    double rmax = fmax(r1, r2);
+    double rmin = fmin(r1, r2);
+
+    double dx = x1 - x2;
+    double dy = y1 - y2;
+    double dz = z1 - z2;
+
+    double d = sqrt(dx * dx + dy * dy + dz * dz);
+
+    if (d < 2 * tol)
+    {
+      rel.reset(new SphereNEDSSphereNEDSR(r1, r2));
+
+      bool found = false;
+      DynamicalSystemsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+           oei != oeiend; ++oei)
+      {
+        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found)
+      {
+        SP::Interaction inter(new Interaction(3,
+                                              parent->_nslaw,
+                                              rel, parent->_interID++));
+        inter->insert(ds1);
+        inter->insert(ds2);
+        parent->_nsds->topology()->insertInteraction(inter);
+      }
+    }
+    else
+    {
+      // is interaction in graph ?
+      bool found = false;
+      DynamicalSystemsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+           oei != oeiend; ++oei)
+      {
+        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        {
+          found = true;
+          break;
+        }
+      }
+
+      if (found)
+      {
+        parent->_nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
+      }
+
+    }
+  }
+};
+
+
+
 /* disk plan relation comparison */
 struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 {
@@ -426,6 +514,11 @@ struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
     parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
   void visit(const SphereLDSSphereLDSR&)
+  {
+    flag = false;
+  };
+
+  void visit(const SphereNEDSSphereNEDSR&)
   {
     flag = false;
   };
@@ -960,7 +1053,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    //    boost::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent,ds1));
+    boost::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -980,7 +1073,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
         {
           // no, check proximity
           declaredInteractions.insert(interpair);
-          //          ds2->acceptSP(sphereFilter);
+          ds2->acceptSP(sphereFilter);
         }
 
       }

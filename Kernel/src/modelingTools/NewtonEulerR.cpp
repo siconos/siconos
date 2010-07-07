@@ -166,7 +166,6 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
-
   prod(*lambda, *_jachqT, *_contactForce, true);
   /*data is a pointer of memory associated to a dynamical system*/
   /** false because it consists in doing a sum*/

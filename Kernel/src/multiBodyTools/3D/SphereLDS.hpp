@@ -52,12 +52,12 @@ public:
     return (*_q[1])(pos);
   };
 
-  inline double getMassValue()
+  inline double getMassValue() const
   {
     return massValue;
   };
 
-  inline double getRadius()
+  inline double getRadius() const
   {
     return radius;
   };
@@ -82,6 +82,7 @@ public:
   /** visitors hook
    */
   ACCEPT_SP_VISITORS();
+  ACCEPT_STD_VISITORS();
 
 };
 

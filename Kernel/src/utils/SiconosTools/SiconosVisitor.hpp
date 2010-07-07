@@ -62,21 +62,21 @@
 /* convenient macros */
 #define SICONOS_VISITOR_QUOTE(M) #M
 
-#define SICONOS_VISITOR_FAIL(X)                                                         \
+#define SICONOS_VISITOR_FAIL(X)                                         \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor)); }
 
 
 /** hook to be inserted in a virtual class definiton */
 #define VIRTUAL_ACCEPT_VISITORS(FROMCLASS)                              \
-  virtual void acceptSP(SP::SiconosVisitor)                               \
+  virtual void acceptSP(SP::SiconosVisitor)                             \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
   virtual void accept(SiconosVisitor&) const = 0;                       \
-  virtual inline Type::Siconos acceptType(FindType& ft) const                  \
+  virtual inline Type::Siconos acceptType(FindType& ft) const           \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
-    return Type::void_type;}            \
+    return Type::void_type;}                                            \
  
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
@@ -86,9 +86,9 @@
 #define ACCEPT_SP_VISITORS()                                            \
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
-#define ACCEPT_VISITORS() \
-  ACCEPT_SP_VISITORS()   \
-  ACCEPT_STD_VISITORS()   \
+#define ACCEPT_VISITORS()                       \
+  ACCEPT_SP_VISITORS()                          \
+  ACCEPT_STD_VISITORS()                         \
  
 
 
@@ -124,11 +124,11 @@ enum Siconos
 
 /* the type visitor */
 #undef REGISTER
-#define REGISTER(X)             \
+#define REGISTER(X)                                                 \
   virtual Type::Siconos visit(const X&) const { return Type::X; };  \
  
 #undef REGISTER_BASE
-#define REGISTER_BASE(X,Y)             \
+#define REGISTER_BASE(X,Y)                                         \
   virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
  
 struct FindType
