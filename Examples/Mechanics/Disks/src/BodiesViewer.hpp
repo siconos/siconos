@@ -61,6 +61,7 @@ DEFINE_SPTR(SelectedBodyDraw);
 #define GETA1(C) C->q()->getValue(3)
 #define GETA2(C) C->q()->getValue(4)
 #define GETA3(C) C->q()->getValue(5)
+#define GETA4(C) C->q()->getValue(6)
 #define GETXFE(C) C->fExt()->getValue(0)
 #define GETYFE(C) C->fExt()->getValue(1)
 #define GETZFE(C) C->fExt()->getValue(2)
@@ -76,6 +77,85 @@ DEFINE_SPTR(SelectedBodyDraw);
 #define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
+#define ANSWER(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = ds . CODE;                         \
+  }
+
+#define ANSWER_V(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = CODE;                              \
+  }
+
+#define ANSWER_F(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = CODE(ds);                          \
+  }
+
+
+struct NeedNdof : public Question<unsigned int>
+{
+  ANSWER_V(Disk, 3);
+  ANSWER_V(Circle, 3);
+  ANSWER_V(SphereLDS, 6);
+  ANSWER_V(SphereNEDS, 6);
+};
+
+
+struct NeedFExt : public Question<SP::SiconosVector>
+{
+
+  ANSWER(Disk, fExt());
+  ANSWER(Circle, fExt());
+  ANSWER(SphereLDS, fExt());
+  ANSWER(SphereNEDS, fExt());
+};
+
+struct Needq : public Question<SP::SiconosVector>
+{
+
+  ANSWER(Disk, q());
+  ANSWER(Circle, q());
+  ANSWER(SphereLDS, q());
+  ANSWER(SphereNEDS, q());
+
+};
+
+
+struct NeedRadius : public Question<double>
+{
+
+  ANSWER(Disk, getRadius());
+  ANSWER(Circle, getRadius());
+  ANSWER(SphereLDS, getRadius());
+  ANSWER(SphereNEDS, getRadius());
+};
+
+struct NeedMassValue : public Question<double>
+{
+  ANSWER(Disk, mass()->getValue(0, 0));
+  ANSWER(Circle, mass()->getValue(0, 0));
+  ANSWER(SphereLDS, mass()->getValue(0, 0));
+  ANSWER(SphereNEDS, massValue());
+};
+
+struct NeedJachq : public Question<SP::SiconosMatrix>
+{
+  ANSWER(LagrangianR, jachq());
+  ANSWER(NewtonEulerR, jachq());
+  ANSWER(DiskDiskR, jachq());
+  ANSWER(DiskPlanR, jachq());
+  ANSWER(DiskMovingPlanR, jachq());
+  ANSWER(SphereLDSPlanR, jachq());
+  ANSWER(SphereNEDSPlanR, jachq());
+  ANSWER(SphereLDSSphereLDSR, jachq());
+  ANSWER(SphereNEDSSphereNEDSR, jachq());
+};
+
+
 /* a drawing of a Siconos Lagrangian DS */
 class Drawing
 {
@@ -83,18 +163,18 @@ class Drawing
 public:
 
   /* construction from a LagrangianDS */
-  Drawing(SP::LagrangianDS D)
+  Drawing(SP::DynamicalSystem D)
   {
     DS_ = D;
     frame_.reset(new qglviewer::ManipulatedFrame());
-    savedFExt_.reset(new SimpleVector(getDS()->getNdof()));
+    savedFExt_.reset(new SimpleVector(ask<NeedNdof>(*getDS())));
     selected_ = false;
   };
 
   ~Drawing() {};
 
   /* pointer to DS */
-  SP::LagrangianDS getDS()
+  SP::DynamicalSystem getDS()
   {
     return DS_;
   };
@@ -110,7 +190,7 @@ public:
   };
 
   /* identifiant */
-  int getID()
+  int getD()
   {
     return id_ ;
   };
@@ -123,11 +203,11 @@ public:
   /* External force set from mouse and restore */
   void saveFExt()
   {
-    *savedFExt_ = *(getDS()->fExt()) ;
+    *savedFExt_ = *(ask<NeedFExt>(*getDS()));
   };
   void restoreFExt()
   {
-    *(getDS()->fExt()) = *savedFExt_;
+    *(ask<NeedFExt>(*getDS())) = *savedFExt_;
   };
 
   /* DS frame */
@@ -141,7 +221,7 @@ protected:
   bool selected_;
   SP::SiconosVector savedFExt_;
   boost::shared_ptr<qglviewer::ManipulatedFrame> frame_;
-  SP::LagrangianDS DS_;
+  SP::DynamicalSystem DS_;
 };
 
 
@@ -178,6 +258,7 @@ public:
   void drawDisk(float x, float y, float a, float r, float *c);
   void rotate(const float R[12]);
   void drawSphere(float x, float y, float z, float theta, float phi, float psi, float r, float *c);
+  void drawSphere(float x, float y, float z, float a, float b, float c, float d, float r, float *color);
 
 
 protected :
@@ -252,6 +333,14 @@ public:
     viewer_->drawings_.push_back(drawing);
   }
 
+  void visit(SP::SphereNEDS d)
+  {
+    SP::Drawing drawing(new Drawing(d));
+    drawing->setID(i_);
+    drawing->saveFExt();
+    viewer_->drawings_.push_back(drawing);
+  }
+
 };
 
 /*
@@ -309,6 +398,22 @@ public:
                         sphere->getRadius(), c);
   }
 
+  void visit(SP::SphereNEDS sphere)
+  {
+    float c[3];
+    c[0] = 1 ;
+    c[1] = .0;
+    c[2] = 0;
+    glLineWidth(2.);
+    viewer_->drawSphere(GETX(sphere),
+                        GETY(sphere),
+                        GETZ(sphere),
+                        GETA1(sphere),
+                        GETA2(sphere),
+                        GETA3(sphere),
+                        GETA4(sphere),
+                        sphere->getRadius(), c);
+  }
 };
 
 
@@ -386,148 +491,27 @@ public:
                        GETZ(sphere) + Cal * GETZFE(sphere), Cal / 10.);
   }
 
-};
 
-class LambdaSecond;
-
-class LambdaFirst : public SiconosVisitor,
-  public boost::enable_shared_from_this<LambdaFirst>
-{
-
-public:
-  SP::LagrangianR relation;
-  float x;
-  float y;
-  float z;
-  float r;
-
-
-  void visit(SP::DiskPlanR rel)
+  void visit(SP::SphereNEDS sphere)
   {
-    relation = rel;
-  }
+    float c[3], dFe, Cal;
+    c[0] = .6 ;
+    c[1] = .1;
+    c[2] = .5;
+    glLineWidth(3.);
+    viewer_->drawSphere(GETX(sphere), GETY(sphere), GETZ(sphere),
+                        GETA1(sphere), GETA2(sphere), GETA3(sphere), GETA4(sphere),
+                        sphere->getRadius(), c);
+    glColor3f(1., 0., 0.);
+    dFe = hypot3d(GETXFE(sphere), GETYFE(sphere), GETZFE(sphere));
+    Cal = log(dFe);
 
-  void visit(SP::CircleCircleR rel)
-  {
-    relation = rel;
+    //    viewer_->drawArrow(GETX(sphere), GETY(sphere), GETZ(sphere),
+    //                       GETX(sphere)+Cal*GETXFE(sphere)/dFe,
+    //                       GETY(sphere)+Cal*GETYFE(sphere)/dFe,
+    //                       GETZ(sphere)+Cal*GETZFE(sphere), Cal/10.);
   }
-
-  void visit(SP::DiskDiskR rel)
-  {
-    relation = rel;
-  }
-
-  void visit(SP::DiskMovingPlanR rel)
-  {
-    relation = rel;
-  }
-
-  void visit(SP::Circle circle)
-  {
-    x = GETX(circle);
-    y = GETY(circle);
-    r = circle->getRadius();
-  }
-
-  void visit(SP::Disk disk)
-  {
-    x = GETX(disk);
-    y = GETY(disk);
-    r = disk->getRadius();
-  }
-
-  void visit(SP::SphereLDS sphere)
-  {
-    x = GETX(sphere);
-    y = GETY(sphere);
-    z = GETZ(sphere);
-    r = sphere->getRadius();
-  }
-
-  void acceptSP(boost::shared_ptr<LambdaSecond>);
 
 };
-
-
-
-class LambdaSecond : public SiconosVisitor
-{
-private:
-  float _w;
-  float x1;
-  float y1;
-  float z1;
-  float r1;
-  SP::LagrangianR relation1;
-  BodiesViewer* viewer_;
-
-public:
-  LambdaSecond(BodiesViewer& viewer, float w) : _w(w)
-  {
-    viewer_ = &viewer;
-  };
-
-  void visit(boost::shared_ptr<LambdaFirst> lambdastart)
-  {
-    x1 = lambdastart->x;
-    y1 = lambdastart->y;
-    z1 = lambdastart->z;
-    r1 = lambdastart->r;
-    relation1 = lambdastart->relation;
-  };
-
-
-  void visit(SP::Circle circle)
-  {
-    float x2 = GETX(circle);
-    float y2 = GETY(circle);
-    float r = circle->getRadius() + r1;
-    float d = hypotf(x1 - x2, y1 - y2);
-
-    glColor3f(.0f, .0f, .0f);
-    viewer_->drawRec(x1, y1, x1 - (x2 - x1)*r / d, y1 - (y2 - y1)*r / d, _w);
-  };
-
-  void visit(SP::Disk disk)
-  {
-
-    float x2 = GETX(disk);
-    float y2 = GETY(disk);
-    float r = disk->getRadius() + r1;
-    float d = hypotf(x1 - x2, y1 - y2);
-
-    glColor3f(.0f, .0f, .0f);
-
-    if (d > 0)
-      viewer_->drawRec(x1, y1, x1 + (x2 - x1)*r / d, y1 + (y2 - y1)*r / d, _w);
-    else
-    {
-      double jx = relation1->jachq()->getValue(0, 0);
-      double jy = relation1->jachq()->getValue(0, 1);
-      double dj = 2 * hypot(jx, jy);
-      viewer_->drawRec(x1, y1, x1 - r * jx / dj, y1 - r * jy / dj, _w);
-    }
-
-  };
-
-  void visit(SP::SphereLDS sphere)
-  {
-
-    float x2 = GETX(sphere);
-    float y2 = GETY(sphere);
-    float z2 = GETZ(sphere);
-    float dx = x1 - x2;
-    float dy = y1 - y2;
-    float dz = z1 - z2;
-    float r = sphere->getRadius() + r1;
-    float d = sqrt(dx * dx + dy * dy + dz * dz);
-
-    glColor3f(.0f, .0f, .0f);
-    viewer_->drawPar(x1, y1, z1, x1 + (x2 - x1)*r / d, y1 + (y2 - y1)*r / d, z1 + (z2 - z1)*r / d, _w);
-
-  };
-
-};
-
 
 #endif

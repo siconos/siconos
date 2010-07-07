@@ -101,17 +101,15 @@ void Spheres::init()
       vTmp.reset(new SimpleVector(6));
       qTmp->zero();
       vTmp->zero();
-      (*vTmp)(0) = 10.;
-
 
       (*qTmp)(0) = (*Spheres)(i, 0);
       (*qTmp)(1) = (*Spheres)(i, 1);
       (*qTmp)(2) = (*Spheres)(i, 2);
 
-      (*qTmp)(3) = 0.25;
-      (*qTmp)(4) = 0.25;
-      (*qTmp)(5) = 0.25;
-      (*qTmp)(6) = 0.25;
+      (*qTmp)(3) = 1.;
+      (*qTmp)(4) = 0.;
+      (*qTmp)(5) = 0.;
+      (*qTmp)(6) = 0.;
 
       SP::SimpleMatrix IMat(new SimpleMatrix(3, 3));
       (*IMat)(0, 0) = (*IMat)(1, 1) = (*IMat)(2, 2) = m * R * R * 2. / 5.;
@@ -170,7 +168,7 @@ void Spheres::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.7, 0, 0.8, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 3));
 
     _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
 

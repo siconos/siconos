@@ -98,6 +98,36 @@ void SpheresViewer::draw()
     }
   }
 
+  float lbd, lbdmax, w;
+
+  SP::UnitaryRelationsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
+
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
+  {
+    interaction = I1->bundle(*ui)->interaction();
+    relation = interaction->relation();
+
+    lbd = interaction->lambdaOld(1)->getValue(0);
+
+    // screen width of interaction
+    w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
+
+    involvedDS = interaction->dynamicalSystems();
+
+    // disk/disk
+    itDS = involvedDS->begin();
+
+    SP::DynamicalSystem d1 = *itDS;
+    SP::DynamicalSystem d2;
+    if (involvedDS->size() == 2)
+      d2 = *++itDS;
+    else
+      d2 = d1;
+
+    /* cf DisksViewer */
+  };
+
   glColor3f(.45, .45, .45);
   glLineWidth(1.);
   drawGrid(100, 200);
@@ -209,10 +239,15 @@ void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
     coor[1] = m_coor[1];
     coor[2] = m_coor[2];
 
-    // toward camera
-    //DS->fExt()->setValue(0,(coor[0]-DS->q()->getValue(0))*mass*10);
-    //DS->fExt()->setValue(1,(coor[1]-DS->q()->getValue(1))*mass*10);
-    //DS->fExt()->setValue(2,(coor[2]-DS->q()->getValue(2))*mass*10);
+    // shoot
+    SP::SiconosVector FExt = ask<NeedFExt>(*DS);
+    SP::SiconosVector q = ask<Needq>(*DS);
+    double mass = ask<NeedMassValue>(*DS);
+
+
+    FExt->setValue(0, (-coor[0] + q->getValue(0))*mass);
+    FExt->setValue(1, (-coor[1] + q->getValue(1))*mass);
+    FExt->setValue(2, (-coor[2] + q->getValue(2))*mass);
   }
 
   QGLViewer::mouseMoveEvent(e);

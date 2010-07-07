@@ -23,8 +23,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-
-using namespace qglviewer;
 using namespace std;
 
 static const int Ne = 64;
@@ -381,6 +379,49 @@ void BodiesViewer::drawSphere(float x, float y, float z, float theta,
   glPopMatrix();
 }
 
+
+
+void BodiesViewer::drawSphere(float x, float y, float z, float a,
+                              float b, float c, float d, float r, float *color)
+{
+
+  float cl[3] = { 0, 0, 0 };
+
+  GLUquadricObj *Sphere = gluNewQuadric();
+  GLUquadricObj *Disk1 = gluNewQuadric();
+  GLUquadricObj *Disk2 = gluNewQuadric();
+
+  GLint slices = 10; // number of slices around z-axis
+  GLint stacks = 10; // number of stacks along z-axis
+  GLint loops = 10; // number of stacks along z-axis
+
+
+  qglviewer::Quaternion q = qglviewer::Quaternion(b, c, d, a);
+
+  glPushMatrix();
+
+  glTranslatef(x, y, z);
+
+  glMultMatrixd(q.matrix());
+
+  glColor3fv(color);
+  gluSphere(Sphere, r, slices, stacks);
+
+  glPushMatrix();
+  glColor3f(.7, .7, .7);
+  glRotatef(90, 0, 1, 0);
+  gluDisk(Disk1, r, 1.1 * r, slices, loops);
+  glPopMatrix();
+
+  glPushMatrix();
+  glColor3f(.7, .7, .7);
+  glRotatef(90, 1, 0, 0);
+  gluDisk(Disk1, r, 1.1 * r, slices, loops);
+  glPopMatrix();
+
+  glPopMatrix();
+}
+
 static int small_text = 7;
 
 // static int big_text=30;
@@ -437,12 +478,6 @@ void BodiesViewer::postSelection(const QPoint& point)
   }
 
 }
-
-void LambdaFirst::acceptSP(boost::shared_ptr<LambdaSecond> l2)
-{
-  l2->visit(shared_from_this());
-};
-
 
 
 #ifdef QT_INTERFACE

@@ -121,53 +121,47 @@ void DisksViewer::draw()
     itDS = involvedDS->begin();
 
     SP::DynamicalSystem d1 = *itDS;
-    SP::DynamicalSystem d2;
+
+    SP::SiconosVector q1 = ask<Needq>(*d1);
+
+    float x1 = (*q1)(0);
+    float y1 = (*q1)(1);
+    float r1 = ask<NeedRadius>(*d1);
+
+
     if (involvedDS->size() == 2)
+    {
+      SP::DynamicalSystem d2;
       d2 = *++itDS;
+      SP::SiconosVector q2 = ask<Needq>(*d2);
+      float x2 = (*q2)(0);
+      float y2 = (*q2)(1);
+      float r2 = ask<NeedRadius>(*d2);
+
+      float d = hypotf(x1 - x2, y1 - y2);
+
+      glPushMatrix();
+
+      glColor3f(.0f, .0f, .0f);
+      drawRec(x1, y1, x1 + (x2 - x1)*r1 / d, y1 + (y2 - y1)*r1 / d, w);
+      drawRec(x2, y2, x2 + (x1 - x2)*r2 / d, y2 + (y1 - y2)*r2 / d, w);
+
+      glPopMatrix();
+    }
+
     else
-      d2 = d1;
+    {
+      SP::SiconosMatrix jachq = ask<NeedJachq>(*relation);
+      double jx = jachq->getValue(0, 0);
+      double jy = jachq->getValue(0, 1);
+      double dj = hypot(jx, jy);
 
-    boost::shared_ptr<LambdaFirst> lambda1(new LambdaFirst());
+      glPushMatrix();
 
-    boost::shared_ptr<LambdaSecond> lambda2(new LambdaSecond(*this, w));
-
-    relation->acceptSP(lambda1);
-    d1->acceptSP(lambda1);
-    lambda1->acceptSP(lambda2);
-    d2->acceptSP(lambda2);
-
-
-    /*else
-      }
-      if (involvedDS->size() == 1) {
-
-         lbd=interaction->getLambdaOldPtr(1)->getValue(0);
-
-         itDS=involvedDS->begin();
-
-         x1 = AS(LagrangianDS )(*itDS)->q()->getValue(0);
-         y1 = AS(LagrangianDS )(*itDS)->q()->getValue(1);
-         r =  AS(Disk )(*itDS)->getRadius();
-
-         if ( relation->getSubType() == RELATION::ScleronomousR ) {
-
-           // disk/plan
-           x2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,0);
-           y2 = AS(LagrangianScleronomousR)(relation)->getJacHPtr(0)->getValue(0,1);
-         } else {
-
-           // unknown relation, do nothing
-           x2 = x1;
-           y2 = y1;
-         }
-
-         glColor3f(0.,0.,0.);
-         d = sqrt(x2*x2+y2*y2);
-         if (AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::DISK)
-         drawRec(x1,y1,x1-r*x2/d,y1-r*y2/d,w);
-         else if ((AS(DiskQGL)(*itDS)->drawing()->shape() == SHAPE::CIRCLE))
-           drawRec(x1-r*x2/d,y1-r*y2/d,x1-r*x2/d,y1-r*y2/d,w);
-           }*/
+      glColor3f(.0f, .0f, .0f);
+      drawRec(x1, y1, x1 - r1 * jx / dj, y1 - r1 * jy / dj, w);
+      glPopMatrix();
+    }
   }
 
   for (i = 0; i < GETNDS(Siconos_); i++)
@@ -310,10 +304,18 @@ void DisksViewer::mouseMoveEvent(QMouseEvent *e)
 
     camera()->getUnprojectedCoordinatesOf(coor, coor, NULL);
 
-    drawings_[selectedName()]->getDS()->fExt()
-    ->setValue(0, ((float)coor[0] - drawings_[selectedName()]->getDS()->q()->getValue(0))*drawings_[selectedName()]->getDS()->mass()->getValue(0, 0) * 30);
-    drawings_[selectedName()]->getDS()->fExt()
-    ->setValue(1, ((float)coor[1] - drawings_[selectedName()]->getDS()->q()->getValue(1))*drawings_[selectedName()]->getDS()->mass()->getValue(0, 0) * 30);
+    SP::SiconosVector fext =
+      ask<NeedFExt>(*drawings_[selectedName()]->getDS());
+
+    SP::SiconosVector q =
+      ask<Needq>(*drawings_[selectedName()]->getDS());
+
+    double massValue =
+      ask<NeedMassValue>(*drawings_[selectedName()]->getDS());
+
+    fext->setValue(0, ((float)coor[0] - q->getValue(0))*massValue * 30);
+
+    fext->setValue(1, ((float)coor[1] - q->getValue(1))*massValue * 30);
   }
 
   QGLViewer::mouseMoveEvent(e);
