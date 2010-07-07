@@ -374,7 +374,7 @@ public:
   //   /** print the data to the screen
   //    */
   void display() const;
-  //virtual void setComputeEFunction(FOVecPtr ptrFunct);
+  virtual void setComputeEFunction(FOVecPtr ptrFunct);
   //  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
