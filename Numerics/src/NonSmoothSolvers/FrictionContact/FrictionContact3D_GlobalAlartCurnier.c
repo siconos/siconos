@@ -579,8 +579,8 @@ int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 200;
+  options->iparam[1] = 1;
   options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
 
   options->internalSolvers = NULL;
 
