@@ -42,11 +42,7 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
   /* Tolerance */
   double tolerance = dparam[0];
 
-  /* Check for trivial case */
-  *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
 
-  if (*info == 0)
-    return;
 
 
 

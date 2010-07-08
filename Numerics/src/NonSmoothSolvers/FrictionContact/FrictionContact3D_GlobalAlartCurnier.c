@@ -421,19 +421,6 @@ void frictionContact3D_GlobalAlartCurnier(
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
 
-  /* Check for trivial case */
-  *info = checkTrivialCase(problemSize, problem->q,
-                           velocity, reaction,
-                           options->iparam, options->dparam);
-
-  if (!*info)
-  {
-    if (verbose > 0)
-      printf("GLOBALAC : trivial case detected, exit.");
-    return;
-  }
-
-
   unsigned int problemSize2 = problemSize * problemSize;
   unsigned int _3problemSize = 3 * problemSize;
 

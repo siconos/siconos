@@ -35,20 +35,14 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
 
   /* Number of contacts */
   int nc = problem->numberOfContacts;
-  double* q = problem->q;
-  /* Dimension of the problem */
-  int n = 3 * nc;
+
 
   /* Maximum number of iterations */
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
 
-  /* Check for trivial case */
-  *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
 
-  if (*info == 0)
-    return;
 
   if (options->numberOfInternalSolvers < 1)
   {

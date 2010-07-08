@@ -63,11 +63,21 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
   /* Solver name */
   /*char * name = options->solverName;*/
 
-
   int info = -1 ;
 
   if (problem->dimension != 3)
     numericsError("FrictionContact3D_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+
+  /* int and double parameters */
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
+
+  /* Check for trivial case */
+  info = checkTrivialCase(problem, velocity, reaction, iparam, dparam);
+
+
+  if (info == 0)
+    return info;
 
 
   switch (options->solverId)
@@ -130,8 +140,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
 
 }
 
-int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* iparam, double* dparam)
+int checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* reaction, int* iparam, double* dparam)
 {
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+  double* q = problem->q;
+  /* Dimension of the problem */
+  int n = 3 * nc;
+
   /* norm of vector q */
   double qs = DNRM2(n , q , 1);
   int i;

@@ -202,15 +202,14 @@ extern "C"
   int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
-      \param dim of the problem
-      \param q global vector (n)
+      \param FrictionContactProblem*  the problem
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param int vector of parameters (max. iteration number ...)
       \param double vector of parameters (tolerance ...)
       \return int =0 if a trivial solution has been found, else = -1
   */
-  int checkTrivialCase(int, double*, double*, double*, int*, double*);
+  int checkTrivialCase(FrictionContactProblem* , double*, double*, int*, double*);
 
 #ifdef __cplusplus
 }

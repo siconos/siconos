@@ -33,7 +33,6 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   double* dparam = options->dparam;
   /* Number of contacts */
   int nc = problem->numberOfContacts;
-  double* q = problem->q;
   NumericsMatrix* M = problem->M;
   /* Dimension of the problem */
   int n = 3 * nc;
@@ -43,11 +42,6 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   /* Tolerance */
   double tolerance = dparam[0];
 
-  /* Check for trivial case */
-  *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
-
-  if (*info == 0)
-    return;
 
   if (options->numberOfInternalSolvers < 1)
   {

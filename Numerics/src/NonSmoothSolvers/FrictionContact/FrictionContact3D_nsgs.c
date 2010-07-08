@@ -42,8 +42,17 @@ void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, 
   }
 }
 
-void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, SolverOptions * localsolver_options)
+void initializeLocalSolver_nsgs(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, SolverOptions * localsolver_options)
 {
+
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+  double* q = problem->q;
+  NumericsMatrix* M = problem->M;
+  double* mu = problem->mu;
+  /* Dimension of the problem */
+  int n = 3 * nc;
+
 
 
 
@@ -146,18 +155,12 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   double* dparam = options->dparam;
   /* Number of contacts */
   int nc = problem->numberOfContacts;
-  double* q = problem->q;
-  NumericsMatrix* M = problem->M;
-  double* mu = problem->mu;
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-
-  /* Check for trivial case */
-  *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
 
   if (*info == 0)
     return;
@@ -176,7 +179,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   ComputeErrorPtr computeError = NULL;
 
   /* Connect local solver */
-  initializeLocalSolver_nsgs(n, &local_solver, &freeSolver, &computeError, M, q, mu, localsolver_options);
+  initializeLocalSolver_nsgs(&local_solver, &freeSolver, &computeError, problem , localsolver_options);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
