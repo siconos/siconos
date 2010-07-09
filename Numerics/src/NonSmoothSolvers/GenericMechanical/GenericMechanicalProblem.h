@@ -21,7 +21,7 @@
 #define NUMERICSGENERICMECHANICALPROBLEM_H
 
 #include "NumericsMatrix.h"
-
+#include "SolverOptions.h"
 /* void * solverFC3D; */
 /* void * solverEquality; */
 /* void * solverLCP; */
@@ -31,29 +31,36 @@
     \param numberOfBlockLine The number of line of blocks.
     \param M A sparse blocks matrix.
     \param q A dense vector.
-    \param problems An array of pointer on Numerics problem, either FrictionContactProblem, LinearSystemProblem, MixedLinearComplementarityProblem or LinearComplementarityProblem. The size is numberOfBlockLine.
-    \param problemsType
  */
 
 /** Remark:
 
-    The M and q contains de matrices of the problem. The sub problems (problems) has also a M and q member because it is usfull for the computation of the local error.
+    The M and q contains de matrices of the problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
 
 
  */
 
+typedef struct _listNumericsProblem
+{
+  int type;
+  void * problem;
+  struct _listNumericsProblem * nextProblem;
+  struct _listNumericsProblem * prevProblem;
+} listNumericsProblem;
+
+
+
 typedef struct
 {
   /*Number of line of blocks.*/
+  int size;
   int numberOfBlockLine;
   NumericsMatrix* M;
   double* q;
-  /*Array[numberOfBlockLine] of pointer on Numerics problem, either FrictionContactProblem, LinearSystemProblem, MixedLinearComplementarityProblem or LinearComplementarityProblem.*/
-  void * * problems;
-  /*Array[numberOfBlockLine] type of numerics problem.*/
-  int * problemsType;
+  listNumericsProblem *firstListElem;
+  listNumericsProblem *lastListElem;
+  //  void * * problems;
 } GenericMechanicalProblem;
-
 
 
 

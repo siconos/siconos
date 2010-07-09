@@ -60,7 +60,11 @@ extern "C"
   */
   int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
-
+  GenericMechanicalProblem * buildEmptyGenericMechanicalProblem();
+  void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP);
+  void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size);
+  void displayGMP(GenericMechanicalProblem * pGMP);
+  void genericMechnicalProblem_setDefaultSolverOptions(GenericMechanicalProblem * pGMP, SolverOptions* options, int id);
 
 #ifdef __cplusplus
 }

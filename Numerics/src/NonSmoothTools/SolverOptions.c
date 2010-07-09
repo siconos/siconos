@@ -27,6 +27,47 @@
 #include "relay_cst.h"
 #include "Friction_cst.h"
 
+char SICONOS_NUMERICS_PROBLEM_LCP_STR[] = "LCP";
+char SICONOS_NUMERICS_PROBLEM_MLCP_STR[] = "MLCP";
+char SICONOS_NUMERICS_PROBLEM_EQUALITY_STR[] = "EQUALITY";
+char SICONOS_NUMERICS_PROBLEM_FC2D_STR[] = "FC2D";
+char SICONOS_NUMERICS_PROBLEM_FC3D_STR[] = "FC3D";
+
+
+char * idProblemToChar(int id)
+{
+  switch (id)
+  {
+  case (SICONOS_NUMERICS_PROBLEM_LCP):
+  {
+    return SICONOS_NUMERICS_PROBLEM_LCP_STR;
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_MLCP):
+  {
+    return SICONOS_NUMERICS_PROBLEM_MLCP_STR;
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
+  {
+    return SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_FC2D):
+  {
+    return SICONOS_NUMERICS_PROBLEM_FC2D_STR;
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_FC3D):
+  {
+    return SICONOS_NUMERICS_PROBLEM_FC3D_STR;
+    break;
+  }
+  default:
+    printf("Numerics:idProblemToChar, id unknown : %d \n", id);
+  }
+
+}
 
 void readSolverOptions(int driverType, SolverOptions* options)
 {

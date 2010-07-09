@@ -25,6 +25,8 @@
 #include "NonSmoothDrivers.h"
 #include "LA.h"
 
+//#define LINEARSYSTEM_DEBUG
+
 /*
  *
  *
@@ -161,10 +163,20 @@ int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, Sol
   int i;
   if (problem->M->storageType == 1)
     numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
+#ifdef LINEARSYSTEM_DEBUG
+  displayLS(problem);
+#endif
   for (i = 0; i < problem->size; i++)
     w[i] = 0.0;
   //
-  return myLu(problem, z , options);
+  int res = myLu(problem, z , options);
+#ifdef LINEARSYSTEM_DEBUG
+  printf("The solution is :\n");
+  for (i = 0; i < problem->size; i++)
+    printf(" %e", z[i]);
+  printf("\n");
+#endif
+  return res;
   //return solveLeastSquareProblem(problem, z , options);
 }
 

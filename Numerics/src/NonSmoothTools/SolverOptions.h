@@ -143,6 +143,21 @@ typedef struct _SolverOptions
   struct _SolverOptions * internalSolvers;
 } SolverOptions;
 
+enum SICONOS_NUMERICS_PROBLEM_TYPE
+{
+  SICONOS_NUMERICS_PROBLEM_LCP = 0,
+  SICONOS_NUMERICS_PROBLEM_MLCP = 1,
+  SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
+  SICONOS_NUMERICS_PROBLEM_FC2D = 3,
+  SICONOS_NUMERICS_PROBLEM_FC3D = 4
+};
+
+extern char SICONOS_NUMERICS_PROBLEM_LCP_STR[];
+extern char SICONOS_NUMERICS_PROBLEM_MLCP_STR[];
+extern char SICONOS_NUMERICS_PROBLEM_EQUALITY_STR[];
+extern char SICONOS_NUMERICS_PROBLEM_FC2D_STR[];
+extern char SICONOS_NUMERICS_PROBLEM_FC3D_STR[];
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -173,7 +188,7 @@ extern "C"
 
   int nameToId(char * pName);
   char * idToName(int Id);
-
+  char * idProblemToChar(int id);
 #ifdef __cplusplus
 }
 #endif

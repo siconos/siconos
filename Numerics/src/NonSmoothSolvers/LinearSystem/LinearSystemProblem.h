@@ -19,15 +19,13 @@
 #ifndef LINEARSYSTEM_PROBLEM_H
 #define LINEARSYSTEM_PROBLEM_H
 
-/*!\file LinearComplementarityProblem.h
+/*!\file LinearSystemProblem.h
   \brief Structure used to define a Linear Complementarity Problem
 
-  \author Franck Perignon
+  \author O. Bonnefon
 */
 
-/*! \page LCProblem System problems
-  \section lcpIntro The problem
-  Find \f$(z,w)\f$ such that:\n
+/*! \page Linear problem System problems
 
   \f$
   \left\lbrace
@@ -39,7 +37,6 @@
 
   \f$ w, z, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix.
 
-  \section lcpSolversList Available solvers
 
   Use the generic function LinearSystem_driver() to call one the the specific solvers listed below:
 

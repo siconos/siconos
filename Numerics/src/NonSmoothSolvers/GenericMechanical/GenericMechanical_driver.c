@@ -21,10 +21,138 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <math.h>
 #include "LA.h"
 #include "NumericsOptions.h"
 #include "GenericMechanical_Solvers.h"
 #include "NonSmoothDrivers.h"
+
+//#define GENERICMECHANICAL_DEBUG
+
+int GenericMechanical_compute_error(GenericMechanicalProblem* problem, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
+{
+  listNumericsProblem * curProblem = problem->firstListElem;
+  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  int currentRowNumber = 0;
+  int ii;
+  int  posInX = 0;
+  int curSize = 0;
+  *err = 0.0;
+  while (curProblem)
+  {
+    if (currentRowNumber)
+      posInX += m->blocksize0[currentRowNumber - 1];
+
+    switch (curProblem->type)
+    {
+    case SICONOS_NUMERICS_PROBLEM_EQUALITY:
+    {
+      LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
+      curSize = linearProblem->size;
+      double * w = velocity + posInX;
+      for (ii = 0; ii < curSize; ii++)
+      {
+        if (fabs(w[ii]) > *err)
+          *err = fabs(w[ii]);
+      }
+      break;
+    }
+    case SICONOS_NUMERICS_PROBLEM_LCP:
+    case SICONOS_NUMERICS_PROBLEM_FC3D:
+    default:
+      printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
+    }
+    curProblem = curProblem->nextProblem;
+    currentRowNumber++;
+  }
+#ifdef GENERICMECHANICAL_DEBUG
+  printf("GenericMechanical_driver, error : %e\n", *err);
+#endif
+  if (*err > tol)
+    return 1;
+  else
+    return 0;
+}
+
+void genericMechanicalProblem_GS(GenericMechanicalProblem* problem, double * reaction, double * velocity, int * info, SolverOptions* options)
+{
+
+  listNumericsProblem * curProblem = 0;
+  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  int iterMax = options->iparam[0];
+  int it = 0;
+  int currentRowNumber = 0;
+  int diagBlockNumber = 0;
+  int globalSize = problem->size;
+  double tol = options->dparam[0];
+  double err = 0;
+  int tolViolate = 1;
+  while (it < iterMax && tolViolate)
+  {
+    currentRowNumber = 0;
+    curProblem =  problem->firstListElem;
+    int  posInX = 0;
+    int ii = 0;
+    int curSize = 0;
+#ifdef GENERICMECHANICAL_DEBUG
+    printf("GS it %d, initial value:\n", it);
+    for (ii = 0; ii < globalSize; ii++)
+      printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+#endif
+    while (curProblem)
+    {
+      if (currentRowNumber)
+        posInX = m->blocksize0[currentRowNumber - 1];
+
+      switch (curProblem->type)
+      {
+      case SICONOS_NUMERICS_PROBLEM_EQUALITY:
+      {
+        /*Mz*/
+        /*about the diagonal block:*/
+        diagBlockNumber = getDiagonalBlockPos(m, currentRowNumber);
+        LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
+        linearProblem->M->matrix0 = m->block[diagBlockNumber];
+        curSize = linearProblem->size;
+        /*about q.*/
+        for (ii = 0; ii < curSize; ii++)
+        {
+          linearProblem->q[ii] = problem->q[posInX + ii];
+        }
+        rowProdNoDiagSBM(problem->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
+
+        double * sol = reaction + posInX;
+        double * w = velocity + posInX;
+        LinearSystem_driver(linearProblem, sol, w, 0);
+#ifdef GENERICMECHANICAL_DEBUG
+        printf("posInX : %d\n", posInX);
+#endif
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_LCP:
+      case SICONOS_NUMERICS_PROBLEM_FC3D:
+      default:
+        printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
+      }
+#ifdef GENERICMECHANICAL_DEBUG
+      printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
+      for (ii = 0; ii < globalSize; ii++)
+        printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+#endif
+      curProblem = curProblem->nextProblem;
+      currentRowNumber++;
+    }
+    /*computation of V=MR+q*/
+    memcpy(velocity, problem->q, globalSize * sizeof(double));
+    prodSBM(globalSize, globalSize, 1.0, m, reaction, 1.0, velocity);
+    tolViolate = GenericMechanical_compute_error(problem, reaction, velocity, tol, options, &err);
+    it++;
+  }
+
+  *info = tolViolate;
+}
+
+
 
 int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options)
 {
@@ -34,10 +162,24 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   /* If the options for solver have not been set, read default values in .opt file */
 
   int info = 0;
-  display(problem->M);
-  //genericMechanicalProblem_GS(problem,reaction,velocity,&info,options);
+  //  display(problem->M);
+  //displayGMP(problem);
+  genericMechanicalProblem_GS(problem, reaction, velocity, &info, options);
 
   return info;
 
+}
+
+void genericMechnicalProblem_setDefaultSolverOptions(GenericMechanicalProblem * pGMP, SolverOptions* options, int id)
+{
+  options->iSize = 5;
+  options->dSize = 5;
+  options->numberOfInternalSolvers = 0;
+  options->dWork = 0;
+  options->iWork = 0;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam[0] = 50;
+  options->dparam[0] = 1e-6;
 }
 
