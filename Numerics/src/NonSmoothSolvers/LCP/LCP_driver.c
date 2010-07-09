@@ -273,11 +273,12 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {
-  if (options == NULL || global_options == NULL)
-    numericsError("lcp_driver", "null input for solver and/or global options");
+  if (options == NULL)
+    numericsError("lcp_driver", "null input for solver options");
 
   /* Set global options */
-  setNumericsOptions(global_options);
+  if (global_options)
+    setNumericsOptions(global_options);
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
