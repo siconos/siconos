@@ -22,6 +22,8 @@
 #include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
+/* Pointer to function used to update the solver, to formalize the local problem for example. */
+typedef void (*UpdateSolverPtr)(int, double*);
 
 static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
@@ -66,21 +68,24 @@ void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jac
 }
 
 
-void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
+void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem,    SolverOptions * localsolver_options)
 {
 
   /*
      Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen formulation.
   */
 
+
+
+
   /* Alart-Curnier formulation */
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
     Fsize = 3;
-    frictionContact3D_AC_initialize(n0, M0, q0, mu0);
+    frictionContact3D_AC_initialize(problem, localproblem);
     F = &F_AC;
     jacobianF = &jacobianF_AC;
-    updateSolver = &frictionContact3D_AC_update;
+    /*     updateSolver = &frictionContact3D_AC_update; */
     postSolver = &frictionContact3D_AC_post;
     freeSolver = &frictionContact3D_AC_free;
 
@@ -89,10 +94,10 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   else if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBNewton)
   {
     Fsize = 5;
-    NCPGlocker_initialize(n0, M0, q0, mu0);
+    NCPGlocker_initialize(problem, localproblem);
     F = &F_GlockerFischerBurmeister;
     jacobianF = &jacobianF_GlockerFischerBurmeister;
-    updateSolver = &NCPGlocker_update;
+    /*     updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
   }
@@ -103,11 +108,14 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   }
 }
 
-void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
+void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
-  (*updateSolver)(contact, reaction);
-  int pos = Fsize * contact; /* Current block position */
-  double * reactionBlock = &reaction[pos];
+
+
+  /*  (*updateSolver)(contact, reaction); */
+
+
+  double * reactionBlock = reaction;
 
   int * iparam = options->iparam;
   double * dparam = options->dparam;
@@ -115,7 +123,7 @@ void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reacti
   int info;
   if (options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
-    info = AlartCurnierNewton(Fsize, reactionBlock, iparam, dparam);
+    info = AlartCurnierNewton(localproblem, reactionBlock, iparam, dparam);
   }
   else
   {
@@ -130,7 +138,7 @@ void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reacti
     }
   }
 
-  (*postSolver)(contact, reaction);
+  /*  (*postSolver)(contact,reaction); */
 }
 
 void frictionContact3D_Newton_free()

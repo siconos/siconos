@@ -53,7 +53,10 @@ For each solver, the input argument are:
 #include "FrictionContact3D_GlobalAlartCurnier.h"
 #include "Friction_cst.h"
 /** pointer to function used to call local solver */
-typedef void (*SolverPtr)(int, int, double*, SolverOptions *);
+typedef void (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
+
+/** pointer to function used to update local problem */
+typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*, SolverOptions *);
 
 /** pointer to function used to post-processed results after a call to the (local) solver */
 typedef void (*PostSolverPtr)(int, double*);
@@ -101,6 +104,11 @@ extern "C"
   */
 
   void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  void frictionContact3D_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
+
+  void frictionContact3D_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double * reaction, int contact);
+
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param SolverOptions ** the pointer to the array of options to set

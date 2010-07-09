@@ -27,8 +27,12 @@
 #include "pinv.h"
 #include "Friction_cst.h"
 
-void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, SolverOptions* localsolver_options)
+void initializeLocalSolver_nsgs_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)
 {
+
+
+
+
   /** Connect to local solver */
   /* Projection */
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_ProjectionOnCone_velocity)
@@ -36,7 +40,7 @@ void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr*
     *solve = &frictionContact3D_projectionOnCone_velocity_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error_velocity;
-    frictionContact3D_projection_initialize(n, M, q, mu);
+    frictionContact3D_projection_initialize(problem, localproblem);
   }
   else
   {
@@ -53,9 +57,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
 
   /* Number of contacts */
   int nc = problem->numberOfContacts;
-  double* q = problem->q;
   NumericsMatrix* M = problem->M;
-  double* mu = problem->mu;
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
@@ -109,13 +111,18 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
   SolverOptions * localsolver_options = options->internalSolvers;
 
   /* Connect local solver */
-  initializeLocalSolver_nsgs_velocity(n, &local_solver, &freeSolver, &computeError, M, q, mu, localsolver_options);
+
+
+  FrictionContactProblem* localproblem;
+  initializeLocalSolver_nsgs_velocity(&local_solver, &freeSolver, &computeError, problem, localproblem, localsolver_options);
 
   /*****  NSGS_VELOCITY Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
+
+
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
   while ((iter < itermax) && (hasNotConverged > 0))
@@ -125,7 +132,8 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
     //DCOPY( n , q , incx , velocity , incy );
     for (contact = 0 ; contact < nc ; ++contact)
     {
-      (*local_solver)(contact, n, velocity, localsolver_options);
+
+      (*local_solver)(localproblem, velocity, localsolver_options);
       for (int ncc = 0; ncc < 3; ncc ++)
       {
         printf("velocity[%i]=%14.7e\t", ncc, velocity[contact * 3 + ncc]);

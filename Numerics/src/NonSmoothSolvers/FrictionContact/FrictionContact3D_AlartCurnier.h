@@ -50,19 +50,15 @@ extern "C"
 #endif
 
   /** Initialize friction-contact 3D Alart-Curnier formulation
-      \param dim. of the global problem
-      \param matrix M of the global problem
-      \param vector q of the global problem
-      \param vector of the friction coefficients
   */
-  void frictionContact3D_AC_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
+  void frictionContact3D_AC_initialize(FrictionContactProblem*, FrictionContactProblem*);
 
   /** Update friction-contact 3D problem: formalize local problem for one contact
       \param number (position in global matrix) of the considered contact
       \param global reaction (only the block corresponding to the current contact will be modified,
       the rest is used to formalize the local problem)
   */
-  void frictionContact3D_AC_update(int, double *);
+  void frictionContact3D_AC_update(int, FrictionContactProblem* , FrictionContactProblem* , double *, SolverOptions* options);
 
   /** Retrieve global reaction vector using local problem solution
       \param number (position in global matrix) of the considered contact
@@ -97,12 +93,12 @@ extern "C"
   void frictionContact3D_AC_free();
 
   /** Home made Alart-Curnier local formulation taken from Confeti. this routine has to be severely optimized !!
-      \param int Fsize :  size of the local problem
+      \param the local problem
       \param reactionBlock : local reaction
       \param iparam :
       \param dparam :
   */
-  int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam);
+  int AlartCurnierNewton(FrictionContactProblem*, double * reactionBlock, int *iparam, double *dparam);
 #ifdef __cplusplus
 }
 #endif

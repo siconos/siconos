@@ -26,6 +26,8 @@
 #include "LA.h"
 #include <stdlib.h>
 #include <stdio.h>
+/* Pointer to function used to update the solver, to formalize the local problem for example. */
+typedef void (*UpdateSolverPtr)(int, double*);
 
 static UpdateSolverPtr updateSolver = NULL;
 static PostSolverPtr postSolver = NULL;
@@ -54,7 +56,7 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
  */
 
 
-void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
+void frictionContact3D_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
 {
 
   /*
@@ -65,8 +67,8 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
   {
     Fsize = 5;
-    NCPGlocker_initialize(n0, M0, q0, mu0);
-    updateSolver = &NCPGlocker_update;
+    NCPGlocker_initialize(problem, localproblem);
+    /*     updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
   }
@@ -77,15 +79,12 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
   }
 }
 
-void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
+void frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
 
-
-  (*updateSolver)(contact, reaction);
-  int pos = Fsize * contact; /* Current block position */
-  double * reactionBlock = &reaction[pos];
+  double * reactionBlock = reaction;
 
   int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
@@ -95,7 +94,7 @@ void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reacti
     exit(EXIT_FAILURE);
   }
 
-  (*postSolver)(contact, reaction);
+  /*   (*postSolver)(contact,reaction); */
 }
 
 void frictionContact3D_FixedP_free()

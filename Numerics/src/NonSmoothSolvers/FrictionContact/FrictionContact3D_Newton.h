@@ -32,7 +32,7 @@
 */
 #include "NumericsMatrix.h"
 #include "SolverOptions.h"
-
+#include "FrictionContactProblem.h"
 #ifdef __cplusplus
 extern "C"
 {
@@ -45,15 +45,14 @@ extern "C"
       \param  SolverOptions * options of the solver
 
    */
-  void frictionContact3D_Newton_initialize(int, const NumericsMatrix*const, const double*const, const double*const, SolverOptions *);
+  void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions *);
 
   /** solve friction-contact 3D problem with Newton
-      \param number (position in global matrix) of the considered contact
-      \param dim. of the global problem
-      \param global reaction (only the block corresponding to the current contact will be modified,
+      \param the local problem to solve
+      \param local reaction
       \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Newton_solve(int, int, double*, SolverOptions *);
+  void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions *);
 
   /** free memory for friction contact 3D Newton solver */
   void frictionContact3D_Newton_free();

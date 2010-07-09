@@ -31,26 +31,36 @@
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
 /* mu corresponds to the vector of friction coefficients */
 /* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
-static int n = 0;
-static const NumericsMatrix* MGlobal = NULL;
-static const double* qGlobal = NULL;
-static const double* mu = NULL;
+/* static int n=0; */
+/* static const NumericsMatrix* MGlobal = NULL; */
+/* static const double* qGlobal = NULL; */
+/* static const double* mu = NULL; */
 
 /* Local problem operators */
-static const int nLocal = 3;
-static double* MLocal;
-static int isMAllocatedIn = 0; /* True if a malloc is done for MLocal, else false */
+/* static const int nLocal = 3; */
+/* static double* MLocal; */
+/* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
 static double velocityLocal[3];
-static double qLocal[3];
-static double mu_i = 0.0;
+/* static double qLocal[3]; */
+/* static double mu_i = 0.0; */
+
+static FrictionContactProblem* localFC3D = NULL;
+static FrictionContactProblem* globalFC3D = NULL;
+
 static double an;
 static double at;
 static double projN;
 static double projT;
 static double projS;
 
-void AC_fillMLocal(int contact)
+void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
 {
+
+  NumericsMatrix * MGlobal = problem->M;
+  int n = 3 * problem->numberOfContacts;
+
+
+
   // Dense storage
   int storageType = MGlobal->storageType;
   if (storageType == 0)
@@ -58,6 +68,7 @@ void AC_fillMLocal(int contact)
     int in = 3 * contact, it = in + 1, is = it + 1;
     int inc = n * in;
     double * MM = MGlobal->matrix0;
+    double * MLocal =  localproblem->M->matrix0;
     /* The part of MM which corresponds to the current block is copied into MLocal */
     MLocal[0] = MM[inc + in];
     MLocal[1] = MM[inc + it];
@@ -74,8 +85,8 @@ void AC_fillMLocal(int contact)
   else if (storageType == 1)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    //MLocal = MGlobal->matrix1->block[diagPos];
-    DCOPY(9, MGlobal->matrix1->block[diagPos], 1, MLocal, 1);
+    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
+    /*     DCOPY(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
 
   }
   else
@@ -83,29 +94,22 @@ void AC_fillMLocal(int contact)
 
 }
 
-void frictionContact3D_AC_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
+void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   /*
-    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
     In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
     for each considered contact.
     Local problem is built during call to update (which depends on the storage type for M).
   */
 
-  n = n0;
-  MGlobal = M0;
-  qGlobal = q0;
-  mu = mu0;
-  /*  if(MGlobal->storageType == 0) */
-  /*     { */
-  MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
-  isMAllocatedIn = 1;
-  /*     } */
-  /*   else */
-  /*     isMAllocatedIn = 0; */
+  localFC3D = localproblem;
+  globalFC3D = problem;
+
+
+
 }
 
-void frictionContact3D_AC_update(int contact, double * reaction)
+void frictionContact3D_AC_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
@@ -116,50 +120,26 @@ void frictionContact3D_AC_update(int contact, double * reaction)
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  AC_fillMLocal(contact);
+  AC_fillMLocal(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  /* reaction current block set to zero, to exclude current contact block */
-  double rin = reaction[in] ;
-  double rit = reaction[it] ;
-  double ris = reaction[is] ;
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qLocal computation*/
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-
-  if (MGlobal->storageType == 0)
-  {
-    double * MM = MGlobal->matrix0;
-    int incx = n, incy = 1;
-    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
-    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
-    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
-  }
-  else if (MGlobal->storageType == 1)
-  {
-    /* qLocal += rowMB * reaction
-    with rowMB the row of blocks of MGlobal which corresponds to the current contact
-    */
-    rowProdNoDiagSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
-  }
-  reaction[in] = rin;
-  reaction[it] = rit;
-  reaction[is] = ris;
+  frictionContact3D_nsgs_computeqLocal(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
-  mu_i = mu[contact];
+  localproblem->mu[0] = problem->mu[contact];
+
+
 }
 
 /* Compute function F(Reaction) */
 void F_AC(int Fsize, double *reaction , double *F, int up2Date)
 {
+
+  int nLocal = 3;
+
+
+
   if (F == NULL)
   {
     fprintf(stderr, "FrictionContact3D_AlartCurnier::F_AC error:  F == NULL.\n");
@@ -170,6 +150,10 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
     fprintf(stderr, "FrictionContact3D_AlartCurnier::F error, wrong block size.\n");
     exit(EXIT_FAILURE);
   }
+  double * qLocal = localFC3D->q;
+  double * MLocal = localFC3D->M->matrix0;
+  double mu_i = localFC3D->mu[0];
+
 
   /* up2Date = 1 = true if jacobianF(n, reaction,jacobianF) has been called just before jacobianFMatrix(...). In that case the computation of
      velocityLocal is not required again.
@@ -201,6 +185,7 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
   }
 
   double num;
+
   double coef2 = mu_i * mu_i;
   if (projN > 0)
   {
@@ -232,6 +217,14 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
 /* Compute Jacobian of function F */
 void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2Date)
 {
+  int nLocal = 3;
+
+  double * qLocal = localFC3D->q;
+  double * MLocal = localFC3D->M->matrix0;
+  double mu_i = localFC3D->mu[0];
+
+
+
   if (jacobianFMatrix == NULL)
   {
     fprintf(stderr, "FrictionContact3D_AlartCurnier::jacobianF_AC error: jacobianMatrix == NULL.\n");
@@ -242,6 +235,10 @@ void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2D
     fprintf(stderr, "FrictionContact3D_AlartCurnier::jacobianF_AC error, wrong block size.\n");
     exit(EXIT_FAILURE);
   }
+
+
+
+
 
   /* Warning: input reaction is not necessary equal to the last computed value of reactionBlock */
 
@@ -320,7 +317,18 @@ void frictionContact3D_AC_post(int contact, double* reaction)
 
 void computeFGlobal_AC(double* reaction, double* FGlobal)
 {
-  int contact, numberOfContacts = n / 3, diagPos = 0, position;
+
+  int numberOfContacts =  globalFC3D->numberOfContacts;
+
+  int n = 3 * numberOfContacts;
+
+  NumericsMatrix * MGlobal = globalFC3D->M;
+  double * MLocal = localFC3D->M->matrix0;
+  double * qLocal = localFC3D->q;
+  double *mu = globalFC3D->mu;
+
+
+  int contact, diagPos = 0, position;
   int in, it, is, inc, incx;
   double * reactionLocal;
   double alpha, det, beta, num, coef2, mrn;
@@ -394,22 +402,26 @@ void computeFGlobal_AC(double* reaction, double* FGlobal)
 
 void frictionContact3D_AC_free()
 {
-  MGlobal = NULL;
-  qGlobal = NULL;
-  mu = NULL;
-  if (isMAllocatedIn == 1)
-    free(MLocal);
-  MLocal = NULL;
+
 }
 
 
-int OldAlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam)
+int OldAlartCurnierNewton(FrictionContactProblem* localproblem, double * reactionBlock, int *iparam, double *dparam)
 {
+
+
+  double MU = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
+
 
   int ITMAX = iparam[0];
   int i, j, inew, INEWTON;
   int STATUS;
-  double MU = mu_i;
+
+
+
   double TOL = dparam[0];
   double RVN, RVT, RVS, RV, RV1, RV3;
   double PhiT4, PhiS4, Phi3;
@@ -678,11 +690,17 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
   return 0;
 }
 
-int TruncatedCylinderAlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam)
-/* int AlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam) */
+int TruncatedCylinderAlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
+/* int AlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam) */
 {
 
-  double mu = mu_i;
+  double mu = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
+
+
+
   double Tol = dparam[0];
   double itermax = iparam[0];
   int i, j, k, inew;
@@ -1014,11 +1032,14 @@ int TruncatedCylinderAlartCurnierNewton(int Fsize, double * R, int *iparam, doub
 
 }
 
-/* int CompleteCylinderAlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam) */
-int AlartCurnierNewton(int Fsize, double * R, int *iparam, double *dparam)
+/* int CompleteAlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam) */
+int AlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
 
-  double mu = mu_i;
+  double mu = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
   double Tol = dparam[0];
   double itermax = iparam[0];
   int i, j, k, inew;

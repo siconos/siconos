@@ -25,6 +25,10 @@
 #include <stdio.h>
 #include "Friction_cst.h"
 
+/* Pointer to function used to update the solver, to formalize the local problem for example. */
+typedef void (*UpdateSolverPtr)(int, double*);
+
+
 static FuncEvalPtr F = NULL;
 static JacEvalPtr jacobianF = NULL;
 static UpdateSolverPtr updateSolver = NULL;
@@ -73,7 +77,7 @@ int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, 
 }
 
 
-void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
+void frictionContact3D_Path_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
 {
 
   /*
@@ -84,10 +88,10 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
   {
     Fsize = 5;
-    NCPGlocker_initialize(n0, M0, q0, mu0);
+    NCPGlocker_initialize(problem, localproblem);
     F = &F_GlockerPath;
     jacobianF = &jacobianF_GlockerPath;
-    updateSolver = &NCPGlocker_update;
+    /*    updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
   }
@@ -98,15 +102,15 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   }
 }
 
-void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
+void frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
 
 
-  (*updateSolver)(contact, reaction);
-  int pos = Fsize * contact; /* Current block position */
-  double * reactionBlock = &reaction[pos];
+  /*   (*updateSolver)(contact, reaction); */
+
+  double * reactionBlock = reaction;
   int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);
   if (info > 0)
   {
@@ -114,7 +118,7 @@ void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction
     exit(EXIT_FAILURE);
   }
 
-  (*postSolver)(contact, reaction);
+  /*   (*postSolver)(contact,reaction); */
 }
 
 void frictionContact3D_Path_free()

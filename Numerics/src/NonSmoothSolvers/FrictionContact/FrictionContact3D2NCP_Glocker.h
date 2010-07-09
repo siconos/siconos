@@ -61,14 +61,14 @@ extern "C"
      \param the global vector q
      \param the global vector mu of the friction coefficients (size = n/3)
   */
-  void NCPGlocker_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
+  void NCPGlocker_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem);
 
   /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
      operators required for the Glocker formulation
      \param the number of the considered contact (its position in global M)
      \param the global reaction vector (size n)
   */
-  void NCPGlocker_update(int, double*);
+  void NCPGlocker_update(int, FrictionContactProblem* problem, FrictionContactProblem* localproblem,  double*, SolverOptions* options);
 
   /** Retrieve global reaction values after solving, from computed "reactionGlocker".
      \param the number of the considered contact

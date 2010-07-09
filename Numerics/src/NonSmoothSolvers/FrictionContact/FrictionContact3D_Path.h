@@ -44,7 +44,7 @@ extern "C"
       \param vector of the friction coefficients
       \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Path_initialize(int, const NumericsMatrix*const, const double*const, const double*const, SolverOptions *);
+  void frictionContact3D_Path_initialize(FrictionContactProblem * problem , FrictionContactProblem * localproblem, SolverOptions *);
 
   /** solve friction-contact 3D problem with Path
       \param number (position in global matrix) of the considered contact
@@ -53,7 +53,7 @@ extern "C"
       \param vector of int parameters (max iteration numnber ...)
       \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Path_solve(int, int, double*, SolverOptions*);
+  void frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double*, SolverOptions*);
 
   /** free memory for friction contact 3D Path solver */
   void frictionContact3D_Path_free();

@@ -40,16 +40,22 @@
 /* mu corresponds to the vector of friction coefficients */
 
 
-/* Global problem */
-static int n = 0;
-static const NumericsMatrix* MGlobal = NULL;
-static const double* qGlobal = NULL;
-static const double* mu = NULL;
+/* /\* Global problem *\/ */
+/* static int n=0; */
+/* static const NumericsMatrix* MGlobal = NULL; */
+/* static const double* qGlobal = NULL; */
+/* static const double* mu = NULL; */
 
-/* Local FC3D problem */
-static double* MLocal;
-static int isMAllocatedIn = 0; /* True if a malloc is done for MLocal, else false */
+/* /\* Local FC3D problem *\/ */
+/* static double* MLocal; */
+/* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
 /* static double qLocal[3]; */
+
+static FrictionContactProblem* localFC3D = NULL;
+static FrictionContactProblem* globalFC3D = NULL;
+
+
+
 
 /* Local "Glocker" variables */
 static const int Gsize = 5;
@@ -81,6 +87,10 @@ void computeE(unsigned int i, double* e)
 /* Compute and save MGlocker */
 void computeMGlocker()
 {
+
+  double * MLocal = localFC3D->M->matrix0;
+
+
   /* Local function used in update */
 
   /* Requires: MLocal and mu_i*/
@@ -140,8 +150,14 @@ void computeGGlocker()
 
 }
 
-void NCPGlocker_fillMLocal(int contact)
+void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
 {
+
+  NumericsMatrix * MGlobal = problem->M;
+  int n = 3 * problem->numberOfContacts;
+
+
+
   int storageType = MGlobal->storageType;
   if (storageType == 0)
   {
@@ -150,6 +166,7 @@ void NCPGlocker_fillMLocal(int contact)
     // === Fill MLocal(3,3) according to the current contact number ===
     /* The part of MGlobal which corresponds to the current block is copied into MLocal */
     double * MM = MGlobal->matrix0;
+    double * MLocal = localproblem->M->matrix0;
     MLocal[0] = MM[inc + in];
     MLocal[1] = MM[inc + it];
     MLocal[2] = MM[inc + is];
@@ -165,15 +182,15 @@ void NCPGlocker_fillMLocal(int contact)
   else if (storageType == 1)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    //MLocal = MGlobal->matrix1->block[diagPos];
-    DCOPY(9, MGlobal->matrix1->block[diagPos], 1, MLocal, 1);
+    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
+    /*     DCOPY(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }
   else
     numericsError("FrictionContact3D2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
 
 }
 
-void NCPGlocker_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
+void NCPGlocker_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   /*
     INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
@@ -184,19 +201,8 @@ void NCPGlocker_initialize(int n0, const NumericsMatrix*const M0, const double*c
     Fill vectors/matrices of parameters: Ip, Ipinv ...
   */
 
-  /* Connect static var to input (global problem) */
-  n = n0;
-  MGlobal = M0;
-  qGlobal = q0;
-  mu = mu0;
-
-  /*   if(MGlobal->storageType == 0) */
-  /*     { */
-  MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
-  isMAllocatedIn = 1;
-  /*     } */
-  /*   else  */
-  /*     isMAllocatedIn = 0; */
+  localFC3D = localproblem;
+  globalFC3D = problem;
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
      Ip = [e1 e2]
@@ -225,7 +231,7 @@ void NCPGlocker_initialize(int n0, const NumericsMatrix*const M0, const double*c
 
 }
 
-void NCPGlocker_update(int contact, double * reaction)
+void NCPGlocker_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
@@ -234,12 +240,10 @@ void NCPGlocker_update(int contact, double * reaction)
 
   int in = 3 * contact, it = in + 1, is = it + 1;
 
-  // === Friction coefficient for current block ===
-  mu_i = mu[contact]; /* required in computeMGlocker */
 
   // === Fill MLocal(3,3) according to the current contact number ===
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  NCPGlocker_fillMLocal(contact);
+  NCPGlocker_fillMLocal(problem, localproblem, contact);
 
   // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
   computeMGlocker();
@@ -248,40 +252,10 @@ void NCPGlocker_update(int contact, double * reaction)
   //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
   //            excluding the block corresponding to the current contact.
   //  - step 2: computes qGlocker using qLocal values
+  frictionContact3D_nsgs_computeqLocal(problem, localproblem, reaction, contact);
 
-  /* reaction current block set to zero, to exclude current contact block */
+  double * qLocal = localproblem->q;
 
-  double rin = reaction[in] ;
-  double rit = reaction[it] ;
-  double ris = reaction[is] ;
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qLocal computation*/
-  double qLocal[3];
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-  int storageType = MGlobal->storageType;
-  int incx = n, incy = 1;
-  if (storageType == 0)
-  {
-    double * MM = MGlobal->matrix0;
-    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
-    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
-    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
-  }
-  else if (storageType == 1)
-  {
-    /* qLocal += rowMB * reaction
-    with rowMB the row of blocks of MGlobal which corresponds to the current contact
-    */
-    subRowProdSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
-  }
-
-  reaction[in] = rin;
-  reaction[it] = rit;
-  reaction[is] = ris;
   /* qGlocker (saved in FGlocker) */
   FGlocker[0] = qLocal[0];
   FGlocker[1] = -sqrt(3.) / 3 * qLocal[1] - qLocal[2];
@@ -304,6 +278,15 @@ void NCPGlocker_update(int contact, double * reaction)
   // - reactionGlocker is up to date
   // - MGlocker is up to date
   // - FGlocker = qGlocker + gGlocker
+
+
+  // === Friction coefficient for current block ===
+
+  localproblem->mu[0] = problem->mu[contact]; /* required in computeMGlocker */
+
+
+
+
 }
 
 void computeJacobianGGlocker()
@@ -434,11 +417,6 @@ void compute_Z_GlockerFixedP(int i, double *reactionstep)
 
 void NCPGlocker_free()
 {
-  MGlobal = NULL;
-  qGlobal = NULL;
-  mu = NULL;
-  if (isMAllocatedIn == 1)
-    free(MLocal);
-  MLocal = NULL;
+
 }
 

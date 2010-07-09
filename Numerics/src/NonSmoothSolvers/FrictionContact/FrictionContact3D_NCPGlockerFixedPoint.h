@@ -31,6 +31,7 @@
 */
 #include "NumericsMatrix.h"
 #include "SolverOptions.h"
+#include "FrictionContactProblem.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -46,7 +47,7 @@ extern "C"
       \param vector of the friction coefficients
       \param  SolverOptions * options of the solver
   */
-  void frictionContact3D_FixedP_initialize(int , const NumericsMatrix*const , const double*const , const double*const , SolverOptions *);
+  void frictionContact3D_FixedP_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions *);
 
   /** solve friction-contact 3D problem with Fixed Point
       \param number (position in global matrix) of the considered contact
@@ -54,7 +55,7 @@ extern "C"
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_FixedP_solve(int , int , double* , SolverOptions *);
+  void frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* , SolverOptions *);
 
   /** free memory for friction contact 3D Fixed Point solver */
   void frictionContact3D_FixedP_free();
