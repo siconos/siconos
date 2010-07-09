@@ -34,8 +34,6 @@
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 
-/* Pointer to function used to update the solver, to formalize the local problem for example. */
-typedef void (*UpdateSolverPtr)(int, double*);
 
 #ifdef __cplusplus
 extern "C"
