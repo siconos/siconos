@@ -242,12 +242,7 @@ void frictionContact3D_projection_update_with_regularization(int contact, Fricti
   /*   reaction[it] = rit; */
   /*   reaction[is] = ris; */
 
-#ifdef VERBOSE_DEBUG
-  for (int i = 0 ; i < 3 ; i++)
-  {
-    printf("before qLocal[%i]=%32.8e\n", i, qLocal[i]) ;
-  }
-#endif
+
   /* qLocal computation*/
   qLocal[0] -= rho * reaction[in];
   qLocal[1] -= rho * reaction[it];
@@ -255,14 +250,6 @@ void frictionContact3D_projection_update_with_regularization(int contact, Fricti
 
 
 
-
-
-#ifdef VERBOSE_DEBUG
-  for (int i = 0 ; i < 3 ; i++)
-  {
-    printf("qLocal[%i]=%32.8e\n", i, qLocal[i]) ;
-  }
-#endif
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
 
@@ -489,17 +476,19 @@ void frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localprobl
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double an = 1. / (MLocal[0] + mu_i);
-
+  //double an = 1./(MLocal[0]+mu_i);
+  double an = 1. / (MLocal[0]);
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;
   DCOPY(nLocal , qLocal, incx , worktmp , incy);
+
   DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, worktmp, incy);
   normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
   reaction[0] -= an * (worktmp[0] + mu_i * normUT);
   reaction[1] -= an * worktmp[1];
   reaction[2] -= an * worktmp[2];
+
 
   projectionOnCone(reaction, mu_i);
 
