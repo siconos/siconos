@@ -193,7 +193,6 @@ void frictionContact3D_projection_update_with_regularization(int contact, Fricti
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
     /*     for (int i =0 ; i< 3*3 ; i++) localproblem->M->matrix0[i] = MGlobal->matrix1->block[diagPos][i] ; */
-
     DCOPY(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1);
 
   }
@@ -204,51 +203,16 @@ void frictionContact3D_projection_update_with_regularization(int contact, Fricti
      excluding the block corresponding to the current contact. ****/
   frictionContact3D_nsgs_computeqLocal(problem, localproblem, reaction, contact);
 
-
   double rho = options->dparam[3];
   for (int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
 
-
   double *qLocal = localproblem->q;
-
   int in = 3 * contact, it = in + 1, is = it + 1;
-  /*     double rin= reaction[in] ; */
-  /*   double rit= reaction[it] ; */
-  /*   double ris= reaction[is] ; */
-  /*   reaction[in] = 0.0; */
-  /*   reaction[it] = 0.0; */
-  /*   reaction[is] = 0.0; */
-  /*   /\* qLocal computation*\/ */
-  /*   qLocal[0] = problem->q[in]-rho*rin; */
-  /*   qLocal[1] = problem->q[it]-rho*rit; */
-  /*   qLocal[2] = problem->q[is]-rho*ris; */
-
-  /*   if (MGlobal->storageType == 0) */
-  /*   { */
-  /*     double * MM = MGlobal->matrix0; */
-  /*     int incx = n, incy = 1; */
-  /*     qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy); */
-  /*     qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy); */
-  /*     qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy); */
-  /*   } */
-  /*   else if (MGlobal->storageType == 1) */
-  /*   { */
-  /*     /\* qLocal += rowMB * reaction */
-  /*     with rowMB the row of blocks of MGlobal which corresponds to the current contact */
-  /*     *\/ */
-  /*     rowProdNoDiagSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0); */
-  /*   } */
-  /*   reaction[in] = rin; */
-  /*   reaction[it] = rit; */
-  /*   reaction[is] = ris; */
-
 
   /* qLocal computation*/
   qLocal[0] -= rho * reaction[in];
   qLocal[1] -= rho * reaction[it];
   qLocal[2] -= rho * reaction[is];
-
-
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
@@ -500,6 +464,12 @@ void frictionContact3D_projection_free(FrictionContactProblem* localproblem)
 {
 
 }
+
+void frictionContact3D_projection_with_regularization_free(FrictionContactProblem* localproblem)
+{
+
+}
+
 
 
 void frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem, double* velocity,  SolverOptions* options)

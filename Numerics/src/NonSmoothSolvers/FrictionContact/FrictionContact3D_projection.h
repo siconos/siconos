@@ -131,6 +131,8 @@ extern "C"
   void frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *, double*, SolverOptions *);
   /** free memory for friction contact 3D projection solver */
   void frictionContact3D_projection_free();
+  /** free memory for friction contact 3D projection solver */
+  void frictionContact3D_projection_with_regularization_free();
 
 #ifdef __cplusplus
 }
