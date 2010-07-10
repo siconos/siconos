@@ -81,7 +81,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *update = &frictionContact3D_projection_update_with_regularization;
-    *freeSolver = &frictionContact3D_projectionwith_regularization_free;
+    *freeSolver = &frictionContact3D_projection_with_regularization_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize_with_regularization(problem, localproblem);
     break;
