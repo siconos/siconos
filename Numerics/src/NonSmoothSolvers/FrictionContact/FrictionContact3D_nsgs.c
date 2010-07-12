@@ -380,7 +380,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
 
   /***** Free memory *****/
-  (*freeSolver)();
+  (*freeSolver)(localproblem);
   localproblem->M->matrix0 = NULL;
   freeFrictionContact_problem(localproblem);
 

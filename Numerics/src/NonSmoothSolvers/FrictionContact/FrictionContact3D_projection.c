@@ -467,7 +467,8 @@ void frictionContact3D_projection_free(FrictionContactProblem* localproblem)
 
 void frictionContact3D_projection_with_regularization_free(FrictionContactProblem* localproblem)
 {
-
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
 }
 
 
