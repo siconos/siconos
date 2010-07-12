@@ -66,9 +66,9 @@ Options are:
                etc.).
 
  -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
- 
+
  -g : to compile with debug informations.
- 
+
  -h | -help : to print this help.
 
  -j<n>   : parrallel compilation with n jobs 
@@ -137,8 +137,6 @@ else
     true
 fi
 
-
-include_directories=
 definitions=
 linker_libraries=
 linker_directories=
@@ -167,9 +165,9 @@ while test $# -gt 0 ; do
         --noexec) exec=false;;
         --nocomp) comp=false;; 
         -I) with_arg $@; shift; 
-            case :$1,:$include_directories in
-                :*,:) include_directories=$1;;
-                :*,:*) include_directories="$include_directories;$1";;
+            case :$1,:$compiler_options in
+                :*,:) compiler_options=-I$1;;
+                :*,:*) compiler_options="$compiler_options;-I$1";;
             esac;;
         -j) with_arg $@; shift; 
             make_args="$make_args -j $1";;
