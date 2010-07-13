@@ -29,7 +29,7 @@ MACRO(SICONOS_PROJECT
     # logical target names must be globally unique
     CMAKE_POLICY(SET CMP0002 NEW) 
     
-    # Libraries linked via full path no longer produce linker search
+    # Libraries linked via full path no longer produce linker searchs
     # paths
     CMAKE_POLICY(SET CMP0003 NEW)
 
@@ -102,6 +102,12 @@ MACRO(SICONOS_PROJECT
 #    INCLUDE(fortran)
 #    INCLUDE(FortranLibraries)
 #  ENDIF(CMAKE_Fortran_COMPILER)
+     
+  MESSAGE("SYSTEM NAME = " ${CMAKE_SYSTEM} )   
+  MESSAGE("SYSTEM NAME = " ${CMAKE_OSX_ARCHITECTURES} ) 
+  MESSAGE("SYSTEM NAME = " ${CMAKE_OSX_SYSROOT} ) 
+
+  SET(CMAKE_Fortran_FLAGS	"-arch x86_64")		
 
   # Some http://pipol.inria.fr configurations
 

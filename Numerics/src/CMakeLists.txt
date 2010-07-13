@@ -309,6 +309,13 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
   NEW_TEST(FC3Dtest301 FrictionContact3D_test301.c)
 
+
+
+  ## test from the Rover Example
+    SET(FC3Dtest500_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(FC3Dtest500 FrictionContact3D_Rover1.c)
+
+
   ## test 2D dense on two differents files
   NEW_TEST(FrictionContact2D_Problemtest1 FrictionContact2D_test1.c)
   NEW_TEST(FrictionContact2D_Problemtest2 FrictionContact2D_test2.c)
