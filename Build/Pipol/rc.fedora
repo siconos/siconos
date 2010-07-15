@@ -1,7 +1,6 @@
 #!/bin/sh
 
-PIPOL_IMAGE_NAME=`expr "$PIPOL_IMAGE" : "\(.*\).dd.gz"`
 
-rpm -Uhv $PIPOL_HOMEDIR/rpm/*-$PIPOL_IMAGE_NAME.rpm
+perl -pi 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-pipol.repo 
 
 yum install -y cmake gcc gcc-gfortran boost-devel atlas atlas-devel gmp gmp-devel libxml2 libxml2-devel cppunit

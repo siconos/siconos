@@ -1,12 +1,6 @@
 #!/bin/sh
 
-if [ ! -f $PIPOL_WDIR/rc.debian-lenny.done ]; then
+apt-get update
 
-    dpkg -i $PIPOL_HOMEDIR/deb/*-$PIPOL_IMAGE_NAME.deb
-    
-    apt-get update
+apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev
 
-    apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev
-
-
-fi

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "deb http://pipol.inria.fr/packages/$PIPOL_IMAGE_NAME ./" > /etc/apt/sources.list.d
+

@@ -3,3 +3,24 @@
 port install rsync
 port install cppunit
 port uninstall cmake
+
+
+cmake_version=2.6.4;;
+
+cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
+gunzip cmake-${cmake_version}.tar.gz
+tar xvf cmake-${cmake_version}.tar
+
+cd cmake-${cmake_version}; {
+    ./bootstrap
+    make
+    sudo make install
+    
+#    cmake . -DCMAKE_INSTALL_PREFIX=/usr
+#    cpack -G $PIPOL_CPACK_G
+    
+#    sudo -H -u $PIPOL_USER mkdir -p $PIPOL_HOMEDIR/$PIPOL_PACK_EXT
+#    sudo -H -u $PIPOL_USER cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/$PIPOL_PACK_EXT/$cmake_pipol_package
+}; cd -
+
+
