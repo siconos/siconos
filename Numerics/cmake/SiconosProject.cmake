@@ -86,6 +86,7 @@ MACRO(SICONOS_PROJECT
   INCLUDE(CheckSymbolExists)
   INCLUDE(CheckFunctionExists)
   INCLUDE(CheckIncludeFileCXX)
+  INCLUDE(CheckIncludeFile)
 
   # Compilers environment
   IF(CMAKE_C_COMPILER)
@@ -98,17 +99,10 @@ MACRO(SICONOS_PROJECT
     INCLUDE(TestCXXAcceptsFlag)
   ENDIF(CMAKE_CXX_COMPILER)
 
-# IF(CMAKE_Fortran_COMPILER)
-#    INCLUDE(fortran)
-#    INCLUDE(FortranLibraries)
-#  ENDIF(CMAKE_Fortran_COMPILER)
+  # check some headers
+  CHECK_INCLUDE_FILE(time.h HAVE_TIME_H)
+  CHECK_INCLUDE_FILE(sys/times.h HAVE_SYSTIMES_H)
      
-  MESSAGE("SYSTEM NAME = " ${CMAKE_SYSTEM} )   
-  MESSAGE("SYSTEM NAME = " ${CMAKE_OSX_ARCHITECTURES} ) 
-  MESSAGE("SYSTEM NAME = " ${CMAKE_OSX_SYSROOT} ) 
-
-  SET(CMAKE_Fortran_FLAGS	"-arch x86_64")		
-
   # Some http://pipol.inria.fr configurations
 
   # system configuration directory
