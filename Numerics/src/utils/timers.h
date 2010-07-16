@@ -24,9 +24,7 @@
   \brief A common interface to different timers, see test/testop3x3.c for examples
 */
 
-/* in the sources */
-#define HAVE_FFTW_CYCLE_H
-
+#define _BSD_SOURCE
 
 #ifdef WITH_TIMER
 #if(                               \
@@ -37,7 +35,11 @@
   !defined(TIMER_FFTW_CYCLE) &&    \
   !defined(TIMER_SYSTIMES))
 /* the default timer */
-#define TIMER_FFTW_CYCLE 1
+#ifdef HAVE_TIME_H
+#define TIMER_CLOCK_GETTIME 1
+#else
+#undef WITH_TIMER
+#endif
 #endif
 #endif
 
@@ -127,7 +129,7 @@
 
 #endif
 
-#if defined(TIMER_CLOCK_GETTIME)
+#if defined(TIMER_CLOCK_GETTIME) && defined(_POSIX_TIMERS)
 #define DECL_TIMER DECL_TIMER_CLOCK_GETTIME
 #define START_TIMER START_TIMER_CLOCK_GETTIME
 #define STOP_TIMER STOP_TIMER_CLOCK_GETTIME
