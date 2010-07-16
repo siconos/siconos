@@ -22,9 +22,12 @@
 #include <stdio.h>
 #include <math.h>
 #include "Friction_cst.h"
+
+typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
+
 //#define VERBOSE_DEBUG
 
-//#define OPTI_RHO
+#define OPTI_RHO
 
 /*Static variables */
 
@@ -405,263 +408,6 @@ void frictionContact3D_AC_free()
 
 }
 
-
-int OldAlartCurnierNewton(FrictionContactProblem* localproblem, double * reactionBlock, int *iparam, double *dparam)
-{
-
-
-  double MU = localproblem->mu[0];
-  double * qLocal = localproblem->q;
-  double * MLocal = localproblem->M->matrix0;
-
-
-
-  int ITMAX = iparam[0];
-  int i, j, inew, INEWTON;
-  int STATUS;
-
-
-
-  double TOL = dparam[0];
-  double RVN, RVT, RVS, RV, RV1, RV3;
-  double PhiT4, PhiS4, Phi3;
-  double Threshold, DET, DET1;
-  double d1, d2, d3, AA, BB, CC;
-  double ERW, WREF;
-
-  double Rloci[3], WRloc[3], WRloci[3], Rerror[3], Verror[3], Rloc[3], S[3];
-  double A[3][3], AWB[3][3], W[3][3];
-  Rloc[0] = reactionBlock[1];
-  S[0] = qLocal[1];
-  Rloc[1] = reactionBlock[2];
-  S[1] = qLocal[2];
-  Rloc[2] = reactionBlock[0];
-  S[2] = qLocal[0];
-  W[2][2] =  MLocal[0 + 0 * 3];
-  W[2][1] =  MLocal[0 + 2 * 3];
-  W[2][0] =  MLocal[0 + 1 * 3];
-  W[1][2] =  MLocal[2 + 0 * 3];
-  W[1][1] =  MLocal[2 + 2 * 3];
-  W[1][0] =  MLocal[2 + 1 * 3];
-  W[0][2] =  MLocal[1 + 0 * 3];
-  W[0][1] =  MLocal[1 + 2 * 3];
-  W[0][0] =  MLocal[1 + 1 * 3];
-#ifdef VERBOSE_DEBUG
-  printf("Initial conditions \n");
-  printf("RN = %le\n", Rloc[2]);
-  printf("RT = %le\n", Rloc[0]);
-  printf("RS = %le\n", Rloc[1]);
-
-  printf("WNN = %le\n", W[2][2]);
-  printf("WNT = %le\n", W[2][0]);
-  printf("WNS = %le\n", W[2][1]);
-  printf("WTT = %le\n", W[0][0]);
-  printf("WTS = %le\n", W[0][1]);
-  printf("WSS = %le\n", W[1][1]);
-#endif
-
-  double RhoN;
-  double RhoT;
-  double SW;
-  double DW;
-
-  SW = W[0][0] + W[1][1];
-
-  DW = SW * SW - 4.0 * (W[0][0] * W[1][1] - W[1][0] * W[0][1]);
-
-  if (DW > 0.0) DW = sqrt(DW);
-  else DW = 0.0;
-
-  RhoN = 1.0 / W[2][2];
-  RhoT = 2.0 * (SW - DW) / ((SW + DW) * (SW + DW));
-
-  for (i = 0 ; i < 3 ; ++i)  WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
-
-
-  for (inew = 0 ; inew < ITMAX ; ++inew)
-  {
-#ifdef VERBOSE_DEBUG
-    printf("-----------------------------------    AlartCurnierNewton iteration = %i \n", inew);
-#endif
-    for (i = 0 ; i < 3 ; ++i)
-    {
-      WRloci[i] =  WRloc[i];
-      Rloci[i]  =  Rloc[i];
-      for (j = 0 ; j < 3 ; ++j)
-      {
-        AWB[i][j] = 0.0;
-        A[i][j] = 0.0;
-      }
-    }
-    /* On cherche à exprimer la matrice gradient:
-     * Dphi=| I  -W  |
-     *      | Ap  Bp |
-     * p étant l'indice inew.
-     * On effectue tour à tour les projections sur le cone
-     * positif et sur le cone de Coulomb pour exprimer les différentes
-     * valeurs des matrices Ap et Bp.
-     */
-
-    RVN = Rloc[2] - RhoN * (WRloc[2] + S[2]);
-
-    if (RVN >= 0.0)
-    {
-
-      /* Projection sur le cone positif */
-
-      Phi3 = RhoN * (WRloc[2] + S[2]);
-
-      for (i = 0 ; i < 3 ; ++i) AWB[2][i] = RhoN * W[2][i];
-      STATUS = 1;
-    }
-    else
-    {
-      Phi3 = Rloc[2];
-      AWB[2][2] = 1.0;
-      AWB[2][1] = 0.0;
-      AWB[2][0] = 0.0;
-      STATUS = 0;
-    }
-#ifdef VERBOSE_DEBUG
-    printf("STATUS =%i\n", STATUS);
-    printf("Phi3 =%le\n", Phi3);
-#endif
-    RVT = Rloc[1] - RhoT * (WRloc[1] + S[1]);
-    RVS = Rloc[0] - RhoT * (WRloc[0] + S[0]);
-
-    RV = sqrt(RVT * RVT + RVS * RVS);
-
-    Threshold = MU * Rloc[2];
-
-    if ((RV < Threshold) || (RV < 1.e-20))
-    {
-
-      PhiT4 = RhoT * (WRloc[1] + S[1]);
-      PhiS4 = RhoT * (WRloc[0] + S[0]);
-
-      for (i = 0 ; i < 2 ; ++i)
-        for (j = 0 ; j < 3 ; ++j)
-          AWB[i][j] = RhoT * W[i][j];
-      STATUS = 1;
-    }
-    else
-    {
-
-      RV1 = 1.0 / RV;
-      PhiT4 = Rloc[1] - Threshold * RVT * RV1;
-      PhiS4 = Rloc[0] - Threshold * RVS * RV1;
-
-      AWB[0][2] = -MU * RVS * RV1;
-      AWB[1][2] = -MU * RVT * RV1;
-
-      RV3 = RV1 * RV1 * RV1;
-
-      A[1][1] = Threshold * (RV - RVS * RVS) * RV3;
-      A[1][0] = -Threshold * RV3 * RVT * RVS;
-      A[0][1] = A[1][0];
-      A[0][0] = Threshold * (RV - RVT * RVT) * RV3;
-
-      for (i = 0 ; i < 2 ; ++i) AWB[i][i] = 1.0 - A[i][i];
-      AWB[1][0] = - A[1][0];
-      AWB[0][1] = - A[0][1];
-
-      for (i = 0 ; i < 2 ; ++i)
-        for (j = 0 ; j < 2 ; ++j)
-          A[i][j] = RhoT * A[i][j];
-
-      for (i = 0 ; i < 2 ; ++i)
-        for (j = 0 ; j < 2 ; ++j) AWB[i][j] += A[i][0] * W[0][j] + A[i][1] * W[1][j];
-      STATUS = 2;
-    }
-#ifdef VERBOSE_DEBUG
-    printf("STATUS =%i\n", STATUS);
-    printf("PhiT4 =%le\n", PhiT4);
-    printf("PhiS4 =%le\n", PhiS4);
-#endif
-
-    //
-    d1 = AWB[1][1] * AWB[2][2] - AWB[1][2] * AWB[2][1];
-    d2 = AWB[1][0] * AWB[2][2] - AWB[2][0] * AWB[1][2];
-    d3 = AWB[1][0] * AWB[2][1] - AWB[2][0] * AWB[1][1];
-
-    DET = AWB[0][0] * d1 - AWB[0][1] * d2 + AWB[0][2] * d3;
-
-    if (fabs(DET) < 1.e-20)
-    {
-      printf("DET NULL\n");
-    }
-#ifdef VERBOSE_DEBUG
-    printf("AWB[%i][%i] = %le\t", 0, 0, AWB[2][2]);
-    printf("AWB[%i][%i] = %le\t", 0, 1, AWB[2][0]);
-    printf("AWB[%i][%i] = %le\t", 0, 2, AWB[2][1]);
-    printf("\n");
-    printf("AWB[%i][%i] = %le\t", 1, 0, AWB[0][2]);
-    printf("AWB[%i][%i] = %le\t", 1, 1, AWB[0][0]);
-    printf("AWB[%i][%i] = %le\t", 1, 2, AWB[0][1]);
-    printf("\n");
-    printf("AWB[%i][%i] = %le\t", 2, 0, AWB[1][2]);
-    printf("AWB[%i][%i] = %le\t", 2, 1, AWB[1][0]);
-    printf("AWB[%i][%i] = %le\t", 2, 2, AWB[1][1]);
-    printf("\n");
-#endif
-    DET1 = 1.0 / DET;
-
-    AA
-      = (AWB[0][1] * AWB[1][2] - AWB[1][1] * AWB[0][2]) * PhiS4
-        - (AWB[0][0] * AWB[1][2] - AWB[1][0] * AWB[0][2]) * PhiT4
-        + (AWB[0][0] * AWB[1][1] - AWB[1][0] * AWB[0][1]) * Phi3;
-
-    //  Rloc[2] = fmax(0.0 , Rloc[2] - AA*DET1);
-    Rloc[2] =  Rloc[2] - AA * DET1;
-
-    BB
-      = -(AWB[0][1] * AWB[2][2] - AWB[2][1] * AWB[0][2]) * PhiS4
-        + (AWB[0][0] * AWB[2][2] - AWB[2][0] * AWB[0][2]) * PhiT4
-        - (AWB[0][0] * AWB[2][1] - AWB[2][0] * AWB[0][1]) * Phi3;
-
-    Rloc[1] = Rloc[1] - BB * DET1;
-
-    CC = d1 * PhiS4 - d2 * PhiT4 + d3 * Phi3;
-
-    Rloc[0] = Rloc[0] - CC * DET1;
-#ifdef VERBOSE_DEBUG
-    printf("RN = %le\n", Rloc[2]);
-    printf("RT = %le\n", Rloc[0]);
-    printf("RS = %le\n", Rloc[1]);
-#endif
-    for (i = 0 ; i < 3 ; ++i) WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
-
-    WREF = 0.0;
-    ERW  = 0.0;
-
-    for (i = 0 ; i < 3 ; ++i)
-    {
-      Rerror[i] = Rloci[i] - Rloc[i];
-      Verror[i] = WRloci[i] - WRloc[i];
-      ERW  += Rerror[i] * Verror[i];
-      WREF += WRloc[i] * Rloci[i];
-    }
-
-    if (WREF < 1.e-20) WREF = 1.0;
-    ERW = ERW / WREF;
-
-    INEWTON = inew + 1;
-    if (fabs(ERW) < TOL)  break;
-  }
-  if (verbose > 1)
-  {
-    printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", INEWTON, ERW);
-  }
-
-  dparam[1] = ERW;
-  reactionBlock[0] = Rloc[2];
-  reactionBlock[1] = Rloc[0];
-  reactionBlock[2] = Rloc[1];
-  if (fabs(ERW) > TOL * TOL)  return 1;
-  else return 0;
-
-
-}
 int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
@@ -690,218 +436,144 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
   return 0;
 }
 
-int TruncatedCylinderAlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
-/* int AlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam) */
+
+void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
-
-  double mu = localproblem->mu[0];
-  double * qLocal = localproblem->q;
-  double * MLocal = localproblem->M->matrix0;
-
-
-
-
-  double Tol = dparam[0];
-  double itermax = iparam[0];
-  int i, j, k, inew;
-  double velocity[3];
-  double A[3][3];
-  A[0][1] = 0.0;
-  A[0][2] = 0.0;
-  A[1][0] = 0.0;
-  A[2][0] = 0.0;
-  double B[3][3];
-  B[0][1] = 0.0;
-  B[0][2] = 0.0;
-
-
-  double AWplusB[3][3];
-
-
-  double RhoN = 1.0;
-  double RhoT = 1.0;
-#ifdef OPTI_RHO
-  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
-
-  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-
-  if (dw > 0.0) dw = sqrt(dw);
-  else dw = 0.0;
-
-  RhoN = 1.0 / MLocal[0 + 0 * 3];
-  RhoT = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
-#ifdef VERBOSE_DEBUG
-  printf("sw=%le = ", sw);
-  printf("dw=%le = ", dw);
-  printf("RhoN=%le = ", RhoN);
-  printf("RhoT=%le\n", RhoT);
-  printf("\n");
-#endif
-#endif
-
-  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                          + MLocal[i + 1 * 3] * R[1]
-                                          + MLocal[i + 2 * 3] * R[2] ;
-#ifdef VERBOSE_DEBUG
-  printf("velocity =\t");
-  for (i = 0; i < 3; i++) printf("velocity[%i]= %le\t", i, velocity[i]);
-  printf("\n");
-#endif
-
-  double RVN, RVT, RVS, RV, RV1, RV3, DET, DET1;
-  double ResN, ResT, ResS, Radius;
-  double d1, d2, d3, AA, BB, CC;
-  double GammaTT, GammaTS, GammaST, GammaSS;
+  double RVN, RVT, RVS;
+  double RhoN = rho[0];
+  double RhoT = rho[1];
+  double Radius, RV, RV1, RV3, GammaTT, GammaTS, GammaST, GammaSS;
 
   RVN = R[0] - RhoN * velocity[0];
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
   Radius = mu * R[0];
-#ifdef VERBOSE_DEBUG
-  printf("RN = %le\t", R[0]);
-  printf("RT = %le\t", R[1]);
-  printf("RS = %le\n", R[2]);
-#endif
-  d1 = MLocal[1 + 1 * 3] * MLocal[2 + 2 * 3] - MLocal[1 + 2 * 3] * MLocal[2 + 1 * 3];
-  d2 = MLocal[1 + 0 * 3] * MLocal[2 + 2 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 2 * 3];
-  d3 = MLocal[1 + 0 * 3] * MLocal[2 + 1 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 1 * 3];
 
-  DET = MLocal[0 + 0 * 3] * d1 - MLocal[0 + 1 * 3] * d2 + MLocal[0 + 2 * 3] * d3;
-#ifdef VERBOSE_DEBUG
-  printf("DET = %le\n", DET);
-#endif
-  if (fabs(DET) < 1.e-20)
+
+
+  if (RVN >= 0.0)
   {
-    printf("DET NULL\n");
-    exit(EXIT_FAILURE);
+#ifdef VERBOSE_DEBUG
+    printf("Normal part in the cone\n");
+#endif
+    F[0] = RhoN * (velocity[0]);
+    if (A && B)
+    {
+      A[0 + 3 * 0] =  RhoN;
+      B[0 + 3 * 0] = 0.0;
+    }
+  }
+  else
+  {
+#ifdef VERBOSE_DEBUG
+    printf("Normal part out the cone\n");
+#endif
+
+    F[0] = R[0];
+    if (A && B)
+    {
+      A[0 + 3 * 0] = 0.0;
+      B[0 + 3 * 0] = 1.0;
+    }
   }
 
-  for (inew = 0 ; inew < itermax ; ++inew)
+  // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
+
+
+#ifdef VERBOSE_DEBUG
+  printf("Radius=%le\n", Radius);
+  printf("RV=%le\n", RV);
+#endif
+  if (RV < Radius) // We are in the disk and Radius is positive
   {
-
-
-
-    // Compute the value of the Alart--Curnier Function and its gradient for the normal part
-
-
-    if (RVN >= 0.0)
-    {
 #ifdef VERBOSE_DEBUG
-      printf("Normal part in the cone\n");
+    printf("We are in the disk\n");
 #endif
-      ResN = RhoN * (velocity[0]);
-      A[0][0] =  RhoN;
-      B[0][0] = 0.0;
+    F[1] = RhoT * (velocity[1]);
+    F[2] = RhoT * (velocity[2]);
+    if (A && B)
+    {
+      A[1 + 3 * 1] = RhoT;
+      A[1 + 3 * 2] = 0.0;
+      A[2 + 3 * 1] = 0.0;
+      A[2 + 3 * 2] = RhoT;
+      B[1 + 3 * 0] = 0.0;
+      B[1 + 3 * 1] = 0.0;
+      B[1 + 3 * 2] = 0.0;
+      B[2 + 3 * 0] = 0.0;
+      B[2 + 3 * 1] = 0.0;
+      B[2 + 3 * 2] = 0.0;
     }
-    else
+  }
+  else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
+  {
+#ifdef VERBOSE_DEBUG
+    printf("We are out the disk and Radius is positive\n");
+#endif
+    RV1 = 1.0 / RV;
+    F[1] = R[1] - Radius * RVT * RV1;
+    F[2] = R[2] - Radius * RVS * RV1;
+    if (A && B)
     {
-#ifdef VERBOSE_DEBUG
-      printf("Normal part out the cone\n");
-#endif
-
-      ResN = R[0];
-      A[0][0] = 0.0;
-      B[0][0] = 1.0;
-    }
-
-    // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
-
-
-#ifdef VERBOSE_DEBUG
-    printf("Radius=%le\n", Radius);
-    printf("RV=%le\n", RV);
-#endif
-    if (RV < Radius) // We are in the disk and Radius is positive
-    {
-#ifdef VERBOSE_DEBUG
-      printf("We are in the disk\n");
-#endif
-      ResT = RhoT * (velocity[1]);
-      ResS = RhoT * (velocity[2]);
-      A[1][1] = RhoT;
-      A[1][2] = 0.0;
-      A[2][1] = 0.0;
-      A[2][2] = RhoT;
-      B[1][0] = 0.0;
-      B[1][1] = 0.0;
-      B[1][2] = 0.0;
-      B[2][0] = 0.0;
-      B[2][1] = 0.0;
-      B[2][2] = 0.0;
-    }
-    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
-    {
-#ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is positive\n");
-#endif
-      RV1 = 1.0 / RV;
-      ResT = R[1] - Radius * RVT * RV1;
-      ResS = R[2] - Radius * RVS * RV1;
-
       RV3 = RV1 * RV1 * RV1;
       GammaTT = RV1 - RVT * RVT * RV3;
       GammaTS =  - RVT * RVS * RV3;
       GammaST =  GammaTS;
       GammaSS = RV1 - RVS * RVS * RV3;
 
-      A[1][1] = GammaTT * RhoT * Radius;
+      A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
-      A[1][2] = GammaTS * RhoT * Radius;
-      A[2][1] = GammaST * RhoT * Radius;
+      A[1 + 3 * 2] = GammaTS * RhoT * Radius;
+      A[2 + 3 * 1] = GammaST * RhoT * Radius;
 
-      A[2][2] = GammaSS * RhoT * Radius;
+      A[2 + 3 * 2] = GammaSS * RhoT * Radius;
 
-      B[1][0] = -mu * RVT * RV1;
+      B[1 + 3 * 0] = -mu * RVT * RV1;
 
-      B[1][1] = 1.0 - GammaTT * Radius ;
-      B[1][2] = - GammaTS  * Radius ;
+      B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
+      B[1 + 3 * 2] = - GammaTS  * Radius ;
 
-      B[2][0] = -mu * RVS * RV1;
+      B[2 + 3 * 0] = -mu * RVS * RV1;
 
-      B[2][1] = - GammaST  * Radius;
-      B[2][2] = 1.0 - GammaSS * Radius;
+      B[2 + 3 * 1] = - GammaST  * Radius;
+      B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
     }
-    else // We are out the disk and Radius is negative
-    {
+  }
+  else // We are out the disk and Radius is negative
+  {
 #ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is negative\n");
+    printf("We are out the disk and Radius is negative\n");
 #endif
 
-      /*Version original */
-      ResT = R[1] ;
-      ResS = R[2] ;
-      A[1][1] = 0.0;
-      A[1][2] = 0.0;
-      A[2][1] = 0.0;
-      A[2][2] = 0.0;
-
-      B[1][0] = 0.0;
-      B[1][1] = 1.0;
-      B[1][2] = 0.0;
-      B[2][0] = 0.0;
-      B[2][1] = 0.0;
-      B[2][2] = 1.0;
-    }
-
-    for (i = 0; i < 3; i++)
+    /*Version original */
+    F[1] = R[1] ;
+    F[2] = R[2] ;
+    if (A && B)
     {
-      for (j = 0; j < 3; j++)
-      {
-        AWplusB[i][j] = 0.0;
-        for (k = 0; k < 3; k++)
-        {
-          AWplusB[i][j] += A[i][k] * MLocal[k + j * 3];
-        }
-        AWplusB[i][j] += B[i][j];
-      }
+      A[1 + 3 * 1] = 0.0;
+      A[1 + 3 * 2] = 0.0;
+      A[2 + 3 * 1] = 0.0;
+      A[2 + 3 * 2] = 0.0;
+
+      B[1 + 3 * 0] = 0.0;
+      B[1 + 3 * 1] = 1.0;
+      B[1 + 3 * 2] = 0.0;
+      B[2 + 3 * 0] = 0.0;
+      B[2 + 3 * 1] = 0.0;
+      B[2 + 3 * 2] = 1.0;
     }
+  }
+
 #ifdef VERBOSE_DEBUG
+
+  if (A && B)
+  {
     for (int l = 0; l < 3; l++)
     {
       for (int k = 0; k < 3; k++)
       {
-        printf("A[%i][%i] = %le\t", l, k, A[l][k]);
+        printf("A[%i+3*%i] = %le\t", l, k, A[l + 3 * k]);
       }
       printf("\n");
     }
@@ -909,7 +581,7 @@ int TruncatedCylinderAlartCurnierNewton(FrictionContactProblem* localproblem, do
     {
       for (int k = 0; k < 3; k++)
       {
-        printf("B[%i][%i] = %le\t", l, k, B[l][k]);
+        printf("B[%i+3*%i] = %le\t", l, k, B[l + 3 * k]);
       }
       printf("\n");
     }
@@ -920,262 +592,109 @@ int TruncatedCylinderAlartCurnierNewton(FrictionContactProblem* localproblem, do
       {
         if (k == l)  diago = 1.0;
         else diago = 0.0;
-        printf("I-B[%i][%i] = %le\t", l, k, diago - B[l][k]);
+        printf("I-B[%i+3*%i] = %le\t", l, k, diago - B[l + 3 * k]);
       }
       printf("\n");
     }
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("AWplusB[%i][%i] = %le\t", l, k, AWplusB[l][k]);
-      }
-      printf("\n");
-    }
-    printf("ResN = %le\t", ResN);
-    printf("ResT = %le\t", ResT);
-    printf("ResS = %le\n", ResS);
-#endif
-    d1 = AWplusB[1][1] * AWplusB[2][2] - AWplusB[1][2] * AWplusB[2][1];
-    d2 = AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2];
-    d3 = AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1];
-
-    DET = AWplusB[0][0] * d1 - AWplusB[0][1] * d2 + AWplusB[0][2] * d3;
-#ifdef VERBOSE_DEBUG
-    printf("DET = %le\n", DET);
-#endif
-    if (fabs(DET) < 1.e-20)
-    {
-      printf("DET NULL\n");
-      exit(EXIT_FAILURE);
-    }
-
-    DET1 = 1.0 / DET;
-    AA = +(AWplusB[1][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[1][2]) * ResN
-         - (AWplusB[0][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[0][2]) * ResT
-         + (AWplusB[0][1] * AWplusB[1][2] - AWplusB[1][1] * AWplusB[0][2]) * ResS ;
-
-    BB = -(AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2]) * ResN
-         + (AWplusB[0][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[0][2]) * ResT
-         - (AWplusB[0][0] * AWplusB[1][2] - AWplusB[1][0] * AWplusB[0][2]) * ResS ;
-
-
-    CC = +(AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1]) * ResN
-         - (AWplusB[0][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[0][1]) * ResT
-         + (AWplusB[0][0] * AWplusB[1][1] - AWplusB[1][0] * AWplusB[0][1]) * ResS ;
-
-    R[0] = R[0] - AA * DET1;
-    R[1] = R[1] - BB * DET1;
-    R[2] = R[2] - CC * DET1;
-#ifdef VERBOSE_DEBUG
-    printf("RN = %le\n", R[0]);
-    printf("RT = %le\n", R[1]);
-    printf("RS = %le\n", R[2]);
-#endif
-    // compute new residue
-
-    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                            + MLocal[i + 1 * 3] * R[1] +
-                                            + MLocal[i + 2 * 3] * R[2] ;
-
-
-    RVN = R[0] - RhoN * velocity[0];
-    RVT = R[1] - RhoT * velocity[1];
-    RVS = R[2] - RhoT * velocity[2];
-    RV = sqrt(RVT * RVT + RVS * RVS);
-    Radius = mu * R[0];
-    if (RVN >= 0.0)
-    {
-      ResN = RhoN * (velocity[0]);
-    }
-    else
-    {
-      ResN = R[0];
-    }
-    if (RV < Radius) // We are in the disk and Radius is postive
-    {
-      ResT = RhoT * (velocity[1]);
-      ResS = RhoT * (velocity[2]);
-    }
-    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
-    {
-      RV1 = 1.0 / RV;
-      ResT = R[1] - Radius * RVT * RV1;
-      ResS = R[2] - Radius * RVS * RV1;
-    }
-    else // We are out the disk and Radius is negative
-    {
-      ResT = R[1] ;
-      ResS = R[2] ;
-    }
-
-    dparam[1] = 0.5 * (ResN * ResN + ResT * ResT + ResS * ResS);
-
-
-    if (verbose > 1)
-    {
-      printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", inew, dparam[1]);
-    }
-    if (dparam[1] < Tol)
-    {
-      return 0;
-
-    }
-
-
   }
-
-
-  return 1;
+#endif
+  printf("F[0] = %le\t", F[0]);
+  printf("F[1] = %le\t", F[1]);
+  printf("F[2] = %le\n", F[2]);
 
 
 
 }
 
-/* int CompleteAlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam) */
-int AlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
+
+
+
+
+void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
 
-  double mu = localproblem->mu[0];
-  double * qLocal = localproblem->q;
-  double * MLocal = localproblem->M->matrix0;
-
-  double Tol = dparam[0];
-  double itermax = iparam[0];
-  int i, j, k, inew;
-  double velocity[3];
-  double A[3][3];
-  A[0][1] = 0.0;
-  A[0][2] = 0.0;
-  A[1][0] = 0.0;
-  A[2][0] = 0.0;
-  double B[3][3];
-  B[0][1] = 0.0;
-  B[0][2] = 0.0;
-
-  double AWplusB[3][3];
-
-
-  double RhoN = 1.0;
-  double RhoT = 1.0;
-#ifdef OPTI_RHO
-  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
-
-  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-
-  if (dw > 0.0) dw = sqrt(dw);
-  else dw = 0.0;
-
-  RhoN = 1.0 / MLocal[0 + 0 * 3];
-  RhoT = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
-#ifdef VERBOSE_DEBUG
-  printf("sw=%le = ", sw);
-  printf("dw=%le = ", dw);
-  printf("RhoN=%le = ", RhoN);
-  printf("RhoT=%le\n", RhoT);
-  printf("\n");
-#endif
-#endif
-  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                          + MLocal[i + 1 * 3] * R[1]
-                                          + MLocal[i + 2 * 3] * R[2] ;
-
-
-  double RVN, RVT, RVS, RV, RV1, RV3, DET, DET1;
-  double ResN, ResT, ResS, Radius;
-  double d1, d2, d3, AA, BB, CC;
-  double GammaTT, GammaTS, GammaST, GammaSS;
+  double RVN, RVT, RVS;
+  double RhoN = rho[0];
+  double RhoT = rho[1];
+  double Radius, RV, RV1, RV3, GammaTT, GammaTS, GammaST, GammaSS;
 
   RVN = R[0] - RhoN * velocity[0];
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
   Radius = mu * R[0];
-#ifdef VERBOSE_DEBUG
-  printf("RN = %le\n", R[0]);
-  printf("RT = %le\n", R[1]);
-  printf("RS = %le\n", R[2]);
-#endif
-  d1 = MLocal[1 + 1 * 3] * MLocal[2 + 2 * 3] - MLocal[1 + 2 * 3] * MLocal[2 + 1 * 3];
-  d2 = MLocal[1 + 0 * 3] * MLocal[2 + 2 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 2 * 3];
-  d3 = MLocal[1 + 0 * 3] * MLocal[2 + 1 * 3] - MLocal[2 + 0 * 3] * MLocal[1 + 1 * 3];
 
-  DET = MLocal[0 + 0 * 3] * d1 - MLocal[0 + 1 * 3] * d2 + MLocal[0 + 2 * 3] * d3;
-#ifdef VERBOSE_DEBUG
-  printf("DET = %le\n", DET);
-#endif
-  if (fabs(DET) < 1.e-20)
+  // Compute the value of the Alart--Curnier Function and its gradient for the normal part
+
+  if (RVN >= 0.0)
   {
-    printf("DET NULL\n");
-    exit(EXIT_FAILURE);
+    F[0] = RhoN * (velocity[0]);
+    if (A && B)
+    {
+      A[0 + 3 * 0] =  RhoN;
+      B[0 + 3 * 0] = 0.0;
+    }
+  }
+  else
+  {
+    F[0] = R[0];
+    if (A && B)
+    {
+      A[0 + 3 * 0] = 0.0;
+      B[0 + 3 * 0] = 1.0;
+    }
   }
 
-  for (inew = 0 ; inew < itermax ; ++inew)
+  // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
+
+
+#ifdef VERBOSE_DEBUG
+  printf("Radius=%le\n", Radius);
+  printf("RV=%le\n", RV);
+#endif
+  if (RV < Radius || RV < 1e-20)  // We are in the disk
   {
-
-
-
-    // Compute the value of the Alart--Curnier Function and its gradient for the normal part
-
-    if (RVN >= 0.0)
-    {
-      ResN = RhoN * (velocity[0]);
-      A[0][0] =  RhoN;
-      B[0][0] = 0.0;
-    }
-    else
-    {
-      ResN = R[0];
-      A[0][0] = 0.0;
-      B[0][0] = 1.0;
-    }
-
-    // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
-
-
 #ifdef VERBOSE_DEBUG
-    printf("Radius=%le\n", Radius);
-    printf("RV=%le\n", RV);
+    printf("We are in the disk \n");
 #endif
-    if (RV < Radius || RV < 1e-20)  // We are in the disk
+    F[1] = RhoT * (velocity[1]);
+    F[2] = RhoT * (velocity[2]);
+    if (A && B)
     {
-#ifdef VERBOSE_DEBUG
-      printf("We are in the disk \n");
-#endif
-      ResT = RhoT * (velocity[1]);
-      ResS = RhoT * (velocity[2]);
-      A[1][1] = RhoT;
-      A[1][2] = 0.0;
-      A[2][1] = 0.0;
-      A[2][2] = RhoT;
-      B[1][0] = 0.0;
-      B[1][1] = 0.0;
-      B[1][2] = 0.0;
-      B[2][0] = 0.0;
-      B[2][1] = 0.0;
-      B[2][2] = 0.0;
+      A[1 + 3 * 1] = RhoT;
+      A[1 + 3 * 2] = 0.0;
+      A[2 + 3 * 1] = 0.0;
+      A[2 + 3 * 2] = RhoT;
+      B[1 + 3 * 0] = 0.0;
+      B[1 + 3 * 1] = 0.0;
+      B[1 + 3 * 2] = 0.0;
+      B[2 + 3 * 0] = 0.0;
+      B[2 + 3 * 1] = 0.0;
+      B[2 + 3 * 2] = 0.0;
     }
-    else  // We are out the disk
-    {
+  }
+  else  // We are out the disk
+  {
 #ifdef VERBOSE_DEBUG
-      printf("We are out the disk\n");
+    printf("We are out the disk\n");
 #endif
-      /*        RV1 = 1.0/RV; */
-      /*        ResT = R[1] - Radius*RVT*RV1; */
-      /*        ResS = R[2] - Radius*RVS*RV1; */
+    /*        RV1 = 1.0/RV; */
+    /*        F[1] = R[1] - Radius*RVT*RV1; */
+    /*        F[2] = R[2] - Radius*RVS*RV1; */
 
 
-      /*        RV3 = RV1*RV1*RV1; */
-      /*        GammaTT = (RV - RVT*RVT)*RV3; */
-      /*        GammaTS =  - RVT*RVS*RV3; */
-      /*        GammaST =  GammaTS; */
-      /*        GammaSS = (RV - RVS*RVS)*RV3; */
+    /*        RV3 = RV1*RV1*RV1; */
+    /*        GammaTT = (RV - RVT*RVT)*RV3; */
+    /*        GammaTS =  - RVT*RVS*RV3; */
+    /*        GammaST =  GammaTS; */
+    /*        GammaSS = (RV - RVS*RVS)*RV3; */
 
 
-      RV1 = 1.0 / RV;
-      ResT = R[1] - Radius * RVT * RV1;
-      ResS = R[2] - Radius * RVS * RV1;
-
+    RV1 = 1.0 / RV;
+    F[1] = R[1] - Radius * RVT * RV1;
+    F[2] = R[2] - Radius * RVS * RV1;
+    if (A && B)
+    {
       RV3 = RV1 * RV1 * RV1;
       GammaTT = RV1 - RVT * RVT * RV3;
       GammaTS =  - RVT * RVS * RV3;
@@ -1183,158 +702,195 @@ int AlartCurnierNewton(FrictionContactProblem* localproblem, double * R, int *ip
       GammaSS = RV1 - RVS * RVS * RV3;
 
 
-      A[1][1] = GammaTT * RhoT * Radius;
+      A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
-      A[1][2] = GammaTS * RhoT * Radius;
+      A[1 + 3 * 2] = GammaTS * RhoT * Radius;
 
-      A[2][1] = GammaST * RhoT * Radius;
-      A[2][2] = GammaSS * RhoT * Radius;
+      A[2 + 3 * 1] = GammaST * RhoT * Radius;
+      A[2 + 3 * 2] = GammaSS * RhoT * Radius;
 
-      B[1][0] = -mu * RVT * RV1;
+      B[1 + 3 * 0] = -mu * RVT * RV1;
 
-      B[1][1] = 1.0 - GammaTT * Radius ;
-      B[1][2] = - GammaTS * Radius ;
+      B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
+      B[1 + 3 * 2] = - GammaTS * Radius ;
 
-      B[2][0] = -mu * RVS * RV1;
+      B[2 + 3 * 0] = -mu * RVS * RV1;
 
-      B[2][1] = - GammaST * Radius;
-      B[2][2] = 1.0 - GammaSS * Radius;
+      B[2 + 3 * 1] = - GammaST * Radius;
+      B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
     }
+  }
 
 
+  printf("F[0] = %le\n", F[0]);
+  printf("F[1] = %le\n", F[1]);
+  printf("F[2] = %le\n", F[2]);
+
+#ifdef VERBOSE_DEBUG
+  if (A && B)
+  {
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("A[%i+3*%i] = %le\t", l, k, A[l + 3 * k]);
+      }
+      printf("\n");
+    }
+    for (int l = 0; l < 3; l++)
+    {
+      for (int k = 0; k < 3; k++)
+      {
+        printf("B[%i+3*%i] = %le\t", l, k, B[l + 3 * k]);
+      }
+      printf("\n");
+    }
+  }
+
+#endif
+}
+void computerho(FrictionContactProblem* localproblem, double * rho)
+{
+  double * MLocal = localproblem->M->matrix0;
+  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
+
+  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+
+  if (dw > 0.0) dw = sqrt(dw);
+  else dw = 0.0;
+
+  rho[0] = 1.0 / MLocal[0 + 0 * 3];
+  rho[1] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+  rho[2] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+
+#ifdef VERBOSE_DEBUG
+  printf("sw=%le = ", sw);
+  printf("dw=%le = ", dw);
+  printf("rho[0]=%le = ", rho[0]);
+  printf("rho[1]=%le\n", rho[1]);
+  printf("rho[2]=%le\n", rho[2]);
+  printf("\n");
+#endif
+}
+
+
+
+
+int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
+{
+  double mu = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
+  double Tol = dparam[0];
+  double itermax = iparam[0];
+
+
+  int i, j, k, inew;
+  double det, d1, d2, d3;
+
+  // store the value fo the function
+  double F[3] = {0., 0., 0.};
+
+  // Store the (sub)-gradient of the function
+  double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  // Set the function for computing F and its gradient
+  // \todo should nbe done in initialization
+  /*    computeNonsmoothFunction  Function= &(computeAlartCurnier); */
+  computeNonsmoothFunction  Function = &(computeAlartCurnierTruncated);
+
+
+  // Value of AW+B
+  double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  // Compute values of Rho (should be here ?)
+  double rho[3] = {1., 1., 1.};
+#ifdef OPTI_RHO
+  computerho(localproblem, rho);
+#endif
+
+  // compute the velocity
+  double velocity[3] = {0., 0., 0.};
+
+  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                          + MLocal[i + 1 * 3] * R[1] +
+                                          + MLocal[i + 2 * 3] * R[2] ;
+
+  for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
+  {
+    //Update function and gradient
+    Function(R, velocity, mu, rho, F, A, B);
+
+    // compute A MLocal +B
     for (i = 0; i < 3; i++)
     {
       for (j = 0; j < 3; j++)
       {
-        AWplusB[i][j] = 0.0;
+        AWplusB[i + 3 * j] = 0.0;
         for (k = 0; k < 3; k++)
         {
-          AWplusB[i][j] += A[i][k] * MLocal[k + j * 3];
+          AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
         }
-        AWplusB[i][j] += B[i][j];
+        AWplusB[i + 3 * j] += B[i + 3 * j];
       }
     }
-#ifdef VERBOSE_DEBUG
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("A[%i][%i] = %le\t", l, k, A[l][k]);
-      }
-      printf("\n");
-    }
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("B[%i][%i] = %le\t", l, k, B[l][k]);
-      }
-      printf("\n");
-    }
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("AWplusB[%i][%i] = %le\t", l, k, AWplusB[l][k]);
-      }
-      printf("\n");
-    }
-    printf("ResN = %le\n", ResN);
-    printf("ResT = %le\n", ResT);
-    printf("ResS = %le\n", ResS);
-#endif
-    d1 = AWplusB[1][1] * AWplusB[2][2] - AWplusB[1][2] * AWplusB[2][1];
-    d2 = AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2];
-    d3 = AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1];
 
-    DET = AWplusB[0][0] * d1 - AWplusB[0][1] * d2 + AWplusB[0][2] * d3;
-#ifdef VERBOSE_DEBUG
-    printf("DET = %le\n", DET);
-#endif
-    if (fabs(DET) < 1.e-20)
+    // Compute its determinant
+    d1 = AWplusB[1 + 1 * 3] * AWplusB[2 + 3 * 2] - AWplusB[1 + 3 * 2] * AWplusB[2 + 3 * 1];
+    d2 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2];
+    d3 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1];
+
+    det = AWplusB[0 + 3 * 0] * d1 - AWplusB[0 + 3 * 1] * d2 + AWplusB[0 + 3 * 2] * d3;
+
+    if (fabs(det) < 1.e-20)
     {
-      printf("DET NULL\n");
+      printf("LocalNonsmoothNewtonSolver : Singular sub-gradient.\n");
       exit(EXIT_FAILURE);
     }
 
-    DET1 = 1.0 / DET;
-    AA = +(AWplusB[1][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[1][2]) * ResN
-         - (AWplusB[0][1] * AWplusB[2][2] - AWplusB[2][1] * AWplusB[0][2]) * ResT
-         + (AWplusB[0][1] * AWplusB[1][2] - AWplusB[1][1] * AWplusB[0][2]) * ResS ;
+    // Solve the linear system
 
-    BB = -(AWplusB[1][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[1][2]) * ResN
-         + (AWplusB[0][0] * AWplusB[2][2] - AWplusB[2][0] * AWplusB[0][2]) * ResT
-         - (AWplusB[0][0] * AWplusB[1][2] - AWplusB[1][0] * AWplusB[0][2]) * ResS ;
+    det = 1.0 / det;
+    double AA = +(AWplusB[1 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[1 + 3 * 2]) * F[0]
+                - (AWplusB[0 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[1]
+                + (AWplusB[0 + 3 * 1] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[2] ;
+
+    double BB = -(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2]) * F[0]
+                + (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[1]
+                - (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[2] ;
 
 
-    CC = +(AWplusB[1][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[1][1]) * ResN
-         - (AWplusB[0][0] * AWplusB[2][1] - AWplusB[2][0] * AWplusB[0][1]) * ResT
-         + (AWplusB[0][0] * AWplusB[1][1] - AWplusB[1][0] * AWplusB[0][1]) * ResS ;
+    double CC = +(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1]) * F[0]
+                - (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[1]
+                + (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 1] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[2] ;
 
-    R[0] = R[0] - AA * DET1;
-    R[1] = R[1] - BB * DET1;
-    R[2] = R[2] - CC * DET1;
-#ifdef VERBOSE_DEBUG
-    printf("RN = %le\n", R[0]);
-    printf("RT = %le\n", R[1]);
-    printf("RS = %le\n", R[2]);
-#endif
+    R[0] = R[0] - AA * det;
+    R[1] = R[1] - BB * det;
+    R[2] = R[2] - CC * det;
+
     // compute new residue
-
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                             + MLocal[i + 1 * 3] * R[1] +
                                             + MLocal[i + 2 * 3] * R[2] ;
 
+    Function(R, velocity, mu, rho, F, NULL, NULL);
 
-    RVN = R[0] - RhoN * velocity[0];
-    RVT = R[1] - RhoT * velocity[1];
-    RVS = R[2] - RhoT * velocity[2];
-    RV = sqrt(RVT * RVT + RVS * RVS);
-    Radius = mu * R[0];
-    if (RVN >= 0.0)
-    {
-      ResN = RhoN * (velocity[0]);
-    }
-    else
-    {
-      ResN = R[0];
-    }
-    if (RV < Radius) // We are in the disk and Radius is postive
-    {
-      ResT = RhoT * (velocity[1]);
-      ResS = RhoT * (velocity[2]);
-    }
-    else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
-    {
-      RV1 = 1.0 / RV;
-      ResT = R[1] - Radius * RVT * RV1;
-      ResS = R[2] - Radius * RVS * RV1;
-    }
-    else // We are out the disk and Radius is negative
-    {
-      ResT = R[1] ;
-      ResS = R[2] ;
-    }
-
-    dparam[1] = 0.5 * (ResN * ResN + ResT * ResT + ResS * ResS);
-
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]); // improve with relative tolerance
 
     if (verbose > 1)
     {
-      printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+      printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
     }
     if (dparam[1] < Tol)
     {
       return 0;
-
     }
 
-
-  }
+  }// End of the Newton iteration
 
 
   return 1;
-
-
 
 }

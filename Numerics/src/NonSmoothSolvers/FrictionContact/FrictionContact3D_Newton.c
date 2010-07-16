@@ -3,7 +3,7 @@
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+2 * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  * Siconos is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -123,7 +123,8 @@ void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double
   int info;
   if (options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
-    info = AlartCurnierNewton(localproblem, reactionBlock, iparam, dparam);
+    info = LocalNonsmoothNewtonSolver(localproblem, reactionBlock, iparam, dparam);
+
   }
   else
   {
