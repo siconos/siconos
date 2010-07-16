@@ -308,8 +308,6 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
   NEW_TEST(FC3Dtest301 FrictionContact3D_test301.c)
-  NEW_TEST(FC3Dtest302 FrictionContact3D_test302.c)
-
 
 
   ## test from the Rover Example
