@@ -308,6 +308,7 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
   NEW_TEST(FC3Dtest301 FrictionContact3D_test301.c)
+  NEW_TEST(FC3Dtest302 FrictionContact3D_test302.c)
 
 
 
@@ -354,9 +355,10 @@ IF(WITH_TESTING)
 
   END_TEST()
 
-  #BEGIN_TEST(utils/test)
+  BEGIN_TEST(utils/test)
   #NEW_TEST(pinvtest testpinv.c)
-  #END_TEST()
+  NEW_TEST(op3x3 testop3x3.c)
+  END_TEST()
 
 ENDIF(WITH_TESTING)
 
