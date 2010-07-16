@@ -566,6 +566,9 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
   }
 
 #ifdef VERBOSE_DEBUG
+  printf("F[0] = %le\t", F[0]);
+  printf("F[1] = %le\t", F[1]);
+  printf("F[2] = %le\n", F[2]);
 
   if (A && B)
   {
@@ -598,9 +601,6 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
     }
   }
 #endif
-  printf("F[0] = %le\t", F[0]);
-  printf("F[1] = %le\t", F[1]);
-  printf("F[2] = %le\n", F[2]);
 
 
 
@@ -722,11 +722,12 @@ void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[
   }
 
 
+
+
+#ifdef VERBOSE_DEBUG
   printf("F[0] = %le\n", F[0]);
   printf("F[1] = %le\n", F[1]);
   printf("F[2] = %le\n", F[2]);
-
-#ifdef VERBOSE_DEBUG
   if (A && B)
   {
     for (int l = 0; l < 3; l++)
@@ -798,8 +799,8 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
   // Set the function for computing F and its gradient
   // \todo should nbe done in initialization
-  /*    computeNonsmoothFunction  Function= &(computeAlartCurnier); */
-  computeNonsmoothFunction  Function = &(computeAlartCurnierTruncated);
+  computeNonsmoothFunction  Function = &(computeAlartCurnier);
+  /*    computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
 
 
   // Value of AW+B

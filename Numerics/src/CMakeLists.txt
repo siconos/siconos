@@ -348,6 +348,8 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test7 PrimalFrictionContact3D_test7.c)
 
   NEW_TEST(PFC3D_test10 PrimalFrictionContact3D_test10.c)
+  NEW_TEST(PFC3D_test11 PrimalFrictionContact3D_test11.c)
+  NEW_TEST(PFC3D_test12 PrimalFrictionContact3D_test12.c)
 
 
   END_TEST()
