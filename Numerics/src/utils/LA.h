@@ -258,7 +258,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_NRHS = NRHS; \
      int C_LDA = LDA; \
      int C_LDB = LDB; \
-     F77NAME(dgels)("N", FCAST(integer,C_M) , FCAST(integer,C_N), FCAST(integer,C_NRHS), FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,B), FCAST(integer, C_LDB), FCASTP(double,C_WORK) ,FCAST(integer,LWORK), FCAST(integer,INFO)); \
+     int C_LWORK = LWORK;                                               \
+     F77NAME(dgels)("N", FCAST(integer,C_M) , FCAST(integer,C_N), FCAST(integer,C_NRHS), FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,B), FCAST(integer, C_LDB), FCASTP(double,C_WORK) ,FCAST(integer,C_LWORK), FCAST(integer,INFO)); \
   })
 #else
 #include <stdio.h>
