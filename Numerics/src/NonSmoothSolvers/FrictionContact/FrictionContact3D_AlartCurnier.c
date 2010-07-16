@@ -27,7 +27,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 
 //#define VERBOSE_DEBUG
 
-#define OPTI_RHO
+//#define OPTI_RHO
 
 /*Static variables */
 
@@ -870,6 +870,324 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     R[0] = R[0] - AA * det;
     R[1] = R[1] - BB * det;
     R[2] = R[2] - CC * det;
+
+    // compute new residue
+    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                            + MLocal[i + 1 * 3] * R[1] +
+                                            + MLocal[i + 2 * 3] * R[2] ;
+
+    Function(R, velocity, mu, rho, F, NULL, NULL);
+
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]); // improve with relative tolerance
+
+    if (verbose > 1)
+    {
+      printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    }
+    if (dparam[1] < Tol)
+    {
+      return 0;
+    }
+
+  }// End of the Newton iteration
+
+
+  return 1;
+
+}
+int  LineSearchGP(FrictionContactProblem* localproblem,
+                  computeNonsmoothFunction  Function,
+                  double * t,
+                  double t_init,
+                  double R[3],
+                  double dR[3],
+                  double *rho,
+                  int LSitermax)
+{
+  double alpha = t_init;
+
+  double inf = 1e20;
+
+  double alphamin = 0.0;
+  double alphamax = inf;
+
+  double m1 = 0.1, m2 = 0.9;
+
+
+  // store the value fo the function
+  double F[3] = {0., 0., 0.};
+
+  // Store the (sub)-gradient of the function
+  double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  double velocity[3] = {0., 0., 0.};
+
+  double mu = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
+  for (int i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+        + MLocal[i + 1 * 3] * R[1] +
+        + MLocal[i + 2 * 3] * R[2] ;
+
+  Function(R, velocity, mu, rho, F, A, B);
+
+
+  // Computation of q(t) and q'(t) for t =0
+
+  double q0 = 0.5 * DDOT(3 , F , 1 , F , 1);
+
+  double tmp[3] = {0., 0., 0.};
+
+  // Value of AW+B
+  double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  // compute A MLocal +B
+  for (int i = 0; i < 3; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      AWplusB[i + 3 * j] = 0.0;
+      for (int k = 0; k < 3; k++)
+      {
+        AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
+      }
+      AWplusB[i + 3 * j] += B[i + 3 * j];
+    }
+  }
+
+#ifdef VERBOSE_DEBUG
+  for (int l = 0; l < 3; l++)
+  {
+    for (int k = 0; k < 3; k++)
+    {
+      printf("AWplusB[%i+3*%i] = %le\t", l, k, AWplusB[l + 3 * k]);
+    }
+    printf("\n");
+  }
+#endif
+
+  for (int i = 0; i < 3; i++)
+  {
+    tmp[i] = 0.0;
+    for (int j = 0; j < 3; j++)
+    {
+      tmp[i] += AWplusB[i + 3 * j] * dR[j]  ;
+    }
+  }
+
+
+
+
+  double dqdt0 = 0.0;
+  for (int i = 0; i < 3; i++)
+  {
+    dqdt0 += F[i] * tmp[i];
+  }
+#ifdef VERBOSE_DEBUG
+  printf("q0 = %12.8e \n", q0);
+  printf("dqdt0 = %12.8e \n", dqdt0);
+  for (int i = 0; i < 3; i++)
+  {
+    printf("tmp[%i] = %12.8e \t", i, tmp[i]);
+  }
+  printf("\n");
+  for (int i = 0; i < 3; i++)
+  {
+    printf("dR[%i] = %12.8e \t", i, dR[i]);
+  }
+  printf("\n");
+#endif
+
+  for (int iter = 0; iter < LSitermax; iter++)
+  {
+
+    for (int i = 0; i < 3; i++)  tmp[i] = R[i] + alpha * dR[i];
+
+    for (int i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * tmp[0] + qLocal[i]
+          + MLocal[i + 1 * 3] * tmp[1] +
+          + MLocal[i + 2 * 3] * tmp[2] ;
+
+    Function(tmp, velocity, mu, rho, F, NULL, NULL);
+
+    double q  = 0.5 * DDOT(3 , F , 1 , F , 1);
+
+    double slope = (q - q0) / alpha;
+
+#ifdef VERBOSE_DEBUG
+    printf("q = %12.8e \n", q);
+    printf("slope = %12.8e \n", slope);
+#endif
+
+
+    int C1 = (slope >= m2 * dqdt0);
+    int C2 = (slope <= m1 * dqdt0);
+
+    if (C1 && C2)
+    {
+#ifdef VERBOSE_DEBUG
+      printf("Sucess in LS: alpha = %12.8e\n", alpha);
+#endif
+      *t = alpha;
+      return 0;
+
+    }
+    else if (!C1)
+    {
+#ifdef VERBOSE_DEBUG
+      printf("LS: alpha too small = %12.8e\t, slope =%12.8e\n", alpha, slope);
+      printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0 , m2 * dqdt0);
+#endif
+      //std::cout << "t = " << t << " is too small : slope = " << slope << ", m2*qp0 = " << m2*qp0 << std::endl;
+      alphamin = alpha;
+    }
+    else     // not(C2)
+    {
+#ifdef VERBOSE_DEBUG
+      printf("LS: alpha too big = %12.8e\t, slope =%12.8e\n", alpha, slope);
+      printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0 , m2 * dqdt0);
+#endif
+      //std::cout << "t = " << t << " is too big : slope = " << slope << ", m1*qp0 = " << m1*qp0 << std::endl;
+      alphamax = alpha;
+    }
+    if (alpha < inf)
+    {
+      alpha = 0.5 * (alphamin + alphamax);
+    }
+    else
+    {
+      alpha = 10 * alpha;
+    }
+
+
+  }
+
+  *t = alpha;
+  return -1;
+}
+
+
+
+int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
+{
+  double mu = localproblem->mu[0];
+  double * qLocal = localproblem->q;
+  double * MLocal = localproblem->M->matrix0;
+
+  double Tol = dparam[0];
+  double itermax = iparam[0];
+  double LSitermax = iparam[1];
+
+
+  int i, j, k, inew;
+  double det, d1, d2, d3;
+
+  // store the value fo the function
+  double F[3] = {0., 0., 0.};
+
+  // Store the (sub)-gradient of the function
+  double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  // store the serach direction
+  double dR[3] = {0., 0., 0.};
+
+  // path length
+  double t = 1.;
+  double t_init = 1.;
+
+  // Set the function for computing F and its gradient
+  // \todo should nbe done in initialization
+  /*      computeNonsmoothFunction  Function= &(computeAlartCurnier);  */
+  computeNonsmoothFunction  Function = &(computeAlartCurnierTruncated);
+
+
+  // Value of AW+B
+  double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+  // Compute values of Rho (should be here ?)
+  double rho[3] = {1., 1., 1.};
+#ifdef OPTI_RHO
+  computerho(localproblem, rho);
+#endif
+
+  // compute the velocity
+  double velocity[3] = {0., 0., 0.};
+
+  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
+                                          + MLocal[i + 1 * 3] * R[1] +
+                                          + MLocal[i + 2 * 3] * R[2] ;
+
+  for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
+  {
+    //Update function and gradient
+    Function(R, velocity, mu, rho, F, A, B);
+
+    // compute A MLocal +B
+    for (i = 0; i < 3; i++)
+    {
+      for (j = 0; j < 3; j++)
+      {
+        AWplusB[i + 3 * j] = 0.0;
+        for (k = 0; k < 3; k++)
+        {
+          AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
+        }
+        AWplusB[i + 3 * j] += B[i + 3 * j];
+      }
+    }
+
+    // Compute its determinant
+    d1 = AWplusB[1 + 1 * 3] * AWplusB[2 + 3 * 2] - AWplusB[1 + 3 * 2] * AWplusB[2 + 3 * 1];
+    d2 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2];
+    d3 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1];
+
+    det = AWplusB[0 + 3 * 0] * d1 - AWplusB[0 + 3 * 1] * d2 + AWplusB[0 + 3 * 2] * d3;
+
+    if (fabs(det) < 1.e-20)
+    {
+      printf("LocalNonsmoothNewtonSolver : Singular sub-gradient.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // Solve the linear system
+
+    det = 1.0 / det;
+    double AA = +(AWplusB[1 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[1 + 3 * 2]) * F[0]
+                - (AWplusB[0 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[1]
+                + (AWplusB[0 + 3 * 1] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[2] ;
+
+    double BB = -(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2]) * F[0]
+                + (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[1]
+                - (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[2] ;
+
+
+    double CC = +(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1]) * F[0]
+                - (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[1]
+                + (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 1] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[2] ;
+
+
+    dR[0] = - AA * det;
+    dR[1] = - BB * det;
+    dR[2] = - CC * det;
+
+
+    // Perform Line Search
+
+    int infoLS = LineSearchGP(localproblem, Function, &t, t_init, R, dR, rho, LSitermax);
+
+
+
+    // upate iterates
+    R[0] = R[0] + t * dR[0];
+    R[1] = R[1] + t * dR[1];
+    R[2] = R[2] + t * dR[2];
+
+
+
+
+
 
     // compute new residue
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]

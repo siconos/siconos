@@ -33,6 +33,7 @@ char  SICONOS_FRICTION_3D_GLOBALAC_STR [] = "F3D_GLOBALAC";
 char  SICONOS_FRICTION_3D_DSFP_STR[] = "F3D_DSFP";
 char  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR[] = "F3D_NCPGlockerFBFixedPoint";
 char  SICONOS_FRICTION_3D_AlartCurnierNewton_STR[] = "F3D_AlartCurnierNewton";
+char  SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR[] = "F3D_DampedAlartCurnierNewton";
 char  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR[] = "F3D_NCPGlockerFBNewton";
 char SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR[] = "F3D_ProjectionOnConeWithDiagonalization";
 char SICONOS_FRICTION_3D_ProjectionOnCone_STR[] = "F3D_ProjectionOnCone";
@@ -44,6 +45,8 @@ char SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR[] = "F3D_ProjectionOnCone
 char SICONOS_FRICTION_3D_PGoC_STR[] = "F3D_PGoC";
 char SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR[] = "F3D_DeSaxceFixedPoint";
 char SICONOS_FRICTION_3D_PROX_STR[] = "F3D_PROX";
+
+
 int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {
   if (options == NULL || global_options == NULL)

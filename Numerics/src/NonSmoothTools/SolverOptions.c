@@ -377,6 +377,8 @@ char * idToName(int Id)
     return SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
     return SICONOS_FRICTION_3D_AlartCurnierNewton_STR;
+  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+    return SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR;
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
     return SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
   case SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization:

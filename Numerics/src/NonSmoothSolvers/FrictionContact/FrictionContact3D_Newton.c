@@ -90,6 +90,21 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
     freeSolver = &frictionContact3D_AC_free;
 
   }
+  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_DampedAlartCurnierNewton)
+  {
+    Fsize = 3;
+    frictionContact3D_AC_initialize(problem, localproblem);
+    F = &F_AC;
+    jacobianF = &jacobianF_AC;
+    /*     updateSolver = &frictionContact3D_AC_update; */
+    postSolver = &frictionContact3D_AC_post;
+    freeSolver = &frictionContact3D_AC_free;
+
+  }
+
+
+
+
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
   else if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBNewton)
   {
@@ -124,8 +139,15 @@ void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double
   if (options->solverId == SICONOS_FRICTION_3D_AlartCurnierNewton)
   {
     info = LocalNonsmoothNewtonSolver(localproblem, reactionBlock, iparam, dparam);
-
   }
+  else if (options->solverId == SICONOS_FRICTION_3D_DampedAlartCurnierNewton)
+  {
+    info = DampedLocalNonsmoothNewtonSolver(localproblem, reactionBlock, iparam, dparam);
+  }
+
+
+
+
   else
   {
     info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);

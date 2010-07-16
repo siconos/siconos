@@ -96,6 +96,15 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
   }
+  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+  {
+    *solve = &frictionContact3D_Newton_solve;
+    *update = &frictionContact3D_AC_update;
+    *freeSolver = &frictionContact3D_Newton_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
+    break;
+  }
   /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {

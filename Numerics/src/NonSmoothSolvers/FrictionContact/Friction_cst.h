@@ -26,6 +26,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ProjectionOnCone_velocity = 515,
   SICONOS_FRICTION_3D_PGoC = 516,
   SICONOS_FRICTION_3D_DeSaxceFixedPoint = 517,
+  SICONOS_FRICTION_3D_DampedAlartCurnierNewton = 518,
   SICONOS_FRICTION_3D_PRIMAL_NSGS_WR = 600,
   SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR = 601,
   SICONOS_FRICTION_3D_PRIMAL_PROX_WR = 602,
@@ -49,6 +50,7 @@ extern char  SICONOS_FRICTION_3D_GLOBALAC_STR [];
 extern char  SICONOS_FRICTION_3D_DSFP_STR[] ;
 extern char SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR[];
 extern char SICONOS_FRICTION_3D_AlartCurnierNewton_STR[];
+extern char SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR[];
 extern char  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR[];
 extern char SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR[];
 extern char SICONOS_FRICTION_3D_ProjectionOnCone_STR[];

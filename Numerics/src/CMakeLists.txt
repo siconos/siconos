@@ -349,6 +349,9 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test10 PrimalFrictionContact3D_test10.c)
   NEW_TEST(PFC3D_test11 PrimalFrictionContact3D_test11.c)
   NEW_TEST(PFC3D_test12 PrimalFrictionContact3D_test12.c)
+  NEW_TEST(PFC3D_test13 PrimalFrictionContact3D_test13.c)
+##    SET(PFC3D_test14_PROPERTIES WILL_FAIL TRUE)	
+##  NEW_TEST(PFC3D_test14 PrimalFrictionContact3D_test14.c)
 
 
   END_TEST()
