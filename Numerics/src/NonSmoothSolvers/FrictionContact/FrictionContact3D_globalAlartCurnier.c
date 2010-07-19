@@ -249,7 +249,7 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
   assert(velocity);
   assert(rho);
   assert(mu);
-  assert(f);
+  assert(ACF);
   assert(A);
   assert(B);
 
