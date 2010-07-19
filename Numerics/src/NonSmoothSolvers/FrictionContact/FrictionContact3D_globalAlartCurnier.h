@@ -51,25 +51,53 @@ extern "C"
 {
 #endif
 
-  void frictionContact3D_GlobalAlartCurnierFunction(
+  void frictionContact3D_localAlartCurnierFunction(
+    double reaction[3],
+    double velocity[3],
+    double mu,
+    double rho[3],
+    double ACresult[3],
+    double A[9],
+    double B[9]);
+
+  void frictionContact3D_localAlartCurnierFunctionHandMade(
+    double reaction[3],
+    double velocity[3],
+    double mu,
+    double rho[3],
+    double ACresult[3],
+    double A[9],
+    double B[9]);
+
+  void frictionContact3D_globalAlartCurnierFunction(
     unsigned int problemSize,
     double *reaction3D,
     double *velocity3D,
-    double *rho3D,
     double *mu,
+    double *rho3D,
+    double *result,
+    double *result3x3_1,
+    double *result3x3_2);
+
+  void frictionContact3D_globalAlartCurnierFunctionHandMade(
+    unsigned int problemSize,
+    double *reaction3D,
+    double *velocity3D,
+    double *mu,
+    double *rho3D,
     double *result,
     double *result3x3_1,
     double *result3x3_2);
 
 
-  void frictionContact3D_GlobalAlartCurnier(
+  void frictionContact3D_globalAlartCurnier(
     FrictionContactProblem* problem,
     double *reaction,
     double *velocity,
     int *info,
     SolverOptions *options);
 
-  int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
+  int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
     SolverOptions* options);
 
 #ifdef __cplusplus

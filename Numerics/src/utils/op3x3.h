@@ -73,7 +73,10 @@
   double* V##12 = V++;                        \
   double* V##20 = V++;                        \
   double* V##21 = V++;                        \
-  double* V##22 = V;
+  double* V##22 = V;                          \
+  V -= 8;                                     \
+  assert(V = V##00);                          \
+ 
 #else // fortran storage
 #define _00 0
 #define _10 1
@@ -84,6 +87,10 @@
 #define _02 6
 #define _12 7
 #define _22 8
+
+/** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
+ * the pointer is lost (use a00 instead)
+ */
 #define SET3X3(V)                                                       \
   double* V##00 = V++;                                                  \
   double* V##10 = V++;                                                  \
@@ -95,6 +102,13 @@
   double* V##12 = V++;                                                  \
   double* V##22 = V;
 #endif
+
+/** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
+ * the pointer is lost (use v0 instead) */
+#define SET3(V)                                 \
+  double* V##0 = V++;                           \
+  double* V##1 = V++;                           \
+  double* V##2 = V;
 
 
 /** copy a 3x3 matrix or a vector[9]
@@ -344,7 +358,7 @@ static inline void cross3(double* a, double* b, double* c)
 
 
 /** norm : || a ||
- * basic computation, may underflow & overflow
+ *  may underflow & overflow
  * \param[in] a[3]
  */
 static inline double hypot3(double* a)
@@ -371,39 +385,79 @@ static inline int isnan3(double* a)
   return isnan(*a0) || isnan(*a1) || isnan(*a2);
 }
 
+/** extract3x3 : copy a sub 3x3 matrix of *a into *b */
+/* \param[in] n row numbers of matrix a
+ * \param[in] i0 row of first element
+ * \param[in] j0 column of first element
+ * \param[in] a[n,n] matrix
+ * \param[out] b[9] a 3x3 matrix */
+static inline void extract3x3(int n, int i0, int j0,
+                              double* a, double* b)
+{
+#if defined(OP3X3_C_STORAGE)
+  int k0 = n * i0 + j0;
+#else
+  int k0 = i0 + n * j0;
+#endif
+  int nm3 = n - 3;
+
+  a += k0;
+
+  *b++ = *a++;
+  *b++ = *a++;
+  *b++ = *a++;
+  a += nm3;
+  *b++ = *a++;
+  *b++ = *a++;
+  *b++ = *a++;
+  a += nm3;
+  *b++ = *a++;
+  *b++ = *a++;
+  *b   = *a;
+}
+
+/** insert3x3 : insert a 3x3 matrix *b into *a */
+/* \param[in] n row numbers of matrix a
+ * \param[in] i0 row of first element
+ * \param[in] j0 column of first element
+ * \param[in,out] a[n,n] matrix
+ * \param[in] b[9] a 3x3 matrix */
+static inline void insert3x3(int n, int i0, int j0,
+                             double* a, double* b)
+{
+
+#if defined(OP3X3_C_STORAGE)
+  int k0 = n * i0 + j0;
+#else
+  int k0 = i0 + n * j0;
+#endif
+  int nm3 = n - 3;
+
+  a += k0;
+
+  *a++ = *b++;
+  *a++ = *b++;
+  *a++ = *b++;
+  a += nm3;
+  *a++ = *b++;
+  *a++ = *b++;
+  *a++ = *b++;
+  a += nm3;
+  *a++ = *b++;
+  *a++ = *b++;
+  *a = *b;
+}
 
 /** print a matrix
  * \param double* a
  */
+void print3x3(double* mat);
 
-#include <stdio.h>
-static inline void print3x3(double* mat)
-{
-  SET3X3(mat);
-
-  printf("%10.4g ", *mat00);
-  printf("%10.4g ", *mat01);
-  printf("%10.4g\n", *mat02);
-
-  printf("%10.4g ", *mat10);
-  printf("%10.4g ", *mat11);
-  printf("%10.4g\n", *mat12);
-
-  printf("%10.4g ", *mat20);
-  printf("%10.4g ", *mat21);
-  printf("%10.4g\n", *mat22);
-
-}
 
 /** print a vector
  * \param[in] double* v
  */
+void print3(double* v);
 
-static inline void print3(double* v)
-{
-  printf("%10.4g\n", *v++);
-  printf("%10.4g\n", *v++);
-  printf("%10.4g\n", *v);
-}
 
 #endif

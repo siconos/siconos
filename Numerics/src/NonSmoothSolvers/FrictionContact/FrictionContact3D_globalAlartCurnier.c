@@ -18,6 +18,7 @@
 */
 
 #include "LA.h"
+#include "op3x3.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact3D_compute_error.h"
@@ -27,29 +28,21 @@
 #include <assert.h>
 #include "Friction_cst.h"
 
-#define FAC frictionContact3D_GlobalAlartCurnierFunction
 
-#define _00 0
-#define _10 1
-#define _20 2
-#define _01 3
-#define _11 4
-#define _21 5
-#define _02 6
-#define _12 7
-#define _22 8
-
-
-#define GAMMA frictionContact3D_gamma
-#define FAC frictionContact3D_GlobalAlartCurnierFunction
-
-void frictionContact3D_gamma(double* x, int i1, int i2, double *r,
-                             int i11, int i12, int i21, int i22,
-                             double *p)
+void frictionContact3D_gamma(double* x, double *r, double *p)
 {
   assert(x);
   assert(r);
   // p optional
+
+  double* x1 = ++x;
+  double* x2 = ++x;
+
+  //  double* r11 = r+_11;
+  //double* r12 = r+_12;
+  //double* r21 = r+_21;
+  //double* r22 = r+_22;
+  SET3X3(r);
 
   double invp_, p_, p3;
 
@@ -59,40 +52,25 @@ void frictionContact3D_gamma(double* x, int i1, int i2, double *r,
   }
   else
   {
-    p_ = hypot(x[i1], x[i2]);
+    p_ = hypot(*x1, *x2);
   }
 
   p3 = p_ * p_ * p_;
   invp_ = 1. / p_;
-  r[i11] = invp_ - x[i1] * x[i1] / p3;
-  r[i12] = - x[i1] * x[i2] / p3;
-  r[i21] = r[i12];
-  r[i22] = invp_ - x[i2] * x[i2] / p3;
+  *r11 = invp_ - *x1 * *x1 / p3;
+  *r12 = - *x1 * *x2 / p3;
+  *r21 = *r12;
+  *r22 = invp_ - *x2 * *x2 / p3;
 
 }
 
-void printm(char *mes, unsigned int n, unsigned int m, double *mat)
-{
-  printf("%s\n", mes);
-
-  for (unsigned int j = 0; j < m; ++j)
-  {
-    for (unsigned int i = 0; i < n; ++i)
-    {
-      printf(" %10.4g ", mat[i + n * j]);
-    }
-    printf("\n");
-  }
-}
-
-
-void frictionContact3D_LocalAlartCurnierFunction(
-  double un,
-  double ut1,
-  double ut2,
+void frictionContact3D_localAlartCurnierFunctionGenerated(
   double rn,
   double rt1,
   double rt2,
+  double un,
+  double ut1,
+  double ut2,
   double mu,
   double rhon,
   double rhot1,
@@ -186,12 +164,41 @@ void frictionContact3D_LocalAlartCurnierFunction(
   };
 };
 
-void frictionContact3D_GlobalAlartCurnierFunction(
+void frictionContact3D_localAlartCurnierFunction(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *f,
+  double *A,
+  double *B)
+{
+  double result[21]; //3 + 2 * 9
+
+  SET3(reaction);
+  SET3(velocity);
+  SET3(rho);
+
+
+  frictionContact3D_localAlartCurnierFunctionGenerated(
+    *reaction0, *reaction1, *reaction2,
+    *velocity0, *velocity1, *velocity2,
+    mu,
+    *rho0, *rho1, *rho2,
+    result);
+
+  cpy3(result, f);
+  cpy3x3(result + 3, A);
+  cpy3x3(result + 12, B);
+}
+
+
+void frictionContact3D_globalAlartCurnierFunction(
   unsigned int problemSize,
   double *reaction,
   double *velocity,
-  double *rho,
   double *mu,
+  double *rho,
   double *result,
   double *A,
   double *B)
@@ -207,79 +214,178 @@ void frictionContact3D_GlobalAlartCurnierFunction(
   assert(problemSize / 3 > 0);
   assert(problemSize % 3 == 0);
 
-
   unsigned int i;
-  double localf[21];
-  double* rn;
-  double* rt1;
-  double* rt2;
-  double* un;
-  double* ut1;
-  double* ut2;
-  double* rhon;
-  double* rhot1;
-  double* rhot2;
-  double* plocalf;
-
-
   for (i = 0; i < problemSize; i += 3)
   {
-    rn = reaction++;
-    rt1 = reaction++;
-    rt2 = reaction++;
-    un = velocity++;
-    ut1 = velocity++;
-    ut2 = velocity++;
-    rhon = rho++;
-    rhot1 = rho++;
-    rhot2 = rho++;
 
-    frictionContact3D_LocalAlartCurnierFunction(*un, *ut1, *ut2,
-        *rn, *rt1, *rt2,
-        *mu++,
-        *rhon, *rhot1, *rhot2,
-        localf);
-    plocalf = localf;
+    frictionContact3D_localAlartCurnierFunction(reaction,
+        velocity,
+        *mu,
+        rho,
+        result, A, B);
 
-
-    *result++ = *plocalf++;
-    *result++ = *plocalf++;
-    *result++ = *plocalf++;
-
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-    *A++ = *plocalf++;
-
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
-
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
-
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
-    *B++ = *plocalf++;
+    reaction += 3;
+    velocity += 3;
+    mu++;
+    rho += 3;
+    result += 3;
+    A += 9;
+    B += 9;
 
   }
 
 }
 
-void frictionContact3D_GlobalAlartCurnierFunctionO(
+void frictionContact3D_localAlartCurnierFunctionHandMade(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *ACF,
+  double *A,
+  double *B)
+{
+  assert(reaction);
+  assert(velocity);
+  assert(rho);
+  assert(mu);
+  assert(f);
+  assert(A);
+  assert(B);
+
+  SET3X3(A);
+  SET3X3(B);
+  SET3(ACF);
+  SET3(reaction);
+  SET3(velocity);
+  SET3(rho);
+
+
+
+  *A01 = 0.;
+  *A02 = 0.;
+  *A10 = 0.;
+  *A20 = 0.;
+
+  *B01 = 0.;
+  *B02 = 0.;
+
+
+  double p0, p1, p2;
+
+  p0 = *reaction0 - *rho0 * *velocity0;
+  p1 = *reaction1 - *rho1 * *velocity1;
+  p2 = *reaction2 - *rho2 * *velocity2;
+
+  // note : rmu was reaction[i0]*mu[i]
+  double rmu = mu * fmax(0, p0);
+
+  double p = hypot(p1, p2);
+
+  if (p0 >= 0)
+  {
+    *ACF0 -= *reaction0; // note : this is -PHI p425
+
+    if (A && B)
+    {
+      // DUnPHI2
+      *A00 = *rho0;
+      *B00 = 0.;
+    }
+
+
+  }
+
+  else
+  {
+    *ACF0 = -*reaction0;
+
+    if (A && B)
+    {
+      // DUnPHI2
+      *A00 = 0.;
+      *B00 = 1.;
+    }
+  }
+
+
+  if (p > rmu)
+  {
+
+    // outside disk
+    if (A && B)
+    {
+
+      double rho1rmu, rho2rmu;
+      rho1rmu = *rho1 * rmu;
+      rho2rmu = *rho2 * rmu;
+
+      frictionContact3D_gamma(ACF0, A00, &p);
+
+      int positivepnv = *ACF0 > 0;
+
+      // DRnPHI3
+      *B10 = - mu * positivepnv * p1 / p; // not rmu
+      *B20 = - mu * positivepnv * p2 / p; // not rmu
+
+      // DRtPHI3
+      *B11 = 1. - rmu* *A11;
+      *B12 = - rmu* *A12;
+      *B21 = *B12;
+      *B22 = 1. - rmu* *A22;
+
+      // DUtPHI3
+      *A11 *= rho1rmu;
+      *A12 *= rho1rmu;
+      *A21 *= rho2rmu;
+      *A22 *= rho2rmu;
+
+    }
+
+    assert(p > 0.);
+
+    *ACF1 *= rmu / p;
+    *ACF2 *= rmu / p;
+
+  }
+
+  else
+  {
+    // inside disk
+    if (A && B)
+    {
+
+      // DUtPHI3
+      *A11 = *rho1;
+      *A12 = 0.;
+      *A21 = 0.;
+      *A22 = *rho2;
+
+      // DRnPHI3
+      *B10 = 0.;
+      *B20 = 0.;
+
+      // DRtPHI3
+      *B11 = 0.;
+      *B12 = 0.;
+      *B21 = 0.;
+      *B22 = 0.;
+
+    }
+
+  }
+
+  *ACF1 -= *reaction1;
+  *ACF2 -= *reaction2;
+};
+
+
+void frictionContact3D_globalAlartCurnierFunctionHandMade(
   unsigned int problemSize,
   double *reaction,
   double *velocity,
-  double *rho,
   double *mu,
+  double *rho,
   double *result,
   double *A,
   double *B)
@@ -289,294 +395,37 @@ void frictionContact3D_GlobalAlartCurnierFunctionO(
   assert(rho);
   assert(mu);
   assert(result);
+  assert(A);
+  assert(B);
+
   assert(problemSize / 3 > 0);
   assert(problemSize % 3 == 0);
 
-  unsigned int ip3, ip9, i, i0, i1, i2,
-           i00, i01, i02, i10, i11, i12, i20, i21, i22;
-
-  for (i = 0, ip3 = 0, ip9 = 0; ip3 < problemSize; ++i)
+  unsigned int i;
+  for (i = 0; i < problemSize; i += 3)
   {
 
-    i0 = ip3++;
-    i1 = ip3++;
-    i2 = ip3++;
+    frictionContact3D_localAlartCurnierFunctionHandMade(reaction,
+        velocity,
+        *mu,
+        rho,
+        result, A, B);
 
-    if (A && B)
-    {
-      // column major
-      i00 = ip9++;
-      i10 = ip9++;
-      i20 = ip9++;
-      i01 = ip9++;
-      i11 = ip9++;
-      i21 = ip9++;
-      i02 = ip9++;
-      i12 = ip9++;
-      i22 = ip9++;
+    reaction += 3;
+    velocity += 3;
+    mu++;
+    rho += 3;
+    result += 3;
+    A += 9;
+    B += 9;
 
-      A[i01] = 0.;
-      A[i02] = 0.;
-      A[i10] = 0.;
-      A[i20] = 0.;
-
-      B[i01] = 0.;
-      B[i02] = 0.;
-
-    }
-
-    result[i0] = reaction[i0] - rho[i0] * velocity[i0];
-    result[i1] = reaction[i1] - rho[i1] * velocity[i1];
-    result[i2] = reaction[i2] - rho[i2] * velocity[i2];
-
-    // note : rmu was reaction[i0]*mu[i]
-    double rmu = mu[i] * fmax(0, result[i0]);
-
-    double p = hypot(result[i1], result[i2]);
-
-    if (result[i0] >= 0)
-    {
-      result[i0] -= reaction[i0]; // note : this is -PHI p425
-
-      if (A && B)
-      {
-        // DUnPHI2
-        A[i00] = rho[i0];
-        B[i00] = 0.;
-      }
-
-
-    }
-
-    else
-    {
-      result[i0] = -reaction[i0];
-
-      if (A && B)
-      {
-        // DUnPHI2
-        A[i00] = 0.;
-        B[i00] = 1.;
-      }
-    }
-
-
-    if (p > rmu && p > 1e-20)
-    {
-
-      // outside disk
-      if (A && B)
-      {
-
-        double rho1rmu, rho2rmu;
-        rho1rmu = rho[i1] * rmu;
-        rho2rmu = rho[i2] * rmu;
-
-
-        GAMMA(result, i1, i2, A, i11, i12, i21, i22, &p);
-
-        int positivepnv = result[i0] > 0;
-
-        // DRnPHI3
-        B[i10] = - mu[i] * positivepnv * result[i1] / p; // not rmu
-        B[i20] = - mu[i] * positivepnv * result[i2] / p; // not rmu
-
-        // DRtPHI3
-        B[i11] = 1. - rmu * A[i11];
-        B[i12] = - rmu * A[i12];
-        B[i21] = B[i12];
-        B[i22] = 1. - rmu * A[i22];
-
-        // DUtPHI3
-        A[i11] *= rho1rmu;
-        A[i12] *= rho1rmu;
-        A[i21] *= rho2rmu;
-        A[i22] *= rho2rmu;
-
-      }
-
-      assert(p > 0.);
-
-      result[i1] *= rmu / p;
-      result[i2] *= rmu / p;
-
-    }
-
-    else
-    {
-      // inside disk
-      if (A && B)
-      {
-
-        // DUtPHI3
-        A[i11] = rho[i1];
-        A[i12] = 0.;
-        A[i21] = 0.;
-        A[i22] = rho[i2];
-
-        // DRnPHI3
-        B[i10] = 0.;
-        B[i20] = 0.;
-
-        // DRtPHI3
-        B[i11] = 0.;
-        B[i12] = 0.;
-        B[i21] = 0.;
-        B[i22] = 0.;
-
-      }
-
-    }
-
-    // no convergence :
-    //    result[i1] = fmax(0,result[i1]);
-    //    result[i2] = fmax(0,result[i2]);
-
-    result[i1] -= reaction[i1];
-    result[i2] -= reaction[i2];
-
-    /*
-    assert ( ! isnan(result[i0]) );
-    assert ( ! isnan(result[i1]) );
-    assert ( ! isnan(result[i2]) );
-
-    assert ( ! isnan(A[i00]) );
-    assert ( ! isnan(A[i01]) );
-    assert ( ! isnan(A[i02]) );
-    assert ( ! isnan(A[i10]) );
-    assert ( ! isnan(A[i11]) );
-    assert ( ! isnan(A[i12]) );
-    assert ( ! isnan(A[i20]) );
-    assert ( ! isnan(A[i21]) );
-    assert ( ! isnan(A[i22]) );
-
-
-    assert ( ! isnan(B[i00]) );
-    assert ( ! isnan(B[i01]) );
-    assert ( ! isnan(B[i02]) );
-    assert ( ! isnan(B[i10]) );
-    assert ( ! isnan(B[i11]) );
-    assert ( ! isnan(B[i12]) );
-    assert ( ! isnan(B[i20]) );
-    assert ( ! isnan(B[i21]) );
-    assert ( ! isnan(B[i22]) );
-
-    */
   }
-};
-
-
-
-void zero3x3(double *a)
-{
-  a[_00] = 0.;
-  a[_01] = 0.;
-  a[_02] = 0.;
-  a[_10] = 0.;
-  a[_11] = 0.;
-  a[_12] = 0.;
-  a[_20] = 0.;
-  a[_21] = 0.;
-  a[_22] = 0.;
-}
-
-
-/* c = a*b */
-/* simple 3x3 multiplication */
-/* note: Strassen alg. and others better for size >> 3 */
-void multm3x3(double *a, double *b, double *c)
-{
-  c[_00] = a[_00] * b[_00] + a[_01] * b[_10] + a[_02] * b[_20];
-  c[_01] = a[_00] * b[_01] + a[_01] * b[_11] + a[_02] * b[_21];
-  c[_02] = a[_00] * b[_02] + a[_01] * b[_12] + a[_02] * b[_22];
-
-  c[_10] = a[_10] * b[_00] + a[_11] * b[_10] + a[_12] * b[_20];
-  c[_11] = a[_10] * b[_01] + a[_11] * b[_11] + a[_12] * b[_21];
-  c[_12] = a[_10] * b[_02] + a[_11] * b[_12] + a[_12] * b[_22];
-
-  c[_20] = a[_20] * b[_00] + a[_21] * b[_10] + a[_22] * b[_20];
-  c[_21] = a[_20] * b[_01] + a[_21] * b[_11] + a[_22] * b[_21];
-  c[_22] = a[_20] * b[_02] + a[_21] * b[_12] + a[_22] * b[_22];
-}
-
-void multv3x3(double *a, double *b, double *c)
-{
-
-  c[0] = a[_00] * b[0] + a[_01] * b[1] + a[_02] * b[2];
-  c[1] = a[_10] * b[0] + a[_11] * b[1] + a[_12] * b[2];
-  c[2] = a[_20] * b[0] + a[_21] * b[1] + a[_22] * b[2];
-
-}
-
-/* b += a */
-void addm3x3(double *a, double *b)
-{
-  b[_00] += a[_00];
-  b[_01] += a[_01];
-  b[_02] += a[_02];
-
-  b[_10] += a[_10];
-  b[_11] += a[_11];
-  b[_12] += a[_12];
-
-  b[_20] += a[_20];
-  b[_21] += a[_21];
-  b[_22] += a[_22];
-}
-
-
-/* copy a sub 3x3 matrix of *a into *b */
-/* n row numbers of matrix a
- * i0, j0 indices of first element of the 3x3 submatrix
- * at most 3 cache miss
- */
-void subextract3x3(int n, int i0, int j0, double *a, double *b)
-{
-  int k0 = i0 + n * j0;
-  int nm2 = n - 2;
-
-
-  b[_00] = a[k0];
-  b[_10] = a[++k0];
-  b[_20] = a[++k0];
-  k0 += nm2;
-  b[_01] = a[k0];
-  b[_11] = a[++k0];
-  b[_21] = a[++k0];
-  k0 += nm2;
-  b[_02] = a[k0];
-  b[_12] = a[++k0];
-  b[_22] = a[++k0];
-
-  assert((n > 3) ? k0 < n * n : 1);
-
-}
-
-
-void subinsert3x3(double *a, int n, int i0, int j0, double *b)
-{
-  int k0 = i0 + n * j0;
-  int nm2 = n - 2; // n - 3 + 1
-
-  b[k0]   = a[_00];
-  b[++k0] = a[_10];
-  b[++k0] = a[_20];
-  k0 += nm2;
-  b[k0]   = a[_01];
-  b[++k0] = a[_11];
-  b[++k0] = a[_21];
-  k0 += nm2;
-  b[k0]   = a[_02];
-  b[++k0] = a[_12];
-  b[++k0] = a[_22];
-
-  assert(k0 < n * n);
 
 }
 
 
 
-void frictionContact3D_GlobalAlartCurnier(
+void frictionContact3D_globalAlartCurnier(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,
@@ -632,7 +481,9 @@ void frictionContact3D_GlobalAlartCurnier(
   double w;
   int dgelsinfo[1];
 
-  DGELS(problemSize, problemSize, 1, R, problemSize, facWork, problemSize, &w, -1, dgelsinfo);
+  DGELS(problemSize, problemSize,
+        1, R, problemSize,
+        facWork, problemSize, &w, -1, dgelsinfo);
 
   int LWORK = (int) w;
 
@@ -653,7 +504,10 @@ void frictionContact3D_GlobalAlartCurnier(
   while (iter++ < itermax)
   {
 
-    frictionContact3D_GlobalAlartCurnierFunction(problemSize, reaction, velocity, rho, problem->mu, facWork, A, B);
+    frictionContact3D_globalAlartCurnierFunction(problemSize,
+        reaction, velocity,
+        problem->mu, rho,
+        facWork, A, B);
 
     /*    printm("fac",1,3,facWork);
           printm("A",3,3,A);
@@ -673,18 +527,18 @@ void frictionContact3D_GlobalAlartCurnier(
     {
       assert(jp9 < 3 * problemSize - 8);
 
-      subextract3x3(3, jp9, 0, A, Aj);
-      subextract3x3(3, jp9, 0, B, Bj);
+      extract3x3(3, jp9, 0, A, Aj);
+      extract3x3(3, jp9, 0, B, Bj);
 
       for (unsigned int ip3 = 0; ip3 < problemSize; ip3 += 3)
       {
         assert(ip3 < problemSize - 2);
         assert(jp3 < problemSize - 2);
 
-        subextract3x3(problemSize, ip3, jp3, problem->M->matrix0, Wij);
-        multm3x3(Aj, Wij, tmp);
-        if (ip3 == jp3) addm3x3(Bj, tmp);
-        subinsert3x3(tmp, problemSize, ip3, jp3, R);
+        extract3x3(problemSize, ip3, jp3, problem->M->matrix0, Wij);
+        mm3x3(Aj, Wij, tmp);
+        if (ip3 == jp3) add3x3(Bj, tmp);
+        insert3x3(problemSize, ip3, jp3, R, tmp);
 
       }
 
@@ -758,7 +612,7 @@ void frictionContact3D_GlobalAlartCurnier(
 
 }
 
-int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
+int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)
@@ -766,7 +620,6 @@ int frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(
     printf("Set the default solver options for the GLOBALAC Solver\n");
   }
 
-  /*  strcpy(options->solverName,"GLOBALAC");*/
   options->solverId = SICONOS_FRICTION_3D_GLOBALAC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

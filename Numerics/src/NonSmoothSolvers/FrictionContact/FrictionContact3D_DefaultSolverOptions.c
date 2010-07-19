@@ -58,7 +58,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
   }
   case SICONOS_FRICTION_3D_GLOBALAC:
   {
-    info =    frictionContact3D_GlobalAlartCurnier_setDefaultSolverOptions(options);
+    info =    frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(options);
     break;
   }
   default:

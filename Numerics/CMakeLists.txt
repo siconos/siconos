@@ -35,7 +35,3 @@ ENDIF(PIPOL_IMAGE MATCHES "lenny|ubuntu")
 
 
 SICONOS_PROJECT(Numerics 3 2 0)
-
-
-  
-

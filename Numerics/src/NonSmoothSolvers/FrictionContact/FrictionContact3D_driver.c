@@ -129,7 +129,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
   {
     if (verbose == 1)
       printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
-    frictionContact3D_GlobalAlartCurnier(problem, reaction , velocity , &info , options);
+    frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
     break;
   }
   default:
