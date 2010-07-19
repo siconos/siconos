@@ -575,6 +575,17 @@ extern "C"
    * \author Pascal Denoyelle, Franck Perignon
    */
   int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double* error);
+  /** This function checks the complementarity of the vectors z and w.\n
+     * The criterion is based on \f$ \sum [ (z[i]*w[i])_{pos} + (z[i])_{neg} + w[i])_{neg} ] \f$ \n
+     * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
+     * \param[in] n size of the problem
+     * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+     * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+     * \param[in] tolerance
+     * \param[in,out] error
+     * \author Pascal Denoyelle, Franck Perignon
+     */
+  void lcp_compute_error_only(int n,  double *z , double *w, double * error);
 
   /*   /\** Function used to extract from LCP matrix the part which corresponds to non null z */
   /*    *\/ */

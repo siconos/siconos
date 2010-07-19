@@ -29,26 +29,57 @@
 
 //#define GENERICMECHANICAL_DEBUG
 
-int GenericMechanical_compute_error(GenericMechanicalProblem* problem, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
+int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
-  listNumericsProblem * curProblem = problem->firstListElem;
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  listNumericsProblem * curProblem = pGMP->firstListElem;
+  SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
   int currentRowNumber = 0;
   int ii;
   int  posInX = 0;
   int curSize = 0;
   *err = 0.0;
+  double localError = 0;
+  int globalSize = pGMP->size;
+  int diagBlockNumber;
+
+  /*update localProblem->q and compute V = M*R+Q of the GMP */
   while (curProblem)
   {
     if (currentRowNumber)
       posInX += m->blocksize0[currentRowNumber - 1];
+    curSize = m->blocksize0[currentRowNumber] - posInX;
 
+    /*localproblem->q <-- GMP->q */
+    memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+
+    /*computation of the localproblem->q*/
+    rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
+
+    /*computation of the velocity of the GMP*/
+    memcpy(velocity + posInX, curProblem->q, curSize * sizeof(double));
+    /*add the missing product to the velocity: the diagonal one*/
+    diagBlockNumber = getDiagonalBlockPos(m, currentRowNumber);
+    DGEMV(LA_NOTRANS, curSize, curSize, 1.0, m->block[diagBlockNumber], curSize, reaction + posInX, 1, 1.0, velocity + posInX, 1);
+
+    /*next*/
+    curProblem = curProblem->nextProblem;
+    currentRowNumber++;
+  }
+
+
+  /*For each sub-problem, call the corresponding function computing the error.*/
+  posInX = 0;
+  currentRowNumber = 0;
+  while (curProblem)
+  {
+    if (currentRowNumber)
+      posInX += m->blocksize0[currentRowNumber - 1];
+    curSize = m->blocksize0[currentRowNumber] - posInX;
     switch (curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
-      LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
-      curSize = linearProblem->size;
+      //  LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
       double * w = velocity + posInX;
       for (ii = 0; ii < curSize; ii++)
       {
@@ -58,11 +89,23 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* problem, double *r
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_LCP:
+    {
+      //LinearComplementarityProblem* lcpproblem = (LinearComplementarityProblem*) curProblem->problem;
+
+      lcp_compute_error_only(curSize, reaction + posInX, velocity + posInX, &localError);
+      localError = localError / (1 + DNRM2(curSize , curProblem->q , 1));
+      if (localError > *err)
+        *err = localError ;
       break;
+    }
     case SICONOS_NUMERICS_PROBLEM_FC3D:
+    {
+      FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+    }
     default:
       printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
     }
+    /*next*/
     curProblem = curProblem->nextProblem;
     currentRowNumber++;
   }
@@ -122,10 +165,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
         linearProblem->M->matrix0 = m->block[diagBlockNumber];
         /*about q.*/
-        for (ii = 0; ii < curSize; ii++)
-        {
-          linearProblem->q[ii] = pGMP->q[posInX + ii];
-        }
+        memcpy(linearProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+        /* for(ii=0;ii< curSize; ii++){ */
+        /*   linearProblem->q[ii] = pGMP->q[posInX+ii]; */
+        /* } */
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
 
         LinearSystem_driver(linearProblem, sol, w, 0);
@@ -138,16 +181,24 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         LinearComplementarityProblem* lcpProblem = (LinearComplementarityProblem*) curProblem->problem;
         lcpProblem->M->matrix0 = m->block[diagBlockNumber];
         /*about q.*/
-        for (ii = 0; ii < curSize; ii++)
-        {
-          lcpProblem->q[ii] = pGMP->q[posInX + ii];
-        }
-        rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, lcpProblem->q, 0);
+        memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+        /* for(ii=0;ii< curSize; ii++){ */
+        /*   lcpProblem->q[ii] = pGMP->q[posInX+ii]; */
+        /* } */
+        rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
         linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers, 0);
 
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_FC3D:
+      {
+        FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+        fcProblem->M->matrix0 = m->block[diagBlockNumber];
+        memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+        rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
+        frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
+        break;
+      }
       default:
         printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
       }
@@ -159,10 +210,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       curProblem = curProblem->nextProblem;
       currentRowNumber++;
     }
-    /*computation of V=MR+q*/
-    memcpy(velocity, pGMP->q, globalSize * sizeof(double));
-    prodSBM(globalSize, globalSize, 1.0, m, reaction, 1.0, velocity);
+    /*compute global error.*/
     tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, &err);
+
+    /*next GS it*/
     it++;
   }
 
@@ -196,11 +247,11 @@ void genericMechnicalProblem_setDefaultSolverOptions(GenericMechanicalProblem * 
   options->iWork = 0;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->iparam[0] = 500;
-  options->dparam[0] = 1e-6;
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-4;
 
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
-  linearComplementarity_setDefaultSolverOptions(0, &options->internalSolvers[1], SICONOS_LCP_LEMKE);
+  frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 

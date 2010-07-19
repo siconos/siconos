@@ -26,7 +26,24 @@
 
 #include <math.h>
 #include <assert.h>
+void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error)
+{
+  double normUT;
+  double rho = 1.0;
 
+  double worktmp[3];
+  /* Compute the modified local velocity */
+  normUT = hypot(w[1], w[2]); // i.e sqrt(w[ic3p1]*w[ic3p1]+w[ic3p2]*w[ic3p2]);
+  worktmp[0] = z[0] - rho * (w[0] + mu * normUT);
+  worktmp[1] = z[1] - rho * w[1] ;
+  worktmp[2] = z[2] - rho * w[2] ;
+  projectionOnCone(worktmp, mu);
+  worktmp[0] = z[0] -  worktmp[0];
+  worktmp[1] = z[1] -  worktmp[1];
+  worktmp[2] = z[2] -  worktmp[2];
+  *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+
+}
 int FrictionContact3D_compute_error(
   FrictionContactProblem* problem,
   double *z , double *w, double tolerance,
@@ -43,31 +60,20 @@ int FrictionContact3D_compute_error(
   int nc = problem->numberOfContacts;
   int n = nc * 3;
   double *mu = problem->mu;
-  double worktmp[3];
+
   DCOPY(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
-  double normUT;
-  double rho = 1.0;
-  int ic, ic3, ic3p1, ic3p2;
 
-  for (ic = 0, ic3 = 0, ic3p1 = 1, ic3p2 = 2 ;
-       ic < nc ;
-       ic++, ic3 += 3 , ic3p1 += 3, ic3p2 += 3)
+
+  int ic, ic3;
+
+  for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
-    /* Compute the modified local velocity */
-    normUT = hypot(w[ic3p1], w[ic3p2]); // i.e sqrt(w[ic3p1]*w[ic3p1]+w[ic3p2]*w[ic3p2]);
-    worktmp[0] = z[ic3] - rho * (w[ic3] + mu[ic] * normUT);
-    worktmp[1] = z[ic3p1] - rho * w[ic3p1] ;
-    worktmp[2] = z[ic3p2] - rho * w[ic3p2] ;
-    projectionOnCone(worktmp, mu[ic]);
-    worktmp[0] = z[ic3] -  worktmp[0];
-    worktmp[1] = z[ic3p1] -  worktmp[1];
-    worktmp[2] = z[ic3p2] -  worktmp[2];
-    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 
+    FrictionContact3D_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error);
   }
   *error = sqrt(*error);
 
@@ -84,6 +90,8 @@ int FrictionContact3D_compute_error(
   else
     return 0;
 }
+
+
 
 int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions *options, double * error)
 {

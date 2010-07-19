@@ -20,19 +20,8 @@
 #include "LA.h"
 #include "NumericsOptions.h" // for global options
 #include "LinearComplementarityProblem.h"
-
-int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)
+void lcp_compute_error_only(int n, double *z , double *w, double * error)
 {
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numericsError("lcp_compute_error", "null input for problem and/or z and/or w");
-
-  /* Computes w = Mz + q */
-  int incx = 1, incy = 1;
-  int n = problem->size;
-  DCOPY(n , problem->q , incx , w , incy);  // w <-q
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
-
   /* Checks complementarity */
   *error = 0.;
   double zi, wi;
@@ -48,9 +37,21 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
     if (wi < 0.0) *error += -wi;
     if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi;
   }
+}
 
-  /* Computes error */
+int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)
+{
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("lcp_compute_error", "null input for problem and/or z and/or w");
+
+  /* Computes w = Mz + q */
+  int incx = 1, incy = 1;
+  int n = problem->size;
+  DCOPY(n , problem->q , incx , w , incy);  // w <-q
+  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   double normq = DNRM2(n , problem->q , incx);
+  lcp_compute_error_only(n, z, w, error);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
@@ -59,4 +60,5 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   }
   else
     return 0;
+
 }

@@ -41,6 +41,13 @@ extern "C"
    */
   void FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
+  /** Error computation for one friction-contact 3D problem
+      \param z vector
+      \param w vector
+      \param mu coeficient of friction
+      \param[in,out] error value
+   */
+  void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error);
   /** Error computation for friction-contact 3D problem
       \param problem the structure which defines the friction-contact problem
       \param z vector

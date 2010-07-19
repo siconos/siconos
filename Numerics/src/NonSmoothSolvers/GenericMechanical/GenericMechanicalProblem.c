@@ -57,25 +57,25 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP)
   while (pGMP->lastListElem)
   {
     listNumericsProblem * pElem = pGMP->lastListElem;
+    free(pElem->q);
     switch (pElem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
       free(((LinearSystemProblem *)(pElem->problem))->M);
-      free(((LinearSystemProblem *)(pElem->problem))->q);
+      //  free(((LinearSystemProblem *)(pElem->problem))->q);
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_LCP:
     {
       free(((LinearComplementarityProblem *)(pElem->problem))->M);
-      free(((LinearComplementarityProblem *)(pElem->problem))->q);
+      //  free(((LinearComplementarityProblem *)(pElem->problem))->q);
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_FC3D:
     {
       free(((FrictionContactProblem*)(pElem->problem))->M);
       free(((FrictionContactProblem*)(pElem->problem))->mu);
-      printf("Numerics : freeGenericMechanicalProblem missing free\n");
       break;
     }
     default:
@@ -114,6 +114,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     LinearComplementarityProblem * pLCP = (LinearComplementarityProblem*)newProblem->problem;
     pLCP->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pLCP->q = (double*) malloc(size * sizeof(double));
+    newProblem->q = pLCP->q;
     pLCP->M->storageType = 0; /*local prb is dense*/
     pLCP->M->size0 = size;
     pLCP->M->size1 = size;
@@ -128,6 +129,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pLS->size = size;
     pLS->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pLS->q = (double*) malloc(size * sizeof(double));
+    newProblem->q = pLS->q;
     pLS->M->storageType = 0; /*local prb is dense*/
     pLS->M->size0 = size;
     pLS->M->size1 = size;
@@ -140,7 +142,8 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pFC3D->mu = (double*) malloc(sizeof(double));
     pFC3D->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pFC3D->M->storageType = 0; /*Local prb is dense*/
-    printf("NUMERICS::::Warning2, missing code to allocate q.\n");
+    pFC3D->q = (double*) malloc(size * sizeof(double));
+    newProblem->q = pFC3D->q;
     break;
   }
   default:

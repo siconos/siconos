@@ -44,6 +44,7 @@ typedef struct _listNumericsProblem
 {
   int type;
   void * problem;
+  double *q;/*a pointer on the q of the problem*/
   struct _listNumericsProblem * nextProblem;
   struct _listNumericsProblem * prevProblem;
 } listNumericsProblem;
