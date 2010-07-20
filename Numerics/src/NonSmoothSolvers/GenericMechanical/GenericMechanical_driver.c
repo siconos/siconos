@@ -26,9 +26,10 @@
 #include "NumericsOptions.h"
 #include "GenericMechanical_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "FrictionContact3D_compute_error.h"
 
 //#define GENERICMECHANICAL_DEBUG
-
+//#define GENERICMECHANICAL_DEBUG2
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
@@ -39,14 +40,17 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
   int curSize = 0;
   *err = 0.0;
   double localError = 0;
-  int globalSize = pGMP->size;
   int diagBlockNumber;
-
+#ifdef GENERICMECHANICAL_DEBUG
+  printf("GenericMechanical compute_error BEGIN:\n");
+#endif
   /*update localProblem->q and compute V = M*R+Q of the GMP */
   while (curProblem)
   {
     if (currentRowNumber)
-      posInX += m->blocksize0[currentRowNumber - 1];
+    {
+      posInX = m->blocksize0[currentRowNumber - 1];
+    }
     curSize = m->blocksize0[currentRowNumber] - posInX;
 
     /*localproblem->q <-- GMP->q */
@@ -70,10 +74,11 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
   /*For each sub-problem, call the corresponding function computing the error.*/
   posInX = 0;
   currentRowNumber = 0;
+  curProblem = pGMP->firstListElem;
   while (curProblem)
   {
     if (currentRowNumber)
-      posInX += m->blocksize0[currentRowNumber - 1];
+      posInX = m->blocksize0[currentRowNumber - 1];
     curSize = m->blocksize0[currentRowNumber] - posInX;
     switch (curProblem->type)
     {
@@ -81,11 +86,18 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     {
       //  LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
       double * w = velocity + posInX;
+      localError = 0.;
       for (ii = 0; ii < curSize; ii++)
       {
         if (fabs(w[ii]) > *err)
+        {
           *err = fabs(w[ii]);
+          localError = *err;
+        }
       }
+#ifdef GENERICMECHANICAL_DEBUG2
+      printf("GenericMechanical_driver, localerror of linearSystem: %e\n", localError);
+#endif
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_LCP:
@@ -96,11 +108,23 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       localError = localError / (1 + DNRM2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
+#ifdef GENERICMECHANICAL_DEBUG2
+      printf("GenericMechanical_driver, localerror of lcp: %e\n", localError);
+#endif
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_FC3D:
     {
       FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+      localError = 0.;
+      FrictionContact3D_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError);
+      localError = sqrt(localError) / (1 + DNRM2(curSize , curProblem->q , 1));
+      if (localError > *err)
+        *err = localError ;
+#ifdef GENERICMECHANICAL_DEBUG2
+      printf("GenericMechanical_driver, localerror of FC3D: %e\n", localError);
+#endif
+      break;
     }
     default:
       printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
@@ -110,7 +134,10 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     currentRowNumber++;
   }
 #ifdef GENERICMECHANICAL_DEBUG
-  printf("GenericMechanical_driver, error : %e\n", *err);
+  if (*err > tol)
+    printf("GenericMechanical_driver compute_error END:, err>tol: error : %e\n", *err);
+  else
+    printf("GenericMechanical_driver compute_error END:, err<tol: error : %e\n", *err);
 #endif
   if (*err > tol)
     return 1;
@@ -127,18 +154,17 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   int it = 0;
   int currentRowNumber = 0;
   int diagBlockNumber = 0;
-  int globalSize = pGMP->size;
   double tol = options->dparam[0];
   double err = 0;
   int tolViolate = 1;
   double * sol = 0;
   double * w = 0;
+  int resLocalSolver = 0;
   while (it < iterMax && tolViolate)
   {
     currentRowNumber = 0;
     curProblem =  pGMP->firstListElem;
     int  posInX = 0;
-    int ii = 0;
     int curSize = 0;
 #ifdef GENERICMECHANICAL_DEBUG
     printf("GS it %d, initial value:\n", it);
@@ -151,9 +177,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       {
         posInX = m->blocksize0[currentRowNumber - 1];
       }
+      curSize = m->blocksize0[currentRowNumber] - posInX;
+
       /*about the diagonal block:*/
       diagBlockNumber = getDiagonalBlockPos(m, currentRowNumber);
-      curSize = m->blocksize0[currentRowNumber] - posInX;
       sol = reaction + posInX;
       w = velocity + posInX;
 
@@ -171,7 +198,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         /* } */
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
 
-        LinearSystem_driver(linearProblem, sol, w, 0);
+        resLocalSolver = LinearSystem_driver(linearProblem, sol, w, 0);
 
         break;
       }
@@ -186,7 +213,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         /*   lcpProblem->q[ii] = pGMP->q[posInX+ii]; */
         /* } */
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
-        linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers, 0);
+        resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers, 0);
 
         break;
       }
@@ -196,7 +223,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         fcProblem->M->matrix0 = m->block[diagBlockNumber];
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
-        frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
+        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
         break;
       }
       default:
@@ -206,6 +233,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
       for (ii = 0; ii < globalSize; ii++)
         printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
+      if (!resLocalSolver)
+        printf("Numerics:GenericMechanical_drivers Local solver failed\n");
 #endif
       curProblem = curProblem->nextProblem;
       currentRowNumber++;
@@ -238,7 +267,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 
 }
 
-void genericMechnicalProblem_setDefaultSolverOptions(GenericMechanicalProblem * pGMP, SolverOptions* options, int id)
+void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
 {
   options->iSize = 5;
   options->dSize = 5;

@@ -21,6 +21,9 @@
 
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
+
+#define GMP_DEBUG
+
 /* void * solverFC3D; */
 /* void * solverEquality; */
 /* void * solverLCP; */
@@ -143,13 +146,14 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pFC3D->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pFC3D->M->storageType = 0; /*Local prb is dense*/
     pFC3D->q = (double*) malloc(size * sizeof(double));
+    pFC3D->dimension = 3;
     newProblem->q = pFC3D->q;
     break;
   }
   default:
     printf("GenericMechanicalProblem.h addProblem : problemType unknown: %d . \n", problemType);
   }
-  return 0;
+  return  newProblem->problem;
 }
 
 
@@ -172,4 +176,72 @@ void displayGMP(GenericMechanicalProblem * pGMP)
 
   //printSBM(pGMP->M->matrix1);
   printf("\nEND Display a GenericMechanicalProblem:\n");
+}
+
+void genericMechnical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
+{
+  listNumericsProblem * curProblem = pGMP->firstListElem;
+  /*Print M*/
+  printInFile(pGMP->M, file);
+  fprintf(file, "\n");
+  /*Print Q*/
+  for (int ii = 0; ii < pGMP->size; ii++)
+    fprintf(file, "%e\n", pGMP->q[ii]);
+  fprintf(file, "\n");
+  /*Print lthe type and options (mu)*/
+  while (curProblem)
+  {
+    fprintf(file, "%d\n", curProblem->type);
+    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_FC3D)
+      fprintf(file, "%e\n", ((FrictionContactProblem*)curProblem->problem)->mu[0]);
+    curProblem = curProblem->nextProblem;
+  }
+}
+
+GenericMechanicalProblem * genericMechnical_newFromFile(FILE* file)
+{
+  int nsubProb = 0;
+  int prbType = 0;
+  int i, posInX, localSize;
+  void * prb;
+
+  GenericMechanicalProblem*  pGMP = buildEmptyGenericMechanicalProblem();
+
+  //fscanf(file,"%d\n",&nsubProb);
+
+  pGMP->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+  newFromFile(pGMP->M, file);
+  SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
+
+  pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));
+  for (i = 0; i < pGMP->M->size1; i++)
+  {
+    fscanf(file, "%lf ", pGMP->q + i);
+  }
+  nsubProb = m->filled1 - 1;
+  posInX = 0;
+  for (int ii = 0; ii < nsubProb; ii++)
+  {
+    if (ii)
+      posInX = m->blocksize0[ii - 1];
+    localSize = m->blocksize0[ii] - posInX;
+    fscanf(file, "%d\n", &prbType);
+    prb = addProblem(pGMP, prbType, localSize);
+    if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
+    {
+      fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu);
+    }
+  }
+
+
+  pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));
+  for (i = 0; i < pGMP->M->size1; i++)
+  {
+    fscanf(file, "%lf ", pGMP->q + i);
+  }
+#ifdef GMP_DEBUG
+  displayGMP(pGMP);
+#endif
+
+  return pGMP;
 }

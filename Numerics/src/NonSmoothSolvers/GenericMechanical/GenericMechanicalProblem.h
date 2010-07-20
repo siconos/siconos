@@ -50,15 +50,21 @@ typedef struct _listNumericsProblem
 } listNumericsProblem;
 
 
-
+/*ONLY q and M must be allocated/free by the users, the others fields are private:
+  DO NOT FILL THIS STRUCTURE BY YOURSELF, BUT USE THE buildEmptyGenericMechanicalProblem, addProblem and freeGenericMechanicalProblem FUNCTIONS.
+ */
 typedef struct
 {
   /*Number of line of blocks.*/
+  /*PRIVATE: manage by addProblem.*/
   int size;
-  int numberOfBlockLine;
+  /*must be set by the user.*/
   NumericsMatrix* M;
+  /*must be set by the user.*/
   double* q;
+  /*PRIVATE: manage by addProblem.*/
   listNumericsProblem *firstListElem;
+  /*PRIVATE: manage by addProblem.*/
   listNumericsProblem *lastListElem;
   //  void * * problems;
 } GenericMechanicalProblem;

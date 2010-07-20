@@ -62,10 +62,12 @@ extern "C"
 
   GenericMechanicalProblem * buildEmptyGenericMechanicalProblem();
   void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP);
+  /*return the localProblem (either lcp, linearSystem of fc3d*/
   void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size);
   void displayGMP(GenericMechanicalProblem * pGMP);
-  void genericMechnicalProblem_setDefaultSolverOptions(GenericMechanicalProblem * pGMP, SolverOptions* options, int id);
-
+  void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int id);
+  void genericMechnical_printInFile(GenericMechanicalProblem*  problem, FILE* file);
+  GenericMechanicalProblem* genericMechnical_newFromFile(FILE* file);
 #ifdef __cplusplus
 }
 #endif

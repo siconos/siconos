@@ -35,6 +35,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/NCP			
   NonSmoothSolvers/MCP
   NonSmoothSolvers/GenericMechanical
+  NonSmoothSolvers/GenericMechanical/test-utils
   NonSmoothTools
   NonSmoothTools/test-utils
   utils)
@@ -357,7 +358,11 @@ IF(WITH_TESTING)
 
 
   END_TEST()
-
+  
+  BEGIN_TEST(NonSmoothSolvers/GenericMechanical/test)
+  NEW_TEST(GMPtest1 GenericMechanical_test1.c)
+  END_TEST()
+  
   BEGIN_TEST(utils/test)
   #NEW_TEST(pinvtest testpinv.c)
   NEW_TEST(op3x3 testop3x3.c)
