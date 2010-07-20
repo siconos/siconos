@@ -65,6 +65,7 @@ char * idProblemToChar(int id)
   }
   default:
     printf("Numerics:idProblemToChar, id unknown : %d \n", id);
+    return NULL;
   }
 
 }
@@ -348,7 +349,7 @@ char * idToName(int Id)
   case SICONOS_RELAY_NLGS:
     return SICONOS_RELAY_NLGS_STR;
   case SICONOS_RELAY_LATIN:
-    SICONOS_RELAY_LATIN_STR;
+    return SICONOS_RELAY_LATIN_STR;
     /*FRICTION_2D*/
   case SICONOS_FRICTION_2D_NSGS:
     return SICONOS_FRICTION_2D_NSGS_STR;
@@ -410,11 +411,14 @@ char * idToName(int Id)
     return SICONOS_FRICTION_3D_PRIMAL_DSFP_WR_STR;
   case SICONOS_FRICTION_3D_PRIMAL_TFP_WR:
     return SICONOS_FRICTION_3D_PRIMAL_TFP_WR_STR;
+  case SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR:
+    return SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR_STR;
   case SICONOS_FRICTION_3D_PRIMAL_NSGS:
     return SICONOS_FRICTION_3D_PRIMAL_NSGS_STR;
     /*DEFAULT*/
   default:
     return SICONOS_NONAME_STR;
+
 
   }
 }
@@ -517,6 +521,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint;
   else if (strcmp(SICONOS_FRICTION_3D_AlartCurnierNewton_STR, pName) == 0)
     return SICONOS_FRICTION_3D_AlartCurnierNewton;
+  else if (strcmp(SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_DampedAlartCurnierNewton;
   else if (strcmp(SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR, pName) == 0)
     return SICONOS_FRICTION_3D_NCPGlockerFBNewton;
   else if (strcmp(SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR, pName) == 0)
@@ -548,6 +554,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_PRIMAL_DSFP_WR;
   else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_TFP_WR_STR, pName) == 0)
     return SICONOS_FRICTION_3D_PRIMAL_TFP_WR;
+  else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR;
   else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_3D_PRIMAL_NSGS;
   return 0;

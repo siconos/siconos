@@ -897,14 +897,13 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 }
 int  LineSearchGP(FrictionContactProblem* localproblem,
                   computeNonsmoothFunction  Function,
-                  double * t,
-                  double t_init,
+                  double * t_opt,
                   double R[3],
                   double dR[3],
                   double *rho,
                   int LSitermax)
 {
-  double alpha = t_init;
+  double alpha = *t_opt;
 
   double inf = 1e20;
 
@@ -1029,7 +1028,11 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
 #ifdef VERBOSE_DEBUG
       printf("Sucess in LS: alpha = %12.8e\n", alpha);
 #endif
-      *t = alpha;
+      *t_opt = alpha;
+      if (verbose > 1)
+      {
+        printf("-----------------------------------------    LineSearchGP success number of iteration = %i  alpha = %.10e \n", iter, alpha);
+      }
       return 0;
 
     }
@@ -1062,8 +1065,11 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
 
 
   }
-
-  *t = alpha;
+  if (verbose > 1)
+  {
+    printf("-----------------------------------------    LineSearchGP failed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
+  }
+  *t_opt = alpha;
   return -1;
 }
 
@@ -1095,8 +1101,9 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
   // path length
   double t = 1.;
+  double t_opt = 1.;
   double t_init = 1.;
-
+  int NumberofLSfailed = 0;
   // Set the function for computing F and its gradient
   // \todo should nbe done in initialization
   /*      computeNonsmoothFunction  Function= &(computeAlartCurnier);  */
@@ -1175,7 +1182,23 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
     // Perform Line Search
 
-    int infoLS = LineSearchGP(localproblem, Function, &t, t_init, R, dR, rho, LSitermax);
+    t_opt = t_init;
+    int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax);
+
+    if (infoLS == 0) t = t_opt;
+    else
+    {
+      NumberofLSfailed++;
+      if (NumberofLSfailed > 5)
+      {
+        t = 100.0;
+        if (verbose > 1) printf("-----------------------------------------  Max Number of LineSearchGP failed =%i Tilt point\n ", NumberofLSfailed);
+        NumberofLSfailed = 0;
+      }
+    }
+
+
+
 
 
 

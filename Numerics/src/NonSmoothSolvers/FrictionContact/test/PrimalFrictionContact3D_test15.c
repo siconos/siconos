@@ -35,10 +35,7 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_NSGS_WR);
-  options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_DampedAlartCurnierNewton;
-  options->internalSolvers->internalSolvers->iparam[0] = 30;
-  options->internalSolvers->internalSolvers->iparam[1] = 10;
+  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR);
 
   info = primalFrictionContact_test_function(finput, options);
   deleteSolverOptions(options);

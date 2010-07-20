@@ -393,6 +393,67 @@ int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
   return 0;
 }
 
+
+
+void  primalFrictionContact3D_globalAlartCurnier_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+{
+
+  // Reformulation
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+
+  reformulationIntoLocalProblem(problem, localproblem);
+
+
+  // From StorageType==1 to Storage==0
+  if (localproblem->M->storageType == 1)
+  {
+    printf("Warning: frictionContact3D_globalAlartCurnier is only implemented for dense matrices.\n");
+    printf("Warning: The problem is reformulated.\n");
+
+    localproblem->M->matrix0 = (double*)malloc(localproblem->M->size0 * localproblem->M->size1 * sizeof(double));
+
+    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
+
+    freeSBM(localproblem->M->matrix1);
+    free(localproblem->M->matrix1);
+    localproblem->M->matrix1 = NULL;
+    localproblem->M->storageType = 0;
+  }
+
+
+  //
+  frictionContact3D_globalAlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
+
+  computeGlobalVelocity(problem, reaction, globalVelocity);
+  freeLocalProblem(localproblem);
+
+
+}
+int primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
+{
+
+
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the GLOBALAC_WR Solver\n");
+  }
+
+  options->solverId = SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR;
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
+}
+
 void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
   // Reformulation

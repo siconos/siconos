@@ -29,6 +29,7 @@ int * Primal_ipiv = NULL;
 int  Primal_MisInverse = 0;
 int  Primal_MisLU = 0;
 char SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR [] = "F3DP_NSGS_WR";
+char SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR_STR [] = "F3DP_GLOBALAC_WR";
 char SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR_STR [] = "F3DP_NSGSV_WR";
 char SICONOS_FRICTION_3D_PRIMAL_PROX_WR_STR [] = "F3DP_PROX_WR";
 char SICONOS_FRICTION_3D_PRIMAL_DSFP_WR_STR [] = "F3DP_DSFP_WR";
@@ -84,6 +85,17 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
     Primal_MisLU = 0;
     primalFrictionContact3D_nsgs_velocity_wr(problem, reaction , velocity, globalVelocity, &info, options);
     break;
+  }
+  case SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR:
+  {
+    if (verbose == 1)
+      printf(" ========================== Call GLOBALAC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+    Primal_ipiv = NULL;
+    Primal_MisInverse = 0;
+    Primal_MisLU = 0;
+    primalFrictionContact3D_globalAlartCurnier_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
+
   }
   case SICONOS_FRICTION_3D_PRIMAL_PROX_WR:
   {

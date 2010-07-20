@@ -38,6 +38,11 @@ int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int 
     options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGS;
     break;
   }
+  case SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR:
+  {
+    info =    primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
   {
     info =    primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(options);
