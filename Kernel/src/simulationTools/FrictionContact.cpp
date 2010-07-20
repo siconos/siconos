@@ -34,13 +34,11 @@ FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
 {
   if (dimPb == 2 && newNumericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
-  _numerics_problem.reset(new  FrictionContactProblem);
+  _numerics_problem.reset(new FrictionContactProblem);
 
 
-  if (dimPb == 2)
+  if (dimPb == 2 || dimPb == 3)
     frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-  else if (dimPb == 3)
-    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else
     RuntimeException::selfThrow("cannot set defaults solver options for other problem dimension than 2 or 3");
 }
@@ -159,7 +157,6 @@ int FrictionContact::compute(double time)
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = &*_q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.isComplete = 1;
     numerics_problem.mu = &((*_mu)[0]);
     // Call Numerics Driver for FrictionContact
     info = (*_frictionContact_driver)(&numerics_problem,

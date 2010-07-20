@@ -444,7 +444,6 @@ int PrimalFrictionContact::compute(double time)
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;
-    numerics_problem.isComplete = 1;
     numerics_problem.mu = &((*mu)[0]);
     // Call Numerics Driver for PrimalFrictionContact
     //  {
