@@ -82,7 +82,6 @@
     \param q vector (n)
     \param b vector (m)
     \param mu, vector of friction coefficients (size: numberOfContacts)
-    \param isComplete, equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
 */
 typedef struct
 {
@@ -93,7 +92,6 @@ typedef struct
   double* q;
   double* b;
   double* mu;
-  int isComplete;
 } PrimalFrictionContactProblem;
 
 #ifdef __cplusplus

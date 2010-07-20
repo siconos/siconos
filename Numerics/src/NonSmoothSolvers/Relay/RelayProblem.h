@@ -86,7 +86,6 @@
     \param q vector
     \param lb upper bound
     \param ub lower bound
-    \param isComplete equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
  */
 typedef struct
 {

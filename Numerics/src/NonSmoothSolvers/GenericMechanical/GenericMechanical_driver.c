@@ -28,8 +28,8 @@
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_compute_error.h"
 
-//#define GENERICMECHANICAL_DEBUG
-//#define GENERICMECHANICAL_DEBUG2
+#define GENERICMECHANICAL_DEBUG
+#define GENERICMECHANICAL_DEBUG2
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
@@ -168,7 +168,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     int curSize = 0;
 #ifdef GENERICMECHANICAL_DEBUG
     printf("GS it %d, initial value:\n", it);
-    for (ii = 0; ii < globalSize; ii++)
+    for (int ii = 0; ii < pGMP->size; ii++)
       printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
 #endif
     while (curProblem)
@@ -231,7 +231,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       }
 #ifdef GENERICMECHANICAL_DEBUG
       printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
-      for (ii = 0; ii < globalSize; ii++)
+      for (int ii = 0; ii < pGMP->size; ii++)
         printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
       if (!resLocalSolver)
         printf("Numerics:GenericMechanical_drivers Local solver failed\n");

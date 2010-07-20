@@ -277,7 +277,6 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   FrictionContactProblem* localproblem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   localproblem->numberOfContacts = 1;
   localproblem->dimension = 3;
-  localproblem->isComplete = 1;
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
 

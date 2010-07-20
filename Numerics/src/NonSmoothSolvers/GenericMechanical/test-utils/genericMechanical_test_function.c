@@ -27,14 +27,14 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
   int k, info = -1 ;
   GenericMechanicalProblem* problem = genericMechnical_newFromFile(f);
 
-  NumericsOptions global_options;
-  global_options.verboseMode = 2; // turn verbose mode to off by default
+  //NumericsOptions global_options;
+  //global_options.verboseMode = 2; // turn verbose mode to off by default
 
 
 
   double *reaction = (double*)calloc(problem->size, sizeof(double));
   double *velocity = (double*)calloc(problem->size, sizeof(double));
-  setNumericsOptions(&global_options);
+  //setNumericsOptions(&global_options);
   info = genericMechanical_driver(problem,
                                   reaction , velocity,
                                   options);

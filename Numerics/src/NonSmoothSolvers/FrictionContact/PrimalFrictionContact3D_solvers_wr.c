@@ -49,7 +49,6 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension =  problem->dimension;
-  localproblem->isComplete = 0;
   localproblem->mu =  problem->mu;
 
   assert(M);
@@ -129,7 +128,6 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     localproblem->mu = problem->mu;
 
 
-    localproblem->isComplete = 1;
 
     free(Htmp);
     free(qtmp);
@@ -254,7 +252,6 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
 
     localproblem->mu = problem->mu;
-    localproblem->isComplete = 1;
 
     /*     FILE * filecheck = fopen("localproblemcheck.dat","w"); */
     /*     frictionContact_printInFile(localproblem,filecheck); */

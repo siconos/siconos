@@ -145,6 +145,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pFC3D->mu = (double*) malloc(sizeof(double));
     pFC3D->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pFC3D->M->storageType = 0; /*Local prb is dense*/
+    pFC3D->numberOfContacts = 1;
     pFC3D->q = (double*) malloc(size * sizeof(double));
     pFC3D->dimension = 3;
     newProblem->q = pFC3D->q;
@@ -234,11 +235,7 @@ GenericMechanicalProblem * genericMechnical_newFromFile(FILE* file)
   }
 
 
-  pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));
-  for (i = 0; i < pGMP->M->size1; i++)
-  {
-    fscanf(file, "%lf ", pGMP->q + i);
-  }
+
 #ifdef GMP_DEBUG
   displayGMP(pGMP);
 #endif

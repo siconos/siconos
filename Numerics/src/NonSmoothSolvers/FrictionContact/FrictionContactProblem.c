@@ -44,7 +44,6 @@ int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
   fprintf(file, "\n");
-  fprintf(file, "%d\n", problem->isComplete);
   return 0;
 }
 
@@ -73,7 +72,6 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
     fscanf(file, "%lf ", &(problem->mu[i]));
   }
   fscanf(file, "\n");
-  fscanf(file, "%d\n", &(problem->isComplete));
   return 0;
 }
 
