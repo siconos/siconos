@@ -223,7 +223,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         fcProblem->M->matrix0 = m->block[diagBlockNumber];
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
-        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
+        resLocalSolver = frictionContact3D_Newton_solve(fcProblem, sol, &options->internalSolvers[1]);
         break;
       }
       default:
@@ -233,7 +233,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
       for (int ii = 0; ii < pGMP->size; ii++)
         printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
-      if (!resLocalSolver)
+      if (resLocalSolver)
         printf("Numerics:GenericMechanical_drivers Local solver failed\n");
 #endif
       curProblem = curProblem->nextProblem;

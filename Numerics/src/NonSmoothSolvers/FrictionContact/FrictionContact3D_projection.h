@@ -79,7 +79,7 @@ extern "C"
       \param local reaction
       \param SolverOptions options of the solver
   */
-  void frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProblem *, double*, SolverOptions *);
+  int frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProblem *, double*, SolverOptions *);
 
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
       \param number (position in global matrix) of the considered contact
@@ -95,7 +95,7 @@ extern "C"
       \param local reaction
       \param SolverOptions options of the local solver
   */
-  void frictionContact3D_projectionOnCone_solve(FrictionContactProblem *, double*, SolverOptions *);
+  int frictionContact3D_projectionOnCone_solve(FrictionContactProblem *, double*, SolverOptions *);
 
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
       \param number (position in global matrix) of the considered contact
@@ -112,7 +112,7 @@ extern "C"
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param SolverOptions options of the solver
   */
-  void frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem *, double*, SolverOptions *);
+  int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem *, double*, SolverOptions *);
 
   /** solve friction-contact 3D problem with projection on the Cone
       \param number (position in global matrix) of the considered contact
@@ -120,7 +120,7 @@ extern "C"
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param SolverOptions options of the solver
   */
-  void frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem *, double*, SolverOptions *);
+  int frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem *, double*, SolverOptions *);
 
   /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
     \param number (position in global matrix) of the considered contact
@@ -128,7 +128,7 @@ extern "C"
     \param global reaction (only the block corresponding to the current contact will be modified,
     \param SolverOptions options of the solver
   */
-  void frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *, double*, SolverOptions *);
+  int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *, double*, SolverOptions *);
   /** free memory for friction contact 3D projection solver */
   void frictionContact3D_projection_free();
   /** free memory for friction contact 3D projection solver */

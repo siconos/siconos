@@ -53,7 +53,7 @@ extern "C"
       \param vector of int parameters (max iteration numnber ...)
       \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double*, SolverOptions*);
+  int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double*, SolverOptions*);
 
   /** free memory for friction contact 3D Path solver */
   void frictionContact3D_Path_free();

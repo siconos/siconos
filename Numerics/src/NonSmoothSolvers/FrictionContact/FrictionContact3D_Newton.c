@@ -123,7 +123,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
   }
 }
 
-void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
+int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
 
@@ -160,7 +160,7 @@ void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }
-
+  return info;
   /*  (*postSolver)(contact,reaction); */
 }
 

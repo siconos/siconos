@@ -51,8 +51,9 @@ extern "C"
       \param the local problem to solve
       \param local reaction
       \param  SolverOptions * options of the solver
+      return 0 iff successful.
    */
-  void frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions *);
+  int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions *);
 
   /** free memory for friction contact 3D Newton solver */
   void frictionContact3D_Newton_free();

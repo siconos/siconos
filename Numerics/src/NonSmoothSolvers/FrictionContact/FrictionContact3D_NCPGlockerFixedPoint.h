@@ -54,8 +54,9 @@ extern "C"
       \param dim. of the global problem
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param  SolverOptions * options of the solver
+      return 0 iff successful
    */
-  void frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* , SolverOptions *);
+  int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* , SolverOptions *);
 
   /** free memory for friction contact 3D Fixed Point solver */
   void frictionContact3D_FixedP_free();

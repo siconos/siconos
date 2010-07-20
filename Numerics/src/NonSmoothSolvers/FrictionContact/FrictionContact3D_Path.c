@@ -102,7 +102,7 @@ void frictionContact3D_Path_initialize(FrictionContactProblem* problem, Friction
   }
 }
 
-void frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
+int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
@@ -117,7 +117,7 @@ void frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double
     fprintf(stderr, "Numerics, FrictionContact3D_Path failed");
     exit(EXIT_FAILURE);
   }
-
+  return info;
   /*   (*postSolver)(contact,reaction); */
 }
 

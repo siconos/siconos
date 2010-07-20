@@ -79,7 +79,7 @@ void frictionContact3D_FixedP_initialize(FrictionContactProblem* problem, Fricti
   }
 }
 
-void frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
+int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
@@ -93,6 +93,7 @@ void frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , doub
     fprintf(stderr, "Numerics, FrictionContact3D_FixedP failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
     exit(EXIT_FAILURE);
   }
+  return info;
 
   /*   (*postSolver)(contact,reaction); */
 }

@@ -220,7 +220,7 @@ void frictionContact3D_projection_update_with_regularization(int contact, Fricti
 
 }
 
-void frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
+int frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
 
@@ -268,10 +268,11 @@ void frictionContact3D_projectionWithDiagonalization_solve(FrictionContactProble
       reaction[2] = reaction[2] * num;
     }
   }
+  return 0;
 }
 
 
-void frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
+int frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -394,6 +395,9 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(FrictionContactP
     /* /\*    printf ("Modified velocity[1] = %14.7e\n",worktmp[1]); *\/ */
     /* /\*    printf ("Modified velocity[2] = %14.7e\n",worktmp[2]); *\/ */
   }
+  if (localerror > localtolerance)
+    return 1;
+  return 0;
 
 }
 void frictionContact3D_projectionOnCylinder_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
@@ -420,7 +424,7 @@ void frictionContact3D_projectionOnCylinder_update(int contact, FrictionContactP
 }
 
 
-void frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
+int frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
 {
 
 
@@ -455,6 +459,7 @@ void frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localprobl
 
 
   projectionOnCone(reaction, mu_i);
+  return 0;
 
 }
 
@@ -473,7 +478,7 @@ void frictionContact3D_projection_with_regularization_free(FrictionContactProble
 
 
 
-void frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem, double* velocity,  SolverOptions* options)
+int frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem, double* velocity,  SolverOptions* options)
 {
   /* int and double parameters */
   /*     int* iparam = options->iparam; */
@@ -511,11 +516,12 @@ void frictionContact3D_projectionOnCone_velocity_solve(FrictionContactProblem* l
 
   normUT = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]);
   velocity[0] -= mu_i * normUT;
+  return 0;
 }
 
 
 
-void frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *localproblem , double* reaction, SolverOptions* options)
+int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *localproblem , double* reaction, SolverOptions* options)
 {
   /* int and double parameters */
   /*   int* iparam = options->iparam; */
@@ -548,6 +554,7 @@ void frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem *localp
   reaction[2] -= an * worktmp[2];
 
   projectionOnCylinder(reaction, R);
+  return 0;
 
 }
 

@@ -53,7 +53,7 @@ For each solver, the input argument are:
 #include "FrictionContact3D_globalAlartCurnier.h"
 #include "Friction_cst.h"
 /** pointer to function used to call local solver */
-typedef void (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
+typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
 
 /** pointer to function used to update local problem */
 typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*, SolverOptions *);
