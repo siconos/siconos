@@ -327,7 +327,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
         reactionold[0] = reaction[3 * contact];
         reactionold[1] = reaction[3 * contact + 1];
         reactionold[2] = reaction[3 * contact + 2];
-
+        if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
         (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
@@ -368,7 +368,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       //DCOPY( n , q , incx , velocity , incy );
       for (contact = 0 ; contact < nc ; ++contact)
       {
-
+        if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
         (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);

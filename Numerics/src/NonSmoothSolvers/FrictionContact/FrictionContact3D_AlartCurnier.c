@@ -22,12 +22,13 @@
 #include <stdio.h>
 #include <math.h>
 #include "Friction_cst.h"
+#include "op3x3.h"
 
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
 //#define VERBOSE_DEBUG
 
-//#define OPTI_RHO
+#define OPTI_RHO
 
 /*Static variables */
 
@@ -788,7 +789,9 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
 
   int i, j, k, inew;
-  double det, d1, d2, d3;
+
+  // store the increment
+  double dR[3] = {0., 0., 0.};
 
   // store the value fo the function
   double F[3] = {0., 0., 0.};
@@ -800,7 +803,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
   // Set the function for computing F and its gradient
   // \todo should nbe done in initialization
   computeNonsmoothFunction  Function = &(computeAlartCurnier);
-  /*    computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
+  /*     computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
 
 
   // Value of AW+B
@@ -824,7 +827,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     //Update function and gradient
     Function(R, velocity, mu, rho, F, A, B);
 
-    // compute A MLocal +B
+    // compute -(A MLocal +B)
     for (i = 0; i < 3; i++)
     {
       for (j = 0; j < 3; j++)
@@ -832,62 +835,27 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
         AWplusB[i + 3 * j] = 0.0;
         for (k = 0; k < 3; k++)
         {
-          AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
+          AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3];
         }
-        AWplusB[i + 3 * j] += B[i + 3 * j];
+        AWplusB[i + 3 * j] -= B[i + 3 * j];
       }
     }
-
-    // Compute its determinant
-    d1 = AWplusB[1 + 1 * 3] * AWplusB[2 + 3 * 2] - AWplusB[1 + 3 * 2] * AWplusB[2 + 3 * 1];
-    d2 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2];
-    d3 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1];
-
-    det = AWplusB[0 + 3 * 0] * d1 - AWplusB[0 + 3 * 1] * d2 + AWplusB[0 + 3 * 2] * d3;
-
-    if (fabs(det) < 1.e-20)
-    {
-      printf("LocalNonsmoothNewtonSolver : Singular sub-gradient.\n");
-      exit(EXIT_FAILURE);
-    }
-
     // Solve the linear system
-
-    det = 1.0 / det;
-    double AA = +(AWplusB[1 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[1 + 3 * 2]) * F[0]
-                - (AWplusB[0 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[1]
-                + (AWplusB[0 + 3 * 1] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[2] ;
-
-    double BB = -(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2]) * F[0]
-                + (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[1]
-                - (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[2] ;
-
-
-    double CC = +(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1]) * F[0]
-                - (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[1]
-                + (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 1] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[2] ;
-
-    R[0] = R[0] - AA * det;
-    R[1] = R[1] - BB * det;
-    R[2] = R[2] - CC * det;
-
+    solv3x3(AWplusB, dR, F);
+    // upate iterates
+    R[0] += dR[0];
+    R[1] += dR[1];
+    R[2] += dR[2];
     // compute new residue
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                             + MLocal[i + 1 * 3] * R[1] +
                                             + MLocal[i + 2 * 3] * R[2] ;
-
     Function(R, velocity, mu, rho, F, NULL, NULL);
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
-    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]); // improve with relative tolerance
+    if (verbose > 1) printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
 
-    if (verbose > 1)
-    {
-      printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
-    }
-    if (dparam[1] < Tol)
-    {
-      return 0;
-    }
+    if (dparam[1] < Tol) return 0;
 
   }// End of the Newton iteration
 
@@ -1087,7 +1055,6 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
 
   int i, j, k, inew;
-  double det, d1, d2, d3;
 
   // store the value fo the function
   double F[3] = {0., 0., 0.};
@@ -1105,9 +1072,9 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
   double t_init = 1.;
   int NumberofLSfailed = 0;
   // Set the function for computing F and its gradient
-  // \todo should nbe done in initialization
-  /*      computeNonsmoothFunction  Function= &(computeAlartCurnier);  */
-  computeNonsmoothFunction  Function = &(computeAlartCurnierTruncated);
+  // \todo should be done in initialization
+  computeNonsmoothFunction  Function = &(computeAlartCurnier);
+  /*     computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated);  */
 
 
   // Value of AW+B
@@ -1131,7 +1098,7 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
     //Update function and gradient
     Function(R, velocity, mu, rho, F, A, B);
 
-    // compute A MLocal +B
+    // compute -(A MLocal +B)
     for (i = 0; i < 3; i++)
     {
       for (j = 0; j < 3; j++)
@@ -1139,46 +1106,13 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
         AWplusB[i + 3 * j] = 0.0;
         for (k = 0; k < 3; k++)
         {
-          AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
+          AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3];
         }
-        AWplusB[i + 3 * j] += B[i + 3 * j];
+        AWplusB[i + 3 * j] -= B[i + 3 * j];
       }
     }
 
-    // Compute its determinant
-    d1 = AWplusB[1 + 1 * 3] * AWplusB[2 + 3 * 2] - AWplusB[1 + 3 * 2] * AWplusB[2 + 3 * 1];
-    d2 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2];
-    d3 = AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1];
-
-    det = AWplusB[0 + 3 * 0] * d1 - AWplusB[0 + 3 * 1] * d2 + AWplusB[0 + 3 * 2] * d3;
-
-    if (fabs(det) < 1.e-20)
-    {
-      printf("LocalNonsmoothNewtonSolver : Singular sub-gradient.\n");
-      exit(EXIT_FAILURE);
-    }
-
-    // Solve the linear system
-
-    det = 1.0 / det;
-    double AA = +(AWplusB[1 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[1 + 3 * 2]) * F[0]
-                - (AWplusB[0 + 3 * 1] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[1]
-                + (AWplusB[0 + 3 * 1] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 1] * AWplusB[0 + 3 * 2]) * F[2] ;
-
-    double BB = -(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 2]) * F[0]
-                + (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 2] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[1]
-                - (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 2] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 2]) * F[2] ;
-
-
-    double CC = +(AWplusB[1 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[1 + 3 * 1]) * F[0]
-                - (AWplusB[0 + 3 * 0] * AWplusB[2 + 3 * 1] - AWplusB[2 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[1]
-                + (AWplusB[0 + 3 * 0] * AWplusB[1 + 3 * 1] - AWplusB[1 + 3 * 0] * AWplusB[0 + 3 * 1]) * F[2] ;
-
-
-    dR[0] = - AA * det;
-    dR[1] = - BB * det;
-    dR[2] = - CC * det;
-
+    solv3x3(AWplusB, dR, F);
 
     // Perform Line Search
 
@@ -1197,20 +1131,10 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
       }
     }
 
-
-
-
-
-
     // upate iterates
     R[0] = R[0] + t * dR[0];
     R[1] = R[1] + t * dR[1];
     R[2] = R[2] + t * dR[2];
-
-
-
-
-
 
     // compute new residue
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
@@ -1218,17 +1142,11 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
                                             + MLocal[i + 2 * 3] * R[2] ;
 
     Function(R, velocity, mu, rho, F, NULL, NULL);
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
-    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]); // improve with relative tolerance
+    if (verbose > 1) printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    if (dparam[1] < Tol) return 0;
 
-    if (verbose > 1)
-    {
-      printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
-    }
-    if (dparam[1] < Tol)
-    {
-      return 0;
-    }
 
   }// End of the Newton iteration
 
