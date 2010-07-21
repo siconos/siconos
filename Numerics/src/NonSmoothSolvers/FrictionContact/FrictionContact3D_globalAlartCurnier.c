@@ -38,11 +38,10 @@ void frictionContact3D_gamma(double* x, double *r, double *p)
   double* x1 = ++x;
   double* x2 = ++x;
 
-  //  double* r11 = r+_11;
-  //double* r12 = r+_12;
-  //double* r21 = r+_21;
-  //double* r22 = r+_22;
-  SET3X3(r);
+  double* r11 = r + _11;
+  double* r12 = r + _12;
+  double* r21 = r + _21;
+  double* r22 = r + _22;
 
   double invp_, p_, p3;
 
@@ -79,27 +78,85 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
 {
   assert(result);
 
-  double x0 = rhon * un;
-  double x1 = rn - x0;
-  double x4 = rhot1 * ut1;
-  double x5 = rt1 - x4;
-  double x6 = mu * x1;
-  double x7 = rhot2 * ut2;
-  double x8 = rt2 - x7;
-  double x9 = pow(x8, 2);
-  double x10 = pow(x5, 2);
-  double x11 = x10 + x9;
-  double x12 = pow(x11, (1.0 / 2.0));
-  double x16 = 1.0 / x12;
-  double x19 = pow(x16, 3);
-  double x20 = x4 - rt1;
-  double x22 = x7 - rt2;
-  double x23 = mu * x1 * x16;
+
+  double x0;
+  double x1;
+  double x2;
+  double x3;
+  double x4;
+  double x5;
+  double x6;
+  double x7;
+  double x8;
+  double x9;
+  double x10;
+  double x11;
+  double x12;
+  double x13;
+  double x14;
+  double x15;
+  double x16;
+  double x17;
+  double x18;
+  double x19;
+  double x20;
+  double x21;
+  double x22;
+  double x23;
+  double x24;
+  x0 = rhon * un;
+  x1 = rn - x0;
+  x2 = x1 < 0;
+  x3 = 0 <= x1;
+  x4 = rhot1 * ut1;
+  x5 = rt1 - x4;
+  x6 = rhot2 * ut2;
+  x7 = rt2 - x6;
+  x8 = pow(x7, 2);
+  x9 = pow(x5, 2);
+  x10 = x8 + x9;
+  x11 = mu * x1;
+  x12 = pow(x10, (1.0 / 2.0));
+  x13 = x12 <= x11;
+  x14 = 1.0 / x12;
+  x15 = x11 < x12;
+  x16 = 0 < x11;
+  x17 = x11 <= 0;
+  x18 = (0, x11 <= 0);
+  x19 = (0, x12 <= x11);
+  x20 = pow(x14, 3);
+  x21 = x4 - rt1;
+  x22 = (1, x12 <= x11);
+  x23 = x6 - rt2;
+  x24 = x11 * x14;
   result[6] = 0;
   result[9] = 0;
   result[15] = 0;
   result[18] = 0;
-  if (x12 <= x6)
+  if ((0 < x11) && (x11 < x12))
+  {
+    result[1] = -rt1 + x24 * x5;
+    result[4] = mu * rhon * x14 * x5;
+    result[7] = rhot1 * x24 - rhot1 * x11 * x20 * x9;
+    result[10] = -rhot2 * x11 * x20 * x5 * x7;
+    result[13] = -mu * x14 * x5;
+    result[16] = 1 - x24 - mu * x1 * x20 * x21 * x5;
+    result[19] = -mu * x1 * x20 * x23 * x5;
+    result[2] = -rt2 + x24 * x7;
+    result[5] = mu * rhon * x14 * x7;
+    result[8] = -rhot1 * x11 * x20 * x5 * x7;
+    result[11] = rhot2 * x24 - rhot2 * x11 * x20 * x8;
+    result[14] = -mu * x14 * x7;
+    result[17] = -mu * x1 * x20 * x21 * x7;
+    result[20] = 1 - x24 - mu * x1 * x20 * x23 * x7;
+  };
+  if (0 <= x1)
+  {
+    result[0] = -x0;
+    result[3] = rhon;
+    result[12] = 0;
+  };
+  if ((0 < x11) && (x12 <= x11))
   {
     result[1] = x5 - rt1;
     result[4] = 0;
@@ -108,7 +165,7 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
     result[13] = 0;
     result[16] = 0;
     result[19] = 0;
-    result[2] = x8 - rt2;
+    result[2] = x7 - rt2;
     result[5] = 0;
     result[8] = 0;
     result[11] = rhot2;
@@ -116,30 +173,7 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
     result[17] = 0;
     result[20] = 0;
   };
-  if (x1 < 0)
-  {
-    result[0] = -rn;
-    result[3] = 0;
-    result[12] = 1;
-  };
-  if (x6 < x12)
-  {
-    result[1] = -rt1 + x23 * x5;
-    result[4] = mu * rhon * x16 * x5;
-    result[7] = rhot1 * x23 - mu * rhot1 * x1 * x10 * x19;
-    result[10] = -mu * rhot2 * x1 * x19 * x5 * x8;
-    result[13] = -mu * x16 * x5;
-    result[16] = 1 - x23 - mu * x1 * x19 * x20 * x5;
-    result[19] = -mu * x1 * x19 * x22 * x5;
-    result[2] = -rt2 + x23 * x8;
-    result[5] = mu * rhon * x16 * x8;
-    result[8] = -mu * rhot1 * x1 * x19 * x5 * x8;
-    result[11] = rhot2 * x23 - mu * rhot2 * x1 * x19 * x9;
-    result[14] = -mu * x16 * x8;
-    result[17] = -mu * x1 * x19 * x20 * x8;
-    result[20] = 1 - x23 - mu * x1 * x19 * x22 * x8;
-  };
-  if (x6 <= 0)
+  if (x11 <= 0)
   {
     result[1] = -rt1;
     result[4] = 0;
@@ -156,11 +190,11 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
     result[17] = 0;
     result[20] = 1;
   };
-  if (0 <= x1)
+  if (x1 < 0)
   {
-    result[0] = -x0;
-    result[3] = rhon;
-    result[12] = 0;
+    result[0] = -rn;
+    result[3] = 0;
+    result[12] = 1;
   };
 };
 
@@ -190,6 +224,7 @@ void frictionContact3D_localAlartCurnierFunction(
   cpy3(result, f);
   cpy3x3(result + 3, A);
   cpy3x3(result + 12, B);
+
 }
 
 
@@ -223,6 +258,7 @@ void frictionContact3D_globalAlartCurnierFunction(
         *mu,
         rho,
         result, A, B);
+
 
     reaction += 3;
     velocity += 3;
@@ -260,123 +296,99 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
   SET3(velocity);
   SET3(rho);
 
-
-
   *A01 = 0.;
   *A02 = 0.;
-  *A10 = 0.;
-  *A20 = 0.;
-
   *B01 = 0.;
   *B02 = 0.;
 
 
-  double p0, p1, p2;
+  double D0, D1, D2, muD0;
 
-  p0 = *reaction0 - *rho0 * *velocity0;
-  p1 = *reaction1 - *rho1 * *velocity1;
-  p2 = *reaction2 - *rho2 * *velocity2;
+  D0 = *reaction0 - *rho0 * *velocity0;
+  D1 = *reaction1 - *rho1 * *velocity1;
+  D2 = *reaction2 - *rho2 * *velocity2;
 
-  // note : rmu was reaction[i0]*mu[i]
-  double rmu = mu * fmax(0, p0);
+  muD0 = mu * D0;
 
-  double p = hypot(p1, p2);
+  double hypotD1D2 = hypot(D1, D2);
 
-  if (p0 >= 0)
+
+  if (muD0 <= 0.)
   {
-    *ACF0 -= *reaction0; // note : this is -PHI p425
 
-    if (A && B)
-    {
-      // DUnPHI2
-      *A00 = *rho0;
-      *B00 = 0.;
-    }
 
+    *ACF1 = *reaction1;
+    *ACF2 = *reaction2;
+    *A10 = 0.;
+    *A11 = 0.;
+    *A12 = 0.;
+    *A20 = 0.;
+    *A21 = 0.;
+    *A22 = 0.;
+    *B10 = 0.;
+    *B11 = 1.;
+    *B12 = 0.;
+    *B20 = 0.;
+    *B22 = 1.;
+
+  };
+
+  if (hypotD1D2 <= muD0)
+  {
+    *ACF1 = *reaction1 - D1;
+    *ACF2 = *reaction2 - D2;
+    *A10 = 0.;
+    *A11 = *rho1;
+    *A12 = 0.;
+    *A20 = 0.;
+    *A21 = 0.;
+    *A22 = *rho2;
+
+    *B10 = 0.;
+    *B11 = 0.;
+    *B12 = 0.;
+  }
+
+  if (D0 < 0.)
+  {
+    *ACF0 = *reaction0;
+    *A00 = 0.;
+    *B00 = 1.;
+  }
+
+  if (D0 >= 0.)
+  {
+    *ACF0 = *reaction0 - D0;
+    *A00 = *rho0;
+    *B00 = 0.;
+  }
+
+  if (muD0 < hypotD1D2)
+  {
+    double cubehypotD1D2 = hypotD1D2 * hypotD1D2 * hypotD1D2;
+    double muD0rho1 = muD0* *rho1;
+
+    *ACF1 = *reaction1 - muD0 * D1 / hypotD1D2;
+    *ACF2 = *reaction2 - muD0 * D2 / hypotD1D2;
+
+    *A10 = mu * D1* *rho0 / hypotD1D2;
+    *A11 = -muD0rho1 * D1 * D1 / cubehypotD1D2 + muD0rho1 / hypotD1D2;
+    *A12 = - D0 * D1 * D2 * mu**rho2 / cubehypotD1D2;
+
+    *A20 = D2 * mu* *rho0 / hypotD1D2;
+    *A21 = - D0 * D1 * D2 * mu* *rho1 / cubehypotD1D2;
+    *A22 = - muD0* *rho2 * D2 * D2 / cubehypotD1D2 + muD0* *rho2 / hypotD1D2;
+
+    *B10 = - mu * D1 / hypotD1D2;
+    *B11 = 1 + muD0 * D1 * D1 / cubehypotD1D2 - muD0 / hypotD1D2;
+    *B12 =  muD0 * D1 * D2 / cubehypotD1D2;
+
+    *B20 = - mu * D2 / hypotD1D2;
+    *B21 =  muD0 * D1 * D2 / cubehypotD1D2;
+    *B22 = 1 + muD0 * D2 * D2 / cubehypotD1D2 - muD0 / hypotD1D2;
 
   }
 
-  else
-  {
-    *ACF0 = -*reaction0;
-
-    if (A && B)
-    {
-      // DUnPHI2
-      *A00 = 0.;
-      *B00 = 1.;
-    }
-  }
-
-
-  if (p > rmu)
-  {
-
-    // outside disk
-    if (A && B)
-    {
-
-      double rho1rmu, rho2rmu;
-      rho1rmu = *rho1 * rmu;
-      rho2rmu = *rho2 * rmu;
-
-      frictionContact3D_gamma(ACF0, A00, &p);
-
-      int positivepnv = *ACF0 > 0;
-
-      // DRnPHI3
-      *B10 = - mu * positivepnv * p1 / p; // not rmu
-      *B20 = - mu * positivepnv * p2 / p; // not rmu
-
-      // DRtPHI3
-      *B11 = 1. - rmu* *A11;
-      *B12 = - rmu* *A12;
-      *B21 = *B12;
-      *B22 = 1. - rmu* *A22;
-
-      // DUtPHI3
-      *A11 *= rho1rmu;
-      *A12 *= rho1rmu;
-      *A21 *= rho2rmu;
-      *A22 *= rho2rmu;
-
-    }
-
-    assert(p > 0.);
-
-    *ACF1 *= rmu / p;
-    *ACF2 *= rmu / p;
-
-  }
-
-  else
-  {
-    // inside disk
-    if (A && B)
-    {
-
-      // DUtPHI3
-      *A11 = *rho1;
-      *A12 = 0.;
-      *A21 = 0.;
-      *A22 = *rho2;
-
-      // DRnPHI3
-      *B10 = 0.;
-      *B20 = 0.;
-
-      // DRtPHI3
-      *B11 = 0.;
-      *B12 = 0.;
-      *B21 = 0.;
-      *B22 = 0.;
-
-    }
-
-  }
-
-  *ACF1 -= *reaction1;
-  *ACF2 -= *reaction2;
 };
 
 
