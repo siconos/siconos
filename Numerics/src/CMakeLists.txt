@@ -278,6 +278,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
   NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
   NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
+
+
+  NEW_TEST(FC3Dtest14 FrictionContact3D_test14.c)
   
   NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c)
   NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
@@ -351,9 +354,14 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test11 PrimalFrictionContact3D_test11.c)
   NEW_TEST(PFC3D_test12 PrimalFrictionContact3D_test12.c)
   NEW_TEST(PFC3D_test13 PrimalFrictionContact3D_test13.c)
-  SET(PFC3D_test14_PROPERTIES WILL_FAIL TRUE)	## Nonconvergence of NSGS	
+
+
   NEW_TEST(PFC3D_test14 PrimalFrictionContact3D_test14.c)
-  SET(PFC3D_test15_PROPERTIES WILL_FAIL TRUE)	## Cycling in GLOBALAC	
+
+
+
+  NEW_TEST(PFC3D_test14bis PrimalFrictionContact3D_test14bis.c)
+ 
   NEW_TEST(PFC3D_test15 PrimalFrictionContact3D_test15.c)
 
 

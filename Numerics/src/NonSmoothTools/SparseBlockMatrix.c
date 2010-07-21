@@ -4,6 +4,10 @@
 #include "SparseBlockMatrix.h"
 #include "LA.h"
 #include <math.h>
+
+
+//#define VERBOSE_DEBUG
+
 void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
@@ -869,19 +873,38 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
         }
         fprintf(file, "];\n");
       }
-      fprintf(file, "];");
-
-
-
+      fprintf(file, "];\n");
       /*       for (int i=0;i<nbRows*nbColumns;i++) */
       /*       { */
       /*         fprintf(file,"%32le\n",m->block[blockNum][i]); */
       /*       } */
-
     }
   }
 
+  fprintf(file, "// Dense version\n");
+  int size0 = m->blocksize0[m->blocknumber0 - 1];
+  int size1 = m->blocksize1[m->blocknumber1 - 1];
+  double * denseMat = (double*)malloc(size0 * size1 * sizeof(double));
+  SBMtoDense(m, denseMat);
+
+  fprintf(file, "data= [");
+  for (int i = 0; i < size0; i++)
+  {
+    fprintf(file, "[");
+    for (int j = 0; j < size1; j++)
+    {
+      fprintf(file, "%32.24e,\t ", denseMat[i + j * size0]);
+    }
+    fprintf(file, "];\n");
+  }
+  fprintf(file, "]");
+  free(denseMat);
+
+
+
 }
+
+
 void printInFileNameSBM(const SparseBlockStructuredMatrix* const m, const char *filename)
 {
 
@@ -1259,14 +1282,21 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
           assert(blockNumB < B->nbblocks);
           B->index1_data[currentColNumberofA + 1]++;
           B->index2_data[blockNumB] = currentRowNumberofA;
-          blockMap[blockNum] = blockNumB;
+          blockMap[blockNumB] = blockNum;
 
         }
-
-
       }
     }
   }
+
+#ifdef VERBOSE_DEBUG
+  printf("----------------- blockMap ---------------\n");
+  for (int i = 0; i < B->filled2; i++)
+  {
+    printf("blockMap[%i] = %i\n", i, blockMap[i]);
+  }
+  printf("----------------- blockMap ---------------\n");
+#endif
 
 
 
@@ -1290,6 +1320,10 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
         nbColumns -= B->blocksize1[colNumber - 1];
       int lengthblock = nbRows * nbColumns;
       B->block[blockNum] = (double*)malloc(lengthblock * sizeof(double));
+
+
+
+
       for (int i = 0; i < nbRows; i++)
       {
         for (int j = 0; j < nbColumns; j++)
@@ -1304,6 +1338,7 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
     }
   }
   free(blockMap);
+
 
   return 0;
 }

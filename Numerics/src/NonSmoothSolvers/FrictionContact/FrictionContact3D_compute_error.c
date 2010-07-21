@@ -28,6 +28,7 @@
 #include <assert.h>
 void FrictionContact3D_unitary_compute_and_add_error(double *z , double *w, double mu, double * error)
 {
+
   double normUT;
   double rho = 1.0;
 

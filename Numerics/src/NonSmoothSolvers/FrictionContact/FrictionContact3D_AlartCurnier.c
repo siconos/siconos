@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include "Friction_cst.h"
 #include "op3x3.h"
 
@@ -753,7 +754,14 @@ void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[
 }
 void computerho(FrictionContactProblem* localproblem, double * rho)
 {
+
+
+
+
   double * MLocal = localproblem->M->matrix0;
+
+  assert(MLocal[0 + 0 * 3] > 0);
+
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
 
   double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
@@ -764,6 +772,13 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
   rho[1] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
   rho[2] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+
+  assert(rho[0] > 0);
+  assert(rho[1] > 0);
+  assert(rho[2] > 0);
+
+
+
 
 #ifdef VERBOSE_DEBUG
   printf("sw=%le = ", sw);
@@ -782,7 +797,12 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 {
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
+
   double * MLocal = localproblem->M->matrix0;
+
+
+
+
 
   double Tol = dparam[0];
   double itermax = iparam[0];
@@ -803,7 +823,8 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
   // Set the function for computing F and its gradient
   // \todo should nbe done in initialization
   computeNonsmoothFunction  Function = &(computeAlartCurnier);
-  /*     computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
+  /*           computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
+  /*         computeNonsmoothFunction  Function= &(frictionContact3D_localAlartCurnierFunction);  */
 
 
   // Value of AW+B
@@ -853,13 +874,24 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     Function(R, velocity, mu, rho, F, NULL, NULL);
     dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
+    /*      dparam[2] =0.0;  */
+    /*      FrictionContact3D_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2])); */
+
+
+
+
     if (verbose > 1) printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \n", inew, dparam[1]);
 
-    if (dparam[1] < Tol) return 0;
+    if (dparam[1] < Tol)
+    {
+      /*    printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
+
+      return 0;
+    }
 
   }// End of the Newton iteration
 
-
+  /*  printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
   return 1;
 
 }

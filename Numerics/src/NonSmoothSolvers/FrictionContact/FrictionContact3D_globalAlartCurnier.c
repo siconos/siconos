@@ -222,8 +222,11 @@ void frictionContact3D_localAlartCurnierFunction(
     result);
 
   cpy3(result, f);
-  cpy3x3(result + 3, A);
-  cpy3x3(result + 12, B);
+  if (A && B)
+  {
+    cpy3x3(result + 3, A);
+    cpy3x3(result + 12, B);
+  }
 
 }
 

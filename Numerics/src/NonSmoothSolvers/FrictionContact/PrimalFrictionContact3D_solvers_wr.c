@@ -32,7 +32,7 @@
 #include "pinv.h"
 #include <string.h>
 //#define TEST_COND
-
+//#define OUTPUT_DEBUG
 extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
 extern int  Primal_MisLU;
@@ -149,20 +149,57 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
     /* copySBM(H->matrix1 , HtmpSBM); */
 
+#ifdef OUTPUT_DEBUG
+    FILE* fileout;
+    fileout = fopen("dataM.sci", "w");
+    printInFileForScilab(M, fileout);
+    fclose(fileout);
+    printf("Display M\n");
+    printSBM(M->matrix1);
+#endif
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
     infoInverseSBM = inverseDiagSBM(M->matrix1);
     assert(!infoInverseSBM);
     Primal_MisInverse = 1;
-
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataMinv.sci", "w");
+    printInFileForScilab(M, fileout);
+    fclose(fileout);
+    printf("Display Minv\n");
+    printSBM(M->matrix1);
+#endif
     allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
 
     prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataH.sci", "w");
+    printInFileForScilab(H, fileout);
+    fclose(fileout);
+    printf("Display H\n");
+    printSBM(H->matrix1);
+
+    fileout = fopen("dataHtmpSBM.sci", "w");
+    printInFileSBMForScilab(HtmpSBM, fileout);
+    fclose(fileout);
+    printf("Display HtmpSBM\n");
+    printSBM(HtmpSBM);
+#endif
+
+
+
+
 
     SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
     transposeSBM(H->matrix1, Htrans);
-
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataHtrans.sci", "w");
+    printInFileSBMForScilab(Htrans, fileout);
+    fclose(fileout);
+    printf("Display Htrans\n");
+    printSBM(Htrans);
+#endif
     localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));;
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 1;
@@ -174,12 +211,13 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
-    /*   FILE * fileout = fopen("dataW.sci","w"); */
-    /*     printInFileForScilab(Wnum,fileout); */
-    /*     fclose(fileout); */
-    /*     printf("Display W\n"); */
-    /*    printSBM(W); */
-
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataW.sci", "w");
+    printInFileForScilab(Wnum, fileout);
+    fclose(fileout);
+    printf("Display W\n");
+    printSBM(W);
+#endif
 
 #ifdef TEST_COND
     NumericsMatrix *WnumInverse = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));

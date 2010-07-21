@@ -285,8 +285,8 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
   else if (storageType == 1)
   {
     printInFileSBMForScilab(m->matrix1, file);
-    fprintf(stderr, "Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType);
-    exit(EXIT_FAILURE);
+    /*       fprintf(stderr,"Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType); */
+    /*       exit(EXIT_FAILURE); */
 
   }
 }
