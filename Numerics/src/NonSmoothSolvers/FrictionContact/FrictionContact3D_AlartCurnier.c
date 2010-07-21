@@ -450,8 +450,7 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
-  Radius = mu * R[0];
-
+  //Radius = mu*R[0];
 
 
   if (RVN >= 0.0)
@@ -459,6 +458,9 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
 #ifdef VERBOSE_DEBUG
     printf("Normal part in the cone\n");
 #endif
+
+
+    Radius = mu * RVN;
     F[0] = RhoN * (velocity[0]);
     if (A && B)
     {
@@ -471,7 +473,7 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
 #ifdef VERBOSE_DEBUG
     printf("Normal part out the cone\n");
 #endif
-
+    Radius = 0.0;
     F[0] = R[0];
     if (A && B)
     {
@@ -487,7 +489,7 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
   printf("Radius=%le\n", Radius);
   printf("RV=%le\n", RV);
 #endif
-  if (RV < Radius) // We are in the disk and Radius is positive
+  if (RV <= Radius) // We are in the disk and Radius is positive
   {
 #ifdef VERBOSE_DEBUG
     printf("We are in the disk\n");
@@ -508,47 +510,51 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
       B[2 + 3 * 2] = 0.0;
     }
   }
-  else if (RV >= Radius && Radius > 0) // We are out the disk and Radius is postive
+  else if (RV > Radius) // We are out the disk and Radius is postive
   {
-#ifdef VERBOSE_DEBUG
-    printf("We are out the disk and Radius is positive\n");
-#endif
-    RV1 = 1.0 / RV;
-    F[1] = R[1] - Radius * RVT * RV1;
-    F[2] = R[2] - Radius * RVS * RV1;
-    if (A && B)
+
+    if (Radius > 0)
     {
-      RV3 = RV1 * RV1 * RV1;
-      GammaTT = RV1 - RVT * RVT * RV3;
-      GammaTS =  - RVT * RVS * RV3;
-      GammaST =  GammaTS;
-      GammaSS = RV1 - RVS * RVS * RV3;
-
-      A[1 + 3 * 1] = GammaTT * RhoT * Radius;
-
-      A[1 + 3 * 2] = GammaTS * RhoT * Radius;
-      A[2 + 3 * 1] = GammaST * RhoT * Radius;
-
-      A[2 + 3 * 2] = GammaSS * RhoT * Radius;
-
-      B[1 + 3 * 0] = -mu * RVT * RV1;
-
-      B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
-      B[1 + 3 * 2] = - GammaTS  * Radius ;
-
-      B[2 + 3 * 0] = -mu * RVS * RV1;
-
-      B[2 + 3 * 1] = - GammaST  * Radius;
-      B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
-    }
-  }
-  else // We are out the disk and Radius is negative
-  {
 #ifdef VERBOSE_DEBUG
-    printf("We are out the disk and Radius is negative\n");
+      printf("We are out the disk and Radius is positive\n");
 #endif
+      RV1 = 1.0 / RV;
+      F[1] = R[1] - Radius * RVT * RV1;
+      F[2] = R[2] - Radius * RVS * RV1;
+      if (A && B)
+      {
+        RV3 = RV1 * RV1 * RV1;
+        GammaTT = RV1 - RVT * RVT * RV3;
+        GammaTS =  - RVT * RVS * RV3;
+        GammaST =  GammaTS;
+        GammaSS = RV1 - RVS * RVS * RV3;
 
-    /*Version original */
+        A[0 + 3 * 1] = mu * RhoN * RVT * RV1;
+        A[0 + 3 * 2] = mu * RhoN * RVS * RV1;
+
+
+        A[1 + 3 * 1] = GammaTT * RhoT * Radius;
+
+        A[1 + 3 * 2] = GammaTS * RhoT * Radius;
+        A[2 + 3 * 1] = GammaST * RhoT * Radius;
+
+        A[2 + 3 * 2] = GammaSS * RhoT * Radius;
+
+        B[1 + 3 * 0] = -mu * RVT * RV1;
+
+        B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
+        B[1 + 3 * 2] = - GammaTS  * Radius ;
+
+        B[2 + 3 * 0] = -mu * RVS * RV1;
+
+        B[2 + 3 * 1] = - GammaST  * Radius;
+        B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
+      }
+    }
+    else
+#ifdef VERBOSE_DEBUG
+      printf("We are out the disk and Radius is zero\n");
+#endif
     F[1] = R[1] ;
     F[2] = R[2] ;
     if (A && B)
@@ -565,7 +571,30 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
       B[2 + 3 * 1] = 0.0;
       B[2 + 3 * 2] = 1.0;
     }
+
   }
+  /*   else // We are out the disk and Radius is negative */
+  /*     { */
+  /* #ifdef VERBOSE_DEBUG */
+  /*       printf("We are out the disk and Radius is negative\n"); */
+  /* #endif */
+
+  /*       /\*Version original *\/ */
+  /*       F[1] = R[1] ; */
+  /*       F[2] = R[2] ; */
+  /*       if (A && B){ */
+  /*    A[1+3*1]=0.0; */
+  /*    A[1+3*2]=0.0; */
+  /*    A[2+3*1]=0.0; */
+  /*    A[2+3*2]=0.0; */
+
+  /*    B[1+3*0]=0.0; */
+  /*    B[1+3*1]=1.0; */
+  /*    B[1+3*2]=0.0; */
+  /*    B[2+3*0]=0.0; */
+  /*    B[2+3*1]=0.0; */
+  /*    B[2+3*2]=1.0;} */
+  /*     } */
 
 #ifdef VERBOSE_DEBUG
   printf("F[0] = %le\t", F[0]);
