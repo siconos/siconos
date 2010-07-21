@@ -615,7 +615,7 @@ void LinearOSNS::preCompute(double time)
   bool b = topology->isTimeInvariant();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
-  if (!b | !isLinear)
+  if (!b || !isLinear)
   {
     // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();

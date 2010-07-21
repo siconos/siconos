@@ -30,7 +30,9 @@ using namespace RELATION;
 GenericMechanical::GenericMechanical():
   LinearOSNS()
 {
-  _numerics_problem.reset(new  GenericMechanicalProblem);
+  _MStorageType = SICONOS_SPARCE;
+  _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
+  genericMechnicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, 0);
 }
 
 
@@ -47,6 +49,40 @@ void GenericMechanical::initialize(SP::Simulation sim)
 
 
 
+}
+
+void GenericMechanical::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+{
+
+  //bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+
+  /*Build the corresponding numerics problems*/
+  if (UR1 == UR2)
+  {
+    printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+    int size = UR1->getNonSmoothLawSize();
+    if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+        == Type::EqualityConditionNSL)
+    {
+      LinearSystemProblem * pAux = (LinearSystemProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+      //pAux->size= UR1->getNonSmoothLawSize();
+    }
+    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+             == Type::NewtonImpactNSL)
+    {
+      void * pAux = addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
+    }
+    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+             == Type::NewtonImpactFrictionNSL)
+    {
+      FrictionContactProblem * pAux = (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
+      pAux->dimension = 3;
+      pAux->numberOfContacts = 1;
+      *(pAux->mu) = 0.6;
+    }
+  }
+
+  LinearOSNS::computeUnitaryBlock(UR1, UR2);
 }
 
 int GenericMechanical::compute(double time)
@@ -76,12 +112,12 @@ int GenericMechanical::compute(double time)
   if (_sizeOutput != 0)
   {
     // The GenericMechanical Problem in Numerics format
-    GenericMechanicalProblem numerics_problem;
-    numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = &*_q->getArray();
+
+    _pnumerics_GMP->M = &*_M->getNumericsMatrix();
+    _pnumerics_GMP->q = &*_q->getArray();
 
     // Call Numerics Driver for GenericMechanical
-    info = genericMechanical_driver(&numerics_problem,
+    info = genericMechanical_driver(_pnumerics_GMP,
                                     &*_z->getArray() ,
                                     &*_w->getArray() ,
                                     &*_numerics_solver_options);
@@ -103,9 +139,23 @@ GenericMechanical* GenericMechanical::convert(OneStepNSProblem* osnsp)
   GenericMechanical* fc2d = dynamic_cast<GenericMechanical*>(osnsp);
   return fc2d;
 }
+void  GenericMechanical::updateUnitaryBlocks()
+{
+  freeGenericMechanicalProblem(_pnumerics_GMP);
+  _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
+  LinearOSNS::updateUnitaryBlocks();
+}
+void  GenericMechanical::computeAllUnitaryBlocks()
+{
+  freeGenericMechanicalProblem(_pnumerics_GMP);
+  _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
 
+  LinearOSNS::computeAllUnitaryBlocks();
+}
 GenericMechanical::~GenericMechanical()
 {
+  freeGenericMechanicalProblem(_pnumerics_GMP);
+  _pnumerics_GMP = 0;
   deleteSolverOptions(&*_numerics_solver_options);
 }
 

@@ -173,7 +173,7 @@ protected:
 
   /** default constructor
    */
-  OneStepNSProblem() {};
+  OneStepNSProblem();
 
 private:
 

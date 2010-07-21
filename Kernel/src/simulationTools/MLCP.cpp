@@ -83,172 +83,63 @@ void  MLCP::reset()
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
 }
 
-void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+
+void MLCP::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
-
-  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
-  // How _unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
-
-  // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
-  if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
+  assert(!commonDS.isEmpty()) ;
+
+  // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+
+  unsigned int equalitySize1 =  0;
+  unsigned int equalitySize2 =  0;
+  if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+      == Type::MixedComplementarityConditionNSL)
+    equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+           == Type::EqualityConditionNSL)
+    equalitySize1 = nslawSize1;
+
+  if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+      == Type::MixedComplementarityConditionNSL)
+    equalitySize2 = MixedComplementarityConditionNSL::
+                    convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+           == Type::EqualityConditionNSL)
+    equalitySize2 = nslawSize2;
+
+
+  if (UR1 == UR2)
   {
-    DSIterator itDS;
-    // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
-
-    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-    unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-    unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-
-    unsigned int equalitySize1 =  0;
-    unsigned int equalitySize2 =  0;
-    if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-        == Type::MixedComplementarityConditionNSL)
-      equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-             == Type::EqualityConditionNSL)
-      equalitySize1 = nslawSize1;
-
-    if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
-        == Type::MixedComplementarityConditionNSL)
-      equalitySize2 = MixedComplementarityConditionNSL::
-                      convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
-             == Type::EqualityConditionNSL)
-      equalitySize2 = nslawSize2;
-    // Check allocation
-    if (! _unitaryBlocks[UR1][UR2])
+    //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+    _m += nslawSize1 - equalitySize1;
+    _n += equalitySize1;
+    if (_curBlock > MLCP_NB_BLOCKS - 2)
+      printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
+    /*add an equality block.*/
+    if (equalitySize1 > 0)
     {
-      (_unitaryBlocks[UR1][UR2]).reset(new SimpleMatrix(nslawSize1, nslawSize2));
-
+      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+      _numerics_problem.blocksIsComp[_curBlock] = 0;
+      _curBlock++;
     }
-    // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-    // If OSI = MOREAU, centralUnitaryBlocks = W
-    // if OSI = LSODAR, centralUnitaryBlocks = M (mass matrices)
-    MapOfDSMatrices centralUnitaryBlocks;
-    getOSIMaps(UR1, centralUnitaryBlocks);
-
-    SP::SiconosMatrix currentUnitaryBlock = _unitaryBlocks[UR1][UR2];
-
-    SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
-
-    unsigned int sizeDS;
-    RELATION::TYPES relationType1, relationType2;
-
-    double h = simulation()->timeDiscretisation()->currentTimeStep();
-    //      printf("h : %f \n",h);
-
-    // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
-    // a and b are scalars, centralUnitaryBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
-    // left, right and extra depend on the relation type and the non smooth law.
-    relationType1 = UR1->getRelationType();
-    relationType2 = UR2->getRelationType();
-    // ==== First Order Relations - Specific treatment for diagonal _unitaryBlocks ===
-    if (UR1 == UR2)
+    /*add a complementarity block.*/
+    if (nslawSize1 - equalitySize1 > 0)
     {
-      UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-      _m += nslawSize1 - equalitySize1;
-      _n += equalitySize1;
-      if (_curBlock > MLCP_NB_BLOCKS - 2)
-        printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
-      /*add an equality block.*/
-      if (equalitySize1 > 0)
-      {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 0;
-        _curBlock++;
-      }
-      /*add a complementarity block.*/
-      if (nslawSize1 - equalitySize1 > 0)
-      {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 1;
-        _curBlock++;
-      }
+      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
+      _numerics_problem.blocksIsComp[_curBlock] = 1;
+      _curBlock++;
     }
-    else
-      currentUnitaryBlock->zero();
-
-
-    // loop over the common DS
-    for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getDim();
-      // get blocks corresponding to the current DS
-      // These blocks depends on the relation type.
-      leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-
-      UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
-      // Computing depends on relation type -> move this in UnitaryRelation method?
-      if (relationType1 == FirstOrder && relationType2 == FirstOrder)
-      {
-        rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-
-        UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-        // centralUnitaryBlock contains a lu-factorized matrix and we solve
-        // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-        //          printf("right bloc: ie B \n");
-        //          rightUnitaryBlock->display();
-        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-        //        printf("W \n");
-        //        centralUnitaryBlocks[*itDS]->display();
-        //          printf("inv(W)B \n");
-        //          rightUnitaryBlock->display();
-        //      integration of r with theta method removed
-        //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
-        //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
-        *leftUnitaryBlock *= h;
-        //          printf("currentbloc : ie D \n");
-        //          currentUnitaryBlock->display();
-        //          printf("leftUnitaryBlock : ie C \n");
-        //          leftUnitaryBlock->display();
-
-        prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-        //left = C, right = W.B
-        //          printf("finalbloc \n");
-        //          currentUnitaryBlock->display();
-
-      }
-      else if (relationType1 == NewtonEuler || relationType2 == NewtonEuler || relationType1 == Lagrangian || relationType2 == Lagrangian)
-      {
-        if (UR1 == UR2)
-        {
-          SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
-          //
-          //        cout<<"LinearOSNS : leftUBlock\n";
-          //        work->display();
-          work->trans();
-          //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
-          //        leftUnitaryBlock->display();
-          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
-          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-          prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
-          //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
-          //*currentUnitaryBlock *=h;
-          //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
-          //        currentUnitaryBlock->display();
-
-        }
-        else
-        {
-          rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-          UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-          // Warning: we use getLeft for Right unitaryBlock
-          // because right = transpose(left) and because of
-          // size checking inside the getBlock function, a
-          // getRight call will fail.
-          rightUnitaryBlock->trans();
-          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-          prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-        }
-      }
-      else RuntimeException::selfThrow("MLCP::computeBlock not yet implemented for relation of type " + relationType1);
-
-    }
-
   }
+}
+
+void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+{
+  computeOptions(UR1, UR2);
+  LinearOSNS::computeUnitaryBlock(UR1, UR2);
 }
 
 void displayNM(const NumericsMatrix* const m)

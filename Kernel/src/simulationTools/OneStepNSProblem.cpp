@@ -29,7 +29,10 @@
 #include "NewtonEulerDS.hpp"
 
 using namespace std;
-
+OneStepNSProblem::OneStepNSProblem()
+{
+  _numerics_solver_options.reset(new SolverOptions);
+}
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(const string& pbType,
@@ -570,8 +573,8 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // === Adds this in the simulation set of OneStepNSProblem ===
   // First checks the id if required.
   // An id is required if there is more than one OneStepNSProblem in the simulation
-  if (!(simulation()->oneStepNSProblems())->empty() && _id == DEFAULT_OSNS_NAME)
-    RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
+  //    if( !(simulation()->oneStepNSProblems())->empty() && _id == DEFAULT_OSNS_NAME)
+  //      RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
 
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.

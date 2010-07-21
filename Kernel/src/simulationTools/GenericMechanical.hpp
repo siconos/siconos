@@ -52,7 +52,7 @@ class GenericMechanical : public LinearOSNS
 {
 protected:
 
-  SP::GenericMechanicalProblem _numerics_problem;
+  GenericMechanicalProblem * _pnumerics_GMP;
 
 public:
 
@@ -88,10 +88,11 @@ public:
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
   int compute(double time);
-
+  virtual void computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
   /** print the data to the screen */
   void display() const;
-
+  void computeAllUnitaryBlocks();
+  void updateUnitaryBlocks();
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted
    * \return a pointer on the problem if it is of the right type, NULL otherwise

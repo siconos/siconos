@@ -92,6 +92,12 @@ TYPEDEF_SPTR(NumericsMatrix);
  *  sub-unitaryBlocks, only links thanks to pointers.
  *
  */
+enum SICONOS_STORAGE_TYPE
+{
+  SICONOS_DENSE = 0,
+  SICONOS_SPARCE = 1
+};
+
 class OSNSMatrix
 {
 protected:
