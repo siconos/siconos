@@ -932,7 +932,11 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
                   double R[3],
                   double dR[3],
                   double *rho,
-                  int LSitermax)
+                  int LSitermax,
+                  double * F,
+                  double * A,
+                  double * B,
+                  double * velocity)
 {
   double alpha = *t_opt;
 
@@ -944,24 +948,24 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
   double m1 = 0.1, m2 = 0.9;
 
 
-  // store the value fo the function
-  double F[3] = {0., 0., 0.};
+  /*     // store the value fo the function */
+  /*     double F[3]={0.,0.,0.}; */
 
-  // Store the (sub)-gradient of the function
-  double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-  double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  /*     // Store the (sub)-gradient of the function */
+  /*     double A[9]={0.,0.,0.,0.,0.,0.,0.,0.,0.}; */
+  /*     double B[9]={0.,0.,0.,0.,0.,0.,0.,0.,0.}; */
 
-  double velocity[3] = {0., 0., 0.};
+  /*     double velocity[3]={0.,0.,0.}; */
 
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
   double * MLocal = localproblem->M->matrix0;
 
-  for (int i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-        + MLocal[i + 1 * 3] * R[1] +
-        + MLocal[i + 2 * 3] * R[2] ;
+  /*     for (int i=0; i<3; i++) velocity[i] = MLocal[i+0*3]*R[0] + qLocal[i] */
+  /*          + MLocal[i+1*3]*R[1] + */
+  /*          + MLocal[i+2*3]*R[2] ; */
 
-  Function(R, velocity, mu, rho, F, A, B);
+  /*     Function(R,velocity,mu,rho,F,A,B); */
 
 
   // Computation of q(t) and q'(t) for t =0
@@ -1180,7 +1184,7 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
     // Perform Line Search
 
     t_opt = t_init;
-    int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax);
+    int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax, F, A, B, velocity);
 
     if (infoLS == 0) t = t_opt;
     else
