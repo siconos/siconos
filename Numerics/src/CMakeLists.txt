@@ -315,8 +315,13 @@ IF(WITH_TESTING)
 
 
   ## test from the Rover Example
-    SET(FC3Dtest500_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest500 FrictionContact3D_Rover1.c)
+  SET(FC3Dtest500_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(FC3Dtest500 FrictionContact3D_Rover1.c) ## GLOBALAC cycling
+
+
+
+  NEW_TEST(FC3Dtest501 FrictionContact3D_Rover2.c) ## test ok without LineSearch
+  NEW_TEST(FC3Dtest503 FrictionContact3D_Rover3.c) ## LineSearch is needed
 
 
   ## test 2D dense on two differents files

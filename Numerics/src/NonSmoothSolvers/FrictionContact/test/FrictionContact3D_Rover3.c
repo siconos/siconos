@@ -22,20 +22,24 @@
 #include "frictionContact_test_function.h"
 
 
-int main(void)
+int test_rover(char  * filename)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/Rover1039.dat";
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBALAC);
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
   options->dparam[0] = 1e-5;
-  options->iparam[0] = 100;
-  options->iparam[1] = 1;
+  options->iparam[0] = 10000;
+  /*   options->internalSolvers->solverId=SICONOS_FRICTION_3D_ProjectionOnCone; */
+  /*   options->internalSolvers->solverId=SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration; */
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_DampedAlartCurnierNewton;
+  options->internalSolvers->iparam[0] = 20;
+  options->internalSolvers->iparam[1] = 20;
+  options->internalSolvers->dparam[0] = 1e-2;
   info = frictionContact_test_function(finput, options);
 
 
@@ -48,16 +52,17 @@ int main(void)
 
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);
+  return info;
+}
 
 
+int main(void)
+{
+  int info = 1 ;
 
-
-
-
-
-
-
-
-
+  info = test_rover("./data/Rover4396.dat");
+  if (info) return info;
+  info = test_rover("./data/Rover4493.dat");
+  if (info) return info;
   return info;
 }
