@@ -34,6 +34,7 @@ int main(void)
   options->iparam[0] = 10000;
   options->internalSolvers->solverId = SICONOS_FRICTION_3D_AlartCurnierNewton;
   options->internalSolvers->iparam[0] = 10;
+  options->internalSolvers->iparam[1] = 0;
   options->internalSolvers->dparam[0] = 1e-18;
 
   info = frictionContact_test_function(finput, options);

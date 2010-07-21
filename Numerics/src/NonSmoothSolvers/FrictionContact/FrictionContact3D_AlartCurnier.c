@@ -418,7 +418,7 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
     printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_AlartCurnierNewton;
+  options->solverId = SICONOS_FRICTION_3D_DampedAlartCurnierNewton;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
@@ -433,7 +433,9 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
+
   options->iparam[0] = 10;
+  options->iparam[1] = 10;
   options->dparam[0] = 1e-16;
   return 0;
 }

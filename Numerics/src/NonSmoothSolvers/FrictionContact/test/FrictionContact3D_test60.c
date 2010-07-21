@@ -32,6 +32,8 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
+  /*  options->internalSolvers->solverId=SICONOS_FRICTION_3D_AlartCurnierNewton;  */
+  /*   options->internalSolvers->iparam[1]=0; */
 
 
   info = frictionContact_test_function(finput, options);

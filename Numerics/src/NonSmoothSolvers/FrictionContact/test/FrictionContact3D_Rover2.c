@@ -36,9 +36,10 @@ int test_rover(char  * filename)
   options->iparam[0] = 10000;
   /*   options->internalSolvers->solverId=SICONOS_FRICTION_3D_ProjectionOnCone; */
   /*   options->internalSolvers->solverId=SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration; */
-  /*    options->internalSolvers->solverId=SICONOS_FRICTION_3D_DampedAlartCurnierNewton;   */
+  options->internalSolvers->solverId = SICONOS_FRICTION_3D_AlartCurnierNewton;
   options->internalSolvers->iparam[0] = 20;
-  options->internalSolvers->dparam[0] = 1e-2;
+  options->internalSolvers->iparam[1] = 20;
+  options->internalSolvers->dparam[0] = 1e-6;
   info = frictionContact_test_function(finput, options);
 
 
