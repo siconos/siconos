@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
 
     // -- (3) Non smooth problem
-    SP::LCP aLCP(new LCP("NSQP"));
+    SP::LCP aLCP(new LCP(SICONOS_LCP_NSQP));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));

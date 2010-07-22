@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     // -- OneStepNsProblem --
 
-    SP::Relay osnspb(new Relay("ENUM"));
+    SP::Relay osnspb(new Relay(SICONOS_RELAY_ENUM));
 
 
     //osnspb->setNumericsSolverName("Lemke");

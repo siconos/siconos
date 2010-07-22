@@ -122,7 +122,6 @@ int main(int argc, char* argv[])
   PrimalFrictionContactProblem numericsProblem;
   numericsProblem.numberOfContacts = NC;
   numericsProblem.dimension = 3;
-  numericsProblem.isComplete = 0;
   numericsProblem.mu = mu;
   numericsProblem.q = q;
   numericsProblem.b = b;

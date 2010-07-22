@@ -111,7 +111,10 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(lds, theta));
 
     // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnspb(new LCP("QP"));
+    SP::OneStepNSProblem osnspb(new LCP(SICONOS_LCP_QP));
+
+    // solver
+    // osnspb->numericsSolverOptions()->solverId=SICONOS_LCP_QP;
 
     // max number of iterations
     osnspb->numericsSolverOptions()->iparam[0] = 101;

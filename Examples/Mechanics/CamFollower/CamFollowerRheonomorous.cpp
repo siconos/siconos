@@ -133,10 +133,10 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
 
-    SP::OneStepNSProblem osnspb(new LCP());
+    SP::OneStepNSProblem osnspb(new LCP(SICONOS_LCP_QP));
 
     // solver
-    osnspb->setNumericsSolverName("QP");
+    //osnspb->numericsSolverOptions()->solverId=SICONOS_LCP_QP;
 
     // max number of iterations
     osnspb->numericsSolverOptions()->iparam[0] = 101;

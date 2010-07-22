@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     SP::Relay osnspb(new Relay());
 
 
-    osnspb->setNumericsSolverName("Lemke");
+    osnspb->numericsSolverOptions()->solverId = SICONOS_RELAY_LEMKE;
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
 
 

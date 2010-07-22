@@ -147,7 +147,6 @@ int main(int argc, char* argv[])
   PrimalFrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
-  NumericsProblem.isComplete = 0;
   NumericsProblem.mu = mu;
   NumericsProblem.q = q;
   NumericsProblem.b = b;

@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new MLCP("PATH"));
+    SP::OneStepNSProblem osnspb(new MLCP(SICONOS_MLCP_PATH));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));

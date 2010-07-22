@@ -284,7 +284,8 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new MLCP("PATH"));
+    //SP::OneStepNSProblem osnspb(new MLCP(SICONOS_MLCP_PATH));
+    SP::OneStepNSProblem osnspb(new GenericMechanical());
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
@@ -305,7 +306,7 @@ int main(int argc, char* argv[])
     myModel->initialize(s);
     int N = (int)((T - t0) / h); // Number of time steps
 
-
+    //myModel->nonSmoothDynamicalSystem()->topology()->setTimeInvariant(true);
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 15 + 7;
@@ -372,6 +373,7 @@ int main(int argc, char* argv[])
       s->nextStep();
       ++show_progress;
       k++;
+      //return 0;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;

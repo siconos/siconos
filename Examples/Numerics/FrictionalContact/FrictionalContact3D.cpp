@@ -83,7 +83,6 @@ int main(int argc, char* argv[])
   FrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
-  NumericsProblem.isComplete = 0;
   NumericsProblem.mu = mu;
   NumericsProblem.q = q;
 
