@@ -78,57 +78,22 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
 {
   assert(result);
 
-
-  double x0;
-  double x1;
-  double x2;
-  double x3;
-  double x4;
-  double x5;
-  double x6;
-  double x7;
-  double x8;
-  double x9;
-  double x10;
-  double x11;
-  double x12;
-  double x13;
-  double x14;
-  double x15;
-  double x16;
-  double x17;
-  double x18;
-  double x19;
-  double x20;
-  double x21;
-  double x22;
-  double x23;
-  double x24;
-  x0 = rhon * un;
-  x1 = rn - x0;
-  x2 = x1 < 0;
-  x3 = 0 <= x1;
-  x4 = rhot1 * ut1;
-  x5 = rt1 - x4;
-  x6 = rhot2 * ut2;
-  x7 = rt2 - x6;
-  x8 = pow(x7, 2);
-  x9 = pow(x5, 2);
-  x10 = x8 + x9;
-  x11 = mu * x1;
-  x12 = pow(x10, (1.0 / 2.0));
-  x13 = x12 <= x11;
-  x14 = 1.0 / x12;
-  x15 = x11 < x12;
-  x16 = 0 < x11;
-  x17 = x11 <= 0;
-  x18 = (0, x11 <= 0);
-  x19 = (0, x12 <= x11);
-  x20 = pow(x14, 3);
-  x21 = x4 - rt1;
-  x22 = (1, x12 <= x11);
-  x23 = x6 - rt2;
-  x24 = x11 * x14;
+  double x0 = rhon * un;
+  double x1 = rn - x0;
+  double x4 = rhot1 * ut1;
+  double x5 = rt1 - x4;
+  double x6 = rhot2 * ut2;
+  double x7 = rt2 - x6;
+  double x8 = pow(x7, 2);
+  double x9 = pow(x5, 2);
+  double x10 = x8 + x9;
+  double x11 = mu * x1;
+  double x12 = pow(x10, (1.0 / 2.0));
+  double x14 = 1.0 / x12;
+  double x20 = pow(x14, 3);
+  double x21 = x4 - rt1;
+  double x23 = x6 - rt2;
+  double x24 = x11 * x14;
   result[6] = 0;
   result[9] = 0;
   result[15] = 0;
@@ -222,11 +187,8 @@ void frictionContact3D_localAlartCurnierFunction(
     result);
 
   cpy3(result, f);
-  if (A && B)
-  {
-    cpy3x3(result + 3, A);
-    cpy3x3(result + 12, B);
-  }
+  cpy3x3(result + 3, A);
+  cpy3x3(result + 12, B);
 
 }
 
