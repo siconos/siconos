@@ -267,9 +267,8 @@ public:
   /** set a specified function to compute the vector e
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
-
-    void setComputeEFunction(const std::string& , const std::string& );
-  */
+   */
+  //  void setComputeEFunction(const std::string& , const std::string& );
   /** set a specified function to compute the vector e
    *  \param VectorFunctionOfTime : a pointer function
    */
@@ -375,7 +374,7 @@ public:
   //    */
   void display() const;
   virtual void setComputeEFunction(FOVecPtr ptrFunct);
-  //  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted

@@ -29,7 +29,8 @@
 #include "NewtonEulerDS.hpp"
 
 using namespace std;
-OneStepNSProblem::OneStepNSProblem()
+OneStepNSProblem::OneStepNSProblem():
+  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
   _numerics_solver_options.reset(new SolverOptions);
 }

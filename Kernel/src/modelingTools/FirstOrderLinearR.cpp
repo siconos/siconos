@@ -332,10 +332,10 @@ void FirstOrderLinearR::display() const
   cout << " ================================================== " << endl;
 }
 
-// void FirstOrderLinearR::setComputeEFunction(const std::string& pluginPath, const std::string& functionName){
-//   FirstOrderR::setComputeEFunction(pluginPath,functionName);
-
-// }
+void FirstOrderLinearR::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  FirstOrderR::setComputeEFunction(pluginPath, functionName);
+}
 void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
 {
   _plugine->setComputeFunction((void*)ptrFunct);
