@@ -28,6 +28,10 @@
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
 //#define VERBOSE_DEBUG
+#define AC_STD
+//#define AC_CKPS
+//#define AC_Generated
+
 
 #define OPTI_RHO
 
@@ -441,7 +445,8 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
 }
 
 
-void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
+
+void computeAlartCurnierCKPS(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
@@ -643,7 +648,7 @@ void computeAlartCurnierTruncated(double R[3], double velocity[3], double mu, do
 
 
 
-void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
+void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
 
   double RVN, RVT, RVS;
@@ -735,6 +740,9 @@ void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[
       GammaSS = RV1 - RVS * RVS * RV3;
 
 
+      A[0 + 3 * 1] = mu * RhoN * RVT * RV1;
+      A[0 + 3 * 2] = mu * RhoN * RVS * RV1;
+
       A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
       A[1 + 3 * 2] = GammaTS * RhoT * Radius;
@@ -783,6 +791,8 @@ void computeAlartCurnier(double R[3], double velocity[3], double mu, double rho[
 
 #endif
 }
+
+
 void computerho(FrictionContactProblem* localproblem, double * rho)
 {
 
@@ -853,9 +863,15 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
   // Set the function for computing F and its gradient
   // \todo should nbe done in initialization
-  computeNonsmoothFunction  Function = &(computeAlartCurnier);
-  /*           computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated); */
-  /*         computeNonsmoothFunction  Function= &(frictionContact3D_localAlartCurnierFunction);  */
+#ifdef AC_STD
+  computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
+#endif
+#ifdef AC_CKPS
+  computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
+#endif
+#ifdef AC_Generated
+  computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunction);
+#endif
 
 
   // Value of AW+B
@@ -926,6 +942,9 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
   return 1;
 
 }
+
+
+
 int  LineSearchGP(FrictionContactProblem* localproblem,
                   computeNonsmoothFunction  Function,
                   double * t_opt,
@@ -1140,8 +1159,15 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
   int NumberofLSfailed = 0;
   // Set the function for computing F and its gradient
   // \todo should be done in initialization
-  computeNonsmoothFunction  Function = &(computeAlartCurnier);
-  /*     computeNonsmoothFunction  Function= &(computeAlartCurnierTruncated);  */
+#ifdef AC_STD
+  computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
+#endif
+#ifdef AC_CKPS
+  computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
+#endif
+#ifdef AC_Generated
+  computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunction);
+#endif
 
 
   // Value of AW+B

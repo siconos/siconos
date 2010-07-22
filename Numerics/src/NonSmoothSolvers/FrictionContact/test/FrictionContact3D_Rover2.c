@@ -58,10 +58,10 @@ int test_rover(char  * filename)
 
 int main(void)
 {
-  int info = 0 ;
+  int info = -1 ;
 
   info = test_rover("./data/Rover1039.dat");
-  if (info) return 0;
+  if (info) return info;
 
   info = test_rover("./data/Rover1040.dat");
   if (info) return info;
@@ -84,7 +84,6 @@ int main(void)
   info = test_rover("./data/Rover11035.dat");
   if (info) return info;
   info = test_rover("./data/Rover11211.dat");
-  if (info) return info;
 
   return info;
 }
