@@ -63,7 +63,7 @@ void frictionContact3D_gamma(double* x, double *r, double *p)
 
 }
 
-void frictionContact3D_localAlartCurnierFunctionGenerated(
+void frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
   double rn,
   double rt1,
   double rt2,
@@ -163,7 +163,7 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
   };
 };
 
-void frictionContact3D_localAlartCurnierFunction(
+void frictionContact3D_localAlartCurnierFunctionGenerated(
   double *reaction,
   double *velocity,
   double mu,
@@ -179,7 +179,7 @@ void frictionContact3D_localAlartCurnierFunction(
   SET3(rho);
 
 
-  frictionContact3D_localAlartCurnierFunctionGenerated(
+  frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
     *reaction0, *reaction1, *reaction2,
     *velocity0, *velocity1, *velocity2,
     mu,
@@ -193,7 +193,7 @@ void frictionContact3D_localAlartCurnierFunction(
 }
 
 
-void frictionContact3D_globalAlartCurnierFunction(
+void frictionContact3D_globalAlartCurnierFunctionGenerated(
   unsigned int problemSize,
   double *reaction,
   double *velocity,
@@ -218,7 +218,7 @@ void frictionContact3D_globalAlartCurnierFunction(
   for (i = 0; i < problemSize; i += 3)
   {
 
-    frictionContact3D_localAlartCurnierFunction(reaction,
+    frictionContact3D_localAlartCurnierFunctionGenerated(reaction,
         velocity,
         *mu,
         rho,
@@ -284,27 +284,35 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
 
     *ACF1 = *reaction1;
     *ACF2 = *reaction2;
+
     *A10 = 0.;
     *A11 = 0.;
     *A12 = 0.;
+
     *A20 = 0.;
     *A21 = 0.;
     *A22 = 0.;
+
     *B10 = 0.;
     *B11 = 1.;
     *B12 = 0.;
+
     *B20 = 0.;
+    *B21 = 0.;
     *B22 = 1.;
+
 
   };
 
-  if (hypotD1D2 <= muD0)
+  if (0 < muD0 && hypotD1D2 <= muD0)
   {
     *ACF1 = *reaction1 - D1;
     *ACF2 = *reaction2 - D2;
+
     *A10 = 0.;
     *A11 = *rho1;
     *A12 = 0.;
+
     *A20 = 0.;
     *A21 = 0.;
     *A22 = *rho2;
@@ -312,6 +320,10 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
     *B10 = 0.;
     *B11 = 0.;
     *B12 = 0.;
+
+    *B20 = 0.;
+    *B21 = 0.;
+    *B22 = 0.;
   }
 
   if (D0 < 0.)
@@ -328,7 +340,7 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
     *B00 = 0.;
   }
 
-  if (muD0 < hypotD1D2)
+  if (0 < muD0 && muD0 < hypotD1D2)
   {
     double cubehypotD1D2 = hypotD1D2 * hypotD1D2 * hypotD1D2;
     double muD0rho1 = muD0* *rho1;
@@ -357,7 +369,7 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
 };
 
 
-void frictionContact3D_globalAlartCurnierFunctionHandMade(
+void frictionContact3D_globalAlartCurnierFunction(
   unsigned int problemSize,
   double *reaction,
   double *velocity,
@@ -388,6 +400,31 @@ void frictionContact3D_globalAlartCurnierFunctionHandMade(
         rho,
         result, A, B);
 
+
+    scal3(-1, result);
+
+    /* generated function = hand made */
+#ifndef NDEBUG
+    double result_g[3];
+    double A_g[9];
+    double B_g[9];
+
+    frictionContact3D_localAlartCurnierFunctionGenerated(reaction,
+        velocity,
+        *mu,
+        rho,
+        result_g, A_g, B_g);
+
+    sub3(result, result_g);
+    sub3x3(A, A_g);
+    sub3x3(B, B_g);
+
+
+    assert(hypot3(result_g) < 1e-7);
+    assert(hypot9(A_g) < 1e-7);
+    assert(hypot9(B_g) < 1e-7);
+#endif
+
     reaction += 3;
     velocity += 3;
     mu++;
@@ -399,7 +436,6 @@ void frictionContact3D_globalAlartCurnierFunctionHandMade(
   }
 
 }
-
 
 
 void frictionContact3D_globalAlartCurnier(
@@ -545,8 +581,12 @@ void frictionContact3D_globalAlartCurnier(
     options->dparam[1] = INFINITY;
 
     if (!(iter % erritermax))
+    {
       FrictionContact3D_compute_error(problem, reaction, velocity,
                                       tolerance, options, &(options->dparam[1]));
+
+    }
+
 
     if (verbose > 0)
       printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);

@@ -43,7 +43,7 @@
     *b++ OP *a++;                               \
     *b++ OP *a++;                               \
     *b++ OP *a++;                               \
-    *b   OP *a  ;                               \
+    *b++ OP *a++;                               \
   };                                            \
  
 #define OP3(NAME,OP)                            \
@@ -51,7 +51,7 @@
   {                                             \
     *b++ OP *a++;                               \
     *b++ OP *a++;                               \
-    *b   OP *a;                                 \
+    *b++ OP *a++;                               \
   };
 
 #if defined(OP3X3_C_STORAGE)
@@ -73,10 +73,7 @@
   double* V##12 = V++;                        \
   double* V##20 = V++;                        \
   double* V##21 = V++;                        \
-  double* V##22 = V;                          \
-  V -= 8;                                     \
-  assert(V = V##00);                          \
- 
+  double* V##22 = V++;
 #else // fortran storage
 #define _00 0
 #define _10 1
@@ -100,7 +97,7 @@
   double* V##21 = V++;                                                  \
   double* V##02 = V++;                                                  \
   double* V##12 = V++;                                                  \
-  double* V##22 = V;
+  double* V##22 = V++;
 #endif
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
@@ -108,7 +105,7 @@
 #define SET3(V)                                 \
   double* V##0 = V++;                           \
   double* V##1 = V++;                           \
-  double* V##2 = V;
+  double* V##2 = V++;
 
 
 /** copy a 3x3 matrix or a vector[9]
@@ -160,6 +157,37 @@ OP3(mul, *=);
  *\param[in] a[3]
  *\param[in,out] b[3]*/
 OP3(div, /=);
+
+/** scalar multiplication of a matrix3x3
+ * \param[in] double scalar
+ * \param[in,out] b[9]
+ */
+static inline void scal3x3(double scal, double* m)
+{
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m++ *= scal;
+  *m *= scal;
+}
+
+/** scalar multiplication of a vector3
+ * \param[in] double scalar
+ * \param[in,out] v[3]
+ */
+static inline void scal3(double scal, double* v)
+{
+  *v++ *= scal;
+  *v++ *= scal;
+  *v   *= scal;
+}
+
+
+
 
 /** matrix vector multiplication
  * \param[in] a[9]
@@ -322,7 +350,18 @@ static inline int equal3x3(double* a, double* b)
          *a++ == *b++ &&
          *a++ == *b++ &&
          *a++ == *b++ &&
-         *a   == *b;
+         *a == *b;
+}
+
+/** check equality : a[3] == b[3]
+ * \param[in] double a[3]
+ * \param[in] double b[3]
+ */
+static inline int equal3(double* a, double* b)
+{
+  return *a++ == *b++ &&
+         *a++ == *b++ &&
+         *a == *b;
 }
 
 /** scalar product : c <- a.b
@@ -330,7 +369,7 @@ static inline int equal3x3(double* a, double* b)
  * \param[in] double b[3]
  * \param[out] double c[3]
  */
-static inline void scal3(double* a, double* b, double* c)
+static inline void dot3(double* a, double* b, double* c)
 {
   *c++ = *a++ * * b++;
   *c++ = *a++ * * b++;
@@ -372,6 +411,32 @@ static inline double hypot3(double* a)
   r += *a * *a;
   return sqrt(r);
 }
+
+static inline double hypot9(double* a)
+{
+  double r;
+
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+
+  return sqrt(r);
+}
+
 
 /* check nan of component
  * \param double* a
