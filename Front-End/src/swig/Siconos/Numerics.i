@@ -40,6 +40,8 @@
 // more convenient
 %rename (LCP) LinearComplementarityProblem;
 
+%ignore lcp_compute_error_only;
+
 // numpy macros
 %include numpy.i 	
 
@@ -64,6 +66,27 @@
 
 %apply (int DIM1 , double* INPLACE_ARRAY1)
 {(int sizew, double *w        )};
+
+%apply (double IN_ARRAY1[ANY])
+{(double reaction[3])}
+
+%apply (double IN_ARRAY1[ANY])
+{(double velocity[3])}
+
+%apply (double IN_ARRAY1[ANY])
+{(double rho[3])}
+
+%apply (double ARGOUT_ARRAY1[ANY])
+{(double ACresult[3])}
+
+%apply (double ARGOUT_ARRAY1[ANY])
+{(double result[3])}
+
+%apply (double ARGOUT_ARRAY1[ANY])
+{(double A[9])}
+
+%apply (double ARGOUT_ARRAY1[ANY])
+{(double B[9])}
 
 
 // Handle standard exceptions
@@ -408,6 +431,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 %include "SolverOptions.h"
 %include "NumericsOptions.h"
 
+
 %extend NumericsOptions
 {
   NumericsOptions()
@@ -474,7 +498,8 @@ static int convert_darray(PyObject *input, double *ptr) {
 
  // FrictionContact
 %include "FrictionContactProblem.h"
-%include "FrictionContact3D_GlobalAlartCurnier.h"
+%include "FrictionContact3D_AlartCurnier.h"
+%include "FrictionContact3D_globalAlartCurnier.h"
 
 %extend FrictionContactProblem
 {
@@ -593,3 +618,4 @@ static int convert_darray(PyObject *input, double *ptr) {
       //linearComplementarity_setDefaultSolverOptions(lcp, (SolverOptions *) $self, solverName);
   }
 }
+
