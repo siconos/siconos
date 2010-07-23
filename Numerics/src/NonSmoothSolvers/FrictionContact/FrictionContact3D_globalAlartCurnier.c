@@ -401,7 +401,7 @@ void frictionContact3D_globalAlartCurnierFunction(
         result, A, B);
 
 
-    scal3(-1, result);
+    scal3(-1., result);
 
     /* generated function = hand made */
 #ifndef NDEBUG
