@@ -51,7 +51,7 @@ extern "C"
 {
 #endif
 
-  void frictionContact3D_localAlartCurnierFunction(
+  void frictionContact3D_localAlartCurnierFunctionGenerated(
     double reaction[3],
     double velocity[3],
     double mu,
@@ -69,7 +69,7 @@ extern "C"
     double A[9],
     double B[9]);
 
-  void frictionContact3D_globalAlartCurnierFunction(
+  void frictionContact3D_globalAlartCurnierFunctionHandMade(
     unsigned int problemSize,
     double *reaction3D,
     double *velocity3D,
@@ -79,7 +79,7 @@ extern "C"
     double *result3x3_1,
     double *result3x3_2);
 
-  void frictionContact3D_globalAlartCurnierFunctionHandMade(
+  void frictionContact3D_globalAlartCurnierFunctionGenerated(
     unsigned int problemSize,
     double *reaction3D,
     double *velocity3D,

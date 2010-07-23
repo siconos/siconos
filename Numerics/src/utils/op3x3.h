@@ -74,6 +74,28 @@
   double* V##20 = V++;                        \
   double* V##21 = V++;                        \
   double* V##22 = V++;
+#define SET3X3MAYBE(V)                          \
+  double* V##00 = 0;                            \
+  double* V##01 = 0;                            \
+  double* V##02 = 0;                            \
+  double* V##10 = 0;                            \
+  double* V##11 = 0;                            \
+  double* V##12 = 0;                            \
+  double* V##20 = 0;                            \
+  double* V##21 = 0;                            \
+  double* V##22 = 0;                            \
+  if (V) {                                      \
+  V##00 = V++;                                  \
+  V##01 = V++;                                  \
+  V##02 = V++;                                  \
+  V##10 = V++;                                  \
+  V##11 = V++;                                  \
+  V##12 = V++;                                  \
+  V##20 = V++;                                  \
+  V##21 = V++;                                  \
+  V##22 = V++;                                  \
+  }
+
 #else // fortran storage
 #define _00 0
 #define _10 1
@@ -86,7 +108,8 @@
 #define _22 8
 
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
- * the pointer is lost (use a00 instead)
+ * warning the pointer a is modified (use a00 instead) and is ready
+ * for a next SET3X3
  */
 #define SET3X3(V)                                                       \
   double* V##00 = V++;                                                  \
@@ -98,15 +121,53 @@
   double* V##02 = V++;                                                  \
   double* V##12 = V++;                                                  \
   double* V##22 = V++;
+#define SET3X3MAYBE(V)                          \
+  double* V##00 = 0;                            \
+  double* V##10 = 0;                            \
+  double* V##20 = 0;                            \
+  double* V##01 = 0;                            \
+  double* V##11 = 0;                            \
+  double* V##21 = 0;                            \
+  double* V##02 = 0;                            \
+  double* V##12 = 0;                            \
+  double* V##22 = 0;                            \
+  if (V) {                                      \
+  V##00 = V++;                                  \
+  V##10 = V++;                                  \
+  V##20 = V++;                                  \
+  V##01 = V++;                                  \
+  V##11 = V++;                                  \
+  V##21 = V++;                                  \
+  V##02 = V++;                                  \
+  V##12 = V++;                                  \
+  V##22 = V++;                                  \
+  }
 #endif
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
- * the pointer is lost (use v0 instead) */
+ * Warning: the pointer v is modified and is ready for a next SET3
+ * use *v0 if you need *v
+ */
 #define SET3(V)                                 \
   double* V##0 = V++;                           \
   double* V##1 = V++;                           \
   double* V##2 = V++;
 
+/** SET3MAYBE : set pointers on a vector3 v (*v0 *v1 *v2) only if v is
+ * non null.
+ * Warning: the pointer v is modified and is ready for a next SET3
+ * use *v0 if you need *v
+ */
+#define SET3MAYBE(V)                                 \
+  double* V##0 = 0;                                  \
+  double* V##1 = 0;                                  \
+  double* V##2 = 0;                                  \
+  if (V)                                             \
+  {                                                  \
+  V##0 = V++;                                        \
+  V##1 = V++;                                        \
+  V##2 = V++;                                        \
+  }
 
 /** copy a 3x3 matrix or a vector[9]
  *\param[in] a[9]
