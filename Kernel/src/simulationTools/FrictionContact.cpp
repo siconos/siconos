@@ -37,8 +37,10 @@ FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
   _numerics_problem.reset(new FrictionContactProblem);
 
 
-  if (dimPb == 2 || dimPb == 3)
+  if (dimPb == 2)
     frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
+  else if (dimPb == 3)
+    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   else
     RuntimeException::selfThrow("cannot set defaults solver options for other problem dimension than 2 or 3");
 }
