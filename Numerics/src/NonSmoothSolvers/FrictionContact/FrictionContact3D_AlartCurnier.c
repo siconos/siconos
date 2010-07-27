@@ -28,8 +28,8 @@
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
 //#define VERBOSE_DEBUG
-//#define AC_STD
 //#define AC_CKPS
+//#define AC_Generated
 #define AC_STD
 
 // Set the function for computing F and its gradient
@@ -41,15 +41,13 @@ computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
 computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
 #endif
 
-// computeAlartCurnierCKPS == AC_Generated (yes!)
-// BUT WARNING!!, at the moment :
-// f1,A1,B1=AC_Generated()
-// f2,A2,B2=computeAlartCurnierCKPS()
-// we have :
-// f1 = -f2,  A1 = A2.transpose(), B1 = B2  ...
+// computeAlartCurnierCKPS == AC_Generated (but with transpose(A) why ?)
+
 #ifdef AC_Generated
 computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunctionGenerated);
 #endif
+
+// HandMade not done
 #ifdef AC_HandMade
 computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunctionHandMade);
 #endif
@@ -905,7 +903,37 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
   for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
   {
     //Update function and gradient
+
     Function(R, velocity, mu, rho, F, A, B);
+
+#ifdef AC_CKPS
+#ifndef NDEBUG
+    double Fg[3] = {0., 0., 0.};
+    double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+    double Bg[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+    double AWpB[9];
+
+
+    assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
+
+    frictionContact3D_localAlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+
+    sub3x3(F, Fg);
+    sub3x3(A, Ag);
+    sub3x3(B, Bg);
+
+    assert(hypot3(Fg) <= 1e-7);
+    assert(hypot9(Ag) <= 1e-7);
+    assert(hypot9(Bg) <= 1e-7);
+    cpy3x3(A, Ag);
+    cpy3x3(B, Bg);
+    mm3x3(A, MLocal, AWpB);
+    add3x3(B, AWpB);
+
+#endif
+#endif
+
+
 
     // compute -(A MLocal +B)
     for (i = 0; i < 3; i++)
@@ -920,6 +948,15 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
         AWplusB[i + 3 * j] -= B[i + 3 * j];
       }
     }
+
+#ifdef AC_CKPS
+#ifndef NDEBUG
+    scal3x3(-1., AWpB);
+    sub3x3(AWplusB, AWpB);
+    assert(hypot9(AWpB) <= 1e-7);
+#endif
+#endif
+
     // Solve the linear system
     solv3x3(AWplusB, dR, F);
     // upate iterates
@@ -930,8 +967,8 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                             + MLocal[i + 1 * 3] * R[1] +
                                             + MLocal[i + 2 * 3] * R[2] ;
-    Function(R, velocity, mu, rho, F, NULL, NULL);
-    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
+    //      Function(R,velocity,mu,rho,F,NULL,NULL);
+    //      dparam[1] = 0.5 *(F[0]*F[0]+F[1]*F[1]+F[2]*F[2])/(1.0 + sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]) ) ; // improve with relative tolerance
 
     /*      dparam[2] =0.0;  */
     /*      FrictionContact3D_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2])); */
@@ -1181,6 +1218,9 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
   // compute the velocity
   double velocity[3] = {0., 0., 0.};
+
+  //cpy3(qLocal,velocity);
+  //mvp3x3(MLocal,velocity)
 
   for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                           + MLocal[i + 1 * 3] * R[1] +

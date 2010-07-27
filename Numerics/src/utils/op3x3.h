@@ -248,7 +248,41 @@ static inline void scal3(double scal, double* v)
 }
 
 
+/** copy & transpose a matrix
+ * \param[in] *a
+ * \param[out] transpose(*a)
+ */
+static inline void cpytr3x3(double* a, double* b)
+{
+  SET3X3(a);
+  SET3X3(b);
+  *b00 = *a00;
+  *b10 = *a01;
+  *b20 = *a02;
+  *b01 = *a10;
+  *b11 = *a11;
+  *b21 = *a12;
+  *b02 = *a20;
+  *b12 = *a21;
+  *b22 = *a22;
+};
 
+/** negative copy of a 3x3 matrix
+ * \param[in] double a[9]
+ * \param[out] b[9] = - a[9]
+ */
+static inline void ncpy3x3(double* a, double* b)
+{
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b++ = - *a++;
+  *b = - *a;
+};
 
 /** matrix vector multiplication
  * \param[in] a[9]
@@ -277,6 +311,51 @@ static inline void mv3x3(double* a, double* v, double* r)
   *pr++ = *a++ * *v;
   *pr++ = *a++ * *v;
   *pr++ = *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+#endif
+
+}
+
+
+/** add a matrix vector multiplication
+ * \param[in] a[9]
+ * \param[in] v[3]
+ * \param[out] r[3]
+ */
+static inline void mvp3x3(double* a, double* v, double* r)
+{
+
+#if defined(OP3X3_C_STORAGE)
+  double* pv;
+
+  pv = v;
+  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
+
+  pv = v;
+  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
+
+  pv = v;
+  *r++ += *a++ * *pv++ + *a++ * *pv++ + *a++ * *pv++;
+#else
+  double* pr;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
 
   pr = r;
 
@@ -343,6 +422,32 @@ static inline void mmp3x3(double* a, double* b, double* c)
   *c20 += *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
   *c21 += *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
   *c22 += *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
+
+}
+
+/** sub a matrix matrix multiplication : c -= a*b
+ * \param[in] a[9]
+ * \param[in] b[9]
+ * \param[out] c[9]
+ */
+static inline void mmm3x3(double* a, double* b, double* c)
+{
+
+  SET3X3(a);
+  SET3X3(b);
+  SET3X3(c);
+
+  *c00 -= *a00 * *b00 + *a01 * *b10 + *a02 * *b20;
+  *c01 -= *a00 * *b01 + *a01 * *b11 + *a02 * *b21;
+  *c02 -= *a00 * *b02 + *a01 * *b12 + *a02 * *b22;
+
+  *c10 -= *a10 * *b00 + *a11 * *b10 + *a12 * *b20;
+  *c11 -= *a10 * *b01 + *a11 * *b11 + *a12 * *b21;
+  *c12 -= *a10 * *b02 + *a11 * *b12 + *a12 * *b22;
+
+  *c20 -= *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
+  *c21 -= *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
+  *c22 -= *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
 
 }
 

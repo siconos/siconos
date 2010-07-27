@@ -29,6 +29,11 @@
 #include "Friction_cst.h"
 
 
+#ifdef DUMP_PROBLEM
+static int file_counter = 0;
+#endif
+
+
 void frictionContact3D_gamma(double* x, double *r, double *p)
 {
   assert(x);
@@ -191,9 +196,18 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
     result);
 
   if (f)
+  {
+    scal3(-1., result);
     cpy3(result, f);
+  }
+
   if (A)
-    cpy3x3(result + 3, A);
+  {
+    // FIX why transpose here ? => idem CKPS
+    //  -- without transpose all Rover tests fails!
+    cpytr3x3(result + 3, A);
+  }
+
   if (B)
     cpy3x3(result + 12, B);
 
@@ -256,9 +270,12 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
   double *A,
   double *B)
 {
-  assert(reaction);
-  assert(velocity);
-  assert(rho);
+  assert(0);
+
+  /*
+  assert (reaction);
+  assert (velocity);
+  assert (rho);
 
   SET3(reaction);
   SET3(velocity);
@@ -270,148 +287,148 @@ void frictionContact3D_localAlartCurnierFunctionHandMade(
 
   if (A && B)
   {
-    *A01 = 0.;
-    *A02 = 0.;
-    *B01 = 0.;
-    *B02 = 0.;
+  *A01 = 0.;
+  *A02 = 0.;
+  *B01 = 0.;
+  *B02 = 0.;
   }
 
 
-  double D0, D1, D2, muD0;
+  double D0,D1,D2,muD0;
 
   D0 = *reaction0 - *rho0 * *velocity0;
   D1 = *reaction1 - *rho1 * *velocity1;
   D2 = *reaction2 - *rho2 * *velocity2;
 
-  muD0 = mu * D0;
+  muD0 = mu*D0;
 
-  double hypotD1D2 = hypot(D1, D2);
+  double hypotD1D2 = hypot(D1,D2);
 
 
   if (muD0 <= 0.)
   {
 
-    if (ACF)
-    {
-      *ACF1 = *reaction1;
-      *ACF2 = *reaction2;
-    }
+  if (ACF)
+  {
+    *ACF1 = *reaction1;
+    *ACF2 = *reaction2;
+  }
 
-    if (A && B)
-    {
+  if (A && B)
+  {
 
-      *A10 = 0.;
-      *A11 = 0.;
-      *A12 = 0.;
+    *A10 = 0.;
+    *A11 = 0.;
+    *A12 = 0.;
 
-      *A20 = 0.;
-      *A21 = 0.;
-      *A22 = 0.;
+    *A20 = 0.;
+    *A21 = 0.;
+    *A22 = 0.;
 
-      *B10 = 0.;
-      *B11 = 1.;
-      *B12 = 0.;
+    *B10 = 0.;
+    *B11 = 1.;
+    *B12 = 0.;
 
-      *B20 = 0.;
-      *B21 = 0.;
-      *B22 = 1.;
-    }
+    *B20 = 0.;
+    *B21 = 0.;
+    *B22 = 1.;
+  }
 
 
   };
 
-  if (0 < muD0 && hypotD1D2 <= muD0)
+  if (0<muD0 && hypotD1D2<=muD0)
   {
-    if (ACF)
-    {
-      *ACF1 = *reaction1 - D1;
-      *ACF2 = *reaction2 - D2;
-    }
+  if (ACF)
+  {
+    *ACF1 = *reaction1 - D1;
+    *ACF2 = *reaction2 - D2;
+  }
 
-    if (A && B)
-    {
-      *A10 = 0.;
-      *A11 = *rho1;
-      *A12 = 0.;
+  if (A && B)
+  {
+    *A10 = 0.;
+    *A11 = *rho1;
+    *A12 = 0.;
 
-      *A20 = 0.;
-      *A21 = 0.;
-      *A22 = *rho2;
+    *A20 = 0.;
+    *A21 = 0.;
+    *A22 = *rho2;
 
-      *B10 = 0.;
-      *B11 = 0.;
-      *B12 = 0.;
+    *B10 = 0.;
+    *B11 = 0.;
+    *B12 = 0.;
 
-      *B20 = 0.;
-      *B21 = 0.;
-      *B22 = 0.;
-    }
+    *B20 = 0.;
+    *B21 = 0.;
+    *B22 = 0.;
+  }
 
   }
 
-  if (D0 < 0.)
+  if (D0<0.)
   {
 
-    if (ACF)
-    {
-      *ACF0 = *reaction0;
-    }
+  if (ACF)
+  {
+    *ACF0 = *reaction0;
+  }
 
-    if (A && B)
-    {
-      *A00 = 0.;
-      *B00 = 1.;
-    }
+  if (A && B)
+  {
+    *A00 = 0.;
+    *B00 = 1.;
+  }
 
   }
 
-  if (D0 >= 0.)
+  if (D0>=0.)
   {
-    if (ACF)
-    {
-      *ACF0 = *reaction0 - D0;
-    }
+  if (ACF)
+  {
+    *ACF0 = *reaction0 - D0;
+  }
 
-    if (A && B)
-    {
-      *A00 = *rho0;
-      *B00 = 0.;
-    }
+  if (A && B)
+  {
+    *A00 = *rho0;
+    *B00 = 0.;
+  }
 
   }
 
   if (0 < muD0 && muD0 < hypotD1D2)
   {
-    double cubehypotD1D2 = hypotD1D2 * hypotD1D2 * hypotD1D2;
-    double muD0rho1 = muD0* *rho1;
+  double cubehypotD1D2 = hypotD1D2 * hypotD1D2 * hypotD1D2;
+  double muD0rho1 = muD0* *rho1;
 
-    if (ACF)
-    {
-      *ACF1 = *reaction1 - muD0 * D1 / hypotD1D2;
-      *ACF2 = *reaction2 - muD0 * D2 / hypotD1D2;
-    }
-
-    if (A && B)
-    {
-      *A10 = mu * D1* *rho0 / hypotD1D2;
-      *A11 = -muD0rho1 * D1 * D1 / cubehypotD1D2 + muD0rho1 / hypotD1D2;
-      *A12 = - D0 * D1 * D2 * mu**rho2 / cubehypotD1D2;
-
-      *A20 = D2 * mu* *rho0 / hypotD1D2;
-      *A21 = - D0 * D1 * D2 * mu* *rho1 / cubehypotD1D2;
-      *A22 = - muD0* *rho2 * D2 * D2 / cubehypotD1D2 + muD0* *rho2 / hypotD1D2;
-
-      *B10 = - mu * D1 / hypotD1D2;
-      *B11 = 1 + muD0 * D1 * D1 / cubehypotD1D2 - muD0 / hypotD1D2;
-      *B12 =  muD0 * D1 * D2 / cubehypotD1D2;
-
-      *B20 = - mu * D2 / hypotD1D2;
-      *B21 =  muD0 * D1 * D2 / cubehypotD1D2;
-      *B22 = 1 + muD0 * D2 * D2 / cubehypotD1D2 - muD0 / hypotD1D2;
-    }
-
+  if (ACF)
+  {
+    *ACF1 = *reaction1 - muD0*D1/hypotD1D2;
+    *ACF2 = *reaction2 - muD0*D2/hypotD1D2;
   }
 
+  if (A && B)
+  {
+    *A10 = mu*D1* *rho0/hypotD1D2;
+    *A11 = -muD0rho1*D1*D1/cubehypotD1D2 + muD0rho1/hypotD1D2;
+    *A12 = - D0*D1*D2*mu**rho2/cubehypotD1D2;
+
+    *A20 = D2*mu* *rho0/hypotD1D2;
+    *A21 = - D0*D1*D2*mu* *rho1/cubehypotD1D2;
+    *A22 = - muD0* *rho2 *D2*D2/cubehypotD1D2 + muD0* *rho2/hypotD1D2;
+
+    *B10 = - mu*D1/hypotD1D2;
+    *B11 = 1 + muD0*D1*D1/cubehypotD1D2 - muD0/hypotD1D2;
+    *B12 =  muD0*D1*D2/cubehypotD1D2;
+
+    *B20 = - mu*D2/hypotD1D2;
+    *B21 =  muD0*D1*D2/cubehypotD1D2;
+    *B22 = 1 + muD0*D2*D2/cubehypotD1D2 - muD0/hypotD1D2;
+  }
+
+  }
+  */
 };
 
 
@@ -594,10 +611,11 @@ void frictionContact3D_globalAlartCurnier(
         assert(ip3 < problemSize - 2);
         assert(jp3 < problemSize - 2);
 
-        extract3x3(problemSize, ip3, jp3, problem->M->matrix0, Wij);
+        extract3x3(problemSize, jp3, ip3, problem->M->matrix0, Wij);
         mm3x3(Aj, Wij, tmp);
         if (ip3 == jp3) add3x3(Bj, tmp);
-        insert3x3(problemSize, ip3, jp3, R, tmp);
+        scal3x3(-1., tmp);
+        insert3x3(problemSize, jp3, ip3, R, tmp);
 
       }
 
@@ -656,9 +674,23 @@ void frictionContact3D_globalAlartCurnier(
       printf("GLOBALAC: convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     else
+    {
       printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
+    }
   }
+
+#ifdef DUMP_PROBLEM
+  if (info[0])
+  {
+    char filename[64];
+    printf("GLOBALAC: dumping problem\n");
+    sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
+    FILE* file = fopen(filename, "w");
+    frictionContact_printInFile(problem, file);
+    fclose(file);
+  }
+#endif
 
   if (!options->dWork)
   {

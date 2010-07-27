@@ -278,10 +278,12 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
   NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
   NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
-
-
   NEW_TEST(FC3Dtest14 FrictionContact3D_test14.c)
   
+  NEW_FC_TEST(SICONOS_FRICTION_3D_NSGS Example1_Fc3D.dat 1e-12 10000 
+    SICONOS_FRICTION_3D_AlartCurnierNewton 1e-18 10)
+
+
   NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c)
   NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
   NEW_TEST(FC3Dtest22 FrictionContact3D_test22.c)
@@ -310,19 +312,33 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest200 FrictionContact3D_test200.c)
   NEW_TEST(FC3Dtest210 FrictionContact3D_test210.c)
 
-  NEW_TEST(FC3Dtest300 FrictionContact3D_test300.c)
-  NEW_TEST(FC3Dtest301 FrictionContact3D_test301.c)
-  NEW_TEST(FC3Dtest302 FrictionContact3D_test302.c)
+  # Global Alart Curnier + Rover ok.
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Example1_Fc3D.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover1039.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover1040.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover1041.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover3865.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4144.dat)
 
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4396.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4493.dat)
+
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4516.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4609.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4613.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover4622.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover9770.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover11035.dat)
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC Rover11211.dat)
+
+  # Newton Euler 3D Spheres : some failures with global Alart Curnier
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC NESpheres_10_1.dat)
+
+  NEW_FC_TEST(SICONOS_FRICTION_3D_GLOBALAC NESpheres_30_1.dat)
 
   ## test from the Rover Example
-  SET(FC3Dtest500_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest500 FrictionContact3D_Rover1.c) ## GLOBALAC cycling
-
-
-
   NEW_TEST(FC3Dtest501 FrictionContact3D_Rover2.c) ## test ok without LineSearch
-  NEW_TEST(FC3Dtest503 FrictionContact3D_Rover3.c) ## LineSearch is needed
+  NEW_TEST(FC3Dtest503 FrictionContact3D_Rover3.c) ## LineSearch is needed 
 
 
   ## test 2D dense on two differents files
@@ -360,14 +376,8 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test11 PrimalFrictionContact3D_test11.c)
   NEW_TEST(PFC3D_test12 PrimalFrictionContact3D_test12.c)
   NEW_TEST(PFC3D_test13 PrimalFrictionContact3D_test13.c)
-
-
   NEW_TEST(PFC3D_test14 PrimalFrictionContact3D_test14.c)
-
-
-
   NEW_TEST(PFC3D_test14bis PrimalFrictionContact3D_test14bis.c)
- 
   NEW_TEST(PFC3D_test15 PrimalFrictionContact3D_test15.c)
 
 
