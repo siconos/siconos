@@ -605,8 +605,7 @@ double Moreau::computeResidu()
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      // ResiduFree = M(vi+1 - v_i) - h*theta*( Fext_i+1 - Kqi+1 - Cvi+1) - h*(1-theta)*(Fext_i -Cvi -kqi) - pi+1
-
+      // ResiduFree = -M(vi+1 - v_i) - h*C*v_i-h*Kq_i-h*h*theta*Kv_i+hFext_theta
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
@@ -621,7 +620,7 @@ double Moreau::computeResidu()
 
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+      prod(*M, (*vold - *v), *residuFree); // residuFree = -M(v - vold)
       SP::SiconosMatrix C = d->C();
       if (C)
         prod(-h, *C, *vold, *residuFree, false); // vfree += -h*C*vi
@@ -639,18 +638,18 @@ double Moreau::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = -h * (1 - _theta);
+        coeff = h * (1 - _theta);
         scal(coeff, *Fext, *residuFree, false); // vfree += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = -h * _theta;
+        coeff = h * _theta;
         scal(coeff, *Fext, *residuFree, false); // vfree += h*_theta * fext(ti+1)
       }
 
 
       (* d->workFree()) = *residuFree;
-      (* d->workFree()) -= *d->p(2);
-      normResidu = d->workFree()->norm2();
+      *residuFree += *d->p(2);
+      normResidu = residuFree->norm2();
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -864,11 +863,11 @@ void Moreau::computeFreeState()
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SP::SiconosVector vfree = d->workFree();//workX[d];
-      (*vfree) = *(d->residuFree());
+      //    (*vfree)=*(d->residuFree());
 
 
       W->PLUForwardBackwardInPlace(*vfree);
-      *vfree *= -1.0;
+      //    *vfree *= -1.0;
       *vfree += *vold;
     }
     else if (dsType == Type::NewtonEulerDS)
