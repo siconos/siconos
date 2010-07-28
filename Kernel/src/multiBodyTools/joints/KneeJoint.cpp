@@ -24,7 +24,46 @@
 #include <boost/math/quaternion.hpp>
 
 int KneeJointR::_sNbEqualities = 3;
+void KneeJointR::checkInitPos()
+{
 
+  SP::SiconosVector x1 = _d1->q0();
+  printf("checkInitPos x1:\n");
+  x1->display();
+  double X1 = x1->getValue(0);
+  double Y1 = x1->getValue(1);
+  double Z1 = x1->getValue(2);
+  double q10 = x1->getValue(3);
+  double q11 = x1->getValue(4);
+  double q12 = x1->getValue(5);
+  double q13 = x1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+  if (_d2)
+  {
+    SP::SiconosVector x2 = _d2->q0();
+    printf("checkInitPos x2:\n");
+    x2->display();
+    X2 = x2->getValue(0);
+    Y2 = x2->getValue(1);
+    Z2 = x2->getValue(2);
+    q20 = x2->getValue(3);
+    q21 = x2->getValue(4);
+    q22 = x2->getValue(5);
+    q23 = x2->getValue(6);
+  }
+
+  printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+
+
+}
 KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P): NewtonEulerR()
 {
   _P0.reset(new SimpleVector(3));
@@ -49,7 +88,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
   P0_abs.setValue(1, quatBuff.R_component_3() + q1->getValue(1));
   P0_abs.setValue(2, quatBuff.R_component_4() + q1->getValue(2));
-  std::cout << "KneeJoint: P0_abs\n";
+  std::cout << "KneeJoint: P0_abs in the initial position.\n";
   P0_abs.display();
   SimpleVector G2P0_abs(3);
   G2P0_abs = P0_abs - G2_abs;
@@ -61,41 +100,65 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
   std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
 
-
+  checkInitPos();
 
 
 }
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SimpleVector P0, P0 contains the coordinates of the Knee point, in the absolute frame.
+   \param a SP::SimpleVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
+   else P0 contains the coordinates of the Knee point, in the frame of d1,
+   ie P0 in the frame of the object, ie G1P0 in the obsolut frame with d1->q=(x,y,z,1,0,0,0).
 */
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRef): NewtonEulerR()
 {
   _P0.reset(new SimpleVector(3));
   *_P0 = *P0;
   _d1 = d1;
   SP::SiconosVector q1 = d1->q0();
-
-
   ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
   ::boost::math::quaternion<float>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
-  ::boost::math::quaternion<float>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
+
   ::boost::math::quaternion<float>    quatBuff(0, 0, 0, 0);
-  /*quadBuff contains the vector G1P0 if the object has no orientation.*/
-  quatBuff = quat1_inv * quatG1P0_abs_init_position * quat1;
+
+  if (absolutRef)
+  {
+    /*quadBuff contains the vector _G1P0 if the object has no orientation.*/
+    ::boost::math::quaternion<float>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
+    quatBuff = quat1_inv * quatG1P0_abs_init_position * quat1;
 
 
-  _G1P0x = quatBuff.R_component_2();
-  _G1P0y = quatBuff.R_component_3();
-  _G1P0z = quatBuff.R_component_4();
+    _G1P0x = quatBuff.R_component_2();
+    _G1P0y = quatBuff.R_component_3();
+    _G1P0z = quatBuff.R_component_4();
 
-  _G2P0x = _P0->getValue(0);
-  _G2P0y = _P0->getValue(1);
-  _G2P0z = _P0->getValue(2);
+    _G2P0x = _P0->getValue(0);
+    _G2P0y = _P0->getValue(1);
+    _G2P0z = _P0->getValue(2);
+  }
+  else
+  {
+
+    _G1P0x = _P0->getValue(0);
+    _G1P0y = _P0->getValue(1);
+    _G1P0z = _P0->getValue(2);
+
+    /*d2 is look as the ref frame. G2 is the origine, and d2 has no orientation.
+     Where is P0 in the frame of d2 ?:*/
+    /*Use initial value of q1 to place P0 in the absolute frame.*/
+    /*quatG1P0_abs_ without any orientation*/
+    ::boost::math::quaternion<float>    quatG1P0_abs_(0, _P0->getValue(0) , _P0->getValue(1) , _P0->getValue(2));
+    /*quatBuff contains the vector G1P at the initial position*/
+    quatBuff = quat1 * quatG1P0_abs_ * quat1_inv;
+
+    _G2P0x = q1->getValue(0) + quatBuff.R_component_2();
+    _G2P0y = q1->getValue(1) + quatBuff.R_component_3();
+    _G2P0z = q1->getValue(2) + quatBuff.R_component_4();
+  }
   std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
   std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
+  checkInitPos();
 }
-
 
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {

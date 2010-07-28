@@ -34,9 +34,11 @@ protected:
 
   SP::NewtonEulerDS _d1;
   SP::NewtonEulerDS _d2;
+  /*absolut coodinate G1P0 when d1 is located in q=(0,0,0,1,0,0,0). ie P0 in the frame of the object d1.*/
   double _G1P0x;
   double _G1P0y;
   double _G1P0z;
+  /*absolut coodinate G2P0 when d2 is located in q=(0,0,0,1,0,0,0). ie P0 in the frame of the object d2.*/
   double _G2P0x;
   double _G2P0y;
   double _G2P0z;
@@ -53,9 +55,10 @@ public:
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
      \param a SP::SimpleVector P, P contains the coordinates of the Knee point, in the absolute frame.
   */
-  KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0);
+  KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRef = true);
   /** destructor
    */
+  void checkInitPos();
   virtual ~KneeJointR() {};
 
   virtual void computeJachq(double t);
@@ -63,6 +66,7 @@ public:
 protected:
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
+public:
   double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);

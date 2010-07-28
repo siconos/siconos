@@ -27,24 +27,28 @@ int PivotJointR::_sNbEqualities = 5;
 
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P, SP::SimpleVector A): KneeJointR(d1, d2, P)
 {
-  SP::SiconosVector q1 = d1->q0();
-  ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<float>    quatA(0, A->getValue(0), A->getValue(1), A->getValue(2));
-  ::boost::math::quaternion<float>    quatBuff(0, 0, 0, 0);
-  /*calcul of axis _A*/
-  quatBuff = quat1 * quatA / quat1;
-  _Ax = quatBuff.R_component_2();
-  _Ay = quatBuff.R_component_3();
-  _Az = quatBuff.R_component_4();
+  // SP::SiconosVector q1 = d1->q0();
+  // ::boost::math::quaternion<float>    quat1(q1->getValue(3),-q1->getValue(4),-q1->getValue(5),-q1->getValue(6));
+  // ::boost::math::quaternion<float>    quatA(0,A->getValue(0),A->getValue(1),A->getValue(2));
+  // ::boost::math::quaternion<float>    quatBuff(0,0,0,0);
+  // /*calcul of axis _A*/
+  // quatBuff=quat1*quatA/quat1;
+  // _Ax=quatBuff.R_component_2();
+  // _Ay=quatBuff.R_component_3();
+  // _Az=quatBuff.R_component_4();
+  _Ax = A->getValue(0);
+  _Ay = A->getValue(1);
+  _Az = A->getValue(2);
   buildA1A2();
 }
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SimpleVector P0, P0 contains the coordinates of the Pivot point, in the absolute frame.
+   \param a SP::SimpleVector P0, see KneeJointR documentation.
+   \param a SP::SimpleVector A, axis in the frame of the object.
+   \param a bool, used only by the KneeJointR constructor see KneeJointR documentation.
 */
-PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVector A): KneeJointR(d1, P0)
+PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
 {
-
   _Ax = A->getValue(0);
   _Ay = A->getValue(1);
   _Az = A->getValue(2);
@@ -223,8 +227,8 @@ void PivotJointR::computeh(double t)
   y->setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
   y->setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
 
-  //std::cout<<"PivotJoint computeH:\n";
-  //y->display();
+  std::cout << "PivotJoint computeH:\n";
+  y->display();
 }
 
 
