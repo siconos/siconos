@@ -32,9 +32,9 @@ siconos --opt -I/usr/include/qt4/Qt --opt -I/usr/include/qt4 --opt -I/usr/includ
 
 
 #include "SiconosKernel.hpp"
-#include "../../../../Kernel/src/multiBodyTools/joints/KneeJoint.hpp"
-#include "../../../../Kernel/src/multiBodyTools/joints/PivotJoint.hpp"
-#include "../../../../Kernel/src/multiBodyTools/joints/PrismaticJoint.hpp"
+#include "KneeJoint.hpp"
+#include "PivotJoint.hpp"
+#include "PrismaticJoint.hpp"
 #include <QGLViewer/qglviewer.h>
 using namespace std;
 #include "qgl.h"
