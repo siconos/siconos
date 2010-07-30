@@ -26,7 +26,7 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "../../../Kernel/src/multiBodyTools/joints/KneeJoint.hpp"
+#include "KneeJoint.hpp"
 using namespace std;
 
 int main(int argc, char* argv[])

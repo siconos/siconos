@@ -284,8 +284,8 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    //SP::OneStepNSProblem osnspb(new MLCP(SICONOS_MLCP_PATH));
-    SP::OneStepNSProblem osnspb(new GenericMechanical());
+    SP::OneStepNSProblem osnspb(new MLCP(SICONOS_MLCP_PATH));
+    //SP::OneStepNSProblem osnspb(new GenericMechanical());
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
@@ -345,6 +345,8 @@ int main(int argc, char* argv[])
     {
       // solve ...
       s->newtonSolve(1e-4, 50);
+      printf("contact force: ");
+      relation0->contactForce()->display();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
