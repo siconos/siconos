@@ -1154,6 +1154,10 @@ void Moreau::updateState(unsigned int level)
       q->setValue(4, q->getValue(4) * normq);
       q->setValue(5, q->getValue(5) * normq);
       q->setValue(6, q->getValue(6) * normq);
+      dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
+      dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
+      dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);
+      dotq->setValue(6, (q->getValue(6) - qold->getValue(6)) / h);
       d->updateT();
     }
     else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
