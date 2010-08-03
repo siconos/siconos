@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   fclose(ff);
 
   SolverOptions *numerics_solver_options  = (SolverOptions *)malloc(sizeof(SolverOptions));
-  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, "NSGS");
+  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_NSGS);
 
   numerics_solver_options->dparam[0] = 1e-16;
 

@@ -227,10 +227,10 @@ int main(int argc, char* argv[])
 
 
   SolverOptions * numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions));
-  char solvername[10] = "NSGS";
+  //    char solvername[10]= "NSGS";
 
   /*\warning Must be adpated  for future primalFrictionContact3D_setDefaultSolverOptions*/
-  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, solvername);
+  primalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_PRIMAL_NSGS);
   numerics_solver_options->dparam[0] = 1e-14;
   numerics_solver_options->iparam[0] = 100000;
 
