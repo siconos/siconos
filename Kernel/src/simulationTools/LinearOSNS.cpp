@@ -34,7 +34,9 @@
 
 using namespace std;
 using namespace RELATION;
-
+LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
+{
+}
 // xml constructor
 LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
                        const string & name) :

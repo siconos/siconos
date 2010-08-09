@@ -90,7 +90,7 @@ protected:
 
   /** default constructor (private)
    */
-  LinearOSNS() {};
+  LinearOSNS() ;
 
 public:
 
