@@ -29,7 +29,7 @@
 class DynamicalSystem;
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
-
+typedef void (*Fext)(double , double*, double*, double*);
 /** NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
  *
  *
@@ -139,14 +139,13 @@ protected:
   FPtr6 computeFIntPtr;
 
   /** NewtonEulerDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
+   * @param[in] time : current time
+   * @param[in] q : current dof
    * @param[in,out] fExt : pointer to the first element of fExt
-   * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(double, unsigned int, double*, unsigned int, double*);
-  void (*computeMmtExtPtr)(double, unsigned int, double*, unsigned int, double*);
+  void (*computeFExtPtr)(double, double *, double*, double*);
+  void (*computeMExtPtr)(double, double *, double*, double*);
 
   /** NewtonEulerDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
    * @param sizeOfq : size of vector q
@@ -605,9 +604,13 @@ public:
   /** set a specified function to compute fExt
    *  \param a pointer on the plugin function
    */
-  void setComputeFExtFunction(VectorFunctionOfTime fct)
+  void setComputeFExtFunction(Fext fct)
   {
     computeFExtPtr = fct ;
+  }
+  void setComputeMExtFunction(Fext fct)
+  {
+    computeMExtPtr = fct ;
   }
 
   /** allow to set a specified function to compute the inertia
@@ -685,7 +688,7 @@ public:
    *  \param double time : the current time
    */
   virtual void computeFExt(double);
-  virtual void computeMmtExt(double);
+  virtual void computeMExt(double);
 
   /** default function to compute the inertia
    */

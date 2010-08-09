@@ -108,6 +108,7 @@ void NewtonEulerDS::zeroPlugin()
   computeJacobianFIntqDotPtr = NULL;
   computeNNLPtr = NULL;
   computeFExtPtr = NULL;
+  computeMExtPtr = NULL;
   //  computeFIntPtr=NULL;
 }
 
@@ -246,7 +247,10 @@ void NewtonEulerDS::initialize(const string& simulationType, double time, unsign
     _jacobianNNLq.reset(new SimpleMatrix(_n, _n));
 
   if (computeFExtPtr && !_fExt)
-    _fExt.reset(new SimpleVector(_n));
+    _fExt.reset(new SimpleVector(_ndof));
+
+  if (computeMExtPtr && !_mExt)
+    _mExt.reset(new SimpleVector(_ndof));
 
   //   if ( computeFIntPtr && ! _fInt)
   //     _fInt.reset(new SimpleVector(_n));
@@ -440,12 +444,12 @@ void NewtonEulerDS::setJacobianNNL(unsigned int i, const PMNNL& newValue)
 void NewtonEulerDS::computeFExt(double time)
 {
   if (computeFExtPtr)
-    (computeFExtPtr)(time, _n, &(*_fExt)(0), _z->size(), &(*_z)(0));
+    (computeFExtPtr)(time, &(*_q)(0), &(*_fExt)(0),  &(*_q0)(0));
 }
-void NewtonEulerDS::computeMmtExt(double time)
+void NewtonEulerDS::computeMExt(double time)
 {
-  if (computeMmtExtPtr)
-    (computeMmtExtPtr)(time, _n, &(*_mExt)(0), _z->size(), &(*_z)(0));
+  if (computeMExtPtr)
+    (computeMExtPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));
 }
 
 void NewtonEulerDS::computeNNL()
@@ -561,7 +565,7 @@ void NewtonEulerDS::computeFL(double time)
     }
     if (_mExt)
     {
-      computeMmtExt(time);
+      computeMExt(time);
       (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
     }
     if (_NNL)
