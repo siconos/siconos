@@ -145,11 +145,13 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
 
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
+    {
       prod(*_jachq, *data[q1], *y);
-    else //if(derivativeNumber == 2)
+    }
+    else  //if(derivativeNumber == 2)
       //  prod(*_jachq,*data[q2],*y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
       //   else
-      RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
+      RuntimeException::selfThrow("NewtonEulerR::computeOutput(time,index), index out of range or not yet implemented.");
   }
 }
 
@@ -170,4 +172,40 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   /*data is a pointer of memory associated to a dynamical system*/
   /** false because it consists in doing a sum*/
   prod(*lambda, *_jachqT, *data[p0 + level], false);
+}
+void NewtonEulerR::computeJachqT()
+{
+  unsigned int k = 0;
+  DSIterator itDS;
+  int sizey = interaction()->getSizeOfY();
+  SP::SimpleMatrix auxBloc(new SimpleMatrix(sizey, 7));
+  SP::SimpleMatrix auxBloc2(new SimpleMatrix(sizey, 6));
+  Index dimIndex(2);
+  Index startIndex(4);
+  itDS = interaction()->dynamicalSystemsBegin();
+  while (itDS != interaction()->dynamicalSystemsEnd())
+  {
+    startIndex[0] = 0;
+    startIndex[1] = 7 * k / 6;
+    startIndex[2] = 0;
+    startIndex[3] = 0;
+    dimIndex[0] = sizey;
+    dimIndex[1] = 7;
+    setBlock(_jachq, auxBloc, dimIndex, startIndex);
+    SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+    SP::SiconosMatrix T = d->T();
+
+    prod(*auxBloc, *T, *auxBloc2);
+
+    startIndex[0] = 0;
+    startIndex[1] = 0;
+    startIndex[2] = 0;
+    startIndex[3] = k;
+    dimIndex[0] = sizey;
+    dimIndex[1] = 6;
+
+    setBlock(auxBloc2, _jachqT, dimIndex, startIndex);
+    k += (*itDS)->getDim();
+    itDS++;
+  }
 }

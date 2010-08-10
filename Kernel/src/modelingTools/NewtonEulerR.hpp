@@ -81,7 +81,7 @@ protected:
   /**vector of contact forces*/
   SP::SimpleVector _contactForce;
 
-  /*updated in UR*/
+  /*updated in computeJachqT*/
   SP::SiconosMatrix _jachqT;
 
   /** basic constructor
@@ -222,12 +222,15 @@ public:
   {
     ;
   }
+  /*default implementation consists in multiplying jachq and T*/
+  virtual void computeJachqT();
   /* compute all the H Jacobian */
   virtual void computeJach(double t)
   {
     computeJachq(t);
     computeJachqDot(t);
     computeJachlambda(t);
+    computeJachqT();
   }
   /* compute all the G Jacobian */
   virtual void computeJacg(double t)

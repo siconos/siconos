@@ -207,45 +207,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   else if (relationType == NewtonEuler)
   {
     SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
-    //      SP::BlockMatrix C = boost::static_pointer_cast<BlockMatrix> (r->jachq());
-    SP::SiconosMatrix C = r->jachq();
-    //      cout<<"UR : r->jachq():\n";
-    //      C->display();
     originalMatrix = r->jachqT();
-
-    //      SP::BlockMatrix jachqT_block = boost::static_pointer_cast<BlockMatrix> (originalMatrix);
-
-    //      SP::SiconosMatrix C_DS_block = C->block(NumDS,0);
-    //      SP::SiconosMatrix CT_DS_block = jachqT_block->block(NumDS,0);
-    //      cout<<" UnitaryRelation::getLeftUnitaryBlockForDS : C_DS_block"<<endl;
-    //      C_DS_block->display();
-    SP::SimpleMatrix auxBloc(new SimpleMatrix(sizey, 7));
-    SP::SimpleMatrix auxBloc2(new SimpleMatrix(sizey, 6));
-    Index dimIndex(2);
-    Index startIndex(4);
-    startIndex[0] = 0;
-    startIndex[1] = 7 * k / 6;
-    startIndex[2] = 0;
-    startIndex[3] = 0;
-    dimIndex[0] = sizey;
-    dimIndex[1] = 7;
-    setBlock(C, auxBloc, dimIndex, startIndex);
-    SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (ds);
-    SP::SiconosMatrix T = d->T();
-
-    prod(*auxBloc, *T, *auxBloc2);
-    //      prod(*C_DS_block,*T,*CT_DS_block);
-
-    startIndex[0] = 0;
-    startIndex[1] = 0;
-    startIndex[2] = 0;
-    startIndex[3] = k;
-    dimIndex[0] = sizey;
-    dimIndex[1] = 6;
-    //      startIndex[1]=k;
-    //      dimIndex[1]=6;
-    setBlock(auxBloc2, originalMatrix, dimIndex, startIndex);
-
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
