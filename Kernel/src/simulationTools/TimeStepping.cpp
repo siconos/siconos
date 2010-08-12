@@ -399,7 +399,8 @@ void TimeStepping::computeInitialResidu()
 void TimeStepping::advanceToEvent()
 {
   computeInitialResidu();
-
+  /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
+  prepareNewtonIteration();
   // solve ...
   computeFreeState();
   int info = 0;
