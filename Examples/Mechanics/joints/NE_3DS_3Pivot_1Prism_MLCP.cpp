@@ -32,9 +32,8 @@
 #include <QGLViewer/qglviewer.h>
 using namespace std;
 #include "qgl.h"
-/*COMPILATION WITH SICONOS:
-siconos --opt -I/usr/include/qt4/Qt --opt -I/usr/include/qt4 --opt -I/usr/include/qt4/QtOpenGL --opt -I/usr/include/qt4/QtXml --opt -I/usr/include/qt4/QtCore --opt -I/usr/include/qt4/QtGui -L/usr/X11R6/lib -L/usr/lib -L/usr/lib -lQGLViewer -lpthread -lGLU -lGL -lQtXml -lQtOpenGL -lQtGui -lQtCore -v -g Pantographe.cpp
-*/
+
+#define WITH_PROJECT_ON_CONSTRAINTS
 
 int main(int argc, char* argv[])
 {
@@ -49,7 +48,7 @@ int main(int argc, char* argv[])
     unsigned int qDim = 7;
     unsigned int nDim = 6;
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                  // final computation time
+    double T = 12.0;                  // final computation time
     double h = 0.005;                // time step
     double L1 = 1.0;
     double L2 = 1.0;
@@ -284,11 +283,14 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new MLCP(SICONOS_MLCP_PATH));
-    //SP::OneStepNSProblem osnspb(new GenericMechanical());
-
+    SP::OneStepNSProblem osnspb(new GenericMechanical());
     // -- (4) Simulation setup with (1) (2) (3)
+#ifdef WITH_PROJECT_ON_CONSTRAINTS
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_PATH));
+    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI1, osnspb, osnspb_pos));
+#else
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
+#endif
     s->insertIntegrator(OSI2);
     s->insertIntegrator(OSI3);
     //    s->setComputeResiduY(true);
