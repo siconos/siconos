@@ -23,7 +23,6 @@
 
 using namespace std;
 using namespace RELATION;
-#define MLCP_NB_BLOCKS 30
 
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):

@@ -25,11 +25,11 @@ using namespace std;
 // warning -> this is an abstract class, so constructors are usefull only for
 // calls in derived classes constructors
 
-NonSmoothLaw::NonSmoothLaw(unsigned int newSize): _size(newSize)
+NonSmoothLaw::NonSmoothLaw(unsigned int newSize): _size(newSize), _sizeProjectOnConstraints(newSize)
 {}
 
 NonSmoothLaw::NonSmoothLaw(SP::NonSmoothLawXML newNsLawXml):
-  _size(1), _nslawxml(newNsLawXml)
+  _size(1), _nslawxml(newNsLawXml), _sizeProjectOnConstraints(1)
 {
   assert(_nslawxml &&
          "NonSmoothLaw:: xml constructor, xml file==NULL");
@@ -39,6 +39,7 @@ NonSmoothLaw::NonSmoothLaw(SP::NonSmoothLawXML newNsLawXml):
          "NonSmoothLaw:: xml constructor, an input is required for the nslaw size.");
 
   _size = _nslawxml->getSize();
+  _sizeProjectOnConstraints = _size;
 }
 
 

@@ -96,7 +96,18 @@ public:
   *  \param unsigned int: the number of the set to be updated
   */
   void updateIndexSet(unsigned int);
-
+  /** Used by the updateIndexSet function in order to deactivate an UR.
+      \param SP::UnitaryRelation ur: an UR activated.
+      \param unsigned int: the number of the set to be updated
+      Return true iff the ur must be deactivate.
+   */
+  virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
+  /** Used by the updateIndexSet function in order to activate an UR.
+      \param SP::UnitaryRelation ur: an UR deactivated.
+      \param unsigned int: the number of the set to be updated
+      Return true iff the ur must be activate.
+   */
+  virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory.
    */
   void nextStep();
@@ -122,7 +133,7 @@ public:
    * \param double, convergence criterion
    * \param unsigned int: maximum number of Newton steps
    */
-  void newtonSolve(double, unsigned int);
+  virtual void newtonSolve(double, unsigned int);
 
   /*
    * To known the number of steps performed by the Newton algorithm.

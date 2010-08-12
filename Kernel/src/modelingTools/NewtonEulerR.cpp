@@ -109,8 +109,8 @@ void NewtonEulerR::computeh(double)
   prod(*_jachq, *_workQ, *y);
   if (_e)
     *y += *_e;
-  //  printf("NewtonEulerR::computeh() :");
-  //  y->display();
+  //printf("NewtonEulerR::computeh() :");
+  //y->display();
 }
 
 //  void NewtonEulerR::computeJachx(double)
@@ -131,6 +131,12 @@ void NewtonEulerR::display() const
 {
   Relation::display();
 }
+
+// void NewtonEulerR::setqProjectOnConstraints(SP::SiconosVector lambda){
+//   SP::SimpleMatrix aux(new SimpleMatrix(*_jachq));
+//   aux->trans();
+//   prod(*aux,*lambda,*data[q0],false);
+// }
 
 void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
 {

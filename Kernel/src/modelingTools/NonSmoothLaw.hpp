@@ -50,7 +50,8 @@ protected:
 
   /** "size" of the NonSmoothLaw */
   unsigned int _size;
-
+  /** size of the NonSmoothLaw to project on the constarints. It is not equal to _size in the case of friction.*/
+  unsigned int _sizeProjectOnConstraints;
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
   SP::NonSmoothLawXML _nslawxml;
 
@@ -110,7 +111,13 @@ public:
   {
     return _size;
   }
-
+  /** to get the signifiant size for the projection on constraints.
+  *  \return an unsigned int
+  */
+  inline unsigned int sizeProjectOnConstraints() const
+  {
+    return _sizeProjectOnConstraints;
+  }
   /** set the size of the nsLaw
   *  \param an unsigned int
   */

@@ -1144,16 +1144,7 @@ void Moreau::updateState(unsigned int level)
       //  q->display();
 
       //q[3:6] must be normalized
-      double normq = sqrt(q->getValue(3) * q->getValue(3) + q->getValue(4) * q->getValue(4) + q->getValue(5) * q->getValue(5) + q->getValue(6) * q->getValue(6));
-      //  printf("-> normq : %f\n",normq);
-
-      assert(normq > 0);
-
-      normq = 1 / normq;
-      q->setValue(3, q->getValue(3) * normq);
-      q->setValue(4, q->getValue(4) * normq);
-      q->setValue(5, q->getValue(5) * normq);
-      q->setValue(6, q->getValue(6) * normq);
+      d->normalizeq();
       dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
       dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
       dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);

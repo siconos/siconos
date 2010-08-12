@@ -471,6 +471,11 @@ public:
    */
   void printStat();
 
+  virtual void display() const
+  {
+    ;
+  }
+
   /** compute unitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
    */
   virtual void updateUnitaryBlocks();
@@ -543,7 +548,7 @@ public:
 
   /** save Interactions states in Memory
    */
-  void saveInMemory();
+  virtual void saveInMemory();
 
   /** prepare data of the osns for solving
    *  param double : current time

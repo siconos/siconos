@@ -285,7 +285,9 @@ public:
   {
     return jacglambda();
   }
-
+  /** A buffer containing the forces due to this.
+      It is an output unused for the computation.
+   */
   SP::SimpleVector contactForce()
   {
     return _contactForce;
@@ -294,8 +296,11 @@ public:
   /** main relation members display
    */
   void display() const;
-
-
+  /** return a block vector containing ths dynamical system's dof.*/
+  SP::SiconosVector getq()
+  {
+    return data[q0];
+  }
   ACCEPT_STD_VISITORS();
 
 };

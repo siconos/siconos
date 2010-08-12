@@ -24,7 +24,7 @@
 #define MLCP_H
 
 #include "LinearOSNS.hpp"
-
+#define MLCP_NB_BLOCKS 30
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -144,7 +144,7 @@ public:
   *  \param a pointer to UnitaryRelation
   *  \param a pointer to UnitaryRelation
   */
-  void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time
@@ -159,7 +159,7 @@ public:
 
   /** print the data to the screen
   */
-  void display() const;
+  virtual void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted

@@ -53,8 +53,8 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
   mComputeResiduY = false;
 
   if (osi) insertIntegrator(osi);
-  (*_allNSProblems).resize(SICONOS_OSNSP_TS_NUMBER);
-  if (osnspb) insertNonSmoothProblem(osnspb);
+  (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
+  if (osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
 
 }
 
@@ -65,7 +65,7 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
   Simulation(strxml, t0, T, dsList, interList)
 {
   mComputeResiduY = false;
-  (*_allNSProblems).resize(SICONOS_OSNSP_TS_NUMBER);
+  (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
   if (_simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
@@ -99,7 +99,24 @@ TimeStepping::~TimeStepping()
 {
 }
 
-
+bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
+{
+  double h = timeStep();
+  double y = ur->getYRef(i - 1);
+  double yDot = ur->getYRef(1);
+  y += 0.5 * h * yDot;
+  assert(!isnan(y));
+  return (y > 0);
+}
+bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
+{
+  double h = timeStep();
+  double y = ur->getYRef(i - 1);
+  double yDot = ur->getYRef(1);
+  y += 0.5 * h * yDot;
+  assert(!isnan(y));
+  return (y <= 0);
+}
 // i=1
 void TimeStepping::updateIndexSet(unsigned int i)
 {
@@ -131,11 +148,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
-  double y, yDot;
   bool inserted;
 
-  // For all UR in Index[i-1] ...
-  double h = timeStep();
 
   // indexSet1 scan
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
@@ -157,10 +171,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(ur1_descr0) = boost::gray_color;
       if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        y = ur1->getYRef(i - 1);
-        yDot = ur1->getYRef(1);
-        y += 0.5 * h * yDot;
-        if (y > 0)
+        if (predictorDeactivate(ur1, i))
         {
           // Unitary relation is not active
           // ui1 becomes invalid
@@ -198,10 +209,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         indexSet0->color(*ui0) = boost::white_color ;
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
-        assert( { y = indexSet0->bundle(*ui0)->getYRef(i - 1);
-                  yDot = indexSet0->bundle(*ui0)->getYRef(1);
-                  y += 0.5 * h*yDot;
-                  y <= 0 || Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+        assert( { !predictorDeactivate(indexSet0->bundle(*ui0), i) || Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
                 });
       }
 
@@ -211,19 +219,12 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
         SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(ur0));
-
+        bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          y = ur0->getYRef(i - 1);
-          yDot = ur0->getYRef(1);
-          y += 0.5 * h * yDot;
-
-          assert(!isnan(y));
-
+          activate = predictorActivate(ur0, i);
         }
-        else
-          y = -1;
-        if (y <= 0)
+        if (activate)
         {
           assert(!indexSet1->is_vertex(ur0));
 
@@ -289,8 +290,8 @@ void TimeStepping::initOSNS()
     // declared and a Non smooth problem
     // built.
   {
-    if (_allNSProblems->size() > 1)
-      RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
+    //if (_allNSProblems->size()>1)
+    //  RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree - 1 except
@@ -499,7 +500,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   }
   if (!isNewtonConverge && !info)
     cout << "Newton process stopped: max. steps number reached." << endl ;
-  //  cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  END NEWTON IT"<<endl;
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)

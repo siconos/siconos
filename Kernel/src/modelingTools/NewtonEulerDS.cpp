@@ -861,3 +861,13 @@ void NewtonEulerDS::updateT()
   _T->setValue(6, 5, q0);
 
 }
+void NewtonEulerDS::normalizeq()
+{
+  double normq = sqrt(_q->getValue(3) * _q->getValue(3) + _q->getValue(4) * _q->getValue(4) + _q->getValue(5) * _q->getValue(5) + _q->getValue(6) * _q->getValue(6));
+  assert(normq > 0);
+  normq = 1 / normq;
+  _q->setValue(3, _q->getValue(3) * normq);
+  _q->setValue(4, _q->getValue(4) * normq);
+  _q->setValue(5, _q->getValue(5) * normq);
+  _q->setValue(6, _q->getValue(6) * normq);
+}

@@ -269,6 +269,10 @@ public:
   {
     return _n;
   }
+  virtual inline unsigned int getqDim() const
+  {
+    return _qDim;
+  }
 
   // -- q --
 
@@ -812,6 +816,7 @@ public:
 
 
   virtual void updateT();
+  virtual void normalizeq();
 
   inline SP::SiconosMatrix W()
   {
