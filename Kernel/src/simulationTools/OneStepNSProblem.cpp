@@ -151,21 +151,6 @@ SP::SiconosMatrix OneStepNSProblem::unitaryBlock(SP::UnitaryRelation UR1,
   return itCol->second;
 
 }
-
-void OneStepNSProblem::setUnitaryBlocks(const MapOfMapOfUnitaryMatrices& newMap)
-{
-  //   clearUnitaryBlocks();
-  //   unitaryBlocks = newMap;
-  //   UnitaryMatrixRowIterator itRow;
-  //   UnitaryMatrixColumnIterator itCol;
-  //   for(itRow = unitaryBlocks.begin(); itRow!= unitaryBlocks.end() ; ++itRow)
-  //     {
-  //       for(itCol = (itRow->second).begin(); itCol!=(itRow->second).end(); ++itCol)
-  //  isUnitaryBlockAllocatedIn[itRow->first][itCol->first] = false;
-  //     }
-  RuntimeException::selfThrow("OneStepNSProblem::setUnitaryBlocks - Not implemented: forbidden operation.");
-}
-
 SP::SiconosMatrix OneStepNSProblem::dSBlock(SP::DynamicalSystem DS1) const
 {
 
@@ -179,45 +164,6 @@ void OneStepNSProblem::setDSBlocks(const MapOfDSMatrices& newMap)
 {
   RuntimeException::selfThrow("OneStepNSProblem::setDSBlocks - Not implemented: forbidden operation.");
 }
-
-SP::SiconosMatrix OneStepNSProblem::unitaryDSBlock(SP::UnitaryRelation UR1, SP::DynamicalSystem DS2) const
-{
-  ConstUnitaryDSMatrixRowIterator itRow = _unitaryDSBlocks.find(UR1);
-
-  // itRow: we get the map of DSBlocks that corresponds to UR1.
-  // Then, thanks to itCol, we iterate through this map to find DS2 and the UnitaryDSBlock that corresonds to UR1 and DS2
-  ConstMatIterator itCol = (itRow->second).find(DS2);
-
-  if (itCol == (itRow->second).end()) // if UR1 and DS2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - unitaryDSBlock(UR1,DS2) : no unitaryDSBlock corresonds to UR1 and DS2, ie the Unitary Relation and the DynamicalSystem are not connected.");
-
-  return itCol->second;
-
-}
-
-void OneStepNSProblem::setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices& newMap)
-{
-  RuntimeException::selfThrow("OneStepNSProblem::setUnitaryDSBlocks - Not implemented: forbidden operation.");
-}
-
-
-
-SP::SiconosMatrix OneStepNSProblem::dSUnitaryBlock(SP::DynamicalSystem DS1, SP::UnitaryRelation UR2) const
-{
-  ConstDSUnitaryMatrixRowIterator itRow = _DSUnitaryBlocks.find(DS1);
-  ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
-  if (itCol == (itRow->second).end()) // if DS1 and UR2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - dSUnitaryBlock(DS1,UR2) : no DSUnitaryBlock corresponds to DS1 and UR2, ie the Unitary Relation and the DynamicalSystem are not connected.");
-
-  return itCol->second;
-
-}
-
-void OneStepNSProblem::setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices& newMap)
-{
-  RuntimeException::selfThrow("OneStepNSProblem::setDSUnitaryBlocks - Not implemented: forbidden operation.");
-}
-
 
 void OneStepNSProblem::updateUnitaryBlocks()
 {
@@ -394,168 +340,6 @@ void OneStepNSProblem::computeDSBlock(SP::DynamicalSystem)
 }
 
 
-
-void OneStepNSProblem::updateUnitaryDSBlocks()
-{
-  // The present functions checks various conditions and possibly compute unitaryBlocks matrices.
-  //
-  // Let URi and DSj be an Unitary Relation and a DynamicalSystem.
-  //
-  // Things to be checked are:
-  //  1 - is the topology time invariant?
-  //  2 - does unitaryDSBlocks[URi][DSj] already exists (ie has been computed in a previous time step)?
-  //  3 - do we need to compute this unitaryDSBlock? A unitaryDSBlock is to be computed if URi is in IndexSet1 AND if DSj is a Dynamical systems concerned by URi
-  //
-  // The possible cases are:
-  //
-  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
-  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the unitaryBlock.
-  //  - If 1==false, 2 is not checked, and the unitaryBlock is computed if 3==true.
-  //
-  SP::UnitaryRelationsSet indexSet;
-  bool isTimeInvariant;
-  UnitaryRelationsIterator itUR;
-  DSIterator itDS;
-  SP::DynamicalSystemsSet concernedDS;
-
-
-  // Get index set from Simulation
-
-  // indexSet = simulation()->indexSet(levelMin);
-
-
-  //   isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
-
-  //   itUR = indexSet->begin();
-
-  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
-  //     {
-  //       concernedDS = (*itUR)->dynamicalSystems();
-
-  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
-  //  {
-  //    if(!isTimeInvariant)
-  //      {
-
-  //        computeUnitaryDSBlock(*itUR, *itDS);
-  //      }
-  //    else // if(isTimeInvariant)
-  //      {
-  //        if( (unitaryDSBlocks.find(*itUR)) != unitaryDSBlocks.end())  // if unitaryBlocks[UR] exists
-  //    {
-  //      if( (unitaryDSBlocks[*itUR].find(*itDS)) == (unitaryDSBlocks[*itUR].end() ) ) // if unitaryBlocks[UR][DS2] does not exist
-  //        {
-
-  //          computeUnitaryDSBlock(*itUR, *itDS);
-  //        }
-  //    }
-  //        else
-  //    {
-  //      computeUnitaryDSBlock(*itUR, *itDS);
-
-  //    }
-  //      }
-  //  }
-  //     }
-
-}
-
-void OneStepNSProblem::computeAllUnitaryDSBlocks()
-{
-  // SP::UnitaryRelationsSet indexSet = simulation()->indexSet(0);
-  //   DSIterator itDS;
-  //   UnitaryRelationsIterator itUR;
-  //   DynamicalSystemsSet concernedDS;
-
-  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
-  //     {
-  //       concernedDS =  *((*itUR)->dynamicalSystems());
-  //       for(itDS = concernedDS.begin(); itDS!=concernedDS.end();itDS++)
-  //  computeUnitaryDSBlock(*itUR, *itDS);
-  //     }
-}
-
-void OneStepNSProblem::computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem)
-{
-  RuntimeException::selfThrow
-  ("OneStepNSProblem::computeUnitaryDSBlock - not yet implemented for problem type ="
-  );
-}
-
-
-void OneStepNSProblem::updateDSUnitaryBlocks()
-{
-  // The present functions checks various conditions and possibly compute unitaryBlocks matrices.
-  //
-  // Let DSi and URj be a DynamicalSystem and an Unitary Relation
-  //
-  // Things to be checked are:
-  //  1 - is the topology time invariant?
-  //  2 - does DUunitaryBlocks[DSi][URj] already exists (ie has been computed in a previous time step)?
-  //  3 - do we need to compute this DSunitaryBlock? A DSUnitaryBlock is to be computed if DSi is a Dynamical systems concerned by URj AND  if URj is in IndexSet1
-  //
-  // The possible cases are:
-  //
-  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
-  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the unitaryBlock.
-  //  - If 1==false, 2 is not checked, and the unitaryBlock is computed if 3==true.
-  //
-  SP::UnitaryRelationsSet indexSet;
-  bool isTimeInvariant;
-  UnitaryRelationsIterator itUR;
-  DSIterator itDS;
-  SP::DynamicalSystemsSet concernedDS;
-
-
-  // Get index set from Simulation
-
-  //   indexSet = simulation()->indexSet(levelMin);
-  //   isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
-
-  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
-  //     {
-  //       concernedDS = (*itUR)->dynamicalSystems();
-  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
-  //  {
-  //    if(!isTimeInvariant)
-  //      computeDSUnitaryBlock(*itDS, *itUR);
-  //    else // if(isTimeInvariant)
-  //      {
-  //        if( (DSUnitaryBlocks.find(*itDS)) != DSUnitaryBlocks.end())  // if unitaryBlocks[UR] exists
-  //    {
-  //      if( (DSUnitaryBlocks[*itDS].find(*itUR)) == (DSUnitaryBlocks[*itDS].end() ) ) // if unitaryBlocks[UR][DS2] does not exist
-  //        computeDSUnitaryBlock(*itDS, *itUR);
-  //    }
-  //        else computeDSUnitaryBlock(*itDS, *itUR);
-  //      }
-  //  }
-  //     }
-}
-
-void OneStepNSProblem::computeAllDSUnitaryBlocks()
-{
-  //  SP::UnitaryRelationsSet indexSet = simulation()->indexSet(0);
-  //   DSIterator itDS;
-  //   UnitaryRelationsIterator itUR;
-  //   SP::DynamicalSystemsSet concernedDS;
-
-  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
-  //     {
-  //       concernedDS =  (*itUR)->dynamicalSystems();
-  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
-  //  computeDSUnitaryBlock(*itDS, *itUR);
-  //     }
-  RuntimeException::selfThrow
-  ("OneStepNSProblem::computeALLDSUnitaryBlocks - not yet implemented for problem type =");
-}
-
-void OneStepNSProblem::computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation)
-{
-  RuntimeException::selfThrow
-  ("OneStepNSProblem::computeDSUnitaryBlock - not yet implemented for problem type =");
-}
 void OneStepNSProblem::initialize(SP::Simulation sim)
 {
   // Link with the simulation that owns this osnsp
@@ -602,18 +386,6 @@ void OneStepNSProblem::saveNSProblemToXML()
 {
   // OUT OF DATE - TO BE REVIEWED
 
-  //   if(onestepnspbxml != NULL)
-  //     {
-  //       onestepnspbxml->setDimNSProblem(sizeOutput);
-  //       vector<int> v;
-  //       InteractionsIterator it;
-  //       for(it=OSNSInteractions->begin(); it!=OSNSInteractions->end();++it)
-  //  v.push_back((*it)->number());
-  //       //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
-
-  //       //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
-  //     }
-  //   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
@@ -673,20 +445,6 @@ void OneStepNSProblem::clear()
 
 
   _DSBlocks.clear();
-
-  for (UnitaryDSMatrixRowIterator itRow = _unitaryDSBlocks.begin();
-       itRow != _unitaryDSBlocks.end() ; ++itRow)
-  {
-    (itRow->second).clear();
-  };
-  _unitaryDSBlocks.clear();
-
-  for (DSUnitaryMatrixRowIterator itRow = _DSUnitaryBlocks.begin();
-       itRow != _DSUnitaryBlocks.end() ; ++itRow)
-  {
-    (itRow->second).clear();
-  };
-  _DSUnitaryBlocks.clear();
   if (_OSNSInteractions)
     _OSNSInteractions->clear();
 }

@@ -98,10 +98,6 @@ protected:
 
 
 
-  /** type of the OneStepNSProblem (LCP ...) */
-  //  std::string _nspbType;
-
-
   /** size of the problem to solve */
   unsigned int _sizeOutput;
 
@@ -114,15 +110,6 @@ protected:
       map < SP::DynamicalSystem , SiconosMatrix * > */
   MapOfDSMatrices _DSBlocks;
 
-  /** map that links each UnitaryRelation and DynamicalSystem with the corresponding unitaryDSBlocks
-      map < UnitaryRelationA * , map < DynamicalSystemB * , unitaryDSBlockMatrixAB > >
-      UnitaryRelation A and DynamicalSystem B are coupled through unitaryDSBlockMatrixAB.  */
-  MapOfUnitaryMapOfDSMatrices _unitaryDSBlocks;
-
-  /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
-      map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
-      Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
-  MapOfDSMapOfUnitaryMatrices _DSUnitaryBlocks;
 
 
   /** link to the simulation that owns the NSPb */
@@ -212,15 +199,6 @@ public:
 
   // --- GETTERS/SETTERS ---
 
-  /** To get the solver algorithm name
-    *  \return a string
-    */
-  //inline const std::string numericsSolverName() const {return _numerics_solver_name;};
-
-  /** To set the solver algorithm name
-   *  \param a string
-   */
-  // inline void setNumericsSolverName(const std::string& newVal) {_numerics_solver_name = newVal;};
 
   /** To get the SolverOptions structure
    *  \return , the numerics structure used to save solver parameters
@@ -230,15 +208,6 @@ public:
     return _numerics_solver_options;
   };
 
-  /** to get the type of the OneStepNSProblem
-   *  \return string
-   */
-  //  inline std::string getType() const {return _nspbType;}
-
-  /** set the type of the OneStepNSProblem
-   *  \param: string
-   */
-  //  inline void setType(const std::string&  newVal) {_nspbType=newVal;}
 
   /** to get the id of the OneStepNSProblem
    *  \return string
@@ -313,45 +282,6 @@ public:
   void setDSBlocks(const MapOfDSMatrices&);
 
 
-  /** get the unitaryDSBlocks matrices map
-   *  \return a MapOfUnitaryMapOfDSMatrices
-   */
-  inline const MapOfUnitaryMapOfDSMatrices getUnitaryDSBlocks() const
-  {
-    return _unitaryDSBlocks;
-  };
-
-  /** get the unitaryDSBlock corresponding to UR1 and DS2
-   *  \param a pointer to UnitaryRelation, UR1
-   *  \param a pointer to DynamicalSystem DS2
-   *  \return a pointer to SiconosMatrix
-   */
-  SP::SiconosMatrix unitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem) const ;
-
-  /** set the map of unitaryDS matrices
-   *  \param a MapOfUnitaryMapOfDSMatrices
-   */
-  void setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices&);
-
-  /** get the DSunitaryBlocks matrices map
-    *  \return a MapOfDSMapOfUnitaryMatrices
-    */
-  inline const MapOfDSMapOfUnitaryMatrices getDSUnitaryBlocks() const
-  {
-    return _DSUnitaryBlocks;
-  };
-
-  /** get the DSunitaryBlock corresponding to DS1 and UR2
-   *  \param a pointer to UnitaryRelation, UR2
-   *  \param a pointer to DynamicalSystem DS1
-   *  \return a pointer to SiconosMatrix
-   */
-  SP::SiconosMatrix dSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation) const ;
-
-  /** set the map of DSUnitary matrices
-   *  \param a MapOfDSMapOfUnitaryMatrices
-   */
-  void setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices&);
 
   /** get the Simulation
    *  \return a pointer on Simulation
@@ -507,38 +437,6 @@ public:
   virtual void computeDSBlock(SP::DynamicalSystem);
 
 
-  /** compute UnitaryDSBlocks if necessary (this depends on the type
-      of OSNS, on the indexSets ...)
-  */
-  void updateUnitaryDSBlocks();
-
-  /** computes all unitaryDSBlock-matrices
-   */
-  void computeAllUnitaryDSBlocks();
-
-  /** computes  unitaryBlock-matrix that corresponds to UR1 and DS2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation UR1
-   *  \param a pointer to DynamicalSystems DS2
-   */
-  virtual void computeUnitaryDSBlock(SP::UnitaryRelation , SP::DynamicalSystem);
-
-
-  /** compute DSUnitaryBlocks if necessary (this depends on the type
-      of OSNS, on the indexSets ...)
-  */
-  void updateDSUnitaryBlocks();
-
-  /** computes all DSunitaryBlock-matrices
-   */
-  void computeAllDSUnitaryBlocks();
-
-  /** computes  DSUnitaryBlock-matrix that corresponds to UR1 and DS2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation UR1
-   *  \param a pointer to DynamicalSystems DS2
-   */
-  virtual void computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation);
 
 
   /** initialize the problem(compute topology ...)
