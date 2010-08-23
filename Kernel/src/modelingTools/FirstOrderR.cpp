@@ -70,16 +70,16 @@ void FirstOrderR::initialize(SP::Interaction inter)
 
 void FirstOrderR::computeJachx(double)
 {
-  RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type " + subType);
+  //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
 }
 void FirstOrderR::computeJachlambda(double)
 {
-  RuntimeException::selfThrow("FirstOrderR::computeJachlambda, not (yet) implemented or forbidden for relations of type " + subType);
+  //RuntimeException::selfThrow("FirstOrderR::computeJachlambda, not (yet) implemented or forbidden for relations of type "+subType);
 }
 
 void FirstOrderR::computeJacglambda(double t)
 {
-  RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type " + subType);
+  //RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
 }
 
 void FirstOrderR::display() const
