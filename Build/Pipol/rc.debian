@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # cmake version is on pipol repository
-echo "deb http://pipol.inria.fr/packages/$PIPOL_IMAGE_NAME ./" > /etc/apt/sources.list.d
+echo "deb http://pipol.inria.fr/packages/$PIPOL_IMAGE_NAME ./" >> /etc/apt/sources.list
 

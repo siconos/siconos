@@ -1,11 +1,12 @@
 #!/bin/sh
 
-
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
 #PIPOL fedora 02:00
 
-#PIPOL debian 02:00
+#PIPOL debian-lenny 02:00
+
+#PIPOL debian-testing 02:00
 
 #PIPOL ubuntu 02:00
 
