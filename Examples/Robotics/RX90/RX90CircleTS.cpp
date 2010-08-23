@@ -61,26 +61,29 @@ int main(int argc, char* argv[])
     // --- DS: manipulator arm ---
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
-    q0(1) = PI / 3;
-    q0(2) = -PI / 6;
-    q0(4) = PI / 6;
-    v0(0) = -0.34;
-    v0(3) = 0.59;
-    v0(5) = -0.34;
+    SP::SimpleVector q0(new SimpleVector(nDof)), v0(new SimpleVector(nDof));
+    q0->zero();
+    v0->zero();
+    (*q0)(1) = PI / 3;
+    (*q0)(2) = -PI / 6;
+    (*q0)(4) = PI / 6;
+    (*v0)(0) = -0.34;
+    (*v0)(3) = 0.59;
+    (*v0)(5) = -0.34;
 
     SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
     arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
-    arm->setComputeJacobianNNLFunction(1, "RX90Plugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "RX90Plugin.so", "jacobianNNLq");
+    //arm->setComputeJacobianNNLFunction(1,"RX90Plugin.so","jacobianVNNL");
+    arm->setComputeJacobianNNLqDotFunction("RX90Plugin.so", "jacobianVNNL");
+    //arm->setComputeJacobianNNLFunction(0,"RX90Plugin.so","jacobianNNLq");
+    arm->setComputeJacobianNNLqFunction("RX90Plugin.so", "jacobianNNLq");
     arm->setComputeFIntFunction("RX90Plugin.so", "U");
-    arm->setComputeJacobianFIntFunction(1, "RX90Plugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntFunction(0, "RX90Plugin.so", "jacobFintQ");
-
+    //arm->setComputeJacobianFIntFunction(1,"RX90Plugin.so","jacobFintV");
+    arm->setComputeJacobianFIntqDotFunction("RX90Plugin.so", "jacobFintV");
+    //arm->setComputeJacobianFIntFunction(0,"RX90Plugin.so","jacobFintQ");
+    arm->setComputeJacobianFIntqFunction("RX90Plugin.so", "jacobFintQ");
     allDS.insert(arm);
 
     // -------------------
@@ -140,14 +143,9 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(arm, 0.5));
     s->insertIntegrator(OSI);
 
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-15; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+
     // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnsp(new LCP(mySolver));
+    SP::OneStepNSProblem osnsp(new LCP());
     s->insertNonSmoothProblem(osnsp);
 
     cout << "=== End of model loading === " << endl;
