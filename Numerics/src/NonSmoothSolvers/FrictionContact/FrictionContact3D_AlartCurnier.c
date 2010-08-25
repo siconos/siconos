@@ -903,7 +903,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
     Function(R, velocity, mu, rho, F, A, B);
 
-#ifdef AC_CKPS
+#ifdef AC_STD
 #ifndef NDEBUG
     double Fg[3] = {0., 0., 0.};
     double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -946,7 +946,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
       }
     }
 
-#ifdef AC_CKPS
+#ifdef AC_STD
 #ifndef NDEBUG
     scal3x3(-1., AWpB);
     sub3x3(AWplusB, AWpB);
