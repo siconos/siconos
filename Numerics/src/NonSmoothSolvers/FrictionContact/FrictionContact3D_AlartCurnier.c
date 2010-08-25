@@ -903,7 +903,6 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
     Function(R, velocity, mu, rho, F, A, B);
 
-#ifdef AC_STD
 #ifndef NDEBUG
     double Fg[3] = {0., 0., 0.};
     double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -913,7 +912,13 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
     assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
 
+#ifdef AC_STD
     frictionContact3D_localAlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+#endif
+
+#ifdef AC_CKPS
+    frictionContact3D_localAlartCurnierCKPSFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+#endif
 
     sub3x3(F, Fg);
     sub3x3(A, Ag);
@@ -927,7 +932,6 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     mm3x3(A, MLocal, AWpB);
     add3x3(B, AWpB);
 
-#endif
 #endif
 
 

@@ -33,47 +33,13 @@
 static int file_counter = 0;
 #endif
 
-
-void frictionContact3D_gamma(double* x, double *r, double *p)
-{
-  assert(x);
-  assert(r);
-  // p optional
-
-  double* x1 = ++x;
-  double* x2 = ++x;
-
-  double* r11 = r + _11;
-  double* r12 = r + _12;
-  double* r21 = r + _21;
-  double* r22 = r + _22;
-
-  double invp_, p_, p3;
-
-  if (p)
-  {
-    p_ = p[0];
-  }
-  else
-  {
-    p_ = hypot(*x1, *x2);
-  }
-
-  p3 = p_ * p_ * p_;
-  invp_ = 1. / p_;
-  *r11 = invp_ - *x1 * *x1 / p3;
-  *r12 = - *x1 * *x2 / p3;
-  *r21 = *r12;
-  *r22 = invp_ - *x2 * *x2 / p3;
-
-}
-
 double sign(double x)
 {
   return copysign(1., x);
 }
 
-void frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
+
+void frictionContact3D_AlartCurnierFABGenerated(
   double rn,
   double rt1,
   double rt2,
@@ -86,56 +52,51 @@ void frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
   double rhot2,
   double *result)
 {
-  assert(result);
-
   double x0 = rhon * un;
   double x1 = rn - x0;
-  double x4 = rhot1 * ut1;
-  double x5 = rt1 - x4;
-  double x6 = rn / 2;
-  double x7 = fabs(x1);
-  double x8 = x7 / 2;
-  double x9 = x6 + x8;
-  double x10 = x0 / 2;
-  double x11 = x9 - x10;
-  double x12 = pow(x5, 2);
-  double x13 = rhot2 * ut2;
-  double x14 = rt2 - x13;
-  double x15 = pow(x14, 2);
-  double x16 = x12 + x15;
-  double x17 = mu * x11;
-  double x18 = pow(x16, (1.0 / 2.0));
-  double x20 = 1.0 / x18;
-  double x23 = pow(x20, 3);
-  double x24 = sign(x1);
-  double x25 = -rhon / 2;
-  double x26 = x24 * x25;
-  double x27 = x25 + x26;
-  double x28 = x24 / 2;
-  double x29 = 1.0 / 2.0 + x28;
-  double x30 = x4 - rt1;
-  double x32 = x13 - rt2;
-  double x33 = x17 * x20;
+  double x2 = sign(x1);
+  double x3 = rhot1 * ut1;
+  double x4 = rt1 - x3;
+  double x5 = rn / 2;
+  double x6 = fabs(x1);
+  double x7 = x6 / 2;
+  double x8 = x0 / 2;
+  double x9 = x5 + x7;
+  double x10 = x9 - x8;
+  double x11 = x4 * x4;
+  double x12 = rhot2 * ut2;
+  double x13 = rt2 - x12;
+  double x14 = x13 * x13;
+  double x15 = x11 + x14;
+  double x16 = mu * x10;
+  double x17 = sqrt(x15);
+  double x19 = 1. / (x17);
+  double x22 = x19 * x19 * x19;
+  double x23 = x2 / 2;
+  double x24 = -rhon / 2;
+  double x25 = x2 * x24;
+  double x26 = x24 + x25;
+  double x27 = 1.0 / 2.0 + x23;
+  double x28 = x3 - rt1;
+  double x30 = x12 - rt2;
+  double x31 = x16 * x19;
+  result[0] = x5 + x8 - x7;
+  result[3] = rhon / 2 + rhon * x23;
   result[6] = 0;
   result[9] = 0;
+  result[12] = 1.0 / 2.0 - x23;
   result[15] = 0;
   result[18] = 0;
-  if (0 <= x1)
+  if (x17 <= x16)
   {
-    result[0] = -x0;
-    result[3] = rhon;
-    result[12] = 0;
-  };
-  if (x18 <= x17)
-  {
-    result[1] = x5 - rt1;
+    result[1] = rt1 - x4;
     result[4] = 0;
     result[7] = rhot1;
     result[10] = 0;
     result[13] = 0;
     result[16] = 0;
     result[19] = 0;
-    result[2] = x14 - rt2;
+    result[2] = rt2 - x13;
     result[5] = 0;
     result[8] = 0;
     result[11] = rhot2;
@@ -143,30 +104,316 @@ void frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
     result[17] = 0;
     result[20] = 0;
   };
-  if (x17 < x18)
+  if (x16 < x17)
   {
-    result[1] = -rt1 + x33 * x5;
-    result[4] = -mu * x20 * x27 * x5;
-    result[7] = rhot1 * x33 - rhot1 * x12 * x17 * x23;
-    result[10] = -rhot2 * x14 * x17 * x23 * x5;
-    result[13] = -mu * x20 * x29 * x5;
-    result[16] = 1 - x33 - mu * x11 * x23 * x30 * x5;
-    result[19] = -mu * x11 * x23 * x32 * x5;
-    result[2] = -rt2 + x14 * x33;
-    result[5] = -mu * x14 * x20 * x27;
-    result[8] = -rhot1 * x14 * x17 * x23 * x5;
-    result[11] = rhot2 * x33 - rhot2 * x15 * x17 * x23;
-    result[14] = -mu * x14 * x20 * x29;
-    result[17] = -mu * x11 * x14 * x23 * x30;
-    result[20] = 1 - x33 - mu * x11 * x14 * x23 * x32;
+    result[1] = rt1 - x31 * x4;
+    result[4] = -mu * x19 * x26 * x4;
+    result[7] = rhot1 * x31 - rhot1 * x11 * x16 * x22;
+    result[10] = -rhot2 * x13 * x16 * x22 * x4;
+    result[13] = -mu * x19 * x27 * x4;
+    result[16] = 1 - x31 - mu * x10 * x22 * x28 * x4;
+    result[19] = -mu * x10 * x22 * x30 * x4;
+    result[2] = rt2 - x13 * x31;
+    result[5] = -mu * x13 * x19 * x26;
+    result[8] = -rhot1 * x13 * x16 * x22 * x4;
+    result[11] = rhot2 * x31 - rhot2 * x14 * x16 * x22;
+    result[14] = -mu * x13 * x19 * x27;
+    result[17] = -mu * x10 * x13 * x22 * x28;
+    result[20] = 1 - x31 - mu * x10 * x13 * x22 * x30;
   };
-  if (x1 < 0)
+}
+void frictionContact3D_AlartCurnierFGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+  double x0 = rhot1 * ut1;
+  double x1 = rt1 - x0;
+  double x2 = rn / 2;
+  double x3 = rhon * un;
+  double x4 = rn - x3;
+  double x5 = fabs(x4);
+  double x6 = x5 / 2;
+  double x7 = x3 / 2;
+  double x8 = x2 + x6;
+  double x9 = x8 - x7;
+  double x10 = x1 * x1;
+  double x11 = rhot2 * ut2;
+  double x12 = rt2 - x11;
+  double x13 = x12 * x12;
+  double x14 = x10 + x13;
+  double x15 = mu * x9;
+  double x16 = sqrt(x14);
+  double x18 = 1. / (x16);
+  result[0] = x2 + x7 - x6;
+  if (x16 <= x15)
   {
-    result[0] = -rn;
-    result[3] = 0;
-    result[12] = 1;
+    result[1] = rt1 - x1;
+    result[2] = rt2 - x12;
   };
-};
+  if (x15 < x16)
+  {
+    result[1] = rt1 - x1 * x15 * x18;
+    result[2] = rt2 - x12 * x15 * x18;
+  };
+}
+void frictionContact3D_AlartCurnierABGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+  double x0 = rhon * un;
+  double x1 = rn - x0;
+  double x2 = sign(x1);
+  double x3 = rhot1 * ut1;
+  double x4 = rt1 - x3;
+  double x5 = x4 * x4;
+  double x6 = rhot2 * ut2;
+  double x7 = rt2 - x6;
+  double x8 = x7 * x7;
+  double x9 = x5 + x8;
+  double x10 = rn / 2;
+  double x11 = fabs(x1);
+  double x12 = x11 / 2;
+  double x13 = x10 + x12;
+  double x14 = x0 / 2;
+  double x15 = x13 - x14;
+  double x16 = mu * x15;
+  double x17 = sqrt(x9);
+  double x19 = 1. / (x17);
+  double x22 = x19 * x19 * x19;
+  double x23 = x2 / 2;
+  double x24 = -rhon / 2;
+  double x25 = x2 * x24;
+  double x26 = x24 + x25;
+  double x27 = 1.0 / 2.0 + x23;
+  double x28 = x3 - rt1;
+  double x30 = x6 - rt2;
+  double x31 = x16 * x19;
+  result[0] = rhon / 2 + rhon * x23;
+  result[3] = 0;
+  result[6] = 0;
+  result[9] = 1.0 / 2.0 - x23;
+  result[12] = 0;
+  result[15] = 0;
+  if (x17 <= x16)
+  {
+    result[1] = 0;
+    result[4] = rhot1;
+    result[7] = 0;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[2] = 0;
+    result[5] = 0;
+    result[8] = rhot2;
+    result[11] = 0;
+    result[14] = 0;
+    result[17] = 0;
+  };
+  if (x16 < x17)
+  {
+    result[1] = -mu * x19 * x26 * x4;
+    result[4] = rhot1 * x31 - rhot1 * x16 * x22 * x5;
+    result[7] = -rhot2 * x16 * x22 * x4 * x7;
+    result[10] = -mu * x19 * x27 * x4;
+    result[13] = 1 - x31 - mu * x15 * x22 * x28 * x4;
+    result[16] = -mu * x15 * x22 * x30 * x4;
+    result[2] = -mu * x19 * x26 * x7;
+    result[5] = -rhot1 * x16 * x22 * x4 * x7;
+    result[8] = rhot2 * x31 - rhot2 * x16 * x22 * x8;
+    result[11] = -mu * x19 * x27 * x7;
+    result[14] = -mu * x15 * x22 * x28 * x7;
+    result[17] = 1 - x31 - mu * x15 * x22 * x30 * x7;
+  };
+}
+
+void frictionContact3D_AlartCurnierCKPSFABGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+  double x0 = rhon * un;
+  double x1 = rn - x0;
+  double x2 = sign(x1);
+  double x3 = rhot1 * ut1;
+  double x4 = rt1 - x3;
+  double x5 = x4 * x4;
+  double x6 = rhot2 * ut2;
+  double x7 = rt2 - x6;
+  double x8 = x7 * x7;
+  double x9 = x5 + x8;
+  double x10 = mu * rn;
+  double x11 = sqrt(x9);
+  double x13 = 1. / (x11);
+  double x15 = x13 * x13 * x13;
+  double x17 = x3 - rt1;
+  double x19 = x10 * x13;
+  double x20 = x6 - rt2;
+  result[0] = rn / 2 + x0 / 2 - fabs(x1) / 2;
+  result[3] = rhon / 2 + rhon * x2 / 2;
+  result[6] = 0;
+  result[9] = 0;
+  result[12] = 1.0 / 2.0 - x2 / 2;
+  result[15] = 0;
+  result[18] = 0;
+  result[4] = 0;
+  result[5] = 0;
+  if (x11 <= x10)
+  {
+    result[1] = rt1 - x4;
+    result[7] = rhot1;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[19] = 0;
+    result[2] = rt2 - x7;
+    result[8] = 0;
+    result[11] = rhot2;
+    result[14] = 0;
+    result[17] = 0;
+    result[20] = 0;
+  };
+  if (x10 < x11)
+  {
+    result[1] = rt1 - x19 * x4;
+    result[7] = rhot1 * x19 - rhot1 * x10 * x15 * x5;
+    result[10] = -rhot2 * x10 * x15 * x4 * x7;
+    result[13] = -mu * x13 * x4;
+    result[16] = 1 - x19 - mu * rn * x15 * x17 * x4;
+    result[19] = -mu * rn * x15 * x20 * x4;
+    result[2] = rt2 - x19 * x7;
+    result[8] = -rhot1 * x10 * x15 * x4 * x7;
+    result[11] = rhot2 * x19 - rhot2 * x10 * x15 * x8;
+    result[14] = -mu * x13 * x7;
+    result[17] = -mu * rn * x15 * x17 * x7;
+    result[20] = 1 - x19 - mu * rn * x15 * x20 * x7;
+  };
+}
+void frictionContact3D_AlartCurnierCKPSFGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+  double x0 = rhot1 * ut1;
+  double x1 = rt1 - x0;
+  double x2 = x1 * x1;
+  double x3 = rhot2 * ut2;
+  double x4 = rt2 - x3;
+  double x5 = x4 * x4;
+  double x6 = x2 + x5;
+  double x7 = mu * rn;
+  double x8 = sqrt(x6);
+  double x10 = 1. / (x8);
+  result[0] = rn / 2 - fabs(rn - rhon * un) / 2 + rhon * un / 2;
+  if (x7 < x8)
+  {
+    result[1] = rt1 - x1 * x10 * x7;
+    result[2] = rt2 - x10 * x4 * x7;
+  };
+  if (x8 <= x7)
+  {
+    result[1] = rt1 - x1;
+    result[2] = rt2 - x4;
+  };
+}
+void frictionContact3D_AlartCurnierCKPSABGenerated(
+  double rn,
+  double rt1,
+  double rt2,
+  double un,
+  double ut1,
+  double ut2,
+  double mu,
+  double rhon,
+  double rhot1,
+  double rhot2,
+  double *result)
+{
+  double x0 = rhon * un;
+  double x1 = rn - x0;
+  double x2 = sign(x1);
+  double x3 = rhot1 * ut1;
+  double x4 = rt1 - x3;
+  double x5 = x4 * x4;
+  double x6 = rhot2 * ut2;
+  double x7 = rt2 - x6;
+  double x8 = x7 * x7;
+  double x9 = x5 + x8;
+  double x10 = mu * rn;
+  double x11 = sqrt(x9);
+  double x13 = 1. / (x11 * x11 * x11);
+  double x16 = pow(x13, (1.0 / 3.0));
+  double x17 = x3 - rt1;
+  double x19 = x10 * x16;
+  double x20 = x6 - rt2;
+  result[0] = rhon / 2 + rhon * x2 / 2;
+  result[3] = 0;
+  result[6] = 0;
+  result[9] = 1.0 / 2.0 - x2 / 2;
+  result[12] = 0;
+  result[15] = 0;
+  result[1] = 0;
+  result[2] = 0;
+  if (x11 <= x10)
+  {
+    result[4] = rhot1;
+    result[7] = 0;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[5] = 0;
+    result[8] = rhot2;
+    result[11] = 0;
+    result[14] = 0;
+    result[17] = 0;
+  };
+  if (x10 < x11)
+  {
+    result[4] = rhot1 * x19 - rhot1 * x10 * x13 * x5;
+    result[7] = -rhot2 * x10 * x13 * x4 * x7;
+    result[10] = -mu * x16 * x4;
+    result[13] = 1 - x19 - mu * rn * x13 * x17 * x4;
+    result[16] = -mu * rn * x13 * x20 * x4;
+    result[5] = -rhot1 * x10 * x13 * x4 * x7;
+    result[8] = rhot2 * x19 - rhot2 * x10 * x13 * x8;
+    result[11] = -mu * x16 * x7;
+    result[14] = -mu * rn * x13 * x17 * x7;
+    result[17] = 1 - x19 - mu * rn * x13 * x20 * x7;
+  };
+}
 
 void frictionContact3D_localAlartCurnierFunctionGenerated(
   double *reaction,
@@ -188,29 +435,100 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
   SET3(rho);
 
 
-  frictionContact3D_localAlartCurnierFunctionGeneratedInternal(
-    *reaction0, *reaction1, *reaction2,
-    *velocity0, *velocity1, *velocity2,
-    mu,
-    *rho0, *rho1, *rho2,
-    result);
+  if (f && A && B)
+  {
+
+    frictionContact3D_AlartCurnierFABGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
+    cpy3(result, f);
+    cpytr3x3(result + 3, A);
+    cpy3x3(result + 12, B);
+  }
 
   if (f)
   {
-    scal3(-1., result);
+    frictionContact3D_AlartCurnierFGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
     cpy3(result, f);
   }
 
-  if (A)
+  if (A && B)
   {
-    // FIX why transpose here ? => idem CKPS
-    //  -- without transpose all Rover tests fails!
+    frictionContact3D_AlartCurnierABGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
+    cpytr3x3(result, A);
+    cpy3x3(result + 9, B);
+  }
+}
+
+void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *f,
+  double *A,
+  double *B)
+{
+  double result[21]; //3 + 2 * 9
+
+  assert(reaction);
+  assert(velocity);
+  assert(rho);
+
+  SET3(reaction);
+  SET3(velocity);
+  SET3(rho);
+
+
+  if (f && A && B)
+  {
+
+    frictionContact3D_AlartCurnierCKPSFABGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
+    cpy3(result, f);
     cpytr3x3(result + 3, A);
+    cpy3x3(result + 12, B);
   }
 
-  if (B)
-    cpy3x3(result + 12, B);
+  if (f)
+  {
+    frictionContact3D_AlartCurnierCKPSFGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
+    cpy3(result, f);
+  }
 
+  if (A && B)
+  {
+    frictionContact3D_AlartCurnierCKPSABGenerated(
+      *reaction0, *reaction1, *reaction2,
+      *velocity0, *velocity1, *velocity2,
+      mu,
+      *rho0, *rho1, *rho2,
+      result);
+    cpytr3x3(result, A);
+    cpy3x3(result + 9, B);
+  }
 }
 
 
