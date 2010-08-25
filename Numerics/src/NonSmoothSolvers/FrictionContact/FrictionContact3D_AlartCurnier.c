@@ -28,9 +28,9 @@
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
 //#define VERBOSE_DEBUG
-//#define AC_CKPS
+//#define AC_STD
 //#define AC_Generated
-#define AC_STD
+#define AC_CKPS // default is Christensen & Pang version
 
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
@@ -464,9 +464,8 @@ int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* 
   return 0;
 }
 
-
-
-void computeAlartCurnierCKPS(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
+/* Alart & Curnier version (Radius = mu*max(0,RVN)) */
+void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
@@ -668,10 +667,8 @@ void computeAlartCurnierCKPS(double R[3], double velocity[3], double mu, double 
 }
 
 
-
-
-
-void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
+/* Christensen & Pang version (Radius = mu* R[0])*/
+void computeAlartCurnierCKPS(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
 
   double RVN, RVT, RVS;
@@ -762,9 +759,9 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
       GammaST =  GammaTS;
       GammaSS = RV1 - RVS * RVS * RV3;
 
-
-      A[0 + 3 * 1] = mu * RhoN * RVT * RV1;
-      A[0 + 3 * 2] = mu * RhoN * RVS * RV1;
+      // come back to r2146
+      //        A[0+3*1]= mu * RhoN * RVT*RV1;
+      //        A[0+3*2]= mu * RhoN * RVS*RV1;
 
       A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
