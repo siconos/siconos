@@ -181,8 +181,8 @@
 
 #if defined(TIMER_TICK)
 #define DECL_TIMER_TICK(X) TIMER_TICK X
-#define GET_ELAPSED(TIMER,X) X = ELAPSED(TIMER)
-#define PRINT_ELAPSED(TIMER) printf("%s:%g\n",#TIMER,(double) ELAPSED(TIMER))
+#define GET_ELAPSED(TIMER,X) do {X = ELAPSED(TIMER);} while(0)
+#define PRINT_ELAPSED(TIMER) do {printf("%s:%g\n",#TIMER,(double) ELAPSED(TIMER)); while(0)
 #define TIMER_COMPARE(TIMER,X,Y) printf("%s:%g\n",#TIMER,(double) ELAPSED(TIMER))
 #else
 #define DECL_TIMER_TICK(X)

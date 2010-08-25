@@ -47,10 +47,17 @@ int main()
 
   DECL_TIMER(t);
 
-
   /* b += a */
   cpy3x3(ia, a);
+  assert(equal3x3(ia, a));
+
+
   cpy3x3(ib, b);
+  assert(equal3x3(ib, b));
+
+  sub3x3(ia, ib);
+  add3x3(ia, ib);
+  assert(equal3x3(ia, a));
 
   START_TIMER(t);
   for (i = 0; i < 1000000; ++i)
@@ -150,6 +157,10 @@ int main()
   */
   cpy3x3(ia, a);
   cpy3(iv, v);
+  assert(equal3(iv, v));
+  sub3(iv, v);
+  add3(iv, v);
+  assert(equal3(iv, v));
 
   int ipiv[3];
   int info;
@@ -157,7 +168,7 @@ int main()
   START_TIMER(t);
   for (i = 0; i < 1; ++i)
   {
-    cpy3x3(v, x);
+    cpy3(v, x);
     DGESV(3, 1, a, 3, ipiv, x, 3, info);
     v[0] += 0.0001;
   }
@@ -177,12 +188,15 @@ int main()
   START_TIMER(t);
   for (i = 0; i < 1; ++i)
   {
-    cpy3x3(v, x);
+    cpy3(v, x);
     solv3x3(a, x, v);
     v[0] += 0.0001;
   }
   STOP_TIMER(t);
   GET_ELAPSED(t, t6);
+
+  printf("v:\n");
+  print3(v);
 
   printf("sol solv3x3:\n");
   print3(x);

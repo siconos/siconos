@@ -23,36 +23,34 @@
 #include <math.h>
 #include <float.h>
 
-/* some convenient macros
- * */
-
-#define DECLARE3X3(NAME)                                  \
-  static inline void NAME##3x3(double* a, double* b)      \
- 
-#define DECLARE3(NAME)                            \
-  static inline void NAME##3(double* a, double* b)
-
-#define OP3X3(NAME,OP)                            \
-  DECLARE3X3(NAME)                                \
+/** OP3X3(EXPR) do EXPR 9 times
+ * \param a C expression that should contains self incrementing
+ *        pointers on arrays[9] */
+#define OP3X3(EXPR)                             \
+  do                                            \
   {                                             \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-  };                                            \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+  } while(0)                                    \
  
-#define OP3(NAME,OP)                            \
-  DECLARE3(NAME)                                \
+/** OP3(EXPR) do EXPR 3 times
+ * \param a C expression that should contains self incrementing
+ *        pointers on arrays[9] */
+#define OP3(EXPR)                               \
+  do                                            \
   {                                             \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-    *b++ OP *a++;                               \
-  };
+    EXPR;                                       \
+    EXPR;                                       \
+    EXPR;                                       \
+  } while(0)                                    \
+ 
 
 #if defined(OP3X3_C_STORAGE)
 #define _00 0
@@ -84,16 +82,17 @@
   double* V##20 = 0;                            \
   double* V##21 = 0;                            \
   double* V##22 = 0;                            \
-  if (V) {                                      \
-  V##00 = V++;                                  \
-  V##01 = V++;                                  \
-  V##02 = V++;                                  \
-  V##10 = V++;                                  \
-  V##11 = V++;                                  \
-  V##12 = V++;                                  \
-  V##20 = V++;                                  \
-  V##21 = V++;                                  \
-  V##22 = V++;                                  \
+  if (V)                                        \
+  {                                             \
+    V##00 = V++;                                \
+    V##01 = V++;                                \
+    V##02 = V++;                                \
+    V##10 = V++;                                \
+    V##11 = V++;                                \
+    V##12 = V++;                                \
+    V##20 = V++;                                \
+    V##21 = V++;                                \
+    V##22 = V++;                                \
   }
 
 #else // fortran storage
@@ -131,16 +130,17 @@
   double* V##02 = 0;                            \
   double* V##12 = 0;                            \
   double* V##22 = 0;                            \
-  if (V) {                                      \
-  V##00 = V++;                                  \
-  V##10 = V++;                                  \
-  V##20 = V++;                                  \
-  V##01 = V++;                                  \
-  V##11 = V++;                                  \
-  V##21 = V++;                                  \
-  V##02 = V++;                                  \
-  V##12 = V++;                                  \
-  V##22 = V++;                                  \
+  if (V)                                        \
+  {                                             \
+    V##00 = V++;                                \
+    V##10 = V++;                                \
+    V##20 = V++;                                \
+    V##01 = V++;                                \
+    V##11 = V++;                                \
+    V##21 = V++;                                \
+    V##02 = V++;                                \
+    V##12 = V++;                                \
+    V##22 = V++;                                \
   }
 #endif
 
@@ -164,87 +164,75 @@
   double* V##2 = 0;                                  \
   if (V)                                             \
   {                                                  \
-  V##0 = V++;                                        \
-  V##1 = V++;                                        \
-  V##2 = V++;                                        \
+    V##0 = V++;                                      \
+    V##1 = V++;                                      \
+    V##2 = V++;                                      \
   }
 
 /** copy a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[out] b[9]*/
-OP3X3(cpy, =);
+static inline void cpy3x3(double a[9], double b[9])
+{
+  OP3X3(*b++ = *a++);
+}
 
 /** add a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[in,out] b[9]*/
-OP3X3(add, +=);
+static inline void add3x3(double a[9], double b[9])
+{
+  OP3X3(*b++ += *a++);
+}
 
 /** sub a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[in,out] b[9]*/
-OP3X3(sub, -=);
-
-/** componentwise multiplication of a vector[9]
- *\param[in] a[9]
- *\param[in,out] b[9]*/
-OP3X3(mul, *=);
-
-/** componentwise division of a vector[9]
- *\param[in] a[9]
- *\param[in,out] b[9]*/
-OP3X3(div, /=);
+static inline void sub3x3(double a[9], double b[9])
+{
+  OP3X3(*b++ -= *a++);
+}
 
 /** copy a vector[3]
  *\param[in] a[3]
  *\param[out] b[3]*/
-OP3(cpy, =);
+static inline void cpy3(double a[3], double b[3])
+{
+  OP3(*b++ = *a++);
+}
 
 /** add a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-OP3(add, +=);
+static inline void add3(double a[3], double b[3])
+{
+  OP3(*b++ += *a++);
+}
 
 /** sub a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-OP3(sub, -=);
-
-/** componentwise multiplication of a vector[3]
- *\param[in] a[3]
- *\param[in,out] b[3]*/
-OP3(mul, *=);
-
-/** componentwise multiplication of a vector[3]
- *\param[in] a[3]
- *\param[in,out] b[3]*/
-OP3(div, /=);
+static inline void sub3(double a[3], double b[3])
+{
+  OP3(*b++ -= *a++);
+}
 
 /** scalar multiplication of a matrix3x3
  * \param[in] double scalar
  * \param[in,out] b[9]
  */
-static inline void scal3x3(double scal, double* m)
+static inline void scal3x3(double scal, double m[9])
 {
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m++ *= scal;
-  *m *= scal;
+  OP3X3(*m++ *= scal);
 }
 
 /** scalar multiplication of a vector3
  * \param[in] double scalar
  * \param[in,out] v[3]
  */
-static inline void scal3(double scal, double* v)
+static inline void scal3(double scal, double v[3])
 {
-  *v++ *= scal;
-  *v++ *= scal;
-  *v   *= scal;
+  OP3(*v++ *= scal);
 }
 
 
@@ -252,7 +240,7 @@ static inline void scal3(double scal, double* v)
  * \param[in] *a
  * \param[out] transpose(*a)
  */
-static inline void cpytr3x3(double* a, double* b)
+static inline void cpytr3x3(double a[9], double b[9])
 {
   SET3X3(a);
   SET3X3(b);
@@ -267,29 +255,12 @@ static inline void cpytr3x3(double* a, double* b)
   *b22 = *a22;
 };
 
-/** negative copy of a 3x3 matrix
- * \param[in] double a[9]
- * \param[out] b[9] = - a[9]
- */
-static inline void ncpy3x3(double* a, double* b)
-{
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b++ = - *a++;
-  *b = - *a;
-};
-
 /** matrix vector multiplication
  * \param[in] a[9]
  * \param[in] v[3]
  * \param[out] r[3]
  */
-static inline void mv3x3(double* a, double* v, double* r)
+static inline void mv3x3(double a[9], double v[9], double r[9])
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -334,7 +305,7 @@ static inline void mv3x3(double* a, double* v, double* r)
  * \param[in] v[3]
  * \param[out] r[3]
  */
-static inline void mvp3x3(double* a, double* v, double* r)
+static inline void mvp3x3(double a[9], double v[9], double r[9])
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -378,7 +349,7 @@ static inline void mvp3x3(double* a, double* v, double* r)
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mm3x3(double* a, double* b, double* c)
+static inline void mm3x3(double a[9], double b[9], double c[9])
 {
 
   SET3X3(a);
@@ -404,7 +375,7 @@ static inline void mm3x3(double* a, double* b, double* c)
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mmp3x3(double* a, double* b, double* c)
+static inline void mmp3x3(double a[9], double b[9], double c[9])
 {
 
   SET3X3(a);
@@ -430,7 +401,7 @@ static inline void mmp3x3(double* a, double* b, double* c)
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mmm3x3(double* a, double* b, double* c)
+static inline void mmm3x3(double a[9], double b[9], double c[9])
 {
 
   SET3X3(a);
@@ -454,7 +425,7 @@ static inline void mmm3x3(double* a, double* b, double* c)
 /** determinant
  * \param[in] double* a
  */
-static inline double det3x3(double* a)
+static inline double det3x3(double a[9])
 {
   SET3X3(a);
 
@@ -465,11 +436,11 @@ static inline double det3x3(double* a)
 
 
 /** system resolution : x <- sol(Ax = b)
- * \param[in] double* a
- * \param[out] double* x
- * \param[in] double* b
+ * \param[in] double a[9]
+ * \param[out] double x[3]
+ * \param[in] double b[3]
  */
-static inline void solv3x3(double* a, double* x, double* b)
+static inline void solv3x3(double a[9], double x[3], double b[3])
 {
 
   SET3X3(a);
@@ -506,7 +477,7 @@ static inline void solv3x3(double* a, double* x, double* b)
  * \param[in] double a[9]
  * \param[in] double b[9]
  */
-static inline int equal3x3(double* a, double* b)
+static inline int equal3x3(double a[9], double b[9])
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -523,7 +494,7 @@ static inline int equal3x3(double* a, double* b)
  * \param[in] double a[3]
  * \param[in] double b[3]
  */
-static inline int equal3(double* a, double* b)
+static inline int equal3(double a[3], double b[3])
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -533,13 +504,15 @@ static inline int equal3(double* a, double* b)
 /** scalar product : c <- a.b
  * \param[in] double a[3]
  * \param[in] double b[3]
- * \param[out] double c[3]
+ * \return double
  */
-static inline void dot3(double* a, double* b, double* c)
+static inline double dot3(double a[3], double b[3])
 {
-  *c++ = *a++ * * b++;
-  *c++ = *a++ * * b++;
-  *c   = *a   * * b;
+  double r;
+  r = *a++ * * b++;
+  r += *a++ * * b++;
+  r += *a * *b;
+  return r;
 };
 
 /** cross product : c <- a x b
