@@ -445,7 +445,7 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
       *rho0, *rho1, *rho2,
       result);
     cpy3(result, f);
-    cpytr3x3(result + 3, A);
+    cpy3x3(result + 3, A);
     cpy3x3(result + 12, B);
   }
 
@@ -468,7 +468,7 @@ void frictionContact3D_localAlartCurnierFunctionGenerated(
       mu,
       *rho0, *rho1, *rho2,
       result);
-    cpytr3x3(result, A);
+    cpy3x3(result, A);
     cpy3x3(result + 9, B);
   }
 }
@@ -526,7 +526,7 @@ void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
       mu,
       *rho0, *rho1, *rho2,
       result);
-    cpytr3x3(result, A);
+    cpy3x3(result, A);
     cpy3x3(result + 9, B);
   }
 }
@@ -879,14 +879,14 @@ void frictionContact3D_globalAlartCurnier(
   double *A = facWork + problemSize; //malloc(3*problemSize*sizeof(double));
   double *B = A + _3problemSize; //malloc(3*problemSize*sizeof(double));
   double *rho = B + _3problemSize; //malloc(problemSize*sizeof(double));
-  double *R = rho + problemSize;// malloc(problemSize*problemSize*sizeof(double));
-  int *ipiv = (int *)(R + problemSize2);  // malloc(problemSize*sizeof(int));
+  double *AWpB = rho + problemSize;// malloc(problemSize*problemSize*sizeof(double));
+  int *ipiv = (int *)(AWpB + problemSize2);  // malloc(problemSize*sizeof(int));
 
   double w;
   int dgelsinfo[1];
 
   DGELS(problemSize, problemSize,
-        1, R, problemSize,
+        1, AWpB, problemSize,
         facWork, problemSize, &w, -1, dgelsinfo);
 
   int LWORK = (int) w;
@@ -917,23 +917,23 @@ void frictionContact3D_globalAlartCurnier(
     // AW + B
     double Wij[9], Aj[9], Bj[9], tmp[9];
 
-    for (unsigned int jp3 = 0, jp9 = 0; jp3 < problemSize; jp3 += 3, jp9 += 9)
+    for (unsigned int ip3 = 0, ip9 = 0; ip3 < problemSize; ip3 += 3, ip9 += 9)
     {
-      assert(jp9 < 3 * problemSize - 8);
+      assert(ip9 < 3 * problemSize - 8);
 
-      extract3x3(3, jp9, 0, A, Aj);
-      extract3x3(3, jp9, 0, B, Bj);
+      extract3x3(3, ip9, 0, A, Aj);
+      extract3x3(3, ip9, 0, B, Bj);
 
-      for (unsigned int ip3 = 0; ip3 < problemSize; ip3 += 3)
+      for (unsigned int jp3 = 0; jp3 < problemSize; jp3 += 3)
       {
-        assert(ip3 < problemSize - 2);
         assert(jp3 < problemSize - 2);
+        assert(ip3 < problemSize - 2);
 
-        extract3x3(problemSize, jp3, ip3, problem->M->matrix0, Wij);
+        extract3x3(problemSize, ip3, jp3, problem->M->matrix0, Wij);
         mm3x3(Aj, Wij, tmp);
-        if (ip3 == jp3) add3x3(Bj, tmp);
+        if (jp3 == ip3) add3x3(Bj, tmp);
         scal3x3(-1., tmp);
-        insert3x3(problemSize, jp3, ip3, R, tmp);
+        insert3x3(problemSize, ip3, jp3, AWpB, tmp);
 
       }
 
@@ -941,10 +941,10 @@ void frictionContact3D_globalAlartCurnier(
 
     int fail;
 
-    //DGESV(problemSize, 1, R, problemSize, ipiv,
+    //DGESV(problemSize, 1, AWpB, problemSize, ipiv,
     //facWork, problemSize, fail );
 
-    DGELS(problemSize, problemSize, 1, R, problemSize,
+    DGELS(problemSize, problemSize, 1, AWpB, problemSize,
           facWork, problemSize, WORK, LWORK, fail);
 
     assert(fail >= 0);
