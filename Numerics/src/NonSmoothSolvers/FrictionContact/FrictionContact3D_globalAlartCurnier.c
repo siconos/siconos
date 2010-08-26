@@ -503,7 +503,7 @@ void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
       *rho0, *rho1, *rho2,
       result);
     cpy3(result, f);
-    cpytr3x3(result + 3, A);
+    cpy3x3(result + 3, A);
     cpy3x3(result + 12, B);
   }
 
