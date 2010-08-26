@@ -30,7 +30,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 //#define VERBOSE_DEBUG
 //#define AC_STD
 //#define AC_Generated
-#define AC_CKPS // default is Christensen & Pang version
+#define AC_CKPS // Christensen & Pang
 
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
@@ -41,7 +41,7 @@ computeNonsmoothFunction  Function = &(computeAlartCurnierSTD);
 computeNonsmoothFunction  Function = &(computeAlartCurnierCKPS);
 #endif
 
-// computeAlartCurnierCKPS == AC_Generated (but with transpose(A) why ?)
+// computeAlartCurnier[CKPS] == AC_Generated
 
 #ifdef AC_Generated
 computeNonsmoothFunction  Function = &(frictionContact3D_localAlartCurnierFunctionGenerated);
@@ -555,8 +555,8 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
         GammaST =  GammaTS;
         GammaSS = RV1 - RVS * RVS * RV3;
 
-        A[0 + 3 * 1] = mu * RhoN * RVT * RV1;
-        A[0 + 3 * 2] = mu * RhoN * RVS * RV1;
+        A[1 + 3 * 0] = mu * RhoN * RVT * RV1;
+        A[2 + 3 * 0] = mu * RhoN * RVS * RV1;
 
 
         A[1 + 3 * 1] = GammaTT * RhoT * Radius;
@@ -920,7 +920,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     frictionContact3D_localAlartCurnierCKPSFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
 #endif
 
-    sub3x3(F, Fg);
+    sub3(F, Fg);
     sub3x3(A, Ag);
     sub3x3(B, Bg);
 
@@ -968,11 +968,11 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
                                             + MLocal[i + 1 * 3] * R[1] +
                                             + MLocal[i + 2 * 3] * R[2] ;
-    //      Function(R,velocity,mu,rho,F,NULL,NULL);
-    //      dparam[1] = 0.5 *(F[0]*F[0]+F[1]*F[1]+F[2]*F[2])/(1.0 + sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]) ) ; // improve with relative tolerance
+    Function(R, velocity, mu, rho, F, NULL, NULL);
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
-    /*      dparam[2] =0.0;  */
-    /*      FrictionContact3D_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2])); */
+    /*      dparam[2] =0.0;
+            FrictionContact3D_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2]));*/
 
 
 
