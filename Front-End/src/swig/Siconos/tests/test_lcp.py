@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 from numpy import *
-from Siconos.Numerics import *
+
+# import Siconos.Numerics * fails with py.test!
+import Siconos.Numerics as N
 
 # basic interface
 # Murty88, p2
@@ -19,33 +21,37 @@ zsol = array([4./3., 7./3.])
 wsol = array([0. , 0.])
 
 # problem
-lcp=LCP(M,q)
+lcp=N.LCP(M,q)
 
 
 def test_lcp_pgs():
-    SO=SolverOptions()
-    linearComplementarity_setDefaultSolverOptions(lcp,SO,"PGS")
-    info  = lcp_pgs(lcp,z,w,SO)
+    SO=N.SolverOptions()
+    N.linearComplementarity_setDefaultSolverOptions(lcp,SO,N.SICONOS_LCP_PGS)
+    info  = N.lcp_pgs(lcp,z,w,SO)
     print z-zsol
     print w
     assert (linalg.norm(z-zsol) <= 0.01)
+    assert not info
 
 def test_lcp_qp():
-    SO=SolverOptions()
-    linearComplementarity_setDefaultSolverOptions(lcp,SO,"QP")
-    info  = lcp_qp(LCP(M,q),z,w,SO)
+    SO=N.SolverOptions()
+    N.linearComplementarity_setDefaultSolverOptions(lcp,SO,N.SICONOS_LCP_QP)
+    info  = N.lcp_qp(lcp,z,w,SO)
 
     print z-zsol
     print w
     assert (linalg.norm(z-zsol) <= 0.01)
+    assert not info
 
 def test_lcp_lexicolemke():
-    SO=SolverOptions()
-    linearComplementarity_setDefaultSolverOptions(lcp,SO,"Lemke")
-    info = lcp_lexicolemke(LCP(M,q), z, w, SO)
+    SO=N.SolverOptions()
+    N.linearComplementarity_setDefaultSolverOptions(lcp,SO,N.SICONOS_LCP_LEMKE)
+    info = N.lcp_lexicolemke(lcp, z, w, SO)
 
     print z-zsol
     print w
     assert (linalg.norm(z-zsol) <= 0.01)
+    assert not info
 
 
+test_lcp_pgs()

@@ -376,6 +376,10 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 %apply (double *z) { (double *wlem) };
 
+%apply (double *z) { (double *reaction) };
+
+%apply (double *z) { (double *velocity) };
+
 %apply (double *vect3D) { (double *reaction3D) };
 
 %apply (double *vect3D) { (double *velocity3D) };
@@ -428,6 +432,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 %include "NumericsMatrix.h"
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
+%include "lcp_cst.h"
 %include "SolverOptions.h"
 %include "NumericsOptions.h"
 
@@ -498,6 +503,8 @@ static int convert_darray(PyObject *input, double *ptr) {
 
  // FrictionContact
 %include "FrictionContactProblem.h"
+%include "FrictionContact3D_Solvers.h"
+%include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_globalAlartCurnier.h"
 

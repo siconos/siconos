@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from Siconos.Kernel import *
-from numpy import *
 
+from numpy import *
+import Siconos.Kernel as K
 
 t0 = 0
 T = 10
@@ -26,7 +26,7 @@ def equalv(v1,v2):
     
 
 def test_LagrangianLinearTIDS():
-    ball = LagrangianLinearTIDS(q,v,mass)
+    ball = K.LagrangianLinearTIDS(q,v,mass)
     assert (equalv(ball.q(),q))
     assert (equalv(ball.velocity(),v))
     assert (equalv(ball.mass(),mass))
@@ -37,23 +37,23 @@ def test_LagrangianLinearTIDS():
 
 
 def test_NewtonImpactNSL():
-    nslaw = NewtonImpactNSL(e)
+    nslaw = K.NewtonImpactNSL(e)
     assert(nslaw.e() == e)
 
 def test_LagrangianLinearTIR():
     H = array([[1,0,0]])
-    relation = LagrangianLinearTIR(H)
+    relation = K.LagrangianLinearTIR(H)
     assert(equalv(relation.jachq(),H))
 
 def test_Model():
-    bouncingBall = Model(t0,T)
+    bouncingBall = K.Model(t0,T)
     assert (bouncingBall.t0() == t0)
 
 def test_display():
-    ball = LagrangianLinearTIDS(q,v,mass)
+    ball = K.LagrangianLinearTIDS(q,v,mass)
     ball.display()
 
 def test_number():
-    ball = LagrangianLinearTIDS(q,v,mass)
+    ball = K.LagrangianLinearTIDS(q,v,mass)
     print ball.number()
 

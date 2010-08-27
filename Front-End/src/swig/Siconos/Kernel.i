@@ -173,7 +173,11 @@ DEFINE_SPTR(TYPE);
 
 typedef SP::##TYPE XSPtr##TYPE;
 
-SWIG_SHARED_PTR_DERIVED(XSPtr##TYPE, BASE, TYPE);
+//%shared_ptr(XSPtr##TYPE);
+%shared_ptr(TYPE);
+
+//Swig 2.0 now complains about this
+//SWIG_SHARED_PTR_DERIVED(XSPtr##TYPE, BASE, TYPE);
 
 %enddef
 
