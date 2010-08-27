@@ -45,10 +45,12 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * This is an abstract class, that provides an interface to define a non smooth problem:
- *   -> a formulation (ie the way the problem is written)
- *   -> a solver (algorithm and solving formulation, that can be different from problem formulation)
- *   -> routines to compute the problem solution.
+ * This is an abstract class, that provides an interface to define a
+ * non smooth problem:
+ * -> a formulation (ie the way the problem is written)
+ * -> a solver (algorithm and solving formulation, that can be
+        different from problem formulation)
+ * -> routines to compute the problem solution.
  *
  * The available problem formulation, given by derived classes, are:
  *  - LCP
@@ -56,15 +58,19 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  - QP
  *  - Relay
  *
- *  See Solver class or Numerics documentation for details on algorithm name and parameters.
+ *  See Solver class or Numerics documentation for details on
+ *  algorithm name and parameters.
  *
- *  Note: simulation is a required input for construction of a OneStepNSProblem.
+ *  Note: simulation is a required input for construction of a
+ *  OneStepNSProblem.
  *
  * \section osns_options Options for Numerics and the driver for solvers
  *
- *  When the Numerics driver is called, two input arguments are required to set specific options:
+ *  When the Numerics driver is called, two input arguments are
+ *  required to set specific options:
  *  - one for general options in Numerics (verbose mode ...)
- *  - the other to set the solver options (name, tolerance, max. number of iterations ...)
+ * - the other to set the solver options (name, tolerance, max. number
+      of iterations ...)
  *
  *  The second one is a member of the NonSmoothSolver, and thus filled
  *  during its construction. The general options are set thanks to
@@ -251,16 +257,13 @@ public:
 
   /** get the unitaryBlock orresponding to UR1 and UR2
    *  \param a pointer to UnitaryRelation, UR1
-   *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
+   *  \param a pointer to UnitaryRelation, optional, default value =
+   *  NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
   SP::SiconosMatrix unitaryBlock(SP::UnitaryRelation,
                                  SP::UnitaryRelation = SP::UnitaryRelation()) const ;
 
-  /** set the map of unitary matrices
-   *  \param a MapOfMapOfUnitaryMatrices
-   */
-  void setUnitaryBlocks(const MapOfMapOfUnitaryMatrices&);
 
   /** get the DSBlocks matrices map
    *  \return a MapOfDSMatrices
@@ -406,7 +409,8 @@ public:
     ;
   }
 
-  /** compute unitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  /** compute unitaryBlocks if necessary (this depends on the type of
+   * OSNS, on the indexSets ...)
    */
   virtual void updateUnitaryBlocks();
 
@@ -414,7 +418,8 @@ public:
    */
   virtual void computeAllUnitaryBlocks();
 
-  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
+  /** computes extra diagonal unitaryBlock-matrix that corresponds to
+   * UR1 and UR2
    *  Move this to Unitary Relation class?
    *  \param a pointer to UnitaryRelation
    *  \param a pointer to UnitaryRelation
@@ -467,7 +472,8 @@ public:
    */
   virtual void saveNSProblemToXML() = 0;
 
-  /** get the OSI-related matrices used to compute the current Unitary Relation unitaryBlock (Ex: for Moreau, W)
+  /** get the OSI-related matrices used to compute the current Unitary
+   * Relation unitaryBlock (Ex: for Moreau, W)
    *  \param a pointer to UnitaryRelation
    *  \param a MapOfDSMatrices(in-out parameter)
    */
