@@ -478,7 +478,6 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   RV = sqrt(RVT * RVT + RVS * RVS);
   //Radius = mu*R[0];
 
-
   if (RVN >= 0.0)
   {
 #ifdef VERBOSE_DEBUG
@@ -578,10 +577,10 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
       }
     }
     else
+    {
 #ifdef VERBOSE_DEBUG
       printf("We are out the disk and Radius is zero\n");
 #endif
-    {
 
       F[1] = R[1] ;
       F[2] = R[2] ;
@@ -903,6 +902,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
 
     Function(R, velocity, mu, rho, F, A, B);
 
+#ifndef AC_Generated
 #ifndef NDEBUG
     double Fg[3] = {0., 0., 0.};
     double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -933,7 +933,7 @@ int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R,
     add3x3(B, AWpB);
 
 #endif
-
+#endif
 
 
     // compute -(A MLocal +B)
