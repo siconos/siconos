@@ -28,15 +28,16 @@
 #include <assert.h>
 #include "Friction_cst.h"
 
-#define VERBOSE_DEBUG
 
-void printm(unsigned int n, double *m)
+//#define VERBOSE_DEBUG
+
+void printm(unsigned int nl, unsigned int nc, double *m)
 {
-  for (unsigned int i = 0; i < n; ++i)
+  for (unsigned int i = 0; i < nl; ++i)
   {
-    for (unsigned int j = 0; j < n; ++j)
+    for (unsigned int j = 0; j < nc; ++j)
     {
-      printf("%10.4g ", *(m + j + n * i));
+      printf("%10.4g ", *(m + j + nc * i));
     }
     printf("\n");
   }
@@ -895,6 +896,8 @@ void computeAWpB(
   }
 }
 
+static int lcounter = 0;
+
 int globalLineSearchGP(
   unsigned int problemSize,
   double *reaction,
@@ -912,17 +915,17 @@ int globalLineSearchGP(
   double alpha[1],
   unsigned int maxiter_ls)
 {
-
-  double inf = 1e20;
+  double inf = 1e10;
   double alphamin = 0.0;
   double alphamax = inf;
 
-  double m1 = 0.1, m2 = 0.9;
+  double m1 = 0.01, m2 = 0.99;
 
   // Computation of q(t) and q'(t) for t =0
 
   double q0 = 0.5 * DDOT(problemSize, F, 1, F, 1);
 
+  // useless (already computed)
   computeAWpB(problemSize, A, W, B, AWpB);
 
   //  tmp <- AWpB * direction
@@ -933,10 +936,11 @@ int globalLineSearchGP(
   for (int iter = 0; iter < maxiter_ls; ++iter)
   {
 
+    // tmp <- alpha*direction+reaction
     DCOPY(problemSize, reaction, 1, tmp, 1);
     DAXPY(problemSize, alpha[0], direction, 1, tmp, 1);
 
-    // velocity <- M*tmp + qfree
+    // velocity <- W*tmp + qfree
     DCOPY(problemSize, qfree, 1, velocity, 1);
     DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
           W, problemSize, tmp, 1, 1., velocity, 1);
@@ -947,6 +951,8 @@ int globalLineSearchGP(
 
     double q  = 0.5 * DDOT(problemSize, F, 1, F, 1);
 
+    assert(q >= 0);
+
     double slope = (q - q0) / alpha[0];
 
     int C1 = (slope >= m2 * dqdt0);
@@ -956,8 +962,9 @@ int globalLineSearchGP(
     {
       if (verbose > 1)
       {
-        printf("global line search success. Number of iteration = %i  alpha = %.10e \n", iter, alpha[0]);
+        printf("global line search success. Number of iteration = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
       }
+
       return 0;
 
     }
@@ -977,7 +984,7 @@ int globalLineSearchGP(
     }
     else
     {
-      alpha[0] = 10 * alpha[0];
+      alpha[0] = alphamin;
     }
 
   }
@@ -1042,7 +1049,7 @@ void frictionContact3D_globalAlartCurnier(
   double *B = A + _3problemSize; //malloc(3*problemSize*sizeof(double));
   double *rho = B + _3problemSize; //malloc(problemSize*sizeof(double));
   double *AWpB = rho + problemSize;// malloc(problemSize*problemSize*sizeof(double));
-  int *ipiv = (int *)(AWpB + problemSize2);  // malloc(problemSize*sizeof(int));
+  //  int *ipiv = (int *)(AWpB + problemSize2);  // malloc(problemSize*sizeof(int));
 
   double w;
   int dgelsinfo[1];
@@ -1100,7 +1107,7 @@ void frictionContact3D_globalAlartCurnier(
     // line search
     double alpha = 1;
     int info_ls = globalLineSearchGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
-                                     problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 10);
+                                     problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 100);
 
     if (!info_ls)
       DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
