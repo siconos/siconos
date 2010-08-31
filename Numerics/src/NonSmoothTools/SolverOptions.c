@@ -169,7 +169,7 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
   {
     printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
     printf("%sId of the solver\t\t\t\t options->solverId = %d \n", marge, options->solverId);
-    printf("%sName of the solver\t\t\t\t options->solverName = %s \n", marge, idToName(options->solverId));
+    printf("%sName of the solver\t\t\t\t  %s \n", marge, idToName(options->solverId));
     if (options->iparam != NULL)
     {
       printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
@@ -400,6 +400,8 @@ char * idToName(int Id)
     return SICONOS_FRICTION_3D_PGoC_STR;
   case SICONOS_FRICTION_3D_DeSaxceFixedPoint:
     return SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
+  case SICONOS_FRICTION_3D_QUARTIC:
+    return SICONOS_FRICTION_3D_QUARTIC_STR;
     /*3D_PRIMAL*/
   case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
     return SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR;
@@ -543,6 +545,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_PGoC;
   else if (strcmp(SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR, pName) == 0)
     return SICONOS_FRICTION_3D_DeSaxceFixedPoint;
+  else if (strcmp(SICONOS_FRICTION_3D_QUARTIC_STR, pName) == 0)
+    return SICONOS_FRICTION_3D_QUARTIC;
   /*FRICTION_3D_PRIMAL**/
   else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGS_WR_STR, pName) == 0)
     return SICONOS_FRICTION_3D_PRIMAL_NSGS_WR;
