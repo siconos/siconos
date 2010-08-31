@@ -1081,12 +1081,13 @@ void frictionContact3D_globalAlartCurnier(
 
     int fail;
 
-    //DGESV(problemSize, 1, AWpB, problemSize, ipiv,
-    //facWork, problemSize, fail );
+
 
     DCOPY(problemSize, F, 1, tmp1, 1);
-    DSCAL(problemSize * problemSize, -1., AWpB, 1);
+    DSCAL(problemSize, -1., tmp1, 1);
 
+    //DGESV(problemSize, 1, AWpB, problemSize, ipiv,
+    //tmp1, problemSize, fail );
     DGELS(problemSize, problemSize, 1, AWpB, problemSize,
           tmp1, problemSize, WORK, LWORK, fail);
 
@@ -1102,7 +1103,7 @@ void frictionContact3D_globalAlartCurnier(
                                      problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 10);
 
     if (!info_ls)
-      DAXPY(problemSize, 1, tmp2, alpha, reaction, 1);
+      DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
     else
       DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
 
