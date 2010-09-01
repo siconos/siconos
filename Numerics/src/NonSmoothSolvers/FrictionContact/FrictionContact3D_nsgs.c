@@ -20,7 +20,7 @@
 #include "FrictionContact3D_Path.h"
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D_projection.h"
-
+#include "FrictionContact3D_unitary_enumeratif.h"
 #include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"
 #include "LA.h"
@@ -41,7 +41,28 @@ void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, 
     *error += Compute_NCP_error1(i, err);
   }
 }
+void frictionContact3D_nsgs_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
+{
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
 
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  frictionContact3D_nsgs_fillMLocal(problem, localproblem, contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
+     excluding the block corresponding to the current contact. ****/
+  frictionContact3D_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+
+  /* Friction coefficient for current block*/
+  localproblem->mu[0] = problem->mu[contact];
+
+
+}
 void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
 {
 
@@ -148,7 +169,15 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
   }
-
+  case SICONOS_FRICTION_3D_QUARTIC:
+  {
+    *solve = &frictionContact3D_unitary_enumeratif_solve;
+    *update = &frictionContact3D_nsgs_update;
+    *freeSolver = &frictionContact3D_unitary_enumeratif_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_unitary_enumeratif_initialize(localproblem);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));

@@ -28,8 +28,8 @@
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_compute_error.h"
 
-#define GENERICMECHANICAL_DEBUG
-#define GENERICMECHANICAL_DEBUG2
+//#define GENERICMECHANICAL_DEBUG
+//#define GENERICMECHANICAL_DEBUG2
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;

@@ -6,8 +6,8 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "op3x3.h"
-
-#define FC3D_UE_DEBUG
+#include "FrictionContact3D_unitary_enumeratif.h"
+//#define FC3D_UE_DEBUG
 
 
 #include <stdio.h>
@@ -312,9 +312,28 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
   printf("FC3D_unitary_enum_factorize2x2 Debug: Following matrix must be diag : d11=l1=%e=%e; d21=%e ;d12=%e ;d22=l2=%e=%e\n", *l1, VM_Vt[0], VM_Vt[1], VM_Vt[2], *l2, VM_Vt[3]);
 #endif
 }
-
+void frictionContact3D_unitary_enumeratif_free(FrictionContactProblem* problem)
+{
+}
+void frictionContact3D_unitary_enumeratif_initialize(FrictionContactProblem* problem)
+{
+}
+int frictionContact3D_unitary_enumeratif_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
+{
+  double velocity[3];
+  int info;
+#ifdef FC3D_UE_DEBUG
+  printf("frictionContact3D_unitary_enumeratif_solve: begin\n");
+#endif
+  frictionContact3D_unitary_enumeratif(problem, reaction, velocity, &info, options);
+#ifdef FC3D_UE_DEBUG
+  printf("frictionContact3D_unitary_enumeratif_solve: end\n");
+#endif
+  return info;
+}
 int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
 {
+
   double * M = problem->M->matrix0;
   double * Q = problem->q;
   double * mu = problem->mu;
@@ -329,6 +348,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
   velocity = velocity0;
   SET3(Q);
   Q = Q0;
+  (*info) = -1;
   /*Decollage? R=0 ?*/
   if (*Q0 + tol > 0)
   {
@@ -365,6 +385,14 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
   }
 
   /*Glissement? */
+#ifdef FC3D_UE_DEBUG
+  if (*mu < 10e-20)
+  {
+    printf("FC3D_UE_DEBUG : wrong value of mu\n");
+    return -1;
+  }
+
+#endif
   double *Q_2 = Q + 1;
   double V[4];
   double * V00 = V, * V10 = V00 + 1, *V01 = V10 + 1, *V11 = V01 + 1;
@@ -426,7 +454,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
     RTb[1] = radius * sintheta;
     *reaction1 = (*V00) * RTb[0] + (*V10) * RTb[1];
     *reaction2 = (*V01) * RTb[0] + (*V11) * RTb[1];
-    *reaction0 = sqrt((*reaction1) * (*reaction1) + (*reaction2) * (*reaction2));
+    *reaction0 = sqrt((*reaction1) * (*reaction1) + (*reaction2) * (*reaction2)) / (*mu);
     alpha = (-Q2b[1] + a2 * radius) / RTb[1] - D2;
     if (alpha <= 0)
       continue;
@@ -451,10 +479,21 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
     double s1 = (*M00) * radius / (*mu);
     double s2 = -Q[0] - (*M01) * (*reaction1) - (*M02) * (*reaction2);
 #ifdef FC3D_UE_DEBUG
-    printf("fabs(s1)=fabs(s2)=%e=%e\n", fabs(s1), fabs(s2));
+    printf("FC3D_UE_DEBUG: fabs(s1)=fabs(s2)=%e=%e\n", fabs(s1), fabs(s2));
 #endif
     if ((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.))
     {
+#ifdef FC3D_UE_DEBUG
+      printf("R:\n");
+      printf("%e\n%e\n%e\n", *reaction0, *reaction1, *reaction2);
+      printf("-alphaRT:\n");
+      printf("%e\n%e\n", -alpha* *reaction1, -alpha* *reaction2);
+      printf("MR+q:\n");
+      printf("%e\n%e\n%e\n",
+             *M00 * (*reaction0) + *M01 * (*reaction1) + *M02 * (*reaction2) + *Q0,
+             *M10 * (*reaction0) + *M11 * (*reaction1) + *M12 * (*reaction2) + *Q1,
+             *M20 * (*reaction0) + *M21 * (*reaction1) + *M22 * (*reaction2) + *Q2);
+#endif
       *velocity0 = 0;
       *velocity1 = -alpha * (*reaction1);
       *velocity2 = -alpha * (*reaction2);
@@ -462,6 +501,9 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
       return 0;
     }
   }
+#ifdef FC3D_UE_DEBUG
+  printf("FC3D_UE_DEBUG: Solver failed\n");
+#endif
   return -1;
 }
 int frictionContact3D_unitary_enumeratif_setDefaultSolverOptions(
