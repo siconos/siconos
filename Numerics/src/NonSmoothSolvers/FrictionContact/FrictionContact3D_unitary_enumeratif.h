@@ -40,6 +40,7 @@ extern "C"
   void frictionContact3D_unitary_enumeratif_initialize(FrictionContactProblem* problem);
   int frictionContact3D_unitary_enumeratif_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
   int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
+  int frictionContact3D_unitary_enumeratif_setDefaultSolverOptions(SolverOptions* options);
 #ifdef __cplusplus
 }
 #endif
