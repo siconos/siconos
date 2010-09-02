@@ -1,13 +1,15 @@
+#define _BSD_SOURCE
+
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <assert.h>
 #include "Friction_cst.h"
 #include "op3x3.h"
 #include "FrictionContact3D_unitary_enumeratif.h"
 //#define FC3D_UE_DEBUG
+
 
 
 #include <stdio.h>
@@ -417,7 +419,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
   OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
   double phi = atan(OD2[1] / OD2[0]);
   if (OD2[0] < 0)
-    phi += 3.14159265358979323846;
+    phi += M_PI;
   double cosphi = cos(phi);
   double sinphi = sin(phi);
   Q2b[0] = (*V00) * Q_2[0] + (*V01) * Q_2[1];
