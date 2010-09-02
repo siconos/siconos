@@ -242,8 +242,8 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   }
   else if (Poly[1] != 0.0)
   {
-    r[1][0] = -Poly[0] / Poly[1];
-    r[2][0] = 0;
+    r[1][1] = -Poly[0] / Poly[1];
+    r[2][1] = 0;
     degp1 = 2;
   }
   else
@@ -497,10 +497,29 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
     *reaction1 = (*V00) * RTb[0] + (*V10) * RTb[1];
     *reaction2 = (*V01) * RTb[0] + (*V11) * RTb[1];
     *reaction0 = sqrt((*reaction1) * (*reaction1) + (*reaction2) * (*reaction2)) / (*mu);
-    if (RTb[0] != 0.0)
-      alpha = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
+
+    //In particular case RTb[x]==0, then check :
+    if (numR >= nbRealRacines)
+    {
+      //RTb[0]==0
+      if (numR < nbRealRacines + 2)
+      {
+        alpha = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
+        if (fabs(Q2b[0] - a1 * fabsradius) > tol)
+          continue;
+      }
+      else  //RTb[1]==0
+      {
+        alpha = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
+        if (fabs(Q2b[1] - a2 * fabsradius) > tol)
+          continue;
+      }
+    }
     else
-      alpha = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
+    {
+      alpha = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
+    }
+
     if (alpha <= 0)
       continue;
 #ifdef FC3D_UE_DEBUG
@@ -530,8 +549,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
 #ifdef FC3D_UE_DEBUG
     printf("FC3D_UE_DEBUG: fabs(s1)=fabs(s2)=%e=%e\n", fabs(s1), fabs(s2));
 #endif
-    /*if RTb[x]!=0 it consists in checking the sign, else, it consists in ckecking the value.*/
-    if (((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.)) && (numR < nbRealRacines || fabs(s1 - s2) < tol))
+    if ((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.))
     {
 #ifdef FC3D_UE_DEBUG
       printf("R:\n");
