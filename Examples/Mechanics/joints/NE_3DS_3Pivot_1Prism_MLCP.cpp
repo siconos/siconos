@@ -283,10 +283,10 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new GenericMechanical());
+    SP::OneStepNSProblem osnspb(new MLCP());/*or new GenericMechanical() */
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef WITH_PROJECT_ON_CONSTRAINTS
-    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_PATH));
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints());
     SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI1, osnspb, osnspb_pos));
 #else
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
