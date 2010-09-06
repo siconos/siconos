@@ -226,7 +226,19 @@ extern "C"
       \author Olivier Bonnefon
   */
   void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-
+  /*
+    Alloc the needed working memory if it was not yet be done, ie options->iwork and options->dwork must be null, else do nothing.
+    \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
+    \param[in] options structure used to define the solver(s) and their parameters
+    \return 0 iff the memory has not be done.
+   */
+  int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+  /*
+    Free the working memory.
+    \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
+    \param[in] options structure used to define the solver(s) and their parameters
+   */
+  void mlcp_free_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   /** General interface to get the number of integers that must be allocated for the solver.\n
       Must be use for the following solvers:\n
       - mlcp_enum
@@ -490,6 +502,8 @@ extern "C"
   int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
   int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
   int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
+
+
 
 #ifdef __cplusplus
 }

@@ -45,7 +45,28 @@ char  SICONOS_MLCP_DIRECT_PATH_ENUM_STR[] = "MLCP_DIRECT_PATH_ENUM";
 char  SICONOS_MLCP_FB_STR[] = "MLCP_FB";
 char  SICONOS_MLCP_DIRECT_FB_STR[] = "MLCP_DIRECT_FB";
 
-
+int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+{
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_ENUM :
+    return mlcp_enum_alloc_working_memory(problem, options);
+    break;
+  default:
+    return 0;/*Nothing to do*/
+  }
+}
+void mlcp_free_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+{
+  switch (options->solverId)
+  {
+  case SICONOS_MLCP_ENUM :
+    mlcp_enum_free_working_memory(problem, options);
+    break;
+  default:
+    ;/*Nothing to do*/
+  }
+}
 void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   //char * name = options->solverName;
@@ -75,7 +96,6 @@ void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions*
     break;
   case SICONOS_MLCP_FB :
     mlcp_FB_init(problem, options);
-    break;
   default:
     ;/*Nothing to do*/
   }
@@ -112,6 +132,7 @@ void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions
   case SICONOS_MLCP_FB :
     mlcp_FB_reset();
     break;
+
   default:
     ;/*Nothing to do*/
   }

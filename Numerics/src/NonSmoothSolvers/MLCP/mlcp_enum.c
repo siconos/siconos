@@ -143,7 +143,7 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptio
 {
   if (!problem)
     return 0;
-  return 2 * (problem->n + problem->m);
+  return 2 * (problem->n + problem->m) + problem->m;
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -171,9 +171,11 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
  * double *z : size n+m
  * double *w : size n+m
  */
-
+void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+  if (problem->blocksLine)
+    return mlcp_enum_Block(problem, z, w, info, options);
   double tol ;
   double * workingFloat = options->dWork;
   int * workingInt = options->iWork;
@@ -325,4 +327,181 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   *info = 1;
   if (verbose || 1)
     printf("mlcp_enum failed!\n");
+}
+/*
+An adaptation of the previuos algorithm, to manage the case of MLCP-block formalization
+ */
+void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
+{
+  double tol ;
+  double * workingFloat = options->dWork;
+  int * workingInt = options->iWork;
+  int lin;
+  int npm = (problem->n) + (problem->m);
+  int NRHS = 1;
+  int * ipiv;
+  int * indexInBlock;
+  int check;
+  int LAinfo;
+
+  sMl = problem->M->size0;
+  sNn = problem->n;
+  sMm = problem->m;
+
+  /*OUTPUT param*/
+  sW1 = w;
+  /*sW2=w+(sMl-problem->m); sW2 size :m */
+  sU = z;
+  tol = options->dparam[0];
+
+  sMref = problem->M->matrix0;
+  /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
+  //  verbose=1;
+  if (verbose)
+    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
+
+  sM = workingFloat;
+  /*  sQ = sM + npm*npm;*/
+  sQ = sM + (sNn + sMm) * sMl;
+  /*  sColNul = sQ + sMm +sNn;*/
+  sColNul = sQ + sMl;
+  /*  sQref = sColNul + sMm +sNn;*/
+  sQref = sColNul + sMl;
+
+  sDgelsWork = sQref + sMl;
+
+  for (lin = 0; lin < sMl; lin++)
+    sQref[lin] =  - problem->q[lin];
+  for (lin = 0; lin < sMl; lin++)
+    sColNul[lin] = 0;
+
+  /*  printf("sColNul\n");
+      displayMat(sColNul,npm,1);*/
+  if (verbose)
+    printRefSystem();
+  sW2V = workingInt;
+  ipiv = sW2V + sMm;
+  indexInBlock = ipiv + sMm + sNn;
+  *info = 0;
+  mlcp_buildIndexInBlock(problem, indexInBlock);
+  initEnum(problem->m);
+  while (nextEnum(sW2V))
+  {
+    mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
+    buildQ();
+    if (verbose)
+      printCurrentSystem();
+#ifdef ENUM_USE_DGELS
+
+    DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
+          LAinfo);
+    if (verbose)
+    {
+      printf("Solution of dgels\n");
+      displayMat(sQ, sMl, 1, 0);
+    }
+#else
+
+    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+#endif
+    if (!LAinfo)
+    {
+#ifdef ENUM_USE_DGELS
+      int cc = 0;
+      int ii;
+      double rest = 0;
+      for (ii = 0; ii < npm; ii++)
+      {
+        if (isnan(sQ[ii]) || isinf(sQ[ii]))
+        {
+          printf("DGELS FAILED\n");
+          cc = 1;
+          break;
+        }
+      }
+      if (cc)
+        continue;
+
+      if (sMl > npm)
+      {
+        rest = DNRM2(sMl - npm, sQ + npm, 1);
+
+        if (rest > tol || isnan(rest) || isinf(rest))
+        {
+          if (verbose)
+            printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+          continue;
+        }
+        if (verbose)
+          printf("DGELS, optimal point rest = %e\n", rest);
+      }
+
+
+#endif
+      if (verbose)
+      {
+        printf("Solving linear system success, solution in cone?\n");
+        displayMat(sQ, sMl, 1, 0);
+      }
+
+      check = 1;
+      for (lin = 0 ; lin < sMm; lin++)
+      {
+        if (sQ[indexInBlock[lin]] < - tol)
+        {
+          check = 0;
+          break;/*out of the cone!*/
+        }
+      }
+      if (!check)
+        continue;
+      else
+      {
+        double err;
+        mlcp_fillSolution_Block(sU, sW1, sNn, sMm, sMl, sW2V, sQ, indexInBlock);
+        mlcp_compute_error(problem, z, w, tol, &err);
+        /*because it happens the LU leads to an wrong solution witout raise any error.*/
+        if (err > 10 * tol)
+        {
+          if (verbose || 1)
+            printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
+          continue;
+        }
+        if (verbose)
+        {
+          printf("mlcp_enum find a solution!\n");
+          mlcp_DisplaySolution_Block(sU, sW1, sNn, sMm, sMl, indexInBlock);
+        }
+        // options->iparam[1]=sCurrentEnum-1;
+        return;
+      }
+    }
+    else
+    {
+      if (verbose)
+      {
+        printf("LU foctorization failed:\n");
+      }
+    }
+  }
+  *info = 1;
+  if (verbose || 1)
+    printf("mlcp_enum failed!\n");
+}
+int mlcp_enum_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+{
+  if (options->iWork || options->dWork)
+    return 0;
+  options->iWork = (int *) malloc(mlcp_enum_getNbIWork(problem, options) * sizeof(int));
+  options->dWork = (double *) malloc(mlcp_enum_getNbDWork(problem, options) * sizeof(double));
+  return 1;
+}
+void mlcp_enum_free_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+{
+  if (options->iWork)
+    free(options->iWork);
+  if (options->dWork)
+    free(options->dWork);
+  options->iWork = NULL;
+  options->dWork = NULL;
 }

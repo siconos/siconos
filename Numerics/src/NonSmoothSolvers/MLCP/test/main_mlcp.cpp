@@ -1112,9 +1112,9 @@ int main(void)
 
   test_matrix();
   printf("nb no cv %d\n", sNbNOCV);
-  if (sNbNOCV > 90)
-    return 0;
-  else
+  if (sNbNOCV > 110)
     return 1;
+  else
+    return 0;
 }
 
