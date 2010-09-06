@@ -172,6 +172,8 @@ int MLCP::compute(double time)
   preCompute(time);
   _numerics_problem.n = _n;
   _numerics_problem.m = _m;
+  /*If user has not allocted the working memory, do it. */
+  int allocated = mlcp_alloc_working_memory(&_numerics_problem, &*_numerics_solver_options);
   int info = 0;
   // --- Call Numerics driver ---
   // Inputs:
@@ -207,7 +209,8 @@ int MLCP::compute(double time)
     postCompute();
 
   }
-
+  if (allocated)
+    mlcp_free_working_memory(&_numerics_problem, &*_numerics_solver_options);
   return info;
 }
 

@@ -33,6 +33,8 @@ OneStepNSProblem::OneStepNSProblem():
   _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
@@ -62,6 +64,9 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
+
   printf("OneStepNSProblem::OneStepNSProblem 1: Depressed inertface, first parameter ignored\n");
 }
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
@@ -89,6 +94,8 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
 
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
@@ -101,6 +108,8 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
   _numerics_solver_options->solverId = newNumericsSolverId;
   printf("OneStepNSProblem::OneStepNSProblem 2: Depressed inertface, first parameter ignored, removed it.\n");
 }
@@ -114,6 +123,8 @@ OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSol
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
 
 }
 OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
@@ -125,6 +136,8 @@ OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
+  _numerics_solver_options->iWork = NULL;
+  _numerics_solver_options->dWork = NULL;
 
 }
 
