@@ -5,7 +5,7 @@
 /opt/local/bin/port uninstall cmake
 
 
-cmake_version=2.6.4;
+cmake_version=2.8.0;
 
 cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
 gunzip cmake-${cmake_version}.tar.gz
@@ -13,7 +13,7 @@ tar xvf cmake-${cmake_version}.tar
 
 cd cmake-${cmake_version}; {
     ./bootstrap
-    make
+    make -j 2
     sudo make install
     
 #    cmake . -DCMAKE_INSTALL_PREFIX=/usr
