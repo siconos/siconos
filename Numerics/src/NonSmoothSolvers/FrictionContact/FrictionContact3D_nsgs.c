@@ -20,7 +20,7 @@
 #include "FrictionContact3D_Path.h"
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D_projection.h"
-#include "FrictionContact3D_unitary_enumeratif.h"
+#include "FrictionContact3D_unitary_enumerative.h"
 #include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"
 #include "LA.h"
@@ -171,11 +171,11 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   }
   case SICONOS_FRICTION_3D_QUARTIC:
   {
-    *solve = &frictionContact3D_unitary_enumeratif_solve;
+    *solve = &frictionContact3D_unitary_enumerative_solve;
     *update = &frictionContact3D_nsgs_update;
-    *freeSolver = &frictionContact3D_unitary_enumeratif_free;
+    *freeSolver = &frictionContact3D_unitary_enumerative_free;
     *computeError = &FrictionContact3D_compute_error;
-    frictionContact3D_unitary_enumeratif_initialize(localproblem);
+    frictionContact3D_unitary_enumerative_initialize(localproblem);
     break;
   }
   default:

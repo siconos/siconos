@@ -63,7 +63,7 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
   }
   case SICONOS_FRICTION_3D_QUARTIC:
   {
-    info =    frictionContact3D_unitary_enumeratif_setDefaultSolverOptions(options);
+    info =    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(options);
     break;
   }
   default:

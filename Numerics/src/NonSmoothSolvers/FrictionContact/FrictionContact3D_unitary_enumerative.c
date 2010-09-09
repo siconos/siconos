@@ -7,214 +7,12 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "op3x3.h"
-#include "FrictionContact3D_unitary_enumeratif.h"
+#include "FrictionContact3D_unitary_enumerative.h"
 //#define FC3D_UE_DEBUG
-
-
 
 #include <stdio.h>
 #include <math.h>
-
-//ROOTS OF LOW-ORDER POLYNOMIAL
-//TERENCE R. F. NONWEILER (Recd. 14 Apr. 1967)
-//James Watt Engineering Laboratories, The University,
-//Glasgow W2, Scotland
-
-int QUADROOTS(p, r)
-double p[5], r[3][5];
-{
-  /*
-  Array r[3][5]  p[5]
-  Roots of poly p[0] x^2 + p[1] x+p[2]=0
-  x=r[1][k] + i r[2][k]  k=1,2
-  */
-  double b, c, d;
-  b = -p[1] / p[0] / 2;
-  c = p[2] / p[0];
-  d = b * b - c;
-  if (d > 0)
-  {
-    if (b > 0) b = r[1][2] = sqrt(d) + b;
-    else    b = r[1][2] = -sqrt(d) + b;
-    r[1][1] = c / b;
-    r[2][1] = r[2][2] = 0;
-  }
-  else
-  {
-    d = r[2][1] = sqrt(-d);
-    r[2][2] = -d;
-    r[1][1] = r[1][2] = b;
-  }
-  return(0);
-}
-int CUBICROOTS(p, r)
-double p[5], r[3][5];
-{
-  /*
-  Array r[3][5]  p[5]
-  Roots of poly p[0] x^3 + p[1] x^2...+p[3]=0
-  x=r[1][k] + i r[2][k]  k=1,...,3
-  Assumes 0<arctan(x)<pi/2 for x>0
-  */
-
-  double s, t, b, c, d;
-  int k;
-  if (p[0] != 1)
-    for (k = 1; k < 4; k++) p[k] = p[k] / p[0];
-  p[0] = 1;
-  s = p[1] / 3.0;
-  t = s * p[1];
-  b = 0.5 * (s * (t / 1.5 - p[2]) + p[3]);
-  t = (t - p[2]) / 3.0;
-  c = t * t * t;
-  d = b * b - c;
-  if (d >= 0)
-  {
-    d = pow((sqrt(d) + fabs(b)), 1.0 / 3.0);
-    printf("d=%f\n", d);
-    if (d != 0)
-    {
-      if (b > 0) b = -d;
-      else b = d;
-      c = t / b;
-    }
-    d = r[2][2] = sqrt(0.75) * (b - c);
-    b = b + c;
-    c = r[1][2] = -0.5 * b - s;
-    if ((b > 0 && s <= 0) || (b < 0 && s > 0))
-    {
-      r[1][1] = c;
-      r[2][1] = -d;
-      r[1][3] = b - s;
-      r[2][3] = 0;
-    }
-    else
-    {
-      r[1][1] = b - s;
-      r[2][1] = 0;
-      r[1][3] = c;
-      r[2][3] = -d;
-    }
-  }  /* end 2 equal or complex roots */
-  else
-  {
-    if (b == 0)
-      d = atan(1.0) / 1.5;
-    else
-      d = atan(sqrt(-d) / fabs(b)) / 3.0;
-    if (b < 0)
-      b = sqrt(t) * 2.0;
-    else
-      b = -2.0 * sqrt(t);
-    c = cos(d) * b;
-    t = -sqrt(0.75) * sin(d) * b - 0.5 * c;
-    d = -t - c - s;
-    c = c - s;
-    t = t - s;
-    if (fabs(c) > fabs(t))
-      r[1][3] = c;
-    else
-    {
-      r[1][3] = t;
-      t = c;
-    }
-    if (fabs(d) > fabs(t))
-      r[1][2] = d;
-    else
-    {
-      r[1][2] = t;
-      t = d;
-    }
-    r[1][1] = t;
-    for (k = 1; k < 4; k++) r[2][k] = 0;
-  }
-  return(0);
-}
-int BIQUADROOTS(p, r)
-/* add _ if calling from fortran */
-/*
-Array r[3][5]  p[5]
-Roots of poly p[0] x^4 + p[1] x^3...+p[4]=0
-x=r[1][k] + i r[2][k]  k=1,...,4
-*/
-
-double p[5], r[3][5];
-{
-  double a, b, c, d, e;
-  int k, j;
-  if (p[0] != 1.0)
-  {
-    for (k = 1; k < 5; k++) p[k] = p[k] / p[0];
-    p[0] = 1;
-  }
-  e = 0.25 * p[1];
-  b = 2 * e;
-  c = b * b;
-  d = 0.75 * c;
-  b = p[3] + b * (c - p[2]);
-  a = p[2] - d;
-  c = p[4] + e * (e * a - p[3]);
-  a = a - d;
-  p[1] = 0.5 * a;
-  p[2] = (p[1] * p[1] - c) * 0.25;
-  p[3] = b * b / (-64.0);
-  if (p[3] < -1e-6)
-  {
-    CUBICROOTS(p, r);
-    for (k = 1; k < 4; k++)
-    {
-      if (r[2][k] == 0 && r[1][k] > 0)
-      {
-        d = r[1][k] * 4;
-        a = a + d;
-        if (a >= 0 && b >= 0)
-          p[1] = sqrt(d);
-        else if (a <= 0 && b <= 0)
-          p[1] = sqrt(d);
-        else p[1] = -sqrt(d);
-        b = 0.5 * (a + b / p[1]);
-        goto QUAD;
-      }
-    }
-  }
-  if (p[2] < 0)
-  {
-    b = sqrt(c);
-    d = b + b - a;
-    p[1] = 0;
-    if (d > 0) p[1] = sqrt(d);
-  }
-  else
-  {
-    if (p[1] > 0)
-      b = sqrt(p[2]) * 2.0 + p[1];
-    else
-      b = -sqrt(p[2]) * 2.0 + p[1];
-    if (b != 0)
-      p[1] = 0;
-    else
-    {
-      for (k = 1; k < 5; k++)
-      {
-        r[1][k] = -e;
-        r[2][k] = 0;
-      }
-      goto END;
-    }
-  }
-QUAD:
-  p[2] = c / b;
-  QUADROOTS(p, r);
-  for (k = 1; k < 3; k++)
-    for (j = 1; j < 3; j++) r[j][k + 2] = r[j][k];
-  p[1] = -p[1];
-  p[2] = b;
-  QUADROOTS(p, r);
-  for (k = 1; k < 5; k++) r[1][k] = r[1][k] - e;
-END:
-  ;
-  return(0);
-}
+#include "quartic.h"
 
 
 void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
@@ -248,7 +46,7 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   }
   else
   {
-    printf("FC3D_unitary_enumeratif: degre of polynom is 0.");
+    printf("FC3D_unitary_enumerative: degre of polynom is 0.");
     degp1 = 1;
   }
   (*nbRealRacines) = 0;
@@ -337,31 +135,31 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
   printf("FC3D_unitary_enum_factorize2x2 Debug: Following matrix must be diag : d11=l1=%e=%e; d21=%e ;d12=%e ;d22=l2=%e=%e\n", *l1, VM_Vt[0], VM_Vt[1], VM_Vt[2], *l2, VM_Vt[3]);
 #endif
 }
-void frictionContact3D_unitary_enumeratif_free(FrictionContactProblem* localproblem)
+void frictionContact3D_unitary_enumerative_free(FrictionContactProblem* localproblem)
 {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
 }
-void frictionContact3D_unitary_enumeratif_initialize(FrictionContactProblem* localproblem)
+void frictionContact3D_unitary_enumerative_initialize(FrictionContactProblem* localproblem)
 {
   if (!localproblem->M->matrix0)
     localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
 
 }
-int frictionContact3D_unitary_enumeratif_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
+int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
 {
   double velocity[3];
   int info;
 #ifdef FC3D_UE_DEBUG
-  printf("frictionContact3D_unitary_enumeratif_solve: begin\n");
+  printf("frictionContact3D_unitary_enumerative_solve: begin\n");
 #endif
-  frictionContact3D_unitary_enumeratif(problem, reaction, velocity, &info, options);
+  frictionContact3D_unitary_enumerative(problem, reaction, velocity, &info, options);
 #ifdef FC3D_UE_DEBUG
-  printf("frictionContact3D_unitary_enumeratif_solve: end\n");
+  printf("frictionContact3D_unitary_enumerative_solve: end\n");
 #endif
   return info;
 }
-int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
+int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
 {
 
   double * M = problem->M->matrix0;
@@ -379,7 +177,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
   SET3(Q);
   Q = Q0;
   (*info) = -1;
-  /*Decollage? R=0 ?*/
+  /*take off? R=0 ?*/
   if (*Q0 + tol > 0)
   {
     *reaction0 = 0.;
@@ -392,7 +190,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
     return 0;
   }
 
-  /*Adherance? 0=MR+q*/
+  /*sticking ? 0=MR+q*/
   solv3x3(M, reaction, Q);
   M = M00;
   reaction = reaction0;
@@ -414,7 +212,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
       }
   }
 
-  /*Glissement? */
+  /*Sliding? */
 #ifdef FC3D_UE_DEBUG
   if (*mu < 10e-20)
   {
@@ -575,7 +373,7 @@ int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double
 #endif
   return -1;
 }
-int frictionContact3D_unitary_enumeratif_setDefaultSolverOptions(
+int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(
   SolverOptions* options)
 {
   if (verbose > 0)

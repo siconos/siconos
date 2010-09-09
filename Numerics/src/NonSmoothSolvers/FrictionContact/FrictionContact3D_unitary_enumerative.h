@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3DUNITARY_ENUMERATIF_H
-#define FRICTIONCONTACT3DUNITARY_ENUMERATIF_H
+#ifndef FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
+#define FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
 
 /*!\file FrictionContact3D_Path.h
   \brief Typedef and functions declarations related to the quartic solver for 3 dimension frictional contact problems.
@@ -36,11 +36,11 @@
 extern "C"
 {
 #endif
-  void frictionContact3D_unitary_enumeratif_free(FrictionContactProblem* problem);
-  void frictionContact3D_unitary_enumeratif_initialize(FrictionContactProblem* problem);
-  int frictionContact3D_unitary_enumeratif_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
-  int frictionContact3D_unitary_enumeratif(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
-  int frictionContact3D_unitary_enumeratif_setDefaultSolverOptions(SolverOptions* options);
+  void frictionContact3D_unitary_enumerative_free(FrictionContactProblem* problem);
+  void frictionContact3D_unitary_enumerative_initialize(FrictionContactProblem* problem);
+  int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
+  int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
+  int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(SolverOptions* options);
 #ifdef __cplusplus
 }
 #endif
