@@ -35,7 +35,28 @@
 #endif
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-%} 
+#include "frictionContact_test_function.h"
+%}
+
+%inline %{
+#include <stdio.h>
+  FrictionContactProblem* frictionContactProblemFromFile(const char * filename)
+  {
+    FILE * finput = fopen(filename, "r");
+    FrictionContactProblem* problem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (frictionContact_newFromFile(problem,finput))
+    {
+      fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
+      return problem;
+    }
+    else
+      return problem;
+  }
+
+%}
+
+
+
 
 // more convenient
 %rename (LCP) LinearComplementarityProblem;
@@ -193,7 +214,6 @@ static int convert_darray(PyObject *input, double *ptr) {
 %typemap(freearg) (int sizei, int *iparam) {
   free($2);
  }
-
 
 // info result
 %typemap(in, numinputs=0) int *info (int temp) {
@@ -367,7 +387,8 @@ static int convert_darray(PyObject *input, double *ptr) {
   }
   
     
- }  
+ }
+
 
 // other names that must be transformed this way
 %apply (double *z) { (double *w) }; 
@@ -415,6 +436,9 @@ static int convert_darray(PyObject *input, double *ptr) {
   nummat->storageType = 0;
   nummat->size0 =  array_size(array,0);
   nummat->size1 =  array_size(array,1);
+
+  if (nummat->matrix0) free(nummat->matrix0);
+
   nummat->matrix0 = (double *)array_data(array);
   $1 = nummat;
 }
@@ -423,10 +447,103 @@ static int convert_darray(PyObject *input, double *ptr) {
     free($1);
 }
 
+%typemap(out) (NumericsMatrix* M) {
+  npy_intp dims[2];
+  dims[0] = $1->size0;
+  dims[1] = $1->size1;
+  if ($1->matrix0)
+  {
+    $result = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
+  }
+  else
+    SWIG_fail;
+ }
+
+%typemap(out) (double* q) {
+  npy_intp dims[1];
+
+  dims[0] = arg1->size;
+  if (arg1->q)
+  {
+    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+  }
+  else
+    SWIG_fail;
+ }
+
 %apply (NumericsMatrix *A) { (NumericsMatrix *m) };
 %apply (NumericsMatrix *A) { (NumericsMatrix *M) };
 
 %feature("autodoc", "1");
+
+%typemap(in) (int iSize) ($1_type iparam_size) {
+  iparam_size = PyInt_AsLong($input);
+ }
+
+%typemap(in) (int dSize) ($1_type dparam_size) {
+  dparam_size = PyInt_AsLong($input);
+ }
+
+%typemap(in) (int *iparam) {
+  
+  $1_type temp;
+  temp = ($1_type) malloc(sizeof($*1_type)*PyObject_Length($input));
+  if (!convert_iarray($input,temp)) {
+    SWIG_fail;
+  }
+
+  if ($1) { free($1); };
+
+  $1 = &temp[0];
+
+  // arg1 is *SolverOptions. May be version dependent, how to get
+  // this?
+  if (arg1) arg1->iSize = PyObject_Length($input);
+
+ }
+
+%typemap(in) (double *dparam) {
+  
+  $1_type temp;
+  temp = ($1_type) malloc(sizeof($*1_type)*PyObject_Length($input));
+  if (!convert_darray($input,temp)) {
+    SWIG_fail;
+  }
+
+  if ($1) { free($1); };
+
+  $1 = &temp[0];
+
+  // arg1 is *SolverOptions. May be version dependent, how to get
+  // this?
+  if (arg1) arg1->dSize = PyObject_Length($input);
+
+ }
+
+// output lists
+
+%typemap(out) (int *iparam) {
+  $1_type piparam = $1;
+  PyObject* return_pylist = PyList_New(0);
+  for (int i=0; i<arg1->iSize; ++i)
+  {
+    PyList_Append(return_pylist, PyLong_FromLong(*piparam++));
+  }
+  $result = return_pylist;
+ }
+
+
+%typemap(out) (double *dparam) {
+  $1_type pdparam = $1;
+  PyObject* return_pylist = PyList_New(0);
+  for (int i=0; i<arg1->dSize; ++i)
+  {
+    PyList_Append(return_pylist, PyFloat_FromDouble(*pdparam++));
+  }
+  $result = return_pylist;
+ }
+
+ 
 
 // LCP
 %include "NumericsMatrix.h"
@@ -435,7 +552,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 %include "lcp_cst.h"
 %include "SolverOptions.h"
 %include "NumericsOptions.h"
-
+%include "frictionContact_test_function.h"
 
 %extend NumericsOptions
 {
@@ -493,15 +610,27 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 
   ~LinearComplementarityProblem()
-    {
-        //    free(self->M);
-        //    free(self->q);
-     }
+  {
+    freeLinearComplementarity_problem(self);
+  }
 
 };
 
 
- // FrictionContact
+
+%typemap(out) (double* q) {
+  npy_intp dims[1];
+
+  dims[0] = arg1->dimension * arg1->numberOfContacts;
+  if (arg1->q)
+  {
+    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+  }
+  else
+    SWIG_fail;
+ }
+
+// FrictionContact
 %include "FrictionContactProblem.h"
 %include "FrictionContact3D_Solvers.h"
 %include "Friction_cst.h"
@@ -537,11 +666,9 @@ static int convert_darray(PyObject *input, double *ptr) {
     }
 
   ~FrictionContactProblem()
-    {
-//      free(self->M);
-        //    free(self->q);
-        //free(self->mu);
-     }
+  {
+    freeFrictionContact_problem(self);
+  }
 
 };
 
@@ -596,7 +723,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     return self->size0 * self->size1;
   }
 
-  std::string __str__()
+  PyObject * __str__()
   {
     std::stringstream result;
     result << "[ ";
@@ -613,16 +740,9 @@ static int convert_darray(PyObject *input, double *ptr) {
         if (i < self->size0-1) result << "," << std::endl;
       }
     result << " ]" << std::endl;
-    return result.str();
+    return PyString_FromString(result.str().c_str());
   }
   
 }; 
 
-%extend SolverOptions
-{
-  void setDefault(PyObject *o1, PyObject *o2)
-  {
-      //linearComplementarity_setDefaultSolverOptions(lcp, (SolverOptions *) $self, solverName);
-  }
-}
 
