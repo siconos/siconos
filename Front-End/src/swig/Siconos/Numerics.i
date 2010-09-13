@@ -36,6 +36,7 @@
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
 #include "frictionContact_test_function.h"
+#include "FrictionContact3D_compute_error.h"
 %}
 
 %inline %{
@@ -215,13 +216,21 @@ static int convert_darray(PyObject *input, double *ptr) {
   free($2);
  }
 
-// info result
+// info, error results
 %typemap(in, numinputs=0) int *info (int temp) {
+  $1 = &temp;
+}
+
+%typemap(in, numinputs=0) double *error (double temp) {
   $1 = &temp;
 }
 
 %typemap(argout) (int *info) {
   $result = PyInt_FromLong(*$1);
+ }
+
+%typemap(argout) (double *error) {
+  $result = PyFloat_FromDouble(*$1);
  }
 
 %typemap(in) (LinearComplementarityProblem*) (npy_intp problem_size) {
@@ -234,14 +243,24 @@ static int convert_darray(PyObject *input, double *ptr) {
   $1 = (LinearComplementarityProblem *) lcp;
 }
 
-%typemap(in, numinputs=0) (unsigned int problemSize) (npy_intp problem_size, npy_intp number_of_contacts)
+// problemSize given as first arg => set by first numpy array length
+// in remaining args
+%typemap(in, numinputs=0) 
+  (unsigned int problemSize) 
+  (unsigned int *p_problem_size, npy_intp number_of_contacts)
 {
   // the first array length sets problemSize
-  problem_size = -1;
-  number_of_contacts = -1;
+  p_problem_size = &$1;
+  *p_problem_size = 0;
+  number_of_contacts = 0;
+
+  
 }
 
-%typemap(in) (FrictionContactProblem*) (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) {
+%typemap(in) 
+  (FrictionContactProblem*) 
+  (npy_intp problem_size, npy_intp problem_dimension, npy_intp number_of_contacts) 
+{
   void *fcp;
   int res = SWIG_ConvertPtr($input, &fcp,SWIGTYPE_p_FrictionContactProblem, 0 |  0 );
   if (!SWIG_IsOK(res)) SWIG_fail;
@@ -258,39 +277,163 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
   
-  if (!array || !require_dimensions(array,1) ||
-      !require_native(array) || !require_contiguous(array)
-      || !require_size(array, &problem_size1, 1)) SWIG_fail;
+  int array_len[2] = {0,0};
+
+  array_len[0] = array_size(array,0);
+
+  if (array_numdims(array) > 1)
+    array_len[1] = array_size(array,1);
+
+
+  if (!array 
+      || !require_native(array) || !require_contiguous(array)
+      || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
+  
+  $1 = (double *) array_data(array);
+
+ }
+
+// list of matrices problemSizex3
+%typemap(in) (double *blocklist3x3) (PyArrayObject* array=NULL, int is_new_object) {
+
+  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+  int array_len[2] = {0,0};
+
+  if (! *p_problem_size1)
+  {
+    if (array_numdims(array) > 1)
+    {
+      *p_problem_size1 = fmax(array_size(array,0), array_size(array,1)) / 3;
+    }
+    else if (array_numdims(array) == 1)
+    {
+      *p_problem_size1 = array_size(array,0) / 3;
+    }
+    else
+      SWIG_fail;
+
+    if (*p_problem_size1 % 3 != 0) SWIG_fail;
+    
+    if (*p_problem_size1 / 3 == 0) SWIG_fail;
+    
+    number_of_contacts1 = *p_problem_size1 / 3;
+    
+  }
+
+  assert (*p_problem_size1);
+  
+
+  if (array_numdims(array) > 1)
+  {
+    array_len[0] = *p_problem_size1 * 3;
+    array_len[1] = 1;
+  } 
+  else 
+  {
+    array_len[0] = *p_problem_size1 * 3;
+  }
+    
+  if (!array 
+      || !require_native(array) || !require_contiguous(array)
+      || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
+  
+  $1 = (double *) array_data(array);
+
+ }
+
+
+// matrices problemSizexproblemSize
+%typemap(in) (double *blockarray3x3) (PyArrayObject* array=NULL, int is_new_object) {
+
+  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+  int array_len[2] = {0,0};
+
+  if (! *p_problem_size1)
+  {
+    if (array_numdims(array) > 1)
+    {
+      *p_problem_size1 = array_size(array,0); // assume square matrix
+    }
+    else if (array_numdims(array) == 1)
+    {
+      *p_problem_size1 = sqrt(array_size(array,0));
+    }
+    else
+      SWIG_fail;
+
+    
+    if (*p_problem_size1 % 3 != 0) SWIG_fail;
+    
+    if (*p_problem_size1 / 3 == 0) SWIG_fail;
+    
+    number_of_contacts1 = *p_problem_size1 / 3;
+    
+  }    
+  
+  assert (*p_problem_size1);
+
+  if (array_numdims(array) > 1)
+  {
+    array_len[0] = *p_problem_size1;
+    array_len[1] = *p_problem_size1;
+  }
+  else 
+  {
+    array_len[0] = *p_problem_size1 * *p_problem_size1;
+  }
+
+  if (!array 
+      || !require_native(array) || !require_contiguous(array)
+      || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
   
   $1 = (double *) array_data(array);
 
  }
 
 // vectors of size problem_size from problemSize as first input
-%typemap(in) (double *vect3D) (PyArrayObject* array=NULL, int is_new_object) {
+%typemap(in) (double *blocklist3) (PyArrayObject* array=NULL, int is_new_object) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  if (problem_size1 < 0)
+  int array_len[2] = {0,0};
+
+  if (! *p_problem_size1)
   {
-    if (array_numdims(array) > 0)
+    if (array_numdims(array) == 1)
     {
-      problem_size1 = array_size(array,0);
-      arg1 = problem_size1;
+      *p_problem_size1 = array_size(array,0);
     }
+    else if (array_numdims(array) > 1)
+    {
+      *p_problem_size1 = fmax(array_size(array,0), array_size(array,1));
+    } 
     
-    if (problem_size1 % 3 != 0) SWIG_fail;
+    if (*p_problem_size1 % 3 != 0) SWIG_fail;
     
-    if (problem_size1 / 3 == 0) SWIG_fail;
+    if (*p_problem_size1 / 3 == 0) SWIG_fail;
     
     
-    number_of_contacts1 = problem_size1 / 3;
+    number_of_contacts1 = *p_problem_size1 / 3;
     
   }
   
-  if (!array || !require_dimensions(array,1) ||
-      !require_native(array) || !require_contiguous(array)
-      || !require_size(array, &problem_size1, 1)) SWIG_fail;
+  assert (*p_problem_size1);
+
+  if (array_numdims(array) == 1)
+  {
+    array_len[0] = *p_problem_size1;
+  }
+  else
+  {
+    array_len[0] = *p_problem_size1;
+    array_len[1] = 1;
+  }
+
+  if (!array 
+      || !require_native(array) || !require_contiguous(array)
+      || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
   
   $1 = (double *) array_data(array);
 
@@ -301,7 +444,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 // vectors of size problem_size
 
 // 1 : numinputs=0 mandatory to avoid arg
-%typemap(in, numinputs=0) (double *result) (PyObject* array=NULL)
+%typemap(in, numinputs=0) (double *output_blocklist3) (PyObject* array=NULL)
 {
     // %typemap(in, numinputs=0)
     // we cannot get problem_size here as numinputs=0 => before
@@ -309,14 +452,14 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *result) 
+%typemap(check) (double *output_blocklist3) 
 {
-  if (problem_size1 > 0)
+  if (*p_problem_size1)
   {
     
-    npy_intp dims[1] = { problem_size1 };
+    npy_intp dims[2] = { *p_problem_size1, 1};
     
-    array$argnum = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (!array$argnum) SWIG_fail;
     $1 = ($1_ltype) array_data(array$argnum);
   }
@@ -324,9 +467,9 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 // 3 : return arg
-%typemap(argout) (double *result)
+%typemap(argout) (double *output_blocklist3)
 {
-  if (problem_size1 > 0)
+  if (*p_problem_size1)
   {
      $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
@@ -337,7 +480,14 @@ static int convert_darray(PyObject *input, double *ptr) {
 // 3x3 matrices
 
 // 1 : numinputs=0 mandatory to avoid arg
-%typemap(in, numinputs=0) (double *result3x3) (PyObject* array=NULL)
+%typemap(in, numinputs=0) (double *output_blocklist3x3) (PyObject* array=NULL)
+{
+    // %typemap(in, numinputs=0)
+    // we cannot get problem_size here as numinputs=0 => before
+    // numinputs=1, how can we change this ??
+}
+
+%typemap(in, numinputs=0) (double *output_blockarray3x3) (PyObject* array=NULL)
 {
     // %typemap(in, numinputs=0)
     // we cannot get problem_size here as numinputs=0 => before
@@ -345,14 +495,28 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 // 2 : check must be done after in
-%typemap(check) (double *result3x3) 
+%typemap(check) (double *output_blocklist3x3) 
 {
-  if (problem_size1 > 0)
+  if (*p_problem_size1)
   {
     
-    npy_intp dims[1] = { problem_size1 * 3 };
+    npy_intp dims[2] = { *p_problem_size1 * 3, 1 };
     
-    array$argnum = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+    if (!array$argnum) SWIG_fail;
+    $1 = ($1_ltype) array_data(array$argnum);
+  }
+  
+}
+
+%typemap(check) (double *output_blockarray3x3) 
+{
+  if (*p_problem_size1)
+  {
+    
+    npy_intp dims[2] = { *p_problem_size1, *p_problem_size1};
+    
+    array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (!array$argnum) SWIG_fail;
     $1 = ($1_ltype) array_data(array$argnum);
   }
@@ -360,27 +524,35 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 // 3 : return arg
-%typemap(argout) (double *result3x3)
+%typemap(argout) (double *output_blocklist3x3)
 {
-  if (problem_size1 > 0)
+  if (*p_problem_size1)
   {
-      $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
+    $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
   }
   
+}
+
+%typemap(argout) (double *output_blockarray3x3)
+{
+  if (*p_problem_size1)
+  {
+    $result = SWIG_Python_AppendOutput($result,(PyObject *)array$argnum);
+  }
 }
 
 
 // vectors of size numberOfContacts
 %typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
 
-  if (number_of_contacts1 > 0)
+  if (number_of_contacts1)
 
   {
     array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     
-    if (!array || !require_dimensions(array,1) ||
-        !require_native(array) || !require_contiguous(array)
-        || !require_size(array, &number_of_contacts1, 1)) SWIG_fail;
+    if (!array
+        || !require_native(array) || !require_contiguous(array)
+        || !require_size(array, &number_of_contacts1, array_numdims(array))) SWIG_fail;
     
     $1 = (double *) array_data(array);
     
@@ -401,23 +573,37 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 %apply (double *z) { (double *velocity) };
 
-%apply (double *vect3D) { (double *reaction3D) };
+%apply (double *blocklist3) { (double *vect3D) };
 
-%apply (double *vect3D) { (double *velocity3D) };
+%apply (double *blocklist3) { (double *reaction3D) };
 
-%apply (double *vect3D) { (double *rho3D) };
+%apply (double *blocklist3) { (double *velocity3D) };
 
-%apply (double *result) { (double *result1) };
+%apply (double *blocklist3) { (double *rho3D) };
 
-%apply (double *result) { (double *result2) };
+%apply (double *blocklist3) { (double *blocklist3_1) };
 
-%apply (double *result) { (double *result3) };
+%apply (double *blocklist3) { (double *blocklist3_2) };
 
-%apply (double *result) { (double *result4) };
+%apply (double *blocklist3) { (double *blocklist3_3) };
 
-%apply (double *result3x3) { (double *result3x3_1) };
+%apply (double *blocklist3x3) { (double *blocklist3x3_1) };
 
-%apply (double *result3x3) { (double *result3x3_2) };
+%apply (double *blocklist3x3) { (double *blocklist3x3_2) };
+
+%apply (double *blocklist3x3) { (double *blocklist3x3_3) };
+
+%apply (double *output_blocklist3) { (double *output_blocklist3_1) };
+
+%apply (double *output_blocklist3) { (double *output_blocklist3_2) };
+
+%apply (double *output_blocklist3) { (double *output_blocklist3_3) };
+
+%apply (double *output_blocklist3) { (double *output_blocklist3_4) };
+
+%apply (double *output_blocklist3x3) { (double *output_blocklist3x3_1) };
+
+%apply (double *output_blocklist3x3) { (double *output_blocklist3x3_2) };
 
 // Numpy array -> NumericsMatrix (dense storage only!)
 %typemap(in) 
@@ -630,12 +816,26 @@ static int convert_darray(PyObject *input, double *ptr) {
     SWIG_fail;
  }
 
+
+%typemap(out) (double* mu) {
+  npy_intp dims[1];
+
+  dims[0] = arg1->numberOfContacts;
+  if (arg1->q)
+  {
+    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+  }
+  else
+    SWIG_fail;
+ }
+
 // FrictionContact
 %include "FrictionContactProblem.h"
 %include "FrictionContact3D_Solvers.h"
 %include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_globalAlartCurnier.h"
+%include "FrictionContact3D_compute_error.h"
 
 %extend FrictionContactProblem
 {
