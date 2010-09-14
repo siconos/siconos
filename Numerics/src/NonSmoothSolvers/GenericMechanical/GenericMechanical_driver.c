@@ -27,7 +27,7 @@
 #include "GenericMechanical_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_compute_error.h"
-
+#include "FrictionContact3D_unitary_enumerative.h"
 //#define GENERICMECHANICAL_DEBUG
 //#define GENERICMECHANICAL_DEBUG2
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
@@ -80,6 +80,14 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     if (currentRowNumber)
       posInX = m->blocksize0[currentRowNumber - 1];
     curSize = m->blocksize0[currentRowNumber] - posInX;
+    double * Vl = velocity + posInX;
+    double * Rl = reaction + posInX;
+    for (ii = 0; ii < curSize; ii++)
+      if (isnan(Vl[ii]) || isnan(Rl[ii]))
+      {
+        *err = 10;
+        return 1;
+      }
     switch (curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
@@ -160,6 +168,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   double * sol = 0;
   double * w = 0;
   int resLocalSolver = 0;
+  //printf("genericMechanicalProblem_GS \n");
+  //displayGMP(pGMP);
   while (it < iterMax && tolViolate)
   {
     currentRowNumber = 0;
@@ -223,7 +233,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         fcProblem->M->matrix0 = m->block[diagBlockNumber];
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
-        resLocalSolver = frictionContact3D_Newton_solve(fcProblem, sol, &options->internalSolvers[1]);
+        resLocalSolver = frictionContact3D_unitary_enumerative_solve(fcProblem, sol, &options->internalSolvers[1]);
         break;
       }
       default:
@@ -245,6 +255,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     /*next GS it*/
     it++;
   }
+  if (tolViolate)
+    printf("---GenericalMechanical_drivers, FAILED***************************************\n");
 
   *info = tolViolate;
 }
@@ -276,11 +288,12 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   options->iWork = 0;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->iparam[0] = 1000;
+  options->iparam[0] = 10000;
   options->dparam[0] = 1e-4;
 
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
-  frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
+  frictionContact3D_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
+  //frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 

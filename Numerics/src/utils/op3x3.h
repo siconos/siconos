@@ -662,6 +662,74 @@ void print3x3(double* mat);
  * \param[in] double* v
  */
 void print3(double* v);
+/** orthoBaseFromVector : From A, build (A,A1,A2) such that it was an orthonormal base.
+ * \param[in,out] Ax
+ * \param[in,out] Ay
+ * \param[in,out] Az
+ * \param[out] A1x
+ * \param[out] A1y
+ * \param[out] A1z
+ * \param[out] A2x
+ * \param[out] A2y
+ * \param[out] A2z
+*/
+static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az, double *A1x, double *A1y, double *A1z, double *A2x, double *A2y, double *A2z)
+{
+
+  double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
+  if (normA == 0.)
+  {
+    (*Ax) = NAN;
+    (*Ay) = NAN;
+    (*Az) = NAN;
+    (*A1x) = NAN;
+    (*A1y) = NAN;
+    (*A1z) = NAN;
+    (*A2x) = NAN;
+    (*A2y) = NAN;
+    (*A2z) = NAN;
+    return;
+  }
+  (*Ax) /= normA;
+  (*Ay) /= normA;
+  (*Az) /= normA;
+  /*build (*A1*/
+  if (fabs(*Ax) > fabs(*Ay))
+  {
+    if (fabs((*Ax)) > fabs((*Az))) /*(*Ax is the bigest*/
+    {
+      (*A1x) = (*Ay);
+      (*A1y) = -(*Ax);
+      (*A1z) = 0;
+    }
+    else  /*(*Az is the biggest*/
+    {
+      (*A1z) = (*Ax);
+      (*A1y) = -(*Az);
+      (*A1x) = 0;
+    }
+  }
+  else if (fabs(*Ay) > fabs(*Az))  /*(*Ay is the bigest*/
+  {
+    (*A1y) = (*Ax);
+    (*A1x) = -(*Ay);
+    (*A1z) = 0;
+  }
+  else  /*(*Az is the biggest*/
+  {
+    (*A1z) = (*Ax);
+    (*A1y) = -(*Az);
+    (*A1x) = 0;
+  }
+  double normA1 = sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z));
+  (*A1x) /= normA1;
+  (*A1y) /= normA1;
+  (*A1z) /= normA1;
+
+  (*A2x) = *Ay * *A1z - *Az * *A1y;
+  (*A2y) = *Az * *A1x - *Ax * *A1z;
+  (*A2z) = *Ax * *A1y - *Ay * *A1x;
+}
 
 
 #endif

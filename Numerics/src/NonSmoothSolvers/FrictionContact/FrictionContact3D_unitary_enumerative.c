@@ -15,6 +15,8 @@
 #include "quartic.h"
 
 
+#define FC3D_UE_TEST_NULL(EXPR)  (EXPR==0)
+
 void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 {
   double r[3][5];
@@ -30,17 +32,17 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
     BIQUADROOTS(Poly, r);
   else if (Poly[1] != 0.0)
   {
-    CUBICROOTS(Poly, r);
+    CUBICROOTS(Poly + 1, r);
     degp1 = 4;
   }
   else if (Poly[2] != 0.0)
   {
-    QUADROOTS(Poly, r);
+    QUADROOTS(Poly + 2, r);
     degp1 = 3;
   }
-  else if (Poly[1] != 0.0)
+  else if (Poly[3] != 0.0)
   {
-    r[1][1] = -Poly[0] / Poly[1];
+    r[1][1] = -Poly[0] / Poly[3];
     r[2][1] = 0;
     degp1 = 2;
   }
@@ -74,7 +76,7 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 /*
 
 M=|ac|
-  |ca|
+  |cb|
   V is such that V*M*V'=|l1 0|
                         |0 l2|
   V'=|V1_x V2_x|
@@ -86,7 +88,10 @@ M=|ac|
  */
 void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1, double *l2, double *V)
 {
-  if (c == 0)
+#ifdef FC3D_UE_DEBUG
+  printf("FC3D_unitary_enum_factorize2x2 matrix:\n %e %e \n %e %e \n", *a, *c, *c, *b);
+#endif
+  if (*c == 0)
   {
     V[0] = 1;
     V[1] = 0;
@@ -177,6 +182,10 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   SET3(Q);
   Q = Q0;
   (*info) = -1;
+  //printf("frictionContact3D_unitary_enumerative M:\n");
+  //print3x3(M);M=M00;
+  //printf("frictionContact3D_unitary_enumerative Q:\n");
+  //print3(Q);Q=Q0;
   /*take off? R=0 ?*/
   if (*Q0 + tol > 0)
   {
@@ -232,22 +241,38 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   double NormD2 = (*M01) * (*M01) + (*M02) * (*M02);
   double NormD = sqrt(NormD2);
   double e = (*mu) * NormD / (*M00);
-  double d = fabs(*Q0) / NormD;
-  double p = e * d;
+  double d, p;
+  double phi;
+  double cosphi;
+  double sinphi;
+  FC3D_unitary_enum_factorize2x2(M11, M22, M12, &D1, &D2, V);
+  if (!FC3D_UE_TEST_NULL(e))
+  {
+    d = fabs(*Q0) / NormD;
+    p = e * d;
+    OD[0] = -((*M01) * (*Q)) / NormD2;
+    OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
+    D_Dir[0] = 1;
+    D_Dir[1] = -(*M01) / (*M02);
+    OD2[0] = (*V00) * OD[0] + (*V01) * OD[1];
+    OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
+    phi = atan(OD2[1] / OD2[0]);
+    if (OD2[0] < 0)
+      phi += M_PI;
+    cosphi = cos(phi);
+    sinphi = sin(phi);
+  }
+  else
+  {
+    d = 0;
+    p = (-(*Q0) * (*mu)) / (*M00);
+    if (p < 0)
+    {
+      return -1;
+    }
+  }
   double RTb[2];
 
-  OD[0] = -((*M01) * (*Q)) / NormD2;
-  OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
-  D_Dir[0] = 1;
-  D_Dir[1] = -(*M01) / (*M02);
-  FC3D_unitary_enum_factorize2x2(M11, M22, M12, &D1, &D2, V);
-  OD2[0] = (*V00) * OD[0] + (*V01) * OD[1];
-  OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
-  double phi = atan(OD2[1] / OD2[0]);
-  if (OD2[0] < 0)
-    phi += M_PI;
-  double cosphi = cos(phi);
-  double sinphi = sin(phi);
   Q2b[0] = (*V00) * Q_2[0] + (*V01) * Q_2[1];
   Q2b[1] = (*V10) * Q_2[0] + (*V11) * Q_2[1];
   M1_b[0] = (*V00) * (*M10) + (*V01) * (*M20);
@@ -323,31 +348,36 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
 #ifdef FC3D_UE_DEBUG
     double alpha1 = 0.0;
     double alpha2 = 0.0;
-    if (RTb[1] != 0.0)
-      alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
-    if (RTb[0] != 0.0)
-      alpha2 = (-Q2b[0] + a1 * fabradius) / RTb[0] - D1;
+    if (numR >= nbRealRacines)
+      //RTb[0]==0
+      if (numR < nbRealRacines + 2)
+        alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
+      else
+        alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
     printf("FC3D_UE_DEBUG :: alpha1 = %e = %e =alpha2.(must be equal except if RTb[x]==0)\n", alpha1, alpha2);
-    double zero1 = (D1 - D2) * radius * costheta * sintheta + Q2b[0] * sintheta - Q2b[1] * costheta - fabsradius * (a1 * sintheta - a2 * costheta);
-    double zero2 = (D1 - D2) * RTb[0] * RTb[1] + Q2b[0] * RTb[1] - Q2b[1] * RTb[0] - (a1 * RTb[1] - a2 * RTb[0]) * sqrt(RTb[0] * RTb[0] + RTb[1] * RTb[1]);
-    printf("FC3D_UE_DEBUG :: zero1 = %e = %e =zero2\n", zero1, zero2);
-    double D_Dir2[2];
-    D_Dir2[0] = (*V00) * D_Dir[0] + (*V01) * D_Dir[1];
-    D_Dir2[1] = (*V10) * D_Dir[0] + (*V11) * D_Dir[1];
-    double ONELIPSE2 = fabsradius / sqrt(
-                         (D_Dir2[1] * RTb[0] - D_Dir2[0] * RTb[1] - OD2[0] * D_Dir2[1] + D_Dir2[0] * OD2[1]) *
-                         (D_Dir2[1] * RTb[0] - D_Dir2[0] * RTb[1] - OD2[0] * D_Dir2[1] + D_Dir2[0] * OD2[1]) / (D_Dir2[0] * D_Dir2[0] + D_Dir2[1] * D_Dir2[1])) - e;
-    double ONELIPSE = ((*M00) * (*M00) / ((*mu) * (*mu))) * radius * radius -
-                      (Q[0] + (*M01) * (*reaction1) + (*M02) * (*reaction2)) *
-                      (Q[0] + (*M01) * (*reaction1) + (*M02) * (*reaction2));
-    printf("FC3D_UE_DEBUG :: OnElipse2 = %e; OnElipse = %e.(must be null)\n", ONELIPSE2, ONELIPSE);
+    if (!FC3D_UE_TEST_NULL(e))
+    {
+      double zero1 = (D1 - D2) * radius * costheta * sintheta + Q2b[0] * sintheta - Q2b[1] * costheta - fabsradius * (a1 * sintheta - a2 * costheta);
+      double zero2 = (D1 - D2) * RTb[0] * RTb[1] + Q2b[0] * RTb[1] - Q2b[1] * RTb[0] - (a1 * RTb[1] - a2 * RTb[0]) * sqrt(RTb[0] * RTb[0] + RTb[1] * RTb[1]);
+      printf("FC3D_UE_DEBUG :: zero1 = %e = %e =zero2\n", zero1, zero2);
+      double D_Dir2[2];
+      D_Dir2[0] = (*V00) * D_Dir[0] + (*V01) * D_Dir[1];
+      D_Dir2[1] = (*V10) * D_Dir[0] + (*V11) * D_Dir[1];
+      double ONELIPSE2 = fabsradius / sqrt(
+                           (D_Dir2[1] * RTb[0] - D_Dir2[0] * RTb[1] - OD2[0] * D_Dir2[1] + D_Dir2[0] * OD2[1]) *
+                           (D_Dir2[1] * RTb[0] - D_Dir2[0] * RTb[1] - OD2[0] * D_Dir2[1] + D_Dir2[0] * OD2[1]) / (D_Dir2[0] * D_Dir2[0] + D_Dir2[1] * D_Dir2[1])) - e;
+      double ONELIPSE = ((*M00) * (*M00) / ((*mu) * (*mu))) * radius * radius -
+                        (Q[0] + (*M01) * (*reaction1) + (*M02) * (*reaction2)) *
+                        (Q[0] + (*M01) * (*reaction1) + (*M02) * (*reaction2));
+      printf("FC3D_UE_DEBUG :: OnElipse2 = %e; OnElipse = %e.(must be null)\n", ONELIPSE2, ONELIPSE);
+    }
 #endif
     double s1 = (*M00) * fabsradius / (*mu);
     double s2 = -Q[0] - (*M01) * (*reaction1) - (*M02) * (*reaction2);
 #ifdef FC3D_UE_DEBUG
     printf("FC3D_UE_DEBUG: fabs(s1)=fabs(s2)=%e=%e\n", fabs(s1), fabs(s2));
 #endif
-    if ((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.))
+    if ((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.) || FC3D_UE_TEST_NULL(e))
     {
 #ifdef FC3D_UE_DEBUG
       printf("R:\n");

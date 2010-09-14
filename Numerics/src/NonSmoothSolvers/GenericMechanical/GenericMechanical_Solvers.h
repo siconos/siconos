@@ -59,14 +59,40 @@ extern "C"
   \return result (0 if successful otherwise 1).
   */
   int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
-
+  /* Build an empty GenericMechanicalProblem
+     \return a pointer on the built GenericMechanicalProblem.
+   */
   GenericMechanicalProblem * buildEmptyGenericMechanicalProblem();
+  /* Free the list of the contained sub-problem, coherently with the memory allocated in the addProblem function, it also free the pGMP.
+   */
   void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP);
-  /*return the localProblem (either lcp, linearSystem of fc3d*/
+  /* Insert a problem in the GenericMechanicalProblem pGMP. The memory of the elematary block is not managed. The user has to ensure it.
+     In the case of SICONOS, the Kernel ensure this allocation in building the global problem. In other words, the matrix0 is shared with the global NumericsMatrix,
+     the plug is done in the function genericMechanicalProblem_GS (ie: localProblem->M->matrix0= m->block[diagBlockNumber];)
+   \param[in-out], pGMP a pointer.
+   \param[in], problemType, type of the added sub-problem (either SICONOS_NUMERICS_PROBLEM_LCP, SICONOS_NUMERICS_PROBLEM_EQUALITY or SICONOS_NUMERICS_PROBLEM_FC3D)
+   \param[in], size of the formulation (dim of the LCP, or dim of the linear system, 3 for the fc3d)
+   \ return the localProblem (either lcp, linearSystem of fc3d
+   */
   void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size);
+  /*A recursive displaying method.
+    \param[in], pGMP the displayed problem.
+   */
   void displayGMP(GenericMechanicalProblem * pGMP);
+  /*Builder of options, it supposes that options is not NULL.
+   \param [in] id, not used in current version
+   \param [in-out] options, the filled options.(by default LEMKE and Quartic)
+   */
   void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int id);
+  /*To print a GenericMechanicalProblem in a file.
+    \param[in] problem, the printed problem.
+    \param[in-out] output file.
+   */
   void genericMechnical_printInFile(GenericMechanicalProblem*  problem, FILE* file);
+  /*To build a GenericMechanicalProblem from a file.
+    \parm[in] file, a file containing the GenericMechanicalProblem.
+    \return the built GenericMechanicalProblem.
+   */
   GenericMechanicalProblem* genericMechnical_newFromFile(FILE* file);
 #ifdef __cplusplus
 }
