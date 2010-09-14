@@ -15,29 +15,34 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ */
+/*! \file NewtonEulerR.h
+
 */
-/*! \file SiconosKernel.h
-Include files related to modelingTools
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
-*/
+#ifndef NEWTONEULERRELATIONFC3D_H
+#define NEWTONEULERRELATIONFC3D_H
 
-#include "EqualityConditionNSL.hpp"
-#include "ComplementarityConditionNSL.hpp"
-#include "MixedComplementarityConditionNSL.hpp"
-#include "RelayNSL.hpp"
-#include "NewtonImpactNSL.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
-
-#include "Interaction.hpp"
-
-#include "RelationTypes.hpp"
-#include "FirstOrderType2R.hpp"
-
-#include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
-#include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerRFC3D.hpp"
 
-#include "NonSmoothDynamicalSystem.hpp"
 
+class NewtonEulerRFC3D : public NewtonEulerR
+{
+
+protected:
+  /*Point of contact*/
+  SP::SimpleVector _Pc;
+  /*Normal to the contact */
+  SP::SimpleVector _Nc;
+public:
+  NewtonEulerRFC3D(): _Pc(new SimpleVector(3)), _Nc(new SimpleVector(3)), NewtonEulerR() {}
+
+  /** destructor
+   */
+  virtual ~NewtonEulerRFC3D() {};
+
+  /*default implementation consists in multiplying jachq and T*/
+  virtual void computeJachqT();
+
+};
+TYPEDEF_SPTR(NewtonEulerRFC3D);
+#endif // NEWTONEULERRELATIONFC3D_H

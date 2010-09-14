@@ -22,7 +22,7 @@
 #include "SphereNEDSPlanR.hpp"
 
 SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)
-  : NewtonEulerR(), r(r), A(A), B(B), C(C), D(D)
+  : NewtonEulerRFC3D(), r(r), A(A), B(B), C(C), D(D)
 {
   nN = sqrt(A * A + B * B + C * C);
 
@@ -30,26 +30,7 @@ SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double 
   n2 = B / nN;
   n3 = C / nN;
 
-  nU = sqrt((A + B) * (A + B) + (B - C) * (B - C) + (A + C) * (A + C));
-  u1 = (B - C) / nU;
-  u2 = -(A + C) / nU;
-  u3 = (A + B) / nU;
 
-  // v = n /\ u
-
-  v1 = B * (A + B) / (nN * nU) - C * (-A - C) / (nN * nU);
-  v2 = C * (B - C) / (nN * nU) - A * (A + B) / (nN * nU);
-  v3 = A * (-A - C) / (nN * nU) - B * (B - C) / (nN * nU);
-
-  // r*u & r *v
-
-  ru1 = r * u1;
-  ru2 = r * u2;
-  ru3 = r * u3;
-
-  rv1 = r * v1;
-  rv2 = r * v2;
-  rv3 = r * v3;
 
 }
 
@@ -70,38 +51,10 @@ void SphereNEDSPlanR::computeh(double)
   SP::SiconosVector y = interaction()->y(0);
 
   y->setValue(0, distance(q_0, q_1, q_2, r));
-
-};
-
-
-void SphereNEDSPlanR::computeJachq(double)
-{
-  SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
-
-  double a = (*data[q0])(3);
-  double b = (*data[q0])(4);
-  double c = (*data[q0])(5);
-  double d = (*data[q0])(6);
-
-  (*g)(0, 0) = n1;
-  (*g)(0, 1) = n2;
-  (*g)(0, 2) = n3;
-  (*g)(0, 3) = 0;
-  (*g)(0, 4) = 0;
-  (*g)(0, 5) = 0;
-  (*g)(0, 6) = 0;
-  (*g)(1, 0) = u1;
-  (*g)(1, 1) = u2;
-  (*g)(1, 2) = u3;
-  (*g)(1, 3) = 2 * r * (b * v1 + c * v2 + d * v3);
-  (*g)(1, 4) = -2 * r * (a * v1 + c * v3 - d * v2);
-  (*g)(1, 5) = -2 * r * (a * v2 + d * v1 - b * v3);
-  (*g)(1, 6) = -2 * r * (a * v3 + b * v2 - c * v1);
-  (*g)(2, 0) = v1;
-  (*g)(2, 1) = v2;
-  (*g)(2, 2) = v3;
-  (*g)(2, 3) = -2 * r * (b * u1 + c * u2 + d * u3);
-  (*g)(2, 4) = 2 * r * (a * u1 + c * u3 - d * u2);
-  (*g)(2, 5) = 2 * r * (a * u2 + d * u1 - b * u3);
-  (*g)(2, 6) = 2 * r * (a * u3 + b * u2 - c * u1);
+  _Pc->setValue(0, q_0 - r * n1);
+  _Pc->setValue(1, q_1 - r * n2);
+  _Pc->setValue(2, q_2 - r * n3);
+  _Nc->setValue(0, n1);
+  _Nc->setValue(1, n2);
+  _Nc->setValue(2, n3);
 };

@@ -56,52 +56,8 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVe
 }
 void PivotJointR::buildA1A2()
 {
-  double normA = sqrt(_Ax * _Ax + _Ay * _Ay + _Az * _Az);
-  assert(normA > 0.9 && "PivotJoint, normA to small\n");
-  _Ax /= normA;
-  _Ay /= normA;
-  _Az /= normA;
-  std::cout << "JointKnee: _Ax _Ay _Az :" << _Ax << " " << _Ay << " " << _Az << std::endl;
-  /*build _A1*/
-  if (fabs(_Ax) > fabs(_Ay))
-  {
-    if (fabs(_Ax) > fabs(_Az)) /*_Ax is the bigest*/
-    {
-      _A1x = _Ay;
-      _A1y = -_Ax;
-      _A1z = 0;
-      _A2x = _Az;
-      _A2z = -_Ax;
-      _A2y = 0;
-    }
-    else  /*_Az is the biggest*/
-    {
-      _A1z = _Ax;
-      _A1y = -_Az;
-      _A1x = 0;
-      _A2z = _Ay;
-      _A2x = -_Az;
-      _A2y = 0;
-    }
-  }
-  else if (fabs(_Ay) > fabs(_Az))  /*_Ay is the bigest*/
-  {
-    _A1y = _Ax;
-    _A1x = -_Ay;
-    _A1z = 0;
-    _A2y = _Az;
-    _A2z = -_Ay;
-    _A2x = 0;
-  }
-  else  /*_Az is the biggest*/
-  {
-    _A1z = _Ax;
-    _A1y = -_Az;
-    _A1x = 0;
-    _A2z = _Ay;
-    _A2x = -_Az;
-    _A2y = 0;
-  }
+  orthoBaseFromVector(&_Ax, &_Ay, &_Az, &_A1x, &_A1y, &_A1z, &_A2x, &_A2y, &_A2z);
+
   assert(fabs(_A1x * _Ax + _A1y * _Ay + _A1z * _Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
   assert(fabs(_A2x * _Ax + _A2y * _Ay + _A2z * _Az) < 1e-9 && "PivotJoint, _A2 wrong\n");
   assert(fabs(_A1x * _A2x + _A1y * _A2y + _A1z * _A2z) < 1e-9 && "PivotJoint, _A12 wrong\n");

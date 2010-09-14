@@ -26,8 +26,8 @@
 #define SphereNEDSSphereNEDSR_h
 
 #include "NewtonEulerR.hpp"
-
-class SphereNEDSSphereNEDSR : public NewtonEulerR,
+#include "NewtonEulerRFC3D.hpp"
+class SphereNEDSSphereNEDSR : public NewtonEulerRFC3D,
   public boost::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:
@@ -48,7 +48,7 @@ public:
 
   void computeh(double);
 
-  void computeJachq(double);
+  //void computeJachq(double);
 
   /** visitors hook
    */

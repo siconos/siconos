@@ -27,9 +27,9 @@
 #ifndef SphereNEDSPlanR_h
 #define SphereNEDSPlanR_h
 
-#include "NewtonEulerR.hpp"
+#include "NewtonEulerRFC3D.hpp"
 
-class SphereNEDSPlanR : public NewtonEulerR, public boost::enable_shared_from_this<SphereNEDSPlanR>
+class SphereNEDSPlanR : public NewtonEulerRFC3D, public boost::enable_shared_from_this<SphereNEDSPlanR>
 {
 private:
 
@@ -56,7 +56,7 @@ public:
 
   void computeh(double);
 
-  void computeJachq(double);
+  //void computeJachq(double);
 
   bool equal(double _A, double _B, double _C, double _D, double _r) const
   {

@@ -117,10 +117,13 @@ int GenericMechanical::compute(double time)
     _pnumerics_GMP->q = &*_q->getArray();
 
     // Call Numerics Driver for GenericMechanical
+    //display();
     info = genericMechanical_driver(_pnumerics_GMP,
                                     &*_z->getArray() ,
                                     &*_w->getArray() ,
                                     &*_numerics_solver_options);
+    //printf("GenericMechanical::compute : R:\n");
+    //_z->display();
     postCompute();
 
   }
@@ -141,12 +144,14 @@ GenericMechanical* GenericMechanical::convert(OneStepNSProblem* osnsp)
 }
 void  GenericMechanical::updateUnitaryBlocks()
 {
+  //printf("GenericMechanical::updateUnitaryBlocks : free and build a new GMP\n");
   freeGenericMechanicalProblem(_pnumerics_GMP);
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   LinearOSNS::updateUnitaryBlocks();
 }
 void  GenericMechanical::computeAllUnitaryBlocks()
 {
+  //printf("GenericMechanical::updateUnitaryBlocks : free and build a new GMP\n");
   freeGenericMechanicalProblem(_pnumerics_GMP);
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
 
