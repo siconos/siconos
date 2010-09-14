@@ -41,21 +41,31 @@
 
 %inline %{
 #include <stdio.h>
-  FrictionContactProblem* frictionContactProblemFromFile(const char * filename)
+  FrictionContactProblem* frictionContactProblemFromFile
+    (const char * filename)
   {
     FILE * finput = fopen(filename, "r");
-    FrictionContactProblem* problem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    if (frictionContact_newFromFile(problem,finput))
+    if (finput) 
     {
+      FrictionContactProblem* problem = 
+        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+      if (frictionContact_newFromFile(problem,finput))
+      {
       fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
-      return problem;
+      free(problem);
+      return 0;
+      }
+      else
+        return problem;
     }
     else
-      return problem;
+    {
+      fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
+      return 0;
+    }
   }
-
 %}
-
+  
 
 
 
@@ -545,14 +555,18 @@ static int convert_darray(PyObject *input, double *ptr) {
 // vectors of size numberOfContacts
 %typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
 
-  if (number_of_contacts1)
+  int array_len[2] = {0,0};
 
+  if (number_of_contacts1)
   {
+    array_len[0] = number_of_contacts1;
+    array_len[1] = 1;
+
     array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     
     if (!array
-        || !require_native(array) || !require_contiguous(array)
-        || !require_size(array, &number_of_contacts1, array_numdims(array))) SWIG_fail;
+        || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
+        || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
     
     $1 = (double *) array_data(array);
     
@@ -639,19 +653,26 @@ static int convert_darray(PyObject *input, double *ptr) {
   dims[1] = $1->size1;
   if ($1->matrix0)
   {
-    $result = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
+    PyArrayObject *array = (PyArrayObject*) obj;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $result = obj;
   }
   else
     SWIG_fail;
  }
 
 %typemap(out) (double* q) {
-  npy_intp dims[1];
+  npy_intp dims[2];
 
   dims[0] = arg1->size;
+  dims[1] = 1;
   if (arg1->q)
   {
-    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->q);
+    PyArrayObject *array = (PyArrayObject*) obj;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $result = obj;
   }
   else
     SWIG_fail;
@@ -805,12 +826,16 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 
 %typemap(out) (double* q) {
-  npy_intp dims[1];
+  npy_intp dims[2];
 
   dims[0] = arg1->dimension * arg1->numberOfContacts;
+  dims[1] = 1;
   if (arg1->q)
   {
-    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->q);
+    PyArrayObject *array = (PyArrayObject*) obj;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $result = obj;
   }
   else
     SWIG_fail;
@@ -818,12 +843,16 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 
 %typemap(out) (double* mu) {
-  npy_intp dims[1];
+  npy_intp dims[2];
 
   dims[0] = arg1->numberOfContacts;
+  dims[1] = 1;
   if (arg1->q)
   {
-    $result = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, arg1->q);
+    PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, arg1->mu);
+    PyArrayObject *array = (PyArrayObject*) obj;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $result = obj;
   }
   else
     SWIG_fail;
