@@ -41,6 +41,7 @@ env
 
 case $PIPOL_IMAGE in 
     *windows*) cp -r $HOME/.ssh /home/root/.ssh;;
+    *mac*) export PATH=$PATH:/usr/local/bin;;
 esac
 
 # a local copy because make Nightly will update this sources.
