@@ -43,10 +43,6 @@ void printm(unsigned int nl, unsigned int nc, double *m)
   }
 }
 
-#ifdef DUMP_PROBLEM
-static int file_counter = 0;
-#endif
-
 double sign(double x)
 {
   return copysign(1., x);
@@ -929,7 +925,7 @@ int globalLineSearchGP(
   computeAWpB(problemSize, A, W, B, AWpB);
 
   //  tmp <- AWpB * direction
-  DGEMV(LA_NOTRANS, problemSize, problemSize, 1., AWpB, problemSize, direction, 1, 1., tmp, 1);
+  DGEMV(LA_NOTRANS, problemSize, problemSize, 1., AWpB, problemSize, direction, 1, 0., tmp, 1);
 
   double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
 
@@ -1068,9 +1064,11 @@ void frictionContact3D_globalAlartCurnier(
   info[0] = 1;
 
   // velocity <- M*reaction + qfree
+  DCOPY(problemSize, problem->q, 1, velocity, 1);
   DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
         problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
-  DAXPY(problemSize, 1, problem->q, 1, velocity, 1);
+
+
 
 
 
@@ -1116,20 +1114,33 @@ void frictionContact3D_globalAlartCurnier(
 
 
     // velocity <- M*reaction + qfree
+    DCOPY(problemSize, problem->q, 1, velocity, 1);
     DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
           problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
-    DAXPY(problemSize, 1, problem->q, 1, velocity, 1);
+
 
 
     options->dparam[1] = INFINITY;
 
     if (!(iter % erritermax))
     {
+      frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
+          reaction, velocity,
+          problem->mu, rho,
+          F, NULL, NULL);
+
+
+
       FrictionContact3D_compute_error(problem, reaction, velocity,
                                       tolerance, options, &(options->dparam[1]));
 
-    }
 
+      assert((DNRM2(problemSize, F, 1)
+              / (1 + DNRM2(problemSize, problem->q, 1)))
+             < 10 * options->dparam[1]);
+
+
+    }
 
     if (verbose > 0)
       printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
@@ -1160,6 +1171,7 @@ void frictionContact3D_globalAlartCurnier(
 #ifdef DUMP_PROBLEM
   if (info[0])
   {
+    static int file_counter = 0;
     char filename[64];
     printf("GLOBALAC: dumping problem\n");
     sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
