@@ -158,28 +158,24 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* 
   double* q = problem->q;
   /* Dimension of the problem */
   int n = 3 * nc;
-
-  /* norm of vector q */
-  double qs = DNRM2(n , q , 1);
-  int i;
-  int info = -1;
-  if (qs <= DBL_EPSILON)
+  int i = 0;
+  /*take off? R=0 ?*/
+  for (i = 0; i < nc; i++)
   {
-    // q norm equal to zero (less than DBL_EPSILON)
-    // -> trivial solution: reaction = 0 and velocity = q
-    for (i = 0 ; i < n ; ++i)
-    {
-      velocity[i] = q[i];
-      reaction[i] = 0.;
-    }
-    iparam[2] = 0;
-    iparam[4] = 0;
-    dparam[1] = 0.0;
-    dparam[3] = 0.0;
-    info = 0;
-    if (verbose == 1)
-      printf("FrictionContact3D driver, norm(q) = 0, trivial solution reaction = 0, velocity = q.\n");
+    if (q[3 * i] < -DBL_EPSILON)
+      return -1;
   }
-  return info;
+  for (i = 0 ; i < n ; ++i)
+  {
+    velocity[i] = q[i];
+    reaction[i] = 0.;
+  }
+  iparam[2] = 0;
+  iparam[4] = 0;
+  dparam[1] = 0.0;
+  dparam[3] = 0.0;
+  if (verbose == 1)
+    printf("FrictionContact3D driver, take off, trivial solution reaction = 0, velocity = q.\n");
+  return 0;
 }
 
