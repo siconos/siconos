@@ -186,6 +186,7 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   //print3x3(M);M=M00;
   //printf("frictionContact3D_unitary_enumerative Q:\n");
   //print3(Q);Q=Q0;
+
   /*take off? R=0 ?*/
   if (*Q0 + tol > 0)
   {
@@ -196,6 +197,19 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     *velocity1 = *Q1;
     *velocity2 = *Q2;
     (*info) = 0;
+    return 0;
+  }
+
+  if (*mu == 0.)
+  {
+    *reaction0 = -(*Q0) / (*M00);
+    if (*reaction0 < 0)
+      return -1;
+    *reaction1 = 0;
+    *reaction2 = 0;
+    *velocity0 = 0;
+    *velocity1 = *reaction0 * *M10 + *Q1;
+    *velocity2 = *reaction0 * *M20 + *Q2;
     return 0;
   }
 
