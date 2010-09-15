@@ -51,6 +51,7 @@ For each solver, the input argument are:
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 #include "FrictionContact3D_globalAlartCurnier.h"
+#include "FrictionContact3D_unitary_enumerative.h"
 #include "Friction_cst.h"
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);

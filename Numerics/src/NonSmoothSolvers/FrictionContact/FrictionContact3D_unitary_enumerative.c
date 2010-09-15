@@ -8,14 +8,14 @@
 #include "Friction_cst.h"
 #include "op3x3.h"
 #include "FrictionContact3D_unitary_enumerative.h"
-//#define FC3D_UE_DEBUG
+#define FC3D_UE_DEBUG
 
 #include <stdio.h>
 #include <math.h>
 #include "quartic.h"
 
 
-#define FC3D_UE_TEST_NULL(EXPR)  (EXPR==0)
+#define FC3D_UE_TEST_NULL(EXPR)  (fabs(EXPR)<1e-15)
 
 void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 {
@@ -91,7 +91,7 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_unitary_enum_factorize2x2 matrix:\n %e %e \n %e %e \n", *a, *c, *c, *b);
 #endif
-  if (*c == 0)
+  if (FC3D_UE_TEST_NULL(*c))
   {
     V[0] = 1;
     V[1] = 0;
@@ -159,6 +159,8 @@ int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem,
   printf("frictionContact3D_unitary_enumerative_solve: begin\n");
 #endif
   frictionContact3D_unitary_enumerative(problem, reaction, velocity, &info, options);
+  if (info)
+    printf("frictionContact3D_unitary_enumerative_solve: localSolver FAILED.\n");
 #ifdef FC3D_UE_DEBUG
   printf("frictionContact3D_unitary_enumerative_solve: end\n");
 #endif
@@ -182,6 +184,15 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   SET3(Q);
   Q = Q0;
   (*info) = -1;
+#ifdef FC3D_UE_DEBUG
+  printf("frictionContact3D_unitary_enumerative M:\n");
+  print3x3(M);
+  M = M00;
+  printf("frictionContact3D_unitary_enumerative Q:\n");
+  print3(Q);
+  Q = Q0;
+
+#endif
   //printf("frictionContact3D_unitary_enumerative M:\n");
   //print3x3(M);M=M00;
   //printf("frictionContact3D_unitary_enumerative Q:\n");
@@ -204,7 +215,15 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   {
     *reaction0 = -(*Q0) / (*M00);
     if (*reaction0 < 0)
+    {
+      *reaction0 = 0;
+      *reaction1 = 0;
+      *reaction2 = 0;
+      *velocity0 = 0;
+      *velocity1 = *Q1;
+      *velocity2 = *Q2;
       return -1;
+    }
     *reaction1 = 0;
     *reaction2 = 0;
     *velocity0 = 0;
@@ -265,23 +284,47 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     d = fabs(*Q0) / NormD;
     p = e * d;
     OD[0] = -((*M01) * (*Q)) / NormD2;
-    OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
-    D_Dir[0] = 1;
-    D_Dir[1] = -(*M01) / (*M02);
+
+
+    if (!FC3D_UE_TEST_NULL(*M02))
+    {
+      OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
+      D_Dir[0] = 1;
+      D_Dir[1] = -(*M01) / (*M02);
+    }
+    else
+    {
+      OD[1] = 0;
+      D_Dir[0] = 0;
+      if (*M01 > 0)
+        D_Dir[1] = 1;
+      else
+        D_Dir[1] = -1;
+    }
     OD2[0] = (*V00) * OD[0] + (*V01) * OD[1];
     OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
-    phi = atan(OD2[1] / OD2[0]);
+    if (!FC3D_UE_TEST_NULL(OD2[0]))
+    {
+      phi = atan(OD2[1] / OD2[0]);
+    }
+    else
+    {
+      phi = M_PI / 2.0;
+      if (OD2[1] < 0)
+        phi = -M_PI / 2.0;
+    }
     if (OD2[0] < 0)
       phi += M_PI;
     cosphi = cos(phi);
     sinphi = sin(phi);
   }
-  else
+  else  /*e is null*/
   {
     d = 0;
     p = (-(*Q0) * (*mu)) / (*M00);
     if (p < 0)
     {
+      projectionOnCone(reaction, *mu);
       return -1;
     }
   }
@@ -415,6 +458,13 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_UE_DEBUG: Solver failed\n");
 #endif
+  printf("frictionContact3D_unitary_enumerative M:\n");
+  print3x3(M);
+  M = M00;
+  printf("frictionContact3D_unitary_enumerative Q:\n");
+  print3(Q);
+  Q = Q0;
+  projectionOnCone(reaction, *mu);
   return -1;
 }
 int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(

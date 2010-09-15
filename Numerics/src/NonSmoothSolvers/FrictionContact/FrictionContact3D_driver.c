@@ -140,6 +140,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     frictionContact3D_unitary_enumerative(problem, reaction , velocity , &info , options);
     break;
   }
+  case SICONOS_FRICTION_3D_AlartCurnierNewton:
+  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+  {
+    if (verbose == 1)
+      printf(" ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
+    info = frictionContact3D_Newton_solve(problem, reaction , options);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");

@@ -233,12 +233,15 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         fcProblem->M->matrix0 = m->block[diagBlockNumber];
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
-        resLocalSolver = frictionContact3D_unitary_enumerative_solve(fcProblem, sol, &options->internalSolvers[1]);
+        resLocalSolver = frictionContact3D_driver(fcProblem, sol, w, &options->internalSolvers[1], NULL);
+        //resLocalSolver=frictionContact3D_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
       }
       default:
-        printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
+        printf("genericMechanical_GS Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
       }
+      if (resLocalSolver)
+        printf("Local solver FAILED, GS continue\n");
 #ifdef GENERICMECHANICAL_DEBUG
       printf("GS it %d, the line number is %d:\n", it, currentRowNumber);
       for (int ii = 0; ii < pGMP->size; ii++)
@@ -260,7 +263,6 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 
   *info = tolViolate;
 }
-
 
 
 int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options)
@@ -293,7 +295,18 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
 
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
-  frictionContact3D_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
+  switch (id)
+  {
+  case SICONOS_FRICTION_3D_QUARTIC:
+    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
+    break;
+  case SICONOS_FRICTION_3D_AlartCurnierNewton:
+  case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
+    frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
+    break;
+  default:
+    printf("FC3D_solverId unknown :%d\n", id);
+  }
   //frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 
