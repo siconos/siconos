@@ -8,7 +8,7 @@
 #include "Friction_cst.h"
 #include "op3x3.h"
 #include "FrictionContact3D_unitary_enumerative.h"
-#define FC3D_UE_DEBUG
+//#define FC3D_UE_DEBUG
 
 #include <stdio.h>
 #include <math.h>
