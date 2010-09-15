@@ -22,17 +22,18 @@
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
 
 using namespace std;
 using namespace RELATION;
 
 
-GenericMechanical::GenericMechanical():
+GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   LinearOSNS()
 {
   _MStorageType = SICONOS_SPARCE;
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
-  genericMechnicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, 0);
+  genericMechnicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }
 
 
@@ -76,9 +77,10 @@ void GenericMechanical::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::Unitary
              == Type::NewtonImpactFrictionNSL)
     {
       FrictionContactProblem * pAux = (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
+      SP::NewtonImpactFrictionNSL nsLaw = boost::static_pointer_cast<NewtonImpactFrictionNSL> (UR1->interaction()->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
-      *(pAux->mu) = 0.6;
+      *(pAux->mu) = nsLaw->mu();
     }
   }
 

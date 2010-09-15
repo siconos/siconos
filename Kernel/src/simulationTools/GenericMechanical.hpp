@@ -67,7 +67,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  GenericMechanical();
+  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_QUARTIC);
 
   /** destructor
    */
