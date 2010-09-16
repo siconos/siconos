@@ -66,6 +66,12 @@ int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_QUARTIC_NU:
+  {
+    info =    frictionContact3D_unitary_enumerative_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_QUARTIC_NU;
+    break;
+  }
   default:
   {
     numericsError("frictionContact3D_setDefaultSolverOptions", "Unknown Solver");

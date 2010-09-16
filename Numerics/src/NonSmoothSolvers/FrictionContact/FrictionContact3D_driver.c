@@ -46,6 +46,7 @@ char SICONOS_FRICTION_3D_PGoC_STR[] = "F3D_PGoC";
 char SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR[] = "F3D_DeSaxceFixedPoint";
 char SICONOS_FRICTION_3D_PROX_STR[] = "F3D_PROX";
 char SICONOS_FRICTION_3D_QUARTIC_STR[] = "F3D_QUARTIC";
+char SICONOS_FRICTION_3D_QUARTIC_NU_STR[] = "F3D_QUARTIC_NU";
 
 int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {
@@ -133,6 +134,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
     break;
   }
+  case SICONOS_FRICTION_3D_QUARTIC_NU:
   case SICONOS_FRICTION_3D_QUARTIC:
   {
     if (verbose == 1)

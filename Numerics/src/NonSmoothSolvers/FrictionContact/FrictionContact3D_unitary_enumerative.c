@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "quartic.h"
-
+#include "projectionOnCone.h"
+#include "FrictionContact3D_compute_error.h"
 
 #define FC3D_UE_TEST_NULL(EXPR)  (fabs(EXPR)<1e-15)
 
@@ -24,9 +25,17 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   //x=r[1][k] + i r[2][k]  k=1,...,4
 #ifdef FC3D_UE_DEBUG
   double Psav[5];
+  printf("compute_racines: polynome(x)=%e.x4+%e.x3+%e.x2+%e.x+%e\n", Poly[0], Poly[1], Poly[2], Poly[3], Poly[4]);
   for (int k = 0; k < 5; k++)
     Psav[k] = Poly[k];
 #endif
+  if (fabs(Poly[1] / Poly[0]) > 1e7)
+  {
+    Poly[0] = 0.0;
+#ifdef FC3D_UE_DEBUG
+    printf("compute_racines: WARNING, Poly[1]/Poly[0] =%e. set Poly[0]=0\n", fabs(Poly[1] / Poly[0]));
+#endif
+  }
   int degp1 = 5;
   if (Poly[0] != 0.0)
     BIQUADROOTS(Poly, r);
@@ -151,29 +160,13 @@ void frictionContact3D_unitary_enumerative_initialize(FrictionContactProblem* lo
     localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
 
 }
-int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
-{
-  double velocity[3];
-  int info;
-#ifdef FC3D_UE_DEBUG
-  printf("frictionContact3D_unitary_enumerative_solve: begin\n");
-#endif
-  frictionContact3D_unitary_enumerative(problem, reaction, velocity, &info, options);
-  if (info)
-    printf("frictionContact3D_unitary_enumerative_solve: localSolver FAILED.\n");
-#ifdef FC3D_UE_DEBUG
-  printf("frictionContact3D_unitary_enumerative_solve: end\n");
-#endif
-  return info;
-}
-int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
-{
 
+
+int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, double * reaction, double * velocity, SolverOptions* options)
+{
   double * M = problem->M->matrix0;
   double * Q = problem->q;
   double * mu = problem->mu;
-  double D1, D2;
-  double alpha;
   double tol = options->dparam[0];
   SET3X3(M);
   M = M00;
@@ -183,16 +176,7 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   velocity = velocity0;
   SET3(Q);
   Q = Q0;
-  (*info) = -1;
-#ifdef FC3D_UE_DEBUG
-  printf("frictionContact3D_unitary_enumerative M:\n");
-  print3x3(M);
-  M = M00;
-  printf("frictionContact3D_unitary_enumerative Q:\n");
-  print3(Q);
-  Q = Q0;
 
-#endif
   //printf("frictionContact3D_unitary_enumerative M:\n");
   //print3x3(M);M=M00;
   //printf("frictionContact3D_unitary_enumerative Q:\n");
@@ -207,7 +191,6 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     *velocity0 = *Q0;
     *velocity1 = *Q1;
     *velocity2 = *Q2;
-    (*info) = 0;
     return 0;
   }
 
@@ -229,6 +212,7 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     *velocity0 = 0;
     *velocity1 = *reaction0 * *M10 + *Q1;
     *velocity2 = *reaction0 * *M20 + *Q2;
+
     return 0;
   }
 
@@ -237,7 +221,6 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   M = M00;
   reaction = reaction0;
   Q = Q0;
-  (*info) = -1;
   if (!isnan(*reaction0))
   {
     if (- *reaction0 + tol > 0.0)
@@ -249,10 +232,90 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
         *velocity0 = 0;
         *velocity1 = 0;
         *velocity2 = 0;
-        (*info) = 0;
         return 0;
       }
   }
+
+}
+/*API for the nsgs*/
+int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction,   SolverOptions* options)
+{
+  int info;
+  double velocity[3];
+  return frictionContact3D_unitary_enumerative(problem, reaction, velocity, &info, options);
+}
+int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
+{
+  *info = frictionContact3D_unitary_enumerative_test_non_sliding(problem, reaction, velocity, options);
+  if (!(*info))
+    return *info ;
+  if (options->solverId == SICONOS_FRICTION_3D_QUARTIC_NU)
+  {
+    *info = frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(problem, reaction, options);
+  }
+  else
+  {
+    *info = frictionContact3D_unitary_enumerative_solve_sliding(problem, reaction, options);
+  }
+  if (!(*info))
+  {
+    double * M = problem->M->matrix0;
+    double * Q = problem->q;
+    SET3(Q);
+    Q = Q0;
+    SET3(reaction);
+    reaction = reaction0;
+    SET3(velocity);
+    velocity = velocity0;
+    mv3x3(M, reaction, velocity);
+    reaction = reaction0;
+    velocity = velocity0;
+    *velocity0 += *Q0;
+    *velocity1 += *Q1;
+    *velocity2 += *Q2;
+  }
+#ifdef FC3D_UE_DEBUG
+  if (*info)
+    printf("frictionContact3D_unitary_enumerative FAILED\n");
+
+  double err = 0.0;
+  FrictionContact3D_unitary_compute_and_add_error(reaction, velocity, *(problem->mu), &err);
+  printf("error is %e.", err);
+
+  printf("frictionContact3D_unitary_enumerative_solve: end\n");
+#endif
+  return *info ;
+}
+int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double * reaction,   SolverOptions* options)
+{
+
+
+  double * M = problem->M->matrix0;
+  double * Q = problem->q;
+  double * mu = problem->mu;
+  double D1, D2;
+  double alpha;
+  double tol = options->dparam[0];
+  SET3X3(M);
+  M = M00;
+  SET3(reaction);
+  reaction = reaction0;
+  SET3(Q);
+  Q = Q0;
+#ifdef FC3D_UE_DEBUG
+  printf("frictionContact3D_unitary_enumerative (begin) M:\n");
+  print3x3(M);
+  M = M00;
+  printf("frictionContact3D_unitary_enumerative (begin) Q:\n");
+  print3(Q);
+  Q = Q0;
+
+#endif
+
+  //printf("frictionContact3D_unitary_enumerative M:\n");
+  //print3x3(M);M=M00;
+  //printf("frictionContact3D_unitary_enumerative Q:\n");
+  //print3(Q);Q=Q0;
 
   /*Sliding? */
 #ifdef FC3D_UE_DEBUG
@@ -266,7 +329,9 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   double *Q_2 = Q + 1;
   double V[4];
   double * V00 = V, * V10 = V00 + 1, *V01 = V10 + 1, *V11 = V01 + 1;
+  /*D is the projection of the origine on the directrice of the conic (R_T1,R_T2)*/
   double OD[2];
+  /*D2 is the projection of the origine on the directrice of the conic (V*R_T1,V*R_T2)*/
   double OD2[2];
   double D_Dir[2];
   double Q2b[2];
@@ -305,7 +370,14 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
     if (!FC3D_UE_TEST_NULL(OD2[0]))
     {
-      phi = atan(OD2[1] / OD2[0]);
+      if (FC3D_UE_TEST_NULL(OD2[1]))
+      {
+        phi = 0;
+      }
+      else
+      {
+        phi = atan(OD2[1] / OD2[0]);
+      }
     }
     else
     {
@@ -330,8 +402,10 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   }
   double RTb[2];
 
+  /*Q2b is V* \tilde q in the siconos dev note.*/
   Q2b[0] = (*V00) * Q_2[0] + (*V01) * Q_2[1];
   Q2b[1] = (*V10) * Q_2[0] + (*V11) * Q_2[1];
+  /*M1_b is V* \tilde M_{1.} in the siconos dev note.*/
   M1_b[0] = (*V00) * (*M10) + (*V01) * (*M20);
   M1_b[1] = (*V10) * (*M10) + (*V11) * (*M20);
   double a1 = -M1_b[0] / (*mu);
@@ -406,11 +480,13 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
     double alpha1 = 0.0;
     double alpha2 = 0.0;
     if (numR >= nbRealRacines)
+    {
       //RTb[0]==0
       if (numR < nbRealRacines + 2)
         alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
       else
         alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
+    }
     printf("FC3D_UE_DEBUG :: alpha1 = %e = %e =alpha2.(must be equal except if RTb[x]==0)\n", alpha1, alpha2);
     if (!FC3D_UE_TEST_NULL(e))
     {
@@ -446,11 +522,15 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
              *M00 * (*reaction0) + *M01 * (*reaction1) + *M02 * (*reaction2) + *Q0,
              *M10 * (*reaction0) + *M11 * (*reaction1) + *M12 * (*reaction2) + *Q1,
              *M20 * (*reaction0) + *M21 * (*reaction1) + *M22 * (*reaction2) + *Q2);
+      double err = 0.0;
+      double velocity[3];
+
+      velocity[0] = 0;
+      velocity[1] = -alpha * (*reaction1);
+      velocity[2] = -alpha * (*reaction2);
+      FrictionContact3D_unitary_compute_and_add_error(reaction, velocity, *(problem->mu), &err);
+      printf("error is %e.", err);
 #endif
-      *velocity0 = 0;
-      *velocity1 = -alpha * (*reaction1);
-      *velocity2 = -alpha * (*reaction2);
-      (*info) = 0;
       return 0;
     }
   }
@@ -458,10 +538,10 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_UE_DEBUG: Solver failed\n");
 #endif
-  printf("frictionContact3D_unitary_enumerative M:\n");
+  printf("frictionContact3D_unitary_enumerative (failed) M:\n");
   print3x3(M);
   M = M00;
-  printf("frictionContact3D_unitary_enumerative Q:\n");
+  printf("frictionContact3D_unitary_enumerative (failed) Q:\n");
   print3(Q);
   Q = Q0;
   projectionOnCone(reaction, *mu);
@@ -495,4 +575,138 @@ int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(
   options->internalSolvers = NULL;
 
   return 0;
+}
+/*ax+by+c=0
+  a1x+b1y+c1=0*/
+void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y)
+{
+  double delta = *a * *b1 - *a1 * *b;
+  if (delta == 0)
+  {
+    *x = NAN;
+    *y = NAN;
+  }
+  else
+  {
+    double invd = 1.0 / delta;
+    *x = (*b * *c1 - *c * *b1) * invd;
+    *y = -(*a * *c1 - *a1 * *c) * invd;
+  }
+
+}
+/*
+ *Implementation from Gilles Davier : quatic formulation in respect of alpha.
+ */
+int frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
+{
+  double * M = problem->M->matrix0;
+  double * Q = problem->q;
+
+  double D1, D2;
+  double tol = options->dparam[0];
+  SET3X3(M);
+  M = M00;
+  SET3(reaction);
+  reaction = reaction0;
+  SET3(Q);
+  Q = Q0;
+
+  double cg[5];
+
+  int nbRealRacines;
+  double Racines[4];
+
+  double W0 = *M00 ;
+  double invW0 = 1 / W0;
+  double alpha = *M01 ;
+  double beta  = *M02 ;
+
+  double q = *Q0 ;
+  double q1 = -(- alpha * q * invW0 + *Q1);
+  double q2 = -(- beta * q * invW0 + *Q2);
+
+
+  double lambda1 = *M11 - alpha * alpha * invW0;
+  double lambda2 = *M22 - beta * beta * invW0;
+  double lambda12  = *M12 - alpha * beta * invW0;
+  double mu = *(problem->mu);
+#ifdef FC3D_UE_DEBUG
+  printf("W0=%e\ninvW0=%e\n,alpha=%e\nbeta=%e\nlambda1=%e\nlambda2=%e\nlambda12=%e\nq=%e\nq1=%e\nq2=%e\nmu=%e", W0, invW0, alpha, beta, lambda1, lambda2, lambda12, q, q1, q2, mu);
+#endif
+
+
+  //MAPLE - 1contact.mws
+  cg[0] = -mu * mu * q * q;
+  cg[1] = -2 * mu * mu * q * alpha * q1 - 2 * mu * mu * q * beta * q2 - (2 * lambda1 + 2 * lambda2) * mu * mu * q * q;
+  cg[2] = 2 * mu * mu * q * beta * q1 * lambda12 + W0 * W0 * q2 * q2 + 2 * mu * mu * q * q * lambda12 * lambda12 - 2 * mu * mu * beta * alpha * q1 * q2 + 2 * mu * mu * q * alpha * q2 * lambda12 - (lambda1 * lambda1 + 4 * lambda1 * lambda2 + lambda2 * lambda2) * mu * mu * q * q + W0 * W0 * q1 * q1 - beta * beta * mu * mu * q2 * q2 - 2 * (lambda1 + 2 * lambda2) * alpha * mu * mu * q * q1 - mu * mu * alpha * alpha * q1 * q1 - 2 * (2 * lambda1 + lambda2) * beta * mu * mu * q * q2;
+  cg[3] = 2 * beta * mu * mu * q * q2 * lambda12 * lambda12 + 2 * (lambda1 + lambda2) * mu * mu * q * q * lambda12 * lambda12 - 4 * W0 * W0 * q1 * q2 * lambda12 - 2 * (lambda1 * lambda1 + 2 * lambda1 * lambda2) * beta * mu * mu * q * q2 + 2 * (lambda1 + lambda2) * alpha * mu * mu * q * q2 * lambda12 - (2 * lambda1 * lambda1 * lambda2 + 2 * lambda1 * lambda2 * lambda2) * mu * mu * q * q + 2 * (lambda1 + lambda2) * beta * mu * mu * q * q1 * lambda12 + 2 * alpha * beta * mu * mu * q2 * q2 * lambda12 + 2 * lambda1 * W0 * W0 * q2 * q2 + 2 * beta * beta * mu * mu * q1 * q2 * lambda12 - 2 * lambda2 * alpha * alpha * mu * mu * q1 * q1 - 2 * (lambda1 + lambda2) * alpha * beta * mu * mu * q1 * q2 - 2 * (2 * lambda1 * lambda2 + lambda2 * lambda2) * alpha * mu * mu * q * q1 + 2 * mu * mu * alpha * alpha * q1 * q2 * lambda12 + 2 * mu * mu * beta * alpha * q1 * q1 * lambda12 + 2 * mu * mu * q * alpha * q1 * lambda12 * lambda12 + 2 * lambda2 * W0 * W0 * q1 * q1 - 2 * lambda1 * beta * beta * mu * mu * q2 * q2;
+  cg[4] = -beta * beta * mu * mu * q1 * q1 * lambda12 * lambda12 - alpha * alpha * mu * mu * q2 * q2 * lambda12 * lambda12 - lambda1 * lambda1 * beta * beta * mu * mu * q2 * q2 - lambda1 * lambda1 * lambda2 * lambda2 * mu * mu * q * q - lambda2 * lambda2 * alpha * alpha * mu * mu * q1 * q1 + lambda2 * lambda2 * W0 * W0 * q1 * q1 + lambda1 * lambda1 * W0 * W0 * q2 * q2 + W0 * W0 * q1 * q1 * lambda12 * lambda12 - 2 * beta * mu * mu * q * q1 *  pow((double) lambda12, (double) 3) - 2 * alpha * mu * mu * q * q2 *  pow((double) lambda12, (double) 3) + 2 * lambda1 * lambda2 * beta * mu * mu * q * q1 * lambda12 + 2 * lambda1 * lambda2 * alpha * mu * mu * q * q2 * lambda12 - 2 * lambda1 * lambda2 * alpha * beta * mu * mu * q1 * q2 - 2 * alpha * beta * mu * mu * q1 * q2 * lambda12 * lambda12 + 2 * lambda2 * alpha * beta * mu * mu * q1 * q1 * lambda12 + 2 * lambda2 * alpha * alpha * mu * mu * q1 * q2 * lambda12 + 2 * lambda1 * beta * mu * mu * q * q2 * lambda12 * lambda12 + 2 * lambda1 * beta * beta * mu * mu * q1 * q2 * lambda12 + 2 * lambda1 * alpha * beta * mu * mu * q2 * q2 * lambda12 - 2 * lambda1 * lambda2 * lambda2 * alpha * mu * mu * q * q1 - 2 * lambda1 * lambda1 * lambda2 * beta * mu * mu * q * q2 + 2 * lambda2 * alpha * mu * mu * q * q1 * lambda12 * lambda12 - mu * mu * q * q *  pow((double) lambda12, (double) 4) + W0 * W0 * q2 * q2 * lambda12 * lambda12 - 2 * lambda2 * W0 * W0 * q1 * q2 * lambda12 - 2 * lambda1 * W0 * W0 * q1 * q2 * lambda12 + 2 * lambda1 * lambda2 * mu * mu * q * q * lambda12 * lambda12;
+
+  compute_racines(cg, &nbRealRacines, Racines);
+  double nu = -1;
+  for (int i = 0; i < nbRealRacines; i++)
+  {
+    if (nu < 0 && Racines[i] > 0)
+      nu = Racines[i];
+    else if (Racines[i] > 0 && Racines[i] < nu)
+      nu = Racines[i];
+  }
+  if (nu > 0)
+  {
+#ifdef FC3D_UE_DEBUG
+    printf("nb racines :%d\n", nbRealRacines);
+    printf("nu=%e\n", nu);
+#endif
+    /*system Mt*Rt=qt*/
+    double Mt00 = lambda1 + nu;
+    double Mt01 = lambda12;
+    double Mt10 = lambda12;
+    double Mt11 = lambda2 + nu;
+    double qt0 = -q1;
+    double qt1 = -q2;
+    solve2x2(&Mt00, &Mt01, &qt0, &Mt10, &Mt11, &qt1, reaction1, reaction2);
+    *reaction0 = sqrt((*reaction1 * *reaction1) + (*reaction2 * *reaction2)) / mu;
+
+    reaction = reaction0;
+
+#ifdef FC3D_UE_DEBUG
+    double velocity_[3];
+    double * velocity = velocity_;
+    SET3(velocity);
+    velocity = velocity0;
+    mv3x3(M, reaction, velocity);
+    velocity = velocity0;
+    reaction = reaction0;
+
+    *velocity0 += *Q0;
+    *velocity1 += *Q1;
+    *velocity2 += *Q2;
+    printf("reaction is:\n");
+    print3(reaction);
+    reaction = reaction0;
+    printf("velocity is:\n");
+    print3(velocity);
+    velocity = velocity0;
+    double err = 0.0;
+    FrictionContact3D_unitary_compute_and_add_error(reaction, velocity, mu, &err);
+    printf("error is %e.\n", err);
+    printf("frictionContact3D_unitary_enumerative_poly_nu  M:\n");
+    print3x3(M);
+    M = M00;
+    printf("frictionContact3D_unitary_enumerative_poly_nu  Q:\n");
+    print3(Q);
+    Q = Q0;
+#endif
+    return 0;
+  }
+#ifdef FC3D_UE_DEBUG
+
+#endif
+  printf("frictionContact3D_unitary_enumerative_poly_nu (FAILED) M:\n");
+  print3x3(M);
+  M = M00;
+  printf("frictionContact3D_unitary_enumerative_poly_nu (FAILED) Q:\n");
+  print3(Q);
+  Q = Q0;
+  return -1;
 }

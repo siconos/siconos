@@ -67,7 +67,7 @@ double p[5], r[3][5];
   if (d >= 0)
   {
     d = pow((sqrt(d) + fabs(b)), 1.0 / 3.0);
-    printf("d=%f\n", d);
+    //printf("d=%f\n",d);
     if (d != 0)
     {
       if (b > 0) b = -d;

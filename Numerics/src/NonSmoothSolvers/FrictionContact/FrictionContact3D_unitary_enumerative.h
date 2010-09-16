@@ -38,9 +38,13 @@ extern "C"
 #endif
   void frictionContact3D_unitary_enumerative_free(FrictionContactProblem* problem);
   void frictionContact3D_unitary_enumerative_initialize(FrictionContactProblem* problem);
+  /*API for the nsgs*/
   int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
+  int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
+  int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, double * reaction, double * velocity, SolverOptions* options);
   int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
   int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(SolverOptions* options);
+  int frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
 #ifdef __cplusplus
 }
 #endif
