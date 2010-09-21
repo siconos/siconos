@@ -487,6 +487,13 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
       else
         alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
     }
+    else
+    {
+      if (RTb[1] != 0.0)
+        alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
+      if (RTb[0] != 0.0)
+        alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
+    }
     printf("FC3D_UE_DEBUG :: alpha1 = %e = %e =alpha2.(must be equal except if RTb[x]==0)\n", alpha1, alpha2);
     if (!FC3D_UE_TEST_NULL(e))
     {
@@ -529,6 +536,7 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
       velocity[1] = -alpha * (*reaction1);
       velocity[2] = -alpha * (*reaction2);
       FrictionContact3D_unitary_compute_and_add_error(reaction, velocity, *(problem->mu), &err);
+      printf("Compute v with alpha=%e\n", alpha);
       printf("error is %e.", err);
 #endif
       return 0;

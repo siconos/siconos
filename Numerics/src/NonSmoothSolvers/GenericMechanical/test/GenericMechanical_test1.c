@@ -31,7 +31,7 @@ int main(void)
   FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  genericMechnicalProblem_setDefaultSolverOptions(options, 0);
+  genericMechnicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_QUARTIC);
 
   info = genericMechanical_test_function(finput, options);
 

@@ -81,7 +81,8 @@ void readSolverOptions(int driverType, SolverOptions* options)
   if (getenv("SICONOSPATH") == NULL)
   {
     fprintf(stderr, "Numerics, readSolverOptions error, SICONOSPATH environment variable not set. Can not find default solver options file.\n");
-    exit(EXIT_FAILURE);
+    return;
+    //exit(EXIT_FAILURE);
   }
 
   FILE * ficin;
