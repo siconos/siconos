@@ -684,20 +684,20 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az, doubl
       (*A1y) = -(*Ax);
       (*A1z) = 0;
     }
-    else  /*(*Az is the biggest*/
+    else /*(*Az is the biggest*/
     {
       (*A1z) = (*Ax);
       (*A1y) = -(*Az);
       (*A1x) = 0;
     }
   }
-  else if (fabs(*Ay) > fabs(*Az))  /*(*Ay is the bigest*/
+  else if (fabs(*Ay) > fabs(*Az)) /*(*Ay is the bigest*/
   {
     (*A1y) = (*Ax);
     (*A1x) = -(*Ay);
     (*A1z) = 0;
   }
-  else  /*(*Az is the biggest*/
+  else /*(*Az is the biggest*/
   {
     (*A1z) = (*Ax);
     (*A1y) = -(*Az);
