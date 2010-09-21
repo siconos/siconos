@@ -53,15 +53,6 @@
  
 
 #if defined(OP3X3_C_STORAGE)
-#define _00 0
-#define _01 1
-#define _02 2
-#define _10 3
-#define _11 4
-#define _12 5
-#define _20 6
-#define _21 7
-#define _22 8
 #define SET3X3(V)                             \
   double* V##00 = V++;                        \
   double* V##01 = V++;                        \
@@ -96,15 +87,6 @@
   }
 
 #else // fortran storage
-#define _00 0
-#define _10 1
-#define _20 2
-#define _01 3
-#define _11 4
-#define _21 5
-#define _02 6
-#define _12 7
-#define _22 8
 
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
  * warning the pointer a is modified (use a00 instead) and is ready
