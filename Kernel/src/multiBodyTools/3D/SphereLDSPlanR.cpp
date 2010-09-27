@@ -24,22 +24,13 @@
 SphereLDSPlanR::SphereLDSPlanR(double r, double A, double B, double C, double D)
   : LagrangianScleronomousR(), r(r), A(A), B(B), C(C), D(D)
 {
+  n1 = A;
+  n2 = B;
+  n3 = C;
+
   nN = sqrt(A * A + B * B + C * C);
 
-  n1 = A / nN;
-  n2 = B / nN;
-  n3 = C / nN;
-
-  nU = sqrt((A + B) * (A + B) + (B - C) * (B - C) + (A + C) * (A + C));
-  u1 = (B - C) / nU;
-  u2 = -(A + C) / nU;
-  u3 = (A + B) / nU;
-
-  // v = n /\ u
-
-  v1 = B * (A + B) / (nN * nU) - C * (-A - C) / (nN * nU);
-  v2 = C * (B - C) / (nN * nU) - A * (A + B) / (nN * nU);
-  v3 = A * (-A - C) / (nN * nU) - B * (B - C) / (nN * nU);
+  orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3);
 
   // r*u & r *v
 
