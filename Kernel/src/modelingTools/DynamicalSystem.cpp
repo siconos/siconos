@@ -283,7 +283,7 @@ void DynamicalSystem::update(double time)
 void DynamicalSystem::initMemory(unsigned int steps)
 {
   if (steps == 0)
-    cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
+    cout << "Warning : initMemory with size equal to zero" << endl;
   else
   {
     _stepsInMemory = steps;
