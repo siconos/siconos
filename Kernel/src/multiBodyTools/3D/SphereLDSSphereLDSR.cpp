@@ -79,92 +79,132 @@ void SphereLDSSphereLDSR::computeJachq(double)
   double phi2 = (*data[q0])(10);
   double psi2 = (*data[q0])(11);
 
-  double cthe1 = cos(theta1);
-  double sthe1 = sin(theta1);
-  double cphi1 = cos(phi1);
-  double sphi1 = sin(phi1);
-
-  double cthe2 = cos(theta2);
-  double sthe2 = sin(theta2);
-  double cphi2 = cos(phi2);
-  double sphi2 = sin(phi2);
-
-
-
   A = -(q_6 - q_0);
   B = -(q_7 - q_1);
   C = -(q_8 - q_2);
 
-  nN = sqrt(A * A + B * B + C * C);
+  n1 = A;
+  n2 = B;
+  n3 = C;
 
-  n1 = A / nN;
-  n2 = B / nN;
-  n3 = C / nN;
+  orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3);
 
-  nU = sqrt((A + B) * (A + B) + (B - C) * (B - C) + (A + C) * (A + C));
-  u1 = (B - C) / nU;
-  u2 = -(A + C) / nU;
-  u3 = (A + B) / nU;
-
-  // v = n /\ u
-
-  v1 = B * (A + B) / (nN * nU) - C * (-A - C) / (nN * nU);
-  v2 = C * (B - C) / (nN * nU) - A * (A + B) / (nN * nU);
-  v3 = A * (-A - C) / (nN * nU) - B * (B - C) / (nN * nU);
-
-  r1u1 = r1 * u1;
-  r1u2 = r1 * u2;
-  r1u3 = r1 * u3;
-
-  r1v1 = r1 * v1;
-  r1v2 = r1 * v2;
-  r1v3 = r1 * v3;
-
-  r2u1 = -r2 * u1;
-  r2u2 = -r2 * u2;
-  r2u3 = -r2 * u3;
-
-  r2v1 = r2 * v1;
-  r2v2 = r2 * v2;
-  r2v3 = r2 * v3;
-
+  double x0 = 2 * n1 * r1 * u2;
+  double x1 = 2 * n2 * r1 * u1;
+  double x2 = x0 - x1;
+  double x3 = sin(phi1);
+  double x4 = 2 * n2 * r1 * u3;
+  double x5 = 2 * n3 * r1 * u2;
+  double x6 = x4 - x5;
+  double x7 = cos(phi1);
+  double x8 = sin(theta1);
+  double x9 = 2 * n3 * r1 * u1;
+  double x10 = 2 * n1 * r1 * u3;
+  double x11 = x9 - x10;
+  double x12 = 2 * n2 * r2 * u1;
+  double x13 = 2 * n1 * r2 * u2;
+  double x14 = x12 - x13;
+  double x15 = sin(phi2);
+  double x16 = 2 * n3 * r2 * u2;
+  double x17 = 2 * n2 * r2 * u3;
+  double x18 = x16 - x17;
+  double x19 = cos(phi2);
+  double x20 = sin(theta2);
+  double x21 = 2 * n1 * r2 * u3;
+  double x22 = 2 * n3 * r2 * u1;
+  double x23 = x21 - x22;
+  double x24 = cos(theta1);
+  double x25 = 2 * n1 * r1 * v2;
+  double x26 = 2 * n2 * r1 * v1;
+  double x27 = x25 - x26;
+  double x28 = 2 * n2 * r1 * v3;
+  double x29 = 2 * n3 * r1 * v2;
+  double x30 = x28 - x29;
+  double x31 = 2 * n3 * r1 * v1;
+  double x32 = 2 * n1 * r1 * v3;
+  double x33 = x31 - x32;
+  double x34 = cos(theta2);
+  double x35 = 2 * n1 * r2 * v2;
+  double x36 = 2 * n2 * r2 * v1;
+  double x37 = x35 - x36;
+  double x38 = 2 * n2 * r2 * v3;
+  double x39 = 2 * n3 * r2 * v2;
+  double x40 = x38 - x39;
+  double x41 = 2 * n3 * r2 * v1;
+  double x42 = 2 * n1 * r2 * v3;
+  double x43 = x41 - x42;
+  double x44 = x3 * x8;
+  double x45 = x7 * x8;
+  double x46 = x19 * x20;
+  double x47 = x15 * x20;
+  double x48 = x18 * x47;
+  double x49 = x30 * x44;
+  double x50 = x33 * x45;
+  double x51 = x44 * x6;
+  double x52 = x11 * x45;
+  double x53 = x40 * x47;
+  double x54 = x23 * x46;
+  double x55 = x43 * x46;
+  double x56 = x2 * x24;
+  double x57 = -u2;
+  double x58 = x6 * x7;
+  double x59 = x14 * x34;
+  double x60 = -n3;
+  double x61 = -u1;
+  double x62 = -n1;
+  double x63 = x24 * x27;
+  double x64 = x34 * x37;
+  double x65 = x11 * x3;
+  double x66 = x3 * x33;
+  double x67 = -u3;
+  double x68 = x19 * x40;
+  double x69 = x30 * x7;
+  double x70 = -n2;
+  double x71 = x15 * x23;
+  double x72 = x15 * x43;
+  double x73 = x18 * x19;
+  double x74 = x48 + x59;
+  double x75 = x49 + x63;
+  double x76 = x66 + x69;
+  double x77 = x68 + x72;
+  double x78 = x71 + x73;
+  double x79 = x51 + x56;
+  double x80 = x58 + x65;
+  double x81 = x53 + x64;
   (*g)(0, 0) = n1;
-  (*g)(1, 0) = u1;
-  (*g)(2, 0) = v1;
   (*g)(0, 1) = n2;
-  (*g)(1, 1) = u2;
-  (*g)(2, 1) = v2;
   (*g)(0, 2) = n3;
-  (*g)(1, 2) = u3;
-  (*g)(2, 2) = v3;
   (*g)(0, 3) = 0;
-  (*g)(1, 3) = -r1v1 * cphi1 - r1v2 * sphi1;
-  (*g)(2, 3) = r1u1 * cphi1 + r1u2 * sphi1;
   (*g)(0, 4) = 0;
-  (*g)(1, 4) = -r1v3;
-  (*g)(2, 4) = r1u3;
   (*g)(0, 5) = 0;
-  (*g)(1, 5) = -r1v3 * cthe1 + r1v2 * cphi1 * sthe1 - r1v1 * sphi1 * sthe1;
-  (*g)(2, 5) = r1u3 * cthe1 + r1u1 * sphi1 * sthe1 - r1u2 * cphi1 * sphi1;
-
-  (*g)(0, 6) = -n1;
-  (*g)(1, 6) = -u1;
-  (*g)(2, 6) = v1;
-  (*g)(0, 7) = -n2;
-  (*g)(1, 7) = -u2;
-  (*g)(2, 7) = v2;
-  (*g)(0, 8) = -n3;
-  (*g)(1, 8) = -u3;
-  (*g)(2, 8) = v3;
+  (*g)(0, 6) = x62;
+  (*g)(0, 7) = x70;
+  (*g)(0, 8) = x60;
   (*g)(0, 9) = 0;
-  (*g)(1, 9) = -r2v1 * cphi2 - r2v2 * sphi2;
-  (*g)(2, 9) = r2u1 * cphi2 + r2u2 * sphi2;
   (*g)(0, 10) = 0;
-  (*g)(1, 10) = -r2v3;
-  (*g)(2, 10) = r2u3;
   (*g)(0, 11) = 0;
-  (*g)(1, 11) = -r2v3 * cthe2 + r2v2 * cphi2 * sthe2 - r2v1 * sphi2 * sthe2;
-  (*g)(2, 11) = r2u3 * cthe2 + r2u1 * sphi2 * sthe2 - r2u2 * cphi2 * sphi2;
-
-}
-
+  (*g)(1, 0) = u1;
+  (*g)(1, 1) = u2;
+  (*g)(1, 2) = u3;
+  (*g)(1, 3) = x80;
+  (*g)(1, 4) = x2;
+  (*g)(1, 5) = x79 - x52;
+  (*g)(1, 6) = x61;
+  (*g)(1, 7) = x57;
+  (*g)(1, 8) = x67;
+  (*g)(1, 9) = x78;
+  (*g)(1, 10) = x14;
+  (*g)(1, 11) = x74 - x54;
+  (*g)(2, 0) = v1;
+  (*g)(2, 1) = v2;
+  (*g)(2, 2) = v3;
+  (*g)(2, 3) = x76;
+  (*g)(2, 4) = x27;
+  (*g)(2, 5) = x75 - x50;
+  (*g)(2, 6) = v1;
+  (*g)(2, 7) = v2;
+  (*g)(2, 8) = v3;
+  (*g)(2, 9) = x77;
+  (*g)(2, 10) = x37;
+  (*g)(2, 11) = x81 - x55;
+};
