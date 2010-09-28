@@ -45,6 +45,7 @@
   REGISTER(NewtonEulerR)                                     \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
   REGISTER_BASE(Lmgc2DDSK, LagrangianDS)                     \
+  REGISTER_BASE(Lmgc2DPOLYG, LagrangianDS)                   \
   REGISTER_BASE(Disk, LagrangianDS)                          \
   REGISTER_BASE(Circle, LagrangianDS)                        \
   REGISTER_BASE(SphereLDS, LagrangianDS)                     \
