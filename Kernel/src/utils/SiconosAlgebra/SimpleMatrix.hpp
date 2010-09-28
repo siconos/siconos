@@ -629,5 +629,6 @@ public:
 
 };
 
+typedef std::vector<SP::SimpleMatrix> VectorOfSimpleMatrices;
 
 #endif

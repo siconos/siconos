@@ -35,6 +35,7 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
+#include "BoundaryCondition.hpp"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -178,7 +179,8 @@ protected:
       (multiplier, force, ...)*/
   SP::SiconosVector _r;
 
-
+  /** Boundary condition applied to a dynamical systems*/
+  SP::BoundaryCondition _boundaryConditions;
 
   /** used by the relative convergence criteron*/
   double _normRef;
@@ -238,7 +240,7 @@ protected:
 
   /** A container of matrices to save temporary values (zeroMatrix, idMatrix, inverse of Mass or any tmp work matrix ...)
    * No get-set functions at the time. Only used as a protected member.*/
-  VectorOfMatrices _workMatrix;
+  VectorOfSimpleMatrices _workMatrix;
 
   /** the XML object linked to the DynamicalSystem  */
   SP::DynamicalSystemXML _dsxml;
@@ -384,6 +386,21 @@ public:
   void setRPtr(SP::SiconosVector);
   // --- Residu ---
 
+  /** set Boundary Conditions
+   *  \param BoundaryConditions
+   */
+  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
+  {
+    _boundaryConditions = newbd;
+  };
+
+  /** get Boundary Conditions
+   *  \return pointer on a BoundaryConditions
+   */
+  inline SP::BoundaryCondition boundaryConditions()
+  {
+    return _boundaryConditions;
+  };
 
   /** get Residu,
    *  \return pointer on a SiconosVector

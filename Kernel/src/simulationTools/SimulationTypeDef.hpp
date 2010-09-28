@@ -45,7 +45,7 @@ const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
 // ================== Objects to handle DS ==================
 
 /** Map of SiconosMatrix; key = the related DS*/
-typedef std::map<SP::DynamicalSystem, SP::SiconosMatrix> MapOfDSMatrices;
+typedef std::map<SP::DynamicalSystem, SP::SimpleMatrix> MapOfDSMatrices;
 
 /** Iterator through a map of matrices */
 typedef MapOfDSMatrices::iterator MatIterator;

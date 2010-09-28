@@ -25,6 +25,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 
+
 using namespace std;
 using namespace RELATION;
 
@@ -128,24 +129,6 @@ void Moreau::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   OSIDynamicalSystems->insert(ds);
 }
-
-void Moreau::setWMap(const MapOfDSMatrices& newMap)
-{
-  // check sizes.
-  if (newMap.size() != OSIDynamicalSystems->size())
-    RuntimeException::selfThrow("Moreau::setWMap(newMap): number of W matrices is different from number of DS.");
-
-  // pointer links! No reallocation
-  ConstMatIterator it;
-
-  WMap.clear();
-
-  for (it = newMap.begin(); it != newMap.end(); ++it)
-  {
-    WMap[(*it).first] = (*it).second;
-  }
-}
-
 const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
@@ -156,7 +139,7 @@ const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
   return *(WMap[ds]); // Copy !!
 }
 
-SP::SiconosMatrix Moreau::W(SP::DynamicalSystem ds)
+SP::SimpleMatrix Moreau::W(SP::DynamicalSystem ds)
 {
   assert(ds && "Moreau::W(ds): ds == NULL.");
   //  return WMap[0];
@@ -199,7 +182,7 @@ void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
   }
 }
 
-void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
+void Moreau::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
 {
   unsigned int line = newPtr->size(0);
   unsigned int col  = newPtr->size(1);
@@ -216,6 +199,29 @@ void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
   WMap[ds] = newPtr;                  // link with new pointer
 }
 
+
+
+const SimpleMatrix Moreau::getWBoundaryConditions(SP::DynamicalSystem ds)
+{
+  assert(ds &&
+         "Moreau::getWBoundaryConditions(ds): ds == NULL.");
+  //    return *(WBoundaryConditionsMap[0]);
+  assert(_WBoundaryConditionsMap[ds] &&
+         "Moreau::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+  return *(_WBoundaryConditionsMap[ds]); // Copy !!
+}
+
+SP::SiconosMatrix Moreau::WBoundaryConditions(SP::DynamicalSystem ds)
+{
+  assert(ds && "Moreau::WBoundaryConditions(ds): ds == NULL.");
+  //  return WBoundaryConditionsMap[0];
+  //  if(WBoundaryConditionsMap[ds]==NULL)
+  //    RuntimeException::selfThrow("Moreau::WBoundaryConditions(ds): W[ds] == NULL.");
+  return _WBoundaryConditionsMap[ds];
+}
+
+
+
 void Moreau::initialize()
 {
   OneStepIntegrator::initialize();
@@ -231,12 +237,13 @@ void Moreau::initialize()
     // W initialization
     initW(t0, *itDS);
 
+
+
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
 
   }
 }
-
 void Moreau::initW(double t, SP::DynamicalSystem ds)
 {
   // This function:
@@ -331,11 +338,102 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     d->luW()->PLUFactorizationInPlace();
 
   }
-  else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
+
+  // WBoundaryConditions initialization
+  if (ds->boundaryConditions())
+  {
+    initWBoundaryConditions(ds);
+  }
+
+
+
 }
+
+
+void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
+{
+  // This function:
+  // - allocate memory for a matrix WBoundaryConditions
+  // - insert this matrix into WBoundaryConditionsMap with ds as a key
+
+  if (!ds)
+    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds == NULL");
+
+  if (!OSIDynamicalSystems->isIn(ds))
+    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+
+  if (_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end())
+    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+
+  // Memory allocation for WBoundaryConditions
+  unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
+
+  unsigned int numberBoundaryConditions = ds->boundaryConditions()->velocityIndices()->size();
+
+  _WBoundaryConditionsMap[ds].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+
+  (ds->boundaryConditions()->reactionImpulse()).reset(new SimpleVector(ds->getDim()));
+
+  ds->boundaryConditions()->reactionImpulse()->zero();
+
+
+
+  computeWBoundaryConditions(ds);
+
+}
+
+
+void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
+{
+  // Compute WBoundaryConditions matrix of the Dynamical System ds, at time t and for the current ds state.
+
+  // When this function is called, WBoundaryConditionsMap[ds] is supposed to exist and not to be null
+  // Memory allocation has been done during initWBoundaryConditions.
+
+  assert(ds &&
+         "Moreau::computeWBoundaryConditions(t,ds) - ds == NULL");
+
+  assert((_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end()) &&
+         "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+
+  SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+
+  SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+
+  int columnindex = 0;
+
+  vector<unsigned int>::iterator itindex;
+
+
+
+  for (itindex = ds->boundaryConditions()->velocityIndices()->begin() ;
+       itindex != ds->boundaryConditions()->velocityIndices()->end();
+       ++itindex)
+  {
+
+    WMap[ds]->getSubCol(*itindex, 0, columntmp);
+
+    WBoundaryConditions->setCol(columnindex, *columntmp);
+    double diag = (*columntmp)(*itindex);
+    columntmp->zero();
+    (*columntmp)(*itindex) = diag;
+
+    WMap[ds]->setSubCol(*itindex, 0, columntmp);
+    WMap[ds]->setSubRow(*itindex, 0, columntmp);
+
+    columnindex ++;
+  }
+
+
+
+
+}
+
+
 
 void Moreau::computeW(double t, SP::DynamicalSystem ds)
 {
@@ -416,6 +514,11 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::NewtonEulerDS)
     ;
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
+
+
+
+
+
 
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -647,7 +750,12 @@ double Moreau::computeResidu()
       }
 
 
+
+
       (* d->workFree()) = *residuFree;
+
+
+
       *residuFree += *d->p(2);
       normResidu = residuFree->norm2();
 
@@ -768,6 +876,7 @@ void Moreau::computeFreeState()
       W->PLUForwardBackwardInPlace(*xfree);
 
 
+
       // -> compute real xfree
       *xfree *= -1.0;
       *xfree += *x;
@@ -861,14 +970,29 @@ void Moreau::computeFreeState()
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
 
+
+      //applyBoundaryConditionsOnResiduFree();
+
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SP::SiconosVector vfree = d->workFree();//workX[d];
       //    (*vfree)=*(d->residuFree());
 
 
+      if (d->boundaryConditions())
+      {
+
+      }
+
+
       W->PLUForwardBackwardInPlace(*vfree);
       //    *vfree *= -1.0;
+
+      //applyBoundaryConditionsOnVelocityFree();
+
       *vfree += *vold;
+
+
+
     }
     else if (dsType == Type::NewtonEulerDS)
     {

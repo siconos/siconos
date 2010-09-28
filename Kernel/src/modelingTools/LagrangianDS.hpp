@@ -513,7 +513,7 @@ public:
   /** get MassLU: a copy of the mass matrix which is LU-factorized. Temporary function?
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix massLU() const
+  inline SP::SimpleMatrix massLU() const
   {
     return (_workMatrix[invMass]);
   }

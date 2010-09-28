@@ -66,6 +66,9 @@ protected:
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
+  /** Stl map that associates the columns of  W Moreau matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
+  MapOfDSMatrices _WBoundaryConditionsMap;
+
   /** Stl map that associates a theta parameter for the integration
    *  scheme to each DynamicalSystem of the OSI */
   double _theta;
@@ -114,10 +117,6 @@ public:
     return WMap;
   };
 
-  /** set W map to newMap
-   *  \param a MapOfDSMatrices
-   */
-  void setWMap(const MapOfDSMatrices&);
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param a pointer to DynamicalSystem, optional, default =
@@ -131,7 +130,7 @@ public:
    * NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix W(SP::DynamicalSystem ds);
+  SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
    * \param SiconosMatrix newValue
@@ -143,7 +142,31 @@ public:
    * \param SP::SiconosMatrix  newPtr
    * \param a pointer to DynamicalSystem
    */
-  void setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem);
+  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
+
+  // -- WBoundaryConditions --
+
+  /** get WBoundaryConditions map
+   *  \return a MapOfDSMatrices
+   */
+  inline MapOfDSMatrices getWBoundaryConditionsMap() const
+  {
+    return _WBoundaryConditionsMap;
+  };
+
+  /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
+   * \param a pointer to DynamicalSystem, optional, default =
+   * NULL. get WBoundaryConditions[0] in that case
+   *  \return SimpleMatrix
+   */
+  const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem = SP::DynamicalSystem());
+
+  /** get WBoundaryConditions corresponding to DynamicalSystem ds
+   * \param a pointer to DynamicalSystem, optional, default =
+   * NULL. get WBoundaryConditions[0] in that case
+   * \return pointer to a SiconosMatrix
+   */
+  SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
 
   // -- theta --
 
@@ -182,6 +205,17 @@ public:
    *  \param a pointer to DynamicalSystem
    */
   void computeW(double, SP::DynamicalSystem);
+
+  /** compute WBoundaryConditionsMap[ds] Moreau matrix at time t
+   *  \param the time (double)
+   *  \param a pointer to DynamicalSystem
+   */
+  void computeWBoundaryConditions(SP::DynamicalSystem);
+
+  /** init WBoundaryConditionsMap[ds] Moreau
+   *  \param a pointer to DynamicalSystem
+   */
+  void initWBoundaryConditions(SP::DynamicalSystem);
 
   /** return the maximum of all norms for the "Moreau-discretized" residus of DS
       \return a double

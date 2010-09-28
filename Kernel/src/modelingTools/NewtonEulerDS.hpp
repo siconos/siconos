@@ -818,11 +818,11 @@ public:
   virtual void updateT();
   virtual void normalizeq();
 
-  inline SP::SiconosMatrix W()
+  inline SP::SimpleMatrix W()
   {
     return _W;
   }
-  inline SP::SiconosMatrix luW()
+  inline SP::SimpleMatrix luW()
   {
     return _luW;
   }
