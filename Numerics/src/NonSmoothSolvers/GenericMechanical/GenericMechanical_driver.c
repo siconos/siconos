@@ -30,6 +30,7 @@
 #include "FrictionContact3D_unitary_enumerative.h"
 //#define GENERICMECHANICAL_DEBUG
 //#define GENERICMECHANICAL_DEBUG2
+//#define GENERICMECHANICAL_DEBUG_CMP
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
@@ -152,10 +153,16 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
   else
     return 0;
 }
-
+#ifdef GENERICMECHANICAL_DEBUG_CMP
+static int SScmp = 0;
+static int SScmpTotal = 0;
+#endif
+//static double sCoefLS=1.0;
 void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options)
 {
-
+#ifdef GENERICMECHANICAL_DEBUG_CMP
+  SScmp++;
+#endif
   listNumericsProblem * curProblem = 0;
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
   int iterMax = options->iparam[0];
@@ -163,15 +170,35 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   int currentRowNumber = 0;
   int diagBlockNumber = 0;
   double tol = options->dparam[0];
-  double err = 0;
+  double * err = &(options->dparam[2]);
+  double * errLS = &(options->dparam[3]);
   int tolViolate = 1;
+  int tolViolateLS = 1;
   double * sol = 0;
   double * w = 0;
   int resLocalSolver = 0;
   //printf("genericMechanicalProblem_GS \n");
   //displayGMP(pGMP);
+  double * pPrevReaction = NULL;
+  double * pBuffVelocity = NULL;
+  int withLS = options->iparam[1];
+  double * pCoefLS = &(options->dparam[1]);
+
+  if (options->dWork)
+  {
+    pPrevReaction = options->dWork;
+  }
+  else
+  {
+    pPrevReaction = (double *) malloc(genericMechnical_getNbDWork(pGMP, options) * sizeof(double));
+  }
+  pBuffVelocity = pPrevReaction + pGMP->size;
   while (it < iterMax && tolViolate)
   {
+#ifdef GENERICMECHANICAL_DEBUG_CMP
+    SScmpTotal++;
+#endif
+    memcpy(pPrevReaction, reaction, pGMP->size * sizeof(double));
     currentRowNumber = 0;
     curProblem =  pGMP->firstListElem;
     int  posInX = 0;
@@ -181,6 +208,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     for (int ii = 0; ii < pGMP->size; ii++)
       printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]);
 #endif
+
     while (curProblem)
     {
       if (currentRowNumber)
@@ -253,14 +281,77 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       currentRowNumber++;
     }
     /*compute global error.*/
-    tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, &err);
 
+    if (withLS)
+    {
+      tolViolate = GenericMechanical_compute_error(pGMP, reaction, pBuffVelocity, tol, options, err);
+      for (int i = 0; i < pGMP->size; i++)
+        pPrevReaction[i] = reaction[i] + (*pCoefLS) * (reaction[i] - pPrevReaction[i]);
+      tolViolateLS = GenericMechanical_compute_error(pGMP, pPrevReaction, velocity, tol, options, errLS);
+#ifdef GENERICMECHANICAL_DEBUG
+      printf("GMD :noscale error=%e error LS=%e\n", *err, *errLS);
+      printf("GMD :scale ceoef=%e\n", *pCoefLS);
+#endif
+      if (*errLS < *err)
+      {
+        if ((*pCoefLS) < 10.0)
+          (*pCoefLS) = 1.0 + (*pCoefLS);
+        memcpy(reaction, pPrevReaction, pGMP->size * sizeof(double));
+        tolViolate = tolViolateLS;
+        *err = *errLS;
+      }
+      else
+      {
+        *pCoefLS = 1.0;
+        memcpy(velocity, pBuffVelocity, pGMP->size * sizeof(double));
+      }
+      /*       tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,err); */
+      /*       for(int i=0;i<pGMP->size;i++) */
+      /*  pPrevReaction[i]=reaction[i]+(*pCoefLS)*(reaction[i]-pPrevReaction[i]); */
+      /*       GenericMechanical_compute_error(pGMP,pPrevReaction,velocity,tol,options,errLS); */
+      /* #ifdef GENERICMECHANICAL_DEBUG */
+      /*       printf("GMD :noscale error=%e error LS=%e\n",*err,*errLS); */
+      /*       printf("GMD :scale ceoef=%e\n",*pCoefLS); */
+      /* #endif */
+      /*       if (*errLS<*err){ */
+      /*  if ((*pCoefLS)<10.0) */
+      /*    (*pCoefLS)=1.0+(*pCoefLS); */
+      /*       }else{ */
+      /*  if ((*pCoefLS)>1.1) */
+      /*    (*pCoefLS)=(*pCoefLS)-1.0; */
+      /*       } */
+      /*       for(int i=0;i<pGMP->size;i++) */
+      /*  reaction[i]=0.5*(reaction[i]+pPrevReaction[i]); */
+      /*       tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,err); */
+      /* #ifdef GENERICMECHANICAL_DEBUG */
+      /*       printf("GMD :half scale error=%e \n",*err); */
+      /* #endif */
+
+
+
+    }
+    else
+    {
+      tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, err);
+    }
+    //tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,&err);
     /*next GS it*/
     it++;
+    //printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
   }
   if (tolViolate)
     printf("---GenericalMechanical_drivers, FAILED***************************************\n");
-
+  else
+  {
+    /* for (int i=0;i<pGMP->size;i++) */
+    /*   printf("GMD CV IT=%d: velocity[%d]=%e \t reaction[%d]=%e \n",it,i,velocity[i],i,reaction[i]); */
+    ;
+#ifdef GENERICMECHANICAL_DEBUG_CMP
+    printf("---GenericalMechanical_drivers, CV %d at it=%d, itTotal=%d.\n", SScmp, it, SScmpTotal);
+#endif
+  }
+  if (! options->dWork)
+    free(pPrevReaction);
   *info = tolViolate;
 }
 
@@ -286,13 +377,17 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   options->iSize = 5;
   options->dSize = 5;
   options->numberOfInternalSolvers = 2;
-  options->dWork = 0;
-  options->iWork = 0;
+  options->dWork = NULL;
+  options->iWork = NULL;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->iparam[0] = 10000;
-  options->dparam[0] = 1e-4;
+  options->iparam[0] = 100000;
+  /*with Line search */
+  options->iparam[1] = 1;
 
+  options->dparam[0] = 1e-4;
+  /*Useful parameter for LS*/
+  options->dparam[1] = 1.0;
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
   switch (id)
@@ -310,3 +405,25 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   //frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(&options->internalSolvers[1]);
 }
 
+/*Alloc memory iff options->iWork options->dWork and are  null.
+ Return 0 if the memory is not allocated. else return 1.*/
+int genericMechnical_alloc_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+{
+  if (options->dWork)
+    return 0;
+
+  options->dWork = (double *) malloc(genericMechnical_getNbDWork(pGMP, options) * sizeof(double));
+  return 1;
+
+}
+/*free the Work memory, and set pointer to zero.*/
+void genericMechnical_free_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+{
+  if (options->dWork)
+    free(options->dWork);
+  options->dWork = NULL;
+}
+int genericMechnical_getNbDWork(GenericMechanicalProblem* pGMP, SolverOptions* options)
+{
+  return 2 * pGMP->size;
+}

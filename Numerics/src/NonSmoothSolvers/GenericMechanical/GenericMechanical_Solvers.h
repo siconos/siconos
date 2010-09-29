@@ -94,6 +94,15 @@ extern "C"
     \return the built GenericMechanicalProblem.
    */
   GenericMechanicalProblem* genericMechnical_newFromFile(FILE* file);
+
+  /*Alloc memory iff options->iWork options->dWork and are  null.
+  Return 0 if the memory is not allocated. else return 1.*/
+  int genericMechnical_alloc_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
+  /*free the Work memory, and set pointer to zero.*/
+  void genericMechnical_free_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
+
+  int genericMechnical_getNbDWork(GenericMechanicalProblem* problem, SolverOptions* options);
+
 #ifdef __cplusplus
 }
 #endif
