@@ -2,15 +2,21 @@
 
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora 02:00
+#PIPOL fedora-core-11 01:30
 
-#PIPOL debian-lenny 02:00
+#PIPOL fedora-core-12 01:30
 
-#PIPOL debian-testing 02:00
+#PIPOL fedora-core-13 01:30
 
-#PIPOL ubuntu 02:00
+#PIPOL debian-lenny 01:30
 
-#PIPOL mac 02:00
+#PIPOL debian-testing 01:30
+
+#PIPOL ubuntu-lucid 01:30
+
+#PIPOL ubuntu-karmic 01:30
+
+#PIPOL mac 01:30
 
 set -x
 #set -e
@@ -37,12 +43,18 @@ local_revision=`cat $PIPOL_HOMEDIR/src/siconos/local_revision`
 echo HEAD : $head_revision
 echo LOCAL : $local_revision
 
-env
-
 case $PIPOL_IMAGE in 
     *windows*) cp -r $HOME/.ssh /home/root/.ssh;;
-    *mac*) export PATH=$PATH:/usr/local/bin;;
+    *mac*) export PATH=$PATH:/usr/local/bin
+        echo "which gfortran:"
+        which gfortran
+        ls -l /usr/bin/gfortran;;
 esac
+
+env
+
+
+
 
 # a local copy because make Nightly will update this sources.
 setup_trunk() {

@@ -1,35 +1,14 @@
 #!/bin/sh
+set -x
+env
 
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
-/opt/local/bin/port uninstall cmake
-
-
-
 
 cmake_version=2.8.0;
-
-cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
-gunzip cmake-${cmake_version}.tar.gz
-tar xvf cmake-${cmake_version}.tar
 
 wget http://r.research.att.com/gfortran-42-5664.pkg
 installer -pkg gfortran-42-5664.pkg -target /
 
 rm -rf /usr/local/bin/gfortran 
 rm -rf /usr/local/lib/libgfortran.*
-
-
-cd cmake-${cmake_version}; {
-    ./bootstrap
-    make -j 2
-    make install
-    
-#    cmake . -DCMAKE_INSTALL_PREFIX=/usr
-#    cpack -G $PIPOL_CPACK_G
-    
-#    sudo -H -u $PIPOL_USER mkdir -p $PIPOL_HOMEDIR/$PIPOL_PACK_EXT
-#    sudo -H -u $PIPOL_USER cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/$PIPOL_PACK_EXT/$cmake_pipol_package
-}; cd -
-
-
