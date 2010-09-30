@@ -70,7 +70,7 @@ protected:
   MapOfDSMatrices _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
-   *  scheme to each DynamicalSystem of the OSI */
+  *  scheme to each DynamicalSystem of the OSI */
   double _theta;
 
   /** Default constructor
@@ -216,6 +216,12 @@ public:
    *  \param a pointer to DynamicalSystem
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
+
+  /** compute reactionToBoundaryConditionsMap[ds] Moreau matrix at time t
+   *  \param the time (double)
+   *  \param a pointer to DynamicalSystem
+   */
+  void computeReactionToBoundaryConditions(SP::DynamicalSystem);
 
   /** return the maximum of all norms for the "Moreau-discretized" residus of DS
       \return a double

@@ -26,7 +26,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "Plugin.hpp"
-
+#include "BoundaryCondition.hpp"
 class DynamicalSystem;
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
@@ -181,6 +181,12 @@ protected:
   SP::SiconosMatrix _jacobianqFL;
   /** jacobian_{qDot} FL*/
   SP::SiconosMatrix _jacobianqDotFL;
+
+  /** Boundary condition applied to a dynamical system*/
+  SP::BoundaryCondition _boundaryConditions;
+
+  /** Reaction to an applied  boundary condition */
+  SP::SiconosVector _reactionToBoundaryConditions;
 
   /** set links with DS members
    */
@@ -942,7 +948,38 @@ public:
    * Used in EventDriven (Lsodar->updateState)
    */
   void computePostImpactVelocity();
+  /** set Boundary Conditions
+   *  \param BoundaryConditions
+   */
+  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
+  {
+    _boundaryConditions = newbd;
+  };
 
+  /** get Boundary Conditions
+   *  \return pointer on a BoundaryConditions
+   */
+  inline SP::BoundaryCondition boundaryConditions()
+  {
+    return _boundaryConditions;
+  };
+
+
+  /** set Reaction to Boundary Conditions
+   *  \param BoundaryConditions
+   */
+  inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
+  {
+    _reactionToBoundaryConditions = newrbd;
+  };
+
+  /** get Reaction to  Boundary Conditions
+   *  \return pointer on a BoundaryConditions
+   */
+  inline SP::SiconosVector reactionToBoundaryConditions()
+  {
+    return _reactionToBoundaryConditions;
+  };
 
   ACCEPT_STD_VISITORS();
 

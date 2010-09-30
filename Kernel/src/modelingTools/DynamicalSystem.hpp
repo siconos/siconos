@@ -35,7 +35,7 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
-#include "BoundaryCondition.hpp"
+
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -93,9 +93,6 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
    x(t_0)=x_0
   \f]
 
-  To define a boundary Value Problem, a pointer on a BoundaryCondition
-  must be set (not yet implemented).
-
   Under some specific conditions, the system can be written as:
 
   \f[
@@ -129,7 +126,7 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
 
   About members:
 
-   - A DynamicalSystem is identified thanks to a number.
+  - A DynamicalSystem is identified thanks to a number.
 
    - A VectorOfVectors, x, is used to saved the state: x[0]=\f$ x \f$
      and x[1]=\f$ \dot x \f$ = right-hand side.
@@ -178,9 +175,6 @@ protected:
   /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
       (multiplier, force, ...)*/
   SP::SiconosVector _r;
-
-  /** Boundary condition applied to a dynamical systems*/
-  SP::BoundaryCondition _boundaryConditions;
 
   /** used by the relative convergence criteron*/
   double _normRef;
@@ -386,31 +380,13 @@ public:
   void setRPtr(SP::SiconosVector);
   // --- Residu ---
 
-  /** set Boundary Conditions
-   *  \param BoundaryConditions
-   */
-  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
-  {
-    _boundaryConditions = newbd;
-  };
-
-  /** get Boundary Conditions
-   *  \return pointer on a BoundaryConditions
-   */
-  inline SP::BoundaryCondition boundaryConditions()
-  {
-    return _boundaryConditions;
-  };
-
   /** get Residu,
-   *  \return pointer on a SiconosVector
-   */
+    *  \return pointer on a SiconosVector
+    */
   inline SP::SiconosVector residuFree() const
   {
     return _residuFree;
   }
-
-
 
   /** set the value of x0 to newValue
    *  \param SiconosVector newValue

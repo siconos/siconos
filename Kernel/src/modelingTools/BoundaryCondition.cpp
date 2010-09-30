@@ -24,35 +24,14 @@ using namespace std;
 // BoundaryCondition::BoundaryCondition()
 // _velocityIndices(NULL)
 // {
-
 // }
+
 
 BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndices, SP::SimpleVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
-
+  _prescribedVelocityOld.reset(new SimpleVector(*newVelocityValues));
 
 }
-
-// BoundaryCondition::initialize(SP::DynamicalSystem newDS)
-// {
-//   _DS = newDS;
-//   int numberofBoundaryConditions = _velocityIndices.size();
-
-//   if (_DS->getType() == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-//   {
-//     _Wcolumns.reset(new SimpleMatrix(_DS->getNdof ,numberofBoundaryConditions ))  ;
-//   }
-//   else
-//   {
-//     _Wcolumns.reset(new SimpleMatrix(_DS->getN() , numberofBoundaryConditions ))  ;
-//   }
-
-// //   vector<unsigned int>::iterator itindex;
-// //   for (itindex =_velocityIndices.begin() ;itindex =_velocityIndices.end(); itindex++ )
-// //   {
-// //   }
-
-// }
 
 
 BoundaryCondition::~BoundaryCondition()
@@ -61,6 +40,6 @@ BoundaryCondition::~BoundaryCondition()
 
 void BoundaryCondition::computePrescribedVelocity(double time)
 {
-  if (_pluginPrescribedVelocity->fPtr)
-    ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices->size(), &(*_prescribedVelocity)(0));
+  //  if(_pluginPrescribedVelocity->fPtr)
+  //     ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time,_velocityIndices->size(), &(*_prescribedVelocity)(0));
 }

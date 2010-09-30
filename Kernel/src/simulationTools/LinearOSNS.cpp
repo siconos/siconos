@@ -31,6 +31,7 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianLinearTIDS.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -253,8 +254,37 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
     }
     else if (relationType1 == Lagrangian || relationType2 == Lagrangian || relationType1 == NewtonEuler || relationType2 == NewtonEuler)
     {
+
+
+      DynamicalSystem * dsPtr = (*itDS).get();
+      Type::Siconos dsType = Type::value(*dsPtr);
+
+      if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+      {
+        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+
+        if (d->boundaryConditions())
+        {
+          for (vector<unsigned int>::iterator itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+               itindex != d->boundaryConditions()->velocityIndices()->end();
+               ++itindex)
+          {
+            // (nslawSize1,sizeDS));
+            SP::SiconosVector rowtmp(new SimpleVector(sizeDS));
+            rowtmp->zero();
+            leftUnitaryBlock->setRow(*itindex, *rowtmp);
+          }
+        }
+      }
+
+
+
       if (UR1 == UR2)
       {
+
+
+
+
         SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
         //
         //        cout<<"LinearOSNS : leftUBlock\n";
@@ -264,6 +294,8 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
         //        leftUnitaryBlock->display();
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
         //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+
+
         prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
         //*currentUnitaryBlock *=h;

@@ -20,7 +20,7 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-
+#include <iostream>
 using namespace std;
 
 // Private function to set linked with members of Dynamical top class
@@ -420,6 +420,9 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
   *_q[0] = *_q0;
   *_q[1] = *_velocity0;
 
+
+
+
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
     _z.reset(new SimpleVector(1));
@@ -441,17 +444,30 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
     _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
 
 
+
+
+
   //
   if (!_workFree)
     _workFree.reset(new SimpleVector(getDim()));
   // Memory allocation for fL and its jacobians.
   initFL();
 
+
+  if (_boundaryConditions)
+  {
+    _reactionToBoundaryConditions.reset(new SimpleVector(_boundaryConditions->velocityIndices()->size()));
+  }
+
+
   // Set links to variables of top-class DynamicalSystem.
   // Warning: this results only in pointers links. No more memory allocation for vectors or matrices.
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   if (!_mass)
     _mass.reset(new SimpleMatrix(_ndof, _ndof));
+
+
+
   checkDynamicalSystem();
 
   // Initialize memory vectors

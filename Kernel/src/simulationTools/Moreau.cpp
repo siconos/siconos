@@ -310,6 +310,11 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
     if (K)
       scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
+
+    // WBoundaryConditions initialization
+    if (d->boundaryConditions())
+      initWBoundaryConditions(d);
+
   }
   // 4 - Lagrangian linear systems
   else if (dsType == Type::LagrangianLinearTIDS)
@@ -325,6 +330,12 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
     if (K)
       scal(h * h * _theta * _theta, *K, *W, false); // W = h*h*_theta*_theta*K
+
+    // WBoundaryConditions initialization
+    if (d->boundaryConditions())
+      initWBoundaryConditions(d);
+
+
   }
 
   // === ===
@@ -343,11 +354,6 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
 
-  // WBoundaryConditions initialization
-  if (ds->boundaryConditions())
-  {
-    initWBoundaryConditions(ds);
-  }
 
 
 
@@ -366,24 +372,28 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
   if (!OSIDynamicalSystems->isIn(ds))
     RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
-  if (_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end())
-    RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+  Type::Siconos dsType = Type::value(*ds);
 
-  // Memory allocation for WBoundaryConditions
-  unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
 
-  unsigned int numberBoundaryConditions = ds->boundaryConditions()->velocityIndices()->size();
-
-  _WBoundaryConditionsMap[ds].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
-
-  (ds->boundaryConditions()->reactionImpulse()).reset(new SimpleVector(ds->getDim()));
-
-  ds->boundaryConditions()->reactionImpulse()->zero();
+  if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+  {
 
 
 
-  computeWBoundaryConditions(ds);
+    if (_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end())
+      RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
+    // Memory allocation for WBoundaryConditions
+    unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
+
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+
+    unsigned int numberBoundaryConditions = d->boundaryConditions()->velocityIndices()->size();
+    _WBoundaryConditionsMap[ds].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    computeWBoundaryConditions(ds);
+  }
+  else
+    RuntimeException::selfThrow("Moreau::initWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
 
 
@@ -397,41 +407,50 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
   assert(ds &&
          "Moreau::computeWBoundaryConditions(t,ds) - ds == NULL");
 
-  assert((_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end()) &&
-         "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
+  Type::Siconos dsType = Type::value(*ds);
 
-  SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
-
-  SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
-
-  int columnindex = 0;
-
-  vector<unsigned int>::iterator itindex;
-
-
-
-  for (itindex = ds->boundaryConditions()->velocityIndices()->begin() ;
-       itindex != ds->boundaryConditions()->velocityIndices()->end();
-       ++itindex)
+  if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   {
 
-    WMap[ds]->getSubCol(*itindex, 0, columntmp);
+    assert((_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end()) &&
+           "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
-    WBoundaryConditions->setCol(columnindex, *columntmp);
-    double diag = (*columntmp)(*itindex);
-    columntmp->zero();
-    (*columntmp)(*itindex) = diag;
+    SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
 
-    WMap[ds]->setSubCol(*itindex, 0, columntmp);
-    WMap[ds]->setSubRow(*itindex, 0, columntmp);
+    SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
 
-    columnindex ++;
+    int columnindex = 0;
+
+    vector<unsigned int>::iterator itindex;
+
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+
+    for (itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+         itindex != d->boundaryConditions()->velocityIndices()->end();
+         ++itindex)
+    {
+
+      WMap[ds]->getCol(*itindex, *columntmp);
+      /*\warning we assume that W is symmetric in the Lagrangian case
+       we store only the column and not the row */
+
+      WBoundaryConditions->setCol(columnindex, *columntmp);
+      double diag = (*columntmp)(*itindex);
+      columntmp->zero();
+      (*columntmp)(*itindex) = diag;
+
+      WMap[ds]->setCol(*itindex, *columntmp);
+      WMap[ds]->setRow(*itindex, *columntmp);
+
+      columnindex ++;
+    }
   }
-
-
-
-
+  else
+    RuntimeException::selfThrow("Moreau::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
 }
+
+
+
 
 
 
@@ -701,6 +720,36 @@ double Moreau::computeResidu()
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
       }
+
+      if (d->boundaryConditions())
+      {
+        unsigned int columnindex = 0;
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+        SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+
+        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+
+          //         double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+          //           -d->boundaryConditions()->prescribedVelocityOld()->getValue(columnindex);
+          double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+                                           - vold->getValue(columnindex);
+
+          WBoundaryConditions->getCol(columnindex, *columntmp);
+          *residuFree -= *columntmp * (DeltaPrescribedVelocity);
+
+          residuFree->setValue(*itindex, columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+
+          columnindex ++;
+
+        }
+      }
+
+
+
+
       *(d->workFree()) = *residuFree;
       *(d->workFree()) -= *d->p(2);
       normResidu = d->workFree()->norm2();
@@ -750,6 +799,31 @@ double Moreau::computeResidu()
       }
 
 
+      if (d->boundaryConditions())
+      {
+        unsigned int columnindex = 0;
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+        SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+
+        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+
+          //         double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+          //           -d->boundaryConditions()->prescribedVelocityOld()->getValue(columnindex);
+          double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+                                           - vold->getValue(columnindex);
+
+          WBoundaryConditions->getCol(columnindex, *columntmp);
+          *residuFree -= *columntmp * (DeltaPrescribedVelocity);
+
+          residuFree->setValue(*itindex, columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+
+          columnindex ++;
+
+        }
+      }
 
 
       (* d->workFree()) = *residuFree;
@@ -807,7 +881,6 @@ double Moreau::computeResidu()
   }
   return maxResidu;
 }
-
 
 void Moreau::computeFreeState()
 {
@@ -971,27 +1044,15 @@ void Moreau::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
 
 
-      //applyBoundaryConditionsOnResiduFree();
-
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SP::SiconosVector vfree = d->workFree();//workX[d];
       //    (*vfree)=*(d->residuFree());
 
 
-      if (d->boundaryConditions())
-      {
-
-      }
-
-
       W->PLUForwardBackwardInPlace(*vfree);
       //    *vfree *= -1.0;
 
-      //applyBoundaryConditionsOnVelocityFree();
-
       *vfree += *vold;
-
-
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -1025,8 +1086,6 @@ void Moreau::computeFreeState()
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-
-
 
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
@@ -1187,8 +1246,44 @@ void Moreau::updateState(unsigned int level)
       // To compute v, we solve W(v - vfree) = p
       *v = *d->p(level); // v = p
 
+      if (d->boundaryConditions())
+        for (vector<unsigned int>::iterator
+             itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+          v->setValue(*itindex, 0.0);
+
+
       W->PLUForwardBackwardInPlace(*v);
       *v +=  * ds->workFree();
+
+      int bc = 0;
+      SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
+
+      if (d->boundaryConditions())
+      {
+        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+          _WBoundaryConditionsMap[ds]->getCol(bc, *columntmp);
+          /*\warning we assume that W is symmetric in the Lagrangian case*/
+          double value = - inner_prod(*columntmp, *v);
+          value += (d->p(level))->getValue(*itindex);
+          /* \warning the computation of reactionToBoundaryConditions take into
+             account the contact impulse but not the external and internal forces.
+             A complete computation of the residue should be better */
+          d->reactionToBoundaryConditions()->setValue(bc, value) ;
+          bc++;
+        }
+
+
+      }
+
+
+
+
+
 
       // Compute q
       SP::SiconosVector q = d->q();

@@ -60,9 +60,9 @@ public:
     return _prescribedVelocity;
   };
 
-  inline SP::SimpleVector reactionImpulse()
+  inline SP::SimpleVector prescribedVelocityOld()
   {
-    return _reactionImpulse;
+    return _prescribedVelocityOld;
   };
 
   /** allow to set a specified function to compute prescribedVelocity
@@ -85,8 +85,8 @@ protected:
   std::vector<unsigned int>   * _velocityIndices;
   /* Values of the prescribed component of the velocity vector */
   SP::SimpleVector _prescribedVelocity;
-  /* Values of the multiplier (impulse) associted with */
-  SP::SimpleVector _reactionImpulse;
+  /* Old values of the prescribed component of the velocity vector */
+  SP::SimpleVector _prescribedVelocityOld;
   /*plugin defining the function V(t)*/
   SP::PluggedObject _pluginPrescribedVelocity;
   //   /*Link to the precribed DynamicalSystem*/

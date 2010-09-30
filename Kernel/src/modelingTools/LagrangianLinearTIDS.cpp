@@ -154,6 +154,12 @@ void LagrangianLinearTIDS::initialize(const string& simulationType,
   // set q and _q[1] to _q0 and velocity0, initialize acceleration.
   *_q[0] = *_q0;
   *_q[1] = *_velocity0;
+
+  if (_boundaryConditions)
+  {
+    _reactionToBoundaryConditions.reset(new SimpleVector(_boundaryConditions->velocityIndices()->size()));
+  }
+
   if (!_workFree)
     _workFree.reset(new SimpleVector(getDim()));
 
