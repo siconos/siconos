@@ -432,7 +432,7 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
       WMap[ds]->getCol(*itindex, *columntmp);
       /*\warning we assume that W is symmetric in the Lagrangian case
-       we store only the column and not the row */
+        we store only the column and not the row */
 
       WBoundaryConditions->setCol(columnindex, *columntmp);
       double diag = (*columntmp)(*itindex);
@@ -533,11 +533,6 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::NewtonEulerDS)
     ;
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
-
-
-
-
-
 
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -665,25 +660,25 @@ double Moreau::computeResidu()
 
 
       /*SP::SiconosVector xBuffer = d->getWorkVector(DynamicalSystem::local_buffer);
-      *xBuffer = theta * (*x_alpha);
-      *xBuffer += (1-theta)*(*x_k);
-      *xBuffer *=-h;
-      SP::SiconosMatrix A = d->A();
-      if( A )
-        prod(*A,*xBuffer,*residuFree, false);  // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
+       *xBuffer = theta * (*x_alpha);
+       *xBuffer += (1-theta)*(*x_k);
+       *xBuffer *=-h;
+       SP::SiconosMatrix A = d->A();
+       if( A )
+       prod(*A,*xBuffer,*residuFree, false);  // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
 
-      *xBuffer =  (* x_alpha);
-      *xBuffer -= (*x_k);
+       *xBuffer =  (* x_alpha);
+       *xBuffer -= (*x_k);
 
        SP::SiconosMatrix M = d->M();
        if(M)
-         prod(*M,*xBuffer,*residuFree, false);// residuFree += M(x^{\alpha}_{k+1} - x_{k})
+       prod(*M,*xBuffer,*residuFree, false);// residuFree += M(x^{\alpha}_{k+1} - x_{k})
        else
-         *residuFree+=*xBuffer;
+       *residuFree+=*xBuffer;
 
-      (*workX[d])=*residuFree;
-      scal(-h, *d->r(), (*workX[d]), false); // residu = residu - h*r
-      normResidu = (workX[d])->norm2();*/
+       (*workX[d])=*residuFree;
+       scal(-h, *d->r(), (*workX[d]), false); // residu = residu - h*r
+       normResidu = (workX[d])->norm2();*/
     }
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
