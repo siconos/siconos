@@ -18,11 +18,11 @@
  */
 
 /*!\file BallOnMovingPlane.cpp
-  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version -
-  V. Acary, F. Perignon.
+  \brief \ref EMBallOnMovingPlane - C++ input file, Time-Stepping version -
+  V. Acary
 
-  A Ball bouncing on the ground.
-  Direct description of the model without XML input.
+  A Ball bouncing on a moving plane.
+  This example shows how some precribed boundary conditions can be imposed.
   Simulation with a Time-Stepping scheme.
 */
 
@@ -90,13 +90,15 @@ int main(int argc, char* argv[])
 
     std::vector<unsigned int>  bdindex(1);
     bdindex[0] = 0;
-    //    bdindex[1] = 1;
 
-    SP::SimpleVector bdPrescribedVelocity(new SimpleVector(1));
-    bdPrescribedVelocity->setValue(0, 0.5);
-    //    bdPrescribedVelocity->setValue(1,0.1);
+    //    SP::SimpleVector bdPrescribedVelocity(new SimpleVector(1));
+    //    bdPrescribedVelocity->setValue(0,0.5);
+    //    SP::BoundaryCondition bd (new BoundaryCondition(&bdindex,bdPrescribedVelocity));
 
-    SP::BoundaryCondition bd(new BoundaryCondition(&bdindex, bdPrescribedVelocity));
+
+    SP::BoundaryCondition bd(new BoundaryCondition(&bdindex));
+    bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin.so", "prescribedvelocity");
+
 
     movingplane->setBoundaryConditions(bd);
 
