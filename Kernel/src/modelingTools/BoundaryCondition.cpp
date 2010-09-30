@@ -29,8 +29,17 @@ using namespace std;
 
 BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndices, SP::SimpleVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
-  _prescribedVelocityOld.reset(new SimpleVector(*newVelocityValues));
 
+  if (newVelocityIndices->size() != newVelocityValues->size())
+    RuntimeException::selfThrow("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
+  _prescribedVelocityOld.reset(new SimpleVector(*newVelocityValues));
+  _pluginPrescribedVelocity.reset(new PluggedObject());
+}
+
+BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndices): _velocityIndices(newVelocityIndices)
+{
+  _prescribedVelocityOld.reset(new SimpleVector(newVelocityIndices->size()));
+  _pluginPrescribedVelocity.reset(new PluggedObject());
 }
 
 
@@ -40,6 +49,6 @@ BoundaryCondition::~BoundaryCondition()
 
 void BoundaryCondition::computePrescribedVelocity(double time)
 {
-  //  if(_pluginPrescribedVelocity->fPtr)
-  //     ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time,_velocityIndices->size(), &(*_prescribedVelocity)(0));
+  if (_pluginPrescribedVelocity->fPtr)
+    ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices->size(), &(*_prescribedVelocity)(0));
 }

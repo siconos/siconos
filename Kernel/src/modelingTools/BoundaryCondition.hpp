@@ -46,6 +46,8 @@ public:
    */
   //   BoundaryCondition();
 
+  BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
+
   BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
 
   virtual ~BoundaryCondition();

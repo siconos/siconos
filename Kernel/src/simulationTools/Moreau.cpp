@@ -718,6 +718,9 @@ double Moreau::computeResidu()
 
       if (d->boundaryConditions())
       {
+
+        d->boundaryConditions()->computePrescribedVelocity(t);
+
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
         SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
@@ -727,10 +730,9 @@ double Moreau::computeResidu()
              ++itindex)
         {
 
-          //         double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-          //           -d->boundaryConditions()->prescribedVelocityOld()->getValue(columnindex);
-          double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-                                           - vold->getValue(columnindex);
+          double DeltaPrescribedVelocity =
+            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+            - vold->getValue(columnindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree -= *columntmp * (DeltaPrescribedVelocity);
@@ -796,6 +798,8 @@ double Moreau::computeResidu()
 
       if (d->boundaryConditions())
       {
+        d->boundaryConditions()->computePrescribedVelocity(t);
+
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
         SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
@@ -805,10 +809,9 @@ double Moreau::computeResidu()
              ++itindex)
         {
 
-          //         double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-          //           -d->boundaryConditions()->prescribedVelocityOld()->getValue(columnindex);
-          double DeltaPrescribedVelocity = d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-                                           - vold->getValue(columnindex);
+          double DeltaPrescribedVelocity =
+            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
+            - vold->getValue(columnindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
           *residuFree -= *columntmp * (DeltaPrescribedVelocity);
