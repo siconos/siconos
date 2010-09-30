@@ -24,7 +24,7 @@ extern "C" void prescribedvelocity(double time, unsigned int sizeofprescribedvel
 {
   /* the plugin implements v(t) = C + A cos(omega *t) */
 
-  double C = 1.0 ;
+  double C = 2.0 ;
   double omega = M_PI / 2.0;
   double A = 1.0;
 

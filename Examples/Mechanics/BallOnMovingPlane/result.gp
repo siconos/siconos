@@ -1,6 +1,6 @@
-#set  term postscript
-#set output "result.ps"
-set term X11
+set  term postscript
+set output "result.ps"
+#set term X11
 !tail -n 100000 result.dat > result-gp.dat
 
 toffset = 2.170E-04
