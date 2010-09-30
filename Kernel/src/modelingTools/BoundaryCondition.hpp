@@ -41,27 +41,45 @@ class BoundaryCondition
 {
 public:
 
-  /** \fn BoundaryCondition();
+
+  /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
    *  \brief Basic constructor
+   *  \param the indices of the velocity subjected to prescribed velocities
    */
-  //   BoundaryCondition();
 
   BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
 
+  /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
+   *  \brief Constructor with constant prescribed values
+   *  \param the indices of the velocity subjected to prescribed velocoties
+   *  \param the values of the prescribed velocoties
+   */
   BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
 
+  /** destructor */
   virtual ~BoundaryCondition();
 
+  // === GETTERS AND SETTERS ===
+
+  /** to get the velocityIndices
+   *  \return a pointer on _velocityIndices
+   */
   inline vector<unsigned int>  * velocityIndices()
   {
     return _velocityIndices;
   };
 
+  /** to get the prescribedVelocity
+   *  \return a pointer on _prescribedVelocity
+   */
   inline SP::SimpleVector prescribedVelocity()
   {
     return _prescribedVelocity;
   };
 
+  /** to get the prescribedVelocityOld
+   *  \return a pointer on _prescribedVelocityOld
+   */
   inline SP::SimpleVector prescribedVelocityOld()
   {
     return _prescribedVelocityOld;
@@ -77,7 +95,7 @@ public:
     if (!_prescribedVelocity) _prescribedVelocity.reset(new SimpleVector(_velocityIndices->size()));
   }
 
-  /** default function to compute the external strengths
+  /** default function to compute the precribed velocities
    *  \param double time : the current time
    */
   virtual void computePrescribedVelocity(double time);

@@ -155,7 +155,7 @@ protected:
   /** mass of the system */
   SP::SiconosMatrix _mass;
 
-  /** internal strength of the system */
+  /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
 
   /** jacobian_q FInt*/
@@ -163,7 +163,7 @@ protected:
   /** jacobian_{qDot} FInt*/
   SP::SiconosMatrix _jacobianFIntqDot;
 
-  /** external strength of the system */
+  /** external forces applied to the system */
   SP::SiconosVector _fExt;
 
   /** non-linear inertia term of the system */
@@ -759,12 +759,12 @@ public:
    */
   void setComputeNNLFunction(FPtr5 fct);
 
-  /** allow to set a specified function to compute the jacobian following q of the internal strength compared to the state
+  /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName);
-  /** allow to set a specified function to compute the jacobian following qDot of the internal strength compared to the state
+  /** allow to set a specified function to compute the jacobian following qDot of the internal forces w.r.t.
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
@@ -779,12 +779,13 @@ public:
    */
   void setComputeJacobianFIntqDotFunction(FPtr6 fct);
 
-  /** allow to set a specified function to compute the jacobian following q of the the external strength compared to the state
+  /** allow to set a specified function to compute the jacobian w.r.t q of the the external forces
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLqFunction(const std::string&  pluginPath, const std::string&  functionName);
-  /** allow to set a specified function to compute the jacobian following qDot of the the external strength compared to the state
+
+  /** allow to set a specified function to compute the jacobian w.r.t qDot of the the external strength
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
@@ -834,36 +835,36 @@ public:
    */
   virtual void computeNNL(SP::SiconosVector q, SP::SiconosVector velocity);
 
-  /** To compute the jacobian following q of the internal strengths compared to the state
+  /** To compute the jacobian w.r.t q of the internal forces
    *  \param double time : the current time
    */
   virtual void computeJacobianFIntq(double);
-  /** To compute the jacobian following qDot of the internal strengths compared to the state
+  /** To compute the jacobian w.r.t qDot of the internal forces
    *  \param double time : the current time
    */
   virtual void computeJacobianFIntqDot(double);
 
-  /** To compute the jacobian following q of the internal strengths compared to state q
+  /** To compute the jacobian w.r.t q of the internal forces
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
   virtual void computeJacobianFIntq(double , SP::SiconosVector q, SP::SiconosVector velocity);
-  /** To compute the jacobian following qDot of the internal strengths compared to state q
+  /** To compute the jacobian w.r.t. qDot of the internal forces
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
   virtual void computeJacobianFIntqDot(double , SP::SiconosVector q, SP::SiconosVector velocity);
 
-  /** function to compute the jacobian following q of the inertia strengths compared to the state q
+  /** function to compute the jacobian w.r.t. q of the inertia forces
    */
   virtual void computeJacobianNNLq();
-  /** function to compute the jacobian following qDot of the inertia strengths compared to the state q
+  /** function to compute the jacobian w.r.t. qDot of the inertia forces
    */
   virtual void computeJacobianNNLqDot();
 
-  /** function to compute the jacobian following q of the inertia strengths compared to the state q
+  /** function to compute the jacobian w.r.t. q of the inertia forces
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
   virtual void computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector velocity);
-  /** function to compute the jacobian following qDot of the inertia strengths compared to the state q
+  /** function to compute the jacobian w.r.t. qDot of the inertia forces
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
   virtual void computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector velocity);
@@ -892,11 +893,11 @@ public:
    */
   virtual void computeFL(double , SP::SiconosVector, SP::SiconosVector);
 
-  /** Default function to compute the jacobian following q of fL
+  /** Default function to compute the jacobian w.r.t. q of fL
    *  \param double, the current time
    */
   virtual void computeJacobianqFL(double);
-  /** Default function to compute the jacobian following qDot of fL
+  /** Default function to compute the jacobian w.r.t. qDot of fL
    *  \param double, the current time
    */
   virtual void computeJacobianqDotFL(double);
