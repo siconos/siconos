@@ -7,9 +7,9 @@
 #include <LA.h>
 #include <assert.h>
 
-#define WITH_TIMER
+#define TIMER_FFTW_CYCLE
 
-#include "timers.h"
+#include "timers_interf.h"
 
 #include "op3x3.h"
 
@@ -80,7 +80,7 @@ int main()
   assert(equal3x3(b, c));
 
 
-#ifdef WITH_TIMER
+#ifdef WITH_TIMERS
   printf("add3x3/DAXPY:%g\n", t2 / t1);
   assert(t2 < t1);
 #endif
@@ -116,7 +116,7 @@ int main()
 
   PRINT_ELAPSED(t);
 
-#ifdef WITH_TIMER
+#ifdef WITH_TIMERS
   printf("mmp3x3/DGEMM:%g\n", t4 / t3);
   assert(t4 < t3);
 #endif
@@ -220,7 +220,7 @@ int main()
 
   PRINT_ELAPSED(t);
 
-#ifdef WITH_TIMER
+#ifdef WITH_TIMERS
   printf("solv3x3/DGESV:%g\n", t6 / t5);
   assert(t6 < t5);
 #endif
@@ -347,7 +347,7 @@ int main()
   k2 = k;
 
 
-#ifdef WITH_TIMER
+#ifdef WITH_TIMERS
   printf("DGESV/solv3x3 (rand):%g\n", t8 / t7);
   printf("Number of pb DGESV and solv3x3 (rand):%d,%d\n", k1, k2);
   assert(t8 < t7);
