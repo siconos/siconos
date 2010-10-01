@@ -5,10 +5,14 @@ env
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
 
-cmake_version=2.8.0;
+#
+# install in /usr
+#
+/sw/bin/wget http://r.research.att.com/gfortran-42-5664.pkg
+/usr/sbin/installer -pkg gfortran-42-5664.pkg -target /
 
-wget http://r.research.att.com/gfortran-42-5664.pkg
-installer -pkg gfortran-42-5664.pkg -target /
-
+#
+# hpc fortran is in /usr/local
+#
 rm -rf /usr/local/bin/gfortran 
 rm -rf /usr/local/lib/libgfortran.*
