@@ -419,7 +419,8 @@ IF(WITH_TESTING)
   
   BEGIN_TEST(utils/test)
   #NEW_TEST(pinvtest testpinv.c)
-  NEW_TEST(op3x3 testop3x3.c)
+  NEW_TEST(test_op3x3 test_op3x3.c)
+  NEW_TEST(test_timers_interf test_timers_interf.c)
   END_TEST()
 
 ENDIF(WITH_TESTING)
