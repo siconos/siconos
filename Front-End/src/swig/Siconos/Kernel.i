@@ -19,7 +19,7 @@
 //	
 
 // Siconos.i - SWIG interface for Siconos
-%module Kernel
+%module(directors="1") Kernel
 
  // where is doxygen feature ?
 %feature("autodoc", "1");
@@ -91,21 +91,32 @@
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SiconosVector>)
 {
-  $1 = is_array($input) || PySequence_Check($input);
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0);
+  int _v = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || _v;
 }
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
 {
+
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  if (!array || !require_dimensions(array,1) ||
-      !require_native(array) || !require_contiguous(array)) SWIG_fail;
-
-  SP::SimpleVector tmp;
-  tmp.reset(new SimpleVector(array_size(array,0)));
-  // copy : with SimpleVector based on resizable std::vector there is
-  // no other way
-  memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-  $1 = tmp;
+  if (!array)
+  {
+    void *argp;
+    SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+  }
+  else
+  {
+    if (!require_dimensions(array,1) ||
+        !require_native(array) || !require_contiguous(array)) SWIG_fail;
+    
+    SP::SimpleVector tmp;
+    tmp.reset(new SimpleVector(array_size(array,0)));
+    // copy : with SimpleVector based on resizable std::vector there is
+    // no other way
+    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+    $1 = tmp;
+  }
  }
 
 // numpy array to SP::SimpleMatrix (here a SiconosMatrix is always a
@@ -182,6 +193,7 @@ typedef SP::##TYPE XSPtr##TYPE;
 %enddef
 
 %include "SiconosPointers.hpp"
+%import "SimulationTypeDef.hpp"
 
 %define REGISTER(X,B)
 SP_TYPE(X,B)
@@ -321,6 +333,10 @@ namespace SP
 %ignore gemv;
 %ignore gemm;
 
+%ignore getWMap;
+%ignore getWBoundaryConditionsMap;
+%ignore getDSBlocks;
+
 %include "Tools.hpp"
 
 DEFINE_SPTR(SiconosVector);
@@ -401,8 +417,6 @@ DEFINE_SPTR(SiconosMatrix);
 //                                                              default_color_type , 
 //                                                              property < edge_index_t, size_t > > > > >::vertex_descriptor >;
 //
-
-%include "SimulationTypeDef.hpp"
 
 %template (dsv) std::vector<boost::shared_ptr<DynamicalSystem> >;
 
