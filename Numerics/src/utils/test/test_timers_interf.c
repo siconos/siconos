@@ -1,8 +1,12 @@
 
 /* to be compared with :
-/* valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes  --simulate-cache=yes */
+   valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes  --simulate-cache=yes */
 
+#include "NumericsConfig.h"
+
+#ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
+#endif
 
 #include <stdlib.h>
 #include <math.h>
