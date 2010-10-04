@@ -75,7 +75,9 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   }
 }
 
-void OSNSMatrix::updateSizeAndPositions(unsigned int& dim, SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph indexSet)
+void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
+                                        SP::DynamicalSystemsSet DSSet,
+                                        SP::UnitaryRelationsGraph indexSet)
 {
   // === Description ===
 
@@ -128,7 +130,9 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
     M1.reset(new SimpleMatrix(n, n));
   }
   else // if(storageType == 1)
+  {
     M2.reset(new BlockCSRMatrix(n));
+  }
   unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);

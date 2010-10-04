@@ -107,16 +107,6 @@ public:
   virtual ~Moreau() {};
 
   // --- GETTERS/SETTERS ---
-  // -- W --
-
-  /** get W map
-   *  \return a MapOfDSMatrices
-   */
-  inline MapOfDSMatrices getWMap() const
-  {
-    return WMap;
-  };
-
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param a pointer to DynamicalSystem, optional, default =
@@ -216,12 +206,6 @@ public:
    *  \param a pointer to DynamicalSystem
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
-
-  /** compute reactionToBoundaryConditionsMap[ds] Moreau matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
-   */
-  void computeReactionToBoundaryConditions(SP::DynamicalSystem);
 
   /** return the maximum of all norms for the "Moreau-discretized" residus of DS
       \return a double

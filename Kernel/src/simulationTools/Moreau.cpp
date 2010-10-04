@@ -33,7 +33,8 @@ using namespace RELATION;
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::MOREAU)
 {
-  // Note: we do not call xml constructor of OSI, but default one, since we need to download _theta and DS at the same time.
+  // Note: we do not call xml constructor of OSI, but default one,
+  // since we need to download _theta and DS at the same time.
 
   if (!osiXML)
     RuntimeException::selfThrow("Moreau::xml constructor - OneStepIntegratorXML object == NULL.");
@@ -64,7 +65,8 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
     for (DSIterator it = dsList->begin(); it != dsList->end(); ++it)
     {
       OSIDynamicalSystems->insert(*it);
-      // get corresponding theta. In xml they must be sorted in an order that corresponds to growing DS-numbers order.
+      // get corresponding theta. In xml they must be sorted in an
+      // order that corresponds to growing DS-numbers order.
       if (moreauXml->hasAllTheta()) // if one single value for all theta
         _theta = thetaXml[0];
       else
@@ -399,10 +401,12 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
 
 void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 {
-  // Compute WBoundaryConditions matrix of the Dynamical System ds, at time t and for the current ds state.
+  // Compute WBoundaryConditions matrix of the Dynamical System ds, at
+  // time t and for the current ds state.
 
-  // When this function is called, WBoundaryConditionsMap[ds] is supposed to exist and not to be null
-  // Memory allocation has been done during initWBoundaryConditions.
+  // When this function is called, WBoundaryConditionsMap[ds] is
+  // supposed to exist and not to be null Memory allocation has been
+  // done during initWBoundaryConditions.
 
   assert(ds &&
          "Moreau::computeWBoundaryConditions(t,ds) - ds == NULL");
@@ -1317,7 +1321,8 @@ void Moreau::updateState(unsigned int level)
       //  cout<<"Moreau::updatestate prev v"<<endl;
       //  v->display();
 
-      /*d->p has been fill by the Relation->computeInput, it constains B \lambda _{k+1}*/
+      /*d->p has been fill by the Relation->computeInput, it contains
+           B \lambda _{k+1}*/
       *v = *d->p(level); // v = p
       d->luW()->PLUForwardBackwardInPlace(*v);
 

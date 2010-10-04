@@ -95,7 +95,7 @@ TYPEDEF_SPTR(NumericsMatrix);
 enum SICONOS_STORAGE_TYPE
 {
   SICONOS_DENSE = 0,
-  SICONOS_SPARCE = 1
+  SICONOS_SPARSE = 1
 };
 
 class OSNSMatrix
