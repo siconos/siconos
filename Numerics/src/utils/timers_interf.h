@@ -105,6 +105,8 @@
 #endif
 
 #ifdef HAVE_FFTW_CYCLE_H
+
+#define asm __asm
 #include "fftw_cycle.h"
 #define DECL_TIMER_FFTW_CYCLE(T)                    \
   ticks __timer__##T##1, __timer__##T##2
