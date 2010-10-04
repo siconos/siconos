@@ -554,9 +554,6 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
   assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
   assert(currentRowNumber <= A->blocknumber0);
 
-  /* Get current block number */
-  blockNum = A->index1_data[currentRowNumber];
-
   /* Get dim (rows) of the current block */
   nbRows = sizeY;
 
