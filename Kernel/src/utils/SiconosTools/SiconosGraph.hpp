@@ -45,7 +45,18 @@
 
 using namespace boost;
 
-template <class V, class E>
+enum vertex_properties_t { vertex_properties };
+enum edge_properties_t { edge_properties };
+
+namespace boost
+{
+BOOST_INSTALL_PROPERTY(vertex, properties);
+BOOST_INSTALL_PROPERTY(edge, properties);
+}
+
+
+
+template <class V, class E, class VProperties, class EProperties>
 class SiconosGraph
 {
 public:
@@ -55,11 +66,13 @@ public:
          property < vertex_bundle_t, V,
          property < vertex_color_t ,
          default_color_type ,
-         property < vertex_index_t, size_t > > > ,
+         property < vertex_index_t, size_t,
+         property< vertex_properties_t , VProperties > > > > ,
          property < edge_bundle_t, E,
          property < edge_color_t ,
          default_color_type ,
-         property < edge_index_t, size_t > > > >
+         property < edge_index_t, size_t,
+         property< edge_properties_t , EProperties > > > > >
          graph_t;
 
   typedef V vertex_t;
@@ -101,6 +114,14 @@ public:
 
   typedef typename
   property_map<graph_t, vertex_index_t >::type VIndexAccess;
+
+  typedef typename
+  property_map<graph_t, edge_properties_t >::type EPropertiesAccess;
+
+  typedef typename
+  property_map<graph_t, vertex_properties_t >::type VPropertiesAccess;
+
+
 
   typedef typename std::map<V, VDescriptor> VMap;
 
@@ -273,6 +294,16 @@ public:
   inline size_t& index(const EDescriptor& ed)
   {
     return get(edge_index, g)[ed];
+  };
+
+  inline VProperties& properties(const VDescriptor& vd)
+  {
+    return get(vertex_properties, g)[vd];
+  };
+
+  inline EProperties& properties(const EDescriptor& ed)
+  {
+    return get(edge_properties, g)[ed];
   };
 
   inline bool is_vertex(const V& vertex)
@@ -644,6 +675,7 @@ public:
   }
 
 };
+
 
 #endif
 

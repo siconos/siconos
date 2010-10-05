@@ -130,14 +130,16 @@ TYPEDEF_SPTR(UR_int);
 typedef std::vector<int> IndexInt;
 TYPEDEF_SPTR(IndexInt);
 
-typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation> DynamicalSystemsGraph;
-typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem> UnitaryRelationsGraph;
+struct SimulationData
+{
+  SP::SiconosMatrix block;
+};
 
-typedef std::map<SP::UnitaryRelation, UnitaryRelationsGraph::VDescriptor > URGVMap;
+typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, boost::no_property, SimulationData > DynamicalSystemsGraph;
+typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, SimulationData, boost::no_property> UnitaryRelationsGraph;
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(UnitaryRelationsGraph);
-TYPEDEF_SPTR(URGVMap);
 
 // ================== Objects to handle OSI ==================
 
