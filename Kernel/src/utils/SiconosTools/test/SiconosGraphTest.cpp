@@ -34,7 +34,8 @@ void SiconosGraphTest::tearDown()
 void SiconosGraphTest::t1()
 {
 
-  typedef SiconosGraph<std::string, int> G;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
 
   G g;
 
@@ -52,7 +53,8 @@ void SiconosGraphTest::t1()
 void SiconosGraphTest::t2()
 {
 
-  typedef SiconosGraph<std::string, int> G;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
 
   G g;
 
@@ -72,7 +74,8 @@ void SiconosGraphTest::t2()
 void SiconosGraphTest::t3()
 {
 
-  typedef SiconosGraph<std::string, int> G;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
 
   G g;
 
@@ -105,8 +108,10 @@ void SiconosGraphTest::t3()
 void SiconosGraphTest::t4()
 {
 
-  typedef SiconosGraph<std::string, int> G;
-  typedef SiconosGraph<int, std::string> AG;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
+  typedef SiconosGraph < int, std::string,
+          boost::no_property, boost::no_property > AG;
 
   G g;
   AG ag;
@@ -159,8 +164,10 @@ struct num_inf
 void SiconosGraphTest::t5()
 {
 
-  typedef SiconosGraph<std::string, int> G;
-  typedef SiconosGraph<int, std::string> AG;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
+  typedef SiconosGraph < int, std::string,
+          boost::no_property, boost::no_property > AG;
 
   G g;
   AG ag;
@@ -212,8 +219,10 @@ void SiconosGraphTest::t5()
 
 void SiconosGraphTest::t6()
 {
-  typedef SiconosGraph<std::string, int> G;
-  typedef SiconosGraph<int, std::string> AG;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
+  typedef SiconosGraph < int, std::string,
+          boost::no_property, boost::no_property > AG;
 
   G g;
   AG ag;
@@ -279,8 +288,10 @@ void SiconosGraphTest::t6()
 void SiconosGraphTest::t7()
 {
 
-  typedef SiconosGraph<std::string, int> G;
-  typedef SiconosGraph<int, std::string> AG;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
+  typedef SiconosGraph < int, std::string,
+          boost::no_property, boost::no_property > AG;
 
   G g;
   AG ag;
@@ -328,7 +339,8 @@ void SiconosGraphTest::t7()
 
 void SiconosGraphTest::t8()
 {
-  typedef SiconosGraph<std::string, int> G;
+  typedef SiconosGraph < std::string, int,
+          boost::no_property, boost::no_property > G;
   G g;
 
   G::VDescriptor vd1, vd2, vd3, vd4, vd5, vd6;
