@@ -28,6 +28,7 @@ using namespace std;
 
 void NewtonEulerR::initComponents()
 {
+  _ysize = interaction()->getSizeOfY();
   _xsize = interaction()->getSizeOfDS();
   _qsize = 7 * (_xsize / 6);
 
