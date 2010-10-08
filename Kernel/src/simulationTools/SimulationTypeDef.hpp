@@ -86,18 +86,6 @@ typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
 /** Const iterator through a MapOfUnitaryMatrices */
 typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
 
-/** Map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal unitaryBlock-terms in assembled matrices of LCP etc ..*/
-typedef std::map< SP::UnitaryRelation , MapOfUnitaryMatrices >  MapOfMapOfUnitaryMatrices;
-
-/** Iterator through a MapOfMapOfUnitaryMatrices */
-typedef MapOfMapOfUnitaryMatrices::iterator UnitaryMatrixRowIterator ;
-
-/** Const iterator through a MapOfMapOfUnitaryMatrices */
-typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixRowIterator ;
-
-
-
-
 /** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
 typedef std::map< SP::DynamicalSystem , MapOfUnitaryMatrices >  MapOfDSMapOfUnitaryMatrices;
 
@@ -130,13 +118,22 @@ TYPEDEF_SPTR(UR_int);
 typedef std::vector<int> IndexInt;
 TYPEDEF_SPTR(IndexInt);
 
-struct SimulationData
+
+// to be replaced with dynamic maps
+struct RelationData
 {
-  SP::SiconosMatrix block;
+  SP::SiconosMatrix block;    // diagonal block
+  SP::DynamicalSystem source;
+  SP::DynamicalSystem target;
 };
 
-typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, boost::no_property, SimulationData > DynamicalSystemsGraph;
-typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, SimulationData, boost::no_property> UnitaryRelationsGraph;
+struct SystemData
+{
+  SP::SiconosMatrix block;   // i,j block i!=j
+};
+
+typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, SystemData , RelationData > DynamicalSystemsGraph;
+typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, RelationData, SystemData > UnitaryRelationsGraph;
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(UnitaryRelationsGraph);

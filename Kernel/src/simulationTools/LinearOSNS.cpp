@@ -157,53 +157,59 @@ void LinearOSNS::updateM()
   // Get index set from Simulation
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   if (! _M) // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
 
   else
   {
     _M->setStorageType(_MStorageType);
-    _M->fill(indexSet, _unitaryBlocks);
+    _M->fill(indexSet);
   }
   _sizeOutput = _M->size();
 }
 
-void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+
+void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
 {
 
-  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
-  // necessary) if UR1 and UR2 have commond DynamicalSystem.  How
+  // Computes matrix _unitaryBlocks[UR1][UR1] (and allocates memory if
+  // necessary) one or two DS are concerned by UR1 .  How
   // _unitaryBlocks are computed depends explicitely on the type of
   // Relation of each UR.
-
-  // Get DS common between UR1 and UR2
-  DynamicalSystemsSet commonDS;
-  intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
-  assert(!commonDS.isEmpty()) ;
 
   // Warning: we suppose that at this point, all non linear
   // operators (G for lagrangian relation for example) have been
   // computed through plug-in mechanism.
 
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-  // Check allocation
-  if (! _unitaryBlocks[UR1][UR2])
-    _unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
+
+  SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
+  SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
+  SP::UnitaryRelation UR = indexSet->bundle(vd);
+
+
+  unsigned int nslawSize = UR->getNonSmoothLawSize();
+
+  if (! indexSet->properties(vd).block)
+  {
+    indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+  }
+
+  assert(indexSet->properties(vd).block->size(0) == nslawSize);
+  assert(indexSet->properties(vd).block->size(1) == nslawSize);
+
+  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).block;
 
   // Get the W and Theta maps of one of the Unitary Relation -
   // Warning: in the current version, if OSI!=Moreau, this fails.
   // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
   // centralUnitaryBlocks = M (mass matrices)
   MapOfDSMatrices centralUnitaryBlocks;
-  getOSIMaps(UR1, centralUnitaryBlocks);
-
-  SP::SiconosMatrix currentUnitaryBlock = _unitaryBlocks[UR1][UR2];
+  getOSIMaps(UR, centralUnitaryBlocks);
 
   SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
 
-  unsigned int sizeDS;
-  RELATION::TYPES relationType1, relationType2;
+  RELATION::TYPES relationType;
   double h = simulation()->timeDiscretisation()->currentTimeStep();
 
   // General form of the unitaryBlock is : unitaryBlock =
@@ -212,35 +218,35 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   // matrix depending on the integrator (and on the DS), the
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
-  relationType1 = UR1->getRelationType();
-  relationType2 = UR2->getRelationType();
-  // ==== First Order Relations - Specific treatment for diagonal _unitaryBlocks ===
-  if (UR1 == UR2)
-    UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-  else
-    currentUnitaryBlock->zero();
+  relationType = UR->getRelationType();
+
+  UR->getExtraUnitaryBlock(currentUnitaryBlock);
 
 
-  // loop over the common DS
-  for (DSIterator itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
+  // loop over the DS
+  bool endl = false;
+  for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
   {
-    sizeDS = (*itDS)->getDim();
+    assert(ds == DS1 || ds == DS2);
+
+    endl = (ds == DS2);
+    unsigned int sizeDS = ds->getDim();
 
     // get _unitaryBlocks corresponding to the current DS
     // These _unitaryBlocks depends on the relation type.
-    leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-    UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
+    leftUnitaryBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
+    UR->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
 
     // Computing depends on relation type -> move this in UnitaryRelation method?
-    if (relationType1 == FirstOrder && relationType2 == FirstOrder)
+    if (relationType == FirstOrder)
     {
 
-      rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
+      rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
 
-      UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+      UR->getRightUnitaryBlockForDS(ds, rightUnitaryBlock);
       // centralUnitaryBlock contains a lu-factorized matrix and we solve
       // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-      centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+      centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
 
       //      integration of r with theta method removed
       //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
@@ -252,20 +258,20 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
 
 
     }
-    else if (relationType1 == Lagrangian || relationType2 == Lagrangian || relationType1 == NewtonEuler || relationType2 == NewtonEuler)
+    else if (relationType == Lagrangian ||
+             relationType == NewtonEuler)
     {
 
-
-      DynamicalSystem * dsPtr = (*itDS).get();
-      Type::Siconos dsType = Type::value(*dsPtr);
+      Type::Siconos dsType = Type::value(*ds);
 
       if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
       {
-        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
         if (d->boundaryConditions())
         {
-          for (vector<unsigned int>::iterator itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+          for (vector<unsigned int>::iterator itindex =
+                 d->boundaryConditions()->velocityIndices()->begin() ;
                itindex != d->boundaryConditions()->velocityIndices()->end();
                ++itindex)
           {
@@ -277,51 +283,160 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
         }
       }
 
+      // (UR1 == UR2)
+      SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
+      //
+      //        cout<<"LinearOSNS : leftUBlock\n";
+      //        work->display();
+      work->trans();
+      //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
+      //        leftUnitaryBlock->display();
+      centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*work);
+      //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
 
 
-      if (UR1 == UR2)
-      {
+      prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
+      //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
+      //*currentUnitaryBlock *=h;
+      //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
+      //        currentUnitaryBlock->display();
 
-
-
-
-        SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
-        //
-        //        cout<<"LinearOSNS : leftUBlock\n";
-        //        work->display();
-        work->trans();
-        //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
-        //        leftUnitaryBlock->display();
-        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
-        //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-
-
-        prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
-        //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
-        //*currentUnitaryBlock *=h;
-        //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
-        //        currentUnitaryBlock->display();
-
-      }
-      else
-      {
-        rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-        UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-        // Warning: we use getLeft for Right unitaryBlock
-        // because right = transpose(left) and because of
-        // size checking inside the getBlock function, a
-        // getRight call will fail.
-        rightUnitaryBlock->trans();
-        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-        //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-        prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-      }
     }
 
-    else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+
+    else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType);
   }
 }
 
+void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
+{
+
+  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
+  // necessary) if UR1 and UR2 have commond DynamicalSystem.  How
+  // _unitaryBlocks are computed depends explicitely on the type of
+  // Relation of each UR.
+
+  // Warning: we suppose that at this point, all non linear
+  // operators (G for lagrangian relation for example) have been
+  // computed through plug-in mechanism.
+
+  // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
+
+  SP::DynamicalSystem ds = indexSet->bundle(ed);
+  SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(ed));
+  SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
+
+  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+
+  if (! indexSet->properties(ed).block)
+  {
+    indexSet->properties(ed).block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+  }
+
+  assert(indexSet->properties(ed).block->size(0) == nslawSize1);
+  assert(indexSet->properties(ed).block->size(1) == nslawSize2);
+
+  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(ed).block;
+
+  // Get the W and Theta maps of one of the Unitary Relation -
+  // Warning: in the current version, if OSI!=Moreau, this fails.
+  // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
+  // centralUnitaryBlocks = M (mass matrices)
+  MapOfDSMatrices centralUnitaryBlocks;
+  getOSIMaps(UR1, centralUnitaryBlocks);
+
+  SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
+
+  RELATION::TYPES relationType1, relationType2;
+  double h = simulation()->timeDiscretisation()->currentTimeStep();
+
+  // General form of the unitaryBlock is : unitaryBlock =
+  // a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks
+  // * rightUnitaryBlock a and b are scalars, centralUnitaryBlocks a
+  // matrix depending on the integrator (and on the DS), the
+  // simulation type ...  left, right and extra depend on the relation
+  // type and the non smooth law.
+  relationType1 = UR1->getRelationType();
+  relationType2 = UR2->getRelationType();
+
+
+  // ==== First Order Relations - Specific treatment for diagonal
+  // _unitaryBlocks ===
+  assert(UR1 != UR2);
+  currentUnitaryBlock->zero();
+
+  // loop over the common DS
+  unsigned int sizeDS = ds->getDim();
+
+  // get _unitaryBlocks corresponding to the current DS
+  // These _unitaryBlocks depends on the relation type.
+  leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
+  UR1->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
+
+  // Computing depends on relation type -> move this in UnitaryRelation method?
+  if (relationType1 == FirstOrder && relationType2 == FirstOrder)
+  {
+
+    rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
+
+    UR2->getRightUnitaryBlockForDS(ds, rightUnitaryBlock);
+    // centralUnitaryBlock contains a lu-factorized matrix and we solve
+    // centralUnitaryBlock * X = rightUnitaryBlock with PLU
+    centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+
+    //      integration of r with theta method removed
+    //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
+    //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
+    *leftUnitaryBlock *= h;
+
+    prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+    //left = C, right = inv(W).B
+
+
+  }
+  else if (relationType1 == Lagrangian ||
+           relationType2 == Lagrangian ||
+           relationType1 == NewtonEuler ||
+           relationType2 == NewtonEuler)
+  {
+
+    Type::Siconos dsType = Type::value(*ds);
+
+    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+    {
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+
+      if (d->boundaryConditions())
+      {
+        for (vector<unsigned int>::iterator itindex =
+               d->boundaryConditions()->velocityIndices()->begin() ;
+             itindex != d->boundaryConditions()->velocityIndices()->end();
+             ++itindex)
+        {
+          // (nslawSize1,sizeDS));
+          SP::SiconosVector rowtmp(new SimpleVector(sizeDS));
+          rowtmp->zero();
+          leftUnitaryBlock->setRow(*itindex, *rowtmp);
+        }
+      }
+    }
+
+    // UR1 != UR2
+    rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+    UR2->getLeftUnitaryBlockForDS(ds, rightUnitaryBlock);
+    // Warning: we use getLeft for Right unitaryBlock
+    // because right = transpose(left) and because of
+    // size checking inside the getBlock function, a
+    // getRight call will fail.
+    rightUnitaryBlock->trans();
+    centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+    //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+    prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+  }
+  else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+}
 
 /* Cascading visitors experimentation.
    the dispatch is done on simulationtype and then on nslawtype
@@ -656,7 +771,7 @@ void LinearOSNS::preCompute(double time)
 
     // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-    _M->fill(indexSet, _unitaryBlocks);
+    _M->fill(indexSet);
     _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary

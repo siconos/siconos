@@ -52,39 +52,50 @@ void GenericMechanical::initialize(SP::Simulation sim)
 
 }
 
-void GenericMechanical::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
 {
-
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   //bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   /*Build the corresponding numerics problems*/
-  if (UR1 == UR2)
+
+  SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
+  SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
+  SP::UnitaryRelation UR = indexSet->bundle(vd);
+
+
+  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+  int size = UR->getNonSmoothLawSize();
+  if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+      == Type::EqualityConditionNSL)
   {
-    printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
-    int size = UR1->getNonSmoothLawSize();
-    if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-        == Type::EqualityConditionNSL)
-    {
-      LinearSystemProblem * pAux = (LinearSystemProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
-      //pAux->size= UR1->getNonSmoothLawSize();
-    }
-    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-             == Type::NewtonImpactNSL)
-    {
-      void * pAux = addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
-    }
-    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-             == Type::NewtonImpactFrictionNSL)
-    {
-      FrictionContactProblem * pAux = (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
-      SP::NewtonImpactFrictionNSL nsLaw = boost::static_pointer_cast<NewtonImpactFrictionNSL> (UR1->interaction()->nonSmoothLaw());
-      pAux->dimension = 3;
-      pAux->numberOfContacts = 1;
-      *(pAux->mu) = nsLaw->mu();
-    }
+    LinearSystemProblem * pAux = (LinearSystemProblem *)
+                                 addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+    //pAux->size= UR->getNonSmoothLawSize();
+  }
+  else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+           == Type::NewtonImpactNSL)
+  {
+    void * pAux = addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
+  }
+  else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+           == Type::NewtonImpactFrictionNSL)
+  {
+    FrictionContactProblem * pAux =
+      (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
+    SP::NewtonImpactFrictionNSL nsLaw =
+      boost::static_pointer_cast<NewtonImpactFrictionNSL> (UR->interaction()->nonSmoothLaw());
+    pAux->dimension = 3;
+    pAux->numberOfContacts = 1;
+    *(pAux->mu) = nsLaw->mu();
   }
 
-  LinearOSNS::computeUnitaryBlock(UR1, UR2);
+  LinearOSNS::computeDiagonalUnitaryBlock(vd);
+}
+
+void GenericMechanical::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
+{
+  LinearOSNS::computeUnitaryBlock(ed);
 }
 
 int GenericMechanical::compute(double time)
@@ -96,10 +107,13 @@ int GenericMechanical::compute(double time)
 
 
   /*
-    La matrice _M est construite.
-    Ici, il faut construire les sous-problemes, c'est a dire completer les champs des NumericsProblem (_mu, _e, _en, les dimentions...).
-    Il faut aussi remplir la sous matrice M du sous-probleme.
-    Pour cela, on peut boucler sur les interactions et completer le membres _numerics_problem.problems[i] and _numerics_problem.problemsType[i].
+    La matrice _M est construite.  Ici, il faut construire les
+    sous-problemes, c'est a dire completer les champs des
+    NumericsProblem (_mu, _e, _en, les dimentions...).  Il faut aussi
+    remplir la sous matrice M du sous-probleme.  Pour cela, on peut
+    boucler sur les interactions et completer le membres
+    _numerics_problem.problems[i] and
+    _numerics_problem.problemsType[i].
    */
 
   //......
@@ -139,11 +153,7 @@ void GenericMechanical::display() const
   LinearOSNS::display();
 }
 
-GenericMechanical* GenericMechanical::convert(OneStepNSProblem* osnsp)
-{
-  GenericMechanical* fc2d = dynamic_cast<GenericMechanical*>(osnsp);
-  return fc2d;
-}
+
 void  GenericMechanical::updateUnitaryBlocks()
 {
   //printf("GenericMechanical::updateUnitaryBlocks : free and build a new GMP\n");

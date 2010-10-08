@@ -156,6 +156,7 @@ int FrictionContact::compute(double time)
       numerics_problem.dimension = 2;
     else // if(_contactProblemDim == 3)
       numerics_problem.dimension = 3;
+
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = &*_q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;

@@ -50,7 +50,7 @@ void MLCP::updateM()
   if (!_M)
   {
     // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
     _numerics_problem.M = &*_M->getNumericsMatrix();
     _numerics_problem.A = 0;
     _numerics_problem.B = 0;
@@ -65,7 +65,7 @@ void MLCP::updateM()
   else
   {
     _M->setStorageType(_MStorageType);
-    _M->fill(indexSet, _unitaryBlocks);
+    _M->fill(indexSet);
 
   }
   _sizeOutput = _M->size();
@@ -135,10 +135,31 @@ void MLCP::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   }
 }
 
-void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+void MLCP::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
 {
+
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(ed));
+  SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
+
+  assert(UR1 != UR2);
+
+  // commonDS here...
   computeOptions(UR1, UR2);
-  LinearOSNS::computeUnitaryBlock(UR1, UR2);
+  LinearOSNS::computeUnitaryBlock(ed);
+}
+
+void MLCP::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
+{
+
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
+  SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
+  SP::UnitaryRelation UR = indexSet->bundle(vd);
+
+  // commonDS here...
+  computeOptions(UR, UR);
+  LinearOSNS::computeDiagonalUnitaryBlock(vd);
 }
 
 void displayNM(const NumericsMatrix* const m)

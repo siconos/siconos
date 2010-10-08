@@ -88,16 +88,21 @@ public:
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
   int compute(double time);
-  virtual void computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
+
+  /** compute extra-diagonal unitaryBlock-matrix
+    *  \param an edge descriptor
+    */
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+
+  /** compute diagonal unitary block
+   * \param a vertex descriptor
+   */
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+
   /** print the data to the screen */
   void display() const;
   void computeAllUnitaryBlocks();
   void updateUnitaryBlocks();
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepNSProblem* : the one step problem which must be converted
-   * \return a pointer on the problem if it is of the right type, NULL otherwise
-   */
-  static GenericMechanical* convert(OneStepNSProblem* osnsp);
 
   /** visitors hook
    */

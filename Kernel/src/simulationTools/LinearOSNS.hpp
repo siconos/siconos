@@ -258,12 +258,15 @@ public:
   */
   virtual void initialize(SP::Simulation);
 
-  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation
-   *  \param a pointer to UnitaryRelation
+  /** compute extra-diagonal unitaryBlock-matrix
+   *  \param an edge descriptor
    */
-  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+
+  /** compute diagonal unitary block
+   * \param a vertex descriptor
+   */
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
 
   /** To compute a part of the "q" vector of the OSNS
       \param SP::UnitaryRelation, the UR which corresponds to the considered block

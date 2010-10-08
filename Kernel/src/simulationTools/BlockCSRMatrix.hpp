@@ -135,10 +135,8 @@ public:
   /** Constructor from index set and map
       \param SP::UnitaryRelation, the index set of the active
       constraints
-      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to
-      a couple of UR*
   */
-  BlockCSRMatrix(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&);
+  BlockCSRMatrix(SP::UnitaryRelationsGraph);
 
   /** Constructor from DynamicalSystemsSet and map
       \param DynamicalSystemsSet*, the index set of the active constraints
@@ -202,10 +200,8 @@ public:
   /** fill the current class using an index set and a map of blocks
       \param UnitaryRelationsGraph*, the index set of the active
       constraints
-      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to
-      a couple of UR*
   */
-  void fill(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&);
+  void fill(SP::UnitaryRelationsGraph);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the set of DynamicalSystem

@@ -262,8 +262,9 @@ void EventDriven::initOSNS()
 
   // For each Unitary relation in I0 ...
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
     indexSet0->bundle(*ui)->initialize("EventDriven");
-
+  }
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
     // built.

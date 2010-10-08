@@ -107,11 +107,6 @@ protected:
   /** size of the problem to solve */
   unsigned int _sizeOutput;
 
-  /** map that links each UnitaryRelation with the corresponding unitaryBlocks
-      map < UnitaryRelationA * , map < UnitaryRelationB* , unitaryBlockMatrixAB > >
-      UnitaryRelations A and B are coupled through unitaryBlockMatrixAB.  */
-  MapOfMapOfUnitaryMatrices _unitaryBlocks;
-
   /** map that links each DynamicalSystem with the corresponding DSBlocks
       map < SP::DynamicalSystem , SiconosMatrix * > */
   MapOfDSMatrices _DSBlocks;
@@ -246,24 +241,6 @@ public:
   {
     _sizeOutput = newVal;
   }
-
-  /** get the unitaryBlocks matrices map
-   *  \return a MapOfMapOfUnitaryMatrices
-   */
-  inline const MapOfMapOfUnitaryMatrices getUnitaryBlocks() const
-  {
-    return _unitaryBlocks;
-  };
-
-  /** get the unitaryBlock orresponding to UR1 and UR2
-   *  \param a pointer to UnitaryRelation, UR1
-   *  \param a pointer to UnitaryRelation, optional, default value =
-   *  NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
-   *  \return a pointer to SiconosMatrix
-   */
-  SP::SiconosMatrix unitaryBlock(SP::UnitaryRelation,
-                                 SP::UnitaryRelation = SP::UnitaryRelation()) const ;
-
 
   /** get the DSBlocks matrices map
    *  \return a MapOfDSMatrices
@@ -415,16 +392,19 @@ public:
   virtual void updateUnitaryBlocks();
 
   /** computes all diagonal and extra-diagonal unitaryBlock-matrices
+   *  useless ?
    */
   virtual void computeAllUnitaryBlocks();
 
-  /** computes extra diagonal unitaryBlock-matrix that corresponds to
-   * UR1 and UR2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation
-   *  \param a pointer to UnitaryRelation
+  /** compute extra-diagonal unitaryBlock-matrix
+   *  \param an edge descriptor
    */
-  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&) PURE_DEF;
+
+  /** compute diagonal unitary block
+   * \param a vertex descriptor
+   */
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&) PURE_DEF;
 
   /** compute DSBlocks if necessary (this depends on the type of
       OSNS, on the indexSets ...)

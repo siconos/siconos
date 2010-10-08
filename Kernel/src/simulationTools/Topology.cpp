@@ -162,8 +162,14 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
           assert(!_DSG[0]->is_edge(dsgv, dsgv, *uri));
           assert(!_URG[0]->is_vertex(*uri));
 
-          _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
+          DynamicalSystemsGraph::EDescriptor new_ed;
+          UnitaryRelationsGraph::VDescriptor urg_new_ve;
+          boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
 
+          _URG[0]->properties(urg_new_ve).source = *i1ds;
+          _URG[0]->properties(urg_new_ve).target = *i1ds;
+
+          assert(_URG[0]->bundle(urg_new_ve) == *uri);
           assert(_URG[0]->is_vertex(*uri));
           assert(_DSG[0]->is_edge(dsgv, dsgv, *uri));
 
@@ -186,9 +192,14 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
             assert(!_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
             assert(!_URG[0]->is_vertex(*uri));
 
+            DynamicalSystemsGraph::EDescriptor new_ed;
+            UnitaryRelationsGraph::VDescriptor urg_new_ve;
+            boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, *uri, *_URG[0]);
 
-            _DSG[0]->add_edge(dsgv1, dsgv2, *uri, *_URG[0]);
+            _URG[0]->properties(urg_new_ve).source = *i1ds;
+            _URG[0]->properties(urg_new_ve).target = *i2ds;
 
+            assert(_URG[0]->bundle(urg_new_ve) == *uri);
             assert(_URG[0]->is_vertex(*uri));
             assert(_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
           }

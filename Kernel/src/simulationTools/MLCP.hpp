@@ -139,12 +139,15 @@ public:
   /** */
   virtual void reset();
 
-  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
-  *  Move this to Unitary Relation class?
-  *  \param a pointer to UnitaryRelation
-  *  \param a pointer to UnitaryRelation
-  */
-  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  /** compute extra-diagonal unitaryBlock-matrix
+   *  \param an edge descriptor
+   */
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+
+  /** compute diagonal unitary block
+   * \param a vertex descriptor
+   */
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time

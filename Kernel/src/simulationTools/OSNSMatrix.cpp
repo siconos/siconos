@@ -162,14 +162,14 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 }
 
 // Basic constructor
-OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
+OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
-  fill(indexSet, unitaryBlocks);
+  fill(indexSet);
 }
 
 OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, int stor):
@@ -191,30 +191,15 @@ OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph 
   fill(DSSet, indexSet, DSUnitaryBlocks);
 }
 
-OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSet DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
+OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSet DSSet,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
-  fill(indexSet, DSSet, unitaryDSBlocks);
+  fill(indexSet, DSSet, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
 }
-
-OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSet DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
-  dimRow(0), dimColumn(0), storageType(stor)
-{
-  unitaryBlocksPositions.reset(new UR_int());
-  DSBlocksPositions.reset(new DS_int());
-  numericsMat.reset(new NumericsMatrix);
-
-  fill(indexSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
-}
-
-
-
-
-
 
 // Copy of a SiconosMatrix (used when OSNS xml constructor is called with M input in XML file)
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
@@ -254,7 +239,7 @@ unsigned int OSNSMatrix::getPositionOfDSBlock(SP::DynamicalSystem DS) const
 
 
 // Fill the matrix
-void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
+void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
 {
 
   assert(indexSet);
@@ -292,47 +277,61 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, MapOfMapOfUnitaryMatri
     // below.
     // === Loop through "active" Unitary Relations (ie present in
     // indexSets[level]) ===
-    UnitaryRelationsGraph::VIterator ui1, ui1end;
-    for (boost::tie(ui1, ui1end) = indexSet->vertices();
-         ui1 != ui1end; ++ui1)
+    UnitaryRelationsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = indexSet->vertices();
+         vi != viend; ++vi)
     {
-      SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
-      pos = (*unitaryBlocksPositions)[ur1];
+      SP::UnitaryRelation ur = indexSet->bundle(*vi);
+      pos = (*unitaryBlocksPositions)[ur];
+
       boost::static_pointer_cast<SimpleMatrix>(M1)
-      ->setBlock(pos, pos, *(unitaryBlocks[ur1][ur1]));
-      UnitaryRelationsGraph::AVIterator ui2, ui2end;
-      for (boost::tie(ui2, ui2end) = indexSet->adjacent_vertices(*ui1);
-           ui2 != ui2end; ++ui2)
-      {
-        SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
-        assert(indexSet->is_vertex(ur2));
-        assert(ur2 != ur1);
-
-        col = (*unitaryBlocksPositions)[ur2];
-
-
-        assert(pos < dimRow);
-        assert(col < dimColumn);
-        boost::static_pointer_cast<SimpleMatrix>(M1)
-        ->setBlock(pos, col, *(unitaryBlocks[ur1][ur2]));
-      }
+      ->setBlock(pos, pos, *indexSet->properties(*vi).block);
     }
+
+
+    UnitaryRelationsGraph::EIterator ei, eiend;
+    for (boost::tie(ei, eiend) = indexSet->edges();
+         ei != eiend; ++ei)
+    {
+      UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
+      UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
+
+      SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
+      SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
+
+      pos = (*unitaryBlocksPositions)[ur1];
+
+      assert(indexSet->is_vertex(ur2));
+
+      col = (*unitaryBlocksPositions)[ur2];
+
+
+      assert(pos < dimRow);
+      assert(col < dimColumn);
+      boost::static_pointer_cast<SimpleMatrix>(M1)
+      ->setBlock(pos, col, *indexSet->properties(*ei).block);
+    }
+
   }
 
   else // if storageType == 1
   {
     if (! M2)
-      M2.reset(new BlockCSRMatrix(indexSet, unitaryBlocks));
+      M2.reset(new BlockCSRMatrix(indexSet));
     else
-      M2->fill(indexSet, unitaryBlocks);
+      M2->fill(indexSet);
   }
   if (update)
     convert();
 
 }
-void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsGraph URSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
+void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsGraph URSet, bool update)
 {
 
+  assert(0);
+
+}
+/*
   assert(URSet);
 
   if (update)
@@ -342,18 +341,18 @@ void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsGraph URSet, MapOfMapOfUnitary
     updateSizeAndPositions(dimRow, URSet);
   }
 
-  if (storageType == 0)
+  if (storageType==0)
   {
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
-        M1.reset(new SimpleMatrix(dimRow, dimColumn));
+        M1.reset(new SimpleMatrix(dimRow,dimColumn));
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
-          M1->resize(dimRow, dimColumn);
+        if (M1->size(0) != dimRow || M1->size(1)!= dimColumn)
+          M1->resize(dimRow,dimColumn);
         M1->zero();
       }
     }
@@ -362,31 +361,31 @@ void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsGraph URSet, MapOfMapOfUnitary
     // common DynamicalSystems.  Then get the corresponding matrix
     // from map unitaryBlocks, and copy it into M
 
-    unsigned int pos = 0, col = 0; // index position used for
+    unsigned int pos = 0, col =0; // index position used for
     // unitaryBlock copy into M, see
     // below.
     // === Loop through "active" Unitary Relations (ie present in
     // indexSets[level]) ===
 
-    UnitaryRelationsGraph::VIterator ui, uiend;
-    for (boost::tie(ui, uiend) = URSet->vertices(); ui != uiend; ++ui)
+    UnitaryRelationsGraph::VIterator ui,uiend;
+    for (boost::tie(ui,uiend)=URSet->vertices(); ui!=uiend; ++ui)
     {
       SP::UnitaryRelation ur = URSet->bundle(*ui);
       pos = (*unitaryBlocksPositions)[ur];
-      boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, pos, *(unitaryBlocks[ur][ur]));
+      boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,pos,*(unitaryBlocks[ur][ur]));
     }
   }
   else // if storageType == 1
   {
     if (! M2)
-      M2.reset(new BlockCSRMatrix(URSet, unitaryBlocks));
+      M2.reset(new BlockCSRMatrix(URSet,unitaryBlocks));
     else
-      M2->fill(URSet, unitaryBlocks);
+      M2->fill(URSet,unitaryBlocks);
   }
 
   if (update)
     convert();
-}
+    }*/
 
 void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, bool update)
 {
@@ -517,113 +516,10 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSe
 {
   assert(false);
 }
-/*
-  assert (indexSet && "NULL pointer");
-  assert (DSSet && "NULL pointer");
-
-  if (update){
-    // Computes dimRow and unitaryBlocksPositions and  DSBlocksPositions according to indexSet
-    updateSizeAndPositions(dimRow,indexSet);
-
-
-    updateSizeAndPositions(dimColumn,DSSet);
-  }
-
-  if(storageType==0)
-    {
-      // === Memory allocation, if required ===
-      // Mem. is allocate only if !M or if its size has changed.
-      if (update){
-  if(! M1)
-    M1.reset(new SimpleMatrix(dimRow,dimColumn));
-  else
-    {
-      if( M1->size(0) != dimRow || M1->size(1)!= dimColumn )
-        M1->resize(dimRow,dimColumn);
-      M1->zero();
-    }
-      }
-
-
-      // Get the matrix from map unitaryDSBlocks which corresponds to
-      // UR and DS, and copy it into M
-
-      unsigned int pos = 0, col =0; // index position used for
-                                    // unitaryBlock copy into M, see
-                                    // below.
-      // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-      for (URGVIterator ui1 = boost::vertices(*indexSet).first;
-           ui1 != boost::vertices(*indexSet).second; ++ui1)
-        {
-          SP::UnitaryRelation ur1 = URGVertices[*ui1];
-          URGVIterator ui2beg, ui2end;
-          boost::tie(ui2beg, ui2end) = boost::adjacent_vertices(*ui1, *indexSet);
-          for (URGVIterator ui2 = ui2beg; ui2 != ui2end; ++ui2)
-            {
-              SP::UnitaryRelation ur2 = URGVertices[*ui2];
-              pos = (*unitaryBlocksPositions)[ur1];
-              col = (*unitaryBlocksPositions)[ur2];
-              boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,col,*(unitaryBlocks[ur1][ur2]));
-            }
-        }
-      for(UnitaryRelationsIterator itRow=indexSet->begin(); itRow!=indexSet->end(); ++itRow)
-  {
-    // Look for UR
-    // The connection is checked thanks to unitaryBlocks map
-    for(MatIterator itCol = unitaryDSBlocks[*itRow].begin(); itCol!=unitaryDSBlocks[*itRow].end(); ++itCol)
-      {
-          // UR = *itRow
-      // DS= *itCol
-      // corresponding matrix = unitaryDSBlocks[*itUR][(*itCol).first]
-
-      // Case 1: basic storage
-      pos = (*unitaryBlocksPositions)[*itRow];
-      col = (*DSBlocksPositions)[(*itCol).first];
-                  boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,col,*(unitaryDSBlocks[*itRow][(*itCol).first]));
-      }
-  }
-
-    }
-  else // if storageType == 1
-    {
-      if(! M2)
-  M2.reset(new BlockCSRMatrix(indexSet,DSSet,unitaryDSBlocks));
-      else
-  M2->fill(indexSet,DSSet,unitaryDSBlocks);
-    }
-  if (update)
-    convert();
-}
-*/
-void OSNSMatrix::fill(SP::UnitaryRelationsGraph URSet, SP::DynamicalSystemsSet DSSet,  MapOfMapOfUnitaryMatrices& unitaryBlocks,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks , bool update)
+void OSNSMatrix::fill(SP::UnitaryRelationsGraph URSet, SP::DynamicalSystemsSet DSSet,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks , bool update)
 {
   assert(false);
 }
-/*
-  updateSizeAndPositions(dimRow, DSSet, URSet);
-  dimColumn = dimRow;
-  if(! M1)
-    M1.reset(new SimpleMatrix(dimRow,dimColumn));
-  else
-    {
-      if( M1->size(0) != dimRow || M1->size(1)!= dimColumn )
-  M1->resize(dimRow,dimColumn);
-      M1->zero();
-    }
-
-  //Fill the diagonal of the DSs block
-  fill(DSSet,DSBlocks,false);
-  //Fill the diagonal of the URs block
-  fillDiagonal(URSet,unitaryBlocks,false);
-  //Fill DSxUR
-  fill(DSSet, URSet, DSUnitaryBlocks,false);
-  //Fill URxDS
-  fill(URSet,DSSet, unitaryDSBlocks,false);
-  convert();
-
-  }*/
-
 
 // convert current matrix to NumericsMatrix structure
 void OSNSMatrix::convert()

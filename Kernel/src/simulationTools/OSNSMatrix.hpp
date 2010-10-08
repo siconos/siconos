@@ -183,14 +183,13 @@ public:
 
   /** Constructor from index set and map
       \param UnitaryRelationsGraph* the index set of the active constraints
-      \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&, int);
+  OSNSMatrix(SP::UnitaryRelationsGraph, int);
 
   /** Constructor from DynamicalSystemsSet and map
       \param UnitaryRelationsGraph* the index set of the active constraints
-      \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
+      \param MapOfDSMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
   OSNSMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&, int);
@@ -211,10 +210,9 @@ public:
 
   /** Constructor from DynamicalSystemsSet and indexSet and maps of Blocks
       \param UnitaryRelationsGraph* the index set of the active constraints
-      \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
+  OSNSMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
       \param MSource matrix to be copied
@@ -273,15 +271,13 @@ public:
 
   /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
-      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
+  void fill(SP::UnitaryRelationsGraph, bool updateSize = true);
 
   /** fill diagonal of thecurrent class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
-      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fillDiagonal(SP::UnitaryRelationsGraph , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
+  void fillDiagonal(SP::UnitaryRelationsGraph, bool updateSize = true);
 
   /** fill the current class using an DynamicalSystemsSet and a map of DSBlocks
       \param DynamicalSystemsSet*, the Dynamical set
@@ -306,9 +302,8 @@ public:
   /** fill the current class using an index set and  maps of Blocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
-      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
+  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the numerics structure numericsMatSparse using MBlockCSR */
   void convert();

@@ -50,14 +50,10 @@ public:
   {
     ;
   }
-  virtual void computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
   virtual void computeqBlock(SP::UnitaryRelation, unsigned int);
   virtual void postCompute();
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepNSProblem* : the one step problem which must be converted
-   * \return a pointer on the problem if it is of the right type, NULL otherwise
-   */
-  static MLCPProjectOnConstraints* convert(OneStepNSProblem* osnsp);
 
 };
 

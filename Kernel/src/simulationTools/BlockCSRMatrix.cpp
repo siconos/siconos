@@ -53,8 +53,7 @@ BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow):
 }
 
 // Basic constructor
-BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet,
-                               MapOfMapOfUnitaryMatrices& blocks):
+BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -67,7 +66,7 @@ BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet,
   rowPos->reserve(nr);
   colPos.reset(new IndexInt());
   colPos->reserve(nr);
-  fill(indexSet, blocks);
+  fill(indexSet);
 }
 BlockCSRMatrix::BlockCSRMatrix(SP::DynamicalSystemsSet DSSet,
                                MapOfDSMatrices& DSblocks):
@@ -111,8 +110,7 @@ BlockCSRMatrix::~BlockCSRMatrix()
 }
 
 // Fill the SparseMat
-void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet,
-                          MapOfMapOfUnitaryMatrices& blocks)
+void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
 {
   // ======> Aim: find UR1 and UR2 both in indexSets[level] and which
   // have common DynamicalSystems.  Then get the corresponding matrix
@@ -125,54 +123,50 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet,
 
   // (re)allocate memory for ublas matrix
   MBlockCSR->resize(nr, nr, false);
-  diagSizes->resize(nr);
 
-  int sizeV = 0;
+  diagSizes->resize(nr);
 
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[level]) ===
-  UnitaryRelationsGraph::VIterator ui1, ui1end;
-  for (boost::tie(ui1, ui1end) = indexSet->vertices();
-       ui1 != ui1end; ++ui1)
+
+  int sizeV = 0;
+
+  UnitaryRelationsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = indexSet->vertices();
+       vi != viend; ++vi)
   {
-    SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
-    sizeV  += ur1->getNonSmoothLawSize();
-    (*diagSizes)[indexSet->index(*ui1)] = sizeV;
+    SP::UnitaryRelation ur = indexSet->bundle(*vi);
 
-    assert((*diagSizes)[indexSet->index(*ui1)] > 0);
-    assert(blocks[ur1][ur1]);
-    assert(blocks[ur1][ur1]->size(0) > 0 && blocks[ur1][ur1]->size(1) > 0);
-    assert(blocks[ur1][ur1]->size(0) == ur1->getNonSmoothLawSize());
-    assert(blocks[ur1][ur1]->size(1) == ur1->getNonSmoothLawSize());
-    assert(indexSet->index(*ui1) < nr);
+    assert(ur->getNonSmoothLawSize() > 0);
 
-    (*MBlockCSR)(indexSet->index(*ui1), indexSet->index(*ui1)) =
-      blocks[ur1][ur1]->getArray();
+    sizeV  += ur->getNonSmoothLawSize();
+    (*diagSizes)[indexSet->index(*vi)] = sizeV;
+    assert((*diagSizes)[indexSet->index(*vi)] > 0);
 
-    UnitaryRelationsGraph::AVIterator ui2, ui2end;
-    for (boost::tie(ui2, ui2end) =
-           indexSet->adjacent_vertices(*ui1);
-         ui2 != ui2end; ++ui2)
-    {
-      SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
+    (*MBlockCSR)(indexSet->index(*vi), indexSet->index(*vi)) =
+      indexSet->properties(*vi).block->getArray();
+  }
 
-      assert(indexSet->is_vertex(ur2));
-      assert(ur2 != ur1);
-      assert(blocks[ur1][ur2]);
-      assert(blocks[ur1][ur2]->size(0) > 0 && blocks[ur1][ur2]->size(1) > 0);
-      assert(blocks[ur1][ur2]->size(0) == ur1->getNonSmoothLawSize());
-      assert(blocks[ur1][ur2]->size(1) == ur2->getNonSmoothLawSize());
+  UnitaryRelationsGraph::EIterator ei, eiend;
+  for (boost::tie(ei, eiend) = indexSet->edges();
+       ei != eiend; ++ei)
+  {
+    UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
+    UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
+    SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
+    SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
 
-      assert(indexSet->index(*ui1) < nr);
-      assert(indexSet->index(*ui2) < nr);
+    assert(indexSet->index(vd1) < nr);
+    assert(indexSet->index(vd2) < nr);
 
-      assert(*ui2 == indexSet->descriptor(ur2));
-      assert(indexSet->index(*ui2) == indexSet->index(indexSet->descriptor(ur2)));
+    assert(indexSet->is_vertex(ur2));
 
-      (*MBlockCSR)(indexSet->index(*ui1), indexSet->index(*ui2)) =
-        blocks[ur1][ur2]->getArray();
+    assert(vd2 == indexSet->descriptor(ur2));
+    assert(indexSet->index(vd2) == indexSet->index(indexSet->descriptor(ur2)));
 
-    }
+    (*MBlockCSR)(indexSet->index(vd1), indexSet->index(vd2)) =
+      indexSet->properties(*ei).block->getArray();
+
   }
 }
 

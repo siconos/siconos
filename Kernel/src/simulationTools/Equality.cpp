@@ -60,13 +60,13 @@ void Equality::updateM()
   if (!_M)
   {
     // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
     _numerics_problem.M = &*_M->getNumericsMatrix();
   }
   else
   {
     _M->setStorageType(_MStorageType);
-    _M->fill(indexSet, _unitaryBlocks);
+    _M->fill(indexSet);
 
   }
   _sizeOutput = _M->size();

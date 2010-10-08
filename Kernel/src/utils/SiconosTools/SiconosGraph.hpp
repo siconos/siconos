@@ -413,6 +413,7 @@ public:
     assert(og.is_vertex(vertex_bundle));
 
     VDescriptor descr = add_vertex(vertex_bundle);
+    properties(descr) = og.properties(og.descriptor(vertex_bundle));
 
     assert(bundle(descr) == vertex_bundle);
 
@@ -497,12 +498,25 @@ public:
     return new_edge;
   }
 
+  /* note : bgl self loop are a nightmare
+     seg fault with self-loop ...
+     https://svn.boost.org/trac/boost/ticket/4622
+
+     try a patch r65198 on clear vertex but loop remains and stranges
+     things occur...
+
+     solution => put self loop info in VProperties (i.e outside graph
+     structure)
+
+  */
+
 
   template<class AdjointG>
-  EDescriptor add_edge(const VDescriptor& vd1,
-                       const VDescriptor& vd2,
-                       const E& e_bundle,
-                       AdjointG& ag)
+  std::pair<EDescriptor, typename AdjointG::VDescriptor>
+  add_edge(const VDescriptor& vd1,
+           const VDescriptor& vd2,
+           const E& e_bundle,
+           AdjointG& ag)
   {
 
     // adjoint static assertions
@@ -564,7 +578,7 @@ public:
       }
     }
     assert(ag.size() == edges_number());
-    return new_ed;
+    return std::pair<EDescriptor, typename AdjointG::VDescriptor>(new_ed, new_ve);
   }
 
   void remove_edge(const EDescriptor& ed)
