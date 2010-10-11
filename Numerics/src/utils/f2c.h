@@ -62,7 +62,11 @@
 #ifndef _F2C_INCLUDE_H
 #define _F2C_INCLUDE_H
 
-typedef long int integer;
+/* long int => int (64 bits) */
+/* typedef long int integer; */
+
+typedef int integer;
+
 typedef char *address;
 typedef short int shortint;
 typedef float f2c_real;
