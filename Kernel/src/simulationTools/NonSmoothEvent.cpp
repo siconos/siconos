@@ -57,7 +57,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     UnitaryRelationsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
     {
-      found = indexSet2->is_vertex(indexSet2->bundle(*ui));
+      found = indexSet2->is_vertex(indexSet1->bundle(*ui));
       if (!found) break;
     }
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
