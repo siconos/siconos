@@ -559,18 +559,6 @@ static inline double hypot9(double* a)
 }
 
 
-/* check nan of component
- * \param double* a
- */
-static inline int isnan3(double* a)
-{
-  double* a0 = a++;
-  double* a1 = a++;
-  double* a2 = a;
-
-  return isnan(*a0) || isnan(*a1) || isnan(*a2);
-}
-
 /** extract3x3 : copy a sub 3x3 matrix of *a into *b */
 /* \param[in] n row numbers of matrix a
  * \param[in] i0 row of first element

@@ -20,6 +20,7 @@
 #ifndef LA_H
 #define LA_H
 
+#include <assert.h>
 #include "NumericsConfig.h"
 
 #define FCAST(T,X) (T *) (& X)
@@ -174,15 +175,18 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
    beta*y, or y := alpha*A'*x + xbeta*y,
    \param TRANS
 */
-#define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY) \
-  ({ int C_M = M; \
-     int C_N = N; \
-     double C_ALPHA = ALPHA; \
-     int C_LDA = LDA; \
-     int C_INCX = INCX; \
-     double C_BETA = BETA; \
-     int C_INCY = INCY; \
-     BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(C_M), INTEGER(C_N), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), X, INTEGER(C_INCX), DOUBLE(C_BETA), Y, INTEGER(C_INCY)); \
+#define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY)       \
+  ({ int C_M = M;                                                       \
+    int C_N = N;                                                        \
+    double C_ALPHA = ALPHA;                                             \
+    int C_LDA = LDA;                                                    \
+    int C_INCX = INCX;                                                  \
+    double C_BETA = BETA;                                               \
+    int C_INCY = INCY;                                                  \
+    assert (C_LDA > 0);                                                 \
+    assert (C_M > 0);                                                   \
+    assert (C_N > 0);                                                   \
+    BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(C_M), INTEGER(C_N), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), X, INTEGER(C_INCX), DOUBLE(C_BETA), Y, INTEGER(C_INCY)); \
   })
 
 /*  DGEMM  performs one of the matrix-matrix operations

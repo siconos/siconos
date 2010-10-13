@@ -322,7 +322,7 @@ int main()
     print3(x);
     */
 
-    if (! isnan3(x))
+    //    if (! isnan3(x))
     {
       k++;
 
