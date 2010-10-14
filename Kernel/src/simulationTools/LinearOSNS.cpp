@@ -182,11 +182,44 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
 
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
-
-  SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
-  SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
+  // At most 2 DS are linked by an unitary relation
+  SP::DynamicalSystem DS1;
+  SP::DynamicalSystem DS2;
+
+  if (indexSet->properties(vd).source != indexSet->properties(vd).target)
+  {
+    // a two DS unitary relation
+    DS1 = indexSet->properties(vd).source;
+    DS2 = indexSet->properties(vd).target;
+  }
+  else
+  {
+    DS1 = indexSet->properties(vd).source;
+    DS2 = DS1;
+
+
+    UnitaryRelationsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = indexSet->out_edges(vd);
+         oei != oeiend; ++oei)
+    {
+      // note : at most 4 edges
+      DS2 = indexSet->bundle(*oei);
+      if (DS2 != DS1) break;
+    }
+  }
+  assert(DS1);
+  assert(DS2);
+
+  /*
+  SP::DynamicalSystemsSet commonDS = UR->dynamicalSystems();
+  assert (!commonDS->isEmpty()) ;
+  for (DSIterator itDS = commonDS->begin(); itDS!=commonDS->end(); itDS++)
+  {
+    assert (*itDS == DS1 || *itDS == DS2);
+  }
+  */
 
   unsigned int nslawSize = UR->getNonSmoothLawSize();
 
@@ -306,6 +339,7 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
 
     else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType);
   }
+
 }
 
 void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
@@ -327,18 +361,50 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
   SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(ed));
   SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
 
+  unsigned int index1 = indexSet->index(indexSet->source(ed));
+  unsigned int index2 = indexSet->index(indexSet->target(ed));
+
   unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
 
-  if (! indexSet->properties(ed).block)
+  /*
+  DynamicalSystemsSet commonDS;
+  intersection(*UR1->dynamicalSystems(),*UR2->dynamicalSystems(), commonDS);
+  assert (!commonDS.isEmpty()) ;
+  for (DSIterator itDS = commonDS.begin(); itDS!=commonDS.end(); itDS++)
   {
-    indexSet->properties(ed).block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    assert (*itDS == ds);
   }
+  */
 
-  assert(indexSet->properties(ed).block->size(0) == nslawSize1);
-  assert(indexSet->properties(ed).block->size(1) == nslawSize2);
+  SP::SiconosMatrix currentUnitaryBlock;
 
-  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(ed).block;
+  assert(index1 != index2);
+
+  if (index2 > index1) // upper block
+  {
+    if (! indexSet->properties(ed).upper_block)
+    {
+      indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    }
+
+    assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
+    assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
+
+    currentUnitaryBlock = indexSet->properties(ed).upper_block;
+  }
+  else  // lower block
+  {
+    if (! indexSet->properties(ed).lower_block)
+    {
+      indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    }
+
+    assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
+    assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
+
+    currentUnitaryBlock = indexSet->properties(ed).lower_block;
+  }
 
   // Get the W and Theta maps of one of the Unitary Relation -
   // Warning: in the current version, if OSI!=Moreau, this fails.
@@ -426,6 +492,7 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
     // UR1 != UR2
     rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
     UR2->getLeftUnitaryBlockForDS(ds, rightUnitaryBlock);
+
     // Warning: we use getLeft for Right unitaryBlock
     // because right = transpose(left) and because of
     // size checking inside the getBlock function, a
@@ -436,6 +503,7 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
     prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
   }
   else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+
 }
 
 /* Cascading visitors experimentation.

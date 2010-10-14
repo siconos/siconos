@@ -33,13 +33,14 @@
 
 // default
 Topology::Topology(): _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
-  _numberOfConstraints(0)
+  _numberOfConstraints(0), _symmetric(false)
 {
   _URG.resize(1);
   _DSG.resize(1);
 
   _URG[0].reset(new UnitaryRelationsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
+
   _allInteractions.reset(new InteractionsSet());
   _maxRelativeDegree = 0;
   _minRelativeDegree = MAX_RELATIVE_DEGREE;
@@ -47,7 +48,7 @@ Topology::Topology(): _isTopologyUpToDate(false), _isTopologyTimeInvariant(true)
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
   _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
-  _numberOfConstraints(0)
+  _numberOfConstraints(0), _symmetric(false)
 {
 
   _URG.resize(1);
@@ -55,6 +56,7 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
 
   _URG[0].reset(new UnitaryRelationsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
+
   _allInteractions.reset(new InteractionsSet());
 
   for (InteractionsIterator it = newInteractions->begin();
@@ -72,7 +74,7 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
 // a constructor with a DS set : when some DS may not be in interactions
 Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions) :
   _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
-  _numberOfConstraints(0)
+  _numberOfConstraints(0), _symmetric(false)
 {
 
   _URG.resize(1);
@@ -80,6 +82,7 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
 
   _URG[0].reset(new UnitaryRelationsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
+
   _allInteractions.reset(new InteractionsSet());
 
   for (InteractionsIterator it = newInteractions->begin();
@@ -166,6 +169,9 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
           UnitaryRelationsGraph::VDescriptor urg_new_ve;
           boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
 
+          // add self branches in vertex properties
+          // note : boost graph SEGFAULT on self branch removal
+          // see https://svn.boost.org/trac/boost/ticket/4622
           _URG[0]->properties(urg_new_ve).source = *i1ds;
           _URG[0]->properties(urg_new_ve).target = *i1ds;
 
@@ -196,6 +202,9 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
             UnitaryRelationsGraph::VDescriptor urg_new_ve;
             boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, *uri, *_URG[0]);
 
+            // add self branches in vertex properties
+            // note : boost graph SEGFAULT on self branch removal
+            // see https://svn.boost.org/trac/boost/ticket/4622
             _URG[0]->properties(urg_new_ve).source = *i1ds;
             _URG[0]->properties(urg_new_ve).target = *i2ds;
 
@@ -421,7 +430,23 @@ void Topology::initialize()
 {
 
   computeRelativeDegrees();
+
   _isTopologyUpToDate = true;
+
+}
+
+void Topology::setProperties()
+{
+  GraphData gprops;
+  gprops.symmetric = _symmetric;
+
+
+  for (unsigned int i = 0; i < _URG.size(); ++i)
+  {
+    _URG[i]->properties() = gprops;
+  }
+  _DSG[0]->properties() = gprops;
+
 }
 
 void Topology::clear()
@@ -433,3 +458,6 @@ void Topology::clear()
 
   _isTopologyUpToDate = false;
 }
+
+
+

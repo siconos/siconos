@@ -47,16 +47,18 @@ using namespace boost;
 
 enum vertex_properties_t { vertex_properties };
 enum edge_properties_t { edge_properties };
+enum graph_properties_t { graph_properties };
 
 namespace boost
 {
 BOOST_INSTALL_PROPERTY(vertex, properties);
 BOOST_INSTALL_PROPERTY(edge, properties);
+BOOST_INSTALL_PROPERTY(graph, properties);
 }
 
 
 
-template <class V, class E, class VProperties, class EProperties>
+template <class V, class E, class VProperties, class EProperties, class GProperties>
 class SiconosGraph
 {
 public:
@@ -72,7 +74,8 @@ public:
          property < edge_color_t ,
          default_color_type ,
          property < edge_index_t, size_t,
-         property< edge_properties_t , EProperties > > > > >
+         property< edge_properties_t , EProperties > > > > ,
+         property < graph_properties_t, GProperties > >
          graph_t;
 
   typedef V vertex_t;
@@ -121,6 +124,8 @@ public:
   typedef typename
   property_map<graph_t, vertex_properties_t >::type VPropertiesAccess;
 
+  typedef typename
+  property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
 
   typedef typename std::map<V, VDescriptor> VMap;
@@ -137,68 +142,21 @@ protected:
 
 private:
 
-  /** copy constructor, private => forbidden
-   *  \param a SiconosGraph to be copied
-   */
   SiconosGraph(const SiconosGraph&);
 
 public:
 
   /** default constructor
    */
-  SiconosGraph() {};
+  SiconosGraph()
+  {
+  };
 
   ~SiconosGraph()
   {
     g.clear();
   };
 
-  bool state_assert()
-  {
-    VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
-    {
-      assert(is_vertex(bundle(*vi)));
-      assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
-
-      OEIterator ei, eiend;
-      for (boost::tie(ei, eiend) = out_edges(*vi);
-           ei != eiend; ++ei)
-      {
-        assert(is_vertex(bundle(target(*ei))));
-        assert(source(*ei) == *vi);
-      }
-      AVIterator avi, aviend;
-      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
-           avi != aviend; ++avi)
-      {
-        assert(is_vertex(bundle(*avi)));
-        assert(bundle(descriptor(bundle(*avi))) == bundle(*avi));
-      }
-    }
-    return true;
-
-  }
-
-  bool adjacent_vertices_ok()
-  {
-
-    VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
-    {
-      assert(is_vertex(bundle(*vi)));
-      assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
-
-      AVIterator avi, aviend;
-      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
-           avi != aviend; ++avi)
-      {
-        assert(is_vertex(bundle(*avi)));
-        assert(bundle(descriptor(bundle(*avi))) == bundle(*avi));
-      }
-    }
-    return true;
-  }
 
   bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2)
   {
@@ -284,6 +242,11 @@ public:
   inline default_color_type& color(const EDescriptor& ed)
   {
     return get(edge_color, g)[ed];
+  };
+
+  inline GProperties& properties()
+  {
+    return get_property(g, graph_properties);
   };
 
   inline size_t& index(const VDescriptor& vd)
@@ -687,6 +650,57 @@ public:
       std::cout << std::endl;
     }
   }
+
+  /* debug */
+#ifndef NDEBUG
+  bool state_assert()
+  {
+    VIterator vi, viend;
+    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    {
+      assert(is_vertex(bundle(*vi)));
+      assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
+
+      OEIterator ei, eiend;
+      for (boost::tie(ei, eiend) = out_edges(*vi);
+           ei != eiend; ++ei)
+      {
+        assert(is_vertex(bundle(target(*ei))));
+        assert(source(*ei) == *vi);
+      }
+      AVIterator avi, aviend;
+      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
+           avi != aviend; ++avi)
+      {
+        assert(is_vertex(bundle(*avi)));
+        assert(bundle(descriptor(bundle(*avi))) == bundle(*avi));
+      }
+    }
+    return true;
+
+  }
+
+  bool adjacent_vertices_ok()
+  {
+
+    VIterator vi, viend;
+    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    {
+      assert(is_vertex(bundle(*vi)));
+      assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
+
+      AVIterator avi, aviend;
+      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
+           avi != aviend; ++avi)
+      {
+        assert(is_vertex(bundle(*avi)));
+        assert(bundle(descriptor(bundle(*avi))) == bundle(*avi));
+      }
+    }
+    return true;
+  }
+#endif
+
 
 };
 

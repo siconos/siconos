@@ -308,12 +308,17 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
 
       assert(pos < dimRow);
       assert(col < dimColumn);
+
       boost::static_pointer_cast<SimpleMatrix>(M1)
-      ->setBlock(pos, col, *indexSet->properties(*ei).block);
+      ->setBlock(std::min(pos, col), std::max(pos, col),
+                 *indexSet->properties(*ei).upper_block);
+
+      boost::static_pointer_cast<SimpleMatrix>(M1)
+      ->setBlock(std::max(pos, col), std::min(pos, col),
+                 *indexSet->properties(*ei).lower_block);
     }
 
   }
-
   else // if storageType == 1
   {
     if (! M2)

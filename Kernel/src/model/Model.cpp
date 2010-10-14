@@ -148,6 +148,10 @@ void Model::initialize(SP::Simulation simulation)
 
   // === Simulation init ===
   _strat->initialize(shared_from_this());
+
+  // symmetry in indexSets
+  _nsds->topology()->setProperties();
+
 }
 
 

@@ -119,7 +119,7 @@ typedef std::vector<int> IndexInt;
 TYPEDEF_SPTR(IndexInt);
 
 
-// to be replaced with dynamic maps
+// to be replaced with exterior property maps
 struct RelationData
 {
   SP::SiconosMatrix block;    // diagonal block
@@ -129,11 +129,17 @@ struct RelationData
 
 struct SystemData
 {
-  SP::SiconosMatrix block;   // i,j block i!=j
+  SP::SiconosMatrix upper_block;   // i,j block i<j
+  SP::SiconosMatrix lower_block;   // i,j block i>j
 };
 
-typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, SystemData , RelationData > DynamicalSystemsGraph;
-typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, RelationData, SystemData > UnitaryRelationsGraph;
+struct GraphData
+{
+  bool symmetric;
+};
+
+typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, SystemData , RelationData, GraphData > DynamicalSystemsGraph;
+typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, RelationData, SystemData, GraphData > UnitaryRelationsGraph;
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(UnitaryRelationsGraph);

@@ -197,7 +197,7 @@ public:
     else return colPos;
   };
 
-  /** fill the current class using an index set and a map of blocks
+  /** fill the current class using an index set
       \param UnitaryRelationsGraph*, the index set of the active
       constraints
   */

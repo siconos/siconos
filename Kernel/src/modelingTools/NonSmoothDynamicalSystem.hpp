@@ -265,6 +265,14 @@ public:
 
   void clear();
 
+  /** set symmetry in the blocks computation
+   * \param a bool
+   */
+  void setSymmetric(bool val)
+  {
+    topology()->setSymmetric(val);
+  }
+
 };
 
 #endif

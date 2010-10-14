@@ -192,39 +192,129 @@ void OneStepNSProblem::updateUnitaryBlocks()
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  // 1 Diagonal blocks
-  UnitaryRelationsGraph::VIterator vi, viend;
-  for (boost::tie(vi, viend) = indexSet->vertices();
-       vi != viend; ++vi)
+  if (simulation()->indexSet(_levelMin)->properties().symmetric)
   {
+    UnitaryRelationsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = indexSet->vertices();
+         vi != viend; ++vi)
+    {
 
-    if (!isTimeInvariant || !isLinear)
-    {
-      computeDiagonalUnitaryBlock(*vi);
-    }
-    else
-    {
-      if (! indexSet->properties(*vi).block)
+      if (!isTimeInvariant || !isLinear)
       {
         computeDiagonalUnitaryBlock(*vi);
       }
+      else
+      {
+        if (! indexSet->properties(*vi).block)
+        {
+          computeDiagonalUnitaryBlock(*vi);
+        }
+      }
     }
-  }
 
-  UnitaryRelationsGraph::EIterator ei, eiend;
-  for (boost::tie(ei, eiend) = indexSet->edges();
-       ei != eiend; ++ei)
-  {
+    UnitaryRelationsGraph::EIterator ei, eiend;
+    for (boost::tie(ei, eiend) = indexSet->edges();
+         ei != eiend; ++ei)
+    {
 
-    if (!isTimeInvariant || !isLinear)
-    {
-      computeUnitaryBlock(*ei);
-    }
-    else
-    {
-      if (! indexSet->properties(*ei).block)
+      if (!isTimeInvariant || !isLinear)
       {
         computeUnitaryBlock(*ei);
+
+        // allocation for transposed block
+        // should be avoided
+        if (! indexSet->properties(*ei).upper_block)
+        {
+          assert(indexSet->properties(*ei).lower_block);
+          indexSet->properties(*ei).upper_block.
+          reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
+                                 indexSet->properties(*ei).lower_block->size(0)));
+          indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
+        }
+        else
+        {
+          assert(indexSet->properties(*ei).upper_block);
+          indexSet->properties(*ei).lower_block.
+          reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
+                                 indexSet->properties(*ei).upper_block->size(0)));
+          indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
+        }
+
+      }
+      else
+      {
+
+        // symmetric : lower or upper can be tested
+        if (! indexSet->properties(*ei).lower_block)
+        {
+          computeUnitaryBlock(*ei);
+
+
+          // allocation for transposed block
+          // should be avoided
+          if (! indexSet->properties(*ei).upper_block)
+          {
+            assert(indexSet->properties(*ei).lower_block);
+            indexSet->properties(*ei).upper_block.
+            reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
+                                   indexSet->properties(*ei).lower_block->size(0)));
+            indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
+          }
+          else
+          {
+            assert(indexSet->properties(*ei).upper_block);
+            indexSet->properties(*ei).lower_block.
+            reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
+                                   indexSet->properties(*ei).upper_block->size(0)));
+            indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
+          }
+        }
+      }
+    }
+  }
+  else // not symmetric
+  {
+    UnitaryRelationsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = indexSet->vertices();
+         vi != viend; ++vi)
+    {
+
+      if (!isTimeInvariant || !isLinear)
+      {
+        computeDiagonalUnitaryBlock(*vi);
+      }
+      else
+      {
+        if (! indexSet->properties(*vi).block)
+        {
+          computeDiagonalUnitaryBlock(*vi);
+        }
+      }
+
+      /* on a undirected graph, out_edges gives all incident edges */
+      UnitaryRelationsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+           oei != oeiend; ++oei)
+      {
+
+        if (!isTimeInvariant || !isLinear)
+        {
+          computeUnitaryBlock(*oei);
+        }
+        else
+        {
+          /* upper or lower ? */
+          unsigned int isrc = indexSet->index(indexSet->source(*oei));
+          unsigned int itar = indexSet->index(indexSet->target(*oei));
+
+          assert(isrc != itar);
+
+          if (((itar > isrc) && !indexSet->properties(*oei).upper_block) ||
+              ((isrc < itar) && !indexSet->properties(*oei).lower_block))
+          {
+            computeUnitaryBlock(*oei);
+          }
+        }
       }
     }
   }
@@ -411,3 +501,5 @@ OneStepNSProblem::~OneStepNSProblem()
 {
   clear();
 };
+
+

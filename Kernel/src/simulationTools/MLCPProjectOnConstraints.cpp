@@ -150,15 +150,37 @@ void MLCPProjectOnConstraints::computeUnitaryBlock(const UnitaryRelationsGraph::
   unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
 
-  if (! indexSet->properties(ed).block)
+  SP::SiconosMatrix currentUnitaryBlock;
+
+  unsigned int index1 = indexSet->index(indexSet->source(ed));
+  unsigned int index2 = indexSet->index(indexSet->target(ed));
+
+  assert(index1 != index2);
+
+  if (index2 > index1) // upper block
   {
-    indexSet->properties(ed).block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    if (! indexSet->properties(ed).upper_block)
+    {
+      indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    }
+
+    assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
+    assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
+
+    currentUnitaryBlock = indexSet->properties(ed).upper_block;
   }
+  else  // lower block
+  {
+    if (! indexSet->properties(ed).lower_block)
+    {
+      indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    }
 
-  assert(indexSet->properties(ed).block->size(0) == nslawSize1);
-  assert(indexSet->properties(ed).block->size(1) == nslawSize2);
+    assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
+    assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
 
-  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(ed).block;
+    currentUnitaryBlock = indexSet->properties(ed).lower_block;
+  }
 
   computeOptions(UR1, UR2);
   // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if

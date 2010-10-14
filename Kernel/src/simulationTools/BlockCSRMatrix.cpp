@@ -129,6 +129,7 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[level]) ===
 
+
   int sizeV = 0;
 
   UnitaryRelationsGraph::VIterator vi, viend;
@@ -164,9 +165,16 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
     assert(vd2 == indexSet->descriptor(ur2));
     assert(indexSet->index(vd2) == indexSet->index(indexSet->descriptor(ur2)));
 
-    (*MBlockCSR)(indexSet->index(vd1), indexSet->index(vd2)) =
-      indexSet->properties(*ei).block->getArray();
 
+    unsigned int pos = indexSet->index(vd1);
+    unsigned int col = indexSet->index(vd2);
+
+
+    (*MBlockCSR)(std::min(pos, col), std::max(pos, col)) =
+      indexSet->properties(*ei).upper_block->getArray();
+
+    (*MBlockCSR)(std::max(pos, col), std::min(pos, col)) =
+      indexSet->properties(*ei).lower_block->getArray();
   }
 }
 

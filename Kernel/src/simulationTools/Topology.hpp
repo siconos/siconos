@@ -106,6 +106,10 @@ private:
       all nslaw sizes of Unitary Relations of IndexSet0.*/
   unsigned int _numberOfConstraints;
 
+
+  /** symmetry in the blocks computation */
+  bool _symmetric;
+
   /** initializations (relative degrees, time invariance) from non
       smooth laws kind */
   struct SetupFromNslaw;
@@ -234,6 +238,7 @@ public:
   {
     assert(num < _URG.size()) ;
     _URG[num].reset(new UnitaryRelationsGraph());
+    _URG[num]->properties().symmetric = false;
   };
 
   /** get a pointer to the graph at level num of Dynamical System
@@ -319,6 +324,20 @@ public:
   void initialize();
 
   void clear();
+
+  /** set symmetry in the blocks computation
+   * \param a bool
+   */
+
+  void setSymmetric(bool val)
+  {
+    _symmetric = val;
+  }
+
+  /** initialize graphs properties */
+  void setProperties();
+
+
 };
 
 DEFINE_SPTR(Topology);

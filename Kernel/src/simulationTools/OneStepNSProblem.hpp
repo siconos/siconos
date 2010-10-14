@@ -100,10 +100,6 @@ protected:
   /** id/name of the problem */
   std::string _id;
 
-
-
-
-
   /** size of the problem to solve */
   unsigned int _sizeOutput;
 
@@ -157,6 +153,8 @@ protected:
       Numerics functions calls */
   SP::NumericsOptions _numerics_options;
 
+
+
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** default constructor
@@ -208,7 +206,6 @@ public:
   {
     return _numerics_solver_options;
   };
-
 
   /** to get the id of the OneStepNSProblem
    *  \return string
