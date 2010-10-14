@@ -652,7 +652,33 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   if (osiType == OSI::MOREAU)
     Xfree = UR->workFree();
   else if (osiType == OSI::LSODAR)
-    Xfree = UR->workx();
+  {
+
+    /* V.A. 10/10/2010
+     * Following the type of OSNS  we need to retrieve the velocity or the acceleration
+     * This tricks is not very nice but for the moment the OSNS do not known if
+     * it is in accelaration of not
+     */
+
+    SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
+    if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
+    {
+      Xfree  = UR->workFree();
+      //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+      //       Xfree->display();
+    }
+    else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this)
+    {
+      Xfree = UR->workx();
+      //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+      //       Xfree->display();
+
+    }
+    else
+      RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
+  }
+
+
 
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {

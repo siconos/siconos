@@ -227,6 +227,9 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   // second argument is useless but present because of top-class function overloading.
 
   *_q[2] = *_p[2]; // Warning: p update is done in Interactions/Relations
+  //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
+  //   std::cout << " p[2] " << std::endl ;
+  //  _p[2]->display();
 
   if (_fExt)
   {
@@ -242,6 +245,30 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
 
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
+
+  _workFree->zero();
+  if (_fExt)
+  {
+    computeFExt(time);
+    *_workFree += *_fExt; // This supposes that _fExt is up to date!!
+  }
+
+  if (_K)
+    *_workFree -= prod(*_K, *_q[0]);
+
+  if (_C)
+    *_workFree -= prod(*_C, *_q[1]);
+
+  // Then we search for _workFree, such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
+  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workFree);
+
+
+  //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
+  //   std::cout << " q[2] " << std::endl ;
+  //   _q[2]->display();
+  //   std::cout << " _workFree " << std::endl ;
+  //   _workFree->display();
+
 }
 
 void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)

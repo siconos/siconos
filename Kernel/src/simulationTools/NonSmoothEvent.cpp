@@ -88,10 +88,12 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //    acceleration LCP if IndexSet[2] is not empty
     if (indexSet2->size() > 0)
     {
-      // Update the state of the DS OSIIterator itOSI; for(itOSI =
-      //    simulation->getOneStepIntegrators().begin();
-      //    itOSI!=simulation->getOneStepIntegrators().end() ;
-      //    ++itOSI) (*itOSI)->updateState(2);
+      // Update the state of the DS
+      OSIIterator itOSI;
+      for (itOSI = simulation->oneStepIntegrators()->begin();
+           itOSI != simulation->oneStepIntegrators()->end() ;
+           ++itOSI)
+        (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
       eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_ACCELERATION); //solveLCPAcceleration();

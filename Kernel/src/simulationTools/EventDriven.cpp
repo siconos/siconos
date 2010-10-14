@@ -211,6 +211,16 @@ void EventDriven::updateIndexSet(unsigned int i)
       }
     }
   }
+  //   std::cout << "EventDriven::updateIndexSet(i = "<< i << ") "<< std::endl;
+  //   if (indexSeti->size() >0 && i==1) {
+  //   std::cout << "indexSeti size ="<< indexSeti->size() <<  std::endl;
+
+  //   indexSeti->display();
+
+  //   std::cout << "indexSetip size ="<< indexSetip->size()<< std::endl;
+  //   indexSetip->display();
+  //   }
+
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()
@@ -317,6 +327,7 @@ void EventDriven::initLevelMax()
 
 void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
+  //  std::cout << "EventDriven::computef -------------------------> start" <<std::endl;
 
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
@@ -349,7 +360,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   //  lsodar->updateState(2); // update based on the last saved values
   //  for the DS state, ie the ones computed by lsodar (x above)
 
-  // Update Index sets?
+  // Update Index sets? No !!
 
   // Get the required value, ie xdot for output.
   SP::SiconosVector xtmp2; // The Right-Hand side
@@ -361,6 +372,8 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
   }
+  //  std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
+
 }
 
 void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
@@ -410,7 +423,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
                            doublereal* x, integer * ng,
                            doublereal * gOut)
 {
-
+  //   std::cout << "EventDriven::computeg start" <<std::endl;
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
@@ -439,27 +452,59 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   if (!_allNSProblems->empty())
     updateOutput(0, 0);
 
+  // Make sure that lambda[2] is uptodate
+
+  double * xdottmp = (double *)malloc(*sizeOfX * sizeof(double));
+
+  computef(osi, sizeOfX, time, x, xdottmp);
+
+  free(xdottmp);
+
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui);
     nsLawSize = ur->getNonSmoothLawSize();
+    //     std::cout << "ur->lambda(2)->display()" <<std::endl;
+    //     ur->lambda(2)->display();
+
     if (indexSet2->is_vertex(ur)) // ie if the current Unitary
       // Relation is in indexSets[2]
     {
       // Get lambda at acc. level, solution of LCP acc, called
       // during computef().
+
+
+
+      assert(ur->lambda(2));
+      assert(ur->lambda(2).get());
+
       lambda = ur->lambda(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
-        gOut[k++] = (*lambda)(i);
+      {
+        gOut[k] = (*lambda)(i);
+        //         std::cout << "Ur in index2" <<std::endl;
+        //         std::cout << " gOut["<< k << "] = " << gOut[k]<< std::endl;
+        k++;
+      }
     }
     else
     {
+
       y = ur->y(0);
       for (unsigned int i = 0; i < nsLawSize; i++)
-        gOut[k++] = (*y)(i);
+      {
+        gOut[k] = (*y)(i);
+        //         std::cout << "Ur in index0" << std::endl;
+        //         std::cout << " gOut["<< k << "] = " << gOut[k]<< std::endl;
+        k++;
+      }
+
     }
   }
+  //    std::cout << "EventDriven::computeg stop" <<std::endl;
+
+
 }
 
 void EventDriven::updateImpactState()
@@ -518,7 +563,10 @@ void EventDriven::advanceToEvent()
   OSIIterator it;
   for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
   {
+
+    //    std::cout << " Start of Lsodar integration" << std::endl;
     (*it)->integrate(_tinit, _tend, _tout, istate); // integrate must
+    //    std::cout << " End of Lsodar integration" << std::endl;
     // return a flag
     // (istate) telling if
     // _tend has been

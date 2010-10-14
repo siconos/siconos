@@ -989,15 +989,19 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 
 void LagrangianDS::resetNonSmoothPart()
 {
-  _p[1]->zero();
+  if (_p[1])
+    _p[1]->zero();
+  if (_p[2])
+    _p[2]->zero();
 }
 
 void LagrangianDS::computePostImpactVelocity()
 {
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_p[1]);
-  *_q[1] += *_p[1];  // v+ = v- + p
+  SimpleVector tmp(*_p[1]);
+  _workMatrix[invMass]->PLUForwardBackwardInPlace(tmp);
+  *_q[1] += tmp;  // v+ = v- + p
 }
 
 void LagrangianDS::setComputeNNLFunction(const std::string& pluginPath, const std::string&  functionName)

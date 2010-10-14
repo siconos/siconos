@@ -79,7 +79,7 @@ void LagrangianR::initialize(SP::Interaction inter)
     data[q0]->insertPtr(lds->q());
     data[q1]->insertPtr(lds->velocity());
     data[q2]->insertPtr(lds->acceleration());
-    data[p0]->insertPtr(lds->p(1));
+    //      data[p0]->insertPtr( lds->p(0) );
     data[p1]->insertPtr(lds->p(1));
     data[p2]->insertPtr(lds->p(2));
     data[z]->insertPtr(lds->z());
