@@ -112,11 +112,6 @@ RELATION::SUBTYPES UnitaryRelation::getRelationSubType() const
   return interaction()->relation()->getSubType();
 }
 
-SP::DynamicalSystemsSet UnitaryRelation::dynamicalSystems()
-{
-  return interaction()->dynamicalSystems();
-}
-
 void UnitaryRelation::initialize(const std::string& simulationType)
 {
   if (!interaction())
@@ -127,7 +122,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   mWorkXq.reset(new BlockVector());
   _workFree.reset(new BlockVector());
 
-  for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+  for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
     _workZ->insertPtr((*it)->z());
 
   if (simulationType == "TimeStepping")
@@ -135,7 +130,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     RELATION::TYPES pbType = getRelationType();
     if (pbType == FirstOrder)
     {
-      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
       {
         SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
         _workX->insertPtr(fds->x());
@@ -150,7 +145,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     RELATION::TYPES pbType = getRelationType();
     if (pbType == FirstOrder)
     {
-      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
       {
         SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
         _workX->insertPtr(fds->x());
@@ -160,7 +155,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     }
     else // Lagrangian
     {
-      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
       {
         _workX->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
         _workFree->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());

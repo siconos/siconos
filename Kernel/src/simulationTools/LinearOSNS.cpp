@@ -618,7 +618,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   RELATION::TYPES relationType = UR->getRelationType();
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
 
-  SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
   OSI::TYPES osiType = simulation()->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();

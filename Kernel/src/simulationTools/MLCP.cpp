@@ -85,10 +85,6 @@ void  MLCP::reset()
 
 void MLCP::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
-  DynamicalSystemsSet commonDS;
-  intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
-  assert(!commonDS.isEmpty()) ;
-
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
   unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSize();

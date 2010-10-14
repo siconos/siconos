@@ -217,51 +217,6 @@ public:
    */
   RELATION::SUBTYPES getRelationSubType() const;
 
-  /** function used to sort UnitaryRelation in SiconosSet<SP::UnitaryRelation>
-   *  \return an int
-   */
-  inline double* getSort() const
-  {
-    return (double*)this;
-  }
-
-  /** gets an iterator to the first element of the DynamicalSystems set.
-   *  \return a DSIterator.
-   */
-  inline DSIterator dynamicalSystemsBegin()
-  {
-    return _mainInteraction->dynamicalSystemsBegin();
-  };
-
-  /** gets an iterator equal to DynamicalSystems.end().
-   *  \return a DSIterator.
-   */
-  inline DSIterator dynamicalSystemsEnd()
-  {
-    return _mainInteraction->dynamicalSystemsEnd();
-  };
-
-  /** gets a const iterator to the first element of the  DynamicalSystems set.
-   *  \return a ConstDSIterator.
-   */
-  inline ConstDSIterator dynamicalSystemsBegin() const
-  {
-    return _mainInteraction->dynamicalSystemsBegin();
-  };
-
-  /** gets a const iterator equal to DynamicalSystems.end().
-   *  \return a ConstDSIterator.
-   */
-  inline ConstDSIterator dynamicalSystemsEnd() const
-  {
-    return _mainInteraction->dynamicalSystemsEnd();
-  };
-
-  /** gets a pointer to the DynamicalSystemsSet
-   *  \return a DynamicalSystemsSet*
-   */
-  SP::DynamicalSystemsSet dynamicalSystems() ;
-
   /** To initialize the UR: mainly to set work vectors.
    */
   void initialize(const std::string&);
