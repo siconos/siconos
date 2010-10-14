@@ -221,37 +221,42 @@ void OneStepNSProblem::updateUnitaryBlocks()
       {
         computeUnitaryBlock(*ei);
 
+        unsigned int isrc = indexSet->index(indexSet->source(*ei));
+        unsigned int itar = indexSet->index(indexSet->target(*ei));
+
         // allocation for transposed block
         // should be avoided
-        if (! indexSet->properties(*ei).upper_block)
+
+        if (itar > isrc) // upper block has been computed
         {
-          assert(indexSet->properties(*ei).lower_block);
-          indexSet->properties(*ei).upper_block.
-          reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
-                                 indexSet->properties(*ei).lower_block->size(0)));
-          indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
+          if (!indexSet->properties(*ei).lower_block)
+          {
+            indexSet->properties(*ei).lower_block.
+            reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
+                                   indexSet->properties(*ei).upper_block->size(0)));
+          }
+          indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
         }
         else
         {
-          assert(indexSet->properties(*ei).upper_block);
-          indexSet->properties(*ei).lower_block.
-          reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
-                                 indexSet->properties(*ei).upper_block->size(0)));
-          indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
+          assert(itar < isrc);    // lower block has been computed
+          if (!indexSet->properties(*ei).upper_block)
+          {
+            indexSet->properties(*ei).upper_block.
+            reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
+                                   indexSet->properties(*ei).lower_block->size(0)));
+          }
+          indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
         }
-
       }
-      else
+      else // isTimeInvariant or isLinear
       {
-
-        // symmetric : lower or upper can be tested
+        // symmetric case : lower or upper can be tested
         if (! indexSet->properties(*ei).lower_block)
         {
           computeUnitaryBlock(*ei);
 
-
-          // allocation for transposed block
-          // should be avoided
+          // if lower block has been computed
           if (! indexSet->properties(*ei).upper_block)
           {
             assert(indexSet->properties(*ei).lower_block);
@@ -260,7 +265,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
                                    indexSet->properties(*ei).lower_block->size(0)));
             indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
           }
-          else
+          else // upper block has been computed
           {
             assert(indexSet->properties(*ei).upper_block);
             indexSet->properties(*ei).lower_block.
@@ -272,7 +277,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
       }
     }
   }
-  else // not symmetric
+  else // not symmetric => follow out_edges for each vertices
   {
     UnitaryRelationsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();

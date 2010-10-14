@@ -169,6 +169,7 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
     unsigned int pos = indexSet->index(vd1);
     unsigned int col = indexSet->index(vd2);
 
+    assert(pos != col);
 
     (*MBlockCSR)(std::min(pos, col), std::max(pos, col)) =
       indexSet->properties(*ei).upper_block->getArray();
@@ -244,10 +245,3 @@ void BlockCSRMatrix::display() const
        << endl;
   print(diagSizes->begin(), diagSizes->end());
 }
-
-
-
-
-
-
-
