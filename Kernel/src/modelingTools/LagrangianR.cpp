@@ -79,7 +79,11 @@ void LagrangianR::initialize(SP::Interaction inter)
     data[q0]->insertPtr(lds->q());
     data[q1]->insertPtr(lds->velocity());
     data[q2]->insertPtr(lds->acceleration());
-    //      data[p0]->insertPtr( lds->p(0) );
+    /* \warning the initialization  data[p0]->insertPtr( lds->p(1) );
+     * is inconsitent. This should be data[p0]->insertPtr( lds->p(0) )
+     * if needed (for instance for projection onto the constraints)
+     */
+    data[p0]->insertPtr(lds->p(1));
     data[p1]->insertPtr(lds->p(1));
     data[p2]->insertPtr(lds->p(2));
     data[z]->insertPtr(lds->z());
