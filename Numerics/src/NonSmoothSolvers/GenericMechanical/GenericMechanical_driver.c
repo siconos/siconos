@@ -388,6 +388,8 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   options->dparam[0] = 1e-4;
   /*Useful parameter for LS*/
   options->dparam[1] = 1.0;
+  options->dparam[2] = 1e-7;
+  options->dparam[3] = 1e-7;
   options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
   switch (id)
