@@ -26,7 +26,20 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 	* NonSmoothSolvers replace solverNmae by solverId.
 	
 --------------------------------------------------------------------------------
-  v3.0.0 - (current release)
+  v3.2.0 - (current release)
+--------------------------------------------------------------------------------	
+
+	
+Changes:
+2010-05-05 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* MLCP: Blocks of equalities and inequalities can be mixed.
+	* Solver name is replaced by an interger id.
+	* GenericMechanicalProblem: a problem where the equalities, inequalities and friction contact 3D are mixed.
+	* Quatic formulation of a unitary friction contact 3D like a polynome(artan(theta)) or a polynome of nu.
+
+
+--------------------------------------------------------------------------------
+  v3.0.0 - 
 --------------------------------------------------------------------------------	
 Notes:
 
