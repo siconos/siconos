@@ -31,7 +31,12 @@ Notes:
 
 Main Changes:
 
+2010 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+	* Add some examples using the NewtonEuler approach.
+	* GenericMechanicalProblem, a new OSNSP using the corresponding solver in Numerics.
+
 2010-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Add the BoundaryCondition classe to deal with the boundary conditions.
 	* Start RelayNSL and Relay ONSNS
  	* Plug Relay Driver for PGS, ENUM and Lemke scheme
 
