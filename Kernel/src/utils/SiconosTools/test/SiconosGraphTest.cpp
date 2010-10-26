@@ -316,8 +316,9 @@ void SiconosGraphTest::t7()
   g.add_edge(vd2, vd6, 200, ag);
   g.add_edge(vd3, vd5, 300, ag);
 
-
+#ifndef NDEBUG
   CPPUNIT_ASSERT(g.state_assert());
+#endif
 
   std::cout << "g:\n";
   g.display();
