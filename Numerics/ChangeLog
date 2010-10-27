@@ -16,31 +16,39 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 #
+
 This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
-2010-07-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
-	* NonSmoothSolvers replace solverNmae by solverId.
-	
---------------------------------------------------------------------------------
-  v3.2.0 - (current release)
---------------------------------------------------------------------------------	
 
-	
+
+--------------------------------------------------------------------------------
+  v3.2.0 - r2305
+--------------------------------------------------------------------------------
+
 Changes:
-2010-05-05 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
+
+2010-09 Maurice Bremond <Maurice.Bremond@inrialpes.fr>
+	* Global Alart Curnier (dense version only)
+	with line search (GP)
+
+2010-09 Vincent Acary <vincent.Acary@Inrialpes.Fr>
+	* fix bugs in Alart Curnier CKPS and STD
+	* line search (GP) added
+
+2010  Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
 	* MLCP: Blocks of equalities and inequalities can be mixed.
 	* Solver name is replaced by an interger id.
 	* GenericMechanicalProblem: a problem where the equalities, inequalities and friction contact 3D are mixed.
-	* Quatic formulation of a unitary friction contact 3D like a polynome(artan(theta)) or a polynome of nu.
+	* Quartic formulation of a unitary friction contact 3D like a polynome(artan(theta)) or a polynome of nu.
 
 
 --------------------------------------------------------------------------------
-  v3.0.0 - 
---------------------------------------------------------------------------------	
+  v3.0.0 -
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
@@ -49,11 +57,10 @@ Changes:
 
 
 2008-01-01 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
-	* NonSmoothSolvers Add MLCP solvers. 
+	* NonSmoothSolvers Add MLCP solvers.
 
 
-2008-January Franck Perignon <Franck.Perignon@inrialpes.fr>
-
+2008-01 Franck Perignon <Franck.Perignon@inrialpes.fr>
 	* NSSpack: split into several dir (one for each solver/formulation)
 	  => create NSSTools, LCP ...
 	* Add header files
@@ -66,14 +73,14 @@ Changes:
 
 --------------------------------------------------------------------------------
   v2.1.1 - August, 23rd 2007 (release 839)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
-	
+
 --------------------------------------------------------------------------------
   v2.1.0 - June, 28th 2007 (release 809)
---------------------------------------------------------------------------------	
+-------------------------------------------------------------------------------
 Notes:
 
 Changes:
@@ -147,23 +154,23 @@ Changes:
 --------------------------------------------------------------------------------
   v1.1.1 - 15 February 2006 (release 421)
 --------------------------------------------------------------------------------
-	
+
 Notes:
 
 Changes:
 2006-02-15   Vincent Acary <vincent.acary@inrialpes.fr>
 
-	* /macros/ac_f77_library_ldflags.m4 : This file is added and 
-	replaced the system defined macro. A small correction is done 
-	to neglect -lcrt2.o option at linking on MacOsX. This bug will 
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
 	be normally corrected in further version of autoconf.
 
 2006-02-13   Vincent Acary <vincent.acary@inrialpes.fr>
 
-	* /src/NSSpack/test/Makefile.am 
+	* /src/NSSpack/test/Makefile.am
 	Use of the variable XFAIL_TESTS for tests expected failures
 
-2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr> 
+2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr>
 	     Vincent Acary <vincent.acary@inrialpes.fr>
 
         * Update macros m4 for cppunit => the same as in kernel
@@ -172,41 +179,39 @@ Changes:
 	  --with-local-name)
 	* Update obsolete keywords in Doxygen config file
 	* Changes in headers files for odepack: add usefull functions
-	  for Lsodar solver in Kernel. 
-  	
+	  for Lsodar solver in Kernel.
 
 --------------------------------------------------------------------------------
   v1.1.0 - February 2006 (release 385)
 --------------------------------------------------------------------------------
-	
+
 Notes:
 
 Changes:
 
-2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr> 
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
 	     Vincent Acary <vincent.acary@inrialpes.fr>
 
         * rename reconf.sh in autogen.sh and m4 directory in macros
-	  Use standard acx_blas and lapack macros. 
+	  Use standard acx_blas and lapack macros.
 	  Warning: new options for configure ( -> configure --help for details )
-	
+
 
 2006-01-20   Vincent Acary <vincent.acary@inrialpes.fr>
 
-        * configure.ac, src/utils/blaslapack.h, f2c.h: Add workaround for 
+        * configure.ac, src/utils/blaslapack.h, f2c.h: Add workaround for
 	gcc-4.0.2 gfortran-4.0.2 and so on. Use of a local f2c.h for gcc4.
-	use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and gfortran 
+	use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and gfortran
 	compiled codes
 
-		
 --------------------------------------------------------------------------------
   v1.0 - November 2005 (release 341)
 --------------------------------------------------------------------------------
 
         - Solverpack renamed in NSSPack
-        - Fixed warnings on invalid pointer type due to integer types	
+        - Fixed warnings on invalid pointer type due to integer types
         - Matlab interface
-	
+
 --------------------------------------------------------------------------------
   v1.0 - October 2005 (release 304)
 --------------------------------------------------------------------------------

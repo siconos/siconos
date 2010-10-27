@@ -25,11 +25,15 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 
 --------------------------------------------------------------------------------
-  vXXX - Current version
+  v3.2.0 - r2305
 --------------------------------------------------------------------------------
 Notes:
 
 Main Changes:
+
+2010 Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Newton Euler Spheres under multibodyTools/3D
+	* unitary blocks stored on graph vertices and edges
 
 2010 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
 	* Add some examples using the NewtonEuler approach.
@@ -40,6 +44,10 @@ Main Changes:
 	* Start RelayNSL and Relay ONSNS
  	* Plug Relay Driver for PGS, ENUM and Lemke scheme
 
+--------------------------------------------------------------------------------
+  v3.1.0 - March 2009
+--------------------------------------------------------------------------------
+
 2009 October Maurice Bremond <maurice.bremond@inrialpes.fr>
 	* from get<Member>Ptr() to member()
 	* member prefix with _
@@ -49,8 +57,8 @@ Main Changes:
 2009 Olivier Bonnefon <olivier.bonnefon@inrialpes.fr>
 	* Add FirsrtOrderType2R, a type of first order relation.
 	* Add NewtonEulerDS, NewtonEulerR and a bouncing ball example based on the NewtonEuler.
-	* Add an electrical example using ideal switch. 
-	
+	* Add an electrical example using ideal switch.
+
 2009 March Maurice Bremond <maurice.bremond@inrialpes.fr>
 	* Add SiconosGraph, to replace maps of DynamicalSystems and maps
 	of UnitaryRelations.
