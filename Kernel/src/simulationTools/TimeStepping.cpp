@@ -237,9 +237,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
     }
   }
 
-  indexSet1->update_vertices_indices();
-  indexSet1->update_edges_indices();
-
   assert(indexSet1->size() <= indexSet0->size());
 
 }
