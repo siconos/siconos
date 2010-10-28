@@ -182,7 +182,11 @@ void Simulation::updateIndexSets()
   if (nindexsets > 1)
   {
     for (unsigned int i = 1; i < nindexsets ; ++i)
+    {
       updateIndexSet(i);
+      model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_vertices_indices();
+      model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
+    }
   }
 }
 
