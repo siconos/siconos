@@ -2,11 +2,11 @@
 
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core-11 01:30
+#PIPOL fedora-core11 01:30
 
-#PIPOL fedora-core-12 01:30
+#PIPOL fedora-core12 01:30
 
-#PIPOL fedora-core-13 01:30
+#PIPOL fedora-core13 01:30
 
 #PIPOL debian-lenny 01:30
 
@@ -85,7 +85,7 @@ setup_3_2() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.2.0
     cd $PIPOL_WDIR/siconos/branches/3.2.0; { 
         for mod in Numerics Kernel Examples ; do 
-            svn co -r2305 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+            svn co -r2309 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
