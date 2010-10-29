@@ -166,7 +166,7 @@ pack_3_1() {
     
 }
 
-pack_3_3() {
+pack_3_2() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
         cmake $PIPOL_WDIR/siconos/branches/3.2.0/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
         cpack -G $PIPOL_CPACK_G 
