@@ -71,12 +71,15 @@ protected:
   SP::SimpleVector _workQ;
 
   /** Jacobian matrices of H */
-  SP::SiconosMatrix _jachq;
+  SP::SimpleMatrix _jachq;
+  SP::SimpleMatrix _jachqProj;
   SP::SiconosMatrix _jachqDot;
   SP::SiconosMatrix _jachlambda;
 
   /**vector e*/
   SP::SiconosVector _e;
+
+  SP::SimpleVector _yProj;
 
   /**vector of contact forces*/
   SP::SimpleVector _contactForce;
@@ -116,11 +119,19 @@ public:
   /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jachq() const
+  inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
   }
-  inline void setJachq(SP::SiconosMatrix newJachq)
+  inline SP::SimpleMatrix jachqProj() const
+  {
+    return _jachqProj;
+  }
+  inline SP::SimpleVector yProj()
+  {
+    return _yProj;
+  }
+  inline void setJachq(SP::SimpleMatrix newJachq)
   {
     _jachq = newJachq;
   }
@@ -162,7 +173,7 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in Jach vector
    */
-  inline void setJachqPtr(SP::SiconosMatrix newPtr)
+  inline void setJachqPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr ;
   }

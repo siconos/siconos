@@ -123,6 +123,7 @@ TYPEDEF_SPTR(IndexInt);
 struct RelationData
 {
   SP::SiconosMatrix block;    // diagonal block
+  SP::SiconosMatrix blockProj;    // diagonal block of Projection
   SP::DynamicalSystem source;
   SP::DynamicalSystem target;
 };

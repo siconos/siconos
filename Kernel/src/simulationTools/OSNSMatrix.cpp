@@ -44,10 +44,11 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
-    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
+    //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
+    indexSet->bundle(*vd)->setAbsolutePosition(dim);
     dim += (indexSet->bundle(*vd)->getNonSmoothLawSize());
 
-    assert((*unitaryBlocksPositions)[indexSet->bundle(*vd)] < dim);
+    assert(indexSet->bundle(*vd)->absolutePosition() < dim);
   }
 }
 
@@ -97,7 +98,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   UnitaryRelationsGraph::VIterator vd, vdend;
   for (boost::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
-    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
+    indexSet->bundle(*vd)->setAbsolutePosition(dim);
     dim += indexSet->bundle(*vd)->getNonSmoothLawSize();
   }
 }
@@ -107,7 +108,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 OSNSMatrix::OSNSMatrix():
   dimRow(0),  dimColumn(0), storageType(0)
 {
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
@@ -133,7 +134,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   {
     M2.reset(new BlockCSRMatrix(n));
   }
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
@@ -156,7 +157,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   else // if(storageType == 1)
     M2.reset(new BlockCSRMatrix(n));
 
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 }
@@ -165,7 +166,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
@@ -175,8 +176,8 @@ OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, int stor):
 OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
-  unitaryBlocksPositions.reset(new UR_int());
-  DSBlocksPositions.reset(new DS_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
+  //  DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
   fill(DSSet, DSBlocks);
@@ -184,7 +185,7 @@ OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks,
 OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
@@ -194,7 +195,7 @@ OSNSMatrix::OSNSMatrix(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph 
 OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSet DSSet,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
 
@@ -205,7 +206,7 @@ OSNSMatrix::OSNSMatrix(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsS
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
   dimRow(MSource.size(0)), dimColumn(MSource.size(1)), storageType(0)
 {
-  unitaryBlocksPositions.reset(new UR_int());
+  //  unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
   M1.reset(new SimpleMatrix(MSource));
@@ -222,11 +223,12 @@ OSNSMatrix::~OSNSMatrix()
 
 unsigned int OSNSMatrix::getPositionOfUnitaryBlock(SP::UnitaryRelation UR) const
 {
-  UR_int::const_iterator it = unitaryBlocksPositions->find(UR);
-  if (it == unitaryBlocksPositions->end())
+  return UR->absolutePosition();
+  /*  UR_int::const_iterator it = unitaryBlocksPositions->find(UR);
+  if (it== unitaryBlocksPositions->end())
     RuntimeException::selfThrow
     ("OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation ur), ur does not belong to the index set used to built the OSNS matrix.");
-  return it->second;
+    return it->second;*/
 }
 unsigned int OSNSMatrix::getPositionOfDSBlock(SP::DynamicalSystem DS) const
 {
@@ -236,7 +238,6 @@ unsigned int OSNSMatrix::getPositionOfDSBlock(SP::DynamicalSystem DS) const
     ("OSNSMatrix::getPositionOfDSBlock(DynamicalSystems ds), ds does not belong to the DynamicalSet used to built the OSNS matrix.");
   return it->second;
 }
-
 
 // Fill the matrix
 void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
@@ -282,7 +283,7 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
          vi != viend; ++vi)
     {
       SP::UnitaryRelation ur = indexSet->bundle(*vi);
-      pos = (*unitaryBlocksPositions)[ur];
+      pos = ur->absolutePosition();
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
@@ -299,11 +300,11 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
       SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
       SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
 
-      pos = (*unitaryBlocksPositions)[ur1];
+      pos = ur1->absolutePosition();
 
       assert(indexSet->is_vertex(ur2));
 
-      col = (*unitaryBlocksPositions)[ur2];
+      col = ur2->absolutePosition();
 
 
       assert(pos < dimRow);
@@ -494,7 +495,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph U
 
         // Case 1: basic storage
         pos = (*DSBlocksPositions)[*itCol];
-        col = (*unitaryBlocksPositions)[(*itRow).first];
+        col = ((*itRow).first)->absolutePosition();
         boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, col, *(DSUnitaryBlocks[*itCol][(*itRow).first]));
       }
     }

@@ -92,7 +92,7 @@ private:
 
   /** Absolute position in the "global" vector of constraints (for
       example, the one handled by lsodar) */
-  unsigned int _absolutePostion;
+  unsigned int _absolutePosition;
 
   /** work vector to save pointers to state-related data of the
       dynamical systems involved in the UR.*/
@@ -202,6 +202,15 @@ public:
    *  \return an unsigned int
    */
   unsigned int getNonSmoothLawSizeProjectOnConstraints() const;
+
+  unsigned int absolutePosition()
+  {
+    return _absolutePosition;
+  };
+  void setAbsolutePosition(unsigned int v)
+  {
+    _absolutePosition = v;
+  };
 
 
   /** temporary visitor to get type

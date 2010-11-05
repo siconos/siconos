@@ -28,9 +28,12 @@
 
 class MLCPProjectOnConstraints : public MLCP
 {
+protected:
 
 public:
 
+  virtual void updateM();
+  virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
 
   /** constructor from data
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n

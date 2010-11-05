@@ -22,10 +22,37 @@
 #include "Simulation.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
+#include "OSNSMatrixProjectOnConstraints.hpp"
 using namespace std;
 using namespace RELATION;
+void MLCPProjectOnConstraints::updateM()
+{
+  // Get index set from Simulation
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
-
+  if (!_M)
+  {
+    // Creates and fills M using UR of indexSet
+    _M.reset(new OSNSMatrixProjectOnConstraints(_n + _m, _n + _m, _MStorageType));
+    _numerics_problem.M = &*_M->getNumericsMatrix();
+    _numerics_problem.A = 0;
+    _numerics_problem.B = 0;
+    _numerics_problem.C = 0;
+    _numerics_problem.D = 0;
+    _numerics_problem.a = 0;
+    _numerics_problem.b = 0;
+    _numerics_problem.problemType = 0;
+    _numerics_problem.n = _n;
+    _numerics_problem.m = _m;
+  }
+  else
+  {
+    _M->setStorageType(_MStorageType);
+    //_M->fill(indexSet);
+  }
+  _M->fill(indexSet);
+  _sizeOutput = _M->size();
+}
 
 
 // Constructor from a set of data
@@ -52,17 +79,17 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
 
-  unsigned int nslawSize = UR->getNonSmoothLawSize();
+  unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
 
-  if (! indexSet->properties(vd).block)
+  if (! indexSet->properties(vd).blockProj)
   {
-    indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+    indexSet->properties(vd).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
   }
 
-  assert(indexSet->properties(vd).block->size(0) == nslawSize);
-  assert(indexSet->properties(vd).block->size(1) == nslawSize);
+  assert(indexSet->properties(vd).blockProj->size(0) == nslawSize);
+  assert(indexSet->properties(vd).blockProj->size(1) == nslawSize);
 
-  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).block;
+  SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).blockProj;
 
   computeOptions(UR, UR);
   // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
@@ -120,8 +147,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       // UR1 == UR2
       SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
       //
-      //        cout<<"LinearOSNS : leftUBlock\n";
-      //        leftUnitaryBlock->display();
+      //      cout<<"MLCPProjectOnContarints : leftUBlock\n";
+      //      leftUnitaryBlock->display();
       work->trans();
       //        cout<<"LinearOSNS : leftUBlock'\n";
       //        work->display();
@@ -132,8 +159,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
       //*currentUnitaryBlock *=h;
-      //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
-      //        currentUnitaryBlock->display();
+      //      cout<<"MLCPProjectOnConstraints::computeUnitaryBlock unitaryBlock "<<endl;
+      //      currentUnitaryBlock->display();
     }
     else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType);
   }
@@ -250,8 +277,10 @@ void MLCPProjectOnConstraints::computeUnitaryBlock(const UnitaryRelationsGraph::
 void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
   unsigned int sizeY = UR->getNonSmoothLawSizeProjectOnConstraints();
+  SP::Relation R = UR->interaction()->relation();
+  SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
   for (int i = 0; i < sizeY; i++)
-    _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
+    _q->setValue(pos + i, ner->yProj()->getValue(UR->getRelativePosition() + i));
 
 }
 void MLCPProjectOnConstraints::postCompute()
@@ -282,24 +311,76 @@ void MLCPProjectOnConstraints::postCompute()
     pos = _M->getPositionOfUnitaryBlock(ur);
 
     // Get Y and Lambda for the current Unitary Relation
-    y = ur->y(levelMin());
-    lambda = ur->lambda(levelMin());
+    //y = ur->y(levelMin());
+    //lambda = ur->lambda(levelMin());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
     //      setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     // saved in y !!
-    setBlock(*_z, lambda, lambda->size(), pos, 0);
+    //setBlock(*_z, lambda, lambda->size(), pos, 0);
 
     SP::Relation R = ur->interaction()->relation();
     Type::Siconos RType = Type::value(*R);
     if (RType != Type::NewtonEulerR)
       RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - R is not from NewtonEulerR.");
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+    SP::SimpleVector yProj = ner->yProj();
+    setBlock(*_z, yProj, yProj->size(), pos, 0);
     /*Now, update the ds's dof throw the relation*/
-    SP::SiconosMatrix J = ner->jachq();
+    SP::SiconosMatrix J = ner->jachqProj();
     SP::SimpleMatrix aux(new SimpleMatrix(*J));
     aux->trans();
-    prod(*aux, *lambda, *(ner->getq()), false);
+    prod(*aux, *yProj, *(ner->getq()), false);
   }
 
+}
+void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+{
+  // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+  unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
+  unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
+
+  unsigned int equalitySize1 =  0;
+  unsigned int equalitySize2 =  0;
+  if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+      == Type::MixedComplementarityConditionNSL)
+    equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+           == Type::EqualityConditionNSL)
+    equalitySize1 = nslawSize1;
+
+  if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+      == Type::MixedComplementarityConditionNSL)
+    equalitySize2 = MixedComplementarityConditionNSL::
+                    convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+           == Type::EqualityConditionNSL)
+    equalitySize2 = nslawSize2;
+
+
+
+  if (UR1 == UR2)
+  {
+    //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+    _m += nslawSize1 - equalitySize1;
+    _n += equalitySize1;
+    //    _m=0;
+    //_n=6;
+    if (_curBlock > MLCP_NB_BLOCKS - 2)
+      printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
+    /*add an equality block.*/
+    if (equalitySize1 > 0)
+    {
+      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+      _numerics_problem.blocksIsComp[_curBlock] = 0;
+      _curBlock++;
+    }
+    /*add a complementarity block.*/
+    if (nslawSize1 - equalitySize1 > 0)
+    {
+      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
+      _numerics_problem.blocksIsComp[_curBlock] = 1;
+      _curBlock++;
+    }
+  }
 }

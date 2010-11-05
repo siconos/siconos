@@ -54,6 +54,13 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVe
   _Az = A->getValue(2);
   buildA1A2();
 }
+
+void PivotJointR::initComponents()
+{
+  KneeJointR::initComponents();
+  _jachqProj.reset(new SimpleMatrix(6, 7));
+  _yProj.reset(new SimpleVector(6));
+}
 void PivotJointR::buildA1A2()
 {
   orthoBaseFromVector(&_Ax, &_Ay, &_Az, &_A1x, &_A1y, &_A1z, &_A2x, &_A2y, &_A2z);
@@ -129,6 +136,18 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
   _jachq->setValue(4, 5, _A2y);
   _jachq->setValue(4, 6, _A2z);
 
+  for (int ii = 0; ii < _jachq->size(0); ii++)
+    for (int jj = 0; jj < _jachq->size(1); jj++)
+      _jachqProj->setValue(ii, jj, _jachq->getValue(ii, jj));
+
+  _jachqProj->setValue(5, 0, 0);
+  _jachqProj->setValue(5, 1, 0);
+  _jachqProj->setValue(5, 2, 0);
+  _jachqProj->setValue(5, 3, 2.0 * q10);
+  _jachqProj->setValue(5, 4, 2.0 * q11);
+  _jachqProj->setValue(5, 5, 2.0 * q12);
+  _jachqProj->setValue(5, 6, 2.0 * q13);
+
 }
 
 
@@ -185,6 +204,7 @@ void PivotJointR::computeh(double t)
 
   std::cout << "PivotJoint computeH:\n";
   y->display();
+  for (int ii = 0; ii < y->size(); ii++)
+    _yProj->setValue(ii, y->getValue(ii));
+  _yProj->setValue(5, q10 * q10 + q11 * q11 + q12 * q12 + q13 * q13 - 1.0);
 }
-
-

@@ -100,7 +100,9 @@ unsigned int UnitaryRelation::getNonSmoothLawSize() const
 }
 unsigned int UnitaryRelation::getNonSmoothLawSizeProjectOnConstraints() const
 {
-  return interaction()->nonSmoothLaw()->sizeProjectOnConstraints();
+  SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(interaction()->relation());
+
+  return nR->yProj()->size();
 }
 RELATION::TYPES UnitaryRelation::getRelationType() const
 {
@@ -269,7 +271,11 @@ void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::Dynamical
   else if (relationType == NewtonEuler)
   {
     SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
-    originalMatrix = r->jachq();
+    originalMatrix = r->jachqProj();
+    //      cout<<"UnitaryRelation, original block:\n";
+    //      originalMatrix->display();
+    //      cout<<"UnitaryRelation, Unitary  block:\n";
+    //      UnitaryBlock->display();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);

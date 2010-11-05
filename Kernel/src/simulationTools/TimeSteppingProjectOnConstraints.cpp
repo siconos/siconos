@@ -45,7 +45,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 {
   TimeStepping::newtonSolve(criterion, maxStep);
   int info = 0;
-  cout << "begin projection:\n";
+  //cout<<"begin projection:\n";
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
@@ -59,11 +59,11 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
   if (info)
     cout << "TimeSteppingProjectOnConstraints project on constraints failed." << endl ;
-  cout << "during projection before normalizing of q:\n";
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->computeh(getTkp1());
-  }
+  //cout<<"during projection before normalizing of q:\n";
+  //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  //{
+  //  (*it)->relation()->computeh(getTkp1());
+  //}
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -93,6 +93,6 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
   double yDot = ur->getYRef(1);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
-  return (y > 10e-5);
+  return (y > 10e-7);
 }
 

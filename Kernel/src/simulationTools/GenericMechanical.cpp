@@ -64,7 +64,7 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
 
-  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+  //  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
   int size = UR->getNonSmoothLawSize();
   if (Type::value(*(UR->interaction()->nonSmoothLaw()))
       == Type::EqualityConditionNSL)

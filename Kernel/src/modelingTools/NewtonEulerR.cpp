@@ -57,6 +57,11 @@ void NewtonEulerR::initComponents()
   _workQ.reset(new SimpleVector(_qsize));
   _workZ.reset(new SimpleVector(interaction()->getSizez()));
   _workY.reset(new SimpleVector(_ysize));
+  //_yQ.reset(new SimpleVector(1));
+  _jachqProj = _jachq;
+  SP::BlockVector vaux = interaction()->y(0);
+  SP::SiconosVector vaux2 = (*vaux)[0];
+  _yProj = boost::static_pointer_cast<SimpleVector>((*(interaction()->y(0)))[0]);
 }
 
 void NewtonEulerR::initialize(SP::Interaction inter)

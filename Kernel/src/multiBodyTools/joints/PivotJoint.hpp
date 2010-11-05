@@ -37,6 +37,8 @@ protected:
   double _A1x, _A1y, _A1z;
   double _A2x, _A2y, _A2z;
   void buildA1A2();
+
+  virtual void initComponents();
 public:
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position

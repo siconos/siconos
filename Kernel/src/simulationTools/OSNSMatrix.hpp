@@ -117,7 +117,7 @@ protected:
    * LCP case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  SP::UR_int unitaryBlocksPositions;
+  //  SP::UR_int unitaryBlocksPositions;
 
   /** map that links each DynamicalSystem with an int that gives the
    * position (in number of scalar elements, not DSBlocks) of the
@@ -149,7 +149,7 @@ protected:
       \param UnitaryRelationsGraph* the index set of
       the active constraints
   */
-  void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
+  virtual void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
 
   /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
       \param DynamicalSystemsSet* the DyncamicalSystemsSet
@@ -221,7 +221,7 @@ public:
 
   /** destructor
    */
-  ~OSNSMatrix();
+  virtual ~OSNSMatrix();
 
   /** get dimension of the square matrix */
   inline unsigned int size() const
@@ -272,8 +272,7 @@ public:
   /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
   */
-  void fill(SP::UnitaryRelationsGraph, bool updateSize = true);
-
+  virtual void fill(SP::UnitaryRelationsGraph, bool updateSize = true);
   /** fill diagonal of thecurrent class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
   */
@@ -284,7 +283,6 @@ public:
       \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystems
   */
   void fill(SP::DynamicalSystemsSet, MapOfDSMatrices&, bool updateSize = true);
-
   /** fill the current class using an index set , a DynamicalSystemsSet and a map of unitaryBlocks
       \param UnitaryRelationsGraph*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
