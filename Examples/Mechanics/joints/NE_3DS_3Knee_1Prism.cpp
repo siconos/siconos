@@ -174,10 +174,10 @@ int main(int argc, char* argv[])
 
     // Interaction
     //
-    SP::SiconosMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
+    SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
     H1->zero();
-    SP::SiconosMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H3(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
     H2->zero();
     H3->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
     //relation Prismatic
 
-    SP::SiconosMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
+    SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
     H4->zero();
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
     SP::SimpleVector axe1(new SimpleVector(3));

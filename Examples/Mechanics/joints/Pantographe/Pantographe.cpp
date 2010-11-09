@@ -226,14 +226,14 @@ int main(int argc, char* argv[])
 
     // Interactions
     //
-    SP::SiconosMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
-    SP::SiconosMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
-    SP::SiconosMatrix H14(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H15(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H23(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H26(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H34(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
-    SP::SiconosMatrix H56(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
+    SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
+    SP::SimpleMatrix H14(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H15(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H23(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H26(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H34(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
+    SP::SimpleMatrix H56(new SimpleMatrix(PivotJointR::_sNbEqualities, 2 * qDim));
     H1->zero();
     H2->zero();
     H23->zero();
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new MLCP("PATH"));
+    SP::OneStepNSProblem osnspb(new MLCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));

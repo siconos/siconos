@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SP::SiconosMatrix H1(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
+    SP::SimpleMatrix H1(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
     H1->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
     SP::SimpleVector axe1(new SimpleVector(3));
