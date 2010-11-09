@@ -28,8 +28,25 @@
 
 #include "SiconosKernel.hpp"
 
+#define WITH_PROJ
 using namespace std;
-
+class my_NERFC3D : public NewtonEulerRFC3D
+{
+public:
+  my_NERFC3D(): NewtonEulerRFC3D() {};
+  virtual void computeh(double t)
+  {
+    NewtonEulerRFC3D::computeh(t);
+    _Nc->setValue(0, 1);
+    _Nc->setValue(1, 0);
+    _Nc->setValue(2, 0);
+    SP::SiconosVector y = interaction()->y(0);
+    _Pc->setValue(0, y->getValue(0));
+    _Pc->setValue(1, 0);
+    _Pc->setValue(2, 0);
+  }
+};
+TYPEDEF_SPTR(my_NERFC3D);
 int main(int argc, char* argv[])
 {
   try
@@ -44,10 +61,10 @@ int main(int argc, char* argv[])
     unsigned int nDim = 6;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
-    double h = 0.005;                // time step
+    double h = 0.0005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 2.0;      // initial velocity for lowest bead.
-    double omega_init = 1.0;      // initial velocity for lowest bead.
+    double omega_init = 0.0;      // initial velocity for lowest bead.
     double theta = 1.0;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
@@ -86,7 +103,8 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SP::SiconosMatrix H(new SimpleMatrix(1, qDim));
+    SP::SimpleMatrix H(new SimpleMatrix(1, qDim));
+    H->zero();
     (*H)(0, 0) = 1.0;
     //     vector<SP::SiconosMatrix> vecMatrix1;
     //     vecMatrix1.push_back(H);
@@ -98,7 +116,9 @@ int main(int argc, char* argv[])
     //     SP::BlockMatrix HT_block(new BlockMatrix(vecMatrix2,1,1));
 
 
+    //SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(e,e,0.6,3));
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
+    //SP::NewtonEulerR relation0(new my_NERFC3D());
     SP::NewtonEulerR relation0(new NewtonEulerR());
     relation0->setJachq(H);
     //    relation0->setJacQH(H_block);
@@ -128,11 +148,17 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new LCP());
-
+    SP::OneStepNSProblem osnspb(new GenericMechanical());
+#ifdef WITH_PROJ
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
+#endif
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-
+#ifdef WITH_PROJ
+    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+#else
+    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+#endif
+    //SP::TimeStepping s(new TimeStepping(t,OSI,osnspb));
 
     // =========================== End of model definition ===========================
 
@@ -146,7 +172,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 6;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
@@ -160,6 +186,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
     dataPlot(0, 5) = acos((*q)(3));
+    dataPlot(0, 6) = relation0->contactForce()->norm2();
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -168,11 +195,11 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-
+    dataPlot(k, 6) = relation0->contactForce()->norm2();
     while (s->nextTime() < T)
     {
-      s->computeOneStep();
-
+      //      s->computeOneStep();
+      s->newtonSolve(1e-4, 10);
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
