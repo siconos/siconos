@@ -28,7 +28,7 @@
 
 #include "SiconosKernel.hpp"
 
-#define WITH_PROJ
+//#define WITH_PROJ
 using namespace std;
 class my_NERFC3D : public NewtonEulerRFC3D
 {
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 #ifdef WITH_PROJ
     SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
 #else
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 #endif
     //SP::TimeStepping s(new TimeStepping(t,OSI,osnspb));
 
