@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     //     Interaction inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);)
 
 
-    string G = "DoublePendulumPlugin:G0";
+    string G = "SimplePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("SimplePendulumPlugin:h0", G));
     SP::Interaction inter(new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation));
