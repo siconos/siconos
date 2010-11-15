@@ -69,5 +69,4 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = l1 * cos(q[0]);
-  G[1] = 0.0;
 }
