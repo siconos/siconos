@@ -235,7 +235,7 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
         return 0;
       }
   }
-
+  return 1;
   assert(0);
 
 }
