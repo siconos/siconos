@@ -23,6 +23,12 @@
 #include <math.h>
 #include <float.h>
 
+#ifdef __GNUC__
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+
 /** OP3X3(EXPR) do EXPR 9 times
  * \param a C expression that should contains self incrementing
  *        pointers on arrays[9] */
@@ -53,27 +59,27 @@
  
 
 #if defined(OP3X3_C_STORAGE)
-#define SET3X3(V)                             \
-  double* V##00 = V++;                        \
-  double* V##01 = V++;                        \
-  double* V##02 = V++;                        \
-  double* V##10 = V++;                        \
-  double* V##11 = V++;                        \
-  double* V##12 = V++;                        \
-  double* V##20 = V++;                        \
-  double* V##21 = V++;                        \
-  double* V##22 = V++;
-#define SET3X3MAYBE(V)                          \
-  double* V##00 = 0;                            \
-  double* V##01 = 0;                            \
-  double* V##02 = 0;                            \
-  double* V##10 = 0;                            \
-  double* V##11 = 0;                            \
-  double* V##12 = 0;                            \
-  double* V##20 = 0;                            \
-  double* V##21 = 0;                            \
-  double* V##22 = 0;                            \
-  if (V)                                        \
+#define SET3X3(V)                                          \
+  double* V##00 MAYBE_UNUSED = V++;                        \
+  double* V##01 MAYBE_UNUSED = V++;                        \
+  double* V##02 MAYBE_UNUSED = V++;                        \
+  double* V##10 MAYBE_UNUSED = V++;                        \
+  double* V##11 MAYBE_UNUSED = V++;                        \
+  double* V##12 MAYBE_UNUSED = V++;                        \
+  double* V##20 MAYBE_UNUSED = V++;                        \
+  double* V##21 MAYBE_UNUSED = V++;                        \
+  double* V##22 MAYBE_UNUSED = V++;
+#define SET3X3MAYBE(V)                                       \
+  double* V##00 MAYBE_UNUSED = 0;                            \
+  double* V##01 MAYBE_UNUSED = 0;                            \
+  double* V##02 MAYBE_UNUSED = 0;                            \
+  double* V##10 MAYBE_UNUSED = 0;                            \
+  double* V##11 MAYBE_UNUSED = 0;                            \
+  double* V##12 MAYBE_UNUSED = 0;                            \
+  double* V##20 MAYBE_UNUSED = 0;                            \
+  double* V##21 MAYBE_UNUSED = 0;                            \
+  double* V##22 MAYBE_UNUSED = 0;                            \
+  if (V)                                                     \
   {                                             \
     V##00 = V++;                                \
     V##01 = V++;                                \
@@ -93,25 +99,25 @@
  * for a next SET3X3
  */
 #define SET3X3(V)                                                       \
-  double* V##00 = V++;                                                  \
-  double* V##10 = V++;                                                  \
-  double* V##20 = V++;                                                  \
-  double* V##01 = V++;                                                  \
-  double* V##11 = V++;                                                  \
-  double* V##21 = V++;                                                  \
-  double* V##02 = V++;                                                  \
-  double* V##12 = V++;                                                  \
-  double* V##22 = V++;
+  double* V##00 MAYBE_UNUSED = V++;                                     \
+  double* V##10 MAYBE_UNUSED = V++;                                     \
+  double* V##20 MAYBE_UNUSED = V++;                                                  \
+  double* V##01 MAYBE_UNUSED = V++;                                                  \
+  double* V##11 MAYBE_UNUSED = V++;                                                  \
+  double* V##21 MAYBE_UNUSED = V++;                                                  \
+  double* V##02 MAYBE_UNUSED = V++;                                                  \
+  double* V##12 MAYBE_UNUSED = V++;                                                  \
+  double* V##22 MAYBE_UNUSED = V++;
 #define SET3X3MAYBE(V)                          \
-  double* V##00 = 0;                            \
-  double* V##10 = 0;                            \
-  double* V##20 = 0;                            \
-  double* V##01 = 0;                            \
-  double* V##11 = 0;                            \
-  double* V##21 = 0;                            \
-  double* V##02 = 0;                            \
-  double* V##12 = 0;                            \
-  double* V##22 = 0;                            \
+  double* V##00 MAYBE_UNUSED = 0;                            \
+  double* V##10 MAYBE_UNUSED = 0;                            \
+  double* V##20 MAYBE_UNUSED = 0;                            \
+  double* V##01 MAYBE_UNUSED = 0;                            \
+  double* V##11 MAYBE_UNUSED = 0;                            \
+  double* V##21 MAYBE_UNUSED = 0;                            \
+  double* V##02 MAYBE_UNUSED = 0;                            \
+  double* V##12 MAYBE_UNUSED = 0;                            \
+  double* V##22 MAYBE_UNUSED = 0;                            \
   if (V)                                        \
   {                                             \
     V##00 = V++;                                \
@@ -131,9 +137,9 @@
  * use *v0 if you need *v
  */
 #define SET3(V)                                 \
-  double* V##0 = V++;                           \
-  double* V##1 = V++;                           \
-  double* V##2 = V++;
+  double* V##0 MAYBE_UNUSED = V++;                           \
+  double* V##1 MAYBE_UNUSED = V++;                           \
+  double* V##2 MAYBE_UNUSED = V++;
 
 /** SET3MAYBE : set pointers on a vector3 v (*v0 *v1 *v2) only if v is
  * non null.
@@ -141,9 +147,9 @@
  * use *v0 if you need *v
  */
 #define SET3MAYBE(V)                                 \
-  double* V##0 = 0;                                  \
-  double* V##1 = 0;                                  \
-  double* V##2 = 0;                                  \
+  double* V##0 MAYBE_UNUSED = 0;                                  \
+  double* V##1 MAYBE_UNUSED = 0;                                  \
+  double* V##2 MAYBE_UNUSED = 0;                                  \
   if (V)                                             \
   {                                                  \
     V##0 = V++;                                      \

@@ -545,7 +545,6 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
   int posInX = 0;
 
   /* Look for the first element of the wanted row */
-  int blockNum = 0;
 
   /* Assertions */
   assert(A);

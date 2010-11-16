@@ -113,7 +113,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
   /* Connect local solver */
 
 
-  FrictionContactProblem* localproblem;
+  FrictionContactProblem* localproblem = 0;
   initializeLocalSolver_nsgs_velocity(&local_solver, &freeSolver, &computeError, problem, localproblem, localsolver_options);
 
   /*****  NSGS_VELOCITY Iterations *****/

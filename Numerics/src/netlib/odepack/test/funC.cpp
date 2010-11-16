@@ -37,7 +37,7 @@ extern "C" void F77NAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, d
   }
   else
   {
-    printf("OscillatorPlugin:vectorField --- Bad size of x. %ld -- %p\n", *sizeOfX, sizeOfX);
+    printf("OscillatorPlugin:vectorField --- Bad size of x. %ld -- %p\n", (long int) *sizeOfX, sizeOfX);
   }
 
 }

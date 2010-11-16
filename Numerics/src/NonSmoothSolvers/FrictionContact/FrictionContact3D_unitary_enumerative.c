@@ -236,6 +236,8 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
       }
   }
 
+  assert(0);
+
 }
 /*API for the nsgs*/
 int frictionContact3D_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction,   SolverOptions* options)
@@ -610,8 +612,6 @@ int frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(FrictionContactP
   double * M = problem->M->matrix0;
   double * Q = problem->q;
 
-  double D1, D2;
-  double tol = options->dparam[0];
   SET3X3(M);
   M = M00;
   SET3(reaction);

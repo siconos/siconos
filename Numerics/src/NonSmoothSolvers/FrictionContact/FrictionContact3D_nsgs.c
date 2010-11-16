@@ -35,7 +35,7 @@ void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, 
   *error = 0.;
   int i, m;
   m = 5 * n / 3;
-  double err;
+  double err = INFINITY;
   for (i = 0 ; i < m ; ++i)
   {
     *error += Compute_NCP_error1(i, err);
