@@ -59,6 +59,10 @@
  
 
 #if defined(OP3X3_C_STORAGE)
+/** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
+ * warning the pointer a is modified (use a00 instead) and is ready
+ * for a next SET3X3
+ */
 #define SET3X3(V)                                          \
   double* V##00 MAYBE_UNUSED = V++;                        \
   double* V##01 MAYBE_UNUSED = V++;                        \
@@ -93,22 +97,17 @@
   }
 
 #else // fortran storage
-
-/** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
- * warning the pointer a is modified (use a00 instead) and is ready
- * for a next SET3X3
- */
 #define SET3X3(V)                                                       \
   double* V##00 MAYBE_UNUSED = V++;                                     \
   double* V##10 MAYBE_UNUSED = V++;                                     \
-  double* V##20 MAYBE_UNUSED = V++;                                                  \
-  double* V##01 MAYBE_UNUSED = V++;                                                  \
-  double* V##11 MAYBE_UNUSED = V++;                                                  \
-  double* V##21 MAYBE_UNUSED = V++;                                                  \
-  double* V##02 MAYBE_UNUSED = V++;                                                  \
-  double* V##12 MAYBE_UNUSED = V++;                                                  \
+  double* V##20 MAYBE_UNUSED = V++;                                     \
+  double* V##01 MAYBE_UNUSED = V++;                                     \
+  double* V##11 MAYBE_UNUSED = V++;                                     \
+  double* V##21 MAYBE_UNUSED = V++;                                     \
+  double* V##02 MAYBE_UNUSED = V++;                                     \
+  double* V##12 MAYBE_UNUSED = V++;                                     \
   double* V##22 MAYBE_UNUSED = V++;
-#define SET3X3MAYBE(V)                          \
+#define SET3X3MAYBE(V)                                       \
   double* V##00 MAYBE_UNUSED = 0;                            \
   double* V##10 MAYBE_UNUSED = 0;                            \
   double* V##20 MAYBE_UNUSED = 0;                            \
@@ -160,7 +159,7 @@
 /** copy a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[out] b[9]*/
-static inline void cpy3x3(double a[9], double b[9])
+static inline void cpy3x3(double* a, double* b)
 {
   OP3X3(*b++ = *a++);
 }
@@ -176,7 +175,7 @@ static inline void add3x3(double a[9], double b[9])
 /** sub a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[in,out] b[9]*/
-static inline void sub3x3(double a[9], double b[9])
+static inline void sub3x3(double* a, double* b)
 {
   OP3X3(*b++ -= *a++);
 }
@@ -184,7 +183,7 @@ static inline void sub3x3(double a[9], double b[9])
 /** copy a vector[3]
  *\param[in] a[3]
  *\param[out] b[3]*/
-static inline void cpy3(double a[3], double b[3])
+static inline void cpy3(double* a, double* b)
 {
   OP3(*b++ = *a++);
 }
@@ -192,7 +191,7 @@ static inline void cpy3(double a[3], double b[3])
 /** add a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-static inline void add3(double a[3], double b[3])
+static inline void add3(double* a, double* b)
 {
   OP3(*b++ += *a++);
 }
@@ -200,7 +199,7 @@ static inline void add3(double a[3], double b[3])
 /** sub a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-static inline void sub3(double a[3], double b[3])
+static inline void sub3(double* a, double* b)
 {
   OP3(*b++ -= *a++);
 }
@@ -218,7 +217,7 @@ static inline void scal3x3(double scal, double m[9])
  * \param[in] double scalar
  * \param[in,out] v[3]
  */
-static inline void scal3(double scal, double v[3])
+static inline void scal3(double scal, double* v)
 {
   OP3(*v++ *= scal);
 }
@@ -228,7 +227,7 @@ static inline void scal3(double scal, double v[3])
  * \param[in] *a
  * \param[out] transpose(*a)
  */
-static inline void cpytr3x3(double a[9], double b[9])
+static inline void cpytr3x3(double* a, double* b)
 {
   SET3X3(a);
   SET3X3(b);
@@ -248,7 +247,7 @@ static inline void cpytr3x3(double a[9], double b[9])
  * \param[in] v[3]
  * \param[out] r[3]
  */
-static inline void mv3x3(double a[9], double v[9], double r[9])
+static inline void mv3x3(double* a, double* v, double* r)
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -293,7 +292,7 @@ static inline void mv3x3(double a[9], double v[9], double r[9])
  * \param[in] v[3]
  * \param[out] r[3]
  */
-static inline void mvp3x3(double a[9], double v[9], double r[9])
+static inline void mvp3x3(double* a, double* v, double* r)
 {
 
 #if defined(OP3X3_C_STORAGE)
@@ -337,7 +336,7 @@ static inline void mvp3x3(double a[9], double v[9], double r[9])
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mm3x3(double a[9], double b[9], double c[9])
+static inline void mm3x3(double* a, double* b, double* c)
 {
 
   SET3X3(a);
@@ -363,7 +362,7 @@ static inline void mm3x3(double a[9], double b[9], double c[9])
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mmp3x3(double a[9], double b[9], double c[9])
+static inline void mmp3x3(double* a, double* b, double* c)
 {
 
   SET3X3(a);
@@ -389,7 +388,7 @@ static inline void mmp3x3(double a[9], double b[9], double c[9])
  * \param[in] b[9]
  * \param[out] c[9]
  */
-static inline void mmm3x3(double a[9], double b[9], double c[9])
+static inline void mmm3x3(double* a, double* b, double* c)
 {
 
   SET3X3(a);
@@ -413,7 +412,7 @@ static inline void mmm3x3(double a[9], double b[9], double c[9])
 /** determinant
  * \param[in] double* a
  */
-static inline double det3x3(double a[9])
+static inline double det3x3(double* a)
 {
   SET3X3(a);
 
@@ -428,7 +427,7 @@ static inline double det3x3(double a[9])
  * \param[out] double x[3]
  * \param[in] double b[3]
  */
-static inline void solv3x3(double a[9], double x[3], double b[3])
+static inline void solv3x3(double* a, double* x, double* b)
 {
 
   SET3X3(a);
@@ -465,7 +464,7 @@ static inline void solv3x3(double a[9], double x[3], double b[3])
  * \param[in] double a[9]
  * \param[in] double b[9]
  */
-static inline int equal3x3(double a[9], double b[9])
+static inline int equal3x3(double* a, double* b)
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -482,7 +481,7 @@ static inline int equal3x3(double a[9], double b[9])
  * \param[in] double a[3]
  * \param[in] double b[3]
  */
-static inline int equal3(double a[3], double b[3])
+static inline int equal3(double* a, double* b)
 {
   return *a++ == *b++ &&
          *a++ == *b++ &&
@@ -494,7 +493,7 @@ static inline int equal3(double a[3], double b[3])
  * \param[in] double b[3]
  * \return double
  */
-static inline double dot3(double a[3], double b[3])
+static inline double dot3(double* a, double* b)
 {
   double r;
   r = *a++ * * b++;
@@ -638,7 +637,9 @@ void print3x3(double* mat);
  * \param[in] double* v
  */
 void print3(double* v);
-/** orthoBaseFromVector : From A, build (A,A1,A2) such that it was an orthonormal base.
+
+/** orthoBaseFromVector : From A, build (A,A1,A2) such that it was an
+ * orthonormal base.
  * \param[in,out] Ax
  * \param[in,out] Ay
  * \param[in,out] Az
@@ -649,7 +650,9 @@ void print3(double* v);
  * \param[out] A2y
  * \param[out] A2z
 */
-static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az, double *A1x, double *A1y, double *A1z, double *A2x, double *A2y, double *A2z)
+static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
+                                       double *A1x, double *A1y, double *A1z,
+                                       double *A2x, double *A2y, double *A2z)
 {
 
   double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
