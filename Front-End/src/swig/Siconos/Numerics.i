@@ -287,7 +287,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
   
-  int array_len[2] = {0,0};
+  npy_intp array_len[2] = {0,0};
 
   array_len[0] = array_size(array,0);
 
@@ -308,7 +308,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  int array_len[2] = {0,0};
+  npy_intp array_len[2] = {0,0};
 
   if (! *p_problem_size1)
   {
@@ -358,7 +358,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  int array_len[2] = {0,0};
+  npy_intp array_len[2] = {0,0};
 
   if (! *p_problem_size1)
   {
@@ -407,7 +407,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
-  int array_len[2] = {0,0};
+  npy_intp array_len[2] = {0,0};
 
   if (! *p_problem_size1)
   {
@@ -555,7 +555,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 // vectors of size numberOfContacts
 %typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
 
-  int array_len[2] = {0,0};
+  npy_intp array_len[2] = {0,0};
 
   if (number_of_contacts1)
   {
@@ -859,6 +859,10 @@ static int convert_darray(PyObject *input, double *ptr) {
  }
 
 // FrictionContact
+%ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
+                          //instead of *iparam, *dparam).
+%ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
+
 %include "FrictionContactProblem.h"
 %include "FrictionContact3D_Solvers.h"
 %include "Friction_cst.h"
