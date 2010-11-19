@@ -188,8 +188,7 @@ DEFINE_SPTR(TimeDiscretisationXML);
 
 TYPEDEF_SAPTR(integer);
 TYPEDEF_SPTR(integer);
-TYPEDEF_SAPTR(integer);
-TYPEDEF_SPTR(doublereal);
 TYPEDEF_SAPTR(doublereal);
+TYPEDEF_SPTR(doublereal);
 
 #endif /* SiconosPointers_hpp */
