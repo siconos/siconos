@@ -18,7 +18,7 @@
 // Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
 //	
 
-// Siconos.i - SWIG interface for Siconos
+// SWIG interface for Siconos Kernel
 %module(directors="1") Kernel
 
  // where is doxygen feature ?
@@ -86,191 +86,69 @@
 // 1. Vector and Matrix <=> numpy array (dense only)
 
 
-// numpy array to SP::SimpleVector (here a SiconosVector is always a
-// SimpleVector)
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SiconosVector>)
-{
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0);
-  int _v = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || _v;
-}
-%typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
-{
-
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-  if (!array)
-  {
-    void *argp;
-    SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-  }
-  else
-  {
-    if (!require_dimensions(array,1) ||
-        !require_native(array) || !require_contiguous(array)) SWIG_fail;
-    
-    SP::SimpleVector tmp;
-    tmp.reset(new SimpleVector(array_size(array,0)));
-    // copy : with SimpleVector based on resizable std::vector there is
-    // no other way
-    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-    $1 = tmp;
-  }
- }
-
-// numpy array to SP::SimpleMatrix (here a SiconosMatrix is always a
-// SimpleMatrix)
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SiconosMatrix>)
-{
-  $1 = is_array($input) || PySequence_Check($input);
-}
-%typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) {
-
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-  if (!array || !require_dimensions(array,2) ||
-      !require_native(array) || !require_contiguous(array)) SWIG_fail;
-
-  SP::SimpleMatrix tmp;
-  tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
-  // copy : with SimpleMatrix based on resizable std::vector
-  memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
-  $1 = tmp;
- }
-
-
-// from C++ to python 
-%template() boost::shared_ptr<SiconosVector>;
-%template() boost::shared_ptr<SimpleVector>;
-%template() boost::shared_ptr<BlockVector>;
-%template() boost::shared_ptr<SiconosMatrix>;
-%template() boost::shared_ptr<SimpleMatrix>;
-
-%typemap(out) boost::shared_ptr<SiconosVector>
-{
-  npy_intp this_vector_dim[1];
-  this_vector_dim[0]=$1->size();
-  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
-}
-
-%typemap(out) boost::shared_ptr<SiconosMatrix>
-{
-  npy_intp this_matrix_dim[2];
-  this_matrix_dim[0]=$1->size(0);
-  this_matrix_dim[1]=$1->size(1);
-  $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
-  PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
-}
-
-
-
-// SiconosMatrix in api mean SimpleMatrix here
-%apply (boost::shared_ptr<SiconosVector>) { (SP::SimpleVector) };
-%apply (boost::shared_ptr<SiconosVector>) { (boost::shared_ptr<SimpleVector>) };
-%apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
-
-%apply (boost::shared_ptr<SiconosMatrix>) { (SP::SimpleMatrix) };
-%apply (boost::shared_ptr<SiconosMatrix>) { (boost::shared_ptr<SimpleMatrix>) };
-%apply (boost::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) }; 
-
+%include "KernelTypes.i"
 
 // 2. try to hide SP::Type on python side
 
-%define SP_TYPE(TYPE, BASE)
-  
-DEFINE_SPTR(TYPE);
-
-typedef SP::##TYPE XSPtr##TYPE;
-
-//%shared_ptr(XSPtr##TYPE);
+%define SP_TYPE(TYPE)
 %shared_ptr(TYPE);
-
-//Swig 2.0 now complains about this
-//SWIG_SHARED_PTR_DERIVED(XSPtr##TYPE, BASE, TYPE);
-
 %enddef
 
-%include "SiconosPointers.hpp"
-%import "SimulationTypeDef.hpp"
-
-%define REGISTER(X,B)
-SP_TYPE(X,B)
-%include("X##.hpp")
-%enddef
-
-SP_TYPE(NonSmoothLaw,NonSmoothLaw);
-SP_TYPE(NewtonImpactNSL,NonSmoothLaw);
-SP_TYPE(NewtonImpactFrictionNSL,NonSmoothLaw);
 
 
+SP_TYPE(NonSmoothLaw);
+SP_TYPE(NewtonImpactNSL);
+SP_TYPE(NewtonImpactFrictionNSL);
 
-SP_TYPE(NonSmoothDynamicalSystem,NonSmoothDynamicalSystem);
-SP_TYPE(Topology,Topology);
+SP_TYPE(NonSmoothDynamicalSystem);
+SP_TYPE(Topology);
 
-SP_TYPE(DynamicalSystem,DynamicalSystem);
-SP_TYPE(LagrangianDS,DynamicalSystem);
-SP_TYPE(LagrangianLinearTIDS,LagrangianDS);
+SP_TYPE(DynamicalSystem);
+SP_TYPE(LagrangianDS);
+SP_TYPE(LagrangianLinearTIDS);
 
-SP_TYPE(Relation,Relation);
-SP_TYPE(UnitaryRelation,UnitaryRelation);
-SP_TYPE(LagrangianR,Relation);
-SP_TYPE(LagrangianLinearTIR,LagrangianR);
-SP_TYPE(LagrangianRheonomousR,LagrangianR);
-SP_TYPE(LagrangianScleronomousR,LagrangianR);
+SP_TYPE(Relation);
+SP_TYPE(UnitaryRelation);
+SP_TYPE(LagrangianR);
+SP_TYPE(LagrangianLinearTIR);
+SP_TYPE(LagrangianRheonomousR);
+SP_TYPE(LagrangianScleronomousR);
 
-SP_TYPE(Interaction,Interaction)
+SP_TYPE(Interaction)
 
-SP_TYPE(TimeDiscretisation,TimeDiscretisation);
+SP_TYPE(TimeDiscretisation);
 
-SP_TYPE(OneStepNSProblem,OneStepNSProblem);
-SP_TYPE(LinearOSNS, OneStepNSProblem);
-SP_TYPE(LCP,LinearOSNS);
-SP_TYPE(FrictionContact,LinearOSNS);
+SP_TYPE(OneStepNSProblem);
+SP_TYPE(LinearOSNS);
+SP_TYPE(LCP);
+SP_TYPE(FrictionContact);
 
-SP_TYPE(OneStepIntegrator, OneStepIntegrator);
-SP_TYPE(Moreau, OneStepIntegrator);
+SP_TYPE(OneStepIntegrator);
+SP_TYPE(Moreau);
 
-SP_TYPE(Simulation,Simulation);
-SP_TYPE(TimeStepping, Simulation);
+SP_TYPE(Simulation);
+SP_TYPE(TimeStepping);
 
-SP_TYPE(Model, Model);
+SP_TYPE(Model);
 
-SP_TYPE(CircularDS,LagrangianDS);
-SP_TYPE(Disk,CircularDS);
-SP_TYPE(Circle,CircularDS);
-SP_TYPE(ExternalBody,LagrangianDS);
-SP_TYPE(DiskDiskR,LagrangianScleronomousR);
-SP_TYPE(DiskPlanR,LagrangianScleronomousR);
-SP_TYPE(DiskMovingPlanR,LagrangianRheonomousR);
-SP_TYPE(SiconosBodies,SiconosBodies);
+SP_TYPE(CircularDS);
+SP_TYPE(Disk);
+SP_TYPE(Circle);
+SP_TYPE(ExternalBody);
+SP_TYPE(DiskDiskR);
+SP_TYPE(DiskPlanR);
+SP_TYPE(DiskMovingPlanR);
+SP_TYPE(SiconosBodies);
 
-SP_TYPE(SpaceFilter,SpaceFilter)
-SP_TYPE(Hashed,Hashed)
+SP_TYPE(SpaceFilter);
 
-SP_TYPE(SiconosMatrix,SiconosMatrix)
-SP_TYPE(SimpleMatrix,SiconosMatrix)
-SP_TYPE(SiconosVector,SiconosVector)
-SP_TYPE(SimpleVector,SiconosVector)
-SP_TYPE(BlockVector,SiconosVector)
+SP_TYPE(SiconosMatrix);
+SP_TYPE(SimpleMatrix);
+SP_TYPE(SiconosVector);
+SP_TYPE(SimpleVector);
+SP_TYPE(BlockVector);
 
-%include "InteractionsSet.hpp"
-%include "SiconosSet.hpp"
-
-%template (InteractionsSet) SiconosSet<Interaction,double*>;
-
-// boost >= 1.40
-%import "boost/version.hpp"
-#if (BOOST_VERSION >= 104000)
-%import "boost/smart_ptr/enable_shared_from_this.hpp"
-#else
-%import "boost/enable_shared_from_this.hpp"
-#endif
-
-%template (sharedModel) boost::enable_shared_from_this<Model>;
-
-SP_TYPE(InteractionsSet,InteractionsSet)
+SP_TYPE(InteractionsSet)
 
 
 // dummy namespaces to make swig happy
@@ -290,10 +168,6 @@ namespace boost
   }
 };
 
-
-namespace SP
-{
-};
 
 // note Visitor etc. => module Visitor, Type if ever needed
 
@@ -315,13 +189,13 @@ namespace SP
 %ignore scal;
 %ignore subscal;
 %ignore cross_product;
-%ignore operator +;
-%ignore operator [];
-%ignore operator -;
-%ignore operator *;
-%ignore operator /;
-%ignore operator ==;
-%ignore operator =;
+%ignore operator+;
+%ignore operator[];
+%ignore operator-;
+%ignore operator*;
+%ignore operator/;
+%ignore operator==;
+%ignore operator=;
 
 // defined in SimpleMatrix.cpp 
 %ignore private_addprod;
@@ -336,15 +210,34 @@ namespace SP
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
+%ignore ACCEPT_SP_VISITORS;
+
+
+%include "SiconosPointers.hpp"
+%import "SimulationTypeDef.hpp" 
+
+%include "InteractionsSet.hpp"
+%include "SiconosSet.hpp"
+
+%import "SiconosGraph.hpp"
+
+%import "boost/config.hpp"
+%import "boost/graph/graph_utility.hpp"
+
+// boost >= 1.40
+%import "boost/version.hpp"
+#if (BOOST_VERSION >= 104000)
+%import "boost/smart_ptr/enable_shared_from_this.hpp"
+#else
+%import "boost/enable_shared_from_this.hpp"
+#endif
+
+
 
 %include "Tools.hpp"
-
-DEFINE_SPTR(SiconosVector);
-DEFINE_SPTR(SiconosMatrix);
-
 %include "addons.hpp"
 
-
+%include "SiconosAlgebra.hpp"
 %include "SiconosVector.hpp"
 %include "BlockVector.hpp"
 %include "SiconosMatrix.hpp"
@@ -392,31 +285,17 @@ DEFINE_SPTR(SiconosMatrix);
 %include "ExternalBody.hpp"
 %include "SpaceFilter.hpp"
 %include "SiconosBodies.hpp"
-%import "SiconosGraph.hpp"
 
-%import "boost/config.hpp"
-%import "boost/graph/graph_utility.hpp"
 
- // boost >= 1.40
- //%import "boost/graph/adjacency_list.hpp"
 
 %fragment("StdSequenceTraits");
 
 %fragment("StdMapTraits");
 
-// this fail with swig::type_name
-//%template (VMap) std::map<boost::shared_ptr<DynamicalSystem>,
-//                          graph_traits<adjacency_list<
-//                                         listS, listS, undirectedS, 
-//                                         property <vertex_bundle_t, boost::shared_ptr<DynamicalSystem>, 
-//                                                   property < vertex_color_t , 
-//                                                              default_color_type , 
-//                                                              property < vertex_index_t, size_t > > >, 
-//                                         property <edge_bundle_t, boost::shared_ptr<UnitaryRelation>, 
-//                                                   property < edge_color_t , 
-//                                                              default_color_type , 
-//                                                              property < edge_index_t, size_t > > > > >::vertex_descriptor >;
-//
+
+%template (InteractionsSet) SiconosSet<Interaction,double*>;
+
+%template (sharedModel) boost::enable_shared_from_this<Model>;
 
 %template (dsv) std::vector<boost::shared_ptr<DynamicalSystem> >;
 
@@ -428,7 +307,4 @@ DEFINE_SPTR(SiconosMatrix);
 
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
-%template (dsg) SiconosGraph<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<UnitaryRelation> >;
 
-
-//%template (urv) std::vector<boost::shared_ptr<UnitaryRelation> >;

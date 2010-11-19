@@ -54,4 +54,3 @@ def test_lcp_lexicolemke():
     assert not info
 
 
-test_lcp_pgs()
