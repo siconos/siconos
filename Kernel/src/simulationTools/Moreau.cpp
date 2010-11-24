@@ -261,25 +261,36 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   if (WMap.find(ds) != WMap.end())
     RuntimeException::selfThrow("Moreau::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
-  // Memory allocation for W
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  WMap[ds].reset(new SimpleMatrix(sizeW, sizeW));
 
+  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+  // Memory allocation for W
+  WMap[ds].reset(new SimpleMatrix(sizeW, sizeW));
   SP::SiconosMatrix W = WMap[ds];
+
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
+    //    // Memory allocation for W
+    //     WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
+    //     SP::SiconosMatrix W = WMap[ds];
+
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
+
+
+
     if (d->M())
-      *W = *d->M();
+      WMap[ds].reset(new SimpleMatrix(*d->M())); //*W = *d->M();
     else
-      W->eye();
+      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW, IDENTITY)); //W->eye();
+
+    SP::SiconosMatrix W = WMap[ds];
+
 
     // d->computeJacobianfx(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
@@ -304,8 +315,9 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotFL(); // jacobian according to velocity
+    WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
-    *W = *d->mass();
+    SP::SiconosMatrix W = WMap[ds];
 
     if (C)
       scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
@@ -324,8 +336,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-
-    *W = *d->mass();
+    WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    SP::SiconosMatrix W = WMap[ds];
 
     if (C)
       scal(h * _theta, *C, *W, false); // W += h*_theta *C
