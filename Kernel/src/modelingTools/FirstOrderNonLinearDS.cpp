@@ -320,7 +320,7 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
 
   if (simulationType == "EventDriven")
   {
-    // Rhs and its jacobian
+    // Rhs and its jacobian ==> the right is to put in initOSNA of EventDriven
     initRhs(time);
   }
 }

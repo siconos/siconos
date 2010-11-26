@@ -274,7 +274,7 @@ void NewtonEulerDS::initialize(const string& simulationType, double time, unsign
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  initRhs(time);
+  //initRhs(time);
 
 }
 

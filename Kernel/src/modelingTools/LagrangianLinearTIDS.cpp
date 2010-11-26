@@ -179,7 +179,7 @@ void LagrangianLinearTIDS::initialize(const string& simulationType,
   initMemory(sizeOfMemory);
 
   // rhs and its jacobian
-  initRhs(time);
+  // initRhs(time);
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)

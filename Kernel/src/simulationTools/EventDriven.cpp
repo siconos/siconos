@@ -263,6 +263,22 @@ void EventDriven::initOSNS()
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
 
+  // === DS Rhs initialization ===
+
+  for (OSIIterator itosi = _allOSI->begin();
+       itosi != _allOSI->end(); ++itosi)
+  {
+    for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
+         itds != (*itosi)->dynamicalSystems()->end();
+         ++itds)
+    {
+      (*itds)->initRhs(model()->t0());
+    }
+  }
+
+
+
+
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   UnitaryRelationsGraph::VIterator ui, uiend;

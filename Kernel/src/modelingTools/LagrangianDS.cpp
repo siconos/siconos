@@ -473,7 +473,7 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  initRhs(time);
+  //initRhs(time);
 
 
 
