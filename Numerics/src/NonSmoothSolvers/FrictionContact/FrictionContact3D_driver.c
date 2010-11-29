@@ -131,7 +131,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
   {
     if (verbose == 1)
       printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
-    frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
+    if (problem->M->matrix0)
+    {
+      frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
+    }
+    else
+    {
+      frictionContact3D_sparseGlobalAlartCurnier(problem, reaction , velocity , &info , options);
+    }
     break;
   }
   case SICONOS_FRICTION_3D_QUARTIC_NU:

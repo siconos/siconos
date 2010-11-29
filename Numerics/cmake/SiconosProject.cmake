@@ -58,7 +58,7 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_TESTING "Enable 'make test' target" ON)
   OPTION(WITH_TIMERS "Enable timers" OFF)
   OPTION(HAVE_FORTRAN_LIBRARIES "Fortran libraries are known (Otherwise try to find them)" ON)
-
+  OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
 
   # Build type
   IF(WITH_DEFAULT_BUILD_TYPE)

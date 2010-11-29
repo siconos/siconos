@@ -19,3 +19,4 @@
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
+#cmakedefine WITH_MUMPS

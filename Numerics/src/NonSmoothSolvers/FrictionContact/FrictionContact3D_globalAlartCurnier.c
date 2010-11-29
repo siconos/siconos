@@ -43,11 +43,8 @@ void printm(unsigned int nl, unsigned int nc, double *m)
   }
 }
 
-double sign(double x)
-{
-  return copysign(1., x);
-}
 
+#define sign(x) copysign(1.,x)
 
 void frictionContact3D_AlartCurnierFABGenerated(
   double rn,
@@ -90,105 +87,49 @@ void frictionContact3D_AlartCurnierFABGenerated(
   double x28 = x3 - rt1;
   double x30 = x12 - rt2;
   double x31 = x16 * x19;
-  double x32 = mu * x10 * x22;
-  double x33 = mu * x4;
-  double x34 = x30 * x32;
-  double x35 = x32 * x4;
-  double x36 = x22 * x4;
-  double x37 = mu * x19;
-  double x38 = x28 * x32;
-  double x39 = x16 * x22;
-  double x40 = x13 * x16 * x36;
-  double x41 = x19 * x33;
-  double x42 = rhot1 * x39;
-  double x43 = x27 * x37;
-  double x44 = rhot2 * x39;
-  double x45 = x26 * x37;
-  double x46 = x13 * x34;
-  double x47 = rhot1 * x40;
-  double x48 = rhot2 * x40;
-  double x49 = x34 * x4;
-  double x50 = x13 * x38;
-  double x51 = x28 * x35;
-  double x52 = x27 * x41;
-  double x53 = x26 * x41;
-  double x54 = x14 * x44;
-  double x55 = x13 * x45;
-  double x56 = x13 * x43;
-  double x57 = x11 * x42;
-  double x58 = -rhot2;
-  double x59 = rhon / 2;
-  double x60;
-  double x61;
-  double x62;
-  double x63;
-  double x64;
-  double x65;
-  double x66 = rhot1 * x31;
-  double x67 = -rhot1;
-  double x68;
-  double x69;
-  double x70 = x13 * x31;
-  double x71 = rhon * x23;
-  double x72;
-  double x73 = x31 * x4;
-  double x74;
-  double x75 = x31 + x46;
-  double x76 = x31 + x51;
-  double x77 = x5 + x8;
-  double x78 = x59 + x71;
   if (x17 <= x16)
   {
-    x60 = 0;
-    x61 = 0;
-    x62 = 0;
-    x63 = -x58;
-    x64 = 0;
-    x65 = 0;
-    x68 = 0;
-    x69 = 0;
-    x72 = 0;
-    x74 = -x67;
     result[1] = rt1 - x4;
+    result[4] = 0;
+    result[7] = rhot1;
+    result[10] = 0;
+    result[13] = 0;
     result[16] = 0;
+    result[19] = 0;
     result[2] = rt2 - x13;
+    result[5] = 0;
+    result[8] = 0;
+    result[11] = rhot2;
+    result[14] = 0;
+    result[17] = 0;
     result[20] = 0;
-  };
-  if (x16 < x17)
+  }
+  else
   {
-    x60 = -x47;
-    x61 = -x48;
-    x62 = -x53;
-    x63 = -x54 + rhot2 * x31;
-    x64 = -x52;
-    x65 = -x56;
-    x68 = -x49;
-    x69 = -x50;
-    x72 = -x55;
-    x74 = x66 - x57;
-    result[1] = rt1 - x73;
-    result[16] = 1 - x76;
-    result[2] = rt2 - x70;
-    result[20] = 1 - x75;
+    result[1] = rt1 - x31 * x4;
+    result[4] = -mu * x19 * x26 * x4;
+    result[7] = rhot1 * x31 - rhot1 * x11 * x16 * x22;
+    result[10] = -rhot2 * x13 * x16 * x22 * x4;
+    result[13] = -mu * x19 * x27 * x4;
+    result[16] = 1 - x31 - mu * x10 * x22 * x28 * x4;
+    result[19] = -mu * x10 * x22 * x30 * x4;
+    result[2] = rt2 - x13 * x31;
+    result[5] = -mu * x13 * x19 * x26;
+    result[8] = -rhot1 * x13 * x16 * x22 * x4;
+    result[11] = rhot2 * x31 - rhot2 * x14 * x16 * x22;
+    result[14] = -mu * x13 * x19 * x27;
+    result[17] = -mu * x10 * x13 * x22 * x28;
+    result[20] = 1 - x31 - mu * x10 * x13 * x22 * x30;
   };
-  result[0] = x77 - x7;
-  result[3] = x78;
+  result[0] = x5 + x8 - x7;
+  result[3] = rhon / 2 + rhon * x23;
   result[6] = 0;
   result[9] = 0;
   result[12] = 1.0 / 2.0 - x23;
   result[15] = 0;
   result[18] = 0;
-  result[4] = x62;
-  result[7] = x74;
-  result[10] = x61;
-  result[13] = x64;
-  result[19] = x68;
-  result[5] = x72;
-  result[8] = x60;
-  result[11] = x63;
-  result[14] = x65;
-  result[17] = x69;
 }
+
 void frictionContact3D_AlartCurnierFGenerated(
   double rn,
   double rt1,
@@ -1225,6 +1166,7 @@ void frictionContact3D_globalAlartCurnier(
   assert(problem->q);
   assert(problem->mu);
   assert(problem->M);
+
   assert(problem->M->matrix0);
 
   unsigned int problemSize = 3 * problem->numberOfContacts;
@@ -1261,7 +1203,7 @@ void frictionContact3D_globalAlartCurnier(
 
   double w;
 
-  int LWORK;
+  int LWORK = 0;
   double *WORK = NULL;
   // iparam[2] != 0 => use of DGELS
   if (options->iparam[2])
@@ -1282,12 +1224,11 @@ void frictionContact3D_globalAlartCurnier(
   info[0] = 1;
 
   // velocity <- M*reaction + qfree
+
+
   DCOPY(problemSize, problem->q, 1, velocity, 1);
   DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
         problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
-
-
-
 
 
   while (iter++ < itermax)
@@ -1449,9 +1390,423 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   }
   options->iparam[0] = 200;
   options->iparam[1] = 1;
+  options->iparam[3] = 100000;
   options->dparam[0] = 1e-3;
 
   options->internalSolvers = NULL;
 
   return 0;
 }
+
+
+#ifdef WITH_MUMPS
+#include <mpi.h>
+#include <dmumps_c.h>
+
+#define JOB_INIT -1
+#define JOB_END -2
+#define USE_COMM_WORLD -987654
+#define ICNTL(I) icntl[(I)-1]
+
+void computeSparseAWpB(
+  unsigned int problemSize,
+  double *A,
+  SparseBlockStructuredMatrix *W,
+  double *B,
+  SparseBlockStructuredMatrix *Wout,
+  int nzmax MAYBE_UNUSED,
+  int *nz,
+  int *irn,
+  int *jcn,
+  double *AWpB)
+{
+  assert(problemSize >= 3);
+  assert(problemSize / 3 >= W->filled1 - 1);
+
+  double Ai[9], Bi[9], tmp[9];
+  unsigned int _nz = 0;
+
+  for (unsigned int row = 0, ip9 = 0, i0 = 0;
+       row < W->filled1 - 1; ++row, ip9 += 9, i0 += 3)
+  {
+    assert(ip9 < 3 * problemSize - 8);
+
+    extract3x3(3, ip9, 0, A, Ai);
+    extract3x3(3, ip9, 0, B, Bi);
+
+    for (unsigned int blockn = W->index1_data[row];
+         blockn < W->index1_data[row + 1]; ++blockn)
+    {
+
+      unsigned int col = W->index2_data[blockn];
+      unsigned int j0 = col * 3;
+
+      mm3x3(Ai, W->block[blockn], tmp);
+      if (col == row) add3x3(Bi, tmp);
+
+      /* output in a BlockCSR for the line search */
+      cpy3x3(tmp, Wout->block[blockn]);
+
+      /* output in coo format for MUMPS */
+      double* ptmp = tmp;
+      unsigned int j = j0;
+      for (unsigned int k = 0; k < 3; ++k)
+      {
+        unsigned int i = i0;
+        OP3(if (*ptmp)
+      {
+        assert(_nz < nzmax);
+          irn[_nz] = i++ + 1;
+          jcn[_nz] = j + 1;
+          AWpB[_nz] = *ptmp++;
+
+          assert(irn[_nz] > 0);
+          assert(jcn[_nz] > 0);
+
+          assert(irn[_nz] <= problemSize);
+          assert(jcn[_nz] <= problemSize);
+
+          _nz++;
+        }
+        else
+        {
+          i++;
+          ptmp++;
+        });
+        j++;
+      }
+      nz[0] = _nz;
+      assert(irn[0]);
+      assert(jcn[0]);
+      assert(irn[_nz - 1] >= irn[0]);
+      assert(jcn[_nz - 1] >= jcn[0]);
+    }
+  }
+}
+
+
+int globalLineSearchSparseGP(
+  unsigned int problemSize,
+  double *reaction,
+  double *velocity,
+  double *mu,
+  double *rho,
+  double *F,
+  double *A,
+  double *B,
+  SparseBlockStructuredMatrix *W,
+  double *qfree,
+  SparseBlockStructuredMatrix *blockAWpB,
+  double *direction,
+  double *tmp,
+  double alpha[1],
+  unsigned int maxiter_ls)
+{
+  double inf = 1e10;
+  double alphamin = 0.0;
+  double alphamax = inf;
+
+  double m1 = 0.01, m2 = 0.99;
+
+  // Computation of q(t) and q'(t) for t =0
+
+  double q0 = 0.5 * DDOT(problemSize, F, 1, F, 1);
+
+  //  tmp <- AWpB * direction
+  DSCAL(problemSize, 0., tmp, 1);
+  prodSBM(problemSize, problemSize, 1., blockAWpB, direction, 1, tmp);
+
+  double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
+
+  for (int iter = 0; iter < maxiter_ls; ++iter)
+  {
+
+    // tmp <- alpha*direction+reaction
+    DCOPY(problemSize, reaction, 1, tmp, 1);
+    DAXPY(problemSize, alpha[0], direction, 1, tmp, 1);
+
+    // velocity <- W*tmp + qfree
+    DCOPY(problemSize, qfree, 1, velocity, 1);
+    prodSBM(problemSize, problemSize, 1., W, tmp, 1., velocity);
+
+    frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize, tmp,
+        velocity, mu, rho, F,
+        NULL, NULL);
+
+    double q  = 0.5 * DDOT(problemSize, F, 1, F, 1);
+
+    assert(q >= 0);
+
+    double slope = (q - q0) / alpha[0];
+
+    int C1 = (slope >= m2 * dqdt0);
+    int C2 = (slope <= m1 * dqdt0);
+
+    if (C1 && C2)
+    {
+      if (verbose > 1)
+      {
+        printf("global line search success. Number of iteration = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
+      }
+
+      return 0;
+
+    }
+    else if (!C1)
+    {
+      alphamin = alpha[0];
+    }
+    else
+    {
+      // not(C2)
+      alphamax = alpha[0];
+    }
+
+    if (alpha[0] < inf)
+    {
+      alpha[0] = 0.5 * (alphamin + alphamax);
+    }
+    else
+    {
+      alpha[0] = alphamin;
+    }
+
+  }
+  if (verbose > 1)
+  {
+    printf("global line search failed. max number of iteration reached  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
+  }
+
+  return -1;
+}
+
+
+void frictionContact3D_sparseGlobalAlartCurnier(
+  FrictionContactProblem* problem,
+  double *reaction,
+  double *velocity,
+  int *info,
+  SolverOptions *options)
+{
+  assert(problem);
+  assert(reaction);
+  assert(velocity);
+  assert(info);
+  assert(options);
+
+  assert(problem->dimension == 3);
+
+  assert(options->iparam);
+  assert(options->dparam);
+
+  assert(problem->q);
+  assert(problem->mu);
+  assert(problem->M);
+
+  assert(!problem->M->matrix0);
+  assert(problem->M->matrix1);
+
+  unsigned int problemSize = 3 * problem->numberOfContacts;
+
+  unsigned int iter = 0;
+  unsigned int itermax = options->iparam[0];
+  unsigned int erritermax = options->iparam[1];
+  int nzmax = options->iparam[3];
+
+  assert(itermax > 0);
+  assert(nzmax > 0);
+
+  double tolerance = options->dparam[0];
+  assert(tolerance > 0);
+
+  unsigned int _3problemSize = 3 * problemSize;
+
+  void *buffer;
+
+  if (!options->dWork)
+    buffer = malloc((10 * problemSize +
+                     3 * nzmax) * sizeof(double) +
+                    problemSize * sizeof(int));
+  else
+    buffer = options->dWork;
+
+  double *F = (double *) buffer;
+  double *tmp1 = (double *) F + problemSize;
+  double *tmp2 = (double *) tmp1 + problemSize;
+  double *A = tmp2 + problemSize;
+  double *B = A + _3problemSize;
+  double *rho = B + _3problemSize;
+  double *AWpB = rho + problemSize;
+  int *irn = (int *)(AWpB + nzmax);
+  int *jcn = (int *)(irn + nzmax);
+
+  SparseBlockStructuredMatrix *blockAWpB = (SparseBlockStructuredMatrix *)(jcn + nzmax);
+
+  int nz[1];
+
+  // compute rho here
+  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
+
+  static DMUMPS_STRUC_C id;
+  static int myid = -1, ierr;
+  int p_argc = 0;
+  char **p_argv;
+  if (myid < 0)
+  {
+    // initialize MPI
+    ierr = MPI_Init(&p_argc, &p_argv);
+    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+    // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
+    id.job = JOB_INIT;
+    id.par = 1;
+    id.sym = 0;
+    id.comm_fortran = USE_COMM_WORLD;
+    dmumps_c(&id);
+  }
+
+  id.ICNTL(1) = -1;
+  id.ICNTL(2) = -1;
+  id.ICNTL(3) = -1;
+  id.ICNTL(4) = 0;
+
+
+
+  // MUMPS problem on host
+  if (!myid)
+  {
+    id.n = problemSize;
+    id.nz = nz[0];
+    id.irn = irn;
+    id.jcn = jcn;
+    id.a = AWpB;
+    id.rhs = tmp1;
+
+    id.job = 6;
+
+    info[0] = 1;
+
+
+    // blockAWpB init
+    copySBM(problem->M->matrix1, blockAWpB);
+
+    // velocity <- M*reaction + qfree
+    DCOPY(problemSize, problem->q, 1, velocity, 1);
+    prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
+
+    while (iter++ < itermax)
+    {
+
+      frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
+          reaction, velocity,
+          problem->mu, rho,
+          F, A, B);
+
+      // AW + B
+      computeSparseAWpB(problemSize, A, problem->M->matrix1, B, blockAWpB, nzmax, nz, irn, jcn, AWpB);
+
+      DCOPY(problemSize, F, 1, tmp1, 1);
+      DSCAL(problemSize, -1., tmp1, 1);
+
+      /* Solve: AWpB X = -F */
+      id.n = problemSize;
+      id.nz = nz[0];
+      id.irn = irn;
+      id.jcn = jcn;
+      id.a = AWpB;
+      id.rhs = tmp1;
+
+      dmumps_c(&id);
+
+      assert(id.info[0] >= 0);
+
+      if (id.info[0] > 0)
+        /*if (verbose>0)*/
+        printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", id.info[0], id.info[1]);
+
+      // line search
+      double alpha = 1;
+      int info_ls = globalLineSearchSparseGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+                                             problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, 100);
+
+      if (!info_ls)
+        DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
+      else
+        DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
+
+
+      // velocity <- M*reaction + qfree
+      DCOPY(problemSize, problem->q, 1, velocity, 1);
+      prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
+
+
+
+      options->dparam[1] = INFINITY;
+
+      if (!(iter % erritermax))
+      {
+        frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
+            reaction, velocity,
+            problem->mu, rho,
+            F, NULL, NULL);
+
+
+
+        FrictionContact3D_compute_error(problem, reaction, velocity,
+                                        tolerance, options, &(options->dparam[1]));
+
+
+        assert((DNRM2(problemSize, F, 1)
+                / (1 + DNRM2(problemSize, problem->q, 1)))
+               <= 10 * options->dparam[1]);
+
+
+      }
+
+      if (verbose > 0)
+        printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+
+      if (options->dparam[1] < tolerance)
+      {
+        info[0] = 0;
+        break;
+      }
+
+
+    }
+
+
+
+    if (verbose > 0)
+    {
+      if (!info[0])
+        printf("GLOBALAC: convergence after %d iterations, error : %g\n",
+               iter, options->dparam[1]);
+      else
+      {
+        printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
+               iter, options->dparam[1]);
+      }
+    }
+
+    if (!options->dWork)
+    {
+      assert(buffer);
+      free(buffer);
+
+    }
+    else
+    {
+      assert(buffer == options->dWork);
+    }
+
+  }
+  else
+    // on other hosts listen for mumps
+    while (1)
+    {
+      dmumps_c(&id);
+    }
+}
+
+#endif /*WITH_MUMPS*/
