@@ -89,6 +89,9 @@ extern "C"
     double *result3x3_1,
     double *result3x3_2);
 
+  void frictionContact3D_sparseGlobalAlartCurnierInit(
+    SolverOptions *SO);
+
 
   void frictionContact3D_globalAlartCurnier(
     FrictionContactProblem* problem,

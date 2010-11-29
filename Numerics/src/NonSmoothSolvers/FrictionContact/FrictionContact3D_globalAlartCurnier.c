@@ -1377,7 +1377,7 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
+  options->iSize = 7;
   options->dSize = 5;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
@@ -1390,7 +1390,10 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   }
   options->iparam[0] = 200;
   options->iparam[1] = 1;
-  options->iparam[3] = 100000;
+  options->iparam[3] = 100000; // nzmax
+  options->iparam[5] = 1;    // mpi goes on
+  //options->iparam[6] => & DMUMPS_STRUC_C
+
   options->dparam[0] = 1e-3;
 
   options->internalSolvers = NULL;
@@ -1580,6 +1583,41 @@ int globalLineSearchSparseGP(
   return -1;
 }
 
+void frictionContact3D_sparseGlobalAlartCurnierInit(
+  SolverOptions *SO)
+{
+  DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
+
+  // SO with void pointers ?
+  SO->iparam[6] = (int) mumps_id;
+
+  // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
+  mumps_id->job = JOB_INIT;
+  mumps_id->par = 1;
+  mumps_id->sym = 0;
+  mumps_id->comm_fortran = USE_COMM_WORLD;
+  dmumps_c(mumps_id);
+
+  mumps_id->ICNTL(1) = -1;
+  mumps_id->ICNTL(2) = -1;
+  mumps_id->ICNTL(3) = -1;
+  mumps_id->ICNTL(4) = 0;
+
+  // process on mpi rank > 0
+  if (SO->iparam[4])
+  {
+    // flag
+    while (SO->iparam[5])
+    {
+      mumps_id->job = 6;
+      dmumps_c(mumps_id);
+    }
+
+    mumps_id->job = JOB_END;
+    dmumps_c(mumps_id);
+    exit(0);
+  }
+}
 
 void frictionContact3D_sparseGlobalAlartCurnier(
   FrictionContactProblem* problem,
@@ -1606,12 +1644,15 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   assert(!problem->M->matrix0);
   assert(problem->M->matrix1);
 
+  assert(!options->iparam[4]); // only host
+
   unsigned int problemSize = 3 * problem->numberOfContacts;
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[1];
   int nzmax = options->iparam[3];
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) options->iparam[6];
 
   assert(itermax > 0);
   assert(nzmax > 0);
@@ -1647,166 +1688,131 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   // compute rho here
   for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
 
-  static DMUMPS_STRUC_C id;
-  static int myid = -1, ierr;
-  int p_argc = 0;
-  char **p_argv;
-  if (myid < 0)
+  mumps_id->n = problemSize;
+  mumps_id->nz = nz[0];
+  mumps_id->irn = irn;
+  mumps_id->jcn = jcn;
+  mumps_id->a = AWpB;
+  mumps_id->rhs = tmp1;
+
+  mumps_id->job = 6;
+
+  info[0] = 1;
+
+
+  // blockAWpB init
+  copySBM(problem->M->matrix1, blockAWpB);
+
+  // velocity <- M*reaction + qfree
+  DCOPY(problemSize, problem->q, 1, velocity, 1);
+  prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
+
+  while (iter++ < itermax)
   {
-    // initialize MPI
-    ierr = MPI_Init(&p_argc, &p_argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
-    // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
-    id.job = JOB_INIT;
-    id.par = 1;
-    id.sym = 0;
-    id.comm_fortran = USE_COMM_WORLD;
-    dmumps_c(&id);
-  }
+    frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
+        reaction, velocity,
+        problem->mu, rho,
+        F, A, B);
 
-  id.ICNTL(1) = -1;
-  id.ICNTL(2) = -1;
-  id.ICNTL(3) = -1;
-  id.ICNTL(4) = 0;
+    // AW + B
+    computeSparseAWpB(problemSize, A, problem->M->matrix1, B, blockAWpB, nzmax, nz, irn, jcn, AWpB);
 
+    DCOPY(problemSize, F, 1, tmp1, 1);
+    DSCAL(problemSize, -1., tmp1, 1);
 
+    /* Solve: AWpB X = -F */
+    mumps_id->n = problemSize;
+    mumps_id->nz = nz[0];
+    mumps_id->irn = irn;
+    mumps_id->jcn = jcn;
+    mumps_id->a = AWpB;
+    mumps_id->rhs = tmp1;
 
-  // MUMPS problem on host
-  if (!myid)
-  {
-    id.n = problemSize;
-    id.nz = nz[0];
-    id.irn = irn;
-    id.jcn = jcn;
-    id.a = AWpB;
-    id.rhs = tmp1;
+    dmumps_c(mumps_id);
 
-    id.job = 6;
+    assert(mumps_id->info[0] >= 0);
 
-    info[0] = 1;
+    if (mumps_id->info[0] > 0)
+      /*if (verbose>0)*/
+      printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
 
+    // line search
+    double alpha = 1;
+    int info_ls = globalLineSearchSparseGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
+                                           problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, 100);
 
-    // blockAWpB init
-    copySBM(problem->M->matrix1, blockAWpB);
+    if (!info_ls)
+      DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
+    else
+      DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
+
 
     // velocity <- M*reaction + qfree
     DCOPY(problemSize, problem->q, 1, velocity, 1);
     prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
 
-    while (iter++ < itermax)
-    {
 
+
+    options->dparam[1] = INFINITY;
+
+    if (!(iter % erritermax))
+    {
       frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
           reaction, velocity,
           problem->mu, rho,
-          F, A, B);
-
-      // AW + B
-      computeSparseAWpB(problemSize, A, problem->M->matrix1, B, blockAWpB, nzmax, nz, irn, jcn, AWpB);
-
-      DCOPY(problemSize, F, 1, tmp1, 1);
-      DSCAL(problemSize, -1., tmp1, 1);
-
-      /* Solve: AWpB X = -F */
-      id.n = problemSize;
-      id.nz = nz[0];
-      id.irn = irn;
-      id.jcn = jcn;
-      id.a = AWpB;
-      id.rhs = tmp1;
-
-      dmumps_c(&id);
-
-      assert(id.info[0] >= 0);
-
-      if (id.info[0] > 0)
-        /*if (verbose>0)*/
-        printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", id.info[0], id.info[1]);
-
-      // line search
-      double alpha = 1;
-      int info_ls = globalLineSearchSparseGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
-                                             problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, 100);
-
-      if (!info_ls)
-        DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
-      else
-        DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
-
-
-      // velocity <- M*reaction + qfree
-      DCOPY(problemSize, problem->q, 1, velocity, 1);
-      prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
+          F, NULL, NULL);
 
 
 
-      options->dparam[1] = INFINITY;
-
-      if (!(iter % erritermax))
-      {
-        frictionContact3D_globalAlartCurnierFunctionGenerated(problemSize,
-            reaction, velocity,
-            problem->mu, rho,
-            F, NULL, NULL);
+      FrictionContact3D_compute_error(problem, reaction, velocity,
+                                      tolerance, options, &(options->dparam[1]));
 
 
-
-        FrictionContact3D_compute_error(problem, reaction, velocity,
-                                        tolerance, options, &(options->dparam[1]));
-
-
-        assert((DNRM2(problemSize, F, 1)
-                / (1 + DNRM2(problemSize, problem->q, 1)))
-               <= 10 * options->dparam[1]);
-
-
-      }
-
-      if (verbose > 0)
-        printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
-
-      if (options->dparam[1] < tolerance)
-      {
-        info[0] = 0;
-        break;
-      }
+      assert((DNRM2(problemSize, F, 1)
+              / (1 + DNRM2(problemSize, problem->q, 1)))
+             <= 10 * options->dparam[1]);
 
 
     }
-
-
 
     if (verbose > 0)
+      printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+
+    if (options->dparam[1] < tolerance)
     {
-      if (!info[0])
-        printf("GLOBALAC: convergence after %d iterations, error : %g\n",
-               iter, options->dparam[1]);
-      else
-      {
-        printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
-               iter, options->dparam[1]);
-      }
+      info[0] = 0;
+      break;
     }
 
-    if (!options->dWork)
-    {
-      assert(buffer);
-      free(buffer);
 
-    }
+  }
+
+
+
+  if (verbose > 0)
+  {
+    if (!info[0])
+      printf("GLOBALAC: convergence after %d iterations, error : %g\n",
+             iter, options->dparam[1]);
     else
     {
-      assert(buffer == options->dWork);
+      printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
+             iter, options->dparam[1]);
     }
+  }
+
+  if (!options->dWork)
+  {
+    assert(buffer);
+    free(buffer);
 
   }
   else
-    // on other hosts listen for mumps
-    while (1)
-    {
-      dmumps_c(&id);
-    }
+  {
+    assert(buffer == options->dWork);
+  }
+
 }
 
 #endif /*WITH_MUMPS*/
