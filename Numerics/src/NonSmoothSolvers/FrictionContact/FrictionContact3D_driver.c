@@ -135,10 +135,12 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     {
       frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
     }
+#ifdef WITH_MUMPS
     else
     {
       frictionContact3D_sparseGlobalAlartCurnier(problem, reaction , velocity , &info , options);
     }
+#endif
     break;
   }
   case SICONOS_FRICTION_3D_QUARTIC_NU:
