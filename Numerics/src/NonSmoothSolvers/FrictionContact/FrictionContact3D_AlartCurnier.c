@@ -851,7 +851,16 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
 }
 
 
-
+#ifndef NDEBUG
+void frictionContact3D_localAlartCurnierCKPSFunctionGenerated(
+  double *reaction,
+  double *velocity,
+  double mu,
+  double *rho,
+  double *f,
+  double *A,
+  double *B);
+#endif
 
 int LocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
