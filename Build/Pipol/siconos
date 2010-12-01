@@ -2,15 +2,11 @@
 
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core11 01:30
-
 #PIPOL fedora-core12 01:30
 
 #PIPOL fedora-core13 01:30
 
-#PIPOL debian-lenny 01:30
-
-#PIPOL debian-testing 01:30
+#PIPOL kvm-linux 01:30
 
 #PIPOL ubuntu-lucid 01:30
 
@@ -174,11 +170,11 @@ pack_3_2() {
     
 }
 
-gforge_upload_stable() { 
+gforge_upload_3_2() { 
     cd $PIPOL_HOMEDIR/src/gforge ;{
         export GFORGE_WSDL=https://gforge.inria.fr/soap/index.php?wsdl 
-        ./gforge.php -v login --username=sicupload --password='UPLOADplp!' --project=siconos
-        ./gforge.php frs addfile --package=3058 --release=4922 --file=$1 
+        $PIPOL_WDIR/siconos/trunk/Build/Pipol/gforge_cli-1.0.1/gforge.php -v login --username=sicupload --password='UPLOADplp!' --project=siconos
+        $PIPOL_WDIR/siconos/trunk/Build/Pipol/gforge_cli-1.0.1/gforge.php/gforge.php frs addfile --package=3058 --release=5666 --file=$1 
     }; cd -
 }
 
@@ -237,94 +233,117 @@ nightly_submit() {
     make_1 $1 $2 ${mode}Submit
 }
 
+swig_setup() { 
+    rm -rf `which swig`
+    
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.1.tar.gz
+
+    cd swig-2.0.1; { 
+        ./configure
+        make
+        sudo make install
+    }
+}
+
+
+
+
 #sudo rm -f /usr/local/bin/ctest
 
 # Stable 
-setup_3_2
-
-configure_3_2 Numerics Release
-nightly_build_3_2 Numerics Release
-nightly_test Numerics Release
-nightly_submit Numerics Release
-nightly_memcheck Numerics Release
-nightly_submit Numerics Release
-install_1 Numerics Release
-
-configure_3_2 Kernel Release
-nightly_build_3_2 Kernel Release
-nightly_test Kernel Release
-nightly_submit Kernel Release
-nightly_memcheck Kernel Release
-nightly_submit Kernel Release
-install_1 Kernel Release
-
-# Examples
-configure_3_2 Examples Release
-nightly_build_3_2 Examples Release
-nightly_test Examples Release
-nightly_memcheck Examples Release
-nightly_submit Examples Release
-
-# Stable Packages
-pack_3_2 Numerics Release
-save_packed_1 Numerics Release
-
-pack_3_2 Kernel Release
-save_packed_1 Kernel Release
-
-pack_3_2 Examples Release
-save_packed_1 Examples Release
-
-# trunk tests
-#setup_trunk
-#configure_trunk Numerics Release
-#nightly_build Numerics Release
+#setup_3_2
+#
+#configure_3_2 Numerics Release
+#nightly_build_3_2 Numerics Release
 #nightly_test Numerics Release
 #nightly_submit Numerics Release
 #nightly_memcheck Numerics Release
 #nightly_submit Numerics Release
 #install_1 Numerics Release
 #
-#configure_trunk Kernel Release
-#nightly_build Kernel Release
+#configure_3_2 Kernel Release
+#nightly_build_3_2 Kernel Release
 #nightly_test Kernel Release
 #nightly_submit Kernel Release
 #nightly_memcheck Kernel Release
 #nightly_submit Kernel Release
 #install_1 Kernel Release
 #
-## Snapshot packages
-#pack_trunk Numerics Release
-#save_packed_1 Numerics Release
-#
-#pack_trunk Kernel Release
-#save_packed_1 Kernel Release
-#
-#pack_trunk Examples Release
-#save_packed_1 Examples Release
-#
-## Coverage
-#setup_trunk
-#configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
-#nightly_build Numerics Debug
-#nightly_coverage Numerics Debug
-#nightly_submit Numerics Debug 
-#
-#setup_trunk
-#configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
-#nightly_build Kernel Debug
-#nightly_coverage Kernel Debug
-#nightly_submit Kernel Debug
-#
-#
 ## Examples
-#rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
-#rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
-#configure_trunk Examples Release
-#nightly_build Examples Release
+#configure_3_2 Examples Release
+#nightly_build_3_2 Examples Release
 #nightly_test Examples Release
 #nightly_memcheck Examples Release
 #nightly_submit Examples Release
+#
+## Stable Packages
+#pack_3_2 Numerics Release
+#save_packed_1 Numerics Release
+#
+#pack_3_2 Kernel Release
+#save_packed_1 Kernel Release
+#
+#pack_3_2 Examples Release
+#save_packed_1 Examples Release
+
+# trunk tests
+setup_trunk
+configure_trunk Numerics Release
+nightly_build Numerics Release
+nightly_test Numerics Release
+nightly_submit Numerics Release
+nightly_memcheck Numerics Release
+nightly_submit Numerics Release
+install_1 Numerics Release
+
+configure_trunk Kernel Release
+nightly_build Kernel Release
+nightly_test Kernel Release
+nightly_submit Kernel Release
+nightly_memcheck Kernel Release
+nightly_submit Kernel Release
+install_1 Kernel Release
+
+# Snapshot packages
+pack_trunk Numerics Release
+save_packed_1 Numerics Release
+
+pack_trunk Kernel Release
+save_packed_1 Kernel Release
+
+pack_trunk Examples Release
+save_packed_1 Examples Release
+
+# Coverage
+setup_trunk
+configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Numerics Debug
+nightly_coverage Numerics Debug
+nightly_submit Numerics Debug 
+
+setup_trunk
+configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Kernel Debug
+nightly_coverage Kernel Debug
+nightly_submit Kernel Debug
+
+
+# Examples
+rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
+rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
+configure_trunk Examples Release
+nightly_build Examples Release
+nightly_test Examples Release
+nightly_memcheck Examples Release
+nightly_submit Examples Release
+
+
+# front-end
+swig_setup
+configure_trunk Front-End Debug
+nightly_build Front-End Debug
+nightly_test Front-End Debug
+nightly_submit Front-End Debug
 
 
 # end
