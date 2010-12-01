@@ -36,6 +36,8 @@ typedef void (*Fext)(double , double*, double*, double*);
  */
 class NewtonEulerDS : public DynamicalSystem
 {
+private:
+  void internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix);
 protected:
 
   // -- MEMBERS --
@@ -72,6 +74,8 @@ protected:
 
   /** Inertial matrix*/
   SP::SiconosMatrix _I;
+  /** coordinate of the center of mass, when q=(0,0,0,1,0,0,0)*/
+  SP::SimpleVector _centerOfMass;
   /** mass of the system */
   double _mass;
 
@@ -212,6 +216,14 @@ public:
    *  \param SiconosMatrix : inertial matrix
    */
   NewtonEulerDS(SP::SiconosVector, SP::SiconosVector, double  , SP::SiconosMatrix);
+  /** constructor from a minimum set of data
+   *  \param SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
+   *  \param double : mass
+   *  \param SiconosMatrix : inertial matrix
+   *  \param SimpleVector : coordinate of the center of mass, when q=(0,0,0,1,0,0,0).
+   */
+  NewtonEulerDS(SP::SiconosVector, SP::SiconosVector, double  , SP::SiconosMatrix, SP::SimpleVector);
 
 
 
@@ -306,6 +318,10 @@ public:
   inline SP::SiconosVector v0() const
   {
     return _v0;
+  }
+  inline SP::SimpleVector centerOfMass() const
+  {
+    return _centerOfMass;
   }
   /** set the value of q0 to newValue
    *  \param SiconosVector newValue

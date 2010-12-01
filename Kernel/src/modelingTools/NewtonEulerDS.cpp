@@ -51,8 +51,32 @@ void NewtonEulerDS::connectToDS()
 Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0)=7)
 Velocity0 : contains the initial velocity of center of mass and the omega initial. (dim(Velocity0)=6)
 */
-NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix):
-  DynamicalSystem(6)
+NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
+{
+  _p.resize(3);
+  zeroPlugin();
+  // --- NEWTONEULER INHERITED CLASS MEMBERS ---
+  // -- Memory allocation for vector and matrix members --
+
+
+  _ndof = 3;
+  _qDim = 7;
+  _n = 6;
+
+
+  // Current state
+  _q.reset(new SimpleVector(_qDim));
+  _v.reset(new SimpleVector(_n));
+
+  _dotq.reset(new SimpleVector(_qDim));
+  _residuFree.reset(new SimpleVector(_n));
+  _W.reset(new SimpleMatrix(_n, _n));
+  _luW.reset(new SimpleMatrix(_n, _n));
+  _W->zero();
+  _T.reset(new SimpleMatrix(_qDim, _n));
+
+}
+void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)
 {
   _p.resize(3);
   zeroPlugin();
@@ -99,6 +123,17 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, 
   _T->setValue(1, 1, 1.0);
   _T->setValue(2, 2, 1.0);
   updateT();
+}
+NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double  mass, SP::SiconosMatrix inertialMatrix, SP::SimpleVector centerOfMass):
+  DynamicalSystem(6)
+{
+  internalInit(Q0, Velocity0, mass, inertialMatrix);
+  _centerOfMass = centerOfMass;
+}
+NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix):
+  DynamicalSystem(6)
+{
+  internalInit(Q0, Velocity0, mass, inertialMatrix);
 }
 void NewtonEulerDS::zeroPlugin()
 {
@@ -274,7 +309,7 @@ void NewtonEulerDS::initialize(const string& simulationType, double time, unsign
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  //initRhs(time);
+  initRhs(time);
 
 }
 
