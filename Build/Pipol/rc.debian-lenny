@@ -2,5 +2,6 @@
 
 apt-get update
 
-apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev
+apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev
+
 
