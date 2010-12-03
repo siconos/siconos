@@ -89,10 +89,6 @@ extern "C"
     double *result3x3_1,
     double *result3x3_2);
 
-  void frictionContact3D_sparseGlobalAlartCurnierInit(
-    SolverOptions *SO);
-
-
   void frictionContact3D_globalAlartCurnier(
     FrictionContactProblem* problem,
     double *reaction,
@@ -102,6 +98,18 @@ extern "C"
 
   int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
     SolverOptions* options);
+
+#ifdef WITH_MUMPS
+  void frictionContact3D_sparseGlobalAlartCurnierInit(
+    SolverOptions *SO);
+
+  void frictionContact3D_sparseGlobalAlartCurnier(
+    FrictionContactProblem* problem,
+    double *reaction,
+    double *velocity,
+    int *info,
+    SolverOptions *options);
+#endif
 
 #ifdef __cplusplus
 }
