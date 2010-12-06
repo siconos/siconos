@@ -416,6 +416,11 @@ IF(WITH_TESTING)
   NEW_TEST(PFC3D_test14bis PrimalFrictionContact3D_test14bis.c)
   NEW_TEST(PFC3D_test15 PrimalFrictionContact3D_test15.c)
 
+  
+  ## Alart Curnier functions
+  NEW_TEST(AlartCurnierFunctions_test FrictionContact3D_AlartCurnierFunctions_test.c)
+
+
 
   END_TEST()
   
