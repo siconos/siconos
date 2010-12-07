@@ -1158,7 +1158,7 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
       //std::cout << "t = " << t << " is too small : slope = " << slope << ", m2*qp0 = " << m2*qp0 << std::endl;
       alphamin = alpha;
     }
-    else     // not(C2)
+    else   // not(C2)
     {
 #ifdef VERBOSE_DEBUG
       printf("LS: alpha too big = %12.8e\t, slope =%12.8e\n", alpha, slope);
