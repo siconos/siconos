@@ -478,6 +478,18 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   RV = sqrt(RVT * RVT + RVS * RVS);
   //Radius = mu*R[0];
 
+  if (A)
+  {
+    A[0 + 3 * 1] = 0.;
+    A[0 + 3 * 2] = 0.;
+  }
+
+  if (B)
+  {
+    B[0 + 3 * 1] = 0.;
+    B[0 + 3 * 2] = 0.;
+  }
+
   if (RVN >= 0.0)
   {
 #ifdef VERBOSE_DEBUG
