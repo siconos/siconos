@@ -25,6 +25,12 @@
   \brief A common interface to different timers, see test/testop3x3.c for examples
 */
 
+#ifdef __GNUC__
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+
 #define HAVE_FFTW_CYCLE_H
 #define _BSD_SOURCE
 
@@ -55,15 +61,15 @@
 
 #ifdef HAVE_TIME_H
 #define DECL_TIMER_CLOCK_GETTIME(T)                                     \
-  struct timespec __timer__##T##1[1],__timer__##T##2[1]; long t##delta;
+  struct timespec __timer__##T##1[1],__timer__##T##2[1]; long T##delta;
 #define START_TIMER_CLOCK_GETTIME(T)                          \
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID,__timer__##T##1)
 #define STOP_TIMER_CLOCK_GETTIME(T)                           \
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID,__timer__##T##2)
 #define ELAPSED_CLOCK_GETTIME(T) \
-  ({t##delta= __timer__##T##2->tv_nsec-__timer__##T##1->tv_nsec;\
-       if (t##delta < 0) t##delta += 1000000000;\
-       (t##delta)*1e-9;})
+  ({T##delta= __timer__##T##2->tv_nsec-__timer__##T##1->tv_nsec;\
+       if (T##delta < 0) T##delta += 1000000000;\
+       (T##delta)*1e-9;})
 #define TIMER_TICK_CLOCK_GETTIME long
 #endif
 
@@ -94,7 +100,7 @@
 
 #ifdef HAVE_TIME_H
 #define DECL_TIMER_CLOCK(T)                           \
-  clock_t __timer__##T##1,__timer__##T##2;
+  clock_t __timer__##T##1,__timer__##T##2
 #define START_TIMER_CLOCK(T)                    \
   __timer__##T##1 = clock()
 #define STOP_TIMER_CLOCK(T)                     \
@@ -108,14 +114,14 @@
 
 #define asm __asm
 #include "fftw_cycle.h"
-#define DECL_TIMER_FFTW_CYCLE(T)                    \
-  ticks __timer__##T##1, __timer__##T##2
+#define DECL_TIMER_FFTW_CYCLE(T)                              \
+  ticks __timer__##T##1, __timer__##T##2; double __timer__##T##total MAYBE_UNUSED =0.
 #define START_TIMER_FFTW_CYCLE(T)               \
   __timer__##T##1 = getticks()
 #define STOP_TIMER_FFTW_CYCLE(T)                \
   __timer__##T##2 = getticks()
-#define ELAPSED_FFTW_CYCLE(T)                         \
-  elapsed(__timer__##T##2,__timer__##T##1)
+#define ELAPSED_FFTW_CYCLE(T)                                           \
+  ({__timer__##T##total+=elapsed(__timer__##T##2,__timer__##T##1); __timer__##T##total ;})
 #define TIMER_TICK_FFTW_CYCLE double
 
 #endif

@@ -1,3 +1,7 @@
+# Remote compilations and tests on Pipol
+# PIPOL_USER must be set in the environment
+#
+
 # On a Pipol system, set:
 # PIPOL_IMAGE : Pipol image full name
 # PIPOL_IMAGE_NAME : Pipol image without extension
@@ -18,7 +22,9 @@ ENDIF(_STMP STREQUAL "[]")
 
 SET(PIPOL_USER $ENV{PIPOL_USER})
 
-
+IF(NOT PIPOL_DURATION)
+  SET(PIPOL_DURATION 02:00)
+ENDIF(NOT PIPOL_DURATION)
 
 # ssh/rsync mandatory 
 FIND_PROGRAM(HAVE_SSH ssh)
@@ -72,7 +78,7 @@ IF(PIPOL_USER)
         ${SYSTEM_TARGET}
         COMMENT "PIPOL Build : ${SYSTEM_PATTERN}"
         COMMAND rsync ${PIPOL_USER}@pipol.inria.fr:/usr/local/bin/pipol-sub . 
-        COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION} --rsynco=${PIPOL_SUB_RSYNC_OPTIONS}
+        COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} ${PIPOL_DURATION} --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION} --rsynco=${PIPOL_SUB_RSYNC_OPTIONS}
         \"sudo mkdir -p \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
           sudo chown ${PIPOL_USER} \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
           cd \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
@@ -84,17 +90,28 @@ IF(PIPOL_USER)
         )
 
       ADD_CUSTOM_TARGET(
+        make-${SYSTEM_TARGET}
+        COMMENT "PIPOL Build : ${SYSTEM_PATTERN}"
+        COMMAND rsync ${PIPOL_USER}@pipol.inria.fr:/usr/local/bin/pipol-sub . 
+        COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} ${PIPOL_DURATION} --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION} --rsynco=${PIPOL_SUB_RSYNC_OPTIONS}
+        \"sudo mkdir -p \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
+          sudo chown ${PIPOL_USER} \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
+          cd \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
+          ${PIPOL_MAKE_COMMAND} \;
+        )
+
+      ADD_CUSTOM_TARGET(
         package-${SYSTEM_TARGET}
         COMMENT "PIPOL Build : ${SYSTEM_PATTERN}"
         COMMAND rsync ${PIPOL_USER}@pipol.inria.fr:/usr/local/bin/pipol-sub . \;\\
-        COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION}  
+        COMMAND ./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} ${PIPOL_DURATION} --reconnect --group --keep --verbose=1 --export=${CMAKE_SOURCE_DIR} ${PIPOL_RC_DIR_OPTION}  
         \"sudo mkdir -p \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
         sudo chown ${PIPOL_USER} \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
         cd \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
           ${PIPOL_CONFIGURE_COMMAND} \;
           ${PIPOL_MAKE_COMMAND} \;
           ${PIPOL_PACKAGE_COMMAND} \" \;\\
-       COMMAND rsync -av ${PIPOL_USER}@`./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=0 echo \\\\$$PIPOL_HOST`.inrialpes.fr:`./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} 02:00 --reconnect --group --keep --verbose=0 ls \\\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}/*.\\\\$$PIPOL_PACK_EXT` .
+       COMMAND rsync -av ${PIPOL_USER}@`./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} ${PIPOL_DURATION} --reconnect --group --keep --verbose=0 echo \\\\$$PIPOL_HOST`.inrialpes.fr:`./pipol-sub --pipol-user=${PIPOL_USER} ${SYSTEM_PATTERN} ${PIPOL_DURATION} --reconnect --group --keep --verbose=0 ls \\\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}/*.\\\\$$PIPOL_PACK_EXT` .
        )
     ENDMACRO(PIPOL_TARGET)
   ENDIF(HAVE_RSYNC)

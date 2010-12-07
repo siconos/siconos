@@ -34,18 +34,17 @@ int main()
   double r;
 
 
-  DECL_TIMER_TICK(t1);
-  DECL_TIMER_TICK(t2);
-  DECL_TIMER_TICK(t3);
-  DECL_TIMER_TICK(t4);
-  DECL_TIMER_TICK(t5);
-  DECL_TIMER_TICK(t6);
-  DECL_TIMER_TICK(t7);
-  DECL_TIMER_TICK(t8);
+  DECL_TIMER(t1);
+  DECL_TIMER(t2);
+  DECL_TIMER(t3);
+  DECL_TIMER(t4);
+  DECL_TIMER(t5);
+  DECL_TIMER(t6);
+  DECL_TIMER(t7);
+  DECL_TIMER(t8);
+  DECL_TIMER(t9);
 
   unsigned int i, k, k1, k2;
-
-  DECL_TIMER(t);
 
   /* b += a */
   cpy3x3(ia, a);
@@ -59,43 +58,41 @@ int main()
   add3x3(ia, ib);
   assert(equal3x3(ia, a));
 
-  START_TIMER(t);
+  START_TIMER(t1);
   for (i = 0; i < 1000000; ++i)
     DAXPY(9, 1., a, 1, b, 1);
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t1);
-  PRINT_ELAPSED(t);
+  STOP_TIMER(t1);
+  PRINT_ELAPSED(t1);
 
   cpy3x3(b, c);
 
   cpy3x3(ia, a);
   cpy3x3(ib, b);
-  START_TIMER(t);
+  START_TIMER(t2);
   for (i = 0; i < 1000000; ++i)
     add3x3(a, b);
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t2);
-  PRINT_ELAPSED(t);
+  STOP_TIMER(t2);
+  PRINT_ELAPSED(t2);
 
   assert(equal3x3(b, c));
 
 
 #ifdef WITH_TIMERS
-  printf("add3x3/DAXPY:%g\n", t2 / t1);
-  assert(t2 < t1);
+  printf("add3x3/DAXPY:%g\n", ELAPSED(t2) / ELAPSED(t1));
+  assert(ELAPSED(t2) < ELAPSED(t1));
 #endif
 
   /* c += a*b */
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   cpy3x3(ib, c);
-  START_TIMER(t);
+  START_TIMER(t3);
   for (i = 0; i < 1000000; ++i)
   {
     DGEMM(LA_NOTRANS, LA_NOTRANS, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t3);
+  STOP_TIMER(t3);
+  PRINT_ELAPSED(t3);
 
   print3x3(c);
   cpy3x3(c, d);
@@ -104,21 +101,20 @@ int main()
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   cpy3x3(ib, c);
-  START_TIMER(t);
+  START_TIMER(t4);
   for (i = 0; i < 1000000; ++i)
   {
     mmp3x3(a, b, c);
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t4);
+  STOP_TIMER(t4);
 
   assert(equal3x3(c, d));
 
-  PRINT_ELAPSED(t);
+  PRINT_ELAPSED(t4);
 
 #ifdef WITH_TIMERS
-  printf("mmp3x3/DGEMM:%g\n", t4 / t3);
-  assert(t4 < t3);
+  printf("mmp3x3/DGEMM:%g\n", ELAPSED(t4) / ELAPSED(t3));
+  assert(ELAPSED(t4) < ELAPSED(t3));
 #endif
 
   print3x3(c);
@@ -129,12 +125,12 @@ int main()
   cpy3x3(ib, b);
   cpy3x3(ib, c);
 
-  START_TIMER(t);
+  START_TIMER(t5);
   for (i = 0; i < 1000000; ++i)
   {
     r = det3x3(a);
   }
-  STOP_TIMER(t);
+  STOP_TIMER(t5);
 
   printf("r:%g\n", r);
 
@@ -165,16 +161,15 @@ int main()
   int ipiv[3];
   int info;
 
-  START_TIMER(t);
+  START_TIMER(t6);
   for (i = 0; i < 1; ++i)
   {
     cpy3(v, x);
     DGESV(3, 1, a, 3, ipiv, x, 3, info);
     v[0] += 0.0001;
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t5);
-  PRINT_ELAPSED(t);
+  STOP_TIMER(t6);
+  PRINT_ELAPSED(t6);
   printf("sol DGESV:\n");
   print3(x);
   cpy3x3(x, d);
@@ -185,15 +180,14 @@ int main()
   cpy3x3(ia, a);
   cpy3(iv, v);
 
-  START_TIMER(t);
+  START_TIMER(t7);
   for (i = 0; i < 1; ++i)
   {
     cpy3(v, x);
     solv3x3(a, x, v);
     v[0] += 0.0001;
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t6);
+  STOP_TIMER(t7);
 
   printf("v:\n");
   print3(v);
@@ -218,11 +212,9 @@ int main()
   assert(hypot3(c) <= 1e-5);
 
 
-  PRINT_ELAPSED(t);
-
 #ifdef WITH_TIMERS
-  printf("solv3x3/DGESV:%g\n", t6 / t5);
-  assert(t6 < t5);
+  printf("solv3x3/DGESV:%g\n", ELAPSED(t7) / ELAPSED(t6));
+  assert(ELAPSED(t7) < ELAPSED(t6));
 #endif
 
 
@@ -247,7 +239,7 @@ int main()
     }
   }
 
-  START_TIMER(t);
+  START_TIMER(t8);
   k = 0;
 
   for (i = 0; i < 1000; ++i)
@@ -294,12 +286,11 @@ int main()
       assert(hypot3(c) <= 1e-5);
     }
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t7);
+  STOP_TIMER(t8);
   k1 = k;
 
   k = 0;
-  START_TIMER(t);
+  START_TIMER(t9);
   for (i = 0; i < 1000; ++i)
   {
 
@@ -342,15 +333,15 @@ int main()
       assert(hypot3(c) <= 1e-5);
     }
   }
-  STOP_TIMER(t);
-  GET_ELAPSED(t, t8);
+  STOP_TIMER(t9);
+
   k2 = k;
 
 
 #ifdef WITH_TIMERS
-  printf("DGESV/solv3x3 (rand):%g\n", t8 / t7);
+  printf("DGESV/solv3x3 (rand):%g\n", ELAPSED(t9) / ELAPSED(t8));
   printf("Number of pb DGESV and solv3x3 (rand):%d,%d\n", k1, k2);
-  assert(t8 < t7);
+  assert(ELAPSED(t9) < ELAPSED(t8));
 #endif
 
 

@@ -4,14 +4,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "NumericsConfig.h"
+#ifdef WITH_TIMERS
+#define TIMER_FFTW_CYCLE
+#endif
+#include "timers_interf.h"
 #include "op3x3.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_globalAlartCurnier.h"
 
+#define SIZE 1000
+
+#define DO(X)                                               \
+  do {for (unsigned int i=0;i<SIZE;++i) {X;};} while(0)
 
 int main()
 {
+  DECL_TIMER(T0);
+  DECL_TIMER(T1);
+
+
   int info = 0;
   int r = -1;
 
@@ -80,7 +93,21 @@ int main()
     p = A2;
     OP3X3(*p++ = NAN);
 
-    computeAlartCurnierSTD(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F1, A1, B1);
+    START_TIMER(T0);
+    DO(computeAlartCurnierSTDOld(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F1, A1, B1));
+    STOP_TIMER(T0);
+
+    START_TIMER(T1);
+    DO(computeAlartCurnierSTD(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F1, A1, B1));
+    STOP_TIMER(T1);
+
+    PRINT_ELAPSED(T0);
+
+    PRINT_ELAPSED(T1);
+
+#ifdef WITH_TIMERS
+    printf("T1/T0 = %g\n", ELAPSED(T1) / ELAPSED(T0));
+#endif
 
     p = F1;
     OP3(info |= isnan(*p++));
@@ -93,7 +120,6 @@ int main()
     p = B1;
     OP3X3(info |= isnan(*p++));
     assert(!info);
-
 
     frictionContact3D_localAlartCurnierFunctionGenerated(&reactions[k * 3], &velocities[k * 3], mus[k], &rhos[k * 3], F2, A2, B2);
 

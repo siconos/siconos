@@ -77,7 +77,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   free(velocity);
 
   freeFrictionContact_problem(problem);
-
+  fclose(foutput);
 
   return info;
 

@@ -87,6 +87,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
   free(reaction);
   free(velocity);
   free(globalvelocity);
+  fclose(foutput);
 
   freePrimalFrictionContact_problem(problem);
 

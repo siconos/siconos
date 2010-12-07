@@ -20,3 +20,4 @@
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
 #cmakedefine WITH_MUMPS
+#cmakedefine WITH_TIMERS

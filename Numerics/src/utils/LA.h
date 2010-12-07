@@ -156,19 +156,26 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 /* DNRM2 - the euclidean norm of a vector via the function name, so
    that DNRM2 := sqrt( x'*x )
 */
-#define DNRM2(N, X, INCX) \
-  ({ int C_N=N; \
-     int C_INCX = INCX; \
-     BLAS_NAME(dnrm2)(INTEGER(C_N), X, INTEGER(C_INCX)); \
+#define DNRM2(N, X, INCX)                                \
+  ({ int C_N=N;                                          \
+    int C_INCX = INCX;                                   \
+    assert(C_N>0);                                       \
+    assert(C_INCX>0);                                    \
+    assert(X!=NULL);                                     \
+    BLAS_NAME(dnrm2)(INTEGER(C_N), X, INTEGER(C_INCX));  \
   })
 
 /* DCOPY - a vector, x, to a vector, y
 */
-#define DCOPY(N, X, INCX, Y, INCY) \
-  ({ int C_N=N; \
-     int C_INCX=INCX; \
-     int C_INCY=INCY; \
-     BLAS_NAME(dcopy)(INTEGER(C_N), X, INTEGER(C_INCX), Y, INTEGER(C_INCY)); \
+#define DCOPY(N, X, INCX, Y, INCY)                                      \
+  ({ int C_N=N;                                                         \
+    int C_INCX=INCX;                                                    \
+    int C_INCY=INCY;                                                    \
+    assert(X!=NULL);                                                    \
+    assert(Y!=NULL);                                                    \
+    assert(C_INCX>0);                                                   \
+    assert(C_INCY>0);                                                   \
+    BLAS_NAME(dcopy)(INTEGER(C_N), X, INTEGER(C_INCX), Y, INTEGER(C_INCY)); \
   })
 
 /** DGEMV - one of the matrix-vector operations y := alpha*A*x +

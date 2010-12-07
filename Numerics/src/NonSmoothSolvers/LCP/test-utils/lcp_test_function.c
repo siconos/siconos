@@ -313,7 +313,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   free(options);
 
   freeLinearComplementarity_problem(problem);
-
+  fclose(foutput);
 
   return info;
 
