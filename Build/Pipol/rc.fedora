@@ -3,4 +3,4 @@
 
 perl -pi 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-pipol.repo 
 
-yum install -y cmake gcc gcc-gfortran boost-devel atlas atlas-devel gmp gmp-devel libxml2 libxml2-devel cppunit
+yum install -y cmake gcc gcc-gfortran boost-devel atlas atlas-devel gmp gmp-devel libxml2 libxml2-devel cppunit pcre-devel python-matplotlib scipy python-numeric python-devel python-py
