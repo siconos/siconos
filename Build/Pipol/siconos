@@ -2,17 +2,17 @@
 
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core12 01:30
+#PIPOL fedora-core12 02:00
 
-#PIPOL fedora-core13 01:30
+#PIPOL fedora-core13 02:00
 
-#PIPOL kvm-linux 01:30
+#PIPOL kvm-linux 02:00
 
-#PIPOL ubuntu-lucid 01:30
+#PIPOL 2010-linux-ubuntu-lucid 02:00
 
-#PIPOL ubuntu-karmic 01:30
+#PIPOL 2010-linux-ubuntu-karmic 02:00
 
-#PIPOL mac 01:30
+#PIPOL mac 02:00
 
 set -x
 #set -e
@@ -292,16 +292,21 @@ configure_trunk Numerics Release
 nightly_build Numerics Release
 nightly_test Numerics Release
 nightly_submit Numerics Release
-nightly_memcheck Numerics Release
-nightly_submit Numerics Release
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Numerics Release
+        nightly_submit Numerics Release;;
+esac
 install_1 Numerics Release
 
 configure_trunk Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_submit Kernel Release
-nightly_memcheck Kernel Release
-nightly_submit Kernel Release
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Kernel Release
+        nightly_submit Kernel Release;;
+esac
+
 install_1 Kernel Release
 
 # Snapshot packages
@@ -315,18 +320,20 @@ pack_trunk Examples Release
 save_packed_1 Examples Release
 
 # Coverage
-setup_trunk
-configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
-nightly_build Numerics Debug
-nightly_coverage Numerics Debug
-nightly_submit Numerics Debug 
+case $PIPOL_IMAGE in ubuntu-lucid)
+        setup_trunk
+        configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+        nightly_build Numerics Debug
+        nightly_coverage Numerics Debug
+        nightly_submit Numerics Debug
 
-setup_trunk
-configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
-nightly_build Kernel Debug
-nightly_coverage Kernel Debug
-nightly_submit Kernel Debug
-
+        setup_trunk
+        configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+        nightly_build Kernel Debug
+        nightly_coverage Kernel Debug
+        nightly_submit Kernel Debug
+        ;;
+esac
 
 # Examples
 rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
@@ -334,8 +341,12 @@ rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
 configure_trunk Examples Release
 nightly_build Examples Release
 nightly_test Examples Release
-nightly_memcheck Examples Release
-nightly_submit Examples Release
+
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Examples Release
+        nightly_submit Examples Release
+        ;;
+esac
 
 
 # front-end
