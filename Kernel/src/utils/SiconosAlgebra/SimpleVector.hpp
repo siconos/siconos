@@ -196,6 +196,10 @@ public:
    *  \return a double
    */
   double norm2() const ;
+  /** return the sum of all elements of the vector
+   * \return a double
+   */
+  double sum() const;
 
   /** display data on standard output
    */
@@ -386,6 +390,19 @@ public:
   friend void subscal(double, const SiconosVector&, SiconosVector&, const Index&, bool);
 
   friend void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
+
+  friend void abs_wise(const SiconosVector&, SiconosVector&);
+
+  friend void getMax(const SiconosVector&, double &, unsigned int &);
+
+  friend void  getMin(const SiconosVector&, double &, unsigned int &);
+  /*
+  friend SimpleVector abs_wise(const SimpleVector&);
+
+  friend void getMax(const SimpleVector&, double &,unsigned int &);
+
+  friend void  getMin(const SimpleVector&, double &, unsigned int &);
+  */
 
   friend class VectorNum;
 

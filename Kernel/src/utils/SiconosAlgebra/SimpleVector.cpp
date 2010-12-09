@@ -290,6 +290,16 @@ double SimpleVector::norm2() const
   else //if(num==4)
     return ublas::norm_2(*vect.Sparse);
 }
+//======================================
+// get sum of all elements of the vector
+//=====================================
+double SimpleVector::sum() const
+{
+  if (_dense)
+    return ublas::sum(*vect.Dense);
+  else
+    return ublas::sum(*vect.Sparse);
+}
 
 //=====================
 // screen display
@@ -1774,3 +1784,78 @@ void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVect
   VOUT.setValue(2, aux);
 
 }
+
+//
+
+void abs_wise(const SiconosVector& V, SiconosVector& Vabs)
+{
+  for (int it = 0; it < V.size(); ++it)
+  {
+    Vabs.setValue(it, std::abs(V.getValue(it)));
+  };
+}
+
+//
+
+void getMax(const SiconosVector& V, double& maxvalue, unsigned int& idmax)
+{
+  maxvalue = V.getValue(0);
+  idmax = 0;
+  for (unsigned int it = 1; it < V.size(); ++it)
+  {
+    if (V.getValue(it) > maxvalue)
+    {
+      maxvalue = V.getValue(it);
+      idmax = it;
+    };
+  };
+}
+
+//
+
+void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin)
+{
+  minvalue = V.getValue(0);
+  idmin = 0;
+  for (unsigned int it = 1; it < V.size(); ++it)
+  {
+    if (V.getValue(it) < minvalue)
+    {
+      minvalue = V.getValue(it);
+      idmin = it;
+    };
+  };
+}
+
+//
+/*
+SimpleVector abs_wise(const SimpleVector& V){
+  SimpleVector Vabs(V.size());
+  for (int it = 0; it < V.size(); ++it){
+    Vabs.setValue(it,std::abs(V.getValue(it)));
+  };
+  return Vabs;
+}
+//
+void getMax(const SimpleVector& V, double& maxvalue, unsigned int& idmax){
+  maxvalue = V.getValue(0);
+  idmax = 0;
+  for (unsigned int it = 1; it < V.size(); ++it){
+    if (V.getValue(it) > maxvalue){
+    maxvalue = V.getValue(it);
+    idmax = it;
+    };
+  };
+}
+//
+void getMin(const SimpleVector& V, double& minvalue, unsigned int& idmin){
+  minvalue = V.getValue(0);
+  idmin = 0;
+  for (unsigned int it = 1; it < V.size(); ++it){
+    if (V.getValue(it) < minvalue){
+      minvalue = V.getValue(it);
+      idmin = it;
+    };
+  };
+}
+*/

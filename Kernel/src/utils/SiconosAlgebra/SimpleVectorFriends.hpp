@@ -147,5 +147,28 @@ void subscal(double, const SiconosVector&, SiconosVector&, const Index&, bool = 
  */
 void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
+/** get an absolute vector
+ *  \param 1, a SimpleVector (Input).
+ *  \param 2, a SimpleVector (Output).
+ */
+
+void abs_wise(const SiconosVector&, SiconosVector&);
+
+/** get maximal element of a vector
+ *  \param 1, a SimpleVector (Input).
+ *  \param 2, a double variable giving the maximum element (Output).
+ *  \param 3, an unsigned int variable giving the position of the maximum element (Output)
+ */
+
+void getMax(const SiconosVector&, double &, unsigned int &);
+
+/** get minimum element of a vector
+ *  \param 1, a SimpleVector (Input).
+ *  \param 2, a double variable giving the minimum element (Output).
+ *  \param 3, an unsigned int variable giving the position of the minimum element (Output)
+ */
+
+void getMin(const SiconosVector&, double &, unsigned int &);
+
 
 #endif
