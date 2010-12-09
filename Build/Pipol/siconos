@@ -57,7 +57,7 @@ setup_trunk() {
     current_dir=$PWD
     mkdir -p $PIPOL_WDIR/siconos/trunk
     cd $PIPOL_WDIR/siconos/trunk; { 
-        for mod in Numerics Kernel Examples ; do 
+        for mod in Numerics Kernel Examples Front-End; do 
             [ -d $mod ] || svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
             cd $mod; { 
                 svn update -r $local_revision
@@ -341,6 +341,7 @@ rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
 configure_trunk Examples Release
 nightly_build Examples Release
 nightly_test Examples Release
+nightly_submit Examples Release
 
 case $PIPOL_IMAGE in fedora-core13)
         nightly_memcheck Examples Release
