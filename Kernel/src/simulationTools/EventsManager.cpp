@@ -37,6 +37,10 @@ bool EventsManager::createAndInsertEvent(int type, double time)
 EventsManager::EventsManager(): _hasNS(false), _hasCM(false)
 {}
 
+
+unsigned long int EventsManager::GapLimit2Events = GAPLIMIT_DEFAULT;
+
+
 void EventsManager::initialize(SP::Simulation sim)
 {
   // Connection with the simulation
@@ -56,23 +60,43 @@ void EventsManager::initialize(SP::Simulation sim)
 
 void EventsManager::preUpdate()
 {
+  //====================================== added by Son Nguyen ===================================
+  // Detect NonSmoothEvent at the beginning of the simulation
+  SP::UnitaryRelationsGraph indexSet1 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+  assert(indexSet1);
+  if (indexSet1->size() >  0) // There is one non-smooth event to be added
+  {
+    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
+    _ENonSmooth = regEvent.instantiate(simulation()->model()->currentTime(), 2);
+    _allEvents.insert(_ENonSmooth);
+    _hasNS = true;
+  };
+  //===============================================================================================
   pair<EventsContainerIterator, EventsContainerIterator> rangeNew = _allEvents.equal_range(_currentEvent);
   // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
   // may result in invalidation of iterator and hazardous results.
   // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
-
   EventsContainer bckUp(rangeNew.first, rangeNew.second);
-
   _allEvents.erase(_allEvents.lower_bound(_currentEvent), _allEvents.upper_bound(_currentEvent));
-
   for (EventsContainerIterator it = bckUp.begin(); it != bckUp.end() ; ++it)
   {
     (*it)->process(simulation());
     // "synchronise" actuators/sensors events with nextEvent
     if ((*it)->getType() == 3 || (*it)->getType() == 4)
+    {
       (*it)->update();
-
-    _allEvents.insert(*it);
+      _allEvents.insert(*it);
+    }
+    // With non-smooth event
+    if ((*it)->getType() == 2)
+    {
+      _hasNS = false;
+    }
+    //
+    if ((*it) == _currentEvent)
+    {
+      _allEvents.insert(*it);
+    }
   }
   bckUp.clear();
 }
@@ -117,7 +141,6 @@ SP::Event EventsManager::followingEvent(SP::Event inputEvent) const
 SP::Event EventsManager::followingEvent(const mpz_t& inputTime) const
 {
   EventsContainer::iterator next = _allEvents.upper_bound(event(inputTime));
-
   if (next == _allEvents.end())
     return SP::Event(); //RuntimeException::selfThrow("EventsManager followingEvent(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
   else
@@ -187,7 +210,21 @@ void EventsManager::insertEvent(SP::Event newE)
 void EventsManager::update()
 {
   // update nextEvent value (may have change because of an insertion).
-  _nextEvent = followingEvent(_currentEvent);
+  // Check if the _ENonSmooth inserted is in the same range of the _currentEvent
+  if (_hasNS) // if have one non-smooth event
+  {
+    const mpz_t * t1 = _currentEvent->getTimeOfEvent(); // time of the current event
+    const mpz_t * t2 = _ENonSmooth->getTimeOfEvent();   // time of the non-smooth event
+    if (mpz_cmp(*t1, *t2) > 0) // t1 > t2
+    {
+      RuntimeException::selfThrow("EventsManager::update, non-smooth event inserted must equal or greater than the current event!");
+    }
+    _nextEvent = _ENonSmooth; // in this case, the next event must be the non-smooth event in order to process the latter one
+  }
+  else
+  {
+    _nextEvent = followingEvent(_currentEvent);
+  }
 }
 
 // Creates (if required) and update the non smooth event of the set
@@ -205,9 +242,8 @@ void EventsManager::scheduleNonSmoothEvent(double time)
     _ENonSmooth->setTime(time);
   }
   _allEvents.insert(_ENonSmooth);
-
-  update();
   _hasNS = true;
+  update();
 }
 
 
@@ -259,19 +295,36 @@ void EventsManager::GeneralProcessEvents()
   // 1 - Process all events simultaneous to nextEvent.
   //  We get a range of all the Events at time tnext and process them.
   pair<EventsContainerIterator, EventsContainerIterator> rangeNew = _allEvents.equal_range(_nextEvent);
-  for (EventsContainerIterator it = rangeNew.first; it != rangeNew.second ; ++it)
-    (*it)->process(simulation());
-
-  // 2 - Update index sets of the simulation
-  simulation()->updateIndexSets();
-
-  _allEvents.erase(_currentEvent);
-  _currentEvent->setTime(_nextEvent->getDoubleTimeOfEvent());
-
   // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
   // may result in invalidation of iterator and hazardous results.
   // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
   EventsContainer bckUp(rangeNew.first, rangeNew.second);
+  // Ckeck if the _ENonSmooth is in the list of events to be processed
+  EventsContainer::iterator it_nonSmooth = bckUp.find(_ENonSmooth);
+  if (it_nonSmooth == bckUp.end())
+  {
+    RuntimeException::selfThrow("EventsManager::GeneralProcessEvents, _ENonSmooth is not in the list of events to be processed.");
+  }
+  // Check if the current event is in the list of events to be processed
+  EventsContainer::iterator it_current = bckUp.find(_currentEvent);
+
+  if (it_current != bckUp.end()) // the _currentEvent is in the list (_currentEvent is in the same range of the _ENonSmooth)
+  {
+    // In this case, we suppose that all the events other than _ENonSmooth have been processed before. We need process only the _ENonSmooth
+    _ENonSmooth->process(simulation());
+  }
+  else  // _currentEvent is not in the list
+  {
+    // In this case, we process all the events in the list
+    for (EventsContainerIterator it = rangeNew.first; it != rangeNew.second ; ++it)
+    {
+      (*it)->process(simulation());
+    }
+  }
+  // 2 - Update index sets of the simulation
+  simulation()->updateIndexSets();
+  _allEvents.erase(_currentEvent);
+  _currentEvent->setTime(_nextEvent->getDoubleTimeOfEvent());
   _allEvents.erase(_allEvents.lower_bound(_nextEvent), _allEvents.upper_bound(_nextEvent));
 
   // 3 - update events at time tnext.
@@ -283,7 +336,6 @@ void EventsManager::GeneralProcessEvents()
       simulation()->timeDiscretisation()->increment();
       _ETD->setTime(simulation()->getTkp1());
       _allEvents.insert(*it);
-
     }
     // Non Smooth Event
     else if ((*it) == _ENonSmooth)
@@ -291,16 +343,31 @@ void EventsManager::GeneralProcessEvents()
       _hasNS = false; // false until next insertion
     }
     // Actuator or or Sensor event
-    else
+    else if (((*it)->getType() == 3) || ((*it)->getType() == 4))
     {
       (*it)->update();
       _allEvents.insert(*it);
     }
   }
   bckUp.clear();
+  //4. Check if the _currentEvent is so close to the event _ETD. If it is the case, we have to move _ETD to the end of the next time step
+  const mpz_t *t1 = _currentEvent->getTimeOfEvent(); // Time of the current event
+  const mpz_t *t2 = _ETD->getTimeOfEvent();          // Time of the _ETD event
+  mpz_t delta_time;
+  mpz_init(delta_time); // initialize delta_time
+  mpz_sub(delta_time, *t2, *t1); // gap between the _currentEvent and _ETD event
+  if (mpz_cmp_ui(delta_time, 0) < 0)
+    RuntimeException::selfThrow("EventsManager::GeneralProcessEvents, the time of current event must be smaller than the time of ETD event.");
+
+  if (mpz_cmp_ui(delta_time, GapLimit2Events) <= 0) // _currentEvent is so close to _ETD
+  {
+    simulation()->timeDiscretisation()->increment();
+    _ETD->setTime(simulation()->getTkp1());
+    _allEvents.insert(_ETD);
+  }
+  //
   _allEvents.insert(_currentEvent);
   update();
-
   // Set Model current time
   if (_nextEvent)
     simulation()->model()->setCurrentTime(getTimeOfEvent(_nextEvent));
