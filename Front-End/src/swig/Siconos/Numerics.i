@@ -818,7 +818,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   ~LinearComplementarityProblem()
   {
-    freeLinearComplementarity_problem(self);
+//    freeLinearComplementarity_problem(self);
   }
 
 };
@@ -900,7 +900,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   ~FrictionContactProblem()
   {
-    freeFrictionContact_problem(self);
+//    freeFrictionContact_problem(self);
   }
 
 };
