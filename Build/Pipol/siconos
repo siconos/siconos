@@ -245,8 +245,22 @@ swig_setup() {
     }
 }
 
+cmake_setup() {
+    case `cmake --version` in 
+        *2.8*);;
+        *) 
+            rm -rf `which make`
+            tar zcvf $PIPOL_HOMEDIR/src/cmake-2.8.0.tar.gz
+            cd cmake-2.8.0; { 
+                ./bootstrap -j2
+                make -j2
+                sudo make install
+            };;
+    esac
+}
+        
 
-
+cmake_setup
 
 #sudo rm -f /usr/local/bin/ctest
 
