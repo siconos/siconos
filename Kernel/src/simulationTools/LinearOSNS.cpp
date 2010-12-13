@@ -860,12 +860,18 @@ void LinearOSNS::computeq(double time)
     computeqBlock(ur, pos); // free output is saved in y
   }
   //
-  cout << "q_osns of LCP: " << endl;
-  _q->display();
 }
 
 
-
+void LinearOSNS::updateOSNSMatrix()
+{
+  SP::Topology topology = simulation()->model()
+                          ->nonSmoothDynamicalSystem()->topology();
+  bool b = topology->isTimeInvariant();
+  // Updates matrix M
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  _M->fill(indexSet, !b);
+}
 
 void LinearOSNS::preCompute(double time)
 {
@@ -893,7 +899,8 @@ void LinearOSNS::preCompute(double time)
 
     // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-    _M->fill(indexSet);
+    //    _M->fill(indexSet);
+    updateOSNSMatrix();
     _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary

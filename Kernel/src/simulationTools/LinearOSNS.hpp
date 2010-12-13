@@ -91,7 +91,7 @@ protected:
   /** default constructor (private)
    */
   LinearOSNS() ;
-  //  virtual void updateOSNSMatrix();
+  virtual void updateOSNSMatrix();
 public:
 
   /** xml constructor
