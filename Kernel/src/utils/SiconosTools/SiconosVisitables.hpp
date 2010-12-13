@@ -19,12 +19,14 @@
   REGISTER(ComplementarityConditionNSL)                      \
   REGISTER(RelayNSL)                                         \
   REGISTER(NewtonImpactNSL)                                  \
+  REGISTER(MultipleImpactNSL)                                \
   REGISTER(NewtonImpactFrictionNSL)                          \
   REGISTER(Simulation)                                       \
   REGISTER(TimeStepping)                                     \
   REGISTER(EventDriven)                                      \
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LCP)                                              \
+  REGISTER(OSNSMultipleImpact)                               \
   REGISTER(FrictionContact)                                  \
   REGISTER(SimpleVector)                                     \
   REGISTER(BlockVector)                                      \

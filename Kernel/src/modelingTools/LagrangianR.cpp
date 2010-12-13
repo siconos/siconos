@@ -43,8 +43,19 @@ void LagrangianR::initComponents()
       assert((_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) &&
              "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
-
+  // Added by Son Nguyen (8/12/2010)
+  if (! _jachqDot)
+    _jachqDot.reset(new SimpleMatrix(sizeY, sizeDS));
+  else
+  {
+    if (_jachqDot->size(0) == 0) // if the matrix dimension are null
+      _jachqDot->resize(sizeY, sizeDS);
+    else
+      assert((_jachqDot->size(1) == sizeDS && _jachqDot->size(0) == sizeY) &&
+             "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
+  }
   _workX.reset(new SimpleVector(sizeDS));
+  _workXdot.reset(new SimpleVector(sizeDS));
   _workZ.reset(new SimpleVector(interaction()->getSizez()));
   _workY.reset(new SimpleVector(sizeY));
 }

@@ -73,8 +73,6 @@ int LCP::compute(double time)
 
 
     }
-
-    // Call LCP Driver
     info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
                                         &*_numerics_solver_options, &*_numerics_options);
 
@@ -109,8 +107,6 @@ void LCP::initialize(SP::Simulation sim)
 {
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
-
-
 }
 
 LCP::~LCP()

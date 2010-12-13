@@ -53,10 +53,10 @@ const double DEFAULT_TICK = 1e-16;
  * Existing types of events:
  *  0 -> undef
  *  1 -> TimeDiscretisation
- *  2 -> NonSmooth
- *  3 -> Actuator
- *  4 -> Sensor
- */
+*  2 -> NonSmooth
+*  3 -> Actuator
+*  4 -> Sensor
+*/
 
 class Event
 {

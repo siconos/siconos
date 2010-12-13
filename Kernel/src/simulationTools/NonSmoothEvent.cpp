@@ -20,6 +20,7 @@
 #include "EventFactory.hpp"
 #include "EventDriven.hpp"
 #include "OneStepIntegrator.hpp"
+#include "LagrangianDS.hpp"
 
 using namespace std;
 using namespace EventFactory;
@@ -51,6 +52,11 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
+    SP::UnitaryRelationsGraph indexSet0 = simulation->indexSet(0);
+    SP::DynamicalSystemsGraph dsG = simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    DynamicalSystemsGraph::VIterator vi, viend;
+
+    //
     SP::UnitaryRelationsGraph indexSet1 = simulation->indexSet(1);
     SP::UnitaryRelationsGraph indexSet2 = simulation->indexSet(2);
     bool found = true;
@@ -60,10 +66,25 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
       if (!found) break;
     }
+    /*
+    // Display the variable before processing NSEvent
+    cout<< "-------Before processing NS events---------" << endl;
+    for (boost::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
+      {
+        SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+        cout << "Velocity at this UR: " << (*ur->y(1))(0) << endl;
+      }
+
+    for (boost::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
+      {
+        SP::DynamicalSystem ds = dsG->bundle(*vi);
+        SP::LagrangianDS  Lag_ds = boost::static_pointer_cast<LagrangianDS>(ds);
+        cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
+      }
+    */
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!found)
     {
-
       // For Event-Driven algo., memories vectors are of size 2
       // (ie 2 unitaryBlocks).  First unitaryBlock (pos 0, last
       // in) for post-event values and last unitaryBlock (pos 1,
@@ -75,12 +96,27 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_IMPACT); // solveLCPImpact();
     }
 
-
     // compute p[1], post-impact velocity, y[1] and indexSet[2]
     simulation->update();
     // Update the corresponding index set ...
     eventDriven->updateIndexSets();
+    /*
+    // Display the variable after processing NSEvent
+    cout<< "-------After processing NS events---------" << endl;
+    for (boost::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
+      {
+        SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+        cout << "Velocity at this UR: " << (*ur->y(1))(0) << endl;
+      }
 
+    for (boost::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
+      {
+        SP::DynamicalSystem ds = dsG->bundle(*vi);
+        SP::LagrangianDS Lag_ds = boost::static_pointer_cast<LagrangianDS>(ds);
+        cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
+      }
+    //
+    */
     // check that IndexSet[1]-IndexSet[2] is now empty if(
     //    !((*indexSet1-*indexSet2).isEmpty()))
     //    RuntimeException::selfThrow("NonSmoothEvent::process,
@@ -96,7 +132,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
         (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
-      eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_ACCELERATION); //solveLCPAcceleration();
+      eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_ACCELERATION); // solveLCPAcceleration();
 
       // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
       eventDriven->updateIndexSetsWithDoubleCondition();

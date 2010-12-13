@@ -127,12 +127,14 @@ protected:
   /** the object linked this Relation to read XML data */
   SP::RelationXML relationxml;
 
-  /** work vector for x */
+  /** work vector for R */
   SP::SimpleVector _workR;
 
   /** work vector for x */
   SP::SimpleVector _workX;
 
+  /** work vector for x dot */
+  SP::SimpleVector _workXdot;
   /** work vector for z */
   SP::SimpleVector _workZ;
 

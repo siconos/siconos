@@ -31,6 +31,7 @@
 
 class Simulation;
 class TimeDiscretisation;
+const unsigned long int GAPLIMIT_DEFAULT = 100;
 
 /** Structure used for Events sorting. The time of occurence (in mpz_t format!!!)  is used to compare two Events. */
 struct compareEvent
@@ -39,7 +40,6 @@ struct compareEvent
   {
     const mpz_t *t1 = e1->getTimeOfEvent();
     const mpz_t *t2 = e2->getTimeOfEvent();
-
     int res = mpz_cmp(*t1, *t2); // res>0 if t1>t2, 0 if t1=t2 else res<0.
     return (res < 0);
   }
@@ -125,6 +125,9 @@ protected:
   /** bool to check if a ControlManager is associated to the simulation */
   bool _hasCM;
 
+  /** unsigned long int variable to check if two events are so close or not */
+  static unsigned long int GapLimit2Events;
+
   /** Creates and adds a new Event in the allEvents list
    *  \return false if Event already exists
    */
@@ -145,6 +148,17 @@ public:
   /** destructor
    */
   ~EventsManager() {};
+
+  /** set the gap limit between two events */
+  inline void setGapLimitEvents(unsigned long int var)
+  {
+    GapLimit2Events = var;
+  };
+  /**Set the gap limit between two events  */
+  inline unsigned long int getGapLimitEvents()
+  {
+    return GapLimit2Events;
+  };
 
   /** initialize current, next events and the events stack.
       \param simulation, owner of the present eventsManager.

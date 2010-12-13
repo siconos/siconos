@@ -33,6 +33,7 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeSteppingProjectOnConstraints.hpp"
 #include "Equality.hpp"
 #include "LCP.hpp"
+#include "OSNSMultipleImpact.hpp"
 #include "MLCP.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "MLCP2.hpp"

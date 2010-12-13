@@ -26,6 +26,7 @@ Note that not all files from the current location are listed below, since some o
 #include "MixedComplementarityConditionNSL.hpp"
 #include "RelayNSL.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
 #include "Interaction.hpp"

@@ -186,6 +186,7 @@ void Simulation::updateIndexSets()
       updateIndexSet(i);
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_vertices_indices();
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
+
     }
   }
 }
@@ -225,7 +226,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // === Events manager initialization ===
   _eventsManager->initialize(shared_from_this());
   _tinit = _eventsManager->startingTime();
-
+  //===
   if (withOSI)
   {
     // === OneStepIntegrators initialization ===
@@ -267,9 +268,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
       topo->resetIndexSetPtr(i);
-
-    // Initialize OneStepNSProblem: in derived classes specific
-    // functions.
+    // Initialize OneStepNSProblem: in derived classes specific functions.
     initOSNS();
   }
 

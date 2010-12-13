@@ -92,10 +92,16 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z: pointer to z vector(s) from DS.
    */
+  /** Plugin object for Jacobian of h */
   SP::PluggedObject pluginjqh;
+  /** Plugin object for the non linear part of the relative acceleration (derivative of Jacobian of H with
+   *respect to the time multiplied by the relative velocity */
+  SP::PluggedObject pluginjqhdot;
   /** basic constructor
       \param the sub-type of the relation
   */
+  /** Non-linear part of the relative acceleration */
+  SP::SiconosVector _NLh2dot;
   LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
     ;
@@ -119,9 +125,28 @@ public:
    */
   LagrangianScleronomousR(const std::string&, const std::string&);
 
+  /** constructor from a set of data used for EventDriven Scheme
+   *  \param string : the name of the plugin to compute h(q,z).\n
+   * The signature  of the plugged function must be:
+   *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+   *  \param string : the name of the plugin to compute jacobian h according to q.\n
+   * The signature  of the plugged function must be:
+   *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+   * \param string: the name of the plugin to compute the derivative of H Jacobian with respect to time
+   * The signature of the plugged function must be:
+   * "void pluginS0(unsigned int, const double*,unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+   *\exception RuntimeException
+   */
+  LagrangianScleronomousR(const std::string&, const std::string&, const std::string&);
+
   /** destructor
    */
   virtual ~LagrangianScleronomousR() {};
+  /** to get the non-linear part of the relative acceleration */
+  inline SP::SiconosVector Nonlinearh2dot()
+  {
+    return _NLh2dot;
+  };
 
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
@@ -132,6 +157,17 @@ public:
    * \param: double, current time
    */
   virtual void computeJachq(double);
+
+  /** to compute the non-linear part of relative accelation using plug-in mechanism
+   *\param: double, current time
+   * \return: SiconosVector, non linear part
+  */
+  void computeNonLinearH2dot(double);
+
+  /** to compute the derivative of H Jacobian with respect to time using plug-in mechanism
+  /*param: double, current time
+  */
+  virtual void computeJachqDot(double);
 
   /** to compute output
    *  \param double : current time

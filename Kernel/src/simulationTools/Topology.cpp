@@ -306,6 +306,7 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 class ComplementarityConditionNSL;
 class MixedComplementarityConditionNSL;
 class NewtonImpactNSL;
+class MultipleImpactNSL; // added by Son in 9/11/2010
 class NewtonImpactFrictionNSL;
 class RelayNSL;
 
@@ -344,6 +345,14 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   };
 
   void visit(const NewtonImpactNSL&)
+  {
+    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
+    parent->_isTopologyTimeInvariant = false;
+    interaction->setRelativeDegree(2);
+  };
+  //visit function added by Son in 9/11/2010
+  void visit(const MultipleImpactNSL &)
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);

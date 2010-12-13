@@ -24,6 +24,7 @@
 
 #include "Simulation.hpp"
 #include "SiconosNumerics.h"
+const double DEFAULT_TOL_ED  = 1000 * DEFAULT_TOLERANCE;
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *
@@ -44,6 +45,10 @@ private:
    */
   int istate;
 
+  /** an epsilon to define the contraint g for Urs in IndexSet[1]
+   */
+  static double TOL_ED;
+
   /** initialisation specific to EventDriven for OneStepNSProblem.
    */
   void initOSNS();
@@ -51,8 +56,8 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
-public:
 
+public:
 
 
 
@@ -85,7 +90,16 @@ public:
   };
 
   /* Getters and setters */
-
+  /** Set value to _epsilon */
+  inline void SetToleranceED(double var)
+  {
+    TOL_ED = var;
+  }
+  /** Get value of _epsilon */
+  inline double ToleranceED()
+  {
+    return TOL_ED;
+  }
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *  \param unsigned int: the number of the set to be updated
    */
@@ -131,6 +145,7 @@ public:
    *  \param lambda order used to compute input
    */
   void update(unsigned int);
+  /** Initialize EventDriven
 
   /** run simulation from one Event to the next, according to events manager settings.
    */

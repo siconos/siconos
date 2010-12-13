@@ -216,8 +216,6 @@ public:
   /** print the data to the screen
    */
   void display();
-
-
 };
 
 #endif // Lsodar_H

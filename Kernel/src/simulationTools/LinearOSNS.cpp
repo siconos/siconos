@@ -28,9 +28,11 @@
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianScleronomousR.hpp"
 #include "LagrangianLinearTIDS.hpp"
 
 using namespace std;
@@ -577,6 +579,11 @@ struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
     subCoord[3] = subCoord[1];
     subscal(e, *(parent->_q), *(parent->_q), subCoord, false); // q = q + e * q
   }
+  // visit function added by Son (9/11/2010)
+  void visit(const MultipleImpactNSL& nslaw)
+  {
+    ;
+  }
 
   // note : no NewtonImpactFrictionNSL
 };
@@ -644,6 +651,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   lambda = UR->interaction()->lambda(0);
   H_alpha = UR->interaction()->relation()->Halpha();
 
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
 
   // ??? cf svn r 1456 Xfree = UR->workx()
   // ==> Event driven does not work without this
@@ -660,7 +668,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
      * it is in accelaration of not
      */
 
-    SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
+    //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
     if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
     {
       Xfree  = UR->workFree();
@@ -739,7 +747,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         subprod(*C, *Xfree, *_q, coord, true);
       }
 
-      if (relationType == Lagrangian && (relationSubType == RheonomousR))
+      if (relationType == Lagrangian)
       {
         SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
         ID->eye();
@@ -753,16 +761,33 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         xcoord[5] = sizeY;
         xcoord[6] = pos;
         xcoord[7] = pos + sizeY;
+        // For the relation of type LagrangianRheonomousR
+        if (relationSubType == RheonomousR)
+        {
+          if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
+          {
+            RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for LCP at acceleration with LagrangianRheonomousR");
+          }
+          else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == this)
+          {
+            boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
+            subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *_q, xcoord, false); // y += hDot
+          }
+          else
+            RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for SICONOS_OSNSP ");
 
-        boost::static_pointer_cast<LagrangianRheonomousR>
-        (UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-        subprod(*ID,
-                *(boost::static_pointer_cast<LagrangianRheonomousR>
-                  (UR->interaction()->relation())->hDot()),
-                *_q,
-                xcoord,
-                false); // y += hDot
+        }
+        // For the relation of type LagrangianScleronomousR
+        if (relationSubType == ScleronomousR)
+        {
+          if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
+          {
+            boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+            subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *_q, xcoord, false); // y += NonLinearPart
+          }
+        }
       }
+
       if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
       {
         // In the first order linear case it may be required to add e + FZ to q.
@@ -800,15 +825,15 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   else
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
 
-  // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+  // Add "non-smooth law effect" on q only for the case LCP at velocity level and with the NewtonImpactNSL
+  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
   {
-    SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, UR, pos));
-    simulation()->accept(*nslEffectOnSim);
+    if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+    {
+      SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, UR, pos));
+      simulation()->accept(*nslEffectOnSim);
+    }
   }
-
-
-
 }
 
 void LinearOSNS::computeq(double time)
@@ -834,18 +859,13 @@ void LinearOSNS::computeq(double time)
     pos = _M->getPositionOfUnitaryBlock(ur);
     computeqBlock(ur, pos); // free output is saved in y
   }
+  //
+  cout << "q_osns of LCP: " << endl;
+  _q->display();
 }
 
 
-void LinearOSNS::updateOSNSMatrix()
-{
-  SP::Topology topology = simulation()->model()
-                          ->nonSmoothDynamicalSystem()->topology();
-  bool b = topology->isTimeInvariant();
-  // Updates matrix M
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  _M->fill(indexSet, !b);
-}
+
 
 void LinearOSNS::preCompute(double time)
 {
@@ -870,8 +890,10 @@ void LinearOSNS::preCompute(double time)
   {
     // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();
+
+    // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-    updateOSNSMatrix();
+    _M->fill(indexSet);
     _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary
@@ -911,7 +933,6 @@ void LinearOSNS::preCompute(double time)
 
   // Computes q of LinearOSNS
   computeq(time);
-
 }
 
 void LinearOSNS::postCompute()

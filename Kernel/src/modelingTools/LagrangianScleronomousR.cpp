@@ -66,6 +66,18 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
+// constructor from a data used for EventDriven scheme
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq, const std::string& computeJachqdot):
+  LagrangianR(ScleronomousR)
+{
+  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+
+  pluginjqh.reset(new PluggedObject());
+  pluginjqh->setComputeFunction(strcomputeJachq);
+
+  pluginjqhdot.reset(new PluggedObject());
+  pluginjqhdot->setComputeFunction(computeJachqdot);
+}
 
 void LagrangianScleronomousR::computeh(double)
 {
@@ -116,6 +128,43 @@ void LagrangianScleronomousR::computeJachq(double)
   }
   //  else nothing!
 }
+
+void LagrangianScleronomousR::computeJachqDot(double time)
+{
+  if (pluginjqhdot->fPtr)
+  {
+    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    *_workX = *data[q0];
+    *_workXdot = *data[q1];
+    *_workZ = *data[z];
+
+    unsigned int sizeS = _jachqDot->size(0);
+    unsigned int sizeQ = _workX->size();
+    unsigned int sizeQdot = _workXdot->size();
+    unsigned int sizeZ = _workZ->size();
+
+    ((FPtr5bis)(pluginjqhdot->fPtr))(sizeQ, &(*_workX)(0), sizeQdot, &(*_workXdot)(0) , sizeS, &(*_jachqDot)(0, 0), sizeZ, &(*_workZ)(0));
+
+    // Copy data that might have been changed in the plug-in call.
+    *data[z] = *_workZ;
+  }
+  //
+  cout << "Dot of H Jacobian: ";
+  _jachqDot->display();
+}
+
+void  LagrangianScleronomousR::computeNonLinearH2dot(double time)
+{
+  // Compute the H Jacobian dot
+  LagrangianScleronomousR::computeJachqDot(time);
+  //
+  SP::SimpleVector _NLh2dot(new SimpleVector(_jachqDot->size(0)));
+  (*_NLh2dot) = prod(*_jachqDot, *_workXdot);
+  //
+  cout << "Non-linear part of the relative acceleration: ";
+  _NLh2dot->display();
+}
+
 
 void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)
 {
