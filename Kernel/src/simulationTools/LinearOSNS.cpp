@@ -764,11 +764,11 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         // For the relation of type LagrangianRheonomousR
         if (relationSubType == RheonomousR)
         {
-          if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
+          if (osiType == OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
           {
             RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for LCP at acceleration with LagrangianRheonomousR");
           }
-          else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == this)
+          else if (osiType != OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == this)
           {
             boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
             subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *_q, xcoord, false); // y += hDot
@@ -780,7 +780,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         // For the relation of type LagrangianScleronomousR
         if (relationSubType == ScleronomousR)
         {
-          if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
+          if (osiType == OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
           {
             boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
             subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *_q, xcoord, false); // y += NonLinearPart
@@ -826,7 +826,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q only for the case LCP at velocity level and with the NewtonImpactNSL
-  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
+  if (osiType != OSI::LSODAR || ((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this) // added by Son Nguyen
   {
     if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
     {
