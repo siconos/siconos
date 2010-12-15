@@ -31,7 +31,7 @@ using namespace RELATION;
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml):
-  BVP(false), nsdsxml(newNsdsxml)
+  BVP(false), nsdsxml(newNsdsxml), mIsLinear(false)
 {
   assert(nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
 
@@ -92,7 +92,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
     SP::Interaction newInteraction,
     const bool& isBVP):
-  BVP(isBVP)
+  BVP(isBVP), mIsLinear(false)
 {
   // === Checks that sets are not empty ===
   if (!newDS)
@@ -119,7 +119,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS,
     InteractionsSet& listOfInteractions,
     const bool& isBVP):
-  BVP(isBVP)
+  BVP(isBVP), mIsLinear(false)
 {
 
   //   if( listOfInteractions.isEmpty())
@@ -153,7 +153,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
-  BVP(isBVP)
+  BVP(isBVP), mIsLinear(false)
 {
 
   // === "copy" listOfDS/listOfInteractions in allDSLocal/allInteractions ===
