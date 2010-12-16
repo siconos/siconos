@@ -78,7 +78,6 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, co
   pluginjqhdot.reset(new PluggedObject());
   pluginjqhdot->setComputeFunction(computeJachqdot);
 }
-
 void LagrangianScleronomousR::computeh(double)
 {
   // arg= time. Unused in this function but required for interface.
@@ -148,23 +147,15 @@ void LagrangianScleronomousR::computeJachqDot(double time)
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
-  //
-  cout << "Dot of H Jacobian: ";
-  _jachqDot->display();
 }
-
 void  LagrangianScleronomousR::computeNonLinearH2dot(double time)
 {
   // Compute the H Jacobian dot
   LagrangianScleronomousR::computeJachqDot(time);
   //
-  SP::SimpleVector _NLh2dot(new SimpleVector(_jachqDot->size(0)));
+  _NLh2dot.reset(new SimpleVector(_jachqDot->size(0)));
   (*_NLh2dot) = prod(*_jachqDot, *_workXdot);
-  //
-  cout << "Non-linear part of the relative acceleration: ";
-  _NLh2dot->display();
 }
-
 
 void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)
 {

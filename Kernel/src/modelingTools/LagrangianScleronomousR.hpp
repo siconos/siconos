@@ -97,11 +97,11 @@ protected:
   /** Plugin object for the non linear part of the relative acceleration (derivative of Jacobian of H with
    *respect to the time multiplied by the relative velocity */
   SP::PluggedObject pluginjqhdot;
+  /** Non-linear part of the relative acceleration */
+  SP::SiconosVector _NLh2dot;
   /** basic constructor
       \param the sub-type of the relation
   */
-  /** Non-linear part of the relative acceleration */
-  SP::SiconosVector _NLh2dot;
   LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
     ;

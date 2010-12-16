@@ -117,6 +117,7 @@ void LagrangianLinearTIDS::initRhs(double time)
   _workMatrix.resize(sizeWorkMat);
   // Copy of Mass into _workMatrix for LU-factorization.
   _workMatrix[invMass].reset(new SimpleMatrix(*_mass));
+
   // compute x[1] (and thus _fExt if required)
   computeRhs(time);
   _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
@@ -179,7 +180,7 @@ void LagrangianLinearTIDS::initialize(const string& simulationType,
   initMemory(sizeOfMemory);
 
   // rhs and its jacobian
-  // initRhs(time);
+  //initRhs(time);
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
@@ -225,18 +226,15 @@ void LagrangianLinearTIDS::display() const
 void LagrangianLinearTIDS::computeRhs(double time, bool)
 {
   // second argument is useless but present because of top-class function overloading.
-
   *_q[2] = *_p[2]; // Warning: p update is done in Interactions/Relations
   //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
   //   std::cout << " p[2] " << std::endl ;
   //  _p[2]->display();
-
   if (_fExt)
   {
     computeFExt(time);
     *_q[2] += *_fExt; // This supposes that _fExt is up to date!!
   }
-
   if (_K)
     *_q[2] -= prod(*_K, *_q[0]);
 
@@ -245,7 +243,6 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
 
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
-
   _workFree->zero();
   if (_fExt)
   {

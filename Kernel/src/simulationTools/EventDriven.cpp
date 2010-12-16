@@ -208,11 +208,12 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     SP::UnitaryRelation ur = indexSet2->bundle(*ui);
     double gamma = ur->getYRef(2);
     double F     = ur->getLambdaRef(2);
-
-    if (gamma > 0 && fabs(F) < TOL_ED)
+    if (fabs(F) < TOL_ED)
       indexSet2->remove_vertex(ur);
-    // else if (fabs(gamma) <TOL_ED && fabs(F) <TOL_ED) // undetermined case
-    //  RuntimeException::selfThrow ("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
+    else if ((gamma < -TOL_ED) || (F < -TOL_ED))
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for UR of indexSet[2] must be higher or equal to zero.");
+    else if (((fabs(gamma) > TOL_ED) && (fabs(F) > TOL_ED)))
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
   }
 }
 
@@ -299,7 +300,7 @@ void EventDriven::initLevelMax()
 
 void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-  //  std::cout << "EventDriven::computef -------------------------> start" <<std::endl;
+  //std::cout << "EventDriven::computef -------------------------> start" <<std::endl;
 
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
@@ -314,7 +315,6 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
 
   double t = *time;
   model()->setCurrentTime(t);
-  // cout << "time: " << t << endl;
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty())
   {
@@ -327,19 +327,6 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     // Compute the right-hand side ( xdot = f + r in DS) for all the
     //ds, with the new value of input.  lsodar->computeRhs(t);
   }
-  // Display
-  /*
-  UnitaryRelationsGraph::VIterator ui, uiend;
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  cout << "After solve LCP at acceleration" << endl;
-    for (boost::tie(ui,uiend)=indexSet0->vertices(); ui!=uiend; ++ui)
-    {
-      SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-      cout << "Force at UR: " << endl;
-      (ur->lambda(2))->display();
-    }
-  */
   // update the DS of the OSI.
   lsodar->computeRhs(t);
   //  lsodar->updateState(2); // update based on the last saved values
@@ -355,20 +342,9 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     xtmp2 = (*it)->rhs(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
-
-    // Display
-    /*
-    SP::LagrangianDS lag_ds = boost::dynamic_pointer_cast<LagrangianDS>(*it);
-    cout << "In EventDriven::computef" << endl;
-    cout << "q of DS:" << endl;
-    (lag_ds->q())->display();
-    cout << "velocity of DS:" << endl;
-    (lag_ds->velocity())->display();
-    cout << "In EventDriven::computef, right hand side f is:" << endl;
-    xtmp2->display();
-    */
   }
-  //  std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
+
+  //std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
 
 }
 
@@ -411,9 +387,6 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
         jacob[i++] = (*jacotmp)(k, j);
     }
-    //
-    // cout << "Jacobian right hand side: " << endl;
-    //jacotmp->display();
   }
 }
 
@@ -422,58 +395,55 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
                            doublereal* x, integer * ng,
                            doublereal * gOut)
 {
-  //   std::cout << "EventDriven::computeg start" <<std::endl;
+  //std::cout << "EventDriven::computeg start" <<std::endl;
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
   UnitaryRelationsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
   SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
-
-  SP::SiconosVector y, ydot, ydotdot, lambda;
-
+  SP::SiconosVector y, ydot, lambda;
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
-  // fill in xWork vector (ie all the x of the ds of this osi) with x
-  lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if
-  // computeF is called for each
-  // computeg.
-
+  // Solve LCP at acceleration level to calculate the lambda[2] at UR of indexSet[2]
+  lsodar->fillXWork(sizeOfX, x);
+  //
   double t = *time;
   model()->setCurrentTime(t);
-
   if (!_allNSProblems->empty())
   {
-    updateOutput(0, 2); // update output from level 0 to level 2
-    updateInput(2); // update input
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->interactions())->isEmpty())
+    {
+      (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(t);
+    }
   };
-  // Make sure that lambda[2] is uptodate
-
-  double * xdottmp = (double *)malloc(*sizeOfX * sizeof(double));
-
-  computef(osi, sizeOfX, time, x, xdottmp);
-
+  /*
+  double * xdottmp = (double *)malloc(*sizeOfX*sizeof(double));
+  computef(osi, sizeOfX,time,x,xdottmp);
   free(xdottmp);
-  // Compute the function g for each UR
-  // if lambda[2]  = 0, if y[0] != 0 => g = y[0]
-  // if lambda[2]  = 0, if y[0] = 0, if y[1] > 0 or y[2] >= 0 => g = _epsilon temporarily
-  // if lambda[2]  != 0 => g = lambda[2]
+  */
+
+  // Update the output from level 0 to level 1
+  updateOutput(0, 1);
+  //
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui);
     nsLawSize = ur->getNonSmoothLawSize();
     y = ur->y(0);   // output y at this UR
     ydot = ur->y(1); // output of level 1 at this UR
-    ydotdot = ur->y(2); // output of level 2 at this UR
     lambda = ur->lambda(2); // input of level 2 at this UR
-    for (unsigned int i = 0; i < nsLawSize; ++i)
+    if (!(indexSet2->is_vertex(ur))) // if UR is not in the indexSet[2]
     {
-      if ((*lambda)(i) <= TOL_ED)  // if lambda = 0;
+      for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        if (((*y)(i) >= 0.0) && ((*y)(i) <= TOL_ED)) // if y[0] = 0
+        if ((*y)(i) >= TOL_ED) // y[0] > 0
+        {
+          gOut[k] = (*y)(i);
+        }
+        else // y[0] = 0
         {
           if ((*ydot)(i) >= 0) // if y[1] >= 0;
           {
@@ -481,79 +451,23 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
           }
           else  // if y[1] < 0
           {
-            gOut[k] = (*y)(i); // g = y
+            gOut[k] = (*y)(i); // g = y[0]
           }
         }
-        else
-        {
-          gOut[k] = (*y)(i); // g = y
-        };
-
+        k++;
       }
-      else  // if lambda different from zero
+    }
+    else // If UR is in the indexSet[2]
+    {
+      for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        gOut[k] = (*lambda)(i);
-      };
-      //
-      /*
-      cout << "Id of the UR" << ur->interaction()->number() << endl;
-      cout << "Position of the UR : " << k << endl;
-      cout << "Output[0] of the UR: " << (*y)(i) << endl;
-      cout << "Output[1] of the UR: " << (*ydot)(i) << endl;
-      cout << "Input[2] of the UR: " << (*lambda)(i) << endl;
-      cout << "Constraint g of the UR: " << gOut[k] << endl;
-      */
-      //
-      k++;
+        gOut[k] = (*lambda)(i); // g = lambda[2]
+        k++;
+      }
     }
   }
+  //std::cout << "EventDriven::computeg stop" <<std::endl;
 }
-/*
-// If UR is in IndexSet2, g = lambda[2], else g = y[0]
-for (boost::tie(ui,uiend)=indexSet0->vertices(); ui!=uiend; ++ui)
-{
-  SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-  nsLawSize = ur->getNonSmoothLawSize();
-//     std::cout << "ur->lambda(2)->display()" <<std::endl;
-//     ur->lambda(2)->display();
-
-  if (indexSet2->is_vertex(ur)) // ie if the current Unitary
-    // Relation is in indexSets[2]
-  {
-    // Get lambda at acc. level, solution of LCP acc, called
-    // during computef().
-
-
-
-    assert(ur->lambda(2));
-    assert(ur->lambda(2).get());
-
-    lambda = ur->lambda(2);
-    for (unsigned int i=0; i<nsLawSize; i++)
-    {
-      gOut[k]=(*lambda)(i);
-//         std::cout << "Ur in index2" <<std::endl;
-//         std::cout << " gOut["<< k << "] = " << gOut[k]<< std::endl;
-      k++;
-    }
-  }
-  else
-  {
-
-    y = ur->y(0);
-    for (unsigned int i=0; i<nsLawSize; i++)
-    {
-      gOut[k]=(*y)(i);
-//         std::cout << "Ur in index0" << std::endl;
-//         std::cout << " gOut["<< k << "] = " << gOut[k]<< std::endl;
-      k++;
-    }
-
-  }
-}
-//    std::cout << "EventDriven::computeg stop" <<std::endl;
-*/
-
 void EventDriven::updateImpactState()
 {
   OSIIterator itOSI;
@@ -625,7 +539,6 @@ void EventDriven::advanceToEvent()
       if (_printStat)
         statOut << " -----------> New non-smooth event at time " << _tout << endl;
     }
-    _printStat = true;
     if (_printStat)
     {
       SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(*it);
@@ -633,19 +546,30 @@ void EventDriven::advanceToEvent()
       SA::integer iwork = lsodar->getIwork();
       SA::doublereal Rwork = lsodar->getRwork();
       statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
-      cout << "Time step used: " << Rwork[10] << endl;
-      cout << "Number of steps: " << iwork[10] << endl;
-      cout << "Maximum number of step: " << iwork[5] << endl;
-      cout << "Number of f evaluations: " << iwork[11] << endl;
-      cout <<  "Number of jacobianF eval.: " << iwork[12] << endl;
-      cout << "Number of g evaluations: " << iwork[9] << endl;
     }
   }
   // Set model time to _tout
   model()->setCurrentTime(_tout);
+  //update output[0], output[1]
+  updateOutput(0, 1);
   // Update all the index sets ...
-  updateOutput(1, 1);
   updateIndexSets();
+  //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
+  // update is done when the new event is processed
+  if (!isNewEventOccur)
+  {
+    if (!_allNSProblems->empty())
+    {
+      // Solve LCP at acceleration level
+      if (!((*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->interactions())->isEmpty())
+      {
+        (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(_tout);
+        updateInput(2); //
+      }
+      // update indexSet[2] with double consition
+      updateIndexSetsWithDoubleCondition();
+    }
+  }
 }
 //
 EventDriven* EventDriven::convert(Simulation *str)

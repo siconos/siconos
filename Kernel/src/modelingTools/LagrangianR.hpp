@@ -55,6 +55,7 @@ typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsign
 
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr5bis)(unsigned int, const double*, unsigned int, const double*, unsigned int, double*, unsigned int, double*);
 

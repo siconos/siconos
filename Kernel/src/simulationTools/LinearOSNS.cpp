@@ -775,7 +775,6 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
           }
           else
             RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for SICONOS_OSNSP ");
-
         }
         // For the relation of type LagrangianScleronomousR
         if (relationSubType == ScleronomousR)
@@ -859,7 +858,6 @@ void LinearOSNS::computeq(double time)
     pos = _M->getPositionOfUnitaryBlock(ur);
     computeqBlock(ur, pos); // free output is saved in y
   }
-  //
 }
 
 

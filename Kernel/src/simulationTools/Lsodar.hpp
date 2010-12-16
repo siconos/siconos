@@ -27,7 +27,8 @@
 #include"OneStepIntegrator.hpp"
 #include"SiconosNumerics.h"
 #include<vector>
-
+const doublereal ATOL_DEFAUTL = 100 * MACHINE_PREC;
+const doublereal RTOL_DEFAULT = 10 * MACHINE_PREC;
 class BlockVector;
 
 /** Lsodar solver (odepack)
@@ -67,9 +68,6 @@ private:
   SA::integer jroot;
   /** temporary vector to save x values */
   SP::BlockVector xWork;
-
-  /** default constructor, private
-   */
   Lsodar() {};
 
 public:
@@ -127,6 +125,14 @@ public:
     return atol;
   }
 
+  /** get the maximum number of steps for one call
+  *\return an interger
+  */
+  inline  int getMaxNstep()const
+  {
+    return iwork[5];
+  }
+
   /** get real work vector parameter for lsodar
    *  \return a doublereal*
    */
@@ -165,6 +171,18 @@ public:
    *  \param doublereal * (atol)
    */
   void setTol(integer, SA::doublereal, SA::doublereal);
+
+  /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
+   *  \param integer (itol value)
+   *  \param double (rtol)
+   *  \param double (atol)
+   */
+  void setTol(integer, doublereal, doublereal);
+
+  /** set the maximul number of steps for one call of Lsodar
+   *\param an integer
+   */
+  void setMaxNstep(int);
 
   /** update doubleData and iwork memory size, when changes occur in intData.
    */

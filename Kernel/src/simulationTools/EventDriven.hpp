@@ -145,6 +145,7 @@ public:
    *  \param lambda order used to compute input
    */
   void update(unsigned int);
+
   /** Initialize EventDriven
 
   /** run simulation from one Event to the next, according to events manager settings.
