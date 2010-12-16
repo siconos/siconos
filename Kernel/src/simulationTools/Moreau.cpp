@@ -287,7 +287,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     if (d->M())
       WMap[ds].reset(new SimpleMatrix(*d->M())); //*W = *d->M();
     else
-      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW, IDENTITY)); //W->eye();
+      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW, Siconos::IDENTITY)); //W->eye();
 
     SP::SiconosMatrix W = WMap[ds];
 
