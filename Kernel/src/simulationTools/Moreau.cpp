@@ -264,8 +264,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
-  WMap[ds].reset(new SimpleMatrix(sizeW, sizeW));
-  SP::SiconosMatrix W = WMap[ds];
+  //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
+  //   SP::SiconosMatrix W = WMap[ds];
 
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -283,12 +283,19 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     // Copy M or I if M is Null into W
 
 
+    //    SP::SiconosMatrix W = WMap[ds];
 
     if (d->M())
-      WMap[ds].reset(new SimpleMatrix(*d->M())); //*W = *d->M();
-    else
-      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW, Siconos::IDENTITY)); //W->eye();
+      //      *W = *d->M();
+      WMap[ds].reset(new SimpleMatrix(*d->M()));
 
+    else
+    {
+      //W->eye();
+      // WMap[ds].reset(new SimpleMatrix(sizeW,sizeW,Siconos::IDENTITY));
+      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
+      WMap[ds]->eye();
+    }
     SP::SiconosMatrix W = WMap[ds];
 
 

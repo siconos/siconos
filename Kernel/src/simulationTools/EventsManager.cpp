@@ -60,18 +60,7 @@ void EventsManager::initialize(SP::Simulation sim)
 
 void EventsManager::preUpdate()
 {
-  //====================================== added by Son Nguyen ===================================
-  // Detect NonSmoothEvent at the beginning of the simulation
-  SP::UnitaryRelationsGraph indexSet1 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-  assert(indexSet1);
-  if (indexSet1->size() >  0) // There is one non-smooth event to be added
-  {
-    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-    _ENonSmooth = regEvent.instantiate(simulation()->model()->currentTime(), 2);
-    _allEvents.insert(_ENonSmooth);
-    _hasNS = true;
-  };
-  //===============================================================================================
+
   pair<EventsContainerIterator, EventsContainerIterator> rangeNew = _allEvents.equal_range(_currentEvent);
   // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
   // may result in invalidation of iterator and hazardous results.

@@ -31,7 +31,7 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 #include "LagrangianDS.hpp"
-
+#include "EventFactory.hpp"
 using namespace std;
 // --- XML constructor ---
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
@@ -284,6 +284,22 @@ void EventDriven::initOSNS()
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
     (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->setLevels(_levelMin, _levelMax);
     (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->initialize(shared_from_this());
+
+
+    //====================================== added by Son Nguyen ===================================
+    // Detect NonSmoothEvent at the beginning of the simulation
+    SP::UnitaryRelationsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    assert(indexSet1);
+    if (indexSet1->size() >  0) // There is one non-smooth event to be added
+    {
+      //       EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
+      //       _ENonSmooth = regEvent.instantiate(model()->currentTime(),2);
+      //       _allEvents.insert(_ENonSmooth);
+      //      _hasNS = true;
+      _eventsManager->scheduleNonSmoothEvent(model()->currentTime());
+    };
+    //===============================================================================================
+
   }
 }
 

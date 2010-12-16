@@ -273,6 +273,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   }
 
 
+
+
+
   // Process events at time _tinit. Useful to save values in memories
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
