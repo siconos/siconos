@@ -249,8 +249,10 @@ cmake_setup() {
     case `cmake --version` in 
         *2.8*);;
         *) 
-            rm -rf `which make`
-            tar zcvf $PIPOL_HOMEDIR/src/cmake-2.8.0.tar.gz
+            sudo rm -rf `which make`
+            sudo rm -rf `which cpack`
+            sudo rm -rf `which ctest`
+            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.0.tar.gz
             cd cmake-2.8.0; { 
                 ./bootstrap -j2
                 make -j2
@@ -259,7 +261,6 @@ cmake_setup() {
     esac
 }
         
-
 cmake_setup
 
 #sudo rm -f /usr/local/bin/ctest
@@ -330,9 +331,6 @@ save_packed_1 Numerics Release
 pack_trunk Kernel Release
 save_packed_1 Kernel Release
 
-pack_trunk Examples Release
-save_packed_1 Examples Release
-
 # Coverage
 case $PIPOL_IMAGE in ubuntu-lucid)
         setup_trunk
@@ -370,7 +368,8 @@ configure_trunk Front-End Debug
 nightly_build Front-End Debug
 nightly_test Front-End Debug
 nightly_submit Front-End Debug
-
+pack_trunk Front-End Debug
+save_packed_1 Front-End Debug
 
 # end
 date
