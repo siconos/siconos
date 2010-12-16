@@ -1230,7 +1230,8 @@ void Moreau::updateState(unsigned int level)
 
 
       // Solve W(x-xfree) = hr
-      scal(h, *fonlds->r(), *x); // x = h*r
+      //scal(h,*fonlds->r(),*x); // x = h*r
+      scal(h, *fonlds->gAlpha(), *x); // x = h*gApha
       W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
       *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
       if (baux)
