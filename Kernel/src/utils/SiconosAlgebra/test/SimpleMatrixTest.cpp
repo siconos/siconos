@@ -24,6 +24,8 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 
+using namespace Siconos;
+
 // Note FP: tests are (rather) complete for Dense objects but many are missing for other cases (Triang, Symm etc ...).
 
 void SimpleMatrixTest::setUp()
@@ -164,7 +166,7 @@ void SimpleMatrixTest::testConstructor3() // Copy constructor, from a BlockMatri
 // void SimpleMatrixTest::testConstructor3()
 // {
 //   cout << "--> Test: constructor 3." << endl;
-//   SP::SimpleMatrix test(new SimpleMatrix(SPARSE);
+//   SP::SimpleMatrix test(new SimpleMatrix(Siconos::SPARSE);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->getNum() == 4, true);
 //   cout << "--> Constructor 3 test ended with success." << endl;
 // }
@@ -1306,7 +1308,7 @@ void SimpleMatrixTest::testOperators6Ter()
   // Sparse +,-,* Sparse
   tmp.reset(new SimpleMatrix(*SP));
   tmp2.reset(new SimpleMatrix(*SP));
-  res.reset(new SimpleMatrix(4, 4, SPARSE));
+  res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE));
   *res = *tmp + *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
@@ -2219,7 +2221,7 @@ void SimpleMatrixTest::testOperators8_5()
   }
 
   // Sparse
-  A2.reset(new SimpleMatrix(10, 10, SPARSE));
+  A2.reset(new SimpleMatrix(10, 10, Siconos::SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       A2->setValue(i, j, 3 * i + j);
@@ -2371,7 +2373,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
 
   // Sparse
-  A2.reset(new SimpleMatrix(10, 10, SPARSE));
+  A2.reset(new SimpleMatrix(10, 10, Siconos::SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       A2->setValue(i, j, 3 * i + j);
@@ -2674,7 +2676,7 @@ void SimpleMatrixTest::testOperators12()
   double m = 2.2;
   int i = 3;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*SP));
-  SP::SiconosMatrix res(new SimpleMatrix(4, 4, SPARSE));
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4, Siconos::SPARSE));
   *res = m ** tmp1;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*m) < tol, true);
   *res = i ** tmp1;
@@ -2732,7 +2734,7 @@ void SimpleMatrixTest::testPow()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp3, prod(*tmp3, *tmp3)), true);
   // Sparse
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
-  res.reset(new SimpleMatrix(4, 4, SPARSE));
+  res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE));
   *res = pow(*tmp4, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp4, prod(*tmp4, *tmp4)), true);
   // Banded

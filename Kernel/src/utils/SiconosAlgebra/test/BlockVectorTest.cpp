@@ -81,7 +81,7 @@ void BlockVectorTest::testConstructor2()
 {
   cout << "--> Test: constructor 2." << endl;
   SP::SiconosVector  w(new SimpleVector(3, 2));
-  // SP::SiconosVector  z(new SimpleVector(5,3,SPARSE);  Problem if z sparse:
+  // SP::SiconosVector  z(new SimpleVector(5,3,Siconos::SPARSE);   Problem if z sparse:
   // " Assertion failed in file /usr/include/boost/numeric/ublas/vector_sparse.hpp at line 1253:
   // *this != (*this) ().end () "
 
@@ -141,7 +141,7 @@ void BlockVectorTest::testConstructor3()
 {
   cout << "--> Test: constructor 3." << endl;
   SP::SiconosVector  w(new SimpleVector(3, 2));
-  SP::SiconosVector  z(new SimpleVector(5, 3, SPARSE));
+  SP::SiconosVector  z(new SimpleVector(5, 3, Siconos::SPARSE));
   SP::BlockVector  v(new BlockVector(w, z));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == 8, true);

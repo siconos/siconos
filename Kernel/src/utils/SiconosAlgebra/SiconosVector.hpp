@@ -30,7 +30,7 @@
 #include "SiconosVectorException.hpp"
 
 /** Union of DenseVect and SparseVect pointers -
-    DENSE, num = 1,
+    Siconos::DENSE, num = 1,
     SPARSE, num = 4
  */
 union VECTOR_UBLAS_TYPE

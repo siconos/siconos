@@ -44,7 +44,7 @@ class SimpleVector;
  *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
- * Possible types: DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY.
+ * Possible types: Siconos::DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, Siconos::IDENTITY.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
  *
@@ -156,32 +156,32 @@ public:
   /** constructor with the type and the dimension of the Boost matrix
    *  \param unsigned int, number of rows.
    *  \param unsigned int, number of columns.
-   *  \param UBLAS_TYPE
-   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param Siconos::UBLAS_TYPE
+   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
    */
-  SimpleMatrix(unsigned int, unsigned int, UBLAS_TYPE = DENSE, unsigned int = 1, unsigned int = 1);
+  SimpleMatrix(unsigned int, unsigned int, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 1, unsigned int = 1);
 
   /** constructor with the the dimensions of the Boost matrix, a default value and the type.
    *  \param unsigned int, number of rows.
    *  \param unsigned int, number of columns.
    *  \param double a, so that *this = [a a a ...]
-   *  \param UBLAS_TYPE
-   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param Siconos::UBLAS_TYPE
+   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
    */
-  SimpleMatrix(unsigned int, unsigned int, double, UBLAS_TYPE = DENSE, unsigned int = 1, unsigned int = 1);
+  SimpleMatrix(unsigned int, unsigned int, double, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 1, unsigned int = 1);
 
   /** constructor with a vector of the values, the dimensiosn and the type of the boost matrix.
    *  The integers upper and lower are useful only for BandedMat
    *  \param a std::vector<double>
    *  \param unsigned int, number of rows
    *  \param unsigned int, number of columns
-   *  \param a UBLAS_TYPE
-   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param a Siconos::UBLAS_TYPE
+   *  \param unsigned int, if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
    */
-  //  SimpleMatrix (const std::vector<double>& ,unsigned int, unsigned int = 0, UBLAS_TYPE = DENSE, unsigned int = 0, unsigned int = 0);
+  //  SimpleMatrix (const std::vector<double>& ,unsigned int, unsigned int = 0, Siconos::UBLAS_TYPE = Siconos::DENSE, unsigned int = 0, unsigned int = 0);
 
   /** copy constructor
    *  \param SimpleMatrix

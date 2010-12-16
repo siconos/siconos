@@ -34,7 +34,7 @@
  *
  * Used to handle vectors of double.
  *
- * Two possible types: DENSE (default) and SPARSE.
+ * Two possible types: Siconos::DENSE (default) and SPARSE.
  *
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
@@ -61,20 +61,20 @@ public:
    *  \param an unsigned int, dimension
    *  \param an_UBLAS_TYPE
    */
-  SimpleVector(unsigned int , UBLAS_TYPE = DENSE);
+  SimpleVector(unsigned int , Siconos::UBLAS_TYPE = Siconos::DENSE);
 
   /** constructor with the dimension of the Boost vector, a default value and the type.
    *  \param an unsigned int, dimension
    *  \param double a, so that *this = [a a a ...]
-   *  \param an UBLAS_TYPE (default = dense)
+   *  \param an Siconos::UBLAS_TYPE (default = dense)
    */
-  SimpleVector(unsigned int , double, UBLAS_TYPE = DENSE);
+  SimpleVector(unsigned int , double, Siconos::UBLAS_TYPE = Siconos::DENSE);
 
   /** constructor with  a std::vector of the values and the type of the boost vector.
    *  \param a std::vector<double>
-   *  \param an UBLAS_TYPE
+   *  \param an Siconos::UBLAS_TYPE
    */
-  SimpleVector(const std::vector<double>&, UBLAS_TYPE = DENSE);
+  SimpleVector(const std::vector<double>&, Siconos::UBLAS_TYPE = Siconos::DENSE);
 
   /** copy constructor
    *  \param SimpleVector

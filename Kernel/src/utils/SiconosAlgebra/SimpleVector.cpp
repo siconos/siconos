@@ -39,49 +39,49 @@ SimpleVector::SimpleVector(): SiconosVector()
 }
 
 // parameters: dimension and type.
-SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector()
+SimpleVector::SimpleVector(unsigned int row, Siconos::UBLAS_TYPE typ): SiconosVector()
 {
-  if (typ == SPARSE)
+  if (typ == Siconos::SPARSE)
   {
     _dense = false;
     vect.Sparse = new SparseVect(ublas::zero_vector<double>(row));
   }
-  else if (typ == DENSE)
+  else if (typ == Siconos::DENSE)
   {
     _dense = true;
     vect.Dense = new DenseVect(ublas::zero_vector<double>(row));
   }
   else
   {
-    SiconosVectorException::selfThrow("SimpleVector::constructor(UBLAS_TYPE, unsigned int) failed, invalid type given");
+    SiconosVectorException::selfThrow("SimpleVector::constructor(Siconos::UBLAS_TYPE, unsigned int) failed, invalid type given");
   }
 }
 
 // parameters: dimension, default value for all components and type.
-SimpleVector::SimpleVector(unsigned int row, double val, UBLAS_TYPE typ): SiconosVector()
+SimpleVector::SimpleVector(unsigned int row, double val, Siconos::UBLAS_TYPE typ): SiconosVector()
 {
-  if (typ == SPARSE)
+  if (typ == Siconos::SPARSE)
   {
     _dense = false;
     vect.Sparse = new SparseVect(row);
     fill(val);
   }
-  else if (typ == DENSE)
+  else if (typ == Siconos::DENSE)
   {
     _dense = true;
     vect.Dense = new DenseVect(ublas::scalar_vector<double>(row, val));
   }
   else
   {
-    SiconosVectorException::selfThrow("SimpleVector::constructor(UBLAS_TYPE, unsigned int) : invalid type given");
+    SiconosVectorException::selfThrow("SimpleVector::constructor(Siconos::UBLAS_TYPE, unsigned int) : invalid type given");
   }
 }
 
 // parameters: a vector (stl) of double and the type.
-SimpleVector::SimpleVector(const std::vector<double>& v, UBLAS_TYPE typ): SiconosVector()
+SimpleVector::SimpleVector(const std::vector<double>& v, Siconos::UBLAS_TYPE typ): SiconosVector()
 {
-  if (typ != DENSE)
-    SiconosVectorException::selfThrow("SimpleVector::constructor(UBLAS_TYPE, std::vector<double>, unsigned int) : invalid type given");
+  if (typ != Siconos::DENSE)
+    SiconosVectorException::selfThrow("SimpleVector::constructor(Siconos::UBLAS_TYPE, std::vector<double>, unsigned int) : invalid type given");
 
   _dense = true;
   vect.Dense = new DenseVect(v.size());

@@ -50,6 +50,8 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "cholesky.hpp"
 #include "ioMatrix.hpp"
 
+using namespace Siconos;
+
 
 // =================================================
 //                CONSTRUCTORS

@@ -116,12 +116,14 @@ const std::string DEFAULT_FORMAT = "ascii";
 /** value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance. */
 const double tolerance = std::numeric_limits<double>::epsilon();
 
-/** UBLAS_TYPE is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC,
+/** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
     SPARSE, BANDED. It is used to describe the type of matrix or
     vector we want to construct.
  */
+namespace Siconos
+{
 enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
-
+}
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm
 // T: value type

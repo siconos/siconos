@@ -88,7 +88,7 @@ void SimpleVectorTest::testConstructor0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->getNum() == 1, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", (*v)(i) == 0, true);
-  v.reset(new SimpleVector(3, SPARSE));
+  v.reset(new SimpleVector(3, Siconos::SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->getNum() == 4, true);
@@ -104,7 +104,7 @@ void SimpleVectorTest::testConstructor1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 1, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2.4, true);
-  v.reset(new SimpleVector(3, 2.4, SPARSE));
+  v.reset(new SimpleVector(3, 2.4, Siconos::SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 4, true);
@@ -139,7 +139,7 @@ void SimpleVectorTest::testConstructor3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == vq.size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->getNum() == 1, true);
-  tmp.reset(new SimpleVector(3, SPARSE));
+  tmp.reset(new SimpleVector(3, Siconos::SPARSE));
   v.reset(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), false);
@@ -177,7 +177,7 @@ void SimpleVectorTest::testConstructor4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == vq.size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNum() == 1, true);
-  tmp.reset(new SimpleVector(4, SPARSE));
+  tmp.reset(new SimpleVector(4, Siconos::SPARSE));
   v.reset(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->isBlock(), false);
@@ -465,7 +465,7 @@ void SimpleVectorTest::testOperators2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
 
   // sparse += -= sparse
-  SP::SiconosVector v(new SimpleVector(5, SPARSE));
+  SP::SiconosVector v(new SimpleVector(5, Siconos::SPARSE));
   *v += *w;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - *sv) < tol, true);
   *v *= 3;
@@ -529,7 +529,7 @@ void SimpleVectorTest::testOperators4()
 
   //  sparse = a*sparse or sparse/a
   x.reset(new SimpleVector(*sv));
-  z.reset(new SimpleVector(size, SPARSE));
+  z.reset(new SimpleVector(size, Siconos::SPARSE));
   *z = a**x; //
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
   z->zero();
@@ -662,7 +662,7 @@ void SimpleVectorTest::testOperators4Bis()
 
   //  sparse = a*sparse or sparse/a
   x.reset(new SimpleVector(*sv));
-  z.reset(new SimpleVector(size, SPARSE));
+  z.reset(new SimpleVector(size, Siconos::SPARSE));
   scal(a, *x, *z);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
   z->zero();
@@ -721,7 +721,7 @@ void SimpleVectorTest::testOperators4Ter()
 
   //  sparse += a*sparse or sparse/a
   x.reset(new SimpleVector(*sv));
-  z.reset(new SimpleVector(size, SPARSE));
+  z.reset(new SimpleVector(size, Siconos::SPARSE));
   z->zero();
   scal(a, *x, *z, false);
   scal(a, *x, *z, false);
@@ -1101,7 +1101,7 @@ void SimpleVectorTest::testSubscal()
   }
 
   // xx sparse, ys dense
-  xx.reset(new SimpleVector(size, SPARSE));
+  xx.reset(new SimpleVector(size, Siconos::SPARSE));
   xx->fill(2.0);
   *yref = *ys;
   subscal(a, *xx, *ys, coord, true);
@@ -1114,7 +1114,7 @@ void SimpleVectorTest::testSubscal()
   }
 
   // xx sparse, ys sparse
-  ys.reset(new SimpleVector(size, SPARSE));
+  ys.reset(new SimpleVector(size, Siconos::SPARSE));
   *yref = *ys;
   subscal(a, *xx, *ys, coord, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);

@@ -398,8 +398,8 @@ void LagrangianDS::initRhs(double time)
     flag2 = true;
   }
 
-  _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, ZERO));
-  _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, IDENTITY));
+  _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
+  _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
 
   if (flag1 && flag2)
     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));

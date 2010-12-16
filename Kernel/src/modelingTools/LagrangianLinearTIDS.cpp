@@ -119,8 +119,8 @@ void LagrangianLinearTIDS::initRhs(double time)
   _workMatrix[invMass].reset(new SimpleMatrix(*_mass));
   // compute x[1] (and thus _fExt if required)
   computeRhs(time);
-  _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, ZERO));
-  _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, IDENTITY));
+  _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
+  _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
 
   // jacobianRhsx
   if (_K)
