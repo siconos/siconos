@@ -17,12 +17,34 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "NewtonEulerRFC3D.hpp"
 #include "NewtonEulerDS.hpp"
 using namespace std;
+/*
+  m \dot V = Fext + R
+  I \dot \homega + \homega I \homega = Mext + R*PG ,
+  with * vectoriel product, R reaction in the globla frame. P the point of contact.
+  r is the reaction in the local frame.
+  M^t r=R
+            |nx t1x t2x|
+  with M^t =|ny t1y t2y|
+            |nz t1z t2z|
 
+
+  |  R | |1 0 0     |
+  |    |=|0 1 0     |
+  |R*PG| |0 0 1     |*R=N^t *R = N^t * M^t r
+         |0 -PGz PGy|
+         |PGz 0 -PGx|
+         |-PGy PGx 0|
+
+
+so jachqT=M*N
+
+
+
+ */
 
 void computeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
 {
@@ -144,10 +166,10 @@ void NewtonEulerRFC3D::computeJachqT()
   {
     SP::NewtonEulerDS d2 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
     SP::SiconosVector Q2 = d2->q();
-    computeJachqTFromContacts(_Pc, _Nc, Q1, Q2, _jachqT);
+    computeJachqTFromContacts(_Pc1, _Nc, Q1, Q2, _jachqT);
   }
   else
   {
-    computeJachqTFromContacts(_Pc, _Nc, Q1, _jachqT);
+    computeJachqTFromContacts(_Pc1, _Nc, Q1, _jachqT);
   }
 }

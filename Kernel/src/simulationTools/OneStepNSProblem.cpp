@@ -469,7 +469,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
       if (dsType != Type::NewtonEulerDS)
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
       else
-        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
+        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luM(); // get its W matrix ( pointer link!)
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {

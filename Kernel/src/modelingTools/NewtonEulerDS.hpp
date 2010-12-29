@@ -81,9 +81,9 @@ protected:
 
 
   /** used for concatenate _I and _mass*/
-  SP::SimpleMatrix _W;
+  SP::SimpleMatrix _M;
 
-  SP::SimpleMatrix _luW;
+  SP::SimpleMatrix _luM;
 
   /** Matrix depending of the meaning of x.*/
   SP::SiconosMatrix _T;
@@ -116,9 +116,9 @@ protected:
   SP::SiconosVector _fL;
 
   /** jacobian_q FL*/
-  SP::SiconosMatrix _jacobianqFL;
+  SP::SimpleMatrix _jacobianqFL;
   /** jacobian_{qDot} FL*/
-  SP::SiconosMatrix _jacobianqDotFL;
+  SP::SimpleMatrix _jacobianqDotFL;
 
   /** set links with DS members
    */
@@ -567,14 +567,14 @@ public:
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqFL() const
+  inline SP::SimpleMatrix jacobianqFL() const
   {
     return _jacobianqFL;
   }
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqDotFL() const
+  inline SP::SimpleMatrix jacobianqDotFL() const
   {
     return _jacobianqDotFL;
   }
@@ -834,13 +834,13 @@ public:
   virtual void updateT();
   virtual void normalizeq();
 
-  inline SP::SimpleMatrix W()
+  inline SP::SimpleMatrix M()
   {
-    return _W;
+    return _M;
   }
-  inline SP::SimpleMatrix luW()
+  inline SP::SimpleMatrix luM()
   {
-    return _luW;
+    return _luM;
   }
   inline SP::SiconosMatrix T()
   {

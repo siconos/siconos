@@ -145,7 +145,7 @@ void NewtonEulerR::display() const
 
 void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
 {
-  /*implemented for the bouncing ball*/
+
   if (derivativeNumber == 0)
   {
     computeh(t);
@@ -157,7 +157,26 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
     {
+      //printf("NewtonEulerR::computeOutput:\n");
+      //data[q1]->display();
       prod(*_jachq, *data[q1], *y);
+      //_jachq->display();
+      //y->display();
+      /*  if (false){
+        unsigned int k=0;
+        DSIterator itDS;
+        itDS=interaction()->dynamicalSystemsBegin();
+        while(  itDS!=interaction()->dynamicalSystemsEnd() ){
+          SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+          SP::SimpleVector vPredictor = d->vPredictor();
+          unsigned int d_dim=d->getDim();
+          SP::SimpleVector F(new SimpleVector(d_dim));
+          setBlock(_contactForce,F,d_dim,0,k);
+          d->luM()->PLUForwardBackwardInPlace(*F);
+          *(d->vPredictor())+=*F;
+          k+=(*itDS)->getDim();
+        }
+        }*/
     }
     else  //if(derivativeNumber == 2)
       //  prod(*_jachq,*data[q2],*y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...

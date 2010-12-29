@@ -726,8 +726,12 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 
         coord[3] = CT->size(1);
         coord[5] = CT->size(1);
-
+        // printf("LinearOSNS: computing q: CT\n");
+        // CT->display();
+        // printf("LinearOSNS: computing q: Xfree and _q\n");
+        // Xfree->display();
         subprod(*CT, *Xfree, *_q, coord, true);
+        //        _q->display();
       }
 
     }

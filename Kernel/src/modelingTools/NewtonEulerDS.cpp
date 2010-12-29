@@ -70,9 +70,9 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 
   _dotq.reset(new SimpleVector(_qDim));
   _residuFree.reset(new SimpleVector(_n));
-  _W.reset(new SimpleMatrix(_n, _n));
-  _luW.reset(new SimpleMatrix(_n, _n));
-  _W->zero();
+  _M.reset(new SimpleMatrix(_n, _n));
+  _luM.reset(new SimpleMatrix(_n, _n));
+  _M->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
 
 }
@@ -98,12 +98,12 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   (*_q) = (*_q0);
   _dotq.reset(new SimpleVector(_qDim));
   _residuFree.reset(new SimpleVector(_n));
-  _W.reset(new SimpleMatrix(_n, _n));
-  _luW.reset(new SimpleMatrix(_n, _n));
-  _W->zero();
-  _W->setValue(0, 0, _mass);
-  _W->setValue(1, 1, _mass);
-  _W->setValue(2, 2, _mass);
+  _M.reset(new SimpleMatrix(_n, _n));
+  _luM.reset(new SimpleMatrix(_n, _n));
+  _M->zero();
+  _M->setValue(0, 0, _mass);
+  _M->setValue(1, 1, _mass);
+  _M->setValue(2, 2, _mass);
   _I = inertialMatrix;
   Index dimIndex(2);
   dimIndex[0] = 3;
@@ -113,8 +113,8 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   startIndex[1] = 0;
   startIndex[2] = 3;
   startIndex[3] = 3;
-  setBlock(_I, _W, dimIndex, startIndex);
-  *_luW = *_W;
+  setBlock(_I, _M, dimIndex, startIndex);
+  *_luM = *_M;
 
 
   _T.reset(new SimpleMatrix(_qDim, _n));

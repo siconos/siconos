@@ -51,9 +51,12 @@ void SphereNEDSPlanR::computeh(double)
   SP::SiconosVector y = interaction()->y(0);
 
   y->setValue(0, distance(q_0, q_1, q_2, r));
-  _Pc->setValue(0, q_0 - r * n1);
-  _Pc->setValue(1, q_1 - r * n2);
-  _Pc->setValue(2, q_2 - r * n3);
+  _Pc1->setValue(0, q_0 - r * n1);
+  _Pc1->setValue(1, q_1 - r * n2);
+  _Pc1->setValue(2, q_2 - r * n3);
+  _Pc2->setValue(0, q_0 - r * n1);
+  _Pc2->setValue(1, q_1 - r * n2);
+  _Pc2->setValue(2, q_2 - r * n3);
   _Nc->setValue(0, n1);
   _Nc->setValue(1, n2);
   _Nc->setValue(2, n3);

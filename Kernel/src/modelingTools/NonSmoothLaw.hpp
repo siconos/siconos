@@ -41,9 +41,6 @@ class Interaction;
  *
  *
  */
-#define SICONOS_NSL_NOTYPE -1
-#define SICONOS_NSL_EQUALITY 1
-#define SICONOS_NSL_MLCP 2
 class NonSmoothLaw
 {
 protected:
@@ -64,7 +61,6 @@ protected:
   NonSmoothLaw(const NonSmoothLaw&) {};
 
 public:
-
   /** basic constructor
   * \param unsigned int, the non smooth law size
   */

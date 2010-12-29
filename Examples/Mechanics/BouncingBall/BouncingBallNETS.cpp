@@ -29,24 +29,34 @@
 #include "SiconosKernel.hpp"
 
 //#define WITH_PROJ
+//#define WITH_FC3D
 using namespace std;
-class my_NERFC3D : public NewtonEulerRFC3D
+#ifdef WITH_FC3D
+#define R_CLASS NewtonEulerRFC3D
+#else
+#define R_CLASS NewtonEulerRImpact
+#endif
+class my_NERFC3D : public R_CLASS
 {
 public:
-  my_NERFC3D(): NewtonEulerRFC3D() {};
+  my_NERFC3D(): R_CLASS() {};
   virtual void computeh(double t)
   {
-    NewtonEulerRFC3D::computeh(t);
+    R_CLASS::computeh(t);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
     SP::SiconosVector y = interaction()->y(0);
-    _Pc->setValue(0, y->getValue(0));
-    _Pc->setValue(1, 0);
-    _Pc->setValue(2, 0);
+    _Pc1->setValue(0, y->getValue(0));
+    _Pc1->setValue(1, 0);
+    _Pc1->setValue(2, 0);
+    _Pc2->setValue(0, y->getValue(0));
+    _Pc2->setValue(1, 0);
+    _Pc2->setValue(2, 0);
   }
 };
 TYPEDEF_SPTR(my_NERFC3D);
+
 int main(int argc, char* argv[])
 {
   try
@@ -61,10 +71,10 @@ int main(int argc, char* argv[])
     unsigned int nDim = 6;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
-    double h = 0.0005;                // time step
+    double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 2.0;      // initial velocity for lowest bead.
-    double omega_init = 0.0;      // initial velocity for lowest bead.
+    double omega_init = 1.0;      // initial velocity for lowest bead.
     double theta = 1.0;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
@@ -79,6 +89,8 @@ int main(int argc, char* argv[])
     SP::SimpleVector q0(new SimpleVector(qDim));
     SP::SimpleVector v0(new SimpleVector(nDim));
     SP::SimpleMatrix I(new SimpleMatrix(3, 3));
+    v0->zero();
+    q0->zero();
     I->eye();
     (*q0)(0) = position_init;
     /*initial quaternion equal to (1,0,0,0)*/
@@ -103,9 +115,7 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SP::SimpleMatrix H(new SimpleMatrix(1, qDim));
-    H->zero();
-    (*H)(0, 0) = 1.0;
+
     //     vector<SP::SiconosMatrix> vecMatrix1;
     //     vecMatrix1.push_back(H);
     //     SP::BlockMatrix H_block(new BlockMatrix(vecMatrix1,1,1));
@@ -115,17 +125,28 @@ int main(int argc, char* argv[])
     //     vecMatrix2.push_back(HT);
     //     SP::BlockMatrix HT_block(new BlockMatrix(vecMatrix2,1,1));
 
-
-    //SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(e,e,0.6,3));
+#ifdef WITH_FC3D
+    int nslawsize = 3;
+    SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(e, e, 0.6, 3));
+#else
+    int nslawsize = 1;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
-    //SP::NewtonEulerR relation0(new my_NERFC3D());
-    SP::NewtonEulerR relation0(new NewtonEulerR());
+#endif
+    SP::SimpleMatrix H(new SimpleMatrix(nslawsize, qDim));
+    H->zero();
+    (*H)(0, 0) = 1.0;
+#ifdef WITH_FC3D
+    (*H)(1, 1) = 1.0;
+    (*H)(2, 2) = 1.0;
+#endif
+    SP::NewtonEulerR relation0(new my_NERFC3D());
+    //SP::NewtonEulerR relation0(new NewtonEulerR());
     relation0->setJachq(H);
     //    relation0->setJacQH(H_block);
     //    relation0->setJacQHT(HT_block);
     cout << "main jacQH" << endl;
     relation0->jachq()->display();
-    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(nslawsize, nslaw0, relation0));
 
     // -------------
     // --- Model ---

@@ -93,6 +93,6 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
   double yDot = ur->getYRef(1);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
-  return (y > 10e-7);
+  return (y > 10e-4);
 }
 

@@ -365,9 +365,9 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
 
     //    scal(1.0/h,*(d->luW()),*(d->luW()));
-    cout << "Moreau::initW luW before LUFact\n";
-    d->luW()->display();
-    d->luW()->PLUFactorizationInPlace();
+    cout << "Moreau::initW luM before LUFact\n";
+    d->luM()->display();
+    d->luM()->PLUFactorizationInPlace();
 
   }
   else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
@@ -554,7 +554,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
   // === ===
   else if (dsType == Type::NewtonEulerDS)
-    ;
+    ;//Nothing here: In present version, use d->M;
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized here.
@@ -678,30 +678,7 @@ double Moreau::computeResidu()
       *residuFree *= -h;
 
 
-      //    cout<<"Moreau TIDS::computeResidu: residu free"<<endl;
-      //    (*residuFree).display();
 
-
-      /*SP::SiconosVector xBuffer = d->getWorkVector(DynamicalSystem::local_buffer);
-       *xBuffer = theta * (*x_alpha);
-       *xBuffer += (1-theta)*(*x_k);
-       *xBuffer *=-h;
-       SP::SiconosMatrix A = d->A();
-       if( A )
-       prod(*A,*xBuffer,*residuFree, false);  // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
-
-       *xBuffer =  (* x_alpha);
-       *xBuffer -= (*x_k);
-
-       SP::SiconosMatrix M = d->M();
-       if(M)
-       prod(*M,*xBuffer,*residuFree, false);// residuFree += M(x^{\alpha}_{k+1} - x_{k})
-       else
-       *residuFree+=*xBuffer;
-
-       (*workX[d])=*residuFree;
-       scal(-h, *d->r(), (*workX[d]), false); // residu = residu - h*r
-       normResidu = (workX[d])->norm2();*/
     }
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
@@ -869,7 +846,7 @@ double Moreau::computeResidu()
       SP::SiconosVector q = d->q();
 
 
-      SP::SiconosMatrix W = d->W();
+      SP::SiconosMatrix W = d->M();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*W, (*v - *vold), *residuFree); // residuFree = M(v - vold)
       if (d->fL())  // if fL exists
@@ -887,6 +864,9 @@ double Moreau::computeResidu()
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
+        //printf("Moreau::residufree: Residu free:\n");
+        //residuFree->display();
+
       }
       *(d->workFree()) = *residuFree;
       //    cout<<"Moreau::computeResidu :\n";
@@ -1103,6 +1083,7 @@ void Moreau::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
       SP::SiconosVector vfree = d->workFree();//workX[d];
       (*vfree) = *(d->residuFree());
+      //*(d->vPredictor())=*(d->residuFree());
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
@@ -1113,14 +1094,13 @@ void Moreau::computeFreeState()
       // -> Solve WX = vfree and set vfree = X
       //    cout<<"Moreau::computeFreeState residu free"<<endl;
       //    vfree->display();
-      d->luW()->PLUForwardBackwardInPlace(*vfree);
+      d->luM()->PLUForwardBackwardInPlace(*vfree);
       //    cout<<"Moreau::computeFreeState -WRfree"<<endl;
       //    vfree->display();
       //    scal(h,*vfree,*vfree);
       // -> compute real vfree
       *vfree *= -1.0;
       *vfree += *v;
-
     }
     else
       RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
@@ -1344,17 +1324,17 @@ void Moreau::updateState(unsigned int level)
       /*d->p has been fill by the Relation->computeInput, it contains
            B \lambda _{k+1}*/
       *v = *d->p(level); // v = p
-      d->luW()->PLUForwardBackwardInPlace(*v);
+      d->luM()->PLUForwardBackwardInPlace(*v);
 
       //  cout<<"Moreau::updatestate hWB lambda"<<endl;
       //  v->display();
 
       *v +=  * ds->workFree();
 
-      //  cout<<"Moreau::updatestate work free"<<endl;
-      //  ds->workFree()->display();
-      //  cout<<"Moreau::updatestate new v"<<endl;
-      //  v->display();
+      //cout<<"Moreau::updatestate work free"<<endl;
+      //ds->workFree()->display();
+      //cout<<"Moreau::updatestate new v"<<endl;
+      //v->display();
 
       //compute q
       //first step consists in computing  \dot q.

@@ -55,9 +55,13 @@ void SphereNEDSSphereNEDSR::computeh(double)
   SP::SiconosVector y = interaction()->y(0);
 
   y->setValue(0, distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2));
-  _Pc->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
-  _Pc->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
-  _Pc->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
+  //Approximation _Pc1=_Pc2
+  _Pc1->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
+  _Pc1->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
+  _Pc1->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
+  _Pc2->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
+  _Pc2->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
+  _Pc2->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
   _Nc->setValue(0, (q_0 - q_7) / (y->getValue(0) + r1pr2));
   _Nc->setValue(1, (q_1 - q_8) / (y->getValue(0) + r1pr2));
   _Nc->setValue(2, (q_2 - q_9) / (y->getValue(0) + r1pr2));

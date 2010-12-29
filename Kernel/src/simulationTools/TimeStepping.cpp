@@ -104,7 +104,10 @@ bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
   double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
+  //prod(*_jachq,*data[q1Tilde],*y);
+  //printf("TS::predictorDeactivate yref=%e, yDot=%e\n",y,yDot);
   y += 0.5 * h * yDot;
+  //printf("TS::predictorDeactivate y=%e\n",y);
   assert(!isnan(y));
   return (y > 0);
 }
@@ -113,8 +116,10 @@ bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
   double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
+  //printf("TS::predictorActivate yref=%e, yDot=%e\n",y,yDot);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
+  //printf("TS::predictorActivate y=%e\n",y);
   return (y <= 0);
 }
 // i=1
@@ -209,7 +214,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
         indexSet0->color(*ui0) = boost::white_color ;
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
-        assert( { !predictorDeactivate(indexSet0->bundle(*ui0), i) || Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+        assert( { !predictorDeactivate(indexSet0->bundle(*ui0), i) ||
+                  Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
                 });
       }
 

@@ -22,19 +22,27 @@
 #ifndef NEWTONEULERRELATIONFC3D_H
 #define NEWTONEULERRELATIONFC3D_H
 
-#include "NewtonEulerR.hpp"
+#include "NewtonEulerRImpact.hpp"
+/** NewtonEulerRFC3D
+ *
+ * \author O. Bonnefon
+ *  \version 3.0.0.
+ *  \date Dec, 2010
+ *
+ * This class is an interface for relation with impact and FC3D.
+ * From NewtonEulerRImpact, it inherits to the computation of the jacoboian, this operator is use for the predictor of activation and deactivation of the UR.
+ * The OSNSP is build using the matrix jachqT, that is computed from the point if contact pc1, pc2 and Nc.
+ * Use this class consists in overload the method computeh, and children class has to set the menber pc1, pc2 and nc.
+ *
+ *
+ */
 
-
-class NewtonEulerRFC3D : public NewtonEulerR
+class NewtonEulerRFC3D : public NewtonEulerRImpact
 {
 
 protected:
-  /*Point of contact*/
-  SP::SimpleVector _Pc;
-  /*Normal to the contact */
-  SP::SimpleVector _Nc;
 public:
-  NewtonEulerRFC3D(): _Pc(new SimpleVector(3)), _Nc(new SimpleVector(3)), NewtonEulerR() {}
+  NewtonEulerRFC3D(): NewtonEulerRImpact() {}
 
   /** destructor
    */
@@ -43,6 +51,7 @@ public:
   /*default implementation consists in multiplying jachq and T*/
   virtual void computeJachqT();
 
+  ACCEPT_STD_VISITORS();
 };
 TYPEDEF_SPTR(NewtonEulerRFC3D);
 #endif // NEWTONEULERRELATIONFC3D_H
