@@ -191,6 +191,9 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
     *velocity0 = *Q0;
     *velocity1 = *Q1;
     *velocity2 = *Q2;
+#ifdef FC3D_UE_DEBUG
+    printf("FC3D: take off with q=v=(%e,%e,%e)\n", *Q0, *Q1, *Q2);
+#endif
     return 0;
   }
 
@@ -232,6 +235,9 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
         *velocity0 = 0;
         *velocity1 = 0;
         *velocity2 = 0;
+#ifdef FC3D_UE_DEBUG
+        printf("FC3D:  0=MR+q with R in cone r=(%e,%e,%e)\n", *reaction0, *reaction1, *reaction2);
+#endif
         return 0;
       }
   }
@@ -251,6 +257,9 @@ int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, doubl
   *info = frictionContact3D_unitary_enumerative_test_non_sliding(problem, reaction, velocity, options);
   if (!(*info))
     return *info ;
+#ifdef FC3D_UE_DEBUG
+  printf("FC3D: Not a trivial case, sliding?\n");
+#endif
   if (options->solverId == SICONOS_FRICTION_3D_QUARTIC_NU)
   {
     *info = frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(problem, reaction, options);
