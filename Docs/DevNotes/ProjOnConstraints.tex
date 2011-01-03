@@ -1,0 +1,63 @@
+\subsection{Velocity formulation}
+
+The first step consists in doing a velocity formulation of the system:
+
+\begin{equation}
+\label{NE_Dyn1}
+\begin{array}{l}
+  M \dot v = F_{ext}+B \lambda \\
+  \dot q = T v\\
+  y=h(q) \\
+  NSLAW(y,\lambda,...)\\
+\end{array}
+\end{equation}
+
+The constraint $\dot q = T v$ is suffisiant to keep a normal quaternion. Because of the speed formulation, $h(q)$ could violate the NSLAW. A solution coul be to add a formulation in position. We must underline that the constraints $\mid Q \mid = 1$ is implicit in this system. Endeed, the direction  $\dot q = T v$ is tangential to the sphere. 
+
+
+\subsection{Posion formulation}
+
+It consists in writting a position formulation on the systeme:
+
+\begin{equation}
+\label{NE_Dyn1}
+\begin{array}{l}
+h(q) = \left(\begin{array}{l}
+  HI(q)\\HE(q)
+\end{array}\right)
+\end{array}
+\end{equation}
+
+
+We are looking for $q_1$ from $q_0$:\\
+\begin{equation}
+  q_1=q_0+\nabla HI \Lambda _I + \nabla HE \Lambda _E
+\end{equation}
+
+Assume that $h(q_0)$ doesn't satisfy the constraints, ie $ HI(q_0) \ngeq 0$ or $ HE(q_0) \neq 0)$. Linearize $h$ leads to:\\
+\begin{equation}
+  0 \leq HI(q_0) + \nabla ^t HI (\nabla HI  \Lambda _I + \nabla HE \Lambda _E) \bot \Lambda _I \geq 0
+\end{equation}
+
+\begin{equation}
+  0=HE(q_0) + \nabla ^t HE (\nabla HI  \Lambda _I + \nabla HE \Lambda _E)
+\end{equation}
+
+The getting system could be written has a MLCP:
+\begin{equation}
+C \ni h(q_0)+ \nabla ^t(\nabla \Lambda) , \Lambda \in C^*
+\end{equation}
+
+In the case of a quaternion $Q$ for the rotation representation, it is noteworthy that this system doesn't deal with the constraints $\mid Q \mid = 1$. Thus, the direction $(q_1,q_0)$ can be normal to this constraint, in that case this approach doesn't work. (It happens in practice) The solution that consists in normaliaed q after this formulation is not convenient because, it could be incompatible with $\mid Q \mid = 1$. A better approach is to add this constraint.
+
+\subsection {Position formulation with the quaternion constraints}
+It consists in adding the constraint $\mid Q \mid = 1$ in the system HE:
+
+\begin{equation}
+  \tilde {HE}(q)= \left(\begin{array}{l}
+    HE(q)\\
+    \mid Q \mid -1
+\end{array}\right)
+\end{equation}
+
+The formulation described above can be done. 
