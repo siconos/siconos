@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding=""?>
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN" "http://style.tigris.org/tigris_transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content=""/>
+  <title>Siconos call</title>
+  <style type="text/css">
+/* <![CDATA[ */ 
+@import "css/readyset.css"; 
+@import "css/inst.css";
+/*  ]]>
+ */
+ </style>
+  <link rel="stylesheet" type="text/css" href="css/print.css" media="print"/>
+</head>
+
+<body>
+
+  
+ 
+  <ul>
+    
+    <li>main</li>
+    <ul>
+      <li>TS::computeOneStep</li>
+      <ul>
+	<li>TS::advanceToEvent</li>
+	<ul>
+	  <li>TS::computeInitialResidu</li><ul>
+	    <li>Relation::computegh</li>
+	    <li>ds::updatePlugins (Warning : Used only for the FirstOrderNonLinearDS)</li>
+	    <li>OSI::computeResidu</li><ul>
+	      <li>for all ds, ds::residuFree <-- W(v-vold)-h Fl_k</li>
+	      </ul>
+	    </ul>
+	  <li>TS::prepareNewtonIteration</li>
+	  <ul>
+	    <li>Moreau::computeW</li><ul>
+	      <li>Lagrangian : WMap[ds]<-- M-h*theta C-hh*theta*thetaK </li>
+	      <li>Newton Euler : Error Do Nothing</li>
+	      </ul>
+	    <li>Relation::computeJachg</li>
+	    <li>DS::preparStep</li>
+	    <li>Relation::preparNewtonIteration</li>
+	    do something only for the FirstOrderType2R!
+	  </ul>
+	  <li>TS::computeFreeState</li>
+	  <ul>
+	    <li>Moreau::ComputeFreeState.</li>
+	    <ul>
+	      <li>Compute the velocity free.</li>
+	      Lagrangian : using WMap<br>
+	      NewtonEuler: using ds::luW (Error, it contains only Mass matrix,it miss elements)
+	    </ul>
+	  </ul>
+	  <li>TS::computeOneStepNSProblem</li>
+	  <ul>
+	    <li>OSNSP::compute</li><ul>
+	      <li>OSNSP::Precompute</li>
+	      <li>Numerics::Solver</li>
+	      _z,_w <-- solution
+	      <li>OSNSP::PostCompute</li>
+	      UR::y(ie Interaction::y) <-- _z,_w 
+	      </ul>
+	  </ul>
+	  <li>TS::update</li>
+	  <ul>
+	    <li>TS::updateInput</li>
+	    <ul>
+	      <li>Interaction,Relation::computeInput</li>
+	      compute B*Lambda, the inpute of the DS
+	    </ul>
+	    <li>OSI::updateState</li>
+	    misaj de q 
+	    NewtonEuler, updateT and update dotq
+	    <li>TS::updateOutput</li><ul>
+	      <li>Interaction,Relation::computeOutput</li>
+	      computeh and sometime computeJachq.
+	      </ul>
+	  </ul>
+	</ul>
+      </ul>
+      <li>TS::nextStep</li>
+      <ul>
+	<li>TS::processEvent</li>
+	<ul>
+	  <li>EventsManager::processEvents</li>
+	  <ul>
+	    <li>EventsManager::OptimizedProcessEvent</li>
+	    <ul>
+	      <li>nextEvent::process(simu)</li>
+	      <ul>
+		<li>Simulation::saveInMemory</li>
+	      </ul>
+	      <li>simulation::updateIndexSets</li>
+	      <li>TD::increment()</li>
+	      set the step size ??
+	      <li>ETD::setTime</li><ul>
+		<li>nextEvent = followingEvent</li>
+		</ul>
+	      <li>EventManager::update</li>
+	    </ul>
+	  </ul>
+	  <li>DS::endStep</li>
+	</ul>
+      </ul>
+    </ul>
+  </ul>
+TO DO
+<ul>
+  <li>use Wmap for NewtonEulerDS</li>
+  <li>project on constraints in the case of FC3D</li>
+  </ul>
+</body>
+
+</html>
