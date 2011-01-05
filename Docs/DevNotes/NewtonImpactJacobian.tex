@@ -1,0 +1,71 @@
+\subsection{Gradiant computaion, case oif NewtonEuler with quaternion}
+
+In the section, $q$ is the quaternion of the dynamical system.
+
+\begin{figure}[h]
+  \centering
+   
+  \input{./Figures/NewtonEulerImpact.pstex_t}
+  
+  \caption{Impact of one DS.}
+  \label{figCase}
+\end{figure}
+
+$\nabla _q h$ consist in computing $P_c(q+\delta q)-P_c(q)$.
+\[GP(q)=qG_0P_0~^cq\]
+\[GP(q+\delta q)=(q+\delta q)G_0P_0~^c(q+\delta q)\]
+\[=(q+\delta q)~^cqGP(q)q~^c(q+\delta q)\]
+\[=(1,0,0,0)+\delta q~^cq)GP(q)(q~^cq+q~^c\delta q)\]
+\[=GP(q)+\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\]
+So, because G is independant of $q$:
+\[P(q+\delta q)-P(q)=qGP(q+\delta q)-GP(q)=\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\]
+For the directional derivation, we chose $\delta q = \epsilon * (1,0,0,0)$
+\[\lim_{\epsilon \to 0}\frac{P(q+\delta q)-P(q)}{\epsilon}=~^cqGP(q) + GP(q)q\]
+For the directional derivation, we chose $\delta q = \epsilon * (0,1,0,0)=\epsilon * e_i$
+\[\lim_{\epsilon \to 0}\frac{P(q+\delta q)-P(q)}{\epsilon}=e_i~^cqGP(q) - GP(q)qe_i\]
+Application to the NewtonEulerRImpact:
+\[H:\mathbb{R}^7 \to \mathbb{R}\]
+\[\nabla _q H \in \mathcal{M}^{1,7}\]
+\[\nabla _q H =\left(\begin{array}{c} N_x\\N_y\\N_z\\
+(~^cqGP(q) + GP(q)q).N\\
+(e_2~^cqGP(q) - GP(q)qe_2).N\\
+(e_3~^cqGP(q) - GP(q)qe_3).N\\
+(e_4~^cqGP(q) - GP(q)qe_4).N\\
+\end{array}\right)\]
+\subsection{Ball case}
+It is the case where $GP=N$:
+for $e2$:
+\[(0,1,0,0).(q_0,p).(0.N)=\]
+\[\left(\left(\begin{array}{c}1\\0\\0\end{array}\right).p,\left(\begin{array}{c}q_0\\0\\0\end{array}\right) -\left(\begin{array}{c}1\\0\\0\end{array}\right)*p \right).(0,N)=\]
+\[\left(?, \left(\begin{array}{c}1\\0\\0\end{array}\right).p~N+\left(\left(\begin{array}{c}q_0\\0\\0\end{array}\right)- \left(\begin{array}{c}1\\0\\0\end{array}\right)*p \right)*N\right)=\]
+\[\left(?, \left(\begin{array}{c}1\\0\\0\end{array}\right).p~N+q_0 \left(\begin{array}{c}1\\0\\0\end{array}\right)*N+ \left(p* \left(\begin{array}{c}1\\0\\0\end{array}\right)\right)*N \right)\]
+and:
+\[(0,N).(q_0,p).(0,1,0,0)=\]
+\[(-N.p,q_0N+N*p).(0,1,0,0)=\]
+\[\left(?,-(N.p)\left(\begin{array}{c}1\\0\\0\end{array}\right) - \left(\begin{array}{c}1\\0\\0\end{array}\right)*(q_0N+N*p)\right)=\]
+\[\left(?,-(N.p)\left(\begin{array}{c}1\\0\\0\end{array}\right)-q_0 \left(\begin{array}{c}1\\0\\0\end{array}\right)*N-\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*p)\right)\]
+sub then and get the resulting vector.N:
+\[\left[ p_x~N -N.p~\left(\begin{array}{c}1\\0\\0\end{array}\right)+()*N-\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*p)\right].N=\]
+\[p_x-N_xN.p+0-\left(\begin{array}{c}1\\0\\0\end{array}\right).((N*p)*N)=\]
+  \[p_x-N_xN.p+\left(\begin{array}{c}1\\0\\0\end{array}\right).(N*(N*p))=\]
+    using $a*(b*c)=b(a.c)-c(a.b)$ leads to
+    \[p_x-N_xN.p+\left(\begin{array}{c}1\\0\\0\end{array}\right).(N(N.p)-p)=\]
+\[p_x-N_xN.p+NxNp-Px=0\]
+for $e1=(1,0,0,0)$:
+\[(q_0,-p).(0,N)=(?,q_0N-p*N)\]
+\[(0,N).(q_0,p)=(?,q_0N+p*N)\]
+So
+\[\nabla _q H =\left(\begin{array}{c} N_x\\N_y\\N_z\\
+2q_0\\
+0\\
+0\\
+0\\
+\end{array}\right)\]
+The question is $(\nabla _q H)^t \delta q$ where $\delta q $ is tengantial to the sphere:
+\[\delta q=(cos((x+\delta x)/2),sin((x+\delta x)/2)(p \delta p))-(cos(x/2),sin(x/2)p)\]
+\[\delta q=(cos(x/2)cos(\delta x /2)-sin(x/2)sin(\delta x /2),?)-(cos(x/2),sin(x/2)p)\]
+\[\delta q = (cos(x/2) +0(\delta x)^2,?)-(cos(x/2),sin(x/2)p)\]
+\[\delta q = (0(\delta x)^2,?)\]
+and
+\[(\nabla _q H)^t \delta q = 0(\delta x)^2\]
+
