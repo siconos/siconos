@@ -24,7 +24,7 @@
 #include <boost/numeric/bindings/atlas/cblas3.hpp>
 #include <boost/numeric/ublas/fwd.hpp>
 
-
+#include "BlockVector.hpp"
 #include "KernelConfig.h"
 
 #ifndef FRAMEWORK_BLAS
@@ -4953,7 +4953,14 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   unsigned int colA = coord[3] - coord[2];
   unsigned int dimX = coord[5] - coord[4];
   unsigned int dimY = coord[7] - coord[6];
-
+  unsigned int r0A = coord[0];
+  unsigned int r1A = coord[1];
+  unsigned int c0A = coord[2];
+  unsigned int c1A = coord[3];
+  unsigned int r0x = coord[4];
+  unsigned int r1x = coord[5];
+  unsigned int r0y = coord[6];
+  unsigned int r1y = coord[7];
   if (colA != dimX)
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: inconsistent sizes between A and x.");
 
@@ -4967,8 +4974,61 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
 
-  if (numA == 0 || numY == 0) // If A,x or y is Block
-    SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for A/y block matrices/vector.");
+  if (numA == 0)  // If A,x or y is Block
+    SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for A block matrices.");
+  if (numY == 0)
+  {
+    BlockVector * pBY = (BlockVector*) &y;
+    unsigned int curPosInY = 0;
+    for (int numBlock = 0; numBlock < pBY->getNumberOfBlocks(); numBlock++)
+    {
+      SP::SiconosVector blockOfY = pBY->vector(numBlock);
+      unsigned int beginPosBlock = curPosInY;
+      unsigned int endPosBlock = curPosInY + blockOfY->size();
+      Index aCoord(8);
+      for (int ii = 0; ii < 8; ii++) aCoord[ii] = coord[ii];
+
+      /*if intersection of [r0y,r1y] with [beginPosBlock,endPosBlock] is null, continue*/
+      if (r0y >= endPosBlock || r1y <= beginPosBlock)
+      {
+        curPosInY += blockOfY->size();
+        continue;
+      }
+
+      /*first coordinate of pBY:*/
+      if (r0y <= beginPosBlock)
+        aCoord[6] = 0;
+      else
+        aCoord[6] = r0y - beginPosBlock;
+
+      /*first line of A:*/
+      if (beginPosBlock <= r0y)
+        aCoord[0] = r0A;
+      else
+        aCoord[0] = r0A + beginPosBlock - r0y;
+
+      /*last coordinate of pBY:*/
+      if (r1y >= endPosBlock)
+        aCoord[7] = blockOfY->size();
+      else
+        aCoord[7] = blockOfY->size() - (endPosBlock - r1y);
+
+      /*last line of A:*/
+      if (r1y <= endPosBlock)
+        aCoord[1] = r1A;
+      else
+        aCoord[1] = r1A - (r1y - endPosBlock);
+      aCoord[2] = c0A;
+      aCoord[3] = c1A;
+      aCoord[4] = r0x;
+      aCoord[5] = r1x;
+
+      subprod(A, x, *blockOfY, aCoord, init);
+
+      curPosInY += blockOfY->size();
+    }
+    return;
+  }
 
   if (numA == 6) // A = 0
   {
