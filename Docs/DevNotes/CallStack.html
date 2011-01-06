@@ -71,10 +71,12 @@
 	      compute B*Lambda, the inpute of the DS
 	    </ul>
 	    <li>OSI::updateState</li>
-	    misaj de q 
+	     V_{k+1} <-- W^{-1}p + V_free<br>
+	    misaj de q <br>  
 	    NewtonEuler, updateT and update dotq
 	    <li>TS::updateOutput</li><ul>
 	      <li>Interaction,Relation::computeOutput</li>
+	      <li>computation of ydot from qdot and jachq</li>
 	      computeh and sometime computeJachq.
 	      </ul>
 	  </ul>
@@ -106,6 +108,32 @@
       </ul>
     </ul>
   </ul>
+<ul>
+  <li>TS::newtonSolve</li><ul>
+    <li>TS::computeInitialResidu</li>
+    <ul>loop
+      <li>TS::prepareNewtonIteration</li>
+      <li>TS::computeFreeState</li>
+      <li>TS::computeOneStepNSProblem</li>
+      <li>TS::update</li>
+      <li>TS::newtonCheckConvergence</li>
+      <ul>
+	<li>OSI::computeResidu</li>
+      </ul>
+      <li>TS::saveYandLambdaInMemory</li>
+    </ul>
+  </ul>
+</ul>
+<ul>
+  <li>TSProj::newtonSolve</li><ul>
+    <li>TS::newtonSolve</li>
+    <li>R::computeJachq</li>
+    <li>R::computeh</li>
+    <li>TS::computeOneStepNSProblem</li>
+    <li>q normalized</li>
+    <li>update T</li>
+  </ul>
+</ul>
 TO DO
 <ul>
   <li>use Wmap for NewtonEulerDS</li>
