@@ -61,7 +61,7 @@ class NewtonEulerR : public Relation
 {
 public:
 
-  enum DataNames {z, q0, q1, q2, p0, p1, p2, sizeDataNames};
+  enum DataNames {z, deltaq, q0, q1, q2, p0, p1, p2, sizeDataNames};
 
 protected:
   unsigned int _ysize;
@@ -311,6 +311,10 @@ public:
   SP::SiconosVector getq()
   {
     return data[q0];
+  }
+  SP::SiconosVector getDeltaq()
+  {
+    return data[deltaq];
   }
   ACCEPT_STD_VISITORS();
 

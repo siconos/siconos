@@ -66,6 +66,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 
   // Current state
   _q.reset(new SimpleVector(_qDim));
+  _deltaq.reset(new SimpleVector(_qDim));
   _v.reset(new SimpleVector(_n));
 
   _dotq.reset(new SimpleVector(_qDim));
@@ -94,6 +95,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
 
   // Current state
   _q.reset(new SimpleVector(_qDim));
+  _deltaq.reset(new SimpleVector(_qDim));
   _v.reset(new SimpleVector(_n));
   (*_q) = (*_q0);
   _dotq.reset(new SimpleVector(_qDim));

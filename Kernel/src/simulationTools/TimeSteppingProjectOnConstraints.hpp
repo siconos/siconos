@@ -53,6 +53,7 @@ public:
   ~TimeSteppingProjectOnConstraints();
 
   virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
+  virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
 
 
   /** newton algorithm

@@ -47,6 +47,9 @@ public:
   /** destructor
    */
   virtual ~NewtonEulerRFC3D() {};
+  /** initialize components specific to derived classes.
+    */
+  virtual void initComponents();
 
   /*default implementation consists in multiplying jachq and T*/
   virtual void computeJachqT();

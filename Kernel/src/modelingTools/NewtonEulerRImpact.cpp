@@ -20,6 +20,7 @@
 
 #include "NewtonEulerRImpact.hpp"
 #include <boost/math/quaternion.hpp>
+//#define NERI_DEBUG
 using namespace std;
 void NewtonEulerRImpact::computeJachq(double t)
 {
@@ -47,7 +48,10 @@ void NewtonEulerRImpact::computeJachq(double t)
       continue;
     double sign = 1.0;
     SP::SiconosVector q = (BlockX->getAllVect())[iDS];
-    //      printf("ds%d->q :",iDS);q->display();
+#ifdef NERI_DEBUG
+    printf("NewtonEulerRImpact::computeJachq : ds%d->q :", iDS);
+    q->display();
+#endif
     ::boost::math::quaternion<float>    quatGP;
     if (iDS == 0)
     {
@@ -62,12 +66,18 @@ void NewtonEulerRImpact::computeJachq(double t)
           _Pc2->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
-    //      printf("GP :%lf, %lf, %lf\n",quatGP.R_component_2(),quatGP.R_component_3(),quatGP.R_component_4());
+#ifdef NERI_DEBUG
+    printf("NewtonEulerRImpact::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
+    printf("NewtonEulerRImpact::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
+#endif
     ::boost::math::quaternion<float>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<float>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
     ::boost::math::quaternion<float>    quat0(1, 0, 0, 0);
     ::boost::math::quaternion<float>    quatBuff;
     quatBuff = (quatGP * quatQ) + (quatcQ * quatGP);
+#ifdef NERI_DEBUG
+    printf("NewtonEulerRImpact::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
+#endif
     _jachq->setValue(0, 7 * iDS + 3, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
                      quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     for (int i = 1; i < 4; i++)
@@ -78,8 +88,13 @@ void NewtonEulerRImpact::computeJachq(double t)
                        quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     }
   }
-  //    printf("computeJachq :");_jachq->display();
-  //    printf("q1dot : ");sOCCContacts[_indexContact]._DS1->dotq()->display();
-  //    printf("q2dot : ");sOCCContacts[_indexContact]._DS2->dotq()->display();
+#ifdef NERI_DEBUG
+  printf("NewtonEulerRImpact::computeJachq :");
+  _jachq->display();
+  printf("q1dot : ");
+  sOCCContacts[_indexContact]._DS1->dotq()->display();
+  printf("q2dot : ");
+  sOCCContacts[_indexContact]._DS2->dotq()->display();
+#endif
 
 }

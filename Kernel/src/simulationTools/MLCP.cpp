@@ -189,6 +189,9 @@ int MLCP::compute(double time)
   preCompute(time);
   _numerics_problem.n = _n;
   _numerics_problem.m = _m;
+#ifdef MLCP_DEBUG
+  printf("MLCP::compute m n :%d,%d\n", _n, _m);
+#endif
   /*If user has not allocted the working memory, do it. */
   int allocated = mlcp_alloc_working_memory(&_numerics_problem, &*_numerics_solver_options);
   int info = 0;
@@ -225,6 +228,12 @@ int MLCP::compute(double time)
     // --- Recovering of the desired variables from MLCP output ---
     postCompute();
 
+  }
+  else
+  {
+#ifdef MLCP_DEBUG
+    printf("MLCP::compute : sizeoutput is null\n");
+#endif
   }
   if (allocated)
     mlcp_free_working_memory(&_numerics_problem, &*_numerics_solver_options);

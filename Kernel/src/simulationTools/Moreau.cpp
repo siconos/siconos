@@ -1317,9 +1317,10 @@ void Moreau::updateState(unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-
-      //  cout<<"Moreau::updatestate prev v"<<endl;
-      //  v->display();
+#ifdef MOREAU_NE_DEBUG
+      cout << "Moreau::updatestate prev v" << endl;
+      v->display();
+#endif
 
       /*d->p has been fill by the Relation->computeInput, it contains
            B \lambda _{k+1}*/
@@ -1331,11 +1332,12 @@ void Moreau::updateState(unsigned int level)
 
       *v +=  * ds->workFree();
 
-      //cout<<"Moreau::updatestate work free"<<endl;
-      //ds->workFree()->display();
-      //cout<<"Moreau::updatestate new v"<<endl;
-      //v->display();
-
+#ifdef MOREAU_NE_DEBUG
+      cout << "Moreau::updatestate work free" << endl;
+      ds->workFree()->display();
+      cout << "Moreau::updatestate new v" << endl;
+      v->display();
+#endif
       //compute q
       //first step consists in computing  \dot q.
       //second step consists in updating q.

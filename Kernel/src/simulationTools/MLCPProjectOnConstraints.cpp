@@ -25,6 +25,7 @@
 #include "OSNSMatrixProjectOnConstraints.hpp"
 using namespace std;
 using namespace RELATION;
+//#define MLCPPROJ_DEBUG
 void MLCPProjectOnConstraints::updateM()
 {
   // Get index set from Simulation
@@ -281,6 +282,10 @@ void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned in
   SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
   for (int i = 0; i < sizeY; i++)
     _q->setValue(pos + i, ner->yProj()->getValue(UR->getRelativePosition() + i));
+#ifdef MLCPPROJ_DEBUG
+  printf("MLCPProjectOnConstraints::computeqBlock, _q from yProj\n");
+  _q->display();
+#endif
 
 }
 void MLCPProjectOnConstraints::postCompute()
@@ -301,8 +306,11 @@ void MLCPProjectOnConstraints::postCompute()
   // indexSets[1]) ===
 
   unsigned int pos = 0;
-
+#ifdef MLCPPROJ_DEBUG
+  printf("MLCPProjectOnConstraints::postCompute\n");
+#endif
   UnitaryRelationsGraph::VIterator ui, uiend;
+
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet->bundle(*ui);
@@ -324,13 +332,32 @@ void MLCPProjectOnConstraints::postCompute()
     if (RType != Type::NewtonEulerR)
       RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - R is not from NewtonEulerR.");
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+#ifdef MLCPPROJ_DEBUG
+    printf("MLCPProjectOnConstraints::postCompute q before update\n");
+    (ner->getq())->display();
+#endif
     SP::SimpleVector yProj = ner->yProj();
-    setBlock(*_z, yProj, yProj->size(), pos, 0);
+    SP::SimpleVector aBuff(new SimpleVector(yProj->size()));
+    setBlock(*_z, aBuff, yProj->size(), pos, 0);
     /*Now, update the ds's dof throw the relation*/
     SP::SiconosMatrix J = ner->jachqProj();
     SP::SimpleMatrix aux(new SimpleMatrix(*J));
     aux->trans();
-    prod(*aux, *yProj, *(ner->getq()), false);
+
+    Index coord(8);
+    coord[0] = 0; /*first line of aux*/
+    coord[1] = aux->size(0); /*last line of aux*/
+    coord[2] = 0; /*first col of aux*/
+    coord[3] = yProj->size();
+    coord[4] = 0;
+    coord[5] = yProj->size();
+    coord[6] = 0;
+    coord[7] = (ner->getq())->size();
+    subprod(*aux, *aBuff, *(ner->getq()), coord, false);
+#ifdef MLCPPROJ_DEBUG
+    printf("MLCPProjectOnConstraints::postCompute q updated\n");
+    (ner->getq())->display();
+#endif
   }
 
 }

@@ -75,6 +75,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
 
   DSIterator it;
   data[q0].reset(new BlockVector()); // displacement
+  data[deltaq].reset(new BlockVector());
   data[q1].reset(new BlockVector()); // velocity
   //  data[q2].reset(new BlockVector()); // acceleration
   data[z].reset(new BlockVector()); // z vector
@@ -93,6 +94,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
     lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     data[q0]->insertPtr(lds->q());
+    data[deltaq]->insertPtr(lds->deltaq());
     data[q1]->insertPtr(lds->dotq());
     //    data[q2]->insertPtr( lds->acceleration());
     data[p0]->insertPtr(lds->p(1));
@@ -111,11 +113,14 @@ void NewtonEulerR::computeh(double)
   SP::SiconosVector y = interaction()->y(0);
   *_workQ = *data[q0];
   //prod(*_jachq,*data[q0],*y);
-  prod(*_jachq, *_workQ, *y);
+
+  prod(*_jachq, *_workQ, *y, true);
   if (_e)
     *y += *_e;
-  //printf("NewtonEulerR::computeh() :");
-  //y->display();
+  //  printf("NewtonEulerR::computeh() q:\n");
+  //  _workQ->display();
+  //  printf("NewtonEulerR::computeh() :\n");
+  //  y->display();
 }
 
 //  void NewtonEulerR::computeJachx(double)
@@ -194,7 +199,7 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   /*implemented for the bouncing ball*/
 
 
-  computeJachq(t);
+  // computeJachq(t);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 

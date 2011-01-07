@@ -27,6 +27,7 @@
 using namespace std;
 using namespace RELATION;
 
+//#define GMP_DEBUG
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   LinearOSNS()
@@ -63,8 +64,9 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
-
-  //  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+#ifdef GMP_DEBUG
+  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+#endif
   int size = UR->getNonSmoothLawSize();
   if (Type::value(*(UR->interaction()->nonSmoothLaw()))
       == Type::EqualityConditionNSL)
@@ -142,6 +144,12 @@ int GenericMechanical::compute(double time)
     //_z->display();
     postCompute();
 
+  }
+  else
+  {
+#ifdef GMP_DEBUG
+    printf("GenericMechanical::compute : sizeoutput is null\n");
+#endif
   }
 
   return info;

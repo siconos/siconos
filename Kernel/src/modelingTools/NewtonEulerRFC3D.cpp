@@ -45,7 +45,13 @@ so jachqT=M*N
 
 
  */
-
+void NewtonEulerRFC3D::initComponents()
+{
+  NewtonEulerRImpact::initComponents();
+  /*keep only the distance.*/
+  /*Warning, in current version, user of FC3D has to set _y and _yProj in the computeh */
+  _yProj.reset(new SimpleVector(1));
+}
 void computeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
 {
   SP::SimpleMatrix M(new SimpleMatrix(3, 3));

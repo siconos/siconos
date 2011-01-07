@@ -67,7 +67,8 @@ protected:
       _q[0:2] : the coordinates of the center of mass.
       _q[3:6] : a quaternion representing the orientation of the solid.
   */
-  SP::SiconosVector _q;
+  SP::SimpleVector _q;
+  SP::SimpleVector _deltaq;
   SP::SiconosVector _q0;
   /** The time derivative of q*/
   SP::SiconosVector _dotq;
@@ -291,9 +292,13 @@ public:
   /** get q
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector q() const
+  inline SP::SimpleVector q() const
   {
     return _q;
+  }
+  inline SP::SimpleVector deltaq() const
+  {
+    return _deltaq;
   }
 
   /** set the value of q to newValue
