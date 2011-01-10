@@ -61,75 +61,148 @@ void frictionContact3D_AlartCurnierFABGenerated(
 {
   double x0 = rhon * un;
   double x1 = rn - x0;
-  double x2 = sign(x1);
-  double x3 = rhot1 * ut1;
-  double x4 = rt1 - x3;
-  double x5 = rn / 2;
-  double x6 = fabs(x1);
-  double x7 = x6 / 2;
-  double x8 = x0 / 2;
-  double x9 = x5 + x7;
-  double x10 = x9 - x8;
-  double x11 = x4 * x4;
-  double x12 = rhot2 * ut2;
-  double x13 = rt2 - x12;
-  double x14 = x13 * x13;
-  double x15 = x11 + x14;
-  double x16 = mu * x10;
-  double x17 = sqrt(x15);
-  double x19 = 1. / (x17);
-  double x22 = x19 * x19 * x19;
-  double x23 = x2 / 2;
-  double x24 = -rhon / 2;
-  double x25 = x2 * x24;
-  double x26 = x24 + x25;
-  double x27 = 1.0 / 2.0 + x23;
-  double x28 = x3 - rt1;
-  double x30 = x12 - rt2;
-  double x31 = x16 * x19;
-  if (x17 <= x16)
+  double x5 = rhot1 * ut1;
+  double x6 = rt1 - x5;
+  double x8;
+  double x9 = x6 * x6;
+  double x10 = rhot2 * ut2;
+  double x11 = rt2 - x10;
+  double x12 = x11 * x11;
+  double x13 = x12 + x9;
+  double x14;
+  double x15 = sqrt(x13);
+  double x16;
+  double x17 = 1. / (x15);
+  double x18 = -rhon;
+  double x20;
+  double x21;
+  double x22;
+  double x23 = x17 * x17 * x17;
+  double x25;
+  double x26 = x5 - rt1;
+  double x27;
+  double x28;
+  double x29 = x10 - rt2;
+  if (x1 <= 0)
   {
-    result[1] = rt1 - x4;
+    x8 = 0;
+    x14 = mu * x8;
+    x16 = x15 <= x14;
+    x20 = 0;
+    x21 = x14 < x15;
+    x25 = 0;
+    x28 = x14 * x17;
+    result[0] = rn - x8;
+    result[3] = -x20;
+    result[12] = 1 - x25;
+  };
+  if (0 < x1)
+  {
+    x8 = x1;
+    x14 = mu * x8;
+    x16 = x15 <= x14;
+    x20 = x18;
+    x21 = x14 < x15;
+    x25 = 1;
+    x28 = x14 * x17;
+    result[0] = rn - x8;
+    result[3] = -x20;
+    result[12] = 1 - x25;
+  };
+  if (x15 <= x14)
+  {
+    x22 = 0;
+    x27 = 1;
+    x28 = x14 * x17;
+    result[0] = rn - x8;
+    result[1] = rt1 - x6;
     result[4] = 0;
     result[7] = rhot1;
     result[10] = 0;
     result[13] = 0;
     result[16] = 0;
     result[19] = 0;
-    result[2] = rt2 - x13;
+    result[2] = rt2 - x11;
     result[5] = 0;
     result[8] = 0;
     result[11] = rhot2;
     result[14] = 0;
     result[17] = 0;
     result[20] = 0;
-  }
-  else
-  {
-    result[1] = rt1 - x31 * x4;
-    result[4] = -mu * x19 * x26 * x4;
-    result[7] = rhot1 * x31 - rhot1 * x11 * x16 * x22;
-    result[10] = -rhot2 * x13 * x16 * x22 * x4;
-    result[13] = -mu * x19 * x27 * x4;
-    result[16] = 1 - x31 - mu * x10 * x22 * x28 * x4;
-    result[19] = -mu * x10 * x22 * x30 * x4;
-    result[2] = rt2 - x13 * x31;
-    result[5] = -mu * x13 * x19 * x26;
-    result[8] = -rhot1 * x13 * x16 * x22 * x4;
-    result[11] = rhot2 * x31 - rhot2 * x14 * x16 * x22;
-    result[14] = -mu * x13 * x19 * x27;
-    result[17] = -mu * x10 * x13 * x22 * x28;
-    result[20] = 1 - x31 - mu * x10 * x13 * x22 * x30;
   };
-  result[0] = x5 + x8 - x7;
-  result[3] = rhon / 2 + rhon * x23;
+  if ((x1 <= 0) && (x15 <= x14))
+  {
+    result[1] = rt1 - x6;
+    result[4] = 0;
+    result[7] = rhot1;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[19] = 0;
+    result[2] = rt2 - x11;
+    result[5] = 0;
+    result[8] = 0;
+    result[11] = rhot2;
+    result[14] = 0;
+    result[17] = 0;
+    result[20] = 0;
+  };
+  if ((x1 <= 0) && (x14 < x15))
+  {
+    result[1] = rt1 - x28 * x6;
+    result[4] = -mu * x17 * x20 * x6;
+    result[7] = rhot1 * x28 - rhot1 * x14 * x23 * x9;
+    result[10] = -rhot2 * x11 * x14 * x23 * x6;
+    result[13] = -mu * x17 * x25 * x6;
+    result[16] = 1 - x28 - mu * x23 * x26 * x6 * x8;
+    result[19] = -mu * x23 * x29 * x6 * x8;
+    result[2] = rt2 - x11 * x28;
+    result[5] = -mu * x11 * x17 * x20;
+    result[8] = -rhot1 * x11 * x14 * x23 * x6;
+    result[11] = rhot2 * x28 - rhot2 * x12 * x14 * x23;
+    result[14] = -mu * x11 * x17 * x25;
+    result[17] = -mu * x11 * x23 * x26 * x8;
+    result[20] = 1 - x28 - mu * x11 * x23 * x29 * x8;
+  };
+  if ((0 < x1) && (x15 <= x14))
+  {
+    result[1] = rt1 - x6;
+    result[4] = 0;
+    result[7] = rhot1;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[19] = 0;
+    result[2] = rt2 - x11;
+    result[5] = 0;
+    result[8] = 0;
+    result[11] = rhot2;
+    result[14] = 0;
+    result[17] = 0;
+    result[20] = 0;
+  };
+  if ((0 < x1) && (x14 < x15))
+  {
+    result[1] = rt1 - x28 * x6;
+    result[4] = -mu * x17 * x20 * x6;
+    result[7] = rhot1 * x28 - rhot1 * x14 * x23 * x9;
+    result[10] = -rhot2 * x11 * x14 * x23 * x6;
+    result[13] = -mu * x17 * x25 * x6;
+    result[16] = 1 - x28 - mu * x23 * x26 * x6 * x8;
+    result[19] = -mu * x23 * x29 * x6 * x8;
+    result[2] = rt2 - x11 * x28;
+    result[5] = -mu * x11 * x17 * x20;
+    result[8] = -rhot1 * x11 * x14 * x23 * x6;
+    result[11] = rhot2 * x28 - rhot2 * x12 * x14 * x23;
+    result[14] = -mu * x11 * x17 * x25;
+    result[17] = -mu * x11 * x23 * x26 * x8;
+    result[20] = 1 - x28 - mu * x11 * x23 * x29 * x8;
+  };
   result[6] = 0;
   result[9] = 0;
-  result[12] = 1.0 / 2.0 - x23;
   result[15] = 0;
   result[18] = 0;
 }
-
 void frictionContact3D_AlartCurnierFGenerated(
   double rn,
   double rt1,
@@ -143,39 +216,57 @@ void frictionContact3D_AlartCurnierFGenerated(
   double rhot2,
   double *result)
 {
-  double x0 = rhot1 * ut1;
-  double x1 = rt1 - x0;
-  double x2 = rn / 2;
-  double x3 = rhon * un;
-  double x4 = rn - x3;
-  double x5 = fabs(x4);
-  double x6 = x5 / 2;
-  double x7 = x3 / 2;
-  double x8 = x2 + x6;
-  double x9 = x8 - x7;
-  double x10 = x1 * x1;
-  double x11 = rhot2 * ut2;
-  double x12 = rt2 - x11;
-  double x13 = x12 * x12;
-  double x14 = x10 + x13;
-  double x15 = mu * x9;
-  double x16 = sqrt(x14);
-  double x18 = 1. / (x16);
-  double x20 = x15 * x18;
-  double x21 = x12 * x20;
-  double x22 = x1 * x20;
-  double x23 = x2 + x7;
-  if (x16 <= x15)
+  double x0 = rhon * un;
+  double x1 = rn - x0;
+  double x2 = rhot1 * ut1;
+  double x3 = rt1 - x2;
+  double x8;
+  double x9 = x3 * x3;
+  double x10 = rhot2 * ut2;
+  double x11 = rt2 - x10;
+  double x12 = x11 * x11;
+  double x13 = x12 + x9;
+  double x14;
+  double x15 = sqrt(x13);
+  double x16;
+  double x17 = 1. / (x15);
+  double x18;
+  if (x1 <= 0)
   {
-    result[1] = rt1 - x1;
-    result[2] = rt2 - x12;
+    x8 = 0;
+    x14 = mu * x8;
+    x16 = x15 <= x14;
+    x18 = x14 < x15;
+    result[0] = rn - x8;
   };
-  if (x15 < x16)
+  if (0 < x1)
   {
-    result[1] = rt1 - x22;
-    result[2] = rt2 - x21;
+    x8 = x1;
+    x14 = mu * x8;
+    x16 = x15 <= x14;
+    x18 = x14 < x15;
+    result[0] = rn - x8;
   };
-  result[0] = x23 - x6;
+  if ((x1 <= 0) && (x15 <= x14))
+  {
+    result[1] = rt1 - x3;
+    result[2] = rt2 - x11;
+  };
+  if ((x1 <= 0) && (x14 < x15))
+  {
+    result[1] = rt1 - x14 * x17 * x3;
+    result[2] = rt2 - x11 * x14 * x17;
+  };
+  if ((0 < x1) && (x15 <= x14))
+  {
+    result[1] = rt1 - x3;
+    result[2] = rt2 - x11;
+  };
+  if ((0 < x1) && (x14 < x15))
+  {
+    result[1] = rt1 - x14 * x17 * x3;
+    result[2] = rt2 - x11 * x14 * x17;
+  };
 }
 void frictionContact3D_AlartCurnierABGenerated(
   double rn,
@@ -192,119 +283,134 @@ void frictionContact3D_AlartCurnierABGenerated(
 {
   double x0 = rhon * un;
   double x1 = rn - x0;
-  double x2 = sign(x1);
-  double x3 = rhot1 * ut1;
-  double x4 = rt1 - x3;
-  double x5 = x4 * x4;
-  double x6 = rhot2 * ut2;
-  double x7 = rt2 - x6;
-  double x8 = x7 * x7;
-  double x9 = x5 + x8;
-  double x10 = rn / 2;
-  double x11 = fabs(x1);
-  double x12 = x11 / 2;
-  double x13 = x10 + x12;
-  double x14 = x0 / 2;
-  double x15 = x13 - x14;
-  double x16 = mu * x15;
-  double x17 = sqrt(x9);
-  double x19 = 1. / (x17);
-  double x22 = x19 * x19 * x19;
-  double x23 = x2 / 2;
-  double x24 = -rhon / 2;
-  double x25 = x2 * x24;
-  double x26 = x24 + x25;
-  double x27 = 1.0 / 2.0 + x23;
-  double x28 = x3 - rt1;
-  double x30 = x6 - rt2;
-  double x31 = x16 * x19;
-  double x32 = mu * x15 * x22;
-  double x33 = mu * x4;
-  double x34 = x32 * x4;
-  double x35 = x32 * x7;
-  double x36 = mu * x19;
-  double x37 = x16 * x22 * x4 * x7;
-  double x38 = x16 * x22;
-  double x39 = x19 * x33;
-  double x40 = rhot1 * x38;
-  double x41 = x36 * x7;
-  double x42 = rhot2 * x38;
-  double x43 = rhot1 * x37;
-  double x44 = rhot2 * x37;
-  double x45 = x30 * x34;
-  double x46 = x30 * x35;
-  double x47 = x28 * x35;
-  double x48 = x28 * x34;
-  double x49 = x26 * x41;
-  double x50 = x27 * x39;
-  double x51 = x26 * x39;
-  double x52 = x42 * x8;
-  double x53 = x40 * x5;
-  double x54 = x27 * x41;
-  double x55 = -rhot2;
-  double x56 = rhon / 2;
-  double x57;
-  double x58;
-  double x59;
-  double x60;
-  double x61 = rhot2 * x31;
-  double x62;
-  double x63 = rhot1 * x31;
-  double x64;
-  double x65 = rhon * x23;
-  double x66;
-  double x67;
-  double x68;
-  double x69;
-  double x70 = x31 + x48;
-  double x71 = x31 + x46;
-  double x72 = x56 + x65;
-  if (x17 <= x16)
+  double x5 = rhot1 * ut1;
+  double x6 = rt1 - x5;
+  double x7 = x6 * x6;
+  double x8 = rhot2 * ut2;
+  double x9 = rt2 - x8;
+  double x10 = x9 * x9;
+  double x11 = x10 + x7;
+  double x12 = -rhon;
+  double x14;
+  double x16;
+  double x17;
+  double x18 = sqrt(x11);
+  double x19;
+  double x20 = 1. / (x18);
+  double x21;
+  double x22;
+  double x23 = x20 * x20 * x20;
+  double x25;
+  double x26 = x5 - rt1;
+  double x27;
+  double x28;
+  double x29 = x8 - rt2;
+  if (x1 <= 0)
   {
-    x57 = 0;
-    x58 = 0;
-    x59 = 0;
-    x60 = 0;
-    x62 = 0;
-    x64 = rhot1;
-    x66 = 0;
-    x67 = 0;
-    x68 = -x55;
-    x69 = 0;
+    x14 = 0;
+    x16 = 0;
+    x17 = mu * x16;
+    x19 = x18 <= x17;
+    x21 = x17 < x18;
+    x25 = 0;
+    x28 = x17 * x20;
+    result[0] = -x14;
+    result[9] = 1 - x25;
+  };
+  if (0 < x1)
+  {
+    x14 = x12;
+    x16 = x1;
+    x17 = mu * x16;
+    x19 = x18 <= x17;
+    x21 = x17 < x18;
+    x25 = 1;
+    x28 = x17 * x20;
+    result[0] = -x14;
+    result[9] = 1 - x25;
+  };
+  if (x18 <= x17)
+  {
+    x22 = 0;
+    x27 = 1;
+    x28 = x17 * x20;
+    result[1] = 0;
+    result[4] = rhot1;
+    result[7] = 0;
+    result[10] = 0;
     result[13] = 0;
+    result[16] = 0;
+    result[2] = 0;
+    result[5] = 0;
+    result[8] = rhot2;
+    result[11] = 0;
+    result[14] = 0;
     result[17] = 0;
   };
-  if (x16 < x17)
+  if ((x1 <= 0) && (x18 <= x17))
   {
-    x57 = -x51;
-    x58 = -x47;
-    x59 = -x49;
-    x60 = -x43;
-    x62 = -x50;
-    x64 = x63 - x53;
-    x66 = -x54;
-    x67 = -x44;
-    x68 = x61 - x52;
-    x69 = -x45;
-    result[13] = 1 - x70;
-    result[17] = 1 - x71;
+    result[1] = 0;
+    result[4] = rhot1;
+    result[7] = 0;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[2] = 0;
+    result[5] = 0;
+    result[8] = rhot2;
+    result[11] = 0;
+    result[14] = 0;
+    result[17] = 0;
   };
-  result[0] = x72;
+  if ((x1 <= 0) && (x17 < x18))
+  {
+    result[1] = -mu * x14 * x20 * x6;
+    result[4] = rhot1 * x28 - rhot1 * x17 * x23 * x7;
+    result[7] = -rhot2 * x17 * x23 * x6 * x9;
+    result[10] = -mu * x20 * x25 * x6;
+    result[13] = 1 - x28 - mu * x16 * x23 * x26 * x6;
+    result[16] = -mu * x16 * x23 * x29 * x6;
+    result[2] = -mu * x14 * x20 * x9;
+    result[5] = -rhot1 * x17 * x23 * x6 * x9;
+    result[8] = rhot2 * x28 - rhot2 * x10 * x17 * x23;
+    result[11] = -mu * x20 * x25 * x9;
+    result[14] = -mu * x16 * x23 * x26 * x9;
+    result[17] = 1 - x28 - mu * x16 * x23 * x29 * x9;
+  };
+  if ((0 < x1) && (x18 <= x17))
+  {
+    result[1] = 0;
+    result[4] = rhot1;
+    result[7] = 0;
+    result[10] = 0;
+    result[13] = 0;
+    result[16] = 0;
+    result[2] = 0;
+    result[5] = 0;
+    result[8] = rhot2;
+    result[11] = 0;
+    result[14] = 0;
+    result[17] = 0;
+  };
+  if ((0 < x1) && (x17 < x18))
+  {
+    result[1] = -mu * x14 * x20 * x6;
+    result[4] = rhot1 * x28 - rhot1 * x17 * x23 * x7;
+    result[7] = -rhot2 * x17 * x23 * x6 * x9;
+    result[10] = -mu * x20 * x25 * x6;
+    result[13] = 1 - x28 - mu * x16 * x23 * x26 * x6;
+    result[16] = -mu * x16 * x23 * x29 * x6;
+    result[2] = -mu * x14 * x20 * x9;
+    result[5] = -rhot1 * x17 * x23 * x6 * x9;
+    result[8] = rhot2 * x28 - rhot2 * x10 * x17 * x23;
+    result[11] = -mu * x20 * x25 * x9;
+    result[14] = -mu * x16 * x23 * x26 * x9;
+    result[17] = 1 - x28 - mu * x16 * x23 * x29 * x9;
+  };
   result[3] = 0;
   result[6] = 0;
-  result[9] = 1.0 / 2.0 - x23;
   result[12] = 0;
   result[15] = 0;
-  result[1] = x57;
-  result[4] = x64;
-  result[7] = x67;
-  result[10] = x62;
-  result[16] = x69;
-  result[2] = x59;
-  result[5] = x60;
-  result[8] = x68;
-  result[11] = x66;
-  result[14] = x58;
 }
 
 void frictionContact3D_AlartCurnierCKPSFABGenerated(
@@ -730,6 +836,38 @@ void frictionContact3D_globalAlartCurnierFunctionGenerated(
         *mu,
         rho,
         result, A, B);
+
+
+#ifndef NDEBUG
+    double result_g[3];
+    double A_g[9];
+    double B_g[9];
+
+    computeAlartCurnierSTD(reaction,
+                           velocity,
+                           *mu,
+                           rho,
+                           result_g, A_g, B_g);
+    if (result)
+    {
+      sub3(result, result_g);
+      assert(hypot3(result_g) < 1e-7);
+    }
+
+    if (A)
+    {
+      sub3x3(A, A_g);
+      assert(hypot9(A_g) < 1e-7);
+    }
+
+    if (B)
+    {
+      sub3x3(B, B_g);
+      assert(hypot9(B_g) < 1e-7);
+    }
+
+
+#endif
 
     reaction += 3;
     velocity += 3;
