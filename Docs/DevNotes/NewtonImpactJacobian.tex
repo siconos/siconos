@@ -69,3 +69,16 @@ The question is $(\nabla _q H)^t \delta q$ where $\delta q $ is tengantial to th
 and
 \[(\nabla _q H)^t \delta q = 0(\delta x)^2\]
 
+\subsection{Case FC3D: using the local frame}
+
+\[\left(\begin{array}{c}m \dot V\\I \dot \omega + \omega I \omega \end{array}\right)= \left(\begin{array}{c}Fect+R\\Mext + R*PG \end{array}\right)\]
+  with * vectoriel product, $R$ reaction in the globla frame. $P$ the point of contact.
+  $r$ is the reaction in the local frame.  $M^t r=R$ with:
+  \[M^t=\left(\begin{array}{ccc} nx&t_1x&t_2x \\ny&t_1y&t_2y\\nz&t_1z&t_2z \end{array}\right)\]
+  we have :
+  \[\left(\begin{array}{c}R\\R*PG\end{array}\right)=\left(\begin{array}{ccc} 1&0&0\\0&1&0\\0&0&1\\
+      0&-PG_z&PG_y\\PG_z&0&-PG_x\\-PG_y&PG_X&0\end{array}\right).R:=N^tR=N^tM^tr\]
+      we want:
+      
+\[\left(\begin{array}{c}m \dot V\\I \dot \omega + \omega I \omega \end{array}\right)=jachqT^t r\]
+So $jachqt=MN$

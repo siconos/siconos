@@ -16,7 +16,7 @@
 
 <body>
 
-  
+  Global stack call.
  
   <ul>
     
@@ -132,6 +132,8 @@
     <li>TS::computeOneStepNSProblem</li>
     <li>q normalized</li>
     <li>update T</li>
+    <li>update dotq</li>
+    <li>TS::updateOutput (in view of updated ydot)</li>
   </ul>
 </ul>
 TO DO
@@ -139,6 +141,44 @@ TO DO
   <li>use Wmap for NewtonEulerDS</li>
   <li>project on constraints in the case of FC3D</li>
   </ul>
+
+Building of the numerics matrix
+<ul>
+  <li>OSNSP::compute</li><ul>
+    <li>OSNSP::preCompute</li><ul>
+      <li>OSNSP::updateUnitaryBlocks</li>
+      <li>OSNSP::updateOSNSMatrix</li><ul>
+	<li>OSNSMatrix_M::fill(indexset)</li><ul>
+	  <li>setBlock...</li>
+	  <li>OSNSMatrix::convert</li><ul>
+	    <li>OSNSMatrix::numericsMatrix : build the numericsMatrix</li>
+	  </ul>
+	</ul>
+      </ul>
+      <li>restore prev lambda and Y</li>
+      <li>OSNSP::computeq</li>
+      </ul>
+    <li>OSNSP::postCompute</li>
+    </ul>
+  </ul>
+
+Case of GenericMechanical Problem:
+<ul>
+  <li>GMP::updateUnitaryBlocks</li><ul>
+    <li>freeGenericMechanicalProblem: freeGMP of Numerics</li>
+    <li>buildEmptyGenericMechanicalProblem: build empty Numerics problem</li>
+    <li>OSNSP::updateUnitaryBlocks</li><ul>
+      <li>GMP::computeDiagonalUnitaryBlock</li><ul>
+	<li>add the prb in the Numerics structure (GMP)</li>
+	<li>LinearOSNSP::computeDiagonalUnitaryBlock</li><ul>
+	  <li>build and get currentUnitaryBlock from the graph</li>
+	  <li>compute currentUnitaryBlock </li>
+	</ul>
+      </ul>
+      <li>GMP::computeUnitaryBlock</li>
+    </ul>
+  </ul>
+</ul>
 </body>
 
 </html>
