@@ -13,6 +13,7 @@
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_globalAlartCurnier.h"
+#include "AlartCurnierGenerated.h"
 
 #define SIZE 1000
 

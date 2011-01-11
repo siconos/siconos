@@ -727,7 +727,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     *B20 = 0.;
   }
 
-  if (RVN >= 0.0)
+  if (RVN > 0.0)
   {
 
 #ifdef VERBOSE_DEBUG
