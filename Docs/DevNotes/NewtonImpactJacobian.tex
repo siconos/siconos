@@ -35,38 +35,41 @@ Application to the NewtonEulerRImpact:
 \subsection{Ball case}
 It is the case where $GP=-N$:
 for $e2$:
-\[(0,1,0,0).(q_0,-p).(0,-N)=\]
-\[\left(\left(\begin{array}{c}1\\0\\0\end{array}\right).p,\left(\begin{array}{c}q_0\\0\\0\end{array}\right) -\left(\begin{array}{c}1\\0\\0\end{array}\right)*p \right).(0,-N)=\]
-\[\left(?, -p_x~N-\left(\left(\begin{array}{c}q_0\\0\\0\end{array}\right)- \left(\begin{array}{c}1\\0\\0\end{array}\right)*p \right)*N\right)=\]
+\[(0,1,0,0).(q_0,-\underline p).(0,-N)=\]
+\[\left(\left(\begin{array}{c}1\\0\\0\end{array}\right).\underline p,\left(\begin{array}{c}q_0\\0\\0\end{array}\right) -\left(\begin{array}{c}1\\0\\0\end{array}\right)*\underline p \right).(0,-N)=\]
+\[\left(?, -\underline p_x~N-\left(\left(\begin{array}{c}q_0\\0\\0\end{array}\right)- \left(\begin{array}{c}1\\0\\0\end{array}\right)*\underline p \right)*N\right)=\]
 and:
-\[(0,-N).(q_0,p).(0,1,0,0)=\]
-\[(N.p,-q_0N-N*p).(0,1,0,0)=\]
-\[\left(?,(N.p)\left(\begin{array}{c}1\\0\\0\end{array}\right) + \left(\begin{array}{c}1\\0\\0\end{array}\right)*(q_0N+N*p)\right)=\]
-\[\left(?,(N.p)\left(\begin{array}{c}1\\0\\0\end{array}\right)+q_0 \left(\begin{array}{c}1\\0\\0\end{array}\right)*N+\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*p)\right)\]
+\[(0,-N).(q_0,\underline p).(0,1,0,0)=\]
+\[(N.\underline p,-q_0N-N*\underline p).(0,1,0,0)=\]
+\[\left(?,(N.\underline p)\left(\begin{array}{c}1\\0\\0\end{array}\right) + \left(\begin{array}{c}1\\0\\0\end{array}\right)*(q_0N+N*\underline p)\right)=\]
+\[\left(?,(N.\underline p)\left(\begin{array}{c}1\\0\\0\end{array}\right)+q_0 \left(\begin{array}{c}1\\0\\0\end{array}\right)*N+\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*\underline p)\right)\]
 sub then and get the resulting vector.N:
-\[\left[ -p_x~N -N.p~\left(\begin{array}{c}1\\0\\0\end{array}\right)+()*N-\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*p)\right].N=\]
-\[-p_x-N_xN.p+0-(\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*p)).N=\]
+\[\left[ -\underline p_x~N -N.\underline p~\left(\begin{array}{c}1\\0\\0\end{array}\right)+()*N-\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*\underline p)\right].N=\]
+\[-\underline p_x-N_xN.\underline p+0-(\left(\begin{array}{c}1\\0\\0\end{array}\right)*(N*\underline p)).N=\]
   using $a*(b*c)=b(a.c)-c(a.b)$ leads to
-  \[-p_x-N_xN.p-(p_x~N-N_x~p).N=\]
-\[-p_x-N_xN.p-p_x+N_xN.p=-2p_x\]
+  \[-q_1-N_xN.\underline p-(q_1~N-N_x~\underline p).N=\]
+\[-q_1-N_xN.\underline p-q_1+N_xN.\underline p=-2q_1\]
 for $e1=(1,0,0,0)$:
-\[(q_0,-p).(0,-N)=(?,-q_0N+p*N)\]
-\[(0,-N).(q_0,p)=(?,-q_0N-p*N)\]
+\[(q_0,-\underline p).(0,-N)=(?,-q_0N+\underline p*N)\]
+\[(0,-N).(q_0,\underline p)=(?,-q_0N-\underline p*N)\]
 So
 \[\nabla _q H =\left(\begin{array}{c} N_x\\N_y\\N_z\\
 -2q_0\\
--2p_x\\
--2p_y\\
--2p_z\\
+-2q_1\\
+-2q_2\\
+-2q_3\\
 \end{array}\right)\]
 
 The question is $(\nabla _q H)^t \delta q$ where $\delta q $ is tengantial to the sphere:
 \[\delta q=(cos((x+\delta x)/2),sin((x+\delta x)/2)(p \delta p))-(cos(x/2),sin(x/2)p)\]
-\[\delta q=(cos(x/2)cos(\delta x /2)-sin(x/2)sin(\delta x /2),?)-(cos(x/2),sin(x/2)p)\]
-\[\delta q = (cos(x/2) +0(\delta x)^2,?)-(cos(x/2),sin(x/2)p)\]
-\[\delta q = (0(\delta x)^2,?)\]
+\[\delta q=(cos(x/2)cos(\delta x/2)-sin(x/2)sin(\delta x/2),(sin(x/2)cos(\delta x/2)+cos(x/2)sin(\delta x/2)(p+\delta p)-(cos(x/2),sin(x/2)p)\]
+\[\delta q=(\frac{\delta x sin(x/2)}{2}+0(\delta x)^2,\delta x/2cos(x/2)p+\delta p sin(x/2) + 0(\delta x)^2)\]
+\[\delta q=(-\delta x/2sin(x/2)+0(\delta x)^2,\delta x/2cos(x/2)p+\delta p sin(x/2)+0(\delta )^2)\]
 and
-\[(\nabla _q H)^t \delta q = \]
+\[(\nabla _q H)^t \delta q = -\delta x cos(x/2)sin(x/2)+\delta x cos(x/2)sin(x/2)+2\delta p .p sin(x/2) +O(\delta)^2\]
+Moreover $\delta p .p =0$
+\[(\nabla _q H)^t \delta q = O(\delta)^2\]
+That shows that this method is a second order aproximation.
 
 \subsection{Case FC3D: using the local frame}
 
