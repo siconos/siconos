@@ -156,7 +156,9 @@ Building of the numerics matrix
 	</ul>
       </ul>
       <li>restore prev lambda and Y</li>
-      <li>OSNSP::computeq</li>
+      <li>OSNSP::computeq</li><ul>
+	<li>q=jachqT*Vfree</li>
+      </ul>
       </ul>
     <li>OSNSP::postCompute</li>
     </ul>
@@ -172,6 +174,10 @@ Case of GenericMechanical Problem:
 	<li>add the prb in the Numerics structure (GMP)</li>
 	<li>LinearOSNSP::computeDiagonalUnitaryBlock</li><ul>
 	  <li>build and get currentUnitaryBlock from the graph</li>
+	  <li>UR::getLeftUnitaryBlockForDS</li><ul>
+	    <li>(NewtonEuler) R::jachqT (overLoaded for FC3D)</li>
+	    <li>(Lagrangian) R::jachq</li>
+	  </ul>
 	  <li>compute currentUnitaryBlock </li>
 	</ul>
       </ul>
