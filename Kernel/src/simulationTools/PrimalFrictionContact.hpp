@@ -110,7 +110,10 @@ public:
    *  \param string numericsSolvername
    *  \param string id of the problem (optional)
    */
-  PrimalFrictionContact(int, const std::string& = "NSGS" , const std::string& = "unamed_friction_contact_problem");
+  PrimalFrictionContact(int dimPb,
+                        const int newNumericsSolverId =
+                          SICONOS_FRICTION_3D_PRIMAL_NSGS_WR ,
+                        const std::string& newId = "unamed_primal_friction_contact_problem");
 
   /** destructor
    */
