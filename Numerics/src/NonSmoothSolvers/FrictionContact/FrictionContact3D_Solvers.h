@@ -205,6 +205,22 @@ extern "C"
   */
   int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
+  /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
+      \param problem, the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      dparam[3] : rho >0
+  */
+  void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for EG
+    \param SolverOptions ** the pointer to the array of options to set
+  */
+  int frictionContact3D_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for AlartCurnierNewton
     \param SolverOptions ** the pointer to the array of options to set
   */
