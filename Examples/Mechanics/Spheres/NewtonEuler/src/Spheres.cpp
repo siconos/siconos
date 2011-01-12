@@ -34,7 +34,7 @@ using namespace std;
 /* do nothing if solver does not converge */
 void localCheckSolverOuput(int, Simulation*)
 {};
-
+#define WITH_GENERIC_SOLVER
 
 // ================= Creation of the model =======================
 void Spheres::init()
@@ -42,17 +42,20 @@ void Spheres::init()
 
   SP::TimeDiscretisation timedisc_;
   SP::Simulation simulation_;
+#ifdef WITH_GENERIC_SOLVER
+  SP::GenericMechanical osnspb_;
+#else
   SP::FrictionContact osnspb_;
-
-
+#endif
   // User-defined main parameters
 
   double t0 = 0;                   // initial computation time
 
   double T = 0.02;
 
-  double h = 0.01;                // time step
+  double h = 0.005;                // time step
   double g = 9.81;
+  double en = 0.7;
 
   double theta = 0.5;              // theta for Moreau integrator
 
@@ -101,6 +104,9 @@ void Spheres::init()
       vTmp.reset(new SimpleVector(6));
       qTmp->zero();
       vTmp->zero();
+      vTmp->setValue(3, (*Spheres)(i, 6));
+      vTmp->setValue(4, (*Spheres)(i, 7));
+      vTmp->setValue(5, (*Spheres)(i, 8));
 
       (*qTmp)(0) = (*Spheres)(i, 0);
       (*qTmp)(1) = (*Spheres)(i, 1);
@@ -122,6 +128,7 @@ void Spheres::init()
       SP::SimpleVector FExt;
       FExt.reset(new SimpleVector(6)); //
       FExt->zero();
+      //if (i)
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);
 
@@ -141,24 +148,26 @@ void Spheres::init()
     timedisc_.reset(new TimeDiscretisation(t0, h));
 
     // -- OneStepNsProblem --
+#ifdef WITH_GENERIC_SOLVER
+    osnspb_.reset(new GenericMechanical(SICONOS_FRICTION_3D_QUARTIC));
+#else
     osnspb_.reset(new FrictionContact(3));
-
-    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[0] = 1000; // Max number of
     // iterations
     osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
     // iterations
 
     osnspb_->numericsSolverOptions()->iparam[4] = 2; // projection
 
-    osnspb_->numericsSolverOptions()->dparam[0] = 1e-6; // Tolerance
-    osnspb_->numericsSolverOptions()->dparam[2] = 1e-8; // Local tolerance
+    osnspb_->numericsSolverOptions()->dparam[0] = 1e-12; // Tolerance
+    osnspb_->numericsSolverOptions()->dparam[2] = 1e-12; // Local tolerance
 
 
     osnspb_->setMaxSize(16384);       // max number of interactions
     osnspb_->setMStorageType(1);      // Sparse storage
     osnspb_->setNumericsVerboseMode(0); // 0 silent, 1 verbose
     osnspb_->setKeepLambdaAndYState(true); // inject previous solution
-
+#endif
     simulation_.reset(new TimeStepping(timedisc_));
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
@@ -168,7 +177,7 @@ void Spheres::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(en, 0.0, 0.6, 3));
 
     _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
 

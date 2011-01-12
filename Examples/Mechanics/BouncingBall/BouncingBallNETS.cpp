@@ -25,11 +25,11 @@
   Direct description of the model without XML input.
   Simulation with a Time-Stepping scheme.
 */
-
+#include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
-
-//#define WITH_PROJ
-//#define WITH_FC3D
+static double sBallRadius = 0.1;
+#define WITH_PROJ
+#define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
 #define R_CLASS NewtonEulerRFC3D
@@ -42,20 +42,31 @@ public:
   my_NERFC3D(): R_CLASS() {};
   virtual void computeh(double t)
   {
-    R_CLASS::computeh(t);
+    SP::SiconosVector y = interaction()->y(0);
+    SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
+    double hpc = fabs(data[q0]->getValue(0)) - sBallRadius;
+    y->setValue(0, hpc);
+    ner->yProj()->setValue(0, hpc);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
-    SP::SiconosVector y = interaction()->y(0);
-    _Pc1->setValue(0, y->getValue(0));
-    _Pc1->setValue(1, 0);
-    _Pc1->setValue(2, 0);
-    _Pc2->setValue(0, y->getValue(0));
-    _Pc2->setValue(1, 0);
-    _Pc2->setValue(2, 0);
+    _Pc1->setValue(0, hpc);
+    _Pc1->setValue(1, data[q0]->getValue(1));
+    _Pc1->setValue(2, data[q0]->getValue(2));
+    _Pc2->setValue(0, hpc);
+    _Pc2->setValue(1, data[q0]->getValue(1));
+    _Pc2->setValue(2, data[q0]->getValue(2));
+    //printf("my_NERFC3D N, Pc\n");
+    //_Nc->display();
+    //_Pc1->display();
   }
+  //ACCEPT_VISITORS();
 };
 TYPEDEF_SPTR(my_NERFC3D);
+
+
+
+
 
 int main(int argc, char* argv[])
 {
@@ -74,11 +85,12 @@ int main(int argc, char* argv[])
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 2.0;      // initial velocity for lowest bead.
-    double omega_init = 1.0;      // initial velocity for lowest bead.
-    double theta = 1.0;              // theta for Moreau integrator
-    double R = 0.1; // Ball radius
+    double omega_initx = 0.0;
+    double omega_initz = 1.0;// initial velocity for lowest bead.
+    double theta = 0.5;              // theta for Moreau integrator
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -97,7 +109,8 @@ int main(int argc, char* argv[])
     (*q0)(3) = 1.0;
 
     (*v0)(0) = velocity_init;
-    (*v0)(3) = omega_init;
+    (*v0)(3) = omega_initx;
+    (*v0)(5) = omega_initz;
     // -- The dynamical system --
     SP::NewtonEulerDS ball(new NewtonEulerDS(q0, v0, m, I));
 
@@ -140,6 +153,7 @@ int main(int argc, char* argv[])
     (*H)(2, 2) = 1.0;
 #endif
     SP::NewtonEulerR relation0(new my_NERFC3D());
+    //SP::NewtonEulerR relation0(new SphereNEDSPlanR(0.1,1.0,0.0,0.0,0.0));
     //SP::NewtonEulerR relation0(new NewtonEulerR());
     relation0->setJachq(H);
     //    relation0->setJacQH(H_block);
@@ -193,7 +207,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 7;
+    unsigned int outputSize = 16;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
@@ -208,6 +222,16 @@ int main(int argc, char* argv[])
     dataPlot(0, 4) = (*lambda)(0);
     dataPlot(0, 5) = acos((*q)(3));
     dataPlot(0, 6) = relation0->contactForce()->norm2();
+    dataPlot(0, 7) = (*q)(0);
+    dataPlot(0, 8) = (*q)(1);
+    dataPlot(0, 9) = (*q)(2);
+    dataPlot(0, 10) = (*q)(3);
+    dataPlot(0, 11) = (*q)(4);
+    dataPlot(0, 12) = (*q)(5);
+    dataPlot(0, 13) = (*q)(6);
+    dataPlot(0, 14) = (*v)(1);
+    dataPlot(0, 15) = (*v)(2);
+
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -228,7 +252,16 @@ int main(int argc, char* argv[])
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
       dataPlot(k, 5) = (*q)(3);
-
+      dataPlot(k, 6) = relation0->contactForce()->norm2();
+      dataPlot(k, 7) = (*q)(0);
+      dataPlot(k, 8) = (*q)(1);
+      dataPlot(k, 9) = (*q)(2);
+      dataPlot(k, 10) = (*q)(3);
+      dataPlot(k, 11) = (*q)(4);
+      dataPlot(k, 12) = (*q)(5);
+      dataPlot(k, 13) = (*q)(6);
+      dataPlot(k, 14) = (*v)(1);
+      dataPlot(k, 15) = (*v)(2);
       s->nextStep();
       ++show_progress;
       k++;

@@ -177,11 +177,11 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
 #ifdef TSPROJ_DEBUG
-  printf("TS::predictorDeactivate yref=%e, yDot=%e\n", y, yDot);
+  printf("TSProjectOnConstraints::predictorDeactivate yref=%e, yDot=%e\n", y, yDot);
 #endif
   y += 0.5 * h * yDot;
   assert(!isnan(y));
-  bool res = (y > 10e-7);
+  bool res = (y > 1e-7);
 #ifdef TSPROJ_DEBUG
   if (res)
   {
@@ -199,7 +199,7 @@ bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur,
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
 #ifdef TSPROJ_DEBUG
-  printf("TS::predictorActivate yref=%e, yDot=%e\n", y, yDot);
+  printf("TSProjectOnConstraints::predictorActivate yref=%e, yDot=%e\n", y, yDot);
 #endif
   y += h * yDot;
   assert(!isnan(y));

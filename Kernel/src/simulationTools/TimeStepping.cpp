@@ -104,8 +104,11 @@ bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
   double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
+  //printf("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e\n",y,yDot,y+0.5*h*yDot);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
+  //if (y>0)
+  //  printf("TS::predictorDeactivate DEACTIVATE\n");
   return (y > 0);
 }
 bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
@@ -113,8 +116,11 @@ bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
   double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
+  //printf("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e\n",y,yDot,y+0.5*h*yDot);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
+  //if (y<=0)
+  // printf("TS::predictorActivate ACTIVATE\n");
   return (y <= 0);
 }
 // i=1

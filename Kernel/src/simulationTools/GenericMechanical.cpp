@@ -65,7 +65,7 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
 #ifdef GMP_DEBUG
-  printf("GenericMechanical::computeUnitaryBlock: add problem!\n");
+  printf("GenericMechanical::computeUnitaryBlock: add problem of type ");
 #endif
   int size = UR->getNonSmoothLawSize();
   if (Type::value(*(UR->interaction()->nonSmoothLaw()))
@@ -73,12 +73,18 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
   {
     LinearSystemProblem * pAux = (LinearSystemProblem *)
                                  addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+#ifdef GMP_DEBUG
+    printf(" Type::EqualityConditionNSL\n");
+#endif
     //pAux->size= UR->getNonSmoothLawSize();
   }
   else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
            == Type::NewtonImpactNSL)
   {
     void * pAux = addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
+#ifdef GMP_DEBUG
+    printf(" Type::NewtonImpactNSL\n");
+#endif
   }
   else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
            == Type::NewtonImpactFrictionNSL)
@@ -90,6 +96,13 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
     pAux->dimension = 3;
     pAux->numberOfContacts = 1;
     *(pAux->mu) = nsLaw->mu();
+#ifdef GMP_DEBUG
+    printf(" Type::NewtonImpactFrictionNSL\n");
+#endif
+  }
+  else
+  {
+    RuntimeException::selfThrow("GenericMechanical::computeDiagonalUnitaryBlock- not yet implemented for that NSLAW type");
   }
 
   LinearOSNS::computeDiagonalUnitaryBlock(vd);
@@ -135,7 +148,7 @@ int GenericMechanical::compute(double time)
     _pnumerics_GMP->q = &*_q->getArray();
 
     // Call Numerics Driver for GenericMechanical
-    //display();
+    //    display();
     info = genericMechanical_driver(_pnumerics_GMP,
                                     &*_z->getArray() ,
                                     &*_w->getArray() ,

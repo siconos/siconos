@@ -162,8 +162,6 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
     {
-      //printf("NewtonEulerR::computeOutput:\n");
-      //data[q1]->display();
       prod(*_jachq, *data[q1], *y);
       //_jachq->display();
       //y->display();

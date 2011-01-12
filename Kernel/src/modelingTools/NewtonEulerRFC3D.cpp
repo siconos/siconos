@@ -23,7 +23,7 @@
 using namespace std;
 /*
   m \dot V = Fext + R
-  I \dot \homega + \homega I \homega = Mext + R*PG ,
+  I \dot \omega + \omega I \omega = Mext + R*PG ,
   with * vectoriel product, R reaction in the globla frame. P the point of contact.
   r is the reaction in the local frame.
   M^t r=R
@@ -34,13 +34,19 @@ using namespace std;
 
   |  R | |1 0 0     |
   |    |=|0 1 0     |
-  |R*PG| |0 0 1     |*R=N^t *R = N^t * M^t r
+  |R*PG| |0 0 1     |.R=N^t R = N^t M^t r
          |0 -PGz PGy|
          |PGz 0 -PGx|
          |-PGy PGx 0|
 
+we want :
 
-so jachqT=M*N
+|m \dot V                          |
+|                                  |= jachqT^t r
+|I \dot \omega + \omega I \omega|
+
+so jachqT=MN
+
 
 
 
@@ -52,7 +58,7 @@ void NewtonEulerRFC3D::initComponents()
   /*Warning, in current version, user of FC3D has to set _y and _yProj in the computeh */
   _yProj.reset(new SimpleVector(1));
 }
-void computeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
+void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
 {
   SP::SimpleMatrix M(new SimpleMatrix(3, 3));
   double Nx = Nc->getValue(0);
@@ -94,12 +100,10 @@ void computeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::Sic
   (*N)(2, 5) = 0;
 
   prod(*M, *N, *jhqT, true);
-  //  cout<<"jhqt\n";
-  //  jhqT->display();
 
 }
 
-void computeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)
+void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)
 {
   SP::SimpleMatrix M(new SimpleMatrix(3, 3));
   double Nx = Nc->getValue(0);
@@ -172,10 +176,10 @@ void NewtonEulerRFC3D::computeJachqT()
   {
     SP::NewtonEulerDS d2 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
     SP::SiconosVector Q2 = d2->q();
-    computeJachqTFromContacts(_Pc1, _Nc, Q1, Q2, _jachqT);
+    FC3DcomputeJachqTFromContacts(_Pc1, _Nc, Q1, Q2, _jachqT);
   }
   else
   {
-    computeJachqTFromContacts(_Pc1, _Nc, Q1, _jachqT);
+    FC3DcomputeJachqTFromContacts(_Pc1, _Nc, Q1, _jachqT);
   }
 }

@@ -66,6 +66,7 @@ public:
   virtual ~NewtonEulerRImpact() {};
 
   virtual void computeJachq(double t);
+  virtual void computeJachqT();
 
   inline SP::SimpleVector pc1()
   {

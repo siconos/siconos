@@ -145,6 +145,8 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pFC3D->mu = (double*) malloc(sizeof(double));
     pFC3D->M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
     pFC3D->M->storageType = 0; /*Local prb is dense*/
+    pFC3D->M->size0 = size;
+    pFC3D->M->size1 = size;
     pFC3D->numberOfContacts = 1;
     pFC3D->q = (double*) malloc(size * sizeof(double));
     pFC3D->dimension = 3;
@@ -162,7 +164,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
 {
   listNumericsProblem * pElem = pGMP->firstListElem;
   int ii;
-  printf("\nBEGIN Display a GenericMechanicalProblem:\n");
+  printf("\nBEGIN Display a GenericMechanicalProblem(Numerics):\n");
 
   while (pElem)
   {

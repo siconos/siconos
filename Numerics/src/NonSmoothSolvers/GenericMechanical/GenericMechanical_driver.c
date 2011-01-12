@@ -31,6 +31,7 @@
 //#define GENERICMECHANICAL_DEBUG
 //#define GENERICMECHANICAL_DEBUG2
 //#define GENERICMECHANICAL_DEBUG_CMP
+//#define GENERICMECHANICAL_FC3D
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
@@ -130,8 +131,8 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       localError = sqrt(localError) / (1 + DNRM2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
-#ifdef GENERICMECHANICAL_DEBUG2
-      printf("GenericMechanical_driver, localerror of FC3D: %e\n", localError);
+#ifdef GENERICMECHANICAL_FC3D
+      printf("GenericMechanical_driver FC3D, Local Velocity v_n=%e v_t1=%e v_t2=%e localerror=%e\n", *(velocity + posInX), *(velocity + posInX + 1), *(velocity + posInX + 2), localError);
 #endif
       break;
     }
@@ -364,8 +365,10 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   /* If the options for solver have not been set, read default values in .opt file */
 
   int info = 0;
-  //  display(problem->M);
-  //displayGMP(problem);
+#ifdef GENERICMECHANICAL_DEBUG
+  display(problem->M);
+  displayGMP(problem);
+#endif
   genericMechanicalProblem_GS(problem, reaction, velocity, &info, options);
 
   return info;
@@ -382,7 +385,7 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->iparam[0] = 100000;
-  /*with Line search */
+  /*with Line search 1 without 0.*/
   options->iparam[1] = 1;
 
   options->dparam[0] = 1e-4;
