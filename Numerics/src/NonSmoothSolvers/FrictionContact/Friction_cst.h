@@ -52,6 +52,7 @@ extern char SICONOS_FRICTION_3D_PROX_STR[];
 extern char  SICONOS_FRICTION_3D_TFP_STR [];
 extern char  SICONOS_FRICTION_3D_GLOBALAC_STR [];
 extern char  SICONOS_FRICTION_3D_DSFP_STR[] ;
+extern char  SICONOS_FRICTION_3D_EG_STR[] ;
 extern char SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR[];
 extern char SICONOS_FRICTION_3D_AlartCurnierNewton_STR[];
 extern char SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR[];
