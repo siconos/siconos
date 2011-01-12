@@ -201,7 +201,7 @@ int frictionContact3D_HyperplaneProjection_setDefaultSolverOptions(SolverOptions
   options->iparam[0] = 20000;
   options->iparam[1] = 50;
   options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-1;
+  options->dparam[3] = 1.0;
   options->dparam[4] = 0.99;
 
   options->internalSolvers = NULL;
