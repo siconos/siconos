@@ -84,7 +84,7 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
     for (contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact * nLocal;
-      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 22]);
+      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
       reactiontmp[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
       reactiontmp[pos + 1] -= rho * velocitytmp[pos + 1];
       reactiontmp[pos + 2] -= rho * velocitytmp[pos + 2];
@@ -96,7 +96,7 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
     for (contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact * nLocal;
-      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 22]);
+      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
       reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
       reaction[pos + 1] -= rho * velocitytmp[pos + 1];
       reaction[pos + 2] -= rho * velocitytmp[pos + 2];

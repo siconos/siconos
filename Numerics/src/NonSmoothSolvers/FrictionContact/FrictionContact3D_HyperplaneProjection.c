@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define VERBOSE_DEBUG
+//#define VERBOSE_DEBUG
 
 void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -95,11 +95,18 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     DCOPY(n , reaction , 1 , reactiontmp, 1);
 
     prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
+
+
+
+
     // projection for each contact
+
+
+
     for (contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact * nLocal;
-      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 22]);
+      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
       reactiontmp[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
       reactiontmp[pos + 1] -= rho * velocitytmp[pos + 1];
       reactiontmp[pos + 2] -= rho * velocitytmp[pos + 2];
@@ -117,16 +124,28 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     DCOPY(n , reaction , 1 , reactiontmp3, 1);
     DAXPY(n, -1.0, reactiontmp, 1, reactiontmp3, 1);
 
+
     while (stopingcriteria && (i < lsitermax))
     {
       i++ ;
       DCOPY(n , reactiontmp , 1 , reactiontmp2, 1);
-      alpha = 1.0 / (pow(2, i));
+      alpha = 1.0 / (pow(2.0, i));
+#ifdef VERBOSE_DEBUG
+      printf("alpha = %f\n", alpha);
+#endif
       DSCAL(n , alpha, reactiontmp2, 1);
-      alpha  = 1 - alpha;
+      alpha  = 1.0 - alpha;
+
       DAXPY(n, alpha, reaction, 1, reactiontmp2, 1);
       DCOPY(n , q , 1 , velocitytmp, 1);
       prodNumericsMatrix(n, n, alpha, M, reactiontmp2, beta, velocitytmp);
+      /* #ifdef VERBOSE_DEBUG */
+      /*     for (contact = 0 ; contact < nc ; ++contact) */
+      /*     { */
+      /*       for(int kk=0; kk<3;kk++) printf("reactiontmp2[%i]=%12.8e\t",contact*nLocal+kk,  reactiontmp2[contact*nLocal+kk]); */
+      /*       printf("\n"); */
+      /*     } */
+      /* #endif   */
       lhs = DDOT(n, velocitytmp, 1, reactiontmp3, 1);
       rhs = DNRM2(n, reactiontmp3, 1);
       rhs = sigma / rho * rhs * rhs;
@@ -136,6 +155,8 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
       printf("lhs = %f\n", lhs);
       printf("rhs = %f\n", rhs);
       printf("alpha = %f\n", alpha);
+      printf("sigma = %f\n", sigma);
+      printf("rho = %f\n", rho);
 #endif
     }
 
@@ -158,7 +179,7 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
     if (verbose > 0)
-      printf("----------------------------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      printf("----------------------------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, rho, rhoequiv, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
@@ -198,7 +219,7 @@ int frictionContact3D_HyperplaneProjection_setDefaultSolverOptions(SolverOptions
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 20000;
+  options->iparam[0] = 2000000;
   options->iparam[1] = 50;
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1.0;
