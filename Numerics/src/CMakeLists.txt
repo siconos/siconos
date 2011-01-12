@@ -336,6 +336,7 @@ IF(WITH_TESTING)
 
   NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c)
   NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c)	
+  NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
 
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
   NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)

@@ -45,6 +45,7 @@ char SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR[] = "F3D_ProjectionOnCone
 char SICONOS_FRICTION_3D_PGoC_STR[] = "F3D_PGoC";
 char SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR[] = "F3D_DeSaxceFixedPoint";
 char SICONOS_FRICTION_3D_EG_STR[] = "F3D_ExtraGradient";
+char SICONOS_FRICTION_3D_HP_STR[] = "F3D_HyperplaneProjection";
 char SICONOS_FRICTION_3D_PROX_STR[] = "F3D_PROX";
 char SICONOS_FRICTION_3D_QUARTIC_STR[] = "F3D_QUARTIC";
 char SICONOS_FRICTION_3D_QUARTIC_NU_STR[] = "F3D_QUARTIC_NU";
@@ -133,6 +134,14 @@ int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction ,
     if (verbose == 1)
       printf(" ========================== Call ExtraGradient (EG) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_ExtraGradient(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* Hyperplane Projection algorithm */
+  case SICONOS_FRICTION_3D_HP:
+  {
+    if (verbose == 1)
+      printf(" ========================== Call Hyperplane Projection (HP) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_HyperplaneProjection(problem, reaction , velocity , &info , options);
     break;
   }
   /* Global Alart Curnier */

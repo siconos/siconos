@@ -54,6 +54,10 @@ int main(void)
   printSolverOptions(options);
   deleteSolverOptions(options);
 
+  info = frictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_HP);
+  printSolverOptions(options);
+  deleteSolverOptions(options);
+
   free(options);
 
   printf("\n End of test on Default SolverOptions\n");
