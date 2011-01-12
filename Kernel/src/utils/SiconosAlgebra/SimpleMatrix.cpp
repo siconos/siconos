@@ -24,7 +24,7 @@
 #include <boost/numeric/bindings/atlas/cblas3.hpp>
 #include <boost/numeric/ublas/fwd.hpp>
 
-#include "BlockVector.hpp"
+
 #include "KernelConfig.h"
 
 #ifndef FRAMEWORK_BLAS
@@ -49,7 +49,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "SimpleVector.hpp"
 #include "cholesky.hpp"
 #include "ioMatrix.hpp"
-
+#include "BlockVector.hpp"
 using namespace Siconos;
 
 
