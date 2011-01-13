@@ -31,6 +31,8 @@ COMPILE_WITH(BLAS REQUIRED)
 
 CONFIGURE_FILE(setup.py.in setup.py)
 
+CONFIGURE_FILE(runtest.py.in runtest.py)
+
 SUBDIRS(Siconos)
 
 ADD_CUSTOM_TARGET(distutils-install

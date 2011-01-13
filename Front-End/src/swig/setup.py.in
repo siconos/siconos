@@ -89,7 +89,7 @@ class test_Siconos(Command):
     def run(self):
         import os
         # hu?
-        os.putenv("PYTHONPATH","${CMAKE_BINARY_DIR}/src/swig")
+        os.environ["PYTHONPATH"] = "${CMAKE_BINARY_DIR}/src/swig"
         os.system("py.test Siconos/tests")
 
 

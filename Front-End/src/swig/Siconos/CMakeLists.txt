@@ -64,7 +64,7 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 
 ENABLE_TESTING()
 
-ADD_TEST(lcp py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
-ADD_TEST(friction_contact py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
+ADD_TEST(lcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
+ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
 
 SUBDIRS(tests)

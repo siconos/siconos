@@ -20,7 +20,7 @@
 // SWIG interface for Siconos Kernel types
 
 // numpy array to SP::SimpleVector (here a SiconosVector is always a
-// SimpleVector)
+// dense SimpleVector)
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SiconosVector>)
 {
@@ -53,7 +53,7 @@
  }
 
 // numpy array to SP::SimpleMatrix (here a SiconosMatrix is always a
-// SimpleMatrix)
+// dense SimpleMatrix)
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SiconosMatrix>)
 {
@@ -101,7 +101,7 @@
 
 
 
-// SiconosMatrix in api mean SimpleMatrix here
+// Siconos{Vector,Matrix} in api mean Simple{Vector,Matrix} here
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SimpleVector) };
 %apply (boost::shared_ptr<SiconosVector>) { (boost::shared_ptr<SimpleVector>) };
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
