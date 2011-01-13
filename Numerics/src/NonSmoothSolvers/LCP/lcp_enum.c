@@ -171,8 +171,13 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int DGESVinfo;
 
   /*OUTPUT param*/
-  sCurrentEnum = 0;
+  sCurrentEnum = options->iparam[3];
   tol = options->dparam[0];
+  int multipleSolutions = options->iparam[0];
+  int numberofSolutions = 0;
+
+
+
 
   sMref = problem->M->matrix0;
   if (!sMref)
@@ -225,11 +230,17 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         continue;
       else
       {
-        if (verbose)
-          printf("lcp_enum find a solution!\n");
+        numberofSolutions++;
+        if (verbose || multipleSolutions)
+        {
+          printf("lcp_enum find %i solution with sCurrentEnum = %d!\n", numberofSolutions, sCurrentEnum - 1);
+        }
+
+
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
         options->iparam[1] = sCurrentEnum - 1;
-        return;
+        options->iparam[2] = numberofSolutions;
+        if (!multipleSolutions)  return;
       }
     }
   }
