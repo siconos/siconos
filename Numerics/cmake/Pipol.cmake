@@ -97,7 +97,7 @@ IF(PIPOL_USER)
         \"sudo mkdir -p \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
           sudo chown ${PIPOL_USER} \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
           cd \\\$$PIPOL_WDIR/${PIPOL_USER}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME} \;
-          ${PIPOL_MAKE_COMMAND} \;
+          ${PIPOL_MAKE_COMMAND} \"
         )
 
       ADD_CUSTOM_TARGET(
