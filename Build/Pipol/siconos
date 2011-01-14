@@ -247,13 +247,13 @@ swig_setup() {
 
 cmake_setup() {
     case `cmake --version` in 
-        *2.8*);;
+        *2.8.3*);;
         *) 
             sudo rm -rf `which make`
             sudo rm -rf `which cpack`
             sudo rm -rf `which ctest`
-            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.0.tar.gz
-            cd cmake-2.8.0; { 
+            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.3.tar.gz
+            cd cmake-2.8.3; { 
                 ./bootstrap -j2
                 make -j2
                 sudo make install
