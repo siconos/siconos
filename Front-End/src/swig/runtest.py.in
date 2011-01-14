@@ -4,4 +4,5 @@ import sys
 import os
 
 os.environ["PYTHONPATH"]="${CMAKE_BINARY_DIR}/src/swig"
-os.system("py.test "+sys.argv[1])
+exit(os.system("py.test "+sys.argv[1]))
+
