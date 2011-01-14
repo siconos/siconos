@@ -65,6 +65,11 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 ENABLE_TESTING()
 
 ADD_TEST(lcp ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_lcp.py)
+ADD_TEST(Kernel ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
 ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
+
+SET_TESTS_PROPERTIES(lcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Error;error")
+SET_TESTS_PROPERTIES(Kernel PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Error;error")
+SET_TESTS_PROPERTIES(friction_contact PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Error;error")
 
 SUBDIRS(tests)
