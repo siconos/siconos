@@ -33,13 +33,27 @@ SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES}
 
 # get python dist-packages
 # warning python may not know cmake_install_prefix
+# installation in standard python dist package with:
+# -DSTD_PYTHON_DIST_PACKAGES=TRUE 
+#
+# installation in specific place:
+# -DPYTHON_DIST_PACKAGES=/my/specific/place
 
-IF(NOT PYTHON_DIST_PACKAGES)
-  execute_process ( COMMAND 
-    python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,\"\")" 
+IF(STD_PYTHON_DIST_PACKAGES)
+  EXECUTE_PROCESS ( COMMAND 
+    python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" 
     OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-ENDIF(NOT PYTHON_DIST_PACKAGES)
+ELSE(STD_PYTHON_DIST_PACKAGES)
+  IF(NOT PYTHON_DIST_PACKAGES)
+    EXECUTE_PROCESS ( COMMAND 
+      python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,\"\")" 
+      OUTPUT_VARIABLE PYTHON_DIST_PACKAGES 
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  ENDIF(NOT PYTHON_DIST_PACKAGES)
+ENDIF(STD_PYTHON_DIST_PACKAGES)
+
+
 
 MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
 
