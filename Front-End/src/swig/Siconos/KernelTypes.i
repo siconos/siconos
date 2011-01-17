@@ -25,8 +25,8 @@
 (boost::shared_ptr<SiconosVector>)
 {
   int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0);
-  int _v = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || _v;
+  int state = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || state;
 }
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
 {
@@ -57,7 +57,9 @@
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SiconosMatrix>)
 {
-  $1 = is_array($input) || PySequence_Check($input);
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t, 0);
+  int state = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || state;
 }
 %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
