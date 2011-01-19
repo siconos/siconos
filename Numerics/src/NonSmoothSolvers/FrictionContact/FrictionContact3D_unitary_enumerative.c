@@ -227,7 +227,7 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
   if (!isnan(*reaction0))
   {
     if (- *reaction0 + tol > 0.0)
-      if ((*reaction0 * *mu) * (*reaction0 * *mu) + tol > *reaction1 * *reaction1 + *reaction2 * *reaction2)
+      if ((*reaction0 * *mu) * (*reaction0 * *mu) + tol * tol > *reaction1 * *reaction1 + *reaction2 * *reaction2)
       {
         *reaction0 = - *reaction0;
         *reaction1 = - *reaction1;
@@ -236,7 +236,8 @@ int frictionContact3D_unitary_enumerative_test_non_sliding(FrictionContactProble
         *velocity1 = 0;
         *velocity2 = 0;
 #ifdef FC3D_UE_DEBUG
-        printf("FC3D:  0=MR+q with R in cone r=(%e,%e,%e)\n", *reaction0, *reaction1, *reaction2);
+        printf("FC3D: (Rn*mu)^2+tol=%e. (Rt)^2=%e\n", (*reaction0 * *mu) * (*reaction0 * *mu) + tol, *reaction1 * *reaction1 + *reaction2 * *reaction2);
+        printf("FC3D:  0=MR+q with R in cone r=(%e,%e,%e), mu=%e,tol=%e\n", *reaction0, *reaction1, *reaction2, *mu, tol);
 #endif
         return 0;
       }

@@ -341,7 +341,15 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     //printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
   }
   if (tolViolate)
+  {
     printf("---GenericalMechanical_drivers, FAILED***************************************\n");
+    //#ifdef GENERICMECHANICAL_DEBUG
+    FILE * toto  = fopen("GMP_FAILED.txt", "w");
+    genericMechnical_printInFile(pGMP, toto);
+    fclose(toto);
+    exit(0);
+    //#endif
+  }
   else
   {
     /* for (int i=0;i<pGMP->size;i++) */
@@ -384,9 +392,9 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   options->iWork = NULL;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->iparam[0] = 100000;
+  options->iparam[0] = 1000000;
   /*with Line search 1 without 0.*/
-  options->iparam[1] = 1;
+  options->iparam[1] = 0;
 
   options->dparam[0] = 1e-4;
   /*Useful parameter for LS*/
@@ -398,6 +406,7 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
   switch (id)
   {
   case SICONOS_FRICTION_3D_QUARTIC:
+  case SICONOS_FRICTION_3D_QUARTIC_NU:
     frictionContact3D_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
   case SICONOS_FRICTION_3D_AlartCurnierNewton:

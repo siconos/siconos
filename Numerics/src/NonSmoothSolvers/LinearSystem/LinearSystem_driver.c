@@ -168,9 +168,10 @@ int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, Sol
 #endif
   for (i = 0; i < problem->size; i++)
     w[i] = 0.0;
-  //
+
   int res = myLu(problem, z , options);
 #ifdef LINEARSYSTEM_DEBUG
+  printf("LinearSystem_driver solved with error = %e\n", LinearSystemComputeError(problem, z));
   printf("The solution is :\n");
   for (i = 0; i < problem->size; i++)
     printf(" %e", z[i]);
