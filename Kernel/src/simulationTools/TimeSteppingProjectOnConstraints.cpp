@@ -109,6 +109,12 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     FextNorm->setValue(0, neds->fExt()->getValue(0));
     FextNorm->setValue(1, neds->fExt()->getValue(1));
     FextNorm->setValue(2, neds->fExt()->getValue(2));
+#ifdef TSPROJ_DEBUG
+    cout << "TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
+    neds->deltaq()->display();
+    cout << "TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
+    FextNorm->display();
+#endif
     double n2 = FextNorm->norm2();
     if (n2 > 1e-7)
     {
@@ -124,11 +130,11 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       double VkcFNorm = VkFNorm;
       if (VkFNorm >= 0 && workFext > 0)
       {
-        VkcFNorm = sqrt(2 * workFext / (neds->massValue()) + VkFNorm * VkFNorm);
+        ;//VkcFNorm=sqrt (2*workFext/(neds->massValue())+VkFNorm*VkFNorm);
       }
       else if (VkFNorm <= 0 && workFext < 0)
       {
-        VkcFNorm = -sqrt(fabs(2 * workFext / (neds->massValue()) + VkFNorm * VkFNorm));
+        ;//VkcFNorm=-sqrt (fabs(2*workFext/(neds->massValue())+VkFNorm*VkFNorm));
       }
       else if (VkFNorm > 0 && workFext < 0)
       {
