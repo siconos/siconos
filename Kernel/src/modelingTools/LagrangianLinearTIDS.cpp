@@ -214,6 +214,9 @@ void LagrangianLinearTIDS::display() const
 {
   LagrangianDS::display();
   cout << "===== Lagrangian Linear Time Invariant System display ===== " << endl;
+  cout << "- Mass Matrix M : " << endl;
+  if (_mass) _mass->display();
+  else cout << "-> NULL" << endl;
   cout << "- Stiffness Matrix K : " << endl;
   if (_K) _K->display();
   else cout << "-> NULL" << endl;

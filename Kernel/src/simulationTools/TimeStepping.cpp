@@ -50,7 +50,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
   : Simulation(td)
 {
 
-  mComputeResiduY = false;
+  _computeResiduY = false;
 
   if (osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
@@ -64,7 +64,7 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            SP::InteractionsSet interList):
   Simulation(strxml, t0, T, dsList, interList)
 {
-  mComputeResiduY = false;
+  _computeResiduY = false;
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
@@ -391,7 +391,7 @@ void TimeStepping::computeInitialResidu()
 
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
-  if (mComputeResiduY)
+  if (_computeResiduY)
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
       (*it)->relation()->computeResiduY(tkp1);
@@ -473,15 +473,15 @@ void TimeStepping::saveYandLambdaInMemory()
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
-  mNbNewtonSteps = 0; // number of Newton iterations
+  _newtonNbSteps = 0; // number of Newton iterations
   //double residu = 0;
   int info = 0;
   //  cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT"<<endl;
   computeInitialResidu();
 
-  while ((!isNewtonConverge || info) && (mNbNewtonSteps <= maxStep))
+  while ((!isNewtonConverge || info) && (_newtonNbSteps <= maxStep))
   {
-    mNbNewtonSteps++;
+    _newtonNbSteps++;
     prepareNewtonIteration();
     computeFreeState();
     if (info)
@@ -523,25 +523,33 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   //  if (nsdsConverge < criterion )
 
   double residu = 0.0;
+  _newtonResiduDSMax = 0.0;
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
     residu = (*it)->computeResidu();
+    if (residu > _newtonResiduDSMax) _newtonResiduDSMax = residu;
     if (residu > criterion)
     {
       checkConvergence = false;
       //break;
     }
   }
-  if (!mComputeResiduY)
+
+
+
+  if (!_computeResiduY)
     return(checkConvergence);
 
 
   //check residuy.
+  _newtonResiduYMax = 0.0;
+  residu = 0.0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->relation()->computeResiduY(getTkp1());
     residu = (*it)->relation()->getResiduY()->norm2();
+    if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
     if (residu > criterion)
     {
       //      cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;

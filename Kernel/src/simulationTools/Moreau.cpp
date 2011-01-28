@@ -744,17 +744,25 @@ double Moreau::computeResidu()
         }
       }
 
-
-
-
-      *(d->workFree()) = *residuFree;
-      *(d->workFree()) -= *d->p(2);
+      *(d->workFree()) = *residuFree; // copy residuFree in Workfree
+      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      residuFree->display();
+      *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
+      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
+      d->workFree()->display();
       normResidu = d->workFree()->norm2();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      // ResiduFree = -M(vi+1 - v_i) - h*C*v_i-h*Kq_i-h*h*theta*Kv_i+hFext_theta
+      // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
+      // This formulae is only valid for the first computation of the residual for v = v_i
+      // otherwise the complete formulae must be applied, that is
+      // ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v + K(q_i+h(1-theta)v_i+h theta v)))
+      //                     +hFext_theta     (2)
+      // for v != vi, the formulae is wrong.
+      // in the sequel, only the equation (1) is implemented
+
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
@@ -762,24 +770,23 @@ double Moreau::computeResidu()
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
 
-      // --- ResiduFree computation ---
+      // --- ResiduFree computation Equation (1) ---
       residuFree->zero();
       double coeff;
       // -- No need to update W --
 
-      SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      prod(*M, (*vold - *v), *residuFree); // residuFree = -M(v - vold)
+
       SP::SiconosMatrix C = d->C();
       if (C)
-        prod(-h, *C, *vold, *residuFree, false); // vfree += -h*C*vi
+        prod(h, *C, *vold, *residuFree, false); // vfree += h*C*vi
 
       SP::SiconosMatrix K = d->K();
       if (K)
       {
-        coeff = -h * h * _theta;
-        prod(coeff, *K, *vold, *residuFree, false); // vfree += -h^2*_theta*K*vi
-        prod(-h, *K, *qold, *residuFree, false); // vfree += -h*K*qi
+        coeff = h * h * _theta;
+        prod(coeff, *K, *vold, *residuFree, false); // vfree += h^2*_theta*K*vi
+        prod(h, *K, *qold, *residuFree, false); // vfree += h*K*qi
       }
 
       SP::SiconosVector Fext = d->fExt();
@@ -787,13 +794,49 @@ double Moreau::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = h * (1 - _theta);
-        scal(coeff, *Fext, *residuFree, false); // vfree += h*(1-_theta) * fext(ti)
+        coeff = -h * (1 - _theta);
+        scal(coeff, *Fext, *residuFree, false); // vfree -= h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = h * _theta;
-        scal(coeff, *Fext, *residuFree, false); // vfree += h*_theta * fext(ti+1)
+        coeff = -h * _theta;
+        scal(coeff, *Fext, *residuFree, false); // vfree -= h*_theta * fext(ti+1)
       }
+
+
+      // Computation of the complete residual Equation (2)
+      //   ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v + K(q_i+h(1-theta)v_i+h theta v)))
+      //                     +hFext_theta     (2)
+      //       SP::SiconosMatrix M = d->mass();
+      //       SP::SiconosVector realresiduFree (new SimpleVector(*residuFree));
+      //       realresiduFree->zero();
+      //       prod(*M, (*v-*vold), *realresiduFree); // residuFree = M(v - vold)
+      //       SP::SiconosVector qkplustheta (new SimpleVector(*qold));
+      //       qkplustheta->zero();
+      //       *qkplustheta = *qold + h *((1-_theta)* *vold + _theta* *v);
+      //       if (C){
+      //         double coef = h*(1-_theta);
+      //         prod(coef, *C, *vold , *realresiduFree, false);
+      //         coef = h*(_theta);
+      //         prod(coef,*C, *v , *realresiduFree, false);
+      //       }
+      //       if (K){
+      //         double coef = h*(1-_theta);
+      //         prod(coef,*K , *qold , *realresiduFree, false);
+      //         coef = h*(_theta);
+      //         prod(coef,*K , *qkplustheta , *realresiduFree, false);
+      //       }
+
+      //       if (Fext)
+      //       {
+      //         // computes Fext(ti)
+      //         d->computeFExt(told);
+      //         coeff = -h*(1-_theta);
+      //         scal(coeff, *Fext, *realresiduFree, false); // vfree -= h*(1-_theta) * fext(ti)
+      //         // computes Fext(ti+1)
+      //         d->computeFExt(t);
+      //         coeff = -h*_theta;
+      //         scal(coeff, *Fext, *realresiduFree, false); // vfree -= h*_theta * fext(ti+1)
+      //       }
 
 
       if (d->boundaryConditions())
@@ -824,12 +867,26 @@ double Moreau::computeResidu()
       }
 
 
-      (* d->workFree()) = *residuFree;
+      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      //       residuFree->display();
+
+      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
+      //       realresiduFree->display();
+
+      (* d->workFree()) = *residuFree; // copy residuFree in Workfree
+      *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
+
+      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //      d->workFree()->display();
+
+      //      *realresiduFree-= *d->p(2);
+      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
+      //      realresiduFree->display();
 
 
-
-      *residuFree += *d->p(2);
-      normResidu = residuFree->norm2();
+      //     normResidu = d->workFree()->norm2();
+      normResidu = 0.0;
+      //     normResidu = realresiduFree->norm2();
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -869,8 +926,8 @@ double Moreau::computeResidu()
 
       }
       *(d->workFree()) = *residuFree;
-      //    cout<<"Moreau::computeResidu :\n";
-      //    residuFree->display();
+      //cout<<"Moreau::computeResidu :\n";
+      // residuFree->display();
       *(d->workFree()) -= *d->p(2);
       normResidu = d->workFree()->norm2();
     }
@@ -891,7 +948,7 @@ void Moreau::computeFreeState()
   double t = simulationLink->nextTime(); // End of the time step
   double told = simulationLink->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
-  //h=0.0100000;
+
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
@@ -1009,8 +1066,6 @@ void Moreau::computeFreeState()
       computeW(t, d);
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
-
-
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
@@ -1047,12 +1102,10 @@ void Moreau::computeFreeState()
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SP::SiconosVector vfree = d->workFree();//workX[d];
-      //    (*vfree)=*(d->residuFree());
-
+      (*vfree) = *(d->residuFree());
 
       W->PLUForwardBackwardInPlace(*vfree);
-      //    *vfree *= -1.0;
-
+      *vfree *= -1.0;
       *vfree += *vold;
 
     }

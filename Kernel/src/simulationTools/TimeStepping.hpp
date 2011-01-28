@@ -51,9 +51,18 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
-  bool mComputeResiduY;
+  bool _computeResiduY;
 
-  unsigned int mNbNewtonSteps;
+  unsigned int _newtonNbSteps;
+
+  /** Maximum Residual for on the Dynamical system
+   */
+  double _newtonResiduDSMax;
+
+
+  /** Maximum Residual for on the output of the relation
+   */
+  double _newtonResiduYMax;
 
 
 public:
@@ -141,7 +150,7 @@ public:
    */
   unsigned int getNewtonNbSteps()
   {
-    return mNbNewtonSteps;
+    return _newtonNbSteps;
   }
 
   /** compute initial residu
@@ -157,6 +166,8 @@ public:
    * \param double, convergence criterion
    */
   bool newtonCheckConvergence(double);
+
+
   void saveYandLambdaInMemory();
   /** run the simulation, from t0 to T
    * \param: simulation option. Default = "linear", else "Newton", used a Newton algorithm.
@@ -185,15 +196,34 @@ public:
    */
   void setComputeResiduY(bool v)
   {
-    mComputeResiduY = v;
+    _computeResiduY = v;
   };
+
   /**
    *To known if the interaction residu must be computed.
    */
   bool getComputeResiduY(bool v)
   {
-    return mComputeResiduY;
+    return _computeResiduY;
   };
+
+  /** accessor to _newtonResiduDSMax
+   */
+  double newtonResiduDSMax()
+  {
+    return _newtonResiduDSMax;
+  };
+
+  /** accessor to _newtonResiduYMax
+   */
+  double newtonResiduYMax()
+  {
+    return _newtonResiduYMax;
+  };
+
+
+
+
 
   /** visitors hook
    */
