@@ -122,14 +122,7 @@ public:
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
 
-  /**
-   * return true if the relation is linear.
-   */
 
-  virtual bool isLinear()
-  {
-    return false;
-  }
 
   static FirstOrderType1R* convert(Relation *r);
 

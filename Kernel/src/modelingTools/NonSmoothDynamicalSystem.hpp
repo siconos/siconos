@@ -186,6 +186,7 @@ public:
   void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->insertDynamicalSystem(ds);
+    mIsLinear = ((ds)->isLinear() && mIsLinear);
   };
 
 
@@ -204,7 +205,8 @@ public:
   void link(SP::Interaction inter, SP::DynamicalSystem ds)
   {
     _topology->link(inter, ds);
-  }
+    mIsLinear = ((inter)->relation()->isLinear() && mIsLinear);
+  };
 
 
   /** get Dynamical system number I

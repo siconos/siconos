@@ -91,6 +91,16 @@ public:
   /** destructor */
   ~FirstOrderLinearTIDS() {};
 
+  /**
+   * return true if the Dynamical system is linear.
+   */
+  virtual bool isLinear()
+  {
+    return true;
+  }
+
+
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.
    */

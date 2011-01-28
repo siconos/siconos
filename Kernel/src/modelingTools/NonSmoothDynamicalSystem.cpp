@@ -31,7 +31,7 @@ using namespace RELATION;
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml):
-  BVP(false), nsdsxml(newNsdsxml), mIsLinear(false)
+  BVP(false), nsdsxml(newNsdsxml), mIsLinear(true)
 {
   assert(nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
 
@@ -67,7 +67,10 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
     else RuntimeException::
       selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.
+    mIsLinear = (mIsLinear && (*checkDS.first)->isLinear());
   }
+
+
 
   // ===  The same process is applied for Interactions ===
   SetOfInteractionsXML  interactionsList = nsdsxml->getInteractionsXML();
@@ -82,6 +85,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
                  ->insert(SP::Interaction(new Interaction(*it2, allDSLocal)));
     // checkInter.first is an iterator that points to the
     // Interaction inserted into the set.
+    mIsLinear = (mIsLinear && (*checkInter.first)->relation()->isLinear());
   }
 
   // === Builds topology ===
@@ -92,7 +96,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
     SP::Interaction newInteraction,
     const bool& isBVP):
-  BVP(isBVP), mIsLinear(false)
+  BVP(isBVP), mIsLinear(true)
 {
   // === Checks that sets are not empty ===
   if (!newDS)
@@ -106,11 +110,12 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
   allDSLocal.reset(new DynamicalSystemsSet());
   allInteractionsLocal.reset(new InteractionsSet());
   allDSLocal->insert(newDS);
+  mIsLinear = newDS->isLinear();
   if (newInteraction)
   {
     allInteractionsLocal->insert(newInteraction);
   }
-  mIsLinear = newInteraction->relation()->isLinear();
+  mIsLinear = (mIsLinear && newInteraction->relation()->isLinear());
 
   // === build topology ===
   _topology.reset(new Topology(allDSLocal, allInteractionsLocal));
@@ -119,7 +124,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS,
     InteractionsSet& listOfInteractions,
     const bool& isBVP):
-  BVP(isBVP), mIsLinear(false)
+  BVP(isBVP), mIsLinear(true)
 {
 
   //   if( listOfInteractions.isEmpty())
@@ -130,17 +135,19 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 
   //allDSLocal.reset(new DynamicalSystemsSet());
   //allInteractions.reset(new InteractionsSet());
-  /*InteractionsIterator itInter;
+  InteractionsIterator itInter;
   DSIterator itDS;
-  for(itDS=listOfDS.begin(); itDS!=listOfDS.end();++itDS)
-    {
-      allDSLocal->insert(*itDS);
-    }
+  for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
+  {
+    mIsLinear = ((*itDS)->isLinear() && mIsLinear);
+    if (!mIsLinear) break;
+  }
 
-  for(itInter=listOfInteractions.begin(); itInter!=listOfInteractions.end();++itInter)
-    {
-      allInteractions->insert(*itInter);
-      }*/
+  for (itInter = listOfInteractions.begin(); itInter != listOfInteractions.end(); ++itInter)
+  {
+    mIsLinear = ((*itInter)->relation()->isLinear() && mIsLinear);
+    if (!mIsLinear) break;
+  }
 
   SP::DynamicalSystemsSet allDSLocal;
   SP::InteractionsSet allInteractionsLocal;
@@ -153,7 +160,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
-  BVP(isBVP), mIsLinear(false)
+  BVP(isBVP), mIsLinear(true)
 {
 
   // === "copy" listOfDS/listOfInteractions in allDSLocal/allInteractions ===
@@ -168,6 +175,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
     allDSLocal->insert(*itDS);
+    mIsLinear = ((*itDS)->isLinear() && mIsLinear);
   }
 
   // === build topology ===

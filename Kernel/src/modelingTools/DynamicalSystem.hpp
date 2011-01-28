@@ -691,6 +691,13 @@ public:
 
   //@}
 
+  /**
+   * return true if the Dynamical system is linear.
+   */
+  virtual bool isLinear()
+  {
+    return false;
+  }
 
   /** Initialization function for the rhs and its jacobian (including
    *  memory allocation).  \param time of initialization

@@ -459,7 +459,7 @@ public:
 
   virtual bool isLinear()
   {
-    return true;
+    return false;
   }
 
   /** main relation members display

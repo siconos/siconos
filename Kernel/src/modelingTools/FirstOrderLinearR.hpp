@@ -382,7 +382,14 @@ public:
    */
   static FirstOrderLinearR* convert(Relation *r);
 
+  /**
+   * return true if the relation is linear.
+   */
 
+  virtual bool isLinear()
+  {
+    return true;
+  }
   ACCEPT_STD_VISITORS();
 
 };
