@@ -133,9 +133,9 @@ void LinearOSNS::initialize(SP::Simulation sim)
 
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
-  bool b = topology->isTimeInvariant();
+  bool isTimeInvariant = topology->isTimeInvariant();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  if ((b || !isLinear) &&   !interactions()->isEmpty())
+  if ((isTimeInvariant && isLinear) &&   !interactions()->isEmpty())
   {
     updateM();
   }

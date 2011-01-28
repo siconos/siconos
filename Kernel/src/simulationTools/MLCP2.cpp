@@ -228,7 +228,7 @@ void MLCP2::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
 
-  if (!topology->isTimeInvariant())
+  if (!topology->isTimeInvariant() || !simulation->model()->nonSmoothDynamicalSystem()->isLinear())
   {
     // Computes new unitaryBlocks if required
     updateUnitaryBlocks();

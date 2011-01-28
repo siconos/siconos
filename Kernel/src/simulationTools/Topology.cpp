@@ -322,6 +322,17 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
+    // \warning if the ComplementarityConditionNSL is used for the unilateral contact between
+    // LagrangianDS, then we should have parent->_isTopologyTimeInvariant = false;
+    DSIterator itds = interaction->dynamicalSystemsBegin();
+    Type::Siconos dsType = Type::value((**itds));
+    if (
+      ((dsType == Type::LagrangianDS)
+       || (dsType == Type::LagrangianLinearTIDS))
+      || (dsType == Type::NewtonEulerDS))
+    {
+      parent->_isTopologyTimeInvariant = false;
+    }
   };
   void visit(const EqualityConditionNSL&)
   {

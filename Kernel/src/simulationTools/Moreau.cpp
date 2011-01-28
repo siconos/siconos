@@ -745,11 +745,11 @@ double Moreau::computeResidu()
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in Workfree
-      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
-      residuFree->display();
+      //    std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      //      residuFree->display();
       *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
-      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
-      d->workFree()->display();
+      //     std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
+      //      d->workFree()->display();
       normResidu = d->workFree()->norm2();
     }
     // 4 - Lagrangian Linear Systems
@@ -874,6 +874,7 @@ double Moreau::computeResidu()
       //       realresiduFree->display();
 
       (* d->workFree()) = *residuFree; // copy residuFree in Workfree
+
       *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
 
       //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
@@ -885,7 +886,7 @@ double Moreau::computeResidu()
 
 
       //     normResidu = d->workFree()->norm2();
-      normResidu = 0.0;
+      normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
 
     }
