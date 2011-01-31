@@ -11,26 +11,26 @@ In the section, $q$ is the quaternion of the dynamical system.
   \label{figCase}
 \end{figure}
 
-$\nabla _q h$ consist in computing $P_c(q+\delta q)-P_c(q)$.
+$\nabla _q h$ consist in computing $P_c(\frac{q+\delta q}{\|q+\delta q\|})-P_c(q)$.
 \[GP(q)=qG_0P_0~^cq\]
-\[GP(q+\delta q)=(q+\delta q)G_0P_0~^c(q+\delta q)\]
-\[=(q+\delta q)~^cqGP(q)q~^c(q+\delta q)\]
-\[=(1,0,0,0)+\delta q~^cq)GP(q)(q~^cq+q~^c\delta q)\]
-\[=GP(q)+\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\]
+\[GP(\frac{q+\delta q}{\|q+\delta q\|})=(q+\delta q)G_0P_0~^c(q+\delta q)\frac{1}{\|q+\delta q\|^2}\]
+\[=(q+\delta q)~^cqGP(q)q~^c(q+\delta q)\frac{1}{\|q+\delta q\|^2}\]
+\[=(1,0,0,0)+\delta q~^cq)GP(q)(q~^cq+q~^c\delta q)\frac{1}{\|q+\delta q\|^2}\]
+\[=GP(q)+\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\frac{1}{\|q+\delta q\|^2}\]
 So, because G is independant of $q$:
-\[P(q+\delta q)-P(q)=qGP(q+\delta q)-GP(q)=\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\]
-For the directional derivation, we chose $\delta q = \epsilon * (1,0,0,0)$
-\[\lim_{\epsilon \to 0}\frac{P(q+\delta q)-P(q)}{\epsilon}=~^cqGP(q) + GP(q)q\]
+\[P(\frac{q+\delta q}{\|q+\delta q\|})-P(q)=qGP(\frac{q+\delta q}{\|q+\delta q\|})-GP(q)=\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2 + GP(q)\frac{1}{\|q+\delta q\|^2}\]
+For the directional derivation, we chose $\delta q = \epsilon * (1,0,0,0)$. using a equivalent to $\frac{1}{1+\epsilon}$
+\[\lim_{\epsilon \to 0}\frac{P(\frac{q+\delta q}{\|q+\delta q\|})-P(q)}{\epsilon}=~^cqGP(q) + GP(q)q-2q_iGP(q)\]
 For the directional derivation, we chose $\delta q = \epsilon * (0,1,0,0)=\epsilon * e_i$
-\[\lim_{\epsilon \to 0}\frac{P(q+\delta q)-P(q)}{\epsilon}=e_i~^cqGP(q) - GP(q)qe_i\]
+\[\lim_{\epsilon \to 0}\frac{P(\frac{q+\delta q}{\|q+\delta q\|})-P(q)}{\epsilon}=e_i~^cqGP(q) - GP(q)qe_i-2q_iGP(q)\]
 Application to the NewtonEulerRImpact:
 \[H:\mathbb{R}^7 \to \mathbb{R}\]
 \[\nabla _q H \in \mathcal{M}^{1,7}\]
 \[\nabla _q H =\left(\begin{array}{c} N_x\\N_y\\N_z\\
-(~^cqGP(q) + GP(q)q).N\\
-(e_2~^cqGP(q) - GP(q)qe_2).N\\
-(e_3~^cqGP(q) - GP(q)qe_3).N\\
-(e_4~^cqGP(q) - GP(q)qe_4).N\\
+(~^cqGP(q) + GP(q)q-2q_0GP(q)).N\\
+(e_2~^cqGP(q) - GP(q)qe_2-2q_1GP(q)).N\\
+(e_3~^cqGP(q) - GP(q)qe_3-2q_2GP(q)).N\\
+(e_4~^cqGP(q) - GP(q)qe_4-2q_3GP(q)).N\\
 \end{array}\right)\]
 \subsection{Ball case}
 It is the case where $GP=-N$:
@@ -54,22 +54,11 @@ for $e1=(1,0,0,0)$:
 \[(0,-N).(q_0,\underline p)=(?,-q_0N-\underline p*N)\]
 So
 \[\nabla _q H =\left(\begin{array}{c} N_x\\N_y\\N_z\\
--2q_0\\
--2q_1\\
--2q_2\\
--2q_3\\
+0\\
+0\\
+0\\
+0\\
 \end{array}\right)\]
-
-The question is $(\nabla _q H)^t \delta q$ where $\delta q $ is tengantial to the sphere:
-\[\delta q=(cos((x+\delta x)/2),sin((x+\delta x)/2)(p \delta p))-(cos(x/2),sin(x/2)p)\]
-\[\delta q=(cos(x/2)cos(\delta x/2)-sin(x/2)sin(\delta x/2),(sin(x/2)cos(\delta x/2)+cos(x/2)sin(\delta x/2)(p+\delta p)-(cos(x/2),sin(x/2)p)\]
-\[\delta q=(\frac{\delta x sin(x/2)}{2}+0(\delta x)^2,\delta x/2cos(x/2)p+\delta p sin(x/2) + 0(\delta x)^2)\]
-\[\delta q=(-\delta x/2sin(x/2)+0(\delta x)^2,\delta x/2cos(x/2)p+\delta p sin(x/2)+0(\delta )^2)\]
-and
-\[(\nabla _q H)^t \delta q = -\delta x cos(x/2)sin(x/2)+\delta x cos(x/2)sin(x/2)+2\delta p .p sin(x/2) +O(\delta)^2\]
-Moreover $\delta p .p =0$
-\[(\nabla _q H)^t \delta q = O(\delta)^2\]
-That shows that this method is a second order aproximation.
 
 
 \subsection{Case NewtonLaw : using the local frame}
@@ -77,7 +66,7 @@ That shows that this method is a second order aproximation.
 \[\left(\begin{array}{c}m \dot V\\I \dot \omega + \omega I \omega \end{array}\right)= \left(\begin{array}{c}Fect+R\\Mext + R*PG \end{array}\right)\]
   with * vectoriel product, $R$ reaction in the globla frame. $P$ the point of contact.
   $r$ is the reaction in the local frame.  $M^t r=R$ with:
-  \[M^t=\left(\begin{array}{c} nx& \\ny\\nz \end{array}\right)\]
+  \[M^t=\left(\begin{array}{c} nx \\ny\\nz \end{array}\right)\]
   we have :
   \[\left(\begin{array}{c}R\\R*PG\end{array}\right)=\left(\begin{array}{ccc} 1&0&0\\0&1&0\\0&0&1\\
       0&-PG_z&PG_y\\PG_z&0&-PG_x\\-PG_y&PG_X&0\end{array}\right).R:=N^tR=N^tM^tr\]
