@@ -51,19 +51,32 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
+  /** boolean variable to known whether the ResiduY has to be computed or nor
+   *  if true, the ResiduY is computed and the convergence is checked
+   */
   bool _computeResiduY;
 
+  /** Default Newton tolerance used in call of run() of ComputeOneStep() */
+  double _newtonTolerance;
+
+  /** Default maximum number of Newton iteration*/
+  unsigned int _newtonMaxIteration;
+
+  /** Number of steps perfomed is the Newton Loop */
   unsigned int _newtonNbSteps;
 
-  /** Maximum Residual for on the Dynamical system
-   */
+  /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
-
-  /** Maximum Residual for on the output of the relation
-   */
+  /** Maximum Residual for the output of the relation */
   double _newtonResiduYMax;
 
+  /** std::string _newtonOptions
+   *  option in the Newon iteration
+   *  "linear" or "linearlyImplicit" will force a single iteration of the Newton Solver
+   * "nonlinear" (default) will perform the newton iteration up to convergence
+   */
+  std::string _newtonOptions;
 
 public:
 
@@ -134,7 +147,7 @@ public:
    */
   void advanceToEvent();
 
-  /** run one step of the simulation
+  /** run one time--step of the simulation
    */
   void computeOneStep();
 
@@ -144,8 +157,7 @@ public:
    */
   virtual void newtonSolve(double, unsigned int);
 
-  /*
-   * To known the number of steps performed by the Newton algorithm.
+  /** To known the number of steps performed by the Newton algorithm.
    *
    */
   unsigned int getNewtonNbSteps()
@@ -160,7 +172,7 @@ public:
   void computeInitialResidu();
 
 
-  void   prepareNewtonIteration();
+  void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
    * \param double, convergence criterion
@@ -169,12 +181,11 @@ public:
 
 
   void saveYandLambdaInMemory();
+
   /** run the simulation, from t0 to T
-   * \param: simulation option. Default = "linear", else "Newton", used a Newton algorithm.
-   * \param: convergence criterion for Newton. Default = 0.005.
-   * \param: maximum iteration number for Newton. Default = 500.
+   * with default parameters if any setting has been done
    */
-  void run(const std::string& = "linear", double = 0.005, unsigned int = 500);
+  void run();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param SP::Simulation : the Simulation which must be converted
@@ -190,22 +201,69 @@ public:
   /** Set CheckSolverOutput function */
   void setCheckSolverFunction(CheckSolverFPtr);
 
-  /**
-   *To specify if the interaction residu must be computed.
-   * \param: a bool
+  /** To specify if the interaction residu must be computed.
+   *  \param: a bool
    */
   void setComputeResiduY(bool v)
   {
     _computeResiduY = v;
   };
 
-  /**
-   *To known if the interaction residu must be computed.
-   */
+  /** To known if the interaction residu must be computed. */
   bool getComputeResiduY(bool v)
   {
     return _computeResiduY;
   };
+
+
+  /** set the Default Newton tolerance
+   *  \param: double
+   */
+  void setNewtonTolerance(double tol)
+  {
+    _newtonTolerance = tol;
+  };
+
+  /** get the Newton tolerance
+   *  \return double
+   */
+  double newtonTolerance()
+  {
+    return   _newtonTolerance;
+  };
+
+  /** set the maximum number of Newton iteration
+   *  \param: unsigned int
+   */
+  void setNewtonMaxIteration(unsigned int maxStep)
+  {
+    _newtonMaxIteration = maxStep;
+  };
+
+  /** get the maximum number of Newton iteration
+   *  \return unsigned int
+   */
+  double newtonMaxIteration()
+  {
+    return _newtonMaxIteration;
+  };
+
+  /** set the NewtonOptions
+   *  \param: std::string
+   */
+  void setNewtonOptions(const std::string& options)
+  {
+    _newtonOptions = options;
+  };
+
+  /** get the NewtonOptions
+   *  \return std::string
+   */
+  std::string newtonOptions()
+  {
+    return _newtonOptions;
+  };
+
 
   /** accessor to _newtonResiduDSMax
    */

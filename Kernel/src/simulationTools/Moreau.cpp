@@ -1235,8 +1235,8 @@ void Moreau::updateState(unsigned int level)
 {
   double h = simulationLink->timeStep();
 
-  const double& RelativeTol = simulationLink->getRelativeConvergenceTol();
-  bool useRCC = simulationLink->getUseRelativeConvergenceCriteron();
+  const double& RelativeTol = simulationLink->relativeConvergenceTol();
+  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
   if (useRCC)
     simulationLink->setRelativeConvergenceCriterionHeld(true);
 
@@ -1255,7 +1255,7 @@ void Moreau::updateState(unsigned int level)
     {
       SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       SP::SiconosVector x = ds->x();
-      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->getRelativeConvergenceCriterionHeld());
+      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
       //    SP::SiconosVector xFree = fonlds->xFree();
 
       // Save value of q in local_buffer for relative convergence computation
@@ -1297,7 +1297,7 @@ void Moreau::updateState(unsigned int level)
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector v = d->velocity();
-      bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->getRelativeConvergenceCriterionHeld();
+      bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
       // To compute v, we solve W(v - vfree) = p
       *v = *d->p(level); // v = p

@@ -132,18 +132,18 @@ protected:
    * bool, option specifying if a critere of relative convergence is
    * used. Default value is false.
    */
-  bool mUseRelativeConvergenceCriterion;
+  bool _useRelativeConvergenceCriterion;
   /**
    * bool used to remind if the relative convergence held(useful for
    * the newton-check-convergence). Modified only if
-   * mUseRelativeConvergenceCriterion is true.
+   * _useRelativeConvergenceCriterion is true.
    */
-  bool mRelativeConvergenceCriterionHeld;
+  bool _relativeConvergenceCriterionHeld;
   /**
-   *double, relative tolerence. Used only if
-   *mUseRelativeConvergenceCriterion is true.
+   *double, relative tolerance. Used only if
+   *_useRelativeConvergenceCriterion is true.
    */
-  double mRelativeConvergenceTol;
+  double _relativeConvergenceTol;
 
 
   /** initialisation for OneStepNSProblem.
@@ -508,11 +508,9 @@ public:
   virtual void update();
 
   /** run the simulation, from t0 to T
-   * \param: simulation option. Used only for TimeStepping.
-   * \param: Used only for TimeStepping (Newton convergence criterion).
-   * \param: Used only for TimeStepping (Newton maximum number of iterations).
+   * with default parameters if any particular settings has been done
    */
-  virtual void run(const std::string& = "linear", double = 0.005, unsigned int = 500);
+  virtual void run();
 
   /** step from current event to next event of EventsManager
    */
@@ -526,15 +524,15 @@ public:
    */
   inline void setUseRelativeConvergenceCriteron(bool use)
   {
-    mUseRelativeConvergenceCriterion = use;
+    _useRelativeConvergenceCriterion = use;
   };
   /**
    * return true iff the relative convergence criteron is activated.
    *
    */
-  inline bool getUseRelativeConvergenceCriteron()
+  inline bool useRelativeConvergenceCriteron()
   {
-    return mUseRelativeConvergenceCriterion;
+    return _useRelativeConvergenceCriterion;
   };
 
   /**
@@ -543,16 +541,16 @@ public:
    */
   inline void setRelativeConvergenceTol(double v)
   {
-    mRelativeConvergenceTol = v;
+    _relativeConvergenceTol = v;
   };
 
   /**
    * get the relative convergence tolerence.
    *
    */
-  inline const double & getRelativeConvergenceTol()
+  inline const double & relativeConvergenceTol()
   {
-    return mRelativeConvergenceTol;
+    return _relativeConvergenceTol;
   };
 
   /**
@@ -561,15 +559,15 @@ public:
    */
   inline void setRelativeConvergenceCriterionHeld(bool newVal)
   {
-    mRelativeConvergenceCriterionHeld = newVal;
+    _relativeConvergenceCriterionHeld = newVal;
   };
   /**
    * return true iff the relative convergence criteron held.
    *
    */
-  inline bool getRelativeConvergenceCriterionHeld()
+  inline bool relativeConvergenceCriterionHeld()
   {
-    return mRelativeConvergenceCriterionHeld;
+    return _relativeConvergenceCriterionHeld;
   };
 
 

@@ -46,9 +46,9 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 {
   if (!_timeDiscretisation)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
-  mUseRelativeConvergenceCriterion = false;
-  mRelativeConvergenceCriterionHeld = false;
-  mRelativeConvergenceTol = 10e-3;
+  _useRelativeConvergenceCriterion = false;
+  _relativeConvergenceCriterionHeld = false;
+  _relativeConvergenceTol = 10e-3;
 
   // === indexSets will be updated during initialize() call ===
 
@@ -65,9 +65,9 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
 {
   if (!_simulationxml)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
-  mUseRelativeConvergenceCriterion = false;
-  mRelativeConvergenceCriterionHeld = false;
-  mRelativeConvergenceTol = 10e-3;
+  _useRelativeConvergenceCriterion = false;
+  _relativeConvergenceCriterionHeld = false;
+  _relativeConvergenceTol = 10e-3;
 
 
   // === Model ===
@@ -408,11 +408,8 @@ void Simulation::updateOutput(int level0, int level1)
   }
 }
 
-void Simulation::run(const std::string&, double, unsigned int)
+void Simulation::run()
 {
-  // Note that input arg. are useless in general case. Only useful for
-  // timeStepping.
-
   unsigned int count = 0; // events counter.
   cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" << endl;
   while (nextTime() <= model()->finalT())

@@ -47,7 +47,7 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td)
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions("nonlinear")
 {
 
   _computeResiduY = false;
@@ -62,7 +62,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            double T, SP::DynamicalSystemsSet dsList,
                            SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList)
+  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions("nonlinear")
 {
   _computeResiduY = false;
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
@@ -371,6 +371,8 @@ void TimeStepping::computeOneStep()
 {
   advanceToEvent();
 }
+
+
 void TimeStepping::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
@@ -400,23 +402,54 @@ void TimeStepping::computeInitialResidu()
   //  cout<<"END computeInitialResidu"<<endl;
 }
 
+void TimeStepping::run()
+{
+  unsigned int count = 0; // events counter.
+  // do simulation while events remains in the "future events" list of
+  // events manager.
+  cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
+  while (_eventsManager->hasNextEvent())
+  {
+
+    //  if (_newtonOptions=="linear" || )
+    //       advanceToEvent();
+
+    //     else if (_newtonOptions=="Newton")
+    //       newtonSolve(criterion,maxIter);
+
+    //     else
+    //       RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: "+opt);
+
+    advanceToEvent();
+
+    _eventsManager->processEvents();
+    count++;
+  }
+  cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
+}
+
 void TimeStepping::advanceToEvent()
 {
-  computeInitialResidu();
-  /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
-  prepareNewtonIteration();
-  // solve ...
-  computeFreeState();
-  int info = 0;
-  if (!_allNSProblems->empty())
-    info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-  // Check output from solver (convergence or not ...)
-  if (!checkSolverOutput)
-    DefaultCheckSolverOutput(info);
-  else
-    checkSolverOutput(info, this);
-  // Update
-  update(_levelMin);
+  //   computeInitialResidu();
+  //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
+  //   prepareNewtonIteration();
+  //   // solve ...
+  //   computeFreeState();
+  //   int info = 0;
+  //   if (!_allNSProblems->empty())
+  //     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+  //   // Check output from solver (convergence or not ...)
+  //   if (!checkSolverOutput)
+  //     DefaultCheckSolverOutput(info);
+  //   else
+  //     checkSolverOutput(info, this);
+  //   // Update
+  //   update(_levelMin);
+
+  newtonSolve(_newtonTolerance, _newtonMaxIteration);
+
+
+
 }
 
 /*update of the nabla */
@@ -474,22 +507,20 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
-  //double residu = 0;
   int info = 0;
   //  cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT"<<endl;
+
+  bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   computeInitialResidu();
 
-  while ((!isNewtonConverge || info) && (_newtonNbSteps <= maxStep))
+  if ((_newtonOptions == "linear" || _newtonOptions == "linearlyImplicit")
+      || isLinear)
   {
     _newtonNbSteps++;
     prepareNewtonIteration();
     computeFreeState();
-    if (info)
-      cout << "new loop because of info\n" << endl;
     if (!_allNSProblems->empty())
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-    if (info)
-      cout << "info!" << endl;
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
@@ -497,24 +528,55 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       checkSolverOutput(info, this);
 
     update(_levelMin);
-    isNewtonConverge = newtonCheckConvergence(criterion);
-    if (!isNewtonConverge && !info)
-    {
-      saveYandLambdaInMemory();
-    }
+
+    //isNewtonConverge = newtonCheckConvergence(criterion);
+
+    saveYandLambdaInMemory();
   }
-  if (!isNewtonConverge && !info)
-    cout << "Newton process stopped: max. steps number reached." << endl ;
+
+  else if (_newtonOptions == "nonlinear")
+  {
+    while ((!isNewtonConverge || info) && (_newtonNbSteps <= maxStep))
+    {
+      _newtonNbSteps++;
+      prepareNewtonIteration();
+      computeFreeState();
+      if (info)
+        cout << "new loop because of info\n" << endl;
+      if (!_allNSProblems->empty())
+        info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+      if (info)
+        cout << "info!" << endl;
+      // Check output from solver (convergence or not ...)
+      if (!checkSolverOutput)
+        DefaultCheckSolverOutput(info);
+      else
+        checkSolverOutput(info, this);
+
+      update(_levelMin);
+      isNewtonConverge = newtonCheckConvergence(criterion);
+      if (!isNewtonConverge && !info)
+      {
+        saveYandLambdaInMemory();
+      }
+    }
+    if (!isNewtonConverge && !info)
+      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
+  }
+  else
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
+
+
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)
 {
   bool checkConvergence = true;
-  //mRelativeConvergenceCriterionHeld is true means that the RCC is
+  //_relativeConvergenceCriterionHeld is true means that the RCC is
   //activated, and the relative criteron helds.  In this case the
   //newtonCheckConvergence has to return true. End of the Newton
   //iterations
-  if (mRelativeConvergenceCriterionHeld)
+  if (_relativeConvergenceCriterionHeld)
   {
     return true;
   }
@@ -558,29 +620,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     }
   }
   return(checkConvergence);
-}
-
-void TimeStepping::run(const std::string& opt, double criterion, unsigned int maxIter)
-{
-  unsigned int count = 0; // events counter.
-  // do simulation while events remains in the "future events" list of
-  // events manager.
-  cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
-  while (_eventsManager->hasNextEvent())
-  {
-    if (opt == "linear")
-      advanceToEvent();
-
-    else if (opt == "Newton")
-      newtonSolve(criterion, maxIter);
-
-    else
-      RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: " + opt);
-
-    _eventsManager->processEvents();
-    count++;
-  }
-  cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 TimeStepping* TimeStepping::convert(Simulation *str)
