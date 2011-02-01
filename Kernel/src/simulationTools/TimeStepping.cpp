@@ -536,7 +536,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   else if (_newtonOptions == "nonlinear")
   {
-    while ((!isNewtonConverge || info) && (_newtonNbSteps <= maxStep))
+    while ((!isNewtonConverge || info) && (_newtonNbSteps < maxStep))
     {
       _newtonNbSteps++;
       prepareNewtonIteration();
@@ -589,6 +589,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
     residu = (*it)->computeResidu();
+
     if (residu > _newtonResiduDSMax) _newtonResiduDSMax = residu;
     if (residu > criterion)
     {

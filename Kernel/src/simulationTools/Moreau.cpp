@@ -698,7 +698,14 @@ double Moreau::computeResidu()
       d->computeMass();
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      //residuFree->zero();
+
+
+      //   std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
+
       prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+
+
       if (d->fL())  // if fL exists
       {
         // computes fL(ti,vi,qi)
@@ -708,9 +715,12 @@ double Moreau::computeResidu()
         scal(coef, *d->fL(), *residuFree, false);
 
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
-
-        // d->computeFL(t,q,v) ?
-        d->computeFL(t);
+        //d->computeFL(t);
+        // or  fL(ti+1, v_k,i+1, q(v_k,i+1))
+        //or
+        SP::SiconosVector qbasedonv(new SimpleVector(*qold));
+        *qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
+        d->computeFL(t, qbasedonv, v);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
@@ -745,10 +755,10 @@ double Moreau::computeResidu()
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in Workfree
-      //    std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
       *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
-      //     std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
+      //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workFree()->display();
       normResidu = d->workFree()->norm2();
     }
@@ -877,7 +887,7 @@ double Moreau::computeResidu()
 
       *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
 
-      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //     std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workFree()->display();
 
       //      *realresiduFree-= *d->p(2);
