@@ -146,7 +146,6 @@ void LinearOSNS::initialize(SP::Simulation sim)
     {
       if (_MStorageType == 0)
         _M.reset(new OSNSMatrix(maxSize(), 0));
-
       else // if(_MStorageType == 1) size = number of _unitaryBlocks
         // = number of UR in the largest considered indexSet
         _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
@@ -893,6 +892,9 @@ void LinearOSNS::preCompute(double time)
                           ->nonSmoothDynamicalSystem()->topology();
   bool b = topology->isTimeInvariant();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+
+  //  std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
+
 
   if (!b || !isLinear)
   {
