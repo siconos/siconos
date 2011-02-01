@@ -473,10 +473,6 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-
-
-
-
 void Moreau::computeW(double t, SP::DynamicalSystem ds)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
@@ -867,9 +863,9 @@ double Moreau::computeResidu()
             - vold->getValue(columnindex);
 
           WBoundaryConditions->getCol(columnindex, *columntmp);
-          *residuFree -= *columntmp * (DeltaPrescribedVelocity);
+          *residuFree += *columntmp * (DeltaPrescribedVelocity);
 
-          residuFree->setValue(*itindex, columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
+          residuFree->setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
 
           columnindex ++;
 
