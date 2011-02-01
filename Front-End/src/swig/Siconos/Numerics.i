@@ -198,13 +198,13 @@ static int convert_darray(PyObject *input, double *ptr) {
 %typemap(in) (int sizei, int *iparam) (int *temp) {
   
   temp = (int *) malloc(sizeof(int)*PyObject_Length($input));
-    if (!convert_iarray($input,temp)) {
-      SWIG_fail;
+  if (!convert_iarray($input,temp)) {
+    SWIG_fail;
   }
   $1 = PyObject_Length($input);
   $2 = &temp[0];
-
-  }
+  
+ }
 
 %typemap(in) (int sized, double *dparam) (double *temp) {
 
@@ -513,6 +513,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     npy_intp dims[2] = { *p_problem_size1 * 3, 1 };
     
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+    // block list : require_fortran useless?
     if (!array$argnum) SWIG_fail;
     $1 = ($1_ltype) array_data(array$argnum);
   }
@@ -527,8 +528,9 @@ static int convert_darray(PyObject *input, double *ptr) {
     npy_intp dims[2] = { *p_problem_size1, *p_problem_size1};
     
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-    if (!array$argnum) SWIG_fail;
-    $1 = ($1_ltype) array_data(array$argnum);
+    PyArrayObject *array = (PyArrayObject*) array$argnum;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $1 = ($1_ltype) array_data(array);
   }
   
 }
