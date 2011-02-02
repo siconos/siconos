@@ -129,6 +129,13 @@ int main()
   // Initialization
   cout << "====> Initialisation ..." << endl << endl;
   aM->initialize(aS);
+  cout << "nonSmoothDynamicalSystem()->isLinear() : " << boolalpha
+       << aM->nonSmoothDynamicalSystem()->isLinear() << endl;
+
+  cout << "nonSmoothDynamicalSystem()->topology()->istimeInvariant() : "
+       << boolalpha
+       << aM->nonSmoothDynamicalSystem()->topology()->isTimeInvariant() << endl;
+
   cout << " ---> End of initialization." << endl;
   //  aS->insertNonSmoothProblem(aMLCP);
   SP::SolverOptions numSolOptions = aMLCP->numericsSolverOptions();
