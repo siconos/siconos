@@ -55,9 +55,16 @@ extern "C"
     double *velocity3D,
     double *mu,
     double *rho3D,
-    double *result,
-    double *result3x3_1,
-    double *result3x3_2);
+    double *output_blocklist3,
+    double *output_blocklist3x3_1,
+    double *output_blocklist3x3_2);
+
+  void computeAWpB(
+    unsigned int problemSize,
+    double *blocklist3x3_1,
+    double *blockarray3x3,
+    double *blocklist3x3_2,
+    double *output_blockarray3x3);
 
   void frictionContact3D_globalAlartCurnier(
     FrictionContactProblem* problem,

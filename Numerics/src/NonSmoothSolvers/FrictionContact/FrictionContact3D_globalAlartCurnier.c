@@ -88,8 +88,6 @@ void frictionContact3D_globalAlartCurnierFunction(
       sub3x3(B, B_g);
       assert(hypot9(B_g) < 1e-7);
     }
-
-
 #endif
 
     reaction += 3;
@@ -195,6 +193,7 @@ int globalLineSearchGP(
 
   double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
 
+
   for (int iter = 0; iter < maxiter_ls; ++iter)
   {
 
@@ -299,9 +298,17 @@ void frictionContact3D_globalAlartCurnier(
   void *buffer;
 
   if (!options->dWork)
+  {
+#ifndef NDEBUG
+    buffer = malloc((14 * problemSize +
+                     2 * problemSize2) * sizeof(double) +
+                    problemSize * sizeof(int));
+#else
     buffer = malloc((14 * problemSize +
                      problemSize2) * sizeof(double) +
                     problemSize * sizeof(int));
+#endif
+  }
   else
     buffer = options->dWork;
 
@@ -313,6 +320,9 @@ void frictionContact3D_globalAlartCurnier(
   double *rho = B + _3problemSize; //malloc(problemSize*sizeof(double));
   double *AWpB = rho + problemSize;// malloc(problemSize*problemSize*sizeof(double));
   int *ipiv = (int *)(AWpB + problemSize2);  // malloc(problemSize*sizeof(int));
+#ifndef NDEBUG
+  double *AWpB_ = (double *) ipiv + problemSize;
+#endif
 
   double w;
 
@@ -353,13 +363,10 @@ void frictionContact3D_globalAlartCurnier(
       problem->mu, rho,
       F, A, B);
 
-
     // AW + B
     computeAWpB(problemSize, A, problem->M->matrix0, B, AWpB);
 
     int fail;
-
-
 
     DCOPY(problemSize, F, 1, tmp1, 1);
     DSCAL(problemSize, -1., tmp1, 1);
@@ -372,10 +379,23 @@ void frictionContact3D_globalAlartCurnier(
     }
     else
     {
+
+#ifndef NDEBUG
+      DCOPY(problemSize * problemSize, AWpB, 1, AWpB_, 1);
+#endif
+
+      // tmp1 <- sol (AWpB * tmp1 = -F)
       DGESV(problemSize, 1, AWpB, problemSize, ipiv,
             tmp1, problemSize, fail);
-    }
 
+#ifndef NDEBUG
+      DCOPY(problemSize, F, 1, tmp2, 1);
+      DGEMV(LA_NOTRANS, problemSize, problemSize, 1., AWpB_,
+            problemSize, tmp1, 1, 1., tmp2, 1);
+      assert(DDOT(problemSize, tmp2, 1, tmp2, 1) < 1e-10);
+#endif
+
+    }
 
     assert(fail >= 0);
 
@@ -399,8 +419,6 @@ void frictionContact3D_globalAlartCurnier(
     DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
           problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
 
-
-
     options->dparam[1] = INFINITY;
 
     if (!(iter % erritermax))
@@ -416,11 +434,9 @@ void frictionContact3D_globalAlartCurnier(
                                       tolerance, options, &(options->dparam[1]));
 
 
-
       assert((DNRM2(problemSize, F, 1)
               / (1 + DNRM2(problemSize, problem->q, 1)))
              <= (10 * options->dparam[1] + 1e-15));
-
 
     }
 
