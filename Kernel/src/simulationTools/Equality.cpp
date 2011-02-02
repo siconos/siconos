@@ -51,6 +51,14 @@ int Equality::compute(double time)
   return info;
 }
 
+void Equality::initialize(SP::Simulation sim)
+{
+  // General initialize for LinearOSNS
+  LinearOSNS::initialize(sim);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  _M.reset(new OSNSMatrix(indexSet, _MStorageType));
+  _numerics_problem.M = &*_M->getNumericsMatrix();
+}
 
 void Equality::updateM()
 {

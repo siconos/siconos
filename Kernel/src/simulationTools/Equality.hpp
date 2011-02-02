@@ -84,6 +84,10 @@ public:
    */
   ~Equality() {};
 
+  /** initialize
+   */
+  void initialize(SP::Simulation sim);
+
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time
    *  \return int, information about the solver convergence.
