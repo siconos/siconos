@@ -356,7 +356,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 // matrices problemSizexproblemSize
 %typemap(in) (double *blockarray3x3) (PyArrayObject* array=NULL, int is_new_object) {
 
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
   npy_intp array_len[2] = {0,0};
 
@@ -395,7 +395,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   }
 
   if (!array 
-      || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
+      || !require_native(array) || !require_fortran(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
   
   $1 = (double *) array_data(array);
