@@ -21,6 +21,19 @@
 // SWIG interface for Siconos Kernel
 %module(directors="1") Kernel
 
+%feature("director") SpaceFilter;
+%feature("director") Moreau;
+%feature("director") DynamicalSystem;
+%feature("director") LagrangianDS;
+%feature("director") LagrangianLinearTIDS;
+
+%feature("director:except") {
+  if ($error != NULL) {
+    throw Swig::DirectorMethodException();
+  }
+ }
+
+
  // where is doxygen feature ?
 %feature("autodoc", "1");
 
@@ -78,6 +91,14 @@
   {
     SWIG_exception(SWIG_IndexError, e.what());
   }
+  catch (const SiconosException& e)
+  {
+    SWIG_exception(SWIG_SystemError, e.report().c_str());
+  }
+  catch (const Swig::DirectorException& e)
+  {
+    SWIG_exception(SWIG_ValueError, e.getMessage());
+  }
 }
 
 // handle stl data types
@@ -90,7 +111,40 @@
 
 // 2. try to hide SP::Type on python side
 
+
+// boost >= 1.40
+%import "boost/version.hpp"
+#if (BOOST_VERSION >= 104000)
+%import "boost/smart_ptr/enable_shared_from_this.hpp"
+#else
+%import "boost/enable_shared_from_this.hpp"
+#endif
+
+// SimpleMatrix operators 
+%rename  (__add__) operator+;
+%rename  (__less__) operator-;
+%rename  (__mul__) operator*;
+%rename  (__div__) operator/;
+%rename  (__iadd__) operator+=;
+%rename  (__iless__) operator-=;
+%rename  (__imul__) operator*=;
+%rename  (__idiv__) operator/=;
+%rename  (__eq__) operator==;
+%rename  (__ne__) operator!=;
+
+
 %define SP_TYPE(TYPE)
+%rename  (__getitem__) TYPE ## ::operator[];
+%rename  (__add__) TYPE ## ::operator+;
+%rename  (__mul__) TYPE ## ::operator*;
+%rename  (__div__) TYPE ## ::operator/;
+%rename  (__iadd__) TYPE ## ::operator+=;
+%rename  (__imul__) TYPE ## ::operator*=;
+%rename  (__idiv__) TYPE ## ::operator/=;
+%rename  (__eq__) TYPE ## ::operator==;
+%rename  (__ne__) TYPE ## ::operator!=;
+// affectation?
+%rename  (__copy__) TYPE ## ::operator=;
 %shared_ptr(TYPE);
 %enddef
 
@@ -171,11 +225,6 @@ namespace boost
 
 // note Visitor etc. => module Visitor, Type if ever needed
 
-%ignore PURE_DEF;
-%ignore VIRTUAL_ACCEPT_VISITORS;
-%ignore ACCEPT_STD_VISITORS;
-%ignore ACCEPT_VISITORS;
-
 %ignore nullDeleter;
 
 // defined in SimpleVector.cpp
@@ -189,13 +238,6 @@ namespace boost
 %ignore scal;
 %ignore subscal;
 %ignore cross_product;
-%ignore operator+;
-%ignore operator[];
-%ignore operator-;
-%ignore operator*;
-%ignore operator/;
-%ignore operator==;
-%ignore operator=;
 
 // defined in SimpleMatrix.cpp 
 %ignore private_addprod;
@@ -210,10 +252,12 @@ namespace boost
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
-%ignore ACCEPT_SP_VISITORS;
 
 
 %include "SiconosPointers.hpp"
+%import "SiconosVisitables.hpp"
+%import "SiconosVisitor.hpp"
+
 %import "SimulationTypeDef.hpp" 
 
 %include "InteractionsSet.hpp"
@@ -221,16 +265,11 @@ namespace boost
 
 %import "SiconosGraph.hpp"
 
+
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
-// boost >= 1.40
-%import "boost/version.hpp"
-#if (BOOST_VERSION >= 104000)
-%import "boost/smart_ptr/enable_shared_from_this.hpp"
-#else
-%import "boost/enable_shared_from_this.hpp"
-#endif
+
 
 
 
