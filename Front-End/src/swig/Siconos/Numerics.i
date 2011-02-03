@@ -395,7 +395,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   }
 
   if (!array 
-      || !require_native(array) || !require_contiguous(array)
+      || !require_native(array) || !require_contiguous(array) || !require_fortran(array)
       || !require_size(array, array_len, array_numdims(array))) SWIG_fail;
   
   $1 = (double *) array_data(array);
@@ -515,7 +515,9 @@ static int convert_darray(PyObject *input, double *ptr) {
     array$argnum = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     // block list : require_fortran useless?
     if (!array$argnum) SWIG_fail;
-    $1 = ($1_ltype) array_data(array$argnum);
+    PyArrayObject *array = (PyArrayObject*) array$argnum;
+    if (!array || !require_fortran(array)) SWIG_fail;
+    $1 = ($1_ltype) array_data(array);
   }
   
 }
@@ -820,7 +822,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   ~LinearComplementarityProblem()
   {
-//    freeLinearComplementarity_problem(self);
+    free($self->M);
   }
 
 };
@@ -902,7 +904,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   ~FrictionContactProblem()
   {
-//    freeFrictionContact_problem(self);
+    free($self->M);
   }
 
 };
