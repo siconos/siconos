@@ -81,6 +81,17 @@ IF(C_HAVE_WALL)
   APPEND_FLAGS(CMAKE_C_FLAGS "-Wall")
 ENDIF(C_HAVE_WALL)
 
+#
+# Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
+#
+IF(C_HAVE_LINKER_M)
+  FIND_LIBRARY(M_FOUND "m")
+  SET(M_LIBRARIES ${M_FOUND})
+  COMPILE_WITH(M STANDARD)
+ENDIF(C_HAVE_LINKER_M)  
+
+
+
 APPEND_FLAGS(CMAKE_CXX_FLAGS "-D_NUMERICS_INTERNAL_CXX_")
 
 # CXX may be needed with MlcpSimplex
