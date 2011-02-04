@@ -48,7 +48,7 @@ private:
   SP::PluggedObject _BDotFunction;
   SP::PluggedObject _CDotFunction;
 
-  DiskMovingPlanR();
+  DiskMovingPlanR() : LagrangianRheonomousR() {};
 
 public:
 

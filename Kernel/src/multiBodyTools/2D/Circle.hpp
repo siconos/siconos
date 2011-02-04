@@ -35,7 +35,7 @@ private:
 
 protected:
 
-  Circle();
+  Circle() : CircularDS() {};
 
 public:
 

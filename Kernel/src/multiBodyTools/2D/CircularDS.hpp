@@ -33,6 +33,8 @@ protected:
   double radius;
   double massValue;
 
+  CircularDS(): LagrangianDS() {};
+
 public:
 
   CircularDS(double, double, SP::SiconosVector, SP::SiconosVector);

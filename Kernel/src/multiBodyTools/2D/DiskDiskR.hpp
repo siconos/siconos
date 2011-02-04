@@ -32,7 +32,7 @@ class DiskDiskR : public CircularR, public boost::enable_shared_from_this<DiskDi
 private:
   double r1pr2;
 
-  DiskDiskR();
+  DiskDiskR() : CircularR() {};
 
 public:
 

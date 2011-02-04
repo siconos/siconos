@@ -38,7 +38,7 @@ private:
 
   void init(double, double, double, double, double, double, double);
 
-  DiskPlanR();
+  DiskPlanR() : LagrangianScleronomousR() {};
 
 public:
 

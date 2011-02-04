@@ -33,7 +33,7 @@ private:
   void MassSetup();
 
 protected:
-  Disk();
+  Disk() : CircularDS() {};
 
 public:
 
