@@ -36,7 +36,12 @@
   PY_REGISTER(TimeDiscretisation);                \
   PY_REGISTER(OneStepNSProblem);                  \
   PY_REGISTER(LinearOSNS);                        \
+  PY_REGISTER(Lsodar);                            \
   PY_REGISTER(LCP);                               \
+  PY_REGISTER(QP);                                \
+  PY_REGISTER(Relay);                             \
+  PY_REGISTER(MLCP);                              \
+  PY_REGISTER(MLCPProjectOnConstraints);          \
   PY_REGISTER(FrictionContact);                   \
   PY_REGISTER(OneStepIntegrator);                 \
   PY_REGISTER(Moreau);                            \
@@ -51,6 +56,12 @@
   PY_REGISTER(DiskDiskR);                         \
   PY_REGISTER(DiskPlanR);                         \
   PY_REGISTER(DiskMovingPlanR);                   \
+  PY_REGISTER(SphereLDS);                         \
+  PY_REGISTER(SphereNEDS);                        \
+  PY_REGISTER(SphereLDSPlanR);                    \
+  PY_REGISTER(SphereNEDSPlanR);                   \
+  PY_REGISTER(SphereLDSSphereLDSR);               \
+  PY_REGISTER(SphereNEDSSphereNEDSR);             \
   PY_REGISTER(SiconosBodies);                     \
   PY_REGISTER(SpaceFilter);                       \
   PY_REGISTER(SiconosMatrix);                     \
@@ -58,4 +69,5 @@
   PY_REGISTER(SiconosVector);                     \
   PY_REGISTER(SimpleVector);                      \
   PY_REGISTER(BlockVector);                       \
-  PY_REGISTER(InteractionsSet)
+  PY_REGISTER(InteractionsSet);  
+

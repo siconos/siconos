@@ -54,6 +54,9 @@
 #include "SpaceFilter.hpp"
 #include "SiconosBodies.hpp"
 #include "addons.hpp"
+#include "KneeJoint.hpp"
+#include "PivotJoint.hpp"
+#include "PrismaticJoint.hpp"
 %} 
 
 // mandatory !
