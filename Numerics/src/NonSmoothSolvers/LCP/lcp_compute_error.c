@@ -55,7 +55,7 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - lcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    if (verbose > 0) printf(" Numerics - lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;
   }
   else

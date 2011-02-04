@@ -53,7 +53,7 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 {
   int info = -1;
   int n = problem->size;
-  int NRHS = 1;
+  /*   int NRHS=1; */
 
   int n2 = n * n;
   double * Maux = (double*)malloc(n2 * sizeof(double));
@@ -132,6 +132,10 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   if (problem == NULL || z == NULL)
     numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   //displayLS(problem);
+
+  assert(problem->M->matrix0);
+  assert(problem->q);
+
   memcpy(Maux, problem->M->matrix0, n2 * sizeof(double));
   memcpy(z, problem->q, n * sizeof(double));
 
@@ -161,6 +165,7 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options)
 {
   int i;
+  assert(problem->M);
   if (problem->M->storageType == 1)
     numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 #ifdef LINEARSYSTEM_DEBUG

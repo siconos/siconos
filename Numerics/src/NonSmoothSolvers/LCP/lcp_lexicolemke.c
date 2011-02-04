@@ -19,6 +19,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "LCP_Solvers.h"
@@ -27,7 +28,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 {
   /* matrix M of the lcp */
   double * M = problem->M->matrix0;
-
+  assert(M);
   /* size of the LCP */
   int dim = problem->size;
   int dim2 = 2 * (dim + 1);
@@ -68,6 +69,8 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   for (ic = 0 ; ic < dim; ++ic)
     for (jc = 0 ; jc < dim; ++jc)
       A[ic][jc + dim + 2] = -M[dim * jc + ic];
+
+  assert(problem->q);
 
   for (ic = 0 ; ic < dim; ++ic) A[ic][0] = problem->q[ic];
 

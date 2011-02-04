@@ -24,7 +24,7 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
-
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -149,6 +149,7 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
 {
   if (!problem)
     return 0;
+  assert(problem->M);
 #ifdef ENUM_USE_DGELS
   LWORK = -1;
   int info = 0;
@@ -343,6 +344,12 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   int * indexInBlock;
   int check;
   int LAinfo;
+
+  assert(problem->M);
+  assert(problem->M->matrix0);
+  assert(problem->q);
+
+
 
   sMl = problem->M->size0;
   sNn = problem->n;
