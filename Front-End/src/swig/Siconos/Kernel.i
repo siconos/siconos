@@ -21,12 +21,6 @@
 // SWIG interface for Siconos Kernel
 %module(directors="1") Kernel
 
-%feature("director") SpaceFilter;
-%feature("director") Moreau;
-%feature("director") DynamicalSystem;
-%feature("director") LagrangianDS;
-%feature("director") LagrangianLinearTIDS;
-
 %feature("director:except") {
   if ($error != NULL) {
     throw Swig::DirectorMethodException();
@@ -112,6 +106,23 @@
 // 2. try to hide SP::Type on python side
 
 
+// boost namespace (can be fixed with a correct import)
+namespace boost 
+{
+  namespace numeric
+  {
+    namespace ublas
+    {
+    }
+    namespace bindings
+    {
+      namespace atlas
+      {
+      }
+    }
+  }
+};
+
 // boost >= 1.40
 %import "boost/version.hpp"
 #if (BOOST_VERSION >= 104000)
@@ -133,97 +144,46 @@
 %rename  (__ne__) operator!=;
 
 
-%define SP_TYPE(TYPE)
-%rename  (__getitem__) TYPE ## ::operator[];
-%rename  (__add__) TYPE ## ::operator+;
-%rename  (__mul__) TYPE ## ::operator*;
-%rename  (__div__) TYPE ## ::operator/;
-%rename  (__iadd__) TYPE ## ::operator+=;
-%rename  (__imul__) TYPE ## ::operator*=;
-%rename  (__idiv__) TYPE ## ::operator/=;
-%rename  (__eq__) TYPE ## ::operator==;
-%rename  (__ne__) TYPE ## ::operator!=;
-// affectation?
-%rename  (__copy__) TYPE ## ::operator=;
-%shared_ptr(TYPE);
-%enddef
+%include "SiconosVisitables.hpp"
+%import "SiconosVisitor.hpp"
+
+%include "SiconosPointers.hpp"
+%import "SimulationTypeDef.hpp" 
+
+%include "InteractionsSet.hpp"
+%include "SiconosSet.hpp"
+
+%import "SiconosGraph.hpp"
 
 
-
-SP_TYPE(NonSmoothLaw);
-SP_TYPE(NewtonImpactNSL);
-SP_TYPE(NewtonImpactFrictionNSL);
-
-SP_TYPE(NonSmoothDynamicalSystem);
-SP_TYPE(Topology);
-
-SP_TYPE(DynamicalSystem);
-SP_TYPE(LagrangianDS);
-SP_TYPE(LagrangianLinearTIDS);
-
-SP_TYPE(Relation);
-SP_TYPE(UnitaryRelation);
-SP_TYPE(LagrangianR);
-SP_TYPE(LagrangianLinearTIR);
-SP_TYPE(LagrangianRheonomousR);
-SP_TYPE(LagrangianScleronomousR);
-
-SP_TYPE(Interaction)
-
-SP_TYPE(TimeDiscretisation);
-
-SP_TYPE(OneStepNSProblem);
-SP_TYPE(LinearOSNS);
-SP_TYPE(LCP);
-SP_TYPE(FrictionContact);
-
-SP_TYPE(OneStepIntegrator);
-SP_TYPE(Moreau);
-
-SP_TYPE(Simulation);
-SP_TYPE(TimeStepping);
-
-SP_TYPE(Model);
-
-SP_TYPE(CircularDS);
-SP_TYPE(Disk);
-SP_TYPE(Circle);
-SP_TYPE(ExternalBody);
-SP_TYPE(DiskDiskR);
-SP_TYPE(DiskPlanR);
-SP_TYPE(DiskMovingPlanR);
-SP_TYPE(SiconosBodies);
-
-SP_TYPE(SpaceFilter);
-
-SP_TYPE(SiconosMatrix);
-SP_TYPE(SimpleMatrix);
-SP_TYPE(SiconosVector);
-SP_TYPE(SimpleVector);
-SP_TYPE(BlockVector);
-
-SP_TYPE(InteractionsSet)
+%import "boost/config.hpp"
+%import "boost/graph/graph_utility.hpp"
 
 
-// dummy namespaces to make swig happy
-namespace boost 
-{
-  namespace numeric
-  {
-    namespace ublas
-    {
-    }
-    namespace bindings
-    {
-      namespace atlas
-      {
-      }
-    }
-  }
-};
+%include "Tools.hpp"
+%include "addons.hpp"
+
+%include "KernelRegistration.i"
+
+#define PY_REGISTER(TYPE) \
+%rename  (__getitem__) TYPE ## ::operator[]; \
+%rename  (__add__) TYPE ## ::operator+; \
+%rename  (__mul__) TYPE ## ::operator*; \
+%rename  (__div__) TYPE ## ::operator/; \
+%rename  (__iadd__) TYPE ## ::operator+=; \
+%rename  (__imul__) TYPE ## ::operator*=; \
+%rename  (__idiv__) TYPE ## ::operator/=; \
+%rename  (__eq__) TYPE ## ::operator==; \
+%rename  (__ne__) TYPE ## ::operator!=; \
+%rename  (__copy__) TYPE ## ::operator=; \
+%feature("director") TYPE; \
+%shared_ptr(TYPE); 
 
 
-// note Visitor etc. => module Visitor, Type if ever needed
+ // registered classes in KernelRegistration.i
+KERNEL_REGISTRATION();
+
+// ignores
 
 %ignore nullDeleter;
 
@@ -252,78 +212,27 @@ namespace boost
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
+%ignore getInvMSimple;
+%ignore getInvMBlock;
 
 
-%include "SiconosPointers.hpp"
-%import "SiconosVisitables.hpp"
-%import "SiconosVisitor.hpp"
-
-%import "SimulationTypeDef.hpp" 
-
-%include "InteractionsSet.hpp"
-%include "SiconosSet.hpp"
-
-%import "SiconosGraph.hpp"
-
-
-%import "boost/config.hpp"
-%import "boost/graph/graph_utility.hpp"
-
-
-
-
-
-%include "Tools.hpp"
-%include "addons.hpp"
 
 %include "SiconosAlgebra.hpp"
-%include "SiconosVector.hpp"
-%include "BlockVector.hpp"
-%include "SiconosMatrix.hpp"
-%include "SimpleVector.hpp"
-%include "SimpleMatrix.hpp"
-%include "DynamicalSystem.hpp"
-%include "NonSmoothDynamicalSystem.hpp"
-%include "Topology.hpp"
-%include "LagrangianDS.hpp"
-%include "LagrangianLinearTIDS.hpp"
 
-%include "Relation.hpp"
-%include "UnitaryRelation.hpp"
-%include "LagrangianR.hpp"
-%include "LagrangianLinearTIR.hpp"
-%include "LagrangianScleronomousR.hpp"
-%include "LagrangianRheonomousR.hpp"
-%include "Interaction.hpp"
-%include "Model.hpp"
+%import "RelationNamespace.hpp";
 
-%include "OneStepIntegrator.hpp"
-%include "Moreau.hpp"
 
-%include "OneStepNSProblem.hpp"
-%include "LinearOSNS.hpp"
-%include "LCP.hpp"
-%include "FrictionContact.hpp"
 
-%include "Simulation.hpp"
-%include "TimeStepping.hpp"
+// include registered headers
 
-%include "NonSmoothLaw.hpp"
-%include "NewtonImpactNSL.hpp"
-%include "NewtonImpactFrictionNSL.hpp"
+#undef PY_REGISTER
+%define PY_REGISTER(X)
+%include "X.hpp";
+%enddef
 
-%include "TimeDiscretisation.hpp"
+KERNEL_REGISTRATION();
 
-%include "CircularDS.hpp"
-%include "Disk.hpp"
-%include "Circle.hpp"
-%include "DiskDiskR.hpp"
-%include "DiskPlanR.hpp"
-%include "DiskMovingPlanR.hpp"
-%include "CircleCircleR.hpp"
-%include "ExternalBody.hpp"
-%include "SpaceFilter.hpp"
-%include "SiconosBodies.hpp"
+
 
 
 
