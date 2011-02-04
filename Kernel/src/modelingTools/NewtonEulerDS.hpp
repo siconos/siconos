@@ -304,12 +304,12 @@ public:
   /** set the value of q to newValue
    *  \param SiconosVector newValue
    */
-  void setQ(const SiconosVector&);
+  //  void setQ(const SiconosVector&);
 
   /** set Q to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setQPtr(SP::SiconosVector newPtr);
+  //  void setQPtr(SP::SiconosVector newPtr);
 
   // -- q0 --
 
@@ -331,12 +331,12 @@ public:
   /** set the value of q0 to newValue
    *  \param SiconosVector newValue
    */
-  void setQ0(const SiconosVector&);
+  //  void setQ0(const SiconosVector&);
 
   /** set Q0 to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setQ0Ptr(SP::SiconosVector newPtr);
+  //  void setQ0Ptr(SP::SiconosVector newPtr);
 
   // Q memory
 
@@ -377,7 +377,7 @@ public:
   /** set Velocity0 to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setVelocity0Ptr(SP::SiconosVector newPtr) ;
+  //  void setVelocity0Ptr(SP::SiconosVector newPtr) ;
 
   // -- acceleration --
 
@@ -411,13 +411,13 @@ public:
    *  \param unsigned int, required level for p, default = 2
    *  \param SiconosVector newValue
    */
-  void setP(const SiconosVector&, unsigned int level = 2);
+  //  void setP(const SiconosVector&, unsigned int level = 2);
 
   /** set P to pointer newPtr
    *  \param unsigned int, required level for p, default = 2
    *  \param SP::SiconosVector newPtr
    */
-  void setPPtr(SP::SiconosVector newPtr, unsigned int level = 2);
+  //  void setPPtr(SP::SiconosVector newPtr, unsigned int level = 2);
 
   // -- Mass --
 
@@ -829,7 +829,7 @@ public:
    *  \param unsigned int: derivative number
    *  \param SP::SiconosVector: in-out parameter, qFree
    */
-  void computeqFree(double, unsigned int, SP::SiconosVector);
+  //  void computeqFree(double, unsigned int, SP::SiconosVector);
 
   /** set p[...] to zero
    */
