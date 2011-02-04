@@ -26,29 +26,29 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-char  SICONOS_FRICTION_3D_NSGS_STR [] = "F3D_NSGS";
-char  SICONOS_FRICTION_3D_NSGSV_STR [] = "F3D_NSGSV";
-char  SICONOS_FRICTION_3D_TFP_STR [] = "F3D_TFP";
-char  SICONOS_FRICTION_3D_GLOBALAC_STR [] = "F3D_GLOBALAC";
-char  SICONOS_FRICTION_3D_DSFP_STR[] = "F3D_DeSaxceFixedPoint";
-char  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR[] = "F3D_NCPGlockerFBFixedPoint";
-char  SICONOS_FRICTION_3D_AlartCurnierNewton_STR[] = "F3D_AlartCurnierNewton";
-char  SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR[] = "F3D_DampedAlartCurnierNewton";
-char  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR[] = "F3D_NCPGlockerFBNewton";
-char SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR[] = "F3D_ProjectionOnConeWithDiagonalization";
-char SICONOS_FRICTION_3D_ProjectionOnCone_STR[] = "F3D_ProjectionOnCone";
-char SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR[] = "F3D_ProjectionOnConeWithLocalIteration";
-char SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR[] = "F3D_projectionOnConeWithRegularization";
-char SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR[] = "F3D_NCPGlockerFBPATH";
-char SICONOS_FRICTION_3D_projectionOnCylinder_STR[] = "F3D_projectionOnCylinder";
-char SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR[] = "F3D_ProjectionOnCone_velocity";
-char SICONOS_FRICTION_3D_PGoC_STR[] = "F3D_PGoC";
-char SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR[] = "F3D_DeSaxceFixedPoint";
-char SICONOS_FRICTION_3D_EG_STR[] = "F3D_ExtraGradient";
-char SICONOS_FRICTION_3D_HP_STR[] = "F3D_HyperplaneProjection";
-char SICONOS_FRICTION_3D_PROX_STR[] = "F3D_PROX";
-char SICONOS_FRICTION_3D_QUARTIC_STR[] = "F3D_QUARTIC";
-char SICONOS_FRICTION_3D_QUARTIC_NU_STR[] = "F3D_QUARTIC_NU";
+char *  SICONOS_FRICTION_3D_NSGS_STR = "F3D_NSGS";
+char *  SICONOS_FRICTION_3D_NSGSV_STR = "F3D_NSGSV";
+char *  SICONOS_FRICTION_3D_TFP_STR = "F3D_TFP";
+char *  SICONOS_FRICTION_3D_GLOBALAC_STR = "F3D_GLOBALAC";
+char *  SICONOS_FRICTION_3D_DSFP_STR = "F3D_DeSaxceFixedPoint";
+char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR = "F3D_NCPGlockerFBFixedPoint";
+char *  SICONOS_FRICTION_3D_AlartCurnierNewton_STR = "F3D_AlartCurnierNewton";
+char *  SICONOS_FRICTION_3D_DampedAlartCurnierNewton_STR = "F3D_DampedAlartCurnierNewton";
+char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR = "F3D_NCPGlockerFBNewton";
+char * SICONOS_FRICTION_3D_ProjectionOnConeWithDiagonalization_STR = "F3D_ProjectionOnConeWithDiagonalization";
+char * SICONOS_FRICTION_3D_ProjectionOnCone_STR = "F3D_ProjectionOnCone";
+char * SICONOS_FRICTION_3D_ProjectionOnConeWithLocalIteration_STR = "F3D_ProjectionOnConeWithLocalIteration";
+char * SICONOS_FRICTION_3D_projectionOnConeWithRegularization_STR = "F3D_projectionOnConeWithRegularization";
+char * SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "F3D_NCPGlockerFBPATH";
+char * SICONOS_FRICTION_3D_projectionOnCylinder_STR = "F3D_projectionOnCylinder";
+char * SICONOS_FRICTION_3D_ProjectionOnCone_velocity_STR = "F3D_ProjectionOnCone_velocity";
+char * SICONOS_FRICTION_3D_PGoC_STR = "F3D_PGoC";
+char * SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "F3D_DeSaxceFixedPoint";
+char * SICONOS_FRICTION_3D_EG_STR = "F3D_ExtraGradient";
+char * SICONOS_FRICTION_3D_HP_STR = "F3D_HyperplaneProjection";
+char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
+char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
+char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
 int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {

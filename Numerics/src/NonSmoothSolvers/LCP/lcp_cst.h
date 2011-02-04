@@ -21,19 +21,19 @@ enum LCP_SOLVER
 
 
 
-extern char  SICONOS_LCP_LEMKE_STR [];
-extern char  SICONOS_LCP_NSGS_SBM_STR[];
-extern char  SICONOS_LCP_PGS_STR[];
-extern char  SICONOS_LCP_CPG_STR[];
-extern char  SICONOS_LCP_LATIN_STR[];
-extern char  SICONOS_LCP_LATIN_W_STR[];
-extern char  SICONOS_LCP_QP_STR[];
-extern char  SICONOS_LCP_NSQP_STR[];
-extern char  SICONOS_LCP_NEWTONMIN_STR[];
-extern char  SICONOS_LCP_NEWTONFB_STR[];
-extern char  SICONOS_LCP_PSOR_STR[];
-extern char  SICONOS_LCP_RPGS_STR[];
-extern char  SICONOS_LCP_PATH_STR[];
-extern char  SICONOS_LCP_ENUM_STR[];
+extern char *  SICONOS_LCP_LEMKE_STR;
+extern char *  SICONOS_LCP_NSGS_SBM_STR;
+extern char *  SICONOS_LCP_PGS_STR;
+extern char *  SICONOS_LCP_CPG_STR;
+extern char *  SICONOS_LCP_LATIN_STR;
+extern char *  SICONOS_LCP_LATIN_W_STR;
+extern char *  SICONOS_LCP_QP_STR;
+extern char *  SICONOS_LCP_NSQP_STR;
+extern char *  SICONOS_LCP_NEWTONMIN_STR;
+extern char *  SICONOS_LCP_NEWTONFB_STR;
+extern char *  SICONOS_LCP_PSOR_STR;
+extern char *  SICONOS_LCP_RPGS_STR;
+extern char *  SICONOS_LCP_PATH_STR;
+extern char *  SICONOS_LCP_ENUM_STR;
 
 #endif

@@ -24,11 +24,11 @@
 #include "NumericsOptions.h"
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
-char  SICONOS_FRICTION_2D_NSGS_STR [] = "F2D_NSGS";
-char  SICONOS_FRICTION_2D_NLGS_STR [] = "F2D_NLGS";
-char  SICONOS_FRICTION_2D_PGS_STR [] = "F2D_PGS";
-char  SICONOS_FRICTION_2D_CPG_STR [] = "F2D_CPG";
-char  SICONOS_FRICTION_2D_LATIN_STR [] = "F2D_LATIN";
+char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
+char *  SICONOS_FRICTION_2D_NLGS_STR  = "F2D_NLGS";
+char *  SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
+char *  SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
+char *  SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif

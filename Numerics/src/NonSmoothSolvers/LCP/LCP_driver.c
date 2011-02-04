@@ -26,20 +26,20 @@
 
 #include "lcp_cst.h"
 
-char  SICONOS_LCP_LEMKE_STR[] = "Lemke";
-char  SICONOS_LCP_NSGS_SBM_STR[] = "NSGS_SBM";
-char  SICONOS_LCP_PGS_STR[] = "PGS";
-char  SICONOS_LCP_CPG_STR[] = "CPG";
-char  SICONOS_LCP_LATIN_STR[] = "Latin";
-char  SICONOS_LCP_LATIN_W_STR[] = "Latin_w";
-char  SICONOS_LCP_QP_STR[] = "QP";
-char  SICONOS_LCP_NSQP_STR[] = "NSQP";
-char  SICONOS_LCP_NEWTONMIN_STR[] = "NewtonMin";
-char  SICONOS_LCP_NEWTONFB_STR[] = "NewtonFB";
-char  SICONOS_LCP_PSOR_STR[] = "PSOR";
-char  SICONOS_LCP_RPGS_STR[] = "RPGS";
-char  SICONOS_LCP_PATH_STR[] = "PATH";
-char  SICONOS_LCP_ENUM_STR[] = "ENUM";
+char *  SICONOS_LCP_LEMKE_STR = "Lemke";
+char *  SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";
+char *  SICONOS_LCP_PGS_STR = "PGS";
+char *  SICONOS_LCP_CPG_STR = "CPG";
+char *  SICONOS_LCP_LATIN_STR = "Latin";
+char *  SICONOS_LCP_LATIN_W_STR = "Latin_w";
+char *  SICONOS_LCP_QP_STR = "QP";
+char *  SICONOS_LCP_NSQP_STR = "NSQP";
+char *  SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
+char *  SICONOS_LCP_NEWTONFB_STR = "NewtonFB";
+char *  SICONOS_LCP_PSOR_STR = "PSOR";
+char *  SICONOS_LCP_RPGS_STR = "RPGS";
+char *  SICONOS_LCP_PATH_STR = "PATH";
+char *  SICONOS_LCP_ENUM_STR = "ENUM";
 
 int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
