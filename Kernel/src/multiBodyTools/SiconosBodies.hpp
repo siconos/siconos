@@ -61,6 +61,10 @@ public:
     return _plans;
   }
 
+  /** destructor
+   */
+  virtual ~SiconosBodies() {};
+
 };
 
 TYPEDEF_SPTR(SiconosBodies);

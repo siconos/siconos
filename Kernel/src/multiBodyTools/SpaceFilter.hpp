@@ -260,6 +260,11 @@ public:
    */
   virtual void buildInteractions(double);
 
+
+  /** destructor
+   */
+  virtual ~SpaceFilter() {};
+
 };
 
 #endif /* SpaceFilter_hpp */
