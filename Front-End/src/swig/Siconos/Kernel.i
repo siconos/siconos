@@ -129,6 +129,7 @@ namespace boost
 // boost >= 1.40
 %import "boost/version.hpp"
 #if (BOOST_VERSION >= 104000)
+%ignore boost::enable_shared_from_this::operator=;
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
 #else
 %import "boost/enable_shared_from_this.hpp"
@@ -162,25 +163,30 @@ namespace boost
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
-
+// what's wrong with this ignore ??
+%ignore PURE_DEF;
 %include "Tools.hpp"
+
 %include "addons.hpp"
 
 %include "KernelRegistration.i"
 
-#define PY_REGISTER(TYPE) \
-%rename  (__getitem__) TYPE ## ::operator[]; \
-%rename  (__add__) TYPE ## ::operator+; \
-%rename  (__mul__) TYPE ## ::operator*; \
-%rename  (__div__) TYPE ## ::operator/; \
-%rename  (__iadd__) TYPE ## ::operator+=; \
-%rename  (__imul__) TYPE ## ::operator*=; \
-%rename  (__idiv__) TYPE ## ::operator/=; \
-%rename  (__eq__) TYPE ## ::operator==; \
-%rename  (__ne__) TYPE ## ::operator!=; \
-%rename  (__copy__) TYPE ## ::operator=; \
-%feature("director") TYPE; \
+%define PY_REGISTER(TYPE)
+%rename  (__getitem__) TYPE ## ::operator[];
+%rename  (__add__) TYPE ## ::operator+;
+%rename  (__mul__) TYPE ## ::operator*;
+%rename  (__div__) TYPE ## ::operator/;
+%rename  (__iadd__) TYPE ## ::operator+=;
+%rename  (__imul__) TYPE ## ::operator*=;
+%rename  (__idiv__) TYPE ## ::operator/=;
+%rename  (__eq__) TYPE ## ::operator==;
+%rename  (__ne__) TYPE ## ::operator!=;
+%rename  (__copy__) TYPE ## ::operator=;
+%feature("director") TYPE;
+%ignore boost::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) boost::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE); 
+%enddef
 
 
  // registered classes in KernelRegistration.i
@@ -233,6 +239,28 @@ KERNEL_REGISTRATION();
 %include "X.hpp";
 %enddef
 
+
+%template (InteractionsSet) SiconosSet<Interaction,double*>;
+
+%template (dsi) std::pair<unsigned int, unsigned int >;
+
+%template (dsp) std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> >;
+
+%template (dspv) std::vector<std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> > >;
+
+%template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
+
+// not sufficient
+%template (qbool) Question<bool>;
+%ignore Question<bool>;
+
+%template (quint) Question<unsigned int>;
+%ignore Question<unsigned int>;
+
+// suppress warning
+%template (sharedHashed) boost::enable_shared_from_this< Hashed >;
+%ignore  boost::enable_shared_from_this< Hashed >;
+
 KERNEL_REGISTRATION();
 
 
@@ -243,19 +271,5 @@ KERNEL_REGISTRATION();
 
 %fragment("StdMapTraits");
 
-
-%template (InteractionsSet) SiconosSet<Interaction,double*>;
-
-%template (sharedModel) boost::enable_shared_from_this<Model>;
-
-%template (dsv) std::vector<boost::shared_ptr<DynamicalSystem> >;
-
-%template (dsi) std::pair<unsigned int, unsigned int >;
-
-%template (dsp) std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> >;
-
-%template (dspv) std::vector<std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> > >;
-
-%template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
 

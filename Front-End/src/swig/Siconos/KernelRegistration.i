@@ -14,9 +14,9 @@
   PY_REGISTER(LagrangianDS);                      \
   PY_REGISTER(LagrangianLinearTIDS);              \
   PY_REGISTER(NewtonEulerDS);                     \
+  PY_REGISTER(FirstOrderNonLinearDS);             \
   PY_REGISTER(FirstOrderLinearDS);                \
   PY_REGISTER(FirstOrderLinearTIDS);              \
-  PY_REGISTER(FirstOrderNonLinearDS);             \
   PY_REGISTER(Relation);                          \
   PY_REGISTER(UnitaryRelation);                   \
   PY_REGISTER(LagrangianR);                       \
@@ -25,8 +25,8 @@
   PY_REGISTER(LagrangianScleronomousR);           \
   PY_REGISTER(LagrangianCompliantR);              \
   PY_REGISTER(NewtonEulerR);                      \
-  PY_REGISTER(NewtonEulerRFC3D);                  \
   PY_REGISTER(NewtonEulerRImpact);                \
+  PY_REGISTER(NewtonEulerRFC3D);                  \
   PY_REGISTER(FirstOrderR);                       \
   PY_REGISTER(FirstOrderLinearR);                 \
   PY_REGISTER(FirstOrderLinearTIR);               \
@@ -35,6 +35,7 @@
   PY_REGISTER(Interaction);                       \
   PY_REGISTER(TimeDiscretisation);                \
   PY_REGISTER(OneStepNSProblem);                  \
+  PY_REGISTER(OneStepIntegrator);                 \
   PY_REGISTER(LinearOSNS);                        \
   PY_REGISTER(Lsodar);                            \
   PY_REGISTER(LCP);                               \
@@ -43,7 +44,6 @@
   PY_REGISTER(MLCP);                              \
   PY_REGISTER(MLCPProjectOnConstraints);          \
   PY_REGISTER(FrictionContact);                   \
-  PY_REGISTER(OneStepIntegrator);                 \
   PY_REGISTER(Moreau);                            \
   PY_REGISTER(Simulation);                        \
   PY_REGISTER(TimeStepping);                      \
@@ -53,6 +53,7 @@
   PY_REGISTER(Disk);                              \
   PY_REGISTER(Circle);                            \
   PY_REGISTER(ExternalBody);                      \
+  PY_REGISTER(CircularR);                         \
   PY_REGISTER(DiskDiskR);                         \
   PY_REGISTER(DiskPlanR);                         \
   PY_REGISTER(DiskMovingPlanR);                   \
