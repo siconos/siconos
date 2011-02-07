@@ -625,6 +625,14 @@ public:
   {
     Plugin::setFunction(&computeFExtPtr, pluginPath, functionName);
   }
+  /** allow to set a specified function to compute Mext
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   */
+  void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    Plugin::setFunction(&computeMExtPtr, pluginPath, functionName);
+  }
 
   /** set a specified function to compute fExt
    *  \param a pointer on the plugin function
