@@ -56,10 +56,6 @@ LinearOSNS::LinearOSNS(const int numericsSolverId,  const string& name,
   OneStepNSProblem(newId, numericsSolverId), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
-LinearOSNS::LinearOSNS(const int numericsSolverId,
-                       const std::string& name):
-  OneStepNSProblem(numericsSolverId), _MStorageType(0), _keepLambdaAndYState(false)
-{}
 // Setters
 
 void LinearOSNS::setW(const SiconosVector& newValue)

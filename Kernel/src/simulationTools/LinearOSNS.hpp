@@ -101,12 +101,6 @@ public:
   LinearOSNS(SP::OneStepNSProblemXML, const std::string&);
 
   /** constructor from data
-        \param int, numerics_solver_id
-        \param string, ns problem type    \
-    */
-  LinearOSNS(const int ,
-             const std::string&);
-  /** constructor from data
       \param int, numerics_solver identifier
       \param string, ns problem type    \
       \param String: id of the problem (default = "unamed")
