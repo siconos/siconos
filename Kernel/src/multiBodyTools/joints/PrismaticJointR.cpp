@@ -20,7 +20,7 @@
 
 */
 
-#include "PrismaticJoint.hpp"
+#include "PrismaticJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
 

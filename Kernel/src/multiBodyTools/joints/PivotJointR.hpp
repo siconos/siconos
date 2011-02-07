@@ -23,7 +23,7 @@
 #define PivotJointRELATION_H
 
 #include "SiconosKernel.hpp"
-#include "KneeJoint.hpp"
+#include "KneeJointR.hpp"
 
 
 class PivotJointR : public KneeJointR

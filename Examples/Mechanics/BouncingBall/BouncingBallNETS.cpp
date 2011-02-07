@@ -29,7 +29,7 @@
 #include "SiconosKernel.hpp"
 static double sBallRadius = 0.1;
 #define WITH_PROJ
-#define WITH_FC3D
+//#define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
 #define R_CLASS NewtonEulerRFC3D
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 2.0;      // initial velocity for lowest bead.
     double omega_initx = 0.0;
-    double omega_initz = 1.0;// initial velocity for lowest bead.
+    double omega_initz = 0.0;// initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
     double m = 1; // Ball mass
     double g = 9.81; // Gravity

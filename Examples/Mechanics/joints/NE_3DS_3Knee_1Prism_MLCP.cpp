@@ -26,8 +26,8 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "KneeJoint.hpp"
-#include "PrismaticJoint.hpp"
+#include "KneeJointR.hpp"
+#include "PrismaticJointR.hpp"
 using namespace std;
 
 int main(int argc, char* argv[])

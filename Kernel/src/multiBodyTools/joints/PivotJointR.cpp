@@ -20,7 +20,7 @@
 
 */
 
-#include "PivotJoint.hpp"
+#include "PivotJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
 int PivotJointR::_sNbEqualities = 5;
