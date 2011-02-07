@@ -27,6 +27,9 @@
   PY_REGISTER(NewtonEulerR);                      \
   PY_REGISTER(NewtonEulerRImpact);                \
   PY_REGISTER(NewtonEulerRFC3D);                  \
+  PY_REGISTER(KneeJointR)                         \
+  PY_REGISTER(PivotJointR)                        \
+  PY_REGISTER(PrismaticJointR)                    \
   PY_REGISTER(FirstOrderR);                       \
   PY_REGISTER(FirstOrderLinearR);                 \
   PY_REGISTER(FirstOrderLinearTIR);               \

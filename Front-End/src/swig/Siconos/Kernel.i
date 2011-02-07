@@ -148,17 +148,18 @@ namespace boost
 %rename  (__ne__) operator!=;
 
 
+%rename("$ignore", regexmatch$name="^createSPtr.*") "";
+
+%include "SiconosPointers.hpp"
 %include "SiconosVisitables.hpp"
 %import "SiconosVisitor.hpp"
 
-%include "SiconosPointers.hpp"
-%import "SimulationTypeDef.hpp" 
+%import "SiconosGraph.hpp"
+
+%include "SimulationTypeDef.hpp" 
 
 %include "InteractionsSet.hpp"
 %include "SiconosSet.hpp"
-
-%import "SiconosGraph.hpp"
-
 
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
@@ -251,15 +252,17 @@ KERNEL_REGISTRATION();
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
 // not sufficient
-%template (qbool) Question<bool>;
 %ignore Question<bool>;
+%template (qbool) Question<bool>;
 
-%template (quint) Question<unsigned int>;
 %ignore Question<unsigned int>;
+%template (quint) Question<unsigned int>;
+
 
 // suppress warning
-%template (sharedHashed) boost::enable_shared_from_this< Hashed >;
 %ignore  boost::enable_shared_from_this< Hashed >;
+%template (sharedHashed) boost::enable_shared_from_this< Hashed >;
+
 
 KERNEL_REGISTRATION();
 
