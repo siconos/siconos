@@ -115,7 +115,11 @@ void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::S
   //jhqT->display();
 
 }
-
+void  NewtonEulerRImpact::initComponents()
+{
+  NewtonEulerR::initComponents();
+  _jachqProj.reset(new SimpleMatrix(_jachq->size(0), _jachq->size(1)));
+}
 
 void NewtonEulerRImpact::computeJachq(double t)
 {
@@ -170,7 +174,10 @@ void NewtonEulerRImpact::computeJachq(double t)
     ::boost::math::quaternion<float>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
     ::boost::math::quaternion<float>    quat0(1, 0, 0, 0);
     ::boost::math::quaternion<float>    quatBuff;
-    quatBuff = (quatGP * quatQ) + (quatcQ * quatGP);
+    ::boost::math::quaternion<float>    _2qiquatGP;
+    _2qiquatGP = quatGP;
+    _2qiquatGP *= 2 * (q->getValue(3));
+    quatBuff = (quatGP * quatQ) + (quatcQ * quatGP) - _2qiquatGP;
 #ifdef NERI_DEBUG
     printf("NewtonEulerRImpact::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 #endif
@@ -181,11 +188,17 @@ void NewtonEulerRImpact::computeJachq(double t)
     for (int i = 1; i < 4; i++)
     {
       ::boost::math::quaternion<float>    quatei(0, (i == 1) ? 1 : 0, (i == 2) ? 1 : 0, (i == 3) ? 1 : 0);
-      quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei;
+      _2qiquatGP = quatGP;
+      _2qiquatGP *= 2 * (q->getValue(3 + i));
+      quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
       _jachq->setValue(0, 7 * iDS + 3 + i, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
                        quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     }
   }
+  //cout<<"WARNING NewtonEulerRImpact set jachq to zedro \n";
+  //_jachq->setValue(0,4,0);_jachq->setValue(0,5,0);_jachq->setValue(0,6,0);
+  *_jachqProj = *_jachq;
+  //_jachqProj->setValue(0,4,0);_jachqProj->setValue(0,5,0);_jachqProj->setValue(0,6,0);
 #ifdef NERI_DEBUG
   printf("NewtonEulerRImpact::computeJachq :");
   _jachq->display();

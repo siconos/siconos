@@ -202,6 +202,8 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   SP::SiconosVector lambda = interaction()->lambda(level);
 
   prod(*lambda, *_jachqT, *_contactForce, true);
+  printf("NewtonEulerR::computeInput contact force :");
+  _contactForce->display();
   /*data is a pointer of memory associated to a dynamical system*/
   /** false because it consists in doing a sum*/
   prod(*lambda, *_jachqT, *data[p0 + level], false);

@@ -50,8 +50,9 @@ protected:
   // /*because set is not sorted!*/
   // SP::NewtonEulerDS _ds1;
   // SP::NewtonEulerDS _ds2;
-
+  virtual void initComponents();
 public:
+  bool _isOnContact;
   NewtonEulerRImpact(): _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)), _Nc(new SimpleVector(3)), NewtonEulerR()
   {
     /*_ds1=NULL;_ds2=NULL;*/
