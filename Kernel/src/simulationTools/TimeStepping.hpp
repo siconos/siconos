@@ -44,10 +44,6 @@ private:
    */
   TimeStepping() {};
 
-  /** initialisation specific to TimeStepping for OneStepNSProblem.
-   */
-  void initOSNS();
-
   /** compute LevelMax */
   void initLevelMax();
 
@@ -77,7 +73,10 @@ private:
    * "nonlinear" (default) will perform the newton iteration up to convergence
    */
   std::string _newtonOptions;
-
+protected:
+  /** initialisation specific to TimeStepping for OneStepNSProblem.
+   */
+  virtual void initOSNS();
 public:
 
   /** Constructor with the time-discretisation.
@@ -280,6 +279,12 @@ public:
   };
 
 
+  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
+    Overload this method to update user model.*/
+  virtual void updateWorldFromDS()
+  {
+    ;
+  };
 
 
 

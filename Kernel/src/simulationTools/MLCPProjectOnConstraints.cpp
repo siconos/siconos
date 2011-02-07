@@ -22,14 +22,16 @@
 #include "Simulation.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
+#include "NewtonEulerRImpact.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
 using namespace std;
 using namespace RELATION;
-//#define MLCPPROJ_DEBUG
+#define MLCPPROJ_DEBUG
 void MLCPProjectOnConstraints::updateM()
 {
   // Get index set from Simulation
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+
 
   if (!_M)
   {
@@ -148,8 +150,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       // UR1 == UR2
       SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
       //
-      //      cout<<"MLCPProjectOnContarints : leftUBlock\n";
-      //      leftUnitaryBlock->display();
       work->trans();
       //        cout<<"LinearOSNS : leftUBlock'\n";
       //        work->display();
@@ -304,7 +304,7 @@ void MLCPProjectOnConstraints::postCompute()
 
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[1]) ===
-
+  (*_z) *= 0.1;
   unsigned int pos = 0;
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::postCompute\n");
@@ -355,6 +355,8 @@ void MLCPProjectOnConstraints::postCompute()
     coord[7] = (ner->getq())->size();
     subprod(*aux, *aBuff, *(ner->getq()), coord, false);
 #ifdef MLCPPROJ_DEBUG
+    printf("MLCPProjectOnConstraints::postCompute _z\n");
+    _z->display();
     printf("MLCPProjectOnConstraints::postCompute q updated\n");
     (ner->getq())->display();
 #endif
@@ -384,6 +386,13 @@ void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::Unita
            == Type::EqualityConditionNSL)
     equalitySize2 = nslawSize2;
 
+  if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
+      Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
+  {
+    SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> (UR1->interaction()->relation());
+    if (ri->_isOnContact)
+      equalitySize1 = nslawSize1;
+  }
 
 
   if (UR1 == UR2)

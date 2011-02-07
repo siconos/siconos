@@ -351,6 +351,9 @@ void TimeStepping::update(unsigned int levelInput)
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
+  /*Because the dof of DS have been updated,
+    the world (CAO for example) must be updated.*/
+  updateWorldFromDS();
 
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())

@@ -304,7 +304,10 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
         if (!isTimeInvariant || !isLinear)
         {
-          computeUnitaryBlock(*oei);
+          unsigned int isrc = indexSet->index(indexSet->source(*oei));
+          unsigned int itar = indexSet->index(indexSet->target(*oei));
+          if (isrc != itar)
+            computeUnitaryBlock(*oei);
         }
         else
         {

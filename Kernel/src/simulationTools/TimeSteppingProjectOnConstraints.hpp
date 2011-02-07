@@ -35,7 +35,8 @@
  */
 class TimeSteppingProjectOnConstraints : public TimeStepping
 {
-
+protected:
+  virtual void initOSNS();
 public:
 
   /** Constructor with the time-discretisation.
@@ -50,10 +51,14 @@ public:
                                    SP::OneStepNSProblem osnspb_velo,
                                    SP::OneStepNSProblem osnspb_pos);
 
-  ~TimeSteppingProjectOnConstraints();
+  virtual ~TimeSteppingProjectOnConstraints();
 
   virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
   virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
+  virtual void updateWorldFromDS()
+  {
+    printf("TimeSteppingProjectOnConstraints::updateWordFromDS\n");
+  }
 
 
   /** newton algorithm
@@ -64,7 +69,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_STD_VISITORS();
+  //ACCEPT_STD_VISITORS();
 
 };
 

@@ -21,10 +21,10 @@
 
 #include "TimeSteppingProjectOnConstraints.hpp"
 #include "NewtonEulerDS.hpp"
-
+#include "NewtonEulerRImpact.hpp"
 using namespace std;
 
-//#define TSPROJ_DEBUG
+#define TSPROJ_DEBUG
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
@@ -40,7 +40,11 @@ TimeSteppingProjectOnConstraints::~TimeSteppingProjectOnConstraints()
 {
 }
 
-
+void TimeSteppingProjectOnConstraints::initOSNS()
+{
+  TimeStepping::initOSNS();
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(0);
+}
 void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned int maxStep)
 {
 #ifdef TSPROJ_DEBUG
@@ -51,17 +55,10 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   cout << "TimeStepping::newtonSolve end :\n";
 #endif
 
-
   int info = 0;
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
 #endif
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->computeJach(getTkp1());
-    (*it)->relation()->computeh(getTkp1());
-  }
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
@@ -72,18 +69,73 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
-  info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
-  //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
-  //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
-  //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
-  if (info)
-    cout << "TimeSteppingProjectOnConstraints project on constraints failed." << endl ;
-  //cout<<"during projection before normalizing of q:\n";
-  //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  //{
-  //  (*it)->relation()->computeh(getTkp1());
-  //}
+  bool runningNewton = true;
+  int cmp = 0;
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
+    if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+        Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    {
+      SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> ((*it)->relation());
+      if (criteria < -1e-7)
+      {
+        ri->_isOnContact = true;
+      }
+      else
+      {
+        ri->_isOnContact = false;
+      }
+    }
+    if (criteria < -1e-4)
+      runningNewton = true;
+  }
 
+
+  while (runningNewton && cmp < 100)
+  {
+    cmp++;
+    printf("TimeSteppingProjectOnConstraints Newton step = %d\n", cmp);
+
+    runningNewton = false;
+    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    {
+      (*it)->relation()->computeJach(getTkp1());
+      (*it)->relation()->computeh(getTkp1());
+      double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
+
+      if (criteria < -1e-4)
+        runningNewton = true;
+    }
+    info = 0;
+    if (runningNewton)
+    {
+      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
+      for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+      {
+        SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+        Type::Siconos dsType = Type::value(*ds);
+        if (dsType != Type::NewtonEulerDS)
+          RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
+        SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+
+        neds->normalizeq();
+      }
+
+      updateWorldFromDS();
+    }
+    //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
+    //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
+    //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
+    if (info)
+      cout << "TimeSteppingProjectOnConstraints project on constraints failed." << endl ;
+    //cout<<"during projection before normalizing of q:\n";
+    //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    //{
+    //  (*it)->relation()->computeh(getTkp1());
+    //}
+  }
 
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
@@ -102,22 +154,27 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     // dotq->setValue(5,(q->getValue(5)-qold->getValue(5))/h);
     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
     neds->updateT();
-
+    //continue;
     /*compute the new velocity seeing the work of fext*/
     *(neds->deltaq()) -= *(neds->q());
-    SP::SimpleVector FextNorm(new SimpleVector(3));
-    FextNorm->setValue(0, neds->fExt()->getValue(0));
-    FextNorm->setValue(1, neds->fExt()->getValue(1));
-    FextNorm->setValue(2, neds->fExt()->getValue(2));
-#ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
-    neds->deltaq()->display();
-    cout << "TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
-    FextNorm->display();
-#endif
-    double n2 = FextNorm->norm2();
-    if (n2 > 1e-7)
+    double  n2q = neds->deltaq()->norm2();
+    double n2 = neds->fExt()->norm2();
+    if (n2 > 1e-7 && n2q > 1e-14)
     {
+      //if (n2q < 1e-14)
+      //  continue;
+
+      SP::SimpleVector FextNorm(new SimpleVector(3));
+      FextNorm->setValue(0, neds->fExt()->getValue(0));
+      FextNorm->setValue(1, neds->fExt()->getValue(1));
+      FextNorm->setValue(2, neds->fExt()->getValue(2));
+#ifdef TSPROJ_DEBUG
+      cout << "TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
+      neds->deltaq()->display();
+      cout << "TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
+      FextNorm->display();
+#endif
+
       (*FextNorm) *= (1. / n2);
       /*work of external forces.*/
       double workFext = neds->fExt()->getValue(0) * neds->deltaq()->getValue(0) +
@@ -128,32 +185,36 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
                        FextNorm->getValue(1) * neds->velocity()->getValue(1) +
                        FextNorm->getValue(2) * neds->velocity()->getValue(2);
       double VkcFNorm = VkFNorm;
-      if (VkFNorm >= 0 && workFext > 0)
+      VkcFNorm = VkFNorm * VkFNorm - 2 * fabs(workFext) / (neds->massValue());
+      if (VkcFNorm > 0)
       {
-        ;//VkcFNorm=sqrt (2*workFext/(neds->massValue())+VkFNorm*VkFNorm);
-      }
-      else if (VkFNorm <= 0 && workFext < 0)
-      {
-        ;//VkcFNorm=-sqrt (fabs(2*workFext/(neds->massValue())+VkFNorm*VkFNorm));
-      }
-      else if (VkFNorm > 0 && workFext < 0)
-      {
-        VkcFNorm = VkFNorm * VkFNorm + 2 * workFext / (neds->massValue());
-        if (VkcFNorm > 0)
+        if (VkFNorm > 0)
           VkcFNorm = sqrt(VkcFNorm);
         else
-          VkcFNorm = 0;
-      }
-      else if (VkFNorm < 0 && workFext > 0)
-      {
-        VkcFNorm = VkFNorm * VkFNorm - 2 * workFext / (neds->massValue());
-        if (VkcFNorm > 0)
           VkcFNorm = -sqrt(VkcFNorm);
-        else
-          VkcFNorm = 0;
       }
+      else
+        VkcFNorm = 0;
+      // if (VkFNorm >= 0 && workFext >0){
+      //   ;//VkcFNorm=sqrt (2*workFext/(neds->massValue())+VkFNorm*VkFNorm);
+      // }else if (VkFNorm <= 0 && workFext < 0){
+      //   ;//VkcFNorm=-sqrt (fabs(2*workFext/(neds->massValue())+VkFNorm*VkFNorm));
+      // }else if (VkFNorm > 0 && workFext <0){
+      //   VkcFNorm= VkFNorm*VkFNorm + 2*workFext/(neds->massValue());
+      //   if (VkcFNorm >0)
+      //     VkcFNorm=sqrt(VkcFNorm);
+      //   else
+      //     VkcFNorm=0;
+      // }else if (VkFNorm < 0 && workFext > 0){
+      //   VkcFNorm= VkFNorm*VkFNorm - 2*workFext/(neds->massValue());
+      //   if (VkcFNorm >0)
+      //     VkcFNorm=-sqrt(VkcFNorm);
+      //   else
+      //     VkcFNorm=0;
+      // }
 #ifdef TSPROJ_DEBUG
-      cout << "TimeSteppingProjectOnConstraints::newtonSolve velocity before update\n";
+      printf("TimeSteppingProjectOnConstraints::newtonSolve velocity before update(prevComp=%e, newComp=%e)\n", VkFNorm, VkcFNorm);
+      printf("VELOCITY1 ");
       neds->velocity()->display();
 #endif
       neds->velocity()->setValue(0, neds->velocity()->getValue(0) + (VkcFNorm - VkFNorm)*FextNorm->getValue(0));
@@ -161,17 +222,19 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       neds->velocity()->setValue(2, neds->velocity()->getValue(2) + (VkcFNorm - VkFNorm)*FextNorm->getValue(2));
 #ifdef TSPROJ_DEBUG
       cout << "TimeSteppingProjectOnConstraints::newtonSolve velocity updated\n";
+      printf("VELOCITY2 ");
       neds->velocity()->display();
 #endif
-      SP::SiconosMatrix T = neds->T();
-      SP::SiconosVector dotq = neds->dotq();
-      prod(*T, *neds->velocity(), *dotq, true);
-      if (!_allNSProblems->empty())
-      {
-        updateOutput(0, _levelMax);
-      }
+    }
+    SP::SiconosMatrix T = neds->T();
+    SP::SiconosVector dotq = neds->dotq();
+    prod(*T, *neds->velocity(), *dotq, true);
+    if (!_allNSProblems->empty())
+    {
+      updateOutput(0, _levelMax);
     }
   }
+
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
 #endif
@@ -191,7 +254,7 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
 #ifdef TSPROJ_DEBUG
   if (res)
   {
-    printf("TimeSteppingProjectOnConstraints::predictorDeactivate\n");
+    printf("TimeSteppingProjectOnConstraints::predictorDeactivate DEACTIVATE\n");
   }
 #endif
 
@@ -207,12 +270,12 @@ bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur,
 #ifdef TSPROJ_DEBUG
   printf("TSProjectOnConstraints::predictorActivate yref=%e, yDot=%e\n", y, yDot);
 #endif
-  y += h * yDot;
+  y += 0.5 * h * yDot;
   assert(!isnan(y));
 #ifdef TSPROJ_DEBUG
   if (y <= 0)
   {
-    printf("TimeSteppingProjectOnConstraints::predictorActivate y=%e\n", y);
+    printf("TimeSteppingProjectOnConstraints::predictorActivate ACTIVATE y=%e\n", y);
   }
 #endif
   //printf("TS::predictorActivate y=%e\n",y);
