@@ -23,6 +23,7 @@
   REGISTER(NewtonImpactFrictionNSL)                          \
   REGISTER(Simulation)                                       \
   REGISTER(TimeStepping)                                     \
+  REGISTER(TimeSteppingProjectOnConstraints)                 \
   REGISTER(EventDriven)                                      \
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LCP)                                              \
