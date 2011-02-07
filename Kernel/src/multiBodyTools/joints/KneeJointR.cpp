@@ -20,7 +20,7 @@
 
 */
 
-#include "KneeJoint.hpp"
+#include "KneeJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
 int KneeJointR::_sNbEqualities = 3;
