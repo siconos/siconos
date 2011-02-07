@@ -53,6 +53,8 @@ public:
    */
   ACCEPT_VISITORS();
 
+  ~DiskDiskR() {};
+
 };
 
 TYPEDEF_SPTR(DiskDiskR);

@@ -33,9 +33,7 @@ class CircularR : public LagrangianScleronomousR
 protected:
   double r1, r2;
 
-  CircularR();
-
-  ~CircularR();
+  CircularR() : LagrangianScleronomousR() {};
 
 public:
 
@@ -44,7 +42,7 @@ public:
   \param disk1 radius
   \param disk2 radius
   */
-  CircularR(double, double);
+  CircularR(double, double) {};
 
   double getRadius1()
   {
@@ -56,7 +54,13 @@ public:
     return r2;
   };
 
-  virtual double distance(double, double, double, double, double, double);
+  virtual double distance(double, double, double, double, double, double)
+  {
+    assert(0);
+    return(0);
+  };
+
+  ~CircularR() {};
 
 };
 

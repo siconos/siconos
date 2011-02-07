@@ -129,6 +129,8 @@ public:
    */
   ACCEPT_VISITORS();
 
+  ~DiskPlanR() {};
+
 };
 
 TYPEDEF_SPTR(DiskPlanR);

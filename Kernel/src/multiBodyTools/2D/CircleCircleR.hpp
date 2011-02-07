@@ -53,6 +53,8 @@ public:
    */
   ACCEPT_VISITORS();
 
+  ~CircleCircleR() {};
+
 };
 
 TYPEDEF_SPTR(CircleCircleR);
