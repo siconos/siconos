@@ -133,8 +133,6 @@ public:
     return createSPtrMixedLinearComplementarityProblem(_numerics_problem);
   }
 
-  /** Build or reinit M and the NumericsProblem*/
-  virtual void updateM();
 
   /** */
   virtual void reset();

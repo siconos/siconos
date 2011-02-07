@@ -42,34 +42,6 @@ MLCP::MLCP(const int newNumericsSolverId):
 
 }
 
-void MLCP::updateM()
-{
-  // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-
-  if (!_M)
-  {
-    // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
-    _numerics_problem.M = &*_M->getNumericsMatrix();
-    _numerics_problem.A = 0;
-    _numerics_problem.B = 0;
-    _numerics_problem.C = 0;
-    _numerics_problem.D = 0;
-    _numerics_problem.a = 0;
-    _numerics_problem.b = 0;
-    _numerics_problem.problemType = 0;
-    _numerics_problem.n = _n;
-    _numerics_problem.m = _m;
-  }
-  else
-  {
-    _M->setStorageType(_MStorageType);
-    _M->fill(indexSet);
-
-  }
-  _sizeOutput = _M->size();
-}
 
 void  MLCP::reset()
 {
@@ -257,9 +229,7 @@ void MLCP::initialize(SP::Simulation sim)
 {
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
-  // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  _M.reset(new OSNSMatrix(indexSet, _MStorageType));
+
   _numerics_problem.M = &*_M->getNumericsMatrix();
   _numerics_problem.A = 0;
   _numerics_problem.B = 0;
@@ -268,8 +238,7 @@ void MLCP::initialize(SP::Simulation sim)
   _numerics_problem.a = 0;
   _numerics_problem.b = 0;
   _numerics_problem.problemType = 0;
-  _numerics_problem.n = _n;
-  _numerics_problem.m = _m;
+
 
 }
 void  MLCP::updateUnitaryBlocks()

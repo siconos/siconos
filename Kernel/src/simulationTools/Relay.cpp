@@ -100,6 +100,13 @@ void Relay::initialize(SP::Simulation sim)
     if (_ub->size() != maxSize())
       _ub->resize(maxSize());
   }
+}
+
+
+int Relay::compute(double time)
+{
+  // --- Prepare data for Relay computing ---
+  preCompute(time);
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
@@ -129,13 +136,16 @@ void Relay::initialize(SP::Simulation sim)
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, ur, pos));
     ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
-}
 
 
-int Relay::compute(double time)
-{
-  // --- Prepare data for Relay computing ---
-  preCompute(time);
+
+
+
+
+
+
+
+
 
   int info = 0;
   // --- Call Numerics driver ---

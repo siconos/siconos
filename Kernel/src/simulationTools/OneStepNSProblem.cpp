@@ -184,31 +184,30 @@ void OneStepNSProblem::updateUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
 
 
-  bool isTimeInvariant = simulation()->model()->
-                         nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  bool hasTopologyChanged = simulation()->model()->
+                            nonSmoothDynamicalSystem()->topology()->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  if (simulation()->indexSet(_levelMin)->properties().symmetric)
+  if (indexSet->properties().symmetric)
   {
     UnitaryRelationsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
+      SP::UnitaryRelation UR = indexSet->bundle(*vi);
+      unsigned int nslawSize = UR->getNonSmoothLawSize();
+      if (! indexSet->properties(*vi).block)
+      {
+        indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+      }
 
-      if (!isTimeInvariant || !isLinear)
+      if (!isLinear || hasTopologyChanged)
       {
         computeDiagonalUnitaryBlock(*vi);
-      }
-      else
-      {
-        if (! indexSet->properties(*vi).block)
-        {
-          computeDiagonalUnitaryBlock(*vi);
-        }
       }
     }
 
@@ -216,13 +215,35 @@ void OneStepNSProblem::updateUnitaryBlocks()
     for (boost::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
+      SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
+      SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
 
-      if (!isTimeInvariant || !isLinear)
+      // Memory allocation if needed
+      unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+      unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+      unsigned int isrc = indexSet->index(indexSet->source(*ei));
+      unsigned int itar = indexSet->index(indexSet->target(*ei));
+
+      if (itar > isrc) // upper block
+      {
+        if (! indexSet->properties(*ei).upper_block)
+        {
+          indexSet->properties(*ei).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+        }
+      }
+      else  // lower block
+      {
+        if (! indexSet->properties(*ei).lower_block)
+        {
+          indexSet->properties(*ei).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+        }
+      }
+
+
+      if (!isLinear || hasTopologyChanged)
       {
         computeUnitaryBlock(*ei);
 
-        unsigned int isrc = indexSet->index(indexSet->source(*ei));
-        unsigned int itar = indexSet->index(indexSet->target(*ei));
 
         // allocation for transposed block
         // should be avoided
@@ -249,32 +270,6 @@ void OneStepNSProblem::updateUnitaryBlocks()
           indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
         }
       }
-      else // isTimeInvariant or isLinear
-      {
-        // symmetric case : lower or upper can be tested
-        if (! indexSet->properties(*ei).lower_block)
-        {
-          computeUnitaryBlock(*ei);
-
-          // if lower block has been computed
-          if (! indexSet->properties(*ei).upper_block)
-          {
-            assert(indexSet->properties(*ei).lower_block);
-            indexSet->properties(*ei).upper_block.
-            reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
-                                   indexSet->properties(*ei).lower_block->size(0)));
-            indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
-          }
-          else // upper block has been computed
-          {
-            assert(indexSet->properties(*ei).upper_block);
-            indexSet->properties(*ei).lower_block.
-            reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
-                                   indexSet->properties(*ei).upper_block->size(0)));
-            indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
-          }
-        }
-      }
     }
   }
   else // not symmetric => follow out_edges for each vertices
@@ -283,17 +278,16 @@ void OneStepNSProblem::updateUnitaryBlocks()
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
+      SP::UnitaryRelation UR = indexSet->bundle(*vi);
+      unsigned int nslawSize = UR->getNonSmoothLawSize();
+      if (! indexSet->properties(*vi).block)
+      {
+        indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+      }
 
-      if (!isTimeInvariant || !isLinear)
+      if (!isLinear || hasTopologyChanged)
       {
         computeDiagonalUnitaryBlock(*vi);
-      }
-      else
-      {
-        if (! indexSet->properties(*vi).block)
-        {
-          computeDiagonalUnitaryBlock(*vi);
-        }
       }
 
       /* on a undirected graph, out_edges gives all incident edges */
@@ -301,28 +295,37 @@ void OneStepNSProblem::updateUnitaryBlocks()
       for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
+        SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*oei));
+        SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*oei));
 
-        if (!isTimeInvariant || !isLinear)
+
+        // Memory allocation if needed
+        unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+        unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+        unsigned int isrc = indexSet->index(indexSet->source(*oei));
+        unsigned int itar = indexSet->index(indexSet->target(*oei));
+
+        if (itar > isrc) // upper block
         {
-          unsigned int isrc = indexSet->index(indexSet->source(*oei));
-          unsigned int itar = indexSet->index(indexSet->target(*oei));
+          if (! indexSet->properties(*oei).upper_block)
+          {
+            indexSet->properties(*oei).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          }
+        }
+        else  // lower block
+        {
+          if (! indexSet->properties(*oei).lower_block)
+          {
+            indexSet->properties(*oei).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          }
+        }
+
+        if (!isLinear || hasTopologyChanged)
+        {
           if (isrc != itar)
             computeUnitaryBlock(*oei);
         }
-        else
-        {
-          /* upper or lower ? */
-          unsigned int isrc = indexSet->index(indexSet->source(*oei));
-          unsigned int itar = indexSet->index(indexSet->target(*oei));
 
-          assert(isrc != itar);
-
-          if (((itar > isrc) && !indexSet->properties(*oei).upper_block) ||
-              ((isrc < itar) && !indexSet->properties(*oei).lower_block))
-          {
-            computeUnitaryBlock(*oei);
-          }
-        }
       }
     }
   }
@@ -402,8 +405,8 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   assert(sim && "OneStepNSProblem::initialize(sim), sim is null.");
 
   _simulation = sim;
-
-  bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  bool hasTopologyChanged = simulation()->model()->
+                            nonSmoothDynamicalSystem()->topology()->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // === Link to the Interactions of the Non Smooth Dynamical System
@@ -421,12 +424,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   //      the simulation has several one step non smooth problem, an
   //      id is required for each of them.");
 
-  // Checks that the set of Interactions is not empty - Empty set is
-  // not forbidden, then we just display a warning message.
-  if (!_OSNSInteractions->isEmpty())
-    if (isTimeInvariant || !isLinear) // if time variant it is done in
-      // precompute
-      updateUnitaryBlocks();
 
   // The maximum size of the problem (for example, the dim. of M in
   // LCP or Friction problems).  Set to the number of possible scalar

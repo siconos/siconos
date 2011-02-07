@@ -32,7 +32,7 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
   _URG.resize(1);
@@ -47,7 +47,7 @@ Topology::Topology(): _isTopologyUpToDate(false), _isTopologyTimeInvariant(true)
 }
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
-  _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+  _isTopologyUpToDate(false), _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
 
@@ -73,7 +73,7 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
 
 // a constructor with a DS set : when some DS may not be in interactions
 Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions) :
-  _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+  _isTopologyUpToDate(false), _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
 
@@ -322,17 +322,6 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
-    // \warning if the ComplementarityConditionNSL is used for the unilateral contact between
-    // LagrangianDS, then we should have parent->_isTopologyTimeInvariant = false;
-    DSIterator itds = interaction->dynamicalSystemsBegin();
-    Type::Siconos dsType = Type::value((**itds));
-    if (
-      ((dsType == Type::LagrangianDS)
-       || (dsType == Type::LagrangianLinearTIDS))
-      || (dsType == Type::NewtonEulerDS))
-    {
-      parent->_isTopologyTimeInvariant = false;
-    }
   };
   void visit(const EqualityConditionNSL&)
   {
@@ -359,15 +348,14 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    parent->_isTopologyTimeInvariant = false;
     interaction->setRelativeDegree(2);
   };
+
   //visit function added by Son in 9/11/2010
   void visit(const MultipleImpactNSL &)
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    parent->_isTopologyTimeInvariant = false;
     interaction->setRelativeDegree(2);
   };
 
@@ -375,7 +363,6 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   {
     parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    parent->_isTopologyTimeInvariant = false;
     interaction->setRelativeDegree(2);
   };
 

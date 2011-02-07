@@ -129,53 +129,23 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
 
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
 
-  // If the topology is TimeInvariant ie if M structure does not change during simulation:
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+
+  // Default size for M = _maxSize
+  if (!M)
   {
-
-    if (!M)
-      // Creates and fills M using UR of indexSet
-      M.reset(new OSNSMatrix(allDS, DSBlocks, MStorageType));
-
-    else
-    {
-      M->setStorageType(MStorageType);
-      M->fill(allDS, DSBlocks);
-    }
-    // Get index set from Simulation
-    SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
-    if (!H)
-      // Creates and fills M using UR of indexSet
-      H.reset(new OSNSMatrix(indexSet, allDS, unitaryDSBlocks, MStorageType));
-    else
-    {
-      H->setStorageType(MStorageType);
-      H->fill(indexSet, allDS, unitaryDSBlocks);
-    }
-
-    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-      _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->interaction()->nonSmoothLaw())->getMu());
-
+    if (MStorageType == 0)
+      M.reset(new OSNSMatrix(_maxSize, 0));
+    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+      M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
   }
-  else // in that case, M and mu will be updated during preCompute
+  if (!H)
   {
-    // Default size for M = _maxSize
-    if (!M)
-    {
-      if (MStorageType == 0)
-        M.reset(new OSNSMatrix(_maxSize, 0));
-      else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-        M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
-    }
-    if (!H)
-    {
-      if (MStorageType == 0)
-        H.reset(new OSNSMatrix(_maxSize, 0));
-      else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+    if (MStorageType == 0)
+      H.reset(new OSNSMatrix(_maxSize, 0));
+    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
 
 
-        H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
-    }
+      H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
   }
 
 
@@ -363,7 +333,7 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
 
 }
 
-Uvoid PrimalFrictionContact::preCompute(const double time)
+void PrimalFrictionContact::preCompute(const double time)
 {
   // This function is used to prepare data for the PrimalFrictionContact problem
   // - computation of M, H _tildeLocalVelocity and q
@@ -377,7 +347,7 @@ Uvoid PrimalFrictionContact::preCompute(const double time)
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
-  if (!topology->isTimeInvariant())
+  if (topology->hasChanged())
   {
     // Computes new unitaryBlocks if required
     updateUnitaryBlocks();

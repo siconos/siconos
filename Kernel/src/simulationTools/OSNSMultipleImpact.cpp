@@ -232,14 +232,14 @@ void OSNSMultipleImpact::PreComputeImpact()
   Ncontact = indexSet->size();
   //2. Compute matrix _M
   SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
-  bool b = topology->isTimeInvariant();
+  bool hasTopologyChanged = topology->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  if (!b || !isLinear)
+  if (hasTopologyChanged || !isLinear)
   {
     // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();
     // Updates matrix M
-    _M->fill(indexSet);
+    _M->fill(indexSet, hasTopologyChanged);
     _sizeOutput = _M->size();
   }
   if (Ncontact != _sizeOutput)
@@ -367,27 +367,16 @@ void OSNSMultipleImpact::initialize(SP::Simulation sim)
   // Note that _unitaryBlocks is up to date since updateUnitaryBlocks
   // has been called during OneStepNSProblem::initialize()
 
-  // If the topology is TimeInvariant ie if M structure does not
-  // change during simulation:
-  bool b = topology->isTimeInvariant();
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  if ((b || !isLinear) &&   !interactions()->isEmpty())
+  if (! _M)
   {
-    updateM();
-  }
-  else // in that case, M will be updated during preCompute
-  {
-    // Default size for M = maxSize()
-    if (! _M)
-    {
-      if (_MStorageType == 0)
-        _M.reset(new OSNSMatrix(maxSize(), 0));
+    if (_MStorageType == 0)
+      _M.reset(new OSNSMatrix(maxSize(), 0));
 
-      else // if(_MStorageType == 1) size = number of _unitaryBlocks
-        // = number of UR in the largest considered indexSet
-        _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
-    }
+    else // if(_MStorageType == 1) size = number of _unitaryBlocks
+      // = number of UR in the largest considered indexSet
+      _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
   }
+
 };
 //========================================================================================
 void OSNSMultipleImpact::PrimConVelocity()

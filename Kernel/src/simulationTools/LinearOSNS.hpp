@@ -91,7 +91,7 @@ protected:
   /** default constructor (private)
    */
   LinearOSNS() ;
-  virtual void updateOSNSMatrix();
+
 public:
 
   /** xml constructor
@@ -244,8 +244,6 @@ public:
   /** Memory allocation or resizing for z,w,q */
   void initVectorsMemory();
 
-  /** Build or reinit M */
-  virtual void updateM();
 
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param the simulation, owner of this OSNSPB

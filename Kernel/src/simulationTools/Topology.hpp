@@ -100,7 +100,7 @@ private:
 
   /** check if topology is static (all relative degrees = 0 or 1) or
       not */
-  bool _isTopologyTimeInvariant;
+  bool _hasChanged;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Unitary Relations of IndexSet0.*/
@@ -293,22 +293,22 @@ public:
     return _isTopologyUpToDate;
   }
 
-  // --- isTopologyTimeInvariant ---
+  // --- _hasChanged ---
 
-  /** set isTopologyTimeInvariant to val
+  /** set _hasChanged to val
   *  \param a bool
   */
-  inline void setTimeInvariant(const bool val)
+  inline void setHasChanged(const bool val)
   {
-    _isTopologyTimeInvariant = val;
+    _hasChanged = val;
   }
 
   /** check if all relative degrees are equal to 0 or 1
   *  \return a bool
   */
-  inline bool isTimeInvariant()
+  inline bool hasChanged()
   {
-    return _isTopologyTimeInvariant;
+    return _hasChanged;
   }
 
   /** get the total number of scalar constraints

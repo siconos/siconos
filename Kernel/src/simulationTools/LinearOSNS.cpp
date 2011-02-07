@@ -127,41 +127,16 @@ void LinearOSNS::initialize(SP::Simulation sim)
   // Note that _unitaryBlocks is up to date since updateUnitaryBlocks
   // has been called during OneStepNSProblem::initialize()
 
-  // If the topology is TimeInvariant ie if M structure does not
-  // change during simulation:
-  bool isTimeInvariant = topology->isTimeInvariant();
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  if ((isTimeInvariant && isLinear) &&   !interactions()->isEmpty())
+  // Default size for M = maxSize()
+  if (! _M)
   {
-    updateM();
+    if (_MStorageType == 0)
+      _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
+    else // if(_MStorageType == 1) size = number of _unitaryBlocks
+      // = number of UR in the largest considered indexSet
+      _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), _MStorageType));
   }
-  else // in that case, M will be updated during preCompute
-  {
-    // Default size for M = maxSize()
-    if (! _M)
-    {
-      if (_MStorageType == 0)
-        _M.reset(new OSNSMatrix(maxSize(), 0));
-      else // if(_MStorageType == 1) size = number of _unitaryBlocks
-        // = number of UR in the largest considered indexSet
-        _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
-    }
-  }
-}
 
-void LinearOSNS::updateM()
-{
-  // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  if (! _M) // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
-
-  else
-  {
-    _M->setStorageType(_MStorageType);
-    _M->fill(indexSet);
-  }
-  _sizeOutput = _M->size();
 }
 
 
@@ -220,13 +195,13 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
 
   unsigned int nslawSize = UR->getNonSmoothLawSize();
 
-  if (! indexSet->properties(vd).block)
-  {
-    indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  }
+  //   if (! indexSet->properties(vd).block)
+  //   {
+  //     indexSet->properties(vd).block.reset(new SimpleMatrix(nslawSize, nslawSize));
+  //   }
 
-  assert(indexSet->properties(vd).block->size(0) == nslawSize);
-  assert(indexSet->properties(vd).block->size(1) == nslawSize);
+  assert(indexSet->properties(vd).block->size(0) == UR->getNonSmoothLawSize());
+  assert(indexSet->properties(vd).block->size(1) == UR->getNonSmoothLawSize());
 
   SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).block;
 
@@ -380,10 +355,10 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
 
   if (index2 > index1) // upper block
   {
-    if (! indexSet->properties(ed).upper_block)
-    {
-      indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-    }
+    //     if (! indexSet->properties(ed).upper_block)
+    //     {
+    //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    //     }
 
     assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
     assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
@@ -392,10 +367,10 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
   }
   else  // lower block
   {
-    if (! indexSet->properties(ed).lower_block)
-    {
-      indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-    }
+    //     if (! indexSet->properties(ed).lower_block)
+    //     {
+    //       indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    //     }
 
     assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
     assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
@@ -860,15 +835,6 @@ void LinearOSNS::computeq(double time)
 }
 
 
-void LinearOSNS::updateOSNSMatrix()
-{
-  SP::Topology topology = simulation()->model()
-                          ->nonSmoothDynamicalSystem()->topology();
-  bool b = topology->isTimeInvariant();
-  // Updates matrix M
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  _M->fill(indexSet, !b);
-}
 
 void LinearOSNS::preCompute(double time)
 {
@@ -886,13 +852,12 @@ void LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->model()
                           ->nonSmoothDynamicalSystem()->topology();
-  bool b = topology->isTimeInvariant();
+  bool hasTopologyChanged = topology->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   //  std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
-
-  if (!b || !isLinear)
+  if (hasTopologyChanged || !isLinear)
   {
     // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();
@@ -900,7 +865,8 @@ void LinearOSNS::preCompute(double time)
     // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
     //    _M->fill(indexSet);
-    updateOSNSMatrix();
+    _M->fill(indexSet, hasTopologyChanged);
+    //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary
@@ -937,6 +903,11 @@ void LinearOSNS::preCompute(double time)
       }
     }
   }
+  else
+  {
+    // nothing to do (IsLinear and not changed)
+  }
+
 
   // Computes q of LinearOSNS
   computeq(time);
