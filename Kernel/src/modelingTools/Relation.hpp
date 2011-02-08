@@ -424,17 +424,26 @@ public:
 
   // --- Residu y functions
 
-  inline const SP::SiconosVector getResiduY()
+  inline const SP::SiconosVector residuY()
   {
     return _Residuy;
   }
+  virtual const SP::SiconosVector residuR();
   /*
    * Compute the residuY.
    *
    *
    */
   virtual void computeResiduY(double t);
-
+  /*
+   * Compute the residuR.
+   * default management is empty, else must be overloaded.
+   *
+   */
+  virtual void computeResiduR(double t)
+  {
+    ;
+  }
   /*
    * Return H_alpha
    *

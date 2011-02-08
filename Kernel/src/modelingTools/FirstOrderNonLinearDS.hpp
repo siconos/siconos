@@ -191,7 +191,7 @@ public:
   }
 
 
-
+  /*Return _residur.*/
   inline SP::SiconosVector residur() const
   {
     return _residur;

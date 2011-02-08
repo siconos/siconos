@@ -641,7 +641,7 @@ double Moreau::computeResidu()
       //    cout<<"Moreau: norm residu :"<<normResidu<<endl;
 
 
-      (*d->residur()) = (*d->r()) - (*d->gAlpha());
+      //(*d->residur())=(*d->r()) -(*d->gAlpha());
 
       //      cout<<"Moreau Type::FirstOrderNonLinearDS: residu r"<<endl;
       //      (*d->residur()).display();
@@ -1270,8 +1270,8 @@ void Moreau::updateState(unsigned int level)
 
 
       // Solve W(x-xfree) = hr
-      //scal(h,*fonlds->r(),*x); // x = h*r
-      scal(h, *fonlds->gAlpha(), *x); // x = h*gApha
+      scal(h, *fonlds->r(), *x); // x = h*r
+      //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
       W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
       *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
       if (baux)

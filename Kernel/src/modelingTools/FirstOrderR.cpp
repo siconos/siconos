@@ -30,6 +30,7 @@ void FirstOrderR::initDSLinks()
   data[x].reset(new BlockVector()); // displacements
   data[z].reset(new BlockVector());
   data[r].reset(new BlockVector());
+  data[residu_r].reset(new BlockVector());
   data[ds_xp].reset(new BlockVector());
   data[g_alpha].reset(new BlockVector());
 
@@ -41,6 +42,7 @@ void FirstOrderR::initDSLinks()
     data[x]->insertPtr(ds->x());
     data[z]->insertPtr(ds->z());
     data[r]->insertPtr(ds->r());
+    data[residu_r]->insertPtr(ds->residur());
     data[g_alpha]->insertPtr(ds->gAlpha());
     data[ds_xp]->insertPtr(ds->xp());
     //      data[Blambda]->insertPtr( ds->bLambda());
@@ -80,6 +82,18 @@ void FirstOrderR::computeJachlambda(double)
 void FirstOrderR::computeJacglambda(double t)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
+}
+
+
+void FirstOrderR::computeResiduR(double t)
+{
+  *data[residu_r] = *data[r];
+  *data[residu_r] -= *data[g_alpha];
+}
+
+const SP::SiconosVector FirstOrderR::residuR()
+{
+  return data[residu_r];
 }
 
 void FirstOrderR::display() const

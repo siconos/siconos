@@ -192,6 +192,11 @@ void Relation::setComputehFunction(const std::string& pluginPath, const std::str
   //  Plugin::setFunction(&_pluginh, pluginPath, functionName,hName);
   //    SSL::buildPluginName(pluginNameOutput,pluginPath,functionName);
 }
+const  SP::SiconosVector Relation::residuR()
+{
+  assert(0);
+  return data[0];
+}
 void Relation::saveRelationToXML() const
 {
   RuntimeException::selfThrow("Relation - saveRelationToXML: not yet implemented for relation of type " + getType());

@@ -47,10 +47,15 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
-  /** boolean variable to known whether the ResiduY has to be computed or nor
+  /** boolean variable to known whether the ResiduY has to be computed or not
    *  if true, the ResiduY is computed and the convergence is checked
    */
   bool _computeResiduY;
+
+  /** boolean variable to known whether the ResiduR has to be computed or not
+   *  if true, the ResiduR is computed and the convergence is checked
+   */
+  bool _computeResiduR;
 
   /** Default Newton tolerance used in call of run() of ComputeOneStep() */
   double _newtonTolerance;
@@ -66,6 +71,10 @@ private:
 
   /** Maximum Residual for the output of the relation */
   double _newtonResiduYMax;
+
+  /** Maximum Residual for the input of the relation */
+  double _newtonResiduRMax;
+
 
   /** std::string _newtonOptions
    *  option in the Newon iteration
@@ -200,7 +209,7 @@ public:
   /** Set CheckSolverOutput function */
   void setCheckSolverFunction(CheckSolverFPtr);
 
-  /** To specify if the interaction residu must be computed.
+  /** To specify if the output interaction residu must be computed.
    *  \param: a bool
    */
   void setComputeResiduY(bool v)
@@ -208,10 +217,25 @@ public:
     _computeResiduY = v;
   };
 
-  /** To known if the interaction residu must be computed. */
-  bool getComputeResiduY(bool v)
+  /** To known if the output interaction residu must be computed. */
+  bool computeResiduY(bool v)
   {
     return _computeResiduY;
+  };
+
+
+  /** To specify if the input interaction residu must be computed.
+   *  \param: a bool
+   */
+  void setComputeResiduR(bool v)
+  {
+    _computeResiduR = v;
+  };
+
+  /** To known if the input interaction residu must be computed. */
+  bool computeResiduR(bool v)
+  {
+    return _computeResiduR;
   };
 
 
@@ -276,6 +300,13 @@ public:
   double newtonResiduYMax()
   {
     return _newtonResiduYMax;
+  };
+
+  /** accessor to _newtonResiduRMax
+   */
+  double newtonResiduRMax()
+  {
+    return _newtonResiduRMax;
   };
 
 

@@ -69,7 +69,7 @@ class FirstOrderR : public Relation
 {
 public:
 
-  enum DataNames {z, x, r, g_alpha, ds_xp, sizeDataNames};
+  enum DataNames {z, x, r, g_alpha, residu_r, ds_xp, sizeDataNames};
 
 protected:
 
@@ -223,7 +223,11 @@ public:
   {
     computeJacglambda(t);
   }
-
+  /*
+   * Compute the residuR from r and g_alpha.
+   *
+   */
+  virtual void computeResiduR(double t);
 
   /** main relation members display
    */
@@ -253,6 +257,9 @@ public:
   {
     return jacglambda();
   }
+
+  // --- Residu r functions
+  virtual const SP::SiconosVector residuR();
 
 
   void display() const;
