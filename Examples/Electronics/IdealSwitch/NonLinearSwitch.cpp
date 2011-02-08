@@ -129,12 +129,15 @@ int main()
   // Initialization
   cout << "====> Initialisation ..." << endl << endl;
   aM->initialize(aS);
+
+  //To compute necessary information for memory allocator
+  aMLCP->preCompute(0.0);
   cout << "nonSmoothDynamicalSystem()->isLinear() : " << boolalpha
        << aM->nonSmoothDynamicalSystem()->isLinear() << endl;
 
-  cout << "nonSmoothDynamicalSystem()->topology()->istimeInvariant() : "
+  cout << "nonSmoothDynamicalSystem()->topology()->hasChanged() : "
        << boolalpha
-       << aM->nonSmoothDynamicalSystem()->topology()->isTimeInvariant() << endl;
+       << aM->nonSmoothDynamicalSystem()->topology()->hasChanged() << endl;
 
   cout << " ---> End of initialization." << endl;
   //  aS->insertNonSmoothProblem(aMLCP);
@@ -162,7 +165,9 @@ int main()
   SP::SiconosVector  y = aI->y(0);
   SP::SiconosVector  lambda = aI->lambda(0);
   ofstream * fout = new ofstream("simu.log");
-
+  fout->precision(10);
+  ifstream * fin = new ifstream("ref.dat");
+  fin->precision(10);
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
@@ -238,6 +243,19 @@ int main()
     }
 
     (*fout) << cmp << " " << x->getValue(0) << " " << lambda->getValue(0) << " " << lambda->getValue(1) << " " << lambda->getValue(2) << " " << lambda->getValue(3) << " " << lambda->getValue(4) << " " << lambda->getValue(5) << endl;
+    int cmpR;
+    double xR;
+    double buffer;
+    string sz;
+
+    (*fin) >> cmpR >> xR;
+
+    getline(*fin, sz);
+    if (fabs(xR - x->getValue(0)) > 10e-7)
+    {
+      cout << "==== simulation stoped because of a difference wuth the referenced trajectory. ==== " << endl;
+      return 1;
+    }
 #else
     (*fout) << cmp << " " << x->getValue(0) << " " << lambda->getValue(0) << " " << lambda->getValue(3) + sR1 << endl;
 #endif
