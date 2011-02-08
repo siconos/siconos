@@ -19,14 +19,10 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-from numpy import *
+from numpy import array, eye
 
-# vpython pb on ubuntu karmic.
-# https://bugs.launchpad.net/ubuntu/karmic/+source/boost1.38/+bug/457688
-# so we use tvtk visual
-from enthought.tvtk.tools import visual
-
-from Siconos.Kernel import *
+from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+     LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
 
 t0 = 0      # start time
 T = 10      # end time
@@ -109,25 +105,25 @@ bouncingBall.initialize(s)
 #
 # Animation
 #
+from visual import display, box, sphere, rate, color, distant_light
 
-ground = visual.box(pos=(-r, 0., 0.), 
-                    size=(0,5, 5), 
-                    color=visual.color.white )
 
-vball = visual.sphere(radius=r, color=visual.color.red)
 
-def anime():
+scene = display(title='Siconos bouncing ball animation',
+                       background=(0,0,0), forward=(0,1,0), up=(1,0,0),
+                       width=800, height=800)
+
+distant_light(direction=(1,1,1), color=color.white)
+
+ground = box(pos=(-r-0.25, 0., 0.), size=(.5,2,2),
+             color=color.white)
+
+# the ball visualization 
+vball = sphere(pos=x, radius=r, color=color.red)
+
+while True:
+    rate(100)
     s.computeOneStep()
+    # copy the ball position to the ball visualization object
     vball.pos = ball.q()
     s.nextStep()
-
-iter = visual.iterate(10,anime)
-
-# Choose a view angle, and display the figure
-v = visual.get_viewer()
-v.scene.y_plus_view()
-v.scene.camera.position = 1,   1,   10
-v.scene.render()
-
-visual.show()
-
