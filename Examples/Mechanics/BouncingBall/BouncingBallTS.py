@@ -20,9 +20,12 @@
 #
 
 
-from matplotlib.pyplot import *
-from Siconos.Kernel import *
-from numpy import *
+from matplotlib.pyplot import subplot, title, plot, grid, show
+
+from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+     LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+
+from numpy import array, eye, empty
 
 t0 = 0      # start time
 T = 5      # end time
@@ -44,7 +47,7 @@ mass = eye(3)      # mass matrix
 mass[2,2]=3./5 * r * r
 
 # the dynamical system
-ball = LagrangianLinearTIDS(x,v,mass)
+ball = LagrangianLinearTIDS(x, v, mass)
 
 # set external forces 
 weight = array([-m * g, 0, 0])
