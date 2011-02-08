@@ -37,6 +37,8 @@ class TimeSteppingProjectOnConstraints : public TimeStepping
 {
 protected:
   virtual void initOSNS();
+  /*tolerence allowed on the constrain.*/
+  double _constraintTol;
 public:
 
   /** Constructor with the time-discretisation.
@@ -59,7 +61,10 @@ public:
   {
     printf("TimeSteppingProjectOnConstraints::updateWordFromDS\n");
   }
-
+  inline void setConstraintTol(double v)
+  {
+    _constraintTol = v;
+  }
 
   /** newton algorithm
    * \param double, convergence criterion

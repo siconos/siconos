@@ -33,6 +33,7 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
+  _constraintTol = 10e-4;
 }
 
 // --- Destructor ---
@@ -88,7 +89,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
         ri->_isOnContact = false;
       }
     }
-    if (criteria < -1e-4)
+    if (criteria < -_constraintTol)
       runningNewton = true;
   }
 

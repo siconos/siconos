@@ -275,7 +275,7 @@ public:
    *  \param double : current time
    *  \return void
    */
-  void preCompute(double);
+  virtual void preCompute(double);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time

@@ -635,10 +635,11 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     {
       (*it)->relation()->computeResiduR(getTkp1());
       residu = (*it)->relation()->residuR()->norm2();
+      cout << "residuR =" << residu << ">" << criterion << endl;
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {
-        //      cout<<"residuR > criteron"<<residu<<">"<<criterion<<endl;
+        cout << "residuR > criteron" << residu << ">" << criterion << endl;
         checkConvergence = false;
         //break;
       }

@@ -155,12 +155,18 @@ void displayNM(const NumericsMatrix* const m)
     fprintf(stderr, "storageType NumericsdisplayNM.\n");
 
 }
+
+void MLCP::preCompute(double time)
+{
+  LinearOSNS::preCompute(time);
+  _numerics_problem.n = _n;
+  _numerics_problem.m = _m;
+}
+
 int MLCP::compute(double time)
 {
   // --- Prepare data for MLCP computing ---
   preCompute(time);
-  _numerics_problem.n = _n;
-  _numerics_problem.m = _m;
 #ifdef MLCP_DEBUG
   printf("MLCP::compute m n :%d,%d\n", _n, _m);
 #endif
@@ -238,8 +244,6 @@ void MLCP::initialize(SP::Simulation sim)
   _numerics_problem.a = 0;
   _numerics_problem.b = 0;
   _numerics_problem.problemType = 0;
-
-
 }
 void  MLCP::updateUnitaryBlocks()
 {
