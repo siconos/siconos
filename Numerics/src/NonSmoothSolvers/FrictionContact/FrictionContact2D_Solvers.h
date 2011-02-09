@@ -142,7 +142,7 @@ extern "C"
    * \param fric       On enter,  parameter which contains the friction coefficient.
    * \param projf1     On return, parameter which contains the projected residue or descent direction.
    *
-   * \author Shéhérazade Nineb.
+   * \author Sheherazade Nineb.
    *
    */
   void FrictionContact2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
