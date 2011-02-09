@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
     unsigned int qDim = 7;
     unsigned int nDim = 6;
     double t0 = 0;                   // initial computation time
-    double T = 5.0;                  // final computation time
     double h = 0.001;                // time step
+    double T = 10;
     double L1 = 1.0;
     double L2 = 2.0;
     double L3 = 1.0;
@@ -155,12 +155,12 @@ int main(int argc, char* argv[])
 
     cout << "====> Initialisation ..." << endl << endl;
     bouncingBall->initialize(s);
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = 2000; // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 8;
-    SimpleMatrix dataPlot(N + 1, outputSize);
+    SimpleMatrix dataPlot(N, outputSize);
 
     SP::SiconosVector q1 = beam1->q();
     std::cout << "computeh1\n";
@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
     int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
-    while (s->nextTime() < T)
+    int cmp = 0;
+    for (cmp = 0; cmp < N; cmp++)
     {
       // solve ...
       s->newtonSolve(1e-4, 50);
@@ -202,6 +203,17 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
+
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("prismatic.ref", "ascii");
+    ref.read(dataPlotRef);
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
   }
 
   catch (SiconosException e)

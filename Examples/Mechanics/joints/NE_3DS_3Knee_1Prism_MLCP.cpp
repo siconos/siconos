@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
     double h = 0.01;                // time step
+    int N = 1000;
     double L1 = 1.0;
     double L2 = 1.0;
     double L3 = 1.0;
@@ -297,13 +298,12 @@ int main(int argc, char* argv[])
 
     cout << "====> Initialisation ..." << endl << endl;
     myModel->initialize(s);
-    int N = (int)((T - t0) / h); // Number of time steps
 
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 15 + 7;
-    SimpleMatrix dataPlot(N + 1, outputSize);
+    SimpleMatrix dataPlot(N, outputSize);
 
     SP::SiconosVector q1 = beam1->q();
     SP::SiconosVector q2 = beam2->q();
@@ -335,41 +335,11 @@ int main(int argc, char* argv[])
     Index dimIndex(2);
     Index startIndex(4);
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
-    while (s->nextTime() < T)
+    for (k = 0; k < N; k++)
     {
       // solve ...
       s->newtonSolve(1e-4, 50);
 
-      //   relation0->computeH(0.);
-      //      yAux->setValue(0,inter->y(0)->getValue(0));
-      //     yAux->setValue(1,inter->y(0)->getValue(1));
-      //     yAux->setValue(2,inter->y(0)->getValue(2));
-
-      //  NewtonIt=0;
-      //  double aux = yAux->norm2();
-      //  if (aux>0)
-      //  while (NewtonIt <1 && yAux->norm2()>1e-3){
-      //    relation0->computeJacQH(0.);
-      //    Jaux->zero();
-      //    startIndex[0]=0;
-      //    startIndex[1]=0;
-      //    startIndex[2]=0;
-      //    startIndex[3]=0;
-      //    dimIndex[0]=3;
-      //    dimIndex[1]=3;
-      //    setBlock(H,Jaux,dimIndex,startIndex);
-      //    //    Jaux->display();
-      //    Jaux->PLUForwardBackwardInPlace(*yAux);
-      //    q->setValue(0,-yAux->getValue(0)+(*q)(0));
-      //    q->setValue(1,-yAux->getValue(1)+(*q)(1));
-      //    q->setValue(2,-yAux->getValue(2)+(*q)(2));
-      //    NewtonIt++;
-      //    relation0->computeH(0.);
-      //    yAux->setValue(0,inter->y(0)->getValue(0));
-      //    yAux->setValue(1,inter->y(0)->getValue(1));
-      //    yAux->setValue(2,inter->y(0)->getValue(2));
-      //    aux = yAux->norm2();
-      //  }
 
 
       // --- Get values to be plotted ---
@@ -407,16 +377,26 @@ int main(int argc, char* argv[])
       fprintf(pFile, "\n");
       s->nextStep();
       ++show_progress;
-      k++;
     }
     fprintf(pFile, "};");
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
-    //cout<<"====> Output file writing ..."<<endl;
-    //ioMatrix io("result.dat", "ascii");
-    //io.write(dataPlot,"noDim");
+    cout << "====> Output file writing ..." << endl;
+    ioMatrix io("result.dat", "ascii");
+    io.write(dataPlot, "noDim");
+
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii");
+    ref.read(dataPlotRef);
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
     fclose(pFile);
   }
 
