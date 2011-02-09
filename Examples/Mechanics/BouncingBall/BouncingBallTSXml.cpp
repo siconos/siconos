@@ -87,7 +87,19 @@ int main(int argc, char* argv[])
 
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix io("result.dat", "ascii");
+    dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
+
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("reference-resultTSXML.dat", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
 
     // Xml output
     //  bouncingBall->saveToXMLFile("./BouncingBall_TIDS.xml.output");
