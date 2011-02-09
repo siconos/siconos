@@ -224,8 +224,15 @@ void Lsodar::initialize()
 
   // memory allocation for doublereal*, according to intData values ...
   updateData();
+  // Set the flag to generate extra printing at method switches.
+  iwork[4] = 1;
   // Set the maximal number of steps for one call
   iwork[5] = 1000;
+  // set  the maximum number of messages printed (per problem)
+  iwork[6] = 10;
+
+
+  //
   // Set atol and rtol values ...
   rtol[0] = ATOL_DEFAUTL; // rtol
   atol[0] = RTOL_DEFAULT;  // atol
