@@ -17,13 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include <fstream>
 #include <iterator>
-
+#include<iostream>
+#include<fstream>
+#include<limits>
 #include "ioMatrix.hpp"
 #include "SiconosMatrixException.hpp"
 #include <boost/numeric/ublas/io.hpp>
-#include<fstream>
 
 template<> bool ioMatrix::read(SiconosMatrix& m) const
 {
@@ -42,6 +42,7 @@ template<> bool ioMatrix::read(SiconosMatrix& m) const
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 
   infile.precision(15);
+  infile.setf(std::ios::scientific);
   DenseMat * p = m.dense();
 
   // Dim of the matrix are given in the first line.
@@ -60,11 +61,30 @@ template<> bool ioMatrix::read(SiconosMatrix& m) const
 
   DenseMat::iterator1 it;
   DenseMat::iterator2 it2;
+  //   std::cout.precision(15);
+  //   std::cout.setf(std::ios::scientific);
 
   for (it = p->begin1(); it != p->end1(); ++it)
   {
+
+
+    //std::string sz;
+    //double  tmp;
+    //getline(infile,sz);
+    //std::cout << sz;
     for (it2 = it.begin(); it2 != it.end(); ++it2)
-      infile >> (*it2);
+    {
+      //infile >> tmp;
+      //std ::cout << tmp << " ";
+      //(*it2)=tmp;
+      //std ::cout << *it2 << " ";
+      infile >> *it2;
+      //        assert(!infile.eof());
+      //        assert(!infile.fail());
+      //        assert(!infile.bad());
+      assert(infile.good());
+    }
+    // std::cout  << std:: endl;
   }
 
   // Old version: result in Boost format for ouptut
@@ -93,7 +113,7 @@ template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outpu
     SiconosMatrixException::selfThrow("ioMatrix:: write error : not yet implemented for BlockMatrix");
 
   outfile.precision(15);
-
+  outfile.setf(std::ios::scientific);
   // Writing
 
   if (outputType != "noDim")
@@ -103,10 +123,20 @@ template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outpu
   {
     DenseMat * p = m.dense();
     DenseMat::iterator1 row;
+    DenseMat::iterator2 col;
+    double tmp;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {
-      std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
+      //std::copy(row.begin(),row.end(),std::ostream_iterator<double>(outfile," "));
+      for (col = row.begin(); col != row.end() ; ++col)
+      {
+        tmp = *col;
+        if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
+        outfile << tmp << " " ;
+        assert(outfile.good());
+      }
       outfile << std::endl;
+
     }
   }
   else if (m.getNum() == 2)
