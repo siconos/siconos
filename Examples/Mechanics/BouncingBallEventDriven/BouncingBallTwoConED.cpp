@@ -40,18 +40,19 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 8.5;                   // final computation time
-    double h = 0.005;                // time step
+    double T = 10.0;                   // final computation time
+    double h = 0.01;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
-    double velocity_init = 0.0;      // initial velocity for lowest bead.
+    double velocity_init = 10.0;      // initial velocity for lowest bead.
+    double Heightbox = 1.5;
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
-    double g = 9.81; // Gravity
+    double g = 10.0; // Gravity
 
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
-
+    DynamicalSystemsSet allDS;
     cout << "====> Model loading ..." << endl << endl;
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -69,23 +70,38 @@ int main(int argc, char* argv[])
     SP::SimpleVector weight(new SimpleVector(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
-
+    //
+    allDS.insert(ball);
     // --------------------
     // --- Interactions ---
     // --------------------
 
     // -- nslaw --
-    double e = 0.9;
+    double e = 0.8; // Warning this example does not work with e=0.0
 
-    // Interaction ball-floor
+    // Interaction ball-floor-ceiling
+    InteractionsSet allInteractions;
     //
-    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
-    (*H)(0, 0) = 1.0;
-    SP::NonSmoothLaw  nslaw0(new NewtonImpactNSL(e));
-    SP::Relation relation0(new LagrangianLinearTIR(H));
-
-    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
-
+    SP::SiconosMatrix H1(new SimpleMatrix(1, nDof));
+    (*H1)(0, 0) = 1.0;
+    SP::SiconosVector E1(new SimpleVector(1));
+    (*E1)(0) = 0.0;//-1.0*R;
+    //
+    SP::SiconosMatrix H2(new SimpleMatrix(1, nDof));
+    (*H2)(0, 0) = -1.0;
+    SP::SiconosVector E2(new SimpleVector(1));
+    (*E2)(0) = Heightbox ;//- R;
+    // impact law
+    SP::NonSmoothLaw  nslaw(new NewtonImpactNSL(e));
+    // Interaction at contact 1 (ball-floor)
+    SP::Relation relation1(new LagrangianLinearTIR(H1, E1));
+    SP::Interaction inter1(new Interaction("contact1", allDS, 1, 1, nslaw, relation1));
+    // Interaction at contact 2 (ball-ceiling)
+    SP::Relation relation2(new LagrangianLinearTIR(H2, E2));
+    SP::Interaction inter2(new Interaction("contact2", allDS, 2, 1, nslaw, relation2));
+    // Interactions for the whole dynamical system
+    allInteractions.insert(inter1);
+    allInteractions.insert(inter2);
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -94,13 +110,7 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model bouncingBall(new Model(t0, T));
-
-    // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-
-    // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    SP::Model bouncingBall(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
@@ -121,7 +131,8 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
-
+    cout << "SICONOS_OSNSP_ED_IMPACT: " << SICONOS_OSNSP_ED_IMPACT << endl;
+    cout << "SICONOS_OSNSP_ED_ACCELERATION :" << SICONOS_OSNSP_ED_ACCELERATION << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -130,21 +141,27 @@ int main(int argc, char* argv[])
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
     bouncingBall->initialize(s);
-
-    int N = 1854; // Number of saved points: depends on the number of events ...
+    OSI->display();
+    int N = 1850; // Number of saved points: depends on the number of events ...
+    int ll = 0;
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
-    SimpleMatrix dataPlot(N + 1, outputSize);
-    SP::SiconosVector q = ball->q();
-    SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector f = ball->p(2);
+    unsigned int outputSize = 9;
+    SimpleMatrix dataPlot(N, outputSize);
+    SP::SiconosVector q = ball->q();        // ball position
+    SP::SiconosVector v = ball->velocity(); // ball velocity
+    SP::SiconosVector gamma = ball->acceleration(); // ball velocity
+    SP::SiconosVector f = ball->p(2);       // resultant force deduced from the LCP at acceleration level
+    SP::SiconosVector p = ball->p(1);       // resultant force deduced from the LCP at velocity level
+
+
+    SP::SiconosVector y1 = inter1->y(0);
+    SP::SiconosVector y2 = inter2->y(0);
     //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
     SP::EventsManager eventsManager = s->eventsManager();
-
+    OSI->display();
     // For the initial time step:
     // time
 
@@ -152,37 +169,62 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*f)(0);
+    dataPlot(0, 4) = 0;
+    dataPlot(0, 5) = (*y1)(0);
+    dataPlot(0, 6) = (*y2)(0);
+    dataPlot(0, 7) = (*gamma)(0);
+    dataPlot(0, 8) = (*f)(0);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     bool nonSmooth = false;
     unsigned int numberOfEvent = 0 ;
-    int k = 0;
+    double k = 1;
     boost::progress_display show_progress(N);
-    while (s->nextTime() < T && k < N)
+    s->setPrintStat(true);
+    //    s->setTolerance(1e-10);
+    while (k < N)
     {
-      s->advanceToEvent();
+      s->advanceToEvent(); // run simulation from one event to the next
       if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
-      s->processEvents();
+      s->processEvents();  // process events
       // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
-      if (nonSmooth)
+      if (nonSmooth) // if the event is nonsmooth
       {
-        dataPlot(k, 0) = s->startingTime();
-        dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
-        k++;
+        //dataPlot(k,0) = s->startingTime(); // get the time at nonsmooth event
+        //dataPlot(k,1) = (*ball->qMemory()->getSiconosVector(1))(0);
+        //dataPlot(k,2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        //k++;
         nonSmooth = false;
         ++show_progress;
+        //dataPlot(k,4) = 1;
+        ++ll;
+        //         cout << "========================================" << endl;
+        //         cout << "Nonsmooth event" << endl;
       }
       dataPlot(k, 0) = s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-      dataPlot(k, 4) = (*f)(0);
-      ++k;
+      dataPlot(k, 5) = (*y1)(0);
+      dataPlot(k, 6) = (*y2)(0);
+      dataPlot(k, 4) = 0;
+      dataPlot(k, 7) = (*gamma)(0);
+      dataPlot(k, 8) = (*f)(0);
+
+
+
+
+      cout << "========================================" << endl;
+      cout << " time: " << s->startingTime() << endl;
+      cout << "ball position: " << (*q)(0) << endl;
+      cout << "ball velocity: " << (*v)(0) << endl;
+      cout << "gap at contact 1: " << (*y1)(0) << endl;
+      cout << "gap at contact 2: " << (*y2)(0) << endl;
+      //
+      k++;
       ++numberOfEvent;
       ++show_progress;
     }
@@ -190,15 +232,16 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << endl;
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "Number of nonsmooth events" << ll << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix io("result.dat", "ascii");
+    ioMatrix io("resultTwoConED.dat", "ascii");
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("BouncingBallED.ref", "ascii");
+    ioMatrix ref("BouncingBallTwoConED.ref", "ascii");
     ref.read(dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)

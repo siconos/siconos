@@ -54,17 +54,19 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
 
     int N = 12368; // Number of saved points: depends on the number of events ...
-    unsigned int outputSize = 4;
+    unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(2);
+    SP::SiconosVector p = ball->p(1);
+    SP::SiconosVector f = ball->p(2);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
+    dataPlot(0, 4) = (*f)(0);
 
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
@@ -96,6 +98,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
+      dataPlot(k, 4) = (*f)(0);
+
       numberOfEvent++;
     }
 
@@ -103,7 +107,21 @@ int main(int argc, char* argv[])
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
+    dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("BouncingBallEDXml.ref", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
+
 
   }
 

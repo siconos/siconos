@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     // --------------------
 
     // -- nslaw --
-    double e = 0.9;
+    double e = 0.0;
 
     // Interaction ball-floor
     //
@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
     SP::SiconosVector f = ball->p(2);
+
     //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
     SP::EventsManager eventsManager = s->eventsManager();
@@ -198,7 +199,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("BouncingBallED.ref", "ascii");
+    ioMatrix ref("BouncingBallEDwithRestingContact.ref", "ascii");
     ref.read(dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
@@ -206,6 +207,7 @@ int main(int argc, char* argv[])
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }
+
 
   }
 
