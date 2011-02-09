@@ -224,12 +224,20 @@ void Lsodar::initialize()
 
   // memory allocation for doublereal*, according to intData values ...
   updateData();
+
+  // set the optional input flags of LSODAR to 0
+  // LSODAR will take the default values
+
   // Set the flag to generate extra printing at method switches.
-  iwork[4] = 1;
+  iwork[4] = 0;
   // Set the maximal number of steps for one call
-  iwork[5] = 1000;
+  iwork[5] = 0;
   // set  the maximum number of messages printed (per problem)
-  iwork[6] = 10;
+  iwork[6] = 0;
+  // Set the maximum order to be allowed for the nonstiff (Adams) method
+  iwork[7] = 0;
+  // Set   the maximum order to be allowed for the stiff  (BDF) method.
+  iwork[8] = 0;
 
 
   //
