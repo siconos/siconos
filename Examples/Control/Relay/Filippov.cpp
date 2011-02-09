@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("Filippov-reference.dat", "ascii");
+    ioMatrix ref("Filippov.ref", "ascii");
     ref.read(dataPlotRef);
     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)

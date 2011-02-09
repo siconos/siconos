@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("reference-resultTSXML.dat", "ascii");
+    ioMatrix ref("resultTSXML.ref", "ascii");
     ref.read(dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)

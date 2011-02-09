@@ -166,7 +166,7 @@ int main()
   SP::SiconosVector  lambda = aI->lambda(0);
   ofstream * fout = new ofstream("simu.log");
   fout->precision(10);
-  ifstream * fin = new ifstream("ref.dat");
+  ifstream * fin = new ifstream("NonLinearSwitch.ref");
   fin->precision(10);
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
