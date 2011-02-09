@@ -16,7 +16,9 @@
 
 <body>
 
-  Global stack call.
+  The goal of this document is to give a global view of the siconos implementation.
+
+  <h2>Global stack call.</h2>
  
   <ul>
     
@@ -108,6 +110,7 @@
       </ul>
     </ul>
   </ul>
+	<h2>TS::newtonSolve</h2>
 <ul>
   <li>TS::newtonSolve</li><ul>
     <li>TS::computeInitialResidu</li>
@@ -124,6 +127,7 @@
     </ul>
   </ul>
 </ul>
+<h2>TSProj::newtonSolve</h2>
 <ul>
   <li>TSProj::newtonSolve</li><ul>
     <li>TS::newtonSolve</li>
@@ -136,24 +140,34 @@
     <li>TS::updateOutput (in view of updated ydot)</li>
   </ul>
 </ul>
-TO DO
-<ul>
-  <li>use Wmap for NewtonEulerDS</li>
-  <li>project on constraints in the case of FC3D</li>
-  </ul>
 
-Building of the numerics matrix
+<h2>Building of the numerics matrix.</h2>
+<p>In cuurent version the memory management about the matrices involve the following datas:</p>
+<ul>
+  <li>OSNSP::_M a SP::OSNSMatrix that can be dense or sparseBlock.</li>
+  <li>OSNSP::_M.M1 a siconosMatrix used for dense storage.</li>
+  <li>OSNSP::_M.M2 a BlockCSRMatrix used for sparseBlock.</li>
+  <li>OSNSP::_M.numericsMat a numerics matrices</li>
+  <li>At each edge and vertex is attach the 'unitaryBlock' that is a dense matrix.</li>
+</ul>
+
+<p>If necessary (topo->hasChange and first step of Newton ?) the numerics matrix must re-built. The OSNSP::preCompute manages theses matrices.</p>
+
 <ul>
   <li>OSNSP::compute</li><ul>
-    <li>OSNSP::preCompute</li><ul>
-      <li>OSNSP::updateUnitaryBlocks</li>
-      <li>OSNSP::updateOSNSMatrix</li><ul>
-	<li>OSNSMatrix_M::fill(indexset)</li><ul>
-	  <li>setBlock...</li>
-	  <li>OSNSMatrix::convert</li><ul>
-	    <li>OSNSMatrix::numericsMatrix : build the numericsMatrix</li>
-	  </ul>
+    <li>LinearOSNSP::preCompute</li><ul>
+      <li>OSNSP::updateUnitaryBlocks</li><ul>
+	The blocks attach to the graph are built.
+	<li>OSNSP::computeDiagUnitaryBlocks</li>
+	<li>OSNSP::computeUnitaryBlocks</li>
 	</ul>
+      <li>OSNSMatrix_M::fill(indexset)</li><ul>
+	<li>OSNSMatrix::updateSizeAndPositions(dimColumn, indexSet);</li>
+	<li>setBlock...</li>
+	<li>OSNSMatrix::convert</li><ul>
+	  <li>OSNSMatrix::numericsMatrix : build the numericsMatrix OSNSP::_M.numericsMat</li>
+	</ul>
+	
       </ul>
       <li>restore prev lambda and Y</li>
       <li>OSNSP::computeq</li><ul>
@@ -164,7 +178,7 @@ Building of the numerics matrix
     </ul>
   </ul>
 
-Case of GenericMechanical Problem:
+<h2>Case of GenericMechanical Problem:</h2>
 <ul>
   <li>GMP::updateUnitaryBlocks</li><ul>
     <li>freeGenericMechanicalProblem: freeGMP of Numerics</li>
