@@ -28,8 +28,11 @@
  }
 
 
- // where is doxygen feature ?
-%feature("autodoc", "1");
+ // signatures
+%feature("autodoc", 1);
+
+// generated docstrings from doxygen xml output
+%include Kernel-docstrings.i
 
 %{
 #define SWIG_FILE_WITH_INIT

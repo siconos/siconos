@@ -65,5 +65,4 @@ graphLayoutInt(SP::DynamicalSystemsGraph dsg)
   return r;
 };
 
-
 #endif

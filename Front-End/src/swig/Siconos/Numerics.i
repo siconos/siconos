@@ -685,7 +685,11 @@ static int convert_darray(PyObject *input, double *ptr) {
 %apply (NumericsMatrix *A) { (NumericsMatrix *m) };
 %apply (NumericsMatrix *A) { (NumericsMatrix *M) };
 
-%feature("autodoc", "1");
+// signatures
+%feature("autodoc", 1);
+
+// generated docstrings from doxygen xml output
+%include Numerics-docstrings.i
 
 %typemap(in) (int iSize) ($1_type iparam_size) {
   iparam_size = PyInt_AsLong($input);
