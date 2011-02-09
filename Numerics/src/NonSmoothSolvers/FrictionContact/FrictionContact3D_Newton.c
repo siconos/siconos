@@ -156,7 +156,7 @@ int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*
   {
     if (verbose > 0)
     {
-      printf("Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %12.8e\n", dparam[1]);
+      printf("Numerics, FrictionContact3D_Newton, warning. reached max. number of iterations without convergence. Error = %12.8e\n", dparam[1]);
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }

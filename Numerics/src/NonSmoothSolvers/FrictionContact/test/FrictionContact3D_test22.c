@@ -26,7 +26,7 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/Confeti-ex13-4contact-Fc3D-SBM.dat";
+  char filename[50] = "./data/Confeti-ex03-Fc3D-SBM.dat";
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");

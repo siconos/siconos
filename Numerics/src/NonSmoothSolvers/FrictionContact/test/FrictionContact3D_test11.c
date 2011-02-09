@@ -25,7 +25,7 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("Test on Confeti-ex13-4contact-Fc3D-SBM.dat\n");
 
   FILE * finput  =  fopen("./data/Confeti-ex13-4contact-Fc3D-SBM.dat", "r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -42,6 +42,6 @@ int main(void)
   deleteSolverOptions(options);
   free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on Confeti-ex13-4contact-Fc3D-SBM.dat\n");
   return info;
 }
