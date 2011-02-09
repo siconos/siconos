@@ -166,7 +166,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
         //free(local_problem);
         /* Number of GS iterations */
         options[0].iparam[1] = iter;
-        fprintf(stderr, "lcp_NSGS_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+        fprintf(stderr, "lcp_NSGS_SBM error: Warning local LCP solver  at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
         //exit(EXIT_FAILURE);
 
         break;

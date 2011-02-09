@@ -153,9 +153,12 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
   }
   case SICONOS_LCP_ENUM:
   {
-    options->dparam[0] = tolerance;
-    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+    /*       options->dparam[0]=tolerance; */
+    /*       options->dWork=(double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
+    /*       options->iWork=(int*) malloc(2*problem->size*sizeof(int)); */
+
+    linearComplementarity_enum_setDefaultSolverOptions(problem,  options);
+
     break;
   }
   case SICONOS_LCP_NEWTONFB :

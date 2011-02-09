@@ -246,7 +246,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   }
   *info = 1;
   if (verbose)
-    printf("lcp_enum failed!\n");
+    printf("lcp_enum has not found a solution!\n");
 }
 
 int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)

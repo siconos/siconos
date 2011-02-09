@@ -62,7 +62,7 @@ int relay_compute_error(RelayProblem* problem, double *z , double *w, double tol
   free(ztmp);
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - relay_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    if (verbose > 0) printf(" Numerics - relay_compute_error: error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;
   }
   else
