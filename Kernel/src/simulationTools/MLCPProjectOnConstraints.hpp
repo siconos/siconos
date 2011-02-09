@@ -53,6 +53,8 @@ public:
   {
     ;
   }
+  virtual void initOSNSMatrix();
+  virtual void updateUnitaryBlocks();
   virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
   virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
   virtual void computeqBlock(SP::UnitaryRelation, unsigned int);

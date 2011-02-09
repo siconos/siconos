@@ -107,7 +107,18 @@ void LinearOSNS::initVectorsMemory()
       _q->resize(maxSize());
   }
 }
-
+void LinearOSNS::initOSNSMatrix()
+{
+  // Default size for M = maxSize()
+  if (! _M)
+  {
+    if (_MStorageType == 0)
+      _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
+    else // if(_MStorageType == 1) size = number of _unitaryBlocks
+      // = number of UR in the largest considered indexSet
+      _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), _MStorageType));
+  }
+}
 void LinearOSNS::initialize(SP::Simulation sim)
 {
   // - Checks memory allocation for main variables (_M,q,_w,z)
@@ -127,15 +138,7 @@ void LinearOSNS::initialize(SP::Simulation sim)
   // Note that _unitaryBlocks is up to date since updateUnitaryBlocks
   // has been called during OneStepNSProblem::initialize()
 
-  // Default size for M = maxSize()
-  if (! _M)
-  {
-    if (_MStorageType == 0)
-      _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
-    else // if(_MStorageType == 1) size = number of _unitaryBlocks
-      // = number of UR in the largest considered indexSet
-      _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), _MStorageType));
-  }
+  initOSNSMatrix();
 
 }
 

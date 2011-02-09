@@ -44,7 +44,8 @@ TimeSteppingProjectOnConstraints::~TimeSteppingProjectOnConstraints()
 void TimeSteppingProjectOnConstraints::initOSNS()
 {
   TimeStepping::initOSNS();
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(0);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(1);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(1);
 }
 void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned int maxStep)
 {

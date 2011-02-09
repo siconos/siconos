@@ -26,7 +26,11 @@ using namespace RELATION;
 
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
-  LinearOSNS(onestepnspbxml, "MLCP") {}
+  LinearOSNS(onestepnspbxml, "MLCP")
+{
+  _n = 0;
+  _m = 0;
+}
 
 // Constructor from a set of data
 MLCP::MLCP(const int newNumericsSolverId):
@@ -34,7 +38,8 @@ MLCP::MLCP(const int newNumericsSolverId):
 {
   _numerics_solver_options->solverId = newNumericsSolverId;
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
-
+  _n = 0;
+  _m = 0;
   _numerics_problem.blocksLine = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem.blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem.blocksLine[0] = 0;

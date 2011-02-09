@@ -29,6 +29,7 @@ using namespace RELATION;
 #define MLCPPROJ_DEBUG
 void MLCPProjectOnConstraints::updateM()
 {
+  assert(0);
   // Get index set from Simulation
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
@@ -57,12 +58,19 @@ void MLCPProjectOnConstraints::updateM()
   _sizeOutput = _M->size();
 }
 
-
+void MLCPProjectOnConstraints::initOSNSMatrix()
+{
+  _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _MStorageType));
+  _n = 0;
+  _m = 0;
+  _curBlock = 0;
+}
 // Constructor from a set of data
 MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId):
   MLCP(newNumericsSolverId)
 {
-
+  _levelMin = 1;
+  _levelMax = 1;
 }
 
 
@@ -71,6 +79,36 @@ void MLCPProjectOnConstraints::display() const
   cout << "======= MLCPProjectOnConstraints of size " << _sizeOutput << " with: " << endl;
   cout << "======= m " << _m << " _n " << _n << endl;
   LinearOSNS::display();
+}
+
+void MLCPProjectOnConstraints::updateUnitaryBlocks()
+{
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
+
+
+  bool hasTopologyChanged = simulation()->model()->
+                            nonSmoothDynamicalSystem()->topology()->hasChanged();
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+
+  if (hasTopologyChanged || !isLinear)
+  {
+    _n = 0;
+    _m = 0;
+    _curBlock = 0;
+    UnitaryRelationsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = indexSet->vertices();
+         vi != viend; ++vi)
+    {
+      SP::UnitaryRelation UR = indexSet->bundle(*vi);
+      unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
+      if (! indexSet->properties(*vi).blockProj)
+      {
+        indexSet->properties(*vi).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
+      }
+
+      computeDiagonalUnitaryBlock(*vi);
+    }
+  }
 }
 
 void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
@@ -84,10 +122,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 
   unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
 
-  if (! indexSet->properties(vd).blockProj)
-  {
-    indexSet->properties(vd).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
-  }
 
   assert(indexSet->properties(vd).blockProj->size(0) == nslawSize);
   assert(indexSet->properties(vd).blockProj->size(1) == nslawSize);
@@ -169,110 +203,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 
 void MLCPProjectOnConstraints::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
 {
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  assert(0);
 
-  SP::DynamicalSystem ds = indexSet->bundle(ed);
-  SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(ed));
-  SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
-
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-
-  SP::SiconosMatrix currentUnitaryBlock;
-
-  unsigned int index1 = indexSet->index(indexSet->source(ed));
-  unsigned int index2 = indexSet->index(indexSet->target(ed));
-
-  assert(index1 != index2);
-
-  if (index2 > index1) // upper block
-  {
-    if (! indexSet->properties(ed).upper_block)
-    {
-      indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-    }
-
-    assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
-
-    currentUnitaryBlock = indexSet->properties(ed).upper_block;
-  }
-  else  // lower block
-  {
-    if (! indexSet->properties(ed).lower_block)
-    {
-      indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-    }
-
-    assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
-
-    currentUnitaryBlock = indexSet->properties(ed).lower_block;
-  }
-
-  computeOptions(UR1, UR2);
-  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
-  // necessary) if UR1 and UR2 have commond DynamicalSystem.  How
-  // _unitaryBlocks are computed depends explicitely on the type of
-  // Relation of each UR.
-
-  // Warning: we suppose that at this point, all non linear
-  // operators (G for lagrangian relation for example) have been
-  // computed through plug-in mechanism.
-
-  // Get the W and Theta maps of one of the Unitary Relation -
-  // Warning: in the current version, if OSI!=Moreau, this fails.
-  // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
-  // centralUnitaryBlocks = M (mass matrices)
-  MapOfDSMatrices centralUnitaryBlocks;
-  getOSIMaps(UR1, centralUnitaryBlocks);
-
-  SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
-
-  RELATION::TYPES relationType1, relationType2;
-  double h = simulation()->timeDiscretisation()->currentTimeStep();
-
-  // General form of the unitaryBlock is : unitaryBlock =
-  // a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks
-  // * rightUnitaryBlock a and b are scalars, centralUnitaryBlocks a
-  // matrix depending on the integrator (and on the DS), the
-  // simulation type ...  left, right and extra depend on the relation
-  // type and the non smooth law.
-  relationType1 = UR1->getRelationType();
-  relationType2 = UR2->getRelationType();
-
-  currentUnitaryBlock->zero();
-
-
-  // loop over the common DS
-  if (Type::value(*ds) != Type::NewtonEulerDS)
-    RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - ds is not from NewtonEulerDS.");
-
-  unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-
-  // get _unitaryBlocks corresponding to the current DS
-  // These _unitaryBlocks depends on the relation type.
-  leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-  UR1->getLeftUnitaryBlockForDSProjectOnConstraints(ds, leftUnitaryBlock);
-
-  if (relationType1 == Lagrangian ||
-      relationType2 == Lagrangian ||
-      relationType1 == NewtonEuler ||
-      relationType2 == NewtonEuler)
-  {
-    // (UR1 != UR2)
-    rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-    UR2->getLeftUnitaryBlockForDSProjectOnConstraints(ds, rightUnitaryBlock);
-    // Warning: we use getLeft for Right unitaryBlock
-    // because right = transpose(left) and because of
-    // size checking inside the getBlock function, a
-    // getRight call will fail.
-    rightUnitaryBlock->trans();
-
-    //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-    prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-  }
-  else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
 }
 
 void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)

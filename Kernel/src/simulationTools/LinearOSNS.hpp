@@ -244,7 +244,8 @@ public:
   /** Memory allocation or resizing for z,w,q */
   void initVectorsMemory();
 
-
+  /** initialize the _M matrix */
+  virtual void initOSNSMatrix();
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param the simulation, owner of this OSNSPB
   */
