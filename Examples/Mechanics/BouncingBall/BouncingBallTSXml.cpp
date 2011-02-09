@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
 
+    // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix ref("reference-resultTSXML.dat", "ascii");
