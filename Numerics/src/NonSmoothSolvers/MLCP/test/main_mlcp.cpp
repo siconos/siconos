@@ -92,6 +92,7 @@ typedef struct
 {
   char file[124];
   char cv[NBMETHODS][2][5];
+  int cvState[NBMETHODS][2];
   int nbSteps[NBMETHODS][2];
   long times[NBMETHODS][2];
 } dataSummary;
@@ -118,7 +119,15 @@ static dataSummary summary[NBTEST];
 static int sRunMethod[NBMETHODS];
 static int itest;
 
-
+void initDataSummary()
+{
+  for (int i = 0; i < NBTEST; i++)
+    for (int j = 0; j < NBMETHODS; j++)
+    {
+      summary[i].cvState[j][0] = 0;
+      summary[i].cvState[j][1] = 0;
+    }
+}
 /*
  ******************************************************************************
  */
@@ -238,6 +247,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[ENUM_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[ENUM_ID][sIdWithSol], "CV");
+    summary[itest].cvState[ENUM_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -270,6 +280,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[PGS_IM_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PGS_IM_ID][sIdWithSol], "CV");
+    summary[itest].cvState[PGS_IM_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -302,6 +313,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[PGS_EX_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PGS_EX_ID][sIdWithSol], "CV");
+    summary[itest].cvState[PGS_EX_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -333,6 +345,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[RPGS_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[RPGS_ID][sIdWithSol], "CV");
+    summary[itest].cvState[RPGS_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -371,6 +384,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       stopTimer();
       summary[itest].times[_ID][sIdWithSol] = sDt.mCumul;
       strcpy(summary[itest].cv[_ID][sIdWithSol], "CV");
+      summary[itest].cvState[_ID][sIdWithSol] = 1;
       if (info > 0)
       {
         printf("Can't find a solution\n");
@@ -404,6 +418,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[RPSOR_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[RPSOR_ID][sIdWithSol], "CV");
+    summary[itest].cvState[RPSOR_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -433,6 +448,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[PATH_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PATH_ID][sIdWithSol], "CV");
+    summary[itest].cvState[PATH_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -474,6 +490,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[SIMPLEX_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[SIMPLEX_ID][sIdWithSol], "CV");
+    summary[itest].cvState[SIMPLEX_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -517,6 +534,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       stopTimer();
       summary[itest].times[DIRECT_ENUM_ID][sIdWithSol] = sDt.mCumul;
       strcpy(summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], "CV");
+      summary[itest].cvState[DIRECT_ENUM_ID][sIdWithSol] = 1;
     }
     if (info > 0)
     {
@@ -556,6 +574,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     stopTimer();
     summary[itest].times[FB_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[FB_ID][sIdWithSol], "CV");
+    summary[itest].cvState[FB_ID][sIdWithSol] = 1;
     if (info > 0)
     {
       printf("Can't find a solution\n");
@@ -570,6 +589,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       //    if (error > 1e-9)
       strcpy(summary[itest].cv[FB_ID][sIdWithSol], "CV");
+      summary[itest].cvState[FB_ID][sIdWithSol] = 1;
       printf("find a solution with error %lf \n", error);
       printSolution("FB", n, m, NbLines, z, w);
     }
@@ -612,6 +632,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       strcpy(summary[itest].cv[DIRECT_FB_ID][sIdWithSol], "CV");
+      summary[itest].cvState[DIRECT_FB_ID][sIdWithSol] = 1;
       printf("find a solution with error %lf \n", error);
       printSolution("DIRECT_FB", n, m, NbLines, z, w);
     }
@@ -1093,9 +1114,17 @@ void test_matrix(void)
       printf("\n");
     }
   }
+
+
   printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");
   printf("* *** ******************** *** * \n");
+  for (itest = 0; itest < NBTEST ; itest++)
+  {
+    for (int imethod = 0; imethod < NBMETHODS; imethod++)
+      printf("%i %i ", summary[itest].cvState[imethod][0], summary[itest].cvState[imethod][1]);
+    printf("\n");
+  }
 
 
 }
@@ -1104,6 +1133,7 @@ int main(void)
 {
   verbose = 0;
   int i;
+  initDataSummary();
   for (i = 0; i < NBMETHODS; i++)
     sRunMethod[i] = 1;
   sRunMethod[PATH_ID] = 0;
@@ -1112,9 +1142,39 @@ int main(void)
 
   test_matrix();
   printf("nb no cv %d\n", sNbNOCV);
-  if (sNbNOCV > 110)
-    return 1;
-  else
-    return 0;
+
+  int T[280] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+                1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0
+               };
+  int cmp = 0;
+  for (itest = 0; itest < NBTEST ; itest++)
+  {
+    for (int imethod = 0; imethod < NBMETHODS; imethod++)
+    {
+      if (T[cmp] < summary[itest].cvState[imethod][0])
+      {
+        printf("Warning, test=%i method=%i failed.", itest, imethod);
+        return 1;//failed
+      }
+      cmp++;
+      if (T[cmp] < summary[itest].cvState[imethod][1])
+      {
+        printf("Warning, test=%i method=%i failed.", itest, imethod);
+        return 1;//failed
+      }
+      cmp++;
+    }
+  }
+  printf("Test succed\n");
+  return 0;
+
 }
 
