@@ -53,7 +53,6 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 {
   int info = -1;
   int n = problem->size;
-  /*   int NRHS=1; */
 
   int n2 = n * n;
   double * Maux = (double*)malloc(n2 * sizeof(double));
@@ -75,7 +74,7 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 
   double * dgelsWork = (double *) malloc(LWORK * sizeof(double));
 
-  DGELS(n, n, NRHS, Maux, n, z, n, dgelsWork, LWORK, LAinfo);
+  DGELS(n, n, 1, Maux, n, z, n, dgelsWork, LWORK, LAinfo);
   if (LAinfo)
   {
     printf("LinearSystem_driver: DGELS  failed:\n");
