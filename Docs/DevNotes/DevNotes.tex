@@ -39,7 +39,7 @@
      \@mkboth{\MakeUppercase{\bibname}}{\MakeUppercase{\bibname}}}}
 \makeatother
 \usepackage{lastpage}
-
+\usepackage{showlabels}
 %% style des entetes et des pieds de page
 \fancyhf{} % nettoie le entetes et les pieds
 \fancyhead[L]{\texttt{Siconos Development team -- Development Notes }}
@@ -659,12 +659,12 @@ No memory allocation is made for unused members $\Rightarrow$ requires if statem
 
 \subsection{DynamicalSystem}
 
-\bf{Required data:}\\
+{\bf Required data:}\\
 n, x0, f, jacobianXF \\
-\bf{Optional:}\\
+{\bf Optional:}\\
 T,u \\
 
-\bf{Always allocated in constructor:} \\
+\textbf{Always allocated in constructor:} \\
 x, x0, xFree, r, rhs, jacobianXF
 
 Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
@@ -672,12 +672,12 @@ This for DS class and any of the derived ones.
 
 \subsection{LagrangianDS}
 
-\bf{Required data:}\\
+\textbf{Required data:}\\
 ndof, q0, velocity0, mass \\
-\bf{Optional:}\\
+\textbf{Optional:}\\
 fInt and its Jacobian, fExt, NNL and its Jacobian. \\
 
-\bf{Always allocated in constructor:} \\
+\textbf{Always allocated in constructor:} \\
 mass, q, q0, qFree, velocity, velocity0, velocityFree, p. \\
 All other pointers to vectors/matrices are set to NULL by default. \\
 Memory vectors are required but allocated during call to initMemory function. 
@@ -862,21 +862,21 @@ Each constructor must:
 Two maps: one for W, and one for theta. To each DS corresponds a theta and a W. \\
 Strategy arg in each constructor.
 
-\bf{Required data:}\\
+\textbf{Required data:}\\
 
-\bf{Optional:}\\
+\textbf{Optional:}\\
 
-\bf{Always allocated in constructor:} \\
+\textbf{Always allocated in constructor:} \\
 
 Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
 
 \subsection{Lsodar}
 
-\bf{Required data:}\\
+\textbf{Required data:}\\
 
-\bf{Optional:}\\
+\textbf{Optional:}\\
 
-\bf{Always allocated in constructor:} \\
+\textbf{Always allocated in constructor:} \\
 
 
 \chapter{Newton's linearization}
@@ -884,6 +884,7 @@ Last update : 2009/07/07
 \input{MCP_linearized.tex}
 \input{MCP_linearized_2.tex}
 \input{MCP_linearized_linear.tex}
+%\input{MCP_linearized-FullThetaGamma.tex}
 
 \chapter{NewtonEuler}
 \input{NewtonEuler.tex}
@@ -898,7 +899,7 @@ Last update : 2009/07/07
 
 
 \chapter{Simulation of a Cam Follower System}
-{\bf Main Contributors:} {\textit{Mario di Bernardo, Gustavo Osorio, Stefania Santini}}\\
+{\textbf Main Contributors:} {\textit{Mario di Bernardo, Gustavo Osorio, Stefania Santini}}\\
 \textit{University of Naples Federico II, Italy.}\\
 
 \input{./CamFollower/Example_Manual_Cam_Follower}
