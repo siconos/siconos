@@ -31,10 +31,12 @@
  *  \version 3.0.0.
  *  \date Dec, 2010
  *
- * This class is an interface for a relation with impact.
- * It implements the computation of the jacoboian of h from the points of contacts and the normal.
- * Use this class consists in overloading the method computeh, by setting the menber pc1, pc2, nc and y.
- * The matrix jachq is used both for the building of the OSNSP (with T) and for the predictor of activation of deactivation of the UR.
+ * This class is an interface for a relation with impact.  It
+ * implements the computation of the jacoboian of h from the points of
+ * contacts and the normal.  Use this class consists in overloading
+ * the method computeh, by setting the menber pc1, pc2, nc and y.  The
+ * matrix jachq is used both for the building of the OSNSP (with T)
+ * and for the predictor of activation of deactivation of the UR.
 *
  */
 
@@ -45,21 +47,28 @@ protected:
   /*Point of contact*/
   SP::SimpleVector _Pc1;
   SP::SimpleVector _Pc2;
+
   /*Normal rentrante at the contact */
   SP::SimpleVector _Nc;
+
   // /*because set is not sorted!*/
   // SP::NewtonEulerDS _ds1;
   // SP::NewtonEulerDS _ds2;
   virtual void initComponents();
+
 public:
+
   bool _isOnContact;
-  NewtonEulerRImpact(): _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)), _Nc(new SimpleVector(3)), NewtonEulerR()
+  NewtonEulerRImpact():
+    _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
+    _Nc(new SimpleVector(3)), NewtonEulerR()
   {
     /*_ds1=NULL;_ds2=NULL;*/
   }
+
   // inline void setDs1(SP::NewtonEulerDS ds1){_ds1=ds1;}
-  //   inline void setDs2(SP::NewtonEulerDS ds2){_ds2=ds2;}
-  //   inline SP::NewtonEulerDS ds1(){return _ds1;}
+  // inline void setDs2(SP::NewtonEulerDS ds2){_ds2=ds2;}
+  // inline SP::NewtonEulerDS ds1(){return _ds1;}
   // inline SP::NewtonEulerDS ds2(){return _ds2;}
 
   /** destructor
@@ -81,7 +90,32 @@ public:
   {
     return _Nc;
   }
-  // -- Jach --
+
+  /** set the coordinates of first contact point
+   * \param SP::SimpleVector new coordinates
+   */
+  void setpc1(SP::SimpleVector npc)
+  {
+    _Pc1 = npc;
+  };
+
+  /** set the coordinates of second contact point
+   * \param SP::SimpleVector new coordinates
+   */
+  void setpc2(SP::SimpleVector npc)
+  {
+    _Pc2 = npc;
+  };
+
+  /** set the coordinates of inside normal vector at the contact point
+   * \param SP::SimpleVector new coordinates
+   */
+  void setnc(SP::SimpleVector nnc)
+  {
+    _Nc = nnc;
+  };
+
+  // visitors hook
   ACCEPT_STD_VISITORS();
 
 };
