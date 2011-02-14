@@ -35,6 +35,7 @@
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianLinearTIDS.hpp"
 
+
 using namespace std;
 using namespace RELATION;
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
@@ -188,12 +189,12 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
   assert(DS2);
 
   /*
-  SP::DynamicalSystemsSet commonDS = UR->dynamicalSystems();
-  assert (!commonDS->isEmpty()) ;
-  for (DSIterator itDS = commonDS->begin(); itDS!=commonDS->end(); itDS++)
-  {
+    SP::DynamicalSystemsSet commonDS = UR->dynamicalSystems();
+    assert (!commonDS->isEmpty()) ;
+    for (DSIterator itDS = commonDS->begin(); itDS!=commonDS->end(); itDS++)
+    {
     assert (*itDS == DS1 || *itDS == DS2);
-  }
+    }
   */
 
   unsigned int nslawSize = UR->getNonSmoothLawSize();
@@ -252,6 +253,18 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
       rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
 
       UR->getRightUnitaryBlockForDS(ds, rightUnitaryBlock);
+      SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+      OSI::TYPES  osiType = Osi->getType();
+
+      if (osiType == OSI::MOREAU)
+      {
+        if ((boost::static_pointer_cast<Moreau> (Osi))->useGamma() || (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+        {
+          *rightUnitaryBlock *= (boost::static_pointer_cast<Moreau> (Osi))->gamma();
+        }
+      }
+
+
       // centralUnitaryBlock contains a lu-factorized matrix and we solve
       // centralUnitaryBlock * X = rightUnitaryBlock with PLU
       centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
@@ -343,13 +356,13 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
   unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
 
   /*
-  DynamicalSystemsSet commonDS;
-  intersection(*UR1->dynamicalSystems(),*UR2->dynamicalSystems(), commonDS);
-  assert (!commonDS.isEmpty()) ;
-  for (DSIterator itDS = commonDS.begin(); itDS!=commonDS.end(); itDS++)
-  {
+    DynamicalSystemsSet commonDS;
+    intersection(*UR1->dynamicalSystems(),*UR2->dynamicalSystems(), commonDS);
+    assert (!commonDS.isEmpty()) ;
+    for (DSIterator itDS = commonDS.begin(); itDS!=commonDS.end(); itDS++)
+    {
     assert (*itDS == ds);
-  }
+    }
   */
 
   SP::SiconosMatrix currentUnitaryBlock;
@@ -599,7 +612,9 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
 
   SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
-  OSI::TYPES osiType = simulation()->integratorOfDS(ds)->getType();
+  SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  OSI::TYPES  osiType = Osi->getType();
+
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   Index coord(8);
@@ -684,8 +699,15 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         subprod(*C, *Xq, *_q, coord, false);
 
       }
+
+
+      if (osiType == OSI::MOREAU && (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+      {
+        RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for Moreau with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+      }
       for (int i = 0; i < sizeY; i++)
         _q->setValue(relativePosition + i, _q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
+
     }
     else if (relationType == NewtonEuler)
     {
@@ -721,7 +743,17 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
         coord[3] = C->size(1);
         coord[5] = C->size(1);
 
-        subprod(*C, *Xfree, *_q, coord, true);
+        if (osiType == OSI::MOREAU && (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+        {
+          // *Xfree *= (boost::static_pointer_cast<Moreau> (Osi))->gamma();
+          subprod(*C, *Xq, *_q, coord, true);
+        }
+        else
+        {
+
+          subprod(*C, *Xfree, *_q, coord, true);
+        }
+
       }
 
       if (relationType == Lagrangian)
@@ -914,6 +946,7 @@ void LinearOSNS::preCompute(double time)
 
   // Computes q of LinearOSNS
   computeq(time);
+
 }
 
 void LinearOSNS::postCompute()

@@ -31,7 +31,7 @@ using namespace RELATION;
 
 // --- xml constructor ---
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator(OSI::MOREAU)
+  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   // Note: we do not call xml constructor of OSI, but default one,
   // since we need to download _theta and DS at the same time.
@@ -105,7 +105,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
 
 // --- constructor from a minimum set of data ---
 Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
-  OneStepIntegrator(OSI::MOREAU)
+  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(newDS);
   _theta = newTheta;
@@ -113,16 +113,44 @@ Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
 
 // --- constructor from a set of data ---
 Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta):
-  OneStepIntegrator(OSI::MOREAU, newDS)
+  OneStepIntegrator(OSI::MOREAU, newDS), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
 }
 
 // --- constructor from a set of data ---
 Moreau::Moreau(double newTheta):
-  OneStepIntegrator(OSI::MOREAU)
+  OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
   _theta = newTheta;
+}
+
+// --- constructor from a minimum set of data ---
+Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta, double newGamma) :
+  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+{
+  OSIDynamicalSystems->insert(newDS);
+  _theta = newTheta;
+  _gamma = newGamma;
+  _useGamma = true;
+}
+
+// --- constructor from a set of data ---
+Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta, double newGamma):
+  OneStepIntegrator(OSI::MOREAU, newDS), _useGammaForRelation(false)
+{
+  _theta = newTheta;
+  _gamma = newGamma;
+  _useGamma = true;
+}
+
+// --- constructor from a set of data ---
+Moreau::Moreau(double newTheta, double newGamma):
+  OneStepIntegrator(OSI::MOREAU), _useGammaForRelation(false)
+{
+  _theta = newTheta;
+  _gamma = newGamma;
+  _useGamma = true;
 }
 
 
@@ -1000,9 +1028,14 @@ void Moreau::computeFreeState()
       SP::SiconosVector xfree = d->workFree();//workX[d];
       *xfree = *(d->residuFree());
 
+      if (_useGamma)
+      {
+        SP::SiconosVector rold = d->rMemory()->getSiconosVector(0);
+        double coeff = -h * (1 - _gamma);
+        scal(coeff, *rold, *xfree, false); //  residuFree += h(1-gamma)*rold
+      }
 
       SP::SiconosVector x = d->x(); // last saved value for x
-
 
       // -- xfree =  x - W^{-1} ResiduFree --
       // At this point xfree = residuFree
@@ -1013,28 +1046,53 @@ void Moreau::computeFreeState()
 
       W->PLUForwardBackwardInPlace(*xfree);
 
-
-
       // -> compute real xfree
       *xfree *= -1.0;
       *xfree += *x;
       //    cout<<" moreau::computefreestate xfree"<<endl;
       //    xfree->display();
 
-      if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear())
+      //       if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear())
+      //       {
+      SP::SiconosVector xp = d->xp();
+      //      cout<<"before moreau::computefreestate xp"<<endl;
+      //      xp->display();
+      W->PLUForwardBackwardInPlace(*xp);
+      scal(h, *xp, *xp);
+      *xp += *xfree;
+      //      cout<<"after moreau::computefreestate xp"<<endl;
+      //      xp->display();
+      SP::SiconosVector xq = d->xq();
+      *xq = *xp;
+      *xq -= *x;
+
+      //         std::cout <<boolalpha << _useGamma << std::endl;
+      //         std::cout <<boolalpha << _useGammaForRelation << std::endl;
+      //         std::cout <<_gamma << std::endl;
+
+      if (_useGammaForRelation)
       {
-        SP::SiconosVector xp = d->xp();
-        //      cout<<"before moreau::computefreestate xp"<<endl;
-        //      xp->display();
-        W->PLUForwardBackwardInPlace(*xp);
-        scal(h, *xp, *xp);
-        *xp += *xfree;
-        //      cout<<"after moreau::computefreestate xp"<<endl;
-        //      xp->display();
-        SP::SiconosVector xq = d->xq();
-        *xq = *xp;
-        *xq -= *x;
+        //           std::cout << "xp before" << std::endl;
+        //           xp->display();
+        //           std::cout << "xfree before" << std::endl;
+        //           xfree->display();
+        //           *xq = *xfree;
+        //           std::cout << "xq before" << std::endl;
+        //           xq->display();
+
+        scal(_gamma, *xq, *xq);
+        SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
+        // std::cout << "xold" << std::endl;
+        //           xold->display();
+
+        scal(1.0 - _gamma, *xold, *xq, false);
+        //           std::cout << "xq after" << std::endl;
+        //           xq->display();
+
       }
+
+
+      //      }
 
     }
 
@@ -1268,12 +1326,29 @@ void Moreau::updateState(unsigned int level)
       if (baux)
         ds->addWorkVector(x, DynamicalSystem::local_buffer);
 
+      //       std::cout <<boolalpha << _useGamma << std::endl;
+      //       std::cout <<_gamma << std::endl;
+      if (_useGamma)
+      {
+        //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
+        // Solve W(x-xfree) = hr
+        scal(_gamma * h, *fonlds->r(), *x); // x = gamma*h*r
+        // scal((1.0-_gamma)*h,*rold,*x,false)// x += (1-gamma)*h*rold
+      }
+      else
+      {
+        // Solve W(x-xfree) = hr
+        scal(h, *fonlds->r(), *x); // x = h*r
+        //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
+      }
 
-      // Solve W(x-xfree) = hr
-      scal(h, *fonlds->r(), *x); // x = h*r
-      //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
+
+
+
       W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
       *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
+
+
       if (baux)
       {
         ds->subWorkVector(x, DynamicalSystem::local_buffer);
@@ -1282,11 +1357,10 @@ void Moreau::updateState(unsigned int level)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
 
+
       //  }else if (dsType == Type::FirstOrderLinearTIDS){
       //    SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       //    SP::SiconosVector x = ds->x();
-
-
       //    // Solve W(x-xfree) = hr
       //    *x=*fonlds->r();
       //    W->PLUForwardBackwardInPlace(*x); // x = W^{-1} *r

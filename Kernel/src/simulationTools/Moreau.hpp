@@ -73,6 +73,22 @@ protected:
   *  scheme to each DynamicalSystem of the OSI */
   double _theta;
 
+  /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
+   * This parameter is used to apply a theta-method to the input $r$
+   */
+  double _gamma;
+
+  /** a boolean to known is the parameter must be used or not
+   */
+  bool _useGamma;
+
+  /** a boolean to known is the parameter must be used or not
+   */
+  bool _useGammaForRelation;
+
+
+
+
   /** Default constructor
    */
   Moreau() {};
@@ -101,6 +117,26 @@ public:
    *  \param theta value for all these DS.
    */
   Moreau(double);
+
+  /** constructor from a minimum set of data: one DS and its theta
+   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param Theta value
+   *  \param gamma value
+   */
+  Moreau(SP::DynamicalSystem, double, double);
+
+  /** constructor from a minimum set of data
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param gamma value for all these DS.
+   *  \param theta value for all these DS.
+   */
+  Moreau(DynamicalSystemsSet&, double, double);
+
+  /** constructor from theta value only
+   *  \param theta value for all these DS.
+   *  \param gamma value for all these DS.
+   */
+  Moreau(double, double);
 
   /** destructor
    */
@@ -175,6 +211,62 @@ public:
   {
     _theta = newTheta;
   };
+
+  // -- gamma --
+
+  /** get gamma
+   *  \return a double
+   */
+  inline double gamma()
+  {
+    return _gamma;
+  };
+
+  /** set the value of gamma
+   *  \param a double
+   */
+  inline void setGamma(double newGamma)
+  {
+    _gamma = newGamma;
+    _useGamma = true;
+  };
+
+  // -- useGamma --
+
+  /** get bool useGamma
+   *  \return a bool
+   */
+  inline bool useGamma()
+  {
+    return _useGamma;
+  };
+
+  /** set the boolean to indicate that we use gamma
+   *  \param a bool
+   */
+  inline void setUseGamma(bool newUseGamma)
+  {
+    _useGamma = newUseGamma;
+  };
+
+  /** get bool gammaForRelation for the relation
+   *  \return a
+   */
+  inline bool useGammaForRelation()
+  {
+    return _useGammaForRelation;
+  };
+
+
+  /** set the boolean to indicate that we use gamma for the relation
+   *  \param a bool
+   */
+  inline void setUseGammaForRelation(bool newUseGammaForRelation)
+  {
+    _useGammaForRelation = newUseGammaForRelation;
+    if (_useGammaForRelation) _useGamma = false;
+  };
+
 
   // --- OTHER FUNCTIONS ---
 
