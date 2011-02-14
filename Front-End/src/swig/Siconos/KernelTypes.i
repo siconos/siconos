@@ -52,6 +52,58 @@
   }
  }
 
+
+%typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
+{
+  // directorout from KernelTypes.i
+  void * swig_argp;
+  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t,  0  | 0);
+
+
+// strange HAlpha not initialized (LinearOSNS)
+// so this is commented
+//  if (!SWIG_IsOK(swig_res)) 
+//  {
+//    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""SP::SiconosVector""'");
+//  }
+
+  if ((!swig_argp) || (!SWIG_IsOK(swig_res)))
+  {
+    return (SP::SiconosVector) c_result;
+  }
+  else
+  {
+    c_result = *(reinterpret_cast< SP::SiconosVector * >(swig_argp));
+    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosVector * >(swig_argp);
+    return (SP::SiconosVector) c_result;
+  }
+}
+
+%typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
+{
+  // directorout from KernelTypes.i
+  void * swig_argp;
+  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t,  0  | 0);
+
+// idem SiconosVector
+//  if (!SWIG_IsOK(swig_res)) 
+//  {
+//    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""SP::SiconosMatrix""'");
+//  }
+
+  if ((!swig_argp) || (!SWIG_IsOK(swig_res)))
+  {  
+    return (SP::SiconosMatrix) c_result;
+  }
+  else
+  {
+    c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
+    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+    return (SP::SiconosMatrix) c_result;
+  }
+}
+
+
 // numpy array to SP::SimpleMatrix (here a SiconosMatrix is always a
 // dense SimpleMatrix)
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
@@ -85,23 +137,35 @@
 
 %typemap(out) boost::shared_ptr<SiconosVector>
 {
-  npy_intp this_vector_dim[1];
-  this_vector_dim[0]=$1->size();
-  // warning shared_ptr counter lost here du to getArray()
-  $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+  if ($1)
+  {
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0]=$1->size();
+    // warning shared_ptr counter lost here du to getArray()
+    $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+  }
+  else
+  {
+    $result = Py_None;
+  }
 }
 
 %typemap(out) boost::shared_ptr<SiconosMatrix>
 {
-  npy_intp this_matrix_dim[2];
-  this_matrix_dim[0]=$1->size(0);
-  this_matrix_dim[1]=$1->size(1);
-  // warning shared_ptr counter lost here du to getArray()
-  $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
-  PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+  if ($1)
+  {
+    npy_intp this_matrix_dim[2];
+    this_matrix_dim[0]=$1->size(0);
+    this_matrix_dim[1]=$1->size(1);
+    // warning shared_ptr counter lost here du to getArray()
+    $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+    PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+  }
+  else
+  {
+    $result = Py_None;
+  }
 }
-
-
 
 // Siconos{Vector,Matrix} in api mean Simple{Vector,Matrix} here
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SimpleVector) };
