@@ -209,10 +209,12 @@ int main(int argc, char* argv[])
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {
     cout << "Exception caught in \'WoodPecker\'" << endl;
+    return 1;
   }
   cout << "Computation Time " << t.elapsed()  << endl;
   return 0;
