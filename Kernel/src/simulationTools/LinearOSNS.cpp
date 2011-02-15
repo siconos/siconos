@@ -887,12 +887,11 @@ void LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->model()
                           ->nonSmoothDynamicalSystem()->topology();
-  bool hasTopologyChanged = topology->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   //  std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
-  if (hasTopologyChanged || !isLinear)
+  if (!_hasBeUpdated || !isLinear)
   {
     // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();
@@ -900,7 +899,7 @@ void LinearOSNS::preCompute(double time)
     // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
     //    _M->fill(indexSet);
-    _M->fill(indexSet, hasTopologyChanged);
+    _M->fill(indexSet, !_hasBeUpdated);
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 

@@ -86,15 +86,18 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
 
 
-  bool hasTopologyChanged = simulation()->model()->
-                            nonSmoothDynamicalSystem()->topology()->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeUpdated: "<<_hasBeUpdated<<endl;
 
-  if (hasTopologyChanged || !isLinear)
+  if (!_hasBeUpdated || !isLinear)
   {
-    _n = 0;
-    _m = 0;
-    _curBlock = 0;
+    if (!_hasBeUpdated)
+    {
+      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
+      _n = 0;
+      _m = 0;
+      _curBlock = 0;
+    }
     UnitaryRelationsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
@@ -109,6 +112,7 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       computeDiagonalUnitaryBlock(*vi);
     }
   }
+  // _hasBeUpdated=true;
 }
 
 void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
@@ -127,8 +131,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   assert(indexSet->properties(vd).blockProj->size(1) == nslawSize);
 
   SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).blockProj;
-
-  computeOptions(UR, UR);
+  if (!_hasBeUpdated)
+    computeOptions(UR, UR);
   // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
   // necessary) if UR1 and UR2 have commond DynamicalSystem.  How
   // _unitaryBlocks are computed depends explicitely on the type of
@@ -222,7 +226,7 @@ void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned in
 }
 void MLCPProjectOnConstraints::postCompute()
 {
-
+  _hasBeUpdated = true;
   // This function is used to set y/lambda values using output from
   // lcp_driver (w,z).  Only UnitaryRelations (ie Interactions) of
   // indexSet(leveMin) are concerned.
@@ -297,6 +301,7 @@ void MLCPProjectOnConstraints::postCompute()
 }
 void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
+  printf("MLCPProjectOnConstraints::computeOptions\n");
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
   unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();

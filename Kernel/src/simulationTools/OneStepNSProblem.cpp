@@ -30,7 +30,7 @@
 
 using namespace std;
 OneStepNSProblem::OneStepNSProblem():
-  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;
@@ -41,7 +41,7 @@ OneStepNSProblem::OneStepNSProblem():
 OneStepNSProblem::OneStepNSProblem(const string& pbType,
                                    SP::OneStepNSProblemXML osnspbxml):
 /*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -71,7 +71,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
 }
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -100,7 +100,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
 
   // Numerics general options
@@ -115,7 +115,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
 }
 
 OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
 
   // Numerics general options
@@ -128,7 +128,7 @@ OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSol
 
 }
 OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
 {
 
   // Numerics general options
@@ -184,8 +184,6 @@ void OneStepNSProblem::updateUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
 
 
-  bool hasTopologyChanged = simulation()->model()->
-                            nonSmoothDynamicalSystem()->topology()->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
@@ -205,7 +203,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || hasTopologyChanged)
+      if (!isLinear || !_hasBeUpdated)
       {
         computeDiagonalUnitaryBlock(*vi);
       }
@@ -240,7 +238,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
       }
 
 
-      if (!isLinear || hasTopologyChanged)
+      if (!isLinear || !_hasBeUpdated)
       {
         computeUnitaryBlock(*ei);
 
@@ -285,7 +283,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || hasTopologyChanged)
+      if (!isLinear || !_hasBeUpdated)
       {
         computeDiagonalUnitaryBlock(*vi);
       }
@@ -320,7 +318,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
           }
         }
 
-        if (!isLinear || hasTopologyChanged)
+        if (!isLinear || !_hasBeUpdated)
         {
           if (isrc != itar)
             computeUnitaryBlock(*oei);
@@ -405,8 +403,6 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   assert(sim && "OneStepNSProblem::initialize(sim), sim is null.");
 
   _simulation = sim;
-  bool hasTopologyChanged = simulation()->model()->
-                            nonSmoothDynamicalSystem()->topology()->hasChanged();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // === Link to the Interactions of the Non Smooth Dynamical System

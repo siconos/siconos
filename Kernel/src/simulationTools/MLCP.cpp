@@ -116,14 +116,15 @@ void MLCP::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
   SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
 
   assert(UR1 != UR2);
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
-  // commonDS here...
-  computeOptions(UR1, UR2);
-  LinearOSNS::computeUnitaryBlock(ed);
+  if (!_hasBeUpdated || !isLinear)
+    LinearOSNS::computeUnitaryBlock(ed);
 }
 
 void MLCP::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
 {
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
@@ -131,7 +132,8 @@ void MLCP::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
   // commonDS here...
-  computeOptions(UR, UR);
+  if (!_hasBeUpdated)
+    computeOptions(UR, UR);
   LinearOSNS::computeDiagonalUnitaryBlock(vd);
 }
 
@@ -172,6 +174,7 @@ int MLCP::compute(double time)
 {
   // --- Prepare data for MLCP computing ---
   preCompute(time);
+  //  _hasBeUpdated=true;
 #ifdef MLCP_DEBUG
   printf("MLCP::compute m n :%d,%d\n", _n, _m);
 #endif
@@ -252,13 +255,17 @@ void MLCP::initialize(SP::Simulation sim)
 }
 void  MLCP::updateUnitaryBlocks()
 {
-  _curBlock = 0;
-  _m = 0;
-  _n = 0;
+  if (!_hasBeUpdated)
+  {
+    _curBlock = 0;
+    _m = 0;
+    _n = 0;
+  }
   LinearOSNS::updateUnitaryBlocks();
 }
 void  MLCP::computeAllUnitaryBlocks()
 {
+  assert(0);
   _curBlock = 0;
   _m = 0;
   _n = 0;

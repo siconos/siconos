@@ -148,7 +148,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   assert(topo->indexSet(0));
   assert(topo->indexSet(1));
-
+  topo->setHasChanged(false);
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
   SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
 
@@ -186,6 +186,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
           indexSet0->color(ur1_descr0) = boost::black_color;
           indexSet1->remove_vertex(ur1);
           ur1->lambda(1)->zero();
+          topo->setHasChanged(true);
         }
       }
     }
@@ -194,6 +195,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
       // Unitary relation is not in indexSet0 anymore.
       // ui1 becomes invalid
       indexSet1->remove_vertex(ur1);
+      topo->setHasChanged(true);
     }
   }
 
@@ -239,7 +241,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
           // vertex and edges insertion in indexSet1
           indexSet1->copy_vertex(ur0, *indexSet0);
-
+          topo->setHasChanged(true);
           assert(indexSet1->is_vertex(ur0));
         }
       }
@@ -497,6 +499,12 @@ void   TimeStepping::prepareNewtonIteration()
   {
     (*it)->relation()->preparNewtonIteration();
   }
+  bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
+  if (topoHasChanged)
+    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+    {
+      (*itOsns)->setHasBeUpdated(false);
+    }
 
 }
 

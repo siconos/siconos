@@ -54,7 +54,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #endif
   TimeStepping::newtonSolve(criterion, maxStep);
 #ifdef TSPROJ_DEBUG
-  cout << "TimeStepping::newtonSolve end :\n";
+  cout << "TimeStepping::newtonSolve end : nbit=" << getNewtonNbSteps() << "\n";
 #endif
 
   int info = 0;

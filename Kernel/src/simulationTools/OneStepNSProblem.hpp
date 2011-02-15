@@ -153,6 +153,8 @@ protected:
       Numerics functions calls */
   SP::NumericsOptions _numerics_options;
 
+  /*During Newton it, this flag allow to update the numerics matrices only once if necessary.*/
+  bool _hasBeUpdated;
 
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -411,6 +413,21 @@ public:
   /** computes all  DSBlock-matrices
    */
   void computeAllDSBlocks();
+
+  /**
+   * return _hasBeUpdated
+   */
+  bool hasBeUpdated()
+  {
+    return _hasBeUpdated;
+  }
+  /**
+   * to set _hasBeUpdated.
+   */
+  void setHasBeUpdated(bool v)
+  {
+    _hasBeUpdated = v;
+  }
 
   /** computes DSBlock-matrix that corresponds to DS1
    *  Move this to Unitary Relation class?

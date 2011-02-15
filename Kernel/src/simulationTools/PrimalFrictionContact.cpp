@@ -347,7 +347,7 @@ void PrimalFrictionContact::preCompute(const double time)
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
-  if (topology->hasChanged())
+  if (!_hasBeUpdated)
   {
     // Computes new unitaryBlocks if required
     updateUnitaryBlocks();
