@@ -312,10 +312,17 @@ public:
   {
     return data[q0];
   }
+
+  SP::SiconosVector q()
+  {
+    return data[q0];
+  }
+
   SP::SiconosVector getDeltaq()
   {
     return data[deltaq];
   }
+
   ACCEPT_STD_VISITORS();
 
 };
