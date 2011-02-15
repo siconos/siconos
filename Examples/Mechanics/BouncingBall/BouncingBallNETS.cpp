@@ -17,9 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file BouncingBallTS.cpp
+/*!\file BouncingBallNETS.cpp
   \brief \ref EMBouncingBall - C++ input file, Time-Stepping version -
-  V. Acary, F. Perignon.
+  V. Acary, O. Bonnefon.
 
   A Ball bouncing on the ground.
   Direct description of the model without XML input.
@@ -29,7 +29,7 @@
 #include "SiconosKernel.hpp"
 static double sBallRadius = 0.1;
 #define WITH_PROJ
-//#define WITH_FC3D
+#define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
 #define R_CLASS NewtonEulerRFC3D
@@ -281,9 +281,9 @@ int main(int argc, char* argv[])
     ioMatrix ref("resultNETS.ref", "ascii");
     ref.read(dataPlotRef);
     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Warning. The results is rather different from the reference file. err = " << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
   }

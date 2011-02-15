@@ -215,4 +215,5 @@ int main(int argc, char* argv[])
     cout << "Exception caught in \'WoodPecker\'" << endl;
   }
   cout << "Computation Time " << t.elapsed()  << endl;
+  return 0;
 }
