@@ -225,6 +225,19 @@ int main(int argc, char* argv[])
     ioMatrix io("CircuitRLCD.dat", "ascii");
     dataPlot.resize(k, 9);
     io.write(dataPlot, "noDim");
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("CircuitRLCD.ref", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
+
   }
 
   // --- Exceptions handling ---

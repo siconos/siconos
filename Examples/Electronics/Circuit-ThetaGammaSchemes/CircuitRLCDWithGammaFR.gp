@@ -61,20 +61,20 @@ set ylabel "V" 1
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):2 t "capacitor voltage , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):2 t "capacitor voltage , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:2 t      "capacitor voltage , Gamma1/2 BE 1us" with lines 
+  "CircuitRLCD.dat" u 1:2 t      "capacitor voltage , Gamma1/2 BE 1us" with lines 
 set origin 0.0,winheight*2.0+heightoff
 set ylabel "A" 1
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):3 t "inductor current , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):3 t "inductor current , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:3 t      "inductor current , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:3 t      "inductor current , Gamma1/2 BE 1us" w l
 set origin 0.0,winheight+heightoff
 set ylabel "V" 1
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):4 t "diode voltage , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):4 t "diode voltage , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:4 t      "diode voltage , Gamma1/2 BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:( -(4*pi*pi)  *$2 - 10*$5) t      "diode voltage(comp) , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:4 t      "diode voltage , Gamma1/2 BE 1us" w l,\
+  "CircuitRLCD.dat" u 1:( -(4*pi*pi)  *$2 - 10*$5) t      "diode voltage(comp) , Gamma1/2 BE 1us" w l
 
 set bmargin 0
 set format
@@ -85,7 +85,7 @@ set ylabel "A" 1
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):5 t "diode current , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):5 t "diode current , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:5 t      "diode current , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:5 t      "diode current , Gamma1/2 BE 1us" w l
 set nomultiplot
 
 set output "EnergyFR.ps"
@@ -95,17 +95,17 @@ set origin
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):7 t "storage function , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):7 t "storage function , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:7 t      "storage function , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:7 t      "storage function , Gamma1/2 BE 1us" w l
 
  
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):8 t "dissipation function , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):8 t "dissipation function , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:8 t "dissipation function , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:8 t "dissipation function , Gamma1/2 BE 1us" w l
 
 plot\
   "CircuitRLCD-gammaFR0.dat" u ($1-toffset):9 t "total function , Gamma0   BE 1us" w l,\
   "CircuitRLCD-gammaFR1.dat" u ($1-toffset):9 t "total function , Gamma1   BE 1us" w l,\
-  "CircuitRLCD-gammaFRhalf.dat" u 1:9    t  "total function , Gamma1/2 BE 1us" w l
+  "CircuitRLCD.dat" u 1:9    t  "total function , Gamma1/2 BE 1us" w l
 
 
