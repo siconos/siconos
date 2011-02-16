@@ -162,7 +162,8 @@ void FirstOrderLinearDS::initRhs(double time)
 void FirstOrderLinearDS::updatePlugins(double time)
 {
   computeA(time);
-  computeb(time);
+  if (_b)
+    computeb(time);
 }
 /*
 void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
@@ -304,21 +305,22 @@ FirstOrderLinearDS* FirstOrderLinearDS::convert(DynamicalSystem* ds)
 }
 void FirstOrderLinearDS::computef(double time)
 {
+  updatePlugins(time);
   prod(*_A, *_x[0], *_f);
   if (_b)
   {
-    //    computeb(time);
+    computeb(time);
     *_f += *_b;
   }
 }
 
 void FirstOrderLinearDS::computef(double time, SP::SiconosVector x2)
 {
-  RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
+  //  RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
+  updatePlugins(time);
   prod(*_A, *x2, *_f);
   if (_b)
   {
-    computeb(time);
     *_f += *_b;
   }
 }

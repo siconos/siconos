@@ -642,21 +642,41 @@ double Moreau::computeResidu()
 
       *residuFree = *x;
       *residuFree -= *xold;
+      //       cout<<"Moreau: x"<<endl;
+      //       (x)->display();
+      //       cout<<"Moreau: xold"<<endl;
+      //       (xold)->display();
+
+
+
       if (M)
         prod(*M, *residuFree, *residuFree, true);
 
       if (d->f())
       {
-        // computes f(ti,xi)
-        //        d->computef(told,xold);
-        double coef = -h * (1 - _theta);
-        // residuFree += coef * f_i
-        scal(coef, *d->fold(), *residuFree, false);
 
+        double coef = -h * (1 - _theta);
+        if (dsType == Type::FirstOrderLinearDS)
+        {
+          // computes f(ti,xi)
+          //This computation is done since fold not  is up to date.
+          d->computef(told, xold);
+          // residuFree += coef * f_i
+          scal(coef, *d->f(), *residuFree, false);
+        }
+        else
+        {
+          // residuFree += coef * f_i
+          scal(coef, *d->fold(), *residuFree, false);
+        }
+        //          cout<<"Moreau: fold"<<endl;
+        //          (*d->fold()).display();
         // computes f(ti+1, x_k,i+1) = f(t,x)
         d->computef(t);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
+        //          cout<<"Moreau: f"<<endl;
+        //          (*d->f()).display();
         scal(coef, *d->f(), *residuFree, false);
       }
       //      cout<<"Moreau: residu free"<<endl;
@@ -1072,21 +1092,17 @@ void Moreau::computeFreeState()
 
       if (_useGammaForRelation)
       {
-        //           std::cout << "xp before" << std::endl;
-        //           xp->display();
-        //           std::cout << "xfree before" << std::endl;
-        //           xfree->display();
-        //           *xq = *xfree;
+        *xq = *xfree;
         //           std::cout << "xq before" << std::endl;
         //           xq->display();
 
         scal(_gamma, *xq, *xq);
         SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-        // std::cout << "xold" << std::endl;
+        //           std::cout << "xold" << std::endl;
         //           xold->display();
 
         scal(1.0 - _gamma, *xold, *xq, false);
-        //           std::cout << "xq after" << std::endl;
+        //          std::cout << "xq after" << std::endl;
         //           xq->display();
 
       }
