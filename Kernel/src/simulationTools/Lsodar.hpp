@@ -70,6 +70,12 @@ private:
   SP::BlockVector xWork;
   Lsodar() {};
 
+  /** nslaw effects
+   */
+  struct _NSLEffectOnFreeOutput;
+  friend class _NSLEffectOnFreeOutput;
+
+
 public:
 
   /** constructor from xml file

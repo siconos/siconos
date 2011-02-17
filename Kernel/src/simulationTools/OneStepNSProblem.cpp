@@ -403,7 +403,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   assert(sim && "OneStepNSProblem::initialize(sim), sim is null.");
 
   _simulation = sim;
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+
 
   // === Link to the Interactions of the Non Smooth Dynamical System
   // (through the Simulation) === Warning: this means that all

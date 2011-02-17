@@ -28,7 +28,9 @@
 #include "LagrangianRheonomousR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderLinearR.hpp"
-
+#include "NewtonImpactNSL.hpp"
+#include "MultipleImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -65,7 +67,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
 
   if (osiXML->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
   {
-    unsigned int i = 0;
+    //unsigned int i=0;
     for (DSIterator it = dsList->begin(); it != dsList->end(); ++it)
     {
       OSIDynamicalSystems->insert(*it);
@@ -85,7 +87,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
     // get list of ds numbers implicated in the OSI
     vector<int> dsNumbers;
     osiXML->getDSNumbers(dsNumbers);
-    unsigned int i = 0;
+    //unsigned int i= 0;
     // get corresponding ds and insert them into the set.
     vector<int>::iterator it;
     SP::DynamicalSystem ds;
@@ -1246,6 +1248,45 @@ void Moreau::computeFreeState()
 
 }
 
+struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
+{
+  OneStepNSProblem *osnsp;
+  SP::UnitaryRelation UR;
+
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
+    osnsp(p), UR(UR) {};
+
+  void visit(const NewtonImpactNSL& nslaw)
+  {
+    double e;
+    e = nslaw.e();
+    Index subCoord(4);
+    subCoord[0] = 0;
+    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[2] = 0;
+    subCoord[3] = subCoord[1];
+    subscal(e, *UR->yOld(osnsp->levelMin()), *(UR->yp()), subCoord, false);
+  }
+
+  void visit(const NewtonImpactFrictionNSL& nslaw)
+  {
+    double e;
+    e = nslaw.en();
+    // Only the normal part is multiplied by e
+    (*UR->yp())(0) +=  e * (*UR->yOld(osnsp->levelMin()))(0);
+
+  }
+  void visit(const EqualityConditionNSL& nslaw)
+  {
+    ;
+  }
+  void visit(const MixedComplementarityConditionNSL& nslaw)
+  {
+    ;
+  }
+};
+
+
 void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
@@ -1416,6 +1457,13 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
     }
 
   }
+
+  if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+  {
+    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
+    UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+  }
+
 
 }
 

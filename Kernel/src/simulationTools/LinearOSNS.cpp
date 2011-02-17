@@ -494,115 +494,7 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
 
 }
 
-/* Cascading visitors experimentation.
-   the dispatch is done on simulationtype and then on nslawtype
 
-   1. Cumbersome. Is it better than if (simulationtype == ... ) { if
-   nslawType == ...) ?
-   2. Can simulation dispatch be done at top-level ?
-
-*/
-
-
-/* nslaw dispatch */
-
-struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
-{
-  LinearOSNS *parent;
-  unsigned int pos;
-  SP::UnitaryRelation UR;
-
-  _TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
-    parent(p), UR(UR), pos(pos) {};
-
-  void visit(const NewtonImpactNSL& nslaw)
-  {
-    double e;
-    e = nslaw.e();
-    Index subCoord(4);
-    subCoord[0] = 0;
-    subCoord[1] = UR->getNonSmoothLawSize();
-    subCoord[2] = pos;
-    subCoord[3] = pos + subCoord[1];
-    subscal(e, *UR->yOld(parent->levelMin()), *(parent->_q), subCoord, false);
-  }
-
-  void visit(const NewtonImpactFrictionNSL& nslaw)
-  {
-    double e;
-    e = nslaw.en();
-    // Only the normal part is multiplied by e
-    (*(parent->_q))(pos) +=  e * (*UR->yOld(parent->levelMin()))(0);
-
-  }
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const MixedComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
-};
-
-struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
-{
-  LinearOSNS *parent;
-  SP::UnitaryRelation UR;
-  unsigned int pos;
-
-  _EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
-    parent(p), UR(UR), pos(pos) {};
-
-  void visit(const NewtonImpactNSL& nslaw)
-  {
-    double e;
-    e = nslaw.e();
-    Index subCoord(4);
-    subCoord[0] = pos;
-    subCoord[1] = pos + UR->getNonSmoothLawSize();
-    subCoord[2] = pos;
-    subCoord[3] = subCoord[1];
-    subscal(e, *(parent->_q), *(parent->_q), subCoord, false); // q = q + e * q
-  }
-  // visit function added by Son (9/11/2010)
-  void visit(const MultipleImpactNSL& nslaw)
-  {
-    ;
-  }
-
-  // note : no NewtonImpactFrictionNSL
-};
-
-
-
-/* Simulation dispatch */
-class TimeStepping;
-class EventDriven;
-
-struct LinearOSNS::_NSLEffectOnSim : public SiconosVisitor
-{
-
-  LinearOSNS *parent;
-  SP::UnitaryRelation UR;
-  unsigned int pos;
-
-  _NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
-    parent(p), UR(UR), pos(pos) {};
-
-  void visit(const TimeStepping& sim)
-  {
-    SP::SiconosVisitor NSLEffect(new _TimeSteppingNSLEffect(parent, UR, pos));
-    UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
-  }
-
-  void visit(const EventDriven& sim)
-  {
-    SP::SiconosVisitor NSLEffect(new _EventDrivenNSLEffect(parent, UR, pos));
-    UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
-  }
-
-};
 
 void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
@@ -634,6 +526,7 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   }
   else if (osiType == OSI::MOREAU2)
   {
+
   }
   else
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
@@ -643,8 +536,8 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   {
     if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
     {
-      SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, UR, pos));
-      simulation()->accept(*nslEffectOnSim);
+      //    SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this,UR,pos));
+      //       simulation()->accept(*nslEffectOnSim);
     }
   }
 }

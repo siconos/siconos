@@ -156,7 +156,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
-  bool inserted;
+  //bool inserted;
 
 
   // indexSet1 scan

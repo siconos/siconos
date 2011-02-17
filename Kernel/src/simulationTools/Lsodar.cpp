@@ -26,6 +26,10 @@
 #include "Topology.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "MultipleImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+
 using namespace std;
 using namespace RELATION;
 
@@ -350,6 +354,36 @@ void Lsodar::updateState(unsigned int level)
   else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
 }
 
+
+struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
+{
+  OneStepNSProblem *osnsp;
+  SP::UnitaryRelation UR;
+
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
+    osnsp(p), UR(UR) {};
+
+  void visit(const NewtonImpactNSL& nslaw)
+  {
+    double e;
+    e = nslaw.e();
+    Index subCoord(4);
+    subCoord[0] = 0;
+    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[2] = 0;
+    subCoord[3] = subCoord[1];
+    subscal(e, *UR->yOld(osnsp->levelMin()), *(UR->yp()), subCoord, false); // q = q + e * q
+  }
+
+  // visit function added by Son (9/11/2010)
+  void visit(const MultipleImpactNSL& nslaw)
+  {
+    ;
+  }
+  // note : no NewtonImpactFrictionNSL
+};
+
+
 void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
@@ -468,7 +502,14 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   }
   else
     RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for Relation of type " + relationType);
-
+  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
+  {
+    if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+    {
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
+      UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    }
+  }
 
 }
 void Lsodar::display()
