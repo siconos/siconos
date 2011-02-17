@@ -113,8 +113,8 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
   _jachq->setValue(4, 12, _A2x * (q13) + _A2y * (-q10) + _A2z * (-q11));
   _jachq->setValue(4, 13, _A2x * (-q12) + _A2y * (q11) + _A2z * (-q10));
 
-  for (int ii = 0; ii < _jachq->size(0); ii++)
-    for (int jj = 0; jj < _jachq->size(1); jj++)
+  for (unsigned int ii = 0; ii < _jachq->size(0); ii++)
+    for (unsigned int jj = 0; jj < _jachq->size(1); jj++)
       _jachqProj->setValue(ii, jj, _jachq->getValue(ii, jj));
 
   _jachqProj->setValue(5, 0, 0);
@@ -158,8 +158,8 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
   _jachq->setValue(4, 5, _A2y);
   _jachq->setValue(4, 6, _A2z);
 
-  for (int ii = 0; ii < _jachq->size(0); ii++)
-    for (int jj = 0; jj < _jachq->size(1); jj++)
+  for (unsigned int ii = 0; ii < _jachq->size(0); ii++)
+    for (unsigned int jj = 0; jj < _jachq->size(1); jj++)
       _jachqProj->setValue(ii, jj, _jachq->getValue(ii, jj));
 
   _jachqProj->setValue(5, 0, 0);
@@ -226,7 +226,7 @@ void PivotJointR::computeh(double t)
 
   std::cout << "PivotJoint computeH:\n";
   y->display();
-  for (int ii = 0; ii < y->size(); ii++)
+  for (unsigned int ii = 0; ii < y->size(); ii++)
     _yProj->setValue(ii, y->getValue(ii));
   _yProj->setValue(5, q10 * q10 + q11 * q11 + q12 * q12 + q13 * q13 - 1.0);
   if (_d2)
