@@ -160,7 +160,9 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     /*compute the new velocity seeing the work of fext*/
     *(neds->deltaq()) -= *(neds->q());
     double  n2q = neds->deltaq()->norm2();
-    double n2 = neds->fExt()->norm2();
+    double n2 = 0.0;
+    if (neds->fExt())
+      n2 = neds->fExt()->norm2();
     if (n2 > 1e-7 && n2q > 1e-14)
     {
       //if (n2q < 1e-14)
