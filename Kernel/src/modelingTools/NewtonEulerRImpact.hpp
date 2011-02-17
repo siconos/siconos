@@ -60,7 +60,7 @@ public:
 
   bool _isOnContact;
   NewtonEulerRImpact():
-    NewtonEulerR(), cd _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
+    NewtonEulerR(), _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
     _Nc(new SimpleVector(3))
   {
     /*_ds1=NULL;_ds2=NULL;*/
