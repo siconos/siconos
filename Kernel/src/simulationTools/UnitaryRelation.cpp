@@ -121,8 +121,9 @@ void UnitaryRelation::initialize(const std::string& simulationType)
 
   _workX.reset(new BlockVector());
   _workZ.reset(new BlockVector());
-  mWorkXq.reset(new BlockVector());
+  _workXq.reset(new BlockVector());
   _workFree.reset(new BlockVector());
+  _workYp.reset(new SimpleVector(getNonSmoothLawSize()));
 
   for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
     _workZ->insertPtr((*it)->z());
@@ -137,7 +138,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
         SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
         _workX->insertPtr(fds->x());
         _workFree->insertPtr(fds->workFree());
-        mWorkXq->insertPtr(fds->xq());
+        _workXq->insertPtr(fds->xq());
       }
     }
   }
@@ -152,7 +153,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
         SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
         _workX->insertPtr(fds->x());
         _workFree->insertPtr(fds->workFree());
-        mWorkXq->insertPtr(fds->xq());
+        _workXq->insertPtr(fds->xq());
       }
     }
     else // Lagrangian

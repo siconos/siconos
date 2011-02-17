@@ -607,10 +607,6 @@ struct LinearOSNS::_NSLEffectOnSim : public SiconosVisitor
 void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
-  // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-
   SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
   SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
   OSI::TYPES  osiType = Osi->getType();
@@ -618,9 +614,8 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   Index coord(8);
-
   unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->interaction();
+
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -628,205 +623,15 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
   coord[6] = pos;
   coord[7] = pos + sizeY;
 
-  SP::SiconosMatrix  C;
-  SP::SiconosMatrix  D;
-  SP::SiconosMatrix  F;
-  SP::SiconosVector Xq;
-  SP::SiconosVector lambda;
-  SP::SiconosVector H_alpha;
-
-  Xq = UR->xq();
-  lambda = UR->interaction()->lambda(0);
-  H_alpha = UR->interaction()->relation()->Halpha();
-
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
-
-  // ??? cf svn r 1456 Xfree = UR->workx()
-  // ==> Event driven does not work without this
-
-  SP::SiconosVector Xfree;
-  if (osiType == OSI::MOREAU)
-    Xfree = UR->workFree();
-  else if (osiType == OSI::LSODAR)
-  {
-
-    /* V.A. 10/10/2010
-     * Following the type of OSNS  we need to retrieve the velocity or the acceleration
-     * This tricks is not very nice but for the moment the OSNS do not known if
-     * it is in accelaration of not
-     */
-
-    //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
-    if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
-    {
-      Xfree  = UR->workFree();
-      //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
-      //       Xfree->display();
-    }
-    else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == this)
-    {
-      Xfree = UR->workx();
-      //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
-      //       Xfree->display();
-
-    }
-    else
-      RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
-  }
 
 
 
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
-
-    if (relationType == FirstOrder && relationSubType == Type2R)
-    {
-      C = mainInteraction->relation()->C();
-      D = mainInteraction->relation()->D();
-      if (D)
-      {
-        coord[3] = D->size(1);
-        coord[5] = D->size(1);
-        subprod(*D, *lambda, *_q, coord, true);
-        for (int i = 0; i < sizeY; i++)
-          _q->setValue(relativePosition + i, -1 * _q->getValue(relativePosition + i));
-
-      }
-      if (C)
-      {
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
-        subprod(*C, *Xq, *_q, coord, false);
-
-      }
-
-
-      if (osiType == OSI::MOREAU && (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
-      {
-        RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for Moreau with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
-      }
-      for (int i = 0; i < sizeY; i++)
-        _q->setValue(relativePosition + i, _q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
-
-    }
-    else if (relationType == NewtonEuler)
-    {
-      SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-
-      if (CT)
-      {
-
-        assert(Xfree);
-        assert(_q);
-
-        coord[3] = CT->size(1);
-        coord[5] = CT->size(1);
-        // printf("LinearOSNS: computing q: CT\n");
-        // CT->display();
-        // printf("LinearOSNS: computing q: Xfree and _q\n");
-        // Xfree->display();
-        subprod(*CT, *Xfree, *_q, coord, true);
-        //        _q->display();
-      }
-
-    }
-    else
-    {
-      C = mainInteraction->relation()->C();
-
-      if (C)
-      {
-
-        assert(Xfree);
-        assert(_q);
-
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
-
-        if (osiType == OSI::MOREAU && (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
-        {
-          // *Xfree *= (boost::static_pointer_cast<Moreau> (Osi))->gamma();
-          subprod(*C, *Xq, *_q, coord, true);
-        }
-        else
-        {
-
-          subprod(*C, *Xfree, *_q, coord, true);
-        }
-
-      }
-
-      if (relationType == Lagrangian)
-      {
-        SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-        ID->eye();
-
-        Index xcoord(8);
-        xcoord[0] = 0;
-        xcoord[1] = sizeY;
-        xcoord[2] = 0;
-        xcoord[3] = sizeY;
-        xcoord[4] = 0;
-        xcoord[5] = sizeY;
-        xcoord[6] = pos;
-        xcoord[7] = pos + sizeY;
-        // For the relation of type LagrangianRheonomousR
-        if (relationSubType == RheonomousR)
-        {
-          if (osiType == OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
-          {
-            RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for LCP at acceleration with LagrangianRheonomousR");
-          }
-          else if (osiType != OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == this)
-          {
-            boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-            subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *_q, xcoord, false); // y += hDot
-          }
-          else
-            RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for SICONOS_OSNSP ");
-        }
-        // For the relation of type LagrangianScleronomousR
-        if (relationSubType == ScleronomousR)
-        {
-          if (osiType == OSI::LSODAR && ((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == this)
-          {
-            boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
-            subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *_q, xcoord, false); // y += NonLinearPart
-          }
-        }
-      }
-
-      if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
-      {
-        // In the first order linear case it may be required to add e + FZ to q.
-        // q = HXfree + e + FZ
-        SP::SiconosVector e;
-        if (relationSubType == LinearTIR)
-        {
-          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
-          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
-        }
-        else
-        {
-          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
-        }
-
-        if (e)
-          boost::static_pointer_cast<SimpleVector>(_q)->addBlock(pos, *e);
-
-        if (F)
-        {
-          SP::SiconosVector  workZ = UR->workz();
-          coord[3] = F->size(1);
-          coord[5] = F->size(1);
-          subprod(*F, *workZ, *_q, coord, false);
-        }
-      }
-
-    }
+    Osi->computeFreeOutput(UR, this);
+    setBlock(*UR->yp(), _q, sizeY , 0, pos);
   }
-
   else if (osiType == OSI::MOREAU2)
   {
   }

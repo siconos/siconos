@@ -24,6 +24,10 @@
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
+#include "NewtonEulerR.hpp"
+#include "LagrangianRheonomousR.hpp"
+#include "FirstOrderLinearTIR.hpp"
+#include "FirstOrderLinearR.hpp"
 
 
 using namespace std;
@@ -1242,6 +1246,178 @@ void Moreau::computeFreeState()
 
 }
 
+void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+{
+  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+
+  // Get relation and non smooth law types
+  RELATION::TYPES relationType = UR->getRelationType();
+  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
+
+  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
+
+  unsigned int sizeY = UR->getNonSmoothLawSize();
+
+  unsigned int relativePosition = UR->getRelativePosition();
+  SP::Interaction mainInteraction = UR->interaction();
+  Index coord(8);
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[4] = 0;
+  coord[6] = 0;
+  coord[7] = sizeY;
+  SP::SiconosMatrix  C;
+  SP::SiconosMatrix  D;
+  SP::SiconosMatrix  F;
+  SP::SiconosVector Xq;
+  SP::SiconosVector Yp;
+  SP::SiconosVector Xfree;
+  SP::SiconosVector lambda;
+  SP::SiconosVector H_alpha;
+
+
+  // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
+  Xq = UR->xq();
+  Yp = UR->yp();
+
+  Xfree = UR->workFree();
+  lambda = UR->interaction()->lambda(0);
+  H_alpha = UR->interaction()->relation()->Halpha();
+
+
+  if (relationType == FirstOrder && relationSubType == Type2R)
+  {
+    C = mainInteraction->relation()->C();
+    D = mainInteraction->relation()->D();
+    if (D)
+    {
+      coord[3] = D->size(1);
+      coord[5] = D->size(1);
+      subprod(*D, *lambda, *Yp, coord, true);
+
+      *Yp *= -1.0;
+    }
+    if (C)
+    {
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+      subprod(*C, *Xq, *Yp, coord, false);
+
+    }
+
+    if (_useGammaForRelation)
+    {
+      RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+    }
+    *Yp += *H_alpha;
+  }
+  else if (relationType == NewtonEuler)
+  {
+    SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
+
+    if (CT)
+    {
+
+      assert(Xfree);
+      assert(Yp);
+
+      coord[3] = CT->size(1);
+      coord[5] = CT->size(1);
+      // printf("LinearOSNS: computing q: CT\n");
+      // CT->display();
+      // printf("LinearOSNS: computing q: Xfree and _q\n");
+      // Xfree->display();
+      subprod(*CT, *Xfree, *Yp, coord, true);
+      //        _q->display();
+    }
+
+  }
+  else
+  {
+    C = mainInteraction->relation()->C();
+
+    if (C)
+    {
+
+      assert(Xfree);
+      assert(Yp);
+      assert(Xq);
+
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+      if (_useGammaForRelation)
+      {
+        subprod(*C, *Xq, *Yp, coord, true);
+      }
+      else
+      {
+        subprod(*C, *Xfree, *Yp, coord, true);
+      }
+    }
+    if (relationType == Lagrangian)
+    {
+      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+      ID->eye();
+
+      Index xcoord(8);
+      xcoord[0] = 0;
+      xcoord[1] = sizeY;
+      xcoord[2] = 0;
+      xcoord[3] = sizeY;
+      xcoord[4] = 0;
+      xcoord[5] = sizeY;
+      xcoord[6] = 0;
+      xcoord[7] = sizeY;
+
+      // For the relation of type LagrangianRheonomousR
+      if (relationSubType == RheonomousR)
+      {
+        if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+        {
+          boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
+          subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+        }
+        else
+          RuntimeException::selfThrow("Moreau::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+      }
+      // For the relation of type LagrangianScleronomousR
+      if (relationSubType == ScleronomousR)
+      {
+
+      }
+    }
+    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+    {
+      // In the first order linear case it may be required to add e + FZ to q.
+      // q = HXfree + e + FZ
+      SP::SiconosVector e;
+      if (relationSubType == LinearTIR)
+      {
+        e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
+        F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
+      }
+      else
+      {
+        e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
+        F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
+      }
+
+      if (e)
+        *Yp += *e;
+
+      if (F)
+      {
+        SP::SiconosVector  workZ = UR->workz();
+        coord[3] = F->size(1);
+        coord[5] = F->size(1);
+        subprod(*F, *workZ, *Yp, coord, false);
+      }
+    }
+
+  }
+
+}
 
 void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 {

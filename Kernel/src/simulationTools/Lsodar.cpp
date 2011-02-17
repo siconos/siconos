@@ -24,9 +24,10 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Model.hpp"
 #include "Topology.hpp"
-
+#include "LagrangianRheonomousR.hpp"
+#include "LagrangianScleronomousR.hpp"
 using namespace std;
-
+using namespace RELATION;
 
 //====================================== modified by Son ================================================
 // ===== Out of class objects and functions =====
@@ -349,6 +350,127 @@ void Lsodar::updateState(unsigned int level)
   else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
 }
 
+void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+{
+  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+
+  // Get relation and non smooth law types
+  RELATION::TYPES relationType = UR->getRelationType();
+  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
+
+  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
+
+  unsigned int sizeY = UR->getNonSmoothLawSize();
+
+  unsigned int relativePosition = UR->getRelativePosition();
+  SP::Interaction mainInteraction = UR->interaction();
+  Index coord(8);
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[4] = 0;
+  coord[6] = 0;
+  coord[7] = sizeY;
+  SP::SiconosMatrix  C;
+  //   SP::SiconosMatrix  D;
+  //   SP::SiconosMatrix  F;
+  SP::SiconosVector Xq;
+  SP::SiconosVector Yp;
+  SP::SiconosVector Xfree;
+  SP::SiconosVector lambda;
+  SP::SiconosVector H_alpha;
+
+
+  // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
+  Xq = UR->xq();
+  Yp = UR->yp();
+
+  /* V.A. 10/10/2010
+       * Following the type of OSNS  we need to retrieve the velocity or the acceleration
+       * This tricks is not very nice but for the moment the OSNS do not known if
+       * it is in accelaration of not
+       */
+
+  //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
+  if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+  {
+    Xfree  = UR->workFree();
+    //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+    //       Xfree->display();
+  }
+  else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
+  {
+    Xfree = UR->workx();
+    //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+    //       Xfree->display();
+
+  }
+  else
+    RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
+
+
+
+
+
+  lambda = UR->interaction()->lambda(0);
+  H_alpha = UR->interaction()->relation()->Halpha();
+
+  if (relationType == Lagrangian)
+  {
+    C = mainInteraction->relation()->C();
+    if (C)
+    {
+      assert(Xfree);
+      assert(Yp);
+
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+
+      subprod(*C, *Xfree, *Yp, coord, true);
+    }
+
+    SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+    ID->eye();
+
+    Index xcoord(8);
+    xcoord[0] = 0;
+    xcoord[1] = sizeY;
+    xcoord[2] = 0;
+    xcoord[3] = sizeY;
+    xcoord[4] = 0;
+    xcoord[5] = sizeY;
+    xcoord[6] = 0;
+    xcoord[7] = sizeY;
+    // For the relation of type LagrangianRheonomousR
+    if (relationSubType == RheonomousR)
+    {
+      if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+      {
+        RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+      }
+      else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+      {
+        boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+      }
+      else
+        RuntimeException::selfThrow("Lsodar::computeFreeOutput not implemented for SICONOS_OSNSP ");
+    }
+    // For the relation of type LagrangianScleronomousR
+    if (relationSubType == ScleronomousR)
+    {
+      if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+      {
+        boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
+      }
+    }
+  }
+  else
+    RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for Relation of type " + relationType);
+
+
+}
 void Lsodar::display()
 {
   OneStepIntegrator::display();
@@ -359,3 +481,5 @@ void Lsodar::display()
   cout << intData[2] << ", " << intData[3] << ", " << intData[4] << ", " << intData[5] << ", " << intData[6]  << ", " << intData[7]  << ", " << intData[8] << endl;
   cout << "====================================" << endl;
 }
+
+

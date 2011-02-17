@@ -165,7 +165,7 @@ int Relay::compute(double time)
     numerics_problem.ub = _ub->getArray();
     numerics_problem.size = _sizeOutput;
 
-    int nbSolvers = 1;
+    //int nbSolvers = 1;
     // Call Relay Driver
 
     //      Relay_display(&numerics_problem);

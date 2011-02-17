@@ -262,6 +262,11 @@ public:
    */
   virtual void computeFreeState();
 
+  /** integrates the UnitaryRelation linked to this integrator, without taking constraints
+    * into account.
+    */
+  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time

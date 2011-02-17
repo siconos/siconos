@@ -231,6 +231,11 @@ public:
    */
   //static Lsodar* convert (OneStepIntegrator* osi);
 
+  /** integrates the UnitaryRelation linked to this integrator, without taking constraints
+     * into account.
+     */
+  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+
   /** print the data to the screen
    */
   void display();

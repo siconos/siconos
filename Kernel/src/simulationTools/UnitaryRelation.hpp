@@ -97,8 +97,10 @@ private:
   /** work vector to save pointers to state-related data of the
       dynamical systems involved in the UR.*/
   SP::SiconosVector _workX;
-  SP::SiconosVector mWorkXq;
+  SP::SiconosVector _workXq;
   SP::SiconosVector _workFree;
+
+  SP::SiconosVector _workYp;
 
   /** work vector to save pointers to z data of the dynamical systems
       involved in the UR.*/
@@ -254,15 +256,20 @@ public:
   };
   inline SP::SiconosVector xq()
   {
-    return mWorkXq;
+    return _workXq;
   };
   inline SP::SiconosVector workFree()
   {
     return _workFree;
   };
 
+  inline SP::SiconosVector yp()
+  {
+    return _workYp;
+  };
 
-  /** Get a pointer to workX */
+
+  /** Get a pointer to workZ */
   inline SP::SiconosVector workz()
   {
     return _workZ;

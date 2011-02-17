@@ -130,7 +130,10 @@ void OneStepIntegrator::computeFreeState()
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + integratorType);
 }
-
+void OneStepIntegrator::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+{
+  RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + integratorType);
+}
 void OneStepIntegrator::resetNonSmoothPart()
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), boost::bind(&DynamicalSystem::resetNonSmoothPart, _1));

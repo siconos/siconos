@@ -146,10 +146,11 @@ public:
    */
   void update(unsigned int);
 
-  /** Initialize EventDriven
+  /** Initialize EventDriven **/
 
   /** run simulation from one Event to the next, according to events manager settings.
-   */
+  *
+  */
   void advanceToEvent();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.

@@ -165,8 +165,8 @@ public:
   void computeNonLinearH2dot(double);
 
   /** to compute the derivative of H Jacobian with respect to time using plug-in mechanism
-  /*param: double, current time
-  */
+   *\param: double, current time
+   */
   virtual void computeJachqDot(double);
 
   /** to compute output

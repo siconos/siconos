@@ -48,7 +48,7 @@ protected:
   SP::SimpleVector _Pc1;
   SP::SimpleVector _Pc2;
 
-  /*Normal rentrante at the contact */
+  /*Inward Normal at the contact */
   SP::SimpleVector _Nc;
 
   // /*because set is not sorted!*/
@@ -60,8 +60,8 @@ public:
 
   bool _isOnContact;
   NewtonEulerRImpact():
-    _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
-    _Nc(new SimpleVector(3)), NewtonEulerR()
+    NewtonEulerR(), _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
+    _Nc(new SimpleVector(3))
   {
     /*_ds1=NULL;_ds2=NULL;*/
   }
