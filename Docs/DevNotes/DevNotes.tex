@@ -40,6 +40,9 @@
 \makeatother
 \usepackage{lastpage}
 \usepackage{showlabels}
+
+\setlength{\fboxrule}{2pt}
+\setlength{\fboxsep}{4mm}
 %% style des entetes et des pieds de page
 \fancyhf{} % nettoie le entetes et les pieds
 \fancyhead[L]{\texttt{Siconos Development team -- Development Notes }}
@@ -69,20 +72,10 @@
 \date{\today}
 \maketitle
 
+\tableofcontents
+\clearpage
 \pagestyle{fancy}
-\chapter{First Order Nonlinear Relation }
 
-\begin{table}[!ht]
-  \begin{tabular}{|l|l|}
-    \hline
-    author  & 0. Bonnefon \\
-    \hline
-    date    & July, 1 2009 \\ 
-    \hline
-    version & Kernel 3.0.0 \\
-    \hline
-  \end{tabular}
-\end{table}
 \chapter{OneStepNSProblem formalisation for several interactions}
 
 \begin{table}[!ht]
@@ -878,13 +871,22 @@ Warning: default constructor is always private or protected and apart from the o
 
 \textbf{Always allocated in constructor:} \\
 
+\chapter{First Order Nonlinear Relation }
+
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & 0. Bonnefon \\
+    \hline
+    date    & July, 1 2009 \\ 
+    \hline
+    version & Kernel 3.0.0 \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \chapter{Newton's linearization}
-Last update : 2009/07/07
-\input{MCP_linearized.tex}
-\input{MCP_linearized_2.tex}
-\input{MCP_linearized_linear.tex}
-%\input{MCP_linearized-FullThetaGamma.tex}
+\input{chapterNewton.tex}
 
 \chapter{NewtonEuler}
 \input{NewtonEuler.tex}
