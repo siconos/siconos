@@ -82,7 +82,7 @@ class LagrangianLinearTIDS : public LagrangianDS
 protected:
 
   /** default constructor */
-  LagrangianLinearTIDS();
+  LagrangianLinearTIDS() : LagrangianDS() {};
 
   /** specific matrix for a LagrangianLinearTIDS */
   SP::SiconosMatrix _K;
@@ -113,7 +113,7 @@ public:
    *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    */
   LagrangianLinearTIDS(SP::SimpleVector, SP::SimpleVector, SP::SiconosMatrix);
-  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  //  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** destructor */
   ~LagrangianLinearTIDS();

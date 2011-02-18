@@ -1789,7 +1789,7 @@ void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVect
 
 void abs_wise(const SiconosVector& V, SiconosVector& Vabs)
 {
-  for (int it = 0; it < V.size(); ++it)
+  for (unsigned int it = 0; it < V.size(); ++it)
   {
     Vabs.setValue(it, std::abs(V.getValue(it)));
   };

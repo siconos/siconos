@@ -4980,7 +4980,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   {
     BlockVector * pBY = (BlockVector*) &y;
     unsigned int curPosInY = 0;
-    for (int numBlock = 0; numBlock < pBY->getNumberOfBlocks(); numBlock++)
+    for (unsigned int numBlock = 0; numBlock < pBY->getNumberOfBlocks(); numBlock++)
     {
       SP::SiconosVector blockOfY = pBY->vector(numBlock);
       unsigned int beginPosBlock = curPosInY;

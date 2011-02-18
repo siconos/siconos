@@ -74,7 +74,6 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type");
 
   // --- Dynamical Systems ---
-  unsigned int sizeDS ;
   _involvedDS.reset(new DynamicalSystemsSet());
   if (!nsdsSet->isEmpty())
   {

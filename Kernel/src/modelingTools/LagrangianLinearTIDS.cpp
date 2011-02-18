@@ -22,11 +22,6 @@
 
 using namespace std;
 
-// --- Default (private) constructor ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS()
-{
-}
-
 // --- Constructor from an xml file---
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): LagrangianDS(dsxml)
 {
@@ -77,10 +72,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVec
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
 }
-LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0, const SiconosMatrix& newMass):
-  LagrangianDS(createSPtrSiconosVector((SimpleVector&)newQ0), createSPtrSiconosVector((SimpleVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass))
-{
-}
+//LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0, const SiconosMatrix& newMass):
+//  LagrangianDS(createSPtrSiconosVector((SimpleVector&)newQ0), createSPtrSiconosVector((SimpleVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass)){
+//}
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {}
 

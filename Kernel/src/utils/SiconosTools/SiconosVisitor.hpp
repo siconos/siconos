@@ -99,7 +99,9 @@
 #define REGISTER(X) class X;
 
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y) REGISTER(X)
+#define REGISTER_BASE_EXTERN(X,Y) REGISTER(X)
 
 SICONOS_VISITABLES()
 
@@ -108,7 +110,9 @@ SICONOS_VISITABLES()
 #define REGISTER(X) X,
 
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y) REGISTER(X)
+#define REGISTER_BASE_EXTERN(X,Y) REGISTER(X)
 namespace Type
 {
 enum Siconos
@@ -128,9 +132,12 @@ enum Siconos
   virtual Type::Siconos visit(const X&) const { return Type::X; };  \
  
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y)                                         \
   virtual Type::Siconos visit(const X&) const { return Type::Y; }; \
  
+#define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
+
 struct FindType
 {
   SICONOS_VISITABLES()
@@ -143,7 +150,10 @@ struct FindType
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y) REGISTER(X)
+
+#define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
 struct SiconosVisitor
 {
@@ -165,7 +175,10 @@ inline Siconos value(const C& c)
 #define REGISTER(X) case Type:: X : r.reset(new std::string(#X)); break;
 
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y) REGISTER(X)
+
+#define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
 namespace
 {
@@ -243,5 +256,6 @@ TYPEDEF_SPTR(SiconosVisitor);
 
 #undef REGISTER
 #undef REGISTER_BASE
+#undef REGISTER_BASE_EXTERN
 
 #endif /* SiconosVisitor_hpp */

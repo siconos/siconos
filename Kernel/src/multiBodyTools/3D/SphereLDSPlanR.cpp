@@ -72,7 +72,6 @@ void SphereLDSPlanR::computeJachq(double)
 
   double theta = (*data[q0])(3);
   double phi   = (*data[q0])(4);
-  double psi   = (*data[q0])(5);
 
   double cthe = cos(theta);
   double sthe = sin(theta);

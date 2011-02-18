@@ -78,8 +78,6 @@ void SphereLDS::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
   //normalize(q,5);
 
   double theta    = q->getValue(3);
-  double phi      = q->getValue(4);
-  double psi      = q->getValue(5);
 
   double thetadot = v->getValue(3);
   double phidot   = v->getValue(4);
@@ -110,8 +108,6 @@ void SphereLDS::computeJacobianNNLqDot()
 void SphereLDS::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
-  double phi      = q->getValue(4);
-  double psi      = q->getValue(5);
 
   double thetadot = v->getValue(3);
   double phidot   = v->getValue(4);
@@ -130,8 +126,6 @@ void SphereLDS::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
 void SphereLDS::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
-  double phi      = q->getValue(4);
-  double psi      = q->getValue(5);
 
   double thetadot = v->getValue(3);
   double phidot   = v->getValue(4);
@@ -170,15 +164,6 @@ SphereLDS::SphereLDS(double r, double m,
 
   assert(qinit->size() == _ndof);
   assert(vinit->size() == _ndof);
-
-  double theta    = qinit->getValue(3);
-  double phi      = qinit->getValue(4);
-  double psi      = qinit->getValue(5);
-
-  double thetadot = vinit->getValue(3);
-  double phidot   = vinit->getValue(4);
-  double psidot   = vinit->getValue(5);
-
 
   _mass.reset(new SimpleMatrix(_ndof, _ndof));
   _mass->zero();

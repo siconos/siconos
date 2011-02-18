@@ -26,6 +26,7 @@
   REGISTER(TimeSteppingProjectOnConstraints)                 \
   REGISTER(EventDriven)                                      \
   REGISTER(OneStepNSProblem)                                 \
+  REGISTER(LinearOSNS)                                       \
   REGISTER(LCP)                                              \
   REGISTER(OSNSMultipleImpact)                               \
   REGISTER(FrictionContact)                                  \
@@ -47,9 +48,10 @@
   REGISTER(NewtonEulerDS)                                    \
   REGISTER(NewtonEulerR)                                     \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
-  REGISTER_BASE(Lmgc2DDSK, LagrangianDS)                     \
-  REGISTER_BASE(Lmgc2DPOLYG, LagrangianDS)                   \
+  REGISTER_BASE_EXTERN(Lmgc2DDSK, LagrangianDS)              \
+  REGISTER_BASE_EXTERN(Lmgc2DPOLYG, LagrangianDS)            \
   REGISTER_BASE(Disk, LagrangianDS)                          \
+  REGISTER_BASE(CircularDS, LagrangianDS)                    \
   REGISTER_BASE(Circle, LagrangianDS)                        \
   REGISTER_BASE(SphereLDS, LagrangianDS)                     \
   REGISTER_BASE(SphereNEDS, NewtonEulerDS)                   \

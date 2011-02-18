@@ -156,7 +156,7 @@ private:
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
-  DynamicalSystem(const DynamicalSystem &);
+  //  DynamicalSystem(const DynamicalSystem & );
 
 protected:
 

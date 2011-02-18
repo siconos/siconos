@@ -183,12 +183,6 @@ void FrictionContact::display() const
   LinearOSNS::display();
 }
 
-FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)
-{
-  FrictionContact* fc2d = dynamic_cast<FrictionContact*>(osnsp);
-  return fc2d;
-}
-
 FrictionContact::~FrictionContact()
 {
   deleteSolverOptions(&*_numerics_solver_options);

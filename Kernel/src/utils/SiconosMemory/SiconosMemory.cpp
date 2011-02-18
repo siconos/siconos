@@ -120,9 +120,7 @@ SP::SiconosVector SiconosMemory::getSiconosVector(const unsigned int index) cons
 
 void SiconosMemory::swap(SP::SiconosVector v)
 {
-  unsigned int i;
   SP::SiconosVector tmp;
-  double tmp2;
 
   // If vectorMemory size is maxSize, we remove its last element.
   if (_vectorMemory->size() == maxSize)

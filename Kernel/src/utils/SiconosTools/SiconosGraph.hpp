@@ -609,6 +609,28 @@ public:
     }
   };
 
+  void update_vertices_indices(const std::vector<size_t>& indices)
+  {
+    VIterator vi, viend;
+    size_t i;
+    for (boost::tie(vi, viend) = boost::vertices(g), i = 0;
+         vi != viend; ++vi, ++i)
+    {
+      index(*vi) = indices[i];
+    }
+  };
+
+  void update_edges_indices(const std::vector<size_t>& indices)
+  {
+    EIterator ei, eiend;
+    size_t i;
+    for (boost::tie(ei, eiend) = boost::edges(g), i = 0;
+         ei != eiend; ++ei, ++i)
+    {
+      index(*ei) = indices[i];
+    }
+  };
+
 
   void clear()
   {
