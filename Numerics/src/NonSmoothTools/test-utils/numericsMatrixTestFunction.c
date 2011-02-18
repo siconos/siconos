@@ -982,3 +982,32 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   return info;
 }
+int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
+{
+  double * denseRes = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+  int curRow = 0;
+  int nbCol = M->blocksize1[M->blocknumber1 - 1];
+  for (int i = 0; i < M->blocknumber0; i++)
+  {
+    SBMRowToDense(M, i, denseRes);
+    int lLin = 0;
+    int nbBlockRow = M->blocksize0[i] - curRow;
+    for (int lin = curRow; lin < M->blocksize0[i]; lin++)
+    {
+      int lCol = 0;
+      for (int col = 0; col < nbCol; col++)
+      {
+        if (fabs(getValueSBM(M, lin, col) - denseRes[lLin + lCol * (nbBlockRow)]) > 10e-12)
+        {
+          free(denseRes);
+          return 1;
+        }
+        lCol++;
+      }
+      lLin++;
+    }
+    curRow += M->blocksize0[i];
+  }
+  free(denseRes);
+  return 0;
+}

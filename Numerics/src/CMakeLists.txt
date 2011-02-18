@@ -155,6 +155,7 @@ IF(WITH_TESTING)
   NEW_TEST(NumericsMatrixTest4 NumericsMatrix_test4.c)
   NEW_TEST(NumericsMatrixTest5 NumericsMatrix_test5.c)
   NEW_TEST(NumericsMatrixTest6 NumericsMatrix_test6.c)
+  NEW_TEST(SBMTest1 SBM_test1.c)
   END_TEST()
   
   BEGIN_TEST(NonSmoothSolvers/LCP/test)
@@ -437,7 +438,7 @@ IF(WITH_TESTING)
   END_TEST()
   
   #BEGIN_TEST(NonSmoothSolvers/GenericMechanical/test)
-  #NEW_TEST(GMPtest1 GenericMechanical_test1.c)
+  #NEW_TEST(GMP_FAILED GenericMechanical_test1.c)
   #END_TEST()
   
   BEGIN_TEST(utils/test)

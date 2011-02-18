@@ -255,6 +255,17 @@ extern "C"
 
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 
+  /**Copy a block row of the SBM into a Dense Matrix
+  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param[in] the block row index copied.
+  \param[out] denseMat the returned dense Matrix
+   */
+  void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat);
+  /** To free a SBM matrix (for example allocated by newFromFile).
+   * param[in] M the SparseBlockStructuredMatrix that mus be de-allocated.
+   * param[in] level. If level is 0 the struct A is also de-allocated.
+   */
+  void SBMfree(SparseBlockStructuredMatrix* A, int level);
 
 #ifdef __cplusplus
 }

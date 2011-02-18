@@ -15,29 +15,49 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
+
+/*
+  Tests functions for NumericsMatrix structure
+
  */
 
-
-
-#ifndef NUMERICSMATRIX_TEST_FUNCTION_H
-#define NUMERICSMATRIX_TEST_FUNCTION_H
-
-#ifdef __cplusplus
-extern "C"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "NumericsMatrix.h"
+#include "LA.h"
+#include <math.h>
+#include "numericsMatrixTestFunction.h"
+int main(void)
 {
-#endif
-  int test_BuildNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM);
-  int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
-#ifdef __cplusplus
+
+  printf("========= Starts SBM tests 1 for SBM ========= \n");
+  SparseBlockStructuredMatrix M;
+  FILE *file = fopen("data/SBM1.dat", "r");
+  newFromFileSBM(&M, file);
+  fclose(file);
+  /*alloc enough memory */
+  int res = test_SBMRowToDense(&M);
+  if (res)
+  {
+    printf("========= Failed SBM tests 1 for SBM  ========= \n");
+    return 1;
+  }
+
+  SBMfree(&M, 1);
+  file = fopen("data/SBM2.dat", "r");
+  newFromFileSBM(&M, file);
+  fclose(file);
+  res = test_SBMRowToDense(&M);
+  if (res)
+  {
+    printf("========= Failed SBM tests 1 for SBM  ========= \n");
+    return 1;
+  }
+  SBMfree(&M, 1);
+  printf("\n========= Succed SBM tests 1 for SBM  ========= \n");
+  return 0;
+
 }
-#endif
-
-#endif
-
 

@@ -1418,3 +1418,67 @@ void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat)
     }
   }
 }
+void SBMfree(SparseBlockStructuredMatrix* A, int level)
+{
+
+  for (int i = 0; i < A->nbblocks; i++)
+    free(A->block[i]);
+  free(A->block);
+  free(A->blocksize0);
+  free(A->blocksize1);
+  free(A->index1_data);
+  free(A->index2_data);
+  if (!level)
+    free(A);
+}
+
+//#define SBM_DEBUG_SBMRowToDense
+void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat)
+{
+  assert(A);
+  int BlockRowNb = 0;
+  int ColNb = A->blocksize1[A->blocknumber1 - 1];
+  if (row)
+    BlockRowNb = A->blocksize0[row] - A->blocksize0[row - 1];
+  else
+    BlockRowNb = A->blocksize0[row];
+#ifdef SBM_DEBUG_SBMRowToDense
+  printf("SBMRowToDense : copi block row %i, containing %i row and %i col.\n", row, BlockRowNb, ColNb);
+#endif
+
+  //index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1]
+  for (int numBlock = A->index1_data[row]; numBlock < A->index1_data[row + 1]; numBlock++)
+  {
+    double * beginBlock = A->block[numBlock];
+    int colNumber = A->index2_data[numBlock];
+    int indexColBegin = 0;
+    if (colNumber)
+      indexColBegin = A->blocksize1[colNumber - 1];
+    int BlockColNb = A->blocksize1[colNumber] - indexColBegin;
+    for (int i = 0; i < BlockRowNb; i++)
+    {
+      for (int j = 0; j < BlockColNb; j++)
+      {
+        denseMat[i + (indexColBegin + j)*BlockRowNb] = beginBlock[i + j * BlockRowNb];
+      }
+    }
+  }
+#ifdef SBM_DEBUG_SBMRowToDense
+  printf("SBMRowToDense : res in file SBMRowToDense.txt.");
+  FILE * titi  = fopen("SBMRowToDense.txt", "w");
+  printInFileSBMForScilab(A, titi);
+  fprintf(titi, "\n//Dense matrix of row block %i:\n", row);
+  fprintf(titi, "denseRow = [ \t");
+  for (int i = 0; i < BlockRowNb; i++)
+  {
+    fprintf(titi, "[");
+    for (int j = 0; j < ColNb; j++)
+    {
+      fprintf(titi, "%32.24e\t  ", denseMat[i + j * BlockRowNb]);
+    }
+    fprintf(titi, "];\n");
+  }
+  fprintf(titi, "];\n");
+  fclose(titi);
+#endif
+}
