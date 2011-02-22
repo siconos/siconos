@@ -35,6 +35,7 @@ extern "C"
   int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4);
   int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
   int test_RowPermutationSBM(SparseBlockStructuredMatrix *M);
+  int test_ColPermutationSBM(SparseBlockStructuredMatrix *M);
 #ifdef __cplusplus
 }
 #endif

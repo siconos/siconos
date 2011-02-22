@@ -1083,3 +1083,25 @@ int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
   SBMfree(&MRes, 0);
   return 0;
 }
+int test_ColPermutationSBM(SparseBlockStructuredMatrix *M)
+{
+  SparseBlockStructuredMatrix MRes;
+  int nbCol = M->blocknumber1;
+  int * colBlockIndex = (int*) malloc(nbCol * sizeof(int));
+  int * mark = (int*) malloc(nbCol * sizeof(int));
+  for (int i = 0; i < nbCol; i++)
+    mark[i] = 0;
+  for (int i = 0; i < nbCol; i++)
+  {
+    int candidate = rand() % nbCol;
+    while (mark[candidate])
+      candidate = rand() % nbCol;
+    colBlockIndex[i] = candidate;
+    mark[candidate] = 1;
+  }
+  ColPermutationSBM(colBlockIndex, M, &MRes);
+  free(colBlockIndex);
+  free(mark);
+  SBMfree(&MRes, 0);
+  return 0;
+}

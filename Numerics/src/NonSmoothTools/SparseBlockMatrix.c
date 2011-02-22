@@ -1534,7 +1534,9 @@ void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBloc
     nbRowInBlock = A->blocksize0[rowA];
     if (rowA)
       nbRowInBlock -= A->blocksize0[rowA - 1];
+#ifdef SBM_DEBUG_SBM_ROW_PERM
     printf("RowPermutationSBM rowA=%i, rowC=%i\n", rowA, rowC);
+#endif
     if (rowC)
       C->blocksize0[rowC] = C->blocksize0[rowC - 1] + nbRowInBlock;
     else
@@ -1555,11 +1557,38 @@ void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBloc
   fclose(titi);
 #endif
 }
+#define SBM_DEBUG_SBM_COL_PERM
 void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
 {
+#ifdef SBM_DEBUG_SBM_COL_PERM
+  FILE * titi  = fopen("ColPermutationSBM_input.txt", "w");
+  printInFileSBMForScilab(A, titi);
+  fclose(titi);
+#endif
   copySBM(A, C, 0);
   for (int n = 0; n < C->nbblocks; n++)
   {
     C->index2_data[n] = colIndex[C->index2_data[n]];
   }
+  int curColnb = 0;
+  int nbBlockCol = A->blocknumber1;
+  for (int numCol = 0; numCol < nbBlockCol; numCol++)
+  {
+#ifdef SBM_DEBUG_SBM_COL_PERM
+    printf("ColPermutationSBM colA=%i, colC=%i\n", numCol, colIndex[numCol]);
+#endif
+    int colInA = colIndex[numCol];
+    int nbCol = A->blocksize1[colInA];
+    if (colInA)
+      nbCol -= A->blocksize1[colInA - 1];
+    if (numCol)
+      C->blocksize1[numCol] = C->blocksize1[numCol - 1] + nbCol;
+    else
+      C->blocksize1[numCol] = nbCol;
+  }
+#ifdef SBM_DEBUG_SBM_COL_PERM
+  titi  = fopen("ColPermutationSBM_output.txt", "w");
+  printInFileSBMForScilab(C, titi);
+  fclose(titi);
+#endif
 }
