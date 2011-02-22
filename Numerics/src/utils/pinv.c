@@ -24,8 +24,12 @@
 #include "LA.h"
 #include "NumericsOptions.h"
 
-
-
+#define NUMERICS_PINV_DEBUG
+/**
+ * n : row number
+ * m : col number
+ * Warnning n correspond to M in the LAPACK routine, and m to N.
+ */
 double pinv(double * A, int n, int m, double tolerance)
 {
 #ifdef COMPLETE_LAPACK_LIBRARIES
@@ -64,7 +68,8 @@ double pinv(double * A, int n, int m, double tolerance)
   /*  } */
   /*  printf("\n"); */
   /*     }  */
-  printf("SVD :\n ");
+#ifdef NUMERICS_PINV_DEBUG
+  printf("pinv: SVD :\n ");
   printf("[\t ");
   for (int i = 0; i < dimS ; i++)
   {
@@ -78,6 +83,8 @@ double pinv(double * A, int n, int m, double tolerance)
   /*  } */
   /*  printf("\n"); */
   /*     }  */
+
+#endif
 
 
 
@@ -93,9 +100,10 @@ double pinv(double * A, int n, int m, double tolerance)
       S[i] = 1.0 / S[i];
     }
   }
+#ifdef NUMERICS_PINV_DEBUG
   printf("\n");
-  printf("Rank of A :%i\n ", rank);
-
+  printf("pinv: Rank of A :%i\n ", rank);
+#endif
   /*Compute the pseudo inverse */
 
 
@@ -122,8 +130,20 @@ double pinv(double * A, int n, int m, double tolerance)
   /*  } */
   /*  printf("\n"); */
   /*     }  */
-  DGEMM(LA_TRANS, LA_NOTRANS, m, n, m, 1.0, VT, m, Utranstmp, m, 0.0, A, m);
+  //DGEMM(LA_TRANS,LA_NOTRANS,m,n,m,1.0,VT,m,Utranstmp,m,0.0,A,m);
+  DGEMM(LA_TRANS, LA_NOTRANS, n, m, n, 1.0, VT, n, Utranstmp, n, 0.0, A, n);
 
+#ifdef NUMERICS_PINV_DEBUG
+  printf("\nApinv=[ \n");
+  for (int i = 0; i < n ; i++)
+  {
+    printf("[");
+    for (int j = 0; j < m; j++)
+      printf("%14.7e\t", A[i + j * n]);
+    printf("];\n");
+  }
+  printf("];\n");
+#endif
   /*    printf("Matrix Pseudo-Inverse of A:\n "); */
   /*     for (int i = 0; i< m; i++){ */
   /*  for (int j = 0; j < n; j++){ */

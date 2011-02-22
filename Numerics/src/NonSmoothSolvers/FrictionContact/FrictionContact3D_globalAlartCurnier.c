@@ -832,7 +832,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
 
   // blockAWpB init
-  copySBM(problem->M->matrix1, blockAWpB);
+  copySBM(problem->M->matrix1, blockAWpB, 1);
 
   // velocity <- M*reaction + qfree
   DCOPY(problemSize, problem->q, 1, velocity, 1);
