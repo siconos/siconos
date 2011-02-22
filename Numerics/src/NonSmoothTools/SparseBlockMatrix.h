@@ -37,9 +37,9 @@
 
     \param blocknumber0           : the first dimension of the block matrix (number of block rows)
     \param blocknumber1           : the second dimension of the block matrix (number of block columns)
-    \param *blocksize0            : the list of sums of the number of rows of the first column of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    \param *blocksize0            : the list of sums of the number of rows of the first column of blocks of M: blocksize0[i] = blocksize0[i-1] + ni,\n
     ni being the number of rows of the  block at  row i
-    *blocksize0       : the list of sums of the number of columns of the first row of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    *blocksize1       : the list of sums of the number of columns of the first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
     ni being the number of columns of the block at  column i
     \param filled1 : number of non empty lines + 1
     \param filled2 : number of non null blocks
@@ -111,6 +111,9 @@ typedef struct
   double **newz;
   double **workspace;
 } SparseBlockStructuredMatrixPred;
+
+extern unsigned int NUMERICS_SBM_FREE_BLOCK;
+extern unsigned int NUMERICS_SBM_FREE_SBM;
 
 #ifdef __cplusplus
 extern "C"
@@ -233,8 +236,9 @@ extern "C"
   /** Copy of a SBM  A into B
     \param[in] A the SparseBlockStructuredMatrix matrix to be copied
     \param[out]  B the SparseBlockStructuredMatrix matrix copy of A
+    \param[in] copyBlock. if copyBlock then the content of block are copied, else only the pointers are copied.
   */
-  int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B);
+  int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B, unsigned int copyBlock);
 
 
   /** Transpose  by copy of a SBM  A into B
@@ -250,22 +254,46 @@ extern "C"
 
   /** Copy a SBM into a Dense Matrix
   \param[in] M the SparseBlockStructuredMatrix matrix to be inversed
-  \param[out] denseMat the returned dense Matrix
+  \param[in] pointer on the filled dense Matrix
   */
 
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 
   /**Copy a block row of the SBM into a Dense Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed.
   \param[in] the block row index copied.
-  \param[out] denseMat the returned dense Matrix
+  \param[in] pointer on the filled dense Matrix.
+  \param[in] rowPos, line pos in the dense matrix.
+  \param[in] rowNb, total number of line of the dense matrix.
+  \The number of line copied is contained in M.
+  \
    */
-  void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat);
+  void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat, int rowPos, int rowNb);
+
+
   /** To free a SBM matrix (for example allocated by newFromFile).
    * param[in] M the SparseBlockStructuredMatrix that mus be de-allocated.
-   * param[in] level. If level is 0 the struct A is also de-allocated.
+   * param[in] level: use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
    */
-  void SBMfree(SparseBlockStructuredMatrix* A, int level);
+  void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level);
+
+  /*
+   * param [in] rowIndex: permutation: the row numC of C is the row rowIndex[numC] of A.
+   * param [in] A The source SBM.
+   * param [out] C The target SBM. It assumes the structure SBM has been allocated.
+   * The memory allocation for its menber is done inside.
+   * NB : The blocks are not copied.
+   */
+  void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
+
+  /*
+  * param [in] colIndex: permutation: the col numC of C is the col colIndex[numC] of A.
+  * param [in] A The source SBM.
+  * param [out] C The target SBM. It assumes the structure SBM has been allocated.
+  * The memory allocation for its menber is done inside.
+  * NB : The blocks are not copied.
+  */
+  void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
 #ifdef __cplusplus
 }

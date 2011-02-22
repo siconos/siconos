@@ -989,9 +989,9 @@ int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
   int nbCol = M->blocksize1[M->blocknumber1 - 1];
   for (int i = 0; i < M->blocknumber0; i++)
   {
-    SBMRowToDense(M, i, denseRes);
     int lLin = 0;
     int nbBlockRow = M->blocksize0[i] - curRow;
+    SBMRowToDense(M, i, denseRes, 0, nbBlockRow);
     for (int lin = curRow; lin < M->blocksize0[i]; lin++)
     {
       int lCol = 0;
@@ -1006,8 +1006,80 @@ int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
       }
       lLin++;
     }
-    curRow += M->blocksize0[i];
+    curRow = M->blocksize0[i];
   }
+  curRow = 0;
+  for (int i = 0; i < M->blocknumber0; i++)
+  {
+
+    //    int lLin=0;
+    //    int nbBlockRow=M->blocksize0[i]-curRow;
+    SBMRowToDense(M, i, denseRes, curRow, M->blocksize0[M->blocknumber0 - 1]);
+    curRow = M->blocksize0[i];
+  }
+
+  double * denseRes2 = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+
+  SBMtoDense(M, denseRes2);
+  for (int n = 0; n < M->blocksize0[M->blocknumber0 - 1]*M->blocksize1[M->blocknumber1 - 1]; n++)
+    if (fabs(denseRes2[n] - denseRes[n]) > 10e-12)
+    {
+      free(denseRes);
+      free(denseRes2);
+      return 1;
+    }
+
   free(denseRes);
+  free(denseRes2);
+  return 0;
+}
+int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
+{
+  SparseBlockStructuredMatrix MRes;
+  int nbRow = M->blocknumber0;
+  int * rowBlockIndex = (int*) malloc(nbRow * sizeof(int));
+  int * mark = (int*) malloc(nbRow * sizeof(int));
+  for (int i = 0; i < nbRow; i++)
+    mark[i] = 0;
+  for (int i = 0; i < nbRow; i++)
+  {
+    int candidate = rand() % nbRow;
+    while (mark[candidate])
+      candidate = rand() % nbRow;
+    rowBlockIndex[i] = candidate;
+    mark[candidate] = 1;
+  }
+  RowPermutationSBM(rowBlockIndex, M, &MRes);
+  double * denseMRes = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+  SBMtoDense(&MRes, denseMRes);
+  double * denseM = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+  int curRow = 0;
+  int nbRowInM = M->blocksize0[M->blocknumber0 - 1];
+  for (int i = 0; i < nbRow; i++)
+  {
+    int rowInM = rowBlockIndex[i];
+    int nbRow = 0;
+    if (rowInM)
+      nbRow = M->blocksize0[rowInM] - M->blocksize0[rowInM - 1];
+    else
+      nbRow = M->blocksize0[rowInM];
+    SBMRowToDense(M, rowInM, denseM, curRow, nbRowInM);
+    curRow += nbRow;
+  }
+  for (int n = 0; n < M->blocksize0[M->blocknumber0 - 1]*M->blocksize1[M->blocknumber1 - 1]; n++)
+    if (fabs(denseMRes[n] - denseM[n]) > 10e-12)
+    {
+      free(denseM);
+      free(denseMRes);
+      free(rowBlockIndex);
+      free(mark);
+      SBMfree(&MRes, 0);
+      return 1;
+    }
+  free(denseM);
+  free(denseMRes);
+  free(rowBlockIndex);
+  free(mark);
+  SBMfree(&MRes, 0);
   return 0;
 }
