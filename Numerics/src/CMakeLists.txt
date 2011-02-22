@@ -156,6 +156,8 @@ IF(WITH_TESTING)
   NEW_TEST(NumericsMatrixTest5 NumericsMatrix_test5.c)
   NEW_TEST(NumericsMatrixTest6 NumericsMatrix_test6.c)
   NEW_TEST(SBMTest1 SBM_test1.c)
+  NEW_TEST(SBMTest2 SBM_test2.c)
+  NEW_TEST(SBMTest3 SBM_test3.c)
   END_TEST()
   
   BEGIN_TEST(NonSmoothSolvers/LCP/test)
