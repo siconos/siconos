@@ -46,6 +46,9 @@ For each solver, the input argument are:
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 
+extern unsigned int NUMERICS_GMP_FREE_MATRIX;
+extern unsigned int NUMERICS_GMP_FREE_GMP;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -65,7 +68,7 @@ extern "C"
   GenericMechanicalProblem * buildEmptyGenericMechanicalProblem();
   /* Free the list of the contained sub-problem, coherently with the memory allocated in the addProblem function, it also free the pGMP.
    */
-  void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP);
+  void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int level);
   /* Insert a problem in the GenericMechanicalProblem pGMP. The memory of the elematary block is not managed. The user has to ensure it.
      In the case of SICONOS, the Kernel ensure this allocation in building the global problem. In other words, the matrix0 is shared with the global NumericsMatrix,
      the plug is done in the function genericMechanicalProblem_GS (ie: localProblem->M->matrix0= m->block[diagBlockNumber];)

@@ -181,7 +181,7 @@ void  GenericMechanical::updateUnitaryBlocks()
   if (!_hasBeUpdated)
   {
     printf("GenericMechanical::updateUnitaryBlocks : must be updated\n");
-    freeGenericMechanicalProblem(_pnumerics_GMP);
+    freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
     _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   }
   LinearOSNS::updateUnitaryBlocks();
@@ -190,14 +190,14 @@ void  GenericMechanical::computeAllUnitaryBlocks()
 {
   assert(0);
   //printf("GenericMechanical::updateUnitaryBlocks : free and build a new GMP\n");
-  freeGenericMechanicalProblem(_pnumerics_GMP);
+  freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
 
   LinearOSNS::computeAllUnitaryBlocks();
 }
 GenericMechanical::~GenericMechanical()
 {
-  freeGenericMechanicalProblem(_pnumerics_GMP);
+  freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
   _pnumerics_GMP = 0;
   deleteSolverOptions(&*_numerics_solver_options);
 }

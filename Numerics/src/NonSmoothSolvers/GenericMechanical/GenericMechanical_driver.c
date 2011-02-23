@@ -194,7 +194,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   double * pBuffVelocity = NULL;
   int withLS = options->iparam[1];
   double * pCoefLS = &(options->dparam[1]);
-  double * bufForLocalProblemDense = storageType ? (double*) malloc(GMP_MAX_SIZE_LOCAL * GMP_MAX_SIZE_LOCAL * sizeof(double)) : 0;
+  double * bufForLocalProblemDense = (storageType == 0) ? (double*) malloc(GMP_MAX_SIZE_LOCAL * GMP_MAX_SIZE_LOCAL * sizeof(double)) : 0;
 
   if (options->dWork)
   {

@@ -56,9 +56,7 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
   free(reaction);
   free(velocity);
 
-  free(problem->M);
-  free(problem->q);
-  freeGenericMechanicalProblem(problem);
+  freeGenericMechanicalProblem(problem, NUMERICS_GMP_FREE_MATRIX | NUMERICS_GMP_FREE_GMP);
 
   return info;
 

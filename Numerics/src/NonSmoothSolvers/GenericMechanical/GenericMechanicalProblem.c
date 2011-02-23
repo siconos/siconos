@@ -23,6 +23,8 @@
 #include "NonSmoothDrivers.h"
 
 #define GMP_DEBUG
+unsigned int NUMERICS_GMP_FREE_MATRIX = 1 << 2;
+unsigned int NUMERICS_GMP_FREE_GMP = 1 << 3;
 
 /* void * solverFC3D; */
 /* void * solverEquality; */
@@ -53,7 +55,7 @@ GenericMechanicalProblem * buildEmptyGenericMechanicalProblem()
   return paux;
 }
 
-void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP)
+void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int level)
 {
   if (!pGMP)
     return;
@@ -89,7 +91,19 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP)
     pGMP->lastListElem = pElem->prevProblem;
     free(pElem);
   }
-  free(pGMP);
+  if (level & NUMERICS_GMP_FREE_MATRIX)
+  {
+    int storageType = pGMP->M->storageType;
+    if (storageType == 0)
+      free(pGMP->M->matrix0);
+    else
+      SBMfree(pGMP->M->matrix1, NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM);
+    free(pGMP->q);
+    free(pGMP->M);
+  }
+  if (level & NUMERICS_GMP_FREE_GMP)
+    free(pGMP);
+
 }
 void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
