@@ -225,6 +225,17 @@ extern "C"
       \param M the matrix to be displayed
   */
   void displayRawbyRaw(const NumericsMatrix* const m);
+  /*
+   *get the diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] m a NumericsMatrix
+   * \param[in] numBlockLin the number of the block Row. useful only in sparce case
+   * \param[in] numRow. the starting row. Useful only in dense case.
+   * \param[in] size of the diag block.Useful only in dense case.
+   * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
+   *   In case of sparce case **Bout contains the resulting block (from the SBM).
+   */
+
+  void getDiagonalBlock(NumericsMatrix* m, int numBlockLin, int numLin, int size, double **Bout);
 
 #ifdef __cplusplus
 }

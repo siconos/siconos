@@ -26,18 +26,23 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
 
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
+  FILE * finput  =  0;
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
   genericMechnicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_QUARTIC);
+  //  options->iparam[2]=1;
 
+  printf("Test on ./data/GMP_FAILED.dat\n");
+  FILE * finput  =  fopen("./data/GMP_FAILED.dat", "r");
   info = genericMechanical_test_function(finput, options);
+  fclose(finput);
+
+
 
   deleteSolverOptions(options);
   free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on ./data/GMP_FAILED.dat\n");
   return info;
 }

@@ -39,12 +39,14 @@
 
 
  */
+#define GMP_MAX_SIZE_LOCAL 30
 
 typedef struct _listNumericsProblem
 {
   int type;
   void * problem;
   double *q;/*a pointer on the q of the problem*/
+  int size;/*size of the local problem.(needed because of dense case)*/
   struct _listNumericsProblem * nextProblem;
   struct _listNumericsProblem * prevProblem;
 } listNumericsProblem;

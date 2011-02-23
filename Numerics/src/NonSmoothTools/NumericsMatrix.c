@@ -136,28 +136,36 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
   /* Checks storage type */
   int storage = A->storageType;
 
+
   /* double* storage */
   if (storage == 0)
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, not yet implemented for matrix not sparse.\n");
-    exit(EXIT_FAILURE);
+    double * xSave = (double*) malloc(sizeY * sizeof(double));
+    double * xx = (double *)x;
+    for (int i = 0; i < sizeY; i++)
+    {
+      xSave[i] = x[currentRowNumber + i];
+      xx[currentRowNumber + i] = 0;
+    }
+    double * MM = A->matrix0;
+    int incx = A->size0;
+    int incy = 1;
+    if (init)
+    {
+      for (int i = 0; i < sizeY; i++)
+        y[i] = 0;
+    }
+    for (int i = 0; i < sizeY; i++)
+    {
+      y[i] += DDOT(A->size0 , A->matrix0 , incx , x , incy);
+    }
+    for (int i = 0; i < sizeY; i++)
+    {
+      xx[currentRowNumber + i] = xSave[i];
+    }
+    free(xSave);
+
   }
-
-  /*    exit(EXIT_FAILURE); */
-  /*       if( currentRowNumber > A->size0 || (currentRowNumber+sizeY) > A->size0 ) */
-  /*  { */
-  /*    fprintf(stderr,"Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unconsistent sizes.\n"); */
-  /*    exit(EXIT_FAILURE); */
-  /*  } */
-  /*       int incx = A->size0, incy = 1; */
-  /*       double coef = 0.0; /\* y = subAx *\/ */
-  /*       double* mat = A->matrix0; */
-  /*       if(init==0) /\* y += subAx *\/ */
-  /*  coef = 1.0; */
-  /*       for(int row = currentRowNumber; row < sizeY+currentRowNumber; row++) */
-  /*  DDOT(sizeX, &mat[row], incx, x, incy); */
-
-  /* SparseBlock storage */
   else if (storage == 1)
     rowProdNoDiagSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
@@ -378,3 +386,29 @@ void readInFileForScilab(NumericsMatrix* const M, FILE *file)
   fprintf(stderr, "Numerics, NumericsMatrix,readInFileForScilab");
   exit(EXIT_FAILURE);
 };
+
+void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, double ** Bout)
+{
+  int storageType = m->storageType;
+  if (storageType == 0)
+  {
+    double * MM = m->matrix0;
+    double * elem = 0;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    for (int i = 0; i < size; i++)
+    {
+      elem = MM + numRow + (numRow + size) * (m->size0);
+      (*Bout)[0] = *elem;
+      elem++;
+      (*Bout)[1] = *elem;
+      elem++;
+      (*Bout)[2] = *elem;
+    }
+  }
+  else if (storageType == 1)
+  {
+    int diagPos = getDiagonalBlockPos(m->matrix1, numBlockRow);
+    (*Bout) = m->matrix1->block[diagPos];
+
+  }
+}

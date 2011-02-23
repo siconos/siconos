@@ -93,9 +93,15 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP)
 }
 void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
+  if (size > GMP_MAX_SIZE_LOCAL)
+  {
+    printf("GMP: addProblem local size to big, set GMP_MAX_SIZE_LOCAL\n");
+    exit(1);
+  }
   listNumericsProblem * newProblem = (listNumericsProblem*) malloc(sizeof(listNumericsProblem));
   newProblem->nextProblem = 0;
   newProblem->type = problemType;
+  newProblem->size = size;
   pGMP->size += size;
   if (!pGMP->lastListElem)
   {
