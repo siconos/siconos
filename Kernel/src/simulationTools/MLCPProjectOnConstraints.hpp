@@ -32,7 +32,6 @@ protected:
 
 public:
 
-  virtual void updateM();
   virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
 
   /** constructor from data

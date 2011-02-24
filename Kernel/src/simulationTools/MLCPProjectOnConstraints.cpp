@@ -27,36 +27,7 @@
 using namespace std;
 using namespace RELATION;
 #define MLCPPROJ_DEBUG
-void MLCPProjectOnConstraints::updateM()
-{
-  assert(0);
-  // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
-
-  if (!_M)
-  {
-    // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrixProjectOnConstraints(_n + _m, _n + _m, _MStorageType));
-    _numerics_problem.M = &*_M->getNumericsMatrix();
-    _numerics_problem.A = 0;
-    _numerics_problem.B = 0;
-    _numerics_problem.C = 0;
-    _numerics_problem.D = 0;
-    _numerics_problem.a = 0;
-    _numerics_problem.b = 0;
-    _numerics_problem.problemType = 0;
-    _numerics_problem.n = _n;
-    _numerics_problem.m = _m;
-  }
-  else
-  {
-    _M->setStorageType(_MStorageType);
-    //_M->fill(indexSet);
-  }
-  _M->fill(indexSet);
-  _sizeOutput = _M->size();
-}
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
 {
@@ -112,7 +83,6 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       computeDiagonalUnitaryBlock(*vi);
     }
   }
-  // _hasBeUpdated=true;
 }
 
 void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
@@ -189,10 +159,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
       //
       work->trans();
-      //        cout<<"LinearOSNS : leftUBlock'\n";
-      //        work->display();
-      //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
-      //        leftUnitaryBlock->display();
+      // cout<<"LinearOSNS : leftUBlock'\n";
+      // work->display();
+      // cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
+      // leftUnitaryBlock->display();
 
       //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
       prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
@@ -240,7 +210,7 @@ void MLCPProjectOnConstraints::postCompute()
 
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[1]) ===
-  (*_z) *= 0.1;
+  (*_z) *= 0.5;
   unsigned int pos = 0;
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::postCompute\n");

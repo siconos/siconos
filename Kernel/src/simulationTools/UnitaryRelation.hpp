@@ -93,6 +93,9 @@ private:
   /** Absolute position in the "global" vector of constraints (for
       example, the one handled by lsodar) */
   unsigned int _absolutePosition;
+  /** Absolute position in the "global" vector of constraints for the proj formulation. */
+
+  unsigned int _absolutePositionProj;
 
   /** work vector to save pointers to state-related data of the
       dynamical systems involved in the UR.*/
@@ -213,7 +216,14 @@ public:
   {
     _absolutePosition = v;
   };
-
+  unsigned int absolutePositionProj()
+  {
+    return _absolutePositionProj;
+  };
+  void setAbsolutePositionProj(unsigned int v)
+  {
+    _absolutePositionProj = v;
+  };
 
   /** temporary visitor to get type
       must be removed */

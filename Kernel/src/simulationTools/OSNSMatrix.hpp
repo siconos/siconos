@@ -255,7 +255,7 @@ public:
   /** get the position (real, not DSBlock) of the first element of the DSBlock which corresponds to DS
       \param DS DynamicalSystem  from which position is required
   */
-  unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
+  virtual unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
 
   /** get the numerics-readable structure */
   inline SP::NumericsMatrix getNumericsMatrix()

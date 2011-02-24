@@ -60,7 +60,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
     //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
-    indexSet->bundle(*vd)->setAbsolutePosition(dim);
+    indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
     dim += (indexSet->bundle(*vd)->getNonSmoothLawSizeProjectOnConstraints());
 
     assert(indexSet->bundle(*vd)->absolutePosition() < dim);
@@ -155,4 +155,8 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
   }
   if (update)
     convert();
+}
+unsigned int OSNSMatrixProjectOnConstraints::getPositionOfUnitaryBlock(SP::UnitaryRelation UR) const
+{
+  return UR->absolutePositionProj();
 }

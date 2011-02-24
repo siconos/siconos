@@ -112,6 +112,8 @@ public:
       \param UnitaryRelationsGraph*, the index set of the active constraints
   */
   virtual void fill(SP::UnitaryRelationsGraph, bool updateSize = true);
+
+  virtual unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
 };
 
 DEFINE_SPTR(OSNSMatrixProjectOnConstraints);
