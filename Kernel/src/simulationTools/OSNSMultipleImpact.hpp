@@ -13,7 +13,6 @@ using namespace std;
 using namespace RELATION;
 
 const double DEFAULT_TOL_IMPACT = 100 * MACHINE_PREC;
-
 class OSNSMultipleImpact : public LinearOSNS
 {
 private:
@@ -25,6 +24,8 @@ private:
   unsigned int Ncontact;
   // Number of calculation steps estimated
   unsigned int NstepEst;
+  // Maximal number of steps for each computation
+  unsigned int NstepMax;
   // Tolerance to define zero
   double TOL_IMPACT;
   // Type of the compliance model
@@ -58,6 +59,8 @@ private:
   SP::SiconosVector DelImpulseContact;
   // Total impulse at contacts
   SP::SiconosVector TolImpulseContact;
+  // Impulse at contacts for each update time
+  SP::SiconosVector ImpulseContact_update;
   // Force at contacts
   SP::SiconosVector ForceContact;
   // Flag to select the primary contact based on the relative velocity or on the potential energy
@@ -69,15 +72,16 @@ private:
   bool SelectPrimaConInVel;
   // ID of the primary contact
   unsigned int IdPrimaContact;
+  // Indicator about the selection of the primary contact
+  // true if primary contact is selected according to the potential energy
+  // false if primary contact is selected according to the relative velocity
+  bool IsPrimaConEnergy;
   // Relative velocity at primary contact
   double VelAtPrimaCon;
   // Potential energy at primary contact
   double EnerAtPrimaCon;
   // Step size for the iterative calculation
   double DeltaP;
-  // UpdateEndImpact = true  => compute the state of dynamical system and output during impact
-  // UpdateEndImpact = false => otherwise
-  bool UpdateEndImpact;
   // ofstream objet to save the data during impact
   std::ofstream OutputFile;
   // Name of file into which the datat is writen
@@ -91,6 +95,18 @@ private:
   unsigned int NstepSave;
   // If IsNumberOfStepsEst = false ==> user choose the step size
   bool IsNumberOfStepsEst;
+  // Matrix on which the data during impact is saved
+  SP::SiconosMatrix _DataMatrix;
+  // indicator to save the data
+  // YesSaveByMatrix = true ==> we save data by a matrix allocated before impact computation
+  // YesSaveByMatrix = false ==> we save data by writing in to a file.dat
+  bool YesSaveByMatrix;
+  // Number of points to be save during impacts
+  unsigned int SizeDataSave;
+  // indicator on the termination of the multiple impact process
+  // _IsImpactEnd = true: impact is terminated
+  // _IsImpactEnd = false: otherwise
+  bool _IsImpactEnd;
 public:
   //Default constructor
   OSNSMultipleImpact();
@@ -117,42 +133,20 @@ public:
     return PowCompLaw;
   };
   //To set the type of the compliance law
-  inline void setTypeCompLaw(std::string newTypeLaw)
-  {
-    TypeCompLaw = newTypeLaw;
-    if ((TypeCompLaw != "MonoStiffness") && (TypeCompLaw != "BiStiffness"))
-      RuntimeException::selfThrow("OSNSMultipleImpact::TypeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
-  };
+  void setTypeCompLaw(std::string newTypeLaw);
   // To set the power of the compliance law
-  inline void setPowCompLaw(double newPow)
-  {
-    PowCompLaw = newPow;
-  };
+  void setPowCompLaw(double newPow);
   // To set the tolerance to define zero
-  inline void setTolImpact(double newTolZero)
-  {
-    TOL_IMPACT = newTolZero;
-  };
+  void setTolImpact(double newTolZero);
   // To get the tolerance to define zero
   inline double getTolImpact()
   {
     return TOL_IMPACT;
   };
-  // To set the bool variable UpdateEndImpact
-  inline void SetUpdateEndImpact(bool var)
-  {
-    UpdateEndImpact = var;
-  };
   // To set the flag to save the data during impact or not
-  inline void SetYesSaveData(bool var)
-  {
-    YesSaveData = var;
-  };
+  void SetYesSaveData(bool var);
   // To set the name for the output file
-  inline void SetNameOutput(std::string file_name)
-  {
-    NameFile = file_name;
-  };
+  void SetNameOutput(std::string file_name);
   // To get step size
   inline double GetStepSize()
   {
@@ -164,18 +158,19 @@ public:
     return Time_variable;
   };
   // To set the variable NstepSave
-  inline void SetNstepSave(unsigned int var)
-  {
-    NstepSave = var;
-  };
+  void SetNstepSave(unsigned int var);
+  // To set the maximal number of steps allowed for each computation
+  void SetNstepMax(unsigned int var);
+  // To set the indicator YesSaveByMatrix
+  void SetYesSaveByMatrix(bool);
+  // Set number of points to be saved during impact
+  void SetSizeDataSave(unsigned int);
   // To compare a double number with zero
   bool isZero(const double);
-  // Compute the total size of all dynamical systems
-  //unsigned int SizeAllDS();
-  // Compute the total size of all interactions
-  //unsigned int SizeAllInters();
   // To calculate the step size for the iterative procedure
   void ComputeStepSize();
+  // To select the pramary contact
+  void SelectPrimaContact();
   // Calculate the vector of distributing rule
   void ComputeDistriVector();
   // Compute the normal imulse at contacts
@@ -191,7 +186,11 @@ public:
   // Post-compute for multiple impacts
   void PostComputeImpact();
   // Check if the multiple impacts process is terminated or not
-  bool IsMulImpactTerminate();
+  //bool IsMulImpactTerminate();
+  inline bool IsMulImpactTerminate()
+  {
+    return _IsImpactEnd;
+  }
   // To allocate the memory
   void AllocateMemory();
   // To build the vector of stiffnesses and restitution coefficient at contacts
@@ -223,8 +222,14 @@ public:
   void display() const;
   // To write a SiconosVector into an ouput file
   void WriteSiconosVector(const SiconosVector&);
+  // To write a SiconosVector into a matrix
+  // row and columns positions starting to write
+  void WriteVectorIntoMatrix(const SimpleVector, const unsigned int, const unsigned int);
   // Save data for each step
-  void SaveDataOneStep();
+  // parameter: ith pointer to be save
+  void SaveDataOneStep(unsigned int);
+  // Estimate size of data matrix
+  unsigned int EstimateNdataCols();
   //==================== Friend methods ================================
   ACCEPT_STD_VISITORS();
 };
