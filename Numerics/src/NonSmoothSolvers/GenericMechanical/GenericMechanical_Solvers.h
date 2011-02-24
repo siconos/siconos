@@ -105,7 +105,7 @@ extern "C"
   void genericMechnical_free_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
 
   int genericMechnical_getNbDWork(GenericMechanicalProblem* problem, SolverOptions* options);
-
+  void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options);
 #ifdef __cplusplus
 }
 #endif

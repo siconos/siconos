@@ -1557,7 +1557,7 @@ void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBloc
   fclose(titi);
 #endif
 }
-#define SBM_DEBUG_SBM_COL_PERM
+//#define SBM_DEBUG_SBM_COL_PERM
 void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
 {
 #ifdef SBM_DEBUG_SBM_COL_PERM

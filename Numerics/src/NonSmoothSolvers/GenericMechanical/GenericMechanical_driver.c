@@ -38,38 +38,56 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
+  int storageType = pGMP->M->storageType;
+  NumericsMatrix* numMat = pGMP->M;
   int currentRowNumber = 0;
   int ii;
   int  posInX = 0;
   int curSize = 0;
   *err = 0.0;
   double localError = 0;
-  int diagBlockNumber;
+
+  double * bufForLocalProblemDense = (storageType == 0) ? (double*) malloc(GMP_MAX_SIZE_LOCAL * GMP_MAX_SIZE_LOCAL * sizeof(double)) : 0;
+
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
   printf("GenericMechanical compute_error BEGIN:\n");
 #endif
   /*update localProblem->q and compute V = M*R+Q of the GMP */
+  posInX = 0;
   while (curProblem)
   {
-    if (currentRowNumber)
-    {
-      posInX = m->blocksize0[currentRowNumber - 1];
-    }
-    curSize = m->blocksize0[currentRowNumber] - posInX;
+    curSize = curProblem->size;
 
     /*localproblem->q <-- GMP->q */
     memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
 
     /*computation of the localproblem->q*/
-    rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
+    if (storageType == 0)
+    {
+      rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, curProblem->q, 0);
+    }
+    else
+      rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
 
     /*computation of the velocity of the GMP*/
     memcpy(velocity + posInX, curProblem->q, curSize * sizeof(double));
     /*add the missing product to the velocity: the diagonal one*/
-    diagBlockNumber = getDiagonalBlockPos(m, currentRowNumber);
-    DGEMV(LA_NOTRANS, curSize, curSize, 1.0, m->block[diagBlockNumber], curSize, reaction + posInX, 1, 1.0, velocity + posInX, 1);
+
+    double * diagBlock = 0;
+    if (storageType == 0) /*dense*/
+    {
+      getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
+      diagBlock = bufForLocalProblemDense;
+    }
+    else
+    {
+      getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &diagBlock);
+    }
+
+    DGEMV(LA_NOTRANS, curSize, curSize, 1.0, diagBlock, curSize, reaction + posInX, 1, 1.0, velocity + posInX, 1);
 
     /*next*/
+    posInX += curProblem->size;
     curProblem = curProblem->nextProblem;
     currentRowNumber++;
   }
@@ -81,9 +99,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
   curProblem = pGMP->firstListElem;
   while (curProblem)
   {
-    if (currentRowNumber)
-      posInX = m->blocksize0[currentRowNumber - 1];
-    curSize = m->blocksize0[currentRowNumber] - posInX;
+    curSize = curProblem->size;
     double * Vl = velocity + posInX;
     double * Rl = reaction + posInX;
     for (ii = 0; ii < curSize; ii++)
@@ -142,6 +158,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
     }
     /*next*/
+    posInX += curProblem->size;
     curProblem = curProblem->nextProblem;
     currentRowNumber++;
   }
@@ -151,6 +168,9 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
   else
     printf("GenericMechanical_driver compute_error END:, err<tol: error : %e\n", *err);
 #endif
+  if (storageType == 0)
+    free(bufForLocalProblemDense);
+
   if (*err > tol)
     return 1;
   else
@@ -160,6 +180,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
 static int SScmp = 0;
 static int SScmpTotal = 0;
 #endif
+//#define GMP_WRITE_PRB
 //static double sCoefLS=1.0;
 void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options)
 {
@@ -362,6 +383,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   printInFileSBMForScilab(pGMP->M->matrix1,titi);
   fclose(titi);
   */
+  options->iparam[3] = it;
   if (tolViolate)
   {
     printf("---GenericalMechanical_drivers, FAILED***************************************\n");
@@ -408,7 +430,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   }
   else
   {
-    GMPReducedsolve(problem, reaction, velocity, options);
+    GMPReducedsolve(problem, reaction, velocity, &info, options);
   }
 
   return info;

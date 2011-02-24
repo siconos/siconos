@@ -22,7 +22,7 @@
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
 
-#define GMP_DEBUG
+//#define GMP_DEBUG
 unsigned int NUMERICS_GMP_FREE_MATRIX = 1 << 2;
 unsigned int NUMERICS_GMP_FREE_GMP = 1 << 3;
 

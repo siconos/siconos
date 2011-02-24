@@ -37,9 +37,10 @@ int main(void)
     options->dparam[0]=@TEST_TOLERANCE@;
     options->iparam[0]=@TEST_MAXITER@;
   }
-
+  options->iparam[2]=@TEST_GMP_REDUCED@;
   
   info = genericMechanical_test_function(finput,options);
+  printf("GMP TEST: Nb DS it=%i\n",options->iparam[3]);
   deleteSolverOptions(options);
   free(options);
 

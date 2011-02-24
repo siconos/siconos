@@ -397,12 +397,12 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
     /* The part of MM which corresponds to the current block is copied into MLocal */
     for (int i = 0; i < size; i++)
     {
-      elem = MM + numRow + (numRow + size) * (m->size0);
-      (*Bout)[0] = *elem;
-      elem++;
-      (*Bout)[1] = *elem;
-      elem++;
-      (*Bout)[2] = *elem;
+      elem = MM + numRow + (numRow + i) * (m->size0);
+      for (int j = 0; j < size; j++)
+      {
+        (*Bout)[j + i * size] = *elem;
+        elem++;
+      }
     }
   }
   else if (storageType == 1)
