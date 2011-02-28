@@ -62,8 +62,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
     //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
     dim += (indexSet->bundle(*vd)->getNonSmoothLawSizeProjectOnConstraints());
-
-    assert(indexSet->bundle(*vd)->absolutePosition() < dim);
+    assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
   }
 }
 
@@ -109,8 +108,7 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
          vi != viend; ++vi)
     {
       SP::UnitaryRelation ur = indexSet->bundle(*vi);
-      pos = ur->absolutePosition();
-
+      pos = ur->absolutePositionProj();
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).blockProj);
     }
