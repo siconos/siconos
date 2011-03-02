@@ -36,6 +36,9 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
  *  \date (Creation) Apr 26, 2004
  *
  */
+#define SICONOS_TS_LINEAR 1
+#define SICONOS_TS_LINEAR_IMPLICIT 2
+#define SICONOS_TS_NONLINEAR 3
 class TimeStepping : public Simulation
 {
 private:
@@ -76,12 +79,12 @@ private:
   double _newtonResiduRMax;
 
 
-  /** std::string _newtonOptions
+  /** unsigned int  _newtonOptions
    *  option in the Newon iteration
-   *  "linear" or "linearlyImplicit" will force a single iteration of the Newton Solver
-   * "nonlinear" (default) will perform the newton iteration up to convergence
+   *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
+   * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
    */
-  std::string _newtonOptions;
+  unsigned int _newtonOptions;
 protected:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
    */
@@ -274,15 +277,15 @@ public:
   /** set the NewtonOptions
    *  \param: std::string
    */
-  void setNewtonOptions(const std::string& options)
+  void setNewtonOptions(unsigned int v)
   {
-    _newtonOptions = options;
+    _newtonOptions = v;
   };
 
   /** get the NewtonOptions
-   *  \return std::string
+   *  \return unsigned int
    */
-  std::string newtonOptions()
+  unsigned int newtonOptions()
   {
     return _newtonOptions;
   };

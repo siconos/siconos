@@ -47,7 +47,7 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions("nonlinear")
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
 {
 
   _computeResiduY = false;
@@ -63,7 +63,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            double T, SP::DynamicalSystemsSet dsList,
                            SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions("nonlinear")
+  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
 {
   _computeResiduY = false;
   _computeResiduR = false;
@@ -526,7 +526,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   computeInitialResidu();
 
-  if ((_newtonOptions == "linear" || _newtonOptions == "linearlyImplicit")
+  if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
     _newtonNbSteps++;
@@ -547,7 +547,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     saveYandLambdaInMemory();
   }
 
-  else if (_newtonOptions == "nonlinear")
+  else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
     while ((!isNewtonConverge || info) && (_newtonNbSteps < maxStep))
     {
@@ -568,10 +568,14 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       update(_levelMin);
       isNewtonConverge = newtonCheckConvergence(criterion);
-      if (!isNewtonConverge && !info)
-      {
-        saveYandLambdaInMemory();
-      }
+      //      if (!isNewtonConverge && !info)
+      //      {
+      //        saveYandLambdaInMemory();
+      //      }
+    }
+    if (!isNewtonConverge && !info)
+    {
+      saveYandLambdaInMemory();
     }
     if (!isNewtonConverge && !info)
       cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
