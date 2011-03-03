@@ -113,8 +113,11 @@ private:
    */
   VectorOfBlockVectors _y;
 
-  /** previous step values for y */
+  /** previous value of Newton iteration for y */
   VectorOfVectors _yOld;
+
+  /** value of the previous time-step */
+  VectorOfVectors _y_k;
 
   /** result of the computeInput function */
   VectorOfVectors _lambda;
@@ -398,6 +401,13 @@ public:
   {
     return _yOld[i];
   }
+  /*get y_k[i]
+    \return pointer on a SiconosVector
+   */
+  inline SP::SiconosVector y_k(const unsigned int i) const
+  {
+    return _y_k[i];
+  }
 
   /** set the output vector yOld to newVector
   *  \param VectorOfVectors
@@ -619,6 +629,9 @@ public:
   */
   void swapInMemory();
 
+  /** Must be call to fill _y_k. (after convergence of the Newton iterations)
+   */
+  void swapTimeStepInMemory();
   /** print the data to the screen
   */
   void display() const;

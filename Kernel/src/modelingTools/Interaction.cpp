@@ -243,6 +243,7 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
 
   _y.resize(numberOfDerivatives) ;
   _yOld.resize(numberOfDerivatives);
+  _y_k.resize(numberOfDerivatives);
   _lambda.resize(numberOfDerivatives);
   _lambdaOld.resize(numberOfDerivatives);
 
@@ -254,16 +255,19 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
 
     _y[i].reset(new BlockVector());
     _yOld[i].reset(new BlockVector());
+    _y_k[i].reset(new BlockVector());
     _lambda[i].reset(new BlockVector());
     _lambdaOld[i].reset(new BlockVector());
     for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
       _y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _y_k[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _y[i]->zero();
       _yOld[i]->zero();
+      _y_k[i]->zero();
       _lambdaOld[i]->zero();
 
     }
@@ -532,6 +536,18 @@ void Interaction::swapInMemory()
     {
       *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
       *(_lambdaOld[i]->vector(j)) = *(_lambda[i]->vector(j));
+    }
+  }
+}
+
+void Interaction::swapTimeStepInMemory()
+{
+  // i corresponds to the derivative number and j the relation number.
+  for (unsigned int i = 0; i < _y.size() ; i++)
+  {
+    for (unsigned int j = 0; j < _numberOfRelations; ++j)
+    {
+      *(_y_k[i]->vector(j)) = *(_y[i]->vector(j)) ;
     }
   }
 }
