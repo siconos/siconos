@@ -1265,7 +1265,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = UR->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *UR->yOld(osnsp->levelMin()), *(UR->yp()), subCoord, false);
+    subscal(e, *UR->y_k(osnsp->levelMin()), *(UR->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -1273,7 +1273,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*UR->yp())(0) +=  e * (*UR->yOld(osnsp->levelMin()))(0);
+    (*UR->yp())(0) +=  e * (*UR->y_k(osnsp->levelMin()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)

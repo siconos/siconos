@@ -328,7 +328,10 @@ void Simulation::saveInMemory()
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
   for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+  {
     (*itOsns)->saveInMemory();
+    (*itOsns)->saveTimeStepInMemory();
+  }
 }
 
 int Simulation::computeOneStepNSProblem(int Id)

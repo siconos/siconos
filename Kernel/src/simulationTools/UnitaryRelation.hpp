@@ -178,6 +178,10 @@ public:
   *  \return pointer on a SimpleVector
   */
   SP::SiconosVector yOld(unsigned int) const;
+  /* get y_k[i]
+   *    \return pointer on a SimpleVector
+   */
+  SP::SiconosVector y_k(unsigned int) const;
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors

@@ -56,6 +56,11 @@ SP::SiconosVector UnitaryRelation::yOld(unsigned int i) const
   // i is the derivative number.
   return (interaction()->yOld(i)->vector(_number));
 }
+SP::SiconosVector UnitaryRelation::y_k(unsigned int i) const
+{
+  //i is the derivative number.
+  return (interaction()->y_k(i)->vector(_number));
+}
 
 const VectorOfVectors UnitaryRelation::getLambda() const
 {

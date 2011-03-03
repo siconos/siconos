@@ -210,7 +210,7 @@ void MLCPProjectOnConstraints::postCompute()
 
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[1]) ===
-  (*_z) *= 0.5;
+  (*_z) *= 0.2;
   unsigned int pos = 0;
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::postCompute\n");

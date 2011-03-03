@@ -507,7 +507,6 @@ void   TimeStepping::prepareNewtonIteration()
     }
 
 }
-
 void TimeStepping::saveYandLambdaInMemory()
 {
   // Save OSNS state (Interactions) in Memory.
@@ -568,22 +567,16 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       update(_levelMin);
       isNewtonConverge = newtonCheckConvergence(criterion);
-      //      if (!isNewtonConverge && !info)
-      //      {
-      //        saveYandLambdaInMemory();
-      //      }
-    }
-    if (!isNewtonConverge && !info)
-    {
-      saveYandLambdaInMemory();
+      if (!isNewtonConverge && !info)
+      {
+        saveYandLambdaInMemory();
+      }
     }
     if (!isNewtonConverge && !info)
       cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
-
-
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)

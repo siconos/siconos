@@ -443,10 +443,13 @@ public:
     */
   virtual void initialize(SP::Simulation);
 
-  /** save Interactions states in Memory
+  /** save Interactions states in Memory, called to save the current state of the Newton iteration.
    */
   virtual void saveInMemory();
 
+  /** save y_k, called by TimeDiscretisation::process.
+   */
+  virtual void saveTimeStepInMemory();
   /** prepare data of the osns for solving
    *  param double : current time
    */

@@ -438,6 +438,12 @@ void OneStepNSProblem::saveInMemory()
   std::for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
                 boost::bind(&Interaction::swapInMemory, _1));
 }
+void OneStepNSProblem::saveTimeStepInMemory()
+{
+  assert(_OSNSInteractions);
+  std::for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
+                boost::bind(&Interaction::swapTimeStepInMemory, _1));
+}
 
 void OneStepNSProblem::saveNSProblemToXML()
 {
