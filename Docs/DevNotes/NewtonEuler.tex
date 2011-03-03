@@ -99,6 +99,46 @@ So using the matrix formulation:
 
 It is noteworthy that $T$ must be updated at each step.
 
-\subsection{Case of the Relation between many DS}
-We focus on relation using 2 DS:
-\[Y=H(\_q1,\_q2)\]
+\subsection{The Newton linearization applied to NewtonEuler formalisme}
+  Let us define the residu:
+\begin{equation}
+  \label{eq:newton_NE1_residu}
+  \mathcal R_k (v,\lambda) =W(v-v_k)-hF_{ext}-^t(CT)\lambda
+\end{equation}
+The linearized residu is:
+\begin{equation}
+  \label{eq:newton_NE1_residuL}
+  \mathcal R_{L_k} (v,\lambda) =\mathcal R_k (v_k,\lambda_k)+W(v-v_k)-^t(CT)(\lambda - \lambda_k)
+\end{equation}
+
+Let us define $v_k^p$ and $\lambda_k^p$ the current Newton iteration, initialized with $v_k$ and $\lambda_k$.
+We are looking for $v_k^{p+1}$ and $\lambda_k^{p+1}$ such that $R_{L_k} (v_k^{p+1},\lambda_k^{p+1}) =0$. That is:
+\begin{equation}
+  \label{eq:newton_NE1_eq1}
+  0 =\mathcal R_k (v_k^p,\lambda_k^p)+W(v_k^{p+1}-v_k^p)-^t(CT)(\lambda_k^{p+1} - \lambda_k^p)
+\end{equation}
+That leads to:
+\begin{equation}
+  \label{eq:newton_NE1_eq2}
+  v_k^{p+1} =v_k^p+W^{-1}[-\mathcal R_k (v_k^p,\lambda_k^p)+^t(CT)(\lambda_k^{p+1} - \lambda_k^p)]
+\end{equation}
+The NSLAW is:
+\begin{equation}
+  \label{eq:newton_NE1_nslaw1}
+  \dot y_k^{p+1}=CTv_k^{p+1}
+\end{equation}
+that leads to the OSNSP:
+\begin{equation}
+  \label{eq:newton_NE1_osnsp}
+  \dot y_k^{p+1}=(CT)W^{-1}~^t(CT)\lambda_k^{p+1}+(CT)[v_k^p-(CT)^t(CT)\lambda_k^p-W^{-1}\mathcal R_k (v_k^p,\lambda_k^p)]
+\end{equation}
+\subsubsection{Siconos implementation}
+
+The expression:~$W(v_k^p-v_k)-hF_{ext}$ is saved in DS->residiFree.Moreau->computeResidu.\\
+The expression:~$\mathcal R_k(v_k^p,\lambda_k^p)=W(v_k^p-v_k)--hF_{ext}+^t(CT)(\lambda_k^p)$ is saved in DS->workFree.\\
+The expression:~$vfree=\dot y_k^{p} - W^{-1} residufree$ is saved in DS->workFree. Moreau->computeFreeState.\\
+The computation:~ $y_k^{p+1}=vfree+W^{-1}\lambda_k^{p+1}$ is done in OSI::updateState.\\
+The OSNSP is :
+\begin{equation}
+  \dot y_k^{p+1}=(CT)W^{-1}~^t(CT)\lambda_k^{p+1}+(CT)vfree+nslaweffect
+\end{equation}

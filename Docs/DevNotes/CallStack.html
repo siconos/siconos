@@ -150,7 +150,7 @@
   <li>OSNSP::_M.numericsMat a numerics matrices</li>
   <li>At each edge and vertex is attach the 'unitaryBlock' that is a dense matrix.</li>
 </ul>
-
+<p>The dense matrix M1 is build from the block graph by copy. The block matrix M2 is buuilt by copy only the pointer of block.</p>
 <p>If necessary (topo->hasChange and first step of Newton ?) the numerics matrix must re-built. The OSNSP::preCompute manages theses matrices.</p>
 
 <ul>
@@ -163,15 +163,24 @@
 	</ul>
       <li>OSNSMatrix_M::fill(indexset)</li><ul>
 	<li>OSNSMatrix::updateSizeAndPositions(dimColumn, indexSet);</li>
-	<li>setBlock...</li>
+	<li>if dense : memory allocation(M1) and setBlock(copy).</li>
+	<li>if block : build block matrix(M2) and M2->fill(indexSet) set pointer</li>
 	<li>OSNSMatrix::convert</li><ul>
 	  <li>OSNSMatrix::numericsMatrix : build the numericsMatrix OSNSP::_M.numericsMat</li>
 	</ul>
 	
       </ul>
       <li>restore prev lambda and Y</li>
-      <li>OSNSP::computeq</li><ul>
-	<li>q=jachqT*Vfree</li>
+      <li>OSNSP::computeq</li>
+      <ul>
+	
+	<li>OSI->computeFreeOutPut</li>
+	      <ul>
+		<li>Yp=jachqT*Vfree</li>
+		<li>Yp+=e yold</li>
+	      </ul>
+	      
+	<li>q=Yp</li>
       </ul>
       </ul>
     <li>OSNSP::postCompute</li>
