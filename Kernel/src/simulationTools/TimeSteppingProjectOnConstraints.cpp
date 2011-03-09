@@ -56,7 +56,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #ifdef TSPROJ_DEBUG
   cout << "TimeStepping::newtonSolve end : nbit=" << getNewtonNbSteps() << "\n";
 #endif
-
+  if (!_doProj)
+    return;
   int info = 0;
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
@@ -103,8 +104,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     runningNewton = false;
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeJach(getTkp1());
       (*it)->relation()->computeh(getTkp1());
+      (*it)->relation()->computeJach(getTkp1());
       double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
 
       if (criteria < -1e-4)

@@ -39,6 +39,8 @@ protected:
   virtual void initOSNS();
   /*tolerence allowed on the constrain.*/
   double _constraintTol;
+  /*disabled or enabled projection*/
+  unsigned int _doProj;
 public:
 
   /** Constructor with the time-discretisation.
@@ -64,6 +66,10 @@ public:
   inline void setConstraintTol(double v)
   {
     _constraintTol = v;
+  }
+  inline void setDoProj(unsigned int v)
+  {
+    _doProj = v;
   }
 
   /** newton algorithm

@@ -25,6 +25,7 @@
 #include "NewtonEulerDS.hpp"
 
 using namespace std;
+#define NER_DEBUG
 
 void NewtonEulerR::initComponents()
 {
@@ -75,8 +76,9 @@ void NewtonEulerR::initialize(SP::Interaction inter)
 
   DSIterator it;
   data[q0].reset(new BlockVector()); // displacement
+  data[velo].reset(new BlockVector()); // velocity
   data[deltaq].reset(new BlockVector());
-  data[q1].reset(new BlockVector()); // velocity
+  data[q1].reset(new BlockVector()); // qdot
   //  data[q2].reset(new BlockVector()); // acceleration
   data[z].reset(new BlockVector()); // z vector
   data[p0].reset(new BlockVector());
@@ -94,6 +96,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
     lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     data[q0]->insertPtr(lds->q());
+    data[velo]->insertPtr(lds->velocity());
     data[deltaq]->insertPtr(lds->deltaq());
     data[q1]->insertPtr(lds->dotq());
     //    data[q2]->insertPtr( lds->acceleration());
@@ -162,7 +165,17 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
     {
-      prod(*_jachq, *data[q1], *y);
+      //prod(*_jachq,*data[q1],*y);
+      //DSIterator itDS;
+      //itDS=interaction()->dynamicalSystemsBegin();
+      //SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+      //  printf("NewtonEulerR::computeOutput velocity:");
+      //  d->velocity()->display();
+      //  printf("NewtonEulerR::computeOutput prod(*_jachq,*data[q1],*y):");
+      //  y->display();
+      prod(*_jachqT, *data[velo], *y);
+      //  printf("NewtonEulerR::computeOutput prod(*_jachqT,_v,*y):");
+      //  y->display();
       //_jachq->display();
       //y->display();
       /*  if (false){

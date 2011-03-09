@@ -61,7 +61,7 @@ class NewtonEulerR : public Relation
 {
 public:
 
-  enum DataNames {z, deltaq, q0, q1, q2, p0, p1, p2, sizeDataNames};
+  enum DataNames {z, deltaq, q0, q1, q2, p0, p1, p2, velo, sizeDataNames};
 
 protected:
   unsigned int _ysize;
