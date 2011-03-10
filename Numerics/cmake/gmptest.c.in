@@ -40,7 +40,7 @@ int main(void)
   options->iparam[2]=@TEST_GMP_REDUCED@;
   
   info = genericMechanical_test_function(finput,options);
-  printf("GMP TEST: Nb DS it=%i\n",options->iparam[3]);
+  printf("GMP TEST: Nb GS it=%i\n",options->iparam[3]);
   deleteSolverOptions(options);
   free(options);
 
