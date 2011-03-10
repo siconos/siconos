@@ -141,13 +141,13 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
   if (storage == 0)
   {
     double * xSave = (double*) malloc(sizeY * sizeof(double));
-    double * xx = (double *)x;
+    double * xx = (double *)x; /*because of const*/
     for (int i = 0; i < sizeY; i++)
     {
       xSave[i] = x[currentRowNumber + i];
       xx[currentRowNumber + i] = 0;
     }
-    double * MM = A->matrix0;
+    double * MM = A->matrix0 + currentRowNumber;
     int incx = A->size0;
     int incy = 1;
     if (init)
@@ -157,7 +157,7 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
     }
     for (int i = 0; i < sizeY; i++)
     {
-      y[i] += DDOT(A->size0 , A->matrix0 , incx , x , incy);
+      y[i] += DDOT(A->size0 , MM + i , incx , x , incy);
     }
     for (int i = 0; i < sizeY; i++)
     {

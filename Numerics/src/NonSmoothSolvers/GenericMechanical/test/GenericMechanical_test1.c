@@ -31,10 +31,10 @@ int main(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
   genericMechnicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_QUARTIC);
-  //  options->iparam[2]=1;
-
-  printf("Test on ./data/GMP_FAILED.dat\n");
-  FILE * finput  =  fopen("./data/GMP_FAILED.dat", "r");
+  options->iparam[0] = 100000000;
+  //options->iparam[2]=1;
+  printf("Test on ./data/GMP.dat\n");
+  finput  =  fopen("./data/GMP.dat", "r");
   info = genericMechanical_test_function(finput, options);
   fclose(finput);
 
@@ -43,6 +43,6 @@ int main(void)
   deleteSolverOptions(options);
   free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/GMP_FAILED.dat\n");
+  printf("\nEnd of test on ./data/GMP.dat\n");
   return info;
 }

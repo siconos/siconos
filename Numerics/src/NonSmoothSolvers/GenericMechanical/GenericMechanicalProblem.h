@@ -39,8 +39,6 @@
 
 
  */
-#define GMP_MAX_SIZE_LOCAL 30
-
 typedef struct _listNumericsProblem
 {
   int type;
@@ -60,6 +58,9 @@ typedef struct
   /*Number of line of blocks.*/
   /*PRIVATE: manage by addProblem.*/
   int size;
+  /*maximal size of local problem.*/
+  /*PRIVATE: manage by addProblem.*/
+  int maxLocalSize;
   /*must be set by the user.*/
   NumericsMatrix* M;
   /*must be set by the user.*/

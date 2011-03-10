@@ -38,6 +38,8 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
   info = genericMechanical_driver(problem,
                                   reaction , velocity,
                                   options);
+  double err = 0;
+  GenericMechanical_compute_error(problem, reaction , velocity, options->dparam[0], options, &err);
   printf("\n");
   for (k = 0 ; k < problem->size; k++)
   {
@@ -47,7 +49,12 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test succeeded info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
+    if (err > options->dparam[0])
+    {
+      printf("but unsucceeded because err>tol\n");
+      return 1;
+    }
   }
   else
   {

@@ -59,6 +59,11 @@ extern "C"
   \param[in-out] , reaction global vector (n)
   \param[in-out] , velocity global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
+                 option->iparam[0]:nb max of iterations
+     option->iparam[1]:0 without 'LS' 1 with.
+     option->iparam[2]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block.
+     option->iparam[3]: output, number of GS it.
+     options->dparam[0]: tolerance
   \return result (0 if successful otherwise 1).
   */
   int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
