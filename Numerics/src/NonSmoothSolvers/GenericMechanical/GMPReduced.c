@@ -40,8 +40,8 @@ void GMPReducedSolToSol(GenericMechanicalProblem* pInProblem, double * reaction,
                         double * Re, double * Rreduced, double * Vreduced)
 {
   listNumericsProblem * curProblem = 0;
-  int curRowE = 0;
-  int curRowI = 0;
+  //int curRowE=0;
+  //int curRowI=0;
   curProblem =  pInProblem->firstListElem;
   int curSize = 0;
   while (curProblem)
@@ -163,7 +163,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
 
 
   /**mem alloc for Me and Mi*/
-  int nbCol = MeRow + MiRow;
+  //int nbCol=MeRow+MiRow;
   *Me_Size = MeRow;
   *Mi_Size = MiRow;
   /*  Me=(double *) malloc(MeRow*nbCol*sizeof(double));
@@ -429,7 +429,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   int Me_size;
   int Mi_size;
   buildReducedGMP(pInProblem, Me, Mi, Qe, Qi, &Me_size, &Mi_size);
-  if (Me_size == 0 | Mi_size == 0)
+  if ((Me_size == 0 | Mi_size == 0))
   {
     genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
     free(Me);

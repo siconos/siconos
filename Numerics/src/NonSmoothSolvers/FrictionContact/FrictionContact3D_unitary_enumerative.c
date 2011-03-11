@@ -352,9 +352,9 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
   double NormD = sqrt(NormD2);
   double e = (*mu) * NormD / (*M00);
   double d, p;
-  double phi;
-  double cosphi;
-  double sinphi;
+  double phi = NAN;
+  double cosphi = NAN;
+  double sinphi = NAN;
   FC3D_unitary_enum_factorize2x2(M11, M22, M12, &D1, &D2, V);
   if (!FC3D_UE_TEST_NULL(e))
   {

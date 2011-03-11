@@ -233,7 +233,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         numberofSolutions++;
         if (verbose || multipleSolutions)
         {
-          printf("lcp_enum find %i solution with sCurrentEnum = %d!\n", numberofSolutions, sCurrentEnum - 1);
+          printf("lcp_enum find %i solution with sCurrentEnum = %ld!\n", numberofSolutions, sCurrentEnum - 1);
         }
 
 

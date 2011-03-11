@@ -70,9 +70,9 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
     rhomax = -dparam[3];
     rho = rhomax;
   }
-  double * work1tmp;
-  double * work2tmp;
-  double * direction;
+  double * work1tmp = 0;
+  double * work2tmp = 0;
+  double * direction = 0;
   if (isVariable)
   {
     work1tmp = malloc(n * sizeof(double));

@@ -263,7 +263,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   assert(B);
   assert(C);
 
-  int i, j;
+  int i;
   /*     Check the compatibility of size of matrices */
   assert(A->blocksize0);
   assert(A->blocksize1);
@@ -1570,7 +1570,7 @@ void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBloc
   {
     C->index2_data[n] = colIndex[C->index2_data[n]];
   }
-  int curColnb = 0;
+  //int curColnb=0;
   int nbBlockCol = A->blocknumber1;
   for (int numCol = 0; numCol < nbBlockCol; numCol++)
   {

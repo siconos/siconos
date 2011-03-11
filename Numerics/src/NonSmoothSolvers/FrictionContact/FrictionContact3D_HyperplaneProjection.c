@@ -118,7 +118,7 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     int stopingcriteria = 1;
     int i = -1;
     double alpha ;
-    double lhs;
+    double lhs = NAN;
     double rhs;
     // z_k-y_k
     DCOPY(n , reaction , 1 , reactiontmp3, 1);
