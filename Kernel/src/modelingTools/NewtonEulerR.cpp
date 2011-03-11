@@ -25,7 +25,10 @@
 #include "NewtonEulerDS.hpp"
 
 using namespace std;
+
+#ifdef YES_I_REALLY_WANT_NER_DEBUG
 #define NER_DEBUG
+#endif
 
 void NewtonEulerR::initComponents()
 {
@@ -88,9 +91,8 @@ void NewtonEulerR::initialize(SP::Interaction inter)
   int sizeForAllxInDs = 0;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
-    Type::Siconos type = Type::value(**it);
     // check dynamical system type
-    assert((type == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((Type::value(**it) == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
