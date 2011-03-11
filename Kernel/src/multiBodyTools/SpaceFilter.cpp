@@ -147,8 +147,8 @@ public:
 /* proximity detection for circular object */
 struct SpaceFilter::_CircularFilter : public SiconosVisitor
 {
-  SP::CircularDS ds1;
   SP::SpaceFilter parent;
+  SP::CircularDS ds1;
 
   _CircularFilter(SP::SpaceFilter parent, SP::CircularDS ds1) : parent(parent), ds1(ds1) {};
 
@@ -280,8 +280,6 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
     double x2 = ds2->getQ(0);
     double y2 = ds2->getQ(1);
     double z2 = ds2->getQ(2);
-    double rmax = fmax(r1, r2);
-    double rmin = fmin(r1, r2);
 
     double dx = x1 - x2;
     double dy = y1 - y2;
@@ -367,8 +365,6 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
     double x2 = ds2->getQ(0);
     double y2 = ds2->getQ(1);
     double z2 = ds2->getQ(2);
-    double rmax = fmax(r1, r2);
-    double rmin = fmin(r1, r2);
 
     double dx = x1 - x2;
     double dy = y1 - y2;
@@ -432,9 +428,9 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 /* disk plan relation comparison */
 struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 {
+  SP::SpaceFilter parent;
   double A, B, C, r, xCenter, yCenter, width;
   bool flag;
-  SP::SpaceFilter parent;
   _IsSameDiskPlanR(SP::SpaceFilter p, double A, double B, double C, double r,
                    double xCenter, double yCenter, double width) :
     parent(p), A(A), B(B), C(C), r(r), xCenter(xCenter), yCenter(yCenter), width(width), flag(false) {};
@@ -469,10 +465,10 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 
 struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 {
+  SP::SpaceFilter parent;
   FTime AF, BF, CF;
   double r;
   bool flag;
-  SP::SpaceFilter parent;
   _IsSameDiskMovingPlanR(SP::SpaceFilter p, FTime AF, FTime BF, FTime CF, double r) :
     parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false) {};
 
@@ -507,9 +503,9 @@ struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 /* sphere plan relation comparison */
 struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
 {
+  SP::SpaceFilter parent;
   double A, B, C, D, r;
   bool flag;
-  SP::SpaceFilter parent;
   _IsSameSpherePlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
     parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 

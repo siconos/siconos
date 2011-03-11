@@ -101,17 +101,17 @@ protected:
   /** interaction counter */
   unsigned int _interID;
 
-  /** plans */
-  SP::SiconosMatrix _plans;
-
-  /** moving plans */
-  SP::FMatrix _moving_plans;
-
   /** the whole NonSmoothDynamicalSystem */
   SP::NonSmoothDynamicalSystem _nsds;
 
   /** only one nslaw */
   SP::NonSmoothLaw _nslaw;
+
+  /** plans */
+  SP::SiconosMatrix _plans;
+
+  /** moving plans */
+  SP::FMatrix _moving_plans;
 
   /* the hash table */
   space_hash _hash_table;

@@ -56,9 +56,9 @@ void SphereLDSSphereLDSR::computeh(double)
 void SphereLDSSphereLDSR::computeJachq(double)
 {
 
-  double r, A, B, C, D, nN, nU;
+  double A, B, C;
   /* u ^ v  = n */
-  double u1, u2, u3, v1, v2, v3, n1, n2, n3, r1u1, r1u2, r1u3, r1v1, r1v2, r1v3, r2u1, r2u2, r2u3, r2v1, r2v2, r2v3;
+  double u1, u2, u3, v1, v2, v3, n1, n2, n3;
 
   SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
 
@@ -68,7 +68,7 @@ void SphereLDSSphereLDSR::computeJachq(double)
 
   double theta1 = (*data[q0])(3);
   double phi1 = (*data[q0])(4);
-  double psi1 = (*data[q0])(5);
+
 
   double q_6 = (*data[q0])(6);
   double q_7 = (*data[q0])(7);
@@ -77,7 +77,7 @@ void SphereLDSSphereLDSR::computeJachq(double)
 
   double theta2 = (*data[q0])(9);
   double phi2 = (*data[q0])(10);
-  double psi2 = (*data[q0])(11);
+
 
   A = -(q_6 - q_0);
   B = -(q_7 - q_1);
