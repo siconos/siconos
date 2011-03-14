@@ -429,7 +429,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   int Me_size;
   int Mi_size;
   buildReducedGMP(pInProblem, Me, Mi, Qe, Qi, &Me_size, &Mi_size);
-  if ((Me_size == 0 | Mi_size == 0))
+  if ((Me_size == 0 || Mi_size == 0))
   {
     genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
     free(Me);
