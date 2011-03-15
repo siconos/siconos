@@ -229,11 +229,12 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 {
 
 
-  if (options == NULL || global_options == NULL)
-    numericsError("mlcp_driver", "null input for solver and/or global options");
+  if (options == NULL)
+    numericsError("mlcp_driver ", "null input for solver options.\n");
 
   /* Set global options */
-  //  setNumericsOptions(global_options);
+  if (global_options)
+    setNumericsOptions(global_options);
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

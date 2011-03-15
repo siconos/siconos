@@ -409,9 +409,9 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     fclose(toto);
 #endif
 
-    if (storageType == 0)
-      free(bufForLocalProblemDense);
-    exit(0);
+    //    if (storageType==0)
+    //      free(bufForLocalProblemDense);
+    //    exit(0);
   }
   else
   {
@@ -451,6 +451,10 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   else if (options->iparam[2] == 2)
   {
     GMPReducedEqualitySolve(problem, reaction, velocity, &info, options);
+  }
+  else if (options->iparam[2] == 3)
+  {
+    GMPasMLCP(problem, reaction, velocity, &info, options);
   }
   else
   {

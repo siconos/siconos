@@ -298,7 +298,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     compat == 1;
             });
     assert( {int compat = 1;
-             for (j = 0; j < C->blocknumber1; j++)
+             for (int j = 0; j < C->blocknumber1; j++)
   {
     if (C->blocksize1[j] != B->blocksize1[j]) compat = 0;
     }

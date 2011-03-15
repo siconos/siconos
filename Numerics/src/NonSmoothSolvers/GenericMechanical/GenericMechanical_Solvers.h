@@ -61,7 +61,7 @@ extern "C"
   \param[in,out] options structure used to define the solver(s) and their parameters
                  option->iparam[0]:nb max of iterations
      option->iparam[1]:0 without 'LS' 1 with.
-     option->iparam[2]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block.
+     option->iparam[2]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block, 3 solve the GMP as a MLCP.
      option->iparam[3]: output, number of GS it.
      options->dparam[0]: tolerance
   \return result (0 if successful otherwise 1).
@@ -108,8 +108,15 @@ extern "C"
   int genericMechnical_alloc_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
   /*free the Work memory, and set pointer to zero.*/
   void genericMechnical_free_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
-
+  /*compute error, return 0 iff succes.*/
+  int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err);
+  /*Useful to get the size of the double working zone memory.
+  * Return the number of double.
+  */
   int genericMechnical_getNbDWork(GenericMechanicalProblem* problem, SolverOptions* options);
+  /*
+   *Containing the Gauss-Seidel algorithm.
+   */
   void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options);
 #ifdef __cplusplus
 }

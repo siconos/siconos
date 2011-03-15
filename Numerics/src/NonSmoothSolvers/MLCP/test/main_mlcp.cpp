@@ -175,6 +175,8 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   int aux = 0;
   long laux;
   int NbLines = problem->M->size0;
+  global_options.verboseMode = 0;
+
 
   //   mlcpOptions.isSet=0;
   //   mlcpOptions.iSize=0;
