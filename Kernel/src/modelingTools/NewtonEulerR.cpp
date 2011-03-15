@@ -26,9 +26,8 @@
 
 using namespace std;
 
-#ifdef YES_I_REALLY_WANT_NER_DEBUG
-#define NER_DEBUG
-#endif
+//#define NER_DEBUG
+
 
 void NewtonEulerR::initComponents()
 {
@@ -92,7 +91,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     // check dynamical system type
-    assert((Type::value(**it) == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((Type::value(**it) == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of that type.\n");
 
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
