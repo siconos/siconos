@@ -13,14 +13,16 @@ private:
   double _ResCof;
   //Normal stiffness at contact
   double _Stiff;
+  //Elasticity coefficient
+  double _ElasCof;
 public:
   // Default Constructor
   MultipleImpactNSL();
   // Constructor with parameters
-  MultipleImpactNSL(double, double);
+  MultipleImpactNSL(double, double, double, unsigned int _dim = 1);
   // Destructor
   ~MultipleImpactNSL();
-  // Get the value of the energytical restitution coefficient
+  // Get the value of the energytical restitution coefficientx
   inline double ResCof() const
   {
     return _ResCof;
@@ -30,20 +32,17 @@ public:
   {
     return _Stiff;
   };
+  // Get the value of the elasticity coefficient
+  inline double ElasCof() const
+  {
+    return _ElasCof;
+  }
   // Set the value to the restitution coefficient
-  inline void setResCof(double newResCof)
-  {
-    _ResCof = newResCof;
-    if ((_ResCof < 0.0) || (_ResCof > 1.0))
-      RuntimeException::selfThrow("MultipleImpactNSL::_ResCof must be between 0.0 and 1.0!");
-  };
+  void setResCof(double newResCof);
   // Set the value to the stiffness
-  inline void setStiff(double newStiff)
-  {
-    _Stiff = newStiff;
-    if (_Stiff < 0.0)
-      RuntimeException::selfThrow("MultipleImpactNSL::_Stiff must be positive!");
-  };
+  void setStiff(double newStiff);
+  // Set the value to the elasticity cofficient
+  void setElasCoeff(double _newElasCoef);
   //
   bool isVerified() const;
   //
