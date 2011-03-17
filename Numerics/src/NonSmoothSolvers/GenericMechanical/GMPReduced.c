@@ -203,7 +203,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   }
   curPos = 0;
   int firtMiLine = 0;
-  if (numBlockRow < nbBlockRowE + nbBlockRowI)
+  if (nbBlockRowI > 0)
     firtMiLine = Morder.blocksize1[nbBlockRowE];
 
   for (int numBlockRow = nbBlockRowE; numBlockRow < nbBlockRowE + nbBlockRowI; numBlockRow++)
