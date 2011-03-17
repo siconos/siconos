@@ -28,30 +28,118 @@
   int state = SWIG_CheckState(res);
   $1 = is_array($input) || PySequence_Check($input) || state;
 }
+
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
+(boost::shared_ptr<SimpleVector>)
+{
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t, 0);
+  int state = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || state;
+}
+
+
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
 {
 
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-  if (!array)
+  void *argp1=0;
+  int res1=0;
+  int newmem = 0;
+  boost::shared_ptr< SiconosVector > tempshared1 ;
+  boost::shared_ptr< SiconosVector > *smartarg1 = 0 ;
+ 
+  // try a conversion from a SiconosVector
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0 |  0 , &newmem);
+  if (SWIG_IsOK(res1)) 
   {
-    void *argp;
-    SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    {
+      assert(false);
+      tempshared1 = *reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+      delete reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+    } 
+    else {
+      smartarg1 = reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+      $1 = *smartarg1;
+    }
   }
   else
   {
-    if (!require_dimensions(array,1) ||
-        !require_native(array) || !require_contiguous(array)) SWIG_fail;
-    
-    SP::SimpleVector tmp;
-    tmp.reset(new SimpleVector(array_size(array,0)));
-    // copy : with SimpleVector based on resizable std::vector there is
-    // no other way
-    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-    $1 = tmp;
-  }
- }
+    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
+    if (!array)
+    {
+      void *argp;
+      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+    }
+    else
+    {
+      if (!require_dimensions(array,1) ||
+          !require_native(array) || !require_contiguous(array)) SWIG_fail;
+      
+      SP::SimpleVector tmp;
+      tmp.reset(new SimpleVector(array_size(array,0)));
+      // copy : with SimpleVector based on resizable std::vector there is
+      // no other way
+      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+      $1 = tmp;
+    }
+  }
+}
+
+
+%typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int is_new_object)
+{
+
+  void *argp1=0;
+  int res1=0;
+  int newmem = 0;
+  boost::shared_ptr< SimpleVector > tempshared1 ;
+  boost::shared_ptr< SimpleVector > *smartarg1 = 0 ;
+ 
+  // try a conversion from a SimpleVector
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t, 0 |  0 , &newmem);
+  if (SWIG_IsOK(res1)) 
+  {
+    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    {
+      assert(false);
+      tempshared1 = *reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
+      delete reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
+    } 
+    else {
+      smartarg1 = reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
+      $1 = *smartarg1;
+    }
+  }
+  else
+  {
+    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+    if (!array)
+    {
+      void *argp;
+      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
+    }
+    else
+    {
+      if (!require_dimensions(array,1) ||
+          !require_native(array) || !require_contiguous(array)) SWIG_fail;
+      
+      SP::SimpleVector tmp;
+      tmp.reset(new SimpleVector(array_size(array,0)));
+      // copy : with SimpleVector based on resizable std::vector there is
+      // no other way
+      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
+      $1 = tmp;
+    }
+  }
+}
+
+//%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
+//{
+//  // directorin typemap
+//  $1=$input;
+//}
 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
 {
@@ -168,9 +256,8 @@
 }
 
 // Siconos{Vector,Matrix} in api mean Simple{Vector,Matrix} here
-%apply (boost::shared_ptr<SiconosVector>) { (SP::SimpleVector) };
-%apply (boost::shared_ptr<SiconosVector>) { (boost::shared_ptr<SimpleVector>) };
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
+%apply (boost::shared_ptr<SimpleVector>) { (SP::SimpleVector) };
 
 %apply (boost::shared_ptr<SiconosMatrix>) { (SP::SimpleMatrix) };
 %apply (boost::shared_ptr<SiconosMatrix>) { (boost::shared_ptr<SimpleMatrix>) };
