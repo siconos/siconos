@@ -44,6 +44,7 @@ SET(SiconosKernel_DIRS
 SET(SiconosKernel_Unstable_SRCS 
   simulationTools/PrimalFrictionContact.cpp
   simulationTools/MLCP2.cpp
+  simulationTools/OSNSMultipleImpact.cpp
   )
 
 
@@ -117,6 +118,16 @@ IF(NOT CPPUNIT_FOUND)
   message(STATUS "Warning, cppunit not found on your system; you will not be able to run make test.")
   SET(WITH_TESTING FALSE)
 ENDIF(NOT CPPUNIT_FOUND)
+
+# contact detection
+IF(WITH_BULLET)
+  COMPILE_WITH(Bullet)
+  IF(BULLET_FOUND)
+    SET(HAVE_BULLET TRUE)
+    MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
+    SET(SiconosKernel_DIRS ${SiconosKernel_DIRS} multiBodyTools/contactDetection/bullet)
+  ENDIF(BULLET_FOUND)
+ENDIF(WITH_BULLET)
 
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
 
