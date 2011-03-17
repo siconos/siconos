@@ -30,8 +30,6 @@ private:
   double TOL_IMPACT;
   // Type of the compliance model
   std::string TypeCompLaw;
-  // Power of the compliance law
-  double PowCompLaw;
   //Velocity of bodies during impact
   //SP::SiconosVector VelAllBody;
   // Relative velocity at all Interactions (with or without contact)
@@ -55,6 +53,8 @@ private:
   SP::SiconosVector  Kcontact;
   // Restitution coefficient of contacts
   SP::SiconosVector ResContact;
+  // Elasticity coefficient of contacts
+  SP::SiconosVector ElasCoefContact;
   // Incremental impulse at contacts
   SP::SiconosVector DelImpulseContact;
   // Total impulse at contacts
@@ -112,14 +112,12 @@ public:
   OSNSMultipleImpact();
   //Constructor from data (number of steps is required here)
   //1st parameter: the type of the compliance law
-  //2sd parameter: the power of the compliance law (= 1.0 for linear elastic law and = 3/2 for Hertz law)
   //3rd parameter: number of steps estimated
-  OSNSMultipleImpact(string, double, unsigned int);
+  OSNSMultipleImpact(string, unsigned int);
   //Constructor from data (step size is required here)
   //1st parameter: the type of the compliance law
-  //2sd parameter: the power of the compliance law (= 1.0 for linear elastic law and = 3/2 for Hertz law)
   //3rd parameter: step size estimated
-  OSNSMultipleImpact(string, double, double);
+  OSNSMultipleImpact(string, double);
   //Destructor
   ~OSNSMultipleImpact();
   //To get the type of the compliance law at contact
@@ -127,15 +125,8 @@ public:
   {
     return TypeCompLaw;
   };
-  //To get the power of the compliance law
-  inline double getPowerCompLaw() const
-  {
-    return PowCompLaw;
-  };
   //To set the type of the compliance law
   void setTypeCompLaw(std::string newTypeLaw);
-  // To set the power of the compliance law
-  void setPowCompLaw(double newPow);
   // To set the tolerance to define zero
   void setTolImpact(double newTolZero);
   // To get the tolerance to define zero
@@ -194,7 +185,7 @@ public:
   // To allocate the memory
   void AllocateMemory();
   // To build the vector of stiffnesses and restitution coefficient at contacts
-  void BuildStiffResCofVec();
+  void BuildParaContact();
   // To get the velocity of bodies, relative velocity and potential energy at the beginning of impact
   void InitializeInput();
   // To check the state of contacts during impact

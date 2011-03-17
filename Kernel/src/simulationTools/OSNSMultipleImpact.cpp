@@ -4,58 +4,114 @@
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "Simulation.hpp"
+#include "ioMatrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/progress.hpp>
 using namespace std;
 //Default constructor
 OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
 {
   TypeCompLaw = "BiStiffness";
-  PowCompLaw = 1.0;
   NstepEst = 10000;
   NstepSave = 100;
   TOL_IMPACT = DEFAULT_TOL_IMPACT;
-  UpdateEndImpact = true;
   YesSaveData = false;
   IsNumberOfStepsEst = true;
+  YesSaveByMatrix = true;
+  SizeDataSave = 1000;
+  NstepMax = 100000;
   NameFile = "DataMultipleImpact.dat";
 }
 //------------------------------ -------------------------------------------------------------
-OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newPowerLaw, unsigned int newNstepEst = 10000): LinearOSNS()
+OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, unsigned int newNstepEst = 10000): LinearOSNS()
 {
   TypeCompLaw = newTypeLaw;
-  PowCompLaw = newPowerLaw;
   NstepEst = newNstepEst;
   NstepSave = 100;
   TOL_IMPACT = DEFAULT_TOL_IMPACT;
-  UpdateEndImpact = true;
   YesSaveData = false;
   IsNumberOfStepsEst = true;
   NameFile = "DataMultipleImpact.dat";
+  YesSaveByMatrix = true;
+  SizeDataSave = 1000;
+  NstepMax = 100000;
   if ((TypeCompLaw != "MonoStiffness") && (TypeCompLaw != "BiStiffness"))
     RuntimeException::selfThrow("OSNSMultipleImpact::TypeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
 //------------------------------ -------------------------------------------------------------
-OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newPowerLaw, double newDelP = 1.0e-5): LinearOSNS()
+OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newDelP = 1.0e-5): LinearOSNS()
 {
   TypeCompLaw = newTypeLaw;
-  PowCompLaw = newPowerLaw;
   DeltaP = newDelP;
   NstepSave = 100;
   TOL_IMPACT = DEFAULT_TOL_IMPACT;
-  UpdateEndImpact = true;
   YesSaveData = false;
   IsNumberOfStepsEst = false;
   NameFile = "DataMultipleImpact.dat";
+  YesSaveByMatrix = true;
+  SizeDataSave = 1000;
+  NstepMax = 100000;
   if ((TypeCompLaw != "MonoStiffness") && (TypeCompLaw != "BiStiffness"))
     RuntimeException::selfThrow("OSNSMultipleImpact::TypeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
 //-------------------------------------------------------------------------------------------------
 OSNSMultipleImpact::~OSNSMultipleImpact() {}
+//------------------------------------------------------------------------------------------------
+
+void OSNSMultipleImpact::setTolImpact(double newTolZero)
+{
+  TOL_IMPACT = newTolZero;
+};
+
+void OSNSMultipleImpact::SetYesSaveData(bool var)
+{
+  YesSaveData = var;
+};
+
+void OSNSMultipleImpact::SetNameOutput(std::string file_name)
+{
+  NameFile = file_name;
+};
+
+void OSNSMultipleImpact::SetNstepSave(unsigned int var)
+{
+  NstepSave = var;
+};
+
+void OSNSMultipleImpact::SetNstepMax(unsigned int var)
+{
+  NstepMax = var;
+};
+
+void OSNSMultipleImpact::setTypeCompLaw(std::string newTypeLaw)
+{
+  TypeCompLaw = newTypeLaw;
+  if ((TypeCompLaw != "MonoStiffness") && (TypeCompLaw != "BiStiffness"))
+    RuntimeException::selfThrow("OSNSMultipleImpact::TypeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
+};
+
+void OSNSMultipleImpact::SetYesSaveByMatrix(bool var)
+{
+  YesSaveByMatrix = var;
+}
+
+void OSNSMultipleImpact::SetSizeDataSave(unsigned int var)
+{
+  SizeDataSave = var;
+}
 //--------------------------------------------------------------------------------------------------
 void OSNSMultipleImpact::WriteSiconosVector(const SiconosVector& m)
 {
   DenseVect*  p = m.dense();
   std::copy(p->begin(), p->end(), std::ostream_iterator<double>(OutputFile, " "));
+}
+//---------------------------------------------------------------------------------------------------
+void OSNSMultipleImpact::WriteVectorIntoMatrix(const SimpleVector m, const unsigned int pos_row, const unsigned int pos_col)
+{
+  for (unsigned int i = 0; i < m.size(); ++i)
+  {
+    (*_DataMatrix)(pos_row, pos_col + i) = m(i);
+  }
 }
 //----------------------------------------------------------------------------------------------------
 bool OSNSMultipleImpact::isZero(const double Var)
@@ -66,9 +122,29 @@ bool OSNSMultipleImpact::isZero(const double Var)
     return false;
 }
 //--------------------------------------------------------------------------------------------------
+unsigned int OSNSMultipleImpact::EstimateNdataCols()
+{
+  unsigned int _numberCols = 2;
+  // Number of columns for data at contacts
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(0); // get indexSet[0]
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    _numberCols = _numberCols + 3 * (indexSet->bundle(*ui)->interaction()->nonSmoothLaw()->size()) + 1;
+  }
+  // Number of columns for data at particles
+  SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  for (boost::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
+  {
+    _numberCols = _numberCols + (DSG->bundle(*dsi)->getDim());
+  }
+  return(_numberCols);
+}
+//-----------------------------------------------------------------------------------------------
 void OSNSMultipleImpact::AllocateMemory()
 {
-  if (! VelContact)
+  if (!VelContact)
     VelContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -76,7 +152,7 @@ void OSNSMultipleImpact::AllocateMemory()
       VelContact->resize(maxSize());
   };
   //
-  if (! OldVelContact)
+  if (!OldVelContact)
     OldVelContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -92,7 +168,7 @@ void OSNSMultipleImpact::AllocateMemory()
       EnerContact->resize(maxSize());
   };
   //
-  if (! WcContact)
+  if (!WcContact)
     WcContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -100,7 +176,7 @@ void OSNSMultipleImpact::AllocateMemory()
       WcContact->resize(maxSize());
   };
   //
-  if (! DistriVector)
+  if (!DistriVector)
     DistriVector.reset(new SimpleVector(maxSize()));
   else
   {
@@ -108,7 +184,7 @@ void OSNSMultipleImpact::AllocateMemory()
       DistriVector->resize(maxSize());
   };
   //
-  if (! StateContact)
+  if (!StateContact)
     StateContact.reset(new IndexInt(maxSize()));
   else
   {
@@ -116,7 +192,7 @@ void OSNSMultipleImpact::AllocateMemory()
       StateContact->resize(maxSize());
   };
   //
-  if (! Kcontact)
+  if (!Kcontact)
     Kcontact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -124,7 +200,7 @@ void OSNSMultipleImpact::AllocateMemory()
       Kcontact->resize(maxSize());
   };
   //
-  if (! ResContact)
+  if (!ResContact)
     ResContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -132,7 +208,14 @@ void OSNSMultipleImpact::AllocateMemory()
       ResContact->resize(maxSize());
   };
   //
-  if (! TolImpulseContact)
+  if (!ElasCoefContact)
+    ElasCoefContact.reset(new SimpleVector(maxSize()));
+  else
+  {
+    if (ElasCoefContact->size() != maxSize())
+      ElasCoefContact->resize(maxSize());
+  };
+  if (!TolImpulseContact)
     TolImpulseContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -140,7 +223,7 @@ void OSNSMultipleImpact::AllocateMemory()
       TolImpulseContact->resize(maxSize());
   };
   //
-  if (! DelImpulseContact)
+  if (!DelImpulseContact)
     DelImpulseContact.reset(new SimpleVector(maxSize()));
   else
   {
@@ -148,16 +231,36 @@ void OSNSMultipleImpact::AllocateMemory()
       DelImpulseContact->resize(maxSize());
   };
   //
-  if (! ForceContact)
+  if (!ImpulseContact_update)
+    ImpulseContact_update.reset(new SimpleVector(maxSize()));
+  else
+  {
+    if (ImpulseContact_update->size() != maxSize())
+      ImpulseContact_update->resize(maxSize());
+  }
+  //
+  if (!ForceContact)
     ForceContact.reset(new SimpleVector(maxSize()));
   else
   {
     if (ForceContact->size() != maxSize())
       ForceContact->resize(maxSize());
   };
+  // for the data matrix
+  if (YesSaveByMatrix)
+  {
+    unsigned int _numberCols = EstimateNdataCols();
+    if (!_DataMatrix)
+      _DataMatrix.reset(new SimpleMatrix(SizeDataSave, _numberCols));
+    else
+    {
+      if ((_DataMatrix->size(0) != SizeDataSave) || (_DataMatrix->size(1) != _numberCols))
+        _DataMatrix->resize(SizeDataSave, _numberCols);
+    }
+  }
 }
 //=====================================================================================
-void OSNSMultipleImpact::BuildStiffResCofVec()
+void OSNSMultipleImpact::BuildParaContact()
 {
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(1); // get indexSet[1]
   //Loop over the UR of the indexSet(1)
@@ -167,59 +270,117 @@ void OSNSMultipleImpact::BuildStiffResCofVec()
     SP::UnitaryRelation ur = indexSet->bundle(*ui);
     SP::NonSmoothLaw nslaw = ur->interaction()->nslaw();
     SP::MultipleImpactNSL Mulnslaw = boost::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
+    assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of UR-unitaryBlock in the vector VelContact
     unsigned int pos = _M->getPositionOfUnitaryBlock(ur);
     (*ResContact)(pos) = Mulnslaw->ResCof();
     (*Kcontact)(pos) = Mulnslaw->Stiff();
+    (*ElasCoefContact)(pos) = Mulnslaw->ElasCof();
   }
   /*
   cout << " Restitution coefficients: " << endl;
   ResContact->display();
   cout << "Stiffnesses: " << endl;
   Kcontact->display();
+  cout << "Elasticity coeffients at contacts: " << endl;
+  ElasCoefContact->display();
   */
+
 }
 //======================================================================================
 void OSNSMultipleImpact::ComputeStepSize()
 {
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   SP::UnitaryRelationsGraph indexSet1 = simulation()->indexSet(1); // get indexSet[1]
-  //Loop over alls DS
-  DynamicalSystemsGraph::VIterator ui, uiend;
-  DynamicalSystemsGraph::OEIterator edi, ediend;
-  double Pest = 0.0;
-  for (boost::tie(ui, uiend) = DSG->vertices(); ui != uiend; ++ui)
+  std::set<SP::DynamicalSystem> setOfDS;
+  UpdateDuringImpact(); // Update the dynamical state
+  //Loop over all UR to obtain the list of DS involved into impact
+  unsigned int pos;
+  SP::DynamicalSystem DS1;
+  SP::DynamicalSystem DS2;
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
-    // Check if this DS is involved in the impact or not
-    bool found = false;
-    // Loop over all edges comming from this DS
-    for (boost::tie(edi, ediend) = DSG->out_edges(*ui); edi != ediend; ++edi)
+    SP::UnitaryRelation ur = indexSet1->bundle(*ui);
+    // Get the relative position of UR-unitaryBlock in the vector VelContact/TolImpulseContact
+    pos = _M->getPositionOfUnitaryBlock(ur);
+    // Check if impact take place at this contact
+    if ((*StateContact)[pos] != 0)
     {
-      SP::UnitaryRelation urp = DSG->bundle(*edi);
-      if (indexSet1->is_vertex(urp)) // there exist at least one edge of this DS in the indexSet[1]
-      {
-        found = true;
-        break;
-      }
+      DS1 = indexSet1->properties(*ui).source;
+      DS2 = indexSet1->properties(*ui).target;
+      assert(DS1);
+      assert(DS2);
+      setOfDS.insert(DS1); // source DS on this UR
+      setOfDS.insert(DS2); // target DS on this UR
     }
-    //
-    if (found) // if this DS involved in the impact
-    {
-      SP::DynamicalSystem ds = DSG->bundle(*ui); // DS
-      SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
-      SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
-      SP::SiconosVector vel_ds = Lagds->velocityMemory()->getSiconosVector(1);  // Pre-impact velocity of DS
-      SP::SiconosVector abs_vel_ds(new SimpleVector(vel_ds->size()));
-      abs_wise(*vel_ds, *abs_vel_ds); // get the absolute (velocity vector of ds)
-      SP::SimpleVector prod_mass_vel(new SimpleVector(mass_ds->size(0)));
-      prod(*mass_ds, *abs_vel_ds, *prod_mass_vel);
-      Pest = Pest + prod_mass_vel->sum();
-    }
-  };
-  DeltaP = Pest / NstepEst;
+  }
+  //
+  std::set<SP::DynamicalSystem>::iterator it;
+  double Pest = 0.0;
+  for (it = setOfDS.begin(); it != setOfDS.end(); it++)
+  {
+    SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(*it);
+    SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
+    SP::SiconosVector vel_ds = Lagds->velocity();  // Pre-impact velocity of DS
+
+    SP::SiconosVector abs_vel_ds(new SimpleVector(vel_ds->size()));
+    abs_wise(*vel_ds, *abs_vel_ds); // get the absolute (velocity vector of ds)
+    SP::SimpleVector prod_mass_vel(new SimpleVector(mass_ds->size(0)));
+    prod(*mass_ds, *abs_vel_ds, *prod_mass_vel);
+    Pest = Pest + prod_mass_vel->sum();
+
+    // cout << "DS involved into impact: " << (*it)->number() << endl;
+    //cout << "mass of DS" << endl;
+    // mass_ds->display();
+    //cout << "velocity of DS" << endl;
+    //vel_ds->display();
+  }
+  DeltaP = Pest / ((setOfDS.size()) * NstepEst);
+  //cout << "Size of setOfDS" << setOfDS.size() << endl;
+  //cout << "Step size is: " << DeltaP << endl;
   if (DeltaP <= 0.0)
     RuntimeException::selfThrow("OSNSMultipleImpact::ComputeStepSize the step size DeltaP must be positive  !!");
-  //
+
+
+  // SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  // SP::UnitaryRelationsGraph indexSet1 = simulation()->indexSet(1); // get indexSet[1]
+  // //Loop over alls DS
+  // DynamicalSystemsGraph::VIterator ui, uiend;
+  // DynamicalSystemsGraph::OEIterator edi, ediend;
+  // double Pest = 0.0;
+  // for (boost::tie(ui,uiend) = DSG->vertices(); ui != uiend; ++ui)
+  //  {
+  //    // Check if this DS is involved in the impact or not
+  //    bool found = false;
+  //    // Loop over all edges comming from this DS
+  //    for(boost::tie(edi,ediend) = DSG->out_edges(*ui); edi != ediend; ++edi)
+  //      {
+  //        SP::UnitaryRelation urp = DSG->bundle(*edi);
+  //        if (indexSet1->is_vertex(urp)) // there exist at least one edge of this DS in the indexSet[1]
+  //          {
+  //            found = true;
+  //            break;
+  //          }
+  //      }
+  //    //
+  //    if (found) // if this DS involved in the impact
+  //      {
+  //        SP::DynamicalSystem ds = DSG->bundle(*ui); // DS
+  //        SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+  //        SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
+  //        SP::SiconosVector vel_ds = Lagds->velocityMemory()->getSiconosVector(1);  // Pre-impact velocity of DS
+  //        SP::SiconosVector abs_vel_ds(new SimpleVector(vel_ds->size()));
+  //        abs_wise(*vel_ds,*abs_vel_ds);// get the absolute (velocity vector of ds)
+  //        SP::SimpleVector prod_mass_vel(new SimpleVector(mass_ds->size(0)));
+  //        prod(*mass_ds,*abs_vel_ds,*prod_mass_vel);
+  //        Pest = Pest + prod_mass_vel->sum();
+  //      }
+  //  };
+  // DeltaP = Pest/NstepEst;
+  // if (DeltaP <= 0.0)
+  //  RuntimeException::selfThrow("OSNSMultipleImpact::ComputeStepSize the step size DeltaP must be positive  !!");
+  // //
   //cout << "Step size:" << DeltaP << endl;
 }
 //========================================================================================
@@ -291,6 +452,12 @@ void OSNSMultipleImpact::PreComputeImpact()
   }
   ResContact->zero();
   //
+  if (ElasCoefContact->size() != _sizeOutput)
+  {
+    ElasCoefContact->resize(_sizeOutput);
+  }
+  ElasCoefContact->zero();
+  //
   if (TolImpulseContact->size() != _sizeOutput)
   {
     TolImpulseContact->resize(_sizeOutput);
@@ -301,6 +468,13 @@ void OSNSMultipleImpact::PreComputeImpact()
   {
     DelImpulseContact->resize(_sizeOutput);
   }
+  DelImpulseContact->zero();
+  //
+  if (ImpulseContact_update->size() != _sizeOutput)
+  {
+    ImpulseContact_update->resize(_sizeOutput);
+  }
+  ImpulseContact_update->zero();
   //
   if (ForceContact->size() != _sizeOutput)
   {
@@ -309,13 +483,13 @@ void OSNSMultipleImpact::PreComputeImpact()
   ForceContact->zero();
   //4. Initialize the relative velocity, potential energy, impulse at contacts
   InitializeInput();
-  //5. Compute the step size
-  if (IsNumberOfStepsEst) // We need to estimate the step size from the initial date of the dynamic system
-  {
-    ComputeStepSize();
-  };
-  //6. Build the vectors of stifnesseses and of restitution coefficients
-  BuildStiffResCofVec();
+  // //5. Compute the step size
+  // if (IsNumberOfStepsEst) // We need to estimate the step size from the initial date of the dynamic system
+  //   {
+  //     ComputeStepSize();
+  //   };
+  //6. Build the vectors of stifnesseses, of restitution coefficients, and of elaticity coefficients
+  BuildParaContact();
   /*
   cout<<"Matrix OSNS problem:  " << endl;
    _M->display();
@@ -428,6 +602,7 @@ bool OSNSMultipleImpact::IsVcminNegative()
 //=======================================================================================
 void OSNSMultipleImpact::CheckStateContact()
 {
+  _IsImpactEnd = true;
   for (unsigned int i = 0; i < Ncontact; ++i)
   {
     if (isZero((*EnerContact)(i)))
@@ -435,53 +610,90 @@ void OSNSMultipleImpact::CheckStateContact()
       if ((*VelContact)(i) >= 0.0) // no impact at this contact
         (*StateContact)[i] = 0;
       else  // impact happens without potential energy
+      {
         (*StateContact)[i] = 1;
+        _IsImpactEnd = false;
+      }
     }
-    else if ((*StateContact)[i] != 2) // impact happens with not zero potential energy
+    else // impact happens with not zero potential energy
     {
-      (*StateContact)[i] = 2;
+      _IsImpactEnd = false;
+      if ((*StateContact)[i] != 2)
+      {
+        (*StateContact)[i] = 2;
+      }
     }
   };
   //
   /*
-  cout << "State at contacts: ";
-  for (unsigned int i = 0; i < Ncontact;++i)
-    {
-      cout << (*StateContact)[i] << " ";
-    };
-  cout << endl;
+    cout << "State at contacts: ";
+    for (unsigned int i = 0; i < Ncontact;++i)
+      {
+        cout << (*StateContact)[i] << " ";
+      };
+    cout << endl;
   */
   //
 }
 //=======================================================================================
-bool OSNSMultipleImpact::IsMulImpactTerminate()
+// bool OSNSMultipleImpact::IsMulImpactTerminate(){
+//  bool var = true;
+//  for(unsigned int i = 0; i < Ncontact;++i)
+//    {
+//      if ((*StateContact)[i] != 0)
+//        {
+//          var = false;
+//          break;
+//        };
+//    };
+//  return var;
+//  /*
+//  cout << "Is the multiple impacts is terminated: " << var << endl;
+//  */
+// }
+//=======================================================================================
+void OSNSMultipleImpact::SelectPrimaContact()
 {
-  bool var = true;
-  for (unsigned int i = 0; i < Ncontact; ++i)
+  if (IsEnermaxZero()) // case of no potential energy at any contact
   {
-    if ((*StateContact)[i] != 0)
-    {
-      var = false;
-      break;
-    };
-  };
-  return var;
-  /*
-  cout << "Is the multiple impacts is terminated: " << var << endl;
-  */
+    PrimConVelocity(); // Select the primary contact according to the relative velocity at contact
+    IsPrimaConEnergy = false;
+  }
+  else
+  {
+    PrimConEnergy(); // Select the primary contact according to the potential energy at contacts
+    IsPrimaConEnergy = true;
+  }
+  //
+  // cout << "The primary contact is :" << IdPrimaContact << endl;
+  // cout << "Is the primary contact is selected according to the potential energy: " << IsPrimaConEnergy << endl;
 }
 //=======================================================================================
 void OSNSMultipleImpact::ComputeDistriVector()
 {
   //Case 1: if no potential energy at any contact
-  if (IsEnermaxZero()) // case of no potential energy at any contact
+  double _ratio_mu, ratio_stiff, ratio_ener;
+  double mu_prima = (*ElasCoefContact)(IdPrimaContact); // Elasticity coefficient at the primary contact
+  double stiff_prima = (*Kcontact)(IdPrimaContact);     // Stiffness at the primary contact
+  double _mu, _stiff, _vel, _energy;
+  if (!IsPrimaConEnergy) // case of primary contact selected according to the relative velocity
   {
-    PrimConVelocity(); // Select the primary contact according to the relative velocity at contact
+    double ratio_vel;
     for (unsigned int i = 0; i < Ncontact; ++i)
     {
       if ((*StateContact)[i] != 0) // the impact can takes place at this contact
       {
-        (*DistriVector)(i) = ((*Kcontact)(i) / (*Kcontact)(IdPrimaContact)) * std::pow(((*VelContact)(i) / VelAtPrimaCon), PowCompLaw);
+        _mu = (*ElasCoefContact)(i); // Elasticity coefficient at the current contact
+        _stiff = (*Kcontact)(i);     // Stiffness at the current contact
+        _vel = (*VelContact)(i);     // Relative velocity at the current contact
+        _ratio_mu = (std::pow(_mu + 1, (_mu / (_mu + 1)))) / (std::pow(mu_prima + 1, (mu_prima / (mu_prima + 1))));
+        ratio_stiff = (std::pow(_stiff, (1 / (1 + _mu)))) / (std::pow(stiff_prima, (1 / (1 + mu_prima))));
+        if (_vel > 0.0)
+        {
+          RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector, the relative velocity when particle starts to impact must be negative!!");
+        }
+        ratio_vel = (std::pow(std::fabs(_vel), (_mu / (_mu + 1)))) / (std::pow(std::fabs(VelAtPrimaCon), (mu_prima / (1 + mu_prima))));
+        (*DistriVector)(i) = std::pow((_ratio_mu * ratio_stiff * ratio_vel), (1 + _mu)) * std::pow(DeltaP, ((_mu - mu_prima) / (1 + mu_prima)));
       }
       else
       {
@@ -491,12 +703,15 @@ void OSNSMultipleImpact::ComputeDistriVector()
         RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector the component of DistriVector must be positive !!");
     };
   }
-  //Case 2: if the potential energy is not zero at contacts
+  //Case 2: case of primary contact selected according to the potential energy
   else
   {
-    PrimConEnergy(); // Select the primary contact according to the potential energy at contacts
     for (unsigned int i = 0; i < Ncontact; ++i)
     {
+      _mu = (*ElasCoefContact)(i);
+      _stiff = (*Kcontact)(i);
+      _ratio_mu = (std::pow(_mu + 1, (_mu / (_mu + 1)))) / (std::pow(mu_prima + 1, (mu_prima / (mu_prima + 1))));
+      ratio_stiff = (std::pow(_stiff, (1 / (1 + _mu)))) / (std::pow(stiff_prima, (1 / (1 + mu_prima))));
       if ((*StateContact)[i] == 1) // no potential energy at this contact, including the contacts at which impact repeats
       {
         if ((*VelContact)(i) > 0)
@@ -505,12 +720,16 @@ void OSNSMultipleImpact::ComputeDistriVector()
         }
         else
         {
-          (*DistriVector)(i) = ((*Kcontact)(i) / (*Kcontact)(IdPrimaContact)) * std::pow(((std::fabs((*VelContact)(i)) * DeltaP) / EnerAtPrimaCon), PowCompLaw);
+          _vel = (*VelContact)(i);
+          ratio_ener = (std::pow(std::fabs(_vel), (_mu / (_mu + 1)))) / (std::pow(EnerAtPrimaCon, (mu_prima / (mu_prima + 1))));
+          (*DistriVector)(i) = std::pow((_ratio_mu * ratio_stiff * ratio_ener), (1 + _mu)) * std::pow(DeltaP, _mu);
         }
       }
       else if ((*StateContact)[i] == 2) // potential is not zero at this contact
       {
-        (*DistriVector)(i) = std::pow((*Kcontact)(i) / (*Kcontact)(IdPrimaContact), 1.0 / (1.0 + PowCompLaw)) * std::pow((*EnerContact)(i) / EnerAtPrimaCon, PowCompLaw / (PowCompLaw + 1.0));
+        _energy = (*EnerContact)(i); // Potential energy at the current contact
+        ratio_ener = (std::pow(_energy, (_mu / (_mu + 1)))) / (std::pow(EnerAtPrimaCon, (mu_prima / (mu_prima + 1))));
+        (*DistriVector)(i) = _ratio_mu * ratio_stiff * ratio_ener;
       }
       else // no impact at this contact
       {
@@ -520,10 +739,55 @@ void OSNSMultipleImpact::ComputeDistriVector()
         RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector the component of DistriVector must be positive !!");
     };
   };
-  /*
-  cout << "Tensor of distributing rule:" << endl;
-  DistriVector->display();
-  */
+  // //Case 1: if no potential energy at any contact
+  // if (!IsPrimaConEnergy) // case of primary contact selected according to the relative velocity
+  //  {
+  //    for(unsigned int i = 0; i< Ncontact; ++i)
+  //      {
+  //        if ((*StateContact)[i] != 0) // the impact can takes place at this contact
+  //          {
+  //            (*DistriVector)(i) = ((*Kcontact)(i)/(*Kcontact)(IdPrimaContact))*std::pow(((*VelContact)(i)/VelAtPrimaCon),PowCompLaw);
+  //          }
+  //        else
+  //          {
+  //            (*DistriVector)(i) = 0.0;
+  //          }
+  //        if ((*DistriVector)(i) < 0.0)
+  //          RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector the component of DistriVector must be positive !!");
+  //      };
+  //  }
+  // //Case 2: case of primary contact selected according to the potential energy
+  // else
+  //  {
+  //    for (unsigned int i = 0; i < Ncontact; ++i)
+  //      {
+  //        if ((*StateContact)[i]==1) // no potential energy at this contact, including the contacts at which impact repeats
+  //          {
+  //            if ((*VelContact)(i) > 0)
+  //              {
+  //                RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector, the pre-impact velocity must be negative!!");
+  //              }
+  //            else
+  //              {
+  //                (*DistriVector)(i) = ((*Kcontact)(i)/(*Kcontact)(IdPrimaContact))*std::pow(((std::fabs((*VelContact)(i))*DeltaP)/EnerAtPrimaCon),PowCompLaw);
+  //              }
+  //          }
+  //        else if ((*StateContact)[i]==2) // potential is not zero at this contact
+  //          {
+  //            (*DistriVector)(i) = std::pow((*Kcontact)(i)/(*Kcontact)(IdPrimaContact),1.0/(1.0 + PowCompLaw))*std::pow((*EnerContact)(i)/EnerAtPrimaCon,PowCompLaw/(PowCompLaw + 1.0));
+  //          }
+  //        else // no impact at this contact
+  //          {
+  //            (*DistriVector)(i) = 0.0;
+  //          };
+  //        if ((*DistriVector)(i) < 0.0)
+  //          RuntimeException::selfThrow("OSNSMultipleImpact::ComputeDistriVector the component of DistriVector must be positive !!");
+  //      };
+  //  };
+  // /*
+  //cout << "Tensor of distributing rule:" << endl;
+  //DistriVector->display();
+  // */
 
 }
 //=======================================================================================
@@ -531,9 +795,12 @@ void OSNSMultipleImpact::ComputeImpulseContact()
 {
   (*DelImpulseContact) = (*DistriVector) * DeltaP;
   (*TolImpulseContact) = (*TolImpulseContact) + (*DelImpulseContact);
+  (*ImpulseContact_update) = (*ImpulseContact_update) + (*DelImpulseContact);
   // Compute the contact force
+  double PowCompLaw;
   for (unsigned i = 0; i < Ncontact; ++i)
   {
+    PowCompLaw = (*ElasCoefContact)(i);
     if (isZero((*EnerContact)(i))) // if potential energy at this contact is zero
     {
       if ((*VelContact)(i) < 0.0) // if the relative velocity at contact is negative
@@ -569,10 +836,10 @@ void OSNSMultipleImpact::ComputeVelContact()
   (*VelContact) = (*VelContact) + prod(*(_M->defaultMatrix()), *DelImpulseContact); // compute the relative velocity at the end of the step
   //
   /*
-  cout << "Relative velocity at contacts at the beginning of step:" << endl;
-  OldVelContact->display();
-  cout << "Relative velocity at contacts at the end of step:" << endl;
-  VelContact->display();
+    cout << "Relative velocity at contacts at the beginning of step:" << endl;
+    OldVelContact->display();
+    cout << "Relative velocity at contacts at the end of step:" << endl;
+    VelContact->display();
   */
   //
 }
@@ -624,14 +891,13 @@ void OSNSMultipleImpact::ComputeEnerContact()
     };
   }
 
-
   //
   /*
-  cout << "Potential energy at contacts at the end of step:" << endl;
-  EnerContact->display();
-  cout << "Work done during the compression phase at contacts" << endl;
-  WcContact->display();
-  */
+    cout << "Potential energy at contacts at the end of step:" << endl;
+    EnerContact->display();
+    cout << "Work done during the compression phase at contacts" << endl;
+    WcContact->display();
+    */
   //
 }
 //======================================================================================
@@ -655,32 +921,46 @@ void OSNSMultipleImpact::UpdateDuringImpact()
     lambda = ur->lambda(levelMin());
     // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
     // save into y !!
-    setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is
+    setBlock(*VelContact, y, y->size(), pos, 0);
     // saved into lambda[1] !!
-    setBlock(*DelImpulseContact, lambda, lambda->size(), pos, 0);
+    setBlock(*ImpulseContact_update, lambda, lambda->size(), pos, 0);
+    //setBlock(*DelImpulseContact, lambda, lambda->size(), pos, 0);
   };
   //2. Update the Input[1], state of DS systems, Output[1]
   simulation()->update(levelMin());
+  ImpulseContact_update->zero(); // reset input[1] to zero after each update
 }
 //--------------------------------------------------------------------------------------
-void OSNSMultipleImpact::SaveDataOneStep()
+void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
 {
   // Save the total impulse at the primary contacts (time-like independent variable) and the time evolution during impact
-  OutputFile << Impulse_variable << " ";
-  OutputFile << Time_variable << " ";
+  if (YesSaveByMatrix)
+  {
+    if (_ithPoint >= _DataMatrix->size(0))
+      RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of points saved exceeds the size of matrix allocated!!!");
+    (*_DataMatrix)(_ithPoint, 0) =  Impulse_variable;
+    (*_DataMatrix)(_ithPoint, 1) = Time_variable;
+  }
+  else
+  {
+    OutputFile << Impulse_variable << " ";
+    OutputFile << Time_variable << " ";
+  }
   // Save the data related to UnitaryRelations
   SP::UnitaryRelationsGraph indexSet0 = simulation()->indexSet(0);
   SP::UnitaryRelationsGraph indexSet1 = simulation()->indexSet(levelMin());
   unsigned int pos;
   int Status_ur;
   UnitaryRelationsGraph::VIterator ui, uiend;
+  unsigned int col_pos = 2;
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui); // UR
+    unsigned int id_contact = ur->interaction()->number();
     SP::SiconosVector ydot = ur->y(1);
     SP::SiconosVector P_ur(new SimpleVector(ur->interaction()->nonSmoothLaw()->size()));
     SP::SiconosVector F_ur(new SimpleVector(ur->interaction()->nonSmoothLaw()->size()));
-    SP::SiconosVector E_ur(new SimpleVector(ur->interaction()->nonSmoothLaw()->size()));
+    SP::SiconosVector E_ur(new SimpleVector(1));
 
     if (indexSet1->is_vertex(ur)) // if UR belongs to the IndexSet[1]
     {
@@ -698,12 +978,30 @@ void OSNSMultipleImpact::SaveDataOneStep()
       E_ur->zero();   // no potential at this UR
     };
     //
-    OutputFile << ur->interaction()->number() << " "; // Write the Id of the its parent interaction
-    OutputFile << Status_ur << " "; // Write the status of UR
-    WriteSiconosVector(*ydot); // Write the relative velocity at the UR
-    WriteSiconosVector(*P_ur); // Write the total impulse at the UR
-    WriteSiconosVector(*F_ur); // Write the force at the UR
-    WriteSiconosVector(*E_ur); // Write the potential energy at the UR
+    if (YesSaveByMatrix)
+    {
+      // Write the relative velocity at the UR
+      WriteVectorIntoMatrix(*ydot, _ithPoint, col_pos);
+      col_pos = col_pos + ydot->size();
+      // Write the total impulse at the UR
+      WriteVectorIntoMatrix(*P_ur, _ithPoint, col_pos);
+      col_pos = col_pos + P_ur->size();
+      // Write the force at the UR
+      WriteVectorIntoMatrix(*F_ur, _ithPoint, col_pos);
+      col_pos = col_pos + F_ur->size();
+      // Write the potential energy at the UR
+      WriteVectorIntoMatrix(*E_ur, _ithPoint, col_pos);
+      col_pos = col_pos + E_ur->size();
+    }
+    else
+    {
+      OutputFile << id_contact  << " "; // Write the Id of the its parent interaction
+      OutputFile << Status_ur << " "; // Write the status of UR
+      WriteSiconosVector(*ydot); // Write the relative velocity at the UR
+      WriteSiconosVector(*P_ur); // Write the total impulse at the UR
+      WriteSiconosVector(*F_ur); // Write the force at the UR
+      WriteSiconosVector(*E_ur); // Write the potential energy at the UR
+    }
   }
   // Save the data related to DS
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -711,31 +1009,49 @@ void OSNSMultipleImpact::SaveDataOneStep()
   for (boost::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
     SP::DynamicalSystem ds = DSG->bundle(*dsi); // DS
+    unsigned int id_ds = ds->number();
     SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
     SP::SiconosVector qdot = Lagds->velocity();
     // Write
-    OutputFile << ds->number() << " "; // number of DS
-    WriteSiconosVector(*qdot);
+    if (YesSaveByMatrix)
+    {
+      WriteVectorIntoMatrix(*qdot, _ithPoint, col_pos);
+      col_pos = col_pos + qdot->size();
+    }
+    else
+    {
+      OutputFile << id_ds  << " "; // number of DS
+      WriteSiconosVector(*qdot);
+    }
   }
-  // Terminate the line
-  OutputFile << "\n";
+  if (!YesSaveByMatrix)
+  {
+    // Terminate the line
+    OutputFile << "\n";
+  }
 }
 //=======================================================================================
 void OSNSMultipleImpact::ComputeImpact()
 {
   // open the stream file
-  if (YesSaveData)
+  if ((YesSaveData) && (!YesSaveByMatrix))
   {
     OutputFile.open(NameFile.c_str(), ios::out | ios::trunc);
     if (!OutputFile.is_open())
-      SiconosVectorException::selfThrow("OSNSMultipleImpact::ComputeImpact==> write error : Fail to open \"" + NameFile + "\"");
+      RuntimeException::selfThrow("OSNSMultipleImpact::ComputeImpact==> write error : Fail to open \"" + NameFile + "\"");
     OutputFile.precision(15);
   }
   //
   Impulse_variable = 0.0;
   Time_variable = 0.0;
   unsigned int number_step = 1;
-  unsigned int _counterstepsave = NstepSave - 1;
+  unsigned int point_save = 0;
+  unsigned int _counterstepsave = 1;
+  unsigned int Old_prima_contact;
+  bool IsPrimaConChange = true;
+  // Show computation progress
+  cout << "*********** Impact computation progress *************" << endl;
+  boost::progress_display show_progress(NstepMax);
   //
   /*
   cout << "----------Before multiple impacts computation---------------" << endl;
@@ -745,7 +1061,13 @@ void OSNSMultipleImpact::ComputeImpact()
   TolImpulseContact->display();
   */
   //cout << "-------------------Multiple impacts computation starts:-----------------------" << endl;
-
+  // First save at the beginning of impact computation
+  if (YesSaveData)
+  {
+    SaveDataOneStep(point_save); // Save the data
+    point_save++;
+  }
+  //
   while (1 != 0)
   {
     //
@@ -754,55 +1076,93 @@ void OSNSMultipleImpact::ComputeImpact()
     cout << "Impulse variable: " << Impulse_variable << endl;
     cout << "Time_variable: " << Time_variable << endl;
     */
-    //
-    //Step 1: Write data into output file at the beginning of each step
-    if ((YesSaveData) && (!UpdateEndImpact))
-    {
-      ++_counterstepsave;
-      if (_counterstepsave >= NstepSave)
-      {
-        OutputFile << number_step << " "; // number of calculation step
-        SaveDataOneStep(); // Save the date
-        _counterstepsave = 0; // reset the counter to 0
-      };
-    }
-    //Step 2: check the state at contacts
+    //Step 1: check the state at contacts
     CheckStateContact();
-    //Step 3: check if the multiple impact is terminated or not
+    //Step 2: check if the multiple impact is terminated or not
     if (IsMulImpactTerminate()) // multiple impact terminated
-      break;
-    //Step 4: compute the vector of distributing law
-    ComputeDistriVector();
-    //Step 5: compute the increment of normal impulse and the total impulse at contacts
-    ComputeImpulseContact();
-    // Step 6: compute the relative velocity at contacts
-    ComputeVelContact();
-    // Step 7: compute the potential energy at contacts
-    ComputeEnerContact();
-    // Step 8: update the state of DS and output during impact
-    if (!UpdateEndImpact)
     {
-      UpdateDuringImpact();
-    };
-    //Step 9: Update the time-like variable
+      if (YesSaveData) // Save the date at the end of impact
+      {
+        UpdateDuringImpact(); // Update state of dynamical system
+        SaveDataOneStep(point_save); // Save the data
+      }
+      break;
+    }
+    // Select the primary contact
+    SelectPrimaContact();
+    // If the primary contact change, we have to re-estimate the step size
+    if ((IsPrimaConChange) && (IsNumberOfStepsEst))
+    {
+      ComputeStepSize();
+    }
+    //Step 3: compute the vector of distributing law
+    ComputeDistriVector();
+    //Check if the primary contact change during computation or not
+    if (number_step == 1) // for first step
+    {
+      Old_prima_contact = IdPrimaContact;
+      IsPrimaConChange = false;
+    }
+    else
+    {
+      if (Old_prima_contact == IdPrimaContact)
+      {
+        IsPrimaConChange = false;
+      }
+      else
+      {
+        IsPrimaConChange = true;
+        Old_prima_contact = IdPrimaContact;
+      }
+    }
+    //cout << "Id of the primary contact: " << IdPrimaContact << endl;
+    //cout << "Is the primary contact change: " << IsPrimaConChange << endl;
+
+    //Step 4: compute the increment of normal impulse and the total impulse at contacts
+    ComputeImpulseContact();
+    // Step 5: compute the relative velocity at contacts
+    ComputeVelContact();
+    // Step 6: compute the potential energy at contacts
+    ComputeEnerContact();
+    //Step 7: Update the time-like variable
+    ++number_step;
+    ++_counterstepsave;
+    ++show_progress;
     Impulse_variable = Impulse_variable + DeltaP;
     Time_variable = Time_variable + DeltaP / (*ForceContact)(IdPrimaContact);
-    ++number_step;
+    // Step 8: update the state of DS and output during impact and write data into output file at the beginning of each step
+    if ((YesSaveData) & (_counterstepsave >= NstepSave))
+    {
+      UpdateDuringImpact(); // Update state of dynamical system
+      SaveDataOneStep(point_save); // Save the data
+      point_save++;
+      _counterstepsave = 0; // reset the counter to 0
+    }
+    //
+    if (number_step > NstepMax)
+      // RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps perfomed exceeds the maximal number of steps allowed!!!");
+      break;
   };
   //
+  cout << "*****************Impact computation is terminated******************" << endl;
+  cout << "Number of integration steps: " << number_step << endl;
   /*
-  cout << "----------After multiple impacts computation---------------" << endl;
-  cout << "Number of iterations: " << number_step << endl;
-  cout << "Velocity at contacts: ";
-  VelContact->display();
-  cout << "Impulse at contact: ";
-  TolImpulseContact->display();
-  cout << "Duration of the multiple impacts process: " << Time_variable << " s" << endl;
-  */
+    cout << "Velocity at contacts: ";
+    VelContact->display();
+    cout << "Impulse at contact: ";
+    TolImpulseContact->display();
+    cout << "Duration of the multiple impacts process: " << Time_variable << " s" << endl;
+    */
   // Close the stream file
   if (YesSaveData)
   {
-    OutputFile.close();
+    if (YesSaveByMatrix)
+    {
+      ioMatrix io(NameFile.c_str(), "ascii");
+      io.write(*_DataMatrix, "noDim");
+    }
+    else
+      OutputFile.close();
   }
 }
 //=======================================================================================
@@ -824,19 +1184,24 @@ void OSNSMultipleImpact::PostComputeImpact()
     // Get Y and Lambda for the current Unitary Relation
     y = ur->y(levelMin());
     lambda = ur->lambda(levelMin());
+    // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
+    // save into y !!
+    setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is
+    // saved into lambda[1] !!
+    setBlock(*ImpulseContact_update, lambda, lambda->size(), pos, 0);
     // If the update is performed at the end of the impact process, we update the total normal impulse at contacts
     // from the beginning to the end of impact (vector TolImpulseContact). Otherwise, we must reset the lambda[1] to zero because
     // the post-impact velocity has been calculated during impact
-    if (UpdateEndImpact)
-    {
-      // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
-      // save into y !!
-      setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is
-      // saved into lambda[1] !!
-      setBlock(*TolImpulseContact, lambda, lambda->size(), pos, 0);
-    }
-    else //
-      lambda->zero();
+    // if (!YesSaveData) // we update the impact state at the end of impact
+    //  {
+    //    // Copy VelContact/TolImpulseContact, starting from index pos into y/lambda
+    //    // save into y !!
+    //    setBlock(*VelContact, y, y->size(), pos, 0);// Warning: yEquivalent is
+    //    // saved into lambda[1] !!
+    //    setBlock(*TolImpulseContact, lambda, lambda->size(), pos, 0);
+    //  }
+    // else //
+    //  lambda->zero();
   }
 }
 //========================================================================================
@@ -859,7 +1224,6 @@ void OSNSMultipleImpact::display() const
 {
   cout << "<<<<<<<<<<<<<<<<< Information about the multiple impact >>>>>>>>>>>>>>>>>>>>>" << endl;
   cout << "Type of the contact compliance law: " << TypeCompLaw << endl;
-  cout << "Power of the compliance law: " << PowCompLaw << endl;
   cout << "Number of contacts involved into impacts: " << Ncontact << endl;
   cout << "Step size used: " << DeltaP << endl;
   cout << "Primary impulse at the end of impact: " << Impulse_variable << endl;
