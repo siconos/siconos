@@ -19,28 +19,56 @@
 //	
 // SWIG interface for Siconos Kernel types
 
-// numpy array to SP::SimpleVector (here a SiconosVector is always a
-// dense SimpleVector)
+
+
+// check on input : a numpy array or a SiconosVector
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SiconosVector>)
 {
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SiconosVector>)
   int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0);
   int state = SWIG_CheckState(res);
   $1 = is_array($input) || PySequence_Check($input) || state;
 }
 
+// check on input : a numpy array or a SimpleVector
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (boost::shared_ptr<SimpleVector>)
 {
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SimpleVector>)
   int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t, 0);
   int state = SWIG_CheckState(res);
   $1 = is_array($input) || PySequence_Check($input) || state;
 }
 
+// check on input : a numpy array or a SiconosMatrix
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
+(boost::shared_ptr<SiconosMatrix>)
+{
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SiconosMatrix>)
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t, 0);
+  int state = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || state;
+}
 
+// check on input : a numpy array or a SimpleMatrix
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
+(boost::shared_ptr<SimpleMatrix>)
+{
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SimpleMatrix>)
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t, 0);
+  int state = SWIG_CheckState(res);
+  $1 = is_array($input) || PySequence_Check($input) || state;
+}
+
+
+
+// numpy or SP::SiconosVector on input -> SP::SiconosVector
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
 {
-
+  // %typemap(in,fragment="NumPy_Fragments")
+  // %boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int
+  // %is_new_object)
   void *argp1=0;
   int res1=0;
   int newmem = 0;
@@ -53,6 +81,7 @@
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
+      // taken from generated code, we assume we should never get here
       assert(false);
       tempshared1 = *reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
       delete reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
@@ -86,10 +115,12 @@
   }
 }
 
-
+// numpy or SP::SimpleVector on input -> SP::SimpleVector
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int is_new_object)
 {
-
+  // %typemap(in,fragment="NumPy_Fragments")
+  // %boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int
+  // %is_new_object)
   void *argp1=0;
   int res1=0;
   int newmem = 0;
@@ -102,6 +133,7 @@
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
+      // taken from generated code, we assume we should never get here
       assert(false);
       tempshared1 = *reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
       delete reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
@@ -135,15 +167,24 @@
   }
 }
 
+// director input : SP::SiconosVector -> numpy
 %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
 {
-// directorin typemap
+  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
   if($1_name)
   {
-    npy_intp this_vector_dim[1];
-    this_vector_dim[0]=$1_name->size();
-    // warning shared_ptr counter lost here du to getArray()
-    $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+    if (ask<IsDense>(*$1_name))
+    {
+      npy_intp this_vector_dim[1];
+      this_vector_dim[0]=$1_name->size();
+      // warning shared_ptr counter lost here du to getArray()
+      $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+    }
+    else
+    {
+      // not a dense vector : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t,  0 );  
+    }
   }
   else
   {
@@ -151,15 +192,24 @@
   }
 }
 
+// director input : SP::SimpleVector -> numpy
 %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> ()
 {
-// directorin typemap
+  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> ()
   if($1_name)
   {
-    npy_intp this_vector_dim[1];
-    this_vector_dim[0]=$1_name->size();
-    // warning shared_ptr counter lost here du to getArray()
-    $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+    if (ask<IsDense>(*$1_name))
+    {
+      npy_intp this_vector_dim[1];
+      this_vector_dim[0]=$1_name->size();
+      // warning shared_ptr counter lost here du to getArray()
+      $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+    }
+    else
+    {
+      // not a dense vector : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t,  0 );  
+    }
   }
   else
   {
@@ -167,20 +217,67 @@
   }
 }
 
+// director input : SP::SiconosMatrix -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
+{
+  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
+  if ($1_name)
+  {
+    if (($1_name).getNum() == 1)
+    {
+      npy_intp this_matrix_dim[2];
+      this_matrix_dim[0]=$1->size(0);
+      this_matrix_dim[1]=$1->size(1);
+      // warning shared_ptr counter lost here du to getArray()
+      $input = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+      PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
+    }
+    else
+    {
+      // not a dense matrix : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t,  0 );  
+    }
 
+  }
+  else
+  {
+    $input = Py_None;
+  }
+}
+
+// director input : SP::SimpleMatrix -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleMatrix> ()
+{
+  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleMatrix> ()
+  if ($1_name)
+  {
+    if (($1_name).getNum() == 1)
+    {
+      npy_intp this_matrix_dim[2];
+      this_matrix_dim[0]=$1->size(0);
+      this_matrix_dim[1]=$1->size(1);
+      // warning shared_ptr counter lost here du to getArray()
+      $input = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+      PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
+    }
+    else
+    {
+      // not a dense matrix : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t,  0 );  
+    }
+  }
+  else
+  {
+    $input = Py_None;
+  }
+}
+
+// director output : PyObject -> SP::SiconosVector 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
 {
-  // directorout from KernelTypes.i
+  // %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
   void * swig_argp;
   int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t,  0  | 0);
-
-
-// strange HAlpha not initialized (LinearOSNS)
-// so this is commented
-//  if (!SWIG_IsOK(swig_res)) 
-//  {
-//    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""SP::SiconosVector""'");
-//  }
 
   if ((!swig_argp) || (!SWIG_IsOK(swig_res)))
   {
@@ -194,17 +291,12 @@
   }
 }
 
+// director output : PyObject -> SP::SimpleVector 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
 {
-  // directorout from KernelTypes.i
+  // %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
   void * swig_argp;
   int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t,  0  | 0);
-
-// idem SiconosVector
-//  if (!SWIG_IsOK(swig_res)) 
-//  {
-//    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""SP::SiconosMatrix""'");
-//  }
 
   if ((!swig_argp) || (!SWIG_IsOK(swig_res)))
   {  
@@ -219,17 +311,9 @@
 }
 
 
-// numpy array to SP::SimpleMatrix (here a SiconosMatrix is always a
-// dense SimpleMatrix)
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SiconosMatrix>)
-{
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t, 0);
-  int state = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || state;
-}
 %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
+  // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
   if (!array || !require_dimensions(array,2) ||
@@ -242,16 +326,24 @@
   $1 = tmp;
  }
 
+%typemap(in) boost::shared_ptr<SimpleMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
-// from C++ to python 
-%template() boost::shared_ptr<SiconosVector>;
-%template() boost::shared_ptr<SimpleVector>;
-%template() boost::shared_ptr<BlockVector>;
-%template() boost::shared_ptr<SiconosMatrix>;
-%template() boost::shared_ptr<SimpleMatrix>;
+  // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
+  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+
+  if (!array || !require_dimensions(array,2) ||
+      !require_native(array) || !require_contiguous(array)) SWIG_fail;
+
+  SP::SimpleMatrix tmp;
+  tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
+  // copy this is due to SimpleMatrix based on resizable std::vector
+  memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
+  $1 = tmp;
+ }
 
 %typemap(out) boost::shared_ptr<SiconosVector>
 {
+  // %typemap(out) boost::shared_ptr<SiconosVector>
   if ($1)
   {
     npy_intp this_vector_dim[1];
@@ -265,8 +357,27 @@
   }
 }
 
+%typemap(out) boost::shared_ptr<SimpleVector>
+{
+  // %typemap(out) boost::shared_ptr<SimpleVector>
+  if ($1)
+  {
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0]=$1->size();
+    // warning shared_ptr counter lost here du to getArray()
+    $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+  }
+  else
+  {
+    $result = Py_None;
+  }
+}
+
+
+
 %typemap(out) boost::shared_ptr<SiconosMatrix>
 {
+  // %typemap(out) boost::shared_ptr<SiconosMatrix>
   if ($1)
   {
     npy_intp this_matrix_dim[2];
@@ -282,11 +393,36 @@
   }
 }
 
-// Siconos{Vector,Matrix} in api mean Simple{Vector,Matrix} here
+%typemap(out) boost::shared_ptr<SimpleMatrix>
+{
+  // %typemap(out) boost::shared_ptr<SimpleMatrix>
+  if ($1)
+  {
+    npy_intp this_matrix_dim[2];
+    this_matrix_dim[0]=$1->size(0);
+    this_matrix_dim[1]=$1->size(1);
+    // warning shared_ptr counter lost here du to getArray()
+    $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+    PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+  }
+  else
+  {
+    $result = Py_None;
+  }
+}
+
+
+// needed?
+// from C++ to python 
+%template() boost::shared_ptr<SiconosVector>;
+%template() boost::shared_ptr<SimpleVector>;
+%template() boost::shared_ptr<BlockVector>;
+%template() boost::shared_ptr<SiconosMatrix>;
+%template() boost::shared_ptr<SimpleMatrix>;
+
+
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
 %apply (boost::shared_ptr<SimpleVector>) { (SP::SimpleVector) };
 
-%apply (boost::shared_ptr<SiconosMatrix>) { (SP::SimpleMatrix) };
-%apply (boost::shared_ptr<SiconosMatrix>) { (boost::shared_ptr<SimpleMatrix>) };
-%apply (boost::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) }; 
-
+%apply (boost::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
+%apply (boost::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
