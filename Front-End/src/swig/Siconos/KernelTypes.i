@@ -135,11 +135,38 @@
   }
 }
 
-//%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
-//{
-//  // directorin typemap
-//  $1=$input;
-//}
+%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
+{
+// directorin typemap
+  if($1_name)
+  {
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0]=$1_name->size();
+    // warning shared_ptr counter lost here du to getArray()
+    $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+  }
+  else
+  {
+    $input = Py_None;
+  }
+}
+
+%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> ()
+{
+// directorin typemap
+  if($1_name)
+  {
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0]=$1_name->size();
+    // warning shared_ptr counter lost here du to getArray()
+    $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+  }
+  else
+  {
+    $input = Py_None;
+  }
+}
+
 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
 {
