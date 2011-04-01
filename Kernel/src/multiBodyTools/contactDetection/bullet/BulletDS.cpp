@@ -22,6 +22,7 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <LinearMath/btVector3.h>
 
 BulletDS::BulletDS(const BroadphaseNativeTypes& shape_type,
@@ -73,6 +74,23 @@ BulletDS::BulletDS(const BroadphaseNativeTypes& shape_type,
     params[1] = (*shapeParams)(1);
     params[2] = (*shapeParams)(2);
     _collisionShape.reset(new btCylinderShape(params));
+    _collisionShape->calculateLocalInertia(mass, inertia);
+    (*_I)(0, 0) = inertia[0];
+    (*_I)(1, 1) = inertia[1];
+    (*_I)(2, 2) = inertia[2];
+
+    _collisionObject->setCollisionShape(&*_collisionShape);
+
+    break;
+  };
+
+  case CAPSULE_SHAPE_PROXYTYPE :
+  {
+    btScalar radius;
+    btScalar height;
+    radius = (*shapeParams)(0);
+    height = (*shapeParams)(1);
+    _collisionShape.reset(new btCapsuleShape(radius, height));
     _collisionShape->calculateLocalInertia(mass, inertia);
     (*_I)(0, 0) = inertia[0];
     (*_I)(1, 1) = inertia[1];
