@@ -1,4 +1,4 @@
-/* Siconos-sample version 3.1.0, Copyright INRIA 2005-2009.
+/* Siconos-Kernel, Copyright INRIA 2005-2010.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,64 +15,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- *
- */
-
-/*! \file SiconosBodies.hpp
-  \brief SiconosBodies class - model + plans + space filter
 */
-#ifndef SiconosBodies_hpp
-#define SiconosBodies_hpp
 
-#include "Model.hpp"
-#include "SpaceFilter.hpp"
+#ifndef BulletR_hpp
+#define BulletR_hpp
 
-/** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
- */
+#include "BulletSiconos.hpp"
 
-class SiconosBodies
+#include "NewtonEulerR.hpp"
+
+class BulletR : public NewtonEulerRFC3D
 {
-
-protected:
-
-  SP::FMatrix _moving_plans;
-  SP::SiconosMatrix _plans;
-  SP::Model _model;
-  SP::SpaceFilter _playground;
+private:
+  SP::btManifoldPoint _contactPoints;
 
 public:
+  BulletR(SP::btManifoldPoint);
 
-  virtual void init() = 0;
-
-  virtual void compute();
-
-  SP::Model model()
+  SP::btManifoldPoint contactPoints() const
   {
-    return _model;
-  }
-
-
-  SP::FMatrix movingPlans()
-  {
-    return _moving_plans;
-  }
-  SP::SiconosMatrix plans()
-  {
-    return _plans;
-  }
-
-
-  SP::SpaceFilter spaceFilter()
-  {
-    return _playground;
+    return _contactPoints;
   };
 
-  /** destructor
-   */
-  virtual ~SiconosBodies() {};
+  void computeh(double);
 
+  ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(SiconosBodies);
+struct ForContactPoints : public Question<SP::btManifoldPoint>
+{
+  ANSWER(BulletR, contactPoints());
+};
 
-#endif // SiconosBodies_hpp
+TYPEDEF_SPTR(BulletR);
+
+#endif

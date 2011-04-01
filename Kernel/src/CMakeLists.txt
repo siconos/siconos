@@ -44,6 +44,7 @@ SET(SiconosKernel_DIRS
 SET(SiconosKernel_Unstable_SRCS 
   simulationTools/PrimalFrictionContact.cpp
   simulationTools/MLCP2.cpp
+  simulationTools/OSNSMultipleImpact.cpp
   )
 
 
@@ -125,6 +126,9 @@ IF(WITH_BULLET)
     SET(HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
     SET(SiconosKernel_DIRS ${SiconosKernel_DIRS} multiBodyTools/contactDetection/bullet)
+    IF(BULLET_USE_DOUBLE_PRECISION)
+      APPEND_FLAGS(CMAKE_CXX_FLAGS "-DBT_USE_DOUBLE_PRECISION")
+    ENDIF(BULLET_USE_DOUBLE_PRECISION)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 

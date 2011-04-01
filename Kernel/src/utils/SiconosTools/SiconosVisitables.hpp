@@ -5,6 +5,7 @@
 #define SICONOS_VISITABLES()                                 \
   REGISTER(DynamicalSystem)                                  \
   REGISTER(DynamicalSystemXML)                               \
+  REGISTER(Relation)                                         \
   REGISTER(DiskPlanR)                                        \
   REGISTER(DiskMovingPlanR)                                  \
   REGISTER(CircleCircleR)                                    \
@@ -47,6 +48,9 @@
   REGISTER(LagrangianLinearTIR)                              \
   REGISTER(NewtonEulerDS)                                    \
   REGISTER(NewtonEulerR)                                     \
+  REGISTER(BulletR)                                          \
+  REGISTER(SpaceFilter)                                      \
+  REGISTER(BulletSpaceFilter)                                \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
   REGISTER_BASE_EXTERN(Lmgc2DDSK, LagrangianDS)              \
   REGISTER_BASE_EXTERN(Lmgc2DPOLYG, LagrangianDS)            \
@@ -55,5 +59,6 @@
   REGISTER_BASE(Circle, LagrangianDS)                        \
   REGISTER_BASE(SphereLDS, LagrangianDS)                     \
   REGISTER_BASE(SphereNEDS, NewtonEulerDS)                   \
- 
+  REGISTER_BASE(BulletDS, NewtonEulerDS)
+
 #endif

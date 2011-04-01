@@ -36,9 +36,8 @@ typedef void (*Fext)(double , double*, double*, double*);
  */
 class NewtonEulerDS : public DynamicalSystem
 {
-private:
-  void internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix);
 protected:
+  void internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix);
 
   // -- MEMBERS --
 

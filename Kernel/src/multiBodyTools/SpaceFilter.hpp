@@ -22,9 +22,7 @@
  */
 
 
-/** Very simple spatial filtering of interactions between 2D/3D
- *  systems => to see how may be plugged more elaborated collision
- *  detection softwares.
+/** Basic broad phase contact detection between 2D/3D mechanical systems
  *
  *  algorithm description:
  *   Optimized Spatial Hashing for Collision Detection of Deformable Objects
@@ -265,6 +263,10 @@ public:
    */
   virtual ~SpaceFilter() {};
 
+
+  /** visitor hook
+   */
+  VIRTUAL_ACCEPT_VISITORS();
 };
 
 #endif /* SpaceFilter_hpp */

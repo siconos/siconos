@@ -248,6 +248,23 @@ struct Question : public SiconosVisitor
 
 };
 
+#define ANSWER(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = ds . CODE;                         \
+  }
+
+#define ANSWER_V(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = CODE;                              \
+  }
+
+#define ANSWER_F(T,CODE) \
+  void visit(const T& ds)                       \
+  {                                             \
+    answer = CODE(ds);                          \
+  }
 
 
 
