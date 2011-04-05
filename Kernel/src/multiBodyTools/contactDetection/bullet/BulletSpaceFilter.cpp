@@ -18,10 +18,10 @@
 */
 
 #include "BulletSpaceFilter.hpp"
+#include "BulletTimeStepping.hpp"
 
 #include "BulletR.hpp"
 #include "BulletDS.hpp"
-
 
 struct ForPosition : public Question<SP::SiconosVector>
 {
@@ -63,23 +63,6 @@ void BulletSpaceFilter::buildInteractions(double time)
 {
 
   // set bullet coordinates from Siconos coordinates
-  SP::DynamicalSystemsGraph dsg = _nsds->dynamicalSystems();
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg->vertices();
-  for (; dsi != dsiend; ++dsi)
-  {
-    SP::btCollisionObject co = ask<ForCollisionObject>(*(dsg->bundle(*dsi)));
-    SP::SiconosVector q = ask<ForPosition>(*(dsg->bundle(*dsi)));
-
-    co->getWorldTransform().getOrigin().setX((*q)(0));
-    co->getWorldTransform().getOrigin().setY((*q)(1));
-    co->getWorldTransform().getOrigin().setZ((*q)(2));
-
-    co->getWorldTransform().getBasis().setRotation(btQuaternion((*q)(4), (*q)(5),
-        (*q)(6), (*q)(3)));
-  };
-
-
   _collisionWorld->performDiscreteCollisionDetection();
 
   std::map<btManifoldPoint*, bool> contactPoints;
@@ -131,6 +114,7 @@ void BulletSpaceFilter::buildInteractions(double time)
         }
         if (obB->getUserPointer())
         {
+          assert(false);
           SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
           inter->insert(dsb);
         }

@@ -299,10 +299,10 @@ public:
   /** A buffer containing the forces due to this.
       It is an output unused for the computation.
    */
-  SP::SimpleVector contactForce()
+  SP::SimpleVector contactForce() const
   {
     return _contactForce;
-  }
+  };
 
   /** main relation members display
    */
