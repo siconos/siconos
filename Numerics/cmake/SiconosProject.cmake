@@ -147,9 +147,6 @@ MACRO(SICONOS_PROJECT
       SET(SITE ${PIPOL_SITE})
     ENDIF(PIPOL_IMAGE)
     
-    INCLUDE(DartConfig)
-    INCLUDE(Dart)
-
     # Tests coverage (taken from ViSp)
     
     #
