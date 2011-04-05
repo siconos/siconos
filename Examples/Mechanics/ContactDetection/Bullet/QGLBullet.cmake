@@ -1,0 +1,2 @@
+SET(WithQGLViewer TRUE)
+
