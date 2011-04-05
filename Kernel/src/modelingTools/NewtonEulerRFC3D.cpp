@@ -32,12 +32,19 @@ using namespace std;
             |nz t1z t2z|
 
 
+  |Rx| |PGx| |Ry PGz - Rz PGy|
+  |Ry|*|PGy|=|Rz PGx - Rx PGz|
+  |Rz| |PGz| |Rx PGy - Ry PGx|
+
+
+
+
   |  R | |1 0 0     |
   |    |=|0 1 0     |
   |R*PG| |0 0 1     |.R=N^t R = N^t M^t r
-         |0 -PGz PGy|
-         |PGz 0 -PGx|
-         |-PGy PGx 0|
+         |0 PGz -PGy|
+         |-PGz 0 PGx|
+         |PGy -PGx 0|
 
 we want :
 
@@ -89,14 +96,15 @@ void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP:
   (*N)(0, 0) = 1;
   (*N)(1, 1) = 1;
   (*N)(2, 2) = 1;
+
   (*N)(0, 3) = 0;
-  (*N)(0, 4) = Pz - G1z;
-  (*N)(0, 5) = -(Py - G1y);
-  (*N)(1, 3) = -(Pz - G1z);
+  (*N)(0, 4) = (G1z - Pz);
+  (*N)(0, 5) = -(G1y - Py);
+  (*N)(1, 3) = -(G1z - Pz);
   (*N)(1, 4) = 0;
-  (*N)(1, 5) = Px - G1x;
-  (*N)(2, 3) = Py - G1y;
-  (*N)(2, 4) = -(Px - G1x);
+  (*N)(1, 5) = G1x - Px;
+  (*N)(2, 3) = G1y - Py;
+  (*N)(2, 4) = -(G1x - Px);
   (*N)(2, 5) = 0;
 
   prod(*M, *N, *jhqT, true);
@@ -140,27 +148,32 @@ void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP:
   (*N)(1, 1) = 1;
   (*N)(2, 2) = 1;
   (*N)(0, 3) = 0;
-  (*N)(0, 4) = Pz - G1z;
-  (*N)(0, 5) = -(Py - G1y);
-  (*N)(1, 3) = -(Pz - G1z);
+
+  (*N)(0, 3) = 0;
+  (*N)(0, 4) = (G1z - Pz);
+  (*N)(0, 5) = -(G1y - Py);
+  (*N)(1, 3) = -(G1z - Pz);
   (*N)(1, 4) = 0;
-  (*N)(1, 5) = Px - G1x;
-  (*N)(2, 3) = Py - G1y;
-  (*N)(2, 4) = -(Px - G1x);
+  (*N)(1, 5) = G1x - Px;
+  (*N)(2, 3) = G1y - Py;
+  (*N)(2, 4) = -(G1x - Px);
   (*N)(2, 5) = 0;
+
 
   (*N)(0, 6) = -1;
   (*N)(1, 7) = -1;
   (*N)(2, 8) = -1;
+
   (*N)(0, 9) = 0;
-  (*N)(0, 10) = -(Pz - G2z);
-  (*N)(0, 11) = (Py - G2y);
-  (*N)(1, 9) = (Pz - G2z);
+  (*N)(0, 10) = -(G2z - Pz);
+  (*N)(0, 11) = (G2y - Py);
+  (*N)(1, 9) = (G2z - Pz);
   (*N)(1, 10) = 0;
-  (*N)(1, 11) = -(Px - G2x);
-  (*N)(2, 9) = -(Py - G2y);
-  (*N)(2, 10) = (Px - G2x);
+  (*N)(1, 11) = -(G2x - Px);
+  (*N)(2, 9) = -(G2y - Py);
+  (*N)(2, 10) = (G2x - Px);
   (*N)(2, 11) = 0;
+
   prod(*M, *N, *jhqT, true);
   //cout<<"jhqt\n";
   //jhqT->display();
