@@ -118,6 +118,7 @@ MACRO(SICONOS_PROJECT
 
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
+    INCLUDE(CTest)
     ENABLE_TESTING()
     
     IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
