@@ -212,7 +212,8 @@ int MLCP::compute(double time)
     }
 
     // --- Recovering of the desired variables from MLCP output ---
-    postCompute();
+    if (!info)
+      postCompute();
 
   }
   else

@@ -129,6 +129,8 @@ struct SystemData
 {
   SP::SiconosMatrix upper_block;   // i,j block i<j
   SP::SiconosMatrix lower_block;   // i,j block i>j
+  SP::SiconosMatrix upper_blockProj;   // i,j block i<j
+  SP::SiconosMatrix lower_blockProj;   // i,j block i>j
 };
 
 struct GraphData

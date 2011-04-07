@@ -41,6 +41,7 @@ protected:
   double _constraintTol;
   /*disabled or enabled projection*/
   unsigned int _doProj;
+  unsigned int _doOnlyProj;
 public:
 
   /** Constructor with the time-discretisation.
@@ -71,7 +72,10 @@ public:
   {
     _doProj = v;
   }
-
+  inline void setDoOnlyProj(unsigned int v)
+  {
+    _doOnlyProj = v;
+  }
   /** newton algorithm
    * \param double, convergence criterion
    * \param unsigned int: maximum number of Newton steps

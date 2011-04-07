@@ -114,34 +114,38 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
     }
 
 
-    // UnitaryRelationsGraph::EIterator ei, eiend;
-    // for (boost::tie(ei, eiend) = indexSet->edges();
-    //      ei != eiend; ++ei)
-    // {
-    //   UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
-    //   UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
+    UnitaryRelationsGraph::EIterator ei, eiend;
+    for (boost::tie(ei, eiend) = indexSet->edges();
+         ei != eiend; ++ei)
+    {
+      UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
+      UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
 
-    //   SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
-    //   SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
+      SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
+      SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
 
-    //   pos = (*unitaryBlocksPositions)[ur1];
+      pos =  ur1->absolutePositionProj();//(*unitaryBlocksPositions)[ur1];
 
-    //   assert(indexSet->is_vertex(ur2));
+      assert(indexSet->is_vertex(ur2));
 
-    //   col = (*unitaryBlocksPositions)[ur2];
+      col =  ur2->absolutePositionProj();//(*unitaryBlocksPositions)[ur2];
 
 
-    //   assert(pos < dimRow);
-    //   assert(col < dimColumn);
+      assert(pos < dimRow);
+      assert(col < dimColumn);
+      //printf("OSNSMatrix M1: %i %i",M1->size(0),M1->size(1));
+      //printf("OSNSMatrix upper: %i %i",indexSet->properties(*ei).upper_blockProj->size(0),indexSet->properties(*ei).upper_blockProj->size(1));
+      //printf("OSNSMatrix lower: %i %i",indexSet->properties(*ei).lower_blockProj->size(0),indexSet->properties(*ei).lower_blockProj->size(1));
 
-    //   boost::static_pointer_cast<SimpleMatrix>(M1)
-    //     ->setBlock(std::min(pos,col),std::max(pos,col),
-    //                *indexSet->properties(*ei).upper_block);
 
-    //   boost::static_pointer_cast<SimpleMatrix>(M1)
-    //     ->setBlock(std::max(pos,col),std::min(pos,col),
-    //                  *indexSet->properties(*ei).lower_block);
-    // }
+      boost::static_pointer_cast<SimpleMatrix>(M1)
+      ->setBlock(std::min(pos, col), std::max(pos, col),
+                 *indexSet->properties(*ei).upper_blockProj);
+
+      boost::static_pointer_cast<SimpleMatrix>(M1)
+      ->setBlock(std::max(pos, col), std::min(pos, col),
+                 *indexSet->properties(*ei).lower_blockProj);
+    }
 
   }
   else // if storageType == 1

@@ -28,9 +28,9 @@ int PivotJointR::_sNbEqualities = 5;
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P, SP::SimpleVector A): KneeJointR(d1, d2, P)
 {
   // SP::SiconosVector q1 = d1->q0();
-  // ::boost::math::quaternion<float>    quat1(q1->getValue(3),-q1->getValue(4),-q1->getValue(5),-q1->getValue(6));
-  // ::boost::math::quaternion<float>    quatA(0,A->getValue(0),A->getValue(1),A->getValue(2));
-  // ::boost::math::quaternion<float>    quatBuff(0,0,0,0);
+  // ::boost::math::quaternion<double>    quat1(q1->getValue(3),-q1->getValue(4),-q1->getValue(5),-q1->getValue(6));
+  // ::boost::math::quaternion<double>    quatA(0,A->getValue(0),A->getValue(1),A->getValue(2));
+  // ::boost::math::quaternion<double>    quatBuff(0,0,0,0);
   // /*calcul of axis _A*/
   // quatBuff=quat1*quatA/quat1;
   // _Ax=quatBuff.R_component_2();
@@ -68,6 +68,8 @@ void PivotJointR::initComponents()
     _jachqProj.reset(new SimpleMatrix(6, 7));
     _yProj.reset(new SimpleVector(6));
   }
+  _jachqProj->zero();
+  _yProj->zero();
 }
 void PivotJointR::buildA1A2()
 {
@@ -87,31 +89,32 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
   _jachq->setValue(3, 1, 0);
   _jachq->setValue(3, 2, 0);
   _jachq->setValue(3, 3, _A1x * (-q21) + _A1y * (-q22) + _A1z * (-q23));
-  _jachq->setValue(3, 4, _A1x * (q20) + _A1y * (q23) + _A1z * (-q22));
-  _jachq->setValue(3, 5, _A1x * (-q23) + _A1y * (q20) + _A1z * (q21));
-  _jachq->setValue(3, 6, _A1x * (q22) + _A1y * (-q21) + _A1z * (q20));
+  _jachq->setValue(3, 4, _A1x * (q20) + _A1y * (-q23) + _A1z * (q22));
+  _jachq->setValue(3, 5, _A1x * (q23) + _A1y * (q20) + _A1z * (-q21));
+  _jachq->setValue(3, 6, _A1x * (-q22) + _A1y * (q21) + _A1z * (q20));
   _jachq->setValue(3, 7, 0);
   _jachq->setValue(3, 8, 0);
   _jachq->setValue(3, 9, 0);
   _jachq->setValue(3, 10, _A1x * (q11) + _A1y * (q12) + _A1z * (q13));
-  _jachq->setValue(3, 11, _A1x * (-q10) + _A1y * (-q13) + _A1z * (q12));
-  _jachq->setValue(3, 12, _A1x * (q13) + _A1y * (-q10) + _A1z * (-q11));
-  _jachq->setValue(3, 13, _A1x * (-q12) + _A1y * (q11) + _A1z * (-q10));
+  _jachq->setValue(3, 11, _A1x * (-q10) + _A1y * (q13) + _A1z * (-q12));
+  _jachq->setValue(3, 12, _A1x * (-q13) + _A1y * (-q10) + _A1z * (q11));
+  _jachq->setValue(3, 13, _A1x * (q12) + _A1y * (-q11) + _A1z * (-q10));
 
   _jachq->setValue(4, 0, 0);
   _jachq->setValue(4, 1, 0);
   _jachq->setValue(4, 2, 0);
   _jachq->setValue(4, 3, _A2x * (-q21) + _A2y * (-q22) + _A2z * (-q23));
-  _jachq->setValue(4, 4, _A2x * (q20) + _A2y * (q23) + _A2z * (-q22));
-  _jachq->setValue(4, 5, _A2x * (-q23) + _A2y * (q20) + _A2z * (q21));
-  _jachq->setValue(4, 6, _A2x * (q22) + _A2y * (-q21) + _A2z * (q20));
+  _jachq->setValue(4, 4, _A2x * (q20) + _A2y * (-q23) + _A2z * (q22));
+  _jachq->setValue(4, 5, _A2x * (q23) + _A2y * (q20) + _A2z * (-q21));
+  _jachq->setValue(4, 6, _A2x * (-q22) + _A2y * (q21) + _A2z * (q20));
   _jachq->setValue(4, 7, 0);
   _jachq->setValue(4, 8, 0);
   _jachq->setValue(4, 9, 0);
   _jachq->setValue(4, 10, _A2x * (q11) + _A2y * (q12) + _A2z * (q13));
-  _jachq->setValue(4, 11, _A2x * (-q10) + _A2y * (-q13) + _A2z * (q12));
-  _jachq->setValue(4, 12, _A2x * (q13) + _A2y * (-q10) + _A2z * (-q11));
-  _jachq->setValue(4, 13, _A2x * (-q12) + _A2y * (q11) + _A2z * (-q10));
+  _jachq->setValue(4, 11, _A2x * (-q10) + _A2y * (q13) + _A2z * (-q12));
+  _jachq->setValue(4, 12, _A2x * (-q13) + _A2y * (-q10) + _A2z * (q11));
+  _jachq->setValue(4, 13, _A2x * (q12) + _A2y * (-q11) + _A2z * (-q10));
+
 
   for (unsigned int ii = 0; ii < _jachq->size(0); ii++)
     for (unsigned int jj = 0; jj < _jachq->size(1); jj++)
@@ -124,13 +127,13 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
   _jachqProj->setValue(5, 4, 2.0 * q11);
   _jachqProj->setValue(5, 5, 2.0 * q12);
   _jachqProj->setValue(5, 6, 2.0 * q13);
-  _jachqProj->setValue(6, 0, 0);
-  _jachqProj->setValue(6, 1, 0);
-  _jachqProj->setValue(6, 2, 0);
-  _jachqProj->setValue(6, 3, 2.0 * q20);
-  _jachqProj->setValue(6, 4, 2.0 * q21);
-  _jachqProj->setValue(6, 5, 2.0 * q22);
-  _jachqProj->setValue(6, 6, 2.0 * q23);
+  _jachqProj->setValue(6, 0 + 7, 0);
+  _jachqProj->setValue(6, 1 + 7, 0);
+  _jachqProj->setValue(6, 2 + 7, 0);
+  _jachqProj->setValue(6, 3 + 7, 2.0 * q20);
+  _jachqProj->setValue(6, 4 + 7, 2.0 * q21);
+  _jachqProj->setValue(6, 5 + 7, 2.0 * q22);
+  _jachqProj->setValue(6, 6 + 7, 2.0 * q23);
 
 
   //_jachq->display();
@@ -179,9 +182,9 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
 
 double PivotJointR::AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23)
 {
-  ::boost::math::quaternion<float>    quat1(q10, q11, q12, q13);
-  ::boost::math::quaternion<float>    quat2_inv(q20, -q21, -q22, -q23);
-  ::boost::math::quaternion<float>    quatBuff = quat1 * quat2_inv;
+  ::boost::math::quaternion<double>    quat1(q10, q11, q12, q13);
+  ::boost::math::quaternion<double>    quat2_inv(q20, -q21, -q22, -q23);
+  ::boost::math::quaternion<double>    quatBuff = quat2_inv * quat1;
   double aX = quatBuff.R_component_2();
   double aY = quatBuff.R_component_3();
   double aZ = quatBuff.R_component_4();
@@ -189,9 +192,9 @@ double PivotJointR::AscalA1(double q10, double q11, double q12, double q13, doub
 }
 double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23)
 {
-  ::boost::math::quaternion<float>    quat1(q10, q11, q12, q13);
-  ::boost::math::quaternion<float>    quat2_inv(q20, -q21, -q22, -q23);
-  ::boost::math::quaternion<float>    quatBuff = quat1 * quat2_inv;
+  ::boost::math::quaternion<double>    quat1(q10, q11, q12, q13);
+  ::boost::math::quaternion<double>    quat2_inv(q20, -q21, -q22, -q23);
+  ::boost::math::quaternion<double>    quatBuff = quat2_inv * quat1;
   double aX = quatBuff.R_component_2();
   double aY = quatBuff.R_component_3();
   double aZ = quatBuff.R_component_4();
@@ -199,6 +202,20 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
 }
 void PivotJointR::computeh(double t)
 {
+  /*check order of ds:*/
+  DSIterator it;
+  SP::NewtonEulerDS lds;
+  it = interaction()->dynamicalSystemsBegin();
+  lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
+  if (lds != _d1)
+  {
+    printf("PivotJointR::computeh order of DS1 wrong.");
+    exit(1);
+  }
+
+
+
+
   KneeJointR::computeh(t);
   SP::SiconosVector x1 = _d1->q();
   //std::cout<<"PivotJoint computeH d1->q:\n";
@@ -213,6 +230,17 @@ void PivotJointR::computeh(double t)
   double q23 = 0;
   if (_d2)
   {
+    /*check order of ds:*/
+    it++;
+    lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
+    if (lds != _d2)
+    {
+      printf("PivotJointR::computeh order of DS2 wrong.");
+      exit(1);
+    }
+
+
+
     SP::SiconosVector x2 = _d2->q();
     q20 = x2->getValue(3);
     q21 = x2->getValue(4);
@@ -224,8 +252,8 @@ void PivotJointR::computeh(double t)
   y->setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
   y->setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
 
-  //    std::cout<<"PivotJoint computeH:\n";
-  //    y->display();
+  std::cout << "PivotJoint computeH:\n";
+  y->display();
   for (unsigned int ii = 0; ii < y->size(); ii++)
     _yProj->setValue(ii, y->getValue(ii));
   _yProj->setValue(5, q10 * q10 + q11 * q11 + q12 * q12 + q13 * q13 - 1.0);

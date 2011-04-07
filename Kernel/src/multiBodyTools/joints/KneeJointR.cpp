@@ -79,10 +79,10 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   G2_abs.setValue(0, q2->getValue(0));
   G2_abs.setValue(1, q2->getValue(1));
   G2_abs.setValue(2, q2->getValue(2));
-  ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<float>    quat2_inv(q2->getValue(3), -q2->getValue(4), -q2->getValue(5), -q2->getValue(6));
-  ::boost::math::quaternion<float>    quatG1P0(0, _G1P0x, _G1P0y, _G1P0z);
-  ::boost::math::quaternion<float>    quatBuff(0, 0, 0, 0);
+  ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
+  ::boost::math::quaternion<double>    quat2_inv(q2->getValue(3), -q2->getValue(4), -q2->getValue(5), -q2->getValue(6));
+  ::boost::math::quaternion<double>    quatG1P0(0, _G1P0x, _G1P0y, _G1P0z);
+  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
   quatBuff = quat1 * quatG1P0 / quat1;
   SimpleVector P0_abs(3);
   P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
@@ -92,7 +92,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   P0_abs.display();
   SimpleVector G2P0_abs(3);
   G2P0_abs = P0_abs - G2_abs;
-  ::boost::math::quaternion<float>    quatG2P0_abs(0, G2P0_abs.getValue(0), G2P0_abs.getValue(1), G2P0_abs.getValue(2));
+  ::boost::math::quaternion<double>    quatG2P0_abs(0, G2P0_abs.getValue(0), G2P0_abs.getValue(1), G2P0_abs.getValue(2));
   quatBuff = quat2_inv * quatG2P0_abs / quat2_inv;
   _G2P0x = quatBuff.R_component_2();
   _G2P0y = quatBuff.R_component_3();
@@ -116,15 +116,15 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRe
   *_P0 = *P0;
   _d1 = d1;
   SP::SiconosVector q1 = d1->q0();
-  ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<float>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
+  ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
+  ::boost::math::quaternion<double>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
 
-  ::boost::math::quaternion<float>    quatBuff(0, 0, 0, 0);
+  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
 
   if (absolutRef)
   {
     /*quadBuff contains the vector _G1P0 if the object has no orientation.*/
-    ::boost::math::quaternion<float>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
+    ::boost::math::quaternion<double>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
     quatBuff = quat1_inv * quatG1P0_abs_init_position * quat1;
 
 
@@ -147,7 +147,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRe
      Where is P0 in the frame of d2 ?:*/
     /*Use initial value of q1 to place P0 in the absolute frame.*/
     /*quatG1P0_abs_ without any orientation*/
-    ::boost::math::quaternion<float>    quatG1P0_abs_(0, _P0->getValue(0) , _P0->getValue(1) , _P0->getValue(2));
+    ::boost::math::quaternion<double>    quatG1P0_abs_(0, _P0->getValue(0) , _P0->getValue(1) , _P0->getValue(2));
     /*quatBuff contains the vector G1P at the initial position*/
     quatBuff = quat1 * quatG1P0_abs_ * quat1_inv;
 

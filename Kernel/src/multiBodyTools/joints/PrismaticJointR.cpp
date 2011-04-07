@@ -70,11 +70,11 @@ void PrismaticJointR::computeFromInitialPosition()
     q1->zero();
     q1->setValue(3, 1);
   }
-  ::boost::math::quaternion<float>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<float>    quat2(q2->getValue(3), q2->getValue(4), q2->getValue(5), q2->getValue(6));
-  ::boost::math::quaternion<float>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
-  ::boost::math::quaternion<float>    quatG10G20_abs(0, q2->getValue(0) - q1->getValue(0), q2->getValue(1) - q1->getValue(1), q2->getValue(2) - q1->getValue(2));
-  ::boost::math::quaternion<float>    quatBuff(0, 0, 0, 0);
+  ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
+  ::boost::math::quaternion<double>    quat2(q2->getValue(3), q2->getValue(4), q2->getValue(5), q2->getValue(6));
+  ::boost::math::quaternion<double>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
+  ::boost::math::quaternion<double>    quatG10G20_abs(0, q2->getValue(0) - q1->getValue(0), q2->getValue(1) - q1->getValue(1), q2->getValue(2) - q1->getValue(2));
+  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
   quatBuff = quat1_inv * quatG10G20_abs * quat1;
   _G10G20d1x = quatBuff.R_component_2();
   _G10G20d1y = quatBuff.R_component_3();

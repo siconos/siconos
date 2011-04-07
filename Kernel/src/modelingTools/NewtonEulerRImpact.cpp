@@ -151,10 +151,10 @@ void NewtonEulerRImpact::computeJachq(double t)
     printf("NewtonEulerRImpact::computeJachq : ds%d->q :", iDS);
     q->display();
 #endif
-    ::boost::math::quaternion<float>    quatGP;
+    ::boost::math::quaternion<double>    quatGP;
     if (iDS == 0)
     {
-      ::boost::math::quaternion<float>    quatAux(0, _Pc1->getValue(0) - q->getValue(0), _Pc1->getValue(1) - q->getValue(1),
+      ::boost::math::quaternion<double>    quatAux(0, _Pc1->getValue(0) - q->getValue(0), _Pc1->getValue(1) - q->getValue(1),
           _Pc1->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
@@ -162,7 +162,7 @@ void NewtonEulerRImpact::computeJachq(double t)
     {
       sign = -1.0;
       //cout<<"NewtonEulerRImpact::computeJachq sign is -1 \n";
-      ::boost::math::quaternion<float>    quatAux(0, _Pc2->getValue(0) - q->getValue(0), _Pc2->getValue(1) - q->getValue(1),
+      ::boost::math::quaternion<double>    quatAux(0, _Pc2->getValue(0) - q->getValue(0), _Pc2->getValue(1) - q->getValue(1),
           _Pc2->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
@@ -170,11 +170,11 @@ void NewtonEulerRImpact::computeJachq(double t)
     printf("NewtonEulerRImpact::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
     printf("NewtonEulerRImpact::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
 #endif
-    ::boost::math::quaternion<float>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
-    ::boost::math::quaternion<float>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
-    ::boost::math::quaternion<float>    quat0(1, 0, 0, 0);
-    ::boost::math::quaternion<float>    quatBuff;
-    ::boost::math::quaternion<float>    _2qiquatGP;
+    ::boost::math::quaternion<double>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
+    ::boost::math::quaternion<double>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
+    ::boost::math::quaternion<double>    quat0(1, 0, 0, 0);
+    ::boost::math::quaternion<double>    quatBuff;
+    ::boost::math::quaternion<double>    _2qiquatGP;
     _2qiquatGP = quatGP;
     _2qiquatGP *= 2 * (q->getValue(3));
     quatBuff = (quatGP * quatQ) + (quatcQ * quatGP) - _2qiquatGP;
@@ -187,7 +187,7 @@ void NewtonEulerRImpact::computeJachq(double t)
     //_jachq->setValue(0,7*iDS+3,0);
     for (int i = 1; i < 4; i++)
     {
-      ::boost::math::quaternion<float>    quatei(0, (i == 1) ? 1 : 0, (i == 2) ? 1 : 0, (i == 3) ? 1 : 0);
+      ::boost::math::quaternion<double>    quatei(0, (i == 1) ? 1 : 0, (i == 2) ? 1 : 0, (i == 3) ? 1 : 0);
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * (q->getValue(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;

@@ -34,6 +34,8 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
   _constraintTol = 10e-4;
+  _doProj = 1;
+  _doOnlyProj = 0;
 }
 
 // --- Destructor ---
@@ -52,7 +54,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #ifdef TSPROJ_DEBUG
   cout << "TimeStepping::newtonSolve begin :\n";
 #endif
-  TimeStepping::newtonSolve(criterion, maxStep);
+  if (!_doOnlyProj)
+    TimeStepping::newtonSolve(criterion, maxStep);
 #ifdef TSPROJ_DEBUG
   cout << "TimeStepping::newtonSolve end : nbit=" << getNewtonNbSteps() << "\n";
 #endif
@@ -106,15 +109,30 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     {
       (*it)->relation()->computeh(getTkp1());
       (*it)->relation()->computeJach(getTkp1());
-      double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
 
-      if (criteria < -1e-4)
-        runningNewton = true;
+      if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+          Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL)
+      {
+        double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
+        if (criteria < -1e-10)
+          runningNewton = true;
+      }
+      else
+      {
+        if ((*it)->relation()->interaction()->y(0)->normInf() > 1e-10)
+          runningNewton = true;
+      }
+
     }
     info = 0;
     if (runningNewton)
     {
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
+      if (info)
+      {
+        cout << "TimeSteppingProjectOnConstraints1 project on constraints failed." << endl ;
+        return;
+      }
       for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
       {
         SP::DynamicalSystem ds = dsGraph->bundle(*vi);
@@ -132,7 +150,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
     if (info)
-      cout << "TimeSteppingProjectOnConstraints project on constraints failed." << endl ;
+      cout << "TimeSteppingProjectOnConstraints2 project on constraints failed." << endl ;
     //cout<<"during projection before normalizing of q:\n";
     //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     //{
@@ -157,9 +175,14 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     // dotq->setValue(5,(q->getValue(5)-qold->getValue(5))/h);
     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
     neds->updateT();
-    //continue;
+
     /*compute the new velocity seeing the work of fext*/
     *(neds->deltaq()) -= *(neds->q());
+#ifdef TSPROJ_DEBUG
+    printf("TSProj NewtonSolve :deltaq:");
+    (neds->deltaq())->display();
+#endif
+    //continue;
     double  n2q = neds->deltaq()->norm2();
     double n2 = 0.0;
     if (neds->fExt())
