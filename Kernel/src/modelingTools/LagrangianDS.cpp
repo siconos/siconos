@@ -341,13 +341,23 @@ void LagrangianDS::initP(const string& simulationType)
   if (simulationType == "TimeStepping")
   {
     _p[1].reset(new SimpleVector(_ndof));
+    /* \warning :V.A. 06/04/2011: What is the exact meaning of the following lines ?*/
     _p[2] = _p[1];
     _p[0] = _p[1];
+
   }
   else if (simulationType == "EventDriven")
   {
     _p[1].reset(new SimpleVector(_ndof));
     _p[2].reset(new SimpleVector(_ndof));
+  }
+  else
+  {
+    //_p[1].reset(new SimpleVector(_ndof));
+    //_p[2] = _p[1];
+    //_p[0] = _p[1];
+
+    RuntimeException::selfThrow("LagrangianDS - initP: the member p of LagrangianDS is not initialized for a simulation of type :    " + simulationType);
   }
 }
 

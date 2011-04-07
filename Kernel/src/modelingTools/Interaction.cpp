@@ -35,8 +35,8 @@ using namespace RELATION;
 
 // --- XML constructor ---
 Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
-  _id("undefined"), _number(0), _interactionSize(0), _numberOfRelations(0),
-  _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml), _initialized(false)
+  _initialized(false), _id("undefined"), _number(0), _interactionSize(0), _numberOfRelations(0),
+  _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml)
 {
   assert(_interactionxml && "NULL pointer");
 
@@ -143,8 +143,8 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
 
 Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   _involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -152,8 +152,8 @@ Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
 }
 Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _initialized(false), _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL),  _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   _involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -162,8 +162,8 @@ Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
 
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
-  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -173,8 +173,8 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
-  _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _initialized(false) , _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _y(2),  _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -184,8 +184,8 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
 
 /* initialisation with empty set */
 Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel, int newNumber):
-  _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
-  _y(2), _nslaw(newNSL), _relation(newRel), _initialized(false)
+  _initialized(false), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _y(2),  _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
 }
@@ -555,27 +555,46 @@ void Interaction::swapTimeStepInMemory()
 void Interaction::display() const
 {
   cout << "======= Interaction display =======" << endl;
+
+  if (_initialized)
+    cout << "The interaction is initialized" << endl;
+  else
+    cout << "The interaction is not initialized" << endl;
   cout << "| id : " << _id << endl;
   cout << "| number : " << _number << endl;
+  cout << "| relativeDegree : " << _relativeDegree << endl;
+  cout << "| interactionSize : " << _interactionSize << endl;
+  cout << "| numberOfRelations : " << _numberOfRelations << endl;
+  cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
+  cout << "|  _sizeZ: " << _sizeZ << endl;
+
+  cout << "| involved DS :" << endl;
   _involvedDS->display();
-  cout << "| y : " << endl;
-  if (_y[0]) _y[0]->display();
-  else cout << "->NULL" << endl;
-  cout << "| yDot : " << endl;
-  if (_y[1]) _y[1]->display();
-  else cout << "->NULL" << endl;
-  cout << "| _yOld : " << endl;
-  if (_yOld[0]) _yOld[0]->display();
-  else cout << "->NULL" << endl;
-  cout << "| yDotOld : " << endl;
-  if (_yOld[1]) _yOld[1]->display();
-  else cout << "->NULL" << endl;
-  cout << "| _lambda : " << endl;
-  if (_lambda[0]) _lambda[0]->display();
-  else cout << "->NULL" << endl;
-  cout << "| _lambdaDot : " << endl;
-  if (_lambda[1]) _lambda[1]->display();
-  else cout << "->NULL" << endl;
+  _relation->display();
+  if (_initialized)
+  {
+    cout << "| y : " << endl;
+    if (_y[0]) _y[0]->display();
+    else cout << "->NULL" << endl;
+    cout << "| yDot : " << endl;
+    if (_y[1]) _y[1]->display();
+    else cout << "->NULL" << endl;
+
+    cout << "| _yOld : " << endl;
+
+    if (_yOld[0]) _yOld[0]->display();
+    else cout << "->NULL" << endl;
+    cout << "| yDotOld : " << endl;
+    if (_yOld[1]) _yOld[1]->display();
+    else cout << "->NULL" << endl;
+
+    cout << "| _lambda : " << endl;
+    if (_lambda[0]) _lambda[0]->display();
+    else cout << "->NULL" << endl;
+    cout << "| _lambdaDot : " << endl;
+    if (_lambda[1]) _lambda[1]->display();
+    else cout << "->NULL" << endl;
+  }
   cout << "===================================" << endl;
 }
 
