@@ -124,7 +124,7 @@ void   mlcp_DisplaySolution_Block(double * z, double * w, int n, int m, int Nbli
   int curCompIndex = 0;
 
   for (lin = 0; lin < Nblines; lin++)
-    if (indexInBlock[curCompIndex] == lin)
+    if (indexInBlock && indexInBlock[curCompIndex] == lin)
     {
       printf("z[%d],w[%d],=%.15e\t%.15e. (complementarity cond)\n", lin, lin, z[lin], w[lin]);
       curCompIndex++;

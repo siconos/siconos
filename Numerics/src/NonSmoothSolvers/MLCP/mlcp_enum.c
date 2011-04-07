@@ -35,9 +35,9 @@ dim(v)=nn
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
 
-#ifdef HAVE_DGELS
+//#ifdef HAVE_DGELS
 //#define ENUM_USE_DGELS
-#endif
+//#endif
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;
@@ -175,6 +175,7 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
 void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+  int nbSol = 0;
   if (problem->blocksLine)
     return mlcp_enum_Block(problem, z, w, info, options);
   double tol ;
@@ -186,7 +187,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   int * ipiv;
   int check;
   int LAinfo;
-
+  *info = 0;
   sMl = problem->M->size0;
   sNn = problem->n;
   sMm = problem->m;
@@ -224,7 +225,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
-  *info = 0;
+
   initEnum(problem->m);
   while (nextEnum(sW2V))
   {
@@ -304,13 +305,14 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if (err > 10 * tol)
         {
-          if (verbose || 1)
+          if (verbose)
             printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
+        nbSol++;
         if (verbose)
         {
-          printf("mlcp_enum find a solution!\n");
+          printf("mlcp_enum find a solution, err=%e !\n", err);
           mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
         }
         // options->iparam[1]=sCurrentEnum-1;
@@ -321,13 +323,13 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     {
       if (verbose)
       {
-        printf("LU foctorization failed:\n");
+        printf("LU factorization failed:\n");
       }
     }
   }
   *info = 1;
-  if (verbose || 1)
-    printf("mlcp_enum failed!\n");
+  if (verbose)
+    printf("mlcp_enum failed nbSol=%i!\n", nbSol);
 }
 /*
 An adaptation of the previuos algorithm, to manage the case of MLCP-block formalization
@@ -344,7 +346,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   int * indexInBlock;
   int check;
   int LAinfo;
-
+  *info = 0;
   assert(problem->M);
   assert(problem->M->matrix0);
   assert(problem->q);
@@ -389,6 +391,8 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   sW2V = workingInt;
   ipiv = sW2V + sMm;
   indexInBlock = ipiv + sMm + sNn;
+  if (sMm == 0)
+    indexInBlock = 0;
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
@@ -470,13 +474,13 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if (err > 10 * tol)
         {
-          if (verbose || 1)
+          if (verbose)
             printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
         if (verbose)
         {
-          printf("mlcp_enum find a solution!\n");
+          printf("mlcp_enum find a solution err = %e!\n", err);
           mlcp_DisplaySolution_Block(sU, sW1, sNn, sMm, sMl, indexInBlock);
         }
         // options->iparam[1]=sCurrentEnum-1;
@@ -492,7 +496,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     }
   }
   *info = 1;
-  if (verbose || 1)
+  if (verbose)
     printf("mlcp_enum failed!\n");
 }
 int mlcp_enum_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
