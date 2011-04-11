@@ -84,19 +84,23 @@ So $jachqt=MN$
 \[\left(\begin{array}{c}m \dot V\\I \dot \Omega + \Omega I \Omega \end{array}\right)= \left(\begin{array}{c}Fect+R\\Mext _{R_{obj}} + (R*PG) _{R_{obj}} \end{array}\right)\]
   with * vectoriel product, $R$ reaction in the globla frame. $P$ the point of contact.
   $r$ is the reaction in the local frame.  $M_{R_{obj}toR_{abs}}=M_{R_{abs}toR_{obj}}^t r=R$ with:
-  \[M_{R_{obj}toR_{abs}}=\left(\begin{array}{ccc} nx&t_1x&t_2x \\ny&t_1y&t_2y\\nz&t_1z&t_2z \end{array}\right)\]
+  \[M_{R_{C}toR_{abs}}=\left(\begin{array}{ccc} nx&t_1x&t_2x \\ny&t_1y&t_2y\\nz&t_1z&t_2z \end{array}\right)\]
   we have :
-  \[\left(\begin{array}{c}R\\(R*PG) _{R_{obj}}\end{array}\right)=\left(\begin{array}{c} I_3\\N_{PG}\end{array}\right).R:=N^tR=N^tM^tr\]
+  \[\left(\begin{array}{c}R\\(R*PG) _{R_{obj}}\end{array}\right)=\left(\begin{array}{c} I_3\\M_{R_{abs}toR_{obj}}N_{PG}\end{array}\right).R\]
+  \[=\left(\begin{array}{c} I_3\\M_{R_{abs}toR_{obj}}N_{PG}\end{array}\right).M_{R_{obj}toR_{abs}}r\]
   \[ N_{PG}=\left(\begin{array}{ccc} 0&PG_z&-PG_y\\-PG_z&0&PG_x\\PG_y&-PG_X&0\end{array}\right)\]
-      we want:
+    that is:
       
-\[\left(\begin{array}{c}m \dot V\\I \dot \Omega + \Omega I \Omega \end{array}\right)=jachqT^t r\]
+\[\left(\begin{array}{c}m \dot V\\I \dot \Omega + \Omega I \Omega \end{array}\right)=
+\left(\begin{array}{c} M_{R_{C}toR_{abs}} \\
+  M_{R_{abs}toR_{obj}}N_{PG}M_{R_{C}toR_{abs}}
+\end{array}\right) r\]
 So $jachqt=MN$
 
 \subsection{Case FC3D: using the local frame local velocities}
-\begin{figure}[h]
+\begin{figure}[h!]
   \centering
-   \scalebox{0.7}{
+   \scalebox{0.6}{
   \input{./Figures/SolideContact.pstex_t}
   }
   \caption{Two objects colliding.}
@@ -109,14 +113,13 @@ We are looking for an operator named $CT$ such that:
 \[V_C=\left(\begin{array}{c} V_N \\ V_T \\ V_S \end{array}\right)_{R_{C}}=CT \left(\begin{array}{c} V_{G1}~_{R_{abs}} \\ \Omega_1~_{R_{obj1}} \\ V_{G2}~_{R_{abs}}\\ \Omega_2~_{R_{obj2}} \end{array}\right)\]
 
 \[V_c=V_{G1}~_{R_{abs}} + w_1 * G_1P~_{R_{abs}} -(V_{G2}~_{R_{abs}} + w_2 * G_1P~_{R_{abs}})\]
-where $w_1$ and $w_2$ are given in $R_{abs}$. We note $M_{R_{obj1}toR_{abs}}$ the matrice converting the object 1 coordinate to the absolute coordinate. We note $N_1$ the matrice such that $w_1*G_1P~_{R_{abs}} = N_1 w_1$. Endly, we note $M_{R_{abs}toR_C}$ converting the absolute coordinate to the $R_C$ frame.
+where $w_1$ and $w_2$ are given in $R_{abs}$. We note $M_{R_{obj1}toR_{abs}}$ the matrice converting the object 1 coordinate to the absolute coordinate. We note $N_{GP}$ the matrice such that $w_1*G_1P~_{R_{abs}} = N_{GC} w_1$. Endly, we note $M_{R_{abs}toR_C}$ converting the absolute coordinate to the $R_C$ frame.
 we get:
-\[CT= M_{R_{abs}toR_C}   \left(\begin{array}{cccc} I_3 & N_1M_{R_{obj1}toR_{abs}} & -I_3 & -N_2M_{R_{obj2}toR_{abs}} \end{array}\right)\]
+\[CT= M_{R_{abs}toR_C}   \left(\begin{array}{cccc} I_3 & N_{G_1C}M_{R_{obj1}toR_{abs}} & -I_3 & -N_{G_2C}M_{R_{obj2}toR_{abs}} \end{array}\right)\]
 
 \subsubsection{Expression of $M_{R_{obj1}toR_{abs}}$}
 Using quaternion, we get :
 \[M_{R_{obj1}toR_{abs}} = \left(\begin{array}{ccc} q \left(\begin{array}{c}1\\0\\0 \end{array}\right)~^cq & q \left(\begin{array}{c}  0\\1\\0 \end{array}\right)~ ^cq & q \left(\begin{array}{c}  0\\0\\1 \end{array}\right)~ ^cq  \end{array}\right)\]
 
 \subsubsection{Expression of $N_1$}
-\[N_1=\left(\begin{array}{ccc} 0&G_1C_z&-G_1C_y\\-G_1C_z&0&G_1C_x\\G_1C_y&-G_1C_X&0\end{array}\right)\]
-
+\[N_{GC}=\left(\begin{array}{ccc} 0&G_1C_z&-G_1C_y\\-G_1C_z&0&G_1C_x\\G_1C_y&-G_1C_X&0\end{array}\right)\]
