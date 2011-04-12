@@ -1300,7 +1300,9 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   unsigned int sizeY = UR->getNonSmoothLawSize();
 
   unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->interaction();
+
+
+
   Index coord(8);
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
@@ -1324,8 +1326,14 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
   Xfree = UR->workFree();
   lambda = UR->interaction()->lambda(0);
-  H_alpha = UR->interaction()->relation()->Halpha();
 
+  assert(Xfree);
+  assert(lambda);
+
+
+  SP::Interaction mainInteraction = UR->interaction();
+  assert(mainInteraction);
+  assert(mainInteraction->relation());
 
   if (relationType == FirstOrder && relationSubType == Type2R)
   {
@@ -1351,8 +1359,11 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
     {
       RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
+    H_alpha = UR->interaction()->relation()->Halpha();
+    assert(H_alpha);
     *Yp += *H_alpha;
   }
+
   else if (relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
@@ -1396,8 +1407,42 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
         subprod(*C, *Xfree, *Yp, coord, true);
       }
     }
+
     if (relationType == Lagrangian)
     {
+      //std::cout << "Moreau.cpp : relation display " << std::endl;
+      //mainInteraction->relation()->display();
+      //mainInteraction->relation()->C();
+
+      //(boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
+
+      C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
+
+      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
+      assert(C == C2);
+
+      //C = mainInteraction->relation()->C();
+      //C->display();
+
+      if (C)
+      {
+
+        assert(Xfree);
+        assert(Yp);
+        assert(Xq);
+
+        coord[3] = C->size(1);
+        coord[5] = C->size(1);
+        if (_useGammaForRelation)
+        {
+          subprod(*C, *Xq, *Yp, coord, true);
+        }
+        else
+        {
+          subprod(*C, *Xfree, *Yp, coord, true);
+        }
+      }
+
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
       ID->eye();
 

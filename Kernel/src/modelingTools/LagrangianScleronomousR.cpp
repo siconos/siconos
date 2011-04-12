@@ -39,10 +39,10 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
   //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
-  pluginjqh.reset(new PluggedObject());
+  _pluginjqh.reset(new PluggedObject());
   if (LRxml->isJacobianHPlugin(0))
   {
-    pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
+    _pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
   }
   else
     _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
@@ -55,8 +55,8 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
 {
   setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
-  pluginjqh.reset(new PluggedObject());
-  pluginjqh->setComputeFunction(strcomputeJachq);
+  _pluginjqh.reset(new PluggedObject());
+  _pluginjqh->setComputeFunction(strcomputeJachq);
 
   //  unsigned int sizeY = interaction()->getSizeOfY();
   //  unsigned int sizeQ = workX->size();
@@ -72,34 +72,37 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, co
 {
   setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
-  pluginjqh.reset(new PluggedObject());
-  pluginjqh->setComputeFunction(strcomputeJachq);
+  _pluginjqh.reset(new PluggedObject());
+  _pluginjqh->setComputeFunction(strcomputeJachq);
 
-  pluginjqhdot.reset(new PluggedObject());
-  pluginjqhdot->setComputeFunction(computeJachqdot);
+  _pluginjqhdot.reset(new PluggedObject());
+  _pluginjqhdot->setComputeFunction(computeJachqdot);
 }
 void LagrangianScleronomousR::computeh(double)
 {
-  // arg= time. Unused in this function but required for interface.
-  if (_pluginh->fPtr)
+  if (_pluginh)
   {
-    // get vector y of the current interaction
-    SP::SiconosVector y = interaction()->y(0);
+    // arg= time. Unused in this function but required for interface.
+    if (_pluginh->fPtr)
+    {
+      // get vector y of the current interaction
+      SP::SiconosVector y = interaction()->y(0);
 
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workZ = *data[z];
-    *_workY = *y;
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      *_workX = *data[q0];
+      *_workZ = *data[z];
+      *_workY = *y;
 
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeY = y->size();
-    unsigned int sizeZ = _workZ->size();
+      unsigned int sizeQ = _workX->size();
+      unsigned int sizeY = y->size();
+      unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(_pluginh->fPtr))(sizeQ, &(*_workX)(0) , sizeY, &(*_workY)(0), sizeZ, &(*_workZ)(0));
+      ((FPtr3)(_pluginh->fPtr))(sizeQ, &(*_workX)(0) , sizeY, &(*_workY)(0), sizeZ, &(*_workZ)(0));
 
-    // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
-    *y = *_workY;
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *_workZ;
+      *y = *_workY;
+    }
   }
   // else nothing
 }
@@ -110,42 +113,48 @@ void LagrangianScleronomousR::computeJachq(double)
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
 
   //
-  if (pluginjqh->fPtr)
+  if (_pluginjqh)
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workZ = *data[z];
+    if (_pluginjqh->fPtr)
+    {
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      *_workX = *data[q0];
+      *_workZ = *data[z];
 
-    unsigned int sizeY = _jachq->size(0);
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeZ = _workZ->size();
+      unsigned int sizeY = _jachq->size(0);
+      unsigned int sizeQ = _workX->size();
+      unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FPtr3)(_pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
 
-    // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *_workZ;
+    }
   }
   //  else nothing!
 }
 
 void LagrangianScleronomousR::computeJachqDot(double time)
 {
-  if (pluginjqhdot->fPtr)
+  if (_pluginjqhdot)
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workXdot = *data[q1];
-    *_workZ = *data[z];
+    if (_pluginjqhdot->fPtr)
+    {
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      *_workX = *data[q0];
+      *_workXdot = *data[q1];
+      *_workZ = *data[z];
 
-    unsigned int sizeS = _jachqDot->size(0);
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeQdot = _workXdot->size();
-    unsigned int sizeZ = _workZ->size();
+      unsigned int sizeS = _jachqDot->size(0);
+      unsigned int sizeQ = _workX->size();
+      unsigned int sizeQdot = _workXdot->size();
+      unsigned int sizeZ = _workZ->size();
 
-    ((FPtr5bis)(pluginjqhdot->fPtr))(sizeQ, &(*_workX)(0), sizeQdot, &(*_workXdot)(0) , sizeS, &(*_jachqDot)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FPtr5bis)(_pluginjqhdot->fPtr))(sizeQ, &(*_workX)(0), sizeQdot, &(*_workXdot)(0) , sizeS, &(*_jachqDot)(0, 0), sizeZ, &(*_workZ)(0));
 
-    // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *_workZ;
+    }
   }
 }
 void  LagrangianScleronomousR::computeNonLinearH2dot(double time)
@@ -185,8 +194,8 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 }
 const std::string LagrangianScleronomousR::getJachqName() const
 {
-  if (pluginjqh->fPtr)
-    return pluginjqh->getPluginName();
+  if (_pluginjqh->fPtr)
+    return _pluginjqh->getPluginName();
   return "unamed";
 
 }

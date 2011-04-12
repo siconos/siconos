@@ -415,6 +415,7 @@ public:
    *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
+
   virtual inline SP::SiconosMatrix jachlambda() const
   {
     return _jachlambda;

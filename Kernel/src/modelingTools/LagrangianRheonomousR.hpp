@@ -102,7 +102,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  //  SP::PluggedObject pluginjqh
+  //  SP::PluggedObject _pluginjqh
   //  FPtr4 hPtr;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)

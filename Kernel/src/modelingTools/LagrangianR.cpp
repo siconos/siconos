@@ -62,7 +62,7 @@ void LagrangianR::initComponents()
 
 void LagrangianR::initialize(SP::Interaction inter)
 {
-  assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
+  assert(inter && "Lagrangian::initialize failed. No Interaction linked to the present relation.");
   _interaction = inter;
 
   // Memory allocation for G[i], if required (depends on the chosen constructor).
@@ -115,4 +115,16 @@ void LagrangianR::saveRelationToXML() const
 void LagrangianR::display() const
 {
   Relation::display();
+  std::cout << " _jachq :" << std::endl;
+  if (_jachq)
+    _jachq->display();
+  std::cout << " _jachqDot :" << std::endl;
+  if (_jachqDot)
+    _jachqDot->display();
+  std::cout << " _jachlambda :" << std::endl;
+  if (_jachlambda)
+    _jachlambda->display();
+  else
+    std::cout << " NULL :" << std::endl;
+
 }

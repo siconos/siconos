@@ -236,7 +236,11 @@ public:
   */
   virtual SP::SiconosMatrix C() const
   {
+    //std::cout << " SP::SiconosMatrix C()      " << std::endl;
+    //jachq()->display();
+    //std::cout << "jachq().get()     " <<  jachq().get()  <<std::endl;
     return jachq();
+    //return _jachq;
   }
   /**
    * return a SP on the D matrix.

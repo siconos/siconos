@@ -93,10 +93,10 @@ protected:
    * @param[in,out] z: pointer to z vector(s) from DS.
    */
   /** Plugin object for Jacobian of h */
-  SP::PluggedObject pluginjqh;
+  SP::PluggedObject _pluginjqh;
   /** Plugin object for the non linear part of the relative acceleration (derivative of Jacobian of H with
    *respect to the time multiplied by the relative velocity */
-  SP::PluggedObject pluginjqhdot;
+  SP::PluggedObject _pluginjqhdot;
   /** Non-linear part of the relative acceleration */
   SP::SiconosVector _NLh2dot;
   /** basic constructor
