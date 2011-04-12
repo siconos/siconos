@@ -1417,9 +1417,14 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
       //(boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
 
       C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
+      //    std::cout << "C.get()     " <<  C.get()  <<std::endl;
+      //      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
+      //SP::SiconosMatrix C2 = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C();
+      //std::cout << "...C.get()     " <<  (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C().get()  <<std::endl;
+      //std::cout << "C2.get()     " <<  C2.get()  <<std::endl;
 
-      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
-      assert(C == C2);
+
+      //assert(C == C2);
 
       //C = mainInteraction->relation()->C();
       //C->display();

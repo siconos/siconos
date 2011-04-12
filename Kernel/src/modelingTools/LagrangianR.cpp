@@ -112,6 +112,16 @@ void LagrangianR::saveRelationToXML() const
   RuntimeException::selfThrow("LagrangianR1::saveRelationToXML - not yet implemented.");
 }
 
+SP::SiconosMatrix LagrangianR::C() const
+{
+  //std::cout << " SP::SiconosMatrix LagrangianR::C()      " << std::endl;
+  // jachq()->display();
+  //  std::cout << "jachq().get()     " <<  jachq().get()  <<std::endl;
+  //return jachq();
+  return _jachq;
+}
+
+
 void LagrangianR::display() const
 {
   Relation::display();

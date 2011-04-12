@@ -71,7 +71,7 @@ protected:
   /** Jacobian matrices of H */
   SP::SiconosMatrix _jachq;
   SP::SiconosMatrix _jachqDot;
-  SP::SiconosMatrix _jachlambda;
+  //SP::SiconosMatrix _jachlambda;
 
 
   /** basic constructor
@@ -107,6 +107,7 @@ public:
    */
   inline SP::SiconosMatrix jachq() const
   {
+    //  std::cout << "_jachq.get()     " <<  _jachq.get()  <<std::endl;
     return _jachq;
   }
   inline SP::SiconosMatrix jacQDotH() const
@@ -234,14 +235,8 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual SP::SiconosMatrix C() const
-  {
-    //std::cout << " SP::SiconosMatrix C()      " << std::endl;
-    //jachq()->display();
-    //std::cout << "jachq().get()     " <<  jachq().get()  <<std::endl;
-    return jachq();
-    //return _jachq;
-  }
+  virtual SP::SiconosMatrix C() const;
+
   /**
    * return a SP on the D matrix.
    * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
