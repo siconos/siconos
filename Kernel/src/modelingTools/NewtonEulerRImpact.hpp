@@ -56,6 +56,21 @@ protected:
   // SP::NewtonEulerDS _ds2;
   virtual void initComponents();
 
+  /*Matrix converting  the absolute coordinate to the contact coordinate.*/
+  SP::SimpleMatrix _Mabs_C;
+  /*Matrix converting  the obj1 coordinate to the absolute coordinate.*/
+  SP::SimpleMatrix _Mobj1_abs;
+  /*Matrix converting  the obj2 coordinate to the absolute coordinate.*/
+  SP::SimpleMatrix _Mobj2_abs;
+  /*cross product matrices*/
+  SP::SimpleMatrix _NPG1;
+  SP::SimpleMatrix _NPG2;
+  /*buffer matrices*/
+  SP::SimpleMatrix _AUX1;
+  SP::SimpleMatrix _AUX2;
+private:
+  void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT);
+  void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT);
 public:
 
   bool _isOnContact;

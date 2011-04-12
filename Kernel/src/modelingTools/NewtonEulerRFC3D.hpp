@@ -40,7 +40,9 @@
 class NewtonEulerRFC3D : public NewtonEulerRImpact
 {
 
-protected:
+private:
+  void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT);
+  void FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT);
 public:
   NewtonEulerRFC3D(): NewtonEulerRImpact() {}
 

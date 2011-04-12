@@ -26,9 +26,8 @@ using namespace std;
 
 
 
-void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
+void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
 {
-  SP::SimpleMatrix M(new SimpleMatrix(1, 3));
   double Nx = Nc->getValue(0);
   double Ny = Nc->getValue(1);
   double Nz = Nc->getValue(2);
@@ -38,34 +37,73 @@ void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::S
   double G1x = G1->getValue(0);
   double G1y = G1->getValue(1);
   double G1z = G1->getValue(2);
-  double t[6];
-  double * pt = t;
-  M->setValue(0, 0, Nx);
-  M->setValue(0, 1, Ny);
-  M->setValue(0, 2, Nz);
-  //  M->display();
-  SP::SimpleMatrix N(new SimpleMatrix(3, 6));
-  N->zero();
-  (*N)(0, 0) = 1;
-  (*N)(1, 1) = 1;
-  (*N)(2, 2) = 1;
-  (*N)(0, 3) = 0;
-  (*N)(0, 4) = Pz - G1z;
-  (*N)(0, 5) = -(Py - G1y);
-  (*N)(1, 3) = -(Pz - G1z);
-  (*N)(1, 4) = 0;
-  (*N)(1, 5) = Px - G1x;
-  (*N)(2, 3) = Py - G1y;
-  (*N)(2, 4) = -(Px - G1x);
-  (*N)(2, 5) = 0;
+#ifdef NEFC3D_DEBUG
+  printf("contact normal:\n");
+  Nc->display();
+  printf("point de contact :\n");
+  Pc->display();
+  printf("center of masse :\n");
+  G1->display();
+#endif
+  _Mabs_C->setValue(0, 0, Nx);
+  _Mabs_C->setValue(0, 1, Ny);
+  _Mabs_C->setValue(0, 2, Nz);
 
-  prod(*M, *N, *jhqT, true);
+  _NPG1->zero();
+
+  (*_NPG1)(0, 0) = 0;
+  (*_NPG1)(0, 1) = -(G1z - Pz);
+  (*_NPG1)(0, 2) = (G1y - Py);
+  (*_NPG1)(1, 0) = (G1z - Pz);
+  (*_NPG1)(1, 1) = 0;
+  (*_NPG1)(1, 2) = -(G1x - Px);
+  (*_NPG1)(2, 0) = -(G1y - Py);
+  (*_NPG1)(2, 1) = (G1x - Px);
+  (*_NPG1)(2, 2) = 0;
+
+
+
+  double q0 = G1->getValue(3);
+  double q1 = G1->getValue(4);
+  double q2 = G1->getValue(5);
+  double q3 = G1->getValue(6);
+
+  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+
+
+  ::boost::math::quaternion<double>    quatBuff;
+  quatBuff = quatcQ * quatx * quatQ;
+  _Mobj1_abs->setValue(0, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(0, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(0, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quaty * quatQ;
+  _Mobj1_abs->setValue(1, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(1, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(1, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quatz * quatQ;
+  _Mobj1_abs->setValue(2, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(2, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(2, 2, quatBuff.R_component_4());
+
+  prod(*_NPG1, *_Mobj1_abs, *_AUX1, true);
+  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+
+
+  for (unsigned int jj = 0; jj < 3; jj++)
+    jhqT->setValue(0, jj, _Mabs_C->getValue(0, jj));
+
+  for (unsigned int jj = 3; jj < 6; jj++)
+    jhqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
+
 
 }
 
-void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)
+void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)
 {
-  SP::SimpleMatrix M(new SimpleMatrix(1, 3));
   double Nx = Nc->getValue(0);
   double Ny = Nc->getValue(1);
   double Nz = Nc->getValue(2);
@@ -75,50 +113,119 @@ void NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::S
   double G1x = G1->getValue(0);
   double G1y = G1->getValue(1);
   double G1z = G1->getValue(2);
+
+  _Mabs_C->setValue(0, 0, Nx);
+  _Mabs_C->setValue(0, 1, Ny);
+  _Mabs_C->setValue(0, 2, Nz);
+
+  _NPG1->zero();
+
+  (*_NPG1)(0, 0) = 0;
+  (*_NPG1)(0, 1) = -(G1z - Pz);
+  (*_NPG1)(0, 2) = (G1y - Py);
+  (*_NPG1)(1, 0) = (G1z - Pz);
+  (*_NPG1)(1, 1) = 0;
+  (*_NPG1)(1, 2) = -(G1x - Px);
+  (*_NPG1)(2, 0) = -(G1y - Py);
+  (*_NPG1)(2, 1) = (G1x - Px);
+  (*_NPG1)(2, 2) = 0;
+
+
+
+  double q0 = G1->getValue(3);
+  double q1 = G1->getValue(4);
+  double q2 = G1->getValue(5);
+  double q3 = G1->getValue(6);
+
+  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  ::boost::math::quaternion<double>    quatBuff;
+  quatBuff = quatcQ * quatx * quatQ;
+  _Mobj1_abs->setValue(0, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(0, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(0, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quaty * quatQ;
+  _Mobj1_abs->setValue(1, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(1, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(1, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quatz * quatQ;
+  _Mobj1_abs->setValue(2, 0, quatBuff.R_component_2());
+  _Mobj1_abs->setValue(2, 1, quatBuff.R_component_3());
+  _Mobj1_abs->setValue(2, 2, quatBuff.R_component_4());
+
+
+  prod(*_NPG1, *_Mobj1_abs, *_AUX1, true);
+  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+
+
+
+  for (unsigned int jj = 0; jj < 3; jj++)
+    jhqT->setValue(0, jj, _Mabs_C->getValue(0, jj));
+
+
+  for (unsigned int jj = 3; jj < 6; jj++)
+    jhqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
+
   double G2x = G2->getValue(0);
   double G2y = G2->getValue(1);
   double G2z = G2->getValue(2);
-  M->setValue(0, 0, Nx);
-  M->setValue(0, 1, Ny);
-  M->setValue(0, 2, Nz);
-  //cout<<"M display\n";
-  //M->display();
-  SP::SimpleMatrix N(new SimpleMatrix(3, 12));
-  N->zero();
-  (*N)(0, 0) = 1;
-  (*N)(1, 1) = 1;
-  (*N)(2, 2) = 1;
-  (*N)(0, 3) = 0;
-  (*N)(0, 4) = Pz - G1z;
-  (*N)(0, 5) = -(Py - G1y);
-  (*N)(1, 3) = -(Pz - G1z);
-  (*N)(1, 4) = 0;
-  (*N)(1, 5) = Px - G1x;
-  (*N)(2, 3) = Py - G1y;
-  (*N)(2, 4) = -(Px - G1x);
-  (*N)(2, 5) = 0;
 
-  (*N)(0, 6) = -1;
-  (*N)(1, 7) = -1;
-  (*N)(2, 8) = -1;
-  (*N)(0, 9) = 0;
-  (*N)(0, 10) = -(Pz - G2z);
-  (*N)(0, 11) = (Py - G2y);
-  (*N)(1, 9) = (Pz - G2z);
-  (*N)(1, 10) = 0;
-  (*N)(1, 11) = -(Px - G2x);
-  (*N)(2, 9) = -(Py - G2y);
-  (*N)(2, 10) = (Px - G2x);
-  (*N)(2, 11) = 0;
-  prod(*M, *N, *jhqT, true);
-  //cout<<"jhqt\n";
-  //jhqT->display();
+  _NPG2->zero();
+  (*_NPG2)(0, 0) = 0;
+  (*_NPG2)(0, 1) = -(G2z - Pz);
+  (*_NPG2)(0, 2) = (G2y - Py);
+  (*_NPG2)(1, 0) = (G2z - Pz);
+  (*_NPG2)(1, 1) = 0;
+  (*_NPG2)(1, 2) = -(G2x - Px);
+  (*_NPG2)(2, 0) = -(G2y - Py);
+  (*_NPG2)(2, 1) = (G2x - Px);
+  (*_NPG2)(2, 2) = 0;
 
+  q0 = G2->getValue(3);
+  q1 = G2->getValue(4);
+  q2 = G2->getValue(5);
+  q3 = G2->getValue(6);
+
+  ::boost::math::quaternion<double>    quatQ2(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ2(q0, -q1, -q2, -q3);
+  quatBuff = quatcQ2 * quatx * quatQ2;
+
+  _Mobj2_abs->setValue(0, 0, quatBuff.R_component_2());
+  _Mobj2_abs->setValue(0, 1, quatBuff.R_component_3());
+  _Mobj2_abs->setValue(0, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ2 * quaty * quatQ2;
+  _Mobj2_abs->setValue(1, 0, quatBuff.R_component_2());
+  _Mobj2_abs->setValue(1, 1, quatBuff.R_component_3());
+  _Mobj2_abs->setValue(1, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ2 * quatz * quatQ2;
+  _Mobj2_abs->setValue(2, 0, quatBuff.R_component_2());
+  _Mobj2_abs->setValue(2, 1, quatBuff.R_component_3());
+  _Mobj2_abs->setValue(2, 2, quatBuff.R_component_4());
+
+  prod(*_NPG2, *_Mobj2_abs, *_AUX1, true);
+  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+
+  for (unsigned int jj = 0; jj < 3; jj++)
+    jhqT->setValue(0, jj + 6, -_Mabs_C->getValue(0, jj));
+
+  for (unsigned int jj = 3; jj < 6; jj++)
+    jhqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 void  NewtonEulerRImpact::initComponents()
 {
   NewtonEulerR::initComponents();
   _jachqProj.reset(new SimpleMatrix(_jachq->size(0), _jachq->size(1)));
+  _Mabs_C.reset(new SimpleMatrix(1, 3));
+  _AUX1.reset(new SimpleMatrix(3, 3));
+  _AUX2.reset(new SimpleMatrix(1, 3));
+  _NPG1.reset(new SimpleMatrix(3, 3));
+  _NPG2.reset(new SimpleMatrix(3, 3));
+  _Mobj1_abs.reset(new SimpleMatrix(3, 3));
+  _Mobj2_abs.reset(new SimpleMatrix(3, 3));
+
 }
 
 void NewtonEulerRImpact::computeJachq(double t)
