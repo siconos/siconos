@@ -788,7 +788,7 @@ public:
    *  \param SP::SiconosVector: pointers on q
    *  \param SP::SiconosVector: pointers on velocity
    */
-  //virtual void computeFL(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeFL(double , SP::SiconosVector, SP::SiconosVector);
 
   /** Default function to compute the jacobian following q of fL
    *  \param double, the current time

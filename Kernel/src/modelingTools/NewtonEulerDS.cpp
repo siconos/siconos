@@ -631,6 +631,44 @@ void NewtonEulerDS::computeFL(double time)
   }
   // else nothing.
 }
+void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+{
+  if (_fL)
+  {
+    _fL->zero();
+    // 1 - Computes the required functions
+    if (_fExt)
+    {
+      computeFExt(time);
+      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(0, *_fExt);
+    }
+    if (_mExt)
+    {
+      computeMExt(time);
+      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
+    }
+    if (_NNL)
+    {
+      computeNNL();
+      (*_fL) += (*_NNL);
+    }
+    /*computation of \Omega vectortiel I \Omega*/
+    if (_I)
+    {
+      SimpleVector bufOmega(3);
+      SimpleVector bufIOmega(3);
+      SimpleVector buf(3);
+      bufOmega.setValue(0, v2->getValue(3));
+      bufOmega.setValue(1, v2->getValue(4));
+      bufOmega.setValue(2, v2->getValue(5));
+      prod(*_I, bufOmega, bufIOmega, true);
+      cross_product(bufOmega, bufIOmega, buf);
+      _fL->setValue(3, _fL->getValue(3) + buf.getValue(0));
+      _fL->setValue(4, _fL->getValue(4) + buf.getValue(1));
+      _fL->setValue(5, _fL->getValue(5) + buf.getValue(2));
+    }
+  }
+}
 
 // void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVector v2)
 // {

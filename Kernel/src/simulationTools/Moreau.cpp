@@ -978,7 +978,8 @@ double Moreau::computeResidu()
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
 
         // d->computeFL(t,q,v) ?
-        d->computeFL(t);
+        d->computeFL(told, qold, vold);
+        //d->computeFL(t);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
@@ -1418,13 +1419,13 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
       C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
       //    std::cout << "C.get()     " <<  C.get()  <<std::endl;
-      //      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
+      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
       //SP::SiconosMatrix C2 = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C();
       //std::cout << "...C.get()     " <<  (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C().get()  <<std::endl;
       //std::cout << "C2.get()     " <<  C2.get()  <<std::endl;
 
 
-      //assert(C == C2);
+      //      assert(C == C2);
 
       //C = mainInteraction->relation()->C();
       //C->display();
@@ -1516,7 +1517,6 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
 
 }
-
 void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 {
   // Last parameter is not used (required for Lsodar but not for Moreau).
@@ -1788,8 +1788,10 @@ void Moreau::updateState(unsigned int level)
       coeff = h * (1 - _theta);
       scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
-      //  cout<<"new q before normalizing"<<endl;
-      //  q->display();
+#ifdef MOREAU_NE_DEBUG
+      cout << "new q before normalizing" << endl;
+      q->display();
+#endif
 
       //q[3:6] must be normalized
       d->normalizeq();
