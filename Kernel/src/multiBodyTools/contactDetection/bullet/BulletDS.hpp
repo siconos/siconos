@@ -28,31 +28,46 @@
 
 class BulletDS : public NewtonEulerDS, public boost::enable_shared_from_this<BulletDS>
 {
-public:
 
+private:
   SP::btCollisionShape _collisionShape;
   SP::btCollisionObject _collisionObject;
 
+public:
+
+  /** Constructor from bullet shapes enum type and generic shapeParam:
+   *  collisionShape is self allocated
+   */
   BulletDS(const BroadphaseNativeTypes& shape_type,
            const SP::SimpleVector& shapeParams,
            SP::SiconosVector position,
            SP::SiconosVector velocity,
            const double& mass);
 
+  /** Constructor from collisionShape. This one should be prefered for
+   *  many objects sharing same shapes
+   */
+  BulletDS(const SP::btCollisionShape& shape,
+           SP::SiconosVector position,
+           SP::SiconosVector velocity,
+           const double& mass);
 
+  /** get the collision object
+  **/
   SP::btCollisionObject collisionObject() const
   {
     return _collisionObject;
   };
 
+  /** get a shared_ptr from this
+   */
   boost::shared_ptr<BulletDS> shared_ptr()
   {
     return shared_from_this();
   };
 
-
-
-
+  /** visitor hook
+   */
   ACCEPT_STD_VISITORS();
 };
 

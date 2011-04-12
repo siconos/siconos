@@ -25,6 +25,38 @@
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <LinearMath/btVector3.h>
 
+BulletDS::BulletDS(const SP::btCollisionShape& shape,
+                   SP::SiconosVector position,
+                   SP::SiconosVector velocity,
+                   const double& mass) : NewtonEulerDS(), _collisionShape(shape)
+{
+  _mass = mass;
+
+  btVector3 inertia;
+
+  SP::SimpleMatrix inertiaMatrix(new SimpleMatrix(3, 3));
+  inertiaMatrix->eye();
+
+  internalInit(position, velocity, mass, inertiaMatrix);
+
+  _collisionObject.reset(new btCollisionObject());
+
+  btMatrix3x3 basis;
+  basis.setIdentity();
+  _collisionObject->getWorldTransform().setBasis(basis);
+
+  _collisionObject->setUserPointer(this);
+  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+
+  _collisionShape->calculateLocalInertia(mass, inertia);
+  (*_I)(0, 0) = inertia[0];
+  (*_I)(1, 1) = inertia[1];
+  (*_I)(2, 2) = inertia[2];
+
+  _collisionObject->setCollisionShape(&*_collisionShape);
+}
+
+
 BulletDS::BulletDS(const BroadphaseNativeTypes& shape_type,
                    const SP::SimpleVector& shapeParams,
                    SP::SiconosVector position,
@@ -100,8 +132,9 @@ BulletDS::BulletDS(const BroadphaseNativeTypes& shape_type,
 
     break;
   };
-  // ...
-
+  default :
+  {
+    RuntimeException::selfThrow("BulletDS: unknown shape");
+  };
   }
 }
-

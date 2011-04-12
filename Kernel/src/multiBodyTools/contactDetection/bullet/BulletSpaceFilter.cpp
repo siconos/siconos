@@ -48,12 +48,12 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
 
-  SP::DynamicalSystemsGraph dsg = _nsds->dynamicalSystems();
+  DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg->vertices();
+  boost::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi)
   {
-    _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg->bundle(*dsi)))));
+    _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
   };
 
 

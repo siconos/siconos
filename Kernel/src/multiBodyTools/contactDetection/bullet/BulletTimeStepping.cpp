@@ -29,25 +29,25 @@ struct ForPosition : public Question<SP::SiconosVector>
 
 void BulletTimeStepping::updateWorldFromDS()
 {
-  SP::DynamicalSystemsGraph dsg = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg->vertices();
+  boost::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi)
   {
-    SP::btCollisionObject co = ask<ForCollisionObject>(*(dsg->bundle(*dsi)));
-    SP::SiconosVector q = ask<ForPosition>(*(dsg->bundle(*dsi)));
+    btCollisionObject& co = *ask<ForCollisionObject>(*(dsg.bundle(*dsi)));
+    SiconosVector& q = *ask<ForPosition>(*(dsg.bundle(*dsi)));
 
-    co->getWorldTransform().getOrigin().setX((*q)(0));
-    co->getWorldTransform().getOrigin().setY((*q)(1));
-    co->getWorldTransform().getOrigin().setZ((*q)(2));
+    co.getWorldTransform().getOrigin().setX(q(0));
+    co.getWorldTransform().getOrigin().setY(q(1));
+    co.getWorldTransform().getOrigin().setZ(q(2));
 
 
-    assert(fabs(sqrt(pow((*q)(3), 2) + pow((*q)(4), 2) +  pow((*q)(5), 2) +  pow((*q)(6), 2)) - 1.) < 1e-10);
+    assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +  pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
 
-    co->getWorldTransform().getBasis().setRotation(btQuaternion((*q)(4), (*q)(5),
-        (*q)(6), (*q)(3)));
+    co.getWorldTransform().getBasis().setRotation(btQuaternion(q(4), q(5),
+        q(6), q(3)));
 
-    co->setActivationState(ACTIVE_TAG);
+    co.setActivationState(ACTIVE_TAG);
 
   }
 }
