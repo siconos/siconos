@@ -36,11 +36,11 @@ void BulletBodies::init()
 
 
     SP::SimpleVector shapeParams(new SimpleVector(3));
-    (*shapeParams)(0) = 1.;
-    (*shapeParams)(1) = 1;
-    (*shapeParams)(2) = 1.;
+    (*shapeParams)(0) = 4.;
+    (*shapeParams)(1) = 2;
+    (*shapeParams)(2) = 7.;
 
-    double theta = acos(1 / sqrt(3)) + 0.01;
+    double theta = acos(1 / sqrt(3)) + 0.10;
 
     double a = 1;
     double b = 1;
@@ -69,6 +69,37 @@ void BulletBodies::init()
     FExt->setValue(2, -9.81);
     body->setFExtPtr(FExt);
 
+    /* a second body : not yet
+        SP::SimpleVector shapeParams2(new SimpleVector(3));
+        (*shapeParams2)(0)=4.;
+        (*shapeParams2)(1)=2;
+        (*shapeParams2)(2)=7.;
+
+        double theta2 = acos(1/sqrt(3))+0.10;
+
+        double a2 = 1;
+        double b2 = 1;
+        double c2 = 0;
+        double k2 = (sin(theta2/2))/sqrt(a2*a2+b2*b2+c2*c2);
+
+        SP::SimpleVector position2(new SimpleVector(7));
+        SP::SimpleVector velocity2(new SimpleVector(6));
+        position2->zero();
+        (*position2)(1) =10.;
+        (*position2)(2) = 40.;
+        (*position2)(3) =cos(theta2/2);
+        (*position2)(4) =a2*k2;
+        (*position2)(5) =b2*k2;
+        (*position2)(6) =c2*k2;
+
+        velocity2->zero();
+        (*velocity2)(3) = 0.;
+        (*velocity2)(4) = 0.;
+        (*velocity2)(5) = 0.;
+
+        SP::BulletDS body2(new BulletDS(BOX_SHAPE_PROXYTYPE, shapeParams2, position2, velocity2, 1.0));
+        body2->setFExtPtr(FExt);
+    */
 
     SP::btCollisionObject ground(new btCollisionObject());
     SP::btCollisionShape groundShape(new btBoxShape(btVector3(50, 50, 3)));
@@ -86,12 +117,14 @@ void BulletBodies::init()
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
-    osi.reset(new Moreau(1));
+    osi.reset(new Moreau(0.5));
 
 
     _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    //    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
 
     osi->insertDynamicalSystem(body);
+    //    osi->insertDynamicalSystem(body2);
 
 
     // ------------------
