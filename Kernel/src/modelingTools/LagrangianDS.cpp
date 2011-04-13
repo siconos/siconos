@@ -872,9 +872,11 @@ void LagrangianDS::saveSpecificDataToXML()
   if (lgptr->hasFInt())
   {
     if (!lgptr->isFIntPlugin())
+    {
       if (_fInt->size() > 0)
         lgptr->setFIntVector(*_fInt);
       else cout << "Warning : FInt can't be saved, the FInt vector is not defined." << endl;
+    }
   }
   else
     lgptr->setFIntPlugin(_pluginFInt->getPluginName());
