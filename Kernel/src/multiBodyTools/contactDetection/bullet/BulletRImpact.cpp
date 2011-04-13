@@ -22,7 +22,7 @@
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-BulletRImpact::BulletRImpact(SP::btManifoldPoint point) : NewtonEulerRImpact(), _contactPoints(point)
+BulletRImpact::BulletRImpact(const SP::btManifoldPoint& point) : NewtonEulerRImpact(), _contactPoints(point)
 {
 };
 

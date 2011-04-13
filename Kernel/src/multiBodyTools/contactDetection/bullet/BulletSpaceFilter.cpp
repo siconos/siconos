@@ -103,8 +103,20 @@ void BulletSpaceFilter::buildInteractions(double time)
 
       if (itc == contactPoints.end())
       {
-        SP::BulletR rel(new BulletR(cpoint));
-        SP::Interaction inter(new Interaction(3, _nslaw, rel, 4 * i + j));
+        SP::Interaction inter;
+        if (_nslaw->size() == 3)
+        {
+          SP::BulletR rel(new BulletR(cpoint));
+          inter.reset(new Interaction(3, _nslaw, rel, 4 * i + j));
+        }
+        else
+        {
+          if (_nslaw->size() == 1)
+          {
+            SP::BulletRImpact rel(new BulletRImpact(cpoint));
+            inter.reset(new Interaction(1, _nslaw, rel, 4 * i + j));
+          }
+        }
 
         // should no be mixed with something else that use UserPointer!
         if (obA->getUserPointer())

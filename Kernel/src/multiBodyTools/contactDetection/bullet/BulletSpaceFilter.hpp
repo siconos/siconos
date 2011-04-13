@@ -23,6 +23,7 @@
 #include "BulletSiconos.hpp"
 #include "SpaceFilter.hpp"
 #include "BulletR.hpp"
+#include "BulletRImpact.hpp"
 #include "BulletDS.hpp"
 
 #include <btBulletCollisionCommon.h>
@@ -83,6 +84,16 @@ struct ForStaticShapes : public Question< boost::shared_ptr<std::vector<SP::btCo
 {
   ANSWER(BulletSpaceFilter, staticShapes());
 };
+
+
+struct ForContactPoints : public Question<SP::btManifoldPoint>
+{
+  ANSWER(BulletR, contactPoints());
+  ANSWER(BulletRImpact, contactPoints());
+};
+
+
+
 
 
 #endif

@@ -30,7 +30,7 @@ private:
   SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletR(SP::btManifoldPoint);
+  BulletRImpact(const SP::btManifoldPoint&);
 
   SP::btManifoldPoint contactPoints() const
   {
@@ -42,10 +42,7 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-struct ForContactPoints : public Question<SP::btManifoldPoint>
-{
-  ANSWER(BulletRImpact, contactPoints());
-};
+
 
 TYPEDEF_SPTR(BulletRImpact);
 
