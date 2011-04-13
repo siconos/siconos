@@ -23,6 +23,12 @@
 #include "BulletR.hpp"
 #include "BulletDS.hpp"
 
+#ifdef DEBUG_BULLET_SPACE_FILTER
+#define DEBUG_MESSAGES 1
+#endif
+#include "Debug.hpp"
+
+
 struct ForPosition : public Question<SP::SiconosVector>
 {
   ANSWER(BulletDS, q());
@@ -59,15 +65,17 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
 };
 
+
 void BulletSpaceFilter::buildInteractions(double time)
 {
 
-  // set bullet coordinates from Siconos coordinates
+  DEBUG_PRINT("-----start build interaction\n");
+
+  // 1. perform bullet collision detection
   _collisionWorld->performDiscreteCollisionDetection();
 
+  // 2. collect old contact points from Siconos graph
   std::map<btManifoldPoint*, bool> contactPoints;
-
-
   SP::UnitaryRelationsGraph indexSet0 = _nsds->topology()->indexSet(0);
   UnitaryRelationsGraph::VIterator ui0, ui0end, v0next;
   boost::tie(ui0, ui0end) = indexSet0->vertices();
@@ -79,6 +87,7 @@ void BulletSpaceFilter::buildInteractions(double time)
     contactPoints[&*ask<ForContactPoints>(*(ur0.interaction()->relation()))] = false;
   };
 
+  // 3. add new contact points in Siconos graph
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();
 
@@ -97,6 +106,8 @@ void BulletSpaceFilter::buildInteractions(double time)
     for (unsigned int j = 0; j < numContacts; ++j)
     {
       SP::btManifoldPoint cpoint(createSPtrbtManifoldPoint(contactManifold->getContactPoint(j)));
+
+      DEBUG_PRINTF("manifold %d, contact %d, &contact %p, lifetime %d\n", i, j, &*cpoint, cpoint->getLifeTime());
 
       std::map<btManifoldPoint*, bool>::iterator itc;
       itc = contactPoints.find(&*cpoint);
@@ -134,23 +145,31 @@ void BulletSpaceFilter::buildInteractions(double time)
 
       }
       contactPoints[&*cpoint] = true;
-    }
-
-    boost::tie(ui0, ui0end) = indexSet0->vertices();
-    for (v0next = ui0 ;
-         ui0 != ui0end; ui0 = v0next)
-    {
-      ++v0next;  // trick to iterate on a dynamic bgl graph
-      UnitaryRelation& ur0 = *(indexSet0->bundle(*ui0));
-
-      if (!contactPoints[&*ask<ForContactPoints>(*(ur0.interaction()->relation()))])
-      {
-        _nsds->removeInteraction(ur0.interaction());
-      }
+      DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
 
     }
   }
 
+  // 4. remove old contact points
+  boost::tie(ui0, ui0end) = indexSet0->vertices();
+  for (v0next = ui0 ;
+       ui0 != ui0end; ui0 = v0next)
+  {
+    ++v0next;  // trick to iterate on a dynamic bgl graph
+    UnitaryRelation& ur0 = *(indexSet0->bundle(*ui0));
+
+    if (!contactPoints[&*ask<ForContactPoints>(*(ur0.interaction()->relation()))])
+    {
+
+      DEBUG_PRINTF("remove contact %p, lifetime %d\n",
+                   &*ask<ForContactPoints>(*(ur0.interaction()->relation())),
+                   ask<ForContactPoints>(*(ur0.interaction()->relation()))->getLifeTime());
+      _nsds->removeInteraction(ur0.interaction());
+    }
+
+  }
   _nsds->topology()->computeRelativeDegrees();
+
+  DEBUG_PRINT("-----end build interaction\n");
 
 }
