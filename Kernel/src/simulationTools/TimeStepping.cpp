@@ -520,8 +520,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   bool isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
-  //  cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT"<<endl;
-
+  //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   computeInitialResidu();
 
@@ -548,7 +547,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    while ((!isNewtonConverge || info) && (_newtonNbSteps < maxStep))
+    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep) && (!info))
     {
       _newtonNbSteps++;
       prepareNewtonIteration();
@@ -572,8 +571,12 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         saveYandLambdaInMemory();
       }
     }
-    if (!isNewtonConverge && !info)
+    if (!isNewtonConverge)
       cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
+    else if (info)
+      cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
+    //    else
+    //      cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);

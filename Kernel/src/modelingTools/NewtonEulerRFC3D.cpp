@@ -22,6 +22,7 @@
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
 using namespace std;
+//#define NEFC3D_DEBUG
 /*
   See devNotes.pdf for details.
  */
@@ -67,7 +68,10 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::Si
   _Mabs_C->setValue(0, 2, Nz);
   _Mabs_C->setValue(1, 2, *(pt + 2));
   _Mabs_C->setValue(2, 2, *(pt + 5));
-
+#ifdef NEFC3D_DEBUG
+  printf("_Mabs_C:\n");
+  _Mabs_C->display();
+#endif
   _NPG1->zero();
 
   (*_NPG1)(0, 0) = 0;
@@ -108,6 +112,12 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::Si
   _Mobj1_abs->setValue(2, 1, quatBuff.R_component_3());
   _Mobj1_abs->setValue(2, 2, quatBuff.R_component_4());
 
+#ifdef NEFC3D_DEBUG
+  printf("NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
+  _Mobj1_abs->display();
+#endif
+
+
   prod(*_NPG1, *_Mobj1_abs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
@@ -119,7 +129,26 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::Si
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       jhqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
-
+#ifdef NEFC3D_DEBUG
+  printf("NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts, jhqT:\n");
+  jhqT->display();
+  SP::SimpleMatrix jaux(new SimpleMatrix(*jhqT));
+  jaux->trans();
+  SP::SimpleVector v(new SimpleVector(3));
+  SP::SimpleVector vRes(new SimpleVector(6));
+  v->zero();
+  v->setValue(0, 1);
+  prod(*jaux, *v, *vRes, true);
+  vRes->display();
+  v->zero();
+  v->setValue(1, 1);
+  prod(*jaux, *v, *vRes, true);
+  vRes->display();
+  v->zero();
+  v->setValue(2, 1);
+  prod(*jaux, *v, *vRes, true);
+  vRes->display();
+#endif
 }
 
 void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)

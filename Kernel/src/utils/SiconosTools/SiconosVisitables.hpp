@@ -49,6 +49,7 @@
   REGISTER(NewtonEulerDS)                                    \
   REGISTER(NewtonEulerR)                                     \
   REGISTER(BulletR)                                          \
+  REGISTER(BulletRImpact)                                    \
   REGISTER(SpaceFilter)                                      \
   REGISTER(BulletSpaceFilter)                                \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \

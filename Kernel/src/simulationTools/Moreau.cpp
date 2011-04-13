@@ -34,7 +34,6 @@
 
 using namespace std;
 using namespace RELATION;
-
 // --- xml constructor ---
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::MOREAU), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
@@ -971,20 +970,15 @@ double Moreau::computeResidu()
       {
         // computes fL(ti,vi,qi)
         SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
-        double coef = -h * (1 - _theta);
+        double _thetaFL = 0;
+        double coef = -h * (1 - _thetaFL);
         // residuFree += coef * fL_i
         scal(coef, *fLold, *residuFree, false);
-
-        // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
-
-        // d->computeFL(t,q,v) ?
-        d->computeFL(told, qold, vold);
-        //d->computeFL(t);
-        coef = -h * _theta;
-        // residuFree += coef * fL_k,i+1
+        d->computeFL(t);
+        printf("cpmputeFreeState d->FL():\n");
+        d->fL()->display();
+        coef = -h * _thetaFL;
         scal(coef, *d->fL(), *residuFree, false);
-        //printf("Moreau::residufree: Residu free:\n");
-        //residuFree->display();
 
       }
       *(d->workFree()) = *residuFree;
@@ -1751,8 +1745,10 @@ void Moreau::updateState(unsigned int level)
       *v = *d->p(level); // v = p
       d->luM()->PLUForwardBackwardInPlace(*v);
 
-      //  cout<<"Moreau::updatestate hWB lambda"<<endl;
-      //  v->display();
+#ifdef MOREAU_NE_DEBUG
+      cout << "Moreau::updatestate hWB lambda" << endl;
+      v->display();
+#endif
 
       *v +=  * ds->workFree();
 

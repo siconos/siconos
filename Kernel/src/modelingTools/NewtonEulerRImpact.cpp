@@ -24,7 +24,7 @@
 //#define NERI_DEBUG
 using namespace std;
 
-
+//#define NEFC3D_DEBUG
 
 void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosMatrix jhqT)
 {
@@ -99,7 +99,10 @@ void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::Si
   for (unsigned int jj = 3; jj < 6; jj++)
     jhqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
-
+#ifdef NEFC3D_DEBUG
+  printf("NewtonEulerRImpact jhqt\n");
+  jhqT->display();
+#endif
 }
 
 void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::SimpleVector Pc, SP::SimpleVector Nc, SP::SiconosVector G1, SP::SiconosVector G2, SP::SiconosMatrix jhqT)

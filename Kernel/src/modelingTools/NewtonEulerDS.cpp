@@ -624,9 +624,9 @@ void NewtonEulerDS::computeFL(double time)
       bufOmega.setValue(2, _v->getValue(5));
       prod(*_I, bufOmega, bufIOmega, true);
       cross_product(bufOmega, bufIOmega, buf);
-      _fL->setValue(3, _fL->getValue(3) + buf.getValue(0));
-      _fL->setValue(4, _fL->getValue(4) + buf.getValue(1));
-      _fL->setValue(5, _fL->getValue(5) + buf.getValue(2));
+      _fL->setValue(3, _fL->getValue(3) - buf.getValue(0));
+      _fL->setValue(4, _fL->getValue(4) - buf.getValue(1));
+      _fL->setValue(5, _fL->getValue(5) - buf.getValue(2));
     }
   }
   // else nothing.
@@ -663,9 +663,9 @@ void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVect
       bufOmega.setValue(2, v2->getValue(5));
       prod(*_I, bufOmega, bufIOmega, true);
       cross_product(bufOmega, bufIOmega, buf);
-      _fL->setValue(3, _fL->getValue(3) + buf.getValue(0));
-      _fL->setValue(4, _fL->getValue(4) + buf.getValue(1));
-      _fL->setValue(5, _fL->getValue(5) + buf.getValue(2));
+      _fL->setValue(3, _fL->getValue(3) - buf.getValue(0));
+      _fL->setValue(4, _fL->getValue(4) - buf.getValue(1));
+      _fL->setValue(5, _fL->getValue(5) - buf.getValue(2));
     }
   }
 }
