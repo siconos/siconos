@@ -24,7 +24,7 @@
 #include "NewtonEulerRImpact.hpp"
 using namespace std;
 
-#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,

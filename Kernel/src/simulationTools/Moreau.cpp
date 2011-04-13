@@ -970,16 +970,15 @@ double Moreau::computeResidu()
       {
         // computes fL(ti,vi,qi)
         SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
-        double _thetaFL = 0;
+        double _thetaFL = 0.5;
         double coef = -h * (1 - _thetaFL);
         // residuFree += coef * fL_i
         scal(coef, *fLold, *residuFree, false);
         d->computeFL(t);
-        printf("cpmputeFreeState d->FL():\n");
-        d->fL()->display();
+        //        printf("cpmputeFreeState d->FL():\n");
+        //  d->fL()->display();
         coef = -h * _thetaFL;
         scal(coef, *d->fL(), *residuFree, false);
-
       }
       *(d->workFree()) = *residuFree;
       //cout<<"Moreau::computeResidu :\n";

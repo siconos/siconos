@@ -19,7 +19,7 @@
 #include "NewtonEulerDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-
+#include <boost/math/quaternion.hpp>
 using namespace std;
 
 // Private function to set linked with members of Dynamical top class
@@ -92,6 +92,8 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   // Initial conditions
   _q0 = Q0;
   _v0 = Velocity0;
+
+  _MObjToAbs.reset(new SimpleMatrix(3, 3));
 
   // Current state
   _q.reset(new SimpleVector(_qDim));
@@ -616,6 +618,10 @@ void NewtonEulerDS::computeFL(double time)
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
     {
+      // printf("NewtonEulerDS::computeFL _I:\n");
+      // _I->display();
+      // _v->display();
+
       SimpleVector bufOmega(3);
       SimpleVector bufIOmega(3);
       SimpleVector buf(3);
@@ -946,4 +952,31 @@ void NewtonEulerDS::normalizeq()
   _q->setValue(4, _q->getValue(4) * normq);
   _q->setValue(5, _q->getValue(5) * normq);
   _q->setValue(6, _q->getValue(6) * normq);
+}
+void NewtonEulerDS::updateMObjToAbs()
+{
+  double q0 = _q->getValue(3);
+  double q1 = _q->getValue(4);
+  double q2 = _q->getValue(5);
+  double q3 = _q->getValue(6);
+
+  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  ::boost::math::quaternion<double>    quatBuff;
+  quatBuff = quatcQ * quatx * quatQ;
+  _MObjToAbs->setValue(0, 0, quatBuff.R_component_2());
+  _MObjToAbs->setValue(0, 1, quatBuff.R_component_3());
+  _MObjToAbs->setValue(0, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quaty * quatQ;
+  _MObjToAbs->setValue(1, 0, quatBuff.R_component_2());
+  _MObjToAbs->setValue(1, 1, quatBuff.R_component_3());
+  _MObjToAbs->setValue(1, 2, quatBuff.R_component_4());
+  quatBuff = quatcQ * quatz * quatQ;
+  _MObjToAbs->setValue(2, 0, quatBuff.R_component_2());
+  _MObjToAbs->setValue(2, 1, quatBuff.R_component_3());
+  _MObjToAbs->setValue(2, 2, quatBuff.R_component_4());
+
 }

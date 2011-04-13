@@ -144,8 +144,8 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
         reset(new SimpleMatrix(*(indexSet->properties(*ei).lower_blockProj)));
         indexSet->properties(*ei).upper_blockProj->trans();
       }
-      printf("MLCPP upper: %i %i\n", indexSet->properties(*ei).upper_blockProj->size(0), indexSet->properties(*ei).upper_blockProj->size(1));
-      printf("MLCPP lower: %i %i\n", indexSet->properties(*ei).lower_blockProj->size(0), indexSet->properties(*ei).lower_blockProj->size(1));
+      //      printf("MLCPP upper: %i %i\n",indexSet->properties(*ei).upper_blockProj->size(0),indexSet->properties(*ei).upper_blockProj->size(1));
+      //      printf("MLCPP lower: %i %i\n",indexSet->properties(*ei).lower_blockProj->size(0),indexSet->properties(*ei).lower_blockProj->size(1));
 
     }
 
@@ -392,6 +392,7 @@ void MLCPProjectOnConstraints::postCompute()
 
 
   UnitaryRelationsGraph::VIterator ui, uiend;
+#ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::postCompute BEFORE UPDATE:\n");
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
@@ -400,6 +401,7 @@ void MLCPProjectOnConstraints::postCompute()
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
     ner->computeh(0);
   }
+#endif
   // boost::tie(ui,uiend)=indexSet->vertices();
   // SP::UnitaryRelation ur1 = indexSet->bundle(*ui);
   // SP::Relation R1 = ur1->interaction()->relation();
@@ -510,6 +512,7 @@ void MLCPProjectOnConstraints::postCompute()
     (ner->getq())->display();
 #endif
   }
+#ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::postCompute AFTER UPDATE:\n");
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
@@ -518,6 +521,7 @@ void MLCPProjectOnConstraints::postCompute()
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
     ner->computeh(0);
   }
+#endif
 }
 void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {

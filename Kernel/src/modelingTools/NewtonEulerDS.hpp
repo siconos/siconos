@@ -71,6 +71,8 @@ protected:
   SP::SiconosVector _q0;
   /** The time derivative of q*/
   SP::SiconosVector _dotq;
+  /*Matrix converting the object coordinates in the absolute coordinates.*/
+  SP::SimpleMatrix _MObjToAbs;
 
   /** Inertial matrix*/
   SP::SiconosMatrix _I;
@@ -870,6 +872,13 @@ public:
   {
     return _dotq;
   }
+  /*get the matrix converting the object coordinates in the absolute coordinates.*/
+  SP::SimpleMatrix MObjToAbs()
+  {
+    return _MObjToAbs;
+  }
+  /*update the _MObjToAbs from the current quaternion.*/
+  void updateMObjToAbs();
 
   ACCEPT_STD_VISITORS();
 
