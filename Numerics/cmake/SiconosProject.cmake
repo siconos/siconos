@@ -118,8 +118,6 @@ MACRO(SICONOS_PROJECT
 
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
-    INCLUDE(CTest)
-    ENABLE_TESTING()
     
     IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
       # a note file for the dashboard
@@ -181,6 +179,9 @@ MACRO(SICONOS_PROJECT
       ENDIF(C_HAVE_FTEST_COVERAGE)
       
     ENDIF(WITH_TESTS_COVERAGE)
+
+    INCLUDE(CTest)
+    ENABLE_TESTING()
   
   ENDIF(WITH_TESTING)
   # The library build stuff
