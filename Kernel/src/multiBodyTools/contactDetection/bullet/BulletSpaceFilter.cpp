@@ -69,6 +69,11 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 void BulletSpaceFilter::buildInteractions(double time)
 {
 
+  typedef std::pair<int, int> interPair;
+
+  typedef std::tr1::unordered_multiset < interPair,
+          boost::hash<interPair> > interPairs;
+
   DEBUG_PRINT("-----start build interaction\n");
 
   // 1. perform bullet collision detection
@@ -88,6 +93,8 @@ void BulletSpaceFilter::buildInteractions(double time)
   };
 
   // 3. add new contact points in Siconos graph
+  interPairs declaredInteractions;
+
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();
 
@@ -130,18 +137,36 @@ void BulletSpaceFilter::buildInteractions(double time)
         }
 
         // should no be mixed with something else that use UserPointer!
-        if (obA->getUserPointer())
-        {
-          SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
-          inter->insert(dsa);
-        }
+        assert(obA->getUserPointer());
+
+        SP::BulletDS dsa(static_cast<BulletDS*>(obA->getUserPointer())->shared_ptr());
+
         if (obB->getUserPointer())
         {
           SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
-          inter->insert(dsb);
-        }
-        _nsds->topology()->insertInteraction(inter);
 
+          int idsa = dsa->number();
+          int idsb = dsb->number();
+          assert(idsa != idsb);
+
+          int imax = (std::max)(idsa, idsb);
+          int imin = (std::min)(idsa, idsb);
+
+          interPair interpair = interPair(imin, imax);
+
+          if (declaredInteractions.find(interpair) == declaredInteractions.end())
+          {
+            inter->insert(dsa);
+            inter->insert(dsb);
+            _nsds->topology()->insertInteraction(inter);
+            declaredInteractions.insert(interpair);
+          }
+        }
+        else
+        {
+          inter->insert(dsa);
+          _nsds->topology()->insertInteraction(inter);
+        }
       }
       contactPoints[&*cpoint] = true;
       DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);

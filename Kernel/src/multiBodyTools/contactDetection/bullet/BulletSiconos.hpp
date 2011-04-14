@@ -23,7 +23,7 @@
 
 #include "SiconosKernel.hpp"
 
-#include <bullet/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
 
 DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
