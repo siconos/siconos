@@ -44,8 +44,9 @@ Relay::Relay(const int newNumericsSolverId , const std::string& newId):
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
 {
   Relay *parent;
-  unsigned int pos;
   SP::UnitaryRelation UR;
+  unsigned int pos;
+
 
   _BoundsNSLEffect(Relay *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
@@ -54,7 +55,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   {
 
     // cout << "Relay::_BoundsNSLEffect visit"  << endl;
-    for (int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  UR->getNonSmoothLawSize(); i++)
     {
       (*(parent->lb()))(pos + i) =
         nslaw.lb();
@@ -65,7 +66,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
 
   void visit(const ComplementarityConditionNSL& nslaw)
   {
-    for (int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  UR->getNonSmoothLawSize(); i++)
     {
       (*(parent->lb()))(pos + i) = 0.0;
       (*(parent->ub()))(pos + i) = 1e+24;

@@ -181,7 +181,6 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   unsigned int NumDS = 0;
   DSIterator itDS;
   itDS = interaction()->dynamicalSystemsBegin();
-  int sizey = interaction()->getSizeOfY();
 
   // look for ds and its position in G
   while (*itDS != ds && itDS != interaction()->dynamicalSystemsEnd())
@@ -198,7 +197,6 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   SP::SiconosMatrix originalMatrix;
 
   RELATION::TYPES relationType = getRelationType();
-  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
@@ -238,7 +236,6 @@ void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::Dynamical
   unsigned int NumDS = 0;
   DSIterator itDS;
   itDS = interaction()->dynamicalSystemsBegin();
-  int sizey = interaction()->getSizeOfY();
 
   // look for ds and its position in G
   while (*itDS != ds && itDS != interaction()->dynamicalSystemsEnd())
@@ -262,7 +259,6 @@ void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::Dynamical
   SP::SiconosMatrix originalMatrix;
 
   RELATION::TYPES relationType = getRelationType();
-  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
@@ -321,7 +317,6 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = getRelationType();
-  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
@@ -358,9 +353,6 @@ void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
   // there is no coupling between UnitaryRelation through D !!!  Any
   // coupling between relations through D must be taken into account
   // thanks to the nslaw (by "increasing" its dimension).
-
-  RELATION::TYPES relationType = getRelationType();
-  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   SP::SiconosMatrix D;
   //  if(interaction()->relation()->getNumberOfJacobiansForH()>1)

@@ -65,7 +65,7 @@ int LCP::compute(double time)
     _numerics_problem->M = &*_M->getNumericsMatrix();
     _numerics_problem->q = _q->getArray();
     _numerics_problem->size = _sizeOutput;
-    int nbSolvers = 1;
+
     //const char * name = &*_numerics_solver_options->solverName;
     if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
     {

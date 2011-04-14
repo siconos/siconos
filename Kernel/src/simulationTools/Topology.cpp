@@ -119,10 +119,10 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   // to get interaction size and nsLaw size.
   unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
-  unsigned int pos; // relative position of the relation in the y
+
   // vector of the Interaction
   UnitaryRelationsGraph::EDescriptor ur_current_edge;
-  UnitaryRelationsGraph::VDescriptor ui_current_vertex;
+
   UnitaryRelationsGraph::EDescriptor ds_current_edge;
 
   SP::DynamicalSystemsSet systems = inter->dynamicalSystems();
@@ -178,7 +178,6 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
           assert(_URG[0]->bundle(urg_new_ve) == *uri);
           assert(_URG[0]->is_vertex(*uri));
           assert(_DSG[0]->is_edge(dsgv, dsgv, *uri));
-
         }
       }
       else
@@ -194,7 +193,6 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
           for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
                uri != current_urs.end(); ++uri)
           {
-
             assert(!_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
             assert(!_URG[0]->is_vertex(*uri));
 

@@ -422,7 +422,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, 
 
     // get the corresponding matrix from map unitaryBlocks, and copy it into M
 
-    unsigned int pos = 0, col = 0; // index position used for unitaryBlock copy into M, see below.
+    unsigned int pos = 0; // index position used for unitaryBlock copy into M, see below.
     // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
     for (DSIterator itDS = DSSet->begin(); itDS != DSSet->end(); ++itDS)
     {

@@ -124,7 +124,6 @@ void MLCP::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
 
 void MLCP::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
 {
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
@@ -191,7 +190,7 @@ int MLCP::compute(double time)
   if (_sizeOutput != 0)
   {
     _numerics_problem.q = _q->getArray();
-    int nbSolvers = 1;
+
     // Call MLCP Driver
     //printf("MLCP display");
     //printf("n %d m %d",n,m);
