@@ -42,6 +42,7 @@ And $\_q_{k}$ represent the system, usually it could be the coordinate of the ce
 representation of the orientation.
 
 \subsubsection{explicit case}
+It consists in evaluating $\Omega  \wedge I\Omega $ as an explicit way. We note that it can cause trouble (numerical instabilities) for object having an important condition number of the inertial matrix.
 The dynamical system~\ref{NE_Dyn1} leads to the system:
 \begin{equation}
   \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
@@ -51,6 +52,34 @@ The dynamical system~\ref{NE_Dyn1} leads to the system:
   \end{equation}
   With \[\_Fl_k = \left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)\]
 Using $W = \left(\begin{array}{cc} m&0\\0&I\end{array}\right) ^{-1} $
+
+\subsubsection{$\theta$ method case}
+It consists in evaluating $\Omega  \wedge I\Omega $ as $\Omega _{k+\theta _{FL}}  \wedge I\Omega _{k+\theta _{FL}} $.
+\begin{equation}
+  \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
+   (\_v_{k+1}-\_v_{k})=
+   h (1-\theta _{FL})\_Fl_k + h \theta _{FL} Fl_{k+1} +
+    ^t(CT) h\lambda _{k+1}
+  \end{equation}
+Using approximation $Fl_{k+1} = \_Fl_{k}+\nabla _v Fl (\_v_{k+1}-\_v_{k})$ leads to:
+
+\begin{equation}
+  \left(\left(\begin{array}{cc} m&0\\0&I\end{array}\right)-h\theta _{FL}\nabla _v Fl\right)
+   (\_v_{k+1}-\_v_{k})=
+   h \_Fl_k + ^t(CT) h\lambda _{k+1}
+  \end{equation}
+We get $W =  \left(\left(\begin{array}{cc} m&0\\0&I\end{array}\right)-h\theta _{FL}\nabla _v Fl\right)^{-1} $
+
+\[ (\Omega+\epsilon)  \wedge I(\Omega+\epsilon)=  \Omega  \wedge I\Omega + \epsilon \wedge I \Omega +  \Omega  \wedge I \epsilon + O(\epsilon ^2)\]
+case $\epsilon = h*e_i$ leads to:
+\[ \frac{\partial (\Omega \wedge I\Omega)}{\partial e_i}=e_i\wedge I\Omega+\Omega \wedge Ie_i\]
+\[\nabla _v Fl = \left(\begin{array}{cc}
+0_{3x3}&0_{3x3}\\
+0_{3x3}&\left(\frac{\partial (\Omega \wedge I\Omega)}{\partial e_i}\right)_{i=1,2,3}
+\end{array}\right)\]
+
+\subsubsection{Building of the OSNSP}
+
 \begin{equation}
   \label{NE_dis_explicit}
   \fbox{$

@@ -60,25 +60,6 @@ So
 0\\
 \end{array}\right)\]
 
-
-\subsection{Case NewtonLaw : using the local frame and momentum}
-
-\[\left(\begin{array}{c}m \dot V\\I \dot \omega + \omega I \omega \end{array}\right)= \left(\begin{array}{c}Fect+R\\Mext + R*PG \end{array}\right)\]
-  with * vectoriel product, $R$ reaction in the globla frame. $P$ the point of contact.
-  $r$ is the reaction in the local frame.  $M^t r=R$ with:
-  \[M^t=\left(\begin{array}{c} nx \\ny\\nz \end{array}\right)\]
-  with :
-  \[\left(\begin{array}{c} R_x \\R_y\\R_z \end{array}\right)*\left(\begin{array}{c} PG_x \\PG_y\\PG_z \end{array}\right) =\left(\begin{array}{c} R_y~PG_z - R_z~PG_y \\R_z~PG_x-R_x~PG_z \\R_x~PG_y-R_y~PG_x \end{array}\right)\]
-
-  we have :
-  
-  \[\left(\begin{array}{c}R\\R*PG\end{array}\right)=\left(\begin{array}{ccc} 1&0&0\\0&1&0\\0&0&1\\
-      0&PG_z&-PG_y\\-PG_z&0&PG_x\\PG_y&-PG_X&0\end{array}\right).R:=N^tR=N^tM^tr\]
-      we want:
-      
-\[\left(\begin{array}{c}m \dot V\\I \dot \omega + \omega I \omega \end{array}\right)=jachqT^t r\]
-So $jachqt=MN$
-
 \subsection{Case FC3D: using the local frame and momentum}
 
 \[\left(\begin{array}{c}m \dot V\\I \dot \Omega + \Omega I \Omega \end{array}\right)= \left(\begin{array}{c}Fect+R\\Mext _{R_{obj}} + (R*PG) _{R_{obj}} \end{array}\right)\]
