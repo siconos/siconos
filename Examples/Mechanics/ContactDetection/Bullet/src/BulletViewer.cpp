@@ -290,49 +290,9 @@ void BulletViewer::draw()
 void BulletViewer::animate()
 {
 
-  struct timespec ts1, ts2;
-
-  // draft of auto-gravitation forces computation
-  std::vector<double> masses;
-  std::vector<SP::SiconosVector> positions;
-  double G = 6.67e-2;
-
-  for (unsigned int i = 0; i < GETNDS(Siconos_); ++i)
-  {
-    masses.push_back(ask<ForMassValue>(*shapes_[i]->DS()));
-    positions.push_back(ask<ForPosition>(*shapes_[i]->DS()));
-
-  }
-
-  for (unsigned int i = 0; i < GETNDS(Siconos_); ++i)
-  {
-    if (!shapes_[i]->selected())
-    {
-
-      SP::SiconosVector fext = (ask<ForFExt>(*shapes_[i]->DS()));
-
-      (*fext)(0) = 0.;
-      (*fext)(1) = 0.;
-
-      for (unsigned int j = 0; j < GETNDS(Siconos_); ++j)
-      {
-        if (i != j)
-        {
-          double distance = pow((*positions[j])(0) - (*positions[i])(0), 2) +
-                            pow((*positions[j])(1) - (*positions[i])(1), 2) ;
-          distance = sqrt(distance);
-          (*fext)(0) += ((*positions[j])(0) - (*positions[i])(0)) * masses[j] / pow(distance, 3);
-          (*fext)(1) += ((*positions[j])(1) - (*positions[i])(1)) * masses[j] / pow(distance, 3);
-        }
-      }
-      (*fext)(0) *= G * masses[i] ;
-      (*fext)(1) *= G * masses[i] ;
-    }
-  }
   Siconos_->compute();
   //Siconos_->compute();
   //saveSnapshot();
-
 }
 
 
