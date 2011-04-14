@@ -395,12 +395,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
-
-    //    scal(1.0/h,*(d->luW()),*(d->luW()));
-    cout << "Moreau::initW luM before LUFact\n";
-    d->luM()->display();
-    d->luM()->PLUFactorizationInPlace();
+    ;
 
   }
   else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
@@ -583,7 +578,19 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
   // === ===
   else if (dsType == Type::NewtonEulerDS)
-    ;//Nothing here: In present version, use d->M;
+  {
+    SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+    d->computeJacobianvFL(t);
+    double thetaFL = _theta;
+    *(d->luW()) = *(d->jacobianvFL());
+    scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
+    *(d->luW()) += *(d->M());
+
+    //cout<<"Moreau::computeW luW before LUFact\n";
+    //d->luW()->display();
+
+    d->luW()->PLUFactorizationInPlace();
+  }
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized here.
@@ -1206,7 +1213,7 @@ void Moreau::computeFreeState()
 
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
-
+      computeW(t, d);
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
@@ -1228,7 +1235,7 @@ void Moreau::computeFreeState()
       // -> Solve WX = vfree and set vfree = X
       //    cout<<"Moreau::computeFreeState residu free"<<endl;
       //    vfree->display();
-      d->luM()->PLUForwardBackwardInPlace(*vfree);
+      d->luW()->PLUForwardBackwardInPlace(*vfree);
       //    cout<<"Moreau::computeFreeState -WRfree"<<endl;
       //    vfree->display();
       //    scal(h,*vfree,*vfree);
@@ -1742,7 +1749,7 @@ void Moreau::updateState(unsigned int level)
       /*d->p has been fill by the Relation->computeInput, it contains
            B \lambda _{k+1}*/
       *v = *d->p(level); // v = p
-      d->luM()->PLUForwardBackwardInPlace(*v);
+      d->luW()->PLUForwardBackwardInPlace(*v);
 
 #ifdef MOREAU_NE_DEBUG
       cout << "Moreau::updatestate hWB lambda" << endl;

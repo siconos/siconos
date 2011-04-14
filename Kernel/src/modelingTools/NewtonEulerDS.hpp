@@ -43,7 +43,7 @@ protected:
 
   /** _v conatains the speed of the Newton Euler system:
       _v[0:2] : velocity of the mass center.
-      _v[3:5] : angular velocity in the referencial attached to the object.
+      _v[3:5] : Omega, angular velocity in the referencial attached to the object.
   */
   SP::SiconosVector _v;
   SP::SiconosVector _v0;
@@ -85,7 +85,7 @@ protected:
   /** used for concatenate _I and _mass*/
   SP::SimpleMatrix _M;
 
-  SP::SimpleMatrix _luM;
+  SP::SimpleMatrix _luW;
 
   /** Matrix depending of the meaning of x.*/
   SP::SiconosMatrix _T;
@@ -118,7 +118,7 @@ protected:
   SP::SiconosVector _fL;
 
   /** jacobian_q FL*/
-  SP::SimpleMatrix _jacobianqFL;
+  SP::SimpleMatrix _jacobianvFL;
   /** jacobian_{qDot} FL*/
   SP::SimpleMatrix _jacobianqDotFL;
 
@@ -573,9 +573,9 @@ public:
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianqFL() const
+  inline SP::SimpleMatrix jacobianvFL() const
   {
-    return _jacobianqFL;
+    return _jacobianvFL;
   }
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
@@ -795,7 +795,7 @@ public:
   /** Default function to compute the jacobian following q of fL
    *  \param double, the current time
    */
-  virtual void computeJacobianqFL(double);
+  virtual void computeJacobianvFL(double);
   /** Default function to compute the jacobian following qDot of fL
    *  \param double, the current time
    */
@@ -852,9 +852,9 @@ public:
   {
     return _M;
   }
-  inline SP::SimpleMatrix luM()
+  inline SP::SimpleMatrix luW()
   {
-    return _luM;
+    return _luW;
   }
   inline SP::SiconosMatrix T()
   {

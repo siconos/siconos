@@ -55,6 +55,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 {
   _p.resize(3);
   zeroPlugin();
+  //assert(0);
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
 
@@ -72,7 +73,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
   _dotq.reset(new SimpleVector(_qDim));
   _residuFree.reset(new SimpleVector(_n));
   _M.reset(new SimpleMatrix(_n, _n));
-  _luM.reset(new SimpleMatrix(_n, _n));
+  _luW.reset(new SimpleMatrix(_n, _n));
   _M->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
 
@@ -103,7 +104,8 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _dotq.reset(new SimpleVector(_qDim));
   _residuFree.reset(new SimpleVector(_n));
   _M.reset(new SimpleMatrix(_n, _n));
-  _luM.reset(new SimpleMatrix(_n, _n));
+  _jacobianvFL.reset(new SimpleMatrix(_n, _n));
+  _luW.reset(new SimpleMatrix(_n, _n));
   _M->zero();
   _M->setValue(0, 0, _mass);
   _M->setValue(1, 1, _mass);
@@ -118,8 +120,6 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   startIndex[2] = 3;
   startIndex[3] = 3;
   setBlock(_I, _M, dimIndex, startIndex);
-  *_luM = *_M;
-
 
   _T.reset(new SimpleMatrix(_qDim, _n));
   _T->zero();
@@ -127,6 +127,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _T->setValue(1, 1, 1.0);
   _T->setValue(2, 2, 1.0);
   updateT();
+  initFL();
 }
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double  mass, SP::SiconosMatrix inertialMatrix, SP::SimpleVector centerOfMass):
   DynamicalSystem(6)
@@ -215,7 +216,7 @@ void NewtonEulerDS::initFL()
 
   _fL.reset(new SimpleVector(_n));
 
-  _jacobianqFL.reset(new SimpleMatrix(_n, _qDim));
+  _jacobianvFL.reset(new SimpleMatrix(_n, _qDim));
   _jacobianqDotFL.reset(new SimpleMatrix(_n, _qDim));
 }
 
@@ -234,24 +235,24 @@ void NewtonEulerDS::initRhs(double time)
 
   // Copy of Mass into _workMatrix for LU-factorization.
 
-  bool flag1 = false, flag2 = false;
-  if (_jacobianqFL)
-  {
-    // Solve MjacobianX(1,0) = jacobianFL[0]
-    computeJacobianqFL(time);
+  // bool flag1 = false, flag2 = false;
+  // if( _jacobianqFL )
+  //   {
+  //     // Solve MjacobianX(1,0) = jacobianFL[0]
+  //     computeJacobianqFL(time);
 
-    //      _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqFL));
-    flag1 = true;
-  }
+  //     //      _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqFL));
+  //     flag1 = true;
+  //   }
 
-  if (_jacobianqDotFL)
-  {
-    // Solve MjacobianX(1,1) = jacobianFL[1]
-    computeJacobianqDotFL(time);
-    //      _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotFL));
-    //      _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
-    flag2 = true;
-  }
+  // if( _jacobianqDotFL )
+  //   {
+  //     // Solve MjacobianX(1,1) = jacobianFL[1]
+  //     computeJacobianqDotFL(time);
+  //     //      _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotFL));
+  //     //      _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
+  //     flag2 = true;
+  //   }
 
   //   _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
   //   _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
@@ -305,7 +306,6 @@ void NewtonEulerDS::initialize(const string& simulationType, double time, unsign
   if (!_workFree)
     _workFree.reset(new SimpleVector(getDim()));
   // Memory allocation for fL and its jacobians.
-  initFL();
 
   // Set links to variables of top-class DynamicalSystem.
   // Warning: this results only in pointers links. No more memory allocation for vectors or matrices.
@@ -608,6 +608,9 @@ void NewtonEulerDS::computeFL(double time)
     if (_mExt)
     {
       computeMExt(time);
+      SimpleVector aux(3);
+      prod(*_mExt, *_MObjToAbs, aux);
+      *_mExt = aux;
       (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
     }
     if (_NNL)
@@ -706,24 +709,43 @@ void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVect
 //   // else nothing.
 // }
 
-void NewtonEulerDS::computeJacobianqFL(double time)
+void NewtonEulerDS::computeJacobianvFL(double time)
 {
-  if (_jacobianqFL)
+  if (_jacobianvFL)
   {
-    //      computeJacobianFIntq(time);
-    computeJacobianNNLq();
+    //Omega /\ I \Omega:
+    _jacobianvFL->zero();
+    SimpleVector omega(3);
+    omega.setValue(0, _v->getValue(3));
+    omega.setValue(1, _v->getValue(4));
+    omega.setValue(2, _v->getValue(5));
+    SimpleVector Iomega(3);
+    prod(*_I, omega, Iomega, true);
+    SimpleVector ei(3);
+    SimpleVector Iei(3);
+    SimpleVector ei_Iomega(3);
+    SimpleVector omega_Iei(3);
 
-    // not true!
-    // if( jacobianFL[i].use_count() == 1 )
+
+    for (int i = 0; i < 3; i++)
     {
-      //if not that means that jacobianFL[i] is already (pointer-)connected with
-      // either jacobianFInt or jacobianNNL
-      _jacobianqFL->zero();
-      //    if( _jacobianFIntq )
-      //      *_jacobianqFL-=*_jacobianFIntq;
-      if (_jacobianNNLq)
-        *_jacobianqFL -= *_jacobianNNLq;
+      ei.zero();
+      ei.setValue(i, 1.0);
+      prod(*_I, ei, Iei, true);
+      cross_product(omega, Iei, omega_Iei);
+      cross_product(ei, Iomega, ei_Iomega);
+      for (int j = 0; j < 3; j++)
+        _jacobianvFL->setValue(3 + i, 3 + j, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
+    //     printf("NewtonEulerDS::computeJacobianvFL :\n");
+    //     _jacobianvFL->display();
+    // computeJacobianNNLq();
+
+    //  {
+    //    _jacobianqFL->zero();
+    //    if( _jacobianNNLq )
+    //      *_jacobianqFL-=*_jacobianNNLq;
+    //  }
   }
   //else nothing.
 }
