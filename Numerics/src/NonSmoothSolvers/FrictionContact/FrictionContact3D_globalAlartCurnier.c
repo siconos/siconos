@@ -60,7 +60,10 @@ void frictionContact3D_globalAlartCurnierFunction(
      result, A, B);
 
 
-#ifndef NDEBUG
+    // note: GENERATED_FUNCTION is different for a cube on plane & four
+    // contact points (mu=0.8). (but test with random values ok see
+    // AlartCurnierFunctions_test)
+#ifdef COMPARE_WITH_GENERATED_FUNCTION
     double result_g[3];
     double A_g[9];
     double B_g[9];
@@ -733,10 +736,14 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->ICNTL(3) = -1;
   mumps_id->ICNTL(4) = 0;
 
+  mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
+  // ok for a cube on a plane & four contact points
+  // computeAlartCurnierSTD != generated in this case...
+
   // process on mpi rank > 0
   if (SO->iparam[4])
   {
-    // flag
+    //!\\ pseudo flag <-- but iparam[5] is not shared => mpi_send
     while (SO->iparam[5])
     {
       mumps_id->job = 6;
@@ -860,6 +867,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     mumps_id->rhs = tmp1;
 
     dmumps_c(mumps_id);
+
 
     assert(mumps_id->info[0] >= 0);
 
