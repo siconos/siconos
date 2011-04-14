@@ -2,6 +2,7 @@
 #include <BulletSpaceFilter.hpp>
 #include <BulletTimeStepping.hpp>
 #include <BulletDS.hpp>
+#include <BulletWeightedShape.hpp>
 
 #define NDOF 3
 
@@ -35,11 +36,6 @@ void BulletBodies::init()
     std::cout << "====> Model loading ..." << std::endl << std::endl;
 
 
-    SP::SimpleVector shapeParams(new SimpleVector(3));
-    (*shapeParams)(0) = 1.;
-    (*shapeParams)(1) = 1;
-    (*shapeParams)(2) = 1.;
-
     double theta = 0.;
 
     double a = 1;
@@ -51,7 +47,7 @@ void BulletBodies::init()
     SP::SimpleVector velocity(new SimpleVector(6));
     position->zero();
     (*position)(1) = 0.;
-    (*position)(2) = 1.;
+    (*position)(2) = 10.;
     (*position)(3) = cos(theta / 2);
     (*position)(4) = a * k;
     (*position)(5) = b * k;
@@ -62,17 +58,15 @@ void BulletBodies::init()
     (*velocity)(4) = 0.;
     (*velocity)(5) = 0.;
 
-    SP::BulletDS body(new BulletDS(BOX_SHAPE_PROXYTYPE, shapeParams, position, velocity, 1.0));
+    SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
+    SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
+
+    SP::BulletDS body(new BulletDS(box1, position, velocity));
     SP::SimpleVector FExt;
     FExt.reset(new SimpleVector(6)); //
     FExt->zero();
     FExt->setValue(2, -9.81);
     body->setFExtPtr(FExt);
-
-    SP::SimpleVector shapeParams2(new SimpleVector(3));
-    (*shapeParams2)(0) = 1.;
-    (*shapeParams2)(1) = 1;
-    (*shapeParams2)(2) = 1.;
 
     double theta2 = 0.;
 
@@ -84,7 +78,7 @@ void BulletBodies::init()
     SP::SimpleVector position2(new SimpleVector(7));
     SP::SimpleVector velocity2(new SimpleVector(6));
     position2->zero();
-    (*position2)(1) = 0.1;
+    (*position2)(1) = 0.;
     (*position2)(2) = 30.;
     (*position2)(3) = cos(theta2 / 2);
     (*position2)(4) = a2 * k2;
@@ -96,13 +90,8 @@ void BulletBodies::init()
     (*velocity2)(4) = 0.;
     (*velocity2)(5) = 0.;
 
-    SP::BulletDS body2(new BulletDS(BOX_SHAPE_PROXYTYPE, shapeParams2, position2, velocity2, 1.0));
+    SP::BulletDS body2(new BulletDS(box1, position2, velocity2));
     body2->setFExtPtr(FExt);
-
-    SP::SimpleVector shapeParams3(new SimpleVector(3));
-    (*shapeParams3)(0) = 1.;
-    (*shapeParams3)(1) = 1;
-    (*shapeParams3)(2) = 1.;
 
     double theta3 = acos(1 / sqrt(3)) + 0.10;
 
@@ -126,7 +115,7 @@ void BulletBodies::init()
     (*velocity3)(4) = 0.;
     (*velocity3)(5) = 0.;
 
-    SP::BulletDS body3(new BulletDS(BOX_SHAPE_PROXYTYPE, shapeParams3, position3, velocity3, 1.0));
+    SP::BulletDS body3(new BulletDS(box1, position3, velocity3));
     body3->setFExtPtr(FExt);
 
     SP::btCollisionObject ground(new btCollisionObject());
