@@ -30,7 +30,6 @@
 #include <assert.h>
 #include "Friction_cst.h"
 
-
 void frictionContact3D_globalAlartCurnierFunction(
   unsigned int problemSize,
   double *reaction,
@@ -932,6 +931,20 @@ void frictionContact3D_sparseGlobalAlartCurnier(
              iter, options->dparam[1]);
     }
   }
+
+#ifdef DUMP_PROBLEM
+  if (info[0])
+  {
+    static int file_counter = 0;
+    char filename[64];
+    printf("GLOBALAC: dumping problem\n");
+    sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
+    FILE* file = fopen(filename, "w");
+    frictionContact_printInFile(problem, file);
+    fclose(file);
+  }
+#endif
+
 
   if (!options->dWork)
   {

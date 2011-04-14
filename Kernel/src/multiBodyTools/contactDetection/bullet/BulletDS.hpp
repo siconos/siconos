@@ -21,7 +21,7 @@
 #include "SiconosPointers.hpp"
 
 #include "BulletSiconos.hpp"
-
+#include "BulletWeightedShape.hpp"
 
 #ifndef BulletDS_hpp
 #define BulletDS_hpp
@@ -30,33 +30,29 @@ class BulletDS : public NewtonEulerDS, public boost::enable_shared_from_this<Bul
 {
 
 private:
-  SP::btCollisionShape _collisionShape;
+  SP::BulletWeightedShape _weightedShape;
   SP::btCollisionObject _collisionObject;
 
 public:
 
-  /** Constructor from bullet shapes enum type and generic shapeParam:
-   *  collisionShape is self allocated
+  /** Constructor from a BulletBodyShape
    */
-  BulletDS(const BroadphaseNativeTypes& shape_type,
-           const SP::SimpleVector& shapeParams,
+  BulletDS(SP::BulletWeightedShape weightedShape,
            SP::SiconosVector position,
-           SP::SiconosVector velocity,
-           const double& mass);
-
-  /** Constructor from collisionShape. This one should be prefered for
-   *  many objects sharing same shapes
-   */
-  BulletDS(const SP::btCollisionShape& shape,
-           SP::SiconosVector position,
-           SP::SiconosVector velocity,
-           const double& mass);
+           SP::SiconosVector velocity);
 
   /** get the collision object
   **/
-  SP::btCollisionObject collisionObject() const
+  const SP::btCollisionObject& collisionObject() const
   {
     return _collisionObject;
+  };
+
+  /** get the shape
+  **/
+  SP::BulletWeightedShape weightedShape() const
+  {
+    return _weightedShape;
   };
 
   /** get a shared_ptr from this
@@ -65,6 +61,10 @@ public:
   {
     return shared_from_this();
   };
+
+  /** update Bullet positions
+   */
+  void updateCollisionObject() const;
 
   /** visitor hook
    */
@@ -75,6 +75,20 @@ struct ForCollisionObject : public Question<SP::btCollisionObject>
 {
   ANSWER(BulletDS, collisionObject());
 };
+
+struct ForWeightedShape : public Question<SP::BulletWeightedShape>
+{
+  ANSWER(BulletDS, weightedShape());
+};
+
+struct UpdateCollisionObject : public SiconosVisitor
+{
+  void visit(const BulletDS& bds)
+  {
+    bds.updateCollisionObject();
+  }
+};
+
 
 TYPEDEF_SPTR(BulletDS);
 

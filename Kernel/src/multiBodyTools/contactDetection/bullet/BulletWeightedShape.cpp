@@ -17,30 +17,22 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "BulletTimeStepping.hpp"
-#include "BulletSiconos.hpp"
-#include "BulletDS.hpp"
-#include <btBulletCollisionCommon.h>
+#include "BulletWeightedShape.hpp"
 
-#ifndef DEBUG_BULLET_TIMESTEPPING
-#define DEBUG_MESSAGES 1
-#endif
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
-#include <debug.h>
-
-
-void BulletTimeStepping::updateWorldFromDS()
+BulletWeightedShape::BulletWeightedShape(SP::btCollisionShape shape, const double& mass) :
+  _mass(mass),
+  _shape(shape)
 {
-  DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg.vertices();
 
-  static UpdateCollisionObject up;
+  btVector3 localinertia;
+  _shape->calculateLocalInertia(_mass, localinertia);
 
-  for (; dsi != dsiend; ++dsi)
-  {
-    dsg.bundle(*dsi)->accept(up);
-  }
+  _inertia.reset(new SimpleMatrix(3, 3));
+
+  (*_inertia)(0, 0) = localinertia[0];
+  (*_inertia)(1, 1) = localinertia[1];
+  (*_inertia)(2, 2) = localinertia[2];
+
 };
-
-

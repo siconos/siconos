@@ -22,7 +22,7 @@
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-BulletR::BulletR(const SP::btManifoldPoint& point) : NewtonEulerRFC3D(), _contactPoints(point)
+BulletR::BulletR(SP::btManifoldPoint point) : NewtonEulerRFC3D(), _contactPoints(point)
 {
 };
 

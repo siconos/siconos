@@ -15,24 +15,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
-
-/*! \file Debug.hpp
-  \brief Some debug facilities (cf wikipedia)
 */
 
-#ifndef DEBUG_HPP
-#define DEBUG_HPP
+#ifndef BULLET_WEIGHTED_SHAPE_HPP
+#define BULLET_WEIGHTED_SHAPE_HPP
+#include "BulletSiconos.hpp"
 
-#ifdef DEBUG_MESSAGES
-#define DEBUG_WHERESTR  "%s:%d:\n"
-#define DEBUG_WHEREARG  __FILE__, __LINE__
-#define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, __VA_ARGS__)
-#define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
-#define DEBUG_PRINT( M )  DEBUG_PRINTF("%s",M)
-#else
-#define DEBUG_PRINTF(_fmt, ...)
-#define DEBUG_PRINT(M)
-#endif
+class BulletWeightedShape
+{
+private:
+  double _mass;
+  SP::btCollisionShape _shape;
+  SP::SimpleMatrix _inertia;
+
+public:
+  BulletWeightedShape(SP::btCollisionShape shape, const double& mass);
+
+  const SP::btCollisionShape& collisionShape() const
+  {
+    return _shape;
+  };
+
+  const double& mass() const
+  {
+    return _mass;
+  };
+
+  SP::SimpleMatrix inertiaMatrix() const
+  {
+    return _inertia;
+  };
+};
+
+TYPEDEF_SPTR(BulletWeightedShape);
 
 #endif

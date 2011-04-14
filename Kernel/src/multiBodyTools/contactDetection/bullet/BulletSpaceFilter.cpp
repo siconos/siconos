@@ -26,7 +26,7 @@
 #ifdef DEBUG_BULLET_SPACE_FILTER
 #define DEBUG_MESSAGES 1
 #endif
-#include "Debug.hpp"
+#include <debug.h>
 
 
 struct ForPosition : public Question<SP::SiconosVector>
@@ -137,7 +137,6 @@ void BulletSpaceFilter::buildInteractions(double time)
         }
         if (obB->getUserPointer())
         {
-          //assert(false);
           SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
           inter->insert(dsb);
         }

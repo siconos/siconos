@@ -30,7 +30,7 @@ private:
   SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletRImpact(const SP::btManifoldPoint&);
+  BulletRImpact(SP::btManifoldPoint);
 
   SP::btManifoldPoint contactPoints() const
   {

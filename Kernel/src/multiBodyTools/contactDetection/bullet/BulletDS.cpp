@@ -19,122 +19,56 @@
 
 #include "BulletDS.hpp"
 
+#ifdef DEBUG_BULLETDS
+#define DEBUG_MESSAGES 1
+#endif
+#include <debug.h>
+
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletCollision/CollisionShapes/btCylinderShape.h>
-#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
-#include <LinearMath/btVector3.h>
 
-BulletDS::BulletDS(const SP::btCollisionShape& shape,
+
+
+
+BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,
-                   SP::SiconosVector velocity,
-                   const double& mass) : NewtonEulerDS(), _collisionShape(shape)
+                   SP::SiconosVector velocity) :
+  NewtonEulerDS(position, velocity, weightedShape->mass(), weightedShape->inertiaMatrix()),
+  _weightedShape(weightedShape)
 {
-  _mass = mass;
-
-  btVector3 inertia;
-
-  SP::SimpleMatrix inertiaMatrix(new SimpleMatrix(3, 3));
-  inertiaMatrix->eye();
-
-  internalInit(position, velocity, mass, inertiaMatrix);
 
   _collisionObject.reset(new btCollisionObject());
-
-  btMatrix3x3 basis;
-  basis.setIdentity();
-  _collisionObject->getWorldTransform().setBasis(basis);
 
   _collisionObject->setUserPointer(this);
   _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 
-  _collisionShape->calculateLocalInertia(mass, inertia);
-  (*_I)(0, 0) = inertia[0];
-  (*_I)(1, 1) = inertia[1];
-  (*_I)(2, 2) = inertia[2];
+  _collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
 
-  _collisionObject->setCollisionShape(&*_collisionShape);
+  updateCollisionObject();
 }
 
-
-BulletDS::BulletDS(const BroadphaseNativeTypes& shape_type,
-                   const SP::SimpleVector& shapeParams,
-                   SP::SiconosVector position,
-                   SP::SiconosVector velocity,
-                   const double& mass) : NewtonEulerDS()
+void BulletDS::updateCollisionObject() const
 {
-  _mass = mass;
 
-  btVector3 inertia;
+  DEBUG_PRINT("updateCollisionObject()");
 
-  SP::SimpleMatrix inertiaMatrix(new SimpleMatrix(3, 3));
-  inertiaMatrix->eye();
+  SimpleVector& q = *_q;
 
-  internalInit(position, velocity, mass, inertiaMatrix);
+  DEBUG_EXPR(q.display());
 
-  _collisionObject.reset(new btCollisionObject());
+
   btMatrix3x3 basis;
   basis.setIdentity();
   _collisionObject->getWorldTransform().setBasis(basis);
 
-  _collisionObject->setUserPointer(this);
-  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+  assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +  pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
+  _collisionObject->getWorldTransform().getOrigin().setX(q(0));
+  _collisionObject->getWorldTransform().getOrigin().setY(q(1));
+  _collisionObject->getWorldTransform().getOrigin().setZ(q(2));
+
+  _collisionObject->getWorldTransform().getBasis().setRotation(btQuaternion(q(4), q(5),
+      q(6), q(3)));
 
 
-  switch (shape_type)
-  {
-  case BOX_SHAPE_PROXYTYPE :
-  {
-    btVector3 params;
-    params[0] = (*shapeParams)(0);
-    params[1] = (*shapeParams)(1);
-    params[2] = (*shapeParams)(2);
-    _collisionShape.reset(new btBoxShape(params));
-    _collisionShape->calculateLocalInertia(mass, inertia);
-    (*_I)(0, 0) = inertia[0];
-    (*_I)(1, 1) = inertia[1];
-    (*_I)(2, 2) = inertia[2];
+  _collisionObject->setActivationState(ACTIVE_TAG);
 
-    _collisionObject->setCollisionShape(&*_collisionShape);
-
-    break;
-  };
-  case CYLINDER_SHAPE_PROXYTYPE :
-  {
-    btVector3 params;
-    params[0] = (*shapeParams)(0);
-    params[1] = (*shapeParams)(1);
-    params[2] = (*shapeParams)(2);
-    _collisionShape.reset(new btCylinderShape(params));
-    _collisionShape->calculateLocalInertia(mass, inertia);
-    (*_I)(0, 0) = inertia[0];
-    (*_I)(1, 1) = inertia[1];
-    (*_I)(2, 2) = inertia[2];
-
-    _collisionObject->setCollisionShape(&*_collisionShape);
-
-    break;
-  };
-
-  case CAPSULE_SHAPE_PROXYTYPE :
-  {
-    btScalar radius;
-    btScalar height;
-    radius = (*shapeParams)(0);
-    height = (*shapeParams)(1);
-    _collisionShape.reset(new btCapsuleShape(radius, height));
-    _collisionShape->calculateLocalInertia(mass, inertia);
-    (*_I)(0, 0) = inertia[0];
-    (*_I)(1, 1) = inertia[1];
-    (*_I)(2, 2) = inertia[2];
-
-    _collisionObject->setCollisionShape(&*_collisionShape);
-
-    break;
-  };
-  default :
-  {
-    RuntimeException::selfThrow("BulletDS: unknown shape");
-  };
-  }
 }
