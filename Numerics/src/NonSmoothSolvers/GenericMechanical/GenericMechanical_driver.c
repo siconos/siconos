@@ -427,7 +427,12 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     free(bufForLocalProblemDense);
 }
 
-
+/*
+ * options->iparam[2] == 0 then GS on all blocks
+ * options->iparam[2] == 1 The equalities are substituated
+ * options->iparam[2] == 2 Equalities are assemblated in one block
+ * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
+ */
 int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options)
 {
   // if (options == NULL )
