@@ -315,6 +315,9 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   int Mi_size;
   double * reducedProb = (double *)malloc(nbRow * nbCol * sizeof(double));
   double * Qreduced = (double *)malloc(nbRow * sizeof(double));
+  double *Rreduced = (double *) calloc(nbCol, sizeof(double));
+  double *Vreduced = (double *) calloc(nbRow, sizeof(double));
+
   _GMPReducedEquality(pInProblem, reducedProb, Qreduced, &Me_size, &Mi_size);
 
   if (Me_size == 0)
@@ -329,21 +332,37 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   curProblem =  pInProblem->firstListElem;
   if (Me_size)
     addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, Me_size);
+  unsigned int curPos = 0;
+  unsigned int curPosEq = 0;
+  unsigned int curPosInq = Me_size;
   while (curProblem)
   {
+    unsigned int curSize = curProblem->size;
     switch (curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
+      memcpy(Vreduced + curPosEq, velocity + curPos, curSize * sizeof(double));
+      memcpy(Rreduced + curPosEq, reaction + curPos, curSize * sizeof(double));
+      curPosEq += curSize;
+      curPos += curSize;
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_LCP:
     {
+      memcpy(Vreduced + curPosInq, velocity + curPos, curSize * sizeof(double));
+      memcpy(Rreduced + curPosInq, reaction + curPos, curSize * sizeof(double));
+      curPosInq += curSize;
+      curPos += curSize;
       addProblem(_pnumerics_GMP, curProblem->type, curProblem->size);
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_FC3D:
     {
+      memcpy(Vreduced + curPosInq, velocity + curPos, curSize * sizeof(double));
+      memcpy(Rreduced + curPosInq, reaction + curPos, curSize * sizeof(double));
+      curPosInq += curSize;
+      curPos += curSize;
       FrictionContactProblem* pFC3D = (FrictionContactProblem*)addProblem(_pnumerics_GMP, curProblem->type, curProblem->size);
       *(pFC3D->mu) = *(((FrictionContactProblem*)curProblem->problem)->mu);
       break;
@@ -366,8 +385,6 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   numM.size1 = nbCol;
   _pnumerics_GMP->M = &numM;
   _pnumerics_GMP->q = Qreduced;
-  double *Rreduced = (double *) calloc(nbCol, sizeof(double));
-  double *Vreduced = (double *) calloc(nbRow, sizeof(double));
   genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   if (*info)
