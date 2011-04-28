@@ -609,6 +609,7 @@ void NewtonEulerDS::computeFL(double time)
     {
       computeMExt(time);
       SimpleVector aux(3);
+      updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
       (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
@@ -654,6 +655,10 @@ void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVect
     if (_mExt)
     {
       computeMExt(time);
+      SimpleVector aux(3);
+      updateMObjToAbs();
+      prod(*_mExt, *_MObjToAbs, aux);
+      *_mExt = aux;
       (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
     }
     if (_NNL)
