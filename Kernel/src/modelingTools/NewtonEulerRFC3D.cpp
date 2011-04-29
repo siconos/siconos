@@ -199,7 +199,7 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
   d2->updateMObjToAbs();
-  SP::SimpleMatrix Mobj2_abs = d1->MObjToAbs();
+  SP::SimpleMatrix Mobj2_abs = d2->MObjToAbs();
 
 
   prod(*_NPG2, *Mobj2_abs, *_AUX1, true);

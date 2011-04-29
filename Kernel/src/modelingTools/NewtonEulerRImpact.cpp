@@ -141,7 +141,7 @@ void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
   (*_NPG2)(2, 2) = 0;
 
   d2->updateMObjToAbs();
-  SP::SimpleMatrix Mobj2_abs = d1->MObjToAbs();
+  SP::SimpleMatrix Mobj2_abs = d2->MObjToAbs();
 
   prod(*_NPG2, *Mobj2_abs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
