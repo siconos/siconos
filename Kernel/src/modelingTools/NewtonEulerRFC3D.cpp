@@ -139,6 +139,9 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
   double G1x = d1->q()->getValue(0);
   double G1y = d1->q()->getValue(1);
   double G1z = d1->q()->getValue(2);
+  double G2x = d2->q()->getValue(0);
+  double G2y = d2->q()->getValue(1);
+  double G2z = d2->q()->getValue(2);
 
   double t[6];
   double * pt = t;
@@ -165,6 +168,18 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
   (*_NPG1)(2, 0) = -(G1y - Py);
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
+
+  _NPG2->zero();
+
+  (*_NPG2)(0, 0) = 0;
+  (*_NPG2)(0, 1) = -(G2z - Pz);
+  (*_NPG2)(0, 2) = (G2y - Py);
+  (*_NPG2)(1, 0) = (G2z - Pz);
+  (*_NPG2)(1, 1) = 0;
+  (*_NPG2)(1, 2) = -(G2x - Px);
+  (*_NPG2)(2, 0) = -(G2y - Py);
+  (*_NPG2)(2, 1) = (G2x - Px);
+  (*_NPG2)(2, 2) = 0;
 
 
   d1->updateMObjToAbs();
