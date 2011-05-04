@@ -228,9 +228,7 @@ IF(WITH_TESTING)
   
   BEGIN_TEST(utils/SiconosTools/test)
 
-  NEW_TEST(testSiconosGraph SiconosGraphTest.cpp)
-  NEW_TEST(testSiconosVisitor SiconosVisitorTest.cpp)
-
+  NEW_TEST(testSiconosTools SiconosGraphTest.cpp SiconosVisitorTest.cpp)
 
   END_TEST()
 
