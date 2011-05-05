@@ -39,7 +39,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   // them, add a new DynamicalSystem in the set allDS. ===
   SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
   SetOfDSXML::iterator it;
-  CheckInsertDS checkDS;
   Type::Siconos type;
 
   /** contains all the Dynamic Systems of the simulation */
@@ -50,24 +49,24 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   {
     type = (*it)->getType();
     if (type  == Type::LagrangianDS)  // LagrangianDS
-      checkDS = allDSLocal->insert
-                (SP::LagrangianDS(new LagrangianDS(*it)));
+      allDSLocal->insert
+      (SP::LagrangianDS(new LagrangianDS(*it)));
     else if (type == Type::LagrangianLinearTIDS)  // Lagrangian Linear Time Invariant
-      checkDS = allDSLocal->insert
-                (SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(*it)));
+      allDSLocal->insert
+      (SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(*it)));
     else if (type == Type::FirstOrderLinearDS)  // Linear DS
-      checkDS = allDSLocal->insert
-                (SP::FirstOrderLinearDS(new FirstOrderLinearDS(*it)));
+      allDSLocal->insert
+      (SP::FirstOrderLinearDS(new FirstOrderLinearDS(*it)));
     else if (type == Type::FirstOrderLinearTIDS)  // Linear Time Invariant DS
-      checkDS = allDSLocal->insert
-                (SP::FirstOrderLinearTIDS(new FirstOrderLinearTIDS(*it)));
+      allDSLocal->insert
+      (SP::FirstOrderLinearTIDS(new FirstOrderLinearTIDS(*it)));
     else if (type == Type::FirstOrderNonLinearDS)  // Non linear DS
-      checkDS = allDSLocal->insert
-                (SP::FirstOrderNonLinearDS(new FirstOrderNonLinearDS(*it)));
+      allDSLocal->insert
+      (SP::FirstOrderNonLinearDS(new FirstOrderNonLinearDS(*it)));
     else RuntimeException::
       selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.
-    mIsLinear = (mIsLinear && (*checkDS.first)->isLinear());
+    mIsLinear = (mIsLinear && (*(--allDSLocal->end()))->isLinear());
   }
 
 

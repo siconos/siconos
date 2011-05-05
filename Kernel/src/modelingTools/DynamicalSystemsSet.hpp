@@ -27,17 +27,96 @@ Set of SP::DynamicalSystem
 
 #include <boost/shared_ptr.hpp>
 
-/** A set of pointers to dynamical systems, sorted in a growing order
+/** DEPRECATED : A set of pointers to dynamical systems, sorted in a growing order
     according to their numbers */
-typedef SiconosSet<DynamicalSystem, int> DynamicalSystemsSet;
+class DynamicalSystemsSet : public std::vector<SP::DynamicalSystem>
+{
+public:
+  typedef std::vector<SP::DynamicalSystem>::iterator iterator;
+  typedef std::vector<SP::DynamicalSystem>::const_iterator const_iterator;
+  DynamicalSystemsSet() {};
+
+  bool isEmpty() const
+  {
+    return size() == 0. ;
+  };
+
+  SP::DynamicalSystem getPtr(int num) const
+  {
+    assert(0);
+  };
+
+  bool isIn(SP::DynamicalSystem& ds)
+  {
+    bool find = false;
+    for (iterator it = begin(); it != end(); ++it)
+    {
+      if ((*it)->number() == ds->number())
+      {
+        find = true;
+        break;
+      }
+    }
+    return find;
+  };
+
+  bool isIn(int num)
+  {
+    bool find = false;
+    for (iterator it = begin(); it != end(); ++it)
+    {
+      if ((*it)->number() == num)
+      {
+        find = true;
+        break;
+      }
+    }
+    return find;
+  };
+
+  iterator find(int num)
+  {
+    iterator it;
+    for (it = begin(); it != end(); ++it)
+    {
+      if ((*it)->number() == num)
+      {
+        break;
+      }
+    }
+    return it;
+  };
+
+  void insert(SP::DynamicalSystem s)
+  {
+    this->push_back(s);
+  };
+
+  void insert(iterator begin,
+              iterator end)
+  {
+    for (iterator it = begin; it != end; ++it)
+    {
+      insert(*it);
+    }
+  }
+
+  void insert(const_iterator begin,
+              const_iterator end)
+  {
+    for (const_iterator it = begin; it != end; ++it)
+    {
+      insert(*it);
+    }
+  }
+
+};
 
 /** Iterator through a set of DS */
-typedef std::set < SP::DynamicalSystem,
-        Cmp<DynamicalSystem, int> >::iterator DSIterator;
+typedef DynamicalSystemsSet::iterator DSIterator;
 
 /** const Iterator through a set of DS */
-typedef std::set < SP::DynamicalSystem,
-        Cmp<DynamicalSystem, int> >::const_iterator ConstDSIterator;
+typedef DynamicalSystemsSet::const_iterator ConstDSIterator;
 
 /** return type value for insert function - bool = false if insertion
     failed. */

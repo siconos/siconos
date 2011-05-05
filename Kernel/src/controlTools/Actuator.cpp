@@ -73,7 +73,7 @@ void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
   // Add all the DS of newDSs into allDS.
   // => allDS is not cleared and so all existing DSs remain.
   // => no copy of DS but copy of the pointers
-  for (DSIterator itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
+  for (ConstDSIterator itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
     _allDS->insert(*itDS);
 }
 

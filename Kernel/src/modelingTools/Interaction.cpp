@@ -487,7 +487,7 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector n
 
 void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
-  DSIterator itDS;
+  ConstDSIterator itDS;
   for (itDS = newSet.begin(); itDS != newSet.end(); ++itDS)
     _involvedDS->insert(*itDS); // smart ptrs
 
@@ -569,7 +569,7 @@ void Interaction::display() const
   cout << "|  _sizeZ: " << _sizeZ << endl;
 
   cout << "| involved DS :" << endl;
-  _involvedDS->display();
+  cout << _involvedDS << endl;
   _relation->display();
   if (_initialized)
   {
