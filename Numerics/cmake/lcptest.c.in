@@ -23,16 +23,18 @@
 
 int main(void)
 {
-  int info = 0 ;
-  printf("Test on ./data/lcp_deudeu.dat\n");
+  int info =0 ;
 
-  FILE * finput  =  fopen("./data/lcp_deudeu_block.dat", "r");
+  char filename[50] = "./data/@TEST_DATA@";
+  printf("Test on %s\n",filename);
 
-  char local_solvername[20] = "NewtonMin";
-  info = lcp_test_function_SBM(finput, nameToId(local_solvername));
-
+  FILE * finput  =  fopen(filename,"r");
+  if(!@TEST_SBM@)
+    info = lcp_test_function(finput,@TEST_SOLVER@);
+  else
+    info = lcp_test_function_SBM(finput,@TEST_SOLVER@);
+  
   fclose(finput);
-
-
+  printf("\nEnd of test on %s\n", filename);
   return info;
 }
