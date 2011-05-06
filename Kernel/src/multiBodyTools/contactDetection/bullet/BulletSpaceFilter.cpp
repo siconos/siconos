@@ -92,9 +92,6 @@ void BulletSpaceFilter::buildInteractions(double time)
     contactPoints[&*ask<ForContactPoints>(*(ur0.interaction()->relation()))] = false;
   };
 
-  // 3. add new contact points in Siconos graph
-  interPairs declaredInteractions;
-
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();
 
@@ -145,22 +142,10 @@ void BulletSpaceFilter::buildInteractions(double time)
         {
           SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
 
-          int idsa = dsa->number();
-          int idsb = dsb->number();
-          assert(idsa != idsb);
+          inter->insert(dsa);
+          inter->insert(dsb);
 
-          int imax = (std::max)(idsa, idsb);
-          int imin = (std::min)(idsa, idsb);
-
-          interPair interpair = interPair(imin, imax);
-
-          if (declaredInteractions.find(interpair) == declaredInteractions.end())
-          {
-            inter->insert(dsa);
-            inter->insert(dsb);
-            _nsds->topology()->insertInteraction(inter);
-            declaredInteractions.insert(interpair);
-          }
+          _nsds->topology()->insertInteraction(inter);
         }
         else
         {
