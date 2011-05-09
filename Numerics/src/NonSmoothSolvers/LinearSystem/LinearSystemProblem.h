@@ -45,7 +45,7 @@
 */
 
 #include "NumericsMatrix.h"
-
+extern int SICONOS_LS_0;
 /** Linear Complementarity Problem elements
     \param size dim of the problem
     \param M matrix of the linear system
@@ -58,11 +58,21 @@ typedef struct
   double * q;
 } LinearSystemProblem;
 
+
+
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-  void displayLS(LinearSystemProblem* p);
+  double LinearSystem_computeError(LinearSystemProblem* problem, double *z);
+  int LinearSystem_getNbDwork(LinearSystemProblem* problem, SolverOptions* options);
+  int LinearSystem_getNbIwork(LinearSystemProblem* problem, SolverOptions* options);
+  int LinearSystem_setDefaultSolverOptions(LinearSystemProblem* problem, SolverOptions* options, int solverId);
+  void LinearSystem_freeProblem(LinearSystemProblem *problem);
+  int LinearSystem_newFromFile(LinearSystemProblem* problem, FILE* file);
+  void LinearSystem_display(LinearSystemProblem* p);
+  int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 #ifdef __cplusplus
 }
 #endif

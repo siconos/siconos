@@ -26,6 +26,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/LCP/test-utils
   NonSmoothSolvers/MLCP
   NonSmoothSolvers/LinearSystem
+  NonSmoothSolvers/LinearSystem/test-utils
   NonSmoothSolvers/InterfaceToPathFerris
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
@@ -232,6 +233,13 @@ IF(WITH_TESTING)
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
   
   
+  END_TEST()
+
+  BEGIN_TEST(NonSmoothSolvers/LinearSystem/test)
+
+  NEW_LS_TEST(SICONOS_LS_0 ls_trivial.dat)
+  SET(test-LS_0-ls_inf_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
+  NEW_LS_TEST(SICONOS_LS_0 ls_inf_sol_perturbed.dat)
   END_TEST()
   
   BEGIN_TEST(NonSmoothSolvers/Relay/test)

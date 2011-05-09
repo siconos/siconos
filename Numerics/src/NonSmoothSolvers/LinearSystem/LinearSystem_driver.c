@@ -24,15 +24,16 @@
 #include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #include "LA.h"
-
+static int LWORK = 0;
+int SICONOS_LS_0 = 0;
 //#define LINEARSYSTEM_DEBUG
 
 /*
- *
+ *check M z + q =0
  *
  *
  */
-double LinearSystemComputeError(LinearSystemProblem* problem, double *z)
+double LinearSystem_computeError(LinearSystemProblem* problem, double *z)
 {
   double * pM = problem->M->matrix0;
   double * pQ = problem->q;
@@ -51,28 +52,43 @@ double LinearSystemComputeError(LinearSystemProblem* problem, double *z)
 */
 int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 {
+
+
+
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   int n = problem->size;
-
   int n2 = n * n;
-  double * Maux = (double*)malloc(n2 * sizeof(double));
-  int * ipiv = (int *) malloc(n * sizeof(int));
+
+  double * Maux = 0;
+  int * ipiv = 0;
+  if (options && options->dWork)
+    Maux = options->dWork;
+  else
+    Maux = (double *) malloc(LinearSystem_getNbDwork(problem, options) * sizeof(double));
+
+  if (options && options->iWork)
+    ipiv = options->iWork;
+  else
+    ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
   int LAinfo;
   /* Checks inputs */
   if (problem == NULL || z == NULL)
     numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   //displayLS(problem);
+
+  assert(problem->M->matrix0);
+  assert(problem->q);
+
   memcpy(Maux, problem->M->matrix0, n2 * sizeof(double));
-  memcpy(z, problem->q, n * sizeof(double));
+  //  memcpy(z,problem->q,n*sizeof(double));
+  for (int ii = 0; ii < n; ii++)
+    z[ii] = -problem->q[ii];
 
 
-  int LWORK = -1;
-  double dgelsSize = 0;
-  DGELS(n, n, 1, 0, n, 0, n, &dgelsSize, LWORK, info);
-  LWORK = (int) dgelsSize;
-  printf("LWORK is :%d\n", LWORK);
+  printf("LinearSystem : solveLeastSquareProblem LWORK is :%d\n", LWORK);
 
-  double * dgelsWork = (double *) malloc(LWORK * sizeof(double));
+  double * dgelsWork = Maux + n2;
 
   DGELS(n, n, 1, Maux, n, z, n, dgelsWork, LWORK, LAinfo);
   if (LAinfo)
@@ -91,20 +107,33 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
     }
   }
   info = 0;
-  printf("LinearSystem_driver: computeError of LinearSystem : %e\n", LinearSystemComputeError(problem, z));
+  printf("LinearSystem_driver: computeError of LinearSystem : %e\n", LinearSystem_computeError(problem, z));
 __fin:
-  free(Maux);
-  free(ipiv);
-  free(dgelsWork);
+  if (!(options && options->dWork))
+    free(Maux);
+
+  if (!(options && options->iWork))
+    free(ipiv);
+
   return info;
 
 
 }
-int LinearSystem_driver_get_dwork(LinearSystemProblem* problem, SolverOptions* options)
+int LinearSystem_getNbDwork(LinearSystemProblem* problem, SolverOptions* options)
 {
-  return problem->size * problem->size;
+  int aux = problem->size * problem->size;
+  if (options && options->iparam[4])
+  {
+    LWORK = -1;
+    int info = 0;
+    double dgelsSize = 0;
+    DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, info);
+    aux += (int) dgelsSize;
+    LWORK = (int) dgelsSize;
+  }
+  return aux;
 }
-int LinearSystem_driver_get_iwork(LinearSystemProblem* problem, SolverOptions* options)
+int LinearSystem_getNbIwork(LinearSystemProblem* problem, SolverOptions* options)
 {
   return problem->size;
 }
@@ -120,12 +149,12 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   if (options && options->dWork)
     Maux = options->dWork;
   else
-    Maux = (double *) malloc(n2 * sizeof(double));
+    Maux = (double *) malloc(LinearSystem_getNbDwork(problem, options) * sizeof(double));
 
   if (options && options->iWork)
     ipiv = options->iWork;
   else
-    ipiv = (int *) malloc(n * sizeof(int));
+    ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
   int LAinfo;
   /* Checks inputs */
   if (problem == NULL || z == NULL)
@@ -136,7 +165,9 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   assert(problem->q);
 
   memcpy(Maux, problem->M->matrix0, n2 * sizeof(double));
-  memcpy(z, problem->q, n * sizeof(double));
+  //  memcpy(z,problem->q,n*sizeof(double));
+  for (int ii = 0; ii < n; ii++)
+    z[ii] = -problem->q[ii];
 
   DGESV(n, 1, Maux, n, ipiv, z, n, LAinfo);
   if (!LAinfo)
@@ -147,8 +178,6 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   {
     printf("Equality_driver:: LU foctorization failed:\n");
   }
-  for (int i = 0; i < problem->size; i++)
-    z[i] = -z[i];
 
   //printf("LinearSystem_driver: computeError of LinearSystem : %e\n",LinearSystemComputeError(problem,z));
 
@@ -160,29 +189,42 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 
   return info;
 }
-
+/*
+ * options->iWork containing the int work memory.
+ * options->dWork containing the double work memory.
+ * options->iparam[4] : use DGELS (1) or DGESV (0).
+ */
 int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options)
 {
   int i;
   assert(problem->M);
   if (problem->M->storageType == 1)
-    numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
+    numericsError("LinearSystem_driver", "forbidden type of storage for the matrix M of the LCP");
 #ifdef LINEARSYSTEM_DEBUG
   displayLS(problem);
 #endif
   for (i = 0; i < problem->size; i++)
     w[i] = 0.0;
 
-  int res = myLu(problem, z , options);
-#ifdef LINEARSYSTEM_DEBUG
-  printf("LinearSystem_driver solved with error = %e\n", LinearSystemComputeError(problem, z));
-  printf("The solution is :\n");
-  for (i = 0; i < problem->size; i++)
-    printf(" %e", z[i]);
-  printf("\n");
-#endif
+  int res = 0;
+  if (options && options->iparam[4])
+  {
+    res = solveLeastSquareProblem(problem, z , options);
+  }
+  else
+  {
+    res = myLu(problem, z , options);
+  }
+  if (options && options->filterOn)
+  {
+    options->dparam[1] = LinearSystem_computeError(problem, z);
+    printf("LinearSystem_driver solved with error = %e\n", LinearSystem_computeError(problem, z));
+    printf("The solution is :\n");
+    for (i = 0; i < problem->size; i++)
+      printf(" %e", z[i]);
+    printf("\n");
+  }
   return res;
-  //return solveLeastSquareProblem(problem, z , options);
 }
 
 void displayLS(LinearSystemProblem* p)
@@ -208,4 +250,64 @@ void displayLS(LinearSystemProblem* p)
   else
     printf("No q:\n");
 
+}
+int LinearSystem_newFromFile(LinearSystemProblem* problem, FILE* file)
+{
+  int n = 0;
+  int i;
+
+  int nread;
+
+  nread = fscanf(file, "%d\n", &n);
+  problem->size = n;
+  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+
+  newFromFile(problem->M, file);
+
+  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    nread = fscanf(file, "%lf ", &(problem->q[i]));
+  }
+  return 1;
+}
+int LinearSystem_setDefaultSolverOptions(LinearSystemProblem* problem, SolverOptions* options, int solverId)
+{
+  int info = 0;
+  if (verbose > 0)
+    printf("Set the Default SolverOptions for the LS Solver\n");
+
+
+  options->solverId = SICONOS_LS_0;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 5;
+  options->dSize = 5;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  /*use dgels ?*/
+  options->iparam[4] = 0;
+  if (problem)
+  {
+    options->dWork = (double*) malloc(LinearSystem_getNbDwork(problem, options) * sizeof(double));
+    options->iWork = (int*) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
+  }
+  else
+  {
+    options->dWork = NULL;
+    options->iWork = NULL;
+  }
+  options->dparam[0] = 1e-12;
+  return info;
+
+}
+void LinearSystem_freeProblem(LinearSystemProblem *problem)
+{
+  freeNumericsMatrix(problem->M);
+  if (problem->M)
+    free(problem->M);
+  if (problem->q)
+    free(problem->q);
+  free(problem);
 }
