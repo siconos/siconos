@@ -41,9 +41,19 @@ public:
     return size() == 0. ;
   };
 
-  SP::DynamicalSystem getPtr(int num) const
+  SP::DynamicalSystem getPtr(int num)
   {
-    assert(0);
+    SP::DynamicalSystem ds;
+    for (iterator it = begin(); it != end(); ++it)
+    {
+      if ((*it)->number() == ds->number())
+      {
+        ds = *it;
+        break;
+      }
+    }
+    if (!ds) RuntimeException::selfThrow("getPtr: dynamicalSystem no found");
+    return ds;
   };
 
   bool isIn(SP::DynamicalSystem& ds)
