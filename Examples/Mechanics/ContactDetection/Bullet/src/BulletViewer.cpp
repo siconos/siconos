@@ -25,6 +25,12 @@
 
 using namespace qglviewer;
 
+btVector3 normalize(const btVector3& v)
+{
+  return (v / sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]));
+};
+
+
 void BulletViewer::init()
 {
   // viewer and scene state
@@ -133,38 +139,54 @@ void BulletViewer::draw()
 
     if (involvedDS->size() == 2)
     {
-      SP::DynamicalSystem d2;
-      d2 = *++itDS;
-      SP::SiconosVector q2 = ask<ForPosition>(*d2);
-      float x2 = (*q2)(0);
-      float y2 = (*q2)(1);
-      float r2 = ask<ForRadius>(*d2);
+      SimpleVector& cf = *ask<ForContactForce>(*relation);
 
-      float d = hypotf(x1 - x2, y1 - y2);
+      btManifoldPoint& cpoint = *ask<ForContactPoints>(*relation);
+
+      btVector3 posa = cpoint.getPositionWorldOnA();
+      btVector3 posb = cpoint.getPositionWorldOnB();
+      btVector3 dirf(cf(0), cf(1), cf(2));
+      btVector3 endf = posa + normalize(dirf) / 2.;
+      btVector3 cnB = posb + normalize(cpoint.m_normalWorldOnB) / 2.;
+
 
       glPushMatrix();
-
-      glColor3f(.0f, .0f, .0f);
-      drawRec(x1, y1, x1 + (x2 - x1)*r1 / d, y1 + (y2 - y1)*r1 / d, w);
-      drawRec(x2, y2, x2 + (x1 - x2)*r2 / d, y2 + (y1 - y2)*r2 / d, w);
-
+      glColor3f(.80, 0, 0);
+      glLineWidth(2.);
+      QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
       glPopMatrix();
+
+      glPushMatrix();
+      glColor3f(0, .80, 0);
+      glLineWidth(2.);
+      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .05, 10.);
+      glPopMatrix();
+
     }
 
     else
     {
       SimpleVector& cf = *ask<ForContactForce>(*relation);
 
-      SP::btManifoldPoint cpoint = ask<ForContactPoints>(*relation);
+      btManifoldPoint& cpoint = *ask<ForContactPoints>(*relation);
 
-      btVector3 posa = cpoint->getPositionWorldOnA();
+      btVector3 posa = cpoint.getPositionWorldOnA();
+      btVector3 posb = cpoint.getPositionWorldOnB();
       btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + 50 * dirf;
+      btVector3 endf = posa + normalize(dirf) / 2.;
+      btVector3 cnB = posb + normalize(cpoint.m_normalWorldOnB) / 2.;
 
       glPushMatrix();
       glColor3f(.80, 0, 0);
       glLineWidth(2.);
-      QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .3, 10.);
+      QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
+      glPopMatrix();
+
+
+      glPushMatrix();
+      glColor3f(0, .80, 0);
+      glLineWidth(2.);
+      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .05, 10.);
       glPopMatrix();
     }
   }

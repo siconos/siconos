@@ -1,0 +1,2 @@
+#!/bin/sh
+siconos -j 2 -DWITH_MUMPS -P"mpirun.openmpi -np 2" -DNDEBUG -opt=-I/usr/lib/openmpi/include -ldopt=-lmpi -ldopt=-ldmumps -ldopt=-lmumps_common  -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp

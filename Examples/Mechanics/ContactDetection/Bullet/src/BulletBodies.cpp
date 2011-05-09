@@ -4,6 +4,10 @@
 #include <BulletDS.hpp>
 #include <BulletWeightedShape.hpp>
 
+#ifdef WITH_GLOBALAC
+#include <mpi.h>
+#endif
+
 #define NDOF 3
 
 void BulletBodies::init()
@@ -63,12 +67,12 @@ void BulletBodies::init()
 
     SP::BulletDS body(new BulletDS(box1, position, velocity));
     SP::SimpleVector FExt;
-    FExt.reset(new SimpleVector(6)); //
+    FExt.reset(new SimpleVector(3)); //
     FExt->zero();
     FExt->setValue(2, -9.81);
     body->setFExtPtr(FExt);
 
-    double theta2 = 0.;
+    double theta2 = acos(1 / sqrt(3)) + 0.01;
 
     double a2 = 1;
     double b2 = 0;
@@ -78,8 +82,8 @@ void BulletBodies::init()
     SP::SimpleVector position2(new SimpleVector(7));
     SP::SimpleVector velocity2(new SimpleVector(6));
     position2->zero();
-    (*position2)(1) = 0.;
-    (*position2)(2) = 30.;
+    (*position2)(1) = .3;
+    (*position2)(2) = 20.;
     (*position2)(3) = cos(theta2 / 2);
     (*position2)(4) = a2 * k2;
     (*position2)(5) = b2 * k2;
@@ -96,15 +100,15 @@ void BulletBodies::init()
     double theta3 = acos(1 / sqrt(3)) + 0.10;
 
     double a3 = 1;
-    double b3 = 1;
-    double c3 = 1;
+    double b3 = 0;
+    double c3 = 0;
     double k3 = (sin(theta3 / 2)) / sqrt(a3 * a3 + b3 * b3 + c3 * c3);
 
     SP::SimpleVector position3(new SimpleVector(7));
     SP::SimpleVector velocity3(new SimpleVector(6));
     position3->zero();
-    (*position3)(1) = 20.;
-    (*position3)(2) = 20.;
+    (*position3)(1) = 0.;
+    (*position3)(2) = 30.;
     (*position3)(3) = cos(theta3 / 2);
     (*position3)(4) = a3 * k3;
     (*position3)(5) = b3 * k3;
@@ -126,6 +130,13 @@ void BulletBodies::init()
     ground->setCollisionShape(&*groundShape);
 
     ground->getWorldTransform().getOrigin().setZ(-3);
+
+    SP::btCollisionObject fbox(new btCollisionObject());
+    SP::btCollisionShape fboxShape(new btBoxShape(btVector3(1, 1, 1)));
+    fbox->getWorldTransform().setBasis(basis);
+    fbox->setCollisionShape(&*fboxShape);
+
+    fbox->getWorldTransform().getOrigin().setZ(5);
 
     // -------------
     // --- Model ---
@@ -155,39 +166,70 @@ void BulletBodies::init()
 
     simulation.reset(new BulletTimeStepping(timedisc));
 
+#ifdef WITH_GLOBALAC
+    osnspb.reset(new FrictionContact(3, SICONOS_FRICTION_3D_GLOBALAC));
+#else
     osnspb.reset(new FrictionContact(3));
+#endif
 
-    osnspb->numericsSolverOptions()->iparam[0] = 1000; // Max number of
+    osnspb->numericsSolverOptions()->iparam[0] = 10000; // Max number of
     // iterations
-    osnspb->numericsSolverOptions()->iparam[1] = 20; // compute error
+
+#ifdef WITH_GLOBALAC
+    osnspb->numericsSolverOptions()->iparam[1] = 1; // compute error with GLOBALAC
+#else
+    osnspb->numericsSolverOptions()->iparam[1] = 10; // with NSGS
+#endif
+
+
     // iterations
     osnspb->numericsSolverOptions()->dparam[0] = 1e-7; // Tolerance
 
     osnspb->setMaxSize(16384);
-    osnspb->setMStorageType(1);
+    osnspb->setMStorageType(0);
     osnspb->setNumericsVerboseMode(0);
     osnspb->setKeepLambdaAndYState(true);
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
+#ifdef WITH_GLOBALAC
+    int myid, ierr;
+    int argc = 0;
+    char **argv = 0;
+    ierr = MPI_Init(&argc, &argv);
+    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    osnspb->numericsSolverOptions()->iparam[4] = myid;
+    osnspb->numericsSolverOptions()->iparam[5] = 1;
+
+    frictionContact3D_sparseGlobalAlartCurnierInit(osnspb->numericsSolverOptions().get());
+#endif
     //simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.2, 3));
 
     _playground.reset(new BulletSpaceFilter(_model->nonSmoothDynamicalSystem(),
                                             nslaw));
 
     ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*ground);
 
+    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*fbox);
+
     ask<ForStaticObjects>(*_playground)->push_back(ground);
+
+    ask<ForStaticObjects>(*_playground)->push_back(fbox);
 
     ask<ForStaticShapes>(*_playground)->push_back(groundShape);
 
+    ask<ForStaticShapes>(*_playground)->push_back(fboxShape);
+
     SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+
+    _model->nonSmoothDynamicalSystem()->setSymmetric(true);
 
     _model->initialize(simulation);
 
