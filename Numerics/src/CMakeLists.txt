@@ -224,7 +224,11 @@ IF(WITH_TESTING)
   NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_ortiz.dat)
   NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_ortiz.dat)
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_ortiz.dat)
-  
+
+  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
+  SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
+  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
+  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
   NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
   
   
