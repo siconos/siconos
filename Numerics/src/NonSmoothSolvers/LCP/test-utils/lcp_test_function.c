@@ -82,11 +82,13 @@ void fillParamWithRespectToSolver(SolverOptions *options, int solverId, LinearCo
   }
   case SICONOS_LCP_ENUM:
   {
-    options->iSize = 2;
+    options->iSize = 5;
     options->dSize = 2;
     options->dparam[0] = tolerance;
-    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+    /*use dgels:*/
+    options->iparam[4] = 0;
+    options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
+    options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
     break;
   }
   case SICONOS_LCP_NEWTONFB:
@@ -228,11 +230,11 @@ int lcp_test_function(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test succeeded err = %e \n", options->dparam[1]);
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsucceeded err =%e  \n", options->dparam[1]);
   }
   free(z);
   free(w);
@@ -247,7 +249,7 @@ int lcp_test_function(FILE * f, int solverId)
   free(options);
 
   freeLinearComplementarity_problem(problem);
-  printf("End of test on ./data/lcp_mmc.dat\n");
+  printf("End of test.\n");
 
 
   return info;
@@ -301,11 +303,11 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test succeeded err=%e \n", options->dparam[1]);
   }
   else
   {
-    printf("test unsucceeded\n");
+    printf("test unsucceeded err =%e \n", options->dparam[1]);
   }
   free(z);
   free(w);

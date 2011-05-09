@@ -46,6 +46,8 @@ void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComp
   pOptions->dparam[0] = 10 - 7;
   /*default number of it*/
   pOptions->iparam[0] = 1000;
+  /*enum case : do not use dgels*/
+  pOptions->iparam[4] = 0;
   pOptions->iparam[5] = 3; /*Number of registered configurations*/
   pOptions->iparam[8] = 0; /*Prb nedd a update*/
   pOptions->dparam[5] = 1e-12; /*tol used by direct solver to check complementarity*/

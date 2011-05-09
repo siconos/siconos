@@ -101,6 +101,7 @@ The enumeratif solver must be initialize: \n
 3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
 \bf parameters:
 - dparam[0] (in): a positive value, tolerane about the sign.
+- iparam[4] (in) :  use DGELS (1) or DGESV (0).
 - dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
 - iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 

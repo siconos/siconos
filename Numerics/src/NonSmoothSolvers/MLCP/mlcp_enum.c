@@ -150,15 +150,15 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
   if (!problem)
     return 0;
   assert(problem->M);
-#ifdef ENUM_USE_DGELS
-  LWORK = -1;
-  int info = 0;
-  double dgelsSize = 0;
-  DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
-  LWORK = (int) dgelsSize;
-#else
   LWORK = 0;
-#endif
+  if (options->iparam[4])
+  {
+    LWORK = -1;
+    int info = 0;
+    double dgelsSize = 0;
+    DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
+    LWORK = (int) dgelsSize;
+  }
   return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
@@ -191,7 +191,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   sMl = problem->M->size0;
   sNn = problem->n;
   sMm = problem->m;
-
+  int useDGELS = options->iparam[4];
   /*OUTPUT param*/
   sW1 = w;
   sW2 = w + (sMl - problem->m); /*sW2 size :m */
@@ -233,53 +233,54 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     buildQ();
     if (verbose)
       printCurrentSystem();
-#ifdef ENUM_USE_DGELS
-
-    DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-          LAinfo);
-    if (verbose)
+    if (useDGELS)
     {
-      printf("Solution of dgels\n");
-      displayMat(sQ, sMl, 1, 0);
+      DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
+            LAinfo);
+      if (verbose)
+      {
+        printf("Solution of dgels\n");
+        displayMat(sQ, sMl, 1, 0);
+      }
     }
-#else
-
-    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
-#endif
+    else
+    {
+      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+    }
     if (!LAinfo)
     {
-#ifdef ENUM_USE_DGELS
-      int cc = 0;
-      int ii;
-      double rest = 0;
-      for (ii = 0; ii < npm; ii++)
+      if (useDGELS)
       {
-        if (isnan(sQ[ii]) || isinf(sQ[ii]))
+        int cc = 0;
+        int ii;
+        double rest = 0;
+        for (ii = 0; ii < npm; ii++)
         {
-          printf("DGELS FAILED\n");
-          cc = 1;
-          break;
+          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          {
+            printf("DGELS FAILED\n");
+            cc = 1;
+            break;
+          }
         }
-      }
-      if (cc)
-        continue;
-
-      if (sMl > npm)
-      {
-        rest = DNRM2(sMl - npm, sQ + npm, 1);
-
-        if (rest > tol || isnan(rest) || isinf(rest))
-        {
-          if (verbose)
-            printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+        if (cc)
           continue;
+
+        if (sMl > npm)
+        {
+          rest = DNRM2(sMl - npm, sQ + npm, 1);
+
+          if (rest > tol || isnan(rest) || isinf(rest))
+          {
+            if (verbose)
+              printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+            continue;
+          }
+          if (verbose)
+            printf("DGELS, optimal point rest = %e\n", rest);
         }
-        if (verbose)
-          printf("DGELS, optimal point rest = %e\n", rest);
       }
 
-
-#endif
       if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
@@ -346,6 +347,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   int * indexInBlock;
   int check;
   int LAinfo;
+  int useDGELS = options->iparam[4];
   *info = 0;
   assert(problem->M);
   assert(problem->M->matrix0);
@@ -402,53 +404,54 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     buildQ();
     if (verbose)
       printCurrentSystem();
-#ifdef ENUM_USE_DGELS
-
-    DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-          LAinfo);
-    if (verbose)
+    if (useDGELS)
     {
-      printf("Solution of dgels\n");
-      displayMat(sQ, sMl, 1, 0);
+      DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
+            LAinfo);
+      if (verbose)
+      {
+        printf("Solution of dgels\n");
+        displayMat(sQ, sMl, 1, 0);
+      }
     }
-#else
-
-    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
-#endif
+    else
+    {
+      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+    }
     if (!LAinfo)
     {
-#ifdef ENUM_USE_DGELS
-      int cc = 0;
-      int ii;
-      double rest = 0;
-      for (ii = 0; ii < npm; ii++)
+      if (useDGELS)
       {
-        if (isnan(sQ[ii]) || isinf(sQ[ii]))
+        int cc = 0;
+        int ii;
+        double rest = 0;
+        for (ii = 0; ii < npm; ii++)
         {
-          printf("DGELS FAILED\n");
-          cc = 1;
-          break;
+          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          {
+            printf("DGELS FAILED\n");
+            cc = 1;
+            break;
+          }
         }
-      }
-      if (cc)
-        continue;
-
-      if (sMl > npm)
-      {
-        rest = DNRM2(sMl - npm, sQ + npm, 1);
-
-        if (rest > tol || isnan(rest) || isinf(rest))
-        {
-          if (verbose)
-            printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+        if (cc)
           continue;
+
+        if (sMl > npm)
+        {
+          rest = DNRM2(sMl - npm, sQ + npm, 1);
+
+          if (rest > tol || isnan(rest) || isinf(rest))
+          {
+            if (verbose)
+              printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+            continue;
+          }
+          if (verbose)
+            printf("DGELS, optimal point rest = %e\n", rest);
         }
-        if (verbose)
-          printf("DGELS, optimal point rest = %e\n", rest);
       }
 
-
-#endif
       if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");

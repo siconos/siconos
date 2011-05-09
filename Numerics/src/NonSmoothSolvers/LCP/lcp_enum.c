@@ -36,7 +36,7 @@ static double * sQ = 0;
 static double * sQref = 0;
 static double * sColNul = 0;
 static int sSize = 0;
-
+static int LWORK = 0;
 /*case defined with sCurrentEnum
  *if sWZ[i]==0
  *  w[i] null
@@ -135,7 +135,17 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 }
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
-  return 3 * (problem->size) + (problem->size) * (problem->size);
+  int aux = 3 * (problem->size) + (problem->size) * (problem->size);
+  if (options->iparam[4])
+  {
+    LWORK = -1;
+    int info = 0;
+    double dgelsSize = 0;
+    DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
+    aux += (int) dgelsSize;
+    LWORK = (int) dgelsSize;
+  }
+  return aux;
 }
 void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
@@ -168,7 +178,8 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int NRHS = 1;
   int * ipiv;
   int check;
-  int DGESVinfo;
+  int LAinfo;
+  int useDGELS = options->iparam[4];
 
   /*OUTPUT param*/
   sCurrentEnum = options->iparam[3];
@@ -208,10 +219,50 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     lcp_buildQ();
     /*     if (verbose) */
     /*       printCurrentSystem(); */
-    DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, DGESVinfo);
-
-    if (!DGESVinfo)
+    if (useDGELS)
     {
+      double * DgelsWork = options->dWork + 3 * (problem->size) + (problem->size) * (problem->size);
+      /* if (verbose) */
+      /*   { */
+      /*     printf("call dgels on ||AX-B||\n"); */
+      /*     printf("A\n"); */
+      /*     displayMat(sM,sSize,sSize,0); */
+      /*     printf("B\n"); */
+      /*     displayMat(sQ,sSize,1,0); */
+      /*   } */
+
+      DGELS(sSize, sSize, NRHS, sM, sSize, sQ, sSize, DgelsWork, LWORK,
+            LAinfo);
+      if (verbose)
+      {
+        printf("Solution of dgels (info=%i)\n", LAinfo);
+        displayMat(sQ, sSize, 1, 0);
+      }
+    }
+    else
+    {
+      DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, LAinfo);
+    }
+    if (!LAinfo)
+    {
+      if (useDGELS)
+      {
+        int cc = 0;
+        int ii;
+        printf("DGELS LAInfo=%i\n", LAinfo);
+        for (ii = 0; ii < sSize; ii++)
+        {
+          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          {
+            printf("DGELS FAILED\n");
+            cc = 1;
+            break;
+          }
+        }
+        if (cc)
+          continue;
+      }
+
       if (verbose)
       {
         printf("lcp_enum LU foctorization success:\n");
@@ -268,8 +319,8 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   if (problem)
   {
-    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+    options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
+    options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
   }
   else
   {
