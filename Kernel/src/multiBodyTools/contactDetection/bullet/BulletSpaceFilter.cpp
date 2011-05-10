@@ -18,16 +18,9 @@
 */
 
 #include "BulletSpaceFilter.hpp"
-#include "BulletTimeStepping.hpp"
 
-#include "BulletR.hpp"
-#include "BulletDS.hpp"
-
-#ifdef DEBUG_BULLET_SPACE_FILTER
-#define DEBUG_MESSAGES 1
-#endif
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
-
 
 struct ForPosition : public Question<SP::SiconosVector>
 {
@@ -68,11 +61,6 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
 void BulletSpaceFilter::buildInteractions(double time)
 {
-
-  typedef std::pair<int, int> interPair;
-
-  typedef std::tr1::unordered_multiset < interPair,
-          boost::hash<interPair> > interPairs;
 
   DEBUG_PRINT("-----start build interaction\n");
 

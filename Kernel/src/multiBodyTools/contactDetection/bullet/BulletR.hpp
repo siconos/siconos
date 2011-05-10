@@ -21,8 +21,7 @@
 #define BulletR_hpp
 
 #include "BulletSiconos.hpp"
-
-#include "NewtonEulerR.hpp"
+#include "NewtonEulerRFC3D.hpp"
 
 class BulletR : public NewtonEulerRFC3D
 {

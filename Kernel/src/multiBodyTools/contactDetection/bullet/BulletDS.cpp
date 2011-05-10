@@ -18,6 +18,7 @@
 */
 
 #include "BulletDS.hpp"
+#include "BulletWeightedShape.hpp"
 
 #ifdef DEBUG_BULLETDS
 #define DEBUG_MESSAGES 1

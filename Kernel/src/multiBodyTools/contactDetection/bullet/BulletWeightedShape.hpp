@@ -21,6 +21,8 @@
 #define BULLET_WEIGHTED_SHAPE_HPP
 #include "BulletSiconos.hpp"
 
+#include "SimpleMatrix.hpp"
+
 class BulletWeightedShape
 {
 private:

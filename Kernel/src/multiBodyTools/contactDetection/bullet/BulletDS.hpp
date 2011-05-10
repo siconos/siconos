@@ -17,14 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "NewtonEulerDS.hpp"
-#include "SiconosPointers.hpp"
+#ifndef BulletDS_hpp
+#define BulletDS_hpp
 
+#include "SiconosPointers.hpp"
 #include "BulletSiconos.hpp"
 #include "BulletWeightedShape.hpp"
 
-#ifndef BulletDS_hpp
-#define BulletDS_hpp
+#include "NewtonEulerDS.hpp"
 
 class BulletDS : public NewtonEulerDS, public boost::enable_shared_from_this<BulletDS>
 {

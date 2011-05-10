@@ -21,8 +21,7 @@
 #define BulletRImpact_hpp
 
 #include "BulletSiconos.hpp"
-
-#include "NewtonEulerR.hpp"
+#include "NewtonEulerRImpact.hpp"
 
 class BulletRImpact : public NewtonEulerRImpact
 {

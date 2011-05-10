@@ -21,9 +21,9 @@
 #ifndef BulletSiconos_hpp
 #define BulletSiconos_hpp
 
-#include "SiconosKernel.hpp"
-
 #include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+
+#include "SiconosPointers.hpp"
 
 DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
