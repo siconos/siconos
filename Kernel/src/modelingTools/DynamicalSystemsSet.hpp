@@ -46,7 +46,7 @@ public:
     SP::DynamicalSystem ds;
     for (iterator it = begin(); it != end(); ++it)
     {
-      if ((*it)->number() == ds->number())
+      if ((*it)->number() == num)
       {
         ds = *it;
         break;
