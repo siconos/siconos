@@ -35,10 +35,10 @@ ___________o_____________o_________o___oooooo
 Available input files are :
 
 	- BouncingBallTS.cpp: input file using direct C++ description of the model, with TimeStepping.
-	- BouncingBallED.cpp: input file using direct C++ description of the model, with EventDriven.
-	- BouncingBall...Xml.cpp: c++ file using xml loading
-	- BouncingBall.py : python input file, using xml.
-
+	- BouncingBallTSXml.cpp: c++ file using xml loading
+	- BouncingBallTS.py : python input file (Front-End required)
+	- BouncingBallNETS.cpp : using the NewtonEulerDS implementation
+	
 Post-treatment : load 'result.gp' with gnuplot
 
 (gnuplot -persist result.gp)
