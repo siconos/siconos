@@ -38,6 +38,7 @@ Available input files are :
 	- BouncingBallTSXml.cpp: c++ file using xml loading
 	- BouncingBallTS.py : python input file (Front-End required)
 	- BouncingBallNETS.cpp : using the NewtonEulerDS implementation
+	- BouncingBallTS-Scleronomous.cpp : using a  LagrangianScleronomousR Relation defined in the plugin
 	
 Post-treatment : load 'result.gp' with gnuplot
 
