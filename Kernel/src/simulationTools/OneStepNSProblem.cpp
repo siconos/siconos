@@ -209,6 +209,11 @@ void OneStepNSProblem::updateUnitaryBlocks()
       }
     }
 
+    /* unitaryBlock must be zeroed at init */
+    std::vector<bool> initialized;
+    initialized.resize(indexSet->edges_number());
+    std::fill(initialized.begin(), initialized.end(), false);
+
     UnitaryRelationsGraph::EIterator ei, eiend;
     for (boost::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
@@ -216,27 +221,49 @@ void OneStepNSProblem::updateUnitaryBlocks()
       SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
       SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
 
+      /* on adjoint graph there is at most 2 edges between source and target */
+      UnitaryRelationsGraph::EDescriptor ed1, ed2;
+      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
+
+      assert(*ei == ed1 || *ei == ed2);
+
+      /* the first edge as the lower index */
+      assert(indexSet->index(ed1) <= indexSet->index(ed2));
+
       // Memory allocation if needed
       unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
       unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
       unsigned int isrc = indexSet->index(indexSet->source(*ei));
       unsigned int itar = indexSet->index(indexSet->target(*ei));
 
+      SP::SiconosMatrix currentUnitaryBlock;
+
       if (itar > isrc) // upper block
       {
-        if (! indexSet->properties(*ei).upper_block)
+        if (! indexSet->properties(ed1).upper_block)
         {
-          indexSet->properties(*ei).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          indexSet->properties(ed1).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          if (ed2 != ed1)
+            indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
         }
+        currentUnitaryBlock = indexSet->properties(ed1).upper_block;
       }
       else  // lower block
       {
-        if (! indexSet->properties(*ei).lower_block)
+        if (! indexSet->properties(ed1).lower_block)
         {
-          indexSet->properties(*ei).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          indexSet->properties(ed1).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          if (ed2 != ed1)
+            indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
         }
+        currentUnitaryBlock = indexSet->properties(ed1).lower_block;
       }
 
+      if (!initialized[indexSet->index(ed1)])
+      {
+        initialized[indexSet->index(ed1)] = true;
+        currentUnitaryBlock->zero();
+      }
 
       if (!isLinear || !_hasBeUpdated)
       {
@@ -248,30 +275,33 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
         if (itar > isrc) // upper block has been computed
         {
-          if (!indexSet->properties(*ei).lower_block)
+          if (!indexSet->properties(ed1).lower_block)
           {
-            indexSet->properties(*ei).lower_block.
-            reset(new SimpleMatrix(indexSet->properties(*ei).upper_block->size(1),
-                                   indexSet->properties(*ei).upper_block->size(0)));
+            indexSet->properties(ed1).lower_block.
+            reset(new SimpleMatrix(indexSet->properties(ed1).upper_block->size(1),
+                                   indexSet->properties(ed1).upper_block->size(0)));
           }
-          indexSet->properties(*ei).lower_block->trans(*indexSet->properties(*ei).upper_block);
+          indexSet->properties(ed1).lower_block->trans(*indexSet->properties(ed1).upper_block);
+          indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
         }
         else
         {
           assert(itar < isrc);    // lower block has been computed
-          if (!indexSet->properties(*ei).upper_block)
+          if (!indexSet->properties(ed1).upper_block)
           {
-            indexSet->properties(*ei).upper_block.
-            reset(new SimpleMatrix(indexSet->properties(*ei).lower_block->size(1),
-                                   indexSet->properties(*ei).lower_block->size(0)));
+            indexSet->properties(ed1).upper_block.
+            reset(new SimpleMatrix(indexSet->properties(ed1).lower_block->size(1),
+                                   indexSet->properties(ed1).lower_block->size(0)));
           }
-          indexSet->properties(*ei).upper_block->trans(*indexSet->properties(*ei).lower_block);
+          indexSet->properties(ed1).upper_block->trans(*indexSet->properties(ed1).lower_block);
+          indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
         }
       }
     }
   }
   else // not symmetric => follow out_edges for each vertices
   {
+
     UnitaryRelationsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
@@ -288,14 +318,28 @@ void OneStepNSProblem::updateUnitaryBlocks()
         computeDiagonalUnitaryBlock(*vi);
       }
 
+      /* unitaryBlock must be zeroed at init */
+      std::vector<bool> initialized;
+      initialized.resize(indexSet->edges_number());
+      std::fill(initialized.begin(), initialized.end(), false);
+
       /* on a undirected graph, out_edges gives all incident edges */
       UnitaryRelationsGraph::OEIterator oei, oeiend;
       for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
+
+        /* on adjoint graph there is at most 2 edges between source and target */
+        UnitaryRelationsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+
+        assert(*oei == ed1 || *oei == ed2);
+
+        /* the first edge as the lower index */
+        assert(indexSet->index(ed1) <= indexSet->index(ed2));
+
         SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*oei));
         SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*oei));
-
 
         // Memory allocation if needed
         unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
@@ -303,20 +347,37 @@ void OneStepNSProblem::updateUnitaryBlocks()
         unsigned int isrc = indexSet->index(indexSet->source(*oei));
         unsigned int itar = indexSet->index(indexSet->target(*oei));
 
+        SP::SiconosMatrix currentUnitaryBlock;
+
         if (itar > isrc) // upper block
         {
-          if (! indexSet->properties(*oei).upper_block)
+          if (! indexSet->properties(ed1).upper_block)
           {
-            indexSet->properties(*oei).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            indexSet->properties(ed1).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            if (ed2 != ed1)
+              indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
           }
+          currentUnitaryBlock = indexSet->properties(ed1).upper_block;
+
         }
         else  // lower block
         {
-          if (! indexSet->properties(*oei).lower_block)
+          if (! indexSet->properties(ed1).lower_block)
           {
-            indexSet->properties(*oei).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            indexSet->properties(ed1).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            if (ed2 != ed1)
+              indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
           }
+          currentUnitaryBlock = indexSet->properties(ed1).lower_block;
         }
+
+
+        if (!initialized[indexSet->index(ed1)])
+        {
+          initialized[indexSet->index(ed1)] = true;
+          currentUnitaryBlock->zero();
+        }
+
 
         if (!isLinear || !_hasBeUpdated)
         {

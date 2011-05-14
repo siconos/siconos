@@ -419,7 +419,7 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
   // ==== First Order Relations - Specific treatment for diagonal
   // _unitaryBlocks ===
   assert(UR1 != UR2);
-  currentUnitaryBlock->zero();
+  //  currentUnitaryBlock->zero();
 
   // loop over the common DS
   unsigned int sizeDS = ds->getDim();

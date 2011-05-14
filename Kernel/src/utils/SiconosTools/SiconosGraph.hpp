@@ -63,6 +63,9 @@ class SiconosGraph
 {
 public:
 
+  /* note : OutEdgeList as multisetS => cannot compile remove_out_edge_if :
+     /usr/include/boost/graph/detail/adjacency_list.hpp:440: error: passing 'const ... */
+
   typedef adjacency_list <
   listS, listS, undirectedS,
          property < vertex_bundle_t, V,
@@ -136,10 +139,6 @@ protected:
 
   graph_t g;
 
-
-
-
-
 private:
 
   SiconosGraph(const SiconosGraph&);
@@ -158,22 +157,91 @@ public:
   };
 
 
+  std::pair<EDescriptor, bool>
+  edge(VDescriptor u, VDescriptor v)
+  {
+    return boost::edge(u, v, g);
+  }
+
   bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2)
   {
     bool ret = false;
+    EDescriptor tmped;
+    boost::tie(tmped, ret) = edge(vd1, vd2);
+
+#ifndef NDEBUG
+    bool check_ret = false;
     AVIterator avi, aviend;
     for (boost::tie(avi, aviend) = adjacent_vertices(vd1);
          avi != aviend; ++avi)
     {
       if (*avi == vd2)
       {
-        ret = true;
+        check_ret = true;
         break;
       }
       assert(is_vertex(bundle(*avi)));
       assert(bundle(descriptor(bundle(*avi))) == bundle(*avi));
     }
+    assert(ret == check_ret);
+#endif
+
     return ret;
+  }
+
+  /* parrallel edges : edge_range needs multisetS as
+     OutEdgesList and with multisetS remove_out_edges_if cannot
+     compile as with listS.
+     This is only needed for AdjointGraph where only 2 edges may be in
+     common which correspond to the source and target in primal graph
+   */
+  std::pair<EDescriptor, EDescriptor>
+  edges(VDescriptor u, VDescriptor v)
+  {
+    //    BOOST_STATIC_ASSERT((GProperties::is_adjoint_graph));
+
+    OEIterator oei, oeiend;
+    bool ifirst = false;
+    bool isecond = false;
+    EDescriptor first, second;
+    for (boost::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
+    {
+      if (target(*oei) == v)
+      {
+        if (!ifirst)
+        {
+          ifirst = true;
+          first = *oei;
+        }
+        else
+        {
+          isecond = true;
+          second = *oei;
+          break;
+        }
+      }
+    }
+
+    if (ifirst && isecond)
+    {
+      if (index(first) < index(second))
+      {
+        return std::pair<EDescriptor, EDescriptor>(first, second);
+      }
+      else
+      {
+        return std::pair<EDescriptor, EDescriptor>(second, first);
+      }
+    }
+    else if (ifirst)
+    {
+      return std::pair<EDescriptor, EDescriptor>(first, first);
+    }
+    else
+    {
+      throw(1);
+    }
+
   }
 
   bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2,
@@ -577,12 +645,32 @@ public:
 
   }
 
+  /** Remove all the out-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
   template<class Predicate>
   void remove_out_edge_if(const VDescriptor& vd,
                           const Predicate& pred)
+  //                      Predicate pred)
   {
 
+    BOOST_CONCEPT_ASSERT((IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((MutableGraphConcept<graph_t>));
+
     boost::remove_out_edge_if(vd, pred, g);
+    /* workaround on multisetS (tested on Disks : ok)
+       multiset allows for member removal without invalidating iterators
+
+        OEIterator oei,oeiend;
+        for(boost::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
+        {
+          if (pred(*oei))
+          {
+            remove_edge(*oei);
+          }
+        }
+    */
 
     assert(state_assert());
   }
