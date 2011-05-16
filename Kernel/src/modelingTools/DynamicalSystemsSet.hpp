@@ -99,7 +99,8 @@ public:
 
   void insert(SP::DynamicalSystem s)
   {
-    this->push_back(s);
+    if (! isIn(s))
+      this->push_back(s);
   };
 
   void insert(iterator begin,
