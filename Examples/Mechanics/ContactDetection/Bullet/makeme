@@ -1,2 +1,2 @@
 #!/bin/sh
-siconos -j 2 -DWITH_MUMPS -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp
+siconos -j 2 -DWITH_MUMPS -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp

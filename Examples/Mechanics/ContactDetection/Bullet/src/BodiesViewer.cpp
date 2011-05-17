@@ -24,6 +24,7 @@
 #include "BulletBodies.hpp"
 
 #include "GL_ShapeDrawer.h"
+#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -581,84 +582,8 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
                GETA4(ds),
                GETRADIUS(ds), c);
     break;
+  };
 
-  case BULLET :
-    SP::btCollisionObject co = ask<ForCollisionObject>(*ds);
-    GL_ShapeDrawer drawer;
-
-    ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawObject(co->getWorldTransform(), co->getCollisionShape(), btVector3(1, 1, 0));
-
-    unsigned int numManifolds =
-      ask<ForCollisionWorld>(*Siconos_->spaceFilter())->getDispatcher()->getNumManifolds();
-
-    for (unsigned int i = 0; i < numManifolds; ++i)
-    {
-      btPersistentManifold* contactManifold =
-        ask<ForCollisionWorld>(*Siconos_->spaceFilter())->getDispatcher()->getManifoldByIndexInternal(i);
-
-      btCollisionObject* obA =
-        static_cast<btCollisionObject*>(contactManifold->getBody0());
-      btCollisionObject* obB =
-        static_cast<btCollisionObject*>(contactManifold->getBody1());
-
-      unsigned int numContacts = contactManifold->getNumContacts();
-
-      for (unsigned int j = 0; j < numContacts; ++j)
-      {
-        btManifoldPoint& pt = contactManifold->getContactPoint(j);
-        glBegin(GL_LINES);
-        glLineWidth(10.);
-        glColor3f(0, 0, 0);
-
-        btVector3 ptA = pt.getPositionWorldOnA();
-        btVector3 ptB = pt.getPositionWorldOnB();
-
-        glVertex3d(ptA.x(), ptA.y(), ptA.z());
-        glVertex3d(ptB.x(), ptB.y(), ptB.z());
-        glEnd();
-      }
-    }
-
-    /*
-        switch(co->getCollisionShape()->getShapeType())
-        {
-        case CYLINDER_SHAPE_PROXYTYPE :
-        {
-          const btCylinderShape* cylinder = static_cast<const btCylinderShape*>(co->getCollisionShape());
-          int upAxis = cylinder->getUpAxis();
-          float radius = cylinder->getRadius();
-          float halfHeight = cylinder->getHalfExtentsWithMargin()[upAxis];
-
-          glPushMatrix();
-          glTranslatef(GETX(ds),GETY(ds),GETZ(ds));
-
-          qglviewer::Quaternion q = qglviewer::Quaternion(GETA2(ds),GETA3(ds),GETA4(ds),GETA1(ds));
-
-          glMultMatrixd(q.matrix());
-
-          drawer.drawCylinder(radius,halfHeight,upAxis);
-          glPopMatrix();
-          break;
-        }
-        case BOX_SHAPE_PROXYTYPE :
-        {
-          const btBoxShape* box = static_cast<const btBoxShape*>(co->getCollisionShape());
-          btVector3 halfExtents = box->getHalfExtents();
-
-          glPushMatrix();
-          glTranslatef(GETX(ds),GETY(ds),GETZ(ds));
-
-          qglviewer::Quaternion q = qglviewer::Quaternion(GETA2(ds),GETA3(ds),GETA4(ds),GETA1(ds));
-
-          glMultMatrixd(q.matrix());
-
-          ask<ForCollisionWorld<(Siconos_->spaceFilter())->
-
-          glPopMatrix();
-          break;
-        }
-        }*/
-  }
 };
 
 void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)

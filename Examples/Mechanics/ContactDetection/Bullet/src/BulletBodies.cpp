@@ -40,7 +40,7 @@ void BulletBodies::init()
     std::cout << "====> Model loading ..." << std::endl << std::endl;
 
 
-    double theta = 0.;
+    double theta = 0.;//acos(1/sqrt(3));
 
     double a = 1;
     double b = 0;
@@ -63,26 +63,31 @@ void BulletBodies::init()
     (*velocity)(5) = 0.;
 
     SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
+    SP::btCollisionShape bbox(new btBoxShape(btVector3(10, 10, 1)));
+    SP::btCollisionShape sphere(new btSphereShape(1.));
     SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
+    SP::BulletWeightedShape box2(new BulletWeightedShape(box, 1.0));
+    SP::BulletWeightedShape box3(new BulletWeightedShape(bbox, 10.0));
+    SP::BulletWeightedShape sphere2(new BulletWeightedShape(sphere, 10.0));
 
     SP::BulletDS body(new BulletDS(box1, position, velocity));
-    SP::SimpleVector FExt;
-    FExt.reset(new SimpleVector(3)); //
-    FExt->zero();
-    FExt->setValue(2, -9.81);
-    body->setFExtPtr(FExt);
+    SP::SimpleVector FExt1;
+    FExt1.reset(new SimpleVector(3)); //
+    FExt1->zero();
+    FExt1->setValue(2, -9.81 * box1->mass());
+    body->setFExtPtr(FExt1);
 
-    double theta2 = acos(1 / sqrt(3)) + 0.01;
+    double theta2 = acos(1 / sqrt(3)) + .01;
 
     double a2 = 1;
-    double b2 = 0;
+    double b2 = 1;
     double c2 = 0;
     double k2 = (sin(theta2 / 2)) / sqrt(a2 * a2 + b2 * b2 + c2 * c2);
 
     SP::SimpleVector position2(new SimpleVector(7));
     SP::SimpleVector velocity2(new SimpleVector(6));
     position2->zero();
-    (*position2)(1) = .3;
+    (*position2)(1) = .0;
     (*position2)(2) = 20.;
     (*position2)(3) = cos(theta2 / 2);
     (*position2)(4) = a2 * k2;
@@ -94,10 +99,14 @@ void BulletBodies::init()
     (*velocity2)(4) = 0.;
     (*velocity2)(5) = 0.;
 
-    SP::BulletDS body2(new BulletDS(box1, position2, velocity2));
-    body2->setFExtPtr(FExt);
+    SP::BulletDS body2(new BulletDS(box2, position2, velocity2));
+    SP::SimpleVector FExt2;
+    FExt2.reset(new SimpleVector(3)); //
+    FExt2->zero();
+    FExt2->setValue(2, -9.81 * box2->mass());
+    body2->setFExtPtr(FExt2);
 
-    double theta3 = acos(1 / sqrt(3)) + 0.10;
+    double theta3 = acos(1 / sqrt(3));
 
     double a3 = 1;
     double b3 = 0;
@@ -119,8 +128,12 @@ void BulletBodies::init()
     (*velocity3)(4) = 0.;
     (*velocity3)(5) = 0.;
 
-    SP::BulletDS body3(new BulletDS(box1, position3, velocity3));
-    body3->setFExtPtr(FExt);
+    SP::BulletDS body3(new BulletDS(box3, position3, velocity3));
+    SP::SimpleVector FExt3;
+    FExt3.reset(new SimpleVector(3)); //
+    FExt3->zero();
+    FExt3->setValue(2, -9.81 * box3->mass());
+    body3->setFExtPtr(FExt3);
 
     SP::btCollisionObject ground(new btCollisionObject());
     SP::btCollisionShape groundShape(new btBoxShape(btVector3(50, 50, 3)));
@@ -136,6 +149,9 @@ void BulletBodies::init()
     fbox->getWorldTransform().setBasis(basis);
     fbox->setCollisionShape(&*fboxShape);
 
+    fbox->getWorldTransform().getOrigin().setX(0);
+    fbox->getWorldTransform().getOrigin().setY(0);
+
     fbox->getWorldTransform().getOrigin().setZ(5);
 
     // -------------
@@ -150,11 +166,11 @@ void BulletBodies::init()
 
     _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
     _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
-    //    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body3);
+    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body3);
 
     osi->insertDynamicalSystem(body);
     osi->insertDynamicalSystem(body2);
-    //    osi->insertDynamicalSystem(body3);
+    osi->insertDynamicalSystem(body3);
 
 
     // ------------------
@@ -172,7 +188,7 @@ void BulletBodies::init()
     osnspb.reset(new FrictionContact(3));
 #endif
 
-    osnspb->numericsSolverOptions()->iparam[0] = 10000; // Max number of
+    osnspb->numericsSolverOptions()->iparam[0] = 100000; // Max number of
     // iterations
 
 #ifdef WITH_GLOBALAC
@@ -183,7 +199,7 @@ void BulletBodies::init()
 
 
     // iterations
-    osnspb->numericsSolverOptions()->dparam[0] = 1e-7; // Tolerance
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-10; // Tolerance
 
     osnspb->setMaxSize(16384);
     osnspb->setMStorageType(0);
@@ -209,10 +225,14 @@ void BulletBodies::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.2, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, .7, 3));
+
+
+    SP::btVector3 aabbmax(new btVector3(100, 100, 100));
+    SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
 
     _playground.reset(new BulletSpaceFilter(_model->nonSmoothDynamicalSystem(),
-                                            nslaw));
+                                            nslaw, aabbmin, aabbmax));
 
     ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*ground);
 

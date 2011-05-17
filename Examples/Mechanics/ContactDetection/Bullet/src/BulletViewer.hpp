@@ -21,14 +21,19 @@
 #include "BodiesViewer.hpp"
 
 #include "GLDebugDrawer.h"
+#include "GL_ShapeDrawer.h"
+
+
 
 class BulletViewer : public BodiesViewer
 {
   GLDebugDrawer _debugDrawer;
+  GL_ShapeDrawer _shapeDrawer;
 
   void init();
   void animate();
   void draw();
+  void drawQGLShape(const QGLShape&);
   QString helpString() const;
   virtual void mousePressEvent(QMouseEvent *);
   virtual void mouseMoveEvent(QMouseEvent *);

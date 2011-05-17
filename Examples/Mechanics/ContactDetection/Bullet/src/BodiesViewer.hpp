@@ -41,6 +41,7 @@
 #include <BulletR.hpp>
 
 #include "SiconosBodies.hpp"
+
 /* QGLViewer */
 #include <qglviewer.h>
 #include <qapplication.h>
@@ -343,8 +344,8 @@ public:
   void drawSphere(float x, float y, float z, float a, float b, float c, float d, float r, float *color);
   void drawPolyg(unsigned int n, double* coor, float *c);
 
-  void drawQGLShape(const QGLShape&);
-  void drawSelectedQGLShape(const QGLShape&);
+  virtual void drawQGLShape(const QGLShape&);
+  virtual void drawSelectedQGLShape(const QGLShape&);
   void insertQGLShape(SHAPE, SP::DynamicalSystem);
 
 
@@ -363,7 +364,6 @@ protected :
   SP::SiconosBodies Siconos_;
 
   std::vector<SP::QGLShape>  shapes_;
-
 
   void print(float x, float y, const char *s, int size);
 

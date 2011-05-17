@@ -25,12 +25,6 @@
 
 using namespace qglviewer;
 
-btVector3 normalize(const btVector3& v)
-{
-  return (v / sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]));
-};
-
-
 void BulletViewer::init()
 {
   // viewer and scene state
@@ -42,17 +36,12 @@ void BulletViewer::init()
   setBackgroundColor(QColor(200, 200, 200));
   setForegroundColor(QColor(0, 0, 0));
 
-  // 2D setup
-  glDisable(GL_LIGHTING);
   camera()->setPosition(Vec(0.0, 0.0, 1.0));
-  //  camera()->lookAt(sceneCenter());
-  //  camera()->setType(Camera::ORTHOGRAPHIC);
   camera()->showEntireScene();
   setManipulatedFrame(camera()->frame());
 
-  //  constraint_.reset(new WorldConstraint());
-  //  constraint_->setRotationConstraintType(AxisPlaneConstraint::FORBIDDEN);
-  //  camera()->frame()->setConstraint(&*constraint_);
+  // shapeDrawer
+  _shapeDrawer.enableTexture(true);
 
   // help screen
   help();
@@ -86,14 +75,98 @@ void BulletViewer::init()
 
 }
 
+void BulletViewer::drawQGLShape(const QGLShape& fig)
+{
 
+  DynamicalSystem * ds = fig.DS().get();
+
+  assert(ask<ForShape>(*ds) == BULLET);
+
+
+  glClear(GL_STENCIL_BUFFER_BIT);
+  glEnable(GL_CULL_FACE);
+
+
+  GLfloat light_ambient[] = { btScalar(0.2), btScalar(0.2), btScalar(0.2), btScalar(1.0) };
+  GLfloat light_diffuse[] = { btScalar(1.0), btScalar(1.0), btScalar(1.0), btScalar(1.0) };
+  GLfloat light_specular[] = { btScalar(1.0), btScalar(1.0), btScalar(1.0), btScalar(1.0)};
+  /*  light_position is NOT default value */
+  GLfloat light_position0[] = { btScalar(1.0), btScalar(10.0), btScalar(1.0), btScalar(0.0)};
+  GLfloat light_position1[] = { btScalar(-1.0), btScalar(-10.0), btScalar(-1.0), btScalar(0.0) };
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+
+  glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
+  glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHT1);
+
+
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+
+  glClearColor(btScalar(0.7), btScalar(0.7), btScalar(0.7), btScalar(0));
+
+  btCollisionObject* co = &*ask<ForCollisionObject>(*ds);
+  btCollisionWorld* cow = &*ask<ForCollisionWorld>(*Siconos_->spaceFilter());
+
+
+  //    ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawObject(co->getWorldTransform(), co->getCollisionShape(), btVector3(1,1,0));
+
+
+  btScalar m[16];
+  btMatrix3x3 rot;
+  co->getWorldTransform().getOpenGLMatrix(m);
+  rot = co->getWorldTransform().getBasis();
+
+  btVector3 aabbMin, aabbMax;
+  cow->getBroadphase()->getBroadphaseAabb(aabbMin, aabbMax);
+
+  aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
+  aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
+
+  btVector3 color = btVector3(0.21f, 0.21f, 0.90f);
+
+  _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
+
+  unsigned int numManifolds =
+    cow->getDispatcher()->getNumManifolds();
+
+  for (unsigned int i = 0; i < numManifolds; ++i)
+  {
+    btPersistentManifold* contactManifold =
+      cow->getDispatcher()->getManifoldByIndexInternal(i);
+
+    unsigned int numContacts = contactManifold->getNumContacts();
+
+    for (unsigned int j = 0; j < numContacts; ++j)
+    {
+      btManifoldPoint& pt = contactManifold->getContactPoint(j);
+      glBegin(GL_LINES);
+      glLineWidth(10.);
+      glColor3f(0, 0, 0);
+
+      btVector3 ptA = pt.getPositionWorldOnA();
+      btVector3 ptB = pt.getPositionWorldOnB();
+
+      glVertex3d(ptA.x(), ptA.y(), ptA.z());
+      glVertex3d(ptB.x(), ptB.y(), ptB.z());
+      glEnd();
+    }
+  }
+}
 
 
 void BulletViewer::draw()
 {
-
-  int i, mrow;
-  clock_t lcptime;
 
   char qs[6];
 
@@ -132,11 +205,6 @@ void BulletViewer::draw()
 
     SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
-    float x1 = (*q1)(0);
-    float y1 = (*q1)(1);
-    float r1 = ask<ForRadius>(*d1);
-
-
     if (involvedDS->size() == 2)
     {
       SimpleVector& cf = *ask<ForContactForce>(*relation);
@@ -146,8 +214,8 @@ void BulletViewer::draw()
       btVector3 posa = cpoint.getPositionWorldOnA();
       btVector3 posb = cpoint.getPositionWorldOnB();
       btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + normalize(dirf) / 2.;
-      btVector3 cnB = posb + normalize(cpoint.m_normalWorldOnB) / 2.;
+      btVector3 endf = posa + dirf.normalize() / 2.;
+      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 2.;
 
 
       glPushMatrix();
@@ -173,8 +241,8 @@ void BulletViewer::draw()
       btVector3 posa = cpoint.getPositionWorldOnA();
       btVector3 posb = cpoint.getPositionWorldOnB();
       btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + normalize(dirf) / 2.;
-      btVector3 cnB = posb + normalize(cpoint.m_normalWorldOnB) / 2.;
+      btVector3 endf = posa + dirf.normalize() / 2.;
+      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 2.;
 
       glPushMatrix();
       glColor3f(.80, 0, 0);
@@ -191,7 +259,7 @@ void BulletViewer::draw()
     }
   }
 
-  for (i = 0; i < GETNDS(Siconos_); i++)
+  for (unsigned int i = 0; i < GETNDS(Siconos_); i++)
   {
     //    if (shapes_[i]->selected())
     //    {
@@ -209,10 +277,28 @@ void BulletViewer::draw()
   for (std::vector<SP::btCollisionObject>::iterator iso = staticObjects.begin();
        iso != staticObjects.end(); ++iso)
   {
-    ask<ForCollisionWorld>(*Siconos_->spaceFilter())
-    ->debugDrawObject((*iso)->getWorldTransform(),
-                      (*iso)->getCollisionShape(),
-                      btVector3(1, 1, 0));
+
+    btCollisionObject* co = &**iso;
+    btCollisionWorld* cow = &*ask<ForCollisionWorld>(*Siconos_->spaceFilter());
+    btScalar m[16];
+    btMatrix3x3 rot;
+    co->getWorldTransform().getOpenGLMatrix(m);
+    rot = co->getWorldTransform().getBasis();
+
+    btVector3 aabbMin, aabbMax;
+    cow->getBroadphase()->getBroadphaseAabb(aabbMin, aabbMax);
+
+    aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
+    aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
+
+    btVector3 color = btVector3(0.21f, 0.21f, 0.21f);
+
+    _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
+
+    //    ask<ForCollisionWorld>(*Siconos_->spaceFilter())
+    //     ->debugDrawObject((*iso)->getWorldTransform(),
+    //                   (*iso)->getCollisionShape(),
+    //                   btVector3(1,1,0));
   };
   glColor3f(.45, .45, .45);
   glLineWidth(1.);
@@ -292,7 +378,7 @@ void BulletViewer::draw()
   QGLViewer::drawArrow(qglviewer::Vec(0, 0, .1), qglviewer::Vec(0, 1, .1), .01, 3);
 
   glLineWidth(1.);
-  for (i = -100; i <= 100; i += 5)
+  for (unsigned int i = -100; i <= 100; i += 5)
   {
     sprintf(qs, "%d", i);
     //    print((float)i,-.8,qs,small_text);
@@ -300,7 +386,7 @@ void BulletViewer::draw()
     drawVec((float)i, -.2, (float)i, .2);
     drawVec(-.2, (float)i, .2, (float)i);
   }
-  for (i = -100; i <= 100; i++)
+  for (unsigned int i = -100; i <= 100; i++)
   {
     drawVec((float)i, -.1, (float)i, .1);
     drawVec(-.1, (float)i, .1, (float)i);
