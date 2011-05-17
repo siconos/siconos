@@ -59,6 +59,23 @@ void BulletViewer::init()
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   boost::tie(dsi, dsend) = GETALLDS(Siconos_)->vertices();
+
+  btVector3 c1(.91, .1, .21);
+  btVector3 c2(.21, .91, .1);
+  btVector3 c3(.1, .21, .91);
+  btVector3 c4(.21, .1, .91);
+  btVector3 c5(.91, .21, .1);
+  btVector3 c6(.7, .7, .7);
+  btVector3 c7(.99, .99, .99);
+
+  _colors.push_back(c1);
+  _colors.push_back(c2);
+  _colors.push_back(c3);
+  _colors.push_back(c4);
+  _colors.push_back(c5);
+  _colors.push_back(c6);
+  _colors.push_back(c7);
+
   for (i = 0; dsi != dsend; ++i, ++dsi)
   {
     SP::DynamicalSystem ds = GETALLDS(Siconos_)->bundle(*dsi);
@@ -133,9 +150,7 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
   aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-  btVector3 color = btVector3(0.21f, 0.21f, 0.90f);
-
-  _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
+  _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 0, aabbMin, aabbMax);
 
   unsigned int numManifolds =
     cow->getDispatcher()->getNumManifolds();

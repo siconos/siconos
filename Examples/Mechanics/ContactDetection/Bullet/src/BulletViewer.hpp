@@ -30,9 +30,16 @@ class BulletViewer : public BodiesViewer
   GLDebugDrawer _debugDrawer;
   GL_ShapeDrawer _shapeDrawer;
 
+  std::vector<btVector3> _colors;
+
   void init();
   void animate();
   void draw();
+
+  void addColor(const btVector3& c)
+  {
+    _colors.push_back(c);
+  };
   void drawQGLShape(const QGLShape&);
   QString helpString() const;
   virtual void mousePressEvent(QMouseEvent *);

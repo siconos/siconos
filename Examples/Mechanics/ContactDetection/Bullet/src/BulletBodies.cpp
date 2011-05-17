@@ -113,7 +113,9 @@ void BulletBodies::init()
           (*velocity)(4) = 0.;
           (*velocity)(5) = 0.;
 
-          SP::BulletDS body(new BulletDS(shapes[(i + j + k) % 4], boost::shared_ptr<SimpleVector>(position), boost::shared_ptr<SimpleVector>(velocity)));
+          SP::BulletDS body(new BulletDS(shapes[(i + j + k) % 4],
+                                         boost::shared_ptr<SimpleVector>(position),
+                                         boost::shared_ptr<SimpleVector>(velocity)));
           body->setFExtPtr(FExt);
 
           _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
