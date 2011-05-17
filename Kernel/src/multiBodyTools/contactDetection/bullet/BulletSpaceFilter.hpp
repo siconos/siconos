@@ -43,7 +43,8 @@ protected:
   SP::btAxisSweep3 _broadphase;
 
 public:
-  BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw);
+  BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw,
+                    SP::btVector3 aabbMin, SP::btVector3 aabbMax);
 
   SP::btAxisSweep3 broadphase() const
   {

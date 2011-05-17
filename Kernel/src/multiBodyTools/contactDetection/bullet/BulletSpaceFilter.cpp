@@ -28,7 +28,12 @@ struct ForPosition : public Question<SP::SiconosVector>
 };
 
 BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
-                                     SP::NonSmoothLaw nslaw) : SpaceFilter()
+                                     SP::NonSmoothLaw nslaw,
+                                     SP::btVector3 aabbMin,
+                                     SP::btVector3 aabbMax) :
+  SpaceFilter(),
+  _worldAabbMin(aabbMin),
+  _worldAabbMax(aabbMax)
 {
 
   _nsds = nsds;
@@ -39,9 +44,6 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
   _collisionConfiguration.reset(new btDefaultCollisionConfiguration());
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
-
-  _worldAabbMin.reset(new btVector3(-1000, -1000, -1000));
-  _worldAabbMax.reset(new btVector3(1000, 1000, 1000));
 
   _broadphase.reset(new btAxisSweep3(*_worldAabbMin, *_worldAabbMax));
 
