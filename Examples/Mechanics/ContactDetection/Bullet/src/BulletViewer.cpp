@@ -170,7 +170,7 @@ void BulletViewer::draw()
 
   char qs[6];
 
-  float lbd, lbdmax, w, x1, y1, x2, y2, d, r;
+  float lbd, lbdmax, w;
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
@@ -291,7 +291,7 @@ void BulletViewer::draw()
     aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
     aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-    btVector3 color = btVector3(0.21f, 0.21f, 0.21f);
+    btVector3 color = btVector3(0.81f, 0.81f, 0.81f);
 
     _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
 
@@ -318,7 +318,7 @@ void BulletViewer::draw()
     {
       double A = (*Siconos_->plans())(i, 0);
       double B = (*Siconos_->plans())(i, 1);
-      double C = (*Siconos_->plans())(i, 2);
+      //double C = (*Siconos_->plans())(i,2);
       double xc = (*Siconos_->plans())(i, 3);
       double yc = (*Siconos_->plans())(i, 4);
       double w = fmin(1e10, (*Siconos_->plans())(i, 5));

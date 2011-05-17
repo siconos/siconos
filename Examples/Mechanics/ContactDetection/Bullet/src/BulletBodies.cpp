@@ -10,6 +10,8 @@
 
 #define NDOF 3
 
+TYPEDEF_SAPTR(BulletWeightedShape);
+
 void BulletBodies::init()
 {
   SP::TimeDiscretisation timedisc;
@@ -39,121 +41,6 @@ void BulletBodies::init()
 
     std::cout << "====> Model loading ..." << std::endl << std::endl;
 
-
-    double theta = 0.;//acos(1/sqrt(3));
-
-    double a = 1;
-    double b = 0;
-    double c = 0;
-    double k = (sin(theta / 2)) / sqrt(a * a + b * b + c * c);
-
-    SP::SimpleVector position(new SimpleVector(7));
-    SP::SimpleVector velocity(new SimpleVector(6));
-    position->zero();
-    (*position)(1) = 0.;
-    (*position)(2) = 10.;
-    (*position)(3) = cos(theta / 2);
-    (*position)(4) = a * k;
-    (*position)(5) = b * k;
-    (*position)(6) = c * k;
-
-    velocity->zero();
-    (*velocity)(3) = 0.;
-    (*velocity)(4) = 0.;
-    (*velocity)(5) = 0.;
-
-    SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
-    SP::btCollisionShape bbox(new btBoxShape(btVector3(10, 10, 1)));
-    SP::btCollisionShape sphere(new btSphereShape(1.));
-    SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
-    SP::BulletWeightedShape box2(new BulletWeightedShape(box, 1.0));
-    SP::BulletWeightedShape box3(new BulletWeightedShape(bbox, 10.0));
-    SP::BulletWeightedShape sphere2(new BulletWeightedShape(sphere, 10.0));
-
-    SP::BulletDS body(new BulletDS(box1, position, velocity));
-    SP::SimpleVector FExt1;
-    FExt1.reset(new SimpleVector(3)); //
-    FExt1->zero();
-    FExt1->setValue(2, -9.81 * box1->mass());
-    body->setFExtPtr(FExt1);
-
-    double theta2 = acos(1 / sqrt(3)) + .01;
-
-    double a2 = 1;
-    double b2 = 1;
-    double c2 = 0;
-    double k2 = (sin(theta2 / 2)) / sqrt(a2 * a2 + b2 * b2 + c2 * c2);
-
-    SP::SimpleVector position2(new SimpleVector(7));
-    SP::SimpleVector velocity2(new SimpleVector(6));
-    position2->zero();
-    (*position2)(1) = .0;
-    (*position2)(2) = 20.;
-    (*position2)(3) = cos(theta2 / 2);
-    (*position2)(4) = a2 * k2;
-    (*position2)(5) = b2 * k2;
-    (*position2)(6) = c2 * k2;
-
-    velocity2->zero();
-    (*velocity2)(3) = 0.;
-    (*velocity2)(4) = 0.;
-    (*velocity2)(5) = 0.;
-
-    SP::BulletDS body2(new BulletDS(box2, position2, velocity2));
-    SP::SimpleVector FExt2;
-    FExt2.reset(new SimpleVector(3)); //
-    FExt2->zero();
-    FExt2->setValue(2, -9.81 * box2->mass());
-    body2->setFExtPtr(FExt2);
-
-    double theta3 = acos(1 / sqrt(3));
-
-    double a3 = 1;
-    double b3 = 0;
-    double c3 = 0;
-    double k3 = (sin(theta3 / 2)) / sqrt(a3 * a3 + b3 * b3 + c3 * c3);
-
-    SP::SimpleVector position3(new SimpleVector(7));
-    SP::SimpleVector velocity3(new SimpleVector(6));
-    position3->zero();
-    (*position3)(1) = 0.;
-    (*position3)(2) = 30.;
-    (*position3)(3) = cos(theta3 / 2);
-    (*position3)(4) = a3 * k3;
-    (*position3)(5) = b3 * k3;
-    (*position3)(6) = c3 * k3;
-
-    velocity3->zero();
-    (*velocity3)(3) = 0.;
-    (*velocity3)(4) = 0.;
-    (*velocity3)(5) = 0.;
-
-    SP::BulletDS body3(new BulletDS(box3, position3, velocity3));
-    SP::SimpleVector FExt3;
-    FExt3.reset(new SimpleVector(3)); //
-    FExt3->zero();
-    FExt3->setValue(2, -9.81 * box3->mass());
-    body3->setFExtPtr(FExt3);
-
-    SP::btCollisionObject ground(new btCollisionObject());
-    SP::btCollisionShape groundShape(new btBoxShape(btVector3(50, 50, 3)));
-    btMatrix3x3 basis;
-    basis.setIdentity();
-    ground->getWorldTransform().setBasis(basis);
-    ground->setCollisionShape(&*groundShape);
-
-    ground->getWorldTransform().getOrigin().setZ(-3);
-
-    SP::btCollisionObject fbox(new btCollisionObject());
-    SP::btCollisionShape fboxShape(new btBoxShape(btVector3(1, 1, 1)));
-    fbox->getWorldTransform().setBasis(basis);
-    fbox->setCollisionShape(&*fboxShape);
-
-    fbox->getWorldTransform().getOrigin().setX(0);
-    fbox->getWorldTransform().getOrigin().setY(0);
-
-    fbox->getWorldTransform().getOrigin().setZ(5);
-
     // -------------
     // --- Model ---
     // -------------
@@ -163,15 +50,87 @@ void BulletBodies::init()
     SP::OneStepIntegrator osi;
     osi.reset(new Moreau(0.5));
 
+    SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
+    SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
 
-    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
-    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body2);
-    _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body3);
+    SP::btCollisionShape bbox(new btBoxShape(btVector3(.5, .5, 1)));
+    SP::BulletWeightedShape bbox1(new BulletWeightedShape(bbox, 1.0));
 
-    osi->insertDynamicalSystem(body);
-    osi->insertDynamicalSystem(body2);
-    osi->insertDynamicalSystem(body3);
+    SP::btCollisionShape capsule(new btCapsuleShape(.5, .5));
+    SP::BulletWeightedShape capsule1(new BulletWeightedShape(capsule, 1.0));
 
+    SP::btCollisionShape bcapsule(new btCapsuleShape(1, 2));
+    SP::BulletWeightedShape capsule2(new BulletWeightedShape(bcapsule, 2.0));
+
+    SP::btCollisionShape cylinder(new btCylinderShape(btVector3(.5, .5, 1)));
+    SP::BulletWeightedShape cylinder1(new BulletWeightedShape(cylinder, 1.0));
+
+    std::vector<SP::BulletWeightedShape> shapes;
+    shapes.push_back(capsule2);
+    shapes.push_back(capsule2);
+    shapes.push_back(capsule2);
+    shapes.push_back(capsule2);
+    //    shapes.push_back(box1);
+    //    shapes.push_back(bbox1);
+    //    shapes.push_back(capsule1);
+    //    shapes.push_back(cylinder1);
+
+    int N = 3;
+
+    SP::SimpleVector FExt;
+    FExt.reset(new SimpleVector(3)); //
+    FExt->zero();
+    FExt->setValue(2, -9.81 * box1->mass());
+
+    for (unsigned int i = 0; i < N; ++i)
+    {
+      for (unsigned int j = 0; j < N; ++j)
+      {
+        for (unsigned int k = 0; k < N; ++k)
+        {
+
+          SP::SimpleVector position(new SimpleVector(7));
+          SP::SimpleVector velocity(new SimpleVector(6));
+          velocity->zero();
+          position->zero();
+
+          double theta = i + j + k; //acos(1/sqrt(3));
+
+          double a = 1;
+          double b = 1;
+          double c = 0;
+          double n = (sin(theta / 2)) / sqrt(a * a + b * b + c * c);
+          (*position)(0) = 4.01 * i - 4.01 * (N - 1) / 2;
+          (*position)(1) = 4.01 * j - 4.01 * (N - 1) / 2;
+          (*position)(2) = 4.01 * k + 10;
+          (*position)(3) = cos(theta / 2);
+          (*position)(4) = a * n;
+          (*position)(5) = b * n;
+          (*position)(6) = c * n;
+
+          velocity->zero();
+          (*velocity)(3) = 0.;
+          (*velocity)(4) = 0.;
+          (*velocity)(5) = 0.;
+
+          SP::BulletDS body(new BulletDS(shapes[(i + j + k) % 4], boost::shared_ptr<SimpleVector>(position), boost::shared_ptr<SimpleVector>(velocity)));
+          body->setFExtPtr(FExt);
+
+          _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+          osi->insertDynamicalSystem(body);
+        }
+      }
+    }
+
+
+    SP::btCollisionObject ground(new btCollisionObject());
+    SP::btCollisionShape groundShape(new btBoxShape(btVector3(20, 20, 3)));
+    btMatrix3x3 basis;
+    basis.setIdentity();
+    ground->getWorldTransform().setBasis(basis);
+    ground->setCollisionShape(&*groundShape);
+
+    ground->getWorldTransform().getOrigin().setZ(-3.01);
 
     // ------------------
     // --- Simulation ---
@@ -188,7 +147,7 @@ void BulletBodies::init()
     osnspb.reset(new FrictionContact(3));
 #endif
 
-    osnspb->numericsSolverOptions()->iparam[0] = 100000; // Max number of
+    osnspb->numericsSolverOptions()->iparam[0] = 1000; // Max number of
     // iterations
 
 #ifdef WITH_GLOBALAC
@@ -199,10 +158,10 @@ void BulletBodies::init()
 
 
     // iterations
-    osnspb->numericsSolverOptions()->dparam[0] = 1e-10; // Tolerance
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-5; // Tolerance
 
     osnspb->setMaxSize(16384);
-    osnspb->setMStorageType(0);
+    osnspb->setMStorageType(1);
     osnspb->setNumericsVerboseMode(0);
     osnspb->setKeepLambdaAndYState(true);
     simulation->insertIntegrator(osi);
@@ -236,15 +195,9 @@ void BulletBodies::init()
 
     ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*ground);
 
-    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*fbox);
-
     ask<ForStaticObjects>(*_playground)->push_back(ground);
 
-    ask<ForStaticObjects>(*_playground)->push_back(fbox);
-
     ask<ForStaticShapes>(*_playground)->push_back(groundShape);
-
-    ask<ForStaticShapes>(*_playground)->push_back(fboxShape);
 
     SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 

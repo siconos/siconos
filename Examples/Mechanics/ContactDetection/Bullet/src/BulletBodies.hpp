@@ -2,11 +2,10 @@
 #define BulletBodies_hpp
 #include <SiconosBodies.hpp>
 
+#include <BulletDS.hpp>
 
 class BulletBodies : public SiconosBodies
 {
-
-private:
 
 public:
 
