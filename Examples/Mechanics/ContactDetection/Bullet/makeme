@@ -1,2 +1,7 @@
 #!/bin/sh
 siconos -j 2 -DWITH_MUMPS -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp
+
+
+# Mac Os X (Snow Leopard)
+#siconos -v -j 2  -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -ldopt=-lBulletDynamics -ldopt=-framework -ldopt=GLUT QGLBullet.cpp
+
