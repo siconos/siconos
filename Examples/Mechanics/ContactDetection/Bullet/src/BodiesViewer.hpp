@@ -67,40 +67,6 @@ public:
 #define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
-#ifndef WITH_LMGC
-struct Lmgc2DPOLYG : public LagrangianDS
-{
-  SP::SimpleVector vertices() const
-  {
-    assert(0);
-  };
-  int vertices_number() const
-  {
-    assert(0);
-  };
-};
-struct Lmgc2DDSK : public LagrangianDS
-{
-  double getRadius() const
-  {
-    assert(0);
-  };
-};
-
-struct Lmgc2DR : public LagrangianR {};
-#endif
-
-
-struct ForVertices : public Question<SP::SimpleVector>
-{
-  ANSWER(Lmgc2DPOLYG, vertices());
-};
-
-struct ForVerticesNumber : public Question<int>
-{
-  ANSWER(Lmgc2DPOLYG, vertices_number());
-};
-
 struct ForNdof : public Question<unsigned int>
 {
   ANSWER_V(Disk, 3);
@@ -108,8 +74,6 @@ struct ForNdof : public Question<unsigned int>
   ANSWER_V(SphereLDS, 6);
   ANSWER_V(SphereNEDS, 6);
   ANSWER_V(BulletDS, 6);
-  ANSWER_V(Lmgc2DDSK, 3);
-  ANSWER_V(Lmgc2DPOLYG, 3);
 };
 
 
@@ -121,9 +85,8 @@ struct ForFExt : public Question<SP::SiconosVector>
   ANSWER(SphereLDS, fExt());
   ANSWER(SphereNEDS, fExt());
   ANSWER(BulletDS, fExt());
-  ANSWER(Lmgc2DDSK, fExt());
-  ANSWER(Lmgc2DPOLYG, fExt());
 };
+
 
 struct ForPosition : public Question<SP::SiconosVector>
 {
@@ -133,9 +96,6 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(SphereLDS, q());
   ANSWER(SphereNEDS, q());
   ANSWER(BulletDS, q());
-  ANSWER(Lmgc2DDSK, q());
-  ANSWER(Lmgc2DPOLYG, q());
-
 };
 
 
@@ -146,8 +106,6 @@ struct ForRadius : public Question<double>
   ANSWER(Circle, getRadius());
   ANSWER(SphereLDS, getRadius());
   ANSWER(SphereNEDS, getRadius());
-  ANSWER(Lmgc2DDSK, getRadius());
-  ANSWER_V(Lmgc2DPOLYG, 0.);
   ANSWER_V(BulletDS, 0.); // fix
 };
 
@@ -158,8 +116,6 @@ struct ForMassValue : public Question<double>
   ANSWER(SphereLDS, mass()->getValue(0, 0));
   ANSWER(SphereNEDS, massValue());
   ANSWER(BulletDS, massValue());
-  ANSWER(Lmgc2DDSK, mass()->getValue(0, 0));;
-  ANSWER(Lmgc2DPOLYG, mass()->getValue(0, 0));;
 };
 
 struct ForJachq : public Question<SP::SiconosMatrix>
@@ -174,7 +130,6 @@ struct ForJachq : public Question<SP::SiconosMatrix>
   ANSWER(SphereLDSSphereLDSR, jachq());
   ANSWER(SphereNEDSSphereNEDSR, jachq());
   ANSWER(BulletR, jachq());
-  ANSWER(Lmgc2DR, jachq());
 };
 
 struct ForContactForce : public Question<SP::SimpleVector>
@@ -225,8 +180,6 @@ struct ForShape : public Question<SHAPE>
   ANSWER_V(Circle, CIRCLE);
   ANSWER_V(SphereLDS, SPHERE);
   ANSWER_V(SphereNEDS, SPHERE);
-  ANSWER_V(Lmgc2DDSK, DISK);
-  ANSWER_V(Lmgc2DPOLYG, POLYG);
   ANSWER_V(BulletDS, BULLET);
 };
 
@@ -237,15 +190,17 @@ class QGLShape
 public:
 
   /* construction from a LagrangianDS */
-  QGLShape(SHAPE f, SP::DynamicalSystem D)
+  QGLShape(SHAPE f, SP::DynamicalSystem D, const qglviewer::Frame* ref)
   {
     assert(D);
 
     figure_ = f;
     DS_ = D;
     frame_.reset(new qglviewer::ManipulatedFrame());
-    savedFExt_.reset(new SimpleVector(ask<ForNdof>(*DS())));
+    frame_->setReferenceFrame(ref);
+    savedFExt_ = ask<ForFExt>(*DS());
     selected_ = false;
+    saved_ = true;
   };
 
   ~QGLShape() {};
@@ -261,9 +216,9 @@ public:
   {
     return selected_ ;
   };
-  void nextSelection()
+  void setSelection(bool v)
   {
-    selected_ = !selected_ ;
+    selected_ = v ;
   };
 
   /* identifiant */
@@ -280,15 +235,31 @@ public:
   /* External force set from mouse and restore */
   void saveFExt()
   {
-    *savedFExt_ = *(ask<ForFExt>(*DS()));
+    savedFExt_ = ask<ForFExt>(*DS());
   };
   void restoreFExt()
   {
-    *(ask<ForFExt>(*DS())) = *savedFExt_;
+    switch (Type::value(*DS()))
+    {
+    case Type::NewtonEulerDS :
+    {
+      boost::static_pointer_cast<NewtonEulerDS>(DS())
+      ->setFExtPtr(boost::static_pointer_cast<SimpleVector>(savedFExt_));
+      break;
+    }
+    case Type::LagrangianDS :
+    {
+      boost::static_pointer_cast<LagrangianDS>(DS())
+      ->setFExtPtr(boost::static_pointer_cast<SimpleVector>(savedFExt_));
+      break;
+    };
+    default:
+    {};
+    }
   };
 
   /* DS frame */
-  qglviewer::ManipulatedFrame * getFrame()
+  qglviewer::ManipulatedFrame * frame()
   {
     return frame_.get();
   };
@@ -301,6 +272,7 @@ public:
 protected:
   int id_;
   bool selected_;
+  bool saved_;
   SP::SiconosVector savedFExt_;
   boost::shared_ptr<qglviewer::ManipulatedFrame> frame_;
 
@@ -362,6 +334,8 @@ protected :
   boost::shared_ptr<qglviewer::WorldConstraint> constraint_;
 
   SP::SiconosBodies Siconos_;
+
+  qglviewer::Frame* referenceFrame_;
 
   std::vector<SP::QGLShape>  shapes_;
 

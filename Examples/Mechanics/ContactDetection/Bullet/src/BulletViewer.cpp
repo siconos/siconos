@@ -42,6 +42,7 @@ void BulletViewer::init()
 
   // shapeDrawer
   _shapeDrawer.enableTexture(true);
+  _transparency = 1.f;
 
   // help screen
   help();
@@ -150,7 +151,7 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
   aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-  _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 0, aabbMin, aabbMax);
+  _shapeDrawer.drawOpenGL(_transparency, m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 0, aabbMin, aabbMax);
 
   unsigned int numManifolds =
     cow->getDispatcher()->getNumManifolds();
@@ -185,7 +186,7 @@ void BulletViewer::draw()
 
   char qs[6];
 
-  float lbd, lbdmax, w;
+  float lbdmax, w;
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
@@ -206,31 +207,28 @@ void BulletViewer::draw()
     interaction = I1->bundle(*ui)->interaction();
     relation = interaction->relation();
 
-    lbd = interaction->lambdaOld(1)->getValue(0);
-
-    // screen width of interaction
-    w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
-
     involvedDS = interaction->dynamicalSystems();
 
-    // disk/disk
     itDS = involvedDS->begin();
 
     SP::DynamicalSystem d1 = *itDS;
 
     SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
-    if (involvedDS->size() == 2)
     {
       SimpleVector& cf = *ask<ForContactForce>(*relation);
+      double cfn = cf.norm2();
+
+      w = fmax(.3, cfn / fmax(lbdmax, cfn));
+
 
       btManifoldPoint& cpoint = *ask<ForContactPoints>(*relation);
 
       btVector3 posa = cpoint.getPositionWorldOnA();
       btVector3 posb = cpoint.getPositionWorldOnB();
       btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + dirf.normalize() / 2.;
-      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 2.;
+      btVector3 endf = posa + dirf.normalize() * w;
+      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 4.;
 
 
       glPushMatrix();
@@ -241,36 +239,10 @@ void BulletViewer::draw()
 
       glPushMatrix();
       glColor3f(0, .80, 0);
-      glLineWidth(2.);
-      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .05, 10.);
+      glLineWidth(1.);
+      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .03, 10.);
       glPopMatrix();
 
-    }
-
-    else
-    {
-      SimpleVector& cf = *ask<ForContactForce>(*relation);
-
-      btManifoldPoint& cpoint = *ask<ForContactPoints>(*relation);
-
-      btVector3 posa = cpoint.getPositionWorldOnA();
-      btVector3 posb = cpoint.getPositionWorldOnB();
-      btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + dirf.normalize() / 2.;
-      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 2.;
-
-      glPushMatrix();
-      glColor3f(.80, 0, 0);
-      glLineWidth(2.);
-      QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
-      glPopMatrix();
-
-
-      glPushMatrix();
-      glColor3f(0, .80, 0);
-      glLineWidth(2.);
-      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .05, 10.);
-      glPopMatrix();
     }
   }
 
@@ -308,7 +280,7 @@ void BulletViewer::draw()
 
     btVector3 color = btVector3(0.81f, 0.81f, 0.81f);
 
-    _shapeDrawer.drawOpenGL(m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
+    _shapeDrawer.drawOpenGL(1.f, m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
 
     //    ask<ForCollisionWorld>(*Siconos_->spaceFilter())
     //     ->debugDrawObject((*iso)->getWorldTransform(),
@@ -424,53 +396,122 @@ void BulletViewer::mousePressEvent(QMouseEvent* e)
   if ((e->button() == Qt::LeftButton) && (e->modifiers() == Qt::NoButton))
     myMouseBehavior_ = true;
   else
+  {
+    myMouseBehavior_ = false;
     QGLViewer::mousePressEvent(e);
+  }
 }
 
 void BulletViewer::mouseMoveEvent(QMouseEvent *e)
 {
 
-  float coor[3];
-
-  if (selectedName() >= 0)
+  if (myMouseBehavior_)
   {
-    lastSelected_ = selectedName();
-    coor[0] = (float) e->x();
-    coor[1] = (float) e->y();
-    coor[2] = 0;
+    qglviewer::Vec cpos = camera()->position();
 
-    camera()->getUnprojectedCoordinatesOf(coor, coor, NULL);
+    if (selectedName() >= 0)
+    {
+      if (!shapes_[selectedName()]->selected())
+      {
+        shapes_[selectedName()]->setSelection(true);
+        shapes_[selectedName()]->saveFExt();
 
-    SP::SiconosVector fext =
-      ask<ForFExt>(*shapes_[selectedName()]->DS());
+        SP::SimpleVector fext(new SimpleVector());
+        fext->resize(ask<ForFExt>(*shapes_[selectedName()]->DS())->size());
 
-    SP::SiconosVector q =
-      ask<ForPosition>(*shapes_[selectedName()]->DS());
+        switch (Type::value(*shapes_[selectedName()]->DS()))
+        {
+        case Type::NewtonEulerDS :
+        {
+          boost::static_pointer_cast<NewtonEulerDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          break;
+        };
+        case Type::LagrangianDS :
+        {
+          boost::static_pointer_cast<LagrangianDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          break;
+        };
+        default :
+        {
+          assert(0);
+        };
+        }
+      }
 
-    double massValue =
-      ask<ForMassValue>(*shapes_[selectedName()]->DS());
+      SP::SiconosVector fext = ask<ForFExt>(*shapes_[selectedName()]->DS());
 
-    fext->setValue(0, ((float)coor[0] - q->getValue(0))*massValue * 30);
+      lastSelected_ = selectedName();
 
-    fext->setValue(1, ((float)coor[1] - q->getValue(1))*massValue * 30);
+      SP::SiconosVector q =
+        ask<ForPosition>(*shapes_[selectedName()]->DS());
+
+      double massValue =
+        ask<ForMassValue>(*shapes_[selectedName()]->DS());
+
+      qglviewer::ManipulatedFrame* frame =  shapes_[selectedName()]->frame();
+
+      //      need ref frame -> ground
+      //      et update frames pos with setTranslation & setRotation
+      //      Quaternion r = frame->rotation();
+      //      Vec t = frame->translation();
+      //      printf("translation : %g,%g,%g ; rotation : %g,%g,%g\n", t[0],t[1],t[2],r[0],r[2],r[3]);
+
+      fext->setValue(0, -((float)cpos[0] - q->getValue(0))*massValue * 30);
+      fext->setValue(1, -((float)cpos[1] - q->getValue(1))*massValue * 30);
+      fext->setValue(2, -((float)cpos[2] - q->getValue(2))*massValue * 30);
+
+    }
+
+
   }
-
-  QGLViewer::mouseMoveEvent(e);
+  else
+  {
+    QGLViewer::mouseMoveEvent(e);
+  }
 }
 
 void BulletViewer::mouseReleaseEvent(QMouseEvent* e)
 {
   if (myMouseBehavior_)
+  {
     myMouseBehavior_ = false;
 
-  if (lastSelected_ >= 0)
+    if (lastSelected_ >= 0)
+    {
+      shapes_[lastSelected_]->restoreFExt();
+      shapes_[lastSelected_]->setSelection(false);
+      setManipulatedFrame(camera()->frame());
+      lastSelected_ = -1;
+      setSelectedName(-1);
+    };
+  }
+  else
   {
-    shapes_[lastSelected_]->restoreFExt();
-    shapes_[lastSelected_]->nextSelection();
-  };
-
-  QGLViewer::mouseReleaseEvent(e);
+    QGLViewer::mouseReleaseEvent(e);
+  }
 }
+
+void BulletViewer::keyPressEvent(QKeyEvent* e)
+{
+
+  if ((e->key() == Qt::Key_T) && (e->modifiers() == Qt::NoButton))
+  {
+    _transparency -= .01;
+    _transparency = fmax(0., _transparency);
+    printf("transparency: %f\n", _transparency);
+
+  }
+
+  if ((e->key() == Qt::Key_R) && (e->modifiers() == Qt::NoButton))
+  {
+    _transparency += .01;
+    _transparency = fmin(1., _transparency);
+    printf("transparency: %f\n", _transparency);
+  }
+
+  QGLViewer::keyPressEvent(e);
+}
+
 
 
 QString BulletViewer::helpString() const

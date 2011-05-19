@@ -8,9 +8,9 @@
 #include <mpi.h>
 #endif
 
-#define NDOF 3
+#include <stdlib.h>
 
-TYPEDEF_SAPTR(BulletWeightedShape);
+#define NDOF 3
 
 void BulletBodies::init()
 {
@@ -53,8 +53,8 @@ void BulletBodies::init()
     SP::btCollisionShape box(new btBoxShape(btVector3(1, 1, 1)));
     SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
 
-    SP::btCollisionShape bbox(new btBoxShape(btVector3(.5, .5, 1)));
-    SP::BulletWeightedShape bbox1(new BulletWeightedShape(bbox, 1.0));
+    SP::btCollisionShape bbox(new btBoxShape(btVector3(.5, 1, 1)));
+    SP::BulletWeightedShape box2(new BulletWeightedShape(bbox, 1.0));
 
     SP::btCollisionShape capsule(new btCapsuleShape(.5, .5));
     SP::BulletWeightedShape capsule1(new BulletWeightedShape(capsule, 1.0));
@@ -66,16 +66,18 @@ void BulletBodies::init()
     SP::BulletWeightedShape cylinder1(new BulletWeightedShape(cylinder, 1.0));
 
     std::vector<SP::BulletWeightedShape> shapes;
-    shapes.push_back(capsule2);
-    shapes.push_back(capsule2);
-    shapes.push_back(capsule2);
-    shapes.push_back(capsule2);
+    shapes.push_back(box1);
+    shapes.push_back(box1);
+    shapes.push_back(box1);
+    shapes.push_back(box1);
     //    shapes.push_back(box1);
-    //    shapes.push_back(bbox1);
+    //    shapes.push_back(box2);
     //    shapes.push_back(capsule1);
     //    shapes.push_back(cylinder1);
 
-    int N = 3;
+    unsigned int N = 3;
+
+    srand(1.);
 
     SP::SimpleVector FExt;
     FExt.reset(new SimpleVector(3)); //
@@ -100,7 +102,7 @@ void BulletBodies::init()
           double b = 1;
           double c = 0;
           double n = (sin(theta / 2)) / sqrt(a * a + b * b + c * c);
-          (*position)(0) = 4.01 * i - 4.01 * (N - 1) / 2;
+          (*position)(0) = 4.01 * i - 4.01 * (N - 1) / 2 + (double) rand() / (10.*RAND_MAX);
           (*position)(1) = 4.01 * j - 4.01 * (N - 1) / 2;
           (*position)(2) = 4.01 * k + 10;
           (*position)(3) = cos(theta / 2);
@@ -126,7 +128,7 @@ void BulletBodies::init()
 
 
     SP::btCollisionObject ground(new btCollisionObject());
-    SP::btCollisionShape groundShape(new btBoxShape(btVector3(20, 20, 3)));
+    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, 3)));
     btMatrix3x3 basis;
     basis.setIdentity();
     ground->getWorldTransform().setBasis(basis);

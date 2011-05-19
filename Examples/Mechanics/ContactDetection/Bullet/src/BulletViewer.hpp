@@ -30,6 +30,8 @@ class BulletViewer : public BodiesViewer
   GLDebugDrawer _debugDrawer;
   GL_ShapeDrawer _shapeDrawer;
 
+  float _transparency;
+
   std::vector<btVector3> _colors;
 
   void init();
@@ -45,4 +47,5 @@ class BulletViewer : public BodiesViewer
   virtual void mousePressEvent(QMouseEvent *);
   virtual void mouseMoveEvent(QMouseEvent *);
   virtual void mouseReleaseEvent(QMouseEvent *);
+  virtual void keyPressEvent(QKeyEvent *);
 };

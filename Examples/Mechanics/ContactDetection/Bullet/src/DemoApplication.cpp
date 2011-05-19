@@ -1260,13 +1260,13 @@ void  DemoApplication::renderscene(int pass)
       switch (pass)
       {
       case  0:
-        m_shapeDrawer->drawOpenGL(m, colObj->getCollisionShape(), wireColor, getDebugMode(), aabbMin, aabbMax);
+        m_shapeDrawer->drawOpenGL(1.f, m, colObj->getCollisionShape(), wireColor, getDebugMode(), aabbMin, aabbMax);
         break;
       case  1:
         m_shapeDrawer->drawShadow(m, m_sundirection * rot, colObj->getCollisionShape(), aabbMin, aabbMax);
         break;
       case  2:
-        m_shapeDrawer->drawOpenGL(m, colObj->getCollisionShape(), wireColor * btScalar(0.3), 0, aabbMin, aabbMax);
+        m_shapeDrawer->drawOpenGL(1.f, m, colObj->getCollisionShape(), wireColor * btScalar(0.3), 0, aabbMin, aabbMax);
         break;
       }
     }

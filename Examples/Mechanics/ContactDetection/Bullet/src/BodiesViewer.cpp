@@ -511,8 +511,7 @@ void BodiesViewer::postSelection(const QPoint& point)
   else
   {
     lastSelected_ = selectedName();
-    setManipulatedFrame(shapes_[selectedName()]->getFrame());
-    shapes_[selectedName()]->nextSelection();
+    setManipulatedFrame(shapes_[selectedName()]->frame());
   }
 
 }
@@ -526,14 +525,6 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
 
   switch (fig.kind())
   {
-  case POLYG :
-    c[0] = .3 ;
-    c[1] = .7;
-    c[2] = .3;
-    drawPolyg(ask<ForVerticesNumber>(*ds),
-              ask<ForVertices>(*ds)->getArray(), c);
-    break;
-
   case CIRCLE :
     c[0] = .9 ;
     c[1] = .1;
@@ -598,22 +589,6 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
 
   switch (fig.kind())
   {
-  case POLYG :
-    c[0] = .4 ;
-    c[1] = .4;
-    c[2] = .7;
-    drawPolyg(ask<ForVerticesNumber>(*ds),
-              ask<ForVertices>(*ds)->getArray(), c);
-
-    glColor3f(1., 0., 0.);
-    dFe = hypot(GETXFE(ds), GETYFE(ds));
-    Cal = log(dFe);
-
-    drawArrow(GETX(ds), GETY(ds),
-              GETX(ds) + Cal * GETXFE(ds) / dFe,
-              GETY(ds) + Cal * GETYFE(ds) / dFe, Cal / 10.);
-    break;
-
   case CIRCLE :
     c[0] = .7 ;
     c[1] = .5;
@@ -681,7 +656,7 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
 void BodiesViewer::insertQGLShape(SHAPE f, SP::DynamicalSystem ds)
 {
 
-  SP::QGLShape fig(new QGLShape(f, ds));
+  SP::QGLShape fig(new QGLShape(f, ds, camera()->frame()));
 
   shapes_.push_back(fig);
 }

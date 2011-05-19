@@ -52,7 +52,7 @@ public:
   virtual ~GL_ShapeDrawer();
 
   ///drawOpenGL might allocate temporary memoty, stores pointer in shape userpointer
-  virtual void    drawOpenGL(btScalar* m, const btCollisionShape* shape, const btVector3& color, int debugMode, const btVector3& worldBoundsMin, const btVector3& worldBoundsMax);
+  virtual void    drawOpenGL(float transparency, btScalar* m, const btCollisionShape* shape, const btVector3& color, int debugMode, const btVector3& worldBoundsMin, const btVector3& worldBoundsMax);
   virtual void    drawShadow(btScalar* m, const btVector3& extrusion, const btCollisionShape* shape, const btVector3& worldBoundsMin, const btVector3& worldBoundsMax);
 
   bool    enableTexture(bool enable)

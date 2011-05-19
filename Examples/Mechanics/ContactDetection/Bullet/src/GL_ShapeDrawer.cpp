@@ -410,7 +410,7 @@ inline void glDrawVector(const btVector3& v)
 }
 
 
-void GL_ShapeDrawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, const btVector3& color, int  debugMode, const btVector3& worldBoundsMin, const btVector3& worldBoundsMax)
+void GL_ShapeDrawer::drawOpenGL(float transparency, btScalar* m, const btCollisionShape* shape, const btVector3& color, int  debugMode, const btVector3& worldBoundsMin, const btVector3& worldBoundsMax)
 {
 
   if (shape->getShapeType() == CUSTOM_CONVEX_SHAPE_TYPE)
@@ -486,7 +486,7 @@ void GL_ShapeDrawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, cons
         {0, 0, 0, 1}
       };
 
-      drawOpenGL((btScalar*)tmpScaling, convexShape, color, debugMode, worldBoundsMin, worldBoundsMax);
+      drawOpenGL(transparency, (btScalar*)tmpScaling, convexShape, color, debugMode, worldBoundsMin, worldBoundsMax);
     }
     glPopMatrix();
     return;
@@ -501,7 +501,7 @@ void GL_ShapeDrawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, cons
       const btCollisionShape* colShape = compoundShape->getChildShape(i);
       btScalar childMat[16];
       childTrans.getOpenGLMatrix(childMat);
-      drawOpenGL(childMat, colShape, color, debugMode, worldBoundsMin, worldBoundsMax);
+      drawOpenGL(transparency, childMat, colShape, color, debugMode, worldBoundsMin, worldBoundsMax);
     }
 
   }
@@ -571,8 +571,9 @@ void GL_ShapeDrawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, cons
       glDisable(GL_TEXTURE_2D);
     }
 
-
-    glColor3f(color.x(), color.y(), color.z());
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(color.x(), color.y(), color.z(), transparency);
 
     bool useWireframeFallback = true;
 
@@ -738,7 +739,7 @@ void GL_ShapeDrawer::drawOpenGL(btScalar* m, const btCollisionShape* shape, cons
           childTransform.setOrigin(multiSphereShape->getSpherePosition(i));
           btScalar childMat[16];
           childTransform.getOpenGLMatrix(childMat);
-          drawOpenGL(childMat, &sc, color, debugMode, worldBoundsMin, worldBoundsMax);
+          drawOpenGL(transparency, childMat, &sc, color, debugMode, worldBoundsMin, worldBoundsMax);
         }
 
         break;
