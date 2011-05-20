@@ -188,6 +188,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $input = Py_None;
   }
 }
@@ -213,6 +214,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $input = Py_None;
   }
 }
@@ -241,6 +243,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $input = Py_None;
   }
 }
@@ -268,6 +271,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $input = Py_None;
   }
 }
@@ -353,6 +357,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $result = Py_None;
   }
 }
@@ -369,6 +374,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $result = Py_None;
   }
 }
@@ -389,6 +395,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $result = Py_None;
   }
 }
@@ -407,6 +414,7 @@
   }
   else
   {
+    Py_INCREF(Py_None);
     $result = Py_None;
   }
 }
