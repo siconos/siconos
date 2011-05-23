@@ -60,6 +60,10 @@
 #include "KneeJointR.hpp"
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
+
+#include <boost/type_traits/is_polymorphic.hpp>
+#include <boost/mpl/eval_if.hpp>
+#include <boost/typeof/typeof.hpp>
 %} 
 
 // mandatory !
@@ -106,7 +110,7 @@
 {
   try
   {
-    $action
+    $action;
   }
   catch (...) {
     if (!PyErr_Occurred()) {
