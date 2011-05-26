@@ -1,4 +1,5 @@
 #!/bin/sh
+
 siconos -j 2 -DBT_USE_DOUBLE_PRECISION -I/usr/local/include -I/usr/local/include/bullet -lBulletCollision -lLinearMath -lBulletDynamics -lglut QGLBullet.cpp
 
 
