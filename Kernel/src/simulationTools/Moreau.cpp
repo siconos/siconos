@@ -1411,44 +1411,6 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
     if (relationType == Lagrangian)
     {
-      //std::cout << "Moreau.cpp : relation display " << std::endl;
-      //mainInteraction->relation()->display();
-      //mainInteraction->relation()->C();
-
-      //(boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
-
-      C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
-      //    std::cout << "C.get()     " <<  C.get()  <<std::endl;
-      SP::SiconosMatrix C2 = mainInteraction->relation()->C();
-      //SP::SiconosMatrix C2 = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C();
-      //std::cout << "...C.get()     " <<  (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->C().get()  <<std::endl;
-      //std::cout << "C2.get()     " <<  C2.get()  <<std::endl;
-
-
-      //      assert(C == C2);
-
-      //C = mainInteraction->relation()->C();
-      //C->display();
-
-      if (C)
-      {
-
-        assert(Xfree);
-        assert(Yp);
-        assert(Xq);
-
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
-        if (_useGammaForRelation)
-        {
-          subprod(*C, *Xq, *Yp, coord, true);
-        }
-        else
-        {
-          subprod(*C, *Xfree, *Yp, coord, true);
-        }
-      }
-
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
       ID->eye();
 
