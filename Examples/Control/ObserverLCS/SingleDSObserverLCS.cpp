@@ -98,8 +98,6 @@ int main(int argc, char* argv[])
     string nameInter = "Interaction";
     unsigned int numInter = 1;
 
-    allDS.display();
-
 
     DynamicalSystemsSet dsProcessConcerned;
     dsProcessConcerned.insert(allDS.getPtr(0));
