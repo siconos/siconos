@@ -23,7 +23,13 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
 
+Changes:
+	* lcp_enum deals with degenerated system using dgels or dgesv.
+	* GenericMechanicalProblem: Build a reduced equivalent problem, equalities are either substituted or written in one block.
 
 --------------------------------------------------------------------------------
   v3.2.0 - r2330
