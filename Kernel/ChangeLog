@@ -22,7 +22,12 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
-
+--------------------------------------------------------------------------------
+  v3.3.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* NewtonEuler: Fix a bug in nablaqT computation.
+	* NewtonEuler: Include nabla _v (Omega I Omega) in the OSNSP formulation.
 
 --------------------------------------------------------------------------------
   v3.2.0 - r2330
