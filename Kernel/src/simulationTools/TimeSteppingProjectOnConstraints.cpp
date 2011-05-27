@@ -102,7 +102,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   while (runningNewton && cmp < 10)
   {
     cmp++;
-    printf("TimeSteppingProjectOnConstraints Newton step = %d\n", cmp);
+    //printf("TimeSteppingProjectOnConstraints Newton step = %d\n",cmp);
 
     runningNewton = false;
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)

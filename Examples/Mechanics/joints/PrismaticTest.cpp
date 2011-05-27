@@ -26,8 +26,8 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "KneeJoint.hpp"
-#include "PrismaticJoint.hpp"
+#include "KneeJointR.hpp"
+#include "PrismaticJointR.hpp"
 #include <math.h>
 using namespace std;
 

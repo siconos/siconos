@@ -64,7 +64,7 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
   {
     if (!_hasBeUpdated)
     {
-      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
+      //      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
       _n = 0;
       _m = 0;
       _curBlock = 0;
@@ -357,7 +357,7 @@ void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned in
   unsigned int sizeY = UR->getNonSmoothLawSizeProjectOnConstraints();
   SP::Relation R = UR->interaction()->relation();
   SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
-  for (int i = 0; i < sizeY; i++)
+  for (unsigned int i = 0; i < sizeY; i++)
     _q->setValue(pos + i, ner->yProj()->getValue(UR->getRelativePosition() + i));
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPProjectOnConstraints::computeqBlock, _q from yProj\n");
@@ -525,7 +525,7 @@ void MLCPProjectOnConstraints::postCompute()
 }
 void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
-  printf("MLCPProjectOnConstraints::computeOptions\n");
+  //  printf("MLCPProjectOnConstraints::computeOptions\n");
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
   unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();

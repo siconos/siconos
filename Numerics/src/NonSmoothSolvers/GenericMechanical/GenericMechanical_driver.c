@@ -420,6 +420,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     printf("---GenericalMechanical_drivers, CV %d at it=%d, itTotal=%d.\n", SScmp, it, SScmpTotal);
 #endif
   }
+  //printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,*err);
   if (! options->dWork)
     free(pPrevReaction);
   *info = tolViolate;

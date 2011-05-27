@@ -62,7 +62,7 @@ public:
   virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
   virtual void updateWorldFromDS()
   {
-    printf("TimeSteppingProjectOnConstraints::updateWordFromDS\n");
+    ;
   }
   inline void setConstraintTol(double v)
   {
