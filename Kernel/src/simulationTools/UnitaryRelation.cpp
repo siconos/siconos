@@ -252,7 +252,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::Dynamical
   Type::Siconos dsType = Type::value(*ds);
   if (dsType != Type::NewtonEulerDS)
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
-  int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+  unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
   if (sizeDS != UnitaryBlock->size(1))
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 

@@ -63,7 +63,6 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
 #ifdef GMP_DEBUG
   printf("GenericMechanical::computeUnitaryBlock: add problem of type ");
@@ -74,8 +73,7 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
     if (Type::value(*(UR->interaction()->nonSmoothLaw()))
         == Type::EqualityConditionNSL)
     {
-      LinearSystemProblem * pAux = (LinearSystemProblem *)
-                                   addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+      addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
 #ifdef GMP_DEBUG
       printf(" Type::EqualityConditionNSL\n");
 #endif
@@ -84,7 +82,6 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
     else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
              == Type::NewtonImpactNSL)
     {
-      void * pAux = addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
 #ifdef GMP_DEBUG
       printf(" Type::NewtonImpactNSL\n");
 #endif
