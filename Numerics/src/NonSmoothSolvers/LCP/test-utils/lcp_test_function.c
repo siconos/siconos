@@ -189,13 +189,15 @@ int lcp_test_function(FILE * f, int solverId)
 
   FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
   info = linearComplementarity_printInFile(problem, foutput);
-
+  fclose(foutput);
 
   NumericsOptions global_options;
   global_options.verboseMode = 1;
   SolverOptions * options ;
   options = malloc(sizeof(*options));
-
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->numberOfInternalSolvers = 0;
   options->solverId = solverId;
   printf("solverName ==> %s\n", idToName(solverId));
   options->iSize = 10;
