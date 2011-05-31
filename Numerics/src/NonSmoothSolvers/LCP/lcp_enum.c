@@ -317,6 +317,11 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   options->dSize = 5;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  for (i = 0; i < 5; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
   if (problem)
   {
     options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
@@ -327,11 +332,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
     options->dWork = NULL;
     options->iWork = NULL;
   }
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+
   options->dparam[0] = 1e-12;
 
 
