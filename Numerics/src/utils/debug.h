@@ -25,8 +25,13 @@
 #define DEBUG_H
 
 #ifdef DEBUG_MESSAGES
+#ifdef DEBUG_WHERE_MESSAGES
 #define DEBUG_WHERESTR  "%s:%d:\n"
 #define DEBUG_WHEREARG  __FILE__, __LINE__
+#else
+#define DEBUG_WHERESTR  "%s"
+#define DEBUG_WHEREARG  ""
+#endif
 #define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, __VA_ARGS__)
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
