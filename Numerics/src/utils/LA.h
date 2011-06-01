@@ -23,6 +23,12 @@
 #include <assert.h>
 #include "NumericsConfig.h"
 
+
+#if defined(USE_MKL)
+#include<SiconosMKL.h>
+
+#else /* do not use MKL */
+
 #define FCAST(T,X) (T *) (& X)
 #define FCASTP(T,X) (T *) X
 
@@ -68,6 +74,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define BLAS_NAME(N) cblas_##N
 #define LA_TRANS CblasTrans
 #define LA_NOTRANS CblasNoTrans
+#define CLA_TRANS CblasTrans
+#define CLA_NOTRANS CblasNoTrans
 #define LA_COLMAJOR CblasColMajor
 #define LA_ROWMAJOR CblasRowMajor
 #define LA_UP CblasUpper
@@ -105,6 +113,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_NAME(N) F77NAME(N)
 #define LA_TRANS "T"
 #define LA_NOTRANS "N"
+#define CLA_TRANS 'T'
+#define CLA_NOTRANS 'N'
 #define LA_COLMAJOR dummy
 #define LA_ROWMAJOR dummy
 #define LA_UP "U"
@@ -368,5 +378,5 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(INFO)); \
   })
 
-
+#endif /* USE_MKL */
 #endif /* LA_H */

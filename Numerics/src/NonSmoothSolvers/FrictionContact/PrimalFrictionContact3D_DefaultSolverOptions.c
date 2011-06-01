@@ -27,6 +27,7 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
+
 int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   int info = -1;

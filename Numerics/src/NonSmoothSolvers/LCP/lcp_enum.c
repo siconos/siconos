@@ -22,9 +22,7 @@
 #include "LA.h"
 #include <math.h>
 #include "LCP_Solvers.h"
-
-
-
+#include "MixedLinearComplementarityProblem.h" /*for displayMat ...*/
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
 static unsigned long  int sNbCase = 0;

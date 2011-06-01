@@ -6,6 +6,7 @@
 #cmakedefine SVN_REVISION ${SVN_REVISION}
 #endif
 
+#cmakedefine USE_MKL
 #cmakedefine HAVE_BLAS
 #cmakedefine HAVE_LAPACK
 #cmakedefine HAVE_ATLAS

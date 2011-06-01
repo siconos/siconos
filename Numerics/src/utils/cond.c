@@ -26,17 +26,14 @@
 double cond(double * A, int n, int m)
 {
 #ifdef COMPLETE_LAPACK_LIBRARIES
-  int LWORK = -1;
-  double * WORK;
-  WORK = malloc(sizeof(*WORK));
   int dimS = n;
   if (m < n) dimS = m;
   double * S =  malloc(dimS * sizeof(*S));
 
-  char JOBU[1] = "N";
+  char JOBU = 'N';
   int LDU = 1;
   double *U = NULL;
-  char JOBVT[1] = "N";
+  char JOBVT = 'N';
   int LDVT = 1;
   double *VT = NULL;
   int size = n * m * sizeof(double);
@@ -44,12 +41,21 @@ double cond(double * A, int n, int m)
   memcpy(Atmp, A, size);
 
   int InfoDGSVD = -1;
+#ifdef USE_MKL
+  double superb[min(m, n) - 1];
+  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, 0, InfoDGSVD);
 
+#else
+  int LWORK = -1;
+  double * WORK;
+  WORK = malloc(sizeof(*WORK));
   assert(WORK);
-  DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
   LWORK = (int)(WORK[0]);
   WORK = realloc(WORK, LWORK * sizeof * WORK);
-  DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  free(WORK);
+#endif
 
   printf("SVD of A :\n ");
   printf("[\t ");
@@ -63,7 +69,6 @@ double cond(double * A, int n, int m)
   double conditioning = S[0] / S[dimS - 1];
 
   free(Atmp);
-  free(WORK);
   free(S);
 
   return conditioning;

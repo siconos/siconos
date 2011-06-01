@@ -104,6 +104,9 @@ extern "C"
 
   int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
 
+  int primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options);
+
+  void  primalFrictionContact3D_globalAlartCurnier_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
   /** Proximal point solver with reformulation for friction-contact 3D problem
     \param problem, the friction-contact 3D problem to solve

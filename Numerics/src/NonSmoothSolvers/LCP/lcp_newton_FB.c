@@ -77,6 +77,9 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
   Phi = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) Phi[i] = 0.0;
 
+  // FP- m was not set, I guess m=n ??
+  m = n;
+
   beta = (double *)malloc(m * sizeof(double));
   mbeta = (double *)malloc(m * sizeof(double));
 

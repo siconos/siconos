@@ -37,6 +37,7 @@ foreach(_library ${_list})
 
   if(_libraries_work)
     if(APPLE)
+	  
       find_library(${_prefix}_${_library}_LIBRARY
         NAMES ${_library}
         PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH
@@ -49,7 +50,7 @@ foreach(_library ${_list})
         PATH_SUFFIXES atlas
         )
     endif(APPLE)
-    
+
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
     set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -86,7 +87,7 @@ endif(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
 
 if(BLAS_FOUND)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
-
+  
   if(ATLAS_FOUND)
     #
     # lapack_atlas or lapack
@@ -116,7 +117,7 @@ if(BLAS_FOUND)
       "lapack"
       "${BLAS_LIBRARIES}")
   endif(ATLAS_FOUND)
-
+  
 #intel lapack
   if(NOT LAPACK_LIBRARIES)
 

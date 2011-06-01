@@ -33,16 +33,14 @@
 double pinv(double * A, int n, int m, double tolerance)
 {
 #ifdef COMPLETE_LAPACK_LIBRARIES
-  int LWORK = -1;
-  double * WORK;
-  WORK = malloc(sizeof(*WORK));
+
   int dimS = n;
   if (m < n) dimS = m;
   double * S =  malloc(dimS * sizeof(*S));
-  char JOBU[1] = "A";
+  char JOBU = 'A';
   int LDU = n;
   double *U = malloc(n * n * sizeof(double));
-  char JOBVT[1] = "A"  ;
+  char JOBVT = 'A'  ;
   int LDVT = m;
   double *VT = malloc(m * m * sizeof(double));
   /*    printf("Matrix A:\n "); */
@@ -54,12 +52,19 @@ double pinv(double * A, int n, int m, double tolerance)
   /*     }  */
 
   int InfoDGSVD = -1;
+#ifdef USE_MKL
+  double superb[min(m, n) - 1];
+  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, 0, InfoDGSVD);
+#else
+  int LWORK = -1;
+  double * WORK = malloc(sizeof(*WORK));
   assert(WORK);
-  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  DGESVD(&JOBU, &JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
   LWORK = (int)(WORK[0]);
   WORK = realloc(WORK, LWORK * sizeof * WORK);
-  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-
+  DGESVD(&JOBU, &JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  free(WORK);
+#endif
 
   /*    printf("Matrix U:\n "); */
   /*     for (int i = 0; i< n; i++){ */
@@ -172,7 +177,6 @@ double pinv(double * A, int n, int m, double tolerance)
 
   free(U);
   free(VT);
-  free(WORK);
   free(Utranstmp);
   free(S);
   return conditioning;

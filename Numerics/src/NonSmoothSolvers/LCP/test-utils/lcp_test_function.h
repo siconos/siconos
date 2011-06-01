@@ -19,6 +19,8 @@
 #ifndef LCP_TEST_FUNCTION_H
 #define LCP_TEST_FUNCTION_H
 
+#include "lcp_enum.h"
+
 #ifdef __cplusplus
 extern "C"
 {

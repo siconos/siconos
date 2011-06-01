@@ -32,7 +32,6 @@ set(${LIBRARIES})
 set(_combined_name)
 foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
-
   if(_libraries_work)
     
    if ( APPLE ) 
@@ -75,6 +74,7 @@ set(BLAS_LIBRARIES)
 
 
 if(NOT BLAS_LIBRARIES)
+  
   # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
   check_libraries(
   BLAS_LIBRARIES
@@ -86,6 +86,7 @@ if(NOT BLAS_LIBRARIES)
   if (BLAS_LIBRARIES)
     set (ATLAS_FOUND TRUE)
   endif(BLAS_LIBRARIES)
+  
 endif(NOT BLAS_LIBRARIES)
 
 
@@ -182,6 +183,7 @@ if(NOT BLAS_LIBRARIES)
   ""
   "mkl;guide;pthread"
   )
+
 endif(NOT BLAS_LIBRARIES)
 
 #BLAS in intel mkl library? (static, 32bit)
@@ -197,6 +199,7 @@ endif(NOT BLAS_LIBRARIES)
 
 #BLAS in intel mkl library? (static, em64t 64bit)
 if(NOT BLAS_LIBRARIES)
+
 check_libraries(
 BLAS_LIBRARIES
 BLAS
