@@ -281,7 +281,11 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
 #else
   for (lin = 0; lin < sNpM; lin++)
     sQ[lin] =  - problem->q[lin];
+#ifdef USE_MKL
+  DGETRS(CLA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
+#else
   DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
+#endif
   solTest = sQ;
 #endif
   if (INFO)

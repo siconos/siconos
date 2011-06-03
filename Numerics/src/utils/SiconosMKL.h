@@ -109,7 +109,7 @@
 #define CLA_NOTRANS 'N'
 #define LA_UP 'U'
 #define LA_LO 'L'
-#define LA_NONUNIT 'N' // 'N' or CblasNonUniy
+#define LA_NONUNIT 'N' // 'N' or CblasNonUnit
 #define LA_UNIT 'U'    // 'U' or CblasUnit
 
 

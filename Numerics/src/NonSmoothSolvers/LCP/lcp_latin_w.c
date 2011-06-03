@@ -206,7 +206,6 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   DPOTRF(LA_UP, n, DPO , n, info2);
 
-
   if (info2 != 0)
   {
     printf(" Matter with Cholesky Factorization \n ");
@@ -260,7 +259,6 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     beta  = 1.;
     DGEMV(LA_TRANS, n, n, alpha, k, n, zc, incx, beta, wc, incy);
 
-
     DCOPY(n, q, incx, znum1, incy);
 
 
@@ -271,15 +269,15 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     DAXPY(n, alpha, wc, incx, znum1, incy);
     nrhs = 1;
 
-
+#ifdef USE_MKL
+    DTRTRS(LA_UP, CLA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+    DTRTRS(LA_UP, CLA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+#else
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+#endif
 
     DCOPY(n, znum1, incx, z, incy);
-
-
-
 
     alpha = -1.;
     beta = 1.;
@@ -384,8 +382,6 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     DGEMV(LA_TRANS, n, n, alpha, kinv, n, ww, incx, beta, kinvwden1, incy);
 
     den11 = DDOT(n, ww, incx, kinvwden1, incy);
-
-
 
 
 

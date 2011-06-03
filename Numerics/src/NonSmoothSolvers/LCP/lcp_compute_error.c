@@ -23,6 +23,7 @@
 void lcp_compute_error_only(int n, double *z , double *w, double * error)
 {
   /* Checks complementarity */
+
   *error = 0.;
   double zi, wi;
   for (int i = 0 ; i < n ; i++)

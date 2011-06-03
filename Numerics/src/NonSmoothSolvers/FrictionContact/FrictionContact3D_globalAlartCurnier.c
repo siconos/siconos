@@ -333,7 +333,7 @@ void frictionContact3D_globalAlartCurnier(
   // iparam[2] != 0 => use of DGELS
   if (options->iparam[2])
   {
-    int dgelsinfo[1];
+    int dgelsinfo;
 
     DGELS(problemSize, problemSize,
           1, AWpB, problemSize,

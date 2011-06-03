@@ -255,11 +255,13 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
     DAXPY(n, alpha, wc, incx, znum1, incy);
     nrhs = 1;
 
-
+#ifdef USE_MKL
+    DTRTRS(LA_UP, CLA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+    DTRTRS(LA_UP, CLA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+#else
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-
+#endif
     DCOPY(n, znum1, incx, z, incy);
 
 

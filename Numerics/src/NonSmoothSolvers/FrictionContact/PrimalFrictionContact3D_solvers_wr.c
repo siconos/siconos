@@ -82,7 +82,11 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     DGETRF(n, n, M->matrix0, n, Primal_ipiv, infoDGETRF);
     assert(!infoDGETRF);
     Primal_MisLU = 1;
+#ifdef USE_MKL
+    DGETRS(CLA_NOTRANS, n, m,  M->matrix0, n, Primal_ipiv, Htmp, n, infoDGETRS);
+#else
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Primal_ipiv, Htmp, n, infoDGETRS);
+#endif
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
@@ -118,8 +122,11 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     // compute H^T M^(-1) q + b
 
     assert(Primal_MisLU);
+#ifdef USE_MKL
+    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, qtmp , n, infoDGETRS);
+#else
     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, qtmp , n, infoDGETRS);
-
+#endif
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
 
@@ -325,7 +332,11 @@ int computeGlobalVelocity(PrimalFrictionContactProblem* problem, double * reacti
     assert(Primal_ipiv);
     assert(Primal_MisLU);
     int infoDGETRS;
+#ifdef USE_MKL
+    DGETRS(CLA_NOTRANS, n, 1,   problem->M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+#else
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+#endif
     assert(!infoDGETRS);
 
     free(Primal_ipiv);
