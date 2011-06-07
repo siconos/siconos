@@ -595,6 +595,27 @@
   }
 }
 
+// check on input : a python sequence
+%typecheck(SWIG_TYPECHECK_INTEGER)
+(boost::shared_ptr<std::vector<unsigned int> >) 
+{
+  // %typecheck(boost::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
+  PySequence_Check($input);
+}
+
+
+// int sequence => std::vector<unsigned int>
+%typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<std::vector<unsigned int> > (boost::shared_ptr<std::vector<unsigned int> > temp) 
+{
+  temp.reset(new std::vector<unsigned int>());
+  if (!sequenceToUnsignedIntVector($input, temp))
+  {
+    SWIG_fail;
+  }
+  $1 = temp; // temp deallocation is done at object destruction
+             // thanks to shared ptr ref counting
+}
+  
 // needed?
 // from C++ to python 
 %template() boost::shared_ptr<SiconosVector>;
@@ -602,6 +623,7 @@
 %template() boost::shared_ptr<BlockVector>;
 %template() boost::shared_ptr<SiconosMatrix>;
 %template() boost::shared_ptr<SimpleMatrix>;
+%template() boost::shared_ptr<std::vector<unsigned int> >;
 
 
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
@@ -610,4 +632,5 @@
 %apply (boost::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
 %apply (boost::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
 
+%apply (boost::shared_ptr<std::vector<unsigned int> >) { (SP::UnsignedIntVector) };
 

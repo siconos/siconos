@@ -73,5 +73,6 @@
   PY_REGISTER(SiconosVector);                     \
   PY_REGISTER(SimpleVector);                      \
   PY_REGISTER(BlockVector);                       \
-  PY_REGISTER(InteractionsSet);  
+  PY_REGISTER(InteractionsSet);                   \
+  PY_REGISTER(BoundaryCondition);
 

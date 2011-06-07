@@ -64,6 +64,8 @@
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
+
+#include <assert.h>
 %} 
 
 // mandatory !
@@ -127,6 +129,39 @@
 
 
 %include "KernelTypes.i"
+
+
+// python int sequence => std::vector<unsigned int>
+%{
+  static int sequenceToUnsignedIntVector(PyObject *input, boost::shared_ptr<std::vector<unsigned int> > ptr) 
+  {
+    int i;
+    if (!PySequence_Check(input)) {
+      PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
+      return NULL;
+    }
+    
+    assert(ptr);
+    
+    for (i =0; i <  PyObject_Length(input); i++) 
+    {
+      PyObject *o = PySequence_GetItem(input,i);
+      if (!PyInt_Check(o)) {
+        Py_XDECREF(o);
+        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+        return NULL;
+      }
+      
+      if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
+        return NULL;
+      
+      ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
+      
+      Py_DECREF(o);
+    }
+    return 1;
+  }
+%}
 
 // 2. try to hide SP::Type on python side
 
