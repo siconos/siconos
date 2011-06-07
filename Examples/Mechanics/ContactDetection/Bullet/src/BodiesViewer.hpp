@@ -167,10 +167,6 @@ enum SHAPE
   DISK,
   CIRCLE,
   SPHERE,
-  SPHERELDS,
-  SPHERENEDS,
-  POLYG,
-  POLYH,
   BULLET
 };
 
@@ -349,9 +345,14 @@ protected :
 
   bool myMouseBehavior_;
 
+  bool stepSimulation_;
+  bool stepNow_;
+
   long timeSiconos_;
 
   long timeGlob_;
+
+  float _transparency;
 
 };
 

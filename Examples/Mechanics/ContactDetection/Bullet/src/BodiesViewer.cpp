@@ -546,7 +546,7 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
              GETRADIUS(ds), c);
     break;
 
-  case SPHERELDS :
+  case SPHERE:
     c[0] = 1 ;
     c[1] = .0;
     c[2] = 0;
@@ -559,21 +559,14 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
                GETA3(ds),
                GETRADIUS(ds), c);
     break;
-  case SPHERENEDS :
-    c[0] = 1 ;
-    c[1] = .0;
-    c[2] = 0;
-    glLineWidth(2.);
-    drawSphere(GETX(ds),
-               GETY(ds),
-               GETZ(ds),
-               GETA1(ds),
-               GETA2(ds),
-               GETA3(ds),
-               GETA4(ds),
-               GETRADIUS(ds), c);
-    break;
+
+  default:
+  {};
+
   };
+
+
+
 
 };
 
@@ -619,7 +612,7 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
               GETY(ds) + Cal * GETYFE(ds) / dFe, Cal / 10.);
     break;
 
-  case SPHERELDS :
+  case SPHERE:
     c[0] = .6 ;
     c[1] = .1;
     c[2] = .5;
@@ -637,19 +630,9 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
               GETZ(ds) + Cal * GETZFE(ds), Cal / 10.);
     break;
 
+  default:
+  {};
 
-  case SPHERENEDS :
-    c[0] = .6 ;
-    c[1] = .1;
-    c[2] = .5;
-    glLineWidth(3.);
-    drawSphere(GETX(ds), GETY(ds), GETZ(ds),
-               GETA1(ds), GETA2(ds), GETA3(ds), GETA4(ds),
-               GETRADIUS(ds), c);
-    glColor3f(1., 0., 0.);
-    dFe = hypot3(ask<ForFExt>(*ds)->getArray());
-    Cal = log(dFe);
-    break;
   }
 };
 

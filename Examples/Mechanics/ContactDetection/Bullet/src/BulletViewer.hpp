@@ -30,8 +30,6 @@ class BulletViewer : public BodiesViewer
   GLDebugDrawer _debugDrawer;
   GL_ShapeDrawer _shapeDrawer;
 
-  float _transparency;
-
   std::vector<btVector3> _colors;
 
   void init();

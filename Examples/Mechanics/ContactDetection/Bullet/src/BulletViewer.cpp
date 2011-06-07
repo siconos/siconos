@@ -54,6 +54,10 @@ void BulletViewer::init()
 
   ask<ForCollisionWorld>(*Siconos_->spaceFilter())->setDebugDrawer(&_debugDrawer);
 
+  stepSimulation_ = false;
+  stepNow_ = false;
+  //  setAnimationPeriod(0.);
+  setAnimationPeriod(Siconos_->model()->simulation()->timeStep() * 1000);
 
   int i;
   DSIterator itDS;
@@ -136,8 +140,10 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   btCollisionObject* co = &*ask<ForCollisionObject>(*ds);
   btCollisionWorld* cow = &*ask<ForCollisionWorld>(*Siconos_->spaceFilter());
 
+  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawAabb | btIDebugDraw::DBG_DrawContactPoints);
+  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
 
-  //    ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawObject(co->getWorldTransform(), co->getCollisionShape(), btVector3(1,1,0));
+  //ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawObject(co->getWorldTransform(), co->getCollisionShape(), btVector3(1,1,0));
 
 
   btScalar m[16];
@@ -151,7 +157,7 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
   aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-  _shapeDrawer.drawOpenGL(_transparency, m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 0, aabbMin, aabbMax);
+  _shapeDrawer.drawOpenGL(_transparency, m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 2, aabbMin, aabbMax);
 
   unsigned int numManifolds =
     cow->getDispatcher()->getNumManifolds();
@@ -178,6 +184,10 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
       glEnd();
     }
   }
+
+  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
+
+
 }
 
 
@@ -186,7 +196,7 @@ void BulletViewer::draw()
 
   char qs[6];
 
-  float lbdmax, w;
+  float lbdmax = 0., w;
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
@@ -222,7 +232,9 @@ void BulletViewer::draw()
       w = fmax(.3, cfn / fmax(lbdmax, cfn));
 
 
-      btManifoldPoint& cpoint = *ask<ForContactPoints>(*relation);
+      btManifoldPoint& cpoint = *ask<ForContactPoint>(*relation);
+
+      //      printf("cpoint.getDistance():%g\n",cpoint.getDistance());
 
       btVector3 posa = cpoint.getPositionWorldOnA();
       btVector3 posb = cpoint.getPositionWorldOnB();
@@ -230,6 +242,7 @@ void BulletViewer::draw()
       btVector3 endf = posa + dirf.normalize() * w;
       btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 4.;
 
+      //      printf("dist(posb,posa):%g\n",sqrt((posb-posa).dot(posb-posa)));
 
       glPushMatrix();
       glColor3f(.80, 0, 0);
@@ -331,7 +344,7 @@ void BulletViewer::draw()
       double C = (*Siconos_->movingPlans())(i, 2)(time);
       double w = 1e10;
       double H = hypot(A, B);
-      double xc, yc;
+      double xc = 0., yc = 0.;
 
       if (fabs(C) > std::numeric_limits<double>::epsilon())
       {
@@ -385,8 +398,15 @@ void BulletViewer::draw()
 void BulletViewer::animate()
 {
 
-  Siconos_->compute();
-  //Siconos_->compute();
+  if (!stepSimulation_)
+  {
+    Siconos_->compute();
+  }
+  else if (stepNow_)
+  {
+    stepNow_ = false;
+    Siconos_->compute();
+  }
   //saveSnapshot();
 }
 
@@ -448,8 +468,6 @@ void BulletViewer::mouseMoveEvent(QMouseEvent *e)
       double massValue =
         ask<ForMassValue>(*shapes_[selectedName()]->DS());
 
-      qglviewer::ManipulatedFrame* frame =  shapes_[selectedName()]->frame();
-
       //      need ref frame -> ground
       //      et update frames pos with setTranslation & setRotation
       //      Quaternion r = frame->rotation();
@@ -508,6 +526,21 @@ void BulletViewer::keyPressEvent(QKeyEvent* e)
     _transparency = fmin(1., _transparency);
     printf("transparency: %f\n", _transparency);
   }
+
+  if ((e->key() == (Qt::Key) 'S'))
+  {
+    stepSimulation_ = not stepSimulation_;
+    stepNow_ = false;
+    printf("step simulation mode\n");
+  }
+
+  if ((e->key() == (Qt::Key) '.'))
+  {
+    stepNow_ = true;
+    printf("step now\n");
+  }
+
+
 
   QGLViewer::keyPressEvent(e);
 }

@@ -25,7 +25,7 @@ void BulletBodies::init()
 
   double T = 0.02;
 
-  double h = 0.01;                // time step
+  double h = 0.005;
 
 
   // -----------------------------------------
@@ -56,26 +56,56 @@ void BulletBodies::init()
     SP::btCollisionShape bbox(new btBoxShape(btVector3(.5, 1, 1)));
     SP::BulletWeightedShape box2(new BulletWeightedShape(bbox, 1.0));
 
-    SP::btCollisionShape capsule(new btCapsuleShape(.5, .5));
+    SP::btCollisionShape capsule(new btCapsuleShape(.5, 2));
     SP::BulletWeightedShape capsule1(new BulletWeightedShape(capsule, 1.0));
 
     SP::btCollisionShape bcapsule(new btCapsuleShape(1, 2));
     SP::BulletWeightedShape capsule2(new BulletWeightedShape(bcapsule, 2.0));
 
-    SP::btCollisionShape cylinder(new btCylinderShape(btVector3(.5, .5, 1)));
+    SP::btCollisionShape cylinder(new btCylinderShapeX(btVector3(1, .1, .1)));
     SP::BulletWeightedShape cylinder1(new BulletWeightedShape(cylinder, 1.0));
 
+
+    SP::btCollisionShape sphere(new btSphereShape(0.5));
+    //    sphere->setLocalScaling(btVector3(.5,10.,.2));
+    SP::BulletWeightedShape sphere1(new BulletWeightedShape(sphere, 1.0));
+
+    SP::btCollisionShape cone(new btConeShape(1, .1));
+    SP::BulletWeightedShape cone1(new BulletWeightedShape(cone, 1.0));
+
+
+    SP::btCollisionShape mshape(new btConvexHullShape());
+
+    {
+      double height = 1;
+      double r = 1;
+      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(0.0,  0.75 * height, 0.0));
+      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,    r));
+      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,    r));
+      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,   -r));
+      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,   -r));
+    }
+    SP::BulletWeightedShape mshape1(new BulletWeightedShape(mshape, 1.0));
+
+
+    const int numSpheres = 2;
+    btVector3 positions[numSpheres] = {btVector3(0, 1, 0), btVector3(0, -1, 0)};
+    btScalar radi[numSpheres] = {1, 1};
+    SP::btCollisionShape mspheres(new btMultiSphereShape(positions, radi, 2));
+    SP::BulletWeightedShape mspheres1(new BulletWeightedShape(mspheres, 1.0));
+
+
     std::vector<SP::BulletWeightedShape> shapes;
-    shapes.push_back(box1);
-    shapes.push_back(box1);
-    shapes.push_back(box1);
-    shapes.push_back(box1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
+    shapes.push_back(mshape1);
     //    shapes.push_back(box1);
     //    shapes.push_back(box2);
     //    shapes.push_back(capsule1);
     //    shapes.push_back(cylinder1);
 
-    unsigned int N = 3;
+    unsigned int N = 1;
 
     srand(1.);
 
@@ -88,7 +118,7 @@ void BulletBodies::init()
     {
       for (unsigned int j = 0; j < N; ++j)
       {
-        for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int k = 0; k < 2; ++k)
         {
 
           SP::SimpleVector position(new SimpleVector(7));
@@ -96,15 +126,15 @@ void BulletBodies::init()
           velocity->zero();
           position->zero();
 
-          double theta = i + j + k; //acos(1/sqrt(3));
+          double theta = 0.;//i+j+k;//acos(1/sqrt(3));
 
           double a = 1;
           double b = 1;
           double c = 0;
           double n = (sin(theta / 2)) / sqrt(a * a + b * b + c * c);
-          (*position)(0) = 4.01 * i - 4.01 * (N - 1) / 2 + (double) rand() / (10.*RAND_MAX);
-          (*position)(1) = 4.01 * j - 4.01 * (N - 1) / 2;
-          (*position)(2) = 4.01 * k + 10;
+          (*position)(0) = 2.01 * i - 2.01 * (N - 1) / 2; // + (double) rand()/(10.*RAND_MAX);
+          (*position)(1) = 2.01 * j - 2.01 * (N - 1) / 2;
+          (*position)(2) = 2.01 * k + 2.;
           (*position)(3) = cos(theta / 2);
           (*position)(4) = a * n;
           (*position)(5) = b * n;
@@ -128,22 +158,67 @@ void BulletBodies::init()
 
 
     SP::btCollisionObject ground(new btCollisionObject());
-    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, 3)));
+    SP::btCollisionObject wall1(new btCollisionObject());
+    SP::btCollisionObject wall2(new btCollisionObject());
+    SP::btCollisionObject wall3(new btCollisionObject());
+    SP::btCollisionObject wall4(new btCollisionObject());
+    ground->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    wall1->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    wall2->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    wall3->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    wall4->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+
+    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, .5)));
+    SP::btCollisionShape wallShape(new btBoxShape(btVector3(3, 30, .5)));
+    //    groundShape->setMargin(1.);
+    //    wallShape->setMargin(1.);
     btMatrix3x3 basis;
     basis.setIdentity();
+
     ground->getWorldTransform().setBasis(basis);
+    wall1->getWorldTransform().setBasis(basis);
+    wall2->getWorldTransform().setBasis(basis);
+    wall3->getWorldTransform().setBasis(basis);
+    wall4->getWorldTransform().setBasis(basis);
+
     ground->setCollisionShape(&*groundShape);
+    wall1->setCollisionShape(&*wallShape);
+    wall2->setCollisionShape(&*wallShape);
+    wall3->setCollisionShape(&*wallShape);
+    wall4->setCollisionShape(&*wallShape);
 
-    ground->getWorldTransform().getOrigin().setZ(-3.01);
+    double s = sqrt(2.) / 2.;
 
+    ground->getWorldTransform().getOrigin().setZ(-.51);
+    wall1->getWorldTransform().getOrigin().setX(-30.01);
+    wall1->getWorldTransform().getOrigin().setZ(-1.01);
+    wall1->getWorldTransform().getBasis().setRotation(btQuaternion(0, s, 0, s));
+    wall2->getWorldTransform().getOrigin().setY(-30.01);
+    wall2->getWorldTransform().getOrigin().setZ(-1.01);
+    wall2->getWorldTransform().getBasis().setRotation(btQuaternion(0, 0, s, s)*btQuaternion(0, s, 0, s));
+    wall3->getWorldTransform().getOrigin().setX(30.01);
+    wall3->getWorldTransform().getOrigin().setZ(-1.01);
+    wall3->getWorldTransform().getBasis().setRotation(btQuaternion(0, s, 0, s));
+    wall4->getWorldTransform().getOrigin().setY(30.01);
+    wall4->getWorldTransform().getOrigin().setZ(-1.01);
+    wall4->getWorldTransform().getBasis().setRotation(btQuaternion(0, 0, s, s)*btQuaternion(0, s, 0, s));
     // ------------------
     // --- Simulation ---
     // ------------------
 
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(.0, .0, .7, 3));
+
+
+    SP::btVector3 aabbmax(new btVector3(100, 100, 100));
+    SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
+
+    _playground.reset(new BulletSpaceFilter(_model->nonSmoothDynamicalSystem(),
+                                            nslaw, aabbmin, aabbmax));
+
     // -- Time discretisation --
     timedisc.reset(new TimeDiscretisation(t0, h));
 
-    simulation.reset(new BulletTimeStepping(timedisc));
+    simulation.reset(new BulletTimeStepping(timedisc, boost::static_pointer_cast<BulletSpaceFilter>(_playground)));
 
 #ifdef WITH_GLOBALAC
     osnspb.reset(new FrictionContact(3, SICONOS_FRICTION_3D_GLOBALAC));
@@ -188,23 +263,23 @@ void BulletBodies::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, .7, 3));
 
-
-    SP::btVector3 aabbmax(new btVector3(100, 100, 100));
-    SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
-
-    _playground.reset(new BulletSpaceFilter(_model->nonSmoothDynamicalSystem(),
-                                            nslaw, aabbmin, aabbmax));
 
     ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*ground);
+    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*wall1);
+    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*wall2);
+    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*wall3);
+    ask<ForCollisionWorld>(*_playground)->addCollisionObject(&*wall4);
+
 
     ask<ForStaticObjects>(*_playground)->push_back(ground);
+    ask<ForStaticObjects>(*_playground)->push_back(wall1);
+    ask<ForStaticObjects>(*_playground)->push_back(wall2);
+    ask<ForStaticObjects>(*_playground)->push_back(wall3);
+    ask<ForStaticObjects>(*_playground)->push_back(wall4);
 
     ask<ForStaticShapes>(*_playground)->push_back(groundShape);
-
-    SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
+    ask<ForStaticShapes>(*_playground)->push_back(wallShape);
 
     _model->nonSmoothDynamicalSystem()->setSymmetric(true);
 
