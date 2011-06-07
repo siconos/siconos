@@ -27,11 +27,12 @@ class BulletR : public NewtonEulerRFC3D
 {
 private:
   SP::btManifoldPoint _contactPoints;
+  SP::btPersistentManifold _contactManifold;
 
 public:
-  BulletR(SP::btManifoldPoint);
+  BulletR(SP::btManifoldPoint, SP::btPersistentManifold);
 
-  SP::btManifoldPoint contactPoints() const
+  SP::btManifoldPoint contactPoint() const
   {
     return _contactPoints;
   };

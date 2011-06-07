@@ -56,20 +56,16 @@ void BulletDS::updateCollisionObject() const
 
   DEBUG_EXPR(q.display());
 
-
-  btMatrix3x3 basis;
-  basis.setIdentity();
-  _collisionObject->getWorldTransform().setBasis(basis);
-
   assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +  pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
-  _collisionObject->getWorldTransform().getOrigin().setX(q(0));
-  _collisionObject->getWorldTransform().getOrigin().setY(q(1));
-  _collisionObject->getWorldTransform().getOrigin().setZ(q(2));
 
+  _collisionObject->getWorldTransform().setOrigin(btVector3(q(0), q(1), q(2)));
   _collisionObject->getWorldTransform().getBasis().setRotation(btQuaternion(q(4), q(5),
       q(6), q(3)));
 
-
   _collisionObject->setActivationState(ACTIVE_TAG);
+  _collisionObject->activate();
+
+  //_collisionObject->setContactProcessingThreshold(BT_LARGE_FLOAT);
+
 
 }

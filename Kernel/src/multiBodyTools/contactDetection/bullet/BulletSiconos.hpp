@@ -37,6 +37,7 @@ DEFINE_SPTR(btCollisionWorld);
 DEFINE_SPTR(btDefaultCollisionConfiguration);
 DEFINE_SPTR(btCollisionDispatcher);
 DEFINE_SPTR(btVector3);
-DEFINE_SPTR(btAxisSweep3);
+
+DEFINE_SPTR(btPersistentManifold);
 
 #endif

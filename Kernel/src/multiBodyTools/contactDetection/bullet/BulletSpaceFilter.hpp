@@ -28,6 +28,13 @@
 
 #include <btBulletCollisionCommon.h>
 
+//typedef btSimpleBroadphase BulletBroadPhase;
+//typedef bt32BitAxisSweep3 BulletBroadPhase;
+typedef btDbvtBroadphase BulletBroadPhase;
+
+
+TYPEDEF_SPTR(BulletBroadPhase);
+
 class BulletSpaceFilter : public SpaceFilter
 {
 
@@ -40,13 +47,13 @@ protected:
   SP::btCollisionDispatcher _dispatcher;
   SP::btVector3 _worldAabbMin;
   SP::btVector3 _worldAabbMax;
-  SP::btAxisSweep3 _broadphase;
+  SP::BulletBroadPhase _broadphase;
 
 public:
   BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw,
                     SP::btVector3 aabbMin, SP::btVector3 aabbMax);
 
-  SP::btAxisSweep3 broadphase() const
+  SP::BulletBroadPhase broadphase() const
   {
     return _broadphase;
   };
@@ -71,6 +78,9 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
+DEFINE_SPTR(BulletSpaceFilter);
+
+
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 {
   ANSWER(BulletSpaceFilter, collisionWorld());
@@ -87,10 +97,10 @@ struct ForStaticShapes : public Question< boost::shared_ptr<std::vector<SP::btCo
 };
 
 
-struct ForContactPoints : public Question<SP::btManifoldPoint>
+struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
-  ANSWER(BulletR, contactPoints());
-  ANSWER(BulletRImpact, contactPoints());
+  ANSWER(BulletR, contactPoint());
+  ANSWER(BulletRImpact, contactPoint());
 };
 
 

@@ -21,11 +21,17 @@
 #define BulletTimeStepping_hpp
 
 #include "TimeStepping.hpp"
+#include "BulletSpaceFilter.hpp"
 
 class BulletTimeStepping : public TimeStepping
 {
+
+  SP::BulletSpaceFilter _spaceFilter;
+
 public:
-  BulletTimeStepping(SP::TimeDiscretisation t) : TimeStepping(t) {};
+  BulletTimeStepping(SP::TimeDiscretisation t, SP::BulletSpaceFilter sf) :
+    TimeStepping(t),
+    _spaceFilter(sf) {};
 
 
   void updateWorldFromDS();
