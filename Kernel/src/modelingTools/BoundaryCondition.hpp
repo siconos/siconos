@@ -25,8 +25,7 @@
 #include "SimpleVector.hpp"
 #include "PluggedObject.hpp"
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
-
-using namespace std;
+TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int);
 
 /** \class BoundaryCondition
  *  \brief This class models simple boundary conditions for prescribing the velocities
@@ -47,14 +46,14 @@ public:
    *  \param the indices of the velocity subjected to prescribed velocities
    */
 
-  BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
+  BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
   /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
    *  \param the indices of the velocity subjected to prescribed velocoties
    *  \param the values of the prescribed velocoties
    */
-  BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
+  BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,  SP::SimpleVector newVelocityValues);
 
   /** destructor */
   virtual ~BoundaryCondition();
@@ -64,7 +63,7 @@ public:
   /** to get the velocityIndices
    *  \return a pointer on _velocityIndices
    */
-  inline vector<unsigned int>  * velocityIndices()
+  inline SP::UnsignedIntVector velocityIndices()
   {
     return _velocityIndices;
   };
@@ -102,7 +101,7 @@ public:
 
 protected:
   /* Indices of the prescribed component of the velocity vector */
-  std::vector<unsigned int>   * _velocityIndices;
+  SP::UnsignedIntVector _velocityIndices;
   /* Values of the prescribed component of the velocity vector */
   SP::SimpleVector _prescribedVelocity;
   /* Old values of the prescribed component of the velocity vector */

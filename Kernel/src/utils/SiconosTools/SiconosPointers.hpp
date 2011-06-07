@@ -131,7 +131,6 @@ struct nullDeleter
   } ;\
   NAME_SPACE_SPTR(X)
 
-
 #define TYPEDEF_SAPTR(X) \
   typedef boost::shared_array<X> X##SAPtr ;\
   NAME_SPACE_SAPTR(X)
@@ -144,6 +143,35 @@ struct nullDeleter
 #define DEFINE_SAPTR(X) \
   class X; \
   TYPEDEF_SAPTR(X)
+
+
+/* template with one argument */
+
+#define NAME_SPACE_TPL1_SPTR(N,X,Y)              \
+  namespace SharedPointer                        \
+  {                                              \
+    typedef SPtr##N N;                           \
+  };                                             \
+  namespace SharedPointerConst                   \
+  {                                              \
+    typedef SPtrConst##N N;                      \
+  }
+
+#define TYPEDEF_TPL1_SPTR(N,X,Y)                           \
+  typedef boost::shared_ptr<X<Y> > SPtr##N;                \
+  typedef boost::shared_ptr<const X<Y> > SPtrConst##N;     \
+  inline SPtr##N create##SPtr##N(X<Y> &x)                  \
+  {                                                        \
+    boost::shared_ptr<X<Y> > px(&x, nullDeleter());        \
+    return px;                                             \
+  };                                                       \
+  inline SPtrConst##N create##SPtrConst##N(const X<Y> &x)  \
+  {                                                        \
+    boost::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
+    return px;                                             \
+  } ;                                                      \
+  NAME_SPACE_TPL1_SPTR(N,X,Y)
+
 
 /* *SPtr types definitions, outside class headers because of some race
    conditions */

@@ -147,7 +147,9 @@ struct FindType
 #undef REGISTER
 #define REGISTER(X)             \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
+  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                       \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
+
 
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN

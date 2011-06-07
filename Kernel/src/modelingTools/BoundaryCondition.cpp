@@ -27,7 +27,7 @@ using namespace std;
 // }
 
 
-BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndices, SP::SimpleVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
+BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, SP::SimpleVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
 
   if (newVelocityIndices->size() != newVelocityValues->size())
@@ -36,7 +36,7 @@ BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndi
   _pluginPrescribedVelocity.reset(new PluggedObject());
 }
 
-BoundaryCondition::BoundaryCondition(std::vector<unsigned int> * newVelocityIndices): _velocityIndices(newVelocityIndices)
+BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices): _velocityIndices(newVelocityIndices)
 {
   _prescribedVelocityOld.reset(new SimpleVector(newVelocityIndices->size()));
   _pluginPrescribedVelocity.reset(new PluggedObject());
