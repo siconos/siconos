@@ -82,6 +82,7 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
     else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
              == Type::NewtonImpactNSL)
     {
+      addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
 #ifdef GMP_DEBUG
       printf(" Type::NewtonImpactNSL\n");
 #endif
