@@ -1,8 +1,8 @@
 #include "NonSmoothDrivers.h"
 #include "pinv.h"
 #include "LA.h"
-//#define GMP_DEBUG_REDUCED
-//#define GMP_DEBUG_GMPREDUCED_SOLVE
+#define GMP_DEBUG_REDUCED
+#define GMP_DEBUG_GMPREDUCED_SOLVE
 
 void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedProb, double * Qreduced, int * Me_size, int* Mi_size);
 void _GMPReducedGetSizes(GenericMechanicalProblem* pInProblem, int * Me_size, int* Mi_size);
@@ -260,6 +260,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
     curBlock++;
   }
 #ifdef GMP_DEBUG_REDUCED
+  int nbCol = MeRow + MiRow;
   printf("\\The Me matrix is:\n");
   printf("Me=[ \n");
   for (int i = 0; i < MeRow; i++)
@@ -325,6 +326,8 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
     genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
     free(reducedProb);
     free(Qreduced);
+    free(Rreduced);
+    free(Vreduced);
     return;
   }
   listNumericsProblem * curProblem = 0;
@@ -374,8 +377,8 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   }
 
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  printDenseMatrice("newPrb", titi, reducedProb, nbRow, nbCol);
-  printDenseMatrice("newQ", titi, Qreduced, nbRow, 1);
+  //  printDenseMatrice("newPrb",titi,reducedProb,nbRow,nbCol);
+  //  printDenseMatrice("newQ",titi,Qreduced,nbRow,1);
 #endif
   NumericsMatrix numM;
   numM.storageType = 0;
@@ -394,16 +397,16 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   else
   {
     printf("\nGMPREduced2 succed!\n");
-    printDenseMatrice("R", titi, Rreduced, nbRow, 1);
-    printDenseMatrice("V", titi, Vreduced, nbRow, 1);
+    //    printDenseMatrice("R",titi,Rreduced,nbRow,1);
+    //    printDenseMatrice("V",titi,Vreduced,nbRow,1);
   }
 #endif
   if (*info)
     goto END_GMP2;
   GMPReducedSolToSol(pInProblem, reaction, velocity, Rreduced, Rreduced + Me_size, Vreduced + Me_size);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  printDenseMatrice("R2", titi, reaction, nbRow, 1);
-  printDenseMatrice("V2", titi, velocity, nbRow, 1);
+  //    printDenseMatrice("R2",titi,reaction,nbRow,1);
+  //    printDenseMatrice("V2",titi,velocity,nbRow,1);
 #endif
   double err;
   int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
@@ -416,7 +419,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
 END_GMP2:
   ;
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  fclose(titi);
+  //    fclose(titi);
 #endif
   free(Rreduced);
   free(Vreduced);
@@ -611,6 +614,8 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
   int nbCol = m->blocksize1[m->blocknumber1 - 1];
 
   _GMPReducedGetSizes(pInProblem, Me_size, Mi_size);
+  if (*Me_size == 0)
+    return;
 
   double *Me = (*Me_size) ? (double *) malloc((*Me_size) * nbCol * sizeof(double)) : 0;
   double *Mi = (*Mi_size) ? (double *) malloc((*Mi_size) * nbCol * sizeof(double)) : 0;
@@ -624,12 +629,13 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
   double *Mi2 = Mi + (*Mi_size) * (*Me_size);
   FILE * titi  = fopen("buildReduced2GMP_output.txt", "w");
   printf("GMP2Reducedsolve\n");
-  printDenseMatrice("Me1", titi, Me1, Me_size, Me_size);
-  printDenseMatrice("Me2", titi, Me2, Me_size, Mi_size);
-  printDenseMatrice("Mi1", titi, Mi1, Mi_size, Me_size);
-  printDenseMatrice("Mi2", titi, Mi2, Mi_size, Mi_size);
-  printDenseMatrice("Qe", titi, Qreduced, Me_size, 1);
-  printDenseMatrice("Qi", titi, Qi, Mi_size, 1);
+  printDenseMatrice("Me1", titi, Me1, *Me_size, *Me_size);
+  printDenseMatrice("Me2", titi, Me2, *Me_size, *Mi_size);
+  printDenseMatrice("Mi1", titi, Mi1, *Mi_size, *Me_size);
+  printDenseMatrice("Mi2", titi, Mi2, *Mi_size, *Mi_size);
+  printDenseMatrice("Qe", titi, Qreduced, *Me_size, 1);
+  printDenseMatrice("Qi", titi, Qi, *Mi_size, 1);
+  fclose(titi);
 #endif
   for (int numCol = 0; numCol < nbCol; numCol++)
   {
