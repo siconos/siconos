@@ -230,72 +230,73 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   subPos[3] = 0;
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
-void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
-{
-  unsigned int k = 0;
-  unsigned int NumDS = 0;
-  DSIterator itDS;
-  itDS = interaction()->dynamicalSystemsBegin();
+// void UnitaryRelation::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+// {
+//   unsigned int k=0;
+//   unsigned int NumDS=0;
+//   DSIterator itDS;
+//   itDS = interaction()->dynamicalSystemsBegin();
 
-  // look for ds and its position in G
-  while (*itDS != ds && itDS != interaction()->dynamicalSystemsEnd())
-  {
-    Type::Siconos dsType = Type::value(*ds);
-    if (dsType != Type::NewtonEulerDS)
-      RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
-    k += (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-    itDS++;
-    NumDS++;
-  }
+//   // look for ds and its position in G
+//   while( *itDS != ds && itDS!=interaction()->dynamicalSystemsEnd() )
+//     {
+//       Type::Siconos dsType = Type::value(*ds);
+//       if (dsType !=Type::NewtonEulerDS)
+//  RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
+//       k+=(boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+//       itDS++;
+//       NumDS++;
+//     }
 
-  // check dimension (1)
-  Type::Siconos dsType = Type::value(*ds);
-  if (dsType != Type::NewtonEulerDS)
-    RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
-  unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-  if (sizeDS != UnitaryBlock->size(1))
-    RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+//   // check dimension (1)
+//   Type::Siconos dsType = Type::value(*ds);
+//   if (dsType !=Type::NewtonEulerDS)
+//     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
+//   unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+//   if( sizeDS != UnitaryBlock->size(1) )
+//     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDSForProject(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
-  SP::SiconosMatrix originalMatrix;
+//
+//   SP::SiconosMatrix originalMatrix;
 
-  RELATION::TYPES relationType = getRelationType();
+//   RELATION::TYPES relationType = getRelationType();
 
-  if (relationType == FirstOrder)
-  {
-    SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (interaction()->relation());
-    originalMatrix = r->jachx();
-  }
-  else if (relationType == Lagrangian)
-  {
-    SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (interaction()->relation());
-    originalMatrix = r->jachq();
-  }
-  else if (relationType == NewtonEuler)
-  {
-    SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
-    originalMatrix = r->jachqProj();
-    //      cout<<"UnitaryRelation, original block:\n";
-    //      originalMatrix->display();
-    //      cout<<"UnitaryRelation, Unitary  block:\n";
-    //      UnitaryBlock->display();
-  }
-  else
-    RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+//   if(relationType == FirstOrder)
+//     {
+//       SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (interaction()->relation());
+//       originalMatrix =r->jachx();
+//     }
+//   else if(relationType == Lagrangian)
+//     {
+//       SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (interaction()->relation());
+//       originalMatrix = r->jachq();
+//     }
+//   else if(relationType == NewtonEuler)
+//     {
+//       SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
+//       //proj_with_q originalMatrix = r->jachqProj();
+//       //      cout<<"UnitaryRelation, original block:\n";
+//       //      originalMatrix->display();
+//       //      cout<<"UnitaryRelation, Unitary  block:\n";
+//       //      UnitaryBlock->display();
+//     }
+//   else
+//     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type "+relationType);
 
-  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
-  // dim of the sub-unitaryBlock
-  Index subDim(2);
-  subDim[0] = UnitaryBlock->size(0);
-  subDim[1] = UnitaryBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in UnitaryBlock
-  Index subPos(4);
-  subPos[0] = _relativePosition;
-  subPos[1] = k;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
-}
+//   // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+//   // dim of the sub-unitaryBlock
+//   Index subDim(2);
+//   subDim[0] = UnitaryBlock->size(0);
+//   subDim[1] = UnitaryBlock->size(1);
+//   // Position (row,col) of first element to be read in originalMatrix
+//   // and of first element to be set in UnitaryBlock
+//   Index subPos(4);
+//   subPos[0] = _relativePosition;
+//   subPos[1] = k;
+//   subPos[2] = 0;
+//   subPos[3] = 0;
+//   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+// }
 
 void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
 {

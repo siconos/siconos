@@ -24,7 +24,7 @@
 #include "NewtonEulerRImpact.hpp"
 using namespace std;
 
-//#define TSPROJ_DEBUG
+#define TSPROJ_DEBUG
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
@@ -33,7 +33,8 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
-  _constraintTol = 10e-4;
+  _constraintTol = 1e-4;
+  _constraintTolUnilateral = 1e-8;
   _doProj = 1;
   _doOnlyProj = 0;
 }
@@ -75,77 +76,107 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
-  bool runningNewton = true;
+  bool runningNewton = false;
   int cmp = 0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++){
+  //   double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
+  //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+  //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
+  //     SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> ((*it)->relation());
+  //     if (criteria < -1e-7){
+  //  ri->_isOnContact=true;
+  //     }else{
+  //  ri->_isOnContact=false;
+  //     }
+  //   }
+  //   if (criteria < -_constraintTol)
+  //     runningNewton=true;
+  // }
+  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+  UnitaryRelationsGraph::VIterator aVi, viend;
+  for (boost::tie(aVi, viend) = indexSet->vertices();
+       aVi != viend; ++aVi)
   {
-    double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
-    if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
-        Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    SP::UnitaryRelation UR = indexSet->bundle(*aVi);
+    SP::Interaction interac = UR->interaction();
+    if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+        Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
-      SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> ((*it)->relation());
-      if (criteria < -1e-7)
+      double criteria = interac->y(0)->getValue(0);
+      if (criteria < - _constraintTolUnilateral)
       {
-        ri->_isOnContact = true;
-      }
-      else
-      {
-        ri->_isOnContact = false;
+        runningNewton = true;
+        printf("TSProj criteria newton true %e.\n", criteria);
       }
     }
-    if (criteria < -_constraintTol)
-      runningNewton = true;
+    else
+    {
+      if (interac->y(0)->normInf() > _constraintTol)
+      {
+        runningNewton = true;
+        printf("TSProj criteria2 newton true %e.\n", interac->y(0)->normInf());
+      }
+    }
   }
 
 
-  while (runningNewton && cmp < 10)
+  while (runningNewton && cmp < 100)
   {
     cmp++;
     //printf("TimeSteppingProjectOnConstraints Newton step = %d\n",cmp);
 
-    runningNewton = false;
-    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-    {
-      (*it)->relation()->computeh(getTkp1());
-      (*it)->relation()->computeJach(getTkp1());
 
-      if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
-          Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    info = 0;
+    cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
+    info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
+    if (info)
+    {
+      cout << "TimeSteppingProjectOnConstraints1 project on constraints failed." << endl ;
+      return;
+    }
+    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    {
+      SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+      Type::Siconos dsType = Type::value(*ds);
+      if (dsType != Type::NewtonEulerDS)
+        RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
+      SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+      neds->normalizeq();
+      neds->updateT();
+    }
+
+    updateWorldFromDS();
+
+    runningNewton = false;
+
+    for (boost::tie(aVi, viend) = indexSet->vertices();
+         aVi != viend; ++aVi)
+    {
+      SP::UnitaryRelation UR = indexSet->bundle(*aVi);
+      SP::Interaction interac = UR->interaction();
+      interac->relation()->computeh(getTkp1());
+      interac->relation()->computeJach(getTkp1());
+      if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+          Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
       {
-        double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
-        if (criteria < -1e-10)
+        double criteria = interac->y(0)->getValue(0);
+        if (criteria < - _constraintTolUnilateral)
+        {
           runningNewton = true;
+          printf("TSProj criteria newton true %e.\n", criteria);
+        }
       }
       else
       {
-        if ((*it)->relation()->interaction()->y(0)->normInf() > 1e-10)
+        if (interac->y(0)->normInf() > _constraintTol)
+        {
           runningNewton = true;
+          printf("TSProj criteria2 newton true %e.\n", interac->y(0)->normInf());
+        }
       }
-
     }
-    info = 0;
-    if (runningNewton)
-    {
-      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
-      if (info)
-      {
-        cout << "TimeSteppingProjectOnConstraints1 project on constraints failed." << endl ;
-        return;
-      }
-      for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-      {
-        SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-        Type::Siconos dsType = Type::value(*ds);
-        if (dsType != Type::NewtonEulerDS)
-          RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
-        SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
 
-        neds->normalizeq();
-      }
-
-      updateWorldFromDS();
-    }
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
@@ -157,15 +188,13 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     //  (*it)->relation()->computeh(getTkp1());
     //}
   }
-
+  return;
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
     Type::Siconos dsType = Type::value(*ds);
     if (dsType != Type::NewtonEulerDS)
       RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
-    SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
-    neds->normalizeq();
     // SP::SiconosVector dotq = neds->dotq();
     // SP::SiconosVector q = neds->q();
     // SP::SiconosVector qold = neds->qMemory()->getSiconosVector(0);
@@ -174,9 +203,9 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     // dotq->setValue(4,(q->getValue(4)-qold->getValue(4))/h);
     // dotq->setValue(5,(q->getValue(5)-qold->getValue(5))/h);
     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
-    neds->updateT();
 
     /*compute the new velocity seeing the work of fext*/
+    SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) -= *(neds->q());
 #ifdef TSPROJ_DEBUG
     printf("TSProj NewtonSolve :deltaq:");
@@ -276,9 +305,14 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
 #ifdef TSPROJ_DEBUG
   printf("TSProjectOnConstraints::predictorDeactivate yref=%e, yDot=%e\n", y, yDot);
 #endif
-  y += 0.5 * h * yDot;
+  //y += 0.5*h*yDot;
   assert(!isnan(y));
   bool res = (y > 1e-7);
+  if (res)
+  {
+    SP::NewtonEulerRImpact  aR = boost::static_pointer_cast<NewtonEulerRImpact>(ur->interaction()->relation());
+    aR->_isOnContact = false;
+  }
 #ifdef TSPROJ_DEBUG
   if (res)
   {
@@ -291,7 +325,7 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
 
 bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
 {
-  return TimeStepping::predictorActivate(ur, i);
+  //return TimeStepping::predictorActivate(ur,i);
   double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
@@ -300,6 +334,12 @@ bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur,
 #endif
   y += 0.5 * h * yDot;
   assert(!isnan(y));
+  bool res = (y <= 0);
+  if (res)
+  {
+    SP::NewtonEulerRImpact  aR = boost::static_pointer_cast<NewtonEulerRImpact>(ur->interaction()->relation());
+    aR->_isOnContact = true;
+  }
 #ifdef TSPROJ_DEBUG
   if (y <= 0)
   {
@@ -307,5 +347,5 @@ bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur,
   }
 #endif
   //printf("TS::predictorActivate y=%e\n",y);
-  return (y <= 0);
+  return res;
 }

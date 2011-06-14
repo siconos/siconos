@@ -72,7 +72,7 @@ protected:
 
   /** Jacobian matrices of H */
   SP::SimpleMatrix _jachq;
-  SP::SimpleMatrix _jachqProj;
+  //proj_with_q SP::SimpleMatrix _jachqProj;
   SP::SiconosMatrix _jachqDot;
   SP::SiconosMatrix _jachlambda;
 
@@ -123,10 +123,7 @@ public:
   {
     return _jachq;
   }
-  inline SP::SimpleMatrix jachqProj() const
-  {
-    return _jachqProj;
-  }
+  //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
   inline SP::SimpleVector yProj()
   {
     return _yProj;

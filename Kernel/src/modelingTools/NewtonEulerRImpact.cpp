@@ -155,7 +155,7 @@ void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
 void  NewtonEulerRImpact::initComponents()
 {
   NewtonEulerR::initComponents();
-  _jachqProj.reset(new SimpleMatrix(_jachq->size(0), _jachq->size(1)));
+  //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   _Mabs_C.reset(new SimpleMatrix(1, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(1, 3));
@@ -240,7 +240,7 @@ void NewtonEulerRImpact::computeJachq(double t)
   }
   //cout<<"WARNING NewtonEulerRImpact set jachq to zedro \n";
   //_jachq->setValue(0,4,0);_jachq->setValue(0,5,0);_jachq->setValue(0,6,0);
-  *_jachqProj = *_jachq;
+  //proj_with_q  *_jachqProj=*_jachq;
   //_jachqProj->setValue(0,4,0);_jachqProj->setValue(0,5,0);_jachqProj->setValue(0,6,0);
 #ifdef NERI_DEBUG
   printf("NewtonEulerRImpact::computeJachq :");

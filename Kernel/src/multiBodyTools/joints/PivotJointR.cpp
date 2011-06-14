@@ -60,15 +60,17 @@ void PivotJointR::initComponents()
   KneeJointR::initComponents();
   if (_d2)
   {
-    _jachqProj.reset(new SimpleMatrix(7, 14));
-    _yProj.reset(new SimpleVector(7));
+    //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
+    //proj_with_q    _yProj.reset(new SimpleVector(7));
+    _yProj.reset(new SimpleVector(5));
   }
   else
   {
-    _jachqProj.reset(new SimpleMatrix(6, 7));
-    _yProj.reset(new SimpleVector(6));
+    //proj_with_q  _jachqProj.reset(new SimpleMatrix(6,7));
+    //proj_with_q    _yProj.reset(new SimpleVector(6));
+    _yProj.reset(new SimpleVector(5));
   }
-  _jachqProj->zero();
+  //proj_with_q  _jachqProj->zero();
   _yProj->zero();
 }
 void PivotJointR::buildA1A2()
@@ -115,26 +117,26 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
   _jachq->setValue(4, 12, _A2x * (-q13) + _A2y * (-q10) + _A2z * (q11));
   _jachq->setValue(4, 13, _A2x * (q12) + _A2y * (-q11) + _A2z * (-q10));
 
+  /*proj_with_q
+  for (unsigned int ii=0; ii <_jachq->size(0); ii++)
+    for (unsigned int jj=0; jj <_jachq->size(1); jj++)
+  _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
 
-  for (unsigned int ii = 0; ii < _jachq->size(0); ii++)
-    for (unsigned int jj = 0; jj < _jachq->size(1); jj++)
-      _jachqProj->setValue(ii, jj, _jachq->getValue(ii, jj));
-
-  _jachqProj->setValue(5, 0, 0);
-  _jachqProj->setValue(5, 1, 0);
-  _jachqProj->setValue(5, 2, 0);
-  _jachqProj->setValue(5, 3, 2.0 * q10);
-  _jachqProj->setValue(5, 4, 2.0 * q11);
-  _jachqProj->setValue(5, 5, 2.0 * q12);
-  _jachqProj->setValue(5, 6, 2.0 * q13);
-  _jachqProj->setValue(6, 0 + 7, 0);
-  _jachqProj->setValue(6, 1 + 7, 0);
-  _jachqProj->setValue(6, 2 + 7, 0);
-  _jachqProj->setValue(6, 3 + 7, 2.0 * q20);
-  _jachqProj->setValue(6, 4 + 7, 2.0 * q21);
-  _jachqProj->setValue(6, 5 + 7, 2.0 * q22);
-  _jachqProj->setValue(6, 6 + 7, 2.0 * q23);
-
+  _jachqProj->setValue(5,0,0);
+  _jachqProj->setValue(5,1,0);
+  _jachqProj->setValue(5,2,0);
+  _jachqProj->setValue(5,3,2.0*q10);
+  _jachqProj->setValue(5,4,2.0*q11);
+  _jachqProj->setValue(5,5,2.0*q12);
+  _jachqProj->setValue(5,6,2.0*q13);
+  _jachqProj->setValue(6,0+7,0);
+  _jachqProj->setValue(6,1+7,0);
+  _jachqProj->setValue(6,2+7,0);
+  _jachqProj->setValue(6,3+7,2.0*q20);
+  _jachqProj->setValue(6,4+7,2.0*q21);
+  _jachqProj->setValue(6,5+7,2.0*q22);
+  _jachqProj->setValue(6,6+7,2.0*q23);
+  */
 
   //_jachq->display();
 }
@@ -160,18 +162,19 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
   _jachq->setValue(4, 4, _A2x);
   _jachq->setValue(4, 5, _A2y);
   _jachq->setValue(4, 6, _A2z);
+  /*proj_with_q
+      for (unsigned int ii=0; ii <_jachq->size(0); ii++)
+        for (unsigned int jj=0; jj <_jachq->size(1); jj++)
+    _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
 
-  for (unsigned int ii = 0; ii < _jachq->size(0); ii++)
-    for (unsigned int jj = 0; jj < _jachq->size(1); jj++)
-      _jachqProj->setValue(ii, jj, _jachq->getValue(ii, jj));
-
-  _jachqProj->setValue(5, 0, 0);
-  _jachqProj->setValue(5, 1, 0);
-  _jachqProj->setValue(5, 2, 0);
-  _jachqProj->setValue(5, 3, 2.0 * q10);
-  _jachqProj->setValue(5, 4, 2.0 * q11);
-  _jachqProj->setValue(5, 5, 2.0 * q12);
-  _jachqProj->setValue(5, 6, 2.0 * q13);
+      _jachqProj->setValue(5,0,0);
+      _jachqProj->setValue(5,1,0);
+      _jachqProj->setValue(5,2,0);
+      _jachqProj->setValue(5,3,2.0*q10);
+      _jachqProj->setValue(5,4,2.0*q11);
+      _jachqProj->setValue(5,5,2.0*q12);
+      _jachqProj->setValue(5,6,2.0*q13);
+  */
 
 }
 
@@ -254,11 +257,12 @@ void PivotJointR::computeh(double t)
 
   std::cout << "PivotJoint computeH:\n";
   y->display();
-  for (unsigned int ii = 0; ii < y->size(); ii++)
-    _yProj->setValue(ii, y->getValue(ii));
-  _yProj->setValue(5, q10 * q10 + q11 * q11 + q12 * q12 + q13 * q13 - 1.0);
-  if (_d2)
-  {
-    _yProj->setValue(6, q20 * q20 + q21 * q21 + q22 * q22 + q23 * q23 - 1.0);
-  }
+  /*proj_with_q
+  for (unsigned int ii=0; ii<y->size();ii++)
+    _yProj->setValue(ii,y->getValue(ii));
+   _yProj->setValue(5,q10*q10+q11*q11+q12*q12+q13*q13 -1.0);
+   if (_d2){
+     _yProj->setValue(6,q20*q20+q21*q21+q22*q22+q23*q23 -1.0);
+   }
+  */
 }

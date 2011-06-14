@@ -17,7 +17,7 @@ The constraint $\dot q = T v$ is suffisiant to keep a normal quaternion. Because
 
 \subsection{Posion formulation}
 
-It consists in writting a position formulation on the systeme:
+It consists in writting a position formulation on the system:
 
 \begin{equation}
 \label{NE_Dyn1}
@@ -28,6 +28,7 @@ h(q) = \left(\begin{array}{l}
 \end{array}
 \end{equation}
 
+\subsubsection{Approach using q}
 
 We are looking for $q_1$ from $q_0$:\\
 \begin{equation}
@@ -45,13 +46,13 @@ Assume that $h(q_0)$ doesn't satisfy the constraints, ie $ HI(q_0) \ngeq 0$ or $
 
 The getting system could be written has a MLCP:
 \begin{equation}
-C \ni h(q_0)+ \nabla ^t(\nabla \Lambda) , \Lambda \in C^*
+C \ni h(q_0)+ \nabla ^t h(\nabla h\Lambda) , \Lambda \in C^*
 \end{equation}
 
 In the case of a quaternion $Q$ for the rotation representation, it is noteworthy that this system doesn't deal with the constraints $\mid Q \mid = 1$. Thus, the direction $(q_1,q_0)$ can be normal to this constraint, in that case this approach doesn't work. (It happens in practice) The solution that consists in normaliaed q after this formulation is not convenient because, it could be incompatible with $\mid Q \mid = 1$. A better approach is to add this constraint.
 
-\subsection {Position formulation with the quaternion constraints}
-It consists in adding the constraint $\mid Q \mid = 1$ in the system HE:
+
+The constraint $\mid Q \mid = 1$ in the system HE:
 
 \begin{equation}
   \tilde {HE}(q)= \left(\begin{array}{l}
@@ -61,3 +62,26 @@ It consists in adding the constraint $\mid Q \mid = 1$ in the system HE:
 \end{equation}
 
 The formulation described above can be done. 
+\subsubsection{Approach using V}
+\begin{equation}
+\label{NE_projV}
+h(q_1) = h(q_0)+\nabla ^t H \delta q
+\end{equation}
+ie:
+\begin{equation}
+\label{NE_projV}
+h(q_1) = h(q_0)+\nabla ^t H T V
+\end{equation}
+
+We are looking for $q_1$ such that:
+\begin{equation}
+  q_1-q_0 = \nabla H \Lambda
+\end{equation}
+ie
+\begin{equation}
+  ^tT(q_1-q_0)=V= ^tT \nabla H\Lambda
+\end{equation}
+With $C=^t\nabla _q h$ leading to the prolem:
+\begin{equation}
+K \ni h(q_0)+ CT~ ^t (CT)   \Lambda \in K^*
+\end{equation}

@@ -39,6 +39,7 @@ protected:
   virtual void initOSNS();
   /*tolerence allowed on the constrain.*/
   double _constraintTol;
+  double _constraintTolUnilateral;
   /*disabled or enabled projection*/
   unsigned int _doProj;
   unsigned int _doOnlyProj;
