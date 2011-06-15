@@ -20,6 +20,13 @@
 
 #include "DisksViewer.hpp"
 
+#include <Siconos/IO/Register.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+
+
+SICONOS_IO_REGISTER(Model, (_t)(_t0)(_T)(_title)(_author)(_description)(_date)(_xmlSchema));
+
 using namespace qglviewer;
 
 void DisksViewer::init()
@@ -50,6 +57,12 @@ void DisksViewer::init()
   Siconos_.reset(new Disks());
 
   Siconos_->init();
+
+  std::ofstream ofs("diskmodel.xml");
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    save(oa, *Siconos_->model(), 0);
+  }
 
   int i;
   DSIterator itDS;
