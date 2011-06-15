@@ -29,6 +29,8 @@
 #include "SiconosPointers.hpp"
 #include "InteractionsSet.hpp"
 
+#include "SiconosSerialization.hpp"
+
 class Simulation;
 DEFINE_SPTR(SiconosModelXML);
 
@@ -76,6 +78,11 @@ private:
   /** assignment operator => forbidden
    */
   Model& operator=(const Model&);
+
+
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(Model);
 
 public:
 
