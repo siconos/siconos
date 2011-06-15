@@ -1,8 +1,8 @@
 #include "NonSmoothDrivers.h"
 #include "pinv.h"
 #include "LA.h"
-#define GMP_DEBUG_REDUCED
-#define GMP_DEBUG_GMPREDUCED_SOLVE
+//#define GMP_DEBUG_REDUCED
+//#define GMP_DEBUG_GMPREDUCED_SOLVE
 
 void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedProb, double * Qreduced, int * Me_size, int* Mi_size);
 void _GMPReducedGetSizes(GenericMechanicalProblem* pInProblem, int * Me_size, int* Mi_size);
@@ -615,7 +615,11 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
 
   _GMPReducedGetSizes(pInProblem, Me_size, Mi_size);
   if (*Me_size == 0)
+  {
+    memcpy(Qreduced, pInProblem->q, (*Mi_size)*sizeof(double));
+    SBMtoDense(m, reducedProb);
     return;
+  }
 
   double *Me = (*Me_size) ? (double *) malloc((*Me_size) * nbCol * sizeof(double)) : 0;
   double *Mi = (*Mi_size) ? (double *) malloc((*Mi_size) * nbCol * sizeof(double)) : 0;
