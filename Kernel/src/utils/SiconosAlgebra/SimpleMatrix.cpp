@@ -2513,7 +2513,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   if (B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(M) failed. Not yet implemented for M being a BlockMatrix.");
-  int info;
+  int info = 0;
 
   if (num == 1)
   {

@@ -534,7 +534,14 @@ void Interaction::swapInMemory()
   {
     for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
+      assert(_y[i]->vector(j));
+      assert(_yOld[i]->vector(j));
+
       *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
+
+      assert(_lambdaOld[i]->vector(j));
+      assert(_lambda[i]->vector(j));
+
       *(_lambdaOld[i]->vector(j)) = *(_lambda[i]->vector(j));
     }
   }

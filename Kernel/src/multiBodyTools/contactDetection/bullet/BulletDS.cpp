@@ -23,7 +23,7 @@
 #ifdef DEBUG_BULLETDS
 #define DEBUG_MESSAGES 1
 #endif
-#include <debug.h>
+#include "debug.h"
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
