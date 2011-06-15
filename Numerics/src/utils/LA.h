@@ -304,7 +304,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #else
 #include <stdio.h>
 #define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
-  ({ fprintf(stderr, "DGELS not found. Please check you LAPACK/ATLAS installation.\n");exit(EXIT_FAILURE); })
+  ({INFO=1;  fprintf(stderr, "DGELS not found. Please check you LAPACK/ATLAS installation.\n");exit(EXIT_FAILURE); fprintf(stderr, "%p", WORK); })
 #endif
 
 /* DGESVD -
