@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 SiconosKernel.hpp
+
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
 
-import sys, os, getopt
+import sys, os, getopt, re
 
 from pygccxml import parser
 from pygccxml import declarations
@@ -48,12 +50,15 @@ global_ns = declarations.get_global_namespace( decls )
 def is_serializable(some_class):
     return 'serializable' in [ t.name for t in class_.typedefs(allow_empty=True) ]
 
+def is_xml(s):
+    m = re.search('xml|XML|Xml',s)
+    return m != None
 # classes in siconos_namespace
 for class_ in reduce(lambda r,c: r + [c] if c.parent.name == siconos_namespace else r,global_ns.classes(),[]):
 
     # with the serializabe tag
     # (could not find friend functions with pygccxml)
-    if is_serializable(class_):
+    if is_serializable(class_) and not is_xml(class_.name):
 
         # print registration macros depending on inheritance
         if len(class_.variables(allow_empty=True))>0:
@@ -72,9 +77,9 @@ for class_ in reduce(lambda r,c: r + [c] if c.parent.name == siconos_namespace e
                     print 'SICONOS_IO_REGISTER({0},'.format(class_.name)
                 
             variables = [ v.name for v in class_.variables(allow_empty=True) ]
-            for vn in variables[:-1]:
-                print '  ({0})'.format(vn)
-            print '  ({0}))'.format(variables[-1:][0])
+
+            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not is_xml(x), variables)))
+
         
             
     

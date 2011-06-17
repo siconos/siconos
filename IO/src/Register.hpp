@@ -7,6 +7,11 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
+
 #include <boost/mpl/eval_if.hpp>
 
 
@@ -22,7 +27,7 @@
     BOOST_PP_STRINGIZE(b),                                              \
     boost::serialization::base_object<b>(c) );                          \
  
-#define INTERNAL_SICONOS_BOOST_REGISTER(CLASS) \
+#define INTERNAL_SICONOS_BOOST_REGISTER(CLASS)                          \
   namespace boost { namespace serialization {                           \
       struct Load##CLASS                                                \
       {                                                                 \
@@ -107,9 +112,7 @@
   void load(Archive & ar, CLASS & c, const unsigned int version)        \
   {                                                                     \
     BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-    ar >> boost::serialization::make_nvp(                               \
-      #CLASS,                                                           \
-      boost::serialization::base_object<BASE>(c) );                     \
+    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE_BASE, c, BASES); \
   };                                                                    \
   INTERNAL_SICONOS_BOOST_REGISTER(CLASS)
 
