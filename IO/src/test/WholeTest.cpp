@@ -179,5 +179,10 @@ void WholeTest::t3()
   }
 
   CPPUNIT_ASSERT((l0.p1().x == l1.p1().x));
+  CPPUNIT_ASSERT((l0.p1().y == l1.p1().y));
+
+  CPPUNIT_ASSERT((l0.p2().x == l1.p2().x));
+  CPPUNIT_ASSERT((l0.p2().y == l1.p2().y));
+
 }
 

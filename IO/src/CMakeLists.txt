@@ -56,10 +56,10 @@ SET(TEST_WRAP TRUE)
 IF(WITH_TESTING)
 
   # the main test driver
-  SET(TEST_MAIN Test/TestMain.cpp)
+  SET(TEST_MAIN test/TestMain.cpp)
 
-  BEGIN_TEST(Test)
+  BEGIN_TEST(test)
   NEW_TEST(whole WholeTest.cpp)
-  END_TEST(Test)
+  END_TEST(test)
 
 ENDIF(WITH_TESTING)

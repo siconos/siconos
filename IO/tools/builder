@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+# we use pygccxml from Roman Yakovenko.
+# http://sourceforge.net/projects/pygccxml/
+
+import sys, os, getopt
+
+from pygccxml import parser
+from pygccxml import declarations
+
+myname = sys.argv[0]
+include_paths=[]
+siconos_namespace = '::'
+
+def usage():
+    print '{0} [--namespace=<namespace>] -I<path> [-I<path> ...] header'.format(myname)
+
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help'])
+except getopt.GetoptError, err:
+    print str(err)
+    usage()
+    sys.exit(2)
+
+for opt, arg in opts:
+    if opt == '-I':
+        include_paths += [ arg ]
+    if opt == '--namespace':
+        siconos_namespace = arg
+    if opt == '--help':
+        usage()
+        sys.exit(0)
+
+
+if len(args) <> 1:
+    usage()
+    sys.exit(1)        
+
+input_header = args[0]    
+
+config = parser.config_t( include_paths=include_paths )
+
+decls = parser.parse( ['SiconosKernel.hpp'], config )
+global_ns = declarations.get_global_namespace( decls )
+
+
+def is_serializable(some_class):
+    return 'serializable' in [ t.name for t in class_.typedefs(allow_empty=True) ]
+
+# classes in siconos_namespace
+for class_ in reduce(lambda r,c: r + [c] if c.parent.name == siconos_namespace else r,global_ns.classes(),[]):
+
+    # with the serializabe tag
+    # (could not find friend functions with pygccxml)
+    if is_serializable(class_):
+
+        # print registration macros depending on inheritance
+        if len(class_.variables(allow_empty=True))>0:
+            if class_.bases == []:
+                print 'SICONOS_IO_REGISTER({0},'.format(class_.name)
+            else:
+                serializable_bases = \
+                                   reduce(lambda r,b:
+                                          r + [b.related_class] if is_serializable(b.related_class)
+                                          and b.related_class.parent.name == siconos_namespace
+                                          else r, class_.bases, [])
+                if len(serializable_bases) > 0:
+                    print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(class_.name,
+                    ''.join(['({0})'.format(c.name) for c in serializable_bases]))
+                else:
+                    print 'SICONOS_IO_REGISTER({0},'.format(class_.name)
+                
+            variables = [ v.name for v in class_.variables(allow_empty=True) ]
+            for vn in variables[:-1]:
+                print '  ({0})'.format(vn)
+            print '  ({0}))'.format(variables[-1:][0])
+        
+            
+    
