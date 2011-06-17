@@ -13,8 +13,14 @@ int main(int argc, char* argv[])
     unsigned int ndof = 2;  // number of degrees of freedom of your system
     double t0 = 0.0;
     double T = 1;        // Total simulation time
-    double h = 1.0e-3;      // Time step
+    double h = 1.0e-4;      // Time step
+    double hcontroller = 1.0e-2;      // Time step
     double Vinit = 1.0;
+
+    if (h > hcontroller)
+    {
+      RuntimeException::selfThrow("hcontroller must be larger than h");
+    }
 
 
     // ================= Creation of the model =======================
@@ -45,9 +51,11 @@ int main(int argc, char* argv[])
     SP::SiconosVector x0(new SimpleVector(ndof));
     (*x0)(0) = Vinit;
     (*x0)(1) = -Vinit;
-    SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
-    process->setComputebFunction("RelayPlugin.so", "computeB");
 
+    SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
+    processDS->setComputebFunction("RelayPlugin.so", "computeB");
+
+    SP::FirstOrderLinearDS controllerDS(new FirstOrderLinearDS(x0, A));
 
     // --------------------
     // --- Interactions ---
@@ -68,59 +76,90 @@ int main(int argc, char* argv[])
     (*C)(1, 0) = 0.0;
     (*C)(0, 1) = 0.0;
     (*C)(1, 1) = 1.0;
-    SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C, B));
+
     SP::SimpleMatrix D(new SimpleMatrix(ninter, ninter));
     (*D)(0, 0) = 0.0;
     (*D)(0, 1) = 0.0;
     (*D)(1, 0) = 0.0;
     (*D)(1, 1) = 0.0;
 
-    myProcessRelation->setDPtr(D);
+
+    //     SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C,B));
+    //     myProcessRelation->setDPtr(D);
     //myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so","computeE");
 
-    // Second relation, related to the observer
-    // haty = C hatX + D hatLambda + E
-    // hatR = B hatLambda
+    SP::FirstOrderLinearR myControllerRelation(new FirstOrderLinearR(C, B));
+    myControllerRelation->setDPtr(D);
 
     // NonSmoothLaw
     unsigned int nslawSize = 2;
     SP::NonSmoothLaw myNslaw(new RelayNSL(nslawSize));
-
     myNslaw->display();
 
     // The Interaction which involves the first DS (the process)
     string nameInter = "processInteraction"; // Name
-    unsigned int numInter = 2; // Dim of the interaction = dim of y and lambda vectors
 
-    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    //    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+
+    SP::Interaction myControllerInteraction(new Interaction(ninter, myNslaw, myControllerRelation));
 
 
 
     // -------------
-    // --- Model ---
+    // --- Model process ---
     // -------------
-    SP::Model relayBiSimulation(new Model(t0, T));
-    relayBiSimulation->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-
-    relayBiSimulation->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::Model process(new Model(t0, T));
+    process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
+    //     process->nonSmoothDynamicalSystem()->link(myProcessInteraction,processDS);
 
     // ------------------
     // --- Simulation ---
     // ------------------
     // TimeDiscretisation
-    SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
+    SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping processSimulation(new TimeStepping(processTD));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau myIntegrator(new Moreau(process, theta));
-    s->insertIntegrator(myIntegrator);
+    SP::Moreau processIntegrator(new Moreau(processDS, theta));
+    processSimulation->insertIntegrator(processIntegrator);
 
     // -- OneStepNsProblem --
-    SP::LCP osnspb1(new LCP());
+    SP::LCP processLCP(new LCP());
 
-    SP::Relay osnspb(new Relay(SICONOS_RELAY_PGS));
-    s->insertNonSmoothProblem(osnspb);
+    SP::Relay processOSNSPB(new Relay(SICONOS_RELAY_PGS));
+    processSimulation->insertNonSmoothProblem(processOSNSPB);
+
+
+    // -------------
+    // --- Model controller ---
+    // -------------
+    SP::Model controller(new Model(t0, T));
+    controller->nonSmoothDynamicalSystem()->insertDynamicalSystem(controllerDS);
+    controller->nonSmoothDynamicalSystem()->link(myControllerInteraction, controllerDS);
+
+    // ------------------
+    // --- Simulation ---
+    // ------------------
+    // TimeDiscretisation
+    SP::TimeDiscretisation controllerTD(new TimeDiscretisation(t0, hcontroller));
+    // == Creation of the Simulation ==
+    SP::TimeStepping controllerSimulation(new TimeStepping(controllerTD));
+    // -- OneStepIntegrators --
+    double controllertheta = 0.5;
+    SP::Moreau controllerIntegrator(new Moreau(controllerDS, controllertheta));
+    controllerSimulation->insertIntegrator(controllerIntegrator);
+
+    // -- OneStepNsProblem --
+    SP::LCP controllerLCP(new LCP());
+
+    SP::Relay controllerOSNSPB(new Relay(SICONOS_RELAY_PGS));
+    controllerSimulation->insertNonSmoothProblem(controllerOSNSPB);
+
+
+
+
+
 
     // =========================== End of model definition ===========================
 
@@ -130,57 +169,87 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    relayBiSimulation->initialize(s);
-
-
-    //  (s->oneStepNSProblems)[0]->initialize(s);
-
+    process->initialize(processSimulation);
+    controller->initialize(controllerSimulation);
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
-    int N = (int)((T - t0) / h); // Number of time steps
-
+    int N = (int)((T - t0) / h) + 10; // Number of time steps
     SimpleMatrix dataPlot(N, outputSize);
 
-    SP::SiconosVector xProc = process->x();
-    SP::SiconosVector lambdaProc = myProcessInteraction->lambda(0);
-    SP::SiconosVector yProc = myProcessInteraction->y(0);
+    SP::SiconosVector xProc = processDS->x();
 
     // -> saved in a matrix dataPlot
-    dataPlot(0, 0) = relayBiSimulation->t0(); // Initial time of the model
+    dataPlot(0, 0) = process->t0(); // Initial time of the model
     dataPlot(0, 1) = (*xProc)(0);
-    dataPlot(0, 2) = (*xProc)(1);
-    dataPlot(0, 5) = (*lambdaProc)(0);
-    dataPlot(0, 6) = (*lambdaProc)(1);
-    dataPlot(0, 7) = (*yProc)(0);
-    dataPlot(0, 8) = (*yProc)(1);
+
+    int Ncontroller = (int)((T - t0) / hcontroller) + 10; // Number of time steps
+    SimpleMatrix dataPlotController(Ncontroller, outputSize);
+
+    SP::SiconosVector xController = controllerDS->x();
+    SP::SiconosVector lambda = myControllerInteraction->lambda(0);
+    SP::SiconosVector y = myControllerInteraction->y(0);
+
+    // -> saved in a matrix dataPlot
+    dataPlotController(0, 0) = controller->t0(); // Initial time of the model
+    dataPlotController(0, 1) = (*xController)(0);
+    dataPlotController(0, 2) = (*xController)(1);
+    dataPlotController(0, 5) = (*lambda)(0);
+    dataPlotController(0, 6) = (*lambda)(1);
+    dataPlotController(0, 7) = (*y)(0);
+    dataPlotController(0, 8) = (*y)(1);
 
 
+    // coupling the simulation
+
+    SP::SimpleVector sampledControl(new SimpleVector(2));
+    sampledControl->zero();
+    processDS->setzPtr(sampledControl);
 
     // ==== Simulation loop =====
     cout << "====> Start computation ... " << endl << endl;
 
     // *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
     int k = 0; // Current step
-
+    int kcontroller = 0;
     // Simulation loop
     boost::timer time;
     time.restart();
-    while (k < 800)
+
+    while (processSimulation->nextTime() < T)
     {
-      k++;
-      cout << "step --> " << k << endl;
-      //    osnspb->setNumericsVerboseMode(1);
-      //  *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
-      s->computeOneStep();
-      dataPlot(k, 0) = s->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
-      dataPlot(k, 5) = (*lambdaProc)(0);
-      dataPlot(k, 6) = (*lambdaProc)(1);
-      dataPlot(k, 7) = (*yProc)(0);
-      dataPlot(k, 8) = (*yProc)(1);
-      s->nextStep();
+      kcontroller ++ ;
+      cout << "step controller--> " << kcontroller << " at time t =" << controllerSimulation->nextTime() << endl;
+
+      // Computation of the controller over the sampling time
+      controllerSimulation->computeOneStep();
+
+      //  input of the controller in the process thanks to z and sampledControl
+      prod(1.0, *B, *lambda, *sampledControl, true);
+
+      while (processSimulation->nextTime() < controllerSimulation->nextTime())
+      {
+        k++;
+        cout << "         step --> " << k  << " at time t =" << processSimulation->nextTime() << endl;
+
+        processSimulation->computeOneStep();
+        dataPlot(k, 0) = processSimulation->nextTime();
+        dataPlot(k, 1) = (*xProc)(0);
+        dataPlot(k, 2) = (*xProc)(1);
+        processSimulation->nextStep();
+      }
+      dataPlotController(kcontroller, 0) = controllerSimulation->nextTime() ; // Initial time of the model
+      dataPlotController(kcontroller, 1) = (*xController)(0);
+      dataPlotController(kcontroller, 2) = (*xController)(1);
+      dataPlotController(kcontroller, 5) = (*lambda)(0);
+      dataPlotController(kcontroller, 6) = (*lambda)(1);
+      dataPlotController(kcontroller, 7) = (*y)(0);
+      dataPlotController(kcontroller, 8) = (*y)(1);
+
+      // feedback output of the measures for the controller
+      *(xController) = *(xProc);
+
+      controllerSimulation->nextStep();
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
@@ -188,12 +257,16 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("RelayBiSimulation.dat", "ascii");
+    ioMatrix ioController("RelayBiSimulation-Controller.dat", "ascii");
     dataPlot.resize(k, outputSize);
+    dataPlotController.resize(kcontroller, outputSize);
     io.write(dataPlot, "noDim");
+    ioController.write(dataPlotController, "noDim");
+
 
     // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    //    SimpleMatrix dataPlotRef(dataPlot);
+    //     dataPlotRef.zero();
     // ioMatrix ref("RelayBiSimulation.ref", "ascii");
     //     ref.read(dataPlotRef);
     //     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
