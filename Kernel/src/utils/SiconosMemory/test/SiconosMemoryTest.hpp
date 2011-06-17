@@ -27,6 +27,10 @@ class SiconosMemoryTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosMemoryTest);
+
 
   // Test suite
   CPPUNIT_TEST_SUITE(SiconosMemoryTest);

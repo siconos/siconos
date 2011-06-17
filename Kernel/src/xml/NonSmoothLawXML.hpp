@@ -42,6 +42,10 @@ class NonSmoothLaw;
 class NonSmoothLawXML
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NonSmoothLawXML);
+
 
   /** rootNode */
   xmlNodePtr rootNode;

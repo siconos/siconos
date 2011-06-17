@@ -70,6 +70,10 @@ TYPEDEF_SPTR(FrictionContactProblem);
 class FrictionContact : public LinearOSNS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FrictionContact);
+
 
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim;

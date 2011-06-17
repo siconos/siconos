@@ -37,6 +37,10 @@ class DiskMovingPlanR : public LagrangianRheonomousR,
   public boost::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DiskMovingPlanR);
+
   double _time, _A, _B, _C, _ADot, _BDot, _CDot, _sqrA2pB2, _r, _AADot, _BBDot, _cubsqrA2pB2;
 
 

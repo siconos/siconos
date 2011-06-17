@@ -29,6 +29,10 @@ class LagrangianLinearTIDSTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianLinearTIDSTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianLinearTIDSTest);

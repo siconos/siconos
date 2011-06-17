@@ -31,6 +31,10 @@
 class CircularR : public LagrangianScleronomousR
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(CircularR);
+
   double r1, r2;
 
   CircularR() : LagrangianScleronomousR() {};

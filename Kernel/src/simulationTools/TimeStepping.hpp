@@ -42,6 +42,10 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 class TimeStepping : public Simulation
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeStepping);
+
 
   /** Default Constructor
    */

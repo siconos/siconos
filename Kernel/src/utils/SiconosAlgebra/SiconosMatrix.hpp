@@ -57,6 +57,10 @@ union MATRIX_UBLAS_TYPE
 class SiconosMatrix
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosMatrix);
+
 
   /** Number of rows (Warning: total number of scalar elements, not number of blocks) */
   unsigned int dimRow;

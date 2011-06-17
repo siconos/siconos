@@ -31,6 +31,10 @@ class SphereNEDSSphereNEDSR : public NewtonEulerRFC3D,
   public boost::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);
+
   double r1, r2, r1pr2;
 
   SphereNEDSSphereNEDSR();

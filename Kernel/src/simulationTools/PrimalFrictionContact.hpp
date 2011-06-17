@@ -73,6 +73,10 @@ typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, Solve
 class PrimalFrictionContact : public LinearOSNS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(PrimalFrictionContact);
+
 
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim;

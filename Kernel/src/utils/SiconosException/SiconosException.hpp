@@ -24,6 +24,7 @@
 #define __SiconosException__
 
 #include <string>
+#include "SiconosSerialization.hpp"
 
 /** General Siconos Exception
  *
@@ -61,6 +62,10 @@ public:
   } ;
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosException);
+
   /** report message which describe the exception */
   std::string reportMsg;
 };

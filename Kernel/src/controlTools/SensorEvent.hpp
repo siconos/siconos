@@ -37,6 +37,10 @@ class SensorEvent : public Event
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SensorEvent);
+
 
   /** The sensor linked to the present event */
   SP::Sensor _sensor;

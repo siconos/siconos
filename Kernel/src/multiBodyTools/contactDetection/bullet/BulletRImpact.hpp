@@ -26,6 +26,10 @@
 class BulletRImpact : public NewtonEulerRImpact
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletRImpact);
+
   SP::btManifoldPoint _contactPoints;
 
 public:

@@ -35,6 +35,10 @@ class InteractionXMLTest: public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(InteractionXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root, *child;

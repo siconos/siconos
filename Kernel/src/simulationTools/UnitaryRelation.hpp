@@ -76,6 +76,10 @@ class UnitaryRelation
   // === PRIVATE MEMBERS ===
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(UnitaryRelation);
+
 
   /** link to Interaction that owns this relation **/
   SP::Interaction _mainInteraction;

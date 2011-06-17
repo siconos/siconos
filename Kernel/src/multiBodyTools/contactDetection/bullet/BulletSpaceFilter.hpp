@@ -39,6 +39,10 @@ class BulletSpaceFilter : public SpaceFilter
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletSpaceFilter);
+
   boost::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
   boost::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
 

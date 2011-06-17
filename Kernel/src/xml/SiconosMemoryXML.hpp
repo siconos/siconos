@@ -45,6 +45,10 @@ class SiconosMemoryXML
   xmlNodePtr parentNode;
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosMemoryXML);
+
 
   /** Return a vector of SiconosVector computed from a memory node
   *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type

@@ -29,6 +29,10 @@
 class MLCPProjectOnConstraints : public MLCP
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
+
 
 public:
 

@@ -92,6 +92,10 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix);
 class BlockCSRMatrix
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BlockCSRMatrix);
+
   /** Number of blocks in  row*/
   unsigned int nr;
 

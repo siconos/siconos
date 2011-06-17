@@ -39,6 +39,10 @@
 class NewtonImpactFrictionNSLXML : public NonSmoothLawXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonImpactFrictionNSLXML);
+
   xmlNode * enNode;
   xmlNode * etNode;
   xmlNode * muNode;

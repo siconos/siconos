@@ -42,6 +42,10 @@ const std::string LTIDS_C = "C";
 class LagrangianLinearTIDSXML : public LagrangianDSXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianLinearTIDSXML);
+
 
   xmlNodePtr KNode;
   xmlNodePtr CNode;

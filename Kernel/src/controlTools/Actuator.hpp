@@ -94,6 +94,10 @@ TYPEDEF_SPTR(Sensors);
 class Actuator : public boost::enable_shared_from_this<Actuator>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Actuator);
+
 
   /** type of the Actuator */
   int _type;

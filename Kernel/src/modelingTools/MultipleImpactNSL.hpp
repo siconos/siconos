@@ -9,6 +9,10 @@ using namespace std;
 class MultipleImpactNSL : public NonSmoothLaw
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MultipleImpactNSL);
+
   //Energytical restitution coefficient
   double _ResCof;
   //Normal stiffness at contact

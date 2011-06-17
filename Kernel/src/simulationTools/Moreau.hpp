@@ -62,6 +62,10 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
 class Moreau : public OneStepIntegrator
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Moreau);
+
 
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;

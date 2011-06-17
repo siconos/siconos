@@ -29,6 +29,10 @@
 class Disk : public CircularDS, public boost::enable_shared_from_this<Disk>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Disk);
+
 
   void MassSetup();
 

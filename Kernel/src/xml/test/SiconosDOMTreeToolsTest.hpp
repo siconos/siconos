@@ -35,6 +35,10 @@ class SiconosDOMTreeToolsTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosDOMTreeToolsTest);
+
 
   xmlDoc *doc;
   xmlNode *root, *child;

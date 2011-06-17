@@ -28,6 +28,7 @@
 #include<gmp.h>
 #include "SiconosConst.hpp"
 #include "SiconosPointers.hpp"
+#include "SiconosSerialization.hpp"
 
 class Simulation;
 
@@ -61,6 +62,10 @@ const double DEFAULT_TICK = 1e-16;
 class Event
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Event);
+
 
   /** Date of the present event,
    *  represented with a mpz_t */

@@ -29,6 +29,10 @@
 class Circle : public CircularDS, public boost::enable_shared_from_this<Circle>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Circle);
+
 
   void MassSetup();
 

@@ -41,6 +41,10 @@ class NonSmoothLaw;
 class EqualityConditionNSL : public NonSmoothLaw
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(EqualityConditionNSL);
+
   /** default constructor
    */
   EqualityConditionNSL() {};

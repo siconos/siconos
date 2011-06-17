@@ -74,6 +74,10 @@ class LagrangianScleronomousR : public LagrangianR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianScleronomousR);
+
   /** LagrangianScleronomousR plug-in to compute h(q,z)
     * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
     * @param q : pointer to the first element of q

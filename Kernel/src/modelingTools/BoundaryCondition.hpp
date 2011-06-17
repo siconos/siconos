@@ -100,6 +100,10 @@ public:
   virtual void computePrescribedVelocity(double time);
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BoundaryCondition);
+
   /* Indices of the prescribed component of the velocity vector */
   SP::UnsignedIntVector _velocityIndices;
   /* Values of the prescribed component of the velocity vector */

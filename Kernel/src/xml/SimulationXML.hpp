@@ -80,6 +80,10 @@ class SimulationXML
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SimulationXML);
+
 
   /* root node for simulation - Tag: Simulation */
   xmlNodePtr rootNode;

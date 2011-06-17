@@ -26,6 +26,10 @@
 class BulletR : public NewtonEulerRFC3D
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletR);
+
   SP::btManifoldPoint _contactPoints;
   SP::btPersistentManifold _contactManifold;
 

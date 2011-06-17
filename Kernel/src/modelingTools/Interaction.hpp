@@ -81,6 +81,10 @@ class BlockVector;
 class Interaction : public boost::enable_shared_from_this<Interaction >
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Interaction);
+
 
   /**initialization flag */
   bool _initialized;

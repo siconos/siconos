@@ -51,6 +51,10 @@ class BlockVector;
 class Lsodar : public OneStepIntegrator, public boost::enable_shared_from_this<Lsodar>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Lsodar);
+
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
    * See opkdmain.f and lsodar routine for details on those variables.

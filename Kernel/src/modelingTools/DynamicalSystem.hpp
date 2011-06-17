@@ -151,6 +151,10 @@ public:
   enum WorkNames {local_buffer, sizeWorkV};
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DynamicalSystem);
+
   /** used to set ds number */
   static unsigned int count;
 

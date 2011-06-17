@@ -55,8 +55,12 @@ using RELATION::SUBTYPES;
 class RelationXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(RelationXML);
 
-  /** Copy => private: no copy nor pass-by value. */
+
+private:
   RelationXML(const RelationXML&);
 
 protected:

@@ -16,6 +16,10 @@ const double DEFAULT_TOL_IMPACT = 100 * MACHINE_PREC;
 class OSNSMultipleImpact : public LinearOSNS
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OSNSMultipleImpact);
+
   // Time-like variable (Impulse)
   double Impulse_variable;
   // Time variable

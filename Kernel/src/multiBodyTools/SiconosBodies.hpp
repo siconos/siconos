@@ -34,6 +34,10 @@ class SiconosBodies
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosBodies);
+
 
   SP::FMatrix _moving_plans;
   SP::SiconosMatrix _plans;

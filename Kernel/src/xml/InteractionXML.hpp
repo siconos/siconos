@@ -40,6 +40,10 @@ class RelationXML;
 class InteractionXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(InteractionXML);
+
 
   /** root node -> named "Interaction"*/
   xmlNodePtr  rootNode;

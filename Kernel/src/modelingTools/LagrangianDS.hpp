@@ -128,6 +128,10 @@ public:
   enum WorkMatrixNames {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, sizeWorkMat};
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianDS);
+
 
   // -- MEMBERS --
 

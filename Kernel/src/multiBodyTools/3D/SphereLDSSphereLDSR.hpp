@@ -30,6 +30,10 @@
 class SphereLDSSphereLDSR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereLDSSphereLDSR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SphereLDSSphereLDSR);
+
   double r1, r2, r1pr2;
 
   SphereLDSSphereLDSR();

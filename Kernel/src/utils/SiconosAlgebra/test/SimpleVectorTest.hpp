@@ -31,6 +31,10 @@ class SimpleVectorTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SimpleVectorTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SimpleVectorTest);

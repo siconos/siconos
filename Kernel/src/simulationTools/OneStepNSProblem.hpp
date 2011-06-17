@@ -89,6 +89,10 @@ class OneStepNSProblem
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OneStepNSProblem);
+
 
   /** Algorithm/solver name
   std::string _numerics_solver_name;*/

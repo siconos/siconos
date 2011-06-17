@@ -47,6 +47,10 @@ public:
   */
   LsodarXML(xmlNode * LsodarNode);
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LsodarXML);
+
 };
 
 DEFINE_SPTR(LsodarXML);

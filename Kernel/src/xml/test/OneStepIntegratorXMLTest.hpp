@@ -40,6 +40,10 @@ class OneStepIntegratorXMLTest: public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OneStepIntegratorXMLTest);
+
   SiconosModelXML* modelXML;
   StrategyXML* strategyXML;
   vector<OneStepIntegratorXML*> oneStepIs;

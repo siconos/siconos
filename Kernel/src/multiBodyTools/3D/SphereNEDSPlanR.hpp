@@ -32,6 +32,10 @@
 class SphereNEDSPlanR : public NewtonEulerRFC3D, public boost::enable_shared_from_this<SphereNEDSPlanR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SphereNEDSPlanR);
+
 
   /* Ax + By + Cz + D = 0 */
   double r, A, B, C, D, nN, nU;

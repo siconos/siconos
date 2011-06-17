@@ -36,6 +36,10 @@
 class TimeSteppingProjectOnConstraints : public TimeStepping
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeSteppingProjectOnConstraints);
+
   virtual void initOSNS();
   /*tolerence allowed on the constrain.*/
   double _constraintTol;

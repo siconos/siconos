@@ -44,6 +44,10 @@ Basic class to handle with dynamical system integrators over a time step.
 class OneStepIntegrator
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OneStepIntegrator);
+
 
   /** type/name of the Integrator */
   OSI::TYPES integratorType;

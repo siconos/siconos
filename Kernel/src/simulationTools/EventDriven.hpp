@@ -38,6 +38,10 @@ const double DEFAULT_TOL_ED  = 1000 * DEFAULT_TOLERANCE;
 class EventDriven : public Simulation
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(EventDriven);
+
 
   /** flag used in DLSODAR -
    *  As input: 1 if first call, else 2

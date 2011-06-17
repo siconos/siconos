@@ -29,6 +29,10 @@ class LagrangianDSTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianDSTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianDSTest);

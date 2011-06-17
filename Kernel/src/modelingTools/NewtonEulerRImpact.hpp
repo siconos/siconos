@@ -45,6 +45,10 @@
 class NewtonEulerRImpact : public NewtonEulerR
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonEulerRImpact);
+
   /*Point of contact*/
   SP::SimpleVector _Pc1;
   SP::SimpleVector _Pc2;

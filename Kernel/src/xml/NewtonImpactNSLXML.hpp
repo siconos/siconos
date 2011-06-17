@@ -39,6 +39,10 @@ const std::string NEWTON_E = "e";
 class NewtonImpactNSLXML : public NonSmoothLawXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonImpactNSLXML);
+
   /** node that handle restitution coefficient for the law */
   xmlNode * ENode;
 

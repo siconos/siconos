@@ -76,6 +76,10 @@ class Relay : public LinearOSNS
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Relay);
+
 
   /** contains the vector lb (lower bounds) of a Relay system */
   SP::SiconosVector _lb;

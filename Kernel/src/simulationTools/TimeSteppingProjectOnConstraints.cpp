@@ -299,7 +299,6 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 }
 bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
 {
-  double h = timeStep();
   double y = ur->getYRef(i - 1);
   double yDot = ur->getYRef(1);
 #ifdef TSPROJ_DEBUG

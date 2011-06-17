@@ -80,6 +80,10 @@ class LagrangianDS;
 class LagrangianLinearTIDS : public LagrangianDS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
+
 
   /** default constructor */
   LagrangianLinearTIDS() : LagrangianDS() {};

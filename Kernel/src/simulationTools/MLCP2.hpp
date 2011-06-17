@@ -78,6 +78,10 @@
 class MLCP2 : public MLCP
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MLCP2);
+
   bool mFirstCall;
 
 public:

@@ -26,6 +26,10 @@ class SiconosGraphTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosGraphTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SiconosGraphTest);

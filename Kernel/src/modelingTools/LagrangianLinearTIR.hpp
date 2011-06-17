@@ -51,6 +51,10 @@ class LagrangianLinearTIR : public LagrangianR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianLinearTIR);
+
 
 
   /** C*/

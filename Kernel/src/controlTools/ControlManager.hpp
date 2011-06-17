@@ -68,6 +68,10 @@ typedef std::pair<ActuatorsIterator, bool> ActuatorsCheckInsert;
 class ControlManager
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(ControlManager);
+
 
   /** A list of Sensors */
   Sensors _allSensors;

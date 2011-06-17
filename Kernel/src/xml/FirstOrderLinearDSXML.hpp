@@ -45,6 +45,10 @@ class SimpleMatrix;
 class FirstOrderLinearDSXML : public FirstOrderNonLinearDSXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearDSXML);
+
 
   //Nodes
   xmlNodePtr ANode; /**< A in \f$ M \dot x = Ax+b \f$ */

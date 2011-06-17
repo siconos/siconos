@@ -62,6 +62,10 @@ class SiconosModelXML
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosModelXML);
+
 
   /**  Root node => named "SiconosModel". */
   xmlNodePtr rootNode;

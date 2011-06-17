@@ -32,6 +32,10 @@
 class DiskPlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<DiskPlanR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DiskPlanR);
+
   double r, A, B, C, sqrA2pB2,
          AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
   bool finite;

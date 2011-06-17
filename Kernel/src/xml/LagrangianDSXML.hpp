@@ -53,6 +53,10 @@ const std::string LNLDS_Mass = "Mass";
 class LagrangianDSXML : public DynamicalSystemXML
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianDSXML);
+
 
   xmlNodePtr qNode;
   xmlNodePtr q0Node;

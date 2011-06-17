@@ -29,6 +29,10 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderNonLinearDSTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderNonLinearDSTest);

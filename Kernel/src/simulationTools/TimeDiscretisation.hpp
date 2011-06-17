@@ -67,6 +67,10 @@
 class TimeDiscretisation
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeDiscretisation);
+
 
   /** Default value for the time step (tk+1 - tk) */
   double h;

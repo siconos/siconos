@@ -44,6 +44,10 @@ class Interaction;
 class NonSmoothLaw
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NonSmoothLaw);
+
 
   /** "size" of the NonSmoothLaw */
   unsigned int _size;

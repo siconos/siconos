@@ -29,6 +29,10 @@ class LagrangianRheonomousRTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianRheonomousRTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianRheonomousRTest);

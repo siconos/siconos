@@ -75,6 +75,10 @@ class NonSmoothSolverXML;
 class OneStepNSProblemXML
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OneStepNSProblemXML);
+
 
   /** root node, name of the OSNS (LCP, FrictionContact ...) */
   xmlNodePtr rootNode;

@@ -40,6 +40,10 @@ class SimpleVector;
 class QP : public OneStepNSProblem
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(QP);
+
 
   /** contains the Q matrix of a QP problem */
   SP::SiconosMatrix Q;

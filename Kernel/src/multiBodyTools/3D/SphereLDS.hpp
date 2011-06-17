@@ -31,6 +31,10 @@
 class SphereLDS : public LagrangianDS, public boost::enable_shared_from_this<SphereLDS>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SphereLDS);
+
   double radius;
   double massValue;
   double I;

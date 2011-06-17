@@ -56,6 +56,10 @@ class LinearRXML : public RelationXML
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LinearRXML);
+
 
   /** C matrix node */
   xmlNodePtr CNode;

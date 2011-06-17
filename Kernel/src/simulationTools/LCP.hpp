@@ -76,6 +76,10 @@ TYPEDEF_SPTR(LinearComplementarityProblem);
 class LCP : public LinearOSNS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LCP);
+
 
   /** Numerics problem to solve */
   SP::LinearComplementarityProblem _numerics_problem;

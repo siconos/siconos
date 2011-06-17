@@ -30,6 +30,10 @@ class FirstOrderLinearRTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearRTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderLinearRTest);

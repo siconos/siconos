@@ -35,6 +35,10 @@ class TimeDiscretisationEvent : public Event
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeDiscretisationEvent);
+
 
   /** Default constructor */
   TimeDiscretisationEvent();

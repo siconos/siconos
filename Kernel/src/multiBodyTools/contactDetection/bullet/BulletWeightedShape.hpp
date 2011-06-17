@@ -26,6 +26,10 @@
 class BulletWeightedShape
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletWeightedShape);
+
   double _mass;
   SP::btCollisionShape _shape;
   SP::SimpleMatrix _inertia;

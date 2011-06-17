@@ -57,6 +57,10 @@ class LagrangianCompliantR : public LagrangianR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianCompliantR);
+
 
   /** LagrangianR plug-in to compute h(q,lambda,z)
     * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction

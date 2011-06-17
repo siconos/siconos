@@ -73,6 +73,10 @@ typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, do
 class FirstOrderLinearDS : public FirstOrderNonLinearDS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearDS);
+
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
   SP::SiconosMatrix _A;

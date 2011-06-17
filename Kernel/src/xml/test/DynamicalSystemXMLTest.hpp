@@ -35,6 +35,10 @@ class DynamicalSystemXMLTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DynamicalSystemXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root;

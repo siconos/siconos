@@ -88,6 +88,10 @@ class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SpaceFilter);
+
 
   /** the bounding box factor is multiplicated by the largest object
       dimension */

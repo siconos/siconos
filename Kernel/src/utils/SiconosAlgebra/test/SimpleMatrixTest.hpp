@@ -32,6 +32,10 @@ class SimpleMatrixTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SimpleMatrixTest);
+
 
   // test suite
   CPPUNIT_TEST_SUITE(SimpleMatrixTest);

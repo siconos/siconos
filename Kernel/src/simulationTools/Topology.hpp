@@ -75,6 +75,10 @@ class Topology : public boost::enable_shared_from_this<Topology>
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Topology);
+
 
   // --- MEMBERS ---
 

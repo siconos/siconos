@@ -43,6 +43,10 @@ class FirstOrderLinearTIR : public FirstOrderR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
+
 
 
 

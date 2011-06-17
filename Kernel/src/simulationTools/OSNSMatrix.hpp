@@ -101,6 +101,10 @@ enum SICONOS_STORAGE_TYPE
 class OSNSMatrix
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OSNSMatrix);
+
 
   /** number of rows */
   unsigned int dimRow;

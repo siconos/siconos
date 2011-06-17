@@ -50,6 +50,10 @@ TYPEDEF_SPTR(MemoryContainer);
 class SiconosMemory
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosMemory);
+
 
   /** the maximum size of the memory (i.e the max numbers of SiconosVectors it can store) */
   unsigned int maxSize;

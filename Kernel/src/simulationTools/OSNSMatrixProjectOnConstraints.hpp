@@ -91,6 +91,10 @@
 class OSNSMatrixProjectOnConstraints : public OSNSMatrix
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OSNSMatrixProjectOnConstraints);
+
   virtual void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
 public:
 

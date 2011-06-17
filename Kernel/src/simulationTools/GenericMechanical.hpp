@@ -51,6 +51,10 @@ TYPEDEF_SPTR(GenericMechanicalProblem);
 class GenericMechanical : public LinearOSNS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(GenericMechanical);
+
 
   GenericMechanicalProblem * _pnumerics_GMP;
 

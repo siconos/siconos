@@ -36,6 +36,10 @@ class LagrangianDSXMLTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianDSXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root;

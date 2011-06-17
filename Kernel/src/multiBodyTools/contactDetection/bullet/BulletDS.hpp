@@ -30,6 +30,10 @@ class BulletDS : public NewtonEulerDS, public boost::enable_shared_from_this<Bul
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BulletDS);
+
   SP::BulletWeightedShape _weightedShape;
   SP::btCollisionObject _collisionObject;
 

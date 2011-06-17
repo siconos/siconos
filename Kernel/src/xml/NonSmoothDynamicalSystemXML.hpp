@@ -52,6 +52,10 @@ typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;
 class NonSmoothDynamicalSystemXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NonSmoothDynamicalSystemXML);
+
   xmlNodePtr rootNode;
 
   /* Map of DSs */

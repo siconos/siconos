@@ -31,6 +31,10 @@ class PivotJointR : public KneeJointR
 public:
   static int _sNbEqualities;
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(PivotJointR);
+
 
   /*Axis coordonates*/
   double _Ax, _Ay, _Az;
@@ -61,6 +65,7 @@ public:
 
   virtual void computeh(double t);
 protected:
+
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
   double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);

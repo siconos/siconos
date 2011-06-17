@@ -72,6 +72,10 @@ public:
   enum DataNames {z, x, r, g_alpha, residu_r, ds_xp, sizeDataNames};
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderR);
+
 
 
 

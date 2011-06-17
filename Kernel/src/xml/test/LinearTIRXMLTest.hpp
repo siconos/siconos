@@ -34,6 +34,10 @@ class LinearTIRXMLTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LinearTIRXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root;

@@ -24,6 +24,10 @@
 class PluggedObject
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(PluggedObject);
+
 
 
   std::string pluginName;

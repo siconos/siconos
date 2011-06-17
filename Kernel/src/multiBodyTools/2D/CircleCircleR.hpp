@@ -30,6 +30,10 @@
 class CircleCircleR : public CircularR, public boost::enable_shared_from_this<CircleCircleR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(CircleCircleR);
+
   double ar1mr2;
 
   CircleCircleR();

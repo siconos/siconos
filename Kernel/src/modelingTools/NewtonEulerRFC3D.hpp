@@ -41,6 +41,10 @@ class NewtonEulerRFC3D : public NewtonEulerRImpact
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonEulerRFC3D);
+
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1);
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
 public:

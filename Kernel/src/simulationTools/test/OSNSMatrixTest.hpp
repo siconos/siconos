@@ -29,6 +29,10 @@ class OSNSMatrixTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OSNSMatrixTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(OSNSMatrixTest);

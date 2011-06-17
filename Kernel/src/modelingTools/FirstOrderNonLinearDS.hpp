@@ -83,6 +83,10 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
 class FirstOrderNonLinearDS : public DynamicalSystem
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
+
 
   /** Matrix coefficient of \f$ \dot x \f$ */
   SP::SiconosMatrix _M;

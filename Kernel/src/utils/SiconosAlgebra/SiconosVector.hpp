@@ -60,6 +60,10 @@ class SiconosVector
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosVector);
+
 
   /** default constructor */
   SiconosVector() {};

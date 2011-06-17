@@ -45,6 +45,10 @@ class Topology;
 class NonSmoothDynamicalSystem
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
+
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool BVP;
@@ -59,8 +63,8 @@ private:
    */
   NonSmoothDynamicalSystem(): BVP(false) {};
 
-  /** copy constructor => private: no copy nor pass-by value.
-   */
+private:
+
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
 
   /** False is one of the interaction is non-linear.

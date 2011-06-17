@@ -26,6 +26,7 @@
     \parameter a class name
  */
 #define ACCEPT_SERIALIZATION(CLASS)                       \
+  typedef void serializable;                              \
   template<typename Archive>                              \
   friend void save(Archive&, CLASS&, const unsigned int); \
   template<typename Archive>                              \

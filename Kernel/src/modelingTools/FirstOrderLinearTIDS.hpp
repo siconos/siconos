@@ -61,6 +61,10 @@ class FirstOrderLinearDS;
 class FirstOrderLinearTIDS : public FirstOrderLinearDS
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearTIDS);
+
 
   /** default constructor
    */

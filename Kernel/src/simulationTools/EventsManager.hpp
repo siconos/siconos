@@ -90,6 +90,10 @@ typedef EventsContainer::iterator EventsContainerIterator;
 class EventsManager
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(EventsManager);
+
 
   /** list of future, not processed, events.
    *  This list is not fixed and can be updated at any time

@@ -79,6 +79,10 @@
 class MLCP : public LinearOSNS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MLCP);
+
 
   /** n is the number of equality */
   int _n;

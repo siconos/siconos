@@ -30,6 +30,10 @@
 class CircularDS : public LagrangianDS
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(CircularDS);
+
   double radius;
   double massValue;
 

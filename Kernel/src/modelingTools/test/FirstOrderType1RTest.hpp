@@ -29,6 +29,10 @@ class FirstOrderType1RTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderType1RTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderType1RTest);

@@ -42,6 +42,10 @@
 class SimpleVector: public SiconosVector , public boost::enable_shared_from_this<SimpleVector>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SimpleVector);
+
 
   bool _dense;
 

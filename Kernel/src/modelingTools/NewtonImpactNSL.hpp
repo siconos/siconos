@@ -45,6 +45,10 @@ class NewtonImpactNSL : public NonSmoothLaw
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonImpactNSL);
+
   /** The Newton normal coefficient of restitution  */
   double _e;
 

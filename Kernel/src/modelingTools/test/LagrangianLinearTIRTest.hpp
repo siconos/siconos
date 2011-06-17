@@ -30,6 +30,10 @@ class LagrangianLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianLinearTIRTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianLinearTIRTest);

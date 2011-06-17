@@ -136,6 +136,10 @@ public:
   VMap vertex_descriptor;
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosGraph);
+
 
   graph_t g;
 

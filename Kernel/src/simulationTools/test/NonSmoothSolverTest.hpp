@@ -27,6 +27,10 @@ class NonSmoothSolverTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NonSmoothSolverTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(NonSmoothSolverTest);

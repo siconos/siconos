@@ -60,6 +60,10 @@ class RelayNSL : public NonSmoothLaw
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(RelayNSL);
+
 
   /** default constructor
    */

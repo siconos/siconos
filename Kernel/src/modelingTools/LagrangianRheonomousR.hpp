@@ -90,6 +90,10 @@ class LagrangianRheonomousR : public LagrangianR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianRheonomousR);
+
   /** plugged vector used to compute hDot */
   SP::SiconosVector _hDot;
 

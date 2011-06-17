@@ -44,6 +44,10 @@
 class BlockMatrix : public SiconosMatrix
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BlockMatrix);
+
 
   /** A container of pointers to SiconosMatrix*
    */

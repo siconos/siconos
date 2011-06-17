@@ -50,6 +50,10 @@
 class FirstOrderType2R : public FirstOrderR
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderType2R);
+
   SP::SimpleMatrix jacgx;
 
 

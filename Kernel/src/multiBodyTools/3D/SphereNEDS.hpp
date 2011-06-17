@@ -32,6 +32,10 @@
 class SphereNEDS : public NewtonEulerDS, public boost::enable_shared_from_this<SphereNEDS>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SphereNEDS);
+
   double radius;
 
 public:

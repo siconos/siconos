@@ -42,6 +42,10 @@ class SimpleVector;
 class BlockVector : public SiconosVector , public boost::enable_shared_from_this<BlockVector>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BlockVector);
+
 
   /** Size (ie total number of scalar elements, not number of blocks) */
   unsigned int _sizeV;

@@ -35,6 +35,10 @@
 class MoreauXML: public OneStepIntegratorXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MoreauXML);
+
 
   /** theta list node */
   xmlNode * thetaNode;

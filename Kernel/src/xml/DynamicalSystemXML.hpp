@@ -45,6 +45,10 @@ class DynamicalSystemXML
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DynamicalSystemXML);
+
 
   xmlNodePtr rootNode;/**< Dynamical System Node  */
   xmlNodePtr stepsInMemoryNode; /**< size of memory */

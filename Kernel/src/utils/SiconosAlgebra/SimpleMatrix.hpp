@@ -63,6 +63,10 @@ class SimpleVector;
 class SimpleMatrix: public SiconosMatrix  , public boost::enable_shared_from_this<SimpleMatrix>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SimpleMatrix);
+
   /** Union of The Boost Matrices : DenseMat, TriangMat, SymMat ...
       (See SiconosMatrix.h for more details on MATRIX_UBLAS_TYPE);
   */

@@ -26,6 +26,7 @@
 #include <iostream>
 #include <dlfcn.h>
 #include <vector>
+#include "SiconosSerialization.hpp"
 
 #define _SYS_UNX
 
@@ -50,6 +51,10 @@ typedef void* PluginHandle;
 class SiconosSharedLibrary
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosSharedLibrary);
+
 
   /* to manage plug-in object closing (for each call to dlopen one object is add into isPlugged)*/
   static std::vector<PluginHandle> isPlugged;

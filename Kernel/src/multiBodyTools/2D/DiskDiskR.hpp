@@ -30,6 +30,10 @@
 class DiskDiskR : public CircularR, public boost::enable_shared_from_this<DiskDiskR>
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(DiskDiskR);
+
   double r1pr2;
 
   DiskDiskR() : CircularR() {};

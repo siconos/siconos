@@ -43,6 +43,10 @@ typedef bool func();
 class FunctionTest
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FunctionTest);
+
 
   //  SiconosMatrix * dataOut;
   /** name of the test \fn void vectorField (const double& time) */

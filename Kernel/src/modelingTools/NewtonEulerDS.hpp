@@ -37,6 +37,10 @@ typedef void (*Fext)(double , double*, double*, double*);
 class NewtonEulerDS : public DynamicalSystem
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(NewtonEulerDS);
+
   void internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix);
 
   // -- MEMBERS --

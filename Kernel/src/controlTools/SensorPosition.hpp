@@ -42,6 +42,10 @@ class SiconosMatrix;
 class SensorPosition : public Sensor
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SensorPosition);
+
 
   /** A matrix for output */
   SP::SiconosMatrix _dataPlot;

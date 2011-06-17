@@ -116,6 +116,10 @@ public:
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(QPXML);
+
   //Nodes
   xmlNode * QNode;
   xmlNode * pNode;

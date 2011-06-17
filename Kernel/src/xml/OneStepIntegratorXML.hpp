@@ -39,6 +39,10 @@ const std::string INTERACTIONS_CONCERNED = "Interactions_Concerned";
 class OneStepIntegratorXML
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(OneStepIntegratorXML);
+
 
   /** root node (tag OneStepIntegrator) */
   xmlNodePtr rootNode;

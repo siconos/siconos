@@ -37,6 +37,10 @@ public:
   void tearDown();
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(SiconosMemoryXMLTest);
+
   xmlDoc *doc;
   xmlNode *root;
   SiconosMemoryXML *smxml;

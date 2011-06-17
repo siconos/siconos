@@ -46,6 +46,10 @@ typedef std::vector<double> TkVector;
 class TimeDiscretisationXML
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeDiscretisationXML);
+
 
   //Nodes
   xmlNodePtr rootNode;

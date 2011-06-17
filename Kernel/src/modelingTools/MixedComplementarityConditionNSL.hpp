@@ -43,6 +43,10 @@ class NonSmoothLaw;
 class MixedComplementarityConditionNSL : public NonSmoothLaw
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(MixedComplementarityConditionNSL);
+
   /** default constructor
    */
   MixedComplementarityConditionNSL() {};

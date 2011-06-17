@@ -57,6 +57,10 @@ class SiconosVector;
 class FirstOrderNonLinearDSXML: public DynamicalSystemXML
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderNonLinearDSXML);
+
 
   xmlNodePtr x0Node;/**< initial state */
   xmlNodePtr xNode;/**<  state (usefull is start from recovery xml-file*/

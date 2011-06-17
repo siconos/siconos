@@ -36,6 +36,10 @@ class RelayNSLXMLTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(RelayNSLXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root;

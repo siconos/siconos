@@ -66,6 +66,10 @@ public:
   enum DataNames {z, q0, q1, q2, p0, p1, p2, sizeDataNames};
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianR);
+
 
 
   /** Jacobian matrices of H */

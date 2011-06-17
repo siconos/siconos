@@ -57,6 +57,10 @@ TYPEDEF_SPTR(MuStorage);
 class LinearOSNS : public OneStepNSProblem
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LinearOSNS);
+
 
   /** contains the vector w of a LinearOSNS system */
   SP::SiconosVector _w;

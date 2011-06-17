@@ -92,6 +92,10 @@ public:
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(RelayNSLXML);
+
   xmlNode * CNode;
   xmlNode * DNode;
 

@@ -56,6 +56,10 @@
 class Moreau2 : public Moreau
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Moreau2);
+
 
   /** Default constructor
    */

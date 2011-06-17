@@ -55,6 +55,10 @@ class FirstOrderLinearR : public FirstOrderR
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(FirstOrderLinearR);
+
 
   /** F*/
   SP::SiconosMatrix _F;

@@ -75,6 +75,10 @@ class Relation
 {
 
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Relation);
+
   /** Plug-in to compute h(...)
   */
   SP::PluggedObject _pluginh;

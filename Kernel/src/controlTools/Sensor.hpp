@@ -106,6 +106,10 @@ typedef std::map<SP::Event, VectorMap>  DataSet;
 class Sensor : public boost::enable_shared_from_this<Sensor>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Sensor);
+
 
   /** type of the Sensor */
   int _type;

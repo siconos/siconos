@@ -30,6 +30,10 @@ class BlockMatrixTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(BlockMatrixTest);
+
 
   // test suite
   CPPUNIT_TEST_SUITE(BlockMatrixTest);

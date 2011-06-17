@@ -29,6 +29,10 @@ class LagrangianCompliantRTest : public CppUnit::TestFixture
 {
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(LagrangianCompliantRTest);
+
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianCompliantRTest);

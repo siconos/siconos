@@ -67,6 +67,10 @@ class SimulationXML;
 class Simulation : public boost::enable_shared_from_this<Simulation>
 {
 protected:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Simulation);
+
 
   /** name or id of the Simulation */
   std::string _name;

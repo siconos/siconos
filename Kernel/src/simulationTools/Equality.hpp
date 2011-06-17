@@ -63,6 +63,10 @@
 class Equality : public LinearOSNS
 {
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(Equality);
+
   LinearSystemProblem _numerics_problem;
 public:
 

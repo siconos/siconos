@@ -34,6 +34,10 @@ class TimeDiscretisationXMLTest : public CppUnit::TestFixture
 
 
 private:
+  /** serialization hooks
+  */
+  ACCEPT_SERIALIZATION(TimeDiscretisationXMLTest);
+
 
   xmlDoc *doc;
   xmlNode *root;
