@@ -28,7 +28,10 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 --------------------------------------------------------------------------------
 
 Changes:
-	* lcp_enum deals with degenerated system using dgels or dgesv.
+	* FrictionContact3D Add ExtraGradient and HyperPlaneProjection methods for solving
+	3D frictional contact problems as VI.
+	* FrictionContact3D Add tests and clean up old test series.
+	* lcp_enum deals with degenerated systems using dgels or dgesv.
 	* GenericMechanicalProblem: Build a reduced equivalent problem, equalities are either substituted or written in one block.
 
 --------------------------------------------------------------------------------
