@@ -5,7 +5,7 @@
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
 
-import sys, os, getopt, re
+import sys, os, getopt, re, itertools
 
 from pygccxml import parser
 from pygccxml import declarations
@@ -47,23 +47,48 @@ decls = parser.parse( ['SiconosKernel.hpp'], config )
 global_ns = declarations.get_global_namespace( decls )
 
 
-def is_serializable(some_class):
-    return 'serializable' in [ t.name for t in class_.typedefs(allow_empty=True) ]
+def is_serializable(c):
+    return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
-def is_xml(s):
+def match_xml(s):
     m = re.search('xml|XML|Xml',s)
     return m != None
-# classes in siconos_namespace
-for class_ in reduce(lambda r,c: r + [c] if c.parent.name == siconos_namespace else r,global_ns.classes(),[]):
 
+def name(t):
+    if isinstance(t,declarations.class_t):
+        return t.name
+    elif isinstance(t,declarations.typedef_t):
+        return t.decl_string[2:] # remove ::
+
+# classes in siconos_namespace
+class_names = dict()
+
+for type_ in filter(lambda c: c.parent.name == siconos_namespace,
+                    itertools.chain(global_ns.classes(), global_ns.typedefs())):
+
+    typedef = False
+
+    if isinstance(type_,declarations.class_t):
+        class_names[declarations.full_name(type_)] = type_
+        class_ = type_
+    elif isinstance(type_,declarations.typedef_t):
+        try:
+            typedef=True
+            class_ = class_names['::' + str(type_.type)]
+        except:
+            class_ = None
     # with the serializabe tag
     # (could not find friend functions with pygccxml)
-    if is_serializable(class_) and not is_xml(class_.name):
+    if class_ is not None and \
+           is_serializable(class_) and not \
+           match_xml(class_.name) and \
+           ( typedef or not \
+             declarations.templates.is_instantiation(class_.name) ):
 
         # print registration macros depending on inheritance
         if len(class_.variables(allow_empty=True))>0:
             if class_.bases == []:
-                print 'SICONOS_IO_REGISTER({0},'.format(class_.name)
+                print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
             else:
                 serializable_bases = \
                                    reduce(lambda r,b:
@@ -71,14 +96,14 @@ for class_ in reduce(lambda r,c: r + [c] if c.parent.name == siconos_namespace e
                                           and b.related_class.parent.name == siconos_namespace
                                           else r, class_.bases, [])
                 if len(serializable_bases) > 0:
-                    print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(class_.name,
+                    print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
                     ''.join(['({0})'.format(c.name) for c in serializable_bases]))
                 else:
-                    print 'SICONOS_IO_REGISTER({0},'.format(class_.name)
+                    print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
                 
             variables = [ v.name for v in class_.variables(allow_empty=True) ]
 
-            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not is_xml(x), variables)))
+            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not match_xml(x), variables)))
 
         
             

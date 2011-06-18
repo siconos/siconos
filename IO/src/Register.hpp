@@ -12,6 +12,8 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
 
+#include <boost/graph/adj_list_serialize.hpp>
+
 #include <boost/mpl/eval_if.hpp>
 
 
