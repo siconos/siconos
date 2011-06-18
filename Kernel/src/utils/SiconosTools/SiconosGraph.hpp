@@ -34,7 +34,6 @@
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-
 #if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
 #else
@@ -42,6 +41,8 @@
 #endif
 
 #include <boost/static_assert.hpp>
+
+#include "SiconosSerialization.hpp"
 
 using namespace boost;
 
@@ -138,8 +139,11 @@ public:
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(SiconosGraph);
-
+  typedef void serializable;
+  template<typename Archive>
+  friend void save(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
+  template<typename Archive>
+  friend void load(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
 
   graph_t g;
 

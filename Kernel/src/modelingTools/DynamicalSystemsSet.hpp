@@ -31,6 +31,9 @@ Set of SP::DynamicalSystem
     according to their numbers */
 class DynamicalSystemsSet : public std::vector<SP::DynamicalSystem>
 {
+protected:
+  ACCEPT_SERIALIZATION(DynamicalSystemsSet);
+
 public:
   typedef std::vector<SP::DynamicalSystem>::iterator iterator;
   typedef std::vector<SP::DynamicalSystem>::const_iterator const_iterator;

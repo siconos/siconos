@@ -67,6 +67,14 @@ public:
   typedef typename std::pair<TIterator, bool> CheckInsertT;
 
 protected:
+  /** serialization hooks
+  */
+  typedef void serializable;
+  template<typename Archive>
+  friend void save(Archive&, SiconosSet<T, U>&, const unsigned int);
+  template<typename Archive>
+  friend void load(Archive&, SiconosSet<T, U>&, const unsigned int);
+
 
   /** Pointer to function used in ordering relation */
   U(T::*fpt)() const;

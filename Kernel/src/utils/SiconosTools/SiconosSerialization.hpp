@@ -21,6 +21,11 @@
   serialization for Siconos
 */
 
+#ifndef SiconosSerialization_hpp
+#define SiconosSerialization_hpp
+
+#include <boost/preprocessor/seq/seq.hpp>
+
 /** install serialization hooks. Must be used inside a protected zone
     of class definition
     \parameter a class name
@@ -31,3 +36,6 @@
   friend void save(Archive&, CLASS&, const unsigned int); \
   template<typename Archive>                              \
   friend void load(Archive&, CLASS&, const unsigned int)
+
+
+#endif
