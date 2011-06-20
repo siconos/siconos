@@ -28,6 +28,11 @@ IF(WITH_TESTING)
   COMPILE_WITH(CppUnit REQUIRED)
 ENDIF(WITH_TESTING)
 
+COMPILE_WITH(SiconosNumerics REQUIRED)
+COMPILE_WITH(SiconosKernel REQUIRED)
+COMPILE_WITH(LibXml2 REQUIRED)
+
+
 FIND_PACKAGE(Boost COMPONENTS serialization)
 
 COMPILE_WITH(Boost REQUIRED)
@@ -59,7 +64,7 @@ IF(WITH_TESTING)
   SET(TEST_MAIN test/TestMain.cpp)
 
   BEGIN_TEST(test)
-  NEW_TEST(whole WholeTest.cpp)
+  NEW_TEST(ioTests WholeTest.cpp KernelTest.cpp)
   END_TEST(test)
 
 ENDIF(WITH_TESTING)

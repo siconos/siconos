@@ -16,7 +16,6 @@
 
 #include <boost/mpl/eval_if.hpp>
 
-
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(class,member)                \
   boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), class.member)
 
@@ -60,7 +59,7 @@
 */
 #define SICONOS_IO_REGISTER(CLASS,MEMBERS)                              \
   template<class Archive>                                               \
-  void save(Archive & ar, CLASS & c, const unsigned int version)        \
+  void save(Archive & ar, CLASS & c, const unsigned int version)  \
   {                                                                     \
     BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
   };                                                                    \
