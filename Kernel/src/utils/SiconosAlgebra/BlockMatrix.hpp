@@ -419,6 +419,10 @@ public:
    *  \param input: the RHS matrix b - output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
+
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 };
 
 DEFINE_SPTR(BlockMatrix);

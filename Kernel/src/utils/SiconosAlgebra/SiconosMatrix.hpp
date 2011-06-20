@@ -508,6 +508,10 @@ public:
   */
   friend bool isComparableTo(const SiconosMatrix&, const SiconosMatrix&);
 
+  /** Visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS();
+
 };
 
 #endif

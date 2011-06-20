@@ -32,7 +32,9 @@
   REGISTER(OSNSMultipleImpact)                               \
   REGISTER(FrictionContact)                                  \
   REGISTER(SimpleVector)                                     \
+  REGISTER(SimpleMatrix)                                     \
   REGISTER(BlockVector)                                      \
+  REGISTER(BlockMatrix)                                      \
   REGISTER(LagrangianDS)                                     \
   REGISTER(LagrangianLinearTIDS)                             \
   REGISTER(FirstOrderLinearDS)                               \
