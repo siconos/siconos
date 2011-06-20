@@ -24,11 +24,9 @@
 #ifndef __SimpleMatrixFriends__
 #define __SimpleMatrixFriends__
 #include "SiconosMatrix.hpp"
-#include "BlocksSimpleMat.hpp"
+//#include "BlocksSimpleMat.hpp"
 
-class SimpleMatrix;
-
-//DEFINE_SPTR(SimpleMatrix);
+DEFINE_SPTR(SimpleMatrix);
 
 /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
  * \param MIn, a SiconosMatrix*

@@ -60,25 +60,6 @@ using namespace Siconos;
 using std::cout;
 using std::endl;
 
-spSimpleMatrix::spSimpleMatrix(int i): boost::shared_ptr<SimpleMatrix>(new SimpleMatrix())
-{
-  ;
-}
-spSimpleMatrix::spSimpleMatrix(): boost::shared_ptr<SimpleMatrix>(new SimpleMatrix())
-{
-  ;
-}
-
-spConstSimpleMatrix::spConstSimpleMatrix(int i): boost::shared_ptr<const SimpleMatrix>(new SimpleMatrix())
-{
-  ;
-}
-spConstSimpleMatrix::spConstSimpleMatrix(): boost::shared_ptr<const SimpleMatrix>(new SimpleMatrix())
-{
-  ;
-}
-
-
 
 // Default (protected, used only for derived classes)
 SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
