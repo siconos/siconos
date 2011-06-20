@@ -210,6 +210,7 @@ namespace boost
 %include "SiconosPointers.hpp"
 %include "SiconosVisitables.hpp"
 %import "SiconosVisitor.hpp"
+%import "SiconosSerialization.hpp"
 
 %import "SiconosGraph.hpp"
 
