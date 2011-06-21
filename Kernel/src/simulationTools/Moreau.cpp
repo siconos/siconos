@@ -395,8 +395,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    ;
-
+    WMap[ds].reset(new SimpleMatrix(3, 3));
   }
   else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
 
