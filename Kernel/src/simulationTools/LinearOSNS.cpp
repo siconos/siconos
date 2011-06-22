@@ -296,10 +296,17 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
                itindex != d->boundaryConditions()->velocityIndices()->end();
                ++itindex)
           {
+#ifdef TRANSPOSE_BOUNDARY_CONDITIONS
+            // (nslawSize,sizeDS));
+            SP::SiconosVector coltmp(new SimpleVector(nslawSize));
+            coltmp->zero();
+            leftUnitaryBlock->setCol(*itindex, *coltmp);
+#else
             // (nslawSize1,sizeDS));
             SP::SiconosVector rowtmp(new SimpleVector(sizeDS));
             rowtmp->zero();
             leftUnitaryBlock->setRow(*itindex, *rowtmp);
+#endif
           }
         }
       }
@@ -469,10 +476,17 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
+#ifdef TRANSPOSE_BOUNDARY_CONDITIONS
+          // (nslawSize1,sizeDS));
+          SP::SiconosVector coltmp(new SimpleVector(nslawSize1));
+          coltmp->zero();
+          leftUnitaryBlock->setCol(*itindex, *coltmp);
+#else
           // (nslawSize1,sizeDS));
           SP::SiconosVector rowtmp(new SimpleVector(sizeDS));
           rowtmp->zero();
           leftUnitaryBlock->setRow(*itindex, *rowtmp);
+#endif
         }
       }
     }
