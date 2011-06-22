@@ -320,13 +320,14 @@ public:
 protected :
 
   void postSelection(const QPoint& point);
-  virtual void init() = 0;
-  virtual void animate() = 0;
-  virtual void mousePressEvent(QMouseEvent *) = 0;
-  virtual void mouseMoveEvent(QMouseEvent *) = 0;
-  virtual void mouseReleaseEvent(QMouseEvent *) = 0;
+  virtual void init();
+  virtual void animate();
+  virtual void mousePressEvent(QMouseEvent *);
+  virtual void mouseMoveEvent(QMouseEvent *);
+  virtual void mouseReleaseEvent(QMouseEvent *);
+  virtual void keyPressEvent(QKeyEvent *);
 
-  virtual QString helpString() const = 0;
+  virtual QString helpString() const;
   boost::shared_ptr<qglviewer::WorldConstraint> constraint_;
 
   SP::SiconosBodies Siconos_;

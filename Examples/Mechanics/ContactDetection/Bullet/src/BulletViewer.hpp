@@ -33,7 +33,6 @@ class BulletViewer : public BodiesViewer
   std::vector<btVector3> _colors;
 
   void init();
-  void animate();
   void draw();
 
   void addColor(const btVector3& c)
@@ -41,9 +40,4 @@ class BulletViewer : public BodiesViewer
     _colors.push_back(c);
   };
   void drawQGLShape(const QGLShape&);
-  QString helpString() const;
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void keyPressEvent(QKeyEvent *);
 };

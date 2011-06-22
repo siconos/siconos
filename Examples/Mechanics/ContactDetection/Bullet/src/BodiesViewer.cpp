@@ -20,18 +20,54 @@
 
 #include "BodiesViewer.hpp"
 
-#include "BulletSpaceFilter.hpp"
-#include "BulletBodies.hpp"
-
-#include "GL_ShapeDrawer.h"
-#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <op3x3.h>
 
 
 using namespace std;
+
+
+void BodiesViewer::init()
+{
+  // viewer and scene state
+  restoreStateFromFile();
+  setSceneRadius(20.);
+  showEntireScene();
+
+  // color
+  setBackgroundColor(QColor(200, 200, 200));
+  setForegroundColor(QColor(0, 0, 0));
+
+  camera()->setPosition(qglviewer::Vec(0.0, 0.0, 1.0));
+  camera()->showEntireScene();
+  setManipulatedFrame(camera()->frame());
+
+  assert(Siconos_);
+  Siconos_->init();
+
+  stepSimulation_ = false;
+  stepNow_ = false;
+  //  setAnimationPeriod(0.);
+  setAnimationPeriod(Siconos_->model()->simulation()->timeStep() * 1000);
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  boost::tie(dsi, dsend) = GETALLDS(Siconos_)->vertices();
+  for (unsigned int i = 0; dsi != dsend; ++i, ++dsi)
+  {
+    SP::DynamicalSystem ds = GETALLDS(Siconos_)->bundle(*dsi);
+    insertQGLShape(ask<ForShape>(*ds), ds);
+  }
+
+  lastSelected_ = -1;
+
+  initUCircle();
+
+  myMouseBehavior_ = false;
+
+  startAnimation();
+}
+
 
 static const int Ne = 64;
 
@@ -642,6 +678,178 @@ void BodiesViewer::insertQGLShape(SHAPE f, SP::DynamicalSystem ds)
   SP::QGLShape fig(new QGLShape(f, ds, camera()->frame()));
 
   shapes_.push_back(fig);
+}
+
+void BodiesViewer::mouseMoveEvent(QMouseEvent *e)
+{
+
+  if (myMouseBehavior_)
+  {
+    qglviewer::Vec cpos = camera()->position();
+
+    if (selectedName() >= 0)
+    {
+      if (!shapes_[selectedName()]->selected())
+      {
+        shapes_[selectedName()]->setSelection(true);
+        shapes_[selectedName()]->saveFExt();
+
+        SP::SimpleVector fext(new SimpleVector());
+        fext->resize(ask<ForFExt>(*shapes_[selectedName()]->DS())->size());
+
+        switch (Type::value(*shapes_[selectedName()]->DS()))
+        {
+        case Type::NewtonEulerDS :
+        {
+          boost::static_pointer_cast<NewtonEulerDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          break;
+        };
+        case Type::LagrangianDS :
+        {
+          boost::static_pointer_cast<LagrangianDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          break;
+        };
+        default :
+        {
+          assert(0);
+        };
+        }
+      }
+
+      SP::SiconosVector fext = ask<ForFExt>(*shapes_[selectedName()]->DS());
+
+      lastSelected_ = selectedName();
+
+      SP::SiconosVector q =
+        ask<ForPosition>(*shapes_[selectedName()]->DS());
+
+      double massValue =
+        ask<ForMassValue>(*shapes_[selectedName()]->DS());
+
+      //      need ref frame -> ground
+      //      et update frames pos with setTranslation & setRotation
+      //      Quaternion r = frame->rotation();
+      //      Vec t = frame->translation();
+      //      printf("translation : %g,%g,%g ; rotation : %g,%g,%g\n", t[0],t[1],t[2],r[0],r[2],r[3]);
+
+      fext->setValue(0, -((float)cpos[0] - q->getValue(0))*massValue * 30);
+      fext->setValue(1, -((float)cpos[1] - q->getValue(1))*massValue * 30);
+      if (fext->size() == 3)
+        fext->setValue(2, -((float)cpos[2] - q->getValue(2))*massValue * 30);
+
+    }
+
+
+  }
+  else
+  {
+    QGLViewer::mouseMoveEvent(e);
+  }
+}
+
+void BodiesViewer::mousePressEvent(QMouseEvent* e)
+{
+  if ((e->button() == Qt::LeftButton) && (e->modifiers() == Qt::NoButton))
+    myMouseBehavior_ = true;
+  else
+  {
+    myMouseBehavior_ = false;
+    QGLViewer::mousePressEvent(e);
+  }
+}
+
+
+void BodiesViewer::mouseReleaseEvent(QMouseEvent* e)
+{
+  if (myMouseBehavior_)
+  {
+    myMouseBehavior_ = false;
+
+    if (lastSelected_ >= 0)
+    {
+      shapes_[lastSelected_]->restoreFExt();
+      shapes_[lastSelected_]->setSelection(false);
+      setManipulatedFrame(camera()->frame());
+      lastSelected_ = -1;
+      setSelectedName(-1);
+    };
+  }
+  else
+  {
+    QGLViewer::mouseReleaseEvent(e);
+  }
+}
+
+
+void BodiesViewer::keyPressEvent(QKeyEvent* e)
+{
+
+  if ((e->key() == Qt::Key_T) && (e->modifiers() == Qt::NoButton))
+  {
+    _transparency -= .01;
+    _transparency = fmax(0., _transparency);
+    printf("transparency: %f\n", _transparency);
+
+  }
+
+  if ((e->key() == Qt::Key_R) && (e->modifiers() == Qt::NoButton))
+  {
+    _transparency += .01;
+    _transparency = fmin(1., _transparency);
+    printf("transparency: %f\n", _transparency);
+  }
+
+  if ((e->key() == (Qt::Key) 'S'))
+  {
+    stepSimulation_ = not stepSimulation_;
+    stepNow_ = false;
+    printf("step simulation mode\n");
+  }
+
+  if ((e->key() == (Qt::Key) '.'))
+  {
+    stepNow_ = true;
+    printf("step now\n");
+  }
+
+
+
+  QGLViewer::keyPressEvent(e);
+}
+
+void BodiesViewer::animate()
+{
+
+  if (!stepSimulation_)
+  {
+    Siconos_->compute();
+  }
+  else if (stepNow_)
+  {
+    stepNow_ = false;
+    Siconos_->compute();
+  }
+  //saveSnapshot();
+}
+
+QString BodiesViewer::helpString() const
+{
+  QString text("<h2>S i m p l e V i e w e r</h2>");
+  text += "Use the mouse to move the camera around the object. ";
+  text += "You can respectively revolve around, zoom and translate with the three mouse buttons. ";
+  text += "Left and middle buttons pressed together rotate around the camera view direction axis<br><br>";
+  text += "Pressing <b>Alt</b> and one of the function keys (<b>F1</b>..<b>F12</b>) defines a camera keyFrame. ";
+  text += "Simply press the function key again to restore it. Several keyFrames define a ";
+  text += "camera path. Paths are saved when you quit the application and restored at next start.<br><br>";
+  text += "Press <b>F</b> to display the frame rate, <b>A</b> for the world axis, ";
+  text += "<b>Alt+Return</b> for full screen mode and <b>Control+S</b> to save a snapshot. ";
+  text += "See the <b>Keyboard</b> tab in this window for a complete shortcut list.<br><br>";
+  text += "Double clicks automates single click actions: A left button double click aligns the closer axis with the camera (if close enough). ";
+  text += "A middle button double click fits the zoom of the camera and the right button re-centers the scene.<br><br>";
+  text += "A left button double click while holding right button pressed defines the camera <i>Revolve Around Point</i>. ";
+  text += "See the <b>Mouse</b> tab and the documentation web pages for details.<br><br>";
+  text += "Press <b>Escape</b> to exit the viewer.";
+  return text;
 }
 
 #ifdef QT_INTERFACE

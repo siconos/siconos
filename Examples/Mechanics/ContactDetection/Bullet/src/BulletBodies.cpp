@@ -206,7 +206,7 @@ void BulletBodies::init()
     // --- Simulation ---
     // ------------------
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(.0, .0, .7, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(.0, .0, .3, 3));
 
 
     SP::btVector3 aabbmax(new btVector3(100, 100, 100));
