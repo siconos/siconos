@@ -1,5 +1,8 @@
 #include "SpaceFilter.hpp"
 
+//#define DEBUG_MESSAGES 1
+#include "debug.h"
+
 
 /* hash is done with encapsulation */
 
@@ -209,6 +212,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
                                               rel, parent->_interID++));
         inter->insert(ds1);
         inter->insert(ds2);
+
+        DEBUG_PRINTF("insert interaction : %d\n", inter->number());
         parent->_nsds->topology()->insertInteraction(inter);
       }
     }
@@ -229,6 +234,9 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
       if (found)
       {
+
+
+        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->interaction()->number());
         parent->_nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
       }
@@ -580,6 +588,8 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
                                             relp, _interID++));
       inter->insert(ds);
 
+      DEBUG_PRINTF("insert interaction : %d\n", inter->number());
+
       _nsds->topology()->insertInteraction(inter);
 
     }
@@ -597,6 +607,9 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
       {
+
+        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->interaction()->number());
+
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
         break;

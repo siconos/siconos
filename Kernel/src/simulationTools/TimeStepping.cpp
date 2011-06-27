@@ -33,6 +33,9 @@
 #include "FrictionContact.hpp"
 #include "Moreau.hpp"
 
+//#define DEBUG_MESSAGES 1
+#include <debug.h>
+
 using namespace std;
 
 /** Pointer to function, used to set the behavior of simulation when
@@ -152,12 +155,12 @@ void TimeStepping::updateIndexSet(unsigned int i)
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
   SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
 
-
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   //bool inserted;
-
 
   // indexSet1 scan
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
@@ -249,6 +252,9 @@ void TimeStepping::updateIndexSet(unsigned int i)
   }
 
   assert(indexSet1->size() <= indexSet0->size());
+
+  DEBUG_PRINTF("update indexSets end : indexSet0 size : %d\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
 
 }
 

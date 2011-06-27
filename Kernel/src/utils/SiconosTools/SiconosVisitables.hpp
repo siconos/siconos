@@ -55,6 +55,7 @@
   REGISTER(SpaceFilter)                                      \
   REGISTER(BulletSpaceFilter)                                \
   REGISTER_BASE(ExternalBody, LagrangianDS)                  \
+  REGISTER_BASE_EXTERN(Lmgc2DDS, LagrangianDS)               \
   REGISTER_BASE_EXTERN(Lmgc2DDSK, LagrangianDS)              \
   REGISTER_BASE_EXTERN(Lmgc2DPOLYG, LagrangianDS)            \
   REGISTER_BASE(Disk, LagrangianDS)                          \

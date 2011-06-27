@@ -71,20 +71,31 @@
 #define VIRTUAL_ACCEPT_VISITORS(FROMCLASS)                              \
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void acceptSP(SP::SiconosVisitor)                             \
-  { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
-  virtual void accept(SiconosVisitor&) const = 0;                       \
-  virtual void acceptModifier(SiconosVisitor&) = 0;                     \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); \
+  };                                                                    \
+  virtual void accept(SiconosVisitor&) const                            \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( "accept: no visitor defined");                     \
+  };                                                                    \
+  virtual void acceptSerializer(SiconosVisitor&)                        \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( "acceptSerializer: no serializer define");                                           \
+  };                                                                    \
   virtual inline Type::Siconos acceptType(FindType& ft) const           \
   { RuntimeException::selfThrow                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
-    return Type::void_type;}                                            \
+    return Type::void_type;                                             \
+  }                                                                     \
  
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
-  virtual void acceptModifier(SiconosVisitor& artisan) { artisan.visit(*this); } \
+  virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
  
 #define ACCEPT_SP_VISITORS()                                            \

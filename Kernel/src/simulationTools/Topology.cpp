@@ -27,6 +27,9 @@
 #include <algorithm>
 #include <limits>
 
+//#define DEBUG_MESSAGES 1
+#include <debug.h>
+
 #define MAX_RELATIVE_DEGREE 999
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -139,6 +142,9 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
 
 
   // for all couples of ds in the interaction
+  DEBUG_PRINTF("addInteractionInIndexSet systems->size() : %d\n", systems->size());
+
+
   for (DSIterator i1ds = systems->begin(); i1ds != systems->end(); ++i1ds)
   {
     for (DSIterator i2ds = i1ds; i2ds != systems->end(); ++i2ds)

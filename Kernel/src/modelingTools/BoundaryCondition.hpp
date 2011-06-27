@@ -50,8 +50,8 @@ public:
 
   /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
-   *  \param the indices of the velocity subjected to prescribed velocoties
-   *  \param the values of the prescribed velocoties
+   *  \param the indices of the velocity subjected to prescribed velocities
+   *  \param the values of the prescribed velocities
    */
   BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,  SP::SimpleVector newVelocityValues);
 
