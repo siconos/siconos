@@ -16,8 +16,22 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+
+# WARNING ${swig_generated_file_fullname} is overriden 
+# tried to add deps with SWIG_MODULE_<name>_EXTRA_DEPS, do not work :(
 SWIG_ADD_MODULE(Numerics python Numerics.i)
+MESSAGE(STATUS "Numerics generated files ${swig_generated_file_fullname}")
+
 SWIG_ADD_MODULE(Kernel python Kernel.i)
+MESSAGE(STATUS "Kernel generated files ${swig_generated_file_fullname}")
+
+
+# neither of the two works :(
+SET_SOURCE_FILES_PROPERTIES(Kernel.i OBJECT_DEPENDS ${CMAKE_SOURCE_DIR}/src/swig/Siconos/KernelRegistration.i)
+
+SET(${SWIG_MODULE_Kernel_EXTRA_DEPS}
+  ${CMAKE_SOURCE_DIR}/src/swig/Siconos/KernelTypes.i
+  ${CMAKE_SOURCE_DIR}/src/swig/Siconos/KernelRegistration.i)
 
 # doxygen documentation
 #
@@ -97,8 +111,12 @@ ADD_CUSTOM_COMMAND(OUTPUT Kernel-docstrings.i
 
 ADD_CUSTOM_TARGET(numerics_docstrings DEPENDS Numerics-docstrings.i)
 ADD_CUSTOM_TARGET(kernel_docstrings DEPENDS Kernel-docstrings.i)
+
+ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_REAL_NAME} ${SWIG_MODULE_Numerics_REAL_NAME})
 ADD_DEPENDENCIES(${SWIG_MODULE_Numerics_REAL_NAME} numerics_docstrings)
 ADD_DEPENDENCIES(${SWIG_MODULE_Kernel_REAL_NAME} kernel_docstrings)
+
+
 
 #
 # Link
@@ -134,16 +152,6 @@ ELSE(STD_PYTHON_DIST_PACKAGES)
       OUTPUT_STRIP_TRAILING_WHITESPACE)
   ENDIF(NOT PYTHON_DIST_PACKAGES)
 ENDIF(STD_PYTHON_DIST_PACKAGES)
-
-# do not work :(
-SET_TARGET_PROPERTIES(${SWIG_MODULE_Numerics_REAL_NAME} PROPERTIES 
-  OBJECT_DEPENDS ${CMAKE_SOURCE_DIR}/src/swig/Siconos/numpy.i)
-
-SET_TARGET_PROPERTIES(${SWIG_MODULE_Kernel_REAL_NAME} PROPERTIES OBJECT_DEPENDS 
-  ${CMAKE_SOURCE_DIR}/src/swig/Siconos/numpy.i 
-  ${CMAKE_SOURCE_DIR}/src/swig/Siconos/KernelTypes.i 
-  ${CMAKE_SOURCE_DIR}/src/swig/Siconos/KernelRegistration.i)
-
 
 MESSAGE(STATUS "PYTHON_DIST_PACKAGES : ${PYTHON_DIST_PACKAGES}")
 

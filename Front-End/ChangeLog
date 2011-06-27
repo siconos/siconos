@@ -1,6 +1,6 @@
-# Siconos-Front-End version 2.0.0, Copyright INRIA 2005-2008.
+# Siconos-Front-End version 3.3.0, Copyright INRIA 2005-2011.
 # Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.	
+# of non smooth dynamical systems.
 # Siconos is a free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -14,8 +14,8 @@
 # along with Siconos; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# Contact: Vincent ACARY vincent.acary@inrialpes.fr 
-#	
+# Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
+#
 This is the changelog for the Siconos Front-End package, www.siconos.gforge.inria.fr.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
@@ -23,65 +23,66 @@ before it.
 
 
 --------------------------------------------------------------------------------
-  v3.0.0 -  Current release
---------------------------------------------------------------------------------	
-Notes:
-
-Changes:  
+  v3.3.0 - July 2011
+--------------------------------------------------------------------------------
+	Kernel & Numerics wrappers for python+numpy through swig 2.0.
+	Kernel virtual methods are overridable in python (see tests).
+	scilab stuff deprecated for the moment.
+	cmake build & install (see INSTALL)
 
 --------------------------------------------------------------------------------
   v2.1.1 - August, 23rd 2007 (release 839)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 
 Notes:
 
 Changes:
-	
+
 --------------------------------------------------------------------------------
   v2.1.0 - June, 28th 2007 (release 809)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
 
 --------------------------------------------------------------------------------
-  v2.0.1 -  December, 14th 2006 (release 626) 
---------------------------------------------------------------------------------	
+  v2.0.1 -  December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
 Notes:
 
-Changes: 
+Changes:
 
 --------------------------------------------------------------------------------
   v2.0.0 - 30 November 2006
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
 
-	
+
 --------------------------------------------------------------------------------
   v1.3.0 - 07 september 2006 (release 567)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 
 Notes:
 
-		
+
 Main changes:
 
 --------------------------------------------------------------------------------
   v1.2.0 - (release 508)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 
 Notes:
 
-		
+
 Main changes:
-	
+
 2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
-	* configure.ac -> run autoupdate to remove obsolete macros. 
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
 	  Keep configure.ac.old to work with older
-	  autotools version. 
+	  autotools version.
 
 --------------------------------------------------------------------------------
   v1.1.2 - February 2006 (release 428)
@@ -89,11 +90,10 @@ Main changes:
 
 Notes: bugs fixing release
 
-		
 Changes:
 
 2006-02-24  Franck Perignon <franck.perignon@inrialpes.fr>
-	* add EventsMangager.h include 
+	* add EventsMangager.h include
 	  (and other EventDriven related files) in pySiconos.i
 
 2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
@@ -101,12 +101,12 @@ Changes:
 	* update configure.ac to use the correct SiconosLDFLAGS
 	  (correct install bug 540)
 	* remove useless .sh files in python
-	 
-2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr> 
 
-        * add a scilab Siconos toolbox 
+2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr>
+
+        * add a scilab Siconos toolbox
 	* upgrade configure for scilab toolbox (--enable-scilab option)
-	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn, 
+	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn,
 	MultiBeadsColumn/HuMAns_pa10,
 
 --------------------------------------------------------------------------------
@@ -115,31 +115,31 @@ Changes:
 
 Notes:
 
-		
+
 Changes:
 
-2006-02-22   Franck Perignon <franck.perignon@inrialpes.fr> 
+2006-02-22   Franck Perignon <franck.perignon@inrialpes.fr>
 
         * remove useless csh or sh files in python (compile.sh,
 	  pySiconos.csh, correctif.sh, pySiconosEnv.csh)
 
-2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr> 
+2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr>
 
-        * add a scilab Siconos toolbox 
+        * add a scilab Siconos toolbox
 	* upgrade configure for scilab toolbox (--enable-scilab option)
-	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn, 
+	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn,
 	MultiBeadsColumn/HuMAns_pa10,
-	
+
 --------------------------------------------------------------------------------
   v1.1.0 - February 2006 (release 388)
 --------------------------------------------------------------------------------
 
 Notes:
 
-		
+
 Changes:
 
-2006-02-01   Franck Perignon <franck.perignon@inrialpes.fr> 
+2006-02-01   Franck Perignon <franck.perignon@inrialpes.fr>
 	     Vincent Acary <vincent.acary@inrialpes.fr>
 
         * rename reconf.sh in autogen.sh and m4 directory in macros
@@ -150,20 +150,17 @@ Changes:
 
 	* upgrade ac_python_devel.m4
         * update pySiconos.i, according to changes in Kernel (friction ...)
-	
+
 --------------------------------------------------------------------------------
   v1.0 - November 2005
 --------------------------------------------------------------------------------
 
-	- add 3 Beads sample using scilab.  
-	
+	- add 3 Beads sample using scilab.
+
 --------------------------------------------------------------------------------
   v1.0 - October 2005
 --------------------------------------------------------------------------------
 
 	- Provides complete Python interface.
 	- First draft of Scilab interface.
-	
 
-
-	

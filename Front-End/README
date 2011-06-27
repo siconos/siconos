@@ -1,4 +1,4 @@
-# Siconos-Front-End version 3.0.0, Copyright INRIA 2005-2008.
+# Siconos-Front-End, Copyright INRIA 2005-2011.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -21,13 +21,19 @@
  README File for Siconos Front-End
 ---------------------------------------------
 
-This project belongs to the European project SICONOS, dedicated to the modeling, the control the analysis and the simulation of the so-called 
-``Non Smooth Dynamical system'' NSDS. More details on this European project can be found on the website of the Project http://siconos.inrialpes.fr.
+This project belongs to the European project SICONOS, dedicated to the
+modeling, the control the analysis and the simulation of the so-called
+``Non Smooth Dynamical system'' NSDS. More details on this European
+project can be found on the website of the Project
+http://siconos.inrialpes.fr.
 
-The present package, Siconos/Front-End provides python and/or scilab interfaces for Siconos/Kernel. 
+The present package, Siconos/Front-End provides python+numpy
+interfaces for Siconos/Kernel and Siconos/Numerics. (scilab stuff is
+deprecated at the moment)
 
-More details are available on software documentation pages, Doc/Devel directory of the current distribution, in "design" chapter,
-or on http://siconos.gforge.inria.fr/
+More details are available on software documentation pages, Doc/Devel
+directory of the current distribution, in "design" chapter, or on
+http://siconos.gforge.inria.fr/
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
