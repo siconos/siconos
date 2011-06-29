@@ -86,6 +86,12 @@ IF(C_HAVE_WALL)
   APPEND_FLAGS(CMAKE_C_FLAGS "-Wall")
 ENDIF(C_HAVE_WALL)
 
+IF(WITH_FCLIB)
+  find_package(FCLib 1.0 REQUIRED)
+  include_directories(${FCLib_INCLUDE_DIRS})
+  set(LIBS ${LIBS} ${FCLib_LIBRARY})
+endif()
+
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
 #
