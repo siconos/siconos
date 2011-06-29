@@ -27,15 +27,21 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 --------------------------------------------------------------------------------
 Main Changes:
 	* NewtonEuler: Fix a bug in nablaqT computation.
-	* NewtonEuler: Include nabla _v (Omega I Omega) in the OSNSP formulation.
-	* computeFreeOutput in OSI. Complete move of SiconosVisitor from LinearOSNS
-	in OSI concerning the computation of free outputs
-	* FirstOrderLinearDS and Moreau OSI. Correct some evaluations for FirstOrderLinearDS	
+	* NewtonEuler: Include nabla _v (Omega I Omega) in the OSNSP
+	formulation.
+	* computeFreeOutput in OSI. Complete move of SiconosVisitor from
+	LinearOSNS in OSI concerning the computation of free outputs
+	* FirstOrderLinearDS and Moreau OSI. Correct some evaluations for
+	FirstOrderLinearDS
 	* Moreau. Add ThetaGamma schemes (x2) for FirstOrderDS
-	* NSDS. Review the computation of IsLinear 
+	* NSDS. Review the computation of IsLinear
 	* Topology. Review and change isTimeInvariant
 	* Moreau. Start Sparse tests for LagrangianDS
 	* Newton in Timestepping. Review of th global process
+	* MultibodyTools : interface with Bullet collision
+	detection (broad phase and narrow phase)
+	* fix a bug with multiple edges in UnitaryRelations graph and the
+	computation of unitary blocks
 
 --------------------------------------------------------------------------------
   v3.2.0 - r2330
@@ -104,11 +110,11 @@ Changes:
 	* Review "sets" management
 	* Replace Interaction/UnitaryRelation/DynamicalSystem/Set classes
 	with a template class SiconosSet
-	
+
 --------------------------------------------------------------------------------
   v2.1.1 - August, 23rd 2007 (release 839)
---------------------------------------------------------------------------------	
-	
+--------------------------------------------------------------------------------
+
 Notes:
 
 Changes:
@@ -119,7 +125,7 @@ Changes:
 
 --------------------------------------------------------------------------------
   v2.1.0 - June, 28th 2007 (release 809)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
@@ -128,15 +134,15 @@ Changes:
         * Add LagrangianRheonomousR and LagrangianCompliantR Relations.
 
 2007-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
-        * Review Relations organization: add/rename LinearTIR in FirstOrderLinearTIR, 
+        * Review Relations organization: add/rename LinearTIR in FirstOrderLinearTIR,
 	  add derived classes for LagrangianR.
-	
+
 2007-02-08 Franck Perignon <franck.perignon@inrialpes.fr>
-	* Add a module controlTools 
+	* Add a module controlTools
 	* Add Sensor, SensorFactory and SensorEvents in controlTools
 	* Add an EventsFactory
-	* Add EventsManager in Simulation (before: only present in EventDriven case) 
-	* Create a "main" header file for each XXXTools location + one "SiconosKernel.h"	
+	* Add EventsManager in Simulation (before: only present in EventDriven case)
+	* Create a "main" header file for each XXXTools location + one "SiconosKernel.h"
 
 2007-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add an abstract DynamicalSystem class, base of FirstOrder, Lagrangian ...
@@ -146,24 +152,24 @@ Changes:
 
 2007-01-23 Vincent  Acary <Vincent.Acary@inrialpes.fr>
 	* configure.ac, MakefilePluginSample.in, ... :
-	Change the name of the variable SICONOS_EXT_LDFLAGS into 
+	Change the name of the variable SICONOS_EXT_LDFLAGS into
 	SICONOS_EXT_LIBS. Change MakefilePluginSample.am to avoid the use of
 	KernelCOnfig.sh (future remove).  Add some bad tricks to allow the use
-	of the original ATLAS sources. Compilation and execution works on 
+	of the original ATLAS sources. Compilation and execution works on
 	MacOsX(intel).
-	
+
 2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
 	* configure.ac :
-	Move check for Lapack and Blas into the check macro for Numerics. 
+	Move check for Lapack and Blas into the check macro for Numerics.
 	Should be replaced in future by only Atlas checking
-	
+
 
 2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add Control class + resulting changes in DynamicalSystem, NSDS ...
-		
+
 --------------------------------------------------------------------------------
-  v2.0.1 -  December, 14th 2006 (release 626) 
---------------------------------------------------------------------------------	
+  v2.0.1 -  December, 14th 2006 (release 626)
+--------------------------------------------------------------------------------
 Notes:
 
 Main Changes:
@@ -172,36 +178,36 @@ Main Changes:
 	* Updates for gcc4.1.1 compatibility (-ffriend-injection, ...)
 
 --------------------------------------------------------------------------------
-  v2.0.0 - 30 November 2006 (release 616) 
---------------------------------------------------------------------------------	
+  v2.0.0 - 30 November 2006 (release 616)
+--------------------------------------------------------------------------------
 Notes:
 
 Main Changes:
 
 2006-10-11 Franck Perignon <franck.perignon@inrialpes.fr>
-	* Remove all lapack++ depencies; replace them by Boost-Ublas 
+	* Remove all lapack++ depencies; replace them by Boost-Ublas
 	  Thus Vectors and Matrices are now fully based on Boost
 	* Review/update Doxygen doc - Based on v1.5.1.
 	  Model/reference file for doc: Interaction.h
 	* Add boost/bindings in the sources (src/boost)
-	
+
 2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
         * Add cppunit tests for MySimple and MyBlock matrices (boost)
-	
+
 2006-09-26 Franck Perignon <franck.perignon@inrialpes.fr>
-        * Add Boost matrices and vectors in Kernel (from Aziz branch) 
+        * Add Boost matrices and vectors in Kernel (from Aziz branch)
 	  (MySiconosMatrix, MySimpleMatrix, MyBlockMatrix, MySiconosVector,
 	   ioMatrix, ioVector classes)
 
 -------------------------------------------------------------------------------
   v1.3.0 - 07 september 2006 (release 567)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 
 Main Changes:
 
 2006-09-07 Franck Perignon <franck.perignon@inrialpes.fr>
         * EventDriven for Lagrangian systems
-	
+
 2006-07-10 Franck Perignon <franck.perignon@inrialpes.fr>
         * Temporary blockVector version with copy of contain to provide contiguous save of
 	  values in Memory
@@ -209,7 +215,7 @@ Main Changes:
 	* Update TimeStepping/OSNS/OSI (use of indexSets)
 	* Update all samples
 	* add "size" arg. in non smooth law
-	
+
 2006-06-28 Franck Perignon <franck.perignon@inrialpes.fr>
         * Review constructors for Interaction, Relation and NonSmooth Law
 
@@ -228,146 +234,146 @@ Main Changes:
 
 2006-05-21 Franck Perignon <franck.perignon@inrialpes.fr>
         * add InteractionsSet class to manage set of Interactions for NSDS, Interaction, OSI ...
-	
+
 2006-05-17 Franck Perignon <franck.perignon@inrialpes.fr>
         * add DSSet class to manage set of Dynamical Systems for NSDS, Interaction, OSI ...
 	* Change the way relation and nslaw are handled by Interaction. See Doc/Dev_Notes/Interaction for details
 	* add Doc/Dev_Notes/Interaction
-	
+
 2006-05-15 Franck Perignon <franck.perignon@inrialpes.fr>
         * remove all nana related files and functions
 
 2006-05-02 Franck Perignon <franck.perignon@inrialpes.fr>
-        * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML. 
-	* review Moreau/Lsodar/OSI 
+        * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML.
+	* review Moreau/Lsodar/OSI
 	* add SiconosTemplates directory in src/utils
 
 2006-04-10 Franck Perignon <franck.perignon@inrialpes.fr>
 
 	* Review DS and derived classes: remove vectorField/xDot
 	   -> rhs (right-hand side) = f(x,t) + Tu
-	  add computeRhs and computeJacobianXRhs in all derived classes, 
-	  plug-in for f(x,t) and its Jacobian. 
+	  add computeRhs and computeJacobianXRhs in all derived classes,
+	  plug-in for f(x,t) and its Jacobian.
 	  Add/correct initialize(t) function in all DS classes, to compute/reset
-	  state at time t. 
+	  state at time t.
 
 2006-03-28 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* Add LinearTIDS class
 
 2006-03-22 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* Set correct links between DynamicalSystem and its derived classes.
 	* Add tests for DS and derived classes.
 
 2006-03-21 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
-	* Add BlockMatrix class, derived from SiconosMatrix. 
+
+	* Add BlockMatrix class, derived from SiconosMatrix.
 	* Add test functions for Matrices
 
 2006-03-16 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
-	* Add SimpleMatrix class, derived from SiconosMatrix. 
+
+	* Add SimpleMatrix class, derived from SiconosMatrix.
 	      SiconosMatrix is now an abstract class
 	* Rename Composite in Block
 
 2006-03-13 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* lapackpp2.4.7 is now required
-	
+
 2006-03-02 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* general review of Model/Strategy and TimeDiscretisation
-	  
+
 2006-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* global_Tests -> add this directory and related files
 	  to allow "global" tests, ie automatic running of chosen
-	  samples. 
+	  samples.
 
 2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
-	* configure.ac -> run autoupdate to remove obsolete macros. 
-	  Warning: must add insure related part after. 
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
 	  Keep configure.ac.old to work with older
-	  autotools version. 
+	  autotools version.
 
 --------------------------------------------------------------------------------
   v1.1.2 -  (release 428)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:  bugs fixing version
 
 Changes:
 
 2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
         * add Event, EventsComparison and EventsManager
 	  classes in simulation tools
 	=> used in EventDriven strategy
 	* Makefile.am -> make install also install doc in @prefix@
 	* Remove Adams class
-	
+
 2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
              Franck Perignon <franck.perignon@inrialpes.fr>
-	* update configure.ac to generate automatically 
-	  siconos/siconos, siconos/MakefilePluginSample, 
+	* update configure.ac to generate automatically
+	  siconos/siconos, siconos/MakefilePluginSample,
 	  KernelConfig.sh.
-	 
+
 2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
 
-	* /macros/ac_f77_library_ldflags.m4 : This file is added and 
-	replaced the system defined macro. A small correction is done 
-	to neglect -lcrt2.o option at linking on MacOsX. This bug will 
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and
+	replaced the system defined macro. A small correction is done
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will
 	be normally corrected in further version of autoconf.
 --------------------------------------------------------------------------------
   v1.1.1 - February 2006 (release 421)
 --------------------------------------------------------------------------------
-	
+
 Notes:
 
 Changes:
 
 2006-02-13 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
         * corrections in Moreau in order to handle u plug-in
-	  for linear DS. 
+	  for linear DS.
 
 2006-02-10 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                                
+
         * update Doxygen config file
 	* minor changes in m4 files and configure.ac (see install bug 495)
-	* prepare Event-Driven and Lsodar (Warning: first version, unstable!!) 
+	* prepare Event-Driven and Lsodar (Warning: first version, unstable!!)
 	  and review of other related classes (OneStepIntegrator, xml ...)
 
 --------------------------------------------------------------------------------
   v1.1.0 - February 2006 (release 388)
 --------------------------------------------------------------------------------
-	
+
 Notes:
 
    This new version includes friction modeling and simulation for
 	Lagrangian systems in 2D (3D version in devel)
-		
+
 Changes:
 
 2006-02-02 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                                
+
         * Add macros/acx_lapackpp.m4 (corresponding to lapackpp 2.4.6)
-                                                                                
+
 2006-02-01 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
 
         * Upgrade SiconosModelXml, configure and make to allow "make check" without install or setenv ...
 
-2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr> 
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr>
 	     Vincent Acary <vincent.acary@inrialpes.fr>
 
         * rename reconf.sh in autogen.sh and m4 directory in macros
-	  Use standard acx_blas and lapack macros. 
+	  Use standard acx_blas and lapack macros.
 	  Warning: new options for configure ( -> configure --help for details )
-	
+
 2006-01-30 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
 
-        * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation 
+        * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation
 	of the version v1.1.0
 	* plugin_test -> plugin/test
 
@@ -383,9 +389,9 @@ Changes:
 
 2005-12-22  Franck Perignon <franck.perignon@inrialpes.fr>
 
-        * src/simulationTools: add friction problem simulation tools (2D) 
-	* src/xml: add xml files for friction problems (2D) 
-	
+        * src/simulationTools: add friction problem simulation tools (2D)
+	* src/xml: add xml files for friction problems (2D)
+
 
 --------------------------------------------------------------------------------
   v1.0 - October 2005 (release 341)
@@ -395,9 +401,9 @@ Changes:
 	 and cppunit tests + general review of all kind of relations.
        - Insure tests ok
        - add user-defined parameters list in all plug-in
-       - add samples "Ball in a bowl", "robotic arm",  	   
+       - add samples "Ball in a bowl", "robotic arm",
        - Fix various bugs in configure and m4 files (local libraries loading)
-	
+
 --------------------------------------------------------------------------------
   v1.0 - October 2005 (release 304)
 --------------------------------------------------------------------------------
@@ -406,9 +412,9 @@ Changes:
 	- Linear Complementarity systems
 	- Lagrangian dynamical systems with unilateral constraints
 	- Linear relations
-	- Complementarity conditions and Newton impact law. 
+	- Complementarity conditions and Newton impact law.
 
 	Simulation:
 	- Moreau Time-stepping scheme
-	- Newton-Raphson 
+	- Newton-Raphson
 	- Linear Complementarity Problems
