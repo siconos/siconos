@@ -446,7 +446,9 @@ IF(WITH_TESTING)
   
   ## Alart Curnier functions
   NEW_TEST(AlartCurnierFunctions_test FrictionContact3D_AlartCurnierFunctions_test.c)
-
+  IF(WITH_FCLIB)
+  NEW_TEST(FCLIB_test1 FrictionContact3D_writefclib_local_test.c)
+  ENDIF(WITH_FCLIB)
 
 
   END_TEST()
