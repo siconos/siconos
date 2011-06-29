@@ -87,9 +87,10 @@ IF(C_HAVE_WALL)
 ENDIF(C_HAVE_WALL)
 
 IF(WITH_FCLIB)
-  find_package(FCLib 1.0 REQUIRED)
-  include_directories(${FCLib_INCLUDE_DIRS})
-  set(LIBS ${LIBS} ${FCLib_LIBRARY})
+  COMPILE_WITH(FCLib 1.0 REQUIRED)
+#  include_directories(${FCLib_INCLUDE_DIRS})
+#  set(LIBS ${LIBS} ${FCLib_LIBRARY})
+#  display(LIBS)
 endif()
 
 #
