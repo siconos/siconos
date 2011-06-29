@@ -23,6 +23,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include <SparseMatrix.h>
+
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to SparseBlockStructuredMatrix
   \author Pascal Denoyelle and Franck Perignon and Co
@@ -253,11 +255,23 @@ extern "C"
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 
   /** Copy a SBM into a Dense Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param[in] M the SparseBlockStructuredMatrix matrix
   \param[in] pointer on the filled dense Matrix
   */
 
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
+
+  /** Copy a SBM into a Sparse (CSR) Matrix
+  \param[in] M the SparseBlockStructuredMatrix matrix
+  \param[in] pointer on the filled sparse Matrix
+  */
+  int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
+
+  /** initMemory of a Sparse (CSR) Matrix form a SBM matrix
+  \param[in] M the SparseBlockStructuredMatrix matrix
+  \param[in] pointer on the initialized sparse Matrix
+  */
+  int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
 
   /**Copy a block row of the SBM into a Dense Matrix
   \param[in] M the SparseBlockStructuredMatrix matrix to be inversed.

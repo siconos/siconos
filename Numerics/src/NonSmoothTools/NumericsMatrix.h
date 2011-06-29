@@ -98,7 +98,9 @@ However, if required, a function freeNumericsMatrix() is available.
   \author Franck Perignon
 */
 #include <stdio.h>
+#include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
+
 /** Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
     Warning: one and only one storage is allowed and thus only one of the pointers below can be different from NULL
     \param storageType, int that identifies the type of storage (0: double*, 1:SparseBlockStructuredMatrix)
@@ -116,6 +118,7 @@ typedef struct
   double* matrix0;
   SparseBlockStructuredMatrix* matrix1;
 } NumericsMatrix;
+
 
 #include "stdio.h"
 
