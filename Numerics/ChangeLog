@@ -28,11 +28,13 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 --------------------------------------------------------------------------------
 
 Changes:
-	* FrictionContact3D Add ExtraGradient and HyperPlaneProjection methods for solving
-	3D frictional contact problems as VI.
+	* FrictionContact3D Add ExtraGradient and HyperPlaneProjection
+	methods for solving 3D frictional contact problems as VI.
 	* FrictionContact3D Add tests and clean up old test series.
 	* lcp_enum deals with degenerated systems using dgels or dgesv.
-	* GenericMechanicalProblem: Build a reduced equivalent problem, equalities are either substituted or written in one block.
+	* GenericMechanicalProblem: Build a reduced equivalent problem,
+	equalities are either substituted or written in one block.
+	* Sparse global Alart Curnier (with MUMPS solver) & gp line search.
 
 --------------------------------------------------------------------------------
   v3.2.0 - r2330
@@ -93,71 +95,71 @@ Changes:
 Notes:
 
 Changes:
-		
+
 2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
-                                                                               
+
 	* lcp_solver : Modification of the convergence criteria
 	* lcp_solver : Renaming lcp_nlgs into lcp_pgs
 	* lcp_solver : Renaming lcp_sor into lcp_psor
-	
+
 --------------------------------------------------------------------------------
   v2.0.1 - December, 14th 2006 (release 626)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Main Changes:
 
 --------------------------------------------------------------------------------
   v2.0.0 - November, 30th 2006
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Main Changes:
 2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* Remove lemke routines and keep only lexicoLemke
-	
+
 --------------------------------------------------------------------------------
   v1.3.0 - 07 september 2006 (release 567)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
 
 2006-09-07 Pascal Denoyelle <pascal.denoyelle@inrialpes.fr>
-                                                                               
+
 	* Add LCP solver for block matrices
 	* Review convergence criteria for LCP solvers
-	
+
 --------------------------------------------------------------------------------
   v1.2.0 - (release 508)
---------------------------------------------------------------------------------	
+--------------------------------------------------------------------------------
 Notes:
 
 Changes:
 
 2006-03-24 Vincent Acary <vincent.acary@inrialpes.fr>
-                                                                               
+
 	* INSTALL, src/Makefile.am, src/dummy.cpp
 	  First draft of a linking strategy on MacOsX
 
 2006-03-22 Vincent Acary <vincent.acary@inrialpes.fr>
-                                                                               
+
 	* lcp_solver.c, lcp_sor.c, lcp_newton_FB.c, NSSpack.h
-	  Removing not reliable solvers. 
+	  Removing not reliable solvers.
 	  Adding Draft version of the sor algorihm and the newton based on
 	  Fischer-Bursmeister function.
 
 2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
-	* configure.ac -> run autoupdate to remove obsolete macros. 
-	  Warning: must add insure related part after. 
+
+	* configure.ac -> run autoupdate to remove obsolete macros.
+	  Warning: must add insure related part after.
 	  Keep configure.ac.old to work with older
-	  autotools version. 
+	  autotools version.
 
 
 2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                               
+
 	* Makefile.am -> make install also install doc in @prefix@
 
 --------------------------------------------------------------------------------
