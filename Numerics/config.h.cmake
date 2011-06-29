@@ -23,3 +23,4 @@
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM
+#cmakedefine WITH_FCLIB
