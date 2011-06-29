@@ -88,6 +88,8 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   info = fclib_write_local(fclib_problem, path);
 
+  /* fclib_delete_local (fclib_problem); */
+
   return info;
 
 }

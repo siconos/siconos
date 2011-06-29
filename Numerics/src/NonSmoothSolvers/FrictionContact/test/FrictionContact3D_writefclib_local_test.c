@@ -40,10 +40,13 @@ int main(void)
   char description[100] = " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat";
   char math_info[50] = "unknown";
 
-  frictionContact_fclib_write(problem, title, description, math_info,
+  frictionContact_fclib_write(problem, "Confeti-ex03-Fc3D-SBM" ,
+                              " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat",
+                              " unknown",
                               "./data/Confeti-ex03-Fc3D-SBM.hdf5");
 
 
+  //freeFrictionContact_problem(problem);
   printf("\n End of test \n");
   return info;
 }
