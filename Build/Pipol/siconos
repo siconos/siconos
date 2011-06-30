@@ -8,9 +8,11 @@
 
 #PIPOL kvm-linux 02:00
 
-#PIPOL 2010-linux-ubuntu-lucid 02:00
+#PIPOL ubuntu-lucid 02:00
 
-#PIPOL 2010-linux-ubuntu-karmic 02:00
+#PIPOL ubuntu-karmic 02:00
+
+#PIPOL ubuntu-maverick 02:00
 
 #PIPOL mac 02:00
 
