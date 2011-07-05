@@ -64,7 +64,7 @@ protected:
 
 
   /** _q dimension, is not necessary _n. In our case, _qDim = 7. _n =6*/
-  int _qDim;
+  unsigned int _qDim;
 
   /** _q contains the representation of the system, in current implementation:
       _q[0:2] : the coordinates of the center of mass.
