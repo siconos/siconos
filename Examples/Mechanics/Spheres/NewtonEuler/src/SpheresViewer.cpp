@@ -24,59 +24,17 @@ using namespace qglviewer;
 
 void SpheresViewer::init()
 {
-  // viewer and scene state
-  restoreStateFromFile();
-  setSceneRadius(100.);
-  showEntireScene();
-  setGridIsDrawn();
-
-  // color
-  setBackgroundColor(QColor(200, 200, 200));
-  setForegroundColor(QColor(0, 0, 0));
-
-  // camera
-  camera()->setPosition(Vec(1., -1.0, 0.5));
-  //camera()->lookAt(sceneCenter());
-  //camera()->setType(Camera::ORTHOGRAPHIC);
-  camera()->showEntireScene();
-  setManipulatedFrame(camera()->frame());
-
-  // help screen
-  help();
-
-  // siconos setup
   Siconos_.reset(new Spheres());
-  Siconos_->init();
 
-  int i;
-  DSIterator itDS;
+  BodiesViewer::init();
 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  boost::tie(dsi, dsend) = GETALLDS(Siconos_)->vertices();
+  setSceneRadius(100.);
 
-  for (i = 0; dsi != dsend; ++i, ++dsi)
-  {
-
-    boost::shared_ptr<SetDrawing> setdrawing(new SetDrawing(*this, i));
-    GETALLDS(Siconos_)->bundle(*dsi)->acceptSP(setdrawing);
-  }
-
-  bodydraw_.reset(new BodyDraw(*this));
-
-  sbodydraw_.reset(new SelectedBodyDraw(*this));
-
-  lastSelected_ = -1;
-
-  myMouseBehavior_ = false;
-
-  startAnimation();
 }
 
 
 void SpheresViewer::draw()
 {
-
-  int i, mrow;
 
   char qs[6];
 
@@ -85,48 +43,17 @@ void SpheresViewer::draw()
   SP::Interaction interaction;
   SP::Relation relation;
 
-
-  for (i = 0; i < GETNDS(Siconos_); i++)
+  for (unsigned int i = 0; i < GETNDS(Siconos_); i++)
   {
-    if (drawings_[i]->selected())
+    if (shapes_[i]->selected())
     {
-      drawings_[i]->getDS()->acceptSP(sbodydraw_);
+      drawSelectedQGLShape(*shapes_[i]);
     }
     else
     {
-      drawings_[i]->getDS()->acceptSP(bodydraw_);
+      drawQGLShape(*shapes_[i]);
     }
   }
-
-  float lbd, lbdmax, w;
-
-  SP::UnitaryRelationsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
-
-  UnitaryRelationsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
-  {
-    interaction = I1->bundle(*ui)->interaction();
-    relation = interaction->relation();
-
-    lbd = interaction->lambdaOld(1)->getValue(0);
-
-    // screen width of interaction
-    w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
-
-    involvedDS = interaction->dynamicalSystems();
-
-    // disk/disk
-    itDS = involvedDS->begin();
-
-    SP::DynamicalSystem d1 = *itDS;
-    SP::DynamicalSystem d2;
-    if (involvedDS->size() == 2)
-      d2 = *++itDS;
-    else
-      d2 = d1;
-
-    /* cf DisksViewer */
-  };
 
   glColor3f(.45, .45, .45);
   glLineWidth(1.);
@@ -164,7 +91,7 @@ void SpheresViewer::draw()
   QGLViewer::drawArrow(qglviewer::Vec(0, 0, .1), qglviewer::Vec(0, 1, .1), .01, 3);
 
   glLineWidth(1.);
-  for (i = -100; i <= 100; i += 5)
+  for (unsigned int i = -100; i <= 100; i += 5)
   {
     sprintf(qs, "%d", i);
     //    print((float)i,-.8,qs,small_text);
@@ -172,7 +99,7 @@ void SpheresViewer::draw()
     drawVec((float)i, -.2, (float)i, .2);
     drawVec(-.2, (float)i, .2, (float)i);
   }
-  for (i = -100; i <= 100; i++)
+  for (unsigned int i = -100; i <= 100; i++)
   {
     drawVec((float)i, -.1, (float)i, .1);
     drawVec(-.1, (float)i, .1, (float)i);
@@ -180,114 +107,4 @@ void SpheresViewer::draw()
 }
 
 
-void SpheresViewer::animate()
-{
-
-  // THREAD or PROCESS ?
-  //clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts1);
-
-  Siconos_->compute();
-  Siconos_->compute();
-  //saveSnapshot();
-
-  //clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts2);
-
-  //timeSiconos = ts2.tv_nsec - ts1.tv_nsec;
-  //std::cout << timeSiconos << std::endl;
-}
-
-
-void SpheresViewer::mousePressEvent(QMouseEvent* e)
-{
-  if ((e->button() == Qt::LeftButton) && (e->modifiers() == Qt::NoButton))
-    myMouseBehavior_ = true;
-  else
-    QGLViewer::mousePressEvent(e);
-}
-
-void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
-{
-
-  float m_coor[3];
-  float c_coor[3] = { 0. , 0., 0.};
-  float coor[3] = { 0. , 0., 0.};
-
-  if (selectedName() >= 0)
-  {
-
-    SP::Drawing selected_drawing = drawings_[selectedName()];
-    SP::DynamicalSystem DS = selected_drawing->getDS();
-    //double mass = ask<Mass, SP::SiconosMatrix>(*DS);
-
-    QPoint pixel;
-    qglviewer::Vec orig;
-    qglviewer::Vec dir;
-
-    lastSelected_ = selectedName();
-    m_coor[0] = (float) e->x();
-    m_coor[1] = (float) e->y();
-    m_coor[2] = 0;
-
-    pixel.setX(e->x());
-    pixel.setY(camera()->screenHeight() - e->y());
-
-    //     camera()->convertClickToLine(pixel,orig,dir);
-
-    camera()->getUnprojectedCoordinatesOf(m_coor, m_coor, NULL);
-
-    coor[0] = m_coor[0];
-    coor[1] = m_coor[1];
-    coor[2] = m_coor[2];
-
-    // shoot
-    SP::SiconosVector FExt = ask<NeedFExt>(*DS);
-    SP::SiconosVector q = ask<Needq>(*DS);
-    double mass = ask<NeedMassValue>(*DS);
-
-
-    FExt->setValue(0, (-coor[0] + q->getValue(0))*mass);
-    FExt->setValue(1, (-coor[1] + q->getValue(1))*mass);
-    FExt->setValue(2, (-coor[2] + q->getValue(2))*mass);
-  }
-
-  QGLViewer::mouseMoveEvent(e);
-}
-
-void SpheresViewer::mouseReleaseEvent(QMouseEvent* e)
-{
-  if (myMouseBehavior_)
-    myMouseBehavior_ = false;
-
-  if (lastSelected_ >= 0)
-  {
-    drawings_[lastSelected_]->restoreFExt();
-    drawings_[lastSelected_]->nextSelection();
-    lastSelected_ = -1;
-    setSelectedName(-1);
-    setManipulatedFrame(camera()->frame());
-  };
-
-  QGLViewer::mouseReleaseEvent(e);
-}
-
-
-QString SpheresViewer::helpString() const
-{
-  QString text("<h2>S i m p l e V i e w e r</h2>");
-  text += "Use the mouse to move the camera around the object. ";
-  text += "You can respectively revolve around, zoom and translate with the three mouse buttons. ";
-  text += "Left and middle buttons pressed together rotate around the camera view direction axis<br><br>";
-  text += "Pressing <b>Alt</b> and one of the function keys (<b>F1</b>..<b>F12</b>) defines a camera keyFrame. ";
-  text += "Simply press the function key again to restore it. Several keyFrames define a ";
-  text += "camera path. Paths are saved when you quit the application and restored at next start.<br><br>";
-  text += "Press <b>F</b> to display the frame rate, <b>A</b> for the world axis, ";
-  text += "<b>Alt+Return</b> for full screen mode and <b>Control+S</b> to save a snapshot. ";
-  text += "See the <b>Keyboard</b> tab in this window for a complete shortcut list.<br><br>";
-  text += "Double clicks automates single click actions: A left button double click aligns the closer axis with the camera (if close enough). ";
-  text += "A middle button double click fits the zoom of the camera and the right button re-centers the scene.<br><br>";
-  text += "A left button double click while holding right button pressed defines the camera <i>Revolve Around Point</i>. ";
-  text += "See the <b>Mouse</b> tab and the documentation web pages for details.<br><br>";
-  text += "Press <b>Escape</b> to exit the viewer.";
-  return text;
-}
 

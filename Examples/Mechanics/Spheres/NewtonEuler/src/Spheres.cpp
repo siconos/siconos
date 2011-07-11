@@ -34,7 +34,7 @@ using namespace std;
 /* do nothing if solver does not converge */
 void localCheckSolverOuput(int, Simulation*)
 {};
-#define WITH_GENERIC_SOLVER
+//#define WITH_GENERIC_SOLVER
 
 // ================= Creation of the model =======================
 void Spheres::init()
@@ -55,7 +55,6 @@ void Spheres::init()
 
   double h = 0.005;                // time step
   double g = 9.81;
-  double en = 0.7;
 
   double theta = 0.5;              // theta for Moreau integrator
 
@@ -64,9 +63,6 @@ void Spheres::init()
   // -----------------------------------------
   // --- Dynamical systems && interactions ---
   // -----------------------------------------
-
-  unsigned int j;
-  int interCounter = 0;
 
   double R;
   double m;
@@ -104,9 +100,6 @@ void Spheres::init()
       vTmp.reset(new SimpleVector(6));
       qTmp->zero();
       vTmp->zero();
-      vTmp->setValue(3, (*Spheres)(i, 6));
-      vTmp->setValue(4, (*Spheres)(i, 7));
-      vTmp->setValue(5, (*Spheres)(i, 8));
 
       (*qTmp)(0) = (*Spheres)(i, 0);
       (*qTmp)(1) = (*Spheres)(i, 1);
@@ -159,8 +152,8 @@ void Spheres::init()
 
     osnspb_->numericsSolverOptions()->iparam[4] = 2; // projection
 
-    osnspb_->numericsSolverOptions()->dparam[0] = 1e-12; // Tolerance
-    osnspb_->numericsSolverOptions()->dparam[2] = 1e-12; // Local tolerance
+    osnspb_->numericsSolverOptions()->dparam[0] = 1e-7; // Tolerance
+    osnspb_->numericsSolverOptions()->dparam[2] = 1e-7; // Local tolerance
 
 
     osnspb_->setMaxSize(16384);       // max number of interactions
@@ -177,7 +170,7 @@ void Spheres::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(en, 0.0, 0.6, 3));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.0, 0.0, 0.6, 3));
 
     _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
 
