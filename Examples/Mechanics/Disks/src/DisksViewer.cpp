@@ -20,25 +20,21 @@
 
 #include "DisksViewer.hpp"
 
-#include <Siconos/IO/Register.hpp>
+//#include <Siconos/IO/Register.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
-
-SICONOS_IO_REGISTER(Model, (_t)(_t0)(_T)(_title)(_author)(_description)(_date)(_xmlSchema));
+//#include "Full.hpp"
 
 using namespace qglviewer;
 
 void DisksViewer::init()
 {
-  // viewer and scene state
-  restoreStateFromFile();
-  setSceneRadius(100.);
-  showEntireScene();
 
-  // color
-  setBackgroundColor(QColor(200, 200, 200));
-  setForegroundColor(QColor(0, 0, 0));
+  // siconos setup
+  Siconos_.reset(new Disks());
+
+  BodiesViewer::init();
 
   // 2D setup
   glDisable(GL_LIGHTING);
@@ -50,44 +46,6 @@ void DisksViewer::init()
   constraint_->setRotationConstraintType(AxisPlaneConstraint::FORBIDDEN);
   camera()->frame()->setConstraint(&*constraint_);
 
-  // help screen
-  help();
-
-  // siconos setup
-  Siconos_.reset(new Disks());
-
-  Siconos_->init();
-
-  std::ofstream ofs("diskmodel.xml");
-  {
-    boost::archive::xml_oarchive oa(ofs);
-    save(oa, *Siconos_->model(), 0);
-  }
-
-  int i;
-  DSIterator itDS;
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  boost::tie(dsi, dsend) = GETALLDS(Siconos_)->vertices();
-  for (i = 0; dsi != dsend; ++i, ++dsi)
-  {
-
-    boost::shared_ptr<SetDrawing> setdrawing(new SetDrawing(*this, i));
-    GETALLDS(Siconos_)->bundle(*dsi)->acceptSP(setdrawing);
-  }
-
-
-  bodydraw_.reset(new BodyDraw(*this));
-
-  sbodydraw_.reset(new SelectedBodyDraw(*this));
-
-  lastSelected_ = -1;
-
-  initUCircle();
-
-  myMouseBehavior_ = false;
-
-  startAnimation();
 }
 
 
@@ -135,21 +93,21 @@ void DisksViewer::draw()
 
     SP::DynamicalSystem d1 = *itDS;
 
-    SP::SiconosVector q1 = ask<Needq>(*d1);
+    SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
     float x1 = (*q1)(0);
     float y1 = (*q1)(1);
-    float r1 = ask<NeedRadius>(*d1);
+    float r1 = ask<ForRadius>(*d1);
 
 
     if (involvedDS->size() == 2)
     {
       SP::DynamicalSystem d2;
       d2 = *++itDS;
-      SP::SiconosVector q2 = ask<Needq>(*d2);
+      SP::SiconosVector q2 = ask<ForPosition>(*d2);
       float x2 = (*q2)(0);
       float y2 = (*q2)(1);
-      float r2 = ask<NeedRadius>(*d2);
+      float r2 = ask<ForRadius>(*d2);
 
       float d = hypotf(x1 - x2, y1 - y2);
 
@@ -164,7 +122,7 @@ void DisksViewer::draw()
 
     else
     {
-      SP::SiconosMatrix jachq = ask<NeedJachq>(*relation);
+      SP::SiconosMatrix jachq = ask<ForJachq>(*relation);
       double jx = jachq->getValue(0, 0);
       double jy = jachq->getValue(0, 1);
       double dj = hypot(jx, jy);
@@ -177,15 +135,15 @@ void DisksViewer::draw()
     }
   }
 
-  for (i = 0; i < GETNDS(Siconos_); i++)
+  for (unsigned int i = 0; i < GETNDS(Siconos_); i++)
   {
-    if (drawings_[i]->selected())
+    if (shapes_[i]->selected())
     {
-      drawings_[i]->getDS()->acceptSP(sbodydraw_);
+      drawSelectedQGLShape(*shapes_[i]);
     }
     else
     {
-      drawings_[i]->getDS()->acceptSP(bodydraw_);
+      drawQGLShape(*shapes_[i]);
     }
   }
 
@@ -280,93 +238,6 @@ void DisksViewer::draw()
     drawVec((float)i, -.1, (float)i, .1);
     drawVec(-.1, (float)i, .1, (float)i);
   }
-}
-
-
-void DisksViewer::animate()
-{
-
-  struct timespec ts1, ts2;
-
-  Siconos_->compute();
-  Siconos_->compute();
-  //saveSnapshot();
-
-}
-
-
-void DisksViewer::mousePressEvent(QMouseEvent* e)
-{
-  if ((e->button() == Qt::LeftButton) && (e->modifiers() == Qt::NoButton))
-    myMouseBehavior_ = true;
-  else
-    QGLViewer::mousePressEvent(e);
-}
-
-void DisksViewer::mouseMoveEvent(QMouseEvent *e)
-{
-
-  float coor[3];
-
-  if (selectedName() >= 0)
-  {
-    lastSelected_ = selectedName();
-    coor[0] = (float) e->x();
-    coor[1] = (float) e->y();
-    coor[2] = 0;
-
-    camera()->getUnprojectedCoordinatesOf(coor, coor, NULL);
-
-    SP::SiconosVector fext =
-      ask<NeedFExt>(*drawings_[selectedName()]->getDS());
-
-    SP::SiconosVector q =
-      ask<Needq>(*drawings_[selectedName()]->getDS());
-
-    double massValue =
-      ask<NeedMassValue>(*drawings_[selectedName()]->getDS());
-
-    fext->setValue(0, ((float)coor[0] - q->getValue(0))*massValue * 30);
-
-    fext->setValue(1, ((float)coor[1] - q->getValue(1))*massValue * 30);
-  }
-
-  QGLViewer::mouseMoveEvent(e);
-}
-
-void DisksViewer::mouseReleaseEvent(QMouseEvent* e)
-{
-  if (myMouseBehavior_)
-    myMouseBehavior_ = false;
-
-  if (lastSelected_ >= 0)
-  {
-    drawings_[lastSelected_]->restoreFExt();
-    drawings_[lastSelected_]->nextSelection();
-  };
-
-  QGLViewer::mouseReleaseEvent(e);
-}
-
-
-QString DisksViewer::helpString() const
-{
-  QString text("<h2>S i m p l e V i e w e r</h2>");
-  text += "Use the mouse to move the camera around the object. ";
-  text += "You can respectively revolve around, zoom and translate with the three mouse buttons. ";
-  text += "Left and middle buttons pressed together rotate around the camera view direction axis<br><br>";
-  text += "Pressing <b>Alt</b> and one of the function keys (<b>F1</b>..<b>F12</b>) defines a camera keyFrame. ";
-  text += "Simply press the function key again to restore it. Several keyFrames define a ";
-  text += "camera path. Paths are saved when you quit the application and restored at next start.<br><br>";
-  text += "Press <b>F</b> to display the frame rate, <b>A</b> for the world axis, ";
-  text += "<b>Alt+Return</b> for full screen mode and <b>Control+S</b> to save a snapshot. ";
-  text += "See the <b>Keyboard</b> tab in this window for a complete shortcut list.<br><br>";
-  text += "Double clicks automates single click actions: A left button double click aligns the closer axis with the camera (if close enough). ";
-  text += "A middle button double click fits the zoom of the camera and the right button re-centers the scene.<br><br>";
-  text += "A left button double click while holding right button pressed defines the camera <i>Revolve Around Point</i>. ";
-  text += "See the <b>Mouse</b> tab and the documentation web pages for details.<br><br>";
-  text += "Press <b>Escape</b> to exit the viewer.";
-  return text;
 }
 
 

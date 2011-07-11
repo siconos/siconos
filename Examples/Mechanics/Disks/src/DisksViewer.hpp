@@ -24,10 +24,5 @@
 class DisksViewer : public BodiesViewer
 {
   void init();
-  void animate();
   void draw();
-  QString helpString() const;
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
 };

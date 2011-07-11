@@ -34,7 +34,7 @@
 
 // CRYSTAL SIZE
 #ifndef Ll
-#define Ll 4
+#define Ll 7
 #endif
 
 #define Rr 1

@@ -153,13 +153,13 @@ void Disks::init()
       (*_plans)(i, 4) = tmpr->getYCenter();
     }
 
-    _moving_plans.reset(new FMatrix(1, 6));
-    (*_moving_plans)(0, 0) = &A;
-    (*_moving_plans)(0, 1) = &B;
-    (*_moving_plans)(0, 2) = &C;
-    (*_moving_plans)(0, 3) = &DA;
-    (*_moving_plans)(0, 4) = &DB;
-    (*_moving_plans)(0, 5) = &DC;
+    /*    _moving_plans.reset(new FMatrix(1,6));
+        (*_moving_plans)(0,0) = &A;
+        (*_moving_plans)(0,1) = &B;
+        (*_moving_plans)(0,2) = &C;
+        (*_moving_plans)(0,3) = &DA;
+        (*_moving_plans)(0,4) = &DB;
+        (*_moving_plans)(0,5) = &DC;*/
 
 
 
@@ -209,7 +209,7 @@ void Disks::init()
     }
 
 
-
+    _model->nonSmoothDynamicalSystem()->setSymmetric(true);
 
 
     // ------------------
@@ -237,6 +237,9 @@ void Disks::init()
 
     // -- Simulation --
     simulation_.reset(new TimeStepping(timedisc_));
+
+    boost::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
+
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);
 
