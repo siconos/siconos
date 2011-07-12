@@ -91,29 +91,29 @@ extern "C"
    \param [in] id, not used in current version
    \param [in-out] options, the filled options.(by default LEMKE and Quartic)
    */
-  void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int id);
+  void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id);
   /*To print a GenericMechanicalProblem in a file.
     \param[in] problem, the printed problem.
     \param[in-out] output file.
    */
-  void genericMechnical_printInFile(GenericMechanicalProblem*  problem, FILE* file);
+  void genericMechanical_printInFile(GenericMechanicalProblem*  problem, FILE* file);
   /*To build a GenericMechanicalProblem from a file.
     \parm[in] file, a file containing the GenericMechanicalProblem.
     \return the built GenericMechanicalProblem.
    */
-  GenericMechanicalProblem* genericMechnical_newFromFile(FILE* file);
+  GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file);
 
   /*Alloc memory iff options->iWork options->dWork and are  null.
   Return 0 if the memory is not allocated. else return 1.*/
-  int genericMechnical_alloc_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
+  int genericMechanical_alloc_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
   /*free the Work memory, and set pointer to zero.*/
-  void genericMechnical_free_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
+  void genericMechanical_free_working_memory(GenericMechanicalProblem* problem, SolverOptions* options);
   /*compute error, return 0 iff succes.*/
   int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err);
   /*Useful to get the size of the double working zone memory.
   * Return the number of double.
   */
-  int genericMechnical_getNbDWork(GenericMechanicalProblem* problem, SolverOptions* options);
+  int genericMechanical_getNbDWork(GenericMechanicalProblem* problem, SolverOptions* options);
   /*
    *Containing the Gauss-Seidel algorithm.
    */

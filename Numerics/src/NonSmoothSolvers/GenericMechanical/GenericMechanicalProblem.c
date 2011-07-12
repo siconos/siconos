@@ -200,7 +200,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
   printf("\nEND Display a GenericMechanicalProblem:\n");
 }
 
-void genericMechnical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
+void genericMechanical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
   /*Print M*/
@@ -220,7 +220,7 @@ void genericMechnical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
   }
 }
 
-GenericMechanicalProblem * genericMechnical_newFromFile(FILE* file)
+GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 {
   int nsubProb = 0;
   int prbType = 0;

@@ -31,7 +31,7 @@ int main(void)
   FILE * finput  =  fopen(filename,"r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  genericMechnicalProblem_setDefaultSolverOptions(options,@TEST_SOLVER@);
+  genericMechanicalProblem_setDefaultSolverOptions(options,@TEST_SOLVER@);
   if (@TEST_TOLERANCE@)
   {
     options->dparam[0]=@TEST_TOLERANCE@;

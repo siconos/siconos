@@ -25,7 +25,7 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  GenericMechanicalProblem* problem = genericMechnical_newFromFile(f);
+  GenericMechanicalProblem* problem = genericMechanical_newFromFile(f);
 
   //NumericsOptions global_options;
   //global_options.verboseMode = 2; // turn verbose mode to off by default

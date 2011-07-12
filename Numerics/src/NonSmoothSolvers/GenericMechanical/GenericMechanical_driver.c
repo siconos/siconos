@@ -197,7 +197,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 {
 #ifdef GMP_WRITE_PRB
   FILE * toto1  = fopen("GMP_CURRENT.txt", "w");
-  genericMechnical_printInFile(pGMP, toto1);
+  genericMechanical_printInFile(pGMP, toto1);
   fclose(toto1);
 #endif
 
@@ -234,7 +234,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   }
   else
   {
-    pPrevReaction = (double *) malloc(genericMechnical_getNbDWork(pGMP, options) * sizeof(double));
+    pPrevReaction = (double *) malloc(genericMechanical_getNbDWork(pGMP, options) * sizeof(double));
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
   while (it < iterMax && tolViolate)
@@ -397,7 +397,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   options->iparam[3] = it;
 #ifdef GMP_WRITE_FAILED_PRB
   FILE * toto  = fopen("GMP_NOT_FAILED.txt", "w");
-  genericMechnical_printInFile(pGMP, toto);
+  genericMechanical_printInFile(pGMP, toto);
   fclose(toto);
 #endif
   if (tolViolate)
@@ -405,7 +405,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     printf("---GenericalMechanical_drivers, FAILED***************************************\n");
 #ifdef GMP_WRITE_FAILED_PRB
     FILE * toto  = fopen("GMP_FAILED.txt", "w");
-    genericMechnical_printInFile(pGMP, toto);
+    genericMechanical_printInFile(pGMP, toto);
     fclose(toto);
 #endif
 
@@ -474,7 +474,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 
 
 
-void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
+void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
 {
   options->iSize = 5;
   options->dSize = 5;
@@ -514,23 +514,23 @@ void genericMechnicalProblem_setDefaultSolverOptions(SolverOptions* options, int
 
 /*Alloc memory iff options->iWork options->dWork and are  null.
  Return 0 if the memory is not allocated. else return 1.*/
-int genericMechnical_alloc_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+int genericMechanical_alloc_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   if (options->dWork)
     return 0;
 
-  options->dWork = (double *) malloc(genericMechnical_getNbDWork(pGMP, options) * sizeof(double));
+  options->dWork = (double *) malloc(genericMechanical_getNbDWork(pGMP, options) * sizeof(double));
   return 1;
 
 }
 /*free the Work memory, and set pointer to zero.*/
-void genericMechnical_free_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+void genericMechanical_free_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   if (options->dWork)
     free(options->dWork);
   options->dWork = NULL;
 }
-int genericMechnical_getNbDWork(GenericMechanicalProblem* pGMP, SolverOptions* options)
+int genericMechanical_getNbDWork(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   return 2 * pGMP->size;
 }

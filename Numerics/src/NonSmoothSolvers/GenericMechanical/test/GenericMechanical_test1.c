@@ -30,7 +30,7 @@ int main(void)
   FILE * finput  =  0;
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  genericMechnicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_QUARTIC);
+  genericMechanicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_QUARTIC);
   options->iparam[0] = 100000000;
   //options->iparam[2]=1;
   printf("Test on ./data/GMP.dat\n");
