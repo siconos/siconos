@@ -21,7 +21,7 @@
 #include <assert.h>
 #include "NumericsMatrix.h"
 #include "LA.h"
-
+#include "misc.h"
 
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {
@@ -313,20 +313,20 @@ void readInFile(NumericsMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, NumericsMatrix readInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  fscanf(file, "%d", &(m->storageType));
-  fscanf(file, "%d", &(m->size0));
-  fscanf(file, "%d", &(m->size1));
+  CHECK_IO(fscanf(file, "%d", &(m->storageType)));
+  CHECK_IO(fscanf(file, "%d", &(m->size0)));
+  CHECK_IO(fscanf(file, "%d", &(m->size1)));
   int storageType = m->storageType;
 
   if (storageType == 0)
   {
-    fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1));
+    CHECK_IO(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
 
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
-      fscanf(file, "%le", &(m->matrix0[i]));
+      CHECK_IO(fscanf(file, "%le", &(m->matrix0[i])));
       if ((i + 1) % m->size1 == 0)
-        fscanf(file, "\n");
+        IGNORE_IO(fscanf(file, "\n"));
     }
 
 
@@ -346,22 +346,22 @@ void newFromFile(NumericsMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, NumericsMatrix newFromFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  fscanf(file, "%d", &(m->storageType));
-  fscanf(file, "%d", &(m->size0));
-  fscanf(file, "%d", &(m->size1));
+  CHECK_IO(fscanf(file, "%d", &(m->storageType)));
+  CHECK_IO(fscanf(file, "%d", &(m->size0)));
+  CHECK_IO(fscanf(file, "%d", &(m->size1)));
   int storageType = m->storageType;
 
   if (storageType == 0)
   {
-    fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1));
+    CHECK_IO(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
 
     m->matrix0 = (double *)malloc(m->size1 * m->size0 * sizeof(double));
 
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
-      fscanf(file, "%le", &(m->matrix0[i]));
+      CHECK_IO(fscanf(file, "%le", &(m->matrix0[i])));
       if ((i + 1) % m->size1 == 0)
-        fscanf(file, "\n");
+        IGNORE_IO(fscanf(file, "\n"));
     }
 
 

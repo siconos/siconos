@@ -26,6 +26,7 @@
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
+#include "misc.h"
 
 char * SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
 char * SICONOS_NUMERICS_PROBLEM_MLCP_STR = "MLCP";
@@ -123,13 +124,13 @@ void readSolverOptions(int driverType, SolverOptions* options)
       exit(-1);
     }
     //nval = fscanf(ficin, "%c", &(options->solverName));
-    fgets(buffer, 64, ficin);
-    fgets(buffer, 64, ficin);
-    fgets(buffer, 64, ficin);
+    CHECK_IO(fgets(buffer, 64, ficin));
+    CHECK_IO(fgets(buffer, 64, ficin));
+    CHECK_IO(fgets(buffer, 64, ficin));
     /* Solver name */
-    fgets(bufferName , 64, ficin);
+    CHECK_IO(fgets(bufferName , 64, ficin));
     options->solverId = nameToId(bufferName);
-    fgets(buffer, 64, ficin);
+    CHECK_IO(fgets(buffer, 64, ficin));
     /* iparam */
     nval = fscanf(ficin, "%d%d", &(options->iparam[0]), &(options->iparam[1]));
     if (nval != 4)

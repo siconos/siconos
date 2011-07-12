@@ -196,7 +196,7 @@ int globalLineSearchGP(
   double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
 
 
-  for (int iter = 0; iter < maxiter_ls; ++iter)
+  for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+reaction
@@ -654,7 +654,7 @@ int globalLineSearchSparseGP(
 
   double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
 
-  for (int iter = 0; iter < maxiter_ls; ++iter)
+  for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+reaction

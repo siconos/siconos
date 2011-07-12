@@ -510,8 +510,7 @@ void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* pro
   /* Change into dense if neccessary*/
 
   int m = localproblem->M->size0;
-  int n = localproblem->M->size1;
-  assert(m == n);
+  assert(localproblem->M->size0 == localproblem->M->size1);
 
   if (localproblem->M->storageType == 1)
   {

@@ -116,7 +116,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   //  int *newIndexOfBlockI;
   // int NbCol=pInProblem->size;
   int nbBlockCol = m->blocknumber1;
-  int * newIndexOfCol = (int*) malloc(nbBlockCol * sizeof(int));
+  unsigned int * newIndexOfCol = (unsigned int*) malloc(nbBlockCol * sizeof(unsigned int));
 
   /*Me building*/
   int MeRow = 0;

@@ -18,7 +18,7 @@
 */
 #include <stdlib.h>
 #include "PrimalFrictionContactProblem.h"
-
+#include "misc.h"
 
 int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FILE* file)
 {
@@ -56,9 +56,9 @@ int primalFrictionContact_newFromFile(PrimalFrictionContactProblem* problem, FIL
 {
   int nc = 0, d = 0;
   int i;
-  fscanf(file, "%d\n", &d);
+  CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  fscanf(file, "%d\n", &nc);
+  CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -69,21 +69,21 @@ int primalFrictionContact_newFromFile(PrimalFrictionContactProblem* problem, FIL
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->q[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
   problem->b = (double *) malloc(problem->H->size1 * sizeof(double));
   for (i = 0; i < problem->H->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->b[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
   }
 
-  fscanf(file, "\n");
+  IGNORE_IO(fscanf(file, "\n"));
   problem->mu = (double *) malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++)
   {
-    fscanf(file, "%lf ", &(problem->mu[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  fscanf(file, "\n");
+  IGNORE_IO(fscanf(file, "\n"));
   return 0;
 }
 

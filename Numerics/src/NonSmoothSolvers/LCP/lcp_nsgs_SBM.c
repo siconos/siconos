@@ -105,7 +105,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
   int blsizemax = blmat->blocksize0[0];
   int k;
-  for (int i = 1 ; i < blmat->blocknumber0 ; i++)
+  for (unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
     k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
     if (k > blsizemax) blsizemax = k;
@@ -113,7 +113,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
 
   /* Current row (of blocks) number */
-  int rowNumber;
+  unsigned int rowNumber;
 
   /*****  Gauss-Seidel iterations *****/
   int iter = 0; /* Current iteration number */

@@ -18,7 +18,7 @@
 */
 #include <stdlib.h>
 #include "FrictionContactProblem.h"
-
+#include "misc.h"
 
 int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
 {
@@ -51,9 +51,9 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
 {
   int nc = 0, d = 0;
   int i;
-  fscanf(file, "%d\n", &d);
+  CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  fscanf(file, "%d\n", &nc);
+  CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
@@ -62,16 +62,16 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
-    fscanf(file, "%lf ", &(problem->q[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
-  fscanf(file, "\n");
+  IGNORE_IO(fscanf(file, "\n"));
   problem->mu = (double *) malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++)
   {
-    fscanf(file, "%lf ", &(problem->mu[i]));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  fscanf(file, "\n");
+  IGNORE_IO(fscanf(file, "\n"));
   return 0;
 }
 

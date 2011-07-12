@@ -44,7 +44,7 @@ static int LWORK = 0;
 void affectWZ()
 {
   unsigned long  int aux = sCurrentEnum;
-  for (unsigned int i = 0; i < sSize; i++)
+  for (int i = 0; i < sSize; i++)
   {
     sWZ[i] = aux & 1;
     aux = aux >> 1;

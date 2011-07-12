@@ -21,6 +21,7 @@
 
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
 
 //#define GMP_DEBUG
 unsigned int NUMERICS_GMP_FREE_MATRIX = 1 << 2;
@@ -237,7 +238,7 @@ GenericMechanicalProblem * genericMechnical_newFromFile(FILE* file)
   pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));
   for (i = 0; i < pGMP->M->size1; i++)
   {
-    fscanf(file, "%lf ", pGMP->q + i);
+    CHECK_IO(fscanf(file, "%lf ", pGMP->q + i));
   }
   nsubProb = m->filled1 - 1;
   posInX = 0;
@@ -246,11 +247,11 @@ GenericMechanicalProblem * genericMechnical_newFromFile(FILE* file)
     if (ii)
       posInX = m->blocksize0[ii - 1];
     localSize = m->blocksize0[ii] - posInX;
-    fscanf(file, "%d\n", &prbType);
+    CHECK_IO(fscanf(file, "%d\n", &prbType));
     prb = addProblem(pGMP, prbType, localSize);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
     {
-      fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu);
+      CHECK_IO(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
     }
   }
 

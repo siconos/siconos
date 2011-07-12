@@ -4,14 +4,14 @@
 #include "SparseBlockMatrix.h"
 #include "LA.h"
 #include <math.h>
-
+#include "misc.h"
 
 
 unsigned int NUMERICS_SBM_FREE_BLOCK = 1 << 2;
 unsigned int NUMERICS_SBM_FREE_SBM = 1 << 3;
 //#define VERBOSE_DEBUG
 
-void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
+void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 
@@ -27,23 +27,21 @@ void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatr
   assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
   assert(sizeY == A->blocksize0[A->blocknumber0 - 1]);
 
-  /* Row (block) position of the current block */
-  int currentRowNumber ;
   /* Column (block) position of the current block*/
-  int colNumber;
+  unsigned int colNumber;
   /* Number of rows/columns of the current block */
-  int nbRows, nbColumns;
+  unsigned int nbRows, nbColumns;
   /* Position of the sub-block of x multiplied by the sub-block of A */
-  int posInX = 0;
+  unsigned int posInX = 0;
   /* Position of the sub-block of y, result of the product */
-  int posInY = 0;
+  unsigned int posInY = 0;
 
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
   */
   DSCAL(sizeY, beta, y, 1);
 
-  for (currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = A->index1_data[currentRowNumber];
          blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
@@ -61,13 +59,13 @@ void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatr
       if (currentRowNumber != 0)
         nbRows -= A->blocksize0[currentRowNumber - 1];
 
-      assert((nbRows <= sizeY) & (nbRows >= 0));
+      assert((nbRows <= sizeY));
 
       nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
         nbColumns -= A->blocksize1[colNumber - 1];
 
-      assert((nbColumns <= sizeX) & (nbColumns >= 0));
+      assert((nbColumns <= sizeX));
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
@@ -91,7 +89,6 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   assert(B);
   assert(C);
 
-  int i, j;
   /*     Check the compatibility of size of matrices */
   assert(A->blocksize0);
   assert(A->blocksize1);
@@ -104,7 +101,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   int compat = 1;
 
   if (A->blocknumber1 != B->blocknumber0) compat = 1; /* Compatibility of number of blocks */
-  for (i = 0; i < A->blocknumber1; i++)
+  for (unsigned int i = 0; i < A->blocknumber1; i++)
   {
     if (A->blocksize1[i] != B->blocksize0[i]) compat = 0; /* Compatibility of sizes of blocks */
   }
@@ -118,28 +115,27 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
     /*      compute blocknumber and block sizes of C */
     C->blocknumber0 = A->blocknumber0;
     C->blocknumber1 = B->blocknumber1;
-    C->blocksize0  = (int *)malloc(C->blocknumber0 * sizeof(int));
-    C->blocksize1  = (int *)malloc(C->blocknumber1 * sizeof(int));
-    for (i = 0; i < C->blocknumber0; i++) C->blocksize0[i] = A->blocksize0[i];
-    for (j = 0; j < C->blocknumber1; j++) C->blocksize1[j] = B->blocksize1[j];
+    C->blocksize0  = (unsigned int *)malloc(C->blocknumber0 * sizeof(int));
+    C->blocksize1  = (unsigned int *)malloc(C->blocknumber1 * sizeof(int));
+    for (unsigned int i = 0; i < C->blocknumber0; i++) C->blocksize0[i] = A->blocksize0[i];
+    for (unsigned int j = 0; j < C->blocknumber1; j++) C->blocksize1[j] = B->blocksize1[j];
   }
 
-  int currentRowNumberofA, currentRowNumberofB;
-  int currentColNumberofB;
-  int colNumberofB;
+  unsigned int currentRowNumberofA, currentRowNumberofB;
+  unsigned int colNumberofB;
 
   /* Search  the non null blocks of C */
 
   /*     Creation of filled3,filled4 and index3_data,index4_data for B (indexation by column) */
 
-  int Bfilled3 = B->blocknumber1 + 1;
-  int * Bindex3_data = (int *)malloc(Bfilled3 * sizeof(int));
-  int Bfilled4 = B->nbblocks;
-  int * Bindex4_data = (int *)malloc(Bfilled4 * sizeof(int));
-  int blockNumB = -1;
+  unsigned int Bfilled3 = B->blocknumber1 + 1;
+  unsigned int * Bindex3_data = (unsigned int *)malloc(Bfilled3 * sizeof(int));
+  unsigned int Bfilled4 = B->nbblocks;
+  unsigned int * Bindex4_data = (unsigned int *)malloc(Bfilled4 * sizeof(int));
+  unsigned int blockNumB = -1;
   Bindex3_data[0] = 0;
   int * blockMap  = (int *)malloc(Bfilled4 * sizeof(int));
-  for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+  for (unsigned int currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
   {
     Bindex3_data[currentColNumberofB + 1] = Bindex3_data[currentColNumberofB];
     for (currentRowNumberofB = 0 ; currentRowNumberofB < B->filled1 - 1; ++currentRowNumberofB)
@@ -185,7 +181,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
     C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA];
-    for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+    for (unsigned int currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
       int BlockCexists = 0;
 
@@ -206,15 +202,15 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
             /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
 
             C->filled2++;
-            int Cblosksize0 = A->blocksize0[currentRowNumberofA];
+            unsigned int Cblosksize0 = A->blocksize0[currentRowNumberofA];
             if (currentRowNumberofA != 0)
               Cblosksize0  -= A->blocksize0[currentRowNumberofA - 1];
-            int Cblocksize1 = B->blocksize1[currentColNumberofB];
+            unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
             /*           printf("of size %dX%d\n",Cblosksize0,Cblocksize1  ); */
             Cblocktmp[C->nbblocks] = (double*)malloc(Cblosksize0 * Cblocksize1 * sizeof(double));
-            for (i = 0; i < Cblosksize0 * Cblocksize1; i++) Cblocktmp[C->nbblocks][i] = 0.0;
+            for (unsigned int i = 0; i < Cblosksize0 * Cblocksize1; i++) Cblocktmp[C->nbblocks][i] = 0.0;
 
             C->index1_data[currentRowNumberofA + 1]++ ;
             Cindex2_datatmp[C->nbblocks] = currentColNumberofB ;
@@ -233,7 +229,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   C->block = (double**)malloc(C->nbblocks * sizeof(double*));
   C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t*));
 
-  for (i = 0 ; i < C->nbblocks; i++)  C->block[i] = Cblocktmp[i];
+  for (unsigned int i = 0 ; i < C->nbblocks; i++)  C->block[i] = Cblocktmp[i];
   /*   for (i =0 ; i <C->nbblocks; i++)   */
   /*       { */
   /*    C->block[i] =  (double*)malloc(C->blocksize0[i]*C->blocksize1[i]*sizeof(double)); */
@@ -241,7 +237,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   /*       } */
 
 
-  for (i = 0 ; i < C->nbblocks; i++)  C->index2_data[i] = Cindex2_datatmp[i];
+  for (unsigned int i = 0 ; i < C->nbblocks; i++)  C->index2_data[i] = Cindex2_datatmp[i];
   free(Cblocktmp);
   free(Cindex2_datatmp);
 
@@ -263,7 +259,6 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   assert(B);
   assert(C);
 
-  int i;
   /*     Check the compatibility of size of matrices */
   assert(A->blocksize0);
   assert(A->blocksize1);
@@ -276,7 +271,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   int compat = 1;
 
   if (A->blocknumber1 != B->blocknumber0) compat = 1; /* Compatibility of number of blocks */
-  for (i = 0; i < A->blocknumber1; i++)
+  for (unsigned int i = 0; i < A->blocknumber1; i++)
   {
     if (A->blocksize1[i] != B->blocksize0[i]) compat = 0; /* Compatibility of sizes of blocks */
   }
@@ -291,14 +286,14 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     assert(C->blocknumber1 == B->blocknumber1);
 
     assert( {int compat = 1;
-             for (i = 0; i < C->blocknumber0; i++)
+             for (unsigned int i = 0; i < C->blocknumber0; i++)
   {
     if (C->blocksize0[i] != A->blocksize0[i]) compat = 0;
     }
     compat == 1;
             });
     assert( {int compat = 1;
-             for (int j = 0; j < C->blocknumber1; j++)
+             for (unsigned int j = 0; j < C->blocknumber1; j++)
   {
     if (C->blocksize1[j] != B->blocksize1[j]) compat = 0;
     }
@@ -306,21 +301,21 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
             });
   }
 
-  int currentRowNumberofA, currentRowNumberofB;
-  int currentColNumberofB;
-  int colNumberofB ;
+  unsigned int currentRowNumberofA, currentRowNumberofB;
+  unsigned int currentColNumberofB;
+  unsigned int colNumberofB ;
 
   /* Search  the non null blocks of C */
 
   /*     Creation of filled3,filled4 and index3_data,index4_data for B (indexation by column) */
 
-  int Bfilled3 = B->blocknumber1 + 1;
-  int * Bindex3_data = (int *)malloc(Bfilled3 * sizeof(int));
-  int Bfilled4 = B->nbblocks;
-  int * Bindex4_data = (int *)malloc(Bfilled4 * sizeof(int));
-  int blockNumB = -1;
+  unsigned int Bfilled3 = B->blocknumber1 + 1;
+  unsigned int * Bindex3_data = (unsigned int *)malloc(Bfilled3 * sizeof(int));
+  unsigned int Bfilled4 = B->nbblocks;
+  unsigned int * Bindex4_data = (unsigned int *)malloc(Bfilled4 * sizeof(int));
+  unsigned int blockNumB = -1;
   Bindex3_data[0] = 0;
-  int * blockMap  = (int *)malloc(Bfilled4 * sizeof(int));
+  unsigned int * blockMap  = (unsigned int *)malloc(Bfilled4 * sizeof(int));
 
   for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
   {
@@ -378,7 +373,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
               Cnbblocks++; /* Find the right C block number*/
               CblockPassed = 0;
             }
-            assert(Cnbblocks < C->nbblocks);
+            assert(Cnbblocks < (int) C->nbblocks);
             /*           printf("Compute C block number %i for %i %i ", Cnbblocks,currentRowNumberofA, currentColNumberofB ); */
 
             int Ablocksize0 = A->blocksize0[currentRowNumberofA];
@@ -437,7 +432,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     }
   }
 
-  assert((Cnbblocks + 1) == C->nbblocks);
+  assert((Cnbblocks + 1) == (int) C->nbblocks);
 
 
 
@@ -453,7 +448,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   /*   exit(EXIT_FAILURE); */
 
 }
-void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
+void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,
                    const double* const x, double* y, int init)
 {
@@ -471,11 +466,11 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
 
   /* Column (block) position of the current block*/
-  int colNumber = 0;
+  unsigned int colNumber = 0;
   /* Number of rows/columns of the current block */
-  int nbRows, nbColumns;
+  unsigned int nbRows, nbColumns;
   /* Position of the sub-block of x multiplied by the sub-block of A */
-  int posInX = 0;
+  unsigned int posInX = 0;
 
   /* Check if currentRowNumber fits with A dimensions */
   assert(currentRowNumber <= A->blocknumber0);
@@ -522,7 +517,7 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   }
 }
 
-void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
@@ -539,13 +534,14 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
 
 
   /* Column (block) position of the current block*/
-  int colNumber = 0;
+  unsigned int colNumber = 0;
 
   /* Number of rows/columns of the current block */
-  int nbRows, nbColumns;
+  unsigned int nbRows, nbColumns;
 
-  /* Position of the sub-block of x multiplied by the sub-block of A */
-  int posInX = 0;
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
 
   /* Look for the first element of the wanted row */
 
@@ -626,7 +622,7 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
     free(blmat->blocksize1);
   }
 
-  for (int i = 0 ; i < blmat->nbblocks ; i++)
+  for (unsigned int i = 0 ; i < blmat->nbblocks ; i++)
   {
     if (blmat->block[i])
     {
@@ -676,27 +672,27 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
   }
   printf("]\n");
   printf("index1_data of size %li= {", (long int)m->filled1);
-  for (int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
+  for (unsigned int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
   printf("%li}\n", (long int)m->index1_data[m->filled1 - 1]);
 
   printf("index2_data of size %li= {", (long int)m->filled2);
-  for (int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
+  for (unsigned int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
   printf("%li}\n", (long int)m->index2_data[m->filled2 - 1]);
 
   printf("blocksize0 of size %li= {", (long int)m->blocknumber0);
-  for (int i = 0 ; i < m->blocknumber0 - 1; i++) printf("%li,  ", (long int)m->blocksize0[i]);
+  for (unsigned int i = 0 ; i < m->blocknumber0 - 1; i++) printf("%li,  ", (long int)m->blocksize0[i]);
   printf("%li}\n", (long int)m->blocksize0[m->blocknumber0 - 1]);
 
   printf("blocksize1 of size %li= {", (long int)m->blocknumber1);
-  for (int i = 0 ; i < m->blocknumber1 - 1; i++) printf("%li,  ", (long int)m->blocksize1[i]);
+  for (unsigned int i = 0 ; i < m->blocknumber1 - 1; i++) printf("%li,  ", (long int)m->blocksize1[i]);
   printf("%li}\n", (long int)m->blocksize1[m->blocknumber1 - 1]);
 
 
 
-  int sizemax = 10;
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
+  unsigned int sizemax = 10;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = m->index1_data[currentRowNumber];
@@ -719,9 +715,9 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
       printf("block[%i] of size %dX%d\n", blockNum, nbRows, nbColumns);
       if ((nbRows <= sizemax) & (nbColumns <= sizemax))
       {
-        for (int i = 0; i < nbRows; i++)
+        for (unsigned int i = 0; i < nbRows; i++)
         {
-          for (int j = 0; j < nbColumns; j++)
+          for (unsigned int j = 0; j < nbColumns; j++)
           {
             printf("block[%i](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
           }
@@ -754,32 +750,32 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
   assert(m->index1_data);
   assert(m->index2_data);
 
-  for (int i = 0; i < m->blocknumber0; i++)
+  for (unsigned int i = 0; i < m->blocknumber0; i++)
   {
     fprintf(file, "%i\t", m->blocksize0[i]);
   }
   fprintf(file, "\n");
-  for (int i = 0; i < m->blocknumber1; i++)
+  for (unsigned int i = 0; i < m->blocknumber1; i++)
   {
     fprintf(file, "%i\t", m->blocksize1[i]);
   }
   fprintf(file, "\n");
   fprintf(file, "%li\n", (long int)m->filled1);
   fprintf(file, "%li\n", (long int)m->filled2);
-  for (int i = 0; i < m->filled1; i++)
+  for (unsigned int i = 0; i < m->filled1; i++)
   {
     fprintf(file, "%li\t", (long int)m->index1_data[i]);
   }
   fprintf(file, "\n");
-  for (int i = 0; i < m->filled2; i++)
+  for (unsigned int i = 0; i < m->filled2; i++)
   {
     fprintf(file, "%li\t", (long int)m->index2_data[i]);
   }
   fprintf(file, "\n");
 
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = m->index1_data[currentRowNumber];
@@ -798,7 +794,7 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
       fprintf(file, "%i\n", blockNum);
-      for (int i = 0; i < nbRows * nbColumns; i++)
+      for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
         fprintf(file, "%32le\n", m->block[blockNum][i]);
       }
@@ -826,13 +822,13 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
   assert(m->index2_data);
 
   fprintf(file, "blocksize0 = [ \t");
-  for (int i = 0; i < m->blocknumber0; i++)
+  for (unsigned int i = 0; i < m->blocknumber0; i++)
   {
     fprintf(file, "%i\t", m->blocksize0[i]);
   }
   fprintf(file, "];\n");
   fprintf(file, "blocksize1 = [ \t");
-  for (int i = 0; i < m->blocknumber1; i++)
+  for (unsigned int i = 0; i < m->blocknumber1; i++)
   {
     fprintf(file, "%i\t", m->blocksize1[i]);
   }
@@ -841,21 +837,21 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
   fprintf(file, "filled2 = %li;\n", (long int)m->filled2);
 
   fprintf(file, "index1_data = [ \t");
-  for (int i = 0; i < m->filled1; i++)
+  for (unsigned int i = 0; i < m->filled1; i++)
   {
     fprintf(file, "%li\t", (long int)m->index1_data[i]);
   }
   fprintf(file, "];\n");
   fprintf(file, "index2_data = [ \t");
-  for (int i = 0; i < m->filled2; i++)
+  for (unsigned int i = 0; i < m->filled2; i++)
   {
     fprintf(file, "%li\t", (long int)m->index2_data[i]);
   }
   fprintf(file, "];\n");
 
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = m->index1_data[currentRowNumber];
@@ -875,10 +871,10 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
       fprintf(file, "block%i = [ \n", blockNum);
 
-      for (int i = 0; i < nbRows; i++)
+      for (unsigned int i = 0; i < nbRows; i++)
       {
         fprintf(file, "[");
-        for (int j = 0; j < nbColumns; j++)
+        for (unsigned int j = 0; j < nbColumns; j++)
         {
           fprintf(file, "%32.24e\t ", m->block[blockNum][i + j * nbRows]);
         }
@@ -927,51 +923,51 @@ void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  fscanf(file, "%d", &(m->nbblocks));
+  CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0)  return;
 
-  fscanf(file, "%d", &(m->blocknumber0));
-  fscanf(file, "%d", &(m->blocknumber1));
+  CHECK_IO(fscanf(file, "%d", &(m->blocknumber0)));
+  CHECK_IO(fscanf(file, "%d", &(m->blocknumber1)));
 
-  m->blocksize0 = (int *)malloc(m->blocknumber0 * sizeof(int));
-  m->blocksize1 = (int *)malloc(m->blocknumber1 * sizeof(int));
+  m->blocksize0 = (unsigned int *)malloc(m->blocknumber0 * sizeof(int));
+  m->blocksize1 = (unsigned int *)malloc(m->blocknumber1 * sizeof(int));
 
 
-  for (int i = 0; i < m->blocknumber0; i++)
+  for (unsigned int i = 0; i < m->blocknumber0; i++)
   {
-    fscanf(file, "%d", &(m->blocksize0[i]));
+    CHECK_IO(fscanf(file, "%d", &(m->blocksize0[i])));
   }
-  for (int i = 0; i < m->blocknumber1; i++)
+  for (unsigned int i = 0; i < m->blocknumber1; i++)
   {
-    fscanf(file, "%d", &(m->blocksize1[i]));
+    CHECK_IO(fscanf(file, "%d", &(m->blocksize1[i])));
   }
 
-  int filled1 = 0, filled2 = 0;
-  fscanf(file, "%d", &(filled1));
+  unsigned int filled1 = 0, filled2 = 0;
+  CHECK_IO(fscanf(file, "%d", &(filled1)));
   m->filled1 = filled1;
-  fscanf(file, "%d", &(filled2));
+  CHECK_IO(fscanf(file, "%d", &(filled2)));
   m->filled2 = filled2;
   m->index1_data = (size_t *)malloc(m->filled1 * sizeof(size_t));
   m->index2_data = (size_t *)malloc(m->filled2 * sizeof(size_t));
 
   int index1_dataCurrent = 0;
-  for (int i = 0; i < m->filled1; i++)
+  for (unsigned int i = 0; i < m->filled1; i++)
   {
-    fscanf(file, "%d", &(index1_dataCurrent));
+    CHECK_IO(fscanf(file, "%d", &(index1_dataCurrent)));
     m->index1_data[i] = index1_dataCurrent;
   }
   int index2_dataCurrent = 0;
-  for (int i = 0; i < m->filled2; i++)
+  for (unsigned int i = 0; i < m->filled2; i++)
   {
-    fscanf(file, "%d", &(index2_dataCurrent));
+    CHECK_IO(fscanf(file, "%d", &(index2_dataCurrent)));
     m->index2_data[i] = index2_dataCurrent;
   }
   m->block = (double**)malloc(m->nbblocks * sizeof(double*));
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
-  int blockk;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
+  unsigned int blockk;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = m->index1_data[currentRowNumber];
@@ -990,15 +986,15 @@ void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
 
-      fscanf(file, "%d", &(blockk));
+      CHECK_IO(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum)
       {
         printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
       }
       m->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
-      for (int i = 0; i < nbRows * nbColumns; i++)
+      for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
-        fscanf(file, "%32le\n", &(m->block[blockNum][i]));
+        CHECK_IO(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
       }
 
     }
@@ -1012,44 +1008,44 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  fscanf(file, "%d", &(m->nbblocks));
+  CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0)  return;
 
-  fscanf(file, "%d", &(m->blocknumber0));
-  fscanf(file, "%d", &(m->blocknumber1));
+  CHECK_IO(fscanf(file, "%d", &(m->blocknumber0)));
+  CHECK_IO(fscanf(file, "%d", &(m->blocknumber1)));
 
-  for (int i = 0; i < m->blocknumber0; i++)
+  for (unsigned int i = 0; i < m->blocknumber0; i++)
   {
-    fscanf(file, "%d", &(m->blocksize0[i]));
+    CHECK_IO(fscanf(file, "%d", &(m->blocksize0[i])));
   }
-  for (int i = 0; i < m->blocknumber1; i++)
+  for (unsigned int i = 0; i < m->blocknumber1; i++)
   {
-    fscanf(file, "%d", &(m->blocksize1[i]));
+    CHECK_IO(fscanf(file, "%d", &(m->blocksize1[i])));
   }
 
-  int filled1 = 0, filled2 = 0;
-  fscanf(file, "%d", &(filled1));
+  unsigned int filled1 = 0, filled2 = 0;
+  CHECK_IO(fscanf(file, "%d", &(filled1)));
   m->filled1 = filled1;
-  fscanf(file, "%d", &(filled2));
+  CHECK_IO(fscanf(file, "%d", &(filled2)));
   m->filled2 = filled2;
 
-  int index1_dataCurrent = 0;
-  for (int i = 0; i < m->filled1; i++)
+  unsigned int index1_dataCurrent = 0;
+  for (unsigned int i = 0; i < m->filled1; i++)
   {
-    fscanf(file, "%d", &(index1_dataCurrent));
+    CHECK_IO(fscanf(file, "%d", &(index1_dataCurrent)));
     m->index1_data[i] = index1_dataCurrent;
   }
-  int index2_dataCurrent = 0;
-  for (int i = 0; i < m->filled2; i++)
+  unsigned int index2_dataCurrent = 0;
+  for (unsigned int i = 0; i < m->filled2; i++)
   {
-    fscanf(file, "%d", &(index2_dataCurrent));
+    CHECK_IO(fscanf(file, "%d", &(index2_dataCurrent)));
     m->index2_data[i] = index2_dataCurrent;
   }
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
-  int blockk;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
+  unsigned int blockk;
   for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = m->index1_data[currentRowNumber];
@@ -1068,15 +1064,15 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
 
-      fscanf(file, "%d", &(blockk));
+      CHECK_IO(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum)
       {
         printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
       }
 
-      for (int i = 0; i < nbRows * nbColumns; i++)
+      for (unsigned int i = 0; i < nbRows * nbColumns; i++)
       {
-        fscanf(file, "%32le\n", &(m->block[blockNum][i]));
+        CHECK_IO(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
       }
 
     }
@@ -1089,9 +1085,7 @@ void readInFileNameSBM(SparseBlockStructuredMatrix* const m, const char *filenam
 void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
 {
 
-  int i;
-
-  for (i = 0 ; i < blmatpred->nbbldiag ; i++)
+  for (int i = 0 ; i < blmatpred->nbbldiag ; i++)
   {
     free(blmatpred->indic[i]);
     free(blmatpred->indicop[i]);
@@ -1117,32 +1111,31 @@ void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
 
 }
 
-int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num)
+unsigned int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, unsigned int num)
 {
   /* Look for the first block of row number num */
-  int pos;
-  int firstBlockOfRow = M->index1_data[num];
+  unsigned int pos;
+  unsigned int firstBlockOfRow = M->index1_data[num];
 
   /* Look at the diagonal block */
   for (pos = firstBlockOfRow; M->index2_data[pos] != num; ++pos, assert(pos < M->filled2));
 
   return pos;
 }
-double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col)
+double getValueSBM(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col)
 {
   /*      Search the row of blocks and the column of blocks */
-  int i, j;
-  int rowblocknumber = M->blocknumber0;
-  int colblocknumber = M->blocknumber1;
+  unsigned int rowblocknumber = M->blocknumber0;
+  unsigned int colblocknumber = M->blocknumber1;
   int rowpos = -1;
   int colpos = -1;
   int blockNumber = -1;
-  int colNumber;
+  unsigned int colNumber;
   assert(row < M->blocksize0[M->blocknumber0 - 1]);
   assert(col < M->blocksize1[M->blocknumber1 - 1]);
 
 
-  for (i = 0; i < M->blocknumber0; i++)
+  for (unsigned int i = 0; i < M->blocknumber0; i++)
   {
     if ((row < M->blocksize0[i]))
     {
@@ -1155,7 +1148,7 @@ double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col)
     }
 
   }
-  for (j = 0; j < M->blocknumber1; j++)
+  for (unsigned int j = 0; j < M->blocknumber1; j++)
   {
     if ((col < M->blocksize1[j]))
     {
@@ -1207,22 +1200,22 @@ int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMat
   B->nbblocks = A->nbblocks;
   B->blocknumber0 = A->blocknumber0;
   B->blocknumber1 = A->blocknumber1;
-  B->blocksize0 = (int*)malloc(B->blocknumber0 * sizeof(int));
-  for (int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize0[i];
-  B->blocksize1 = (int*)malloc(B->blocknumber1 * sizeof(int));
-  for (int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize1[i];
+  B->blocksize0 = (unsigned int*)malloc(B->blocknumber0 * sizeof(int));
+  for (unsigned int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize0[i];
+  B->blocksize1 = (unsigned int*)malloc(B->blocknumber1 * sizeof(int));
+  for (unsigned int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize1[i];
   B->filled1 = A->filled1;
   B->filled2 = A->filled2;
   B->index1_data = (size_t*)malloc(B->filled1 * sizeof(size_t));
-  for (int i = 0; i < B->filled1; i++) B->index1_data[i] = A->index1_data[i];
+  for (unsigned int i = 0; i < B->filled1; i++) B->index1_data[i] = A->index1_data[i];
   B->index2_data = (size_t*)malloc(B->filled2 * sizeof(size_t));
-  for (int i = 0; i < B->filled2; i++) B->index2_data[i] = A->index2_data[i];
+  for (unsigned int i = 0; i < B->filled2; i++) B->index2_data[i] = A->index2_data[i];
   B->block = (double **)malloc(B->nbblocks * sizeof(double*));
   if (copyBlock)
   {
-    int currentRowNumber ;
-    int colNumber;
-    int nbRows, nbColumns;
+    unsigned int currentRowNumber ;
+    unsigned int colNumber;
+    unsigned int nbRows, nbColumns;
     for (currentRowNumber = 0 ; currentRowNumber < B->filled1 - 1; ++currentRowNumber)
     {
       for (unsigned int blockNum = B->index1_data[currentRowNumber];
@@ -1238,7 +1231,7 @@ int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMat
         if (colNumber != 0)
           nbColumns -= B->blocksize1[colNumber - 1];
         B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
-        for (int i = 0; i < nbRows * nbColumns; i++)
+        for (unsigned int i = 0; i < nbRows * nbColumns; i++)
         {
           B->block[blockNum] [i] = A->block[blockNum] [i] ;
         }
@@ -1247,7 +1240,7 @@ int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMat
   }
   else
   {
-    for (int n = 0; n < B->nbblocks; n++)
+    for (unsigned int n = 0; n < B->nbblocks; n++)
       B->block[n] = A->block[n];
   }
 
@@ -1261,10 +1254,10 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
   B->nbblocks = A->nbblocks;
   B->blocknumber0 = A->blocknumber1;
   B->blocknumber1 = A->blocknumber0;
-  B->blocksize0 = (int*)malloc(B->blocknumber0 * sizeof(int));
-  for (int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize1[i];
-  B->blocksize1 = (int*)malloc(B->blocknumber1 * sizeof(int));
-  for (int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize0[i];
+  B->blocksize0 = (unsigned int*)malloc(B->blocknumber0 * sizeof(int));
+  for (unsigned int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize1[i];
+  B->blocksize1 = (unsigned int*)malloc(B->blocknumber1 * sizeof(int));
+  for (unsigned int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize0[i];
 
   B->filled1 = A->blocknumber1 + 1;;
   B->filled2 = A->filled2;
@@ -1272,11 +1265,11 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
   B->index2_data = (size_t *)malloc(B->filled2 * sizeof(size_t));
 
 
-  int currentRowNumberofA;
-  int currentColNumberofA ;
-  int colNumberofA;
+  unsigned int currentRowNumberofA;
+  unsigned int currentColNumberofA ;
+  unsigned int colNumberofA;
 
-  int * blockMap  = (int *)malloc(B->filled2 * sizeof(int));
+  unsigned int * blockMap  = (unsigned int *)malloc(B->filled2 * sizeof(unsigned int));
 
 
 
@@ -1296,7 +1289,7 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
         if (colNumberofA == currentColNumberofA)
         {
           blockNumB++;
-          assert(blockNumB < B->nbblocks);
+          assert(blockNumB < (int) B->nbblocks && blockNumB >= 0);
           B->index1_data[currentColNumberofA + 1]++;
           B->index2_data[blockNumB] = currentRowNumberofA;
           blockMap[blockNumB] = blockNum;
@@ -1318,9 +1311,9 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
 
 
   B->block = (double **)malloc(B->nbblocks * sizeof(double*));
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
   for (currentRowNumber = 0 ; currentRowNumber < B->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = B->index1_data[currentRowNumber];
@@ -1341,9 +1334,9 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
 
 
 
-      for (int i = 0; i < nbRows; i++)
+      for (unsigned int i = 0; i < nbRows; i++)
       {
-        for (int j = 0; j < nbColumns; j++)
+        for (unsigned int j = 0; j < nbColumns; j++)
         {
           assert(i + j * nbRows < nbRows * nbColumns);
           assert(j + i * nbColumns < nbRows * nbColumns);
@@ -1362,16 +1355,16 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
 int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 {
 
-  for (int i = 0; i < M->filled1 - 1; i++)
+  for (unsigned int i = 0; i < M->filled1 - 1; i++)
   {
-    int numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
+    unsigned int numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
     if (numberofblockperrow != 1)
     {
       fprintf(stderr, "SparseBlockMatrix : inverseDiagSBM: Not a diagonal blocks matrix\n");
       exit(EXIT_FAILURE);
     }
   }
-  for (int i = 0; i < M->filled2; i++)
+  for (unsigned int i = 0; i < M->filled2; i++)
   {
     if (M->index2_data[i] != i)
     {
@@ -1380,9 +1373,9 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
     }
   }
 
-  int currentRowNumber ;
-  int colNumber;
-  int nbRows, nbColumns;
+  unsigned int currentRowNumber ;
+  unsigned int colNumber;
+  unsigned int nbRows, nbColumns;
   int infoDGETRF, infoDGETRI ;
   int info = 0;
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
@@ -1456,9 +1449,9 @@ int  SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMat
   sparseMat->p = (int*)malloc((sparseMat->m + 1) * sizeof(int));
 
   /* Row (block) position of the current block */
-  int currentRowNumber ;
+  unsigned int currentRowNumber ;
   /* Column (block) position of the current block*/
-  int colNumber;
+  unsigned int colNumber;
   /* Number of rows/columns of the current block */
   int nbRows, nbColumns;
 
@@ -1504,9 +1497,9 @@ int  SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *spars
   assert(sparseMat->x);
 
   /* Row (block) position of the current block */
-  int currentRowNumber ;
+  unsigned int currentRowNumber ;
   /* Column (block) position of the current block*/
-  int colNumber;
+  unsigned int colNumber;
   /* Number of rows/columns of the current block */
   int nbRows, nbColumns;
 
@@ -1623,7 +1616,7 @@ void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level)
 
   if (level & NUMERICS_SBM_FREE_BLOCK)
   {
-    for (int i = 0; i < A->nbblocks; i++)
+    for (unsigned int i = 0; i < A->nbblocks; i++)
       free(A->block[i]);
   }
   free(A->block);
@@ -1655,7 +1648,7 @@ void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *
       denseMat[numRow + numCol * rowNb] = 0.0;
 
   //index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1]
-  for (int numBlock = A->index1_data[row]; numBlock < A->index1_data[row + 1]; numBlock++)
+  for (unsigned int numBlock = A->index1_data[row]; numBlock < A->index1_data[row + 1]; numBlock++)
   {
     double * beginBlock = A->block[numBlock];
     int colNumber = A->index2_data[numBlock];
@@ -1691,7 +1684,7 @@ void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *
 #endif
 }
 //#define SBM_DEBUG_SBM_ROW_PERM
-void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
+void RowPermutationSBM(unsigned int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
 {
 #ifdef SBM_DEBUG_SBM_ROW_PERM
   FILE * titi  = fopen("RowPermutationSBM_input.txt", "w");
@@ -1704,8 +1697,8 @@ void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBloc
   C->block = (double**)malloc(A->nbblocks * sizeof(double*));
   C->blocknumber0 = A->blocknumber0;
   C->blocknumber1 = A->blocknumber1;
-  C->blocksize0 = (int*)malloc(nbRow * sizeof(int));
-  C->blocksize1 = (int*)malloc(nbCol * sizeof(int));
+  C->blocksize0 = (unsigned int*)malloc(nbRow * sizeof(unsigned int));
+  C->blocksize1 = (unsigned int*)malloc(nbCol * sizeof(unsigned int));
   C->filled1 = A->filled1;
   C->filled2 = A->filled2;
   C->index1_data = (size_t*)malloc(C->filled1 * sizeof(size_t));
@@ -1749,7 +1742,7 @@ void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBloc
 #endif
 }
 //#define SBM_DEBUG_SBM_COL_PERM
-void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
+void ColPermutationSBM(unsigned int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C)
 {
 #ifdef SBM_DEBUG_SBM_COL_PERM
   FILE * titi  = fopen("ColPermutationSBM_input.txt", "w");
@@ -1757,7 +1750,7 @@ void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBloc
   fclose(titi);
 #endif
   copySBM(A, C, 0);
-  for (int n = 0; n < C->nbblocks; n++)
+  for (unsigned int n = 0; n < C->nbblocks; n++)
   {
     C->index2_data[n] = colIndex[C->index2_data[n]];
   }

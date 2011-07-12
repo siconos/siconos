@@ -142,7 +142,7 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
 
   int blsizemax = blmat->blocksize0[0];
   int k;
-  for (int i = 1 ; i < blmat->blocknumber0 ; i++)
+  for (unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
     k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
     if (k > blsizemax) blsizemax = k;
@@ -150,7 +150,7 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
 
   /* Current row (of blocks) number */
-  int rowNumber;
+  unsigned int rowNumber;
 
   /*****  Gauss-Seidel iterations *****/
   int iter = 0; /* Current iteration number */

@@ -52,7 +52,7 @@ extern "C"
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */
-  void printSparseMat(const SparseMatrix* const M);
+  void printSparse(const SparseMatrix* const M);
 
 #ifdef __cplusplus
 }

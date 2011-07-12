@@ -26,14 +26,14 @@ void initEnum(int M)
 void affectW2V(int * W2V)
 {
   unsigned long  int aux = sCurrentEnum;
-  for (unsigned int i = 0; i < sMm; i++)
+  for (int i = 0; i < sMm; i++)
   {
     W2V[i] = aux & 1;
     aux = aux >> 1;
   }
   if (verbose)
   {
-    for (unsigned int i = 0; i < sMm; i++)
+    for (int i = 0; i < sMm; i++)
       printf("wv[%d]=%d \t", i, W2V[i]);
     printf("\n");
   }

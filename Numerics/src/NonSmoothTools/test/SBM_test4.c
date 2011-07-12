@@ -29,6 +29,9 @@
 #include "LA.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
+#include "SparseMatrix.h"
+
+
 int main(void)
 {
   int res;

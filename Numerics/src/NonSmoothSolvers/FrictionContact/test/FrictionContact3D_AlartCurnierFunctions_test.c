@@ -15,6 +15,8 @@
 #include "FrictionContact3D_globalAlartCurnier.h"
 #include "AlartCurnierGenerated.h"
 
+void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9]);
+
 #define SIZE 1000
 
 #define DO(X)                                               \
@@ -30,7 +32,7 @@ int main()
   int r = -1;
 
   FILE* file = fopen("./data/ACinputs.dat", "r");
-  int dim = 0;
+  unsigned int dim = 0;
   double* reactions;
   double* velocities;
   double *mus;

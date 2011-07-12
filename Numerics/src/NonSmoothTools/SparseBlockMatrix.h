@@ -85,12 +85,12 @@
 
 typedef struct
 {
-  int nbblocks;
+  unsigned int nbblocks;
   double **block;
-  int blocknumber0;
-  int blocknumber1;
-  int *blocksize0;
-  int *blocksize1;
+  unsigned int blocknumber0;
+  unsigned int blocknumber1;
+  unsigned int *blocksize0;
+  unsigned int *blocksize1;
   size_t filled1;
   size_t filled2;
   size_t *index1_data;
@@ -131,7 +131,9 @@ extern "C"
       \param[in] beta coefficient
       \param[in-out] y, the resulting vector
   */
-  void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y);
+  void prodSBM(unsigned int sizeX, unsigned int sizeY,
+               double alpha, const SparseBlockStructuredMatrix* const A,
+               const double* const x, double beta, double* y);
 
   /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
      \param[in] alpha coefficient
@@ -140,7 +142,8 @@ extern "C"
     \param[in] beta coefficient
      \param[in-out] C, the resulting matrix
   */
-  void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
+  void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A,
+                  const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
 
   /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
     \param[in] A, the matrix to be multiplied
@@ -158,7 +161,7 @@ extern "C"
       \param[in-out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
-  void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX, dim of the vector x
@@ -169,7 +172,7 @@ extern "C"
       \param[in-out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
-  void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Destructor for SparseBlockStructuredMatrix objects
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.
@@ -227,14 +230,14 @@ extern "C"
       \param num the row of the required block
       \return pos the position of the block
   */
-  int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num);
+  unsigned int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, unsigned int num);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix
      \param int row the row index
      \return int col the column index
   */
-  double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col);
+  double getValueSBM(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col);
   /** Copy of a SBM  A into B
     \param[in] A the SparseBlockStructuredMatrix matrix to be copied
     \param[out]  B the SparseBlockStructuredMatrix matrix copy of A
@@ -298,7 +301,7 @@ extern "C"
    * The memory allocation for its menber is done inside.
    * NB : The blocks are not copied.
    */
-  void RowPermutationSBM(int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
+  void RowPermutationSBM(unsigned int *rowIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
   /*
   * param [in] colIndex: permutation: the col numC of C is the col colIndex[numC] of A.
@@ -307,7 +310,7 @@ extern "C"
   * The memory allocation for its menber is done inside.
   * NB : The blocks are not copied.
   */
-  void ColPermutationSBM(int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
+  void ColPermutationSBM(unsigned int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
 #ifdef __cplusplus
 }
