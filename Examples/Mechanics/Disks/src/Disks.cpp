@@ -88,9 +88,6 @@ void Disks::init()
   // --- Dynamical systems && interactions ---
   // -----------------------------------------
 
-  unsigned int j;
-  int interCounter = 0;
-
   double R;
   double m;
 
@@ -222,7 +219,7 @@ void Disks::init()
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
 
-    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[0] = 100000; // Max number of
     // iterations
     osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
     // iterations
