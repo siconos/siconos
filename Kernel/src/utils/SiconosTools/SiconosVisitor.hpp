@@ -83,7 +83,7 @@
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
     RuntimeException::selfThrow                                         \
-      ( "acceptSerializer: no serializer define");                                           \
+      ( "acceptSerializer: no serializer defined");                                           \
   };                                                                    \
   virtual inline Type::Siconos acceptType(FindType& ft) const           \
   { RuntimeException::selfThrow                                         \
@@ -230,7 +230,7 @@ std::string name(const C& c)
 
 /* example :
  *
- * struct NeedMass : public Question<SP::SiconosMatrix>
+ * struct ForMass : public Question<SP::SiconosMatrix>
  * {
  *    void visit(const LagrangianDS& ds)
  *    {
@@ -241,7 +241,7 @@ std::string name(const C& c)
  * SP::DynamicalSystem ds
  * [...]
  *
- * SP::SiconosMatrix mass = ask<NeedMass>(*ds);
+ * SP::SiconosMatrix mass = ask<ForMass>(*ds);
  */
 
 template <class GeneralQuestion, class Visitable>
