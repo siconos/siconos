@@ -112,7 +112,7 @@ typedef std::map< SP::UnitaryRelation , unsigned int > UR_int;
 TYPEDEF_SPTR(UR_int);
 
 /** list of indices */
-typedef std::vector<int> IndexInt;
+typedef std::vector<unsigned int> IndexInt;
 TYPEDEF_SPTR(IndexInt);
 
 
