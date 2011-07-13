@@ -34,7 +34,7 @@ GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
 {
   _MStorageType = SICONOS_SPARSE;
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
-  genericMechnicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
+  genericMechanicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }
 
 
