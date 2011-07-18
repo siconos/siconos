@@ -35,9 +35,11 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem = malloc(sizeof(struct fclib_local));
 
   fclib_problem->spacedim = problem->dimension;
-
   fclib_problem->mu =  problem->mu;
   fclib_problem->q =  problem->q;
+
+
+
   fclib_problem->s =  NULL;
 
   fclib_problem->info = malloc(sizeof(struct fclib_info)) ;
@@ -53,6 +55,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem->W->n = problem->M->size1;
   fclib_problem->W->nz = -2;
 
+  SparseMatrix * spmat ;
   if (problem ->M->storageType == 0) /* Dense Matrix */
   {
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;
@@ -72,7 +75,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   }
   else if (problem ->M->storageType == 1) /* Sparse block storage */
   {
-    SparseMatrix * spmat = malloc(sizeof(SparseMatrix));
+    spmat = malloc(sizeof(SparseMatrix));
     int res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
     res = SBMtoSparse(problem->M->matrix1, spmat);
     fclib_problem->W->nzmax = spmat->nzmax;
@@ -88,7 +91,21 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   info = fclib_write_local(fclib_problem, path);
 
-  /* fclib_delete_local (fclib_problem); */
+  /*   fclib_delete_local (fclib_problem); */
+
+  if (problem ->M->storageType == 0) /* Dense Matrix */
+  {
+    free(fclib_problem->W->p);
+    free(fclib_problem->W->i);
+    free(fclib_problem->W->x);
+  }
+  else if (problem ->M->storageType == 1)
+  {
+    freeSparse(spmat);
+  }
+  free(fclib_problem->W);
+  free(fclib_problem->info);
+  free(fclib_problem);
 
   return info;
 

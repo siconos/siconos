@@ -46,3 +46,20 @@ void printSparse(const SparseMatrix* const m)
 
 
 }
+void freeSparse(const SparseMatrix* const M)
+{
+
+  assert(M);
+  if (M->p)
+  {
+    free(M->p);
+  }
+  if (M->i)
+  {
+    free(M->i);
+  }
+  if (M->x)
+  {
+    free(M->x);
+  }
+}

@@ -54,6 +54,11 @@ extern "C"
    */
   void printSparse(const SparseMatrix* const M);
 
+  /** free memeory of a Sparse Matrix
+      \param M the matrix to be freed
+   */
+  void freeSparse(const SparseMatrix* const M);
+
 #ifdef __cplusplus
 }
 #endif

@@ -136,30 +136,28 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_8 APPLY
 #define LAPACK_9 APPLY
 #define LAPACK_9_SIDED APPLY
-#define LAPACK_4_W(F,A1,A2,A3,A4,INFO) \
- ({ int C_LWORK=-1; \
-    double * C_WORK; \
-    C_WORK = malloc(sizeof *C_WORK); \
-    if (C_WORK == NULL) -1; else { \
-      F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO); \
-      C_LWORK = (int) (C_WORK[0]); \
-      C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
-      F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO); \
-      free(C_WORK); \
-    } \
- })
+#define LAPACK_4_W(F,A1,A2,A3,A4,INFO)                    \
+  ({ int C_LWORK=-1;                                      \
+    double * C_WORK;                                      \
+    C_WORK = malloc(sizeof *C_WORK);                      \
+    assert(C_WORK);                                       \
+    F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO);          \
+    C_LWORK = (int) (C_WORK[0]);                          \
+    C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK);   \
+    F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO);          \
+    free(C_WORK);                                         \
+  })
 #define LAPACK_5_W(F,A1,A2,A3,A4,A5,INFO) \
- ({ int C_LWORK=-1; \
-    double * C_WORK; \
-    C_WORK = malloc(sizeof *C_WORK); \
-    if (C_WORK == NULL) -1; else { \
-      F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO); \
-      C_LWORK = (int) (C_WORK[0]); \
-      C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
-      F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO); \
-      free(C_WORK); \
-    } \
- })
+  ({ int C_LWORK=-1;                                      \
+    double * C_WORK;                                      \
+    C_WORK = malloc(sizeof *C_WORK);                      \
+    assert(C_WORK);                                       \
+    F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO);       \
+    C_LWORK = (int) (C_WORK[0]);                          \
+    C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK);   \
+    F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO);       \
+    free(C_WORK);                                         \
+  })
 
 #endif /* HAVE_CBLAS */
 
@@ -375,8 +373,10 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DGETRI(N,A,LDA,IPIV,INFO) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
+     printf("C_LDA = %i\n",C_LDA ); \
      LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(INFO)); \
   })
+
 
 #endif /* USE_MKL */
 #endif /* LA_H */
