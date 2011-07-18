@@ -17,7 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>]
+#include <string.h>
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
@@ -30,23 +31,34 @@ int main(void)
   char filename[50] = "./data/Confeti-ex03-Fc3D-SBM.dat";
   printf("Test on %s\n", filename);
 
+
+  /* Remove file if it exists */
+  FILE * foutput = fopen("./data/Confeti-ex03-Fc3D-SBM.hdf5", "w");
+  fclose(foutput);
+
+
   FILE * f  =  fopen(filename, "r");
 
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
 
   info = frictionContact_newFromFile(problem, f);
 
-  char title[50] = "Confeti-ex03-Fc3D-SBM";
-  char description[100] = " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat";
-  char math_info[50] = "unknown";
+  int n = 50;
+  char * title = (char *)malloc(n * sizeof(char *));
+  strcpy(title, "Confeti-ex03-Fc3D-SBM");
+  char * description = (char *)malloc(n * sizeof(char *));
+  strcpy(description, " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat");
+  char * math_info = (char *)malloc(n * sizeof(char *));
+  strcpy(math_info,  "unknown");
 
-  frictionContact_fclib_write(problem, "Confeti-ex03-Fc3D-SBM" ,
-                              " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat",
-                              " unknown",
+  frictionContact_fclib_write(problem,
+                              title,
+                              description,
+                              math_info,
                               "./data/Confeti-ex03-Fc3D-SBM.hdf5");
 
 
-  //freeFrictionContact_problem(problem);
+  freeFrictionContact_problem(problem);
   printf("\n End of test \n");
   return info;
 }
