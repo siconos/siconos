@@ -29,8 +29,7 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define CHECK_IO(EXPR)                                                  \
   do                                                                    \
   {                                                                     \
-    int return_value=(int) EXPR;                                        \
-    if (!return_value)                                                  \
+    if (!EXPR)                                                          \
     {                                                                   \
       if (errno != 0)                                                   \
       {                                                                 \
