@@ -30,7 +30,7 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 /* with signed int typedef  boost::numeric::ublas::compressed_matrix<double*> CompressedRowMat; */
 /* cf http://boost.2283326.n4.nabble.com/LU-decomposition-of-compressed-matrix-td3417929.html */
 typedef ublas::compressed_matrix <
-double*, ublas::basic_row_major<unsigned int>, 0, ublas::unbounded_array<unsigned int>
+double*, ublas::basic_row_major<unsigned int>, 0, ublas::unbounded_array<std::size_t>
 >  CompressedRowMat;
 
 
