@@ -93,7 +93,7 @@ setup_3_3() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.3.0
     cd $PIPOL_WDIR/siconos/branches/3.3.0; { 
         for mod in Numerics Kernel Examples ; do 
-            svn co -r2741 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+            svn co -r2743 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
