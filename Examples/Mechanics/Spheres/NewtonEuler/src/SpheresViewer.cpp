@@ -28,7 +28,10 @@ void SpheresViewer::init()
 
   BodiesViewer::init();
 
-  setSceneRadius(100.);
+  setSceneRadius(500.);
+
+  camera()->setPosition(qglviewer::Vec(100.0, 100.0, 100.0));
+  camera()->setOrientation(1., 1.);
 
 }
 
