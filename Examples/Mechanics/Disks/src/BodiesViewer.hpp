@@ -98,7 +98,6 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(BulletDS, q());
 };
 
-
 struct ForRadius : public Question<double>
 {
 
@@ -197,6 +196,8 @@ public:
     savedFExt_ = ask<ForFExt>(*DS());
     selected_ = false;
     saved_ = true;
+    type_ = Type::value(*DS());
+
   };
 
   ~QGLShape() {};
@@ -260,9 +261,14 @@ public:
     return frame_.get();
   };
 
-  SHAPE kind() const
+  SHAPE shape() const
   {
     return figure_;
+  }
+
+  Type::Siconos type() const
+  {
+    return type_;
   }
 
 protected:
@@ -274,6 +280,10 @@ protected:
 
   SHAPE figure_;
   SP::DynamicalSystem DS_;
+  int positionSize_;
+
+  Type::Siconos type_;
+
 };
 
 TYPEDEF_SPTR(QGLShape);

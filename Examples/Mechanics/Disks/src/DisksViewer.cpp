@@ -54,13 +54,13 @@ void DisksViewer::init()
 void DisksViewer::draw()
 {
 
-  int i, mrow;
-  clock_t lcptime;
+  int i;
 
   char qs[6];
 
-  float lbd, lbdmax, w, x1, y1, x2, y2, d, r;
+  float lbd, w;
 
+  float lbdmax = 0.;
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
@@ -165,7 +165,7 @@ void DisksViewer::draw()
     {
       double A = (*Siconos_->plans())(i, 0);
       double B = (*Siconos_->plans())(i, 1);
-      double C = (*Siconos_->plans())(i, 2);
+      //double C = (*Siconos_->plans())(i,2);
       double xc = (*Siconos_->plans())(i, 3);
       double yc = (*Siconos_->plans())(i, 4);
       double w = fmin(1e10, (*Siconos_->plans())(i, 5));
@@ -191,7 +191,8 @@ void DisksViewer::draw()
       double C = (*Siconos_->movingPlans())(i, 2)(time);
       double w = 1e10;
       double H = hypot(A, B);
-      double xc, yc;
+      double xc = 0.;
+      double yc = 0.;
 
       if (fabs(C) > std::numeric_limits<double>::epsilon())
       {

@@ -383,7 +383,7 @@ void BodiesViewer::drawSphere(float x, float y, float z, float theta,
   glPushMatrix();
   glColor3fv(clg1);
   glRotatef(90, 1, 0, 0);
-  gluDisk(Diskphi, r, 1.5 * r, slices, loops);
+  gluDisk(Diskphi, r, 1.1 * r, slices, loops);
   glPopMatrix();
 
 
@@ -392,7 +392,7 @@ void BodiesViewer::drawSphere(float x, float y, float z, float theta,
   glPushMatrix();
   glColor3fv(clg2);
   glRotatef(90, 0, 1, 0);
-  gluDisk(Disktheta, r, 1.5 * r, slices, loops);
+  gluDisk(Disktheta, r, 1.1 * r, slices, loops);
   glPopMatrix();
 
 
@@ -401,7 +401,7 @@ void BodiesViewer::drawSphere(float x, float y, float z, float theta,
   glPushMatrix();
   glColor3fv(clg3);
   glRotatef(90, 0, 1, 0);
-  gluDisk(Diskpsi, r, 1.5 * r, slices, loops);
+  gluDisk(Diskpsi, r, 1.1 * r, slices, loops);
   glPopMatrix();
 
 
@@ -412,12 +412,12 @@ void BodiesViewer::drawSphere(float x, float y, float z, float theta,
 
   glPushMatrix();
   glRotatef(90, 0, 1, 0);
-  gluDisk(Disk1, r, 1.1 * r, slices, loops);
+  gluDisk(Disk1, r, 1.05 * r, slices, loops);
   glPopMatrix();
 
   glPushMatrix();
   glRotatef(90, 1, 0, 0);
-  gluDisk(Disk2, r, 1.1 * r, slices, loops);
+  gluDisk(Disk2, r, 1.05 * r, slices, loops);
   glPopMatrix();
 
   glPopMatrix();
@@ -462,7 +462,6 @@ void BodiesViewer::drawSphere(float x, float y, float z, float a,
 
   glPopMatrix();
 }
-
 
 void BodiesViewer::drawPolyg(unsigned int nvertices, double *coor, float *c)
 {
@@ -559,7 +558,7 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
   float c[3];
 
 
-  switch (fig.kind())
+  switch (fig.shape())
   {
   case CIRCLE :
     c[0] = .9 ;
@@ -583,17 +582,35 @@ void BodiesViewer::drawQGLShape(const QGLShape& fig)
     break;
 
   case SPHERE:
-    c[0] = 1 ;
-    c[1] = .0;
-    c[2] = 0;
+    c[0] = .9 ;
+    c[1] = .9;
+    c[2] = .9;
     glLineWidth(2.);
-    drawSphere(GETX(ds),
-               GETY(ds),
-               GETZ(ds),
-               GETA1(ds),
-               GETA2(ds),
-               GETA3(ds),
-               GETRADIUS(ds), c);
+    switch (fig.type())
+    {
+    case Type::LagrangianDS :
+      drawSphere(GETX(ds),
+                 GETY(ds),
+                 GETZ(ds),
+                 GETA1(ds),
+                 GETA2(ds),
+                 GETA3(ds),
+                 GETRADIUS(ds), c);
+      break;
+    case Type::NewtonEulerDS :
+      drawSphere(GETX(ds),
+                 GETY(ds),
+                 GETZ(ds),
+                 GETA1(ds),
+                 GETA2(ds),
+                 GETA3(ds),
+                 GETA4(ds),
+                 GETRADIUS(ds), c);
+      break;
+
+    default :
+    {};
+    }
     break;
 
   default:
@@ -616,7 +633,7 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
 
 
 
-  switch (fig.kind())
+  switch (fig.shape())
   {
   case CIRCLE :
     c[0] = .7 ;
@@ -653,9 +670,23 @@ void BodiesViewer::drawSelectedQGLShape(const QGLShape& fig)
     c[1] = .1;
     c[2] = .5;
     glLineWidth(3.);
-    drawSphere(GETX(ds), GETY(ds), GETZ(ds),
-               GETA1(ds), GETA2(ds), GETA3(ds),
-               GETRADIUS(ds), c);
+    switch (fig.type())
+    {
+    case Type::LagrangianDS :
+
+      drawSphere(GETX(ds), GETY(ds), GETZ(ds),
+                 GETA1(ds), GETA2(ds), GETA3(ds),
+                 GETRADIUS(ds), c);
+      break;
+    case Type::NewtonEulerDS :
+      drawSphere(GETX(ds), GETY(ds), GETZ(ds),
+                 GETA1(ds), GETA2(ds), GETA3(ds), GETA4(ds),
+                 GETRADIUS(ds), c);
+      break;
+
+    default :
+    {};
+    }
     glColor3f(1., 0., 0.);
     dFe = hypot3(ask<ForFExt>(*ds)->getArray());
     Cal = log(dFe);
