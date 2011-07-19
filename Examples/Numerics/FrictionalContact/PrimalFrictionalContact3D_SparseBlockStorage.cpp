@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   /*     double mu[3] = {0.1,0.1,0.1};    */
 
 
-  int i, j, k;
+  int k;
   int m = 3 * NC;
   int n = Ndof;
 
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->block = block;
   MBlockMatrix->blocknumber0 = 3;
   MBlockMatrix->blocknumber1 = 3;
-  int blocksize[3] = {3, 6, 9} ;
+  unsigned int blocksize[3] = {3, 6, 9} ;
   MBlockMatrix->blocksize0 = blocksize;
   MBlockMatrix->blocksize1 = blocksize;
   MBlockMatrix->filled1 = 4;
@@ -188,8 +188,8 @@ int main(int argc, char* argv[])
   HBlockMatrix->block = hblock;
   HBlockMatrix->blocknumber0 = 3;
   HBlockMatrix->blocknumber1 = 1;
-  int blocksize0[3] = {3, 6, 9} ;
-  int blocksize1[1] = {3} ;
+  unsigned int blocksize0[3] = {3, 6, 9} ;
+  unsigned int blocksize1[1] = {3} ;
   HBlockMatrix->blocksize0 = blocksize0;
   HBlockMatrix->blocksize1 = blocksize1;
   HBlockMatrix->filled1 = 4;
