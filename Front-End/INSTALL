@@ -1,4 +1,4 @@
-# Siconos-Front-End version, Copyright INRIA 2005-2011.
+# Siconos-Front-End, Copyright INRIA 2005-2011.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -23,14 +23,11 @@
 
 ---++ Required:
 
-   * swig
-      * actual version used with the platform : 2.0
-      * known problems : none
+   * swig (version >= 2.0)
       * location : http://www.swig.org/
 
    * python
       * actual version used with the platform : 2.6
-      * known problems : none
       * location : http://www.python.org/
 
 ---++ Getting the sources
@@ -48,4 +45,12 @@ In a build directory (out of sources) :
  
 cmake <Front-End source directory>
 make
+make test
 make install
+
+
+---+++ Is the installation of the Front-End OK ?
+   * You can try to run : 
+
+   cd /path/to/your/source/code/Examples/Mechanics/BouncingBall ; python BouncingBallTS.py
+   cd /path/to/your/source/code/Examples/Mechanics/BouncingBall ; python BouncingBallAnimation.py
