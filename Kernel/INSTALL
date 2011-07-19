@@ -1,4 +1,4 @@
-# Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+# Siconos-Kernel, Copyright INRIA 2005-2011.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -24,32 +24,22 @@
 A complete Installation Guide is available at
 siconos.gforge.inria.fr/SiconosInstall/index.html.
 
+The installation of Siconos Numerics is required.
+
 ---++ Required external libraries
 
    * libxml2
-      * actual version used with the platform : 2.6.17
-      * last version : 2.6.17 
-      * known problems : none
-      * location : http://www.xmlsoft.org/downloads.html
 
    * Atlas
- 	
+
+   * Boost (version >=1.41)
+
+      * look at the "quick installation notes of Boost" at the
+        end of this document
+ 
 ---++ Optional external libraries (advised for developers)
 
-   * cppunit
-      * last version used with the platform: 1.12
-      * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
-
-   * Boost
-      * actual version used with the platform: 1.34.1
-      * last version : 1.34.1
-      * known problems : none
-
-      * location :
-        http://sourceforge.net/project/showfiles.php?group_id=7586
-
-      * you can read the "quick installation notes of Boost" at the
-        end of this document
+   * cppunit (may be avoided with -DWITH_TESTING=False)
 
 ---++ Getting the sources
 
@@ -59,9 +49,11 @@ siconos.gforge.inria.fr/SiconosInstall/index.html.
    * Download the source packages on the Gforge   
 
 
----++ INSTALL with cmake
+---++ BUILD & INSTALL with cmake
 
-The command `cmake' is needed (http://www.cmake.org/).
+The command `cmake' is needed (http://www.cmake.org/). The cmake
+version must be >= 2.8.
+
 The compilation is done out of the source directory:
 
    * create a build directory <build>
@@ -94,7 +86,7 @@ Some CMAKE OPTIONS that may be usefull:
      -DCMAKE_BUILD_TYPE=Release
 
    * to include the build of the tests suites and enable a make test
-     target
+     target (cppunit is needed)
      -DWITH_TESTING=ON
 
    * to build the documentation
@@ -106,11 +98,14 @@ Some CMAKE OPTIONS that may be usefull:
      -DWITH_DOCUMENTATION=TRUE -DDOXYGEN_OUTPUT=/some/where
      (you may have to create the directory /some/where/Tags)
 
-   * to see cmake state : -DPRINT_ENV=1
+   * to build with Bullet collision detection library
+     -DWITH_BULLET=TRUE 
+     if bullet was built in double precision
+     -DBULLET_USE_DOUBLE_PRECISION=TRUE
+
+   * to print cmake state : -DPRINT_ENV=1
 
    * to print a cmake variable : -DPRINT_VAR=VAR_NAME
-
-
 
         
 
@@ -122,12 +117,7 @@ Some MAKE OPTIONS that may be usefull:
 
    * You can try to run : 
 
-   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; siconos BouncingBall.cpp
-
----+++ Is the installation of the Front-End OK ?
-   * You can try to run : 
-
-   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; pySiconos BouncingBall.py
+   cd /path/to/your/source/code/Examples/Mechanics/BouncingBall ; siconos BouncingBallTS.cpp
 
 
 ----------------------------------------------
