@@ -1,4 +1,4 @@
-# Siconos-Numerics version 3.0.0, Copyright INRIA 2005-2008.
+# Siconos-Numerics, Copyright INRIA 2005-2011
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -35,7 +35,9 @@
 
 ---++ INSTALL with cmake
 
-The command `cmake' is needed (http://www.cmake.org/).
+The command `cmake' is needed (http://www.cmake.org/). The cmake
+version must be >= 2.8.
+
 The compilation is done out of the source directory:
 
    * create a build directory <build>
@@ -64,6 +66,11 @@ Some CMAKE OPTIONS that may be usefull:
    * to build an optimized library (-O3 -DNDEBUG) (this is the
     default): -DCMAKE_BUILD_TYPE=Release
 
+   * to build Global Alart&Curnier solver with MUMPS 
+     -DWITH_MUMPS=TRUE
+     (if mumps library is not in a standard place, see
+      CMAKE_INCLUDE_PATH & CMAKE_LIBRARY_PATH above)
+
    * to include the build of the tests suites and enable a make test
      target
      -DWITH_TESTING=ON
@@ -88,6 +95,11 @@ Some MAKE OPTIONS that may be usefull:
 
 ---++ Note on MacOS and gfortran
 
-      gfortran is not packaged in Apple Xcode. You need to install it from a port system such as fink, MacPort or to download a binary version at http://hpc.sourceforge.net/.
+      gfortran is not packaged in Apple Xcode. You need to install it
+      from a port system such as fink, MacPort or to download a binary
+      version at http://hpc.sourceforge.net/.
 
-      For snow leopard (MacOSX>= 10.6), the only possible compilation is in i386 mode. For a complete compilation in x86_64 mode, we strongly recommend fully comptatible gfortran of the "R" software   http://r.research.att.com/tools/
+      For snow leopard (MacOSX>= 10.6), the only possible compilation
+      is in i386 mode. For a complete compilation in x86_64 mode, we
+      strongly recommend fully comptatible gfortran of the "R"
+      software http://r.research.att.com/tools/
