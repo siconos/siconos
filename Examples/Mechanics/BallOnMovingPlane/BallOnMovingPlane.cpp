@@ -88,15 +88,15 @@ int main(int argc, char* argv[])
     // -- Set external forces (weight) --
     movingplane->setFExtPtr(weight);
 
-    std::vector<unsigned int>  bdindex(1);
-    bdindex[0] = 0;
+    SP::IndexInt bdindex(new IndexInt(1));
+    (*bdindex)[0] = 0;
 
     //    SP::SimpleVector bdPrescribedVelocity(new SimpleVector(1));
     //    bdPrescribedVelocity->setValue(0,0.5);
     //    SP::BoundaryCondition bd (new BoundaryCondition(&bdindex,bdPrescribedVelocity));
 
 
-    SP::BoundaryCondition bd(new BoundaryCondition(&bdindex));
+    SP::BoundaryCondition bd(new BoundaryCondition(bdindex));
     bd->setComputePrescribedVelocityFunction("BallOnMovingPlanePlugin.so", "prescribedvelocity");
 
 
