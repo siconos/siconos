@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// Siconos-Front-End version 3.2.0, Copyright INRIA 2005-2010.
+// Siconos-Front-End , Copyright INRIA 2005-2011.
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.	
 // Siconos is a free software; you can redistribute it and/or modify
