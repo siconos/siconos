@@ -1,4 +1,4 @@
-/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-sample , Copyright INRIA 2005-2011.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -219,7 +219,7 @@ void Disks::init()
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
 
-    osnspb_->numericsSolverOptions()->iparam[0] = 100000; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[0] = 10000; // Max number of
     // iterations
     osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
     // iterations
