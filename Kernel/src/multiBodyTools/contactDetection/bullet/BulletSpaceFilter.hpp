@@ -29,8 +29,8 @@
 #include <btBulletCollisionCommon.h>
 
 //typedef btSimpleBroadphase BulletBroadPhase;
-//typedef bt32BitAxisSweep3 BulletBroadPhase;
-typedef btDbvtBroadphase BulletBroadPhase;
+typedef bt32BitAxisSweep3 BulletBroadPhase;
+//typedef btDbvtBroadphase BulletBroadPhase;
 
 
 TYPEDEF_SPTR(BulletBroadPhase);

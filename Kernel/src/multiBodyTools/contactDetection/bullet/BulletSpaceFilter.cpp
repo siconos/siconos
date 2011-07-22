@@ -73,7 +73,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
 
-  _broadphase.reset(new BulletBroadPhase());//*_worldAabbMin, *_worldAabbMax));
+  _broadphase.reset(new BulletBroadPhase(*_worldAabbMin, *_worldAabbMax));
 
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
 
