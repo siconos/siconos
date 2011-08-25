@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
   double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[3] = {0.1, 0.1, 0.1};
 
-  int i, j, k;
+  int k;
 
 
   FrictionContactProblem NumericsProblem;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->block = block;
   MBlockMatrix->blocknumber0 = 3;
   MBlockMatrix->blocknumber1 = 3;
-  int blocksize[3] = {3, 6, 9} ;
+  unsigned int blocksize[3] = {3, 6, 9} ;
   MBlockMatrix->blocksize0 = blocksize;
   MBlockMatrix->blocksize1 = blocksize;
   MBlockMatrix->filled1 = 4;

@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[3] = {0.1, 0.1, 0.1};
 
-  int i, j, k;
+  int k;
   /*  for (j =0 ; j<9; j++){ */
   /*  for (k =0 ; k<9; k++) */
   /*      M[j][k]=0.0; */

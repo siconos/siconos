@@ -67,7 +67,6 @@ int main(int argc, char* argv[])
 
 
   int NC = 1;//Number of contacts
-  int Ndof = 9;//Number of DOF
   int m = 3;
   int n = 9;
   double M[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -117,7 +116,7 @@ int main(int argc, char* argv[])
   /*     double mu[3] = {0.1,0.1,0.1};    */
 
 
-  int i = 0, j = 0, k = 0;
+  int i = 0, k = 0;
 
   PrimalFrictionContactProblem numericsProblem;
   numericsProblem.numberOfContacts = NC;
