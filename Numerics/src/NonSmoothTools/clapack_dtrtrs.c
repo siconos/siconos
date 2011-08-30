@@ -113,7 +113,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   {
     info = -2;
   }
-  else if (! nounit && !(Diag == CblasUpper))
+  else if (! nounit && !(Uplo == CblasUpper))
   {
     info = -3;
   }
