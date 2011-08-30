@@ -36,7 +36,9 @@ enum TYPES
   /** */
   LSODAR,
   /** */
-  MOREAU2
+  MOREAU2,
+  /** */
+  D1MINUSLINEAR
 };
 
 }

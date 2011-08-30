@@ -49,7 +49,8 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
-                           SP::OneStepNSProblem osnspb)
+                           SP::OneStepNSProblem osnspb,
+                           int nb)
   : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
 {
 
@@ -57,7 +58,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
   _computeResiduR = false;
 
   if (osi) insertIntegrator(osi);
-  (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
+  (*_allNSProblems).resize(nb);
   if (osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
 
 }

@@ -100,10 +100,12 @@ public:
   *  that owns this simulation)
      \param a one step integrator (default none)
      \param a one step non smooth problem (default none)
+     \param number of non smooth problem (default SICONOS_NB_OSNSP_TS)
   */
   TimeStepping(SP::TimeDiscretisation,
                SP::OneStepIntegrator = SP::OneStepIntegrator(),
-               SP::OneStepNSProblem = SP::OneStepNSProblem());
+               SP::OneStepNSProblem = SP::OneStepNSProblem(),
+               int nb = SICONOS_NB_OSNSP_TS);
 
   /** constructor with XML object for TimeStepping
       \param SimulationXML* : the XML object corresponding

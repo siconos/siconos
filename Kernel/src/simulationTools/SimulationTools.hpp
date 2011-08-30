@@ -43,6 +43,7 @@ Note that not all files from the current location are listed below, since some o
 #include "Lsodar.hpp"
 #include "Moreau.hpp"
 #include "Moreau2.hpp"
+#include "D1MinusLinear.hpp"
 #include "Relay.hpp"
 #include "NonSmoothEvent.hpp"
 #include "TimeDiscretisationEvent.hpp"
