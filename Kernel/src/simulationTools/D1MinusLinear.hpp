@@ -28,7 +28,6 @@
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-class Simulation;
 class SiconosMatrix;
 
 /**  D1MinusLinear Time-Integrator for Dynamical Systems

@@ -19,17 +19,11 @@
 
 #include "D1MinusLinear.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "FirstOrderLinearR.hpp"
 #include "NewtonImpactNSL.hpp"
-#include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
 using namespace std;
@@ -353,7 +347,7 @@ void D1MinusLinear::computeFreeState()
   DSIterator it; // iterator through the set of DS
   SP::DynamicalSystem ds; // current DS
   SP::SiconosMatrix W; // W iteration matrix of the current DS
-  Type::Siconos dsType ; // type of the current DS.
+  Type::Siconos dsType ; // type of the current DS
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -398,17 +392,14 @@ void D1MinusLinear::computeFreeState()
 
 void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 {
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
 
-  // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
+  // get relation and non smooth law information
+  RELATION::TYPES relationType = UR->getRelationType(); // relation type
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-
-  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
-
-  unsigned int sizeY = UR->getNonSmoothLawSize();
-
+  unsigned int sizeY = UR->getNonSmoothLawSize(); //
   unsigned int relativePosition = UR->getRelativePosition();
+  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin()); // related DS
 
   Index coord(8);
   coord[0] = relativePosition;

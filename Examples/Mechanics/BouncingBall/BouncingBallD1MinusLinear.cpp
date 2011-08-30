@@ -18,12 +18,12 @@
  */
 
 /*!\file
-  C++ input file, D1Minus-Time-Stepping version
+  C++ input file, D1MinusLinear-Time-Stepping version
   T. Schindler, V. Acary
 
   A Ball bouncing on the ground.
   Direct description of the model without XML input.
-  Simulation with a D1Minus-Time-Stepping scheme.
+  Simulation with a D1MinusLinear-Time-Stepping scheme.
 */
 
 #include "SiconosKernel.hpp"
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ------------------
     // -- (1) OneStepIntegrators --
-    SP::D1Minus OSI(new D1Minus(ball));
+    SP::D1MinusLinear OSI(new D1MinusLinear(ball));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -112,11 +112,11 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem forceRight(new LCP()); // contact force left limit right side
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t), 3);
+    SP::TimeStepping s(new TimeStepping(t, 3));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
-    s->insertNonSmoothProblem(accelerationLeft, SICONOS_OSNSP_TS_VELOCITY + 1);
-    s->insertNonSmoothProblem(accelerationRight, SICONOS_OSNSP_TS_VELOCITY + 2);
+    s->insertNonSmoothProblem(forceLeft, SICONOS_OSNSP_TS_VELOCITY + 1);
+    s->insertNonSmoothProblem(forceRight, SICONOS_OSNSP_TS_VELOCITY + 2);
 
     // =========================== End of model definition ===========================
 
