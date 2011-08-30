@@ -28,7 +28,7 @@
 #include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 static double sBallRadius = 0.1;
-#define WITH_PROJ
+//#define WITH_PROJ
 #define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D

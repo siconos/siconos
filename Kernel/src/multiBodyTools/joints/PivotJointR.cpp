@@ -257,12 +257,11 @@ void PivotJointR::computeh(double t)
 
   std::cout << "PivotJoint computeH:\n";
   y->display();
-  /*proj_with_q
-  for (unsigned int ii=0; ii<y->size();ii++)
-    _yProj->setValue(ii,y->getValue(ii));
-   _yProj->setValue(5,q10*q10+q11*q11+q12*q12+q13*q13 -1.0);
-   if (_d2){
-     _yProj->setValue(6,q20*q20+q21*q21+q22*q22+q23*q23 -1.0);
-   }
-  */
+  /*proj_with_q*/
+  for (unsigned int ii = 0; ii < y->size(); ii++)
+    _yProj->setValue(ii, y->getValue(ii));
+  //    _yProj->setValue(5,q10*q10+q11*q11+q12*q12+q13*q13 -1.0);
+  //   if (_d2){
+  //  _yProj->setValue(6,q20*q20+q21*q21+q22*q22+q23*q23 -1.0);
+  //}
 }
