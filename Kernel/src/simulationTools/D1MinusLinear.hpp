@@ -130,11 +130,14 @@ public:
   void computeW(double, SP::DynamicalSystem);
 
   /** return the maximum of all norms for the residus of DS
-    \return double
-    */
+   *  \post{ds->residuFree will be calculated, ds->workFree contains ds->residuFree-p, ds->p() contains new position}
+   *  \return double
+   */
   virtual double computeResidu();
 
-  /** integrates the Dynamical System linked to this integrator without boring the constraints */
+  /** integrates the Dynamical System linked to this integrator without boring the constraints
+   *  \post{ds->workFree contains free velocity}
+   */
   virtual void computeFreeState();
 
   /** integrates the UnitaryRelation linked to this integrator, without taking constraints into account
@@ -156,6 +159,7 @@ public:
 
   /** updates the state of the Dynamical Systems
    *  \param level of interest for the dynamics: not used at the time
+   *  \post{ds->velocity contains new velocity}
    */
   virtual void updateState(unsigned int);
 
