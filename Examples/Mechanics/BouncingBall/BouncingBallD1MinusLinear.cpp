@@ -24,7 +24,7 @@
   A Ball bouncing on the ground.
   Direct description of the model without XML input.
   Simulation with a D1MinusLinear-Time-Stepping scheme.
-*/
+  */
 
 #include "SiconosKernel.hpp"
 

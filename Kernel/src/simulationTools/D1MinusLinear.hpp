@@ -39,9 +39,6 @@ class SiconosMatrix;
  * see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  * on Discontinuous Galerkin Methods: Definition and Outlook
  *
- * D1MinusLinear class is used to define some time-integration method for a
- * list of dynamical systems.
-
  * A D1MinusLinear instance is defined by the list of concerned dynamical systems.
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W"
  *
@@ -64,100 +61,93 @@ protected:
   /** Stl map that associates a W D1MinusLinear matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
-  /** nslaw effects
-   */
+  /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
   friend class _NSLEffectOnFreeOutput;
 
-  /** default constructor
-   */
+  /** default constructor */
   D1MinusLinear() {};
 
 public:
 
   /** constructor from one dynamical system
-   *  \param SP::DynamicalSystem : the DynamicalSystem to be integrated
+   *  \param DynamicalSystem to be integrated
    */
   D1MinusLinear(SP::DynamicalSystem);
 
   /** constructor from a list of dynamical systems
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param list of DynamicalSystems to be integrated
    */
   D1MinusLinear(DynamicalSystemsSet&);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~D1MinusLinear() {};
 
   // --- GETTERS/SETTERS ---
 
-  /** get the value of W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+  /** get value of W corresponding to DynamicalSystem ds
+   *  \param pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
-   * \return pointer to a SiconosMatrix
+   * \param pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
+   * \return pointer to SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
    * \param SiconosMatrix newValue
-   * \param a pointer to DynamicalSystem,
+   * \param pointer to DynamicalSystem,
    */
   void setW(const SiconosMatrix&, SP::DynamicalSystem);
 
   /** set W[ds] to pointer newPtr
-   * \param SP::SiconosMatrix  newPtr
-   * \param a pointer to DynamicalSystem
+   * \param newPtr
+   * \param pointer to DynamicalSystem
    */
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
 
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the D1MinusLinear integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
+   *  invariant systems, we compute time invariant operator (example : W)
    */
   virtual void initialize();
 
   /** init WMap[ds] D1MinusLinear matrix at time t
-   *  Allocate memory for W and insert into WMap with ds as key
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  allocate memory for W and insert into WMap with ds as key
+   *  \param time
+   *  \param pointer to DynamicalSystem
    */
   void initW(double, SP::DynamicalSystem);
 
   /** compute WMap[ds] D1MinusLinear matrix at time t
-   *  \param the time (double)
-   *  \param a pointer to DynamicalSystem
+   *  \param time
+   *  \param pointer to DynamicalSystem
    */
   void computeW(double, SP::DynamicalSystem);
 
   /** return the maximum of all norms for the residus of DS
-      \return a double
-   */
+    \return double
+    */
   virtual double computeResidu();
 
-  /** integrates the Dynamical System linked to this integrator
-   *  without boring the constraints
-   */
+  /** integrates the Dynamical System linked to this integrator without boring the constraints */
   virtual void computeFreeState();
 
-  /** integrates the UnitaryRelation linked to this integrator, without taking constraints
-   * into account.
+  /** integrates the UnitaryRelation linked to this integrator, without taking constraints into account
+   * \param pointer to UnitaryRelation
+   * \param pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int: useless flag (for D1MinusLinear, used in Lsodar)
+   *  \param initial time
+   *  \param end time
+   *  \param real end time
+   *  \param useless flag (for D1MinusLinear, used in Lsodar)
    */
   virtual void integrate(double&, double&, double&, int&)
   {
@@ -165,22 +155,21 @@ public:
   }
 
   /** updates the state of the Dynamical Systems
-   *  \param unsigned int: level of interest for the dynamics: not used at the time
+   *  \param level of interest for the dynamics: not used at the time
    */
   virtual void updateState(unsigned int);
 
-  /** Displays the data of the D1MinusLinear's integrator
-   */
+  /** displays the data of the D1MinusLinear's integrator */
   virtual void display();
 
   /** insert a dynamical system in this Integrator
-   *  \param a SP::DynamicalSystem
+   *  \param pointer to DynamicalSystem
    */
   virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepIntegrator* : the integrator which must be converted
-   * \return a pointer on the integrator if it is of the right type, 0 otherwise
+  /** encapsulates an operation of dynamic casting. needed by Python interface
+   *  \param integrator which must be converted
+   *  \return pointer on the integrator if it is of the right type, NULL otherwise
    */
   static D1MinusLinear* convert(OneStepIntegrator* osi);
 
