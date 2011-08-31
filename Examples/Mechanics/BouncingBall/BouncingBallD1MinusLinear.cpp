@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
+    ioMatrix io("result_tdg.dat", "ascii");
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
     SimpleMatrix dataPlotRef(dataPlot);

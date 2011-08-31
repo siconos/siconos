@@ -253,7 +253,7 @@ double D1MinusLinear::computeResidu()
       }
 
       *q = *qold; // new position
-      scal(-0.5 * h, *vold + *vpred, *q, false);
+      scal(0.5 * h, *vold + *vpred, *q, false);
 
       if (d->fL())
       {
@@ -314,7 +314,7 @@ double D1MinusLinear::computeResidu()
       *vpred += *vold;
 
       *q = *qold; // new position
-      scal(-0.5 * h, *vold + *vpred, *q, false);
+      scal(0.5 * h, *vold + *vpred, *q, false);
 
       // right evaluations
       if (Fext)
@@ -364,7 +364,7 @@ double D1MinusLinear::computeResidu()
       }
 
       *q = *qold; // new position
-      scal(-0.5 * h, *vold + *vpred, *q, false);
+      scal(0.5 * h, *vold + *vpred, *q, false);
 
       if (d->fL())
       {
