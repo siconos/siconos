@@ -546,6 +546,7 @@ void D1MinusLinear::updateState(unsigned int level)
 {
   DSIterator it; // iterator through the set of DS
   SP::SiconosMatrix W; // W iteration matrix of the current DS
+  double h = simulationLink->timeStep(); // time step length
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -562,6 +563,13 @@ void D1MinusLinear::updateState(unsigned int level)
       *v = *d->p(level); // value = nonsmooth impulse
       W->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
       *v += *ds->workFree(); // add free velocity
+
+      // pointer constructor: problem is detection of contact and the definition of the re-initiated position
+      SP::SiconosVector q = d->q();
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      *q = *qold;
+      scal(0.5 * h, *vold + *v, *q, false);
     }
     // Newton Euler Systems
     else if (dsType == Type::NewtonEulerDS)
@@ -572,6 +580,13 @@ void D1MinusLinear::updateState(unsigned int level)
       *v = *d->p(level); // value = nonsmooth impulse
       d->luW()->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
       *v += *ds->workFree(); // add free velocity
+
+      // pointer constructor: problem is detection of contact and the definition of the re-initiated position
+      SP::SiconosVector q = d->q();
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      *q = *qold;
+      scal(0.5 * h, *vold + *v, *q, false);
     }
     else RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not yet implemented for Dynamical system type: " + dsType);
   }
