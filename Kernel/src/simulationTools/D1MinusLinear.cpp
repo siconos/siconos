@@ -45,13 +45,13 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = UR->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *UR->y_k(osnsp->levelMin()), *(UR->yp()), subCoord, false);
+    subscal(e, *(UR->y_k(osnsp->levelMin())), *(UR->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
   {
     double e = nslaw.en();
-    (*UR->yp())(0) +=  e * (*UR->y_k(osnsp->levelMin()))(0);
+    (*(UR->yp()))(0) +=  e * (*(UR->y_k(osnsp->levelMin())))(0);
   }
 
   void visit(const EqualityConditionNSL& nslaw)
@@ -168,7 +168,7 @@ void D1MinusLinear::initW(double t, SP::DynamicalSystem ds)
   if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    WMap[ds].reset(new SimpleMatrix(*d->mass()));
+    WMap[ds].reset(new SimpleMatrix(*(d->mass())));
     SP::SiconosMatrix W = WMap[ds];
   }
   // Newton Euler Systems
@@ -192,7 +192,7 @@ void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
     d->computeMass();
-    *W = *d->mass();
+    *W = *(d->mass());
   }
   // Lagrangian Linear Systems
   else if (dsType == Type::LagrangianLinearTIDS)
@@ -232,37 +232,38 @@ double D1MinusLinear::computeResidu()
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosMatrix Mold = d->mass(); // TODO OLD mass matrix
 
-      // get right information
-      SP::SiconosVector q = d->q(); // pointer constructor
-      SP::SiconosVector v = d->velocity(); // right limit
-      d->computeMass();
-      SP::SiconosMatrix M = d->mass();
+      // initialize ds->residuFree and predicted right velocity (left limit)
+      residuFree->zero();
+      SP::SiconosVector vpred(new SimpleVector(*vold));
 
-      prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
-
-      SP::SiconosVector vpred(new SimpleVector(*vold)); // right velocity (left limit) with prediction
-
+      // -- LEFT SIDE --
       if (d->fL())
       {
         d->computeFL(told, qold, vold); // left force vector
-        scal(-0.5 * h, *d->fL(), *residuFree, false);
+        scal(-0.5 * h, *(d->fL()), *residuFree, false);
 
-        M->PLUForwardBackwardInPlace(*d->fL()); // right force vector
-        scal(h, *d->fL(), *vpred, false);
+        Mold->PLUForwardBackwardInPlace(*(d->fL())); // predicted right velocity (left limit)
+        scal(h, *(d->fL()), *vpred, false);
       }
 
-      *q = *qold; // new position
+      // get current information for right side
+      SP::SiconosVector q = d->q(); // pointer constructor
+      *q = *qold;
       scal(0.5 * h, *vold + *vpred, *q, false);
+      d->computeMass();
+      SP::SiconosMatrix M = d->mass();
 
+      // -- RIGHT SIDE --
       if (d->fL())
       {
         d->computeFL(t, q, vpred);
-        scal(-0.5 * h, *d->fL(), *residuFree, false);
+        scal(-0.5 * h, *(d->fL()), *residuFree, false);
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *d->p(2); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
     }
     // Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -272,21 +273,18 @@ double D1MinusLinear::computeResidu()
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosMatrix M = d->mass(); // constant mass
+      SP::SiconosMatrix C = d->C(); // constant dissipation
+      SP::SiconosMatrix K = d->K(); // constant stiffness
 
-      // get right information
-      SP::SiconosVector q = d->q(); // pointer constructor
-      SP::SiconosVector v = d->velocity(); // right limit
-      SP::SiconosMatrix M = d->mass();
-
-      prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
-      SP::SiconosVector vpred(new SimpleVector(vold->size())); // right velocity (left limit) with prediction
-
-      // system matrices
-      SP::SiconosMatrix C = d->C();
-      SP::SiconosMatrix K = d->K();
+      // current time dependent force
       SP::SiconosVector Fext = d->fExt();
 
-      // left evaluations
+      // initialize ds->residuFree and predicted right velocity (left limit)
+      residuFree->zero();
+      SP::SiconosVector vpred(new SimpleVector(vold->size()));
+
+      // -- LEFT SIDE --
       if (Fext)
       {
         d->computeFExt(told);
@@ -296,7 +294,7 @@ double D1MinusLinear::computeResidu()
 
       if (K)
       {
-        SP::SiconosVector dummy(new SimpleVector(*qold));
+        SP::SiconosVector dummy(new SimpleVector(qold->size()));
         prod(*K, *qold, *dummy);
         scal(0.5 * h, *dummy, *residuFree, false);
         scal(-h, *dummy, *vpred, false);
@@ -304,7 +302,7 @@ double D1MinusLinear::computeResidu()
 
       if (C)
       {
-        SP::SiconosVector dummy(new SimpleVector(*vold));
+        SP::SiconosVector dummy(new SimpleVector(vold->size()));
         prod(*C, *vold, *dummy);
         scal(0.5 * h, *dummy, *residuFree, false);
         scal(-h, *dummy, *vpred, false);
@@ -313,10 +311,12 @@ double D1MinusLinear::computeResidu()
       M->PLUForwardBackwardInPlace(*vpred);
       *vpred += *vold;
 
-      *q = *qold; // new position
+      // get current information for right side
+      SP::SiconosVector q = d->q(); // pointer constructor
+      *q = *qold;
       scal(0.5 * h, *vold + *vpred, *q, false);
 
-      // right evaluations
+      // -- RIGHT SIDE --
       if (Fext)
       {
         d->computeFExt(t);
@@ -334,7 +334,7 @@ double D1MinusLinear::computeResidu()
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *d->p(2); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
     }
     // Newton Euler Systems
     else if (dsType == Type::NewtonEulerDS)
@@ -344,36 +344,39 @@ double D1MinusLinear::computeResidu()
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosMatrix Mold = d->M(); // constant mass
+      SP::SiconosMatrix T = d->T(); // explicit usage of T TODO
 
-      // get right information
-      SP::SiconosVector q = d->q(); // pointer constructor
-      SP::SiconosVector v = d->velocity(); // right limit
-      SP::SiconosMatrix M = d->M();
+      // initialize ds->residuFree and predicted right velocity (left limit)
+      residuFree->zero();
+      SP::SiconosVector vpred(new SimpleVector(*vold));
 
-      prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
-
-      SP::SiconosVector vpred(new SimpleVector(*vold)); // right velocity (left limit) with prediction
-
+      // -- LEFT SIDE --
       if (d->fL())
       {
         d->computeFL(told, qold, vold); // left force vector
-        scal(-0.5 * h, *d->fL(), *residuFree, false);
+        scal(-0.5 * h, *(d->fL()), *residuFree, false);
 
-        M->PLUForwardBackwardInPlace(*d->fL()); // right force vector
-        scal(h, *d->fL(), *vpred, false);
+        Mold->PLUForwardBackwardInPlace(*(d->fL())); // predicted right velocity (left limit)
+        scal(h, *(d->fL()), *vpred, false);
       }
 
-      *q = *qold; // new position
-      scal(0.5 * h, *vold + *vpred, *q, false);
+      // get current information for right side
+      SP::SiconosVector q = d->q(); // pointer constructor
+      *q = *qold;
+      prod(0.5 * h, *T, *vold + *vpred, *q, false);
 
+      // -- RIGHT SIDE --
       if (d->fL())
       {
         d->computeFL(t, q, vpred);
-        scal(-0.5 * h, *d->fL(), *residuFree, false);
+        scal(-0.5 * h, *(d->fL()), *residuFree, false);
       }
 
+      d->updateT();
+
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *d->p(2); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
     }
     else
       RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not yet implemented for Dynamical system type: " + dsType);
@@ -415,6 +418,8 @@ void D1MinusLinear::computeFreeState()
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+
+      // get left state from memory
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
       SP::SiconosVector vfree = d->workFree(); // pointer constructor
@@ -429,7 +434,7 @@ void D1MinusLinear::computeFreeState()
   }
 }
 
-void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp)
 {
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
 
@@ -546,7 +551,6 @@ void D1MinusLinear::updateState(unsigned int level)
 {
   DSIterator it; // iterator through the set of DS
   SP::SiconosMatrix W; // W iteration matrix of the current DS
-  double h = simulationLink->timeStep(); // time step length
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -560,16 +564,9 @@ void D1MinusLinear::updateState(unsigned int level)
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       SP::SiconosVector v = d->velocity(); // pointer constructor
-      *v = *d->p(level); // value = nonsmooth impulse
+      *v = *(d->p(level)); // value = nonsmooth impulse
       W->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-      *v += *ds->workFree(); // add free velocity
-
-      // pointer constructor: problem is detection of contact and the definition of the re-initiated position
-      SP::SiconosVector q = d->q();
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-      *q = *qold;
-      scal(0.5 * h, *vold + *v, *q, false);
+      *v += *(ds->workFree()); // add free velocity
     }
     // Newton Euler Systems
     else if (dsType == Type::NewtonEulerDS)
@@ -577,16 +574,9 @@ void D1MinusLinear::updateState(unsigned int level)
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
 
       SP::SiconosVector v = d->velocity(); // pointer constructor
-      *v = *d->p(level); // value = nonsmooth impulse
+      *v = *(d->p(level)); // value = nonsmooth impulse
       d->luW()->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-      *v += *ds->workFree(); // add free velocity
-
-      // pointer constructor: problem is detection of contact and the definition of the re-initiated position
-      SP::SiconosVector q = d->q();
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-      *q = *qold;
-      scal(0.5 * h, *vold + *v, *q, false);
+      *v += *(ds->workFree()); // add free velocity
     }
     else RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not yet implemented for Dynamical system type: " + dsType);
   }

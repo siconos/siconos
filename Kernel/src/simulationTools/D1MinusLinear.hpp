@@ -94,6 +94,7 @@ public:
   /** get W corresponding to DynamicalSystem ds
    * \param pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    * \return pointer to SiconosMatrix
+   * \todo identifier W is in general not a good choice, e.g. it is the Delassus operator in Acary2008 or global-local velocity projection matrix in Pfeiffer2008; I suggest e.g. IterMat (Thorsten Schindler, 01.09.2011)
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
@@ -131,6 +132,7 @@ public:
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->workFree contains ds->residuFree-p, ds->p() contains new position}
+   *  \todo T is used just explicitely in position update of Newton Euler; it has to be included locally in fixed point iteration considering the norm of the position residuum
    *  \return double
    */
   virtual double computeResidu();
