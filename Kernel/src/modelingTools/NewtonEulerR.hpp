@@ -44,7 +44,7 @@ class SimpleVector;
  * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
  *
  * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
- *
+ * For more details, see the DevNotes.pdf, chapter NewtonEuler.
  */
 
 /**Pointer to function - Plug-in utilities*/
@@ -82,13 +82,15 @@ protected:
 
   /**vector e*/
   SP::SiconosVector _e;
-
+  /*Used for the projection formulation*/
   SP::SimpleVector _yProj;
 
-  /**vector of contact forces*/
+  /**vector of contact forces, ie: _contactForce = B \lambda. Useful for the end user.*/
   SP::SimpleVector _contactForce;
 
-  /*updated in computeJachqT*/
+  /**updated in computeJachqT:
+   In the case of the bilateral constrains, it is _jachq._T.
+   In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
   SP::SiconosMatrix _jachqT;
 
   /** basic constructor
@@ -158,18 +160,7 @@ public:
     _jachqT = newJachqT;
   }
 
-  /** set the value of Jach[index] to newValue (copy)
-   *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in Jach vector
 
-  template <class U> void setJach(const U& newValue, unsigned int index = 0)
-    {
-      assert(index>=Jach.size()&&"NewtonEulerR:: setJach(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
-
-      if(Jach[index]) Jach[index]->resize(newValue.size(0), newValue.size(1));
-      setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jach[index],newValue);
-    }
-  */
   /** set Jach[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in Jach vector
@@ -179,20 +170,7 @@ public:
     _jachq = newPtr ;
   }
 
-  /** To get the name of Jach[i] plugin
-   *  \return a string
-  const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
-   */
 
-  /** true if Jach[i] is plugged
-   *  \return a bool
-  const bool isJachPlugged(unsigned int i) const {return Jach[i]->isPlugged();}
-   */
-
-  /** Gets the number of computed jacobians for h
-      \return an unsigned int.
-  inline unsigned int numberOfJacobiansForH() const { return Jach.size();}
-  */
 
 
   /** initialize the relation (check sizes, memory allocation ...)

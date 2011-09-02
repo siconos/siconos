@@ -26,8 +26,8 @@
 #define SphereNEDSSphereNEDSR_h
 
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerRFC3D.hpp"
-class SphereNEDSSphereNEDSR : public NewtonEulerRFC3D,
+#include "NewtonEulerFrom3DLocalFrameR.hpp"
+class SphereNEDSSphereNEDSR : public NewtonEulerFrom3DLocalFrameR,
   public boost::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:

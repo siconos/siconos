@@ -18,7 +18,7 @@
  */
 
 
-#include "NewtonEulerRFC3D.hpp"
+#include "NewtonEulerFrom3DLocalFrameR.hpp"
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
 using namespace std;
@@ -26,16 +26,16 @@ using namespace std;
 /*
   See devNotes.pdf for details.
  */
-void NewtonEulerRFC3D::initComponents()
+void NewtonEulerFrom3DLocalFrameR::initComponents()
 {
-  NewtonEulerRImpact::initComponents();
+  NewtonEulerFrom1DLocalFrameR::initComponents();
   /*keep only the distance.*/
   /*Warning, in current version, user of FC3D has to set _y and _yProj in the computeh */
   _yProj.reset(new SimpleVector(1));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
 }
-void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
+void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
 {
 
   double Nx = _Nc->getValue(0);
@@ -90,7 +90,7 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
 
 
 #ifdef NEFC3D_DEBUG
-  printf("NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
   Mobj1_abs->display();
 #endif
 
@@ -107,7 +107,7 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 #ifdef NEFC3D_DEBUG
-  printf("NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts, jhqT:\n");
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, jhqT:\n");
   _jachqT->display();
   SP::SimpleMatrix jaux(new SimpleMatrix(*jhqT));
   jaux->trans();
@@ -128,7 +128,7 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
 #endif
 }
 
-void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
+void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -214,7 +214,7 @@ void NewtonEulerRFC3D::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
 
 }
-void NewtonEulerRFC3D::computeJachqT()
+void NewtonEulerFrom3DLocalFrameR::computeJachqT()
 {
   DSIterator itDS = interaction()->dynamicalSystemsBegin();
   SP::NewtonEulerDS d1 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);

@@ -27,9 +27,9 @@
 #ifndef SphereNEDSPlanR_h
 #define SphereNEDSPlanR_h
 
-#include "NewtonEulerRFC3D.hpp"
+#include "NewtonEulerFrom3DLocalFrameR.hpp"
 
-class SphereNEDSPlanR : public NewtonEulerRFC3D, public boost::enable_shared_from_this<SphereNEDSPlanR>
+class SphereNEDSPlanR : public NewtonEulerFrom3DLocalFrameR, public boost::enable_shared_from_this<SphereNEDSPlanR>
 {
 private:
   /** serialization hooks

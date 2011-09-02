@@ -38,8 +38,8 @@ Note that not all files from the current location are listed below, since some o
 #include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerRImpact.hpp"
-#include "NewtonEulerRFC3D.hpp"
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEulerFrom3DLocalFrameR.hpp"
 
 #include "NonSmoothDynamicalSystem.hpp"
 

@@ -22,7 +22,7 @@
 #include "Simulation.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerRImpact.hpp"
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
 using namespace std;
 using namespace RELATION;
@@ -543,7 +543,7 @@ void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::Unita
   if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
       Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
   {
-    SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> (UR1->interaction()->relation());
+    SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (UR1->interaction()->relation());
     if (ri->_isOnContact)
       equalitySize1 = nslawSize1;
   }

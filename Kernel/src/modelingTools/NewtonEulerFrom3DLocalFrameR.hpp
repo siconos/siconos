@@ -22,37 +22,37 @@
 #ifndef NEWTONEULERRELATIONFC3D_H
 #define NEWTONEULERRELATIONFC3D_H
 
-#include "NewtonEulerRImpact.hpp"
-/** NewtonEulerRFC3D
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
+/** NewtonEulerFrom3DLocalFrameR
  *
  * \author O. Bonnefon
  *  \version 3.0.0.
  *  \date Dec, 2010
  *
  * This class is an interface for relation with impact and FC3D.
- * From NewtonEulerRImpact, it inherits to the computation of the jacoboian, this operator is use for the predictor of activation and deactivation of the UR.
+ * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacoboian, this operator is use for the predictor of activation and deactivation of the UR.
  * The OSNSP is build using the matrix jachqT, that is computed from the point if contact pc1, pc2 and Nc.
  * Use this class consists in overload the method computeh, and children class has to set the menber pc1, pc2 and nc.
  *
  *
  */
 
-class NewtonEulerRFC3D : public NewtonEulerRImpact
+class NewtonEulerFrom3DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(NewtonEulerRFC3D);
+  ACCEPT_SERIALIZATION(NewtonEulerFrom3DLocalFrameR);
 
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1);
   void FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
 public:
-  NewtonEulerRFC3D(): NewtonEulerRImpact() {}
+  NewtonEulerFrom3DLocalFrameR(): NewtonEulerFrom1DLocalFrameR() {}
 
   /** destructor
    */
-  virtual ~NewtonEulerRFC3D() {};
+  virtual ~NewtonEulerFrom3DLocalFrameR() {};
   /** initialize components specific to derived classes.
     */
   virtual void initComponents();
@@ -62,5 +62,5 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
-TYPEDEF_SPTR(NewtonEulerRFC3D);
+TYPEDEF_SPTR(NewtonEulerFrom3DLocalFrameR);
 #endif // NEWTONEULERRELATIONFC3D_H

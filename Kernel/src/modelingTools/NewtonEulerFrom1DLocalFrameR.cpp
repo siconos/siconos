@@ -18,7 +18,7 @@
  */
 
 
-#include "NewtonEulerRImpact.hpp"
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include <boost/math/quaternion.hpp>
 #include "NewtonEulerDS.hpp"
 //#define NERI_DEBUG
@@ -26,7 +26,7 @@ using namespace std;
 
 //#define NEFC3D_DEBUG
 
-void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
+void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -76,12 +76,12 @@ void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
     _jachqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
 #ifdef NEFC3D_DEBUG
-  printf("NewtonEulerRImpact jhqt\n");
+  printf("NewtonEulerFrom1DLocalFrameR jhqt\n");
   _jachqT->display();
 #endif
 }
 
-void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
+void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -152,7 +152,7 @@ void NewtonEulerRImpact::NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::N
   for (unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
-void  NewtonEulerRImpact::initComponents()
+void  NewtonEulerFrom1DLocalFrameR::initComponents()
 {
   NewtonEulerR::initComponents();
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
@@ -164,7 +164,7 @@ void  NewtonEulerRImpact::initComponents()
 
 }
 
-void NewtonEulerRImpact::computeJachq(double t)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double t)
 {
   DSIterator itDS = interaction()->dynamicalSystemsBegin();
   SP::DynamicalSystem aux = *itDS;
@@ -191,7 +191,7 @@ void NewtonEulerRImpact::computeJachq(double t)
     double sign = 1.0;
     SP::SiconosVector q = (BlockX->getAllVect())[iDS];
 #ifdef NERI_DEBUG
-    printf("NewtonEulerRImpact::computeJachq : ds%d->q :", iDS);
+    printf("NewtonEulerFrom1DLocalFrameR::computeJachq : ds%d->q :", iDS);
     q->display();
 #endif
     ::boost::math::quaternion<double>    quatGP;
@@ -204,14 +204,14 @@ void NewtonEulerRImpact::computeJachq(double t)
     else
     {
       sign = -1.0;
-      //cout<<"NewtonEulerRImpact::computeJachq sign is -1 \n";
+      //cout<<"NewtonEulerFrom1DLocalFrameR::computeJachq sign is -1 \n";
       ::boost::math::quaternion<double>    quatAux(0, _Pc2->getValue(0) - q->getValue(0), _Pc2->getValue(1) - q->getValue(1),
           _Pc2->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
 #ifdef NERI_DEBUG
-    printf("NewtonEulerRImpact::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
-    printf("NewtonEulerRImpact::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
+    printf("NewtonEulerFrom1DLocalFrameR::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
+    printf("NewtonEulerFrom1DLocalFrameR::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
 #endif
     ::boost::math::quaternion<double>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
@@ -222,11 +222,11 @@ void NewtonEulerRImpact::computeJachq(double t)
     _2qiquatGP *= 2 * (q->getValue(3));
     quatBuff = (quatGP * quatQ) + (quatcQ * quatGP) - _2qiquatGP;
 #ifdef NERI_DEBUG
-    printf("NewtonEulerRImpact::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
+    printf("NewtonEulerFrom1DLocalFrameR::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 #endif
     _jachq->setValue(0, 7 * iDS + 3, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
                      quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
-    //cout<<"WARNING NewtonEulerRImpact set jachq \n";
+    //cout<<"WARNING NewtonEulerFrom1DLocalFrameR set jachq \n";
     //_jachq->setValue(0,7*iDS+3,0);
     for (int i = 1; i < 4; i++)
     {
@@ -238,17 +238,17 @@ void NewtonEulerRImpact::computeJachq(double t)
                        quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     }
   }
-  //cout<<"WARNING NewtonEulerRImpact set jachq to zedro \n";
+  //cout<<"WARNING NewtonEulerFrom1DLocalFrameR set jachq to zedro \n";
   //_jachq->setValue(0,4,0);_jachq->setValue(0,5,0);_jachq->setValue(0,6,0);
   //proj_with_q  *_jachqProj=*_jachq;
   //_jachqProj->setValue(0,4,0);_jachqProj->setValue(0,5,0);_jachqProj->setValue(0,6,0);
 #ifdef NERI_DEBUG
-  printf("NewtonEulerRImpact::computeJachq :");
+  printf("NewtonEulerFrom1DLocalFrameR::computeJachq :");
   _jachq->display();
 #endif
 
 }
-void NewtonEulerRImpact::computeJachqT()
+void NewtonEulerFrom1DLocalFrameR::computeJachqT()
 {
   DSIterator itDS = interaction()->dynamicalSystemsBegin();
   SP::NewtonEulerDS d1 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);

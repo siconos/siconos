@@ -21,7 +21,7 @@
 
 #include "TimeSteppingProjectOnConstraints.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NewtonEulerRImpact.hpp"
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
 
 #define TSPROJ_DEBUG
@@ -83,7 +83,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   //   double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
-  //     SP::NewtonEulerRImpact ri = boost::static_pointer_cast<NewtonEulerRImpact> ((*it)->relation());
+  //     SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{
@@ -309,7 +309,7 @@ bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation u
   bool res = (y > 1e-7);
   if (res)
   {
-    SP::NewtonEulerRImpact  aR = boost::static_pointer_cast<NewtonEulerRImpact>(ur->interaction()->relation());
+    SP::NewtonEulerFrom1DLocalFrameR  aR = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR>(ur->interaction()->relation());
     aR->_isOnContact = false;
   }
 #ifdef TSPROJ_DEBUG
@@ -336,7 +336,7 @@ bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur,
   bool res = (y <= 0);
   if (res)
   {
-    SP::NewtonEulerRImpact  aR = boost::static_pointer_cast<NewtonEulerRImpact>(ur->interaction()->relation());
+    SP::NewtonEulerFrom1DLocalFrameR  aR = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR>(ur->interaction()->relation());
     aR->_isOnContact = true;
   }
 #ifdef TSPROJ_DEBUG

@@ -23,7 +23,7 @@
 
 SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR(double r,
     double rr)
-  : NewtonEulerRFC3D()
+  : NewtonEulerFrom3DLocalFrameR()
 {
   r1 = r;
   r2 = rr;

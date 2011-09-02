@@ -26,7 +26,7 @@
 #include "NewtonEulerDS.hpp"
 
 
-/** NewtonEulerRImpact
+/** NewtonEulerFrom1DLocalFrameR
  *
  * \author O. Bonnefon
  *  \version 3.0.0.
@@ -42,12 +42,12 @@
  */
 
 
-class NewtonEulerRImpact : public NewtonEulerR
+class NewtonEulerFrom1DLocalFrameR : public NewtonEulerR
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(NewtonEulerRImpact);
+  ACCEPT_SERIALIZATION(NewtonEulerFrom1DLocalFrameR);
 
   /*Point of contact*/
   SP::SimpleVector _Pc1;
@@ -75,7 +75,7 @@ private:
 public:
 
   bool _isOnContact;
-  NewtonEulerRImpact():
+  NewtonEulerFrom1DLocalFrameR():
     NewtonEulerR(), _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
     _Nc(new SimpleVector(3))
   {
@@ -89,7 +89,7 @@ public:
 
   /** destructor
    */
-  virtual ~NewtonEulerRImpact() {};
+  virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double t);
   virtual void computeJachqT();
@@ -135,5 +135,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-TYPEDEF_SPTR(NewtonEulerRImpact);
+TYPEDEF_SPTR(NewtonEulerFrom1DLocalFrameR);
 #endif // NEWTONEULERRIMPACT_H

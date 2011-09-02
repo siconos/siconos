@@ -22,7 +22,7 @@
 #include "SphereNEDSPlanR.hpp"
 
 SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)
-  : NewtonEulerRFC3D(), r(r), A(A), B(B), C(C), D(D)
+  : NewtonEulerFrom3DLocalFrameR(), r(r), A(A), B(B), C(C), D(D)
 {
   nN = sqrt(A * A + B * B + C * C);
 

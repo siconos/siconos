@@ -583,7 +583,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     double thetaFL = _theta;
     *(d->luW()) = *(d->jacobianvFL());
     scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
-    *(d->luW()) += *(d->M());
+    *(d->luW()) += *(d->massMatrix());
 
     //cout<<"Moreau::computeW luW before LUFact\n";
     //d->luW()->display();
@@ -969,9 +969,9 @@ double Moreau::computeResidu()
       SP::SiconosVector q = d->q();
 
 
-      SP::SiconosMatrix W = d->M();
+      SP::SiconosMatrix massMatrix = d->massMatrix();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      prod(*W, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+      prod(*massMatrix, (*v - *vold), *residuFree); // residuFree = M(v - vold)
       if (d->fL())  // if fL exists
       {
         // computes fL(ti,vi,qi)

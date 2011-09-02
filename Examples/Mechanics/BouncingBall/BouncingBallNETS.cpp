@@ -32,9 +32,9 @@ static double sBallRadius = 0.1;
 #define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
-#define R_CLASS NewtonEulerRFC3D
+#define R_CLASS NewtonEulerFrom3DLocalFrameR
 #else
-#define R_CLASS NewtonEulerRImpact
+#define R_CLASS NewtonEulerFrom1DLocalFrameR
 #endif
 class my_NERFC3D : public R_CLASS
 {
