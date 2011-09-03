@@ -37,8 +37,13 @@
 #include <SphereNEDSPlanR.hpp>
 #include <SphereNEDSSphereNEDSR.hpp>
 
+#if WITH_BULLET
 #include <BulletDS.hpp>
 #include <BulletR.hpp>
+#define IFBULLET(X) X
+#else
+#define IFBULLET(X)
+#endif
 
 #include "SiconosBodies.hpp"
 
@@ -73,7 +78,7 @@ struct ForNdof : public Question<unsigned int>
   ANSWER_V(Circle, 3);
   ANSWER_V(SphereLDS, 6);
   ANSWER_V(SphereNEDS, 6);
-  ANSWER_V(BulletDS, 6);
+  IFBULLET(ANSWER_V(BulletDS, 6));
 };
 
 
@@ -84,7 +89,7 @@ struct ForFExt : public Question<SP::SiconosVector>
   ANSWER(Circle, fExt());
   ANSWER(SphereLDS, fExt());
   ANSWER(SphereNEDS, fExt());
-  ANSWER(BulletDS, fExt());
+  IFBULLET(ANSWER(BulletDS, fExt()));
 };
 
 
@@ -95,7 +100,7 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(Circle, q());
   ANSWER(SphereLDS, q());
   ANSWER(SphereNEDS, q());
-  ANSWER(BulletDS, q());
+  IFBULLET(ANSWER(BulletDS, q()));
 };
 
 struct ForRadius : public Question<double>
@@ -105,7 +110,7 @@ struct ForRadius : public Question<double>
   ANSWER(Circle, getRadius());
   ANSWER(SphereLDS, getRadius());
   ANSWER(SphereNEDS, getRadius());
-  ANSWER_V(BulletDS, 0.); // fix
+  IFBULLET(ANSWER_V(BulletDS, 0.)); // fix
 };
 
 struct ForMassValue : public Question<double>
@@ -114,7 +119,7 @@ struct ForMassValue : public Question<double>
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
   ANSWER(SphereNEDS, massValue());
-  ANSWER(BulletDS, massValue());
+  IFBULLET(ANSWER(BulletDS, massValue()));
 };
 
 struct ForJachq : public Question<SP::SiconosMatrix>
@@ -128,12 +133,12 @@ struct ForJachq : public Question<SP::SiconosMatrix>
   ANSWER(SphereNEDSPlanR, jachq());
   ANSWER(SphereLDSSphereLDSR, jachq());
   ANSWER(SphereNEDSSphereNEDSR, jachq());
-  ANSWER(BulletR, jachq());
+  IFBULLET(ANSWER(BulletR, jachq()));
 };
 
 struct ForContactForce : public Question<SP::SimpleVector>
 {
-  ANSWER(BulletR, contactForce());
+  IFBULLET(ANSWER(BulletR, contactForce()));
 };
 
 
@@ -166,7 +171,7 @@ enum SHAPE
   DISK,
   CIRCLE,
   SPHERE,
-  BULLET
+  IFBULLET(BULLET)
 };
 
 struct ForShape : public Question<SHAPE>
@@ -175,7 +180,7 @@ struct ForShape : public Question<SHAPE>
   ANSWER_V(Circle, CIRCLE);
   ANSWER_V(SphereLDS, SPHERE);
   ANSWER_V(SphereNEDS, SPHERE);
-  ANSWER_V(BulletDS, BULLET);
+  IFBULLET(ANSWER_V(BulletDS, BULLET));
 };
 
 /* dynamical system / figure association */
