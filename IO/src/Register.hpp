@@ -11,66 +11,45 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
+#include <boost/serialization/list.hpp>
 
 #include <boost/graph/adj_list_serialize.hpp>
 
+#include <boost/serialization/export.hpp>
+
 #include <boost/mpl/eval_if.hpp>
 
-#define INTERNAL_SICONOS_SERIALIZATION_NVP(class,member)                \
-  boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), class.member)
+#include <boost/typeof/typeof.hpp>
+
+#define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
+  ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), object.member)
 
 /* serialization is not splitted */
-#define INTERNAL_SICONOS_IO_SERIALIZE(r,c,m) \
-  ar & INTERNAL_SICONOS_SERIALIZATION_NVP(c,m);
+#define INTERNAL_SICONOS_IO_SERIALIZE(r,o,m) \
+  ar & INTERNAL_SICONOS_SERIALIZATION_NVP(o,m);
 
-#define INTERNAL_SICONOS_IO_SERIALIZE_BASE(r,c,b)                       \
-  ar & boost::serialization::make_nvp(                                  \
+#define INTERNAL_SICONOS_IO_SERIALIZE_BASE(r,o,b)                       \
+  ar & ::boost::serialization::make_nvp(                                \
     BOOST_PP_STRINGIZE(b),                                              \
-    boost::serialization::base_object<b>(c) );                          \
+    ::boost::serialization::base_object<b>(o) );                        \
  
-#define INTERNAL_SICONOS_BOOST_REGISTER(CLASS)                          \
-  namespace boost { namespace serialization {                           \
-      struct Load##CLASS                                                \
-      {                                                                 \
-        typedef Load##CLASS type;                                       \
-        template<typename Archive>                                      \
-          void function(Archive& ar, CLASS& c, const unsigned int version) \
-        { load(ar,c,version); };                                        \
-      };                                                                \
-      struct Save##CLASS                                                \
-      {                                                                 \
-        typedef Save##CLASS type;                                       \
-        template<typename Archive>                                      \
-          void function(Archive& ar, CLASS& c, const unsigned int version) \
-        { save(ar,c,version); };                                        \
-      };                                                                \
-      template<class Archive>                                           \
-      void serialize(Archive & ar, CLASS & c, const unsigned int version) \
-      {                                                                 \
-        typedef typename boost::mpl::eval_if<typename Archive::is_saving, \
-          Load##CLASS, Save##CLASS>::type Serializer;                   \
-        static Serializer serializer;                                   \
-        serializer.function(ar,c,version);};                            \
-    }}
-
 /** base class members registration
     \param class name
     \param members sequence (as a boost sequence (member1)(member2) ...)
 */
 #define SICONOS_IO_REGISTER(CLASS,MEMBERS)                              \
   template<class Archive>                                               \
-  void save(Archive & ar, CLASS & c, const unsigned int version)  \
+  void siconos_io(Archive & ar, CLASS & o, const unsigned int version) \
   {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
+    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, o, MEMBERS);   \
   };                                                                    \
-  template<class Archive>                                               \
-  void load(Archive & ar, CLASS & c, const unsigned int version)        \
-  {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-  };                                                                    \
-  INTERNAL_SICONOS_BOOST_REGISTER(CLASS)
-
-
+  namespace boost { namespace serialization {                           \
+      template<class Archive>                                           \
+      void serialize(Archive & ar, CLASS & o, const unsigned int version) \
+      {                                                                 \
+        siconos_io(ar,o,version);                                       \
+      };                                                                \
+    }}
 
 /** derived class members registration
     \param derived class name
@@ -79,23 +58,20 @@
 */
 #define SICONOS_IO_REGISTER_WITH_BASE(CLASS,BASE,MEMBERS)               \
   template<class Archive>                                               \
-  void save(Archive & ar, CLASS & c, const unsigned int version)        \
+  void siconos_io(Archive & ar, CLASS & o, const unsigned int version)  \
   {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-    ar << boost::serialization::make_nvp(                               \
-      BOOST_PP_STRINGIZE(CLASS),                                        \
-      boost::serialization::base_object<BASE>(c) );                     \
-  };                                                                    \
-  template<class Archive>                                               \
-  void load(Archive & ar, CLASS & c, const unsigned int version)        \
-  {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-    ar >> boost::serialization::make_nvp(                               \
+    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, o, MEMBERS);   \
+    ar &  ::boost::serialization::make_nvp(                             \
       BOOST_PP_STRINGIZE(BASE),                                         \
-      boost::serialization::base_object<BASE>(c) );                     \
+      ::boost::serialization::base_object<BASE>(o) );                   \
   };                                                                    \
-  INTERNAL_SICONOS_BOOST_REGISTER(CLASS)
-
+  namespace boost { namespace serialization {                           \
+      template<class Archive>                                           \
+      void serialize(Archive & ar, CLASS & o, const unsigned int version) \
+      {                                                                 \
+        siconos_io(ar,o,version);                                       \
+      };                                                                \
+    }}
 
 /** derived class with multiple inheritance registration
     \param derived class name
@@ -104,19 +80,18 @@
 */
 #define SICONOS_IO_REGISTER_WITH_BASES(CLASS,BASES,MEMBERS)             \
   template<class Archive>                                               \
-  void save(Archive & ar, CLASS & c, const unsigned int version)        \
+  void siconos_io(Archive & ar, CLASS & o, const unsigned int version)  \
   {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE_BASE, c, BASES); \
+    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, o, MEMBERS);   \
+    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE_BASE, o, BASES); \
   };                                                                    \
-  template<class Archive>                                               \
-  void load(Archive & ar, CLASS & c, const unsigned int version)        \
-  {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE, c, MEMBERS);   \
-    BOOST_PP_SEQ_FOR_EACH(INTERNAL_SICONOS_IO_SERIALIZE_BASE, c, BASES); \
-  };                                                                    \
-  INTERNAL_SICONOS_BOOST_REGISTER(CLASS)
-
+  namespace boost { namespace serialization {                           \
+      template<class Archive>                                           \
+      void serialize(Archive & ar, CLASS & o, const unsigned int version) \
+      {                                                                 \
+        siconos_io(ar,o,version);                                       \
+      };                                                                \
+    }}
 
 
 #endif

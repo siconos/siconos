@@ -43,7 +43,7 @@ input_header = args[0]
 
 config = parser.config_t( include_paths=include_paths )
 
-decls = parser.parse( ['SiconosKernel.hpp'], config )
+decls = parser.parse( [input_header], config )
 global_ns = declarations.get_global_namespace( decls )
 
 

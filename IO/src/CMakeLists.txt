@@ -37,6 +37,16 @@ FIND_PACKAGE(Boost COMPONENTS serialization)
 
 COMPILE_WITH(Boost REQUIRED)
 
+# remove debug & optimized inside LINK_LIBRARIES...
+FOREACH(_L ${SiconosIO_LINK_LIBRARIES})
+  IF(NOT ${_L} STREQUAL "debug")
+    IF(NOT ${_L} STREQUAL "optimized")
+      LIST(APPEND _LL ${_L})
+    ENDIF()
+  ENDIF()
+ENDFOREACH()
+SET(SiconosIO_LINK_LIBRARIES ${_LL})
+
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
 
@@ -64,7 +74,7 @@ IF(WITH_TESTING)
   SET(TEST_MAIN test/TestMain.cpp)
 
   BEGIN_TEST(test)
-  NEW_TEST(ioTests WholeTest.cpp KernelTest.cpp)
+  NEW_TEST(ioTests BasicTest.cpp KernelTest.cpp)
   END_TEST(test)
 
 ENDIF(WITH_TESTING)

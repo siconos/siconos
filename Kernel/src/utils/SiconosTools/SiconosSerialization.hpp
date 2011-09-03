@@ -24,18 +24,22 @@
 #ifndef SiconosSerialization_hpp
 #define SiconosSerialization_hpp
 
-#include <boost/preprocessor/seq/seq.hpp>
-
 /** install serialization hooks. Must be used inside a protected zone
     of class definition
     \parameter a class name
  */
-#define ACCEPT_SERIALIZATION(CLASS)                       \
-  typedef void serializable;                              \
-  template<typename Archive>                              \
-  friend void save(Archive&, CLASS&, const unsigned int); \
-  template<typename Archive>                              \
-  friend void load(Archive&, CLASS&, const unsigned int)
+namespace boost
+{
+namespace serialization
+{
+class access;
+}
+}
 
+#define ACCEPT_SERIALIZATION(CLASS)                             \
+  typedef void serializable;                                    \
+  template<typename Archive>                                    \
+  friend void siconos_io(Archive&, CLASS&, const unsigned int); \
+  friend class boost::serialization::access
 
 #endif

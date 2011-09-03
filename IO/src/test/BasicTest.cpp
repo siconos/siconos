@@ -1,4 +1,4 @@
-#include "WholeTest.hpp"
+#include "BasicTest.hpp"
 #include "../Register.hpp"
 
 #include <boost/static_assert.hpp>
@@ -10,12 +10,27 @@
 #include <boost/archive/xml_oarchive.hpp>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(WholeTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(BasicTest);
 
-struct point
+class point
 {
+public:
+  virtual void dummy() {};
   int x;
   int y;
+};
+
+class colored_point : public point
+{
+public:
+  virtual void dummy() {};
+  std::string color;
+};
+
+struct label
+{
+  std::string name;
+  double value;
 };
 
 class line
@@ -25,11 +40,10 @@ private:
   point* _p2;
 
   template<class Archive>
-  friend void save(Archive&, line&, const unsigned int);
-  template<class Archive>
-  friend void load(Archive&, line&, const unsigned int);
+  friend void siconos_io(Archive&, line&, const unsigned int);
 
 public:
+  line() {};
   line(point* a, point*b) : _p1(a), _p2(b) {};
 
   const point& p1() const
@@ -53,46 +67,38 @@ public:
 
 
 
-struct colored_point : public point
-{
-  std::string color;
-};
-
-struct label
-{
-  std::string name;
-  double value;
-};
-
-
+BOOST_CLASS_EXPORT_GUID(point, "point")
+BOOST_CLASS_EXPORT_GUID(colored_point, "colored_point")
 SICONOS_IO_REGISTER(point, (x)(y));
+SICONOS_IO_REGISTER_WITH_BASE(colored_point, point, (color));
 
-SICONOS_IO_REGISTER(label, (name)(value));
+SICONOS_IO_REGISTER(label, (name)(value))
 
 SICONOS_IO_REGISTER(line, (_p1)(_p2));
 
-SICONOS_IO_REGISTER_WITH_BASE(colored_point, point, (color));
 
 
 
-void WholeTest::setUp() {};
-void WholeTest::tearDown() {};
+void BasicTest::setUp() {};
+void BasicTest::tearDown() {};
 
-void WholeTest::t0()
+void BasicTest::t0()
 {
-  point p0 = {3, 7};
+  point p0;
+  p0.x = 3.;
+  p0.y = 4.;
 
   point p1;
 
   std::ostringstream os;
   {
     boost::archive::binary_oarchive oa(os);
-    save(oa, p0, 0);
+    oa << BOOST_SERIALIZATION_NVP(p0);
   }
   std::istringstream is(os.str());
   {
     boost::archive::binary_iarchive ia(is);
-    load(ia, p1, 0);
+    ia >> BOOST_SERIALIZATION_NVP(p1);
   }
 
   CPPUNIT_ASSERT((p0.x == p1.x));
@@ -101,7 +107,7 @@ void WholeTest::t0()
 }
 
 
-void WholeTest::t1()
+void BasicTest::t1()
 {
   label l0 = { "l0", 1.0 };
   label l1;
@@ -110,13 +116,13 @@ void WholeTest::t1()
   CPPUNIT_ASSERT(ofs.good());
   {
     boost::archive::xml_oarchive oa(ofs);
-    save(oa, l0, 0);
+    boost::serialization::serialize(oa, l0, 0);
   }
   std::ifstream ifs("t1.xml");
   CPPUNIT_ASSERT(ifs.good());
   {
     boost::archive::xml_iarchive ia(ifs);
-    load(ia, l1, 0);
+    boost::serialization::serialize(ia, l1, 0);
   }
 
   CPPUNIT_ASSERT((l0.name == l1.name));
@@ -124,7 +130,7 @@ void WholeTest::t1()
 
 }
 
-void WholeTest::t2()
+void BasicTest::t2()
 {
 
   colored_point p0, p1;
@@ -136,13 +142,13 @@ void WholeTest::t2()
   CPPUNIT_ASSERT(ofs.good());
   {
     boost::archive::xml_oarchive oa(ofs);
-    save(oa, p0, 0);
+    oa << boost::serialization::make_nvp("colored_point", p0);
   }
   std::ifstream ifs("t2.xml");
   CPPUNIT_ASSERT(ifs.good());
   {
     boost::archive::xml_iarchive ia(ifs);
-    load(ia, p1, 0);
+    ia >> boost::serialization::make_nvp("colored_point", p1);
   }
 
   CPPUNIT_ASSERT((p0.color == p1.color));
@@ -153,29 +159,71 @@ void WholeTest::t2()
 
 
 
-void WholeTest::t3()
+void BasicTest::t3()
 {
-  point p;
 
-  point p1 = { 2, 3};
-  point p2 = { 4, 5};
+  point *p;
 
-  line l0(&p1, &p2);
+  point *pn;
 
-  line l1(&p, &p);
+  p = new colored_point();
+  pn = new colored_point();
+
+  p->x = 1.;
+  p->y = 2.;
+  static_cast<colored_point *>(p)->color = "red";
+
 
   std::ofstream ofs("t3.xml");
   CPPUNIT_ASSERT(ofs.good());
   {
     boost::archive::xml_oarchive oa(ofs);
-    save(oa, l0, 0);
+    oa.register_type(static_cast<colored_point*>(NULL));
+    oa << BOOST_SERIALIZATION_NVP(p);
   }
 
   std::ifstream ifs("t3.xml");
   CPPUNIT_ASSERT(ifs.good());
   {
     boost::archive::xml_iarchive ia(ifs);
-    load(ia, l1, 0);
+    ia.register_type(static_cast<colored_point*>(NULL));
+    ia >> BOOST_SERIALIZATION_NVP(pn);
+  }
+
+}
+
+void BasicTest::t4()
+{
+
+  colored_point p;
+
+  colored_point p1, p2;
+
+  p1.x = 32.33444;
+  p1.y = 45.34434;
+  p2.x = 36.33443;
+  p2.y = 34.34345;
+
+  p1.color = "red";
+  p2.color = "black";
+
+
+
+  line l0(&p1, &p2);
+  line l1(&p, &p);
+
+  std::ofstream ofs("t4.xml");
+  CPPUNIT_ASSERT(ofs.good());
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    boost::serialization::serialize(oa, l0, 0);
+  }
+
+  std::ifstream ifs("t4.xml");
+  CPPUNIT_ASSERT(ifs.good());
+  {
+    boost::archive::xml_iarchive ia(ifs);
+    boost::serialization::serialize(ia, l1, 0);
   }
 
   CPPUNIT_ASSERT((l0.p1().x == l1.p1().x));
@@ -183,6 +231,8 @@ void WholeTest::t3()
 
   CPPUNIT_ASSERT((l0.p2().x == l1.p2().x));
   CPPUNIT_ASSERT((l0.p2().y == l1.p2().y));
+
+  //  CPPUNIT_ASSERT((l0.p2().color == l1.p2().color));
 
 }
 
