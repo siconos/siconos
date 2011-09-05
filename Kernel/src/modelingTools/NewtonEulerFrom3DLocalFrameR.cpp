@@ -24,7 +24,7 @@
 using namespace std;
 //#define NEFC3D_DEBUG
 /*
-  See devNotes.pdf for details.
+  See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
  */
 void NewtonEulerFrom3DLocalFrameR::initComponents()
 {

@@ -199,38 +199,6 @@ void NewtonEulerDS::initRhs(double time)
     //      *_q += *_fL;
   }
 
-  // Copy of Mass into _workMatrix for LU-factorization.
-
-  // bool flag1 = false, flag2 = false;
-  // if( _jacobianqFL )
-  //   {
-  //     // Solve MjacobianX(1,0) = jacobianFL[0]
-  //     computeJacobianqFL(time);
-
-  //     //      _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqFL));
-  //     flag1 = true;
-  //   }
-
-  // if( _jacobianqDotFL )
-  //   {
-  //     // Solve MjacobianX(1,1) = jacobianFL[1]
-  //     computeJacobianqDotFL(time);
-  //     //      _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotFL));
-  //     //      _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
-  //     flag2 = true;
-  //   }
-
-  //   _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
-  //   _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
-
-  //   if(flag1&&flag2)
-  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
-  //   else if(flag1) // flag2 = false
-  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
-  //   else if(flag2) // flag1 = false
-  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
-  //   else
-  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
 }
 
 void NewtonEulerDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -412,7 +380,7 @@ void NewtonEulerDS::computeJacobianvFL(double time)
     SimpleVector ei_Iomega(3);
     SimpleVector omega_Iei(3);
 
-
+    /*See equation of DevNotes.pdf, equation with label eq:NE_nablaFL1*/
     for (int i = 0; i < 3; i++)
     {
       ei.zero();
@@ -560,6 +528,7 @@ void NewtonEulerDS::updateMObjToAbs()
   ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
   ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
   ::boost::math::quaternion<double>    quatBuff;
+  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf, chapter Gradiant computaion, case oif NewtonEuler with quaternion*/
   quatBuff = quatcQ * quatx * quatQ;
   _MObjToAbs->setValue(0, 0, quatBuff.R_component_2());
   _MObjToAbs->setValue(0, 1, quatBuff.R_component_3());

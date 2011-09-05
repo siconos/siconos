@@ -224,6 +224,7 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   /** false because it consists in doing a sum*/
   prod(*lambda, *_jachqT, *data[p0 + level], false);
 }
+/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
 void NewtonEulerR::computeJachqT()
 {
   unsigned int k = 0;
