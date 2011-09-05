@@ -108,8 +108,8 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   btCollisionObject* co = &*ask<ForCollisionObject>(*ds);
   btCollisionWorld* cow = &*ask<ForCollisionWorld>(*Siconos_->spaceFilter());
 
-  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawAabb | btIDebugDraw::DBG_DrawContactPoints);
-  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
+  //  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawAabb | btIDebugDraw::DBG_DrawContactPoints);
+  //  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
 
   //ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawObject(co->getWorldTransform(), co->getCollisionShape(), btVector3(1,1,0));
 
@@ -153,7 +153,7 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
     }
   }
 
-  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
+  //  ask<ForCollisionWorld>(*Siconos_->spaceFilter())->debugDrawWorld();
 
 
 }
