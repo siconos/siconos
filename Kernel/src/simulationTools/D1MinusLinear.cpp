@@ -202,7 +202,7 @@ void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
-    *(d->luW()) = *(d->M());
+    *(d->luW()) = *(d->massMatrix());
     d->luW()->PLUFactorizationInPlace();
   }
   else RuntimeException::selfThrow("D1MinusLinear::computeW(t,ds) - not yet implemented for Dynamical system type: " + dsType);
@@ -284,6 +284,8 @@ double D1MinusLinear::computeResidu()
       residuFree->zero();
       SP::SiconosVector vpred(new SimpleVector(vold->size()));
 
+      SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
+
       // -- LEFT SIDE --
       if (Fext)
       {
@@ -344,7 +346,7 @@ double D1MinusLinear::computeResidu()
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
-      SP::SiconosMatrix Mold = d->M(); // constant mass
+      SP::SiconosMatrix Mold = d->massMatrix(); // constant mass
       SP::SiconosMatrix T = d->T(); // explicit usage of T TODO
 
       // initialize ds->residuFree and predicted right velocity (left limit)
