@@ -63,6 +63,7 @@ The constraint $\mid Q \mid = 1$ in the system HE:
 
 The formulation described above can be done. 
 \subsubsection{Approach using V}
+It consists in building the OSNSP using $CT$ instead of $C$. 
 \begin{equation}
 \label{NE_projV}
 h(q_1) = h(q_0)+\nabla ^t H \delta q
@@ -77,11 +78,13 @@ We are looking for $q_1$ such that:
 \begin{equation}
   q_1-q_0 = \nabla H \Lambda
 \end{equation}
+We have
+\[\delta q=TV, \qquad ^tT\delta q=^tTTV, \qquad(^tTT)^{-1}~^tT\delta q=V\]
 ie
 \begin{equation}
-  ^tT(q_1-q_0)=V= ^tT \nabla H\Lambda
+  h(q_1)=h(q_0)+^t\nabla _q hT(^tTT)^{-1}~^tT\nabla _q h\Lambda
 \end{equation}
 With $C=^t\nabla _q h$ leading to the prolem:
 \begin{equation}
-K \ni h(q_0)+ CT~ ^t (CT)   \Lambda \in K^*
+K \ni h(q_0)+ CT~ (^tTT)^{-1}~ ^t(CT)   \Lambda \in K^*
 \end{equation}
