@@ -25,8 +25,8 @@
   PY_REGISTER(LagrangianScleronomousR);           \
   PY_REGISTER(LagrangianCompliantR);              \
   PY_REGISTER(NewtonEulerR);                      \
-  PY_REGISTER(NewtonEulerRImpact);                \
-  PY_REGISTER(NewtonEulerRFC3D);                  \
+  PY_REGISTER(NewtonEulerFrom1DLocalFrameR);                \
+  PY_REGISTER(NewtonEulerFrom3DLocalFrameR);      \
   PY_REGISTER(KneeJointR)                         \
   PY_REGISTER(PivotJointR)                        \
   PY_REGISTER(PrismaticJointR)                    \
