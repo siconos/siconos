@@ -305,122 +305,122 @@ cmake_setup
 #sudo rm -f /usr/local/bin/ctest
 
 # Stable 
-setup_3_3
+#setup_3_3
 #
-configure_3_3 Numerics Release
-nightly_build_3_3 Numerics Release
-nightly_test Numerics Release
-nightly_submit Numerics Release
-nightly_memcheck Numerics Release
-nightly_submit Numerics Release
-install_1 Numerics Release
-#
-configure_3_3 Kernel Release
-nightly_build_3_3 Kernel Release
-nightly_test Kernel Release
-nightly_submit Kernel Release
-nightly_memcheck Kernel Release
-nightly_submit Kernel Release
-install_1 Kernel Release
-
-# Examples
-configure_3_3 Examples Release
-nightly_build_3_3 Examples Release
-nightly_test Examples Release
-nightly_memcheck Examples Release
-nightly_submit Examples Release
-
-# front-end
-swig_setup
-configure_3_3 Front-End Release
-nightly_build_3_3 Front-End Release
-nightly_test Front-End Release
-nightly_submit Front-End Release
-pack_trunk Front-End Release
-save_packed_1 Front-End Release
-
-# Stable Packages
-pack_3_3 Numerics Release
-save_packed_1 Numerics Release
-
-pack_3_3 Kernel Release
-save_packed_1 Kernel Release
-
-pack_3_3 Examples Release
-save_packed_1 Examples Release
-
-pack_3_3 Front-End Release
-save_packed_1 Front-End Release
-
-# trunk tests
-#setup_trunk
-#configure_trunk Numerics Release
-#nightly_build Numerics Release
+#configure_3_3 Numerics Release
+#nightly_build_3_3 Numerics Release
 #nightly_test Numerics Release
 #nightly_submit Numerics Release
-#case $PIPOL_IMAGE in fedora-core13)
-#        nightly_memcheck Numerics Release
-#        nightly_submit Numerics Release;;
-#esac
+#nightly_memcheck Numerics Release
+#nightly_submit Numerics Release
 #install_1 Numerics Release
 #
-#configure_trunk Kernel Release
-#nightly_build Kernel Release
+#configure_3_3 Kernel Release
+#nightly_build_3_3 Kernel Release
 #nightly_test Kernel Release
 #nightly_submit Kernel Release
-#case $PIPOL_IMAGE in fedora-core13)
-#        nightly_memcheck Kernel Release
-#        nightly_submit Kernel Release;;
-#esac
-#
+#nightly_memcheck Kernel Release
+#nightly_submit Kernel Release
 #install_1 Kernel Release
+
+# Examples
+#configure_3_3 Examples Release
+#nightly_build_3_3 Examples Release
+#nightly_test Examples Release
+#nightly_memcheck Examples Release
+#nightly_submit Examples Release
+
+# front-end
+#swig_setup
+#configure_3_3 Front-End Release
+#nightly_build_3_3 Front-End Release
+#nightly_test Front-End Release
+#nightly_submit Front-End Release
+#pack_trunk Front-End Release
+#save_packed_1 Front-End Release
+
+# Stable Packages
+#pack_3_3 Numerics Release
+#save_packed_1 Numerics Release
+
+#pack_3_3 Kernel Release
+#save_packed_1 Kernel Release
+
+#pack_3_3 Examples Release
+#save_packed_1 Examples Release
+
+#pack_3_3 Front-End Release
+#save_packed_1 Front-End Release
+
+# trunk tests
+setup_trunk
+configure_trunk Numerics Release
+nightly_build Numerics Release
+nightly_test Numerics Release
+nightly_submit Numerics Release
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Numerics Release
+        nightly_submit Numerics Release;;
+esac
+install_1 Numerics Release
+
+configure_trunk Kernel Release
+nightly_build Kernel Release
+nightly_test Kernel Release
+nightly_submit Kernel Release
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Kernel Release
+        nightly_submit Kernel Release;;
+esac
+#
+install_1 Kernel Release
 #
 ## Snapshot packages
-#pack_trunk Numerics Release
-#save_packed_1 Numerics Release
+pack_trunk Numerics Release
+save_packed_1 Numerics Release
 #
-#pack_trunk Kernel Release
-#save_packed_1 Kernel Release
+pack_trunk Kernel Release
+save_packed_1 Kernel Release
 #
 ## Coverage
-#case $PIPOL_IMAGE in ubuntu-lucid)
-#        setup_trunk
-#        configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
-#        nightly_build Numerics Debug
-#        nightly_coverage Numerics Debug
-#        nightly_submit Numerics Debug
+case $PIPOL_IMAGE in ubuntu-lucid)
+        setup_trunk
+        configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+        nightly_build Numerics Debug
+        nightly_coverage Numerics Debug
+        nightly_submit Numerics Debug
 #
-#        setup_trunk
-#        configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
-#        nightly_build Kernel Debug
-#        nightly_coverage Kernel Debug
-#        nightly_submit Kernel Debug
-#        ;;
-#esac
+        setup_trunk
+        configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+        nightly_build Kernel Debug
+        nightly_coverage Kernel Debug
+        nightly_submit Kernel Debug
+        ;;
+esac
 #
 ## Examples
-#rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
-#rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
-#configure_trunk Examples Release
-#nightly_build Examples Release
-#nightly_test Examples Release
-#nightly_submit Examples Release
+rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
+rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
+configure_trunk Examples Release
+nightly_build Examples Release
+nightly_test Examples Release
+nightly_submit Examples Release
 #
-#case $PIPOL_IMAGE in fedora-core13)
-#        nightly_memcheck Examples Release
-#        nightly_submit Examples Release
-#        ;;
-#esac
+case $PIPOL_IMAGE in fedora-core13)
+        nightly_memcheck Examples Release
+        nightly_submit Examples Release
+        ;;
+esac
 #
 #
 ## front-end
-#swig_setup
-#configure_trunk Front-End Debug
-#nightly_build Front-End Debug
-#nightly_test Front-End Debug
-#nightly_submit Front-End Debug
-#pack_trunk Front-End Debug
-#save_packed_1 Front-End Debug
+swig_setup
+configure_trunk Front-End Debug
+nightly_build Front-End Debug
+nightly_test Front-End Debug
+nightly_submit Front-End Debug
+pack_trunk Front-End Debug
+save_packed_1 Front-End Debug
 
 # end
 date
