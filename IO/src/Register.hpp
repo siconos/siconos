@@ -8,6 +8,7 @@
 #include <boost/serialization/nvp.hpp>
 
 #include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
@@ -16,10 +17,6 @@
 #include <boost/graph/adj_list_serialize.hpp>
 
 #include <boost/serialization/export.hpp>
-
-#include <boost/mpl/eval_if.hpp>
-
-#include <boost/typeof/typeof.hpp>
 
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
   ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), object.member)
