@@ -71,9 +71,8 @@ protected:
   */
   typedef void serializable;
   template<typename Archive>
-  friend void save(Archive&, SiconosSet<T, U>&, const unsigned int);
-  template<typename Archive>
-  friend void load(Archive&, SiconosSet<T, U>&, const unsigned int);
+  friend void siconos_io(Archive&, SiconosSet<T, U>&, const unsigned int);
+  friend class boost::serialization::access;
 
 
   /** Pointer to function used in ordering relation */

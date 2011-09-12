@@ -104,6 +104,9 @@ protected:
   */
   ACCEPT_SERIALIZATION(BoundaryCondition);
 
+  /** protected default constructor */
+  BoundaryCondition() {};
+
   /* Indices of the prescribed component of the velocity vector */
   SP::UnsignedIntVector _velocityIndices;
   /* Values of the prescribed component of the velocity vector */

@@ -141,9 +141,8 @@ protected:
   */
   typedef void serializable;
   template<typename Archive>
-  friend void save(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
-  template<typename Archive>
-  friend void load(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
+  friend void siconos_io(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
+  friend class boost::serialization::access;
 
   graph_t g;
 
