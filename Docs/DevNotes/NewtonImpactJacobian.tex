@@ -1,4 +1,4 @@
-\subsection{Gradiant computaion, case oif NewtonEuler with quaternion}
+\subsection{Gradient computation, case of NewtonEuler with quaternion}
 
 In the section, $q$ is the quaternion of the dynamical system.
 
@@ -12,11 +12,15 @@ In the section, $q$ is the quaternion of the dynamical system.
   \label{figCase}
 \end{figure}
 
+The normal vector $N$ is view as a constant.
+\[~\tilde h(q)=P_c(\frac{q}{\|q\|})\]
+\[^t \nabla h(q)(\delta q) = \lim _{e \to 0}\frac{(\tilde h (q+e\delta q)-\tilde h (q)).N}{e}  \]
+
 $\nabla _q h$ consist in computing $P_c(\frac{q+\delta q}{\|q+\delta q\|})-P_c(q)$.
 \[GP(q)=qG_0P_0~^cq\]
 \[GP(\frac{q+\delta q}{\|q+\delta q\|})=(q+\delta q)G_0P_0~^c(q+\delta q)\frac{1}{\|q+\delta q\|^2}\]
 \[=(q+\delta q)~^cqGP(q)q~^c(q+\delta q)\frac{1}{\|q+\delta q\|^2}\]
-\[=(1,0,0,0)+\delta q~^cq)GP(q)(q~^cq+q~^c\delta q)\frac{1}{\|q+\delta q\|^2}\]
+\[=((1,0,0,0)+\delta q~^cq)GP(q)((1,0,0,0)+q~^c\delta q)\frac{1}{\|q+\delta q\|^2}\]
 \[=GP(q)+\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2\frac{1}{\|q+\delta q\|^2}\]
 So, because G is independant of $q$:
 \[P(\frac{q+\delta q}{\|q+\delta q\|})-P(q)=qGP(\frac{q+\delta q}{\|q+\delta q\|})-GP(q)=\delta q~^cqGP(q) + GP(q)q~^c\delta q+0(\delta q)^2 + GP(q)\frac{1}{\|q+\delta q\|^2}\]
@@ -84,6 +88,7 @@ So $jachqt=MN$
   \centering
    \scalebox{0.6}{
   \input{./Figures/SolideContact.pdf_t}
+  %   \input{./Figures/SolideContact.pdf_t}
   }
   \caption{Two objects colliding.}
   \label{figCase}
