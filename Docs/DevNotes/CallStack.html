@@ -16,197 +16,220 @@
 
 <body>
 
-  The goal of this document is to give a global view of the siconos implementation.
+The goal of this document is to give a global view of the timestepping implementation in SICONOS.
 
-  <h2>Global stack call.</h2>
- 
-  <ul>
-    
-    <li>main</li>
-    <ul>
-      <li>TS::computeOneStep</li>
-      <ul>
-	<li>TS::advanceToEvent</li>
-	<ul>
-	  <li>TS::computeInitialResidu</li><ul>
-	    <li>Relation::computegh</li>
-	    <li>ds::updatePlugins (Warning : Used only for the FirstOrderNonLinearDS)</li>
-	    <li>OSI::computeResidu</li><ul>
-	      <li>for all ds, ds::residuFree <-- W(v-vold)-h Fl_k</li>
-	      </ul>
-	    </ul>
-	  <li>TS::prepareNewtonIteration</li>
-	  <ul>
-	    <li>Moreau::computeW</li><ul>
-	      <li>Lagrangian : WMap[ds]<-- M-h*theta C-hh*theta*thetaK </li>
-	      <li>Newton Euler : Error Do Nothing</li>
-	      </ul>
-	    <li>Relation::computeJachg</li>
-	    <li>DS::preparStep</li>
-	    <li>Relation::preparNewtonIteration</li>
-	    do something only for the FirstOrderType2R!
-	  </ul>
-	  <li>TS::computeFreeState</li>
-	  <ul>
-	    <li>Moreau::ComputeFreeState.</li>
-	    <ul>
-	      <li>Compute the velocity free.</li>
-	      Lagrangian : using WMap<br>
-	      NewtonEuler: using ds::luW (Error, it contains only Mass matrix,it miss elements)
-	    </ul>
-	  </ul>
-	  <li>TS::computeOneStepNSProblem</li>
-	  <ul>
-	    <li>OSNSP::compute</li><ul>
-	      <li>OSNSP::Precompute</li>
-	      <li>Numerics::Solver</li>
-	      _z,_w <-- solution
-	      <li>OSNSP::PostCompute</li>
-	      UR::y(ie Interaction::y) <-- _z,_w 
-	      </ul>
-	  </ul>
-	  <li>TS::update</li>
-	  <ul>
-	    <li>TS::updateInput</li>
-	    <ul>
-	      <li>Interaction,Relation::computeInput</li>
-	      compute B*Lambda, the inpute of the DS
-	    </ul>
-	    <li>OSI::updateState</li>
-	     V_{k+1} <-- W^{-1}p + V_free<br>
-	    misaj de q <br>  
-	    NewtonEuler, updateT and update dotq
-	    <li>TS::updateOutput</li><ul>
-	      <li>Interaction,Relation::computeOutput</li>
-	      <li>computation of ydot from qdot and jachq</li>
-	      computeh and sometime computeJachq.
-	      </ul>
-	  </ul>
-	</ul>
-      </ul>
-      <li>TS::nextStep</li>
-      <ul>
-	<li>TS::processEvent</li>
-	<ul>
-	  <li>EventsManager::processEvents</li>
-	  <ul>
-	    <li>EventsManager::OptimizedProcessEvent</li>
-	    <ul>
-	      <li>nextEvent::process(simu)</li>
-	      <ul>
-		<li>Simulation::saveInMemory</li>
-	      </ul>
-	      <li>simulation::updateIndexSets</li>
-	      <li>TD::increment()</li>
-	      set the step size ??
-	      <li>ETD::setTime</li><ul>
-		<li>nextEvent = followingEvent</li>
-		</ul>
-	      <li>EventManager::update</li>
-	    </ul>
-	  </ul>
-	  <li>DS::endStep</li>
-	</ul>
-      </ul>
-    </ul>
-  </ul>
-	<h2>TS::newtonSolve</h2>
+<h1>Global Stack</h1>
 <ul>
-  <li>TS::newtonSolve</li><ul>
-    <li>TS::computeInitialResidu</li>
-    <ul>loop
-      <li>TS::prepareNewtonIteration</li>
-      <li>TS::computeFreeState</li>
-      <li>TS::computeOneStepNSProblem</li>
-      <li>TS::update</li>
-      <li>TS::newtonCheckConvergence</li>
-      <ul>
-	<li>OSI::computeResidu</li>
-      </ul>
-      <li>TS::saveYandLambdaInMemory</li>
-    </ul>
-  </ul>
+	<li>TimeStepping::computeOneStep -> TimeStepping::advanceToEvent -> TimeStepping::NewtonSolve</li>
+	<li>TimeStepping::nextStep</li>
 </ul>
-<h2>TSProj::newtonSolve</h2>
+  
+<h2>TimeStepping::newtonSolve</h2>
+<ul>  
+  	<li>TimeStepping::computeInitialResidu</li>
+  	<li>CASE : LINEAR</li>
+  	<ul>
+  		<li>TimeStepping::prepareNewtonIteration</li>
+     	<li>TimeStepping::computeFreeState</li>
+     	<li>TimeStepping::computeOneStepNSProblem(SICONOS_OSNSP_TimeStepping_VELOCITY)</li>
+     	<li>TimeStepping::(Default)CheckSolverOutput</li>
+     	<li>TimeStepping::update</li>
+     	<li>TimeStepping::saveYandLambdaInMemory</li>
+  	</ul>
+  	<li>CASE : NONLINEAR -> LOOP WITH INDIVIDUAL STEP :</li>
+  	<ul>
+  		<li>TimeStepping::prepareNewtonIteration</li>
+     	<li>TimeStepping::computeFreeState</li>
+     	<li>TimeStepping::computeOneStepNSProblem(SICONOS_OSNSP_TimeStepping_VELOCITY)</li>
+     	<li>TimeStepping::(Default)CheckSolverOutput</li>
+     	<li>TimeStepping::update</li>
+     	<li><strong>TimeStepping:newtonCheckConvergence</strong></li>
+     	<li>TimeStepping::saveYandLambdaInMemory</li>
+  	</ul>
+</ul>
+    
+<h3>TimeStepping::computeInitialResidu</h3>
 <ul>
-  <li>TSProj::newtonSolve</li><ul>
-    <li>TS::newtonSolve</li>
-    <li>R::computeJachq</li>
-    <li>R::computeh</li>
-    <li>TS::computeOneStepNSProblem</li>
-    <li>q normalized</li>
-    <li>update T</li>
-    <li>update dotq</li>
-    <li>TS::updateOutput (in view of updated ydot)</li>
-  </ul>
+	<li>Simulation::getTkp1</li>
+	<span style="padding-left:20px"><font size="-1">advance to t<sub>k+1</sub></font></span>
+	<li>Relation::computeh <em>(virtual)</em> -> Relation::computeOutput</em></li>
+	<span style="padding-left:20px"><font size="-1">compute local gaps for all Relations</font></span>
+	<li>Relation::computeg <em>(virtual)</em> -> Relation::computeInput</li>
+	<span style="padding-left:20px"><font size="-1">compute local forces for all Relations</font></span>
+	<li>DynamicalSystem::updatePlugins</li>
+	<span style="padding-left:20px"><font size="-1">update plugin functions for the DynamicalSystem graph</font></span>
+	<li>OneStepIntegrator::computeResidu <em>(virtual)</em> <strong> WHY / WHERE LATER</strong></li>
+	<span style="padding-left:20px"><font size="-1">compute the <strong>global free residu</strong> DS->residuFree and the <strong>global residu</strong> DS->workFree for all OneStepIntegrators</font></span>
+	<li>Relation::computeResiduY <em>(virtual)</em><strong> WHY / WHERE LATER</strong></li>
+	<span style="padding-left:20px"><font size="-1">compute the <strong>local free residu</strong> for output Relations (gaps) if switched on</font></span>
+</ul>
+	    			
+<h3>TimeStepping::prepareNewtonIteration</h3>
+<ul>
+	<li>Moreau::computeW</li>
+	<span style="padding-left:20px"><font size="-1">compute the iteration matrix only for Moreau OneStepIntegrators <strong>WHY</strong></font></span>
+	<li>Relation::computeJach <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">compute output Jacobians for all Relations</font></span>
+	<li>Relation::computeJacg <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">compute input Jacobians for all Relations</font></span>
+	<li>DynamicalSystem::preparStep</li>
+	<span style="padding-left:20px"><font size="-1">prepare the DynamicalSystem graph : does nothing <strong>WHY</strong></font></span>
+	<li>Relation::preparNewtonIteration</li>
+	<span style="padding-left:20px"><font size="-1">prepare all Relations : does nothing <strong>WHY</strong></font></span>
+	<li>OneStepNonsmoothProblem::setHasBeUpdated</li>
+	<span style="padding-left:20px"><font size="-1">inform all OneStepNonsmoothProblems about changed topology <strong>WHY</strong></font></span>
+</ul>
+	  			
+<h3>TimeStepping::computeFreeState</h3>
+<span style="padding-left:20px">-> OneStepIntegrator::computeFreeState <em>(virtual)</em></span><br/>
+<span style="padding-left:20px"><font size="-1">compute the global free state for all OneStepIntegrators in connected DynamicalSystems in DS->workFree</font></span>
+
+<h3>TimeStepping::computeOneStepNSProblem</h3>
+<span style="padding-left:20px">-> OneStepNonsmoothProblem::compute <em>(virtual)</em></span><br/>
+<span style="padding-left:20px"><font size="-1">solve all OneStepNonsmoothProblems</font></span>	  		
+<ul>
+	<li>OneStepNonsmoothProblem::preCompute <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">calculate input for numerical solution method from local values</font></span>
+	<li>Solve OneStepNonsmoothProblem</li>
+	<span style="padding-left:20px"><font size="-1">interface to numerical solution method</font></span>     				
+	<li>OneStepNonsmoothProblem::postCompute <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">restore local gap and force from numerical solution method output</font></span>
+</ul>
+
+<h3>TimeStepping::(Default)CheckSolverOutput</h3>
+<span style="padding-left:20px"><font size="-1">reaction on numerical solution method flags</font></span>
+			
+<h3>TimeStepping::update</h3>
+<ul>
+	<li>Simulation::updateInput</li>
+	<ul>
+		<li>OneStepIntegrator::resetNonsmoothPart <em>(virtual)</em></li>
+		<span style="padding-left:20px"><font size="-1">set global force to zero for all Interactions</font></span>
+	 	<li>Interaction::computeInput -> Relation::computeInput <em>(virtual)</em></li>
+		<span style="padding-left:20px"><font size="-1">compute global force from local forces for all Interactions</font></span>
+	</ul>
+	<li>OneStepIntegrator::updateState <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">compute new state for all OneStepIntegrators</font></span>
+	<li>TimeStepping::updateWorldFromDS</li>
+	<span style="padding-left:20px"><font size="-1">update connected software, e.g. CAD, with new state</font></span> 				
+	<li>Simulation::updateOutput -> Interaction::computeOutput -> Relation::computeOutput <em>(virtual)</em></li>
+	<span style="padding-left:20px"><font size="-1">compute local gaps from global values for all Interactions</font></span> 
+</ul>
+
+<h3>TimeStepping::saveYandLambdaInMemory</h3>
+<span style="padding-left:20px">-> Interaction::swapInMemory <em>(virtual)</em></span><br/>
+<span style="padding-left:20px">-> Interaction::swapTimeStepInMemory <em>(virtual)</em></span><br/>
+<span style="padding-left:20px"><font size="-1">save local gap and force</font></span>
+      
+<h2>TimeStepping::nextStep</h2>
+<span style="padding-left:20px">-> Simulation::processEvent -> EventsManager::processEvents -> EventsManager::OptimizedProcessEvent</span><br/>
+<ul>
+	<li>TimeDiscretizationEvent::process -> Simulation::saveInMemory</li>
+	<ul>
+		<li>OneStepIntegrator::saveInMemory -> DynamicalSystem::swapInMemory <em>(virtual)</em></li>
+	   <span style="padding-left:20px"><font size="-1">save state and set global force to zero <strong>WHY</strong></font></span>
+	   <li>OneStepNonsmoothProblem::saveInMemory -> Interaction::swapInMemory <em>(virtual)</em></li>
+		<li>OneStepNonsmoothProblem::saveTimeStepInMemory -> Interaction::swapTimeStepInMemory <em>(virtual)</em></li>
+		<span style="padding-left:20px"><font size="-1">save local gap and force <strong>WHY</strong></font></span>
+	</ul>
+	<li>Simulation::updateIndexSets</li>
+	<ul>
+		<li>TimeStepping::updateIndexSet <strong>WHICH</strong></li>
+	   <li>Topology::indexSet::update_vertices_indices</li>
+	   <li>Topology::indexSet::update_edges_indices</li>
+   </ul>
+	<li>TimeDiscretization::increment</li>
+	<li>EventManager::update</li>
+</ul>
+
+<h2>TimeSteppingProj::newtonSolve</h2>
+<ul>
+	<li>TimeSteppingProj::newtonSolve</li>
+	<ul>
+    	<li>TimeStepping::newtonSolve</li>
+    	<li>R::computeJachq</li>
+    	<li>R::computeh</li>
+    	<li>TimeStepping::computeOneStepNSProblem</li>
+    	<li>q normalized</li>
+    	<li>update T</li>
+    	<li>update dotq</li>
+    	<li>TimeStepping::updateOutput (in view of updated ydot)</li>
+  	</ul>
 </ul>
 
 <h2>Building of the numerics matrix.</h2>
-<p>In cuurent version the memory management about the matrices involve the following datas:</p>
+<p>In the current version the memory management of the matrices involves the following data:</p>
 <ul>
-  <li>OSNSP::_M a SP::OSNSMatrix that can be dense or sparseBlock.</li>
-  <li>OSNSP::_M.M1 a siconosMatrix used for dense storage.</li>
-  <li>OSNSP::_M.M2 a BlockCSRMatrix used for sparseBlock.</li>
-  <li>OSNSP::_M.numericsMat a numerics matrices</li>
-  <li>At each edge and vertex is attach the 'unitaryBlock' that is a dense matrix.</li>
+ 	<li>OSNSP::_M a SP::OSNSMatrix that can be dense or sparseBlock.</li>
+  	<li>OSNSP::_M.M1 a siconosMatrix used for dense storage.</li>
+  	<li>OSNSP::_M.M2 a BlockCSRMatrix used for sparseBlock.</li>
+  	<li>OSNSP::_M.numericsMat a numerics matrix.</li>
+  	<li>At each edge and vertex the 'unitaryBlock', i.e. a dense matrix, is attached.</li>
 </ul>
-<p>The dense matrix M1 is build from the block graph by copy. The block matrix M2 is buuilt by copy only the pointer of block.</p>
-<p>If necessary (topo->hasChange and first step of Newton ?) the numerics matrix must re-built. The OSNSP::preCompute manages theses matrices.</p>
+<p>The dense matrix M1 is build from the block graph by copy. The block matrix M2 is built by copy only using the pointers of blocks.</p>
+<p>If necessary (topology->hasChanged and first step of Newton) the numerics matrix must be re-built. The OSNSP::preCompute manages these matrices.</p>
 
 <ul>
-  <li>OSNSP::compute</li><ul>
-    <li>LinearOSNSP::preCompute</li><ul>
-      <li>OSNSP::updateUnitaryBlocks</li><ul>
-	The blocks attach to the graph are built.
-	<li>OSNSP::computeDiagUnitaryBlocks</li>
-	<li>OSNSP::computeUnitaryBlocks</li>
-	</ul>
-      <li>OSNSMatrix_M::fill(indexset)</li><ul>
-	<li>OSNSMatrix::updateSizeAndPositions(dimColumn, indexSet);</li>
-	<li>if dense : memory allocation(M1) and setBlock(copy).</li>
-	<li>if block : build block matrix(M2) and M2->fill(indexSet) set pointer</li>
-	<li>OSNSMatrix::convert</li><ul>
-	  <li>OSNSMatrix::numericsMatrix : build the numericsMatrix OSNSP::_M.numericsMat</li>
-	</ul>
-	
-      </ul>
-      <li>restore prev lambda and Y</li>
-      <li>OSNSP::computeq</li>
-      <ul>
-	
-	<li>OSI->computeFreeOutPut</li>
-	      <ul>
-		<li>Yp=jachqT*Vfree</li>
-		<li>Yp+=e yold</li>
-	      </ul>
-	      
-	<li>q=Yp</li>
-      </ul>
-      </ul>
-    <li>OSNSP::postCompute</li>
-    </ul>
-  </ul>
+  	<li>OSNSP::compute</li>
+  	<ul>
+    	<li>LinearOSNSP::preCompute</li>
+    	<ul>
+      	<li>OSNSP::updateUnitaryBlocks</li>
+      	<ul>
+				The blocks attached to the graph are built.
+				<li>OSNSP::computeDiagUnitaryBlocks</li>
+				<li>OSNSP::computeUnitaryBlocks</li>
+			</ul>
+      	<li>OSNSMatrix_M::fill(indexset)</li>
+      	<ul>
+				<li>OSNSMatrix::updateSizeAndPositions(dimColumn, indexSet);</li>
+				<li>if dense : memory allocation(M1) and setBlock(copy).</li>
+				<li>if block : build block matrix(M2) and M2->fill(indexSet) set pointer</li>
+				<li>OSNSMatrix::convert</li>
+				<ul>
+	  				<li>OSNSMatrix::numericsMatrix : build the numericsMatrix OSNSP::_M.numericsMat</li>
+				</ul>
+			</ul>
+   		<li>restore prev lambda and Y</li>
+   		<li>OSNSP::computeq</li>
+   		<ul>
+				<li>OSI->computeFreeOutPut</li>
+	   		<ul>
+					<li>Yp=jachqT*Vfree</li>
+					<li>Yp+=e yold</li>
+	  			</ul>
+	 			<li>q=Yp</li>
+    		</ul>
+		</ul>
+   	<li>OSNSP::postCompute</li>
+   </ul>
+</ul>
 
 <h2>Case of GenericMechanical Problem:</h2>
 <ul>
-  <li>GMP::updateUnitaryBlocks</li><ul>
-    <li>freeGenericMechanicalProblem: freeGMP of Numerics</li>
-    <li>buildEmptyGenericMechanicalProblem: build empty Numerics problem</li>
-    <li>OSNSP::updateUnitaryBlocks</li><ul>
-      <li>GMP::computeDiagonalUnitaryBlock</li><ul>
-	<li>add the prb in the Numerics structure (GMP)</li>
-	<li>LinearOSNSP::computeDiagonalUnitaryBlock</li><ul>
-	  <li>build and get currentUnitaryBlock from the graph</li>
-	  <li>UR::getLeftUnitaryBlockForDS</li><ul>
-	    <li>(NewtonEuler) R::jachqT (overLoaded for FC3D)</li>
-	    <li>(Lagrangian) R::jachq</li>
-	  </ul>
-	  <li>compute currentUnitaryBlock </li>
+	<li>GMP::updateUnitaryBlocks</li>
+  	<ul>
+   	<li>freeGenericMechanicalProblem: freeGMP of Numerics</li>
+    	<li>buildEmptyGenericMechanicalProblem: build empty Numerics problem</li>
+    	<li>OSNSP::updateUnitaryBlocks</li>
+    	<ul>
+      	<li>GMP::computeDiagonalUnitaryBlock</li>
+      	<ul>
+				<li>add the problem in the Numerics structure (GMP)</li>
+				<li>LinearOSNSP::computeDiagonalUnitaryBlock</li>
+				<ul>
+	  				<li>build and get currentUnitaryBlock from the graph</li>
+	  				<li>UR::getLeftUnitaryBlockForDS</li>
+	  				<ul>
+	    				<li>(NewtonEuler) R::jachqT (overLoaded for FC3D)</li>
+	    				<li>(Lagrangian) R::jachq</li>
+	  				</ul>
+	  				<li>compute currentUnitaryBlock </li>
+				</ul>
+    		</ul>
+      	<li>GMP::computeUnitaryBlock</li>
+  		</ul>
 	</ul>
-      </ul>
-      <li>GMP::computeUnitaryBlock</li>
-    </ul>
-  </ul>
 </ul>
 </body>
 
