@@ -30,6 +30,10 @@ The goal of this document is to give a global view of the timestepping implement
 			<span style="padding-left:20px"><font size="-1">e.g. save data</font></span>
 			<li>DynamicSystem::initialize</li>
 			<li>OneStepIntegrator::initialize</li>
+			<li>TimeStepping::initLevelMax</li>
+			<span style="padding-left:20px"><font size="-1">define number of index sets by Simulation strategy and relative degree of UnitaryRelation</font></span>
+			<li>Topology::indexSetsResize</li>
+			<span style="padding-left:20px"><font size="-1">resizes vector of UnitaryRelationsGraph to include graphs of active UnitaryRelation in specific updateIndexSet method</font></span>			
 			<li>Timestepping::initOSNS</li>
 			<span style="padding-left:20px"><font size="-1">initialize position depending index sets and OSNS</font></span>
 		</ul>
@@ -96,7 +100,7 @@ The goal of this document is to give a global view of the timestepping implement
 <span style="padding-left:20px">-> <font color="#FF0000">OneStepIntegrator</font>::computeFreeState <em>(virtual)</em></span><br/>
 <span style="padding-left:20px"><font size="-1">compute the global free state for all OneStepIntegrators in connected DynamicalSystems in DS->workFree</font></span>
 
-<h3>TimeStepping::computeOneStepNSProblem</h3>
+<h3>Simulation::computeOneStepNSProblem</h3>
 <span style="padding-left:20px">-> OneStepNonsmoothProblem::compute <em>(virtual)</em></span><br/>
 <span style="padding-left:20px"><font size="-1">solve all OneStepNonsmoothProblems</font></span>	  		
 <ul>
