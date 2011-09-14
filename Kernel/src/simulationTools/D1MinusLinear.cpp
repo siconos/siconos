@@ -269,7 +269,9 @@ double D1MinusLinear::computeResidu()
       residuFree->zero();
       SP::SiconosVector vpred(new SimpleVector(vold->size()));
 
+      // introduce calculation of contact forces
       SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
+      cout << simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() << endl;
 
       // -- LEFT SIDE --
       if (Fext)

@@ -178,7 +178,6 @@ public:
    *  \return pointer on the integrator if it is of the right type, NULL otherwise
    */
   static D1MinusLinear* convert(OneStepIntegrator* osi);
-
 };
 
 #endif // D1MINUSLINEAR_H

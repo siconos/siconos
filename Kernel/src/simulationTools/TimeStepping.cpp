@@ -47,6 +47,10 @@ using namespace std;
  */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
+static bool cmp_osi_type_d1minuslinear(SP::OneStepIntegrator osi)
+{
+  return osi->getType() == OSI::D1MINUSLINEAR;
+}
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
@@ -156,8 +160,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
   assert(i != 0 &&   // IndexSets[0] must not be updated in simulation,
          // since it belongs to the Topology.
          "TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
-
-  assert(i == 1);  // yes
 
   assert(topo->indexSet(0));
   assert(topo->indexSet(1));
@@ -348,10 +350,20 @@ void TimeStepping::initLevelMax()
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
 
-  if (_levelMax != 0) // level max is equal to relative degree-1. But for
-    // relative degree 0 case, we keep 0 value for
-    // _levelMax
-    _levelMax--;
+  if (find_if(_allOSI->begin(), _allOSI->end(), cmp_osi_type_d1minuslinear) != _allOSI->end())
+  {
+    // at least one d1minuslinear osi found
+    if (_levelMax == 0)
+      _levelMax++;
+    // like event driven scheme
+  }
+  else
+  {
+    // pure moreau case
+    if (_levelMax != 0)
+      _levelMax--;
+    // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
+  }
 }
 
 void TimeStepping::nextStep()
