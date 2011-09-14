@@ -32,6 +32,7 @@
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
 #include "Moreau.hpp"
+#include "D1MinusLinear.hpp"
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
@@ -486,6 +487,10 @@ void   TimeStepping::prepareNewtonIteration()
     if ((it->second)->getType() == OSI::MOREAU)
     {
       Moreau::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
+    }
+    if ((it->second)->getType() == OSI::D1MINUSLINEAR)
+    {
+      D1MinusLinear::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
     }
     ++it;
   }

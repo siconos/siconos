@@ -34,8 +34,7 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
   OneStepNSProblem *osnsp;
   SP::UnitaryRelation UR;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
-    osnsp(p), UR(UR) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) : osnsp(p), UR(UR) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -54,15 +53,9 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     (*(UR->yp()))(0) +=  e * (*(UR->y_k(osnsp->levelMin())))(0);
   }
 
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
+  void visit(const EqualityConditionNSL& nslaw) {}
 
-  void visit(const MixedComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
+  void visit(const MixedComplementarityConditionNSL& nslaw) {}
 };
 
 // --- constructor from a ds ---
@@ -73,10 +66,7 @@ D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
 }
 
 // --- constructor from a list of ds ---
-D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS):
-  OneStepIntegrator(OSI::D1MINUSLINEAR, newDS)
-{
-}
+D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS): OneStepIntegrator(OSI::D1MINUSLINEAR, newDS) {}
 
 const SimpleMatrix D1MinusLinear::getW(SP::DynamicalSystem ds)
 {
@@ -172,10 +162,7 @@ void D1MinusLinear::initW(double t, SP::DynamicalSystem ds)
     SP::SiconosMatrix W = WMap[ds];
   }
   // Newton Euler Systems
-  else if (dsType == Type::NewtonEulerDS)
-  {
-    ;
-  }
+  else if (dsType == Type::NewtonEulerDS) {}
   else RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - not yet implemented for Dynamical system type: " + dsType);
 }
 
@@ -195,9 +182,7 @@ void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
     *W = *(d->mass());
   }
   // Lagrangian Linear Systems
-  else if (dsType == Type::LagrangianLinearTIDS)
-  {
-  }
+  else if (dsType == Type::LagrangianLinearTIDS) {}
   // Newton Euler Systems
   else if (dsType == Type::NewtonEulerDS)
   {
@@ -535,9 +520,7 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
         else
           RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput(ur,osnsp) - not yet implemented for SICONOS_OSNSP.");
       }
-      if (relationSubType == ScleronomousR)
-      {
-      }
+      if (relationSubType == ScleronomousR) {}
     }
   }
 
