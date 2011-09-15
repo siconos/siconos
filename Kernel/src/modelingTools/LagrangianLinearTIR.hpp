@@ -126,11 +126,11 @@ public:
    */
   void initComponents();
 
-  /** default function to compute h
-   *  \param double : current time
-   */
-  void computeh(double);
-  void computeg(double time);
+  // /** default function to compute h
+  //  *  \param double : current time
+  //  */
+  // void computeh(double);
+  // void computeg(double time);
 
 
   /** default function to compute y

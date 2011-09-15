@@ -178,13 +178,40 @@ void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integ
 void Lsodar::initialize()
 {
   OneStepIntegrator::initialize();
+  // Get initial time
+  double t0 = simulationLink->model()->t0();
   xWork.reset(new BlockVector());
-  DSIterator it;
+  DSIterator itDS;
   string type;
   // initialize xWork with x values of the dynamical systems present in the set.
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    xWork->insertPtr((*it)->x());
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  {
+    // Computatation of the levelMin and the levelMax for _r or _p
 
+    /** \warning the computation of LevelMin ans LevelMax do not depend
+     *  only on Relativedegree but also on the method. This should be fixed.
+     */
+    unsigned int levelMin;
+    unsigned int levelMax;
+    Type::Siconos dsType = Type::value(*(*itDS));
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+
+      if (Type::name(*simulationLink) == "EventDriven")
+      {
+        levelMin = 1;
+        levelMax = 2;
+      }
+      else
+        RuntimeException::selfThrow("Lsodar::initialize - unknown simulation type: " + Type::name(*simulationLink));
+    }
+    else RuntimeException::selfThrow("Lsodar::initialize - not yet implemented for Dynamical system type :" + dsType);
+
+    (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
+
+    xWork->insertPtr((*itDS)->x());
+  }
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 

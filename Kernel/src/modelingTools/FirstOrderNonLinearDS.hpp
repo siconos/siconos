@@ -346,19 +346,23 @@ public:
 
   /** dynamical system initialization function: mainly set memory and
       compute value for initial state values.
-   *  \param string: simulation type
+   *  \param int levelMin for allocation of _r
+   *  \param int levelMax for allocation of _r
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const std::string&, double = 0, unsigned int = 1) ;
+  void initialize(unsigned int, unsigned int,
+                  double = 0, unsigned int = 1) ;
 
   // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
   /** initialize the SiconosMemory objects: reserve memory for i
       vectors in memory and reset all to zero.
+   *  \param int levelMin for allocation of _r
+   *  \param int levelMax for allocation of _r
    *  \param the size of the SiconosMemory (i)
    */
-  void initMemory(unsigned int) ;
+  void initMemory(unsigned int, unsigned int, unsigned int) ;
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,

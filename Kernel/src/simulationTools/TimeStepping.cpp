@@ -324,12 +324,8 @@ void TimeStepping::initOSNS()
     // for degree 0 case where we keep 0.
 
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
-    assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
 
-    _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
-
-    if (_levelMin != 0)
-      _levelMin--;
+    initLevelMin();
 
     // === update all index sets ===
     updateIndexSets();
@@ -341,6 +337,16 @@ void TimeStepping::initOSNS()
       (*itOsns)->initialize(shared_from_this());
     }
   }
+}
+
+void TimeStepping::initLevelMin()
+{
+  assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
+
+  _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
+
+  if (_levelMin != 0)
+    _levelMin--;
 }
 
 void TimeStepping::initLevelMax()
@@ -412,12 +418,27 @@ void TimeStepping::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->computeh(tkp1);
-    (*it)->relation()->computeg(tkp1);
-  }
+
+
+
+  // SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+  // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  // {
+  //   (*it)->relation()->computeh(tkp1);
+  //   (*it)->relation()->computeg(tkp1);
+  // }
+
+
+  double time = model()->currentTime();
+  assert(abs(time - tkp1) < 1e-14);
+
+
+
+
+  updateOutput(0, _levelMax);
+  updateInput(_levelMin);
+
+
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -425,6 +446,7 @@ void TimeStepping::computeInitialResidu()
     dsGraph->bundle(*vi)->updatePlugins(tkp1);
   }
 
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
 
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();

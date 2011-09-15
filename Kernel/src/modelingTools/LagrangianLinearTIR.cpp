@@ -121,14 +121,14 @@ void LagrangianLinearTIR::initComponents()
 
 }
 
-void LagrangianLinearTIR::computeh(double time)
-{
-  computeOutput(time, 0);
-}
-void LagrangianLinearTIR::computeg(double time)
-{
-  computeInput(time, 0);
-}
+// void LagrangianLinearTIR::computeh(double time)
+// {
+//   computeOutput(time, 0);
+// }
+// void LagrangianLinearTIR::computeg(double time)
+// {
+//   computeInput(time, 0);
+// }
 
 void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumber)
 {

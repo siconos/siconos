@@ -153,7 +153,14 @@ protected:
   /** memory of previous velocities of the system */
   SP::SiconosMemory _velocityMemory;
 
-  /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
+  /** "Reaction" due to the non smooth law - The index corresponds to the kinematic
+   * level of the corresponding constraints. It mainly depends on what the simulation
+   * part want to store, but some rules have to be followed. For instance :
+   *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
+   *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
+   *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
+   * in position
+   */
   std::vector<SP::SiconosVector> _p;
 
   /** mass of the system */
@@ -330,10 +337,11 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** allocate memory for p[...] vectors
-   *  \param string: simulation type
+  /** Allocate memory for _p[levelMin] to _p[levelMax] vectors
+   *  \param int : levelMin
+   *  \param int : levelMax
    */
-  void initP(const std::string&);
+  void initP(unsigned int, unsigned int);
 
   /** allocate memory for fL and its jacobians, if required.
    */
@@ -345,11 +353,12 @@ public:
   void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
-   *  \param string: simulation type
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const std::string&, double = 0, unsigned int = 1) ;
+  void initialize(unsigned int, unsigned int, double = 0, unsigned int = 1) ;
 
   // === GETTERS AND SETTERS ===
 
@@ -482,25 +491,25 @@ public:
   // -- p --
 
   /** get p
-   *  \param unsigned int, required level for p, default = 2
+   *  \param unsigned int, required level for p
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector p(unsigned int level = 2) const
+  inline SP::SiconosVector p(unsigned int level) const
   {
     return _p[level];
   }
 
   /** set the value of p to newValue
-   *  \param unsigned int, required level for p, default = 2
+   *  \param unsigned int, required level for p,
    *  \param SiconosVector newValue
    */
-  void setP(const SiconosVector&, unsigned int level = 2);
+  void setP(const SiconosVector&, unsigned int level);
 
   /** set P to pointer newPtr
-   *  \param unsigned int, required level for p, default = 2
+   *  \param unsigned int, required level for p, default
    *  \param SP::SiconosVector newPtr
    */
-  void setPPtr(SP::SiconosVector newPtr, unsigned int level = 2);
+  void setPPtr(SP::SiconosVector newPtr, unsigned int level);
 
   // -- Mass --
 
@@ -917,9 +926,11 @@ public:
   void display() const;
 
   /** initialize the SiconosMemory objects with a positive size.
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int);
+  void initMemory(unsigned int , unsigned int, unsigned int);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,

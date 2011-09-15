@@ -266,6 +266,47 @@ void Moreau::initialize()
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
+
+    // Computatation of the levelMin and the levelMax for _r or _p
+
+    /** \warning the computation of LevelMin ans LevelMax do not depend
+     *  only on Relativedegree but also on the method. This should be fixed.
+     */
+    unsigned int levelMin;
+    unsigned int levelMax;
+    Type::Siconos dsType = Type::value(*(*itDS));
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+
+      if (Type::name(*simulationLink) == "TimeStepping")
+      {
+        levelMin = 1;
+        levelMax = 1 ;
+      }
+      else if (Type::name(*simulationLink) == "TimeSteppingProjectOnConstraints")
+      {
+        levelMin = 0;
+        levelMax = 1 ;
+      }
+      else
+        RuntimeException::selfThrow("Moreau::initialize - unknown simulation type: " + Type::name(*simulationLink));
+    }
+    else if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
+    {
+      if (Type::name(*simulationLink) == "TimeStepping")
+      {
+        levelMin = 0;
+        levelMax = 0;
+      }
+      else
+        RuntimeException::selfThrow("Moreau::initialize - unknown simulation type: " + Type::name(*simulationLink));
+    }
+    else RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + dsType);
+
+    (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
+
+
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
 
@@ -812,7 +853,7 @@ double Moreau::computeResidu()
       *(d->workFree()) = *residuFree; // copy residuFree in Workfree
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
-      *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
+      *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workFree()->display();
       normResidu = d->workFree()->norm2();
@@ -825,7 +866,7 @@ double Moreau::computeResidu()
       // otherwise the complete formulae must be applied, that is
       // ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v + K(q_i+h(1-theta)v_i+h theta v)))
       //                     +hFext_theta     (2)
-      // for v != vi, the formulae is wrong.
+      // for v != vi, the formulae (1) is wrong.
       // in the sequel, only the equation (1) is implemented
 
       // -- Convert the DS into a Lagrangian one.
@@ -940,12 +981,12 @@ double Moreau::computeResidu()
 
       (* d->workFree()) = *residuFree; // copy residuFree in Workfree
 
-      *(d->workFree()) -= *d->p(2); // Compute Residu in Workfree Notation !!
+      *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
 
       //     std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workFree()->display();
 
-      //      *realresiduFree-= *d->p(2);
+      //      *realresiduFree-= *d->p(1);
       //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
       //      realresiduFree->display();
 
@@ -989,7 +1030,7 @@ double Moreau::computeResidu()
       *(d->workFree()) = *residuFree;
       //cout<<"Moreau::computeResidu :\n";
       // residuFree->display();
-      *(d->workFree()) -= *d->p(2);
+      *(d->workFree()) -= *d->p(1);
       normResidu = d->workFree()->norm2();
     }
     else
@@ -1503,7 +1544,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       // get p pointer
-      SP::SiconosVector p = d->p(2);
+      SP::SiconosVector p = d->p(1);
 
       // velocity computation :
       //

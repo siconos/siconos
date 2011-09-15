@@ -143,11 +143,12 @@ public:
   void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute value for initial state values.
-   *  \param string: simulation type
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const std::string&, double = 0, unsigned int = 1) ;
+  void initialize(unsigned int, unsigned int, double = 0, unsigned int = 1) ;
 
   // --- GETTERS AND SETTERS ---
 

@@ -197,9 +197,10 @@ public:
   bool checkDynamicalSystem();
 
   /** allocate memory for p[...] vectors
-   *  \param string: simulation type
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    */
-  void initP(const std::string&);
+  void initP(unsigned int, unsigned int);
 
   /** allocate memory for fL and its jacobians, if required.
    */
@@ -211,11 +212,12 @@ public:
   void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
-   *  \param string: simulation type
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const std::string&, double = 0, unsigned int = 1) ;
+  void initialize(unsigned int,  unsigned int, double = 0, unsigned int = 1) ;
 
   // === GETTERS AND SETTERS ===
 
@@ -477,9 +479,11 @@ public:
   void display() const;
 
   /** initialize the SiconosMemory objects with a positive size.
+   *  \param int levelMin for allocation of _p
+   *  \param int levelMax for allocation of _p
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int);
+  void initMemory(unsigned int, unsigned int, unsigned int);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,

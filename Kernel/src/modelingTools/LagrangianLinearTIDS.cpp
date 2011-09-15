@@ -140,11 +140,11 @@ void LagrangianLinearTIDS::initRhs(double time)
                                  _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
 }
 
-void LagrangianLinearTIDS::initialize(const string& simulationType,
+void LagrangianLinearTIDS::initialize(unsigned int levelMin, unsigned int levelMax,
                                       double time, unsigned int sizeOfMemory)
 {
   // Memory allocation for p[0], p[1], p[2].
-  initP(simulationType);
+  initP(levelMin, levelMax);
 
   // set q and _q[1] to _q0 and velocity0, initialize acceleration.
   *_q[0] = *_q0;
@@ -171,7 +171,7 @@ void LagrangianLinearTIDS::initialize(const string& simulationType,
   checkDynamicalSystem();
 
   // Initialize memory vectors
-  initMemory(sizeOfMemory);
+  initMemory(levelMin, levelMax, sizeOfMemory);
 
   // rhs and its jacobian
   //initRhs(time);

@@ -86,6 +86,7 @@ void LagrangianR::initialize(SP::Interaction inter)
 
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);
+
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     data[q0]->insertPtr(lds->q());
     data[q1]->insertPtr(lds->velocity());
@@ -94,9 +95,14 @@ void LagrangianR::initialize(SP::Interaction inter)
      * is inconsitent. This should be data[p0]->insertPtr( lds->p(0) )
      * if needed (for instance for projection onto the constraints)
      */
-    data[p0]->insertPtr(lds->p(1));
-    data[p1]->insertPtr(lds->p(1));
-    data[p2]->insertPtr(lds->p(2));
+    if (lds->p(0))
+      data[p0]->insertPtr(lds->p(0));
+    if (lds->p(1))
+      data[p1]->insertPtr(lds->p(1));
+    if (lds->p(2))
+      data[p2]->insertPtr(lds->p(2));
+
+
     data[z]->insertPtr(lds->z());
   }
 }

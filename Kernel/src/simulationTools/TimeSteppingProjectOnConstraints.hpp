@@ -37,16 +37,27 @@ class TimeSteppingProjectOnConstraints : public TimeStepping
 {
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(TimeSteppingProjectOnConstraints);
 
   virtual void initOSNS();
-  /*tolerence allowed on the constrain.*/
+
+  /** tolerance for the violation of the equality
+   *  constraints at the  position level.
+   */
   double _constraintTol;
+
+  /** tolerance for the violation of the unilateral
+   *  constraints at the  position level.
+   */
   double _constraintTolUnilateral;
-  /*disabled or enabled projection*/
+
+
+  /** disabled or enabled projection (Debug Projection) */
   unsigned int _doProj;
   unsigned int _doOnlyProj;
+
+
 public:
 
   /** Constructor with the time-discretisation.
@@ -81,6 +92,7 @@ public:
   {
     _doOnlyProj = v;
   }
+
   /** newton algorithm
    * \param double, convergence criterion
    * \param unsigned int: maximum number of Newton steps

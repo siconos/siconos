@@ -101,9 +101,13 @@ void NewtonEulerR::initialize(SP::Interaction inter)
     data[deltaq]->insertPtr(lds->deltaq());
     data[q1]->insertPtr(lds->dotq());
     //    data[q2]->insertPtr( lds->acceleration());
-    data[p0]->insertPtr(lds->p(1));
-    data[p1]->insertPtr(lds->p(1));
-    data[p2]->insertPtr(lds->p(2));
+    if (lds->p(0))
+      data[p0]->insertPtr(lds->p(0));
+    if (lds->p(1))
+      data[p1]->insertPtr(lds->p(1));
+    if (lds->p(2))
+      data[p2]->insertPtr(lds->p(2));
+
     data[z]->insertPtr(lds->z());
     sizeForAllxInDs += lds->p(1)->size();
   }

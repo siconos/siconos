@@ -268,12 +268,7 @@ void EventDriven::initOSNS()
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
-    // At the time, we consider that for all systems, levelMin is
-    // equal to the minimum value of the relative degree
-    _levelMin = model()->nonSmoothDynamicalSystem()
-                ->topology()->minRelativeDegree();
-    if (_levelMin == 0)
-      _levelMin++;
+    initLevelMin();
 
     // === update all index sets ===
     updateIndexSets();
@@ -302,6 +297,19 @@ void EventDriven::initOSNS()
 
   }
 }
+
+
+void EventDriven::initLevelMin()
+{
+  // At the time, we consider that for all systems, levelMin is
+  // equal to the minimum value of the relative degree
+  _levelMin = model()->nonSmoothDynamicalSystem()
+              ->topology()->minRelativeDegree();
+  if (_levelMin == 0)
+    _levelMin++;
+}
+
+
 
 void EventDriven::initLevelMax()
 {

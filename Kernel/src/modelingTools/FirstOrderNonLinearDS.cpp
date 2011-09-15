@@ -301,7 +301,8 @@ void FirstOrderNonLinearDS::updatePlugins(double time)
   computeJacobianfx(time);
 }
 
-void FirstOrderNonLinearDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
+void FirstOrderNonLinearDS::initialize(unsigned int levelMin, unsigned int levelMax,
+                                       double time, unsigned int sizeOfMemory)
 {
   // reset x to x0 and r to zero.
   _r->zero();
@@ -312,24 +313,23 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
     _z.reset(new SimpleVector(1));
 
   // Initialize memory vectors
-  initMemory(sizeOfMemory);
+  initMemory(levelMin, levelMax, sizeOfMemory);
 
   updatePlugins(time);
   if (_f)
     *_fold = *_f;
 
-  if (simulationType == "EventDriven")
-  {
-    // Rhs and its jacobian ==> the right is to put in initOSNA of EventDriven
-    initRhs(time);
-  }
+  //   if (simulationType == "EventDriven"){
+  //     // Rhs and its jacobian ==> the right is to put in initOSNA of EventDriven
+  //     initRhs(time);
+  //   }
 }
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void FirstOrderNonLinearDS::initMemory(unsigned int steps)
+void FirstOrderNonLinearDS::initMemory(unsigned int levelMin, unsigned int levelMax, unsigned int steps)
 {
-  DynamicalSystem::initMemory(steps);
+  DynamicalSystem::initMemory(levelMin, levelMax, steps);
 
   if (steps == 0)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;

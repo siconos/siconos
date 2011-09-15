@@ -154,6 +154,9 @@ protected:
    */
   virtual void initOSNS() = 0;
 
+  /** compute LevelMin */
+  virtual void initLevelMin() = 0;
+
   /** compute LevelMax */
   virtual void initLevelMax() = 0;
 

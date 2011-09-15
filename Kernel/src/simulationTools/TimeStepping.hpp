@@ -51,6 +51,9 @@ private:
    */
   TimeStepping() {};
 
+  /** compute LevelMin */
+  void initLevelMin();
+
   /** compute LevelMax */
   void initLevelMax();
 

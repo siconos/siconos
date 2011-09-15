@@ -280,8 +280,13 @@ void DynamicalSystem::update(double time)
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void DynamicalSystem::initMemory(unsigned int steps)
+void DynamicalSystem::initMemory(unsigned int levelMin, unsigned int levelMax,
+                                 unsigned int steps)
 {
+
+  /** \warning  V.A. Should use the levelMin and levelMax for _r
+   */
+
   if (steps == 0)
     cout << "Warning : initMemory with size equal to zero" << endl;
   else

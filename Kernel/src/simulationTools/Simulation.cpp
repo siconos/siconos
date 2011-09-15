@@ -240,8 +240,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
            itds != (*itosi)->dynamicalSystems()->end();
            ++itds)
       {
-        (*itds)->initialize(Type::name(*shared_from_this()), model()->t0(),
-                            (*itosi)->getSizeMem());
         addInOSIMap(*itds, *itosi);
       }
 

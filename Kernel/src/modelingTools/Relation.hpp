@@ -393,7 +393,7 @@ public:
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible
-   *  jacobian => i = 0 is the default value .
+   *  jacobian => i = 0 is the default value x.
    */
   virtual void computeJacglambda(double)
   {

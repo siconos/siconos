@@ -134,8 +134,39 @@ void D1MinusLinear::initialize()
   double t0 = simulationLink->model()->t0();
 
   ConstDSIterator itDS;
+
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
+
+    // Computatation of the levelMin and the levelMax for _r or _p
+
+    /** \warning the computation of LevelMin ans LevelMax do not depend
+     *  only on Relativedegree but also on the method. This should be fixed.
+     */
+    unsigned int levelMin;
+    unsigned int levelMax;
+    Type::Siconos dsType = Type::value(*(*itDS));
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+
+      if (Type::name(*simulationLink) == "TimeStepping")
+      {
+        levelMin = 1;
+        levelMax = 2 ;
+      }
+      else if (Type::name(*simulationLink) == "TimeSteppingProjectOnConstraints")
+      {
+        RuntimeException::selfThrow("D1MinusLinear::initialize -  simulation type: " + Type::name(*simulationLink) + "not yet implemented");
+      }
+      else
+        RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: " + Type::name(*simulationLink));
+    }
+    else RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + dsType);
+
+
+    (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
+
     initW(t0, *itDS);
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
   }
@@ -248,7 +279,7 @@ double D1MinusLinear::computeResidu()
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(1)); // subtract nonsmooth reaction on impulse level
     }
     // Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -323,7 +354,7 @@ double D1MinusLinear::computeResidu()
       }
 
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(1)); // subtract nonsmooth reaction on impulse level
     }
     // Newton Euler Systems
     else if (dsType == Type::NewtonEulerDS)
@@ -365,7 +396,7 @@ double D1MinusLinear::computeResidu()
       d->updateT();
 
       *(d->workFree()) = *residuFree; // copy residuFree in workFree
-      *(d->workFree()) -= *(d->p(2)); // subtract nonsmooth reaction on impulse level
+      *(d->workFree()) -= *(d->p(1)); // subtract nonsmooth reaction on impulse level
     }
     else
       RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not yet implemented for Dynamical system type: " + dsType);
