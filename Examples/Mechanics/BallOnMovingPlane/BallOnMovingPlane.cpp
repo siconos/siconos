@@ -170,10 +170,10 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(2);
+    SP::SiconosVector p = ball->p(1);
     SP::SiconosVector qplane = movingplane->q();
     SP::SiconosVector vplane = movingplane->velocity();
-    SP::SiconosVector pplane = movingplane->p(2);
+    SP::SiconosVector pplane = movingplane->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
     SP::SiconosVector reaction = movingplane->reactionToBoundaryConditions();
 

@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = beam->q();
     SP::SiconosVector v = beam->velocity();
-    SP::SiconosVector p = beam->p(2);
+    SP::SiconosVector p = beam->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
 
     dataPlot(0, 0) = impactingBeam->t0();

@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
                                (oscillator->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     SP::SiconosVector q = oscillo->q();
     SP::SiconosVector v = oscillo->velocity();
-    SP::SiconosVector p = oscillo->p(2);
+    SP::SiconosVector p = oscillo->p(1);
 
     dataPlot(k, 0) = t0;
     dataPlot(0, 1) = (*q)(0);

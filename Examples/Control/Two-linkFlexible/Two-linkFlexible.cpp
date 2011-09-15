@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = arm->q();
     SP::SiconosVector v = arm->velocity();
-    SP::SiconosVector p = arm->p(2);
+    SP::SiconosVector p = arm->p(1);
     // EventsManager * eventsManager = s->eventsManager();
 
     dataPlot(k, 0) =  Manipulator->t0();

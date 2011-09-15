@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(2);
+    SP::SiconosVector p = ball->p(1);
 
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
