@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 
       q = yoyo->q();
       v = yoyo->velocity();
-      p = yoyo->p();
+      p = yoyo->p(1);
       lambda = inter->lambda(1);
 
 
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
       q = yoyo->q();
       v = yoyo->velocity();
-      p = yoyo->p();
+      p = yoyo->p(1);
       lambda = inter->lambda(1);
 
       while (k < N)
