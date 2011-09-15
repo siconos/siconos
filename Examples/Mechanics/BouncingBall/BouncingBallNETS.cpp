@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(2);
+    SP::SiconosVector p = ball->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
 
     dataPlot(0, 0) = bouncingBall->t0();
