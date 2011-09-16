@@ -137,7 +137,6 @@ void D1MinusLinear::initialize()
 
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-
     // Computatation of the levelMin and the levelMax for _r or _p
 
     /** \warning the computation of LevelMin ans LevelMax do not depend
@@ -149,15 +148,15 @@ void D1MinusLinear::initialize()
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
-      //if(Type::name(*simulationLink)=="TimeSteppingD1Minus")
-      //{
-      levelMin = 1;
-      levelMax = 2 ;
-      //}
-      //else
-      //  RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: "+ Type::name(*simulationLink));
+      if (Type::name(*simulationLink) == "TimeSteppingD1Minus")
+      {
+        levelMin = 1;
+        levelMax = 2 ;
+      }
+      else
+        RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: " + Type::name(*simulationLink));
     }
-    else RuntimeException::selfThrow("D1MinusLinear::initialize - not yet implemented for DynamicalSystem type :" + dsType);
+    else RuntimeException::selfThrow("D1MinusLinear::initialize - not yet implemented for DynamicalSystem type: " + dsType);
 
 
     (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
@@ -297,7 +296,6 @@ double D1MinusLinear::computeResidu()
 
       // introduce calculation of contact forces
       SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
-      cout << simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() << endl;
 
       // -- LEFT SIDE --
       if (Fext)
@@ -510,11 +508,11 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
       coord[5] = C->size(1);
       subprod(*C, *Xfree, *Yp, coord, true);
     }
-
     if (relationType == Lagrangian)
     {
       C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
       SP::SiconosMatrix C2 = mainInteraction->relation()->C();
+
       if (C)
       {
         assert(Xfree);
@@ -525,6 +523,7 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
         coord[5] = C->size(1);
         subprod(*C, *Xfree, *Yp, coord, true);
       }
+
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
       ID->eye();
 

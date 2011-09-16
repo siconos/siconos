@@ -19,7 +19,6 @@
 
 #include "TimeSteppingD1Minus.hpp"
 #include "SimulationXML.hpp"
-#include "OneStepNSProblemXML.hpp"
 #include "Topology.hpp"
 #include "LCP.hpp"
 #include "Relay.hpp"
@@ -38,19 +37,6 @@
 
 using namespace std;
 
-/** Pointer to function, used to set the behavior of simulation when
-  ns solver failed.  If equal to null, use DefaultCheckSolverOutput
-  else (set with setCheckSolverFunction) call the pointer below).
-  Note FP: (temporary) bad method to set checkSolverOutput but it
-  works ... It may be better to use plug-in?
-  */
-static CheckSolverFPtr checkSolverOutput = NULL;
-
-static bool cmp_osi_type_d1minuslinear(SP::OneStepIntegrator osi)
-{
-  return osi->getType() == OSI::D1MINUSLINEAR;
-}
-
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb)
@@ -63,7 +49,6 @@ TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td,
   if (osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   if (osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
-
 }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb)
@@ -80,42 +65,10 @@ TimeSteppingD1Minus::~TimeSteppingD1Minus()
 {
 }
 
-bool TimeSteppingD1Minus::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  double h = timeStep();
-  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
-  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-  DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
-  assert(!isnan(y));
-  if (y > 0)
-    DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
-  return (y > 0);
-}
-
-bool TimeSteppingD1Minus::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  double h = timeStep();
-  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
-  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-  DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
-  assert(!isnan(y));
-  if (y <= 0)
-    DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
-  return (y <= 0);
-}
-
 void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
   // To update IndexSet i: add or remove UnitaryRelations from
   // this set, depending on y values.
-  // boost::default_color_type is used to organize update in UnitaryRelationsGraph:
-  // - white_color : undiscovered vertex (UnitaryRelation)
-  // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
-  // - black_color : discovered vertex (UnitaryRelation) together with the descendants
-  // Originally this function was only evaluated for i=1 (OSI::MOREAU), it is re-arranged
-  // for being available on arbitrary kinematic levels.
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -131,106 +84,85 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0); // (ALL UnitaryRelations : formula (8.30) of Acary2008)
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // (CLOSED UnitaryRelations : formula (8.31) of Acary2008)
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0); // ALL UnitaryRelations : formula (8.30) of Acary2008
+  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // ACTIVE UnitaryRelations : formula (8.31) of Acary2008
+  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2); // STAYING ACTIVE UnitaryRelations : formula (8.32) of Acary2008
   assert(indexSet0);
   assert(indexSet1);
+  assert(indexSet2);
 
-  topo->setHasChanged(false); // WHY
+  topo->setHasChanged(false); // TODO NOETIG?
 
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
 
-  // Check indexSet1
-  UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
-  boost::tie(ui1, ui1end) = indexSet1->vertices();
+  UnitaryRelationsGraph::VIterator uipend, uip;
 
-  //Remove interactions from the indexSet1
-  for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+  for (tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
-
-    cout << "v1=" << *v1next << endl;
-    cout << "ui1=" << *ui1 << endl;
-    cout << "ui1end=" << *ui1end << endl;
-    ++v1next;
-
-    SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
-    if (indexSet0->is_vertex(ur1))
+    SP::UnitaryRelation urp = indexSet0->bundle(*uip);
+    if (i == 1) // ACTIVE?
     {
-      UnitaryRelationsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(ur1);
+      double y = urp->getYRef(0); // position
 
-      assert((indexSet0->color(ur1_descr0) == boost::white_color));
-
-      indexSet0->color(ur1_descr0) = boost::gray_color;
-      if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
+      if (!indexSet1->is_vertex(urp))
       {
-        if (predictorDeactivate(ur1, i))
+        if (y <= 0.)
         {
-          // Unitary relation is not active
-          // ui1 becomes invalid
-          indexSet0->color(ur1_descr0) = boost::black_color;
-          indexSet1->remove_vertex(ur1);
-          ur1->lambda(1)->zero();
+          // if UnitaryRelation has not been active in the previous calculation and now becomes active
+          indexSet1->copy_vertex(urp, *indexSet0);
           topo->setHasChanged(true);
         }
       }
-    }
-    else
-    {
-      // UnitaryRelation is not in indexSet0 anymore.
-      // ui1 becomes invalid
-      indexSet1->remove_vertex(ur1);
-      topo->setHasChanged(true);
-    }
-  }
-  cout << "SEPP" << endl;
-
-  // indexSet0\indexSet1 scan
-  UnitaryRelationsGraph::VIterator ui0, ui0end;
-  //Add interaction in indexSet1
-  for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
-  {
-    if (indexSet0->color(*ui0) == boost::black_color)
-    {
-      // reset
-      indexSet0->color(*ui0) = boost::white_color ;
-    }
-    else
-    {
-      if (indexSet0->color(*ui0) == boost::gray_color)
-      {
-        // reset
-        indexSet0->color(*ui0) = boost::white_color;
-
-        assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
-        /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-          Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
-          });*/
-      }
       else
       {
-        assert(indexSet0->color(*ui0) == boost::white_color);
-
-        SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
-        assert(!indexSet1->is_vertex(ur0));
-        if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
-          if (predictorActivate(ur0, i))
-          {
-            assert(!indexSet1->is_vertex(ur0));
-
-            // vertex and edges insertion in indexSet1
-            indexSet1->copy_vertex(ur0, *indexSet0);
-            topo->setHasChanged(true);
-            assert(indexSet1->is_vertex(ur0));
-          }
+        if (y > 0.)
+        {
+          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
+          indexSet1->remove_vertex(urp);
+          topo->setHasChanged(true);
+          urp->lambda(1)->zero(); // TODO WAS ZU NULL SETZEN?
+        }
       }
     }
+    //else if(i == 2) // STAYING ACTIVE
+    //{
+    //  if(indexSet1->is_vertex(urp)) // if UnitaryRelation is active
+    //  {
+    //    double y = urp->getYRef(1); // velocity
+
+    //    if(!indexSet2->is_vertex(urp))
+    //    {
+    //      if(y <= 0.)
+    //      { // if UnitaryRelation has not been staying active in the previous calculation and now becomes staying active
+    //        indexSet2->copy_vertex(urp, *indexSet0);
+    //        topo->setHasChanged(true);
+    //      }
+    //    }
+    //    else
+    //    {
+    //      if(y > 0.)
+    //      { // if UnitaryRelation has been staying active in the previous calculation and now does not stay active
+    //        indexSet2->remove_vertex(urp);
+    //        topo->setHasChanged(true);
+    //        urp->lambda(2)->zero(); // TODO WAS ZU NULL SETZEN?
+    //      }
+    //    }
+    //  }
+    //  else
+    //  {
+    //    if(indexSet2->is_vertex(urp))
+    //    { // if UnitaryRelation is in-active and has been staying active in previous calculation
+    //      indexSet2->remove_vertex(urp);
+    //      topo->setHasChanged(true);
+    //      urp->lambda(2)->zero(); // TODO WAS ZU NULL SETZEN?
+    //    }
+    //  }
+    //}
+    //else
+    //  RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
   }
-
-  assert(indexSet1->size() <= indexSet0->size());
-
-  DEBUG_PRINTF("update indexSets end : indexSet0 size : %d\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
 }
 
 void TimeSteppingD1Minus::initOSNS()
@@ -263,18 +195,10 @@ void TimeSteppingD1Minus::initOSNS()
     }
   }
 
-
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
     // built.
   {
-    //if (_allNSProblems->size()>1)
-    //  RuntimeException::selfThrow("TimeSteppingD1Minus::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
-
-    // At the time, we consider that for all systems, levelMin is
-    // equal to the minimum value of the relative degree - 1 except
-    // for degree 0 case where we keep 0.
-
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
 
     initLevelMin();
@@ -308,20 +232,9 @@ void TimeSteppingD1Minus::initLevelMax()
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
 
-  if (find_if(_allOSI->begin(), _allOSI->end(), cmp_osi_type_d1minuslinear) != _allOSI->end())
-  {
-    // at least one d1minuslinear osi found
-    if (_levelMax == 0)
-      _levelMax++;
-    // like event driven scheme
-  }
-  else
-  {
-    // pure moreau case
-    if (_levelMax != 0)
-      _levelMax--;
-    // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
-  }
+  if (_levelMax == 0)
+    _levelMax++;
+  // like event driven scheme
 }
 
 void TimeSteppingD1Minus::nextStep()
@@ -337,7 +250,6 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
     updateInput(levelInput);
 
   // 2 - compute state for each dynamical system
-
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
@@ -365,32 +277,16 @@ void TimeSteppingD1Minus::computeOneStep()
   advanceToEvent();
 }
 
-
 void TimeSteppingD1Minus::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
 
-
-
-  // SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  // {
-  //   (*it)->relation()->computeh(tkp1);
-  //   (*it)->relation()->computeg(tkp1);
-  // }
-
-
   double time = model()->currentTime();
   assert(abs(time - tkp1) < 1e-14);
 
-
-
-
   updateOutput(0, _levelMax);
   updateInput(_levelMin);
-
-
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -407,8 +303,6 @@ void TimeSteppingD1Minus::computeInitialResidu()
     {
       (*it)->relation()->computeResiduY(tkp1);
     }
-
-  //  cout<<"END computeInitialResidu"<<endl;
 }
 
 void TimeSteppingD1Minus::run()
@@ -420,15 +314,6 @@ void TimeSteppingD1Minus::run()
   while (_eventsManager->hasNextEvent())
   {
 
-    //  if (_newtonOptions=="linear" || )
-    //       advanceToEvent();
-
-    //     else if (_newtonOptions=="Newton")
-    //       newtonSolve(criterion,maxIter);
-
-    //     else
-    //       RuntimeException::selfThrow("TimeSteppingD1Minus::run(opt) failed. Unknow simulation option: "+opt);
-
     advanceToEvent();
 
     _eventsManager->processEvents();
@@ -439,34 +324,13 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
-  //   computeInitialResidu();
-  //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
-  //   prepareNewtonIteration();
-  //   // solve ...
-  //   computeFreeState();
-  //   int info = 0;
-  //   if (!_allNSProblems->empty())
-  //     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-  //   // Check output from solver (convergence or not ...)
-  //   if (!checkSolverOutput)
-  //     DefaultCheckSolverOutput(info);
-  //   else
-  //     checkSolverOutput(info, this);
-  //   // Update
-  //   update(_levelMin);
-
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
-
-
 }
 
 /*update of the nabla */
 /*discretisation of the Interactions */
 void   TimeSteppingD1Minus::prepareNewtonIteration()
 {
-  //  cout << "update the operators" <<endl ;
-
   DSOSIConstIterator it = _osiMap.begin();
   while (it != _osiMap.end())
   {
@@ -487,7 +351,6 @@ void   TimeSteppingD1Minus::prepareNewtonIteration()
     (*it)->relation()->computeJach(getTkp1());
     (*it)->relation()->computeJacg(getTkp1());
   }
-
 
   /*reset to zero the ds buffers*/
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -526,7 +389,6 @@ void TimeSteppingD1Minus::newtonSolve(double criterion, unsigned int maxStep)
   bool isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
-  //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   computeInitialResidu();
 
@@ -539,14 +401,9 @@ void TimeSteppingD1Minus::newtonSolve(double criterion, unsigned int maxStep)
     if (!_allNSProblems->empty())
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
-    if (!checkSolverOutput)
-      DefaultCheckSolverOutput(info);
-    else
-      checkSolverOutput(info, this);
+    DefaultCheckSolverOutput(info);
 
     update(_levelMin);
-
-    //isNewtonConverge = newtonCheckConvergence(criterion);
 
     saveYandLambdaInMemory();
   }
@@ -565,10 +422,7 @@ void TimeSteppingD1Minus::newtonSolve(double criterion, unsigned int maxStep)
       if (info)
         cout << "info!" << endl;
       // Check output from solver (convergence or not ...)
-      if (!checkSolverOutput)
-        DefaultCheckSolverOutput(info);
-      else
-        checkSolverOutput(info, this);
+      DefaultCheckSolverOutput(info);
 
       update(_levelMin);
       isNewtonConverge = newtonCheckConvergence(criterion);
@@ -617,9 +471,6 @@ bool TimeSteppingD1Minus::newtonCheckConvergence(double criterion)
     }
   }
 
-
-
-
   if (_computeResiduY)
   {
     //check residuy.
@@ -658,7 +509,6 @@ bool TimeSteppingD1Minus::newtonCheckConvergence(double criterion)
         //break;
       }
     }
-
   }
 
   return(checkConvergence);
@@ -677,33 +527,5 @@ void TimeSteppingD1Minus::DefaultCheckSolverOutput(int info)
   if (info != 0)
   {
     cout << "TimeSteppingD1Minus::check non smooth solver output warning: output message from solver is equal to " << info << endl;
-    //       cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
-    /*      if(info == 1)
-            cout <<" reach max iterations number with solver " << solverName << endl;
-            else if (info == 2)
-            {
-            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-            RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
-            else if (solverName == "QP" || solverName == "NSQP" )
-            RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
-            else if (solverName == "Latin")
-            RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
-            }
-            else if (info == 3 && solverName == "CPG")
-            cout << "pWp null in solver CPG" << endl;
-            else if (info == 3 && solverName == "Latin")
-            RuntimeException::selfThrow("Null diagonal term with solver Latin");
-            else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-            RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
-            else
-            RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
-            */
   }
-}
-
-void TimeSteppingD1Minus::setCheckSolverFunction(CheckSolverFPtr newF)
-{
-  checkSolverOutput = newF;
 }

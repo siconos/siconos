@@ -25,7 +25,6 @@
 #define TIMESTEPPINGD1MINUS_H
 
 #include "Simulation.hpp"
-
 #include "SiconosPointers.hpp"
 
 /** type of function used to post-treat output info from solver. */
@@ -48,13 +47,10 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 class TimeSteppingD1Minus : public Simulation
 {
 private:
-  /** serialization hooks
-  */
+  /** serialization hooks */
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
-
-  /** Default Constructor
-  */
+  /** Default Constructor */
   TimeSteppingD1Minus() {};
 
   /** compute LevelMin */
@@ -91,38 +87,34 @@ private:
   /** Maximum Residual for the input of the relation */
   double _newtonResiduRMax;
 
-
-  /** unsigned int  _newtonOptions
+  /** unsigned int _newtonOptions
    *  option in the Newon iteration
    *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
    * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
    */
   unsigned int _newtonOptions;
+
 protected:
-  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem.
-  */
+  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem. */
   virtual void initOSNS();
 public:
 
   /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model
-   *  that owns this simulation)
-   \param a one step integrator (default none)
-   \param a one step non smooth problem (default none)
+   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   *  \param a one step integrator (default none)
+   *  \param a one step non smooth problem (default none)
    */
   TimeSteppingD1Minus(SP::TimeDiscretisation,
                       SP::OneStepIntegrator = SP::OneStepIntegrator(),
                       SP::OneStepNSProblem = SP::OneStepNSProblem());
 
   /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model
-   *  that owns this simulation)
-   \param number of non smooth problem
+   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   *  \param number of non smooth problem
    */
   TimeSteppingD1Minus(SP::TimeDiscretisation, int nb);
 
-  /** Destructor.
-  */
+  /** Destructor. */
   ~TimeSteppingD1Minus();
 
   /* type name because parent class needs it */
@@ -131,30 +123,10 @@ public:
     return Type::name(*this);
   };
 
-  /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
-   *  \param a pointer to OneStepNSProblem
-
-   void insertNonSmoothProblem(SP::OneStepNSProblem);
-   */
-
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *  \param unsigned int: the number of the set to be updated
    */
   void updateIndexSet(unsigned int);
-
-  /** Used by the updateIndexSet function in order to deactivate SP::UnitaryRelation.
-   * \param SP::UnitaryRelation: SP::UnitaryRelation to be activated.
-   * \param unsigned int : number of the set to be updated.
-   * \return true iff SP::UnitaryRelation must be deactivated.
-   */
-  virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
-
-  /** Used by the updateIndexSet function in order to activate SP::UnitaryRelation.
-   * \param SP::UnitaryRelation: SP::UnitaryRelation to be deactivated.
-   * \param unsigned int : number of the set to be updated.
-   * \return true iff SP::UnitaryRelation must be activated.
-   */
-  virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   void nextStep();
@@ -176,7 +148,7 @@ public:
   */
   void computeOneStep();
 
-  /** newton algorithm
+  /** Newton algorithm
    * \param double, convergence criterion
    * \param unsigned int: maximum number of Newton steps
    */
@@ -192,7 +164,6 @@ public:
 
   /** compute initial residu
    * It computes the initial residu to start the newton algorithm.
-   *
    */
   void computeInitialResidu();
 
@@ -204,7 +175,7 @@ public:
    */
   bool newtonCheckConvergence(double);
 
-  /*save y_k^p, the current Newton iteration*/
+  /** save y_k^p, the current Newton iteration*/
   void saveYandLambdaInMemory();
 
   /** run the simulation, from t0 to T
@@ -239,7 +210,6 @@ public:
   {
     return _computeResiduY;
   };
-
 
   /** To specify if the input interaction residu must be computed.
    *  \param: a bool
@@ -329,24 +299,12 @@ public:
 
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
+  virtual void updateWorldFromDS() {};
 
-
-
-  /** visitors hook
-  */
+  /** visitors hook */
   ACCEPT_STD_VISITORS();
-
 };
 
 DEFINE_SPTR(TimeSteppingD1Minus);
 
 #endif // TIMESTEPPINGD1MINUS_H
-
-
-
-
-
