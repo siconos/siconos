@@ -232,7 +232,8 @@ void BasicTest::t4()
   CPPUNIT_ASSERT((l0.p2().x == l1.p2().x));
   CPPUNIT_ASSERT((l0.p2().y == l1.p2().y));
 
-  //  CPPUNIT_ASSERT((l0.p2().color == l1.p2().color));
+  CPPUNIT_ASSERT((static_cast<const colored_point*>(&l0.p2())->color ==
+                  static_cast<const colored_point*>(&l1.p2())->color));
 
 }
 

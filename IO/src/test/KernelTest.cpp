@@ -1,3 +1,8 @@
+#define  BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR
+#include <boost/numeric/ublas/vector.hpp>
+
+
+
 #include "KernelTest.hpp"
 #include "../Register.hpp"
 
@@ -542,11 +547,89 @@ SICONOS_IO_REGISTER(SystemData, (upper_block)(lower_block)(upper_blockProj)(lowe
 
 
 // need object<int>, ,object<double> etc.
-//SICONOS_IO_REGISTER(_SolverOptions,(solverId)(isSet)(iSize)(iparam)(dSize)(dparam)(filterOn)(dWork)(iWork)(numberOfInternalSolvers)(internalSolvers));
 
-//SICONOS_IO_REGISTER(NumericsOptions,(verboseMode));
 
-//SICONOS_IO_REGISTER(NumericsMatrix,(storageType)(size0)(size1)(matrix0)(matrix1));
+
+SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
+
+SICONOS_IO_REGISTER(NumericsMatrix, (storageType)(size0)(size1)(matrix0)(matrix1));
+
+struct SaveCase
+{
+  typedef SaveCase type;
+
+  void init(_SolverOptions& v)
+  {
+  }
+};
+
+struct LoadCase
+{
+  typedef LoadCase type;
+
+  void init(_SolverOptions& v)
+  {
+    v.iparam = (int *) malloc(v.iSize * sizeof(int));
+    v.dparam = (double *) malloc(v.dSize * sizeof(double));
+  }
+};
+
+template <class Archive>
+void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
+{
+  /* bad, why? */
+  /* typedef typename boost::mpl::eval_if<typename Archive::is_saving,
+     SaveCase, LoadCase>::type Allocator; ... */
+
+  /* serialization is missing in shallow adatator */
+  /*  boost::numeric::ublas::vector<int,boost::numeric::ublas::shallow_array_adaptor<int> >
+      iparam(v.iSize,boost::numeric::ublas::shallow_array_adaptor<int>(v.iSize,v.iparam));
+
+    boost::numeric::ublas::vector<double,boost::numeric::ublas::shallow_array_adaptor<double> >
+    dparam(v.dSize,boost::numeric::ublas::shallow_array_adaptor<double>(v.dSize,v.dparam));*/
+
+  ar & boost::serialization::make_nvp("solverId", v.solverId);
+  ar & boost::serialization::make_nvp("isSet", v.isSet);
+  ar & boost::serialization::make_nvp("iSize", v.iSize);
+
+  /* we hope nothing have been allocated here */
+  if (Archive::is_loading::value)
+  {
+    v.iparam = (int *) malloc(v.iSize * sizeof(int));
+  }
+
+  boost::serialization::array<int> iparam =
+    boost::serialization::make_array(v.iparam, v.iSize);
+
+  ar & boost::serialization::make_nvp("iparam", iparam);
+  ar & boost::serialization::make_nvp("dSize", v.dSize);
+
+  /* we hope nothing have been allocated here */
+  if (Archive::is_loading::value)
+  {
+    v.dparam = (double *) malloc(v.dSize * sizeof(double));
+  }
+
+  boost::serialization::array<double> dparam =
+    boost::serialization::make_array(v.dparam, v.dSize);
+
+  ar & boost::serialization::make_nvp("dparam", dparam);
+  ar & boost::serialization::make_nvp("dSize", v.dSize);
+  ar & boost::serialization::make_nvp("filterOn", v.filterOn);
+  ar & boost::serialization::make_nvp("numberOfInternalSolvers", v.numberOfInternalSolvers);
+
+  /* we hope nothing have been allocated here */
+  if (Archive::is_loading::value)
+  {
+    v.internalSolvers = (_SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(_SolverOptions));
+  }
+
+  boost::serialization::array<_SolverOptions> internalSolvers =
+    boost::serialization::make_array(v.internalSolvers, v.numberOfInternalSolvers);
+
+  ar & boost::serialization::make_nvp("internalSolvers", internalSolvers);
+
+}
 
 template <class Archive>
 void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
@@ -636,9 +719,9 @@ namespace serialization
 {
 
 template <class Archive>
-void serialize(Archive& ar, std::basic_ofstream<char>&, unsigned int version)
+void serialize(Archive& ar, _SolverOptions& v, unsigned int version)
 {
-
+  siconos_io(ar, v, version);
 }
 
 template <class Archive>
@@ -769,8 +852,39 @@ void KernelTest::t2()
 }
 
 
-using namespace std;
 void KernelTest::t3()
+{
+  SP::SolverOptions so(new SolverOptions);
+  SP::SolverOptions sor(new SolverOptions);
+  so->solverId = SICONOS_FRICTION_3D_GLOBALAC;
+  so->isSet = 36;
+  so->iSize = 10;
+  so->iparam = (int*) malloc(sizeof(int) * so->iSize);
+  so->dSize = 10;
+  so->dparam = (double *)malloc(sizeof(double) * so->dSize);
+  so->filterOn = 1;
+  so->numberOfInternalSolvers = 1;
+  so->internalSolvers = (_SolverOptions *) malloc(sizeof(_SolverOptions) * so->numberOfInternalSolvers);
+
+
+  std::ofstream ofs("SolverOptions.xml");
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    oa << NVP(so);
+  }
+
+  std::ifstream ifs("SolverOptions.xml");
+  {
+    boost::archive::xml_iarchive ia(ifs);
+    ia >> NVP(sor);
+  }
+
+  CPPUNIT_ASSERT((so->iSize == sor->iSize));
+
+}
+
+using namespace std;
+void KernelTest::t4()
 {
 
   // ================= Creation of the model =======================
@@ -870,8 +984,9 @@ void KernelTest::t3()
   {
     boost::archive::xml_oarchive oa(ofs);
 
+    SP::SolverOptions so;
 
-    oa.register_type(static_cast<LCP*>(NULL));
+    //    oa.register_type(static_cast<LCP*>(NULL));
 
     /*    oa.register_type(static_cast<BlockVector*>(NULL));
         oa.register_type(static_cast<SensorPosition*>(NULL));
