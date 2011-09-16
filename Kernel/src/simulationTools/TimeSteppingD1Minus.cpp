@@ -41,9 +41,7 @@ void TimeSteppingD1Minus::initOSNS()
 
   UnitaryRelationsGraph::VIterator ui, uiend;
 
-  // For each Unitary relation in I0 ...
-  for (boost::tie(ui, uiend) = indexSet0->vertices();
-       ui != uiend; ++ui)
+  for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui);
     indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus");
@@ -53,7 +51,7 @@ void TimeSteppingD1Minus::initOSNS()
     for (itDS = ur->interaction()->dynamicalSystemsBegin();
          itDS != ur->interaction()->dynamicalSystemsEnd(); ++itDS)
     {
-      ur->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
+      ur->insertInWorkFree((*itDS)->workFree());
     }
   }
 
@@ -66,7 +64,7 @@ void TimeSteppingD1Minus::initOSNS()
     // === update all index sets ===
     updateIndexSets();
 
-    // initialization of  OneStepNonSmoothProblem
+    // initialization of OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
       (*itOsns)->setLevels(_levelMin, _levelMax);
@@ -87,14 +85,11 @@ void TimeSteppingD1Minus::initLevelMin()
 
 void TimeSteppingD1Minus::initLevelMax()
 {
+  // like event driven scheme
   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-  // Interactions initialization (here, since level depends on the
-  // type of simulation) level corresponds to the number of Y and
-  // Lambda derivatives computed.
 
   if (_levelMax == 0)
     _levelMax++;
-  // like event driven scheme
 }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
@@ -216,8 +211,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
     updateInput(levelInput);
 
   // 2 - compute state for each dynamical system
-  OSIIterator itOSI;
-  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
   // 3 - compute output ( x ... -> y)
@@ -229,9 +223,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
 
 void TimeSteppingD1Minus::run()
 {
-  unsigned int count = 0; // events counter.
-  // do simulation while events remains in the "future events" list of
-  // events manager.
+  unsigned int count = 0;
   cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
   while (_eventsManager->hasNextEvent())
   {
@@ -259,7 +251,6 @@ void TimeSteppingD1Minus::advanceToEvent()
 
 void TimeSteppingD1Minus::computeInitialResidu()
 {
-  //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
 
   double time = model()->currentTime();
@@ -282,11 +273,9 @@ void TimeSteppingD1Minus::computeInitialResidu()
 
 void TimeSteppingD1Minus::prepareNewtonIteration()
 {
-  DSOSIConstIterator it = _osiMap.begin();
-  while (it != _osiMap.end())
+  for (DSOSIConstIterator it = _osiMap.begin(); it != _osiMap.end(); ++it)
   {
     D1MinusLinear::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
-    ++it;
   }
 
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
@@ -308,8 +297,7 @@ void TimeSteppingD1Minus::prepareNewtonIteration()
   {
     (*it)->relation()->preparNewtonIteration();
   }
-  bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
-  if (topoHasChanged)
+  if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
       (*itOsns)->setHasBeUpdated(false);
@@ -324,9 +312,7 @@ void TimeSteppingD1Minus::computeFreeState()
 
 void TimeSteppingD1Minus::saveYandLambdaInMemory()
 {
-  // Save OSNS state (Interactions) in Memory.
-  OSNSIterator itOsns;
-  for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+  for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     (*itOsns)->saveInMemory();
 
 }
