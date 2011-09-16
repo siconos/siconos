@@ -151,6 +151,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // - white_color : undiscovered vertex (UnitaryRelation)
   // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
   // - black_color : discovered vertex (UnitaryRelation) together with the descendants
+  // Originally this function was only evaluated for i=1 (OSI::MOREAU), it is re-arranged
+  // for being available on arbitrary kinematic levels.
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -176,7 +178,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
 
-  // indexSet1 scan
+  // Check IndexSet1 (CLOSED UnitaryRelations : formula (8.31) of Acary2008)
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
   //Remove interactions from the indexSet1

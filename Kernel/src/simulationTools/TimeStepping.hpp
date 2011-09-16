@@ -147,14 +147,14 @@ public:
 
   /** Used by the updateIndexSet function in order to deactivate SP::UnitaryRelation.
    * \param SP::UnitaryRelation: SP::UnitaryRelation to be activated.
-   * \param unsigned int : number (kinematic level) of the set to be updated.
+   * \param unsigned int : number of the set to be updated.
    * \return true iff SP::UnitaryRelation must be deactivated.
    */
   virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
 
   /** Used by the updateIndexSet function in order to activate SP::UnitaryRelation.
    * \param SP::UnitaryRelation: SP::UnitaryRelation to be deactivated.
-   * \param unsigned int : number (kinematic level) of the set to be updated.
+   * \param unsigned int : number of the set to be updated.
    * \return true iff SP::UnitaryRelation must be activated.
    */
   virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
