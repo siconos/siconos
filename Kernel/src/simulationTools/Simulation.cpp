@@ -36,6 +36,7 @@
 #include "Relay.hpp"
 
 using namespace std;
+#define LEVELMAX 999
 
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
 // --- id ---
@@ -249,6 +250,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     }
   }
 
+
+
+
   // === IndexSets building ===
 
   // The number of indexSets is given by the maximum value of relative
@@ -258,6 +262,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //  if( !allInteractions->isEmpty() ) // ie if some Interactions
   //  have been declared
   {
+
+    //ComputeLevelsForInputAndOutput();
     initLevelMax();
     topo->indexSetsResize(_levelMax + 1);
 
@@ -432,5 +438,137 @@ void Simulation::processEvents()
   {
     dsGraph->bundle(*vi)->endStep();
   }
+}
+
+
+
+/** a visitor to set the level(s) parameter in Interaction
+ *  and to compute the levelMin and levelMax
+ */
+// class NonSmoothLaw;
+// class DynamicalSystem;
+// class OneStepIntegrator;
+class Moreau;
+
+struct Simulation::SetupLevels : public SiconosVisitor
+{
+  SP::Simulation _parent;
+  SP::Interaction _interaction;
+  SP::NonSmoothLaw _nonSmoothLaw;
+  SP::DynamicalSystem _ds;
+  SetupLevels(SP::Simulation s, SP::Interaction inter,
+              SP::DynamicalSystem ds) :
+    _parent(s), _interaction(inter), _ds(ds)
+  {
+    _nonSmoothLaw = inter->nonSmoothLaw();
+  };
+
+  void visit(const Moreau&)
+  {
+
+    unsigned int lowerLevelForOutput = LEVELMAX;
+    unsigned int upperLevelForOutput = 0;
+    unsigned int lowerLevelForInput = LEVELMAX;
+    unsigned int upperLevelForInput = 0;
+
+    Type::Siconos dsType = Type::value(*_ds);
+
+    /** there is only a test on the dstype and simulation since  we assume that
+     * we implicitely the nonsmooth law when a DS type is chosen
+     */
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+
+      if (Type::name(*_parent) == "TimeStepping")
+      {
+        lowerLevelForOutput = 0;
+        upperLevelForOutput = 1 ;
+        lowerLevelForInput = 1;
+        upperLevelForInput = 1;
+      }
+      else if (Type::name(*_parent) == "TimeSteppingProjectOnConstraints")
+      {
+        lowerLevelForOutput = 0;
+        upperLevelForOutput = 1 ;
+        lowerLevelForInput = 0;
+        upperLevelForInput = 1;
+      }
+      else
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
+    }
+    else if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
+    {
+      if (Type::name(*_parent) == "TimeStepping")
+      {
+        lowerLevelForOutput = 0;
+        upperLevelForOutput = 0;
+        lowerLevelForInput = 0;
+        upperLevelForInput = 0;
+      }
+      else
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
+    }
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
+
+    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
+    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
+    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
+    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+
+
+
+    // _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    // _interaction->setUpperLevelForOutput(upperLevelForOutput);
+
+    // _interaction->setLowerLevelForInput(lowerLevelForInput);
+    // _interaction->setUpperLevelForInput(upperLevelForInput);
+
+    ConstDSIterator itDS;
+    for (itDS = _interaction->dynamicalSystemsBegin(); itDS != _interaction->dynamicalSystemsBegin() ; ++itDS)
+    {
+      //*itDS->setLowerLevelForInput(lowerLevelForInput);
+      //
+      //*itDS->setUpperLevelForInput(upperLevelForInput);
+    }
+
+
+  };
+
+
+};
+
+
+void Simulation::ComputeLevelsForInputAndOutput()
+{
+  SP::InteractionsSet allInteractions =
+    model()->nonSmoothDynamicalSystem()->interactions();
+
+
+  _levelMinForInput = LEVELMAX;
+  _levelMaxForInput = 0;
+  _levelMinForOutput = LEVELMAX;
+  _levelMaxForOutput = 0;
+  SP::DynamicalSystem ds;
+  SP::OneStepIntegrator Osi;
+  boost::shared_ptr<SetupLevels> setupLevels;
+
+
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    /** \warning. We test only for the first Dynamical of the interaction.
+     * we assume that the osi(s) are consistent for one interaction
+     */
+    ds = *((*it)->dynamicalSystemsBegin());
+    Osi = integratorOfDS(ds);
+    setupLevels.reset(new SetupLevels(shared_from_this(), *it, ds));
+    Osi->accept(*(setupLevels.get()));
+  }
+
+  std::cout <<  "_levelMinForInput =" << _levelMinForInput << std::endl;
+  std::cout <<  "_levelMaxForInput =" << _levelMaxForInput << std::endl;
+  std::cout <<  "_levelMinForOutput =" << _levelMinForOutput << std::endl;
+  std::cout <<  "_levelMaxForOutput =" << _levelMaxForOutput << std::endl;
+
 }
 

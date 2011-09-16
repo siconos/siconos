@@ -1330,6 +1330,10 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 {
+  /** \warning: ensures that it can also work with two different osi for two different ds ?
+   */
+
+
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types

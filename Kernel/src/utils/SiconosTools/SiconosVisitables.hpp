@@ -27,6 +27,8 @@
   REGISTER(TimeSteppingD1Minus)                              \
   REGISTER(TimeSteppingProjectOnConstraints)                 \
   REGISTER(EventDriven)                                      \
+  REGISTER(OneStepIntegrator)                                \
+  REGISTER(Moreau)                                           \
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LinearOSNS)                                       \
   REGISTER(LCP)                                              \

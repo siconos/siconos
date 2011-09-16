@@ -296,6 +296,10 @@ public:
    */
   void saveIntegratorToXML();
 
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(OneStepIntegrator);
+
 };
 
 #endif // ONESTEPINTEGRATOR_H

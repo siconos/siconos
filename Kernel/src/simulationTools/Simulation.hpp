@@ -121,6 +121,24 @@ protected:
       variables */
   unsigned int _levelMax;
 
+  /** \todo update the doxy comment */
+  /** int used to set the maximal derivative order used in the OSNS
+      variables */
+  unsigned int _levelMinForOutput;
+
+  /** int used to set the maximal derivative order used in the OSNS
+      variables */
+  unsigned int _levelMaxForOutput;
+
+  /** int used to set the minimal derivative order used in the OSNS
+      variables */
+  unsigned int _levelMinForInput;
+  /** int used to set the maximal derivative order used in the OSNS
+      variables */
+  unsigned int _levelMaxForInput;
+
+
+
   /** tolerance value used to compute the index sets - Default: equal
       to machine double precision (from dlamch lapack routine).*/
   double _tolerance;
@@ -149,6 +167,11 @@ protected:
    */
   double _relativeConvergenceTol;
 
+  /** initializations of levels
+   *
+   */
+  struct SetupLevels;
+  friend class Simulation::SetupLevels;
 
   /** initialisation for OneStepNSProblem.
    */
@@ -163,6 +186,8 @@ protected:
   /** default constructor.
    */
   Simulation() {};
+
+
 
 private:
 
@@ -599,6 +624,10 @@ public:
   /** call eventsManager processEvents.
    */
   void processEvents();
+
+  /**
+   */
+  void ComputeLevelsForInputAndOutput();
 
   /** visitors hook
    */

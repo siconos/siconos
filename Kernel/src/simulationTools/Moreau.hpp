@@ -363,6 +363,10 @@ public:
    */
   static Moreau* convert(OneStepIntegrator* osi);
 
+  /** visitors hook
+  */
+  ACCEPT_STD_VISITORS();
+
 };
 
 #endif // MOREAU_H
