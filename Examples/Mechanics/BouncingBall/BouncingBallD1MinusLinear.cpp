@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 
     while (s->nextTime() < T)
     {
-      s->computeOneStep();
+      s->advanceToEvent();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
-      s->nextStep();
+      s->processEvents();
       ++show_progress;
       k++;
     }

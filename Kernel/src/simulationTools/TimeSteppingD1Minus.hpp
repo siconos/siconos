@@ -25,10 +25,6 @@
 #define TIMESTEPPINGD1MINUS_H
 
 #include "Simulation.hpp"
-#include "SiconosPointers.hpp"
-
-/** type of function used to post-treat output info from solver. */
-typedef void (*CheckSolverFPtr)(int, Simulation*);
 
 /** TimeSteppingD1Minus Timestepping Strategy
  *
@@ -40,266 +36,79 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */
 
-#define SICONOS_TS_LINEAR 1
-#define SICONOS_TS_LINEAR_IMPLICIT 2
-#define SICONOS_TS_NONLINEAR 3
-
 class TimeSteppingD1Minus : public Simulation
 {
 private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
-  /** Default Constructor */
-  TimeSteppingD1Minus() {};
-
-  /** compute LevelMin */
-  void initLevelMin();
-
-  /** compute LevelMax */
-  void initLevelMax();
-
-  /** boolean variable to known whether the ResiduY has to be computed or not
-   *  if true, the ResiduY is computed and the convergence is checked
-   */
-  bool _computeResiduY;
-
-  /** boolean variable to known whether the ResiduR has to be computed or not
-   *  if true, the ResiduR is computed and the convergence is checked
-   */
-  bool _computeResiduR;
-
-  /** Default Newton tolerance used in call of run() of ComputeOneStep() */
-  double _newtonTolerance;
-
-  /** Default maximum number of Newton iteration*/
-  unsigned int _newtonMaxIteration;
-
-  /** Number of steps perfomed is the Newton Loop */
-  unsigned int _newtonNbSteps;
-
-  /** Maximum Residual for the Dynamical system */
-  double _newtonResiduDSMax;
-
-  /** Maximum Residual for the output of the relation */
-  double _newtonResiduYMax;
-
-  /** Maximum Residual for the input of the relation */
-  double _newtonResiduRMax;
-
-  /** unsigned int _newtonOptions
-   *  option in the Newon iteration
-   *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
-   * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
-   */
-  unsigned int _newtonOptions;
+  /** default constructor */
+  TimeSteppingD1Minus() {}
 
 protected:
-  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem. */
+  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   virtual void initOSNS();
+
+  /** compute minimum index set level */
+  virtual void initLevelMin();
+
+  /** compute maximum index set level */
+  virtual void initLevelMax();
+
 public:
 
-  /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
-   *  \param a one step integrator (default none)
-   *  \param a one step non smooth problem (default none)
-   */
-  TimeSteppingD1Minus(SP::TimeDiscretisation,
-                      SP::OneStepIntegrator = SP::OneStepIntegrator(),
-                      SP::OneStepNSProblem = SP::OneStepNSProblem());
-
-  /** Constructor with the time-discretisation.
-   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+  /** constructor with the time-discretisation
+   *  \param pointer to a TimeDiscretisation
    *  \param number of non smooth problem
    */
   TimeSteppingD1Minus(SP::TimeDiscretisation, int nb);
 
-  /** Destructor. */
+  /** destructor */
   ~TimeSteppingD1Minus();
 
-  /* type name because parent class needs it */
-  inline std::string typeName()
+  /* type name */
+  virtual std::string typeName()
   {
     return Type::name(*this);
-  };
-
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   *  \param unsigned int: the number of the set to be updated
-   */
-  void updateIndexSet(unsigned int);
-
-  /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
-  void nextStep();
-
-  /** update input, state of each dynamical system and output
-   *  \param lambda order used to compute input
-   */
-  void update(unsigned int);
-
-  /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
-  */
-  void computeFreeState();
-
-  /** step from current event to next event of EventsManager
-  */
-  void advanceToEvent();
-
-  /** run one time--step of the simulation
-  */
-  void computeOneStep();
-
-  /** Newton algorithm
-   * \param double, convergence criterion
-   * \param unsigned int: maximum number of Newton steps
-   */
-  virtual void newtonSolve(double, unsigned int);
-
-  /** To known the number of steps performed by the Newton algorithm.
-   *
-   */
-  unsigned int getNewtonNbSteps()
-  {
-    return _newtonNbSteps;
   }
 
-  /** compute initial residu
-   * It computes the initial residu to start the newton algorithm.
+  /** updateIndexSet using current y and lambda values of interactions
+   *  \param unsigned int: number of the set to be updated
+   *  0 : ALL interactions (NEVER)
+   *  1 : ACTIVE interactions
+   *  2 : STAYING ACTIVE interactions
    */
+  virtual void updateIndexSet(unsigned int);
+
+  /** update input, state and output of DynamicalSystems
+   *  \param level to be updated for input
+   */
+  virtual void update(unsigned int);
+
+  /** run the simulation, from t0 to T */
+  virtual void run();
+
+  /** step from current event to next event of EventsManager */
+  virtual void advanceToEvent();
+
+  /** compute initial residu */
   void computeInitialResidu();
 
-
+  /** prepare calculation */
   void prepareNewtonIteration();
 
-  /** check the convergence of Newton algorithm according to criterion
-   * \param double, convergence criterion
-   */
-  bool newtonCheckConvergence(double);
+  /** integrate DynamicalSystems taking not into account non-smooth part */
+  void computeFreeState();
 
-  /** save y_k^p, the current Newton iteration*/
+  /** save input and output */
   void saveYandLambdaInMemory();
 
-  /** run the simulation, from t0 to T
-   * with default parameters if any setting has been done
-   */
-  void run();
-
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param SP::Simulation : the Simulation which must be converted
-   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
+  /** encapsulates an operation of dynamic casting
+   *  needed by Python interface
+   *  \param simulation which must be converted
+   *  \return pointer to the Simulation if it is of the right type, NULL otherwise
    */
   static TimeSteppingD1Minus* convert(Simulation* str);
-
-  /** check returning value from computeOneStepNSProblem and process
-   *  \param: an int
-   */
-  void DefaultCheckSolverOutput(int);
-
-  /** Set CheckSolverOutput function */
-  void setCheckSolverFunction(CheckSolverFPtr);
-
-  /** To specify if the output interaction residu must be computed.
-   *  \param: a bool
-   */
-  void setComputeResiduY(bool v)
-  {
-    _computeResiduY = v;
-  };
-
-  /** To known if the output interaction residu must be computed. */
-  bool computeResiduY(bool v)
-  {
-    return _computeResiduY;
-  };
-
-  /** To specify if the input interaction residu must be computed.
-   *  \param: a bool
-   */
-  void setComputeResiduR(bool v)
-  {
-    _computeResiduR = v;
-  };
-
-  /** To known if the input interaction residu must be computed. */
-  bool computeResiduR(bool v)
-  {
-    return _computeResiduR;
-  };
-
-
-  /** set the Default Newton tolerance
-   *  \param: double
-   */
-  void setNewtonTolerance(double tol)
-  {
-    _newtonTolerance = tol;
-  };
-
-  /** get the Newton tolerance
-   *  \return double
-   */
-  double newtonTolerance()
-  {
-    return   _newtonTolerance;
-  };
-
-  /** set the maximum number of Newton iteration
-   *  \param: unsigned int
-   */
-  void setNewtonMaxIteration(unsigned int maxStep)
-  {
-    _newtonMaxIteration = maxStep;
-  };
-
-  /** get the maximum number of Newton iteration
-   *  \return unsigned int
-   */
-  double newtonMaxIteration()
-  {
-    return _newtonMaxIteration;
-  };
-
-  /** set the NewtonOptions
-   *  \param: std::string
-   */
-  void setNewtonOptions(unsigned int v)
-  {
-    _newtonOptions = v;
-  };
-
-  /** get the NewtonOptions
-   *  \return unsigned int
-   */
-  unsigned int newtonOptions()
-  {
-    return _newtonOptions;
-  };
-
-
-  /** accessor to _newtonResiduDSMax
-  */
-  double newtonResiduDSMax()
-  {
-    return _newtonResiduDSMax;
-  };
-
-  /** accessor to _newtonResiduYMax
-  */
-  double newtonResiduYMax()
-  {
-    return _newtonResiduYMax;
-  };
-
-  /** accessor to _newtonResiduRMax
-  */
-  double newtonResiduRMax()
-  {
-    return _newtonResiduRMax;
-  };
-
-
-  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
-    Overload this method to update user model.*/
-  virtual void updateWorldFromDS() {};
 
   /** visitors hook */
   ACCEPT_STD_VISITORS();

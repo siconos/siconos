@@ -617,6 +617,5 @@ void D1MinusLinear::insertDynamicalSystem(SP::DynamicalSystem ds)
 
 D1MinusLinear* D1MinusLinear::convert(OneStepIntegrator* osi)
 {
-  D1MinusLinear* d1minus = dynamic_cast<D1MinusLinear*>(osi);
-  return d1minus;
+  return dynamic_cast<D1MinusLinear*>(osi);
 }
