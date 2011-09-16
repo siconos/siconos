@@ -18,7 +18,7 @@
  */
 /*! \file
   Event Driven Simulation
-*/
+  */
 #ifndef EVENTDRIVEN_H
 #define EVENTDRIVEN_H
 
@@ -50,11 +50,11 @@ private:
   int istate;
 
   /** an epsilon to define the contraint g for Urs in IndexSet[1]
-   */
+  */
   static double TOL_ED;
 
   /** initialisation specific to EventDriven for OneStepNSProblem.
-   */
+  */
   void initOSNS();
 
   /** compute LevelMin */
@@ -74,20 +74,20 @@ public:
   EventDriven(SP::TimeDiscretisation td);
 
   /** constructor with XML object of the EventDriven
-       \param SimulationXML* : the XML object corresponding
-       \param initial time
-       \param final time
-       \param the set of all DS in the NSDS
-       \param the set of all interactions in the NSDS
-  */
+    \param SimulationXML* : the XML object corresponding
+    \param initial time
+    \param final time
+    \param the set of all DS in the NSDS
+    \param the set of all interactions in the NSDS
+    */
   EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** defaut constructor
-   */
+  */
   // EventDriven() {};
 
   /** destructor
-   */
+  */
   ~EventDriven() {};
 
   /* type name because parent class needs it */
@@ -113,7 +113,7 @@ public:
   void updateIndexSet(unsigned int);
 
   /** update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
-   */
+  */
   void updateIndexSetsWithDoubleCondition();
 
   /** compute right-hand side of xdot = f(x,t), for the integrator osi.
@@ -145,7 +145,7 @@ public:
   void computeg(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
 
   /** update input for impact case (ie compute p[1])
-   */
+  */
   void updateImpactState();
 
   /** update input, output and indexSets.
@@ -156,8 +156,8 @@ public:
   /** Initialize EventDriven **/
 
   /** run simulation from one Event to the next, according to events manager settings.
-  *
-  */
+   *
+   */
   void advanceToEvent();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -167,7 +167,7 @@ public:
   static EventDriven* convert(Simulation* str);
 
   /** visitors hook
-   */
+  */
   ACCEPT_STD_VISITORS();
 
 };

@@ -15,10 +15,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 /*! \file
   Time-Stepping simulation
-*/
+  */
 #ifndef TIMESTEPPING_H
 #define TIMESTEPPING_H
 
@@ -48,7 +48,7 @@ private:
 
 
   /** Default Constructor
-   */
+  */
   TimeStepping() {};
 
   /** compute LevelMin */
@@ -94,38 +94,38 @@ private:
   unsigned int _newtonOptions;
 protected:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
-   */
+  */
   virtual void initOSNS();
 public:
 
   /** Constructor with the time-discretisation.
-  *  \param a pointer to a timeDiscretisation (linked to the model
-  *  that owns this simulation)
-     \param a one step integrator (default none)
-     \param a one step non smooth problem (default none)
-  */
+   *  \param a pointer to a timeDiscretisation (linked to the model
+   *  that owns this simulation)
+   \param a one step integrator (default none)
+   \param a one step non smooth problem (default none)
+   */
   TimeStepping(SP::TimeDiscretisation,
                SP::OneStepIntegrator = SP::OneStepIntegrator(),
                SP::OneStepNSProblem = SP::OneStepNSProblem());
 
   /** Constructor with the time-discretisation.
-  *  \param a pointer to a timeDiscretisation (linked to the model
-  *  that owns this simulation)
-     \param number of non smooth problem
-  */
+   *  \param a pointer to a timeDiscretisation (linked to the model
+   *  that owns this simulation)
+   \param number of non smooth problem
+   */
   TimeStepping(SP::TimeDiscretisation, int nb);
 
   /** constructor with XML object for TimeStepping
-      \param SimulationXML* : the XML object corresponding
-      \param initial time
-      \param final time
-      \param the set of all DS in the NSDS
-      \param the set of all interactions in the NSDS
-  */
+    \param SimulationXML* : the XML object corresponding
+    \param initial time
+    \param final time
+    \param the set of all DS in the NSDS
+    \param the set of all interactions in the NSDS
+    */
   TimeStepping(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** Destructor.
-   */
+  */
   ~TimeStepping();
 
   /* type name because parent class needs it */
@@ -137,26 +137,29 @@ public:
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
    *  \param a pointer to OneStepNSProblem
 
-  void insertNonSmoothProblem(SP::OneStepNSProblem);
-  */
+   void insertNonSmoothProblem(SP::OneStepNSProblem);
+   */
+
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-  *  \param unsigned int: the number of the set to be updated
-  */
+   *  \param unsigned int: the number of the set to be updated
+   */
   void updateIndexSet(unsigned int);
-  /** Used by the updateIndexSet function in order to deactivate an UR.
-      \param SP::UnitaryRelation ur: an UR activated.
-      \param unsigned int: the number of the set to be updated
-      Return true iff the ur must be deactivate.
+
+  /** Used by the updateIndexSet function in order to deactivate SP::UnitaryRelation.
+   * \param SP::UnitaryRelation: SP::UnitaryRelation to be activated.
+   * \param unsigned int : number (kinematic level) of the set to be updated.
+   * \return true iff SP::UnitaryRelation must be deactivated.
    */
   virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
-  /** Used by the updateIndexSet function in order to activate an UR.
-      \param SP::UnitaryRelation ur: an UR deactivated.
-      \param unsigned int: the number of the set to be updated
-      Return true iff the ur must be activate.
+
+  /** Used by the updateIndexSet function in order to activate SP::UnitaryRelation.
+   * \param SP::UnitaryRelation: SP::UnitaryRelation to be deactivated.
+   * \param unsigned int : number (kinematic level) of the set to be updated.
+   * \return true iff SP::UnitaryRelation must be activated.
    */
   virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
-  /** increment model current time according to User TimeDiscretisation and call SaveInMemory.
-   */
+
+  /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   void nextStep();
 
   /** update input, state of each dynamical system and output
@@ -165,15 +168,15 @@ public:
   void update(unsigned int);
 
   /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
-   */
+  */
   void computeFreeState();
 
   /** step from current event to next event of EventsManager
-   */
+  */
   void advanceToEvent();
 
   /** run one time--step of the simulation
-   */
+  */
   void computeOneStep();
 
   /** newton algorithm
@@ -306,21 +309,21 @@ public:
 
 
   /** accessor to _newtonResiduDSMax
-   */
+  */
   double newtonResiduDSMax()
   {
     return _newtonResiduDSMax;
   };
 
   /** accessor to _newtonResiduYMax
-   */
+  */
   double newtonResiduYMax()
   {
     return _newtonResiduYMax;
   };
 
   /** accessor to _newtonResiduRMax
-   */
+  */
   double newtonResiduRMax()
   {
     return _newtonResiduRMax;
@@ -337,7 +340,7 @@ public:
 
 
   /** visitors hook
-   */
+  */
   ACCEPT_STD_VISITORS();
 
 };

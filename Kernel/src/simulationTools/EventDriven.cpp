@@ -32,7 +32,11 @@
 #include "DynamicalSystem.hpp"
 #include "LagrangianDS.hpp"
 #include "EventFactory.hpp"
+
+#include <debug.h>
+
 using namespace std;
+
 // --- XML constructor ---
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
                          SP::DynamicalSystemsSet dsList,
@@ -73,7 +77,7 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
   }
 }
 /** defaut constructor
-   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+ *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
 EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), istate(1)
 {
@@ -84,25 +88,34 @@ double EventDriven::TOL_ED = DEFAULT_TOL_ED;
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
+  // To update IndexSet i: add or remove UnitaryRelations from
+  // this set, depending on y values.
+
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
+
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+
   assert(i < topo->indexSetsSize() &&
          "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
-  // IndexSets[0] must not be updated by this function.
+  // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
   assert(i > 0  &&
-         "EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
-  // update the indexSet[i]
+         "EventDriven::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
+  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i].
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
   SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
   SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
-  double y;
+
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
+
   UnitaryRelationsGraph::VIterator uibegin, uipend, uip;
   boost::tie(uibegin, uipend) = indexSet0->vertices();
   // loop over all vextice of the indexSet[i-1]
@@ -113,15 +126,15 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
-      y = urp->getYRef(0); // output to define the IndexSets at this UR
+      double y = urp->getYRef(0); // output to define the IndexSets at this UR
       /*
-        if (i == 1)
-        {
-        cout << "Id of UR: " << urp->interaction()->number() << endl;
-        cout << "Output of level 0 at this UR: " << y << endl;
-        cout << endl;
-        }
-      */
+         if (i == 1)
+         {
+         cout << "Id of UR: " << urp->interaction()->number() << endl;
+         cout << "Output of level 0 at this UR: " << y << endl;
+         cout << endl;
+         }
+         */
       if (y < -TOL_ED) // y[0] < 0
       {
         RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
@@ -148,7 +161,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       if (indexSet1->is_vertex(urp)) // UR is in the indexSet[1]
       {
-        y = urp->getYRef(1); // output of level 1 at this UR
+        double y = urp->getYRef(1); // output of level 1 at this UR
         if (!indexSet2->is_vertex(urp)) // UR is not yet in the indexSet[2]
         {
           if (fabs(y) <= TOL_ED)
@@ -179,11 +192,9 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       RuntimeException::selfThrow("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't existe");
     }
-
   }
-
 }
-//
+
 void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
@@ -313,8 +324,7 @@ void EventDriven::initLevelMin()
 
 void EventDriven::initLevelMax()
 {
-  _levelMax = model()->nonSmoothDynamicalSystem()->
-              topology()->maxRelativeDegree();
+  _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
@@ -444,10 +454,10 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
     }
   };
   /*
-  double * xdottmp = (double *)malloc(*sizeOfX*sizeof(double));
-  computef(osi, sizeOfX,time,x,xdottmp);
-  free(xdottmp);
-  */
+     double * xdottmp = (double *)malloc(*sizeOfX*sizeof(double));
+     computef(osi, sizeOfX,time,x,xdottmp);
+     free(xdottmp);
+     */
 
   // Update the output from level 0 to level 1
   updateOutput(0, 1);
@@ -590,7 +600,7 @@ void EventDriven::advanceToEvent()
         (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(_tout);
         updateInput(2); //
       }
-      // update indexSet[2] with double consition
+      // update indexSet[2] with double condition
       updateIndexSetsWithDoubleCondition();
     }
   }

@@ -34,17 +34,16 @@
 #include "Moreau.hpp"
 #include "D1MinusLinear.hpp"
 
-//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 using namespace std;
 
 /** Pointer to function, used to set the behavior of simulation when
-    ns solver failed.  If equal to null, use DefaultCheckSolverOutput
-    else (set with setCheckSolverFunction) call the pointer below).
-    Note FP: (temporary) bad method to set checkSolverOutput but it
-    works ... It may be better to use plug-in?
- */
+  ns solver failed.  If equal to null, use DefaultCheckSolverOutput
+  else (set with setCheckSolverFunction) call the pointer below).
+  Note FP: (temporary) bad method to set checkSolverOutput but it
+  works ... It may be better to use plug-in?
+  */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
 static bool cmp_osi_type_d1minuslinear(SP::OneStepIntegrator osi)
@@ -121,32 +120,37 @@ TimeStepping::~TimeStepping()
 bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
 {
   double h = timeStep();
-  double y = ur->getYRef(i - 1);
-  double yDot = ur->getYRef(1);
-  //printf("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e\n",y,yDot,y+0.5*h*yDot);
+  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
+  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+  DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
-  //if (y>0)
-  //  printf("TS::predictorDeactivate DEACTIVATE\n");
+  if (y > 0)
+    DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
   return (y > 0);
 }
+
 bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
 {
   double h = timeStep();
-  double y = ur->getYRef(i - 1);
-  double yDot = ur->getYRef(1);
-  //printf("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e\n",y,yDot,y+0.5*h*yDot);
+  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
+  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+  DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
   y += 0.5 * h * yDot;
   assert(!isnan(y));
-  //if (y<=0)
-  // printf("TS::predictorActivate ACTIVATE\n");
+  if (y <= 0)
+    DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
   return (y <= 0);
 }
-// i=1
+
 void TimeStepping::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet number i: add or remove UnitaryRelations from
+  // To update IndexSet i: add or remove UnitaryRelations from
   // this set, depending on y values.
+  // boost::default_color_type is used to organize update in UnitaryRelationsGraph:
+  // - white_color : undiscovered vertex (UnitaryRelation)
+  // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
+  // - black_color : discovered vertex (UnitaryRelation) together with the descendants
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -156,30 +160,27 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
+  // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
+  assert(i > 0 &&
+         "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
-  assert(i != 0 &&   // IndexSets[0] must not be updated in simulation,
-         // since it belongs to the Topology.
-         "TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
-
-  assert(topo->indexSet(0));
-  assert(topo->indexSet(1));
-  topo->setHasChanged(false);
+  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i].
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
   SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
+  assert(indexSet0);
+  assert(indexSet1);
+
+  topo->setHasChanged(false); // WHY
 
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
-
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
-  // update the indexSet[i]
-  //bool inserted;
 
   // indexSet1 scan
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
   //Remove interactions from the indexSet1
-  for (v1next = ui1 ;
-       ui1 != ui1end; ui1 = v1next)
+  for (v1next = ui1 ; ui1 != ui1end; ui1 = v1next)
   {
     ++v1next;
 
@@ -188,8 +189,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
     {
       UnitaryRelationsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(ur1);
 
-      assert((indexSet0->color(ur1_descr0)
-              == boost::white_color));
+      assert((indexSet0->color(ur1_descr0) == boost::white_color));
 
       indexSet0->color(ur1_descr0) = boost::gray_color;
       if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
@@ -217,8 +217,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // indexSet0\indexSet1 scan
   UnitaryRelationsGraph::VIterator ui0, ui0end;
   //Add interaction in indexSet1
-  for (boost::tie(ui0, ui0end) = indexSet0->vertices();
-       ui0 != ui0end; ++ui0)
+  for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
   {
     if (indexSet0->color(*ui0) == boost::black_color)
     {
@@ -229,36 +228,30 @@ void TimeStepping::updateIndexSet(unsigned int i)
     {
       if (indexSet0->color(*ui0) == boost::gray_color)
       {
-
         // reset
-        indexSet0->color(*ui0) = boost::white_color ;
+        indexSet0->color(*ui0) = boost::white_color;
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
         /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-              Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
-              });*/
+          Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+          });*/
       }
-
       else
       {
         assert(indexSet0->color(*ui0) == boost::white_color);
 
         SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(ur0));
-        bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
-        {
-          activate = predictorActivate(ur0, i);
-        }
-        if (activate)
-        {
-          assert(!indexSet1->is_vertex(ur0));
+          if (predictorActivate(ur0, i))
+          {
+            assert(!indexSet1->is_vertex(ur0));
 
-          // vertex and edges insertion in indexSet1
-          indexSet1->copy_vertex(ur0, *indexSet0);
-          topo->setHasChanged(true);
-          assert(indexSet1->is_vertex(ur0));
-        }
+            // vertex and edges insertion in indexSet1
+            indexSet1->copy_vertex(ur0, *indexSet0);
+            topo->setHasChanged(true);
+            assert(indexSet1->is_vertex(ur0));
+          }
       }
     }
   }
@@ -267,7 +260,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   DEBUG_PRINTF("update indexSets end : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
-
 }
 
 // void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
@@ -729,25 +721,25 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
     //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
     /*      if(info == 1)
-    cout <<" reach max iterations number with solver " << solverName << endl;
-    else if (info == 2)
-    {
-    if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-    RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
-    else if (solverName == "QP" || solverName == "NSQP" )
-    RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
-    else if (solverName == "Latin")
-    RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
-    }
-    else if (info == 3 && solverName == "CPG")
-       cout << "pWp null in solver CPG" << endl;
-    else if (info == 3 && solverName == "Latin")
-    RuntimeException::selfThrow("Null diagonal term with solver Latin");
-    else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-    RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
-    else
-    RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
-    */
+            cout <<" reach max iterations number with solver " << solverName << endl;
+            else if (info == 2)
+            {
+            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
+            RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
+            else if (solverName == "QP" || solverName == "NSQP" )
+            RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
+            else if (solverName == "Latin")
+            RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
+            }
+            else if (info == 3 && solverName == "CPG")
+            cout << "pWp null in solver CPG" << endl;
+            else if (info == 3 && solverName == "Latin")
+            RuntimeException::selfThrow("Null diagonal term with solver Latin");
+            else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
+            RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
+            else
+            RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
+            */
   }
 }
 
