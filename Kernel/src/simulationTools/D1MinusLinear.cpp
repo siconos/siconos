@@ -149,20 +149,15 @@ void D1MinusLinear::initialize()
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
-
-      if (Type::name(*simulationLink) == "TimeStepping")
-      {
-        levelMin = 1;
-        levelMax = 2 ;
-      }
-      else if (Type::name(*simulationLink) == "TimeSteppingProjectOnConstraints")
-      {
-        RuntimeException::selfThrow("D1MinusLinear::initialize -  simulation type: " + Type::name(*simulationLink) + "not yet implemented");
-      }
-      else
-        RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: " + Type::name(*simulationLink));
+      //if(Type::name(*simulationLink)=="TimeSteppingD1Minus")
+      //{
+      levelMin = 1;
+      levelMax = 2 ;
+      //}
+      //else
+      //  RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: "+ Type::name(*simulationLink));
     }
-    else RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + dsType);
+    else RuntimeException::selfThrow("D1MinusLinear::initialize - not yet implemented for DynamicalSystem type :" + dsType);
 
 
     (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());

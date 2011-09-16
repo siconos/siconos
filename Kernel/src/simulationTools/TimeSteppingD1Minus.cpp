@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "TimeStepping.hpp"
+#include "TimeSteppingD1Minus.hpp"
 #include "SimulationXML.hpp"
 #include "OneStepNSProblemXML.hpp"
 #include "Topology.hpp"
@@ -32,6 +32,7 @@
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
 #include "Moreau.hpp"
+#include "D1MinusLinear.hpp"
 
 #include <debug.h>
 
@@ -45,9 +46,14 @@ using namespace std;
   */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
-TimeStepping::TimeStepping(SP::TimeDiscretisation td,
-                           SP::OneStepIntegrator osi,
-                           SP::OneStepNSProblem osnspb)
+static bool cmp_osi_type_d1minuslinear(SP::OneStepIntegrator osi)
+{
+  return osi->getType() == OSI::D1MINUSLINEAR;
+}
+
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb)
   : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
 {
 
@@ -60,7 +66,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 
 }
 
-TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb)
   : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
 {
   _computeResiduY = false;
@@ -69,49 +75,12 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
   (*_allNSProblems).resize(nb);
 }
 
-// --- XML constructor ---
-TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
-                           double T, SP::DynamicalSystemsSet dsList,
-                           SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
-{
-  _computeResiduY = false;
-  _computeResiduR = false;
-  (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
-  // === One Step NS Problem === For time stepping, only one non
-  // smooth problem is built.
-  if (_simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
-    // not empty
-  {
-    SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
-    if (OSNSList.size() != 1)
-      RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
-    SP::OneStepNSProblemXML osnsXML = *(OSNSList.begin());
-    // OneStepNSProblem - Memory allocation/construction
-    string type = osnsXML->getNSProblemType();
-    if (type == LCP_TAG)  // LCP
-    {
-      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new LCP(osnsXML));
-    }
-    else if (type == FRICTIONCONTACT_TAG)
-    {
-      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new FrictionContact(osnsXML));
-    }
-    else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-
-    //      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setId("timeStepping");
-
-    // Add QP and Relay cases when these classes will be fully
-    // implemented.
-  }
-}
-
 // --- Destructor ---
-TimeStepping::~TimeStepping()
+TimeSteppingD1Minus::~TimeSteppingD1Minus()
 {
 }
 
-bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
+bool TimeSteppingD1Minus::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
 {
   double h = timeStep();
   double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
@@ -124,7 +93,7 @@ bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
   return (y > 0);
 }
 
-bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
+bool TimeSteppingD1Minus::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
 {
   double h = timeStep();
   double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
@@ -137,7 +106,7 @@ bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
   return (y <= 0);
 }
 
-void TimeStepping::updateIndexSet(unsigned int i)
+void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
   // To update IndexSet i: add or remove UnitaryRelations from
   // this set, depending on y values.
@@ -145,6 +114,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // - white_color : undiscovered vertex (UnitaryRelation)
   // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
   // - black_color : discovered vertex (UnitaryRelation) together with the descendants
+  // Originally this function was only evaluated for i=1 (OSI::MOREAU), it is re-arranged
+  // for being available on arbitrary kinematic levels.
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -153,19 +124,19 @@ void TimeStepping::updateIndexSet(unsigned int i)
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   assert(i < topo->indexSetsSize() &&
-         "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
+         "TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not exist.");
   // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
   assert(i > 0 &&
-         "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
+         "TimeSteppingD1Minus::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
   // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0); // (ALL UnitaryRelations : formula (8.30) of Acary2008)
+  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // (CLOSED UnitaryRelations : formula (8.31) of Acary2008)
   assert(indexSet0);
   assert(indexSet1);
 
-  topo->setHasChanged(false);
+  topo->setHasChanged(false); // WHY
 
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
@@ -177,6 +148,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
   //Remove interactions from the indexSet1
   for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
   {
+
+    cout << "v1=" << *v1next << endl;
+    cout << "ui1=" << *ui1 << endl;
+    cout << "ui1end=" << *ui1end << endl;
     ++v1next;
 
     SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
@@ -208,6 +183,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
       topo->setHasChanged(true);
     }
   }
+  cout << "SEPP" << endl;
 
   // indexSet0\indexSet1 scan
   UnitaryRelationsGraph::VIterator ui0, ui0end;
@@ -257,18 +233,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
 }
 
-// void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
-// {
-//   // A the time, a time stepping simulation can only have one non
-//   // smooth problem.
-//   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
-//      RuntimeException::selfThrow
-//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
-
-//   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
-// }
-
-void TimeStepping::initOSNS()
+void TimeSteppingD1Minus::initOSNS()
 {
   // === creates links between work vector in OSI and work vector in
   // Unitary Relations
@@ -286,7 +251,7 @@ void TimeStepping::initOSNS()
        ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-    indexSet0->bundle(*ui)->initialize("TimeStepping");
+    indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus");
     // creates a POINTER link between workX[ds] (xfree) and the
     // corresponding unitaryBlock in each UR for each ds of the
     // current UR.
@@ -304,7 +269,7 @@ void TimeStepping::initOSNS()
     // built.
   {
     //if (_allNSProblems->size()>1)
-    //  RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
+    //  RuntimeException::selfThrow("TimeSteppingD1Minus::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree - 1 except
@@ -326,7 +291,7 @@ void TimeStepping::initOSNS()
   }
 }
 
-void TimeStepping::initLevelMin()
+void TimeSteppingD1Minus::initLevelMin()
 {
   assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
 
@@ -336,24 +301,36 @@ void TimeStepping::initLevelMin()
     _levelMin--;
 }
 
-void TimeStepping::initLevelMax()
+void TimeSteppingD1Minus::initLevelMax()
 {
   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
 
-  if (_levelMax != 0)
-    _levelMax--;
-  // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
+  if (find_if(_allOSI->begin(), _allOSI->end(), cmp_osi_type_d1minuslinear) != _allOSI->end())
+  {
+    // at least one d1minuslinear osi found
+    if (_levelMax == 0)
+      _levelMax++;
+    // like event driven scheme
+  }
+  else
+  {
+    // pure moreau case
+    if (_levelMax != 0)
+      _levelMax--;
+    // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
+  }
 }
 
-void TimeStepping::nextStep()
+void TimeSteppingD1Minus::nextStep()
 {
   processEvents();
 }
 
-void TimeStepping::update(unsigned int levelInput)
+
+void TimeSteppingD1Minus::update(unsigned int levelInput)
 {
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
@@ -375,7 +352,7 @@ void TimeStepping::update(unsigned int levelInput)
   }
 }
 
-void TimeStepping::computeFreeState()
+void TimeSteppingD1Minus::computeFreeState()
 {
   std::for_each(_allOSI->begin(), _allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
 }
@@ -383,13 +360,13 @@ void TimeStepping::computeFreeState()
 // compute simulation between current and next event.  Initial
 // DS/interaction state is given by memory vectors and final state is
 // the one saved in DS/Interaction at the end of this function
-void TimeStepping::computeOneStep()
+void TimeSteppingD1Minus::computeOneStep()
 {
   advanceToEvent();
 }
 
 
-void TimeStepping::computeInitialResidu()
+void TimeSteppingD1Minus::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
@@ -434,7 +411,7 @@ void TimeStepping::computeInitialResidu()
   //  cout<<"END computeInitialResidu"<<endl;
 }
 
-void TimeStepping::run()
+void TimeSteppingD1Minus::run()
 {
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of
@@ -450,7 +427,7 @@ void TimeStepping::run()
     //       newtonSolve(criterion,maxIter);
 
     //     else
-    //       RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: "+opt);
+    //       RuntimeException::selfThrow("TimeSteppingD1Minus::run(opt) failed. Unknow simulation option: "+opt);
 
     advanceToEvent();
 
@@ -460,7 +437,7 @@ void TimeStepping::run()
   cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
-void TimeStepping::advanceToEvent()
+void TimeSteppingD1Minus::advanceToEvent()
 {
   //   computeInitialResidu();
   //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
@@ -486,7 +463,7 @@ void TimeStepping::advanceToEvent()
 
 /*update of the nabla */
 /*discretisation of the Interactions */
-void   TimeStepping::prepareNewtonIteration()
+void   TimeSteppingD1Minus::prepareNewtonIteration()
 {
   //  cout << "update the operators" <<endl ;
 
@@ -496,6 +473,10 @@ void   TimeStepping::prepareNewtonIteration()
     if ((it->second)->getType() == OSI::MOREAU)
     {
       Moreau::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
+    }
+    if ((it->second)->getType() == OSI::D1MINUSLINEAR)
+    {
+      D1MinusLinear::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
     }
     ++it;
   }
@@ -532,7 +513,7 @@ void   TimeStepping::prepareNewtonIteration()
     }
 
 }
-void TimeStepping::saveYandLambdaInMemory()
+void TimeSteppingD1Minus::saveYandLambdaInMemory()
 {
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
@@ -540,7 +521,7 @@ void TimeStepping::saveYandLambdaInMemory()
     (*itOsns)->saveInMemory();
 
 }
-void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
+void TimeSteppingD1Minus::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
@@ -597,17 +578,17 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       }
     }
     if (!isNewtonConverge)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
+      cout << "TimeSteppingD1Minus::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
     else if (info)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
+      cout << "TimeSteppingD1Minus::newtonSolve -- Newton process stopped: solver failed." << endl ;
     //    else
-    //      cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+    //      cout << "TimeSteppingD1Minus::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeSteppingD1Minus::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
 }
 
-bool TimeStepping::newtonCheckConvergence(double criterion)
+bool TimeSteppingD1Minus::newtonCheckConvergence(double criterion)
 {
   bool checkConvergence = true;
   //_relativeConvergenceCriterionHeld is true means that the RCC is
@@ -683,19 +664,19 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   return(checkConvergence);
 }
 
-TimeStepping* TimeStepping::convert(Simulation *str)
+TimeSteppingD1Minus* TimeSteppingD1Minus::convert(Simulation *str)
 {
-  TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
+  TimeSteppingD1Minus* ts = dynamic_cast<TimeSteppingD1Minus*>(str);
   return ts;
 }
 
-void TimeStepping::DefaultCheckSolverOutput(int info)
+void TimeSteppingD1Minus::DefaultCheckSolverOutput(int info)
 {
   // info = 0 => ok
   // else: depend on solver
   if (info != 0)
   {
-    cout << "TimeStepping::check non smooth solver output warning: output message from solver is equal to " << info << endl;
+    cout << "TimeSteppingD1Minus::check non smooth solver output warning: output message from solver is equal to " << info << endl;
     //       cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
@@ -722,7 +703,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   }
 }
 
-void TimeStepping::setCheckSolverFunction(CheckSolverFPtr newF)
+void TimeSteppingD1Minus::setCheckSolverFunction(CheckSolverFPtr newF)
 {
   checkSolverOutput = newF;
 }

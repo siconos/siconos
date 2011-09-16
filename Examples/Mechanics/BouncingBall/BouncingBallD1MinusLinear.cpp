@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem forceRight(new LCP()); // contact force left limit right side
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, 3));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 3));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(forceLeft, SICONOS_OSNSP_TS_VELOCITY + 1);

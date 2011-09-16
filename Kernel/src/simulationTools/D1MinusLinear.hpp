@@ -30,28 +30,28 @@
 
 class SiconosMatrix;
 
-/**  D1MinusLinear Time-Integrator for Dynamical Systems
+/** D1MinusLinear Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.3.0.
  *  \date (Creation) September 01, 2011
  *
- * see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
- * on Discontinuous Galerkin Methods: Definition and Outlook
+ *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
+ *  on Discontinuous Galerkin Methods: Definition and Outlook
  *
- * A D1MinusLinear instance is defined by the list of concerned dynamical systems.
- * Each DynamicalSystem is associated to a SiconosMatrix, named "W"
+ *  A D1MinusLinear instance is defined by the list of concerned dynamical systems.
+ *  Each DynamicalSystem is associated to a SiconosMatrix, named "W"
  *
- * W matrices are initialized and computed in initW and
- * computeW. Depending on the DS type, they may depend on time and DS
- * state (x).
+ *  W matrices are initialized and computed in initW and
+ *  computeW. Depending on the DS type, they may depend on time and DS
+ *  state (x).
  *
- * Main functions:
+ *  Main functions:
  *
- * - computeFreeState(): computes xfree (or vfree), dynamical systems
- *   state without taking non-smooth part into account \n
+ *  - computeFreeState(): computes xfree (or vfree), dynamical systems
+ *    state without taking non-smooth part into account \n
  *
- * - updateState(): computes x(q,v), the complete dynamical systems
+ *  - updateState(): computes x(q,v), the complete dynamical systems
  *    states.
  */
 class D1MinusLinear : public OneStepIntegrator
