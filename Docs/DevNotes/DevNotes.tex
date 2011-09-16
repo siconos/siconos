@@ -22,6 +22,7 @@
 \usepackage{psfrag}
 \usepackage{fancyhdr}
 \usepackage{subfigure}
+\usepackage{cases}
 
 %\renewcommand{\baselinestretch}{1.2}
 \textheight 23cm
@@ -586,7 +587,7 @@ Warning: control terms ($Tu$) are not fully implemented in Lagrangian systems. T
 
 % LAGRANGIAN LINEAR TIME INVARIANT DS
 \section{Second order linear and time-invariant Lagrangian dynamical systems $\rightarrow$ class \it{LagrangianLinearTIDS}}
-
+\label{Sec:LagrangianLineatTIDS}
 \begin{eqnarray}
 M \ddot q + C \dot q + K q =  F_{Ext}(t) + p
 \end{eqnarray}
@@ -885,6 +886,23 @@ Warning: default constructor is always private or protected and apart from the o
     \hline
   \end{tabular}
 \end{table}
+
+\chapter{Computation of the number of Derivatives, index Set, levelMin and levelMax }
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & V. Acary \\
+    \hline
+    date    & Septembre 16, 2011 \\ 
+    \hline
+    version & Kernel 3.3.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\input{ChapterIndex.tex}
+
+
 
 \chapter{Newton's linearization}
 \input{chapterNewton.tex}
