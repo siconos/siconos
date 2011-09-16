@@ -34,17 +34,18 @@
   Lagrangian Relation with:
 
   \f[
-  y= Cq + e + D\lambda[0] + Fz
-  \f]
-  \f[
-  \dot y= C \dot q + D\lambda[1]
+  y= Cq + e + D\lambda + Fz
   \f]
 
   \f[
-  p= C^t \lambda[1]
+  p = C^t \lambda
   \f]
 
    C is the only required input to built a LagrangianLinearTIR.
+   D is optional and may represent a stiffness in the relation
+
+
+
 
 */
 class LagrangianLinearTIR : public LagrangianR

@@ -61,9 +61,13 @@ class BlockVector;
  *
  * - nslaw: the non smooth law
  *
- * - the local variables y and lambda (their size is interactionSize).
- *   STL vectors are used and y[i] (resp lambda[i]) represents the
- *   i-eme derivative of variable y (resp lambda).
+ * - the local variable y  (its size is interactionSize).
+ *   STL vectors are used and y[i] usually represents the
+ *   i-eme derivative of variable y.
+ *
+ * - the local variable lambda  (its size is interactionSize).
+ *   STL vectors are used and lambda[i] represents various level
+ *   of multiplier involved in the nonsmooth law and usd by the OSI
  *
  *   y is a container of BlockVector. Each block corresponds to a
  *    "unitary relation", a relation which size is the one of the

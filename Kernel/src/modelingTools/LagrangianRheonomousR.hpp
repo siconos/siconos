@@ -33,11 +33,11 @@
  *  This class provides tools to describe non linear relation of the type:
  *
  * \f[
- * Y[0] = y = h(q,t,z)
+ * y = h(q,t,z)
  * \f]
  *
  * \f[
- * Y[1] = \dot y = G0(q,t,z)\dot q + \frac{\partial h}{\partial t}(q,t,z)
+ *  \dot y = G0(q,t,z)\dot q + \frac{\partial h}{\partial t}(q,t,z)
  * \f]
  *
  * \f[
@@ -48,6 +48,11 @@
  * \f[
  * G0(q,t,z) = \nabla_q h(q,t,z)
  * \f]
+ *
+ *  y (or its discrete approximation) is usually stored in y[0]
+ *  \dot y (or its discrete approximation) is usually stored in y[1]
+ *  higher level can used for storing higher levels of derivatives.
+ *
  *
  *
  * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are

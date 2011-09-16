@@ -50,6 +50,13 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * computeW. Depending on the DS type, they may depend on time and DS
  * state (x).
  *
+ * For first order systems, the implementation uses _r for storing the
+ * the input due to the nonsmooth law. This Moreau scheme assumes that the
+ * relative degree is zero or one and one level for _r is sufficient
+ *
+ * For Lagrangian systems, the implementation uses _p[1] for storing the
+ * discrete impulse.
+ *
  * Main functions:
  *
  * - computeFreeState(): computes xfree (or vfree), dynamical systems

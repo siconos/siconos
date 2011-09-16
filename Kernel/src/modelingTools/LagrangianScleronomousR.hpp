@@ -33,11 +33,11 @@
  * Relation with:
  *
  * \f[
- * Y[0] = y = h(q,z) \\
+ * y = h(q,z) \\
  * \f]
  *
  * \f[
- * Y[1] = \dot y = G0(q,z)\dot q \\
+ * \dot y = G0(q,z)\dot q \\
  * \f]
  *
  * \f[
@@ -49,7 +49,11 @@
  \f[
  G0(q,z) = \nabla_q h(q,z)
  \f]
-
+ *
+ *  y (or its discrete approximation) is usually stored in y[0]
+ *  \dot y (or its discrete approximation) is usually stored in y[1]
+ *  higher level can used for storing higher levels of derivatives.
+ *
  * G0 and h are connected to plug-in functions.\n
  * The plugin function to compute h(q,z) needs the following parameters:\n
  * --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n

@@ -177,7 +177,11 @@ protected:
   SP::SiconosVector _residuFree;
 
   /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
-      (multiplier, force, ...)*/
+   * (multiplier, force, ...)
+   * \remark V.A. 17/09/2011 :
+   * This should be a VectorOfVectors as for _x when higher relative degree
+   * systems will be simulated
+   */
   SP::SiconosVector _r;
 
   /** used by the relative convergence criteron*/
