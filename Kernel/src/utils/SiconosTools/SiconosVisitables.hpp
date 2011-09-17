@@ -29,6 +29,8 @@
   REGISTER(EventDriven)                                      \
   REGISTER(OneStepIntegrator)                                \
   REGISTER(Moreau)                                           \
+  REGISTER(Lsodar)                                           \
+  REGISTER(D1MinusLinear)                                    \
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LinearOSNS)                                       \
   REGISTER(LCP)                                              \

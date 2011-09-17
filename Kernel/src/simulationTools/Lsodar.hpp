@@ -249,6 +249,10 @@ public:
   /** print the data to the screen
    */
   void display();
+
+  /** visitors hook
+  */
+  ACCEPT_STD_VISITORS();
 };
 
 #endif // Lsodar_H
