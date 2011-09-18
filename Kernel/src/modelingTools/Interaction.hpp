@@ -102,6 +102,30 @@ private:
   /** relative degree of this interaction */
   unsigned int _relativeDegree;
 
+  /** Lowel level for storing output y
+   *  y will be initialized from
+   *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
+   */
+  unsigned int _lowerLevelForOutput;
+
+  /** Upper level for storing output y
+    *  y will be initialized from
+    *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
+    */
+  unsigned int _upperLevelForOutput;
+
+  /** Lowel level for storing input lambda
+   *  lambda will be initialized from
+   *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
+   */
+  unsigned int _lowerLevelForInput;
+
+  /** Upper level for storing input lambda
+   *  lambda will be initialized from
+   *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
+   */
+  unsigned int _upperLevelForInput;
+
   /** size of the interaction, ie size of y[i] and lambda[i] */
   unsigned int _interactionSize;
 
@@ -283,6 +307,39 @@ public:
   inline void setRelativeDegree(const unsigned int newVal)
   {
     _relativeDegree = newVal;
+  };
+
+
+  /** set the lower level for output y
+   * \param an unsigned int
+   */
+  inline void setLowerLevelForOutput(const unsigned int newVal)
+  {
+    _lowerLevelForOutput = newVal;
+  };
+
+  /** set the upper level for output y
+   * \param an unsigned int
+   */
+  inline void setUpperLevelForOutput(const unsigned int newVal)
+  {
+    _upperLevelForOutput = newVal;
+  };
+
+  /** set the lower level for input Lambda
+   * \param an unsigned int
+   */
+  inline void setLowerLevelForInput(const unsigned int newVal)
+  {
+    _lowerLevelForInput = newVal;
+  };
+
+  /** set the upper level for input Lambda
+   * \param an unsigned int
+   */
+  inline void setUpperLevelForInput(const unsigned int newVal)
+  {
+    _upperLevelForInput = newVal;
   };
 
 

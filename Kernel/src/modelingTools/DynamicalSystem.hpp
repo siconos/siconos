@@ -184,6 +184,18 @@ protected:
    */
   SP::SiconosVector _r;
 
+  /** Lowel level for storing input _r
+  *  _r should be initialized from
+  *  _r[_lowerLevelForIntput] to _r[_upperLevelForInput]
+  */
+  unsigned int _lowerLevelForInput;
+
+  /** Upper level for storing input _r
+  *  _r should be initialized from
+  *  _r[_lowerLevelForIntput] to _r[_upperLevelForInput]
+  */
+  unsigned int _upperLevelForInput;
+
   /** used by the relative convergence criteron*/
   double _normRef;
 
@@ -386,6 +398,25 @@ public:
    *  \param SP::SiconosVector newPtr
    */
   void setRPtr(SP::SiconosVector);
+
+  /** set the lower level for input _r
+   * \param an unsigned int
+   */
+  inline void setLowerLevelForInput(const unsigned int newVal)
+  {
+    _lowerLevelForInput = newVal;
+  };
+
+  /** set the upper level for input _r
+   * \param an unsigned int
+   */
+  inline void setUpperLevelForInput(const unsigned int newVal)
+  {
+    _upperLevelForInput = newVal;
+  };
+
+
+
   // --- Residu ---
 
   /** get Residu,

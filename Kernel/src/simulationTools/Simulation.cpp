@@ -447,7 +447,7 @@ void Simulation::processEvents()
 // class NonSmoothLaw;
 // class DynamicalSystem;
 // class OneStepIntegrator;
-class Moreau;
+// class Moreau;
 
 struct Simulation::SetupLevels : public SiconosVisitor
 {
@@ -470,10 +470,6 @@ struct Simulation::SetupLevels : public SiconosVisitor
     unsigned int upperLevelForInput = 0;
 
     Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
@@ -514,20 +510,17 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
 
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
-
-    // _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    // _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    // _interaction->setLowerLevelForInput(lowerLevelForInput);
-    // _interaction->setUpperLevelForInput(upperLevelForInput);
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
 
     ConstDSIterator itDS;
     for (itDS = _interaction->dynamicalSystemsBegin(); itDS != _interaction->dynamicalSystemsBegin() ; ++itDS)
     {
-      //*itDS->setLowerLevelForInput(lowerLevelForInput);
-      //
-      //*itDS->setUpperLevelForInput(upperLevelForInput);
+      (*itDS)->setLowerLevelForInput(lowerLevelForInput);
+      (*itDS)->setUpperLevelForInput(upperLevelForInput);
     }
 
 
