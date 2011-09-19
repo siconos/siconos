@@ -67,10 +67,6 @@ private:
   /** information concerning the Model */
   std::string _title, _author, _description, _date, _xmlSchema;
 
-  /** default constructor
-   */
-  Model();
-
   /** Copy constructor => private, no copy nor pass-by value for Model
    */
   Model(const Model&) {};
@@ -85,6 +81,10 @@ private:
   ACCEPT_SERIALIZATION(Model);
 
 public:
+
+  /** default constructor
+   */
+  Model();
 
   /** create the Model from an xml file
    *  \param char * : the input XML file (optional parameter)

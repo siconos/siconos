@@ -172,7 +172,7 @@ private:
   // === PRIVATE FUNCTIONS ===
 
   /** default constructor */
-  Interaction();
+  Interaction() {};
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
