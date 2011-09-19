@@ -4,9 +4,12 @@
 
 
 #include "KernelTest.hpp"
+
+
+#define DEBUG_MESSAGES 1
 #include "../Register.hpp"
 
-#include <boost/static_assert.hpp>
+
 
 #include <SiconosKernel.hpp>
 
@@ -16,6 +19,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
+#include <boost/typeof/typeof.hpp>
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
@@ -125,10 +129,11 @@ SICONOS_IO_REGISTER(OSNSMatrix,
                     (dimColumn)
                     (storageType)
                     (DSBlocksPositions)
-                    (numericsMat)
+                    //  (numericsMat)
                     (M1)
                     (Mt)
-                    (M2))
+                    (M2)
+                   )
 SICONOS_IO_REGISTER_WITH_BASES(RelayNSL, (NonSmoothLaw),
                                (_lb)
                                (_ub))
@@ -194,11 +199,12 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianR, (Relation),
 SICONOS_IO_REGISTER(BlockCSRMatrix,
                     (nr)
                     (nc)
-                    (numericsMatSparse)
-                    (MBlockCSR)
+                    //  (numericsMatSparse)
+                    //  (MBlockCSR)     ===> double* CSR : boost serialization fail!
                     (diagSizes)
                     (rowPos)
-                    (colPos))
+                    (colPos)
+                   )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR, (LagrangianR),
                                (_F)
                                (_e))
@@ -319,7 +325,7 @@ SICONOS_IO_REGISTER(Simulation,
                     (_levelMax)
                     (_tolerance)
                     (_printStat)
-                    (statOut)
+                    //  (statOut)
                     (_useRelativeConvergenceCriterion)
                     (_relativeConvergenceCriterionHeld)
                     (_relativeConvergenceTol))
@@ -442,7 +448,7 @@ SICONOS_IO_REGISTER_WITH_BASES(Moreau, (OneStepIntegrator),
                                (_useGamma)
                                (_useGammaForRelation))
 SICONOS_IO_REGISTER(Event,
-                    (timeOfEvent)
+                    //  (timeOfEvent)  => need __mpz_struct (gmp) serialization
                     (type)
                     (dTime)
                     (tick))
@@ -488,15 +494,16 @@ SICONOS_IO_REGISTER(PluggedObject,
                     //  (fPtr)
                     (pluginName))
 SICONOS_IO_REGISTER(EventsManager,
-                    (_allEvents)
-                    (_currentEvent)
-                    (_nextEvent)
-                    (_ETD)
-                    (_ENonSmooth)
-                    (_simulation)
-                    (_hasNS)
-                    (_hasCM)
-                    (GapLimit2Events))
+                    //  (_allEvents)        => segfault (save)
+                    //  (_currentEvent)
+                    //  (_nextEvent)
+                    //  (_ETD)
+                    //  (_ENonSmooth)
+                    //  (_simulation)
+                    //  (_hasNS)
+                    //  (_hasCM)
+                    // (GapLimit2Events)
+                   )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)
@@ -541,101 +548,72 @@ SICONOS_IO_REGISTER(DynamicalSystemsGraph,
 
 /* hand written */
 
+SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
+
 SICONOS_IO_REGISTER(RelationData, (block)(blockProj)(source)(target));
 
 SICONOS_IO_REGISTER(SystemData, (upper_block)(lower_block)(upper_blockProj)(lower_blockProj));
 
+BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 
-// need object<int>, ,object<double> etc.
+BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
 
+#include <boost/preprocessor/tuple/elem.hpp>
 
+#define SERIALIZE_I(r,T,M)                                              \
+  BOOST_PP_TUPLE_ELEM(2,0,T) & ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(M), BOOST_PP_TUPLE_ELEM(2,1,T) . M);
 
-SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
+#define SERIALIZE(S,MEMBERS, ARCHIVE)                       \
+  BOOST_PP_SEQ_FOR_EACH(SERIALIZE_I, (ARCHIVE, S), MEMBERS)
 
-SICONOS_IO_REGISTER(NumericsMatrix, (storageType)(size0)(size1)(matrix0)(matrix1));
-
-struct SaveCase
-{
-  typedef SaveCase type;
-
-  void init(_SolverOptions& v)
-  {
-  }
-};
-
-struct LoadCase
-{
-  typedef LoadCase type;
-
-  void init(_SolverOptions& v)
-  {
-    v.iparam = (int *) malloc(v.iSize * sizeof(int));
-    v.dparam = (double *) malloc(v.dSize * sizeof(double));
-  }
-};
-
+#define SERIALIZE_C_ARRAY(DIM, STRUCT, ARRAY, ARCHIVE)                   \
+  if (Archive::is_loading::value)                                       \
+  {                                                                     \
+    STRUCT . ARRAY = (BOOST_TYPEOF(STRUCT . ARRAY)) malloc(DIM * sizeof(BOOST_TYPEOF(* (STRUCT . ARRAY)))); \
+  };                                                                    \
+  {                                                                     \
+    boost::serialization::array<BOOST_TYPEOF(*(STRUCT . ARRAY))>        \
+      wrapper = boost::serialization::make_array(STRUCT . ARRAY,DIM);   \
+    ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
+  }                                                                     \
+ 
 template <class Archive>
 void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
 {
-  /* bad, why? */
-  /* typedef typename boost::mpl::eval_if<typename Archive::is_saving,
-     SaveCase, LoadCase>::type Allocator; ... */
+  SERIALIZE(v, (solverId)(isSet)(iSize)(dSize)(filterOn)(numberOfInternalSolvers), ar);
 
-  /* serialization is missing in shallow adatator */
-  /*  boost::numeric::ublas::vector<int,boost::numeric::ublas::shallow_array_adaptor<int> >
-      iparam(v.iSize,boost::numeric::ublas::shallow_array_adaptor<int>(v.iSize,v.iparam));
+  SERIALIZE_C_ARRAY(v.iSize, v, iparam, ar);
+  SERIALIZE_C_ARRAY(v.dSize, v, dparam, ar);
+  SERIALIZE_C_ARRAY(v.numberOfInternalSolvers, v, internalSolvers, ar);
+}
 
-    boost::numeric::ublas::vector<double,boost::numeric::ublas::shallow_array_adaptor<double> >
-    dparam(v.dSize,boost::numeric::ublas::shallow_array_adaptor<double>(v.dSize,v.dparam));*/
+template <class Archive>
+void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int version)
+{
+  SERIALIZE(v, (size)(M), ar);
+  SERIALIZE_C_ARRAY(v.size, v, q, ar);
+}
 
-  ar & boost::serialization::make_nvp("solverId", v.solverId);
-  ar & boost::serialization::make_nvp("isSet", v.isSet);
-  ar & boost::serialization::make_nvp("iSize", v.iSize);
+template <class Archive>
+void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
+{
+  SERIALIZE(v, (nbblocks)(blocknumber0)(blocknumber1)(filled1)(filled2), ar);
+  SERIALIZE_C_ARRAY(v.filled1, v, index1_data, ar);
+  SERIALIZE_C_ARRAY(v.filled2, v, index2_data, ar);
+}
 
-  /* we hope nothing have been allocated here */
-  if (Archive::is_loading::value)
-  {
-    v.iparam = (int *) malloc(v.iSize * sizeof(int));
-  }
-
-  boost::serialization::array<int> iparam =
-    boost::serialization::make_array(v.iparam, v.iSize);
-
-  ar & boost::serialization::make_nvp("iparam", iparam);
-  ar & boost::serialization::make_nvp("dSize", v.dSize);
-
-  /* we hope nothing have been allocated here */
-  if (Archive::is_loading::value)
-  {
-    v.dparam = (double *) malloc(v.dSize * sizeof(double));
-  }
-
-  boost::serialization::array<double> dparam =
-    boost::serialization::make_array(v.dparam, v.dSize);
-
-  ar & boost::serialization::make_nvp("dparam", dparam);
-  ar & boost::serialization::make_nvp("dSize", v.dSize);
-  ar & boost::serialization::make_nvp("filterOn", v.filterOn);
-  ar & boost::serialization::make_nvp("numberOfInternalSolvers", v.numberOfInternalSolvers);
-
-  /* we hope nothing have been allocated here */
-  if (Archive::is_loading::value)
-  {
-    v.internalSolvers = (_SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(_SolverOptions));
-  }
-
-  boost::serialization::array<_SolverOptions> internalSolvers =
-    boost::serialization::make_array(v.internalSolvers, v.numberOfInternalSolvers);
-
-  ar & boost::serialization::make_nvp("internalSolvers", internalSolvers);
-
+template <class Archive>
+void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
+{
+  SERIALIZE(v, (storageType)(size0)(size1)(matrix1), ar);
+  SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
 }
 
 template <class Archive>
 void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
 {
-  ar & boost::serialization::make_nvp("DynamicalSystemsSet",
-                                      static_cast<const std::vector<SP::DynamicalSystem> >(v));
+  ar &  boost::serialization::make_nvp("ThisShouldNotBeASetAnyMore",
+                                       boost::serialization::base_object< std::vector<SP::DynamicalSystem> >(v));
 }
 
 template <class Archive>
@@ -717,6 +695,26 @@ namespace boost
 {
 namespace serialization
 {
+
+template <class Archive>
+void serialize(Archive& ar, NumericsMatrix& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
+
+
+template <class Archive>
+void serialize(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
+
+
+template <class Archive>
+void serialize(Archive& ar, LinearComplementarityProblem& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
 
 template <class Archive>
 void serialize(Archive& ar, _SolverOptions& v, unsigned int version)
@@ -883,8 +881,48 @@ void KernelTest::t3()
 
 }
 
-using namespace std;
 void KernelTest::t4()
+{
+  SP::SiconosMatrix m(new SimpleMatrix(3, 3));
+  SP::SiconosVector v(new SimpleVector(3));
+  SP::SiconosVector q(new SimpleVector(3));
+
+  m->eye();
+
+
+  SP::DynamicalSystem ds1(new LagrangianDS(q, v, m));
+  SP::DynamicalSystem ds2(new LagrangianDS(q, v, m));
+
+  SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
+
+  dsset->insert(ds1);
+  dsset->insert(ds2);
+
+  std::ofstream ofs("t4.xml");
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    oa.register_type(static_cast<SimpleMatrix*>(NULL));
+    oa.register_type(static_cast<SimpleVector*>(NULL));
+    oa.register_type(static_cast<LagrangianDS*>(NULL));
+    oa << NVP(dsset);
+  }
+
+  SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
+
+  std::ifstream ifs("t4.xml");
+  {
+    boost::archive::xml_iarchive ia(ifs);
+    ia.register_type(static_cast<SimpleMatrix*>(NULL));
+    ia.register_type(static_cast<SimpleVector*>(NULL));
+    ia.register_type(static_cast<LagrangianDS*>(NULL));
+    ia >> NVP(dssetfromfile);
+  }
+
+}
+
+
+using namespace std;
+void KernelTest::t5()
 {
 
   // ================= Creation of the model =======================
@@ -986,56 +1024,124 @@ void KernelTest::t4()
 
     SP::SolverOptions so;
 
-    //    oa.register_type(static_cast<LCP*>(NULL));
 
-    /*    oa.register_type(static_cast<BlockVector*>(NULL));
-        oa.register_type(static_cast<SensorPosition*>(NULL));
-        oa.register_type(static_cast<NewtonImpactNSL*>(NULL));
-        oa.register_type(static_cast<NewtonEulerDS*>(NULL));
-        oa.register_type(static_cast<PrimalFrictionContact*>(NULL));
-        oa.register_type(static_cast<RelayNSL*>(NULL));
-        oa.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-        oa.register_type(static_cast<SensorEvent*>(NULL));
-        oa.register_type(static_cast<MLCP*>(NULL));
+    oa.register_type(static_cast<BlockVector*>(NULL));
+    //    oa.register_type(static_cast<SensorPosition*>(NULL));
+    oa.register_type(static_cast<NewtonImpactNSL*>(NULL));
+    //    oa.register_type(static_cast<NewtonEulerDS*>(NULL));
+    //    oa.register_type(static_cast<PrimalFrictionContact*>(NULL));
+    //   oa.register_type(static_cast<RelayNSL*>(NULL));
+    //   oa.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+    //    oa.register_type(static_cast<SensorEvent*>(NULL));
+    //    oa.register_type(static_cast<MLCP*>(NULL));
 
-        oa.register_type(static_cast<NewtonEulerRImpact*>(NULL));
-        oa.register_type(static_cast<QP*>(NULL));
-        oa.register_type(static_cast<LagrangianR*>(NULL));
-        oa.register_type(static_cast<LagrangianLinearTIR*>(NULL));
-        oa.register_type(static_cast<SimpleVector*>(NULL));
-        oa.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-        oa.register_type(static_cast<LCP*>(NULL));
-        oa.register_type(static_cast<NewtonEulerR*>(NULL));
-        oa.register_type(static_cast<EventDriven*>(NULL));
-        oa.register_type(static_cast<TimeStepping*>(NULL));
-        oa.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-        oa.register_type(static_cast<GenericMechanical*>(NULL));
-        oa.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-        oa.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
-        oa.register_type(static_cast<Lsodar*>(NULL));
-        oa.register_type(static_cast<Relay*>(NULL));
-        oa.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-        oa.register_type(static_cast<MLCP2*>(NULL));
-        oa.register_type(static_cast<LinearOSNS*>(NULL));
-        oa.register_type(static_cast<FirstOrderType2R*>(NULL));
-        oa.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
-        oa.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-        oa.register_type(static_cast<MultipleImpactNSL*>(NULL));
-        oa.register_type(static_cast<LagrangianCompliantR*>(NULL));
-        oa.register_type(static_cast<FirstOrderLinearR*>(NULL));
-        oa.register_type(static_cast<SimpleMatrix*>(NULL));
-        oa.register_type(static_cast<BlockMatrix*>(NULL));
-        oa.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-        oa.register_type(static_cast<Equality*>(NULL));
-        oa.register_type(static_cast<FirstOrderR*>(NULL));
-        oa.register_type(static_cast<Moreau*>(NULL));
-        oa.register_type(static_cast<ActuatorEvent*>(NULL));
-        oa.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-        oa.register_type(static_cast<LagrangianDS*>(NULL));*/
+    //    oa.register_type(static_cast<NewtonEulerRImpact*>(NULL));
+    //    oa.register_type(static_cast<QP*>(NULL));
+    //    oa.register_type(static_cast<LagrangianR*>(NULL));
+    oa.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+    oa.register_type(static_cast<SimpleVector*>(NULL));
+    //    oa.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+    //    oa.register_type(static_cast<NewtonEulerR*>(NULL));
+    //    oa.register_type(static_cast<EventDriven*>(NULL));
+    oa.register_type(static_cast<TimeStepping*>(NULL));
+    oa.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+    //    oa.register_type(static_cast<GenericMechanical*>(NULL));
+    oa.register_type(static_cast<LagrangianScleronomousR*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
+    //    oa.register_type(static_cast<Lsodar*>(NULL));
+    //    oa.register_type(static_cast<Relay*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+    //    oa.register_type(static_cast<MLCP2*>(NULL));
+    //    oa.register_type(static_cast<OneStepNSProblem*>(NULL));
+    oa.register_type(static_cast<LCP*>(NULL));
+    //    oa.register_type(static_cast<LinearOSNS*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderType2R*>(NULL));
+    //   oa.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
+    oa.register_type(static_cast<LagrangianRheonomousR*>(NULL));
+    //    oa.register_type(static_cast<MultipleImpactNSL*>(NULL));
+    //    oa.register_type(static_cast<LagrangianCompliantR*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderLinearR*>(NULL));
+    oa.register_type(static_cast<SimpleMatrix*>(NULL));
+    oa.register_type(static_cast<BlockMatrix*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
+    //    oa.register_type(static_cast<Equality*>(NULL));
+    //    oa.register_type(static_cast<FirstOrderR*>(NULL));
+    oa.register_type(static_cast<Moreau*>(NULL));
+    //    oa.register_type(static_cast<ActuatorEvent*>(NULL));
+    //    oa.register_type(static_cast<Event*>(NULL));
+    //    oa.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+    oa.register_type(static_cast<LagrangianDS*>(NULL));
 
-    // not yet => need serialization of some Numerics struct
-    // oa << NVP(osnspb);
+    // dump
+    DEBUG_PRINT("saving\n");
+    oa << NVP(bouncingBall);
   }
 
-}
 
+
+  SP::Model bouncingBallFromFile(new Model());
+
+  std::ifstream ifs("BouncingBall1.xml");
+  {
+    boost::archive::xml_iarchive ia(ifs);
+
+    ia.register_type(static_cast<BlockVector*>(NULL));
+    //    ia.register_type(static_cast<SensorPosition*>(NULL));
+    ia.register_type(static_cast<NewtonImpactNSL*>(NULL));
+    //    ia.register_type(static_cast<NewtonEulerDS*>(NULL));
+    //    ia.register_type(static_cast<PrimalFrictionContact*>(NULL));
+    //   ia.register_type(static_cast<RelayNSL*>(NULL));
+    //   ia.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+    //    ia.register_type(static_cast<SensorEvent*>(NULL));
+    //    ia.register_type(static_cast<MLCP*>(NULL));
+
+    //    ia.register_type(static_cast<NewtonEulerRImpact*>(NULL));
+    //    ia.register_type(static_cast<QP*>(NULL));
+    //    ia.register_type(static_cast<LagrangianR*>(NULL));
+    ia.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+    ia.register_type(static_cast<SimpleVector*>(NULL));
+    //    ia.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+    //    ia.register_type(static_cast<NewtonEulerR*>(NULL));
+    //    ia.register_type(static_cast<EventDriven*>(NULL));
+    ia.register_type(static_cast<TimeStepping*>(NULL));
+    ia.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+    //    ia.register_type(static_cast<GenericMechanical*>(NULL));
+    ia.register_type(static_cast<LagrangianScleronomousR*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
+    //    ia.register_type(static_cast<Lsodar*>(NULL));
+    //    ia.register_type(static_cast<Relay*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+    //    ia.register_type(static_cast<MLCP2*>(NULL));
+    //    ia.register_type(static_cast<OneStepNSProblem*>(NULL));
+    ia.register_type(static_cast<LCP*>(NULL));
+    //    ia.register_type(static_cast<LinearOSNS*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderType2R*>(NULL));
+    //   ia.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
+    ia.register_type(static_cast<LagrangianRheonomousR*>(NULL));
+    //    ia.register_type(static_cast<MultipleImpactNSL*>(NULL));
+    //    ia.register_type(static_cast<LagrangianCompliantR*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearR*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(NULL));
+    ia.register_type(static_cast<BlockMatrix*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
+    //    ia.register_type(static_cast<Equality*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderR*>(NULL));
+    ia.register_type(static_cast<Moreau*>(NULL));
+    //    ia.register_type(static_cast<ActuatorEvent*>(NULL));
+    //    ia.register_type(static_cast<Event*>(NULL));
+    //    ia.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+    ia.register_type(static_cast<LagrangianDS*>(NULL));
+
+    DEBUG_PRINT("loading\n");
+    ia >> NVP(bouncingBallFromFile);
+  }
+
+
+  CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
+  // in depth comparison?
+
+  // now we should try to run the bouncing ball from file
+
+  // BUT: non serialized members => must be initialized or serialized
+
+}

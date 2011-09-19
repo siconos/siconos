@@ -18,6 +18,8 @@
 
 #include <boost/serialization/export.hpp>
 
+#include <debug.h>
+
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
   ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), object.member)
 
@@ -44,6 +46,7 @@
       template<class Archive>                                           \
       void serialize(Archive & ar, CLASS & o, const unsigned int version) \
       {                                                                 \
+        DEBUG_PRINTF("serialize %s\n", BOOST_PP_STRINGIZE(CLASS));      \
         siconos_io(ar,o,version);                                       \
       };                                                                \
     }}
@@ -65,9 +68,10 @@
   namespace boost { namespace serialization {                           \
       template<class Archive>                                           \
       void serialize(Archive & ar, CLASS & o, const unsigned int version) \
-      {                                                                 \
-        siconos_io(ar,o,version);                                       \
-      };                                                                \
+  {                                                                     \
+    DEBUG_PRINTF("serialize %s\n", BOOST_PP_STRINGIZE(CLASS));          \
+    siconos_io(ar,o,version);                                           \
+  };                                                                    \
     }}
 
 /** derived class with multiple inheritance registration
