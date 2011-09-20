@@ -519,7 +519,10 @@ void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 
 
 
-  if (osiType == OSI::MOREAU || osiType == OSI::LSODAR || osiType == OSI::D1MINUSLINEAR)
+  if (osiType == OSI::MOREAU ||
+      osiType == OSI::LSODAR ||
+      osiType == OSI::D1MINUSLINEAR ||
+      osiType == OSI::SCHATZMANPAOLI)
   {
     Osi->computeFreeOutput(UR, this);
     setBlock(*UR->yp(), _q, sizeY , 0, pos);

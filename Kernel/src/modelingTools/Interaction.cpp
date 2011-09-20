@@ -218,6 +218,8 @@ void Interaction::initialize(double t0)
     }
 
 
+
+
     relation()->setInteractionPtr(shared_from_this());
 
     // compute number of relations.
@@ -264,6 +266,10 @@ void Interaction::initializeMemory()
   _lambda.resize(_upperLevelForInput + 1);
   _lambdaOld.resize(_upperLevelForInput + 1);
 
+  _yMemory.resize(_upperLevelForOutput + 1);
+
+
+
   // get the dimension of the non smooth law, ie the size of a unitary blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
   relation()->initializeMemory();
@@ -275,6 +281,8 @@ void Interaction::initializeMemory()
     _y[i].reset(new BlockVector());
     _yOld[i].reset(new BlockVector());
     _y_k[i].reset(new BlockVector());
+    assert(_steps > 0);
+    _yMemory[i].reset(new SiconosMemory(_steps));
 
     for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
@@ -284,6 +292,8 @@ void Interaction::initializeMemory()
       _y[i]->zero();
       _yOld[i]->zero();
       _y_k[i]->zero();
+      _yMemory[i]->swap(_y[i]); // should be fixed
+      _yMemory[i]->swap(_y[i]);
     }
   }
   for (unsigned int i = _lowerLevelForInput ;
@@ -299,6 +309,9 @@ void Interaction::initializeMemory()
       _lambdaOld[i]->zero();
     }
   }
+
+
+
 
 }
 
@@ -566,6 +579,8 @@ void Interaction::swapInMemory()
 
       *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
     }
+
+
   }
 
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
@@ -579,6 +594,9 @@ void Interaction::swapInMemory()
       *(_lambdaOld[i]->vector(j)) = *(_lambda[i]->vector(j));
     }
   }
+
+
+
 }
 
 void Interaction::swapTimeStepInMemory()
@@ -590,7 +608,10 @@ void Interaction::swapTimeStepInMemory()
     {
       *(_y_k[i]->vector(j)) = *(_y[i]->vector(j)) ;
     }
+    _yMemory[i]->swap(_y[i]);
   }
+
+
 }
 
 void Interaction::display() const

@@ -981,6 +981,8 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 
 void LagrangianDS::resetNonSmoothPart()
 {
+  if (_p[0])
+    _p[0]->zero();
   if (_p[1])
     _p[1]->zero();
   if (_p[2])

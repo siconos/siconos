@@ -62,6 +62,16 @@ SP::SiconosVector UnitaryRelation::y_k(unsigned int i) const
   return (interaction()->y_k(i)->vector(_number));
 }
 
+SP::SiconosVector UnitaryRelation::yMemory(unsigned int i, unsigned int j) const
+{
+  //i is the derivative number.
+  //j is the depth in time
+
+  SP::SiconosMemory tmp = interaction()->yMemory(i);
+
+  return ((tmp->getSiconosVector(j))->vector(_number));
+}
+
 const VectorOfVectors UnitaryRelation::getLambda() const
 {
   // A new object of type VectorOfVectors is created but it handles

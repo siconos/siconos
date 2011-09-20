@@ -510,14 +510,13 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
 
-
+    _interaction->setSteps(1);
   };
   void visit(const SchatzmanPaoli&)
   {
@@ -531,25 +530,6 @@ struct Simulation::SetupLevels : public SiconosVisitor
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
 
-      if (Type::name(*_parent) == "TimeStepping")
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 1;
-        upperLevelForInput = 1;
-      }
-      else if (Type::name(*_parent) == "TimeSteppingProjectOnConstraints")
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 1;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
       if (Type::name(*_parent) == "TimeStepping")
       {
         lowerLevelForOutput = 0;
@@ -573,7 +553,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
 
-
+    _interaction->setSteps(2);
   };
   void visit(const D1MinusLinear&)
   {
@@ -614,7 +594,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
-
+    _interaction->setSteps(1);
   };
 
 
@@ -676,7 +656,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
 
-
+    _interaction->setSteps(1);
   };
 
 
@@ -709,10 +689,10 @@ void Simulation::ComputeLevelsForInputAndOutput()
     Osi->accept(*(setupLevels.get()));
   }
 
-  std::cout <<  "_levelMinForInput =" << _levelMinForInput << std::endl;
-  std::cout <<  "_levelMaxForInput =" << _levelMaxForInput << std::endl;
-  std::cout <<  "_levelMinForOutput =" << _levelMinForOutput << std::endl;
-  std::cout <<  "_levelMaxForOutput =" << _levelMaxForOutput << std::endl;
+  // std::cout <<  "_levelMinForInput =" <<_levelMinForInput << std::endl;
+  // std::cout <<  "_levelMaxForInput =" <<_levelMaxForInput << std::endl;
+  // std::cout <<  "_levelMinForOutput =" <<_levelMinForOutput << std::endl;
+  // std::cout <<  "_levelMaxForOutput =" <<_levelMaxForOutput << std::endl;
 
 }
 

@@ -36,6 +36,10 @@
 class DynamicalSystem;
 class BlockVector;
 
+typedef std::vector<SP::SiconosMemory> VectorOfMemories;
+
+
+
 /**  An Interaction describes the non-smooth interactions between some
  *  Dynamical Systems.
  *
@@ -150,6 +154,12 @@ private:
 
   /** value of the previous time-step */
   VectorOfVectors _y_k;
+
+  /** memory of previous coordinates of the system */
+  VectorOfMemories _yMemory;
+
+  /** Size (depth) of the Memory*/
+  unsigned int _steps;
 
   /** result of the computeInput function */
   VectorOfVectors _lambda;
@@ -519,6 +529,24 @@ public:
   *  \param a SP::SiconosVector  and an unsigned int
   */
   void setYOldPtr(const unsigned int , SP::SiconosVector newPtr);
+
+
+  /** set yOld[i] to pointer newPtr
+   *  \param a SP::SiconosVector  and an unsigned int
+   */
+  void setSteps(unsigned int newval)
+  {
+    _steps = newval;
+  };
+
+
+  /** get all the values of the state vector y stored in memory
+   *  \return a memory
+   */
+  inline SP::SiconosMemory yMemory(unsigned int level) const
+  {
+    return _yMemory[level];
+  }
 
   // -- lambda --
 

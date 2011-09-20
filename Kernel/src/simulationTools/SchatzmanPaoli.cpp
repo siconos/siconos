@@ -26,6 +26,7 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianLinearTIR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "NewtonImpactNSL.hpp"
@@ -617,12 +618,12 @@ double SchatzmanPaoli::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = -h * (1 - _theta);
-        scal(coeff, *Fext, *residuFree, false); // residufree -= h*(1-_theta) * fext(ti)
+        coeff = -h * h * (1 - _theta);
+        scal(coeff, *Fext, *residuFree, false); // residufree -= h^2*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = -h * _theta;
-        scal(coeff, *Fext, *residuFree, false); // residufree -= h*_theta * fext(ti+1)
+        coeff = -h * h * _theta;
+        scal(coeff, *Fext, *residuFree, false); // residufree -= h^2*_theta * fext(ti+1)
       }
 
 
@@ -662,6 +663,11 @@ double SchatzmanPaoli::computeResidu()
       if (d->p(0))
         *(d->workFree()) -= *d->p(0); // Compute Residu in Workfree Notation !!
 
+      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
+      if (d->p(0))
+        d->p(0)->display();
+      else
+        std::cout << " p(0) :"  << std::endl;
       std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       d->workFree()->display();
 
@@ -904,7 +910,19 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = UR->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *UR->y_k(osnsp->levelMin()), *(UR->yp()), subCoord, false);
+    // Only the normal part is multiplied by e
+    SP::SiconosVector yprev = UR->y_k(osnsp->levelMin());
+    std::cout << "yprev " << std::endl;
+    yprev->display();
+    SP::SiconosVector yprev2 = UR->yMemory(osnsp->levelMin(), 0);
+    std::cout << "yprev2 " << std::endl;
+    yprev2->display();
+    SP::SiconosVector yprev3 = UR->yMemory(osnsp->levelMin(), 1);
+    std::cout << "yprev3 " << std::endl;
+    yprev3->display();
+
+
+    subscal(e, *yprev3, *(UR->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -912,7 +930,17 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*UR->yp())(0) +=  e * (*UR->y_k(osnsp->levelMin()))(0);
+    SP::SiconosVector yprev = UR->y_k(osnsp->levelMin());
+    std::cout << "yprev " << std::endl;
+    yprev->display();
+    SP::SiconosVector yprev2 = UR->yMemory(osnsp->levelMin(), 0);
+    std::cout << "yprev2 " << std::endl;
+    yprev2->display();
+    SP::SiconosVector yprev3 = UR->yMemory(osnsp->levelMin(), 1);
+    std::cout << "yprev3 " << std::endl;
+    yprev3->display();
+
+    (*UR->yp())(0) +=  e * (*yprev)(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -958,6 +986,7 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
   SP::SiconosMatrix  F;
   SP::SiconosVector Xq;
   SP::SiconosVector Yp;
+  SP::SiconosVector e;
   SP::SiconosVector Xfree;
 
   SP::SiconosVector H_alpha;
@@ -976,62 +1005,12 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
-  if (relationType == FirstOrder && relationSubType == Type2R)
+  if (relationSubType == LinearTIR)
   {
-    SP::SiconosVector lambda;
-    lambda = UR->interaction()->lambda(0);
-    C = mainInteraction->relation()->C();
-    D = mainInteraction->relation()->D();
-    assert(lambda);
 
-    if (D)
-    {
-      coord[3] = D->size(1);
-      coord[5] = D->size(1);
-      subprod(*D, *lambda, *Yp, coord, true);
+    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() != osnsp)
+      RuntimeException::selfThrow("SchatzmanPaoli::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
 
-      *Yp *= -1.0;
-    }
-    if (C)
-    {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-      subprod(*C, *Xq, *Yp, coord, false);
-
-    }
-
-    if (_useGammaForRelation)
-    {
-      RuntimeException::selfThrow("SchatzmanPaoli::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
-    }
-    H_alpha = UR->interaction()->relation()->Halpha();
-    assert(H_alpha);
-    *Yp += *H_alpha;
-  }
-
-  else if (relationType == NewtonEuler)
-  {
-    SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-
-    if (CT)
-    {
-
-      assert(Xfree);
-      assert(Yp);
-
-      coord[3] = CT->size(1);
-      coord[5] = CT->size(1);
-      // printf("LinearOSNS: computing q: CT\n");
-      // CT->display();
-      // printf("LinearOSNS: computing q: Xfree and _q\n");
-      // Xfree->display();
-      subprod(*CT, *Xfree, *Yp, coord, true);
-      //        _q->display();
-    }
-
-  }
-  else
-  {
     C = mainInteraction->relation()->C();
 
     if (C)
@@ -1052,70 +1031,20 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
         subprod(*C, *Xfree, *Yp, coord, true);
       }
     }
-
-    if (relationType == Lagrangian)
+    SP::LagrangianLinearTIR ltir = boost::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
+    e = ltir->e();
+    if (e)
     {
-      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-      ID->eye();
-
-      Index xcoord(8);
-      xcoord[0] = 0;
-      xcoord[1] = sizeY;
-      xcoord[2] = 0;
-      xcoord[3] = sizeY;
-      xcoord[4] = 0;
-      xcoord[5] = sizeY;
-      xcoord[6] = 0;
-      xcoord[7] = sizeY;
-
-      // For the relation of type LagrangianRheonomousR
-      if (relationSubType == RheonomousR)
-      {
-        if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
-        {
-          boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-          subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false); // y += hDot
-        }
-        else
-          RuntimeException::selfThrow("SchatzmanPaoli::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
-      }
-      // For the relation of type LagrangianScleronomousR
-      if (relationSubType == ScleronomousR)
-      {
-
-      }
-    }
-    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
-    {
-      // In the first order linear case it may be required to add e + FZ to q.
-      // q = HXfree + e + FZ
-      SP::SiconosVector e;
-      if (relationSubType == LinearTIR)
-      {
-        e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
-        F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
-      }
-      else
-      {
-        e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-        F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
-      }
-
-      if (e)
-        *Yp += *e;
-
-      if (F)
-      {
-        SP::SiconosVector  workZ = UR->workz();
-        coord[3] = F->size(1);
-        coord[5] = F->size(1);
-        subprod(*F, *workZ, *Yp, coord, false);
-      }
+      *Yp += *e;
     }
 
   }
+  else
+    RuntimeException::selfThrow("SchatzmanPaoli::ComputeFreeOutput not yet implemented  for relation of Type : " + relationType);
 
-  if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+
+
+  if (UR->getRelationSubType() == LinearTIR)
   {
     SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
     UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);

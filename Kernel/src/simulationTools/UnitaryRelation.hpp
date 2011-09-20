@@ -182,10 +182,18 @@ public:
   *  \return pointer on a SimpleVector
   */
   SP::SiconosVector yOld(unsigned int) const;
+
   /* get y_k[i]
    *    \return pointer on a SimpleVector
    */
   SP::SiconosVector y_k(unsigned int) const;
+
+  /* get yMemory[i][j]
+   *    \return pointer on a SimpleVector
+   * i is the derivative number.
+   * j is the depth in time
+   */
+  SP::SiconosVector yMemory(unsigned int, unsigned int) const;
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
