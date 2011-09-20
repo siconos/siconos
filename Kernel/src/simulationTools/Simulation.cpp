@@ -45,7 +45,7 @@ using namespace std;
 Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _timeDiscretisation(td),
   _tinit(0.0), _tend(0.0), _tout(0.0),
-  _tolerance(DEFAULT_TOLERANCE), _printStat(false)
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
 {
   if (!_timeDiscretisation)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
@@ -65,7 +65,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
                        SP::InteractionsSet interactionsList):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
   _simulationxml(strxml),
-  _tolerance(DEFAULT_TOLERANCE), _printStat(false)
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false), _staticLevels(false), _levelsAreComputed(false)
 {
   if (!_simulationxml)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
@@ -264,7 +264,17 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //  have been declared
   {
     ComputeLevelsForInputAndOutput();
-    topo->indexSetsResize(_levelMaxForOutput + 1);
+
+    if (_levelsAreComputed)
+    {
+      topo->indexSetsResize(_levelMaxForOutput + 1);
+    }
+    else
+    {
+      topo->indexSetsResize(5);
+      //                    ^ the max in setupLevels + 1
+      // ComputeLevelsForInputAndOutput will resize the indexSets when some interactions appear
+    }
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
                   boost::bind(&Interaction::initialize, _1, _tinit));
@@ -677,22 +687,26 @@ void Simulation::ComputeLevelsForInputAndOutput()
   SP::OneStepIntegrator Osi;
   boost::shared_ptr<SetupLevels> setupLevels;
 
-
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  if (not _staticLevels or not _levelsAreComputed)
   {
-    /** \warning. We test only for the first Dynamical of the interaction.
-     * we assume that the osi(s) are consistent for one interaction
-     */
-    ds = *((*it)->dynamicalSystemsBegin());
-    Osi = integratorOfDS(ds);
-    setupLevels.reset(new SetupLevels(shared_from_this(), *it, ds));
-    Osi->accept(*(setupLevels.get()));
+    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    {
+      /** \warning. We test only for the first Dynamical of the interaction.
+       * we assume that the osi(s) are consistent for one interaction
+       */
+      ds = *((*it)->dynamicalSystemsBegin());
+      Osi = integratorOfDS(ds);
+      setupLevels.reset(new SetupLevels(shared_from_this(), *it, ds));
+      Osi->accept(*(setupLevels.get()));
+      _levelsAreComputed = true;
+    }
+    model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput + 1);
   }
-
-  // std::cout <<  "_levelMinForInput =" <<_levelMinForInput << std::endl;
-  // std::cout <<  "_levelMaxForInput =" <<_levelMaxForInput << std::endl;
-  // std::cout <<  "_levelMinForOutput =" <<_levelMinForOutput << std::endl;
-  // std::cout <<  "_levelMaxForOutput =" <<_levelMaxForOutput << std::endl;
-
+#include <debug.h>
+  // #define DEBUG_MESSAGES 1
+  DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
+  DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
+  DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
+  DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
 }
 

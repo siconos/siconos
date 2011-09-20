@@ -141,6 +141,16 @@ protected:
       required, else false.*/
   bool _printStat;
 
+  /** _staticLevels : do not recompute levels once they have been
+   * initialized */
+  bool _staticLevels;
+
+  /** _levelsAreComputed : to keep track of levels initialization
+   * initialized */
+  bool _levelsAreComputed;
+
+
+
   /**Output file for stats*/
   std::ofstream statOut;
 
@@ -608,6 +618,14 @@ public:
   /**
    */
   void ComputeLevelsForInputAndOutput();
+
+  /** set staticLevels
+   * \param bool : if levels are to be computed a each iterations
+   */
+  void setStaticLevels(bool v)
+  {
+    _staticLevels = true;
+  }
 
   /** visitors hook
    */
