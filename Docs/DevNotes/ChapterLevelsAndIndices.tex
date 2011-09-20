@@ -196,30 +196,47 @@ The size of the vector {\tt lambda} in the {\tt Interaction} depends on the same
 
 We can define new members in {\tt Interaction}:
 \begin{itemize}
-\item {\tt \_levelMinForY}, this value is to $0$ by default
-\item {\tt \_levelMaxForY},  this value must be computed at initialization with respect to the previous criteria
-\item {\tt \_levelMinForlambda},  this value must be computed at initialization with respect to the previous criteria
-\item {\tt \_levelMaxForlambda},  this value must be computed at initialization with respect to the previous criteria
+\item {\tt \_lowerlevelForOutput}, this value is to $0$ by default
+\item {\tt \_upperlevelForOutput},  this value must be computed at initialization with respect to the previous criteria
+\item {\tt \_lowerlevelForInput},  this value must be computed at initialization with respect to the previous criteria
+\item {\tt \_upperlevelForInput},  this value must be computed at initialization with respect to the previous criteria
 \end{itemize}
 
-\begin{ndrva}
-  Where can we centralize this computation of level ?
-\end{ndrva}
+
+
+
+This level are computed in {\tt Simulation::ComputeLevelsForInputAndOutput}. A visitor is used for the {\tt OneStepIntegrator}. Furthermore, four global levels are computed 
+\begin{itemize}
+\item {\_levelMinForOutput} this value is the minimum level for the output {\tt Interaction::\_lowerlevelForOutput}  for all the interactions
+\item {\_levelMaxForOutput} this value is the maximum level for the output {\tt Interaction::\_upperlevelForOutput}  for all the interactions
+\item {\_levelMinForInput} this value is the minimum level for the output {\tt Interaction::\_lowerlevelForInput}  for all the interactions
+\item {\_levelMaxForInput} this value is the maximum level for the output {\tt Interaction::\_upperlevelForInput}  for all the interactions
+\end{itemize}
+
+
+
 
 \begin{itemize}
-\item the values {\tt y[i]} must be initialized from {\tt \_levelMinForY} to {\tt \_levelMaxForY}.
-\item the values {\tt lamdba[i]} must be initialized from {\tt \_levelMinForlambda} to  {\tt \_levelMinForlambda}.
+\item the values {\tt y[i]} must be initialized from {\tt \_lowerlevelForOutput} to {\tt \_upperlevelForOutput}.
+\item the values {\tt lamdba[i]} must be initialized from {\tt \_lowerlevelForInput} to  {\tt \_upperlevelForInput}.
 \item the values {\tt y[i]} in {\tt Interaction} must be used in priority to store the i-th derivative of $y$. When it is needed, higher index $i$ can be used for other triggering variables. For instance, for an Event--Driven scheme with a Lagrangian systems with friction, sliding velocity must be stored.
 \item the values of {\tt lamdba[i]} must stored the various multiplier for the nonsmooth law. We affect the same index $i$ as for the level of {\tt y[i]} present in the corresponding nonsmooth law.
 \item The number of {\tt IndexSets} should follows {\tt \_levelMaxForY}.
-\item The number of levels for {\tt \_r} and {\tt \_p} in the DS should follow {\tt \_levelMinForlambda} to  {\tt \_levelMinForlambda}.
+\end{itemize}
+
+
+
+For the dynamical systems :
+\begin{itemize}
+\item The number of levels for {\tt \_r} and {\tt \_p} in the DS should follow {\tt \_lowerlevelForInput} and {\tt \_upperlevelForOutput} of the associated interactions. This is done in {\tt Interaction::initialize}.
 \item A new variable should be added in the LagrangianDS to store the multiplier at the position level ({\tt \_tau} ?) to avoid the use of {\tt \_p[0]}. Indeed, we will continue to assume that {\tt \_p} is the input in the equation of motion. For {\tt lambda} we can  use {\tt lambda[0]} 
 \end{itemize}
 
-TODO LIST
+TODO LIST AND QUESTIONS
 \begin{itemize}
-\item Remove pseudo computation of relative degree ans this notion form the Kernel
-\item Implement the centralized computation of levelMin and levelMax...
+\item What about the case of multiples interactions on a DS with various {\tt \_lowerlevelForInput} and {\tt \_upperlevelForOutput} ? Normally, all the levels should be correctly initialized thanks to the proposed implementation (r2821)
+\item {\tt DynamicalSystem::\_r} should be a VectorOfVectors
+\item {\tt DynamicalSystem::\_r} is split in {\tt LagrangianDS}. a first part is {\tt LagrangianDS::\_p}. The other is not implemented !! {\tt LagrangianDS::\_tau} ?
 \end{itemize}
 
 
