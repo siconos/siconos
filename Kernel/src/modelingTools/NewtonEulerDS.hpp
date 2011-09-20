@@ -196,12 +196,6 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** allocate memory for p[...] vectors
-   *  \param int levelMin for allocation of _p
-   *  \param int levelMax for allocation of _p
-   */
-  void initP(unsigned int, unsigned int);
-
   /** allocate memory for fL and its jacobians, if required.
    */
   void initFL();
