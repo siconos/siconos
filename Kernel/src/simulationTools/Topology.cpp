@@ -276,6 +276,12 @@ void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 };
 
 
+void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
+{
+  _DSG[0]->add_vertex(ds);
+};
+
+
 void Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);

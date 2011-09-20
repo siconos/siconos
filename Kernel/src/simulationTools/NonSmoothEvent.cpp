@@ -97,7 +97,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     }
 
     // compute p[1], post-impact velocity, y[1] and indexSet[2]
-    simulation->update();
+    simulation->update(1);
     // Update the corresponding index set ...
     eventDriven->updateIndexSets();
     /*

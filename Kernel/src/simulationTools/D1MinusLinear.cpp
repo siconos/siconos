@@ -137,30 +137,6 @@ void D1MinusLinear::initialize()
 
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-    // Computatation of the levelMin and the levelMax for _r or _p
-
-    /** \warning the computation of LevelMin ans LevelMax do not depend
-     *  only on Relativedegree but also on the method. This should be fixed.
-     */
-    unsigned int levelMin;
-    unsigned int levelMax;
-    Type::Siconos dsType = Type::value(*(*itDS));
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-      if (Type::name(*simulationLink) == "TimeSteppingD1Minus")
-      {
-        levelMin = 1;
-        levelMax = 2 ;
-      }
-      else
-        RuntimeException::selfThrow("D1MinusLinear::initialize - unknown simulation type: " + Type::name(*simulationLink));
-    }
-    else RuntimeException::selfThrow("D1MinusLinear::initialize - not yet implemented for DynamicalSystem type: " + dsType);
-
-
-    (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
-
     initW(t0, *itDS);
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
   }
@@ -469,10 +445,8 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
   SP::SiconosVector Xq = UR->xq();
   SP::SiconosVector Yp = UR->yp();
   SP::SiconosVector Xfree = UR->workFree();
-  SP::SiconosVector lambda = UR->interaction()->lambda(0);
 
   assert(Xfree);
-  assert(lambda);
 
   SP::Interaction mainInteraction = UR->interaction();
   assert(mainInteraction);

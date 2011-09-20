@@ -279,16 +279,16 @@ void EventDriven::initOSNS()
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
-    initLevelMin();
+
 
     // === update all index sets ===
     updateIndexSets();
 
     // WARNING: only for Lagrangian systems - To be reviewed for
     // other ones.
-    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setLevels(_levelMin - 1, _levelMax - 1);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setLevels(1, 1);
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
-    (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->setLevels(_levelMin, _levelMax);
+    (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->setLevels(2, 2);
     (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->initialize(shared_from_this());
 
 
@@ -310,27 +310,27 @@ void EventDriven::initOSNS()
 }
 
 
-void EventDriven::initLevelMin()
-{
-  // At the time, we consider that for all systems, levelMin is
-  // equal to the minimum value of the relative degree
-  _levelMin = model()->nonSmoothDynamicalSystem()
-              ->topology()->minRelativeDegree();
-  if (_levelMin == 0)
-    _levelMin++;
-}
+// void EventDriven::initLevelMin()
+// {
+//   // At the time, we consider that for all systems, levelMin is
+//   // equal to the minimum value of the relative degree
+//   _levelMin = model()->nonSmoothDynamicalSystem()
+//               ->topology()->minRelativeDegree();
+//   if(_levelMin==0)
+//     _levelMin++;
+// }
 
 
 
-void EventDriven::initLevelMax()
-{
-  _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-  // Interactions initialization (here, since level depends on the
-  // type of simulation) level corresponds to the number of Y and
-  // Lambda derivatives computed.
-  if (_levelMax == 0)
-    _levelMax++;
-}
+// void EventDriven::initLevelMax()
+// {
+//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
+//   // Interactions initialization (here, since level depends on the
+//   // type of simulation) level corresponds to the number of Y and
+//   // Lambda derivatives computed.
+//   if(_levelMax==0)
+//     _levelMax++;
+// }
 
 void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
@@ -460,7 +460,8 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
      */
 
   // Update the output from level 0 to level 1
-  updateOutput(0, 1);
+  updateOutput(0);
+  updateOutput(1);
   //
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -526,7 +527,7 @@ void EventDriven::update(unsigned int levelInput)
       (*itOSI)->updateState(levelInput);
 
     // Update output (y)
-    updateOutput(levelInput, levelInput);
+    updateOutput(levelInput);
   }
   // Warning: index sets are not updated in this function !!
 }
@@ -585,7 +586,8 @@ void EventDriven::advanceToEvent()
   // Set model time to _tout
   model()->setCurrentTime(_tout);
   //update output[0], output[1]
-  updateOutput(0, 1);
+  updateOutput(0);
+  updateOutput(1);
   // Update all the index sets ...
   updateIndexSets();
   //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this

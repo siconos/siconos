@@ -49,11 +49,11 @@ protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   virtual void initOSNS();
 
-  /** compute minimum index set level */
-  virtual void initLevelMin();
+  // /** compute minimum index set level */
+  // virtual void initLevelMin();
 
-  /** compute maximum index set level */
-  virtual void initLevelMax();
+  // /** compute maximum index set level */
+  // virtual void initLevelMax();
 
 public:
 

@@ -256,7 +256,6 @@ SP::SiconosMatrix Moreau::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-
 void Moreau::initialize()
 {
   OneStepIntegrator::initialize();
@@ -266,58 +265,14 @@ void Moreau::initialize()
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-
-    // Computatation of the levelMin and the levelMax for _r or _p
-
-    /** \warning the computation of LevelMin ans LevelMax do not depend
-     *  only on Relativedegree but also on the method. This should be fixed.
-     */
-    unsigned int levelMin;
-    unsigned int levelMax;
-    Type::Siconos dsType = Type::value(*(*itDS));
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-
-      if (Type::name(*simulationLink) == "TimeStepping")
-      {
-        levelMin = 1;
-        levelMax = 1 ;
-      }
-      else if (Type::name(*simulationLink) == "TimeSteppingProjectOnConstraints")
-      {
-        levelMin = 0;
-        levelMax = 1 ;
-      }
-      else
-        RuntimeException::selfThrow("Moreau::initialize - unknown simulation type: " + Type::name(*simulationLink));
-    }
-    else if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-      if (Type::name(*simulationLink) == "TimeStepping")
-      {
-        levelMin = 0;
-        levelMax = 0;
-      }
-      else
-        RuntimeException::selfThrow("Moreau::initialize - unknown simulation type: " + Type::name(*simulationLink));
-    }
-    else RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + dsType);
-
-    (*itDS)->initialize(levelMin, levelMax, t0, getSizeMem());
-
-
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
 
     // W initialization
     initW(t0, *itDS);
 
-
-
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
     (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
-
   }
 }
 void Moreau::initW(double t, SP::DynamicalSystem ds)
@@ -853,7 +808,8 @@ double Moreau::computeResidu()
       *(d->workFree()) = *residuFree; // copy residuFree in Workfree
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
-      *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
+      if (d->p(1))
+        *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workFree()->display();
       normResidu = d->workFree()->norm2();
@@ -980,8 +936,8 @@ double Moreau::computeResidu()
       //       realresiduFree->display();
 
       (* d->workFree()) = *residuFree; // copy residuFree in Workfree
-
-      *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
+      if (d->p(1))
+        *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
 
       //     std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workFree()->display();
@@ -1030,7 +986,8 @@ double Moreau::computeResidu()
       *(d->workFree()) = *residuFree;
       //cout<<"Moreau::computeResidu :\n";
       // residuFree->display();
-      *(d->workFree()) -= *d->p(1);
+      if (d->p(1))
+        *(d->workFree()) -= *d->p(1);
       normResidu = d->workFree()->norm2();
     }
     else
@@ -1361,7 +1318,7 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   SP::SiconosVector Xq;
   SP::SiconosVector Yp;
   SP::SiconosVector Xfree;
-  SP::SiconosVector lambda;
+
   SP::SiconosVector H_alpha;
 
 
@@ -1370,10 +1327,8 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   Yp = UR->yp();
 
   Xfree = UR->workFree();
-  lambda = UR->interaction()->lambda(0);
 
   assert(Xfree);
-  assert(lambda);
 
 
   SP::Interaction mainInteraction = UR->interaction();
@@ -1382,8 +1337,12 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
   if (relationType == FirstOrder && relationSubType == Type2R)
   {
+    SP::SiconosVector lambda;
+    lambda = UR->interaction()->lambda(0);
     C = mainInteraction->relation()->C();
     D = mainInteraction->relation()->D();
+    assert(lambda);
+
     if (D)
     {
       coord[3] = D->size(1);

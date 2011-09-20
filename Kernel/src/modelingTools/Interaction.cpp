@@ -196,7 +196,7 @@ Interaction::~Interaction()
 {
 }
 
-void Interaction::initialize(double t0, unsigned int level)
+void Interaction::initialize(double t0)
 {
 
   if (!_initialized)
@@ -207,16 +207,27 @@ void Interaction::initialize(double t0, unsigned int level)
 
     computeSizeOfDS();
 
+    DSIterator itDS;
+    for (itDS = dynamicalSystemsBegin(); itDS != dynamicalSystemsEnd(); ++itDS)
+    {
+      assert(_lowerLevelForInput <= _upperLevelForInput);
+      for (unsigned int k = _lowerLevelForInput ; k < _upperLevelForInput + 1; k++)
+      {
+        (*itDS)->initializeNonSmoothInput(k);
+      }
+    }
+
+
     relation()->setInteractionPtr(shared_from_this());
 
     // compute number of relations.
     _numberOfRelations = _interactionSize / nslaw()->size();
 
-    initializeMemory(level);
+    initializeMemory();
     relation()->initialize(shared_from_this());
 
     // Compute y values for t0
-    for (unsigned int i = 0; i < level; ++i)
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
     {
       computeOutput(t0, i);
       //      computeInput(t0,i);
@@ -230,46 +241,62 @@ void Interaction::initialize(double t0, unsigned int level)
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(unsigned int numberOfDerivatives)
+void Interaction::initializeMemory()
 {
   // Warning: this function is called from Simulation initialize,
-  // since we need to know the relative degree and the type of
-  // simulation to size Y and Lambda.
+  // since we need to know :
+  // the levels _lowerLevelForOutput and _upperLevelForOutput to size Y
+  // and the levels _lowerLevelForInput and _upperLevelForInput to size  Lambda.
+  // this depends on many criteria (simulation type, osi type, ds type, nonsmooth type)
+  // and they are computed in Simulation::ComputeLevelsForInputAndOutput
 
   // Memory allocation for y and lambda
 
-  // Note that numberOfDerivatives depends on the type of simulation
-  // and on the relative degree.
+  assert(_upperLevelForOutput >= 0);
+  assert(_upperLevelForOutput >= _lowerLevelForOutput);
+  assert(_upperLevelForInput >= 0);
+  assert(_upperLevelForInput >= _lowerLevelForInput);
 
-  _y.resize(numberOfDerivatives) ;
-  _yOld.resize(numberOfDerivatives);
-  _y_k.resize(numberOfDerivatives);
-  _lambda.resize(numberOfDerivatives);
-  _lambdaOld.resize(numberOfDerivatives);
+  // in order to simplify we size from 0 to _upperLevelForXXX
+  _y.resize(_upperLevelForOutput + 1) ;
+  _yOld.resize(_upperLevelForOutput + 1);
+  _y_k.resize(_upperLevelForOutput + 1);
+  _lambda.resize(_upperLevelForInput + 1);
+  _lambdaOld.resize(_upperLevelForInput + 1);
 
   // get the dimension of the non smooth law, ie the size of a unitary blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
   relation()->initializeMemory();
-  for (unsigned int i = 0; i < numberOfDerivatives ; i++)
-  {
 
+  for (unsigned int i = _lowerLevelForOutput ;
+       i < _upperLevelForOutput + 1 ;
+       i++)
+  {
     _y[i].reset(new BlockVector());
     _yOld[i].reset(new BlockVector());
     _y_k[i].reset(new BlockVector());
-    _lambda[i].reset(new BlockVector());
-    _lambdaOld[i].reset(new BlockVector());
+
     for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
       _y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _y_k[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _y[i]->zero();
       _yOld[i]->zero();
       _y_k[i]->zero();
+    }
+  }
+  for (unsigned int i = _lowerLevelForInput ;
+       i < _upperLevelForInput + 1 ;
+       i++)
+  {
+    _lambda[i].reset(new BlockVector());
+    _lambdaOld[i].reset(new BlockVector());
+    for (unsigned int j = 0; j < _numberOfRelations; ++j)
+    {
+      _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
       _lambdaOld[i]->zero();
-
     }
   }
 
@@ -530,7 +557,7 @@ void Interaction::computeSizeOfDS()
 void Interaction::swapInMemory()
 {
   // i corresponds to the derivative number and j the relation number.
-  for (unsigned int i = 0; i < _y.size() ; i++)
+  for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
@@ -538,6 +565,13 @@ void Interaction::swapInMemory()
       assert(_yOld[i]->vector(j));
 
       *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
+    }
+  }
+
+  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
+  {
+    for (unsigned int j = 0; j < _numberOfRelations; ++j)
+    {
 
       assert(_lambdaOld[i]->vector(j));
       assert(_lambda[i]->vector(j));

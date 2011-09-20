@@ -57,11 +57,11 @@ private:
   */
   void initOSNS();
 
-  /** compute LevelMin */
-  void initLevelMin();
+  // /** compute LevelMin */
+  // void initLevelMin();
 
-  /** compute LevelMax */
-  void initLevelMax();
+  // /** compute LevelMax */
+  // void initLevelMax();
 
 
 public:

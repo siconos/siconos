@@ -312,7 +312,6 @@ void TimeStepping::initOSNS()
 
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
 
-    initLevelMin();
 
     // === update all index sets ===
     updateIndexSets();
@@ -320,33 +319,33 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->setLevels(_levelMin, _levelMax);
+      (*itOsns)->setLevels(_levelMinForInput, _levelMaxForInput);
       (*itOsns)->initialize(shared_from_this());
     }
   }
 }
 
-void TimeStepping::initLevelMin()
-{
-  assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
+// void TimeStepping::initLevelMin()
+// {
+//   assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree()>=0);
 
-  _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
+//   _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
 
-  if (_levelMin != 0)
-    _levelMin--;
-}
+//   if(_levelMin!=0)
+//     _levelMin--;
+// }
 
-void TimeStepping::initLevelMax()
-{
-  _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-  // Interactions initialization (here, since level depends on the
-  // type of simulation) level corresponds to the number of Y and
-  // Lambda derivatives computed.
+// void TimeStepping::initLevelMax()
+// {
+//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
+//   // Interactions initialization (here, since level depends on the
+//   // type of simulation) level corresponds to the number of Y and
+//   // Lambda derivatives computed.
 
-  if (_levelMax != 0)
-    _levelMax--;
-  // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
-}
+//   if(_levelMax!=0)
+//     _levelMax--;
+//   // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for _levelMax
+// }
 
 void TimeStepping::nextStep()
 {
@@ -371,7 +370,10 @@ void TimeStepping::update(unsigned int levelInput)
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
-    updateOutput(0, _levelMax);
+    for (unsigned int level = _levelMinForOutput;
+         level < _levelMaxForOutput + 1;
+         level++)
+      updateOutput(level);
   }
 }
 
@@ -394,26 +396,19 @@ void TimeStepping::computeInitialResidu()
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
 
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+
+  if (!allInteractions->isEmpty())
+  {
+    assert(_levelMinForOutput >= 0);
+    assert(_levelMaxForOutput >= _levelMinForOutput);
+    assert(_levelMinForInput >= 0);
+    assert(_levelMaxForInput >= _levelMinForInput);
 
 
-  // SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  // {
-  //   (*it)->relation()->computeh(tkp1);
-  //   (*it)->relation()->computeg(tkp1);
-  // }
-
-
-  double time = model()->currentTime();
-  assert(abs(time - tkp1) < 1e-14);
-
-
-
-
-  updateOutput(0, _levelMax);
-  updateInput(_levelMin);
-
-
+    updateOutput(_levelMinForOutput);
+    updateInput(_levelMinForInput);
+  }
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -421,10 +416,9 @@ void TimeStepping::computeInitialResidu()
     dsGraph->bundle(*vi)->updatePlugins(tkp1);
   }
 
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
+
   if (_computeResiduY)
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
@@ -547,6 +541,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+
   computeInitialResidu();
 
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
@@ -555,7 +551,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     _newtonNbSteps++;
     prepareNewtonIteration();
     computeFreeState();
-    if (!_allNSProblems->empty())
+    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
@@ -563,7 +559,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    update(_levelMin);
+    update(_levelMinForInput);
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
 
@@ -589,7 +585,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       else
         checkSolverOutput(info, this);
 
-      update(_levelMin);
+      update(_levelMinForInput);
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {

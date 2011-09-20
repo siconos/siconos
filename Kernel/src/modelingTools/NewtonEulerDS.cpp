@@ -161,16 +161,10 @@ bool NewtonEulerDS::checkDynamicalSystem()
   return output;
 }
 
-// TEMPORARY FUNCTION: Must be called before this->initialize
-void NewtonEulerDS::initP(unsigned int levelMin, unsigned int levelMax)
+void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
-
-
-  for (unsigned int k = levelMin ; k < levelMax + 1; k++)
-  {
-    _p[k].reset(new SimpleVector(_n));
-  }
-
+  if (!_p[level])
+    _p[level].reset(new SimpleVector(_n));
 }
 
 void NewtonEulerDS::initFL()
@@ -197,12 +191,8 @@ void NewtonEulerDS::initRhs(double time)
 
 }
 
-void NewtonEulerDS::initialize(unsigned int levelMin, unsigned int levelMax,
-                               double time, unsigned int sizeOfMemory)
+void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 {
-  // Memory allocation for p[0], p[1], p[2].
-  initP(levelMin, levelMax);
-
   // set q and q[1] to q0 and velocity0, initialize acceleration.
   *_q = *_q0;
   *_v = *_v0;
@@ -238,7 +228,7 @@ void NewtonEulerDS::initialize(unsigned int levelMin, unsigned int levelMax,
   checkDynamicalSystem();
 
   // Initialize memory vectors
-  initMemory(levelMin, levelMax, sizeOfMemory);
+  initMemory(sizeOfMemory);
 
   initRhs(time);
 
@@ -440,9 +430,9 @@ void NewtonEulerDS::display() const
 }
 
 // --- Functions for memory handling ---
-void NewtonEulerDS::initMemory(unsigned int levelMin, unsigned levelMax, unsigned int steps)
+void NewtonEulerDS::initMemory(unsigned int steps)
 {
-  DynamicalSystem::initMemory(levelMin, levelMax, steps);
+  DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
@@ -464,8 +454,7 @@ void NewtonEulerDS::swapInMemory()
   _vMemory->swap(_v);
   _dotqMemory->swap(_dotq);
   _fLMemory->swap(_fL);
-  // initialization of the reaction force due to the non smooth law
-  _p[1]->zero();
+
 }
 
 NewtonEulerDS* NewtonEulerDS::convert(DynamicalSystem* ds)
@@ -473,8 +462,6 @@ NewtonEulerDS* NewtonEulerDS::convert(DynamicalSystem* ds)
   NewtonEulerDS* lnlds = dynamic_cast<NewtonEulerDS*>(ds);
   return lnlds;
 }
-
-
 
 void NewtonEulerDS::resetNonSmoothPart()
 {

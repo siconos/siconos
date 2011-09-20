@@ -301,11 +301,9 @@ void FirstOrderNonLinearDS::updatePlugins(double time)
   computeJacobianfx(time);
 }
 
-void FirstOrderNonLinearDS::initialize(unsigned int levelMin, unsigned int levelMax,
-                                       double time, unsigned int sizeOfMemory)
+void FirstOrderNonLinearDS::initialize(double time, unsigned int sizeOfMemory)
 {
-  // reset x to x0 and r to zero.
-  _r->zero();
+  // reset x to x0.
   *(_x[0]) = *_x0;
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
@@ -313,7 +311,7 @@ void FirstOrderNonLinearDS::initialize(unsigned int levelMin, unsigned int level
     _z.reset(new SimpleVector(1));
 
   // Initialize memory vectors
-  initMemory(levelMin, levelMax, sizeOfMemory);
+  initMemory(sizeOfMemory);
 
   updatePlugins(time);
   if (_f)
@@ -325,11 +323,24 @@ void FirstOrderNonLinearDS::initialize(unsigned int levelMin, unsigned int level
   //   }
 }
 
+void FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level)
+{
+
+  /**\warning V.A. _r should be initialized here and not in  the constructor
+   * The level should also be used if we need more thatn one _r
+   */
+
+  // reset  r to zero.
+  _r->zero();
+}
+
+
+
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void FirstOrderNonLinearDS::initMemory(unsigned int levelMin, unsigned int levelMax, unsigned int steps)
+void FirstOrderNonLinearDS::initMemory(unsigned int steps)
 {
-  DynamicalSystem::initMemory(levelMin, levelMax, steps);
+  DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;

@@ -91,19 +91,19 @@ void LagrangianR::initialize(SP::Interaction inter)
     data[q0]->insertPtr(lds->q());
     data[q1]->insertPtr(lds->velocity());
     data[q2]->insertPtr(lds->acceleration());
-    /* \warning the initialization  data[p0]->insertPtr( lds->p(1) );
-     * is inconsitent. This should be data[p0]->insertPtr( lds->p(0) )
-     * if needed (for instance for projection onto the constraints)
-     */
-    if (lds->p(0))
-      data[p0]->insertPtr(lds->p(0));
-    if (lds->p(1))
-      data[p1]->insertPtr(lds->p(1));
-    if (lds->p(2))
-      data[p2]->insertPtr(lds->p(2));
-
-
     data[z]->insertPtr(lds->z());
+
+    // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
+    for (unsigned int k = interaction()->lowerLevelForInput() ;
+         k < interaction()->upperLevelForInput() + 1;
+         k++)
+    {
+      assert(lds->p(k));
+      assert(data[p0 + k]);
+      data[p0 + k]->insertPtr(lds->p(k));
+    }
+
+
   }
 }
 

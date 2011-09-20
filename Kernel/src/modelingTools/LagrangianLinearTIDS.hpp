@@ -142,13 +142,19 @@ public:
    */
   void initRhs(double) ;
 
-  /** dynamical system initialization function: mainly set memory and compute value for initial state values.
-   *  \param int levelMin for allocation of _p
-   *  \param int levelMax for allocation of _p
+  /** dynamical system initialization function except for _p:
+   *  mainly set memory and compute plug-in for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(unsigned int, unsigned int, double = 0, unsigned int = 1) ;
+  void initialize(double = 0, unsigned int = 1) ;
+
+  /** dynamical system initialization function for _p
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
+  //void initializeNonSmoothInput(double = 0, unsigned int = 1) ;
+
 
   // --- GETTERS AND SETTERS ---
 

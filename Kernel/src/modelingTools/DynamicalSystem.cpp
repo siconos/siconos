@@ -280,12 +280,8 @@ void DynamicalSystem::update(double time)
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void DynamicalSystem::initMemory(unsigned int levelMin, unsigned int levelMax,
-                                 unsigned int steps)
+void DynamicalSystem::initMemory(unsigned int steps)
 {
-
-  /** \warning  V.A. Should use the levelMin and levelMax for _r
-   */
 
   if (steps == 0)
     cout << "Warning : initMemory with size equal to zero" << endl;
@@ -293,8 +289,8 @@ void DynamicalSystem::initMemory(unsigned int levelMin, unsigned int levelMax,
   {
     _stepsInMemory = steps;
     _xMemory.reset(new SiconosMemory(steps));
-
   }
+
 }
 
 void DynamicalSystem::setComputegFunction(const string& pluginPath, const string& functionName)

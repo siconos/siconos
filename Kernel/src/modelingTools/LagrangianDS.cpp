@@ -335,40 +335,10 @@ bool LagrangianDS::checkDynamicalSystem()
   return output;
 }
 
-// TEMPORARY FUNCTION: Must be called before this->initialize
-void LagrangianDS::initP(unsigned int levelMin, unsigned int levelMax)
+void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
-
-
-
-  for (unsigned int k = levelMin ; k < levelMax + 1; k++)
-  {
-    _p[k].reset(new SimpleVector(_ndof));
-  }
-
-  /* \warning : V.A. 14/09/2011: this should not be done here. First of all the type of
-   * simulation should not be present in the modelling part. Secondly, the initialization depends
-   * the type of type of simulation and OSI and projection method. wit respect to the type of simulation*/
-  // // if (simulationType == "TimeStepping")
-  // // {
-  // //   _p[1].reset(new SimpleVector(_ndof));
-  // //   /* \warning :V.A. 06/04/2011: What is the exact meaning of the following lines ?*/
-  // //   _p[2] = _p[1];
-  // //   _p[0] = _p[1];
-
-  // // }
-  // // else if (simulationType == "EventDriven")
-  // // {
-  // //   _p[1].reset(new SimpleVector(_ndof));
-  // //   _p[2].reset(new SimpleVector(_ndof));
-  // // }
-  // // else
-  // // {
-  // //   //_p[1].reset(new SimpleVector(_ndof));
-  // //   //_p[2] = _p[1];
-  // //   //_p[0] = _p[1];
-  //   RuntimeException::selfThrow("LagrangianDS - initP: the member p of LagrangianDS is not initialized for a simulation of type :    " + simulationType);
-  // }
+  if (!_p[level])
+    _p[level].reset(new SimpleVector(_ndof));
 }
 
 void LagrangianDS::initFL()
@@ -431,19 +401,12 @@ void LagrangianDS::initRhs(double time)
     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
 }
 
-void LagrangianDS::initialize(unsigned int levelMin, unsigned int levelMax,
-                              double time, unsigned int sizeOfMemory)
+void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
 {
-  // Memory allocation from p[levelMin], to  p[levelMax].
-
-  initP(levelMin, levelMax);
 
   // set q and q[1] to q0 and velocity0, initialize acceleration.
   *_q[0] = *_q0;
   *_q[1] = *_velocity0;
-
-
-
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
@@ -493,7 +456,7 @@ void LagrangianDS::initialize(unsigned int levelMin, unsigned int levelMax,
   checkDynamicalSystem();
 
   // Initialize memory vectors
-  initMemory(levelMin, levelMax, sizeOfMemory);
+  initMemory(sizeOfMemory);
 
   //initRhs(time);
 
@@ -938,16 +901,22 @@ void LagrangianDS::display() const
   cout << "- v0 " << endl;
   if (_velocity0) _velocity0->display();
   else cout << "-> NULL" << endl;
-  cout << "- p " << endl;
+  cout << "- p[0] " << endl;
+  if (_p[0]) _p[0]->display();
+  else cout << "-> NULL" << endl;
+  cout << "- p[1] " << endl;
+  if (_p[1]) _p[1]->display();
+  else cout << "-> NULL" << endl;
+  cout << "- p[2] " << endl;
   if (_p[2]) _p[2]->display();
   else cout << "-> NULL" << endl;
   cout << "===================================== " << endl;
 }
 
 // --- Functions for memory handling ---
-void LagrangianDS::initMemory(unsigned levelMin, unsigned levelMax, unsigned int steps)
+void LagrangianDS::initMemory(unsigned int steps)
 {
-  DynamicalSystem::initMemory(levelMin, levelMax, steps);
+  DynamicalSystem::initMemory(steps);
   if (steps == 0)
     cout << "Warning : LagragianDS::initMemory with size equal to zero" << endl;
   else

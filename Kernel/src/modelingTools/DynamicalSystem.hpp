@@ -184,18 +184,6 @@ protected:
    */
   SP::SiconosVector _r;
 
-  /** Lowel level for storing input _r
-  *  _r should be initialized from
-  *  _r[_lowerLevelForIntput] to _r[_upperLevelForInput]
-  */
-  unsigned int _lowerLevelForInput;
-
-  /** Upper level for storing input _r
-  *  _r should be initialized from
-  *  _r[_lowerLevelForIntput] to _r[_upperLevelForInput]
-  */
-  unsigned int _upperLevelForInput;
-
   /** used by the relative convergence criteron*/
   double _normRef;
 
@@ -398,24 +386,6 @@ public:
    *  \param SP::SiconosVector newPtr
    */
   void setRPtr(SP::SiconosVector);
-
-  /** set the lower level for input _r
-   * \param an unsigned int
-   */
-  inline void setLowerLevelForInput(const unsigned int newVal)
-  {
-    _lowerLevelForInput = newVal;
-  };
-
-  /** set the upper level for input _r
-   * \param an unsigned int
-   */
-  inline void setUpperLevelForInput(const unsigned int newVal)
-  {
-    _upperLevelForInput = newVal;
-  };
-
-
 
   // --- Residu ---
 
@@ -743,13 +713,17 @@ public:
    */
   virtual void initRhs(double) = 0 ;
 
-  /** dynamical system initialization function: mainly set memory and compute value for initial state values.
-   *  \param int levelMin for allocation of _r
-   *  \param int levelMax for allocation of _r
+  /** dynamical system initialization function except for _r :
+   *  mainly set memory and compute value for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  virtual void initialize(unsigned int, unsigned int,  double = 0, unsigned int = 1) = 0;
+  virtual void initialize(double = 0, unsigned int = 1) = 0;
+
+  /** dynamical system initialization function for NonSmoothInput _r
+   *  \param level of _r.
+   */
+  virtual void initializeNonSmoothInput(unsigned int level) = 0;
 
   /** dynamical system update: mainly call compute for all time or state depending functions
    *  \param current time
@@ -759,11 +733,9 @@ public:
   /*! @name Memory vectors management  */
   //@{
   /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset all to zero.
-   *  \param int levelMin for allocation of _r
-   *  \param int levelMax for allocation of _r
    *  \param the size of the SiconosMemory (i)
    */
-  virtual void initMemory(unsigned int, unsigned int, unsigned int);
+  virtual void initMemory(unsigned int);
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,

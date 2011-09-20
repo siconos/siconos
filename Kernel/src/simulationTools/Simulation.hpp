@@ -113,13 +113,13 @@ protected:
   /** A link to the Model which contains the Simulation */
   boost::weak_ptr<Model> _model;
 
-  /** int used to set the minimal derivative order used in the OSNS
-      variables */
-  unsigned int _levelMin;
+  // /** int used to set the minimal derivative order used in the OSNS
+  //     variables */
+  // unsigned int _levelMin;
 
-  /** int used to set the maximal derivative order used in the OSNS
-      variables */
-  unsigned int _levelMax;
+  // /** int used to set the maximal derivative order used in the OSNS
+  //     variables */
+  // unsigned int _levelMax;
 
   /** \todo update the doxy comment */
   /** int used to set the maximal derivative order used in the OSNS
@@ -177,11 +177,11 @@ protected:
    */
   virtual void initOSNS() = 0;
 
-  /** compute LevelMin */
-  virtual void initLevelMin() = 0;
+  // /** compute LevelMin */
+  // virtual void initLevelMin() = 0;
 
-  /** compute LevelMax */
-  virtual void initLevelMax() = 0;
+  // /** compute LevelMax */
+  // virtual void initLevelMax() = 0;
 
   /** default constructor.
    */
@@ -379,21 +379,21 @@ public:
     return _allNSProblems;
   };
 
-  /** get levelMin
-   *  \return the value of LevelMin
-   */
-  inline int levelMin() const
-  {
-    return _levelMin;
-  };
+  // /** get levelMin
+  //  *  \return the value of LevelMin
+  //  */
+  // inline int levelMin() const
+  // {
+  //   return _levelMin;
+  // };
 
-  /** get levelMax
-   *  \return the value of LevelMax
-   */
-  inline int levelMax() const
-  {
-    return _levelMax;
-  };
+  // /** get levelMax
+  //  *  \return the value of LevelMax
+  //  */
+  // inline int levelMax() const
+  // {
+  //   return _levelMax;
+  // };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
    *  \param a string, the name of the osns
@@ -611,15 +611,14 @@ public:
   virtual void saveSimulationToXML();
 
   /** compute r thanks to lambda[level] for all Interactions
-   *  \param unsigned int: lambda order, default = levelMin
+   *  \param unsigned int: lambda level
    */
-  void updateInput(int = -1);
+  void updateInput(unsigned int);
 
   /** compute output for all the interactions
-   *  \param  int: y min order to be computed, default = 0
-   *  \param  int: y max order to be computed, default = levelMax
+   *  \param  unsigned int: y min order to be computed default 0
    */
-  void updateOutput(int = 0, int = -1);
+  void updateOutput(unsigned int = 0);
 
   /** call eventsManager processEvents.
    */

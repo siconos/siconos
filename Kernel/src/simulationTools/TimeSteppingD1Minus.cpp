@@ -59,7 +59,7 @@ void TimeSteppingD1Minus::initOSNS()
   {
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
 
-    initLevelMin();
+
 
     // === update all index sets ===
     updateIndexSets();
@@ -67,30 +67,30 @@ void TimeSteppingD1Minus::initOSNS()
     // initialization of OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->setLevels(_levelMin, _levelMax);
+      (*itOsns)->setLevels(_levelMinForInput, _levelMaxForInput);
       (*itOsns)->initialize(shared_from_this());
     }
   }
 }
 
-void TimeSteppingD1Minus::initLevelMin()
-{
-  assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
+// void TimeSteppingD1Minus::initLevelMin()
+// {
+//   assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree()>=0);
 
-  _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
+//   _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
 
-  if (_levelMin != 0)
-    _levelMin--;
-}
+//   if(_levelMin!=0)
+//     _levelMin--;
+// }
 
-void TimeSteppingD1Minus::initLevelMax()
-{
-  // like event driven scheme
-  _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
+// void TimeSteppingD1Minus::initLevelMax()
+// {
+//   // like event driven scheme
+//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
 
-  if (_levelMax == 0)
-    _levelMax++;
-}
+//   if(_levelMax==0)
+//     _levelMax++;
+// }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
 {
@@ -217,7 +217,10 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
-    updateOutput(0, _levelMax);
+    for (unsigned int level = _levelMinForOutput;
+         level < _levelMaxForOutput;
+         level++)
+      updateOutput(level);
   }
 }
 
@@ -244,7 +247,7 @@ void TimeSteppingD1Minus::advanceToEvent()
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
-  update(_levelMin);
+  update(_levelMinForInput);
 
   saveYandLambdaInMemory();
 }
@@ -253,11 +256,14 @@ void TimeSteppingD1Minus::computeInitialResidu()
 {
   double tkp1 = getTkp1();
 
-  double time = model()->currentTime();
-  assert(abs(time - tkp1) < 1e-14);
+  assert(_levelMinForOutput >= 0);
+  assert(_levelMaxForOutput >= _levelMinForOutput);
+  assert(_levelMinForInput >= 0);
+  assert(_levelMaxForInput >= _levelMinForInput);
 
-  updateOutput(0, _levelMax);
-  updateInput(_levelMin);
+
+  updateOutput(_levelMinForOutput);
+  updateInput(_levelMinForInput);
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)

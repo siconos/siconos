@@ -106,7 +106,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2G : ", ds->b()->isPlugged(), true);
 
   double time = 1.5;
-  ds->initialize(0, 0, time);
+  ds->initialize(time);
   ds->computeb(time);
   ds->computeA(time);
   SP::SimpleVector x01(new SimpleVector(3));
@@ -142,7 +142,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getX0() == *x0, true);
 
   double time = 1.5;
-  ds->initialize(0, 0, time);
+  ds->initialize(time);
   ds->computeA(time);
   ds->computeb(time);
   ds->computeRhs(time);

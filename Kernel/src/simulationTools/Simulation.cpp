@@ -42,7 +42,7 @@ using namespace std;
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _timeDiscretisation(td),
-  _tinit(0.0), _tend(0.0), _tout(0.0), _levelMin(0), _levelMax(0),
+  _tinit(0.0), _tend(0.0), _tout(0.0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
   if (!_timeDiscretisation)
@@ -62,7 +62,8 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList,
                        SP::InteractionsSet interactionsList):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
-  _simulationxml(strxml), _levelMin(0), _levelMax(0), _tolerance(DEFAULT_TOLERANCE), _printStat(false)
+  _simulationxml(strxml),
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
   if (!_simulationxml)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
@@ -205,12 +206,11 @@ void Simulation::updateInteractions()
 
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
-  initLevelMax();
 
   double time = model()->currentTime(); // init with current model time
 
   std::for_each(allInteractions->begin(), allInteractions->end(),
-                boost::bind(&Interaction::initialize, _1, time, _levelMax + 1));
+                boost::bind(&Interaction::initialize, _1, time));
 
   initOSNS();
 
@@ -236,11 +236,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
          itosi != _allOSI->end(); ++itosi)
     {
 
-
       for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
            itds != (*itosi)->dynamicalSystems()->end();
            ++itds)
       {
+        (*itds)->initialize(model()->t0(),
+                            (*itosi)->getSizeMem());
         addInOSIMap(*itds, *itosi);
       }
 
@@ -252,28 +253,24 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
 
 
-
   // === IndexSets building ===
-  // The number of indexSets is given by the maximum value of relative
-  // degrees of the unitary relations.
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
   //  if( !allInteractions->isEmpty() ) // ie if some Interactions
   //  have been declared
   {
-
     ComputeLevelsForInputAndOutput();
-    initLevelMax();
-    topo->indexSetsResize(_levelMax + 1);
+    topo->indexSetsResize(_levelMaxForOutput + 1);
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, _tinit, _levelMax + 1));
+                  boost::bind(&Interaction::initialize, _1, _tinit));
 
     for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
       topo->resetIndexSetPtr(i);
     // Initialize OneStepNSProblem: in derived classes specific functions.
     initOSNS();
   }
+
 
 
 
@@ -348,8 +345,9 @@ int Simulation::computeOneStepNSProblem(int Id)
 
 void Simulation::update()
 {
-  for (unsigned int i = 1; i < _levelMax; ++i)
-    update(i);
+  assert(0);
+  // for(unsigned int i = 1; i<_levelMax; ++i)
+  //   update(i);
 }
 
 void Simulation::saveSimulationToXML()
@@ -372,14 +370,10 @@ void Simulation::saveSimulationToXML()
   else RuntimeException::selfThrow("Simulation::saveSimulationToXML - SimulationXML = NULL");
 }
 
-void Simulation::updateInput(int level)
+void Simulation::updateInput(unsigned int level)
 {
   // To compute input(level) (ie with lambda[level]) for all Interactions.
-
-  if (level == -1)
-    level = _levelMin; // We use this since it is impossible to set
-  // _levelMin as defaultValue in
-  // OneStepNSProblem.h
+  assert(level >= 0);
 
   //  double time = nextTime();
   double time = model()->currentTime();
@@ -392,15 +386,17 @@ void Simulation::updateInput(int level)
   // We compute input using lambda(level).
   for (it = topology->interactions()->begin();
        it != topology->interactions()->end(); it++)
+  {
+    assert((*it)->lowerLevelForInput() <= level);
+    assert((*it)->upperLevelForInput() >= level);
     (*it)->computeInput(time, level);
+  }
 }
 
-void Simulation::updateOutput(int level0, int level1)
+void Simulation::updateOutput(unsigned int level)
 {
-  // To compute output() for all levels between level0 and level1
-  // (included), for all Interactions.
-  if (level1 == -1)
-    level1 = _levelMax;
+  // To compute output(level) (ie with y[level]) for all Interactions.
+  assert(level >= 0);
 
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
@@ -409,8 +405,9 @@ void Simulation::updateOutput(int level0, int level1)
   for (it = topology->interactions()->begin();
        it != topology->interactions()->end(); it++)
   {
-    for (int i = level0; i <= level1; ++i)
-      (*it)->computeOutput(time , i);
+    assert((*it)->lowerLevelForOutput() <= level);
+    assert((*it)->upperLevelForOutput() >= level);
+    (*it)->computeOutput(time , level);
   }
 }
 
@@ -516,13 +513,6 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
 
-    ConstDSIterator itDS;
-    for (itDS = _interaction->dynamicalSystemsBegin(); itDS != _interaction->dynamicalSystemsBegin() ; ++itDS)
-    {
-      (*itDS)->setLowerLevelForInput(lowerLevelForInput);
-      (*itDS)->setUpperLevelForInput(upperLevelForInput);
-    }
-
 
   };
 
@@ -560,22 +550,11 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
 
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
-
-    // _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    // _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    // _interaction->setLowerLevelForInput(lowerLevelForInput);
-    // _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    ConstDSIterator itDS;
-    for (itDS = _interaction->dynamicalSystemsBegin(); itDS != _interaction->dynamicalSystemsBegin() ; ++itDS)
-    {
-      //*itDS->setLowerLevelForInput(lowerLevelForInput);
-      //
-      //*itDS->setUpperLevelForInput(upperLevelForInput);
-    }
-
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
 
   };
 
@@ -632,19 +611,11 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 
 
-    // _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    // _interaction->setUpperLevelForOutput(upperLevelForOutput);
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
-    // _interaction->setLowerLevelForInput(lowerLevelForInput);
-    // _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    ConstDSIterator itDS;
-    for (itDS = _interaction->dynamicalSystemsBegin(); itDS != _interaction->dynamicalSystemsBegin() ; ++itDS)
-    {
-      //*itDS->setLowerLevelForInput(lowerLevelForInput);
-      //
-      //*itDS->setUpperLevelForInput(upperLevelForInput);
-    }
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
 
 
   };

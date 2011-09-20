@@ -51,11 +51,11 @@ private:
   */
   TimeStepping() {};
 
-  /** compute LevelMin */
-  void initLevelMin();
+  // /** compute LevelMin */
+  // void initLevelMin();
 
-  /** compute LevelMax */
-  void initLevelMax();
+  // /** compute LevelMax */
+  // void initLevelMax();
 
   /** boolean variable to known whether the ResiduY has to be computed or not
    *  if true, the ResiduY is computed and the convergence is checked

@@ -337,12 +337,6 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** Allocate memory for _p[levelMin] to _p[levelMax] vectors
-   *  \param int : levelMin
-   *  \param int : levelMax
-   */
-  void initP(unsigned int, unsigned int);
-
   /** allocate memory for fL and its jacobians, if required.
    */
   void initFL();
@@ -352,13 +346,17 @@ public:
    */
   void initRhs(double) ;
 
-  /** dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
-   *  \param int levelMin for allocation of _p
-   *  \param int levelMax for allocation of _p
+  /** dynamical system initialization function except for _p:
+   *  mainly set memory and compute plug-in for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(unsigned int, unsigned int, double = 0, unsigned int = 1) ;
+  void initialize(double = 0, unsigned int = 1) ;
+
+  /** dynamical system initialization function for _p
+   *  \param level for _p
+   */
+  void initializeNonSmoothInput(unsigned int level) ;
 
   // === GETTERS AND SETTERS ===
 
@@ -926,11 +924,9 @@ public:
   void display() const;
 
   /** initialize the SiconosMemory objects with a positive size.
-   *  \param int levelMin for allocation of _p
-   *  \param int levelMax for allocation of _p
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int , unsigned int, unsigned int);
+  void initMemory(unsigned int);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,

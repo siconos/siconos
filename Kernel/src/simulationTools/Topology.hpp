@@ -202,10 +202,7 @@ public:
   /** add a dynamical system
    * \param a shared pointer to a dynamical system
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _DSG[0]->add_vertex(ds);
-  };
+  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** remove a dynamical system
    * \param a shared pointer to a dynamical system

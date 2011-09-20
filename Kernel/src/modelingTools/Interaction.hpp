@@ -240,7 +240,7 @@ public:
    * \param time for initialization.
    * \param the number of required derivatives for y.
    */
-  void initialize(double, unsigned int);
+  void initialize(double);
 
   /** check if Interaction is initialized
    */
@@ -251,12 +251,8 @@ public:
 
 
   /** build Y and Lambda stl vectors.
-  *   \param unsigned int: dim of Y and Lambda vector of Interactions
-  *          (ie number of derivatives that are taken into
-  *          account). This is an input argument since it depends on
-  *          the simulation type.
   */
-  void initializeMemory(const unsigned int);
+  void initializeMemory();
 
   // === GETTERS/SETTERS ===
 
@@ -326,6 +322,20 @@ public:
     _upperLevelForOutput = newVal;
   };
 
+  /** get the lower level for output y
+   */
+  inline unsigned int lowerLevelForOutput()
+  {
+    return _lowerLevelForOutput;
+  };
+
+  /** get the upper level for output y
+   */
+  inline unsigned int  upperLevelForOutput()
+  {
+    return _upperLevelForOutput;
+  };
+
   /** set the lower level for input Lambda
    * \param an unsigned int
    */
@@ -340,6 +350,21 @@ public:
   inline void setUpperLevelForInput(const unsigned int newVal)
   {
     _upperLevelForInput = newVal;
+  };
+
+
+  /** get the lower level for input Lambda
+   */
+  inline unsigned int lowerLevelForInput()
+  {
+    return _lowerLevelForInput ;
+  };
+
+  /** get the upper level for input Lambda
+   */
+  inline unsigned int upperLevelForInput()
+  {
+    return _upperLevelForInput;
   };
 
 

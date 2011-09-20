@@ -288,7 +288,10 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     prod(*T, *neds->velocity(), *dotq, true);
     if (!_allNSProblems->empty())
     {
-      updateOutput(0, _levelMax);
+      for (unsigned int level = _levelMinForOutput;
+           level < _levelMaxForOutput;
+           level++)
+        updateOutput(level);
     }
   }
 
