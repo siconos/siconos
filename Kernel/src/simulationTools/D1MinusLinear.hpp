@@ -147,8 +147,6 @@ public:
    */
   virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp);
 
-  void prepareNewtonIteration(double time); // TODO
-
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param initial time
    *  \param end time
@@ -168,6 +166,12 @@ public:
 
   /** displays the data of the D1MinusLinear's integrator */
   virtual void display();
+
+  /** preparations for Newton iteration */
+  virtual void prepareNewtonIteration(double time)
+  {
+    RuntimeException::selfThrow("D1MinusLinear::prepareNewtonIteration - not yet implemented!");
+  }
 
   /** insert a dynamical system in this Integrator
    *  \param pointer to DynamicalSystem

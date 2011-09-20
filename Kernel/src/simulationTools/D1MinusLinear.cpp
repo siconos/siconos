@@ -210,7 +210,7 @@ double D1MinusLinear::computeResidu()
     // get left state from memory
     SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
     SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
-    SP::SiconosMatrix Mold = d->mass(); // TODO OLD constant mass
+    SP::SiconosMatrix Mold = d->mass();
 
     // initialize *it->residuFree and predicted right velocity (left limit)
     SP::SiconosVector residuFree = (*it)->residuFree(); // POINTER CONSTRUCTOR
@@ -460,14 +460,6 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
   {
     SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
     UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
-  }
-}
-
-void D1MinusLinear::prepareNewtonIteration(double time)
-{
-  for (ConstDSIterator itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    computeW(time, *itDS);
   }
 }
 
