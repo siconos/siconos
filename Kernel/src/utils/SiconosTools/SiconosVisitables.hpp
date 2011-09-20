@@ -31,6 +31,7 @@
   REGISTER(Moreau)                                           \
   REGISTER(Lsodar)                                           \
   REGISTER(D1MinusLinear)                                    \
+  REGISTER(SchatzmanPaoli)                                   \
   REGISTER(OneStepNSProblem)                                 \
   REGISTER(LinearOSNS)                                       \
   REGISTER(LCP)                                              \

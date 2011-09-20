@@ -28,7 +28,7 @@
 namespace OSI
 {
 
-/** List of possible DynamicalSystems types*/
+/** List of possible OneStepIntegrator types*/
 enum TYPES
 {
   /** */
@@ -38,11 +38,14 @@ enum TYPES
   /** */
   MOREAU2,
   /** */
-  D1MINUSLINEAR
+  D1MINUSLINEAR,
+  /** */
+  SCHATZMANPAOLI,
 };
 
 }
 DEFINE_SPTR(Moreau);
 DEFINE_SPTR(Lsodar);
 DEFINE_SPTR(D1MinusLinear);
+DEFINE_SPTR(SchatzmanPaoli);
 #endif

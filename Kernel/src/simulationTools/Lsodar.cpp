@@ -62,7 +62,7 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, 
 {
   // local time discretisation is set by default to those of the simulation.
   intData.resize(9);
-  sizeMem = 2;
+  _sizeMem = 2;
 }
 
 Lsodar::Lsodar(SP::DynamicalSystem ds):
@@ -72,14 +72,14 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
   OSIDynamicalSystems->insert(ds);
 
   intData.resize(9);
-  sizeMem = 2;
+  _sizeMem = 2;
 }
 
 Lsodar::Lsodar(DynamicalSystemsSet& newDS):
   OneStepIntegrator(OSI::LSODAR, newDS)
 {
   intData.resize(9);
-  sizeMem = 2;
+  _sizeMem = 2;
 }
 
 
@@ -354,7 +354,6 @@ void Lsodar::updateState(unsigned int level)
   }
   else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
 }
-
 
 struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 {

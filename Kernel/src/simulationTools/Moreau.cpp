@@ -48,7 +48,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   SP::MoreauXML moreauXml = boost::static_pointer_cast<MoreauXML>(osiXML);
 
   // Required inputs: a list of DS and one _theta per DS.
-  // No xml entries at the time for sizeMem and W.
+  // No xml entries at the time for _sizeMem and W.
 
   if (!osiXML->hasDSList())
     RuntimeException::selfThrow("Moreau::xml constructor - DS list is missing in xml input file.");
@@ -1246,6 +1246,16 @@ void Moreau::computeFreeState()
 
 }
 
+void Moreau::prepareNewtonIteration(double time)
+{
+  ConstDSIterator itDS;
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  {
+    computeW(time, *itDS);
+  }
+}
+
+
 struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   OneStepNSProblem *osnsp;
@@ -1552,6 +1562,9 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
 void Moreau::updateState(unsigned int level)
 {
+
+
+
   double h = simulationLink->timeStep();
 
   const double& RelativeTol = simulationLink->relativeConvergenceTol();
@@ -1575,34 +1588,39 @@ void Moreau::updateState(unsigned int level)
       SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       SP::SiconosVector x = ds->x();
       bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
-      //    SP::SiconosVector xFree = fonlds->xFree();
-
-      // Save value of q in local_buffer for relative convergence computation
-      if (baux)
-        ds->addWorkVector(x, DynamicalSystem::local_buffer);
-
-      //       std::cout <<boolalpha << _useGamma << std::endl;
-      //       std::cout <<_gamma << std::endl;
-      if (_useGamma)
+      if (level != LEVELMAX)
       {
-        //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
-        // Solve W(x-xfree) = hr
-        scal(_gamma * h, *fonlds->r(), *x); // x = gamma*h*r
-        // scal((1.0-_gamma)*h,*rold,*x,false)// x += (1-gamma)*h*rold
+
+        //    SP::SiconosVector xFree = fonlds->xFree();
+
+        // Save value of q in local_buffer for relative convergence computation
+        if (baux)
+          ds->addWorkVector(x, DynamicalSystem::local_buffer);
+
+        //       std::cout <<boolalpha << _useGamma << std::endl;
+        //       std::cout <<_gamma << std::endl;
+        if (_useGamma)
+        {
+          //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
+          // Solve W(x-xfree) = hr
+          scal(_gamma * h, *fonlds->r(), *x); // x = gamma*h*r
+          // scal((1.0-_gamma)*h,*rold,*x,false)// x += (1-gamma)*h*rold
+        }
+        else
+        {
+          // Solve W(x-xfree) = hr
+          scal(h, *fonlds->r(), *x); // x = h*r
+          //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
+        }
+
+        W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
+
+        *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
       }
       else
       {
-        // Solve W(x-xfree) = hr
-        scal(h, *fonlds->r(), *x); // x = h*r
-        //      scal(h,*fonlds->gAlpha(),*x); // x = h*gApha
+        *x = *(fonlds->workFree()); //*workX[ds]; // x=xfree
       }
-
-
-
-
-      W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
-      *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
-
 
       if (baux)
       {
@@ -1634,19 +1652,28 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector v = d->velocity();
       bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
-      // To compute v, we solve W(v - vfree) = p
-      *v = *d->p(level); // v = p
 
-      if (d->boundaryConditions())
-        for (vector<unsigned int>::iterator
-             itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-             itindex != d->boundaryConditions()->velocityIndices()->end();
-             ++itindex)
-          v->setValue(*itindex, 0.0);
+      if (level != LEVELMAX)
+      {
+        // To compute v, we solve W(v - vfree) = p
+        assert(d->p(level));
+
+        *v = *d->p(level); // v = p
+        if (d->boundaryConditions())
+          for (vector<unsigned int>::iterator
+               itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+               itindex != d->boundaryConditions()->velocityIndices()->end();
+               ++itindex)
+            v->setValue(*itindex, 0.0);
+        W->PLUForwardBackwardInPlace(*v);
 
 
-      W->PLUForwardBackwardInPlace(*v);
-      *v +=  * ds->workFree();
+        *v +=  * ds->workFree();
+      }
+      else
+      {
+        *v =  * ds->workFree();
+      }
 
       int bc = 0;
       SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
@@ -1710,18 +1737,21 @@ void Moreau::updateState(unsigned int level)
       cout << "Moreau::updatestate prev v" << endl;
       v->display();
 #endif
-
-      /*d->p has been fill by the Relation->computeInput, it contains
-           B \lambda _{k+1}*/
-      *v = *d->p(level); // v = p
-      d->luW()->PLUForwardBackwardInPlace(*v);
+      if (level != LEVELMAX)
+      {
+        /*d->p has been fill by the Relation->computeInput, it contains
+          B \lambda _{k+1}*/
+        *v = *d->p(level); // v = p
+        d->luW()->PLUForwardBackwardInPlace(*v);
 
 #ifdef MOREAU_NE_DEBUG
-      cout << "Moreau::updatestate hWB lambda" << endl;
-      v->display();
+        cout << "Moreau::updatestate hWB lambda" << endl;
+        v->display();
 #endif
-
-      *v +=  * ds->workFree();
+        *v +=  * ds->workFree();
+      }
+      else
+        *v =  * ds->workFree();
 
 #ifdef MOREAU_NE_DEBUG
       cout << "Moreau::updatestate work free" << endl;

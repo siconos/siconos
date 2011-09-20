@@ -61,7 +61,7 @@ protected:
   SP::InteractionsSet OSIInteractions;
 
   /** size of the memory for the integrator */
-  unsigned int sizeMem;
+  unsigned int _sizeMem;
 
   /** A link to the simulation that owns this OSI */
   SP::Simulation simulationLink;
@@ -191,20 +191,20 @@ public:
    */
   void setInteractions(const InteractionsSet&);
 
-  /** get sizeMem value
+  /** get _sizeMem value
    *  \return an unsigned int
    */
   inline unsigned int getSizeMem() const
   {
-    return sizeMem;
+    return _sizeMem;
   };
 
-  /** set sizeMem
+  /** set _sizeMem
    *  \param an unsigned int
    */
   inline void setSizeMem(unsigned int newValue)
   {
-    sizeMem = newValue;
+    _sizeMem = newValue;
   };
 
   /** get the Simulation that owns the OneStepIntegrator
@@ -295,6 +295,12 @@ public:
   /** copy the data of the OneStepNSProblem to the XML tree
    */
   void saveIntegratorToXML();
+
+  /**
+   */
+  virtual void prepareNewtonIteration(double time) = 0;
+
+
 
   /** visitors hook
    */

@@ -148,6 +148,9 @@ public:
    */
   virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp);
 
+  void prepareNewtonIteration(double time);
+
+
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param initial time
    *  \param end time

@@ -241,6 +241,12 @@ public:
    */
   //static Lsodar* convert (OneStepIntegrator* osi);
 
+  void prepareNewtonIteration(double time)
+  {
+    assert(0);
+  };
+
+
   /** integrates the UnitaryRelation linked to this integrator, without taking constraints
      * into account.
      */

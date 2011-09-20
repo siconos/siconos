@@ -27,7 +27,7 @@
 using namespace std;
 
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
-  integratorType(id), sizeMem(1)
+  integratorType(id), _sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
   OSIInteractions.reset(new InteractionsSet());
@@ -36,7 +36,7 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
 // --- Xml constructor ---
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegratorXML osixml,
                                      SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
-  integratorType(id), sizeMem(1), integratorXml(osixml)
+  integratorType(id), _sizeMem(1), integratorXml(osixml)
 {
   if (!integratorXml)
     RuntimeException::selfThrow("OneStepIntegrator::xml constructor - OneStepIntegratorXML object == NULL");
@@ -83,7 +83,7 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegrator
 
 // --- Constructors from a minimum set of data ---
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, const DynamicalSystemsSet& listOfDs):
-  integratorType(id), sizeMem(1)
+  integratorType(id), _sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
   OSIInteractions.reset(new InteractionsSet());
@@ -143,7 +143,7 @@ void OneStepIntegrator::display()
 {
   cout << "==== OneStepIntegrator display =====" << endl;
   cout << "| integratorType : " << integratorType << endl;
-  cout << "| sizeMem: " << sizeMem << endl;
+  cout << "| _sizeMem: " << _sizeMem << endl;
   cout << "====================================" << endl;
 }
 

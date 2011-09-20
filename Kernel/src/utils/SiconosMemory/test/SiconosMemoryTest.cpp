@@ -28,7 +28,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SiconosMemoryTest);
 
 void SiconosMemoryTest::setUp()
 {
-  sizeMem = 3;
+  _sizeMem = 3;
   unsigned int sizeVect = 3;
 
   std::vector<double> v(sizeVect);

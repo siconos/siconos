@@ -31,7 +31,7 @@
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
-#include "Moreau.hpp"
+
 
 #include <debug.h>
 
@@ -484,15 +484,13 @@ void   TimeStepping::prepareNewtonIteration()
 {
   //  cout << "update the operators" <<endl ;
 
-  DSOSIConstIterator it = _osiMap.begin();
-  while (it != _osiMap.end())
+
+  for (OSIIterator itosi = _allOSI->begin();
+       itosi != _allOSI->end(); ++itosi)
   {
-    if ((it->second)->getType() == OSI::MOREAU)
-    {
-      Moreau::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
-    }
-    ++it;
+    (*itosi)->prepareNewtonIteration(getTkp1());
   }
+
 
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)

@@ -203,6 +203,9 @@ enum SICONOS_OSNSP_TS
 };
 const int SICONOS_NB_OSNSP_TS = 1;
 const int SICONOS_NB_OSNSP_TSP = 2;
+
+#define LEVELMAX 999
+
 TYPEDEF_SPTR(OSISet);
 TYPEDEF_SPTR(OneStepNSProblems);
 

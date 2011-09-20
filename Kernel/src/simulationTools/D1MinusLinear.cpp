@@ -29,6 +29,19 @@
 using namespace std;
 using namespace RELATION;
 
+
+void D1MinusLinear::prepareNewtonIteration(double time)
+{
+  ConstDSIterator itDS;
+
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  {
+    computeW(time, *itDS);
+  }
+}
+
+
+
 struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   OneStepNSProblem *osnsp;
@@ -46,7 +59,6 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[3] = subCoord[1];
     subscal(e, *(UR->y_k(osnsp->levelMin())), *(UR->yp()), subCoord, false);
   }
-
   void visit(const NewtonImpactFrictionNSL& nslaw)
   {
     double e = nslaw.en();

@@ -17,11 +17,11 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 /*! \file
-  Moreau Time-Integrator for Dynamical Systems
+  SchatzmanPaoli Time-Integrator for Dynamical Systems
 */
 
-#ifndef MOREAU_H
-#define MOREAU_H
+#ifndef SCHATZMANPAOLI_H
+#define SCHATZMANPAOLI_H
 
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
@@ -29,20 +29,19 @@
 class Simulation;
 class SiconosMatrix;
 
-const unsigned int MOREAUSTEPSINMEMORY = 1;
+const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
-/**  Moreau Time-Integrator for Dynamical Systems
+/**  SchatzmanPaoli Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
- * See User's guide, \ref docSimuMoreauTS for details.
  *
- * Moreau class is used to define some time-integrators methods for a
+ * SchatzmanPaoli class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
- * A Moreau instance is defined by the value of theta and the list of
+ * A SchatzmanPaoli instance is defined by the value of theta and the list of
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
@@ -50,12 +49,9 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * computeW. Depending on the DS type, they may depend on time and DS
  * state (x).
  *
- * For first order systems, the implementation uses _r for storing the
- * the input due to the nonsmooth law. This Moreau scheme assumes that the
- * relative degree is zero or one and one level for _r is sufficient
  *
- * For Lagrangian systems, the implementation uses _p[1] for storing the
- * discrete impulse.
+ * For Lagrangian systems, the implementation uses _p[0] for storing the
+ * discrete multiplier.
  *
  * Main functions:
  *
@@ -66,18 +62,18 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *    states.
  *
  */
-class Moreau : public OneStepIntegrator
+class SchatzmanPaoli : public OneStepIntegrator
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(Moreau);
+  ACCEPT_SERIALIZATION(SchatzmanPaoli);
 
 
-  /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
+  /** Stl map that associates a W SchatzmanPaoli matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
 
-  /** Stl map that associates the columns of  W Moreau matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
+  /** Stl map that associates the columns of  W SchatzmanPaoli matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
   MapOfDSMatrices _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
@@ -106,7 +102,7 @@ protected:
 
   /** Default constructor
    */
-  Moreau() {};
+  SchatzmanPaoli() {};
 
 public:
 
@@ -114,48 +110,48 @@ public:
    *  \param OneStepIntegratorXML* : the XML object corresponding
    *  \param DynamicalSystemsSet: set of all DS in the NSDS
    */
-  Moreau(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
+  //SchatzmanPaoli(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    */
-  Moreau(SP::DynamicalSystem, double);
+  SchatzmanPaoli(SP::DynamicalSystem, double);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
    */
-  Moreau(DynamicalSystemsSet&, double);
+  SchatzmanPaoli(DynamicalSystemsSet&, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  Moreau(double);
+  SchatzmanPaoli(double);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
    *  \param gamma value
    */
-  Moreau(SP::DynamicalSystem, double, double);
+  SchatzmanPaoli(SP::DynamicalSystem, double, double);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param gamma value for all these DS.
    *  \param theta value for all these DS.
    */
-  Moreau(DynamicalSystemsSet&, double, double);
+  SchatzmanPaoli(DynamicalSystemsSet&, double, double);
 
   /** constructor from theta value only
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
-  Moreau(double, double);
+  SchatzmanPaoli(double, double);
 
   /** destructor
    */
-  virtual ~Moreau() {};
+  virtual ~SchatzmanPaoli() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -285,36 +281,36 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the Moreau integrator; for linear time
+  /** initialization of the SchatzmanPaoli integrator; for linear time
       invariant systems, we compute time invariant operator (example :
       W)
    */
   void initialize();
 
-  /** init WMap[ds] Moreau matrix at time t
+  /** init WMap[ds] SchatzmanPaoli matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void initW(double, SP::DynamicalSystem);
 
-  /** compute WMap[ds] Moreau matrix at time t
+  /** compute WMap[ds] SchatzmanPaoli matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeW(double, SP::DynamicalSystem);
 
-  /** compute WBoundaryConditionsMap[ds] Moreau matrix at time t
+  /** compute WBoundaryConditionsMap[ds] SchatzmanPaoli matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
   void computeWBoundaryConditions(SP::DynamicalSystem);
 
-  /** init WBoundaryConditionsMap[ds] Moreau
+  /** init WBoundaryConditionsMap[ds] SchatzmanPaoli
    *  \param a pointer to DynamicalSystem
    */
   void initWBoundaryConditions(SP::DynamicalSystem);
 
-  /** return the maximum of all norms for the "Moreau-discretized" residus of DS
+  /** return the maximum of all norms for the "SchatzmanPaoli-discretized" residus of DS
       \return a double
    */
   double computeResidu();
@@ -329,16 +325,13 @@ public:
    */
   virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
 
-  /**
-   */
   void prepareNewtonIteration(double time);
-
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param int: useless flag (for Moreau, used in Lsodar)
+   *  \param int: useless flag (for SchatzmanPaoli, used in Lsodar)
    */
   void integrate(double&, double&, double&, int&);
 
@@ -347,12 +340,7 @@ public:
    */
   virtual void updateState(unsigned int);
 
-  /** copy the matrix W of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
-  void saveWToXML();
-
-  /** Displays the data of the Moreau's integrator
+  /** Displays the data of the SchatzmanPaoli's integrator
    */
   void display();
 
@@ -365,7 +353,7 @@ public:
    *  \param OneStepIntegrator* : the integrator which must be converted
    * \return a pointer on the integrator if it is of the right type, 0 otherwise
    */
-  static Moreau* convert(OneStepIntegrator* osi);
+  static SchatzmanPaoli* convert(OneStepIntegrator* osi);
 
   /** visitors hook
   */
@@ -373,4 +361,4 @@ public:
 
 };
 
-#endif // MOREAU_H
+#endif // SCHATZMANPAOLI_H
