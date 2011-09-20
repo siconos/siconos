@@ -574,7 +574,7 @@ public:
     return _relativeConvergenceCriterionHeld;
   };
 
-  R
+
   // --- XML RELATED FUNCTIONS ---
 
   /** copys the data of the Simulation to the XML tree
