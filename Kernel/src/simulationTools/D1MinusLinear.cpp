@@ -560,21 +560,31 @@ void D1MinusLinear::updateState(unsigned int level)
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-
       SP::SiconosVector v = d->velocity(); // pointer constructor
-      *v = *(d->p(level)); // value = nonsmooth impulse
-      W->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-      *v += *(ds->workFree()); // add free velocity
+      if (level != LEVELMAX)
+      {
+        *v = *(d->p(level)); // value = nonsmooth impulse
+        W->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
+        *v += *(ds->workFree()); // add free velocity
+      }
+      else
+      {
+        *v = *(ds->workFree());
+      }
     }
     // Newton Euler Systems
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
-
       SP::SiconosVector v = d->velocity(); // pointer constructor
-      *v = *(d->p(level)); // value = nonsmooth impulse
-      d->luW()->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-      *v += *(ds->workFree()); // add free velocity
+      if (level != LEVELMAX)
+      {
+        *v = *(d->p(level)); // value = nonsmooth impulse
+        d->luW()->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
+        *v += *(ds->workFree()); // add free velocity
+      }
+      else
+        *v += *(ds->workFree());
     }
     else RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not yet implemented for Dynamical system type: " + dsType);
   }
