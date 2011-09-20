@@ -36,8 +36,7 @@ class UnitaryRelation;
 
 
 /**  This class describes the topology of the non-smooth dynamical
- *  system. It holds all the "potential" Unitary Relations and their
- *  Relative Degrees.
+ *  system. It holds all the "potential" Unitary Relations".
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -57,18 +56,12 @@ class UnitaryRelation;
  *    - scan of all the interactions of the NSDS
  *    - initialization of each interaction
  *    - insertion of the relations of all the Interaction into indexSet0
- *    - computation of all relative degrees
  *
  * Insertion of an Interaction into the set indexSet0:
  * addInteractionInIndexSet(SP::Interaction inter) for each relation
  * of the interaction, it creates a new UnitaryRelation and inserts it
  * into indexSet0 It also counts the total number of "constraints" in
  * the system.
- *
- * Relative degrees computation: at the time, depends only on the
- * non-smooth law type of each UnitaryRelation.  Degrees are saved in
- * a map that links each UnitaryRelation to an int, its relative
- * degree.
  *
  */
 class Topology : public boost::enable_shared_from_this<Topology>
@@ -81,12 +74,6 @@ private:
 
 
   // --- MEMBERS ---
-
-  /** minimum of the relative degrees */
-  unsigned int _minRelativeDegree;
-
-  /** maximum of the relative degrees */
-  unsigned int _maxRelativeDegree;
 
   /** the set of all the interactions of the system */
   SP::InteractionsSet _allInteractions;
@@ -102,8 +89,7 @@ private:
       occur */
   bool _isTopologyUpToDate;
 
-  /** check if topology is static (all relative degrees = 0 or 1) or
-      not */
+  /** check if topology is static or  not */
   bool _hasChanged;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
@@ -114,7 +100,7 @@ private:
   /** symmetry in the blocks computation */
   bool _symmetric;
 
-  /** initializations (relative degrees, time invariance) from non
+  /** initializations ( time invariance) from non
       smooth laws kind */
   struct SetupFromNslaw;
   friend class Topology::SetupFromNslaw;
@@ -156,10 +142,6 @@ public:
   /** destructor */
   ~Topology();
 
-
-  /** compute the  RelativeDegrees Map
-  */
-  void computeRelativeDegrees();
 
   // === GETTERS/SETTERS ===
 
@@ -263,19 +245,6 @@ public:
     return _URG.resize(i);
   };
 
-  // --- relativeDegreesMap ---
-
-  /** for all relative degrees (one per Unitary Relation), find the
-  *  maximum value.
-  \return an unsigned int
-  */
-  unsigned int maxRelativeDegree();
-
-  /** for all relative degrees (one per Unitary Relation), find the minimum value.
-  *  \return an unsigned int
-  */
-  unsigned int minRelativeDegree();
-
   // --- isTopologyUpToDate ---
 
   /** set isTopologyUpToDate to val
@@ -304,7 +273,7 @@ public:
     _hasChanged = val;
   }
 
-  /** check if all relative degrees are equal to 0 or 1
+  /** check
   *  \return a bool
   */
   inline bool hasChanged()

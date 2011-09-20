@@ -209,6 +209,8 @@ void Simulation::updateInteractions()
 
   double time = model()->currentTime(); // init with current model time
 
+  ComputeLevelsForInputAndOutput();
+
   std::for_each(allInteractions->begin(), allInteractions->end(),
                 boost::bind(&Interaction::initialize, _1, time));
 

@@ -1132,7 +1132,7 @@ void SpaceFilter::buildInteractions(double time)
   }
 
   // should be done on the fly. Linear time anyway.
-  _nsds->topology()->computeRelativeDegrees();
+  //_nsds->topology()->computeRelativeDegrees();
 
 }
 

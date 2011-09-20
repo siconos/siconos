@@ -45,8 +45,6 @@ Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
   _DSG[0].reset(new DynamicalSystemsGraph());
 
   _allInteractions.reset(new InteractionsSet());
-  _maxRelativeDegree = 0;
-  _minRelativeDegree = MAX_RELATIVE_DEGREE;
 }
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
@@ -68,8 +66,6 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
     insertInteraction(*it);
   }
 
-  _maxRelativeDegree = 0;
-  _minRelativeDegree = MAX_RELATIVE_DEGREE;
   _isTopologyUpToDate = false;
 }
 
@@ -98,8 +94,6 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
   {
     _DSG[0]->add_vertex(*ids);
   }
-  _maxRelativeDegree = 0;
-  _minRelativeDegree = MAX_RELATIVE_DEGREE;
   _isTopologyUpToDate = false;
 }
 
@@ -311,73 +305,6 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 };
 
 
-/* a visitor to set parameters depending on nslaw */
-
-class ComplementarityConditionNSL;
-class MixedComplementarityConditionNSL;
-class NewtonImpactNSL;
-class MultipleImpactNSL; // added by Son in 9/11/2010
-class NewtonImpactFrictionNSL;
-class RelayNSL;
-
-struct Topology::SetupFromNslaw : public SiconosVisitor
-{
-  SP::Topology parent;
-  SP::Interaction interaction;
-  SetupFromNslaw(SP::Topology p, SP::Interaction inter) :
-    parent(p), interaction(inter) {};
-
-  void visit(const ComplementarityConditionNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(0);
-  };
-  void visit(const EqualityConditionNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(2);
-  };
-
-  void visit(const MixedComplementarityConditionNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(0);
-  };
-
-  void visit(const RelayNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(0);
-  };
-
-  void visit(const NewtonImpactNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(2);
-  };
-
-  //visit function added by Son in 9/11/2010
-  void visit(const MultipleImpactNSL &)
-  {
-    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(2);
-  };
-
-  void visit(const NewtonImpactFrictionNSL&)
-  {
-    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
-    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
-    interaction->setRelativeDegree(2);
-  };
-
-};
-
 void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
 {
   // interactions should not know linked dynamical systems in the
@@ -395,36 +322,6 @@ void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
 };
 
 
-// Compute min & max of relative degrees
-void Topology::computeRelativeDegrees()
-{
-
-  boost::shared_ptr<SetupFromNslaw> setupFromNslaw;
-  UnitaryRelationsGraph::VIterator uv, uend;
-
-
-  if (_URG[0]->size() > 0)
-  {
-    _minRelativeDegree = MAX_RELATIVE_DEGREE;
-    _maxRelativeDegree = 0;
-
-
-    for (boost::tie(uv, uend) = _URG[0]->vertices(); uv != uend; ++uv)
-    {
-      setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
-                                              _URG[0]->bundle(*uv)->interaction()));
-      _URG[0]->bundle(*uv)->interaction()->nonSmoothLaw()->accept(*(setupFromNslaw.get()));
-    }
-  }
-  else
-  {
-    // default values
-    _minRelativeDegree = 2;
-    _maxRelativeDegree = 2;
-  }
-
-}
-
 
 
 bool Topology::hasInteraction(SP::Interaction inter) const
@@ -432,21 +329,9 @@ bool Topology::hasInteraction(SP::Interaction inter) const
   return _allInteractions->isIn(inter);
 }
 
-unsigned int Topology::maxRelativeDegree()
-{
-  return _maxRelativeDegree;
-}
-
-unsigned int Topology::minRelativeDegree()
-{
-  assert(_minRelativeDegree != MAX_RELATIVE_DEGREE);
-  return _minRelativeDegree;
-}
-
 void Topology::initialize()
 {
 
-  computeRelativeDegrees();
 
   _isTopologyUpToDate = true;
 
