@@ -33,7 +33,7 @@ using namespace std;
 
 // --- CONSTRUCTORS ---
 
-// --- Default (private) constructor ---
+// --- Default (public) constructor ---
 Model::Model(): _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
   _date("none"), _xmlSchema("none")
 {}

@@ -68,7 +68,7 @@ private:
   SP::SiconosMemoryXML memoryXML;
 
   /** default constructor, private. */
-  SiconosMemory();
+  SiconosMemory() {};
 
   /** Copy constructor, private */
   SiconosMemory(const SiconosMemory&);

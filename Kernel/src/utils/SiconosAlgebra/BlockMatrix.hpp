@@ -63,7 +63,7 @@ private:
 
   /** default constructor
    */
-  BlockMatrix();
+  BlockMatrix() {};
 
 public:
 
