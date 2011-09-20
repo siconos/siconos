@@ -30,67 +30,42 @@ using namespace std;
 
 void TimeSteppingD1Minus::initOSNS()
 {
-  // === creates links between work vector in OSI and work vector in
-  // Unitary Relations
-  SP::OneStepIntegrator  osi;
-
-  ConstDSIterator itDS;
-
+  // initialize OSNS for UnitaryRelationsGraph from Topology
+  assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
   SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
 
   UnitaryRelationsGraph::VIterator ui, uiend;
-
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-    indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus");
+    indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus"); // TODO
     // creates a POINTER link between workX[ds] (xfree) and the
     // corresponding unitaryBlock in each UR for each ds of the
     // current UR.
-    for (itDS = ur->interaction()->dynamicalSystemsBegin();
-         itDS != ur->interaction()->dynamicalSystemsEnd(); ++itDS)
+    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+    for (ConstDSIterator itDS = ur->interaction()->dynamicalSystemsBegin();
+         itDS != ur->interaction()->dynamicalSystemsEnd(); ++itDS) // TODO
     {
       ur->insertInWorkFree((*itDS)->workFree());
     }
   }
 
+  // there is at least one OSNP
   if (!_allNSProblems->empty())
   {
-    assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
+    if (_allNSProblems->size() != 2)
+      RuntimeException::selfThrow("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
 
-
-
-    // === update all index sets ===
+    //update all index sets
     updateIndexSets();
 
-    // initialization of OneStepNonSmoothProblem
-    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    {
-      (*itOsns)->setLevels(_levelMinForInput, _levelMaxForInput);
-      (*itOsns)->initialize(shared_from_this());
-    }
+    // set evaluation levels (first is of velocity, second of acceleration type)
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevels(1, 1);
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->initialize(shared_from_this());
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setLevels(2, 2);
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(shared_from_this());
   }
 }
-
-// void TimeSteppingD1Minus::initLevelMin()
-// {
-//   assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree()>=0);
-
-//   _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
-
-//   if(_levelMin!=0)
-//     _levelMin--;
-// }
-
-// void TimeSteppingD1Minus::initLevelMax()
-// {
-//   // like event driven scheme
-//   _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
-
-//   if(_levelMax==0)
-//     _levelMax++;
-// }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
 {
@@ -217,9 +192,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
-    for (unsigned int level = _levelMinForOutput;
-         level < _levelMaxForOutput;
-         level++)
+    for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
       updateOutput(level);
   }
 }
@@ -260,7 +233,6 @@ void TimeSteppingD1Minus::computeInitialResidu()
   assert(_levelMaxForOutput >= _levelMinForOutput);
   assert(_levelMinForInput >= 0);
   assert(_levelMaxForInput >= _levelMinForInput);
-
 
   updateOutput(_levelMinForOutput);
   updateInput(_levelMinForInput);
@@ -308,7 +280,6 @@ void TimeSteppingD1Minus::prepareNewtonIteration()
     {
       (*itOsns)->setHasBeUpdated(false);
     }
-
 }
 
 void TimeSteppingD1Minus::computeFreeState()

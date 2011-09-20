@@ -132,7 +132,6 @@ public:
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->workFree contains ds->residuFree-p, ds->p() contains new position}
-   *  \todo T is used just explicitely in position update of Newton Euler; it has to be included locally in fixed point iteration considering the norm of the position residuum
    *  \return double
    */
   virtual double computeResidu();
@@ -148,8 +147,7 @@ public:
    */
   virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp);
 
-  void prepareNewtonIteration(double time);
-
+  void prepareNewtonIteration(double time); // TODO
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param initial time
@@ -183,11 +181,8 @@ public:
    */
   static D1MinusLinear* convert(OneStepIntegrator* osi);
 
-  /** visitors hook
-   */
+  /** visitors hook */
   ACCEPT_STD_VISITORS();
-
-
 };
 
 #endif // D1MINUSLINEAR_H

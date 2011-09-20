@@ -108,15 +108,13 @@ int main(int argc, char* argv[])
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem impact(new LCP()); // impulse right limit right side
-    SP::OneStepNSProblem forceLeft(new LCP()); // contact force right limit left side
-    SP::OneStepNSProblem forceRight(new LCP()); // contact force left limit right side
+    SP::OneStepNSProblem force(new LCP()); // contact force right limit left side
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 3));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
-    s->insertNonSmoothProblem(forceLeft, SICONOS_OSNSP_TS_VELOCITY + 1);
-    s->insertNonSmoothProblem(forceRight, SICONOS_OSNSP_TS_VELOCITY + 2);
+    s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
 
     // =========================== End of model definition ===========================
 

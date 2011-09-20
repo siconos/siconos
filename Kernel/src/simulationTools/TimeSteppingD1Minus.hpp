@@ -49,12 +49,6 @@ protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   virtual void initOSNS();
 
-  // /** compute minimum index set level */
-  // virtual void initLevelMin();
-
-  // /** compute maximum index set level */
-  // virtual void initLevelMax();
-
 public:
 
   /** constructor with the time-discretisation
@@ -95,7 +89,7 @@ public:
   void computeInitialResidu();
 
   /** prepare calculation */
-  void prepareNewtonIteration();
+  void prepareNewtonIteration(); // TODO can be killed? should be renamed
 
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();

@@ -367,6 +367,16 @@ public:
     return _allNSProblems;
   };
 
+  inline unsigned int levelMinForOutput() const
+  {
+    return _levelMinForOutput;
+  };
+
+  inline unsigned int levelMaxForOutput() const
+  {
+    return _levelMaxForOutput;
+  };
+
   /** get allNSProblems[name], a specific OneStepNSProblem
    *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem
