@@ -113,31 +113,25 @@ protected:
   /** A link to the Model which contains the Simulation */
   boost::weak_ptr<Model> _model;
 
-  // /** int used to set the minimal derivative order used in the OSNS
-  //     variables */
-  // unsigned int _levelMin;
-
-  // /** int used to set the maximal derivative order used in the OSNS
-  //     variables */
-  // unsigned int _levelMax;
-
-  /** \todo update the doxy comment */
-  /** int used to set the maximal derivative order used in the OSNS
-      variables */
+  /** _levelMinForOutput is the minimum level for the output
+   * (Interaction::_lowerlevelForOutput) for all the interactions
+   */
   unsigned int _levelMinForOutput;
 
-  /** int used to set the maximal derivative order used in the OSNS
-      variables */
+  /** _levelMaxForOutput is the maximunm level for the output
+   * (Interaction::_upperlevelForOutput) for all the interactions
+   */
   unsigned int _levelMaxForOutput;
 
-  /** int used to set the minimal derivative order used in the OSNS
-      variables */
+  /** _levelMinForInput is the minimum level for the input
+   * (Interaction::_lowerlevelForInput) for all the interactions
+   */
   unsigned int _levelMinForInput;
-  /** int used to set the maximal derivative order used in the OSNS
-      variables */
+
+  /** _levelMaxForInput is the maximum level for the input
+   * (Interaction::_upperlevelForInput) for all the interactions
+   */
   unsigned int _levelMaxForInput;
-
-
 
   /** tolerance value used to compute the index sets - Default: equal
       to machine double precision (from dlamch lapack routine).*/
@@ -176,12 +170,6 @@ protected:
   /** initialisation for OneStepNSProblem.
    */
   virtual void initOSNS() = 0;
-
-  // /** compute LevelMin */
-  // virtual void initLevelMin() = 0;
-
-  // /** compute LevelMax */
-  // virtual void initLevelMax() = 0;
 
   /** default constructor.
    */
@@ -378,22 +366,6 @@ public:
   {
     return _allNSProblems;
   };
-
-  // /** get levelMin
-  //  *  \return the value of LevelMin
-  //  */
-  // inline int levelMin() const
-  // {
-  //   return _levelMin;
-  // };
-
-  // /** get levelMax
-  //  *  \return the value of LevelMax
-  //  */
-  // inline int levelMax() const
-  // {
-  //   return _levelMax;
-  // };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
    *  \param a string, the name of the osns
@@ -602,7 +574,7 @@ public:
     return _relativeConvergenceCriterionHeld;
   };
 
-
+  R
   // --- XML RELATED FUNCTIONS ---
 
   /** copys the data of the Simulation to the XML tree
