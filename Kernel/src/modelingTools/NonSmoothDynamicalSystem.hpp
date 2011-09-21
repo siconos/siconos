@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file NonSmoothDynamicalSystem.h
+/*! \file NonSmoothDynamicalSystem.hpp
  */
 #ifndef NSDS_H
 #define NSDS_H

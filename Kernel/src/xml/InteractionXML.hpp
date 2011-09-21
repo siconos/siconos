@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file InteractionXML.h
+/*! \file InteractionXML.hpp
 */
 
 #ifndef __INTERACTIONXML__

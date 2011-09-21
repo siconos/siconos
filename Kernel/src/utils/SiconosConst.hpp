@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file SiconosConst.h
+/*! \file SiconosConst.hpp
 \brief General constants for Siconos Kernel.
 */
 #ifndef __SICONOSCONST__

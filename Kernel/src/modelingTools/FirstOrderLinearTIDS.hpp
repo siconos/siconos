@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file FirstOrderLinearTIDS.h
+/*! \file FirstOrderLinearTIDS.hpp
 
 */
 #ifndef LINEARTIDS_H

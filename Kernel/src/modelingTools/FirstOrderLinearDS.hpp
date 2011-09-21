@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file FirstOrderLinearDS.h
+/*! \file FirstOrderLinearDS.hpp
 
  */
 #ifndef FOLINEARDS_H

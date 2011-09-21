@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file Relation.h
+/*! \file Relation.hpp
   \brief General interface for relations.
 */
 

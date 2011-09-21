@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file SiconosKernel.h
+/*! \file SiconosKernel.hpp
 Include files related to modelingTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */

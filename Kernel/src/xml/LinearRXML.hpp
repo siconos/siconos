@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file LinearRXML.h
+/*! \file LinearRXML.hpp
   \brief xml management for first order linear relations (LinearR).
 */
 

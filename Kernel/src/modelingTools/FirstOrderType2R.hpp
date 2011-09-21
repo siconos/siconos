@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file FirstOrderType2.h
+/*! \file FirstOrderType2.hpp
 \brief non linear relations, with y depending on dynamical systems state and r on lambda.
  */
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file Event.h
+/*! \file Event.hpp
   General interface for Events
 */
 

@@ -19,7 +19,7 @@
  */
 
 
-/*! \file DiskPlanR.h
+/*! \file DiskPlanR.hpp
   \brief disk - plan relation - Inherits from LagrangianScleronomousR
 */
 

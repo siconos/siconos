@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file Model.h
+/*! \file Model.hpp
   \brief The general Siconos Model
 */
 

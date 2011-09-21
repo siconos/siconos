@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file LCP.h
+/*! \file LCP.hpp
   \brief Linear Complementarity Problem formulation and solving
 */
 

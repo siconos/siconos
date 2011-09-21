@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file OneStepNSProblemXML.h
+/*! \file OneStepNSProblemXML.hpp
   XML management for One Step Non Smooth Problem interface
 */
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file OSNSMatrix.h
+/*! \file OSNSMatrix.hpp
   Specific storage for matrices used in OneStepNSProblem
 */
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file LagrangianR.h
+/*! \file LagrangianR.hpp
 
 */
 #ifndef LAGRANGIANRELATION_H

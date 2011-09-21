@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SiconosVectorException.h
+/*! \file SiconosVectorException.hpp
  */
 
 #ifndef __SiconosVectorException__

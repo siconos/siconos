@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file Simulation.h
+/*! \file Simulation.hpp
   \brief Global interface for simulation process description.
 */
 

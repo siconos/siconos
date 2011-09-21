@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file BlockCSRMatrix.h
+/*! \file BlockCSRMatrix.hpp
 Definition of a compressed row sparse block matrix of SiconosMatrix*
 */
 

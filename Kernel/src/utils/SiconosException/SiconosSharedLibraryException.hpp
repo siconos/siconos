@@ -21,7 +21,7 @@
 
 #include "SiconosException.hpp"
 
-/*! \file SiconosSharedLibraryException.h
+/*! \file SiconosSharedLibraryException.hpp
 
 */
 

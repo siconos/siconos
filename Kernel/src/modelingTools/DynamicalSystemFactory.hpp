@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file DynamicalSystemFactory.h
+/*! \file DynamicalSystemFactory.hpp
 \brief  Factory to generate user-defined DynamicalSystems
 */
 

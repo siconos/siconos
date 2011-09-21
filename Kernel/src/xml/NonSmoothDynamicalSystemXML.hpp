@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file NonSmoothDynamicalSystemXML.h
+/*! \file NonSmoothDynamicalSystemXML.hpp
 
 */
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file EventFactory.h
+/*! \file EventFactory.hpp
 \brief  Factory to generate user-defined Events
 */
 

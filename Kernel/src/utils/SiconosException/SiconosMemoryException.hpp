@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file SiconosMemoryException.h
+/*! \file SiconosMemoryException.hpp
     \brief  SiconosMemoryException class
 
 */

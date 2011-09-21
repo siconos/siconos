@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Interaction.h
+/*! \file Interaction.hpp
   \brief Interaction class and related typedef
 */
 

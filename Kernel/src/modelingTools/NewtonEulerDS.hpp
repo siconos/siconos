@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file NewtonEulerDS.h
+/*! \file NewtonEulerDS.hpp
   \brief NewtonEulerDS class - Second Order Non Linear Dynamical Systems.
 
   For more details, see the DevNotes.pdf, chapter NewtonEuler.

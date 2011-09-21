@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SiconosSharedLibrary.h
+/*! \file SiconosSharedLibrary.hpp
 */
 
 #ifndef SICONOSSHAREDLIBRARY_H

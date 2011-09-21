@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file SphereLDSSphereLDSR.h
+/*! \file SphereLDSSphereLDSR.hpp
   \brief Two spheres relation - Inherits from LagrangianScleronomousR
 */
 

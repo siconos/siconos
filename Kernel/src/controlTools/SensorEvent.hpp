@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file SensorEvent.h
+/*! \file SensorEvent.hpp
   Sensor Events
 */
 #ifndef SensorEvent_H

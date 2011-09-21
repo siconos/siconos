@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file CircleCircleR.h
+/*! \file CircleCircleR.hpp
   \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
 

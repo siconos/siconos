@@ -18,7 +18,7 @@
  */
 
 
-/*! \file SiconosMatrixException.h
+/*! \file SiconosMatrixException.hpp
  */
 #ifndef __SiconosMatrixException__
 #define __SiconosMatrixException__

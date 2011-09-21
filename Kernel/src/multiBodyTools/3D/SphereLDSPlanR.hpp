@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file SphereLDSPlanR.h
+/*! \file SphereLDSPlanR.hpp
   \brief SphereLDS relation with a plan - Inherits from LagrangianScleronomousR
 */
 

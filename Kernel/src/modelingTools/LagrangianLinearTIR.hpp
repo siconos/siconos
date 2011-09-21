@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file LagrangianLinearTIR.h
+/*! \file LagrangianLinearTIR.hpp
 
 */
 #ifndef LAGRANGIANLINEARRELATION_H

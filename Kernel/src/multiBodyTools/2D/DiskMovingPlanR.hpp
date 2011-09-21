@@ -19,7 +19,7 @@
  */
 
 
-/*! \file DiskMovingPlanR.h
+/*! \file DiskMovingPlanR.hpp
   \brief disk - moving plan relation - Inherits from LagrangianRheonomousR
 */
 

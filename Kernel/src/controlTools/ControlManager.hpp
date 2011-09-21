@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ControlManager.h
+/*! \file ControlManager.hpp
   \brief Tools to control a Model: Sensors and Actuators.
 */
 

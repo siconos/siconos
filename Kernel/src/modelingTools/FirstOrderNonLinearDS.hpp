@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file FirstOrderNonLinearDS.h
+/*! \file FirstOrderNonLinearDS.hpp
   First Order Non Linear Dynamical Systems
 */
 

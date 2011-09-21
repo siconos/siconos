@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file BlockVector.h
+/*! \file BlockVector.hpp
   \brief Object to handle vectors of vectors ( ... of vectors)
 */
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Circle.h
+/*! \file Circle.hpp
   \brief Definition of a 2D Circle - Inherits from CircularDS
 */
 

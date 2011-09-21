@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file XMLException.h
+/*! \file XMLException.hpp
  */
 
 #ifndef __XMLException__

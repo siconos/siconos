@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file RuntimeException.h
+/*! \file RuntimeException.hpp
  */
 
 #ifndef __RuntimeException__

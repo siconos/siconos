@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file TimeDiscretisation.h
+/*! \file TimeDiscretisation.hpp
 
   \brief A time-discretisation scheme for a given interval.
  */

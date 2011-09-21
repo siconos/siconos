@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file SimulationXML.h
+/*! \file SimulationXML.hpp
   \brief XML management for simulation-type objects
  */
 

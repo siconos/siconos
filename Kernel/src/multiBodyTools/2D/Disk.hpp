@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Disk.h
+/*! \file Disk.hpp
   \brief Definition of a 2D disk - Inherits from LagrangianDS
 */
 

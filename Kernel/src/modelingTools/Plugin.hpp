@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file DynamicalSystem.h
+/*! \file DynamicalSystem.hpp
   \brief Abstract class - General interface for all Dynamical Systems.
 */
 

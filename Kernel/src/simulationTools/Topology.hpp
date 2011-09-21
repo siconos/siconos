@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Topology.h
+/*! \file Topology.hpp
 
 */
 #ifndef TOPOLOGY_H

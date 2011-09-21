@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file RelationXML.h
+/*! \file RelationXML.hpp
   \brief XML data reading for Relation.
 */
 

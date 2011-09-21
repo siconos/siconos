@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file SphereNEDSSphereNEDSR.h
+/*! \file SphereNEDSSphereNEDSR.hpp
   \brief Two spheres relation with the Newton Euler formalism and quaternions.
 */
 

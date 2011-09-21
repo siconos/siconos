@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file NewtonImpactNSL.h
+/*! \file NewtonImpactNSL.hpp
 
 */
 #ifndef NEWTONIMPACTNSL_H

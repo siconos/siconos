@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file RelationFactory.h
+/*! \file RelationFactory.hpp
 \brief  Factory to generate user-defined Relations
 */
 

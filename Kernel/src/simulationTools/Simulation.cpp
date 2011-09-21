@@ -678,17 +678,16 @@ void Simulation::ComputeLevelsForInputAndOutput()
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
 
-
-  _levelMinForInput = LEVELMAX;
-  _levelMaxForInput = 0;
-  _levelMinForOutput = LEVELMAX;
-  _levelMaxForOutput = 0;
-  SP::DynamicalSystem ds;
-  SP::OneStepIntegrator Osi;
-  boost::shared_ptr<SetupLevels> setupLevels;
-
   if (not _staticLevels or not _levelsAreComputed)
   {
+    _levelMinForInput = LEVELMAX;
+    _levelMaxForInput = 0;
+    _levelMinForOutput = LEVELMAX;
+    _levelMaxForOutput = 0;
+    SP::DynamicalSystem ds;
+    SP::OneStepIntegrator Osi;
+    boost::shared_ptr<SetupLevels> setupLevels;
+
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
       /** \warning. We test only for the first Dynamical of the interaction.

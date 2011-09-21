@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file FirstOrderR.h
+/*! \file FirstOrderR.hpp
 \brief General interface for relations.
  */
 

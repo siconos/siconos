@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Actuator.h
+/*! \file Actuator.hpp
   \brief General interface to define an actuator
 */
 

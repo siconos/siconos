@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file SiconosMemoryXML.h
+/*! \file SiconosMemoryXML.hpp
 
 */
 #ifndef SICONOSMEMORYXML_H

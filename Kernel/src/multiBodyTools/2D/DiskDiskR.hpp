@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file DiskDiskR.h
+/*! \file DiskDiskR.hpp
   \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
 

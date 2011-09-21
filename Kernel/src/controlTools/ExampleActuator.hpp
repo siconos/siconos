@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ExampleActuator.h
+/*! \file ExampleActuator.hpp
   \brief An example on how to implement a user-defined actuator.
 */
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file NonSmoothLawXML.h
+/*! \file NonSmoothLawXML.hpp
   \brief
 
 */

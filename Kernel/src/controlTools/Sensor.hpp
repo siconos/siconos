@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Sensor.h
+/*! \file Sensor.hpp
   \brief General interface to define a sensor
 */
 

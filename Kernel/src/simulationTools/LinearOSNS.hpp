@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file LinearOSNS.h
+/*! \file LinearOSNS.hpp
   \brief Linear Complementarity Problem formulation and solving
 */
 

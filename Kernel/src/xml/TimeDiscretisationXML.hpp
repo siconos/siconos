@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file TimeDiscretisationXML.h
+/*! \file TimeDiscretisationXML.hpp
 
   \brief: xml management for TimeDiscretisation
 */

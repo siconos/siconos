@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file FirstOrderLinearTIR.h
+/*! \file FirstOrderLinearTIR.hpp
 
 */
 #ifndef FirstOrderLinearTIR_H

@@ -18,7 +18,7 @@
  *
  */
 
-/*! \file SphereNEDSPlanR.h
+/*! \file SphereNEDSPlanR.hpp
 
   \brief Newton Euler sphere relation with a plan Ax+By+Cz+D=0
 

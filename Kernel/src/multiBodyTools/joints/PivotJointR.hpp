@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file NewtonEulerR.h
+/*! \file NewtonEulerR.hpp
 
 */
 #ifndef PivotJointRELATION_H

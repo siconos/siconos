@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SiconosMatrix.h
+/*! \file SiconosMatrix.hpp
   \brief Interface for matrices handling.
 
 */

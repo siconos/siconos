@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SiconosDOMTreeTools.h
+/*! \file SiconosDOMTreeTools.hpp
 
 */
 

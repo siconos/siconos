@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file ActuatorEvent.h
+/*! \file ActuatorEvent.hpp
   \brief Actuator Events
 */
 #ifndef ActuatorEvent_H

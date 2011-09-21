@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file LagrangianDS.h
+/*! \file LagrangianDS.hpp
   \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
 */
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file LagrangianLinearTIDS.h
+/*! \file LagrangianLinearTIDS.hpp
 
 */
 #ifndef LAGRANGIANTIDS_H

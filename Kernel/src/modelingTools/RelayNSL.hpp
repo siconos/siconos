@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file RelayNSL.h
+/*! \file RelayNSL.hpp
 
 */
 #ifndef RELAYNSLAW_H

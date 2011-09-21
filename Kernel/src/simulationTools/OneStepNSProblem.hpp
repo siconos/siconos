@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file OneStepNSProblem.h
+/*! \file OneStepNSProblem.hpp
   \brief Interface to formalize and solve Non-Sooth problems
  */
 

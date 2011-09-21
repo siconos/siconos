@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SensorPosition.h
+/*! \file SensorPosition.hpp
   A specific sensor, to capture q vector ("position") in Lagrangian systems.
   Used as an example on how to implement new user-sensors.
 */

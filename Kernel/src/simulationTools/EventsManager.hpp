@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \file EventsManager.h
+/*! \file EventsManager.hpp
   \brief Management of a Set (STL) of Events for the Simulation process
 */
 

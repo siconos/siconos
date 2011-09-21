@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file utils.h
+/*! \file utils.hpp
 Include files related to utils directory
 */
 

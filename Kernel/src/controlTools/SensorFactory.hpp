@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SensorFactory.h
+/*! \file SensorFactory.hpp
   Factory to generate user-defined sensors
 */
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-/*! \file UnitaryRelation.h
+/*! \file UnitaryRelation.hpp
 
 */
 #ifndef UNITARYRELATION_H
