@@ -38,16 +38,7 @@ void TimeSteppingD1Minus::initOSNS()
   UnitaryRelationsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus"); // TODO
-    // creates a POINTER link between workX[ds] (xfree) and the
-    // corresponding unitaryBlock in each UR for each ds of the
-    // current UR.
-    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-    for (ConstDSIterator itDS = ur->interaction()->dynamicalSystemsBegin();
-         itDS != ur->interaction()->dynamicalSystemsEnd(); ++itDS) // TODO
-    {
-      ur->insertInWorkFree((*itDS)->workFree());
-    }
+    indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus");
   }
 
   // there is at least one OSNP

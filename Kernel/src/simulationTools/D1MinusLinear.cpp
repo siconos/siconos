@@ -456,7 +456,7 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
     }
   }
   else
-    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput not implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType);
 }
 
 void D1MinusLinear::updateState(unsigned int level)

@@ -158,6 +158,21 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     }
   }
 
+  if (simulationType == "TimeSteppingD1Minus")
+  {
+    RELATION::TYPES pbType = getRelationType();
+    if (pbType == Lagrangian)
+    {
+      for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
+      {
+        _workX->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
+        _workFree->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
+      }
+    }
+    else
+      RuntimeException::selfThrow("UnitaryRelation::initialize - not implemented for TimeSteppingD1Minus simulation and Relation of type " + pbType);
+  }
+
   if (simulationType == "EventDriven")
   {
     RELATION::TYPES pbType = getRelationType();
