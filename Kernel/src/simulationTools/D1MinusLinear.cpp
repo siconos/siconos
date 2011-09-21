@@ -154,6 +154,7 @@ double D1MinusLinear::computeResidu()
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
       RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not implemented for Dynamical system type: " + dsType);
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
+    SP::SiconosVector workFree = d->workFree(); // POINTER CONSTRUCTOR
 
     // get left state from memory
     SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -169,7 +170,11 @@ double D1MinusLinear::computeResidu()
     Mold->PLUForwardBackwardInPlace(*residuFree);
     Mold->PLUForwardBackwardInPlace(*v);
 
+    *residuFree -= 0.5 * h**workFree;
+
+    *v += h**workFree;
     *v += *vold;
+
     SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR
     *q = *qold;
     scal(0.5 * h, *vold + *v, *q, false);
