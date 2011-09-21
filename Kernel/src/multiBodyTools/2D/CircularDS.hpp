@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file CircularDS
+/*! \file CircularDS.hpp
   \brief Definition of a 2D circular shape - Inherits from LagrangianDS
 */
 

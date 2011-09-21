@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file PivotJoint.cpp
+/*! \file PivotJointR.cpp
 
 */
 

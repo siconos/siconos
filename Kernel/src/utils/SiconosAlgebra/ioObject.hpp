@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file ioObject.h
+/*! \file ioObject.hpp
   Interface for input/output of SiconosAlgebra
 */
 

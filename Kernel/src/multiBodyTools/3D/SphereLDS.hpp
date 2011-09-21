@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SphereLDS
+/*! \file SphereLDS.hpp
   \brief Definition of a 3D sphere as a LagrangianDS (with Euler
          Angles)
 */

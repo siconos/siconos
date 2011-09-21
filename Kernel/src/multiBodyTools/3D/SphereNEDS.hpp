@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SphereNEDS
+/*! \file SphereNEDS.hpp
 
   \brief Definition of a 3D Sphere as a NewtonEulerDS (with
   quaternions).
