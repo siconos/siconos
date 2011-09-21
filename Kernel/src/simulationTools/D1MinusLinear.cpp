@@ -67,6 +67,18 @@ double D1MinusLinear::computeResidu()
 
   // -- LEFT SIDE --
   // solve a LCP at acceleration level
+  SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions();
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->relation()->computeJach(told);
+    (*it)->relation()->computeJacg(told);
+  }
+
+  if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+    for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
+    {
+      (*itOsns)->setHasBeUpdated(false);
+    }
   if (!allOSNS->empty())
   {
     if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())

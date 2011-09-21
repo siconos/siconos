@@ -85,11 +85,8 @@ public:
   /** step from current event to next event of EventsManager */
   virtual void advanceToEvent();
 
-  /** compute initial residu */
-  void computeInitialResidu();
-
-  /** prepare calculation */
-  void prepareNewtonIteration(); // TODO can be killed? should be renamed
+  /** compute residu */
+  void computeResidu();
 
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();

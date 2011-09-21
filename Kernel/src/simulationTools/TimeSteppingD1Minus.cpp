@@ -55,6 +55,10 @@ void TimeSteppingD1Minus::initOSNS()
     (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->initialize(shared_from_this());
     (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->setLevels(2, 2);
     (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(shared_from_this());
+
+    // update output
+    for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
+      updateOutput(level);
   }
 }
 
@@ -93,7 +97,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  topo->setHasChanged(false); // TODO NOETIG?
+  topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
@@ -172,15 +176,15 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
 void TimeSteppingD1Minus::update(unsigned int levelInput)
 {
-  // 1 - compute input (lambda -> r)
+  // compute input (lambda -> r)
   if (!_allNSProblems->empty())
     updateInput(levelInput);
 
-  // 2 - compute state for each dynamical system
+  // compute state for each dynamical system
   for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
     (*itOSI)->updateState(levelInput);
 
-  // 3 - compute output ( x ... -> y)
+  // compute output (x -> y)
   if (!_allNSProblems->empty())
   {
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
@@ -204,43 +208,43 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
-  computeInitialResidu();
+  // we start after initialization with
+  // * initial state (q_0, v_0^+)
+  // * updated indexset (I_0^+)
+  // * updated  gaps and gap velocities (g_0^+)
+  //
+  // hence we end this procedure with
+  // * state (q_{k+1}, v_{k+1}^+)
+  // * updated gaps and gap velocities (g_{k+1}^+)
+  // * indexset (I_{k+1}^+)
 
-  prepareNewtonIteration();
+  // calculate residu without nonsmooth event with OSI
+  // * calculate position (q_{k+1})
+  computeResidu();
+
+  // calculate state without nonsmooth event with OSI
+  // * calculate velocity (v_{k+1}^-)
   computeFreeState();
+
+  // event (impulse) calculation
+  // * calculate gap velocity (g_{k+1}^-) with OSI
+  // * calculate local impulse (Lambda_{k+1}^+)
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
   // update on impulse level
-  // * calculate global impulse
-  // * update velocity
-  // * calculate gaps until acceleration level
+  // * calculate global impulse (p_{k+1}^+)
+  // * update velocity (v_{k+1}^+) with OSI
+  // * calculate local gaps (g_{k+1}^+)
   update(1);
+
+  // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
 
-void TimeSteppingD1Minus::computeInitialResidu()
+void TimeSteppingD1Minus::computeResidu()
 {
-  updateOutput(_levelMinForOutput);
-  updateInput(_levelMinForInput);
-
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
-}
-
-void TimeSteppingD1Minus::prepareNewtonIteration()
-{
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->computeJach(getTkp1());
-    (*it)->relation()->computeJacg(getTkp1());
-  }
-
-  if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
-    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    {
-      (*itOsns)->setHasBeUpdated(false);
-    }
 }
 
 void TimeSteppingD1Minus::computeFreeState()
