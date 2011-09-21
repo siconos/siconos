@@ -28,7 +28,7 @@
 #include <btBulletCollisionCommon.h>
 
 BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactManifold) :
-  NewtonEulerRFC3D(),
+  NewtonEulerFrom3DLocalFrameR(),
   _contactPoints(point),
   _contactManifold(contactManifold)
 {

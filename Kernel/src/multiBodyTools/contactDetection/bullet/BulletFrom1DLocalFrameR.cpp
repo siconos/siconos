@@ -17,16 +17,16 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "BulletRImpact.hpp"
+#include "BulletFrom1DLocalFrameR.hpp"
 
 #include <bullet/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-BulletRImpact::BulletRImpact(SP::btManifoldPoint point) : NewtonEulerRImpact(), _contactPoints(point)
+BulletFrom1DLocalFrameR::BulletFrom1DLocalFrameR(SP::btManifoldPoint point) : NewtonEulerFrom1DLocalFrameR(), _contactPoints(point)
 {
 };
 
-void BulletRImpact::computeh(double)
+void BulletFrom1DLocalFrameR::computeh(double)
 {
   interaction()->y(0)->setValue(0, _contactPoints->getDistance());
   btVector3 posa = _contactPoints->getPositionWorldOnA();

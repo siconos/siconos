@@ -23,7 +23,7 @@
 #include "BulletSiconos.hpp"
 #include "SpaceFilter.hpp"
 #include "BulletR.hpp"
-#include "BulletRImpact.hpp"
+#include "BulletFrom1DLocalFrameR.hpp"
 #include "BulletDS.hpp"
 
 #include <btBulletCollisionCommon.h>
@@ -104,7 +104,7 @@ struct ForStaticShapes : public Question< boost::shared_ptr<std::vector<SP::btCo
 struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
   ANSWER(BulletR, contactPoint());
-  ANSWER(BulletRImpact, contactPoint());
+  ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };
 
 

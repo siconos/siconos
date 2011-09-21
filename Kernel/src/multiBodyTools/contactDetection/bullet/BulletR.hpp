@@ -21,9 +21,9 @@
 #define BulletR_hpp
 
 #include "BulletSiconos.hpp"
-#include "NewtonEulerRFC3D.hpp"
+#include "NewtonEulerFrom3DLocalFrameR.hpp"
 
-class BulletR : public NewtonEulerRFC3D
+class BulletR : public NewtonEulerFrom3DLocalFrameR
 {
 private:
   /** serialization hooks

@@ -17,23 +17,23 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#ifndef BulletRImpact_hpp
-#define BulletRImpact_hpp
+#ifndef BulletFrom1DLocalFrameR_hpp
+#define BulletFrom1DLocalFrameR_hpp
 
 #include "BulletSiconos.hpp"
-#include "NewtonEulerRImpact.hpp"
+#include "NewtonEulerFrom1DLocalFrameR.hpp"
 
-class BulletRImpact : public NewtonEulerRImpact
+class BulletFrom1DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(BulletRImpact);
+  ACCEPT_SERIALIZATION(BulletFrom1DLocalFrameR);
 
   SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletRImpact(SP::btManifoldPoint);
+  BulletFrom1DLocalFrameR(SP::btManifoldPoint);
 
   SP::btManifoldPoint contactPoint() const
   {
@@ -47,6 +47,6 @@ public:
 
 
 
-TYPEDEF_SPTR(BulletRImpact);
+TYPEDEF_SPTR(BulletFrom1DLocalFrameR);
 
 #endif

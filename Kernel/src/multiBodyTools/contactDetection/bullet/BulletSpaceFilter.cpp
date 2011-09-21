@@ -259,7 +259,7 @@ void BulletSpaceFilter::buildInteractions(double time)
           {
             if (_nslaw->size() == 1)
             {
-              SP::BulletRImpact rel(new BulletRImpact(cpoint));
+              SP::BulletFrom1DLocalFrameR rel(new BulletFrom1DLocalFrameR(cpoint));
               inter.reset(new Interaction(1, _nslaw, rel, 4 * i + z));
             }
           }
@@ -327,7 +327,6 @@ void BulletSpaceFilter::buildInteractions(double time)
     }
 
   }
-  _nsds->topology()->computeRelativeDegrees();
 
   DEBUG_PRINT("-----end build interaction\n");
 
