@@ -55,6 +55,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #ifdef TSPROJ_DEBUG
   cout << "TimeStepping::newtonSolve begin :\n";
 #endif
+  /** First step, the velocity formulation.*/
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(criterion, maxStep);
 #ifdef TSPROJ_DEBUG
@@ -100,35 +101,44 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   {
     SP::UnitaryRelation UR = indexSet->bundle(*aVi);
     SP::Interaction interac = UR->interaction();
+    interac->relation()->computeJach(getTkp1());
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
       double criteria = interac->y(0)->getValue(0);
+      //printf("TSProj newton criteria unilateral  %e.\n",criteria);
       if (criteria < - _constraintTolUnilateral)
       {
         runningNewton = true;
-        printf("TSProj criteria newton true %e.\n", criteria);
+#ifdef TSPROJ_DEBUG
+        printf("TSProj newton criteria unilateral true %e.\n", criteria);
+#endif
       }
     }
     else
     {
+      //printf("TSProj newton criteria  %e.\n",interac->y(0)->normInf());
       if (interac->y(0)->normInf() > _constraintTol)
       {
         runningNewton = true;
-        printf("TSProj criteria2 newton true %e.\n", interac->y(0)->normInf());
+#ifdef TSPROJ_DEBUG
+        printf("TSProj newton criteria equality true %e.\n", interac->y(0)->normInf());
+#endif
       }
     }
   }
 
 
-  while (runningNewton && cmp < 100)
+  while (runningNewton && cmp < 10)
   {
     cmp++;
     //printf("TimeSteppingProjectOnConstraints Newton step = %d\n",cmp);
 
 
     info = 0;
+#ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
+#endif
     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
     if (info)
     {
@@ -164,7 +174,9 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
         if (criteria < - _constraintTolUnilateral)
         {
           runningNewton = true;
-          printf("TSProj criteria newton true %e.\n", criteria);
+#ifdef TSPROJ_DEBUG
+          printf("TSProj it %d newton criteria unilateral true %e.\n", cmp, criteria);
+#endif
         }
       }
       else
@@ -172,7 +184,9 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
         if (interac->y(0)->normInf() > _constraintTol)
         {
           runningNewton = true;
-          printf("TSProj criteria2 newton true %e.\n", interac->y(0)->normInf());
+#ifdef TSPROJ_DEBUG
+          printf("TSProj it %d newton criteria equality true %e.\n", cmp, interac->y(0)->normInf());
+#endif
         }
       }
     }
@@ -188,6 +202,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     //  (*it)->relation()->computeh(getTkp1());
     //}
   }
+  /*The following reduces the velocity because the position step increase the energy of the system. This formulation works only with simple systems.To activate it, comment the next line.*/
   return;
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {

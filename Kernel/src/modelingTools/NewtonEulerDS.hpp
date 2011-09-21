@@ -89,7 +89,7 @@ protected:
   SP::SimpleMatrix _luW;
 
   /** Matrix depending of the meaning of x.*/
-  SP::SiconosMatrix _T;
+  SP::SimpleMatrix _T;
 
 
   /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
@@ -512,7 +512,7 @@ public:
   {
     return _luW;
   }
-  inline SP::SiconosMatrix T()
+  inline SP::SimpleMatrix T()
   {
     return _T;
   }

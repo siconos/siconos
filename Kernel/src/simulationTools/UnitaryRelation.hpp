@@ -318,7 +318,7 @@ public:
      *  \param a pointer to a dynamical system
      *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
      */
-  //void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const;
+  void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const;
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system

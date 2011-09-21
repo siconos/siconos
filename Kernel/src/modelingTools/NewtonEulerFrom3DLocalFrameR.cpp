@@ -34,6 +34,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents()
   _yProj.reset(new SimpleVector(1));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
+  //  _isContact=1;
 }
 void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEulerDS d1)
 {
