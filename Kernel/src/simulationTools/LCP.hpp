@@ -70,8 +70,6 @@ TYPEDEF_SPTR(LinearComplementarityProblem);
  *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
  *  ouput results from the solver (z,w); function postCompute().
  *
- *
- * \todo : add "recover" function to start from old values of z and w.
  */
 class LCP : public LinearOSNS
 {
