@@ -21,8 +21,8 @@
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianScleronomousR.hpp"
 #include "NewtonImpactNSL.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -44,15 +44,6 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[3] = subCoord[1];
     subscal(e, *(UR->y_k(osnsp->levelMin())), *(UR->yp()), subCoord, false);
   }
-  void visit(const NewtonImpactFrictionNSL& nslaw)
-  {
-    double e = nslaw.en();
-    (*(UR->yp()))(0) +=  e * (*(UR->y_k(osnsp->levelMin())))(0);
-  }
-
-  void visit(const EqualityConditionNSL& nslaw) {}
-
-  void visit(const MixedComplementarityConditionNSL& nslaw) {}
 };
 
 // --- constructor from a ds ---
@@ -157,7 +148,7 @@ void D1MinusLinear::initW(double t, SP::DynamicalSystem ds)
     WMap[ds].reset(new SimpleMatrix(*(d->mass())));
     SP::SiconosMatrix W = WMap[ds];
   }
-  else RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - not yet implemented for Dynamical system type: " + dsType);
+  else RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - not implemented for Dynamical system type: " + dsType);
 }
 
 void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
@@ -177,7 +168,7 @@ void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
   }
   // Lagrangian Linear Systems
   else if (dsType == Type::LagrangianLinearTIDS) {}
-  else RuntimeException::selfThrow("D1MinusLinear::computeW(t,ds) - not yet implemented for Dynamical system type: " + dsType);
+  else RuntimeException::selfThrow("D1MinusLinear::computeW(t,ds) - not implemented for Dynamical system type: " + dsType);
 }
 
 double D1MinusLinear::computeResidu()
@@ -204,7 +195,7 @@ double D1MinusLinear::computeResidu()
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not implemented for Dynamical system type: " + dsType);
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
 
     // get left state from memory
@@ -349,11 +340,10 @@ void D1MinusLinear::computeFreeState()
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     Type::Siconos dsType = Type::value(**it); // type of the current DS
-    SP::SiconosMatrix W = WMap[*it]; // W iteration matrix of the current DS
 
     // Lagrangian Systems
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinear::computeFreeState - not implemented for Dynamical system type: " + dsType);
 
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
 
@@ -380,55 +370,54 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
   unsigned int relativePosition = UR->getRelativePosition();
   unsigned int sizeY = UR->getNonSmoothLawSize(); // related NSL
-  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin()); // related DS
 
   Index coord(8);
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
+  coord[3] = 0;
   coord[4] = 0;
+  coord[5] = 0;
   coord[6] = 0;
   coord[7] = sizeY;
-  SP::SiconosMatrix C;
-  SP::SiconosVector Xq = UR->xq();
-  SP::SiconosVector Yp = UR->yp();
-  SP::SiconosVector Xfree = UR->workFree();
+  SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
+  SP::SiconosVector Xfree; // free degree of freedom
+  SP::SiconosVector Yp = UR->yp(); // POINTER CONSTRUCTOR
 
-  assert(Xfree);
+  // define Xfree for velocity and acceleration level
+  if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+  {
+    Xfree = UR->workx();
+  }
+  else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+  {
+    Xfree  = UR->workFree();
+  }
+  else
+    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
 
+  // calculate data of interaction
   SP::Interaction mainInteraction = UR->interaction();
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
-  // Lagrangian Systems
-  C = mainInteraction->relation()->C();
-
-  if (C)
-  {
-    assert(Xfree);
-    assert(Yp);
-    assert(Xq);
-
-    coord[3] = C->size(1);
-    coord[5] = C->size(1);
-    subprod(*C, *Xfree, *Yp, coord, true);
-  }
+  // only Lagrangian Systems
   if (relationType == Lagrangian)
   {
-    C = (boost::static_pointer_cast<LagrangianR>(mainInteraction->relation()))->jachq();
-    SP::SiconosMatrix C2 = mainInteraction->relation()->C();
+    // in Yp the linear part of velocity or acceleration relation will be saved
+    C = mainInteraction->relation()->C();
 
     if (C)
     {
       assert(Xfree);
       assert(Yp);
-      assert(Xq);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
       subprod(*C, *Xfree, *Yp, coord, true);
     }
 
+    // in Yp corrections have to be added
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
     ID->eye();
 
@@ -442,7 +431,7 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
     xcoord[6] = 0;
     xcoord[7] = sizeY;
 
-    if (relationSubType == RheonomousR)
+    if (relationSubType == RheonomousR) // explicit time dependence -> partial time derivative has to be added
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
@@ -450,17 +439,24 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
         subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false);
       }
       else
-        RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput(ur,osnsp) - not yet implemented for SICONOS_OSNSP.");
+        RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
     }
-    if (relationSubType == ScleronomousR) {}
+    if (relationSubType == ScleronomousR) // acceleration term involving Hesse matrix of Relation with respect to degree is added
+    {
+      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+      {
+        boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+      }
+    }
+    if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) // impact terms are added
+    {
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
+      UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    }
   }
-
-  // Lagrangian Systems
-  if (UR->getRelationType() == Lagrangian)
-  {
-    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
-    UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
-  }
+  else
+    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput not implemented for Relation of type " + relationType);
 }
 
 void D1MinusLinear::updateState(unsigned int level)
@@ -472,7 +468,7 @@ void D1MinusLinear::updateState(unsigned int level)
 
     // Lagrangian Systems
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not implemented for Dynamical system type: " + dsType);
 
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector v = d->velocity(); // pointer constructor
@@ -487,21 +483,6 @@ void D1MinusLinear::updateState(unsigned int level)
       *v = *(d->workFree());
     }
   }
-}
-
-void D1MinusLinear::display()
-{
-  OneStepIntegrator::display();
-
-  cout << "====== D1MinusLinear OSI display ======" << endl;
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    cout << "--------------------------------" << endl;
-    cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
-    if (WMap[*it]) WMap[*it]->display();
-    else cout << "-> NULL" << endl;
-  }
-  cout << "================================" << endl;
 }
 
 void D1MinusLinear::insertDynamicalSystem(SP::DynamicalSystem ds)

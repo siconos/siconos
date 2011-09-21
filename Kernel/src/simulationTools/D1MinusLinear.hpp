@@ -155,7 +155,7 @@ public:
    */
   virtual void integrate(double&, double&, double&, int&)
   {
-    RuntimeException::selfThrow("D1MinusLinear::integrate - not yet implemented!");
+    RuntimeException::selfThrow("D1MinusLinear::integrate - not implemented!");
   }
 
   /** updates the state of the Dynamical Systems
@@ -165,12 +165,15 @@ public:
   virtual void updateState(unsigned int);
 
   /** displays the data of the D1MinusLinear's integrator */
-  virtual void display();
+  virtual void display()
+  {
+    RuntimeException::selfThrow("D1MinusLinear::display - not implemented!");
+  }
 
   /** preparations for Newton iteration */
   virtual void prepareNewtonIteration(double time)
   {
-    RuntimeException::selfThrow("D1MinusLinear::prepareNewtonIteration - not yet implemented!");
+    RuntimeException::selfThrow("D1MinusLinear::prepareNewtonIteration - not implemented!");
   }
 
   /** insert a dynamical system in this Integrator
