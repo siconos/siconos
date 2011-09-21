@@ -271,8 +271,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     }
     else
     {
-      topo->indexSetsResize(5);
-      //                    ^ the max in setupLevels + 1
+      topo->indexSetsResize(LEVELMAX);
       // ComputeLevelsForInputAndOutput will resize the indexSets when some interactions appear
     }
 
@@ -701,7 +700,12 @@ void Simulation::ComputeLevelsForInputAndOutput()
     }
     if (_levelsAreComputed)
     {
-      model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput + 1);
+      if (model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() == LEVELMAX
+          or  model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() < _levelMaxForOutput + 1)
+      {
+        model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput + 1);
+      }
+
     }
   }
 #include <debug.h>
