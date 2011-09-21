@@ -208,7 +208,7 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
-  // we start after initialization with
+  // we start after initialization (initOSNS) with
   // * initial state (q_0, v_0^+)
   // * updated indexset (I_0^+)
   // * updated  gaps and gap velocities (g_0^+)

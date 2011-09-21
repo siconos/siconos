@@ -64,23 +64,81 @@ double D1MinusLinear::computeResidu()
   double told = simulationLink->startingTime(); // beginning of the time step
   double h = simulationLink->timeStep(); // time step length
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
+  SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
 
   // -- LEFT SIDE --
-  // solve a LCP at acceleration level
-  SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions();
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  // calculate acceleration without contact force
+  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    (*it)->relation()->computeJach(told);
-    (*it)->relation()->computeJacg(told);
+    // type of the current DS
+    Type::Siconos dsType = Type::value(**it);
+    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+      RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not implemented for Dynamical system type: " + dsType);
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
+    SP::SiconosVector workFree = d->workFree(); // POINTER CONSTRUCTOR
+    workFree->zero();
+
+    // get left state from memory
+    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+    SP::SiconosMatrix Mold = d->mass();
+
+    // Lagrangian Nonlinear Systems
+    if (dsType == Type::LagrangianDS)
+    {
+      if (d->fL())
+      {
+        d->computeFL(told, qold, vold); // left force vector
+        *workFree = *(d->fL());
+      }
+    }
+    // Lagrangian Linear Systems
+    else if (dsType == Type::LagrangianLinearTIDS)
+    {
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (*it);
+
+      // get left state from memory
+      SP::SiconosMatrix C = d->C(); // constant dissipation
+      SP::SiconosMatrix K = d->K(); // constant stiffness
+      SP::SiconosVector Fext = d->fExt(); // time dependent force
+
+      if (K)
+      {
+        prod(*K, *qold, *workFree, true);
+      }
+
+      if (C)
+      {
+        prod(*C, *vold, *workFree, false);
+      }
+
+      *workFree *= -1.;
+
+      if (Fext)
+      {
+        d->computeFExt(told);
+        *workFree += *Fext;
+      }
+    }
+
+    Mold->PLUForwardBackwardInPlace(*workFree); // current acceleration without contact force
   }
 
-  if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
-    for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
-    {
-      (*itOsns)->setHasBeUpdated(false);
-    }
+  // solve a LCP at acceleration level
   if (!allOSNS->empty())
   {
+    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    {
+      (*it)->relation()->computeJach(told);
+      (*it)->relation()->computeJacg(told);
+    }
+    if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+    {
+      for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
+      {
+        (*itOsns)->setHasBeUpdated(false);
+      }
+    }
     if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
     {
       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -88,7 +146,7 @@ double D1MinusLinear::computeResidu()
     }
   }
 
-  // advance to the right side
+  // ADVANCE TO RIGHT
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // type of the current DS
@@ -106,51 +164,7 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector residuFree = (*it)->residuFree(); // POINTER CONSTRUCTOR
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR
     scal(-0.5 * h, *(d->p(2)), *residuFree, true);
-    scal(h, *(d->p(2)), *v, true);
-
-    // Lagrangian Nonlinear Systems
-    if (dsType == Type::LagrangianDS)
-    {
-      if (d->fL())
-      {
-        d->computeFL(told, qold, vold); // left force vector
-        scal(-0.5 * h, *(d->fL()), *residuFree, false);
-        scal(h, *(d->fL()), *v, false);
-      }
-    }
-    // Lagrangian Linear Systems
-    else if (dsType == Type::LagrangianLinearTIDS)
-    {
-      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (*it);
-
-      // get left state from memory
-      SP::SiconosMatrix C = d->C(); // constant dissipation
-      SP::SiconosMatrix K = d->K(); // constant stiffness
-      SP::SiconosVector Fext = d->fExt(); // time dependent force
-
-      if (Fext)
-      {
-        d->computeFExt(told);
-        scal(-0.5 * h, *Fext, *residuFree, false);
-        scal(h, *Fext, *v, false);
-      }
-
-      if (K)
-      {
-        SP::SiconosVector dummy(new SimpleVector(qold->size()));
-        prod(*K, *qold, *dummy);
-        scal(0.5 * h, *dummy, *residuFree, false);
-        scal(-h, *dummy, *v, false);
-      }
-
-      if (C)
-      {
-        SP::SiconosVector dummy(new SimpleVector(vold->size()));
-        prod(*C, *vold, *dummy);
-        scal(0.5 * h, *dummy, *residuFree, false);
-        scal(-h, *dummy, *v, false);
-      }
-    }
+    scal(h, *(d->p(2)), *v, true); // TODO START HERE DEFINITION FUER WORKFREE
 
     Mold->PLUForwardBackwardInPlace(*residuFree);
     Mold->PLUForwardBackwardInPlace(*v);
@@ -226,9 +240,6 @@ double D1MinusLinear::computeResidu()
     prod(*M, *residuFree, *dummy, false);
 
     *residuFree = *dummy;
-
-    *(d->workFree()) = *residuFree; // copy residuFree in workFree
-    *(d->workFree()) -= *(d->p(1)); // subtract nonsmooth reaction on impulse level
   }
 
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
@@ -251,7 +262,7 @@ void D1MinusLinear::computeFreeState()
 
     // get right information
     SP::SiconosMatrix M = d->mass();
-    SP::SiconosVector vfree = d->workFree(); // POINTER CONSTRUCTOR
+    SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR
     (*vfree) = *(d->residuFree());
 
     M->PLUForwardBackwardInPlace(*vfree);
@@ -286,11 +297,11 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    Xfree = UR->workFree();
+    Xfree = UR->workx();
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    Xfree  = UR->workFree(); // TODO
+    Xfree  = UR->workFree();
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
@@ -372,9 +383,9 @@ void D1MinusLinear::updateState(unsigned int level)
     SP::SiconosMatrix M = d->mass();
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR
 
-    *v = *(d->p(1)); // value = nonsmooth impulse
-    M->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-    *v += *(d->workFree()); // add free velocity
+    SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
+    M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+    *v += *dummy; // add free velocity
   }
 }
 
