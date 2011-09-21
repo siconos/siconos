@@ -94,9 +94,6 @@ public:
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();
 
-  /** save input and output */
-  void saveYandLambdaInMemory();
-
   /** encapsulates an operation of dynamic casting
    *  needed by Python interface
    *  \param simulation which must be converted

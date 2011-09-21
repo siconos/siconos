@@ -124,7 +124,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
           // if UnitaryRelation has been active in the previous calculation and now becomes in-active
           indexSet1->remove_vertex(urp);
           topo->setHasChanged(true);
-          urp->lambda(1)->zero(); // TODO WAS ZU NULL SETZEN?
+          urp->lambda(1)->zero(); // impuls is zero
         }
       }
     }
@@ -150,7 +150,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
             // if UnitaryRelation has been staying active in the previous calculation and now does not stay active
             indexSet2->remove_vertex(urp);
             topo->setHasChanged(true);
-            urp->lambda(2)->zero(); // TODO WAS ZU NULL SETZEN?
+            urp->lambda(2)->zero(); // force is zero
           }
         }
       }
@@ -161,7 +161,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
           // if UnitaryRelation is in-active and has been staying active in previous calculation
           indexSet2->remove_vertex(urp);
           topo->setHasChanged(true);
-          urp->lambda(2)->zero(); // TODO WAS ZU NULL SETZEN?
+          urp->lambda(2)->zero(); // force is zero
         }
       }
     }
@@ -177,7 +177,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
     updateInput(levelInput);
 
   // 2 - compute state for each dynamical system
-  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
     (*itOSI)->updateState(levelInput);
 
   // 3 - compute output ( x ... -> y)
@@ -211,30 +211,17 @@ void TimeSteppingD1Minus::advanceToEvent()
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
-  update(_levelMinForInput);
-
-  saveYandLambdaInMemory();
+  // update on impulse level
+  // * calculate global impulse
+  // * update velocity
+  // * calculate gaps until acceleration level
+  update(1);
 }
 
 void TimeSteppingD1Minus::computeInitialResidu()
 {
-  double tkp1 = getTkp1();
-
-  assert(_levelMinForOutput >= 0);
-  assert(_levelMaxForOutput >= _levelMinForOutput);
-  assert(_levelMinForInput >= 0);
-  assert(_levelMaxForInput >= _levelMinForInput);
-
   updateOutput(_levelMinForOutput);
   updateInput(_levelMinForInput);
-
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->updatePlugins(tkp1);
-  }
-
-  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
 
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
@@ -249,18 +236,6 @@ void TimeSteppingD1Minus::prepareNewtonIteration()
     (*it)->relation()->computeJacg(getTkp1());
   }
 
-  /*reset to zero the ds buffers*/
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  /* should be evaluated only if needed */
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->preparStep();
-  }
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->preparNewtonIteration();
-  }
   if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
@@ -271,13 +246,6 @@ void TimeSteppingD1Minus::prepareNewtonIteration()
 void TimeSteppingD1Minus::computeFreeState()
 {
   std::for_each(_allOSI->begin(), _allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
-}
-
-void TimeSteppingD1Minus::saveYandLambdaInMemory()
-{
-  for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    (*itOsns)->saveInMemory();
-
 }
 
 TimeSteppingD1Minus* TimeSteppingD1Minus::convert(Simulation *str)

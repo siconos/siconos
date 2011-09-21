@@ -46,14 +46,12 @@ struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 };
 
-// --- constructor from a ds ---
 D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
   OneStepIntegrator(OSI::D1MINUSLINEAR)
 {
   OSIDynamicalSystems->insert(newDS);
 }
 
-// --- constructor from a list of ds ---
 D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS): OneStepIntegrator(OSI::D1MINUSLINEAR, newDS) {}
 
 void D1MinusLinear::initialize()
@@ -356,21 +354,15 @@ void D1MinusLinear::updateState(unsigned int level)
 
     // Lagrangian Systems
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinear::updateState - not implemented for Dynamical system type: " + dsType);
 
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosMatrix M = d->mass();
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR
-    if (level != LEVELMAX)
-    {
-      *v = *(d->p(level)); // value = nonsmooth impulse
-      M->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
-      *v += *(d->workFree()); // add free velocity
-    }
-    else
-    {
-      *v = *(d->workFree());
-    }
+
+    *v = *(d->p(1)); // value = nonsmooth impulse
+    M->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
+    *v += *(d->workFree()); // add free velocity
   }
 }
 
