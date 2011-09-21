@@ -923,13 +923,12 @@ void LagrangianDS::initMemory(unsigned int steps)
   {
     _qMemory.reset(new SiconosMemory(steps));
     _velocityMemory.reset(new SiconosMemory(steps));
-    swapInMemory();
+    //swapInMemory();
   }
 }
 
 void LagrangianDS::swapInMemory()
 {
-
   _xMemory->swap(_x[0]);
   _qMemory->swap(_q[0]);
   _velocityMemory->swap(_q[1]);

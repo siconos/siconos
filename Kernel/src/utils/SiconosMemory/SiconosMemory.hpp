@@ -56,10 +56,10 @@ private:
 
 
   /** the maximum size of the memory (i.e the max numbers of SiconosVectors it can store) */
-  unsigned int maxSize;
+  unsigned int _maxSize;
 
   /** the real number of SiconosVectors saved in the Memory (ie the ones for which memory has been allocated) */
-  unsigned int nbVectorsInMemory;
+  unsigned int _nbVectorsInMemory;
 
   /** the stl deque which contains the SiconosVectors kept in memory */
   SP::MemoryContainer _vectorMemory;
@@ -80,7 +80,7 @@ public:
 
   /** constructor with size parameter.
    * \param int : the size of the memory
-   * maxSize is set with the parameter, and the memory is allocated for this number of SiconosVector
+   * _maxSize is set with the parameter, and the memory is allocated for this number of SiconosVector
    */
   SiconosMemory(const unsigned int);
 
@@ -91,7 +91,7 @@ public:
 
   /** constructor with deque parameter.
    * \param MemoryContainer, the deque of siconosVector which must be stored
-   * maxSize is set to the size of the deque given in parameters
+   * _maxSize is set to the size of the deque given in parameters
    */
   SiconosMemory(const MemoryContainer&);
 
@@ -109,7 +109,7 @@ public:
 
   /** fill the memory with a vector of siconosVector
    * \param MemoryContainer
-   * maxSize is set to the size of the deque given in parameters
+   * _maxSize is set to the size of the deque given in parameters
    */
   void setVectorMemory(const MemoryContainer&);
 
@@ -124,7 +124,7 @@ public:
    */
   inline unsigned int getMemorySize() const
   {
-    return maxSize;
+    return _maxSize;
   };
 
   /** set the max size of the SiconosMemory
@@ -132,15 +132,15 @@ public:
    */
   inline void setSiconosMemorySize(const unsigned int max)
   {
-    maxSize = max;
+    _maxSize = max;
   }
 
   /** gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
    */
-  inline unsigned int getNbVectorsInMemory() const
+  inline unsigned int nbVectorsInMemory() const
   {
-    return nbVectorsInMemory;
+    return _nbVectorsInMemory;
   };
 
   /** gives the vector of SiconosVectors of the memory

@@ -195,6 +195,12 @@ public:
    */
   SP::SiconosVector yMemory(unsigned int, unsigned int) const;
 
+  /* get yMemory[i]
+   *    \return pointer on a SiconosMemory
+   * \param unsigned int i is the derivative number.
+   */
+  SP::SiconosMemory yMemory(unsigned int) const;
+
   /** get vector of input derivatives
   *  \return a VectorOfVectors
   */

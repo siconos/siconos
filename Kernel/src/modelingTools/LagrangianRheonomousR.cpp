@@ -189,8 +189,11 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     computeJachq(time);
     if (derivativeNumber == 1)
     {
-      computehDot(time); // \todo: save hDot directly into y[1] ?
+      // Computation of the partial derivative w.r.t time of h(q,t)
+      computehDot(time);
+      // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
       prod(*_jachq, *data[q1], *y);
+      // Sum of the terms
       *y += *_hDot;
     }
     else if (derivativeNumber == 2)
@@ -200,7 +203,7 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     // Jach[0]q[2]. For the moment, other terms are neglected
     // (especially, partial derivatives with respect to time).
     else
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
+      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index >2  not yet implemented.");
   }
 }
 

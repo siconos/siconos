@@ -217,9 +217,6 @@ void Interaction::initialize(double t0)
       }
     }
 
-
-
-
     relation()->setInteractionPtr(shared_from_this());
 
     // compute number of relations.
@@ -292,8 +289,6 @@ void Interaction::initializeMemory()
       _y[i]->zero();
       _yOld[i]->zero();
       _y_k[i]->zero();
-      _yMemory[i]->swap(_y[i]); // should be fixed
-      _yMemory[i]->swap(_y[i]);
     }
   }
   for (unsigned int i = _lowerLevelForInput ;
@@ -625,6 +620,10 @@ void Interaction::display() const
   cout << "| id : " << _id << endl;
   cout << "| number : " << _number << endl;
   cout << "| relativeDegree : " << _relativeDegree << endl;
+  cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
+  cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
+  cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
+  cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
   cout << "| interactionSize : " << _interactionSize << endl;
   cout << "| numberOfRelations : " << _numberOfRelations << endl;
   cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
@@ -635,27 +634,25 @@ void Interaction::display() const
   _relation->display();
   if (_initialized)
   {
-    cout << "| y : " << endl;
-    if (_y[0]) _y[0]->display();
-    else cout << "->NULL" << endl;
-    cout << "| yDot : " << endl;
-    if (_y[1]) _y[1]->display();
-    else cout << "->NULL" << endl;
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+    {
+      cout << "| y[" << i  << "] : " << endl;
+      if (_y[i]) _y[i]->display();
+      else cout << "->NULL" << endl;
+    }
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+    {
+      cout << "| yOld[" << i  << "] : " << endl;
+      if (_yOld[i]) _yOld[i]->display();
+      else cout << "->NULL" << endl;
+    }
+    for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+    {
+      cout << "| lambda[" << i  << "] : " << endl;
+      if (_lambda[i]) _lambda[i]->display();
+      else cout << "->NULL" << endl;
+    }
 
-    cout << "| _yOld : " << endl;
-
-    if (_yOld[0]) _yOld[0]->display();
-    else cout << "->NULL" << endl;
-    cout << "| yDotOld : " << endl;
-    if (_yOld[1]) _yOld[1]->display();
-    else cout << "->NULL" << endl;
-
-    cout << "| _lambda : " << endl;
-    if (_lambda[0]) _lambda[0]->display();
-    else cout << "->NULL" << endl;
-    cout << "| _lambdaDot : " << endl;
-    if (_lambda[1]) _lambda[1]->display();
-    else cout << "->NULL" << endl;
   }
   cout << "===================================" << endl;
 }

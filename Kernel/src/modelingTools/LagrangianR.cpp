@@ -41,7 +41,7 @@ void LagrangianR::initComponents()
       _jachq->resize(sizeY, sizeDS);
     else
       assert((_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) &&
-             "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
+             "LagrangianR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
   // Added by Son Nguyen (8/12/2010)
   if (! _jachqDot)
@@ -52,7 +52,7 @@ void LagrangianR::initComponents()
       _jachqDot->resize(sizeY, sizeDS);
     else
       assert((_jachqDot->size(1) == sizeDS && _jachqDot->size(0) == sizeY) &&
-             "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
+             "LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
   }
   _workX.reset(new SimpleVector(sizeDS));
   _workXdot.reset(new SimpleVector(sizeDS));
@@ -115,7 +115,7 @@ void LagrangianR::computeh(double)
 
 void LagrangianR::saveRelationToXML() const
 {
-  RuntimeException::selfThrow("LagrangianR1::saveRelationToXML - not yet implemented.");
+  RuntimeException::selfThrow("LagrangianR::saveRelationToXML - not yet implemented.");
 }
 
 SP::SiconosMatrix LagrangianR::C() const

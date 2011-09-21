@@ -199,6 +199,47 @@ void SchatzmanPaoli::initialize()
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
+    Type::Siconos dsType = Type::value(*(*itDS));
+    if (dsType == Type::LagrangianLinearTIDS)
+    {
+      // Computation of the first step for starting
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (*itDS);
+
+      SP::SiconosVector q0  = d->q0();
+      SP::SiconosVector q  = d->q();
+      SP::SiconosVector v0  = d->velocity0();
+      SP::SiconosVector velocity  = d->velocity();
+
+      std::cout << " q0 = " << std::endl;
+      q0->display();
+      std::cout << " v0 = " << std::endl;
+      v0->display();
+      // We first swap the initial value contained in q and v after initialization.
+
+      d->qMemory()->swap(q);
+      d->velocityMemory()->swap(velocity);
+
+      // we compute the new state values
+      double h = simulationLink->timeStep();
+      *q = *q0 + h* * v0;
+      //*velocity=*velocity; we do nothing for the velocity
+
+      // This value will swapped when OneStepIntegrator::saveInMemory will be called
+      // by the rest of  Simulation::initialize (_eventsManager->preUpdate();)
+
+      // SP::SiconosVector qprev = d->qMemory()->getSiconosVector(0);
+      // SP::SiconosVector qprev2 = d->qMemory()->getSiconosVector(1);
+      // SP::SiconosVector vprev = d->velocityMemory()->getSiconosVector(0);
+      // std::cout << " qprev = " << std::endl;
+      // qprev->display();
+      // std::cout << " qprev2 = " << std::endl;
+      // qprev2->display();
+      // std::cout << " vprev = " << std::endl;
+      // vprev->display();
+
+
+
+    }
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
 
@@ -590,6 +631,12 @@ double SchatzmanPaoli::computeResidu()
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
+      std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" << std::endl;
+      q_k_1->display();
+      std::cout << "SchatzmanPaoli::computeResidu - q_k =" << std::endl;
+      q_k->display();
+      std::cout << "SchatzmanPaoli::computeResidu - v_k =" << std::endl;
+      v_k->display();
 
       // --- ResiduFree computation Equation (1) ---
       residuFree->zero();
@@ -655,21 +702,21 @@ double SchatzmanPaoli::computeResidu()
       // }
 
 
-      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
-      residuFree->display();
+      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      // residuFree->display();
 
 
       (* d->workFree()) = *residuFree; // copy residuFree in Workfree
       if (d->p(0))
         *(d->workFree()) -= *d->p(0); // Compute Residu in Workfree Notation !!
 
-      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
-      if (d->p(0))
-        d->p(0)->display();
-      else
-        std::cout << " p(0) :"  << std::endl;
-      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      d->workFree()->display();
+      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
+      //  if (d->p(0))
+      //    d->p(0)->display();
+      //  else
+      //    std::cout << " p(0) :"  << std::endl;
+      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      // d->workFree()->display();
 
 
 
@@ -911,18 +958,18 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
-    SP::SiconosVector yprev = UR->y_k(osnsp->levelMin());
-    std::cout << "yprev " << std::endl;
-    yprev->display();
-    SP::SiconosVector yprev2 = UR->yMemory(osnsp->levelMin(), 0);
-    std::cout << "yprev2 " << std::endl;
-    yprev2->display();
-    SP::SiconosVector yprev3 = UR->yMemory(osnsp->levelMin(), 1);
-    std::cout << "yprev3 " << std::endl;
-    yprev3->display();
-
-
-    subscal(e, *yprev3, *(UR->yp()), subCoord, false);
+    SP::SiconosVector y_k_1 ;
+    if (UR->yMemory(osnsp->levelMin())->nbVectorsInMemory() > 1)
+    {
+      y_k_1 = UR->yMemory(osnsp->levelMin(), 1);
+    }
+    else
+    {
+      y_k_1 = UR->yMemory(osnsp->levelMin(), 0);
+    }
+    std::cout << "y_k_1 " << std::endl;
+    y_k_1->display();
+    subscal(e, *y_k_1, *(UR->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -930,17 +977,19 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    SP::SiconosVector yprev = UR->y_k(osnsp->levelMin());
-    std::cout << "yprev " << std::endl;
-    yprev->display();
-    SP::SiconosVector yprev2 = UR->yMemory(osnsp->levelMin(), 0);
-    std::cout << "yprev2 " << std::endl;
-    yprev2->display();
-    SP::SiconosVector yprev3 = UR->yMemory(osnsp->levelMin(), 1);
-    std::cout << "yprev3 " << std::endl;
-    yprev3->display();
+    SP::SiconosVector y_k_1 ;
+    if (UR->yMemory(osnsp->levelMin())->nbVectorsInMemory() > 1)
+    {
+      y_k_1 = UR->yMemory(osnsp->levelMin(), 1);
+    }
+    else
+    {
+      y_k_1 = UR->yMemory(osnsp->levelMin(), 0);
+    }
+    std::cout << "y_k_1 " << std::endl;
+    y_k_1->display();
 
-    (*UR->yp())(0) +=  e * (*yprev)(0);
+    (*UR->yp())(0) +=  e * (*y_k_1)(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
