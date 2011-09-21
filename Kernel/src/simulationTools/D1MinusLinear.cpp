@@ -56,119 +56,8 @@ D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
 // --- constructor from a list of ds ---
 D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS): OneStepIntegrator(OSI::D1MINUSLINEAR, newDS) {}
 
-const SimpleMatrix D1MinusLinear::getW(SP::DynamicalSystem ds)
-{
-  assert(ds && "D1MinusLinear::getW(ds) - ds == NULL.");
-  assert(WMap[ds] && "D1MinusLinear::getW(ds) - W[ds] == NULL.");
-  return *(WMap[ds]); // copy
-}
-
-SP::SimpleMatrix D1MinusLinear::W(SP::DynamicalSystem ds)
-{
-  assert(ds && "D1MinusLinear::W(ds) - ds == NULL.");
-  return WMap[ds];
-}
-
-void D1MinusLinear::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
-{
-  // check if ds is in the OSI
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - ds does not belong to this Integrator...");
-
-  // check dimensions consistency
-  unsigned int line = newValue.size(0);
-  unsigned int col  = newValue.size(1);
-
-  if (line != col)
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - newVal is not square.");
-
-  if (!ds)
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim();
-  if (line != sizeW)
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - inconsistent dimension between newVal and dynamical system to be integrated.");
-
-  // memory allocation for W, if required
-  if (!WMap[ds])
-    WMap[ds].reset(new SimpleMatrix(newValue));
-  else if (line == WMap[ds]->size(0) && col == WMap[ds]->size(1))
-    *(WMap[ds]) = newValue;
-  else
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - inconsistent dimensions with problem size for given input matrix W.");
-}
-
-void D1MinusLinear::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
-{
-  unsigned int line = newPtr->size(0);
-  unsigned int col  = newPtr->size(1);
-  if (line != col)
-    RuntimeException::selfThrow("D1MinusLinear::setWPtr(newVal,ds) - newVal is not square.");
-
-  if (!ds)
-    RuntimeException::selfThrow("D1MinusLinear::setWPtr(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim();
-  if (line != sizeW)
-    RuntimeException::selfThrow("D1MinusLinear::setW(newVal,ds) - inconsistent dimension between newVal and dynamical system to be integrated.");
-
-  WMap[ds] = newPtr;
-}
-
 void D1MinusLinear::initialize()
 {
-  OneStepIntegrator::initialize();
-
-  double t0 = simulationLink->model()->t0();
-
-  for (ConstDSIterator itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    initW(t0, *itDS);
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
-  }
-}
-
-void D1MinusLinear::initW(double t, SP::DynamicalSystem ds)
-{
-  if (!ds)
-    RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - ds == NULL");
-
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - ds does not belong to the OSI.");
-
-  if (WMap.find(ds) != WMap.end())
-    RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - W(ds) is already in the map and has been initialized.");
-
-  Type::Siconos dsType = Type::value(*ds);
-
-  // Lagrangian Systems
-  if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-  {
-    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    WMap[ds].reset(new SimpleMatrix(*(d->mass())));
-    SP::SiconosMatrix W = WMap[ds];
-  }
-  else RuntimeException::selfThrow("D1MinusLinear::initW(t,ds) - not implemented for Dynamical system type: " + dsType);
-}
-
-void D1MinusLinear::computeW(double t, SP::DynamicalSystem ds)
-{
-  assert(ds && "D1MinusLinear::computeW(t,ds) - ds == NULL.");
-  assert((WMap.find(ds) != WMap.end()) && "D1MinusLinear::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the OSI?");
-
-  Type::Siconos dsType = Type::value(*ds);
-  SP::SiconosMatrix W = WMap[ds];
-
-  // Lagrangian Nonlinear Systems
-  if (dsType == Type::LagrangianDS)
-  {
-    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    d->computeMass();
-    *W = *(d->mass());
-  }
-  // Lagrangian Linear Systems
-  else if (dsType == Type::LagrangianLinearTIDS) {}
-  else RuntimeException::selfThrow("D1MinusLinear::computeW(t,ds) - not implemented for Dynamical system type: " + dsType);
 }
 
 double D1MinusLinear::computeResidu()
@@ -463,7 +352,6 @@ void D1MinusLinear::updateState(unsigned int level)
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    SP::SiconosMatrix W = WMap[*it]; // W iteration matrix of the current DS
     Type::Siconos dsType = Type::value(**it);
 
     // Lagrangian Systems
@@ -471,11 +359,12 @@ void D1MinusLinear::updateState(unsigned int level)
       RuntimeException::selfThrow("D1MinusLinear::updateState(level) - not implemented for Dynamical system type: " + dsType);
 
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
-    SP::SiconosVector v = d->velocity(); // pointer constructor
+    SP::SiconosMatrix M = d->mass();
+    SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR
     if (level != LEVELMAX)
     {
       *v = *(d->p(level)); // value = nonsmooth impulse
-      W->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
+      M->PLUForwardBackwardInPlace(*v); // solution for its velocity equivalent
       *v += *(d->workFree()); // add free velocity
     }
     else

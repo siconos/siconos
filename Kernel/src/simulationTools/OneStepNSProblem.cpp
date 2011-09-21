@@ -526,7 +526,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
   {
     Osi = simulation()->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
-    if (osiType == OSI::MOREAU || osiType == OSI::D1MINUSLINEAR || osiType == OSI::SCHATZMANPAOLI)
+    if (osiType == OSI::MOREAU || osiType == OSI::SCHATZMANPAOLI)
     {
       dsType = Type::value(**itDS);
       if (dsType != Type::NewtonEulerDS)
@@ -544,6 +544,14 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
       centralUnitaryBlocks[*itDS] =
         (boost::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
 
+    }
+    else if (osiType == OSI::D1MINUSLINEAR)
+    {
+      dsType = Type::value(**itDS);
+      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
+
+      centralUnitaryBlocks[*itDS] = SP::SimpleMatrix(new SimpleMatrix(*((boost::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);

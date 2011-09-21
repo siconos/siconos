@@ -40,11 +40,6 @@ class SiconosMatrix;
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  *
  *  A D1MinusLinear instance is defined by the list of concerned dynamical systems.
- *  Each DynamicalSystem is associated to a SiconosMatrix, named "W"
- *
- *  W matrices are initialized and computed in initW and
- *  computeW. Depending on the DS type, they may depend on time and DS
- *  state (x).
  *
  *  Main functions:
  *
@@ -57,9 +52,6 @@ class SiconosMatrix;
 class D1MinusLinear : public OneStepIntegrator
 {
 protected:
-
-  /** Stl map that associates a W D1MinusLinear matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices WMap;
 
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
@@ -83,52 +75,10 @@ public:
   /** destructor */
   virtual ~D1MinusLinear() {};
 
-  // --- GETTERS/SETTERS ---
-
-  /** get value of W corresponding to DynamicalSystem ds
-   *  \param pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
-   *  \return SimpleMatrix
-   */
-  const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
-
-  /** get W corresponding to DynamicalSystem ds
-   * \param pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
-   * \return pointer to SiconosMatrix
-   * \todo identifier W is in general not a good choice, e.g. it is the Delassus operator in Acary2008 or global-local velocity projection matrix in Pfeiffer2008; I suggest e.g. IterMat (Thorsten Schindler, 01.09.2011)
-   */
-  SP::SimpleMatrix W(SP::DynamicalSystem ds);
-
-  /** set the value of W[ds] to newValue
-   * \param SiconosMatrix newValue
-   * \param pointer to DynamicalSystem,
-   */
-  void setW(const SiconosMatrix&, SP::DynamicalSystem);
-
-  /** set W[ds] to pointer newPtr
-   * \param newPtr
-   * \param pointer to DynamicalSystem
-   */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem);
-
-  // --- OTHER FUNCTIONS ---
-
   /** initialization of the D1MinusLinear integrator; for linear time
-   *  invariant systems, we compute time invariant operator (example : W)
+   *  invariant systems, we compute time invariant operator
    */
   virtual void initialize();
-
-  /** init WMap[ds] D1MinusLinear matrix at time t
-   *  allocate memory for W and insert into WMap with ds as key
-   *  \param time
-   *  \param pointer to DynamicalSystem
-   */
-  void initW(double, SP::DynamicalSystem);
-
-  /** compute WMap[ds] D1MinusLinear matrix at time t
-   *  \param time
-   *  \param pointer to DynamicalSystem
-   */
-  void computeW(double, SP::DynamicalSystem);
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->workFree contains ds->residuFree-p, ds->p() contains new position}

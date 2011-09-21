@@ -242,11 +242,6 @@ void TimeSteppingD1Minus::computeInitialResidu()
 
 void TimeSteppingD1Minus::prepareNewtonIteration()
 {
-  for (DSOSIConstIterator it = _osiMap.begin(); it != _osiMap.end(); ++it)
-  {
-    D1MinusLinear::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
-  }
-
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
