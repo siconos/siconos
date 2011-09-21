@@ -699,7 +699,10 @@ void Simulation::ComputeLevelsForInputAndOutput()
       Osi->accept(*(setupLevels.get()));
       _levelsAreComputed = true;
     }
-    model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput + 1);
+    if (_levelsAreComputed)
+    {
+      model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput + 1);
+    }
   }
 #include <debug.h>
   // #define DEBUG_MESSAGES 1

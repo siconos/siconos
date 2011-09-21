@@ -137,6 +137,12 @@ int FrictionContact::compute(double time)
   // Update mu
   _mu->clear();
 
+  // nothing to do
+  if (levelMin() == LEVELMAX)
+  {
+    return info;
+  }
+
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   UnitaryRelationsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)

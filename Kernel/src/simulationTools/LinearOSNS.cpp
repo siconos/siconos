@@ -599,6 +599,10 @@ void LinearOSNS::preCompute(double time)
 
   //  std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
+  // nothing to do
+  if (_levelMin == LEVELMAX)
+    return;
+
   if (!_hasBeUpdated || !isLinear)
   {
     // Computes new _unitaryBlocks if required
