@@ -100,8 +100,8 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
                     ''.join(['({0})'.format(c.name) for c in serializable_bases]))
                 else:
                     print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
-                
-            variables = [ v.name for v in class_.variables(allow_empty=True) ]
+
+            variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
 
             print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not match_xml(x), variables)))
 
