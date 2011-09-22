@@ -1,2 +1,2 @@
 #!/bin/sh
-siconos -j 2 -DWITH_GLOBALAC -DWITH_MUMPS -P"mpirun.openmpi -np 2" -DNDEBUG -I/usr/lib/openmpi/include -lmpi -ldmumps -lmumps_common  -DBT_USE_DOUBLE_PRECISION -I/usr/local/include/bullet -lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp
+siconos -j 2 -DWITH_BULLET -DWITH_GLOBALAC -DWITH_MUMPS -P"mpirun.openmpi -np 2" -DNDEBUG -I/usr/lib/openmpi/include -lmpi -ldmumps -lmumps_common  -DBT_USE_DOUBLE_PRECISION -I/usr/local/include/bullet -lBulletCollision -ldopt=-lLinearMath -lBulletDynamics -lglut QGLBullet.cpp
