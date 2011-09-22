@@ -125,6 +125,8 @@ int main(int argc, char* argv[])
 
     cout << "====> Initialisation ..." << endl << endl;
     bouncingBall->initialize(s);
+
+    OSI->interactions()->display();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -155,10 +157,11 @@ int main(int argc, char* argv[])
 
     while (s->nextTime() < T)
     {
-      cout << "iteration  " << k << endl;
+      //cout << "iteration  " << k <<endl;
       s->computeOneStep();
-      osnspb->display();
-      ball->velocity()->display();
+      // osnspb->display();
+      // ball->velocity()->display();
+      // inter->display();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
@@ -176,7 +179,7 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "NoDim");
+    io.write(dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
@@ -185,7 +188,10 @@ int main(int argc, char* argv[])
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
+
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Error = " << (dataPlot - dataPlotRef).normInf()  <<  std::endl;
+      (dataPlot - dataPlotRef).display();
       return 1;
     }
 
