@@ -86,10 +86,10 @@ double D1MinusLinear::computeResidu()
     // Lagrangian Nonlinear Systems
     if (dsType == Type::LagrangianDS)
     {
-      if (d->fL())
+      if (d->forces())
       {
-        d->computeFL(told, qold, vold); // left force vector
-        *workFree = *(d->fL());
+        d->computeForces(told, qold, vold); // left force vector
+        *workFree = *(d->forces());
       }
     }
     // Lagrangian Linear Systems
@@ -210,10 +210,10 @@ double D1MinusLinear::computeResidu()
     if (dsType == Type::LagrangianDS)
     {
       d->computeMass();
-      if (d->fL())
+      if (d->forces())
       {
-        d->computeFL(t, q, v);
-        scal(-0.5 * h, *(d->fL()), *dummy, false);
+        d->computeForces(t, q, v);
+        scal(-0.5 * h, *(d->forces()), *dummy, false);
       }
     }
     else if (dsType == Type::LagrangianLinearTIDS)

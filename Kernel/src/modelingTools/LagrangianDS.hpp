@@ -43,32 +43,40 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q,z) \ddot q + NNL(\dot q, q, z) + F_{Int}(\dot q , q , t, z) = F_{Ext}(t, z) + p
+ * \begin{cases}
+ * M(q,z) \dot v + N(v, q, z) + F_{Int}(v , q , t, z) = F_{Ext}(t, z) + p \\
+ * \dot q = v
+ * \end{cases}
  * \f]
  * where
  * - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
- * - \f$ \dot q \in R^{ndof} \f$ the velocity, i. e. the time
- *      derivative of the generalized coordinates.
- * - \f$ \ddot q \in R^{ndof} \f$ the acceleration, i. e. the second
+ * - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
+ *      derivative of the generalized coordinates (Lagrangian systems).
+ * - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
  *       time derivative of the generalized coordinates.
- * - \f$ p \in R^{ndof} \f$ the forces due to the Non Smooth
- *       Interaction. In the particular case of Non Smooth evolution,
- *       the variable p contains the impulse and not the force.
+ * - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
+ *       Interaction.
  * - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
  *       in the SiconosMatrix mass.
- * - \f$ NNL(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
- *       saved in the SiconosVector NNL.
+ * - \f$ N(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+ *       saved in the SiconosVector _NNL.
  * - \f$ F_{Int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
  *       forces saved in the SiconosVector fInt.
  * - \f$ F_{Ext}(t) \in R^{ndof} \f$ are the external forces saved in
  *       the SiconosVector fExt.
  * - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
- *       variables, some sort of discret state.
+ *       variables, some sort of discrete state.
  *
- *  Or:
+ * The equation of motion is also shortly denoted as:
  * \f[
- * M(q,z) \ddot q = f_L(\dot q, q, t, z) + p
+ * M(q,z) \dot v = F(v, q, t, z) + p
  * \f]
+ *
+ * where
+ * - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
+ * acting on the system, that is
+ * \f[ F(v, q, t, z) =  F_{Ext}(t, z) -  NNL(v, q, z) + F_{Int}(v, q , t, z) \f]
+ * This vector is stored in the  SiconosVector _Forces
  *
  * Links with first order DynamicalSystem top-class are:
  *
@@ -78,15 +86,15 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  * The rhs is given by:
  * \f[
  * \dot x = \left[\begin{array}{c}
- *  \dot q  \\
- * \ddot q = M^{-1}(q)\left[f_L(\dot q, q , t, z) + p \right]\\
+ *  \dot q  \                                           \
+ * \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
  * \end{array}\right]
  * \f]
  * Its jacobian is:
  * \f[
  * \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
  *  0  & I \\
- * \nabla_{q}(M^{-1}(q)f_L(\dot q, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)f_L(\dot q, q , t, z)) \\
+ * \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q , t, z)) \\
  * \end{array}\right]
  * \f]
  *  The input due to the non smooth law is:
@@ -171,6 +179,7 @@ protected:
 
   /** jacobian_q FInt*/
   SP::SiconosMatrix _jacobianFIntq;
+
   /** jacobian_{qDot} FInt*/
   SP::SiconosMatrix _jacobianFIntqDot;
 
@@ -185,13 +194,13 @@ protected:
   /** jacobian_{qDot} NNLq*/
   SP::SiconosMatrix _jacobianNNLqDot;
 
-  /** fL(q[0],q[1],t)= fExt - fInt -NNL */
-  SP::SiconosVector _fL;
+  /** forces(q[0],q[1],t)= fExt - fInt -NNL */
+  SP::SiconosVector _forces;
 
-  /** jacobian_q FL*/
-  SP::SiconosMatrix _jacobianqFL;
-  /** jacobian_{qDot} FL*/
-  SP::SiconosMatrix _jacobianqDotFL;
+  /** jacobian_q forces*/
+  SP::SiconosMatrix _jacobianqForces;
+  /** jacobian_{qDot} forces*/
+  SP::SiconosMatrix _jacobianqDotForces;
 
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
@@ -337,9 +346,9 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** allocate memory for fL and its jacobians, if required.
+  /** allocate memory for forces and its jacobians, if required.
    */
-  void initFL();
+  void initForces();
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
@@ -661,40 +670,41 @@ public:
     _jacobianNNLqDot = newPtr;
   }
 
-  // -- fL --
+  // -- forces --
 
-  /** get the value of fL
+  /** get the value of forces
    *  \return SimpleVector
    */
-  inline const SimpleVector getFL() const
+  inline const SimpleVector getForces() const
   {
-    return *_fL;
+    return *_forces;
   }
 
-  /** get fL
+  /** get forces
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector fL() const
+  inline SP::SiconosVector forces() const
   {
-    return _fL;
+    return _forces;
   }
 
-  // -- Jacobian fL --
+  // -- Jacobian forces --
 
 
-  /** get JacobianFL
+  /** get JacobianForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqFL() const
+  inline SP::SiconosMatrix jacobianqForces() const
   {
-    return _jacobianqFL;
+    return _jacobianqForces;
   }
-  /** get JacobianFL
+
+  /** get JacobianqDotForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqDotFL() const
+  inline SP::SiconosMatrix jacobianqDotForces() const
   {
-    return _jacobianqDotFL;
+    return _jacobianqDotForces;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
@@ -892,26 +902,26 @@ public:
    */
   virtual void computeJacobianRhsx(double, bool  = false);
 
-  /** Default function to compute fL
+  /** Default function to compute forces
    *  \param double, the current time
    */
-  virtual void computeFL(double);
+  virtual void computeForces(double);
 
-  /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
+  /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
    *  \param double time : the current time
    *  \param SP::SiconosVector: pointers on q
    *  \param SP::SiconosVector: pointers on velocity
    */
-  virtual void computeFL(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeForces(double , SP::SiconosVector, SP::SiconosVector);
 
-  /** Default function to compute the jacobian w.r.t. q of fL
+  /** Default function to compute the jacobian w.r.t. q of forces
    *  \param double, the current time
    */
-  virtual void computeJacobianqFL(double);
-  /** Default function to compute the jacobian w.r.t. qDot of fL
+  virtual void computeJacobianqForces(double);
+  /** Default function to compute the jacobian w.r.t. qDot of forces
    *  \param double, the current time
    */
-  virtual void computeJacobianqDotFL(double);
+  virtual void computeJacobianqDotForces(double);
 
   // --- miscellaneous ---
 

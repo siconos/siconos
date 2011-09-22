@@ -157,7 +157,7 @@ void Moreau2::computeFreeState()
       // "i" values are saved in memory vectors.
 
 
-      // fFree =  W v_k,i+1 -M(q_k,i+1)(v_k,i+1- v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
+      // fFree =  W v_k,i+1 -M(q_k,i+1)(v_k,i+1- v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
@@ -179,19 +179,19 @@ void Moreau2::computeFreeState()
       prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
 
       *ffree *= -1.0;
-      if (d->fL()) // if fL exists
+      if (d->forces()) // if fL exists
       {
-        // computes fL(ti,vi,qi)
-        d->computeFL(told, qold, vold);
+        // computes forces(ti,vi,qi)
+        d->computeForces(told, qold, vold);
         double coef = h * (1 - _theta);
         // ffree += coef * fL_i
-        scal(coef, *d->fL(), *ffree, false);
+        scal(coef, *d->forces(), *ffree, false);
 
-        // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
-        d->computeFL(t);
+        // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
+        d->computeForces(t);
         coef = h * _theta;
         // ffree += coef * fL_k,i+1
-        scal(coef, *d->fL(), *ffree, false);
+        scal(coef, *d->forces(), *ffree, false);
       }
 
       SP::SiconosVector  ftmp(new SimpleVector(*ffree));

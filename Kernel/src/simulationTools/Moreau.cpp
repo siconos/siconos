@@ -349,8 +349,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianqDotFL(); // jacobian according to velocity
+    SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
     WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
     SP::SiconosMatrix W = WMap[ds];
@@ -547,21 +547,21 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianqDotFL(); // jacobian according to velocity
+    SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
     d->computeMass();
     *W = *d->mass();
 
     if (C)
     {
-      d->computeJacobianqDotFL(t);
+      d->computeJacobianqDotForces(t);
       scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
     }
 
     if (K)
     {
-      d->computeJacobianqFL(t);
+      d->computeJacobianqForces(t);
       scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
     }
   }
@@ -734,7 +734,7 @@ double Moreau::computeResidu()
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
     {
-      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi) - pi+1
+      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
@@ -757,24 +757,24 @@ double Moreau::computeResidu()
       prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
 
 
-      if (d->fL())  // if fL exists
+      if (d->forces())  // if fL exists
       {
-        // computes fL(ti,vi,qi)
-        d->computeFL(told, qold, vold);
+        // computes forces(ti,vi,qi)
+        d->computeForces(told, qold, vold);
         double coef = -h * (1 - _theta);
         // residuFree += coef * fL_i
-        scal(coef, *d->fL(), *residuFree, false);
+        scal(coef, *d->forces(), *residuFree, false);
 
-        // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
-        //d->computeFL(t);
-        // or  fL(ti+1, v_k,i+1, q(v_k,i+1))
+        // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
+        //d->computeForces(t);
+        // or  forces(ti+1, v_k,i+1, q(v_k,i+1))
         //or
         SP::SiconosVector qbasedonv(new SimpleVector(*qold));
         *qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
-        d->computeFL(t, qbasedonv, v);
+        d->computeForces(t, qbasedonv, v);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
-        scal(coef, *d->fL(), *residuFree, false);
+        scal(coef, *d->forces(), *residuFree, false);
       }
 
       if (d->boundaryConditions())
@@ -954,7 +954,7 @@ double Moreau::computeResidu()
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*fL(ti,vi,qi) - pi+1
+      // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
@@ -969,19 +969,19 @@ double Moreau::computeResidu()
       SP::SiconosMatrix massMatrix = d->massMatrix();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*massMatrix, (*v - *vold), *residuFree); // residuFree = M(v - vold)
-      if (d->fL())  // if fL exists
+      if (d->forces())  // if fL exists
       {
-        // computes fL(ti,vi,qi)
+        // computes forces(ti,vi,qi)
         SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
         double _thetaFL = 0.5;
         double coef = -h * (1 - _thetaFL);
         // residuFree += coef * fL_i
         scal(coef, *fLold, *residuFree, false);
-        d->computeFL(t);
+        d->computeForces(t);
         //        printf("cpmputeFreeState d->FL():\n");
-        //  d->fL()->display();
+        //  d->forces()->display();
         coef = -h * _thetaFL;
-        scal(coef, *d->fL(), *residuFree, false);
+        scal(coef, *d->forces(), *residuFree, false);
       }
       *(d->workFree()) = *residuFree;
       //cout<<"Moreau::computeResidu :\n";
@@ -1130,7 +1130,7 @@ void Moreau::computeFreeState()
 
       // vFree = v_k,i+1 - W^{-1} ResiduFree
       // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
+      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
@@ -1140,7 +1140,7 @@ void Moreau::computeFreeState()
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
       // --- ResiduFree computation ---
-      // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
+      // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
       SP::SiconosVector vfree = d->workFree();//workX[d];
@@ -1206,7 +1206,7 @@ void Moreau::computeFreeState()
 
       // vFree = v_k,i+1 - W^{-1} ResiduFree
       // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
+      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
@@ -1216,7 +1216,7 @@ void Moreau::computeFreeState()
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
       // --- ResiduFree computation ---
-      // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
+      // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
       SP::SiconosVector vfree = d->workFree();//workX[d];

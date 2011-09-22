@@ -341,13 +341,13 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
     _p[level].reset(new SimpleVector(_ndof));
 }
 
-void LagrangianDS::initFL()
+void LagrangianDS::initForces()
 {
 
-  _fL.reset(new SimpleVector(_ndof));
+  _forces.reset(new SimpleVector(_ndof));
 
-  _jacobianqFL.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianqDotFL.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
 }
 
 void LagrangianDS::initRhs(double time)
@@ -357,10 +357,10 @@ void LagrangianDS::initRhs(double time)
   // Solve Mq[2]=fL+p.
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (_fL)
+  if (_forces)
   {
-    computeFL(time);
-    *_q[2] += *_fL;
+    computeForces(time);
+    *_q[2] += *_forces;
   }
   computeMass();
   // Copy of Mass into _workMatrix for LU-factorization.
@@ -369,21 +369,21 @@ void LagrangianDS::initRhs(double time)
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
 
   bool flag1 = false, flag2 = false;
-  if (_jacobianqFL)
+  if (_jacobianqForces)
   {
     // Solve MjacobianX(1,0) = jacobianFL[0]
-    computeJacobianqFL(time);
+    computeJacobianqForces(time);
 
-    _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqFL));
+    _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqForces));
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc10]);
     flag1 = true;
   }
 
-  if (_jacobianqDotFL)
+  if (_jacobianqDotForces)
   {
     // Solve MjacobianX(1,1) = jacobianFL[1]
-    computeJacobianqDotFL(time);
-    _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotFL));
+    computeJacobianqDotForces(time);
+    _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotForces));
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
     flag2 = true;
   }
@@ -436,7 +436,7 @@ void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
   if (!_workFree)
     _workFree.reset(new SimpleVector(getDim()));
   // Memory allocation for fL and its jacobians.
-  initFL();
+  initForces();
 
 
   if (_boundaryConditions)
@@ -661,10 +661,10 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (_fL)
+  if (_forces)
   {
-    computeFL(time);
-    *_q[2] += *_fL;
+    computeForces(time);
+    *_q[2] += *_forces;
   }
 
   // mass and inv(mass) computatiton
@@ -694,27 +694,27 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
   //  if(mass->isPlugged()) : mass may b not plugged in LagrangianDS children
   *_workMatrix[invMass] = *_mass;
 
-  if (_jacobianqFL)
+  if (_jacobianqForces)
   {
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
-    computeJacobianqFL(time);
-    *bloc10 = *_jacobianqFL;
+    computeJacobianqForces(time);
+    *bloc10 = *_jacobianqForces;
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc10);
   }
 
-  if (_jacobianqDotFL)
+  if (_jacobianqDotForces)
   {
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
-    computeJacobianqDotFL(time);
-    *bloc11 = *_jacobianqDotFL;
+    computeJacobianqDotForces(time);
+    *bloc11 = *_jacobianqDotForces;
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc11);
   }
 }
 
-void LagrangianDS::computeFL(double time)
+void LagrangianDS::computeForces(double time)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_fL)
+  if (_forces)
   {
     // 1 - Computes the required functions
     computeFInt(time);
@@ -724,29 +724,29 @@ void LagrangianDS::computeFL(double time)
     // 2 - set fL = fExt - fInt - NNL
 
     // seems ok.
-    if (_fL.use_count() == 1)
+    if (_forces.use_count() == 1)
     {
       //if not that means that fL is already (pointer-)connected with
       // either fInt, NNL OR fExt.
-      _fL->zero();
+      _forces->zero();
 
       if (_fInt)
-        *_fL -= *_fInt;
+        *_forces -= *_fInt;
 
       if (_fExt)
-        *_fL += *_fExt;
+        *_forces += *_fExt;
 
       if (_NNL)
-        *_fL -= *_NNL;
+        *_forces -= *_NNL;
     }
   }
   // else nothing.
 }
 
-void LagrangianDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+void LagrangianDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_fL)
+  if (_forces)
   {
     // 1 - Computes the required functions
     computeFInt(time, q2, v2);
@@ -754,28 +754,28 @@ void LagrangianDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVecto
     computeNNL(q2, v2);
 
     // seems ok.
-    if (_fL.use_count() == 1)
+    if (_forces.use_count() == 1)
     {
       //if not that means that fL is already (pointer-)connected with
       // either fInt, NNL OR fExt.
-      _fL->zero();
+      _forces->zero();
 
       if (_fInt)
-        *_fL -= *_fInt;
+        *_forces -= *_fInt;
 
       if (_fExt)
-        *_fL += *_fExt;
+        *_forces += *_fExt;
 
       if (_NNL)
-        *_fL -= *_NNL;
+        *_forces -= *_NNL;
     }
   }
   // else nothing.
 }
 
-void LagrangianDS::computeJacobianqFL(double time)
+void LagrangianDS::computeJacobianqForces(double time)
 {
-  if (_jacobianqFL)
+  if (_jacobianqForces)
   {
     computeJacobianFIntq(time);
     computeJacobianNNLq();
@@ -785,18 +785,18 @@ void LagrangianDS::computeJacobianqFL(double time)
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
-      _jacobianqFL->zero();
+      _jacobianqForces->zero();
       if (_jacobianFIntq)
-        *_jacobianqFL -= *_jacobianFIntq;
+        *_jacobianqForces -= *_jacobianFIntq;
       if (_jacobianNNLq)
-        *_jacobianqFL -= *_jacobianNNLq;
+        *_jacobianqForces -= *_jacobianNNLq;
     }
   }
   //else nothing.
 }
-void LagrangianDS::computeJacobianqDotFL(double time)
+void LagrangianDS::computeJacobianqDotForces(double time)
 {
-  if (_jacobianqDotFL)
+  if (_jacobianqDotForces)
   {
     computeJacobianFIntqDot(time);
     computeJacobianNNLqDot();
@@ -806,11 +806,11 @@ void LagrangianDS::computeJacobianqDotFL(double time)
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
-      _jacobianqDotFL->zero();
+      _jacobianqDotForces->zero();
       if (_jacobianFIntqDot)
-        *_jacobianqDotFL -= *_jacobianFIntqDot;
+        *_jacobianqDotForces -= *_jacobianFIntqDot;
       if (_jacobianNNLqDot)
-        *_jacobianqDotFL -= *_jacobianNNLqDot;
+        *_jacobianqDotForces -= *_jacobianNNLqDot;
     }
   }
   //else nothing.

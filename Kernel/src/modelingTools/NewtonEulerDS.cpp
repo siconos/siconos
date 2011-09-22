@@ -113,7 +113,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _T->setValue(1, 1, 1.0);
   _T->setValue(2, 2, 1.0);
   updateT();
-  initFL();
+  initForces();
 }
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double  mass, SP::SiconosMatrix inertialMatrix):
   DynamicalSystem(6)
@@ -167,13 +167,13 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
     _p[level].reset(new SimpleVector(_n));
 }
 
-void NewtonEulerDS::initFL()
+void NewtonEulerDS::initForces()
 {
 
-  _fL.reset(new SimpleVector(_n));
+  _forces.reset(new SimpleVector(_n));
 
   _jacobianvFL.reset(new SimpleMatrix(_n, _qDim));
-  _jacobianqDotFL.reset(new SimpleMatrix(_n, _qDim));
+  _jacobianqDotForces.reset(new SimpleMatrix(_n, _qDim));
 }
 
 void NewtonEulerDS::initRhs(double time)
@@ -183,10 +183,10 @@ void NewtonEulerDS::initRhs(double time)
   // Solve Mq[2]=fL+p.
   //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (_fL)
+  if (_forces)
   {
-    computeFL(time);
-    //      *_q += *_fL;
+    computeForces(time);
+    //      *_q += *_forces;
   }
 
 }
@@ -253,10 +253,10 @@ void NewtonEulerDS::computeRhs(double time, bool isDSup)
 
   //  *_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (_fL)
+  if (_forces)
   {
-    computeFL(time);
-    //*_q += *_fL;
+    computeForces(time);
+    //*_q += *_forces;
   }
 
 
@@ -268,17 +268,17 @@ void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
   RuntimeException::selfThrow("NewtonEulerDS::computeJacobianRhsx - not yet implemented.");
 }
 
-void NewtonEulerDS::computeFL(double time)
+void NewtonEulerDS::computeForces(double time)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_fL)
+  if (_forces)
   {
-    _fL->zero();
+    _forces->zero();
     // 1 - Computes the required functions
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(0, *_fExt);
+      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
@@ -287,7 +287,7 @@ void NewtonEulerDS::computeFL(double time)
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
+      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
@@ -304,23 +304,23 @@ void NewtonEulerDS::computeFL(double time)
       bufOmega.setValue(2, _v->getValue(5));
       prod(*_I, bufOmega, bufIOmega, true);
       cross_product(bufOmega, bufIOmega, buf);
-      _fL->setValue(3, _fL->getValue(3) - buf.getValue(0));
-      _fL->setValue(4, _fL->getValue(4) - buf.getValue(1));
-      _fL->setValue(5, _fL->getValue(5) - buf.getValue(2));
+      _forces->setValue(3, _forces->getValue(3) - buf.getValue(0));
+      _forces->setValue(4, _forces->getValue(4) - buf.getValue(1));
+      _forces->setValue(5, _forces->getValue(5) - buf.getValue(2));
     }
   }
   // else nothing.
 }
-void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
 {
-  if (_fL)
+  if (_forces)
   {
-    _fL->zero();
+    _forces->zero();
     // 1 - Computes the required functions
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(0, *_fExt);
+      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
@@ -329,7 +329,7 @@ void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVect
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SimpleVector>(_fL))->setBlock(3, *_mExt);
+      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
@@ -342,9 +342,9 @@ void NewtonEulerDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVect
       bufOmega.setValue(2, v2->getValue(5));
       prod(*_I, bufOmega, bufIOmega, true);
       cross_product(bufOmega, bufIOmega, buf);
-      _fL->setValue(3, _fL->getValue(3) - buf.getValue(0));
-      _fL->setValue(4, _fL->getValue(4) - buf.getValue(1));
-      _fL->setValue(5, _fL->getValue(5) - buf.getValue(2));
+      _forces->setValue(3, _forces->getValue(3) - buf.getValue(0));
+      _forces->setValue(4, _forces->getValue(4) - buf.getValue(1));
+      _forces->setValue(5, _forces->getValue(5) - buf.getValue(2));
     }
   }
 }
@@ -381,9 +381,9 @@ void NewtonEulerDS::computeJacobianvFL(double time)
   }
   //else nothing.
 }
-void NewtonEulerDS::computeJacobianqDotFL(double time)
+void NewtonEulerDS::computeJacobianqDotForces(double time)
 {
-  if (_jacobianqDotFL)
+  if (_jacobianqDotForces)
   {
     //      computeJacobianFIntqDot(time);
 
@@ -392,9 +392,9 @@ void NewtonEulerDS::computeJacobianqDotFL(double time)
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt
-      _jacobianqDotFL->zero();
+      _jacobianqDotForces->zero();
       //    if( _jacobianFIntqDot )
-      //      *_jacobianqDotFL-=*_jacobianFIntqDot;
+      //      *_jacobianqDotForces-=*_jacobianFIntqDot;
     }
   }
   //else nothing.
@@ -440,7 +440,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
   {
     _qMemory.reset(new SiconosMemory(steps));
     _vMemory.reset(new SiconosMemory(steps));
-    _fLMemory.reset(new SiconosMemory(steps));
+    _forcesMemory.reset(new SiconosMemory(steps));
     _dotqMemory.reset(new SiconosMemory(steps));
     swapInMemory();
   }
@@ -453,7 +453,7 @@ void NewtonEulerDS::swapInMemory()
   _qMemory->swap(_q);
   _vMemory->swap(_v);
   _dotqMemory->swap(_dotq);
-  _fLMemory->swap(_fL);
+  _forcesMemory->swap(_forces);
 
 }
 

@@ -58,7 +58,7 @@ protected:
   /** _vMemory: to acces at previous step */
   SP::SiconosMemory _vMemory;
   SP::SiconosMemory _qMemory;
-  SP::SiconosMemory _fLMemory;
+  SP::SiconosMemory _forcesMemory;
   SP::SiconosMemory _dotqMemory;
 
 
@@ -108,13 +108,13 @@ protected:
   /** external strength of the system */
   SP::SiconosVector _fExt;
 
-  /** fL(q[0],q[1],t)= fExt - fInt */
-  SP::SiconosVector _fL;
+  /** forces(q[0],q[1],t)= fExt - fInt */
+  SP::SiconosVector _forces;
 
   /** jacobian_q FL*/
   SP::SimpleMatrix _jacobianvFL;
   /** jacobian_{qDot} FL*/
-  SP::SimpleMatrix _jacobianqDotFL;
+  SP::SimpleMatrix _jacobianqDotForces;
 
   /** set links with DS members
    */
@@ -196,9 +196,9 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** allocate memory for fL and its jacobians, if required.
+  /** allocate memory for forces and its jacobians, if required.
    */
-  void initFL();
+  void initForces();
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
@@ -353,22 +353,22 @@ public:
 
 
 
-  // -- fL --
+  // -- forces --
 
   /** get the value of fL
    *  \return SimpleVector
    */
-  inline const SimpleVector getFL() const
+  inline const SimpleVector getForces() const
   {
-    return *_fL;
+    return *_forces;
   }
 
-  /** get fL
+  /** get forces
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector fL() const
+  inline SP::SiconosVector forces() const
   {
-    return _fL;
+    return _forces;
   }
 
   // -- Jacobian fL --
@@ -384,9 +384,9 @@ public:
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianqDotFL() const
+  inline SP::SimpleMatrix jacobianqDotForces() const
   {
-    return _jacobianqDotFL;
+    return _jacobianqDotForces;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
@@ -448,14 +448,14 @@ public:
   /** Default function to compute fL
    *  \param double, the current time
    */
-  virtual void computeFL(double);
+  virtual void computeForces(double);
 
   /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
    *  \param double time : the current time
    *  \param SP::SiconosVector: pointers on q
    *  \param SP::SiconosVector: pointers on velocity
    */
-  virtual void computeFL(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeForces(double , SP::SiconosVector, SP::SiconosVector);
 
   /** Default function to compute the jacobian following q of fL
    *  \param double, the current time
@@ -464,7 +464,7 @@ public:
   /** Default function to compute the jacobian following qDot of fL
    *  \param double, the current time
    */
-  virtual void computeJacobianqDotFL(double);
+  virtual void computeJacobianqDotForces(double);
 
   // --- miscellaneous ---
 
@@ -518,7 +518,7 @@ public:
   }
   inline SP::SiconosMemory fLMemory()
   {
-    return _fLMemory;
+    return _forcesMemory;
   }
   inline SP::SiconosMemory dotqMemory()
   {
