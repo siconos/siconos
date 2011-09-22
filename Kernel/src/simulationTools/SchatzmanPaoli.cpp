@@ -958,22 +958,8 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
-
     SP::SiconosVector y_k_1 ;
-    /** \warning V.A. 21/09/2011
-     * The goal of the following hack is to circumvent a problem
-     * when we initialize the interaction. Is it for the moment very hard to get
-     * the right pile in the SiconosMemeory for the interaction
-     */
-
-    if (UR->yMemory(osnsp->levelMin())->nbVectorsInMemory() > 1)
-    {
-      y_k_1 = UR->yMemory(osnsp->levelMin(), 1);
-    }
-    else
-    {
-      y_k_1 = UR->yMemory(osnsp->levelMin(), 0);
-    }
+    y_k_1 = UR->yMemory(osnsp->levelMin(), 1);
     // std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
     subscal(e, *y_k_1, *(UR->yp()), subCoord, false);

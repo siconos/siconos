@@ -247,7 +247,20 @@ public:
    */
   void saveRelationToXML() const;
 
+  /** Link the data of the Relation with the DS
+   */
+  void LinkData()
+  {
+    RuntimeException::selfThrow("NewtonEulerR::LinkData: not yet implemented");
+  };
 
+  /** Link the data of the Relation with the DS Memory
+   * \param unsigned int Memory level
+   */
+  void LinkDataFromMemory(unsigned int)
+  {
+    RuntimeException::selfThrow("NewtonEulerR::LinkData: not yet implemented");
+  };
 
 
   /**

@@ -485,6 +485,16 @@ public:
   virtual void saveRelationToXML() const;
 
 
+  /** Link the data of the Relation with the DS
+   */
+  virtual void LinkData() {};
+
+  /** Link the data of the Relation with the DS Memory
+   * \param unsigned int Memory level
+   */
+  virtual void LinkDataFromMemory(unsigned int) {};
+
+
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Relation);

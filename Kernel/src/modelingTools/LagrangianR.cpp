@@ -69,7 +69,13 @@ void LagrangianR::initialize(SP::Interaction inter)
   initComponents();
   data.resize(sizeDataNames);
 
-  DSIterator it;
+  LinkData();
+}
+
+void LagrangianR::LinkData()
+{
+
+
   data[q0].reset(new BlockVector()); // displacement
   data[q1].reset(new BlockVector()); // velocity
   data[q2].reset(new BlockVector()); // acceleration
@@ -77,7 +83,9 @@ void LagrangianR::initialize(SP::Interaction inter)
   data[p0].reset(new BlockVector());
   data[p1].reset(new BlockVector());
   data[p2].reset(new BlockVector());
+
   SP::LagrangianDS lds;
+  DSIterator it;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     Type::Siconos type = Type::value(**it);
@@ -107,6 +115,58 @@ void LagrangianR::initialize(SP::Interaction inter)
   }
 }
 
+
+
+void LagrangianR::LinkDataFromMemory(unsigned memoryLevel)
+{
+
+
+  assert(memoryLevel >= 0);
+
+  DSIterator it;
+  data[q0].reset(new BlockVector()); // displacement
+  data[q1].reset(new BlockVector()); // velocity
+  data[q2].reset(new BlockVector()); // acceleration
+  data[z].reset(new BlockVector()); // z vector
+  data[p0].reset(new BlockVector());
+  data[p1].reset(new BlockVector());
+  data[p2].reset(new BlockVector());
+
+  SP::LagrangianDS lds;
+  for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
+  {
+    Type::Siconos type = Type::value(**it);
+    // check dynamical system type
+    assert((type == Type::LagrangianLinearTIDS || type == Type::LagrangianDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
+
+    // convert vDS systems into LagrangianDS and put them in vLDS
+    lds = boost::static_pointer_cast<LagrangianDS> (*it);
+
+    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
+    data[q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
+    data[q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
+
+
+    // Do nothing for the remaining of data since there are no Memory
+    // An access to the content ofdata[q2] based on a link on Memory
+    //must throw an exeption
+
+
+    // data[q2]->insertPtr( lds->acceleration());
+    // data[z]->insertPtr( lds->z());
+
+    // // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
+    // for (unsigned int k = interaction()->lowerLevelForInput() ;
+    //      k < interaction()->upperLevelForInput()+1;
+    //      k++)
+    // {
+    //   assert(lds->p(k));
+    //   assert(data[p0+k]);
+    //   data[p0+k]->insertPtr( lds->p(k) );
+    // }
+
+  }
+}
 
 void LagrangianR::computeh(double)
 {

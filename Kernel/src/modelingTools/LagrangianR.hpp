@@ -231,8 +231,14 @@ public:
    */
   void saveRelationToXML() const;
 
+  /** Link the data of the Relation with the DS
+   */
+  void LinkData();
 
-
+  /** Link the data of the Relation with the DS Memory
+   * \param unsigned int Memory level
+   */
+  void LinkDataFromMemory(unsigned int);
 
   /**
   * return a SP on the C matrix.

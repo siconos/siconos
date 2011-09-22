@@ -233,6 +233,21 @@ public:
    */
   virtual void computeResiduR(double t);
 
+  /** Link the data of the Relation with the DS
+   */
+  void LinkData()
+  {
+    RuntimeException::selfThrow("FirstOrderR::LinkData: not yet implemented");
+  };
+
+  /** Link the data of the Relation with the DS Memory
+   * \param unsigned int Memory level
+   */
+  void LinkDataFromMemory(unsigned int)
+  {
+    RuntimeException::selfThrow("FirstOrderR::LinkData: not yet implemented");
+  };
+
   /** main relation members display
    */
 

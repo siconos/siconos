@@ -225,12 +225,42 @@ void Interaction::initialize(double t0)
     initializeMemory();
     relation()->initialize(shared_from_this());
 
+
+    if (_steps > 1) // Multi--step methods
+    {
+      // Comoyte the old Values of Output with stored values in Memory
+      for (unsigned int k = 0; k < _steps - 1; k++)
+      {
+        /** ComputeOutput to fill the Memory
+         * We assume the state x is stored in xMemory except for the  initial
+         * condition which has not been swap yet.
+         */
+        relation()->LinkDataFromMemory(k);
+        for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
+        {
+          computeOutput(t0, i);
+          // std::cout <<"_y["<<i<<"] = (link Memory level ["<< k <<"]) " << std::endl;
+          // _y[i]->display();
+          _yMemory[i]->swap(_y[i]);
+        }
+
+      }
+      relation()->LinkData();
+    }
+
     // Compute y values for t0
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
     {
       computeOutput(t0, i);
-      //      computeInput(t0,i);
+      // std::cout <<"_y["<<i<<"] = (current value) " << std::endl;
+      // _y[i]->display();
     }
+
+
+
+
+
+
     _initialized = true;
   }
 
