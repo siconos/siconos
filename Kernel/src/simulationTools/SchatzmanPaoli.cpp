@@ -210,10 +210,10 @@ void SchatzmanPaoli::initialize()
       SP::SiconosVector v0  = d->velocity0();
       SP::SiconosVector velocity  = d->velocity();
 
-      std::cout << " q0 = " << std::endl;
-      q0->display();
-      std::cout << " v0 = " << std::endl;
-      v0->display();
+      // std::cout << " q0 = " << std::endl;
+      // q0->display();
+      // std::cout << " v0 = " << std::endl;
+      // v0->display();
       // We first swap the initial value contained in q and v after initialization.
 
       d->qMemory()->swap(q);
@@ -631,12 +631,12 @@ double SchatzmanPaoli::computeResidu()
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
-      std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" << std::endl;
-      q_k_1->display();
-      std::cout << "SchatzmanPaoli::computeResidu - q_k =" << std::endl;
-      q_k->display();
-      std::cout << "SchatzmanPaoli::computeResidu - v_k =" << std::endl;
-      v_k->display();
+      // std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" <<std::endl;
+      // q_k_1->display();
+      // std::cout << "SchatzmanPaoli::computeResidu - q_k =" <<std::endl;
+      // q_k->display();
+      // std::cout << "SchatzmanPaoli::computeResidu - v_k =" <<std::endl;
+      // v_k->display();
 
       // --- ResiduFree computation Equation (1) ---
       residuFree->zero();
@@ -958,7 +958,14 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
+
     SP::SiconosVector y_k_1 ;
+    /** \warning V.A. 21/09/2011
+     * The goal of the following hack is to circumvent a problem
+     * when we initialize the interaction. Is it for the moment very hard to get
+     * the right pile in the SiconosMemeory for the interaction
+     */
+
     if (UR->yMemory(osnsp->levelMin())->nbVectorsInMemory() > 1)
     {
       y_k_1 = UR->yMemory(osnsp->levelMin(), 1);
@@ -967,8 +974,8 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     {
       y_k_1 = UR->yMemory(osnsp->levelMin(), 0);
     }
-    std::cout << "y_k_1 " << std::endl;
-    y_k_1->display();
+    // std::cout << "y_k_1 " << std::endl;
+    // y_k_1->display();
     subscal(e, *y_k_1, *(UR->yp()), subCoord, false);
   }
 
@@ -986,8 +993,8 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     {
       y_k_1 = UR->yMemory(osnsp->levelMin(), 0);
     }
-    std::cout << "y_k_1 " << std::endl;
-    y_k_1->display();
+    // std::cout << "y_k_1 " << std::endl;
+    // y_k_1->display();
 
     (*UR->yp())(0) +=  e * (*y_k_1)(0);
 
@@ -1163,14 +1170,14 @@ void SchatzmanPaoli::updateState(unsigned int level)
       SP::SiconosVector v = d->velocity();
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
 
-      std::cout << "SchatzmanPaoli::updateState - q_k_1 =" << std::endl;
-      q_k_1->display();
-      std::cout << "SchatzmanPaoli::updateState - q =" << std::endl;
-      q->display();
+      // std::cout << "SchatzmanPaoli::updateState - q_k_1 =" <<std::endl;
+      // q_k_1->display();
+      // std::cout << "SchatzmanPaoli::updateState - q =" <<std::endl;
+      // q->display();
 
       *v = 1.0 / (2.0 * h) * (*q - *q_k_1);
-      std::cout << "SchatzmanPaoli::updateState - v =" << std::endl;
-      v->display();
+      // std::cout << "SchatzmanPaoli::updateState - v =" <<std::endl;
+      // v->display();
 
       // int bc=0;
       // SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
