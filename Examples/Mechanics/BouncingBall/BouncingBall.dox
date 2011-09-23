@@ -34,9 +34,9 @@ In this section, we provide a short description of a general abstract class of N
 \f}
 where 
 - \f$ q \in \mathcal R^n\f$  is the generalized coordinates vector. The dimension \f$ n\f$   of this vector is called  the number of degree of freedom of the system. The first and the second time derivative of \f$ q\f$ , denoted \f$ \dot q\f$  and \f$ \ddot q\f$ , are usually called the velocity and the acceleration of the system.
-- \f$ M(q): \mathcal R^n \mapsto \mathcal M^{n X n}\f$  is the inertia term 
-- \f$ Q(q,\dot q ): \mathcal R^n  X \mathcal R^n \mapsto \mathcal R^{n}\f$  is the non linear inertia term,
-- \f$ F(\dot q, q , t) : \mathcal R^n  X \mathcal R^n  X \mathcal R \mapsto \mathcal R^{n}\f$  is the internal force of the system,
+- \f$ M(q): \mathcal R^n \mapsto \mathcal M^{n \times n}\f$  is the inertia term 
+- \f$ Q(q,\dot q ): \mathcal R^n  \times \mathcal R^n \mapsto \mathcal R^{n}\f$  is the non linear inertia term,
+- \f$ F(\dot q, q , t) : \mathcal R^n  \times \mathcal R^n  \times \mathcal R \mapsto \mathcal R^{n}\f$  is the internal force of the system,
 - \f$ F_{ext}(t):  \mathcal R \mapsto \mathcal R^{n}  \f$   is the given external force,
 - \f$ p \in \mathcal R^n\f$  is the force due the nonsmooth law.
 
@@ -49,12 +49,12 @@ In a general way, we denote the state of the system as
   \dot q
   \end{array}\right] 
 \f]
-which is a vector of dimension \f$ 2 X n\f$ .  The equation of evolution (1) may be reformulated in terms of the state vector as :
+which is a vector of dimension \f$ 2  n\f$ .  The equation of evolution (1) may be reformulated in terms of the state vector as :
 \f[
-\dot x =f (x,t) +  \left[\begin{array}{c}
+\dot x =f (x,t) + r \mbox{  with } r= \left[\begin{array}{c}
   0 \\
-  I
-  \end{array}\right] r
+  p
+  \end{array}\right] 
 \f]
 which is a classical order one formulation for an ordinary differential equation (ODE).
 
@@ -66,8 +66,8 @@ In most mechanical applications, the order one form is not very convenient for t
 
 In this case, all of the operators defined above are linear time invariant. In this case, we can define it directly provided that the following matrices are given :
 
-- \f$ M\in \mathcal M^{n X n}  \f$  is the mass matrix
-- \f$ F(\dot q, q , t) = C \dot q + K q  \f$  where \f$  C \in \mathcal M^{n X n}  \f$  is the viscosity matrix and \f$ K \in \mathcal M^{n X n}\f$    is the stiffness matrix.
+- \f$ M\in \mathcal M^{n \times n}  \f$  is the mass matrix
+- \f$ F(\dot q, q , t) = C \dot q + K q  \f$  where \f$  C \in \mathcal M^{n \times n}  \f$  is the viscosity matrix and \f$ K \in \mathcal M^{n \times n}\f$    is the stiffness matrix.
 
 <b> Boundary conditions </b>
 The boundary conditions are given for an Initial Value Problem (IVP) as :
@@ -76,7 +76,7 @@ The boundary conditions are given for an Initial Value Problem (IVP) as :
 \f]
 and for a Boundary Value Problem (BVP) :
 \f[
-   (t_0,T) \in \mathcal R X \mathcal R , \quad \Gamma(q(t_0),\dot q(t_0),q(T),\dot q(T))=0
+   (t_0,T) \in \mathcal R \times \mathcal R , \quad \Gamma(q(t_0),\dot q(t_0),q(T),\dot q(T))=0
 \f]
 
 \subsection EMBouncingBallRelation Relation between constrained variables and state variables

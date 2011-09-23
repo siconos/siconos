@@ -365,7 +365,6 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
-      printf("reaction0:%lf", interFloor->lambda(0)->getValue(0));
       printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
       for (int jj = 0; jj < outputSize; jj++)
@@ -393,6 +392,7 @@ int main(int argc, char* argv[])
     ref.read(dataPlotRef);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
+      (dataPlot - dataPlotRef).display();
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }
