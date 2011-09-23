@@ -127,6 +127,9 @@ private:
 
 public:
 
+  /** default constructor */
+  Cmp() {};
+
   /**  constructor for sorting criterion
   *  default criterion uses value normal
   * \param a pointer to function of type const int(T::*_fpt)() const
