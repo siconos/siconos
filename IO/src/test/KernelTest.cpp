@@ -61,6 +61,46 @@ BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
     ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
   }                                                                     \
  
+
+
+template <class Archive>
+void siconos_io(Archive& ar, DynamicalSystemsGraph& v, unsigned int version)
+{
+
+  ar & boost::serialization::make_nvp("g", v.g);
+
+  if (Archive::is_loading::value)
+  {
+    DynamicalSystemsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = v.vertices(); vi != viend; ++vi)
+    {
+      v.vertex_descriptor[v.bundle(*vi)] = *vi;
+    }
+  }
+
+}
+
+template <class Archive>
+void siconos_io(Archive& ar, UnitaryRelationsGraph& v, unsigned int version)
+{
+
+  ar & boost::serialization::make_nvp("g", v.g);
+
+  if (Archive::is_loading::value)
+  {
+    DynamicalSystemsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = v.vertices(); vi != viend; ++vi)
+    {
+      v.vertex_descriptor[v.bundle(*vi)] = *vi;
+    }
+  }
+
+}
+
+
+
+
+
 template <class Archive>
 void siconos_io(Archive& ar, std::basic_ofstream<char>&v , unsigned int version)
 {
@@ -188,9 +228,18 @@ namespace boost
 namespace serialization
 {
 
+
 template <class Archive>
-void serialize(Archive& ar, PluginHandle& v, unsigned int version)
+void serialize(Archive& ar, UnitaryRelationsGraph& v, unsigned int version)
 {
+  siconos_io(ar, v, version);
+}
+
+
+template <class Archive>
+void serialize(Archive& ar, DynamicalSystemsGraph& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
 }
 
 

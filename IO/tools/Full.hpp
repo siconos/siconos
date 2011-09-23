@@ -513,13 +513,16 @@ SICONOS_IO_REGISTER(UnitaryRelationsSet,
                     //  (fpt)
                     //  (setOfT)
                    )
-SICONOS_IO_REGISTER(UnitaryRelationsGraph,
-                    (g))
+//SICONOS_IO_REGISTER(UnitaryRelationsGraph,
+//  (vertex_descriptor)
+//  (g))
 //SICONOS_IO_REGISTER(SSL,
 //)
 SICONOS_IO_REGISTER(InteractionsSet,
                     //  (fpt)
                     //  (setOfT)
                    )
-SICONOS_IO_REGISTER(DynamicalSystemsGraph,
-                    (g))
+//SICONOS_IO_REGISTER(DynamicalSystemsGraph,
+//                    (vertex_descriptor)
+//                    (g)
+//  )
