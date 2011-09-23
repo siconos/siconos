@@ -50,8 +50,8 @@ global_ns = declarations.get_global_namespace( decls )
 def is_serializable(c):
     return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
-def match_xml(s):
-    m = re.search('xml|XML|Xml',s)
+def unwanted(s):
+    m = re.search('xml|XML|Xml|SimpleMatrix|SimpleVector|DynamicalSystemsGraph|UnitaryRelationsGraph|SiconosSharedLibrary',s)
     return m != None
 
 def name(t):
@@ -81,7 +81,7 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
     # (could not find friend functions with pygccxml)
     if class_ is not None and \
            is_serializable(class_) and not \
-           match_xml(class_.name) and \
+           unwanted(class_.name) and \
            ( typedef or not \
              declarations.templates.is_instantiation(class_.name) ):
 
@@ -103,7 +103,7 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
 
             variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
 
-            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not match_xml(x), variables)))
+            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
 
         
             

@@ -52,7 +52,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_v0)
                                (_vMemory)
                                (_qMemory)
-                               (_fLMemory)
+                               (_forcesMemory)
                                (_dotqMemory)
                                (_qDim)
                                (_q)
@@ -68,9 +68,9 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_p)
                                (_mExt)
                                (_fExt)
-                               (_fL)
+                               (_forces)
                                (_jacobianvFL)
-                               (_jacobianqDotFL)
+                               (_jacobianqDotForces)
                                (computeFIntPtr)
                                (computeJacobianFIntqPtr)
                                (computeJacobianFIntqDotPtr))
@@ -110,8 +110,6 @@ SICONOS_IO_REGISTER(UnitaryRelation,
                     (_workZ))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
                                (_sensor))
-SICONOS_IO_REGISTER(SiconosSharedLibrary,
-                   )
 SICONOS_IO_REGISTER(OneStepIntegrator,
                     (integratorType)
                     (OSIDynamicalSystems)
@@ -158,9 +156,6 @@ SICONOS_IO_REGISTER(BlockCSRMatrix,
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR, (LagrangianR),
                                (_F)
                                (_e))
-//SICONOS_IO_REGISTER_WITH_BASES(SimpleVector,(SiconosVector),
-//  (_dense)
-//  (vect))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL, (NonSmoothLaw),
                                (_en)
                                (_et)
@@ -279,8 +274,8 @@ SICONOS_IO_REGISTER(Actuator,
 SICONOS_IO_REGISTER(SiconosException,
                     (reportMsg))
 SICONOS_IO_REGISTER(SiconosMemory,
-                    (maxSize)
-                    (nbVectorsInMemory)
+                    (_maxSize)
+                    (_nbVectorsInMemory)
                     (_vectorMemory))
 SICONOS_IO_REGISTER(Simulation,
                     (_name)
@@ -341,7 +336,8 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS, (DynamicalSystem),
 SICONOS_IO_REGISTER_WITH_BASES(Relay, (LinearOSNS),
                                (_lb)
                                (_ub)
-                               (_numerics_problem))
+                               //  (_numerics_problem)
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderNonLinearDS),
                                (_A)
                                (_b)
@@ -399,11 +395,6 @@ SICONOS_IO_REGISTER(BoundaryCondition,
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR, (FirstOrderR),
                                (_F)
                                (_e))
-//SICONOS_IO_REGISTER_WITH_BASES(SimpleMatrix,(SiconosMatrix),
-// (mat)
-//  (ipiv)
-//  (isPLUFactorized)
-//  (isPLUInversed))
 SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix, (SiconosMatrix),
                                (_mat)
                                (_tabRow)
@@ -412,7 +403,8 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR),
                                (_F)
                                (_e))
 SICONOS_IO_REGISTER_WITH_BASES(Equality, (LinearOSNS),
-                               (_numerics_problem))
+                               //  (_numerics_problem)
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR, (Relation),
                                (Jachx)
                                (Jacglambda))
@@ -468,18 +460,18 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (_IsImpactEnd))
 SICONOS_IO_REGISTER(PluggedObject,
                     //  (fPtr)
+
                     (pluginName))
 SICONOS_IO_REGISTER(EventsManager,
                     //  (_allEvents)
-                    //  (_currentEvent)
+                    // (_currentEvent)
                     //  (_nextEvent)
                     //  (_ETD)
                     //  (_ENonSmooth)
                     //  (_simulation)
                     //  (_hasNS)
                     //  (_hasCM)
-                    //  (GapLimit2Events)
-                   )
+                    (GapLimit2Events))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)
@@ -496,9 +488,9 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_NNL)
                                (_jacobianNNLq)
                                (_jacobianNNLqDot)
-                               (_fL)
-                               (_jacobianqFL)
-                               (_jacobianqDotFL)
+                               (_forces)
+                               (_jacobianqForces)
+                               (_jacobianqDotForces)
                                (_boundaryConditions)
                                (_reactionToBoundaryConditions)
                                (_pluginMass)
@@ -510,19 +502,5 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_pluginJacqNNL)
                                (_pluginJacqDotNNL))
 SICONOS_IO_REGISTER(UnitaryRelationsSet,
-                    //  (fpt)
-                    //  (setOfT)
-                   )
-//SICONOS_IO_REGISTER(UnitaryRelationsGraph,
-//  (vertex_descriptor)
-//  (g))
-//SICONOS_IO_REGISTER(SSL,
-//)
-SICONOS_IO_REGISTER(InteractionsSet,
-                    //  (fpt)
-                    //  (setOfT)
-                   )
-//SICONOS_IO_REGISTER(DynamicalSystemsGraph,
-//                    (vertex_descriptor)
-//                    (g)
-//  )
+                    (fpt)
+                    (setOfT))

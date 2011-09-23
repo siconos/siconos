@@ -61,6 +61,16 @@ BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
     ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
   }                                                                     \
  
+template <class Archive>
+void siconos_io(Archive& ar, InteractionsSet& v, unsigned int)
+{
+  if (Archive::is_loading::value)
+  {
+    v.fpt = &Interaction::getSort;
+  }
+  ar & boost::serialization::make_nvp("setOfT", v.setOfT);
+}
+
 
 
 template <class Archive>
@@ -228,6 +238,17 @@ namespace boost
 namespace serialization
 {
 
+template <class Archive>
+void serialize(Archive& ar, InteractionsSet& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
+
+template <class Archive>
+void serialize(Archive& ar, PluginHandle& v, unsigned int version)
+{
+
+}
 
 template <class Archive>
 void serialize(Archive& ar, UnitaryRelationsGraph& v, unsigned int version)
