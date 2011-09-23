@@ -237,16 +237,20 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
         SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(ur0));
+        bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
-          if (predictorActivate(ur0, i))
-          {
-            assert(!indexSet1->is_vertex(ur0));
+        {
+          activate = predictorActivate(ur0, i);
+        }
+        if (activate)
+        {
+          assert(!indexSet1->is_vertex(ur0));
 
-            // vertex and edges insertion in indexSet1
-            indexSet1->copy_vertex(ur0, *indexSet0);
-            topo->setHasChanged(true);
-            assert(indexSet1->is_vertex(ur0));
-          }
+          // vertex and edges insertion in indexSet1
+          indexSet1->copy_vertex(ur0, *indexSet0);
+          topo->setHasChanged(true);
+          assert(indexSet1->is_vertex(ur0));
+        }
       }
     }
   }
