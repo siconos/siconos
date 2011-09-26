@@ -30,30 +30,6 @@
 using namespace std;
 using namespace RELATION;
 
-
-
-
-void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
-{
-  for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
-    inter->workZ()->insertPtr((*it)->z());
-
-  RELATION::TYPES pbType = inter->relation()->getType();
-  if (pbType == Lagrangian)
-  {
-    for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
-    {
-      inter->workX()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
-      inter->workFree()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
-    }
-  }
-  else
-    RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions(SP::interaction inter) - not implemented for Relation of type " + pbType);
-
-}
-
-
-
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for UnitaryRelationsGraph from Topology
@@ -64,7 +40,6 @@ void TimeSteppingD1Minus::initOSNS()
   UnitaryRelationsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    // indexSet0->bundle(*ui)->initialize("TimeSteppingD1Minus");
     initializeInteraction(indexSet0->bundle(*ui)->interaction());
   }
 
@@ -87,6 +62,25 @@ void TimeSteppingD1Minus::initOSNS()
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
       updateOutput(level);
   }
+}
+
+void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
+{
+  for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    inter->workZ()->insertPtr((*it)->z());
+
+  RELATION::TYPES pbType = inter->relation()->getType();
+  if (pbType == Lagrangian)
+  {
+    for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    {
+      inter->workX()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
+      inter->workFree()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
+    }
+  }
+  else
+    RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);
+
 }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
@@ -247,10 +241,11 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   // calculate residu without nonsmooth event with OSI
   // * calculate position (q_{k+1})
+  // * calculate velocity (v_{k+1}^-)
   computeResidu();
 
   // calculate state without nonsmooth event with OSI
-  // * calculate velocity (v_{k+1}^-)
+  // * calculate free velocity (!=v_{k+1}^-)
   computeFreeState();
 
   // event (impulse) calculation

@@ -86,12 +86,12 @@ public:
    */
   virtual double computeResidu();
 
-  /** integrates the Dynamical System linked to this integrator without boring the constraints
+  /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
    *  \post{ds->workFree contains free velocity}
    */
   virtual void computeFreeState();
 
-  /** integrates the UnitaryRelation linked to this integrator, without taking constraints into account
+  /** integrates the UnitaryRelation linked to this integrator, without taking non-smooth effects into account
    * \param pointer to UnitaryRelation
    * \param pointer to OneStepNSProblem
    */
