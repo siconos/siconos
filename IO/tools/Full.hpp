@@ -98,16 +98,7 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL, (NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL, (NonSmoothLaw),
                                (EqualitySize))
 SICONOS_IO_REGISTER(UnitaryRelation,
-                    (_mainInteraction)
-                    (_relativePosition)
-                    (_number)
-                    (_absolutePosition)
-                    (_absolutePositionProj)
-                    (_workX)
-                    (_workXq)
-                    (_workFree)
-                    (_workYp)
-                    (_workZ))
+                    (_mainInteraction))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
                                (_sensor))
 SICONOS_IO_REGISTER(OneStepIntegrator,
@@ -216,6 +207,8 @@ SICONOS_IO_REGISTER(Interaction,
                     (_numberOfRelations)
                     (_sizeOfDS)
                     (_sizeZ)
+                    (_absolutePosition)
+                    (_absolutePositionProj)
                     (_y)
                     (_yOld)
                     (_y_k)
@@ -225,7 +218,12 @@ SICONOS_IO_REGISTER(Interaction,
                     (_lambdaOld)
                     (_involvedDS)
                     (_nslaw)
-                    (_relation))
+                    (_relation)
+                    (_workX)
+                    (_workXq)
+                    (_workFree)
+                    (_workYp)
+                    (_workZ))
 SICONOS_IO_REGISTER(DynamicalSystem,
                     (_number)
                     (_n)
@@ -304,7 +302,8 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS, (LagrangianDS),
                                (_K)
                                (_C))
 SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical, (LinearOSNS),
-                               (_pnumerics_GMP))
+                               (_pnumerics_GMP)
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR, (LagrangianR),
                                (_pluginjqh)
                                (_pluginjqhdot)
@@ -460,7 +459,6 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (_IsImpactEnd))
 SICONOS_IO_REGISTER(PluggedObject,
                     //  (fPtr)
-
                     (pluginName))
 SICONOS_IO_REGISTER(EventsManager,
                     //  (_allEvents)
@@ -504,3 +502,10 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
 SICONOS_IO_REGISTER(UnitaryRelationsSet,
                     (fpt)
                     (setOfT))
+//SICONOS_IO_REGISTER(UnitaryRelationsGraph,
+// (g))
+//SICONOS_IO_REGISTER(InteractionsSet,
+//  (fpt)
+//  (setOfT))
+//SICONOS_IO_REGISTER(DynamicalSystemsGraph,
+//  (g))
