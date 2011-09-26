@@ -28,6 +28,9 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "DynamicalSystem.hpp"
 
+#include "NewtonEulerR.hpp" // ??
+#include "NewtonEulerDS.hpp" // ??
+
 using namespace std;
 using namespace RELATION;
 
@@ -222,6 +225,11 @@ void Interaction::initialize(double t0)
     // compute number of relations.
     _numberOfRelations = _interactionSize / nslaw()->size();
 
+    if (_numberOfRelations > 1)
+    {
+      RuntimeException::selfThrow("Interaction::initialize() - _numberOfRelations > 1. Obsolete !");
+    }
+
     initializeMemory();
     relation()->initialize(shared_from_this());
 
@@ -257,9 +265,11 @@ void Interaction::initialize(double t0)
     }
 
 
-
-
-
+    _workX.reset(new BlockVector());
+    _workZ.reset(new BlockVector());
+    _workXq.reset(new BlockVector());
+    _workFree.reset(new BlockVector());
+    _workYp.reset(new SimpleVector(nslaw()->size()));
 
     _initialized = true;
   }
@@ -305,38 +315,23 @@ void Interaction::initializeMemory()
        i < _upperLevelForOutput + 1 ;
        i++)
   {
-    _y[i].reset(new BlockVector());
-    _yOld[i].reset(new BlockVector());
-    _y_k[i].reset(new BlockVector());
+    _y[i].reset(new SimpleVector(nslawSize));
+    _yOld[i].reset(new SimpleVector(nslawSize));
+    _y_k[i].reset(new SimpleVector(nslawSize));
     assert(_steps > 0);
     _yMemory[i].reset(new SiconosMemory(_steps));
-
-    for (unsigned int j = 0; j < _numberOfRelations; ++j)
-    {
-      _y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _y_k[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _y[i]->zero();
-      _yOld[i]->zero();
-      _y_k[i]->zero();
-    }
+    _y[i]->zero();
+    _yOld[i]->zero();
+    _y_k[i]->zero();
   }
   for (unsigned int i = _lowerLevelForInput ;
        i < _upperLevelForInput + 1 ;
        i++)
   {
-    _lambda[i].reset(new BlockVector());
-    _lambdaOld[i].reset(new BlockVector());
-    for (unsigned int j = 0; j < _numberOfRelations; ++j)
-    {
-      _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      _lambdaOld[i]->zero();
-    }
+    _lambda[i].reset(new SimpleVector(nslawSize));
+    _lambdaOld[i].reset(new SimpleVector(nslawSize));
+    _lambdaOld[i]->zero();
   }
-
-
-
 
 }
 
@@ -351,10 +346,10 @@ void Interaction::setY(const VectorOfVectors& newVector)
   _y.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _y[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _y[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
 }
 
-void Interaction::setYPtr(const VectorOfBlockVectors& newVector)
+void Interaction::setYPtr(const VectorOfVectors& newVector)
 {
   _y.clear();
 
@@ -362,7 +357,7 @@ void Interaction::setYPtr(const VectorOfBlockVectors& newVector)
   _y = newVector; // smart ptr
 }
 
-void Interaction::setY(const unsigned int  index, const BlockVector& newY)
+void Interaction::setY(const unsigned int  index, const SiconosVector& newY)
 {
   assert(_y.size() > index &&
          "Interaction::setY, index out of range ");
@@ -370,7 +365,7 @@ void Interaction::setY(const unsigned int  index, const BlockVector& newY)
   // set y[index]
   if (! _y[index])
   {
-    _y[index].reset(new BlockVector(newY));
+    _y[index].reset(new SimpleVector(newY));
   }
   else
   {
@@ -380,7 +375,7 @@ void Interaction::setY(const unsigned int  index, const BlockVector& newY)
   }
 }
 
-void Interaction::setYPtr(const unsigned int  index, SP::BlockVector newY)
+void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
 {
   assert(_y.size() > index &&
          "Interaction::setYPtr, index out of range");
@@ -388,10 +383,10 @@ void Interaction::setYPtr(const unsigned int  index, SP::BlockVector newY)
   assert(newY->size() == _interactionSize &&
          "Interaction::setYPtr, interactionSize differs from newY vector size");
 
-  assert(newY->isBlock() &&
-         "Interaction::setYPtr(newY), newY is not a block vector!");
+  assert(!newY->isBlock() &&
+         "Interaction::setYPtr(newY), newY is a block vector!");
 
-  _y[index] = boost::static_pointer_cast<BlockVector>(newY);
+  _y[index] = boost::static_pointer_cast<SimpleVector>(newY);
 }
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
@@ -401,7 +396,7 @@ void Interaction::setYOld(const VectorOfVectors& newVector)
   _yOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _yOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _yOld[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYOldPtr(const VectorOfVectors& newVector)
@@ -414,7 +409,7 @@ void Interaction::setYOldPtr(const VectorOfVectors& newVector)
   _yOld = newVector; // smart ptr
 }
 
-void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
+void Interaction::setYOld(const unsigned int  index, const SiconosVector& newYOld)
 {
   if (_yOld.size() <= index)
     RuntimeException::selfThrow("Interaction::setYOld, index out of range ");
@@ -422,7 +417,7 @@ void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
   // set _yOld[index]
   if (! _yOld[index])
   {
-    _yOld[index].reset(new BlockVector(newYOld));
+    _yOld[index].reset(new SimpleVector(newYOld));
   }
   else
   {
@@ -441,10 +436,10 @@ void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOl
          "Interaction::setYOldPtr, interactionSize differs from newYOld vector size");
 
   assert((! newYOld->isBlock()) &&
-         "Interaction::setYOldPtr(newY), newY is not a block vector!");
+         "Interaction::setYOldPtr(newY), newY is a block vector!");
 
   // set _yOld[index]
-  _yOld[index] = boost::static_pointer_cast<BlockVector>(newYOld);
+  _yOld[index] = boost::static_pointer_cast<SimpleVector>(newYOld);
 }
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
@@ -454,7 +449,7 @@ void Interaction::setLambda(const VectorOfVectors& newVector)
   _lambda.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _lambda[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _lambda[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
@@ -464,7 +459,7 @@ void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
   _lambda = newVector; // smart ptr
 }
 
-void Interaction::setLambda(const unsigned int  index, const BlockVector& newLambda)
+void Interaction::setLambda(const unsigned int  index, const SiconosVector& newLambda)
 {
   assert(_lambda.size() <= index &&
          "Interaction::setLambda, index out of range");
@@ -472,7 +467,7 @@ void Interaction::setLambda(const unsigned int  index, const BlockVector& newLam
   // set lambda[index]
   if (! _lambda[index])
   {
-    _lambda[index].reset(new BlockVector(newLambda));
+    _lambda[index].reset(new SimpleVector(newLambda));
   }
   else
   {
@@ -490,11 +485,11 @@ void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newL
   assert(newLambda->size() == _interactionSize &&
          "Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
 
-  assert(newLambda->isBlock() &&
-         "Interaction::setLambdaPtr(newLambda), newLambda is not a block vector! ");
+  assert(!newLambda->isBlock() &&
+         "Interaction::setLambdaPtr(newLambda), newLambda is  a block vector! ");
 
   // set lambda[index]
-  _lambda[index] = boost::static_pointer_cast<BlockVector>(newLambda);
+  _lambda[index] = boost::static_pointer_cast<SimpleVector>(newLambda);
 }
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
@@ -506,7 +501,7 @@ void Interaction::setLambdaOld(const VectorOfVectors& newVector)
   _lambdaOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _lambdaOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _lambdaOld[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
@@ -518,7 +513,7 @@ void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
   _lambdaOld = newVector; // smart ptrs
 }
 
-void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& newLambdaOld)
+void Interaction::setLambdaOld(const unsigned int  index, const SiconosVector& newLambdaOld)
 {
   assert(_lambdaOld.size() > index &&
          "Interaction::setLambdaOld, index out of range ");
@@ -526,7 +521,7 @@ void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& new
   // set lambdaOld[index]
   if (! _lambdaOld[index])
   {
-    _lambdaOld[index].reset(new BlockVector(newLambdaOld));
+    _lambdaOld[index].reset(new SimpleVector(newLambdaOld));
   }
   else
   {
@@ -543,10 +538,10 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector n
   if (newLambdaOld->size() != _interactionSize)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
   if (!newLambdaOld->isBlock())
-    RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is not a block vector! ");
+    RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is  a block vector! ");
 
   // set lambdaOld[index]
-  _lambdaOld[index] = boost::static_pointer_cast<BlockVector>(newLambdaOld);
+  _lambdaOld[index] = boost::static_pointer_cast<SimpleVector>(newLambdaOld);
 }
 
 
@@ -754,5 +749,196 @@ void Interaction::saveInteractionToXML()
 
   nslaw()->saveNonSmoothLawToXML();
 
+}
+
+
+void Interaction::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+{
+
+  unsigned int k = 0;
+  unsigned int NumDS = 0;
+  DSIterator itDS;
+  // itDS = dynamicalSystemsBegin();
+
+  itDS =    _involvedDS->begin();
+
+  // look for ds and its position in G
+  while (*itDS != ds && itDS != dynamicalSystemsEnd())
+  {
+    k += (*itDS)->getDim();
+    itDS++;
+    NumDS++;
+  }
+
+  // check dimension (1)
+  if ((*itDS)->getDim() != UnitaryBlock->size(1))
+    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+
+  SP::SiconosMatrix originalMatrix;
+
+  RELATION::TYPES relationType = relation()->getType();
+
+  if (relationType == FirstOrder)
+  {
+    SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (relation());
+    originalMatrix = r->jachx();
+  }
+  else if (relationType == Lagrangian)
+  {
+    SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (relation());
+    originalMatrix = r->jachq();
+  }
+  else if (relationType == NewtonEuler)
+  {
+    SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (relation());
+    originalMatrix = r->jachqT();
+  }
+  else
+    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
+  Index subDim(2);
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix
+  // and of first element to be set in UnitaryBlock
+  Index subPos(4);
+  subPos[0] = 0; //_relativePosition;
+  subPos[1] = k;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+}
+void Interaction::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+{
+  unsigned int k = 0;
+  unsigned int NumDS = 0;
+  DSIterator itDS;
+
+  itDS = _involvedDS->begin();
+
+  Type::Siconos dsType = Type::value(*ds);
+  if (dsType != Type::NewtonEulerDS)
+    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
+
+  RELATION::TYPES relationType = relation()->getType();
+  if (relationType != NewtonEuler)
+    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject- relation is not from NewtonEulerR.");
+
+  // look for ds and its position in G
+  while (*itDS != ds && itDS != dynamicalSystemsEnd())
+  {
+    k += (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+    itDS++;
+    NumDS++;
+  }
+
+  // check dimension (1)
+  unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+  if (sizeDS != UnitaryBlock->size(1))
+    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+
+
+  SP::SiconosMatrix originalMatrix;
+
+  SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (relation());
+  //proj_with_q originalMatrix = r->jachqProj();
+  originalMatrix = r->jachq();
+
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
+  Index subDim(2);
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix
+  // and of first element to be set in UnitaryBlock
+  Index subPos(4);
+  subPos[0] = 0;//_relativePosition;
+  subPos[1] = k;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+}
+void Interaction::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+{
+  unsigned int k = 0;
+  DSIterator itDS;
+  itDS = _involvedDS->begin();
+
+  // look for ds and its position in G
+  while (*itDS != ds && itDS != dynamicalSystemsEnd())
+  {
+    k += (*itDS)->getDim();
+    itDS++;
+  }
+
+  // check dimension (1)
+  if ((*itDS)->getDim() != UnitaryBlock->size(0))
+    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+
+
+  SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
+  RELATION::TYPES relationType = relation()->getType();
+
+  if (relationType == FirstOrder)
+  {
+    originalMatrix = relation()->jacglambda();
+  }
+  else if (relationType == Lagrangian || relationType == NewtonEuler)
+  {
+    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS, call not permit " + relationType);
+  }
+  else
+    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+
+  if (! originalMatrix)
+    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
+
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
+  Index subDim(2);
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix
+  // and of first element to be set in UnitaryBlock
+  Index subPos(4);
+  subPos[0] = k;
+  subPos[1] = 0;//_relativePosition;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+}
+
+void Interaction::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
+{
+  // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that
+  // there is no coupling between Interaction through D !!!  Any
+  // coupling between relations through D must be taken into account
+  // thanks to the nslaw (by "increasing" its dimension).
+
+  SP::SiconosMatrix D;
+  //  if(relation()->getNumberOfJacobiansForH()>1)
+  D = relation()->jachlambda();
+
+  if (! D)
+  {
+    UnitaryBlock->zero();
+    return; //ie no extra unitaryBlock
+  }
+
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
+  Index subDim(2);
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix
+  // and of first element to be set in UnitaryBlock
+  Index subPos(4);
+  subPos[0] = 0;//_relativePosition;
+  subPos[1] = 0;//_relativePosition;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(D, UnitaryBlock, subDim, subPos);
 }
 

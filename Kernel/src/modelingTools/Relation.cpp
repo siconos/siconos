@@ -52,15 +52,15 @@ void Relation::zeroPlugin()
 
 void Relation::initializeMemory()
 {
-  _Residuy.reset(new BlockVector());
   unsigned int nslawSize = interaction()->nonSmoothLaw()->size();
-  unsigned int numberOfRelations = interaction()->numberOfRelations();
-  for (unsigned int j = 0; j < numberOfRelations ; ++j)
-    _Residuy->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+  _Residuy.reset(new SimpleVector(nslawSize));
+  // unsigned int numberOfRelations = interaction()->numberOfRelations();
+  // for(unsigned int j = 0; j<numberOfRelations ; ++j)
+  //   _Residuy->insertPtr(SP::SimpleVector (new SimpleVector(nslawSize)));
 
-  _h_alpha.reset(new BlockVector());
-  for (unsigned int j = 0; j < numberOfRelations; ++j)
-    _h_alpha->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+  _h_alpha.reset(new SimpleVector(nslawSize));
+  // for(unsigned int j = 0; j< numberOfRelations; ++j)
+  //   _h_alpha->insertPtr( SP::SimpleVector(new SimpleVector(nslawSize)) );
 
 }
 

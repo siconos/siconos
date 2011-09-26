@@ -117,6 +117,9 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
 
+  if (m > 1)
+    RuntimeException::selfThrow("Topology::addInteractionInIndexSet - m > 1. Obsolete !");
+
   // vector of the Interaction
   UnitaryRelationsGraph::EDescriptor ur_current_edge;
 

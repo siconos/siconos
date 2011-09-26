@@ -33,6 +33,7 @@
 #include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
 
+
 class DynamicalSystem;
 class BlockVector;
 
@@ -143,11 +144,19 @@ private:
   /** sum of all z sizes, for DS involved in the interaction */
   unsigned int _sizeZ;
 
+  /** Absolute position in the "global" vector of constraints (for
+      example, the one handled by lsodar) */
+  unsigned int _absolutePosition;
+
+  /** Absolute position in the "global" vector of constraints for the proj formulation. */
+  unsigned int _absolutePositionProj;
+
+
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  VectorOfBlockVectors _y;
+  VectorOfVectors _y;
 
   /** previous value of Newton iteration for y */
   VectorOfVectors _yOld;
@@ -178,6 +187,19 @@ private:
 
   /** the XML object linked to the Interaction to read XML data */
   SP::InteractionXML _interactionxml;
+
+  /** Work vectors to save pointers to state-related data of the
+      dynamical systems involved in the Interaction.*/
+  SP::SiconosVector _workX;
+  SP::SiconosVector _workXq;
+  SP::SiconosVector _workFree;
+
+  SP::SiconosVector _workYp;
+
+  /** Work vector to save pointers to z data of the dynamical systems
+      involved in the UR.*/
+  SP::SiconosVector _workZ;
+
 
   // === PRIVATE FUNCTIONS ===
 
@@ -418,12 +440,32 @@ public:
     return _sizeZ;
   }
 
+  unsigned int absolutePosition()
+  {
+    return _absolutePosition;
+  };
+  void setAbsolutePosition(unsigned int v)
+  {
+    _absolutePosition = v;
+  };
+  unsigned int absolutePositionProj()
+  {
+    return _absolutePositionProj;
+  };
+  void setAbsolutePositionProj(unsigned int v)
+  {
+    _absolutePositionProj = v;
+  };
+
+
+
+
   // -- y --
 
   /** get y[i], derivative number i of output
    *  \return BlockVector
    */
-  inline const BlockVector getCopyOfy(const unsigned int i) const
+  inline const SimpleVector getCopyOfy(const unsigned int i) const
   {
     return *(_y[i]);
   }
@@ -431,7 +473,7 @@ public:
   /** get y[i], derivative number i of output
    *  \return BlockVector
    */
-  inline const BlockVector getCopyOfyOld(const unsigned int i) const
+  inline const SimpleVector getCopyOfyOld(const unsigned int i) const
   {
     return *(_yOld[i]);
   }
@@ -440,16 +482,16 @@ public:
   /** get vector of output derivatives
   *  \return a VectorOfVectors
   */
-  inline const VectorOfBlockVectors y() const
+  inline const VectorOfVectors y() const
   {
     return _y;
   }
 
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a BlockVector
+  *  \return pointer on a SimpleVector
   */
-  inline SP::BlockVector y(const unsigned int i) const
+  inline SP::SiconosVector y(const unsigned int i) const
   {
     return _y[i];
   }
@@ -464,17 +506,17 @@ public:
   *  equality for the y[i]
   * \param VectorOfVectors
   */
-  void setYPtr(const VectorOfBlockVectors&);
+  void setYPtr(const VectorOfVectors&);
 
   /** set y[i] to newValue
-  *  \param a BlockVector and an unsigned int
+  *  \param a SiconosVector and an unsigned int
   */
-  void setY(const unsigned int , const BlockVector&);
+  void setY(const unsigned int , const SiconosVector&);
 
   /** set y[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setYPtr(const unsigned int , SP::BlockVector newPtr);
+  void setYPtr(const unsigned int , SP::SiconosVector newPtr);
 
   // -- yOld --
 
@@ -489,7 +531,7 @@ public:
   /** get yOld[i], derivative number i of output
   *  \return BlockVector
   */
-  inline const BlockVector getYOld(const unsigned int i) const
+  inline const SimpleVector getYOld(const unsigned int i) const
   {
     return *(_yOld[i]);
   }
@@ -521,9 +563,9 @@ public:
   void setYOldPtr(const VectorOfVectors&);
 
   /** set yOld[i] to newValue
-  *  \param a BlockVector and an unsigned int
+  *  \param a SiconosVector and an unsigned int
   */
-  void setYOld(const unsigned int , const BlockVector&);
+  void setYOld(const unsigned int , const SiconosVector&);
 
   /** set yOld[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
@@ -559,15 +601,15 @@ public:
   }
 
   /** get lambda[i], derivative number i of input
-  *  \return BlockVector
+  *  \return SimpleVector
   */
-  inline const BlockVector getLambda(const unsigned int i) const
+  inline const SimpleVector getLambda(const unsigned int i) const
   {
     return *(_lambda[i]);
   }
 
   /** get lambda[i], derivative number i of input
-  *  \return pointer on a SiconosVector
+  *  \return pointer on a SimpleVector
   */
   inline SP::SiconosVector lambda(const unsigned int i) const
   {
@@ -585,9 +627,9 @@ public:
   void setLambdaPtr(const VectorOfVectors&);
 
   /** set lambda[i] to newValue
-  *  \param a BlockVector and an unsigned int
+  *  \param a SiconosVector and an unsigned int
   */
-  void setLambda(const unsigned int , const BlockVector&);
+  void setLambda(const unsigned int , const SiconosVector&);
 
   /** set lambda[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
@@ -605,9 +647,9 @@ public:
   }
 
   /** get lambdaOld[i], derivative number i of input
-  *  \return BlockVector
+  *  \return SimpleVector
   */
-  inline const BlockVector getLambdaOld(const unsigned int i) const
+  inline const SimpleVector getLambdaOld(const unsigned int i) const
   {
     return *(_lambdaOld[i]);
   }
@@ -631,9 +673,9 @@ public:
   void setLambdaOldPtr(const VectorOfVectors&);
 
   /** set lambdaOld[i] to newValue
-  *  \param a BlockVector and an unsigned int
+  *  \param a SiconosVector and an unsigned int
   */
-  void setLambdaOld(const unsigned int , const BlockVector&);
+  void setLambdaOld(const unsigned int , const SiconosVector&);
 
   /** set lambdaOld[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
@@ -729,6 +771,15 @@ public:
   */
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
+  // /** returns the signifiant size for the projection on constraints
+  //  *  \return an unsigned int
+  //  */
+  // unsigned int getNonSmoothLawSizeProjectOnConstraints() const
+  // {
+  //     SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(relation());
+  //     return nR->yProj()->size();
+  // };
+
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */
@@ -768,11 +819,100 @@ public:
    */
   void computeInput(double, unsigned int);
 
+
+  /** to set workX content.
+   * \param a SP::SiconosVector to be inserted into workX
+   */
+  inline void insertInWorkX(SP::SiconosVector newX)
+  {
+    assert(_workX) ;
+    _workX->insertPtr(newX);
+  };
+  /** to set _workFree content.
+   * \param a SP::SiconosVector to be inserted into workFree
+   */
+  inline void insertInWorkFree(SP::SiconosVector newX)
+  {
+    assert(_workFree) ;
+    _workFree->insertPtr(newX);
+  };
+
+  /** Get a pointer to workX */
+  inline SP::SiconosVector workX()
+  {
+    return _workX;
+  };
+
+  inline SP::SiconosVector workXq()
+  {
+    return _workXq;
+  };
+
+  inline SP::SiconosVector workFree()
+  {
+    return _workFree;
+  };
+
+  inline SP::SiconosVector yp()
+  {
+    return _workYp;
+  };
+
+
+  /** Get a pointer to workZ */
+  inline SP::SiconosVector workZ()
+  {
+    return _workZ;
+  };
+
+  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   */
+  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+
+  /** gets the matrix used in unitaryBlock computation. Used only for the formulation projecting on the constraints.
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   */
+  void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const;
+  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   */
+  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+
+  /** gets extra unitaryBlock corresponding to the present UR (see the
+   *  top of this files for extra unitaryBlock meaning)
+   * \param a pointer to a SiconosMatrix (in-out parameter)
+   */
+  void getExtraUnitaryBlock(SP::SiconosMatrix) const;
+
+  inline double getYRef(unsigned int i) const
+  {
+    // get the single value used to build indexSets Warning: the
+    // relativePosition depends on NsLawSize and/or type.  This means
+    // that at the time, for the unitaryBlock of y that corresponds to
+    // the present relation, the first scalar value is used.  For
+    // example, for friction, normal part is in first position, followed
+    // by the tangential parts.
+    return (*y(i))(0);
+  }
+
+  inline double getLambdaRef(unsigned int i) const
+  {
+    // get the single value used to build indexSets
+    return (*lambda(i))(0);
+  }
+
   // --- XML RELATED FUNCTIONS ---
 
   /** get the InteractionXML* of the Interaction
-  *  \return InteractionXML* : the pointer on the InteractionXML
-  */
+   *  \return InteractionXML* : the pointer on the InteractionXML
+   */
   inline SP::InteractionXML interactionXML() const
   {
     return _interactionxml;

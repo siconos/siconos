@@ -84,34 +84,34 @@ private:
   /** link to Interaction that owns this relation **/
   SP::Interaction _mainInteraction;
 
-  /** relative position of the present relation in the Interaction -
-   For example if the present relation takes place from index 2 to 4
-   in y vector of mainInteraction, the relative position is equal to
-   2. */
-  unsigned int _relativePosition;
+  // /** relative position of the present relation in the Interaction -
+  //  For example if the present relation takes place from index 2 to 4
+  //  in y vector of mainInteraction, the relative position is equal to
+  //  2. */
+  // unsigned int _relativePosition;
 
-  /** number of the relation, ie the number of the corresponding
-      unitaryBlock vector in the main Interaction.*/
-  unsigned int _number;
+  // /** number of the relation, ie the number of the corresponding
+  //     unitaryBlock vector in the main Interaction.*/
+  // unsigned int _number;
 
-  /** Absolute position in the "global" vector of constraints (for
-      example, the one handled by lsodar) */
-  unsigned int _absolutePosition;
-  /** Absolute position in the "global" vector of constraints for the proj formulation. */
+  // /** Absolute position in the "global" vector of constraints (for
+  //     example, the one handled by lsodar) */
+  // unsigned int _absolutePosition;
+  // /** Absolute position in the "global" vector of constraints for the proj formulation. */
 
-  unsigned int _absolutePositionProj;
+  // unsigned int _absolutePositionProj;
 
-  /** work vector to save pointers to state-related data of the
-      dynamical systems involved in the UR.*/
-  SP::SiconosVector _workX;
-  SP::SiconosVector _workXq;
-  SP::SiconosVector _workFree;
+  // /** work vector to save pointers to state-related data of the
+  //     dynamical systems involved in the UR.*/
+  // SP::SiconosVector _workX;
+  // SP::SiconosVector _workXq;
+  // SP::SiconosVector _workFree;
 
-  SP::SiconosVector _workYp;
+  // SP::SiconosVector _workYp;
 
-  /** work vector to save pointers to z data of the dynamical systems
-      involved in the UR.*/
-  SP::SiconosVector _workZ;
+  // /** work vector to save pointers to z data of the dynamical systems
+  //     involved in the UR.*/
+  // SP::SiconosVector _workZ;
 
 
 
@@ -134,11 +134,12 @@ public:
   *  vector of the interaction that corresponds to the present
   *  unitary relation.
   */
-  UnitaryRelation(SP::Interaction , unsigned int, unsigned int);
+  UnitaryRelation(SP::Interaction inter, unsigned int, unsigned int): _mainInteraction(inter)
+  {};
 
   /** destructor
   */
-  ~UnitaryRelation();
+  ~UnitaryRelation() {};
 
   /** get main interaction of this unitary relation
   *  \return a pointer to Interaction
@@ -154,7 +155,8 @@ public:
   */
   inline unsigned int getRelativePosition() const
   {
-    return _relativePosition;
+    //return _relativePosition;
+    return 0;
   } ;
 
   /** get id of the parent interaction
@@ -170,81 +172,114 @@ public:
    */
   inline unsigned int number() const
   {
-    return _number;
+    //return _number;
+    assert(0);
+    return 1;
   };
 
   /** get y[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector y(unsigned int) const;
+  inline SP::SiconosVector y(unsigned int i) const
+  {
+    // i is the derivative number.
+    return (interaction()->y(i));
+  };
 
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector yOld(unsigned int) const;
+  inline SP::SiconosVector yOld(unsigned int i) const
+  {
+    // i is the derivative number.
+    return (interaction()->yOld(i));
+  };
 
   /* get y_k[i]
    *    \return pointer on a SimpleVector
    */
-  SP::SiconosVector y_k(unsigned int) const;
+  inline SP::SiconosVector y_k(unsigned int i) const
+  {
+    //i is the derivative number.
+    return (interaction()->y_k(i));
+  };
 
-  /* get yMemory[i][j]
-   *    \return pointer on a SimpleVector
-   * i is the derivative number.
-   * j is the depth in time
-   */
-  SP::SiconosVector yMemory(unsigned int, unsigned int) const;
+  // /* get yMemory[i][j]
+  //  *    \return pointer on a SimpleVector
+  //  * i is the derivative number.
+  //  * j is the depth in time
+  //  */
+  // SP::SiconosVector yMemory(unsigned int,unsigned int) const;
 
   /* get yMemory[i]
    *    \return pointer on a SiconosMemory
    * \param unsigned int i is the derivative number.
    */
-  SP::SiconosMemory yMemory(unsigned int) const;
+  inline  SP::SiconosMemory yMemory(unsigned int i) const
+  {
+    //i is the derivative number.
+    return interaction()->yMemory(i);
+  };
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
   */
-  const  VectorOfVectors getLambda() const;
+  inline const  VectorOfVectors getLambda() const
+  {
+    // A new object of type VectorOfVectors is created but it handles
+    // pointers to BlockVectors, thus there is no copy of the "basic"
+    // SimpleVectors.
+    return  interaction()->getLambda();
+  };
 
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector lambda(unsigned int) const;
+  inline SP::SiconosVector lambda(unsigned int i) const
+  {
+    // i is the derivative number.
+    return ((interaction()->lambda(i)));
+  };
 
   /** get y[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  double getYRef(unsigned int) const;
+  double getYRef(unsigned int i) const
+  {
+    return ((interaction()->getYRef(i)));
+  };
 
   /** get lambda[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  double getLambdaRef(unsigned int) const;
+  double getLambdaRef(unsigned int i) const
+  {
+    return ((interaction()->getLambdaRef(i)));
+  };
 
   /** returns the size of the embedded non smooth law
   *  \return an unsigned int
   */
-  unsigned int getNonSmoothLawSize() const;
-  /** returns the signifiant size for the projection on constraints
-   *  \return an unsigned int
-   */
-  unsigned int getNonSmoothLawSizeProjectOnConstraints() const;
+  inline unsigned int getNonSmoothLawSize() const
+  {
+    return interaction()->nonSmoothLaw()->size();
+  };
 
   unsigned int absolutePosition()
   {
-    return _absolutePosition;
+    return _mainInteraction->absolutePosition();
   };
   void setAbsolutePosition(unsigned int v)
   {
-    _absolutePosition = v;
+    _mainInteraction->setAbsolutePosition(v);
   };
   unsigned int absolutePositionProj()
   {
-    return _absolutePositionProj;
+    return _mainInteraction->absolutePositionProj();
   };
   void setAbsolutePositionProj(unsigned int v)
   {
-    _absolutePositionProj = v;
+    _mainInteraction->setAbsolutePositionProj(v);
   };
 
   /** temporary visitor to get type
@@ -254,83 +289,105 @@ public:
 
   /** returns the type of the embedded relation.
    */
-  RELATION::TYPES getRelationType() const;
+  inline RELATION::TYPES getRelationType() const
+  {
+    return interaction()->relation()->getType();
+  };
 
   /** returns the subtype of the embedded relation.
    */
-  RELATION::SUBTYPES getRelationSubType() const;
+  inline RELATION::SUBTYPES getRelationSubType() const
+  {
+    return interaction()->relation()->getSubType();
+  } ;
 
   /** To initialize the UR: mainly to set work vectors.
    */
-  void initialize(const std::string&);
+  void initialize(const std::string&)
+  {
+    RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) - Obsolete - should not be called");
+  };
 
   /* to set workX content.
    \param a SP::SiconosVector to be inserted into workX
   */
   inline void insertInWorkX(SP::SiconosVector newX)
   {
-    assert(_workX) ;
-    _workX->insertPtr(newX);
+    assert(_mainInteraction->workX()) ;
+    _mainInteraction->workX()->insertPtr(newX);
   };
   /* to set _workFree content.
    \param a SP::SiconosVector to be inserted into workFree
   */
   inline void insertInWorkFree(SP::SiconosVector newX)
   {
-    assert(_workFree) ;
-    _workFree->insertPtr(newX);
+    assert(_mainInteraction->workFree()) ;
+    _mainInteraction->workFree()->insertPtr(newX);
   };
 
   /** Get a pointer to workX */
   inline SP::SiconosVector workx()
   {
-    return _workX;
+    return _mainInteraction->workX();
   };
   inline SP::SiconosVector xq()
   {
-    return _workXq;
+    return _mainInteraction->workXq();
   };
   inline SP::SiconosVector workFree()
   {
-    return _workFree;
+    return _mainInteraction->workFree();
   };
 
   inline SP::SiconosVector yp()
   {
-    return _workYp;
+    return _mainInteraction->yp();
   };
 
 
   /** Get a pointer to workZ */
   inline SP::SiconosVector workz()
   {
-    return _workZ;
+    return _mainInteraction->workZ();
   };
+
 
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    */
-  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  inline void getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+  {
+    interaction()->getLeftUnitaryBlockForDS(ds, UnitaryBlock);
+  };
   /** gets the matrix used in unitaryBlock computation. Used only for the formulation projecting on the constraints.
-     *         We get only the part corresponding to ds.
-     *  \param a pointer to a dynamical system
-     *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
-     */
-  void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const;
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   */
+  inline void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+  {
+    interaction()->getLeftUnitaryBlockForDSProjectOnConstraints(ds, UnitaryBlock);
+  };
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    */
-  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  inline void getRightUnitaryBlockForDS(SP::DynamicalSystem ds , SP::SiconosMatrix UnitaryBlock) const
+  {
+    interaction()->getRightUnitaryBlockForDS(ds, UnitaryBlock);
+  };
 
   /** gets extra unitaryBlock corresponding to the present UR (see the
    *  top of this files for extra unitaryBlock meaning)
    * \param a pointer to a SiconosMatrix (in-out parameter)
    */
-  void getExtraUnitaryBlock(SP::SiconosMatrix) const;
+  inline void getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
+  {
+    interaction()->getExtraUnitaryBlock(UnitaryBlock);
+  };
 
 };
 

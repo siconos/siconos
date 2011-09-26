@@ -31,11 +31,13 @@
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
+#include "FirstOrderNonLinearDS.hpp"
 
 
 #include <debug.h>
 
 using namespace std;
+using namespace RELATION;
 
 /** Pointer to function, used to set the behavior of simulation when
   ns solver failed.  If equal to null, use DefaultCheckSolverOutput
@@ -272,6 +274,27 @@ void TimeStepping::updateIndexSet(unsigned int i)
 //   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
 // }
 
+void TimeStepping::initializeInteraction(SP::Interaction inter)
+{
+  for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    inter->workZ()->insertPtr((*it)->z());
+
+  RELATION::TYPES pbType = inter->relation()->getType();
+  if (pbType == FirstOrder)
+  {
+    for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    {
+      SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
+      inter->workX()->insertPtr(fds->x());
+      inter->workFree()->insertPtr(fds->workFree());
+      inter->workXq()->insertPtr(fds->xq());
+    }
+  }
+
+}
+
+
+
 void TimeStepping::initOSNS()
 {
   // === creates links between work vector in OSI and work vector in
@@ -290,7 +313,10 @@ void TimeStepping::initOSNS()
        ui != uiend; ++ui)
   {
     SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-    indexSet0->bundle(*ui)->initialize("TimeStepping");
+    // indexSet0->bundle(*ui)->initialize("TimeStepping");
+    initializeInteraction(indexSet0->bundle(*ui)->interaction());
+
+
     // creates a POINTER link between workX[ds] (xfree) and the
     // corresponding unitaryBlock in each UR for each ds of the
     // current UR.

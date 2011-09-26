@@ -19,6 +19,7 @@
 #include <assert.h>
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Tools.hpp"
+#include "NewtonEulerR.hpp"
 
 using namespace std;
 
@@ -61,7 +62,10 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
 
     //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
-    dim += (indexSet->bundle(*vd)->getNonSmoothLawSizeProjectOnConstraints());
+    SP::UnitaryRelation UR = indexSet->bundle(*vd);
+    SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
+    unsigned int nslawSize = nR->yProj()->size();
+    dim += nslawSize;
     assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
   }
 }

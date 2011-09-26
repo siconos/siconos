@@ -74,7 +74,9 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
          vi != viend; ++vi)
     {
       SP::UnitaryRelation UR = indexSet->bundle(*vi);
-      unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
+      SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
+      unsigned int nslawSize = nR->yProj()->size();
+
       if (! indexSet->properties(*vi).blockProj)
       {
         indexSet->properties(*vi).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
@@ -89,11 +91,16 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
          ei != eiend; ++ei)
     {
       SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
+      SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
+      unsigned int nslawSize1 = nR1->yProj()->size();
+
       SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
+      SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
+      unsigned int nslawSize2 = nR2->yProj()->size();
 
       // Memory allocation if needed
-      unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-      unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
+      // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
+      // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
       unsigned int isrc = indexSet->index(indexSet->source(*ei));
       unsigned int itar = indexSet->index(indexSet->target(*ei));
 
@@ -159,9 +166,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
+  SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
+  unsigned int nslawSize = nR->yProj()->size();
 
 
-  unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
+  // unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
 
 
   assert(indexSet->properties(vd).blockProj->size(0) == nslawSize);
@@ -299,8 +308,15 @@ void MLCPProjectOnConstraints::computeUnitaryBlock(const UnitaryRelationsGraph::
   unsigned int index1 = indexSet->index(indexSet->source(ed));
   unsigned int index2 = indexSet->index(indexSet->target(ed));
 
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
+  SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
+  unsigned int nslawSize1 = nR1->yProj()->size();
+
+  SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
+  unsigned int nslawSize2 = nR2->yProj()->size();
+
+
+  // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
+  // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
 
   /*
     DynamicalSystemsSet commonDS;
@@ -395,7 +411,11 @@ void MLCPProjectOnConstraints::computeUnitaryBlock(const UnitaryRelationsGraph::
 
 void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
-  unsigned int sizeY = UR->getNonSmoothLawSizeProjectOnConstraints();
+
+  SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
+  unsigned int sizeY = nR->yProj()->size();
+
+  // unsigned int sizeY = UR->getNonSmoothLawSizeProjectOnConstraints();
   SP::Relation R = UR->interaction()->relation();
   SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
   for (unsigned int i = 0; i < sizeY; i++)
@@ -454,7 +474,12 @@ void MLCPProjectOnConstraints::postCompute()
     // Get the relative position of UR-unitaryBlock in the vector w
     // or z
     pos = _M->getPositionOfUnitaryBlock(ur);
-    unsigned int nslawSize = ur->getNonSmoothLawSizeProjectOnConstraints();
+    SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation());
+    unsigned int nslawSize = nR->yProj()->size();
+
+    // unsigned int nslawSize = ur->getNonSmoothLawSizeProjectOnConstraints();
+
+
     // Get Y and Lambda for the current Unitary Relation
     //y = ur->y(levelMin());
     //lambda = ur->lambda(levelMin());
@@ -590,8 +615,19 @@ void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::Unita
 {
   //  printf("MLCPProjectOnConstraints::computeOptions\n");
   // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
+
+
+  SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
+  unsigned int nslawSize1 = nR1->yProj()->size();
+
+  SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
+  unsigned int nslawSize2 = nR2->yProj()->size();
+
+
+  // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
+  // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
+
+
 
   unsigned int equalitySize1 =  0;
   unsigned int equalitySize2 =  0;

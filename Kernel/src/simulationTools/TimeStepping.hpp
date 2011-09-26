@@ -96,6 +96,10 @@ protected:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
   */
   virtual void initOSNS();
+
+  /** initialisation specific to TimeStepping for Interactions.
+   */
+  void initializeInteraction(SP::Interaction inter);
 public:
 
   /** Constructor with the time-discretisation.

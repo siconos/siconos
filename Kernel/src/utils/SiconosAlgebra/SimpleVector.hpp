@@ -482,6 +482,5 @@ struct IsBlock : public Question<bool>
   }
 };
 
-DEFINE_SPTR(SimpleVector);
 
 #endif

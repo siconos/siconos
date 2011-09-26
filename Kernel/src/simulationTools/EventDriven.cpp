@@ -36,6 +36,7 @@
 #include <debug.h>
 
 using namespace std;
+using namespace RELATION;
 
 // --- XML constructor ---
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
@@ -228,6 +229,29 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   }
 }
 
+void EventDriven::initializeInteraction(SP::Interaction inter)
+{
+  for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    inter->workZ()->insertPtr((*it)->z());
+
+  RELATION::TYPES pbType = inter->relation()->getType();
+  if (pbType == Lagrangian)
+  {
+    for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
+    {
+      inter->workX()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
+      inter->workFree()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
+    }
+
+  }
+  else
+    RuntimeException::selfThrow("EventDriven::initializeInteractions(SP::interaction inter) - not implemented for Relation of type " + pbType);
+
+}
+
+
+
+
 void EventDriven::initOSNS()
 {
 
@@ -257,7 +281,8 @@ void EventDriven::initOSNS()
   // For each Unitary relation in I0 ...
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    indexSet0->bundle(*ui)->initialize("EventDriven");
+    // indexSet0->bundle(*ui)->initialize("EventDriven");
+    initializeInteraction(indexSet0->bundle(*ui)->interaction());
   }
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem

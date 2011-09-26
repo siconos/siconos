@@ -57,6 +57,11 @@ private:
   */
   void initOSNS();
 
+  /** initialisation specific to EventDriven for Interactions.
+   */
+  void initializeInteraction(SP::Interaction inter);
+
+
   // /** compute LevelMin */
   // void initLevelMin();
 
