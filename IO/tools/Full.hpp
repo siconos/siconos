@@ -101,6 +101,10 @@ SICONOS_IO_REGISTER(UnitaryRelation,
                     (_mainInteraction))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
                                (_sensor))
+SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent, (Event),
+                              )
+SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent, (Event),
+                              )
 SICONOS_IO_REGISTER(OneStepIntegrator,
                     (integratorType)
                     (OSIDynamicalSystems)
@@ -461,15 +465,16 @@ SICONOS_IO_REGISTER(PluggedObject,
                     //  (fPtr)
                     (pluginName))
 SICONOS_IO_REGISTER(EventsManager,
-                    //  (_allEvents)
-                    // (_currentEvent)
-                    //  (_nextEvent)
-                    //  (_ETD)
-                    //  (_ENonSmooth)
-                    //  (_simulation)
-                    //  (_hasNS)
-                    //  (_hasCM)
-                    (GapLimit2Events))
+                    (_allEvents)
+                    (_currentEvent)
+                    (_nextEvent)
+                    (_ETD)
+                    (_ENonSmooth)
+                    (_simulation)
+                    (_hasNS)
+                    (_hasCM)
+                    (GapLimit2Events)
+                   )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)

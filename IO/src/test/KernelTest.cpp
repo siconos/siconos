@@ -118,6 +118,13 @@ void siconos_io(Archive& ar, std::basic_ofstream<char>&v , unsigned int version)
 }
 
 
+template <class Archive>
+void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
+{
+  SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
+  SERIALIZE_C_ARRAY(v._mp_alloc, v, _mp_d, ar);
+}
+
 
 template <class Archive>
 void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
@@ -237,6 +244,13 @@ namespace boost
 {
 namespace serialization
 {
+
+template <class Archive>
+void serialize(Archive& ar, __mpz_struct& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
+
 
 template <class Archive>
 void serialize(Archive& ar, InteractionsSet& v, unsigned int version)
@@ -608,7 +622,6 @@ void KernelTest::t5()
     //    oa.register_type(static_cast<PrimalFrictionContact*>(NULL));
     //   oa.register_type(static_cast<RelayNSL*>(NULL));
     //   oa.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-    //    oa.register_type(static_cast<SensorEvent*>(NULL));
     //    oa.register_type(static_cast<MLCP*>(NULL));
 
     //    oa.register_type(static_cast<NewtonEulerRImpact*>(NULL));
@@ -643,7 +656,10 @@ void KernelTest::t5()
     //    oa.register_type(static_cast<Equality*>(NULL));
     //    oa.register_type(static_cast<FirstOrderR*>(NULL));
     oa.register_type(static_cast<Moreau*>(NULL));
-    //    oa.register_type(static_cast<ActuatorEvent*>(NULL));
+    oa.register_type(static_cast<SensorEvent*>(NULL));
+    oa.register_type(static_cast<ActuatorEvent*>(NULL));
+    oa.register_type(static_cast<NonSmoothEvent*>(NULL));
+    oa.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
     //    oa.register_type(static_cast<Event*>(NULL));
     //    oa.register_type(static_cast<OSNSMultipleImpact*>(NULL));
     oa.register_type(static_cast<LagrangianDS*>(NULL));
@@ -706,6 +722,10 @@ void KernelTest::t5()
     //    ia.register_type(static_cast<ActuatorEvent*>(NULL));
     //    ia.register_type(static_cast<Event*>(NULL));
     //    ia.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+    ia.register_type(static_cast<SensorEvent*>(NULL));
+    ia.register_type(static_cast<ActuatorEvent*>(NULL));
+    ia.register_type(static_cast<NonSmoothEvent*>(NULL));
+    ia.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
     ia.register_type(static_cast<LagrangianDS*>(NULL));
 
     DEBUG_PRINT("loading\n");
@@ -720,4 +740,161 @@ void KernelTest::t5()
 
   // BUT: non serialized members => must be initialized or serialized
 
+}
+
+
+void KernelTest::t6()
+{
+  SP::Model bouncingBall(new Model());
+
+  std::ifstream ifs("BouncingBall1.xml");
+  {
+    boost::archive::xml_iarchive ia(ifs);
+
+    ia.register_type(static_cast<BlockVector*>(NULL));
+    //    ia.register_type(static_cast<SensorPosition*>(NULL));
+    ia.register_type(static_cast<NewtonImpactNSL*>(NULL));
+    //    ia.register_type(static_cast<NewtonEulerDS*>(NULL));
+    //    ia.register_type(static_cast<PrimalFrictionContact*>(NULL));
+    //   ia.register_type(static_cast<RelayNSL*>(NULL));
+    //   ia.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+    //    ia.register_type(static_cast<SensorEvent*>(NULL));
+    //    ia.register_type(static_cast<MLCP*>(NULL));
+
+    //    ia.register_type(static_cast<NewtonEulerRImpact*>(NULL));
+    //    ia.register_type(static_cast<QP*>(NULL));
+    //    ia.register_type(static_cast<LagrangianR*>(NULL));
+    ia.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+    ia.register_type(static_cast<SimpleVector*>(NULL));
+    //    ia.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+    //    ia.register_type(static_cast<NewtonEulerR*>(NULL));
+    //    ia.register_type(static_cast<EventDriven*>(NULL));
+    ia.register_type(static_cast<TimeStepping*>(NULL));
+    ia.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+    //    ia.register_type(static_cast<GenericMechanical*>(NULL));
+    ia.register_type(static_cast<LagrangianScleronomousR*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
+    //    ia.register_type(static_cast<Lsodar*>(NULL));
+    //    ia.register_type(static_cast<Relay*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+    //    ia.register_type(static_cast<MLCP2*>(NULL));
+    //    ia.register_type(static_cast<OneStepNSProblem*>(NULL));
+    ia.register_type(static_cast<LCP*>(NULL));
+    //    ia.register_type(static_cast<LinearOSNS*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderType2R*>(NULL));
+    //   ia.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
+    ia.register_type(static_cast<LagrangianRheonomousR*>(NULL));
+    //    ia.register_type(static_cast<MultipleImpactNSL*>(NULL));
+    //    ia.register_type(static_cast<LagrangianCompliantR*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearR*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(NULL));
+    ia.register_type(static_cast<BlockMatrix*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
+    //    ia.register_type(static_cast<Equality*>(NULL));
+    //    ia.register_type(static_cast<FirstOrderR*>(NULL));
+    ia.register_type(static_cast<Moreau*>(NULL));
+    //    ia.register_type(static_cast<ActuatorEvent*>(NULL));
+    //    ia.register_type(static_cast<Event*>(NULL));
+    //    ia.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+    ia.register_type(static_cast<SensorEvent*>(NULL));
+    ia.register_type(static_cast<ActuatorEvent*>(NULL));
+    ia.register_type(static_cast<NonSmoothEvent*>(NULL));
+    ia.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
+    ia.register_type(static_cast<LagrangianDS*>(NULL));
+
+    DEBUG_PRINT("loading\n");
+    ia >> NVP(bouncingBall);
+
+    try
+    {
+      double T = bouncingBall->finalT();
+      double t0 = bouncingBall->t0();
+      double h = bouncingBall->simulation()->timeStep();
+      int N = (int)((T - t0) / h); // Number of time steps
+
+
+
+      SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
+                              (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
+
+      SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
+      SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+
+
+      // --- Get the values to be plotted ---
+      // -> saved in a matrix dataPlot
+      unsigned int outputSize = 5;
+      SimpleMatrix dataPlot(N + 1, outputSize);
+
+
+
+      SP::SiconosVector q = ball->q();
+      SP::SiconosVector v = ball->velocity();
+      SP::SiconosVector p = ball->p(1);
+      SP::SiconosVector lambda = inter->lambda(1);
+
+      dataPlot(0, 0) = bouncingBall->t0();
+      dataPlot(0, 1) = (*q)(0);
+      dataPlot(0, 2) = (*v)(0);
+      dataPlot(0, 3) = (*p)(0);
+      dataPlot(0, 4) = (*lambda)(0);
+      // --- Time loop ---
+      cout << "====> Start computation ... " << endl << endl;
+      // ==== Simulation loop - Writing without explicit event handling =====
+      int k = 1;
+      boost::progress_display show_progress(N);
+
+      boost::timer time;
+      time.restart();
+
+      while (s->nextTime() < T)
+      {
+        s->computeOneStep();
+
+        // --- Get values to be plotted ---
+        dataPlot(k, 0) =  s->nextTime();
+        dataPlot(k, 1) = (*q)(0);
+        dataPlot(k, 2) = (*v)(0);
+        dataPlot(k, 3) = (*p)(0);
+        dataPlot(k, 4) = (*lambda)(0);
+        s->nextStep();
+        ++show_progress;
+        k++;
+      }
+      cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+      cout << "Computation Time " << time.elapsed()  << endl;
+
+      // --- Output files ---
+      cout << "====> Output file writing ..." << endl;
+      ioMatrix io("result.dat", "ascii");
+      dataPlot.resize(k, outputSize);
+      io.write(dataPlot, "noDim");
+      // Comparison with a reference file
+      SimpleMatrix dataPlotRef(dataPlot);
+      dataPlotRef.zero();
+      ioMatrix ref("result.ref", "ascii");
+      ref.read(dataPlotRef);
+
+      if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+      {
+        std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+        CPPUNIT_ASSERT(false);
+      }
+
+    }
+
+    catch (SiconosException e)
+    {
+      cout << e.report() << endl;
+      CPPUNIT_ASSERT(false);
+    }
+    catch (...)
+    {
+      cout << "Exception caught in BouncingBallTS.cpp" << endl;
+      CPPUNIT_ASSERT(false);
+
+    }
+
+
+  }
 }
