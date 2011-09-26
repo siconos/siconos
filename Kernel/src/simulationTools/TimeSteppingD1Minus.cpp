@@ -240,23 +240,24 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * indexset (I_{k+1}^+)
 
   // calculate residu without nonsmooth event with OSI
-  // * calculate position (q_{k+1})
-  // * calculate velocity (v_{k+1}^-)
+  // * calculate position q_{k+1} in ds->q()
+  // * calculate velocity v_{k+1}^- and not free velocity in ds->velocity()
+  // * calculate free residu in ds->freeResidu()
   computeResidu();
 
   // calculate state without nonsmooth event with OSI
-  // * calculate free velocity (!=v_{k+1}^-)
+  // * calculate free velocity and not v_{k+1}^- in ds->velocity
   computeFreeState();
 
   // event (impulse) calculation
-  // * calculate gap velocity (g_{k+1}^-) with OSI
+  // * calculate gap velocity using free velocity with OSI
   // * calculate local impulse (Lambda_{k+1}^+)
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)
-  // * update velocity (v_{k+1}^+) with OSI
+  // * update velocity (v_{k+1}^+) with OSI in ds->velocity
   // * calculate local gaps (g_{k+1}^+)
   update(1);
 
