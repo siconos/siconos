@@ -91,36 +91,45 @@ int main(int argc, char* argv[])
     (*b1)(0) = l_M + l_G - l_S - r_O;
     (*b1)(1) = 0;
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eps_N_1, eps_T_123, mu_123, 2));
+
     SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
 
-    SP::SiconosMatrix H23(new SimpleMatrix(4, nDof));
-    (*H23)(0, 0) = 0;
-    (*H23)(0, 1) = h_M;
-    (*H23)(0, 2) = 0;
-    (*H23)(1, 0) = 1;
-    (*H23)(1, 1) = r_M;
-    (*H23)(1, 2) = 0;
-    (*H23)(2, 0) = 0;
-    (*H23)(2, 1) = -h_M;
-    (*H23)(2, 2) = 0;
-    (*H23)(3, 0) = 1;
-    (*H23)(3, 1) = r_M;
-    (*H23)(3, 2) = 0;
-    SP::SimpleVector b23(new SimpleVector(4));
-    (*b23)(0) = r_M - r_O;
-    (*b23)(1) = 0;
-    (*b23)(2) = r_M - r_O;
-    (*b23)(3) = 0;
+    SP::SiconosMatrix H2(new SimpleMatrix(2, nDof));
+    (*H2)(0, 0) = 0;
+    (*H2)(0, 1) = h_M;
+    (*H2)(0, 2) = 0;
+    (*H2)(1, 0) = 1;
+    (*H2)(1, 1) = r_M;
+    (*H2)(1, 2) = 0;
+    SP::SiconosMatrix H3(new SimpleMatrix(2, nDof));
+    (*H3)(0, 0) = 0;
+    (*H3)(0, 1) = -h_M;
+    (*H3)(0, 2) = 0;
+    (*H3)(1, 0) = 1;
+    (*H3)(1, 1) = r_M;
+    (*H3)(1, 2) = 0;
+    SP::SimpleVector b2(new SimpleVector(2));
+    (*b2)(0) = r_M - r_O;
+    (*b2)(1) = 0;
+    SP::SimpleVector b3(new SimpleVector(2));
+    (*b3)(0) = r_M - r_O;
+    (*b3)(1) = 0;
+
     SP::NonSmoothLaw nslaw23(new NewtonImpactFrictionNSL(eps_N_23, eps_T_123, mu_123, 2));
-    SP::Relation relation23(new LagrangianLinearTIR(H23, b23));
+
+    SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
+    SP::Relation relation3(new LagrangianLinearTIR(H3, b3));
 
     SP::Interaction I1(new Interaction("contact1", allDS, 0, 2, nslaw1, relation1));
 
-    SP::Interaction I2(new Interaction("contact23", allDS, 1, 4, nslaw23, relation23));
+    SP::Interaction I2(new Interaction("contact2", allDS, 1, 2, nslaw23, relation2));
+
+    SP::Interaction I3(new Interaction("contact3", allDS, 1, 2, nslaw23, relation3));
 
     InteractionsSet allInteractions;
     allInteractions.insert(I1);
     allInteractions.insert(I2);
+    allInteractions.insert(I3);
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -203,7 +212,17 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("Woodpecker.ref", "ascii");
+    ref.read(dataPlotRef);
 
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
   }
 
   catch (SiconosException e)
