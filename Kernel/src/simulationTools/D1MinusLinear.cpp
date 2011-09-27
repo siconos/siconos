@@ -165,6 +165,9 @@ double D1MinusLinear::computeResidu()
     scal(-0.5 * h, *(d->p(2)), *residuFree, true);
     scal(h, *(d->p(2)), *v, true);
 
+    cout << "LEFT FORCE" << endl;
+    cout << (*(d->p(2)))(0) << endl;
+
     Mold->PLUForwardBackwardInPlace(*residuFree);
     Mold->PLUForwardBackwardInPlace(*v);
 
@@ -234,13 +237,13 @@ double D1MinusLinear::computeResidu()
     M->PLUForwardBackwardInPlace(*workFree); // contains right (left limit) acceleration without contact force
   }
 
-  // solve a LCP at acceleration level
+  // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
   if (!allOSNS->empty())
   {
     for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
       simulationLink->updateOutput(level);
 
-    simulationLink->updateIndexSets();
+    simulationLink->updateIndexSet(3); // special update to consider only contacts which have been active at the beginning of the time-step
 
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
@@ -284,6 +287,12 @@ double D1MinusLinear::computeResidu()
 
     prod(*M, *residuFree, *dummy, true);
     *residuFree = *dummy;
+
+    cout << "RIGHT FORCE" << endl;
+    cout << (*(d->p(2)))(0) << endl;
+
+    cout << "RESIDU FREE" << endl;
+    cout << (*residuFree)(0) << endl;
   }
 
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
@@ -430,6 +439,8 @@ void D1MinusLinear::updateState(unsigned int level)
     SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
     M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
     *v += *dummy; // add free velocity
+    cout << "RIGHT IMPULSE" << endl;
+    cout << (*(d->p(1)))(0) << endl;
   }
 }
 

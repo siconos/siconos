@@ -25,6 +25,7 @@
 #include "Relation.hpp"
 #include "OneStepIntegratorXML.hpp"
 #include "EventsManager.hpp"
+#include "LagrangianDS.hpp"
 
 // One Step Integrators
 #include "Moreau.hpp"
@@ -394,7 +395,20 @@ void Simulation::updateInput(unsigned int level)
   InteractionsIterator it;
 
   // Set dynamical systems non-smooth part to zero.
-  reset();
+  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
+  {
+    for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS != (*itOSI)->dynamicalSystems()->end(); ++itDS)
+    {
+      Type::Siconos dsType = Type::value(**itDS);
+      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+        (*itDS)->resetNonSmoothPart();
+      else
+      {
+        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+        d->p(level)->zero();
+      }
+    }
+  }
 
   // We compute input using lambda(level).
   for (it = topology->interactions()->begin();

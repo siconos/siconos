@@ -96,6 +96,9 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
   // To update IndexSet i: add or remove UnitaryRelations from
   // this set, depending on y values.
+  // for i=3: a special update is made for the right forces only considering active left forces
+  // -> assert has been adapted
+  // -> not active constacts have to be removed before updateIndexSet(2)
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -103,7 +106,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  assert(i < topo->indexSetsSize() &&
+  assert(i < topo->indexSetsSize() + 1 &&
          "TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not exist.");
   // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
   assert(i > 0 &&
@@ -146,9 +149,8 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       {
         if (y > 0.)
         {
-          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
+          // if UnitaryRelation has been active in the previous calculation and now becomes in-active we do not consider a topology change on velocity level to detect impacts due to closing contacts
           indexSet1->remove_vertex(urp);
-          topo->setHasChanged(true);
           urp->lambda(1)->zero(); // impuls is zero
         }
       }
@@ -189,6 +191,22 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
           urp->lambda(2)->zero(); // force is zero
         }
       }
+    }
+    else if (i == 3) // RIGHT FORCES ONLY IF CONTACT HAS BEEN CLOSED AT LEFT SIDE
+    {
+      double y = urp->getYRef(0); // position
+
+      if (indexSet1->is_vertex(urp))
+      {
+        if (y > 0.)
+        {
+          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
+          indexSet1->remove_vertex(urp);
+          urp->lambda(1)->zero(); // impuls is zero
+        }
+      }
+
+      updateIndexSet(2);
     }
     else
       RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
@@ -249,11 +267,21 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * calculate free velocity and not v_{k+1}^- in ds->velocity
   computeFreeState();
 
-  // event (impulse) calculation
+  // event (impulse) calculation only when there has been a topology change (here: closing contact)
   // * calculate gap velocity using free velocity with OSI
   // * calculate local impulse (Lambda_{k+1}^+)
-  if (!_allNSProblems->empty())
-    computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+  updateIndexSet(1);
+
+  if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+  {
+    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+    {
+      (*itOsns)->setHasBeUpdated(false);
+    }
+
+    if (!_allNSProblems->empty())
+      computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+  }
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)

@@ -81,13 +81,13 @@ public:
   virtual void initialize();
 
   /** return the maximum of all norms for the residus of DS
-   *  \post{ds->residuFree will be calculated, ds->workFree contains ds->residuFree-p, ds->p() contains new position}
+   *  \post{ds->residuFree will be calculated, ds->p() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
   virtual double computeResidu();
 
   /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
-   *  \post{ds->workFree contains free velocity}
+   *  \post{ds->velocity contains free velocity}
    */
   virtual void computeFreeState();
 

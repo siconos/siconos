@@ -74,6 +74,7 @@ public:
    *  0 : ALL interactions (NEVER)
    *  1 : ACTIVE interactions
    *  2 : STAYING ACTIVE interactions
+   *  3 : SPECIAL update - right forces occur only if contact on the left side has been closed
    */
   virtual void updateIndexSet(unsigned int);
 
