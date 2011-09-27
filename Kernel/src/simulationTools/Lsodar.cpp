@@ -62,6 +62,7 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, 
 {
   // local time discretisation is set by default to those of the simulation.
   intData.resize(9);
+  for (int i = 0; i < 9; i++) intData[i] = 0;
   _sizeMem = 2;
 }
 
@@ -72,6 +73,7 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
   OSIDynamicalSystems->insert(ds);
 
   intData.resize(9);
+  for (int i = 0; i < 9; i++) intData[i] = 0;
   _sizeMem = 2;
 }
 
@@ -79,6 +81,7 @@ Lsodar::Lsodar(DynamicalSystemsSet& newDS):
   OneStepIntegrator(OSI::LSODAR, newDS)
 {
   intData.resize(9);
+  for (int i = 0; i < 9; i++) intData[i] = 0;
   _sizeMem = 2;
 }
 
@@ -131,12 +134,22 @@ void Lsodar::updateData()
   rtol.reset(new doublereal[sizeTol]) ;    // rtol, relative tolerance
 
   atol.reset(new doublereal[sizeTol]) ;  // atol, absolute tolerance
+  for (unsigned int i = 0; i < sizeTol; i++)
+  {
+    atol[i] = 0.0;
+  }
+
+
 
   iwork.reset(new integer[intData[7]]);
+  for (int i = 0; i < intData[7]; i++) iwork[i] = 0;
 
   rwork.reset(new doublereal[intData[6]]);
+  for (int i = 0; i < intData[6]; i++) rwork[i] = 0.0;
 
   jroot.reset(new integer[intData[1]]);
+  for (int i = 0; i < intData[1]; i++) jroot[i] = 0;
+
 }
 
 void Lsodar::fillXWork(integer* sizeOfX, doublereal* x)
