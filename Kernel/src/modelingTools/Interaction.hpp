@@ -74,16 +74,8 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *   STL vectors are used and lambda[i] represents various level
  *   of multiplier involved in the nonsmooth law and usd by the OSI
  *
- *   y is a container of BlockVector. Each block corresponds to a
- *    "unitary relation", a relation which size is the one of the
- *    non-smooth law. \n => ySize = interactionSize =
- *    numberOfRelations * nsLawSize .  Same thing for lambda.
+ *   y is a container of SiconosVector.
  *
- *  => all the relations of the interaction have the same non-smooth law. \n
- *
- *  => the number of relations is equal to
- *     interactionSize/nsLawSize. Thus a relation is not necessarily
- *     represented by a single equation.
  *
  *
  */
@@ -134,9 +126,9 @@ private:
   /** size of the interaction, ie size of y[i] and lambda[i] */
   unsigned int _interactionSize;
 
-  /** number of relations in the interaction ( equal to
-      interactionSize / nsLawSize ) */
-  unsigned int _numberOfRelations;
+  // /** number of relations in the interaction ( equal to
+  //     interactionSize / nsLawSize ) */
+  // unsigned int _numberOfRelations;
 
   /** sum of all DS sizes, for DS involved in the interaction */
   unsigned int _sizeOfDS;
@@ -416,13 +408,10 @@ public:
     _interactionSize = newVal;
   }
 
-  /** get the number of relations in the interaction
-  *  \return an unsigned int
-  */
-  inline unsigned int numberOfRelations() const
-  {
-    return _numberOfRelations;
-  }
+  //  /** get the number of relations in the interaction
+  //  *  \return an unsigned int
+  //  */
+  // inline unsigned int numberOfRelations() const {return _numberOfRelations;}
 
   /** get the sum of DS sizes, for DS involved in interaction
    *  \return an unsigned int

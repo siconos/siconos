@@ -38,7 +38,7 @@ using namespace RELATION;
 
 // --- XML constructor ---
 Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
-  _initialized(false), _id("undefined"), _number(0), _interactionSize(0), _numberOfRelations(0),
+  _initialized(false), _id("undefined"), _number(0), _interactionSize(0),
   _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml)
 {
   assert(_interactionxml && "NULL pointer");
@@ -146,7 +146,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
 
 Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter),
   _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
@@ -155,7 +155,7 @@ Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
 }
 Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false), _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _initialized(false), _id(newId), _number(newNumber), _interactionSize(nInter),
   _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL),  _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
@@ -165,7 +165,7 @@ Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
 
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _initialized(false) , _id("none"), _number(newNumber), _interactionSize(nInter),
   _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
@@ -176,7 +176,7 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  _initialized(false) , _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _initialized(false) , _id(newId), _number(newNumber), _interactionSize(nInter),  _sizeOfDS(0), _sizeZ(0),
   _y(2),  _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
@@ -187,7 +187,7 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
 
 /* initialisation with empty set */
 Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel, int newNumber):
-  _initialized(false), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _initialized(false), _number(newNumber), _interactionSize(nInter), _sizeOfDS(0), _sizeZ(0),
   _y(2),  _nslaw(newNSL), _relation(newRel)
 {
   _involvedDS.reset(new DynamicalSystemsSet());
@@ -223,12 +223,13 @@ void Interaction::initialize(double t0)
     relation()->setInteractionPtr(shared_from_this());
 
     // compute number of relations.
-    _numberOfRelations = _interactionSize / nslaw()->size();
+    //_numberOfRelations = _interactionSize/nslaw()->size();
 
-    if (_numberOfRelations > 1)
+    if (_interactionSize != nslaw()->size())
     {
-      RuntimeException::selfThrow("Interaction::initialize() - _numberOfRelations > 1. Obsolete !");
+      RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
     }
+
 
     initializeMemory();
     relation()->initialize(shared_from_this());
@@ -592,31 +593,18 @@ void Interaction::swapInMemory()
   // i corresponds to the derivative number and j the relation number.
   for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
-    for (unsigned int j = 0; j < _numberOfRelations; ++j)
-    {
-      assert(_y[i]->vector(j));
-      assert(_yOld[i]->vector(j));
+    assert(_y[i]);
+    assert(_yOld[i]);
 
-      *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
-    }
-
-
+    *(_yOld[i]) = *(_y[i]) ;
   }
 
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
-    for (unsigned int j = 0; j < _numberOfRelations; ++j)
-    {
-
-      assert(_lambdaOld[i]->vector(j));
-      assert(_lambda[i]->vector(j));
-
-      *(_lambdaOld[i]->vector(j)) = *(_lambda[i]->vector(j));
-    }
+    assert(_lambdaOld[i]);
+    assert(_lambda[i]);
+    *(_lambdaOld[i]) = *(_lambda[i]);
   }
-
-
-
 }
 
 void Interaction::swapTimeStepInMemory()
@@ -624,10 +612,9 @@ void Interaction::swapTimeStepInMemory()
   // i corresponds to the derivative number and j the relation number.
   for (unsigned int i = 0; i < _y.size() ; i++)
   {
-    for (unsigned int j = 0; j < _numberOfRelations; ++j)
-    {
-      *(_y_k[i]->vector(j)) = *(_y[i]->vector(j)) ;
-    }
+
+    *(_y_k[i]) = *(_y[i]) ;
+
     _yMemory[i]->swap(_y[i]);
   }
 
@@ -650,7 +637,6 @@ void Interaction::display() const
   cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
   cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
   cout << "| interactionSize : " << _interactionSize << endl;
-  cout << "| numberOfRelations : " << _numberOfRelations << endl;
   cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
   cout << "|  _sizeZ: " << _sizeZ << endl;
 
