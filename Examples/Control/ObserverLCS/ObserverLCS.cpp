@@ -224,6 +224,22 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("ObserverLCS.dat", "ascii");
     io.write(dataPlot, "noDim");
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("ObserverLCS.ref", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    {
+
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Error =" << (dataPlot - dataPlotRef).normInf() << std::endl;
+      return 1;
+    }
+
+
+
   }
 
   catch (SiconosException e)

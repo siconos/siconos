@@ -75,7 +75,7 @@ extern "C"   double computeControl(double time)
 
     if ((njump % 2) == 0) u = -u;
 
-    printf("njump = %i\n", njump);
+    //    printf("njump = %i\n",njump);
     //printf("time = %e\n",time);
     //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
     //printf("u = %e\n",u);

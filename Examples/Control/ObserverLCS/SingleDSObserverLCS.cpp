@@ -191,6 +191,21 @@ int main(int argc, char* argv[])
     io.write(dataPlot, "noDim");
 
     // --- Time loop ---
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("SingleDSObserverLCS.ref", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    {
+
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Error =" << (dataPlot - dataPlotRef).normInf() << std::endl;
+      return 1;
+    }
+
+
 
   }
 
