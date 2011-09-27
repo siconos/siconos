@@ -453,6 +453,18 @@ address {
 
 /* MODIFICATIONS-START-HERE */
 
+div#navrow1 { 
+    vertical-align: middle;
+    float: left;     
+}
+
+div#navrow2 { 
+    float: left;     
+	background-color: ##ee;
+	border: 1px solid ##b0;
+	text-align: left;
+}
+
 .container {
     background-color: white;
     margin: 0 auto;
