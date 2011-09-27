@@ -608,6 +608,7 @@ h1 {
 }
 
 body, table, div, p, dl {
+    overflow: auto;
     font-family: Lucida Grande, Verdana, Geneva, Arial, sans-serif;
     font-size: 16px;
 }
