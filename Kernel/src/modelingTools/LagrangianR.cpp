@@ -88,9 +88,9 @@ void LagrangianR::LinkData()
   DSIterator it;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
-    Type::Siconos type = Type::value(**it);
     // check dynamical system type
-    assert((type == Type::LagrangianLinearTIDS || type == Type::LagrangianDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
+            Type::value(**it) == Type::LagrangianDS));
 
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);
@@ -135,10 +135,9 @@ void LagrangianR::LinkDataFromMemory(unsigned memoryLevel)
   SP::LagrangianDS lds;
   for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
-    Type::Siconos type = Type::value(**it);
     // check dynamical system type
-    assert((type == Type::LagrangianLinearTIDS || type == Type::LagrangianDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
-
+    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
+            Type::value(**it) == Type::LagrangianDS));
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);
 
