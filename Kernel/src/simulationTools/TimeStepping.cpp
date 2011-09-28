@@ -191,10 +191,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(ur1_descr0) = boost::gray_color;
       if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        DSIterator itDS = ur1->interaction()->dynamicalSystemsBegin();
-        SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
+        SP::Interaction inter =  ur1->interaction();
+        DSIterator itDS = inter->dynamicalSystemsBegin();
+        SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
         //if(predictorDeactivate(ur1,i))
-        if (Osi->removeInteractionInIndexSet(ur1->interaction(), i))
+        if (Osi->removeInteractionInIndexSet(inter, i))
         {
           // Unitary relation is not active
           // ui1 becomes invalid
@@ -245,10 +246,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
         bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          DSIterator itDS = ur0->interaction()->dynamicalSystemsBegin();
-          SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
-          //if(predictorDeactivate(ur1,i))
-          activate = Osi->addInteractionInIndexSet(ur0->interaction(), i);
+          SP::Interaction inter =  ur0->interaction();
+          DSIterator itDS = inter->dynamicalSystemsBegin();
+          SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
+          activate = Osi->addInteractionInIndexSet(inter, i);
         }
         if (activate)
         {

@@ -114,6 +114,7 @@ Simulation::~Simulation()
   _allNSProblems->clear();
   _allOSI->clear();
   _osiMap.clear();
+  _interactionOsiMap.clear();
 
   _allNSProblems->clear();
   // -> see shared ressources for this
@@ -144,11 +145,21 @@ SP::OneStepIntegrator Simulation::integratorOfDS(int numberDS) const
   return (it->second);
 }
 
+
+
 SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
 {
   DSOSIConstIterator it = _osiMap.find(ds);
   if (it == _osiMap.end())
     RuntimeException::selfThrow("Simulation::integratorOfDS(ds), ds not found in the integrator set.");
+  return it->second;
+}
+
+SP::OneStepIntegrator Simulation::integratorOfInteraction(SP::Interaction inter) const
+{
+  InteractionOSIConstIterator it = _interactionOsiMap.find(inter);
+  if (it == _interactionOsiMap.end())
+    RuntimeException::selfThrow("Simulation::integratorOfInteraction(inter), inter not found in the integrator set.");
   return it->second;
 }
 
@@ -169,6 +180,14 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
   _osiMap[ds] = osi;
 }
 
+void Simulation::addInteractionInOSIMap(SP::Interaction inter, SP::OneStepIntegrator  osi)
+{
+  if (_interactionOsiMap.find(inter) != _interactionOsiMap.end())
+    // in the map with another
+    // integrator
+    ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
+  _interactionOsiMap[inter] = osi;
+}
 
 SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 {
@@ -685,6 +704,19 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
 };
 
+void Simulation::ComputeLevelsForInputAndOutput(SP::Interaction inter)
+{
+  /** \warning. We test only for the first Dynamical of the interaction.
+   * we assume that the osi(s) are consistent for one interaction
+   */
+  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
+  SP::OneStepIntegrator Osi =  integratorOfDS(ds);
+  addInteractionInOSIMap(inter, Osi);
+
+  boost::shared_ptr<SetupLevels> setupLevels;
+  setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
+  Osi->accept(*(setupLevels.get()));
+}
 
 void Simulation::ComputeLevelsForInputAndOutput()
 {
@@ -697,19 +729,10 @@ void Simulation::ComputeLevelsForInputAndOutput()
     _levelMaxForInput = 0;
     _levelMinForOutput = LEVELMAX;
     _levelMaxForOutput = 0;
-    SP::DynamicalSystem ds;
-    SP::OneStepIntegrator Osi;
-    boost::shared_ptr<SetupLevels> setupLevels;
 
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      /** \warning. We test only for the first Dynamical of the interaction.
-       * we assume that the osi(s) are consistent for one interaction
-       */
-      ds = *((*it)->dynamicalSystemsBegin());
-      Osi = integratorOfDS(ds);
-      setupLevels.reset(new SetupLevels(shared_from_this(), *it, ds));
-      Osi->accept(*(setupLevels.get()));
+      ComputeLevelsForInputAndOutput(*it);
       _levelsAreComputed = true;
     }
     if (_levelsAreComputed)
