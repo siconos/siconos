@@ -191,7 +191,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(ur1_descr0) = boost::gray_color;
       if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::DSIterator itDS = ur1->interaction()->DynamicalSystemsBegin();
+        DSIterator itDS = ur1->interaction()->dynamicalSystemsBegin();
         SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
         //if(predictorDeactivate(ur1,i))
         if (Osi->removeInteractionInIndexSet(ur1->interaction(), i))
@@ -245,10 +245,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
         bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          SP::DSiterator itDS = ur1->interaction()->DynamicalSystemsBegin();
+          DSIterator itDS = ur0->interaction()->dynamicalSystemsBegin();
           SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
           //if(predictorDeactivate(ur1,i))
-          activate = Osi->addInteractionInIndexSet(ur1->interaction(), i);
+          activate = Osi->addInteractionInIndexSet(ur0->interaction(), i);
         }
         if (activate)
         {
