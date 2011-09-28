@@ -308,8 +308,6 @@ void D1MinusLinear::computeFreeState()
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    Type::Siconos dsType = Type::value(**it); // type of the current DS
-
     // Lagrangian Systems
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
 
@@ -429,8 +427,6 @@ void D1MinusLinear::updateState(unsigned int level)
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    Type::Siconos dsType = Type::value(**it);
-
     // Lagrangian Systems
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosMatrix M = d->mass();
