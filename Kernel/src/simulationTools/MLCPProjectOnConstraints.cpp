@@ -475,7 +475,7 @@ void MLCPProjectOnConstraints::postCompute()
     // or z
     pos = _M->getPositionOfUnitaryBlock(ur);
     SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation());
-    unsigned int nslawSize = nR->yProj()->size();
+    //unsigned int nslawSize = nR->yProj()->size();
 
     // unsigned int nslawSize = ur->getNonSmoothLawSizeProjectOnConstraints();
 
@@ -512,11 +512,12 @@ void MLCPProjectOnConstraints::postCompute()
     printf("MLCPP lambda of ur is pos =%i :", pos);
     aBuff->display();
 
-    unsigned int k = 0;
-    unsigned int NumDS = 0;
+
     DSIterator itDS;
     Index coord(8);
 #ifdef MLCPPROJ_WITH_CT
+    unsigned int k = 0;
+    unsigned int NumDS = 0;
     SP::SiconosMatrix J = ner->jachqT();
     //printf("J\n");
     //J->display();

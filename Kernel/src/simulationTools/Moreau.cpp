@@ -32,6 +32,9 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
+
+#include <debug.h>
+
 using namespace std;
 using namespace RELATION;
 // --- xml constructor ---
@@ -1801,6 +1804,39 @@ void Moreau::updateState(unsigned int level)
     else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
+
+
+bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+{
+  assert(i == 1);
+  double h = simulationLink->timeStep();
+  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+
+  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
+  y += 0.5 * h * yDot;
+  assert(!isnan(y));
+  if (y <= 0)
+    DEBUG_PRINTF("Moreau::addInteractionInIndexSet ACTIVATE.\n");
+  return (y <= 0);
+}
+
+
+bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+{
+  assert(i == 1);
+  double h = simulationLink->timeStep();
+  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+
+  DEBUG_PRINTF("Moreau::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
+  y += 0.5 * h * yDot;
+  assert(!isnan(y));
+  if (y > 0)
+    DEBUG_PRINTF("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
+  return (y > 0);
+}
+
 
 
 void Moreau::display()

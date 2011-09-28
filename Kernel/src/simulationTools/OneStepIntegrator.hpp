@@ -300,6 +300,24 @@ public:
    */
   virtual void prepareNewtonIteration(double time) = 0;
 
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   */
+  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+  {
+    RuntimeException::selfThrow("OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
+    return 0;
+  }
+  ;
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   */
+  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+  {
+    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should be called at this level");
+    return 0;
+  };
 
 
   /** visitors hook

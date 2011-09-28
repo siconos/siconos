@@ -40,11 +40,11 @@ using namespace std;
 using namespace RELATION;
 
 /** Pointer to function, used to set the behavior of simulation when
-  ns solver failed.  If equal to null, use DefaultCheckSolverOutput
-  else (set with setCheckSolverFunction) call the pointer below).
-  Note FP: (temporary) bad method to set checkSolverOutput but it
-  works ... It may be better to use plug-in?
-  */
+    ns solver failed.  If equal to null, use DefaultCheckSolverOutput
+    else (set with setCheckSolverFunction) call the pointer below).
+    Note FP: (temporary) bad method to set checkSolverOutput but it
+    works ... It may be better to use plug-in?
+*/
 static CheckSolverFPtr checkSolverOutput = NULL;
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
@@ -113,31 +113,31 @@ TimeStepping::~TimeStepping()
 {
 }
 
-bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  double h = timeStep();
-  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
-  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-  DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
-  assert(!isnan(y));
-  if (y > 0)
-    DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
-  return (y > 0);
-}
+// bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
+// {
+//   double h = timeStep();
+//   double y = ur->getYRef(i-1); // for i=1 it is the position -> historic notation y
+//   double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+//   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
+//   y += 0.5*h*yDot;
+//   assert(!isnan(y));
+//   if(y>0)
+//     DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
+//   return (y>0);
+// }
 
-bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  double h = timeStep();
-  double y = ur->getYRef(i - 1); // for i=1 it is the position -> historic notation y
-  double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-  DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
-  assert(!isnan(y));
-  if (y <= 0)
-    DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
-  return (y <= 0);
-}
+// bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
+// {
+//   double h = timeStep();
+//   double y = ur->getYRef(i-1); // for i=1 it is the position -> historic notation y
+//   double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+//   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
+//   y += 0.5*h*yDot;
+//   assert(!isnan(y));
+//   if(y<=0)
+//     DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
+//   return (y<=0);
+// }
 
 void TimeStepping::updateIndexSet(unsigned int i)
 {
@@ -191,7 +191,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(ur1_descr0) = boost::gray_color;
       if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        if (predictorDeactivate(ur1, i))
+        SP::DSIterator itDS = ur1->interaction()->DynamicalSystemsBegin();
+        SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
+        //if(predictorDeactivate(ur1,i))
+        if (Osi->removeInteractionInIndexSet(ur1->interaction(), i))
         {
           // Unitary relation is not active
           // ui1 becomes invalid
@@ -242,7 +245,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
         bool activate = true;
         if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          activate = predictorActivate(ur0, i);
+          SP::DSiterator itDS = ur1->interaction()->DynamicalSystemsBegin();
+          SP::OneStepIntegrator Osi = integratorOfDS(*itDS);
+          //if(predictorDeactivate(ur1,i))
+          activate = Osi->addInteractionInIndexSet(ur1->interaction(), i);
         }
         if (activate)
         {
@@ -742,7 +748,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
             RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
             else
             RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
-            */
+    */
   }
 }
 

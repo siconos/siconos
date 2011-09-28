@@ -319,15 +319,27 @@ public:
    */
   double computeResidu();
 
-  /** integrates the Dynamical System linked to this integrator
-   *  without boring the constraints
+  /** Perform the integration of the dynamical systems linked to this integrator
+   *  without taking into account the nonsmooth input (_r or _p)
    */
   virtual void computeFreeState();
 
-  /** integrates the UnitaryRelation linked to this integrator, without taking constraints
-   * into account.
+  /** Compute the Output (y) which corresponds to the free state (state without
+   * taking into account the nonsmooth input) plus the possible contribution of
+   * the nslaw
    */
   virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   */
+  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   */
+  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
 
   /**
    */
