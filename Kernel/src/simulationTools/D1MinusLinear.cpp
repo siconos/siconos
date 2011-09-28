@@ -56,6 +56,14 @@ D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS): OneStepIntegrator(OSI:
 
 void D1MinusLinear::initialize()
 {
+  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  {
+    Type::Siconos dsType = Type::value(**it);
+    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+      RuntimeException::selfThrow("D1MinusLinear::initialize - not implemented for Dynamical system type: " + dsType);
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
+    d->computeMass();
+  }
 }
 
 double D1MinusLinear::computeResidu()
@@ -72,8 +80,6 @@ double D1MinusLinear::computeResidu()
   {
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
-    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu() - not implemented for Dynamical system type: " + dsType);
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector workFree = d->workFree(); // POINTER CONSTRUCTOR : contains acceleration without contact force
     workFree->zero();
@@ -305,9 +311,6 @@ void D1MinusLinear::computeFreeState()
     Type::Siconos dsType = Type::value(**it); // type of the current DS
 
     // Lagrangian Systems
-    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::computeFreeState - not implemented for Dynamical system type: " + dsType);
-
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
 
     // get left state from memory
@@ -429,9 +432,6 @@ void D1MinusLinear::updateState(unsigned int level)
     Type::Siconos dsType = Type::value(**it);
 
     // Lagrangian Systems
-    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("D1MinusLinear::updateState - not implemented for Dynamical system type: " + dsType);
-
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosMatrix M = d->mass();
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
