@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    // -- (3) one step non smooth problem
+    // -- (3) One step non smooth problem
     SP::OneStepNSProblem impact(new LCP()); // impulse right limit right side
     SP::OneStepNSProblem force(new LCP()); // contact force right limit left side
 
@@ -161,10 +161,12 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
+
       s->processEvents();
       ++show_progress;
       k++;
     }
+
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
@@ -173,8 +175,8 @@ int main(int argc, char* argv[])
     ioMatrix io("result_tdg.dat", "ascii");
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    //    SimpleMatrix dataPlotRef(dataPlot);
+    //    dataPlotRef.zero();
     //    ioMatrix ref("result.ref", "ascii");
     //    ref.read(dataPlotRef);
     //
@@ -191,6 +193,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+    cout << "Exception caught in BouncingBallD1MinusLinear.cpp" << endl;
   }
 }
