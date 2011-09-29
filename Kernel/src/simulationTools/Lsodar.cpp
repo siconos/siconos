@@ -361,7 +361,9 @@ void Lsodar::updateState(unsigned int level)
   }
   else if (level == 2)
   {
-    RuntimeException::selfThrow("Lsodar::updateState(2), The update must be made in the Lsodar integrator");
+    double time = simulationLink->model()->currentTime();
+    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+      (*it)->update(time);
   }
   else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
 }

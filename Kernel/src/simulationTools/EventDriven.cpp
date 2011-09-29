@@ -565,12 +565,16 @@ void EventDriven::advanceToEvent()
     _tend =  _eventsManager->nextTime();
   }
 
+
   _tout = _tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   // call integrate method for each OSI, between _tinit and _tend.
   OSIIterator it;
   for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
   {
+
+    (*it)->resetNonSmoothPart();
+
     //====================================================================================
     //    std::cout << " Start of Lsodar integration" << std::endl;
     (*it)->integrate(_tinit, _tend, _tout, istate); // integrate must
@@ -616,7 +620,7 @@ void EventDriven::advanceToEvent()
       {
         (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(_tout);
         updateInput(2); //
-        updateInput(1); // this is done to reset the nonsmoothinput at the level of impact
+        //  updateInput(1); // this is done to reset the nonsmoothinput at the level of impact
       }
       // update indexSet[2] with double condition
       updateIndexSetsWithDoubleCondition();
