@@ -51,7 +51,7 @@ def is_serializable(c):
     return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|SimpleMatrix|SimpleVector|DynamicalSystemsGraph|UnitaryRelationsGraph|SiconosSharedLibrary',s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics',s)
     return m != None
 
 def name(t):
@@ -86,25 +86,24 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
              declarations.templates.is_instantiation(class_.name) ):
 
         # print registration macros depending on inheritance
-        if len(class_.variables(allow_empty=True))>0:
-            if class_.bases == []:
-                print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
+        if class_.bases == []:
+            print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
+        else:
+            serializable_bases = \
+                               reduce(lambda r,b:
+                                      r + [b.related_class] if is_serializable(b.related_class)
+                                      and b.related_class.parent.name == siconos_namespace
+                                      else r, class_.bases, [])
+            if len(serializable_bases) > 0:
+                print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
+                ''.join(['({0})'.format(c.name) for c in serializable_bases]))
             else:
-                serializable_bases = \
-                                   reduce(lambda r,b:
-                                          r + [b.related_class] if is_serializable(b.related_class)
-                                          and b.related_class.parent.name == siconos_namespace
-                                          else r, class_.bases, [])
-                if len(serializable_bases) > 0:
-                    print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
-                    ''.join(['({0})'.format(c.name) for c in serializable_bases]))
-                else:
-                    print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
+                print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
 
-            variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
+        variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
 
-            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
+        print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
 
-        
-            
-    
+
+
+

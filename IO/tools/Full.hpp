@@ -8,6 +8,12 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR, (NewtonEulerR),
                                (_NPG2)
                                (_AUX1)
                                (_AUX2))
+SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent, (Event),
+                              )
+SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix, (SiconosMatrix),
+                               (_mat)
+                               (_tabRow)
+                               (_tabCol))
 SICONOS_IO_REGISTER_WITH_BASES(BlockVector, (SiconosVector),
                                (_sizeV)
                                (vect)
@@ -88,7 +94,6 @@ SICONOS_IO_REGISTER(OSNSMatrix,
                     (dimColumn)
                     (storageType)
                     (DSBlocksPositions)
-                    //  (numericsMat)
                     (M1)
                     (Mt)
                     (M2))
@@ -101,10 +106,6 @@ SICONOS_IO_REGISTER(UnitaryRelation,
                     (_mainInteraction))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
                                (_sensor))
-SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent, (Event),
-                              )
-SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent, (Event),
-                              )
 SICONOS_IO_REGISTER(OneStepIntegrator,
                     (integratorType)
                     (OSIDynamicalSystems)
@@ -114,18 +115,13 @@ SICONOS_IO_REGISTER(OneStepIntegrator,
 SICONOS_IO_REGISTER_WITH_BASES(MLCP, (LinearOSNS),
                                (_n)
                                (_m)
-                               (_curBlock)
-                               //  (_numerics_problem)
+                               (_curBlock))
+SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingD1Minus, (Simulation),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(FrictionContact, (LinearOSNS),
                                (_contactProblemDim)
                                (_mu)
-                               (_frictionContact_driver)
-                               //  (_numerics_problem)
-                              )
-SICONOS_IO_REGISTER_WITH_BASES(QP, (OneStepNSProblem),
-                               (Q)
-                               (_p))
+                               (_frictionContact_driver))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianR, (Relation),
                                (_jachq)
                                (_jachqDot))
@@ -143,20 +139,17 @@ SICONOS_IO_REGISTER(SiconosMatrix,
 SICONOS_IO_REGISTER(BlockCSRMatrix,
                     (nr)
                     (nc)
-                    //  (numericsMatSparse)
-                    //  (MBlockCSR)
                     (diagSizes)
                     (rowPos)
                     (colPos))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR, (LagrangianR),
                                (_F)
                                (_e))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL, (NonSmoothLaw),
-                               (_en)
-                               (_et)
-                               (_mu))
+SICONOS_IO_REGISTER_WITH_BASES(Moreau2, (Moreau),
+                              )
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR, (NewtonEulerFrom1DLocalFrameR),
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(LCP, (LinearOSNS),
-                               //  (_numerics_problem)
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
                                (_ysize)
@@ -174,8 +167,6 @@ SICONOS_IO_REGISTER_WITH_BASES(EventDriven, (Simulation),
                                (istate)
                                (TOL_ED))
 SICONOS_IO_REGISTER(OneStepNSProblem,
-                    (_numerics_solver_id)
-                    (_numerics_solver_options)
                     (_id)
                     (_sizeOutput)
                     (_DSBlocks)
@@ -186,7 +177,6 @@ SICONOS_IO_REGISTER(OneStepNSProblem,
                     (_maxSize)
                     (_CPUtime)
                     (_nbIter)
-                    (_numerics_options)
                     (_hasBeUpdated))
 SICONOS_IO_REGISTER_WITH_BASES(TimeStepping, (Simulation),
                                (_computeResiduY)
@@ -275,6 +265,8 @@ SICONOS_IO_REGISTER(Actuator,
                     (_eActuator))
 SICONOS_IO_REGISTER(SiconosException,
                     (reportMsg))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIDS, (FirstOrderLinearDS),
+                              )
 SICONOS_IO_REGISTER(SiconosMemory,
                     (_maxSize)
                     (_nbVectorsInMemory)
@@ -306,7 +298,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS, (LagrangianDS),
                                (_K)
                                (_C))
 SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical, (LinearOSNS),
-                               (_pnumerics_GMP)
                               )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR, (LagrangianR),
                                (_pluginjqh)
@@ -338,8 +329,10 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS, (DynamicalSystem),
                                (_invM))
 SICONOS_IO_REGISTER_WITH_BASES(Relay, (LinearOSNS),
                                (_lb)
-                               (_ub)
-                               //  (_numerics_problem)
+                               (_ub))
+SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL, (NonSmoothLaw),
+                              )
+SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL, (NonSmoothLaw),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderNonLinearDS),
                                (_A)
@@ -374,6 +367,8 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR, (LagrangianR),
                                (_hDot)
                                (_pluginhDot)
                                (_pluginJachq))
+SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent, (Event),
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw),
                                (_ResCof)
                                (_Stiff)
@@ -398,15 +393,10 @@ SICONOS_IO_REGISTER(BoundaryCondition,
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR, (FirstOrderR),
                                (_F)
                                (_e))
-SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix, (SiconosMatrix),
-                               (_mat)
-                               (_tabRow)
-                               (_tabCol))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR),
                                (_F)
                                (_e))
 SICONOS_IO_REGISTER_WITH_BASES(Equality, (LinearOSNS),
-                               //  (_numerics_problem)
                               )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR, (Relation),
                                (Jachx)
@@ -425,6 +415,8 @@ SICONOS_IO_REGISTER(Event,
                     (tick))
 SICONOS_IO_REGISTER_WITH_BASES(ActuatorEvent, (Event),
                                (_actuator))
+SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints, (MLCP),
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (Impulse_variable)
                                (Time_variable)
@@ -462,8 +454,14 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (SizeDataSave)
                                (_IsImpactEnd))
 SICONOS_IO_REGISTER(PluggedObject,
-                    //  (fPtr)
                     (pluginName))
+SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL, (NonSmoothLaw),
+                               (_en)
+                               (_et)
+                               (_mu))
+SICONOS_IO_REGISTER_WITH_BASES(QP, (OneStepNSProblem),
+                               (Q)
+                               (_p))
 SICONOS_IO_REGISTER(EventsManager,
                     (_allEvents)
                     (_currentEvent)
@@ -473,8 +471,7 @@ SICONOS_IO_REGISTER(EventsManager,
                     (_simulation)
                     (_hasNS)
                     (_hasCM)
-                    (GapLimit2Events)
-                   )
+                    (GapLimit2Events))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)
@@ -504,13 +501,3 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_pluginJacqDotFInt)
                                (_pluginJacqNNL)
                                (_pluginJacqDotNNL))
-SICONOS_IO_REGISTER(UnitaryRelationsSet,
-                    (fpt)
-                    (setOfT))
-//SICONOS_IO_REGISTER(UnitaryRelationsGraph,
-// (g))
-//SICONOS_IO_REGISTER(InteractionsSet,
-//  (fpt)
-//  (setOfT))
-//SICONOS_IO_REGISTER(DynamicalSystemsGraph,
-//  (g))
