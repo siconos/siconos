@@ -102,5 +102,22 @@
       };                                                                \
     }}
 
+#include <boost/preprocessor/tuple/elem.hpp>
 
+#define SERIALIZE_I(r,T,M)                                              \
+  BOOST_PP_TUPLE_ELEM(2,0,T) & ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(M), BOOST_PP_TUPLE_ELEM(2,1,T) . M);
+
+#define SERIALIZE(S,MEMBERS, ARCHIVE)                       \
+  BOOST_PP_SEQ_FOR_EACH(SERIALIZE_I, (ARCHIVE, S), MEMBERS)
+
+#define SERIALIZE_C_ARRAY(DIM, STRUCT, ARRAY, ARCHIVE)                   \
+  if (Archive::is_loading::value)                                       \
+  {                                                                     \
+    STRUCT . ARRAY = (BOOST_TYPEOF(STRUCT . ARRAY)) malloc(DIM * sizeof(BOOST_TYPEOF(* (STRUCT . ARRAY)))); \
+  };                                                                    \
+  {                                                                     \
+    boost::serialization::array<BOOST_TYPEOF(*(STRUCT . ARRAY))>        \
+      wrapper = boost::serialization::make_array(STRUCT . ARRAY,DIM);   \
+    ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
+  }
 #endif

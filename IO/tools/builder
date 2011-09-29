@@ -63,6 +63,9 @@ def name(t):
 # classes in siconos_namespace
 class_names = dict()
 
+print "// generated with the command : {0}".format(' '.join(sys.argv))
+
+
 for type_ in filter(lambda c: c.parent.name == siconos_namespace,
                     itertools.chain(global_ns.classes(), global_ns.typedefs())):
 

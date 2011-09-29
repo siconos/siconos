@@ -1,3 +1,4 @@
+// generated with the command : ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 SiconosKernel.hpp
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR, (NewtonEulerR),
                                (_isOnContact)
                                (_Pc1)
