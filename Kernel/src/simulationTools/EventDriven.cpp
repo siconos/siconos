@@ -388,7 +388,6 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   }
   // update the DS of the OSI.
   lsodar->computeRhs(t);
-  //  lsodar->updateState(2); // update based on the last saved values
   //  for the DS state, ie the ones computed by lsodar (x above)
   // Update Index sets? No !!
 
@@ -541,19 +540,10 @@ void EventDriven::updateImpactState()
 
 void EventDriven::update(unsigned int levelInput)
 {
-  if (!_allNSProblems->empty())
-  {
-    // compute input (lambda -> r)
-    updateInput(levelInput);
-
-    // Update dynamical systems states
-    OSIIterator itOSI;
-    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateState(levelInput);
-
-    // Update output (y)
-    updateOutput(levelInput);
-  }
+  assert(levelInput == 1);
+  updateImpactState();
+  // Update output (y)
+  updateOutput(levelInput);
   // Warning: index sets are not updated in this function !!
 }
 
@@ -626,6 +616,7 @@ void EventDriven::advanceToEvent()
       {
         (*_allNSProblems)[SICONOS_OSNSP_ED_ACCELERATION]->compute(_tout);
         updateInput(2); //
+        updateInput(1); // this is done to reset the nonsmoothinput at the level of impact
       }
       // update indexSet[2] with double condition
       updateIndexSetsWithDoubleCondition();
