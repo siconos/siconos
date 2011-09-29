@@ -311,7 +311,7 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
       else
       {
         SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
-        d->p(level)->zero();
+        if (d->p(level)) d->p(level)->zero();
       }
     }
   }

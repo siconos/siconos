@@ -58,7 +58,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsign
 
 extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
-  // nonlinear inertia terms
+  // nonlinear inertia terms (negative in h according to LagrangianDS)
   NNL[0] = (0.5 * m2 + m3) * l1 * l2 * sin(q[0] - q[1]) * velocity[1] * velocity[1];
   NNL[1] = -(0.5 * m2 + m3) * l1 * l2 * sin(q[0] - q[1]) * velocity[0] * velocity[0];
   NNL[2] = 0.;
@@ -98,10 +98,10 @@ extern "C" void jacobianNNLqDot(unsigned int sizeOfq, const double *q, const  do
 
 extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
-  // internal forces
+  // internal forces (negative in h according to LagrangianDS)
   fInt[0] = (0.5 * m1 + m2 + m3) * gravity * l1 * cos(q[0]);
   fInt[1] = (0.5 * m2 + m3) * gravity * l2 * cos(q[1]);
-  fInt[1] = 0.;
+  fInt[2] = 0.;
 }
 
 extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
@@ -162,7 +162,7 @@ extern "C" void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
 extern "C" void g3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d - (-l1 * sin(q[0]) - l2 * sin(q[1]) + a * sin(q[2]) + b * cos(q[2]));
+  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) - b * cos(q[2]);
 }
 
 extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
@@ -174,7 +174,7 @@ extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
 extern "C" void g4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d - (-l1 * sin(q[0]) - l2 * sin(q[1]) - a * sin(q[2]) + b * cos(q[2]));
+  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) - b * cos(q[2]);
 }
 
 extern "C" void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)

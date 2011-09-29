@@ -168,14 +168,19 @@ double D1MinusLinear::computeResidu()
     // initialize *it->residuFree and predicted right velocity (left limit)
     SP::SiconosVector residuFree = (*it)->residuFree(); // POINTER CONSTRUCTOR : contains residu without nonsmooth effect
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains velocity v_{k+1}^- and not free velocity
-    scal(-0.5 * h, *(d->p(2)), *residuFree, true);
-    scal(h, *(d->p(2)), *v, true);
+    residuFree->zero();
+    v->zero();
+    if (d->p(2))
+    {
+      scal(-0.5 * h, *(d->p(2)), *residuFree, false);
+      scal(h, *(d->p(2)), *v, false);
 
-    cout << "LEFT FORCE" << endl;
-    cout << (*(d->p(2)))(0) << endl;
+      cout << "LEFT FORCE" << endl;
+      cout << (*(d->p(2)))(0) << endl;
 
-    Mold->PLUForwardBackwardInPlace(*residuFree);
-    Mold->PLUForwardBackwardInPlace(*v);
+      Mold->PLUForwardBackwardInPlace(*residuFree);
+      Mold->PLUForwardBackwardInPlace(*v);
+    }
 
     *residuFree -= 0.5 * h**workFree;
 
@@ -284,18 +289,19 @@ double D1MinusLinear::computeResidu()
 
     // initialize *it->residuFree
     SP::SiconosVector residuFree = (*it)->residuFree(); // POINTER CONSTRUCTOR : contains residu without nonsmooth effect
-
-    SP::SiconosVector dummy(new SimpleVector(*(d->p(2)))); // value = contact force
-    M->PLUForwardBackwardInPlace(*dummy);
-
     *residuFree -= 0.5 * h**workFree;
-    *residuFree -= 0.5 * h**dummy;
 
-    prod(*M, *residuFree, *dummy, true);
-    *residuFree = *dummy;
+    if (d->p(2))
+    {
+      SP::SiconosVector dummy(new SimpleVector(*(d->p(2)))); // value = contact force
+      M->PLUForwardBackwardInPlace(*dummy);
+      *residuFree -= 0.5 * h**dummy;
 
-    cout << "RIGHT FORCE" << endl;
-    cout << (*(d->p(2)))(0) << endl;
+      cout << "RIGHT FORCE" << endl;
+      cout << (*(d->p(2)))(0) << endl;
+    }
+
+    *residuFree = prod(*M, *residuFree);
 
     cout << "RESIDU FREE" << endl;
     cout << (*residuFree)(0) << endl;
@@ -432,11 +438,14 @@ void D1MinusLinear::updateState(unsigned int level)
     SP::SiconosMatrix M = d->mass();
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
 
-    SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
-    M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
-    *v += *dummy; // add free velocity
-    cout << "RIGHT IMPULSE" << endl;
-    cout << (*(d->p(1)))(0) << endl;
+    if (d->p(1))
+    {
+      SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
+      M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+      *v += *dummy; // add free velocity
+      cout << "RIGHT IMPULSE" << endl;
+      cout << (*(d->p(1)))(0) << endl;
+    }
   }
 }
 

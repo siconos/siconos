@@ -44,6 +44,12 @@ int main(int argc, char* argv[])
     double T = 1.0;        // final computation time
     double h = 0.0005;     // time step
 
+    // geometrical characteristics
+    double l1 = 0.1530;
+    double l2 = 0.3060;
+    double a = 0.05;
+    double b = 0.025;
+
     // contact parameters
     double e1 = 0.4;
     double e2 = 0.4;
@@ -59,15 +65,14 @@ int main(int argc, char* argv[])
     SP::SimpleVector v0(new SimpleVector(nDof));
     q0->zero();
     v0->zero();
-    (*v0)(0) = 150.;
-    (*v0)(1) = -75.;
+    (*v0)(0) = 0.;//150.;
+    (*v0)(1) = 0.;//-75.;
 
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
     cout << "====> Model loading ..." << endl << endl;
 
-    DynamicalSystemsSet allDS;
     SP::LagrangianDS slider(new LagrangianDS(q0, v0, "SliderCrankPlugin:mass"));
     slider->setComputeNNLFunction("SliderCrankPlugin.so", "NNL");
     slider->setComputeJacobianNNLqFunction("SliderCrankPlugin.so", "jacobianNNLq");
@@ -75,42 +80,39 @@ int main(int argc, char* argv[])
     slider->setComputeFIntFunction("SliderCrankPlugin.so", "FInt");
     slider->setComputeJacobianFIntqFunction("SliderCrankPlugin.so", "jacobianFIntq");
     slider->setComputeJacobianFIntqDotFunction("SliderCrankPlugin.so", "jacobianFIntqDot");
-    allDS.insert(slider);
 
     // -------------------
     // --- Interactions---
     // -------------------
-    InteractionsSet allInteractions;
-
     // -- corner 1 --
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
-    SP::Interaction inter1(new Interaction("corner1", allDS, 1, 1, nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
 
     // -- corner 2 --
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
-    SP::Interaction inter2(new Interaction("corner2", allDS, 2, 1, nslaw2, relation2));
+    SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
 
     // -- corner 3 --
     SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(e3));
     SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
-    SP::Interaction inter3(new Interaction("corner3", allDS, 3, 1, nslaw3, relation3));
+    SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
 
     // -- corner 4 --
     SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(e4));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
-    SP::Interaction inter4(new Interaction("corner4", allDS, 4, 1, nslaw4, relation4));
-
-    allInteractions.insert(inter1);
-    allInteractions.insert(inter2);
-    allInteractions.insert(inter3);
-    allInteractions.insert(inter4);
+    SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
 
     // -------------
     // --- Model ---
     // -------------
-    SP::Model SliderWithClearance(new Model(t0, T, allDS, allInteractions));
+    SP::Model sliderWithClearance(new Model(t0, T));
+    sliderWithClearance->nonSmoothDynamicalSystem()->insertDynamicalSystem(slider);
+    //sliderWithClearance->nonSmoothDynamicalSystem()->link(inter1, slider);
+    //sliderWithClearance->nonSmoothDynamicalSystem()->link(inter2, slider);
+    //sliderWithClearance->nonSmoothDynamicalSystem()->link(inter3, slider);
+    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter4, slider);
 
     // ----------------
     // --- Simulation ---
@@ -131,24 +133,28 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
-    SliderWithClearance->initialize(s);
+    sliderWithClearance->initialize(s);
     int N = (int)((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 7;
+    unsigned int outputSize = 11;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
 
-    dataPlot(0, 0) =  SliderWithClearance->t0();
+    dataPlot(0, 0) =  sliderWithClearance->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*q)(1);
     dataPlot(0, 3) = (*q)(2);
     dataPlot(0, 4) = (*v)(0);
     dataPlot(0, 5) = (*v)(1);
     dataPlot(0, 6) = (*v)(2);
+    dataPlot(0, 7) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 1
+    dataPlot(0, 8) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 2
+    dataPlot(0, 9) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 3
+    dataPlot(0, 10) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 4
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -172,6 +178,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
       dataPlot(k, 6) = (*v)(2);
+      dataPlot(k, 7) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 1
+      dataPlot(k, 8) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 2
+      dataPlot(k, 9) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 3
+      dataPlot(k, 10) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 4
 
       s->processEvents();
       ++show_progress;
@@ -183,7 +193,7 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("SliderCrankResult.dat", "ascii");
+    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
   }
