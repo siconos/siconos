@@ -426,7 +426,7 @@ void Simulation::updateInput(unsigned int level)
       {
         SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
         d->p(level)->zero();
-        std::cout << "Simulation::updateInput(unsigned int level) level = " << level << std::endl;
+        //    std::cout << "Simulation::updateInput(unsigned int level) level = "<<level<<std::endl;
       }
     }
   }
