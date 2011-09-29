@@ -359,7 +359,7 @@ void Lsodar::updateState(unsigned int level)
       lds->computePostImpactVelocity();
     }
   }
-  else if (level == 2)// compute acceleration ie RHS and its jacobian.
+  else if (level == 2) // compute acceleration ie RHS and its jacobian.
   {
     double time = simulationLink->model()->currentTime();
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)

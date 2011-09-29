@@ -348,6 +348,7 @@ void Simulation::reset()
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
+  std::cout << "     Simulation::reset()"  << std::endl;
 }
 
 
@@ -425,9 +426,14 @@ void Simulation::updateInput(unsigned int level)
       {
         SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
         d->p(level)->zero();
+        std::cout << "Simulation::updateInput(unsigned int level) level = " << level << std::endl;
       }
     }
   }
+
+
+
+  //  reset();
 
   // We compute input using lambda(level).
   for (it = topology->interactions()->begin();
