@@ -39,7 +39,7 @@ class SimpleVector;
  * Insertion of NULL SP::SiconosVector is not allowed.
  *
  */
-class BlockVector : public SiconosVector , public boost::enable_shared_from_this<BlockVector>
+class BlockVector : public SiconosVector
 {
 private:
   /** serialization hooks
@@ -427,7 +427,7 @@ public:
    */
   void insertPtr(SP::SiconosVector) ;
 
-  ACCEPT_VISITORS();
+  ACCEPT_STD_VISITORS();
 
 };
 

@@ -39,7 +39,7 @@
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SimpleVector: public SiconosVector , public boost::enable_shared_from_this<SimpleVector>
+class SimpleVector: public SiconosVector
 {
 protected:
   /** serialization hooks
@@ -416,7 +416,7 @@ public:
 
   friend class IsBlock;
 
-  ACCEPT_VISITORS();
+  ACCEPT_STD_VISITORS();
 
 };
 

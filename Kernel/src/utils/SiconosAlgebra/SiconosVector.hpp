@@ -56,7 +56,7 @@ union VECTOR_UBLAS_TYPE
  * matrices in \ref GS_SicAlgebra .
  *
  */
-class SiconosVector
+class SiconosVector : public boost::enable_shared_from_this<SiconosVector>
 {
 
 protected:
