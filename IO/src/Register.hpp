@@ -20,6 +20,14 @@
 
 #include <debug.h>
 
+#define REGISTER_BOOST_SERIALIZATION(C)                                 \
+  namespace boost { namespace serialization                             \
+  {                                                                     \
+    template <class Archive>                                            \
+      void serialize(Archive& ar, C& v, unsigned int version)           \
+      siconos_io(ar, v, version);                                       \
+  }                                                                     \
+ 
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
   ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), object.member)
 
