@@ -348,7 +348,7 @@ void Simulation::reset()
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
-  std::cout << "     Simulation::reset()"  << std::endl;
+  //std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
 
@@ -415,25 +415,7 @@ void Simulation::updateInput(unsigned int level)
   InteractionsIterator it;
 
   // Set dynamical systems non-smooth part to zero.
-  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
-  {
-    for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS != (*itOSI)->dynamicalSystems()->end(); ++itDS)
-    {
-      Type::Siconos dsType = Type::value(**itDS);
-      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-        (*itDS)->resetNonSmoothPart();
-      else
-      {
-        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
-        d->p(level)->zero();
-        //    std::cout << "Simulation::updateInput(unsigned int level) level = "<<level<<std::endl;
-      }
-    }
-  }
-
-
-
-  //  reset();
+  reset();
 
   // We compute input using lambda(level).
   for (it = topology->interactions()->begin();

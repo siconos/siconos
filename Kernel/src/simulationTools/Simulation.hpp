@@ -618,7 +618,7 @@ public:
   /** compute r thanks to lambda[level] for all Interactions
    *  \param unsigned int: lambda level
    */
-  void updateInput(unsigned int);
+  virtual void updateInput(unsigned int);
 
   /** compute output for all the interactions
    *  \param  unsigned int: y min order to be computed default 0
