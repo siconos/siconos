@@ -287,55 +287,7 @@ void KernelTest::t5()
 
     SP::SolverOptions so;
 
-
-    oa.register_type(static_cast<BlockVector*>(NULL));
-    //    oa.register_type(static_cast<SensorPosition*>(NULL));
-    oa.register_type(static_cast<NewtonImpactNSL*>(NULL));
-    //    oa.register_type(static_cast<NewtonEulerDS*>(NULL));
-    //    oa.register_type(static_cast<PrimalFrictionContact*>(NULL));
-    //   oa.register_type(static_cast<RelayNSL*>(NULL));
-    //   oa.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-    //    oa.register_type(static_cast<MLCP*>(NULL));
-
-    //    oa.register_type(static_cast<NewtonEulerRImpact*>(NULL));
-    //    oa.register_type(static_cast<QP*>(NULL));
-    //    oa.register_type(static_cast<LagrangianR*>(NULL));
-    oa.register_type(static_cast<LagrangianLinearTIR*>(NULL));
-    oa.register_type(static_cast<SimpleVector*>(NULL));
-    //    oa.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-    //    oa.register_type(static_cast<NewtonEulerR*>(NULL));
-    //    oa.register_type(static_cast<EventDriven*>(NULL));
-    oa.register_type(static_cast<TimeStepping*>(NULL));
-    oa.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-    //    oa.register_type(static_cast<GenericMechanical*>(NULL));
-    oa.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
-    //    oa.register_type(static_cast<Lsodar*>(NULL));
-    //    oa.register_type(static_cast<Relay*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-    //    oa.register_type(static_cast<MLCP2*>(NULL));
-    //    oa.register_type(static_cast<OneStepNSProblem*>(NULL));
-    oa.register_type(static_cast<LCP*>(NULL));
-    //    oa.register_type(static_cast<LinearOSNS*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderType2R*>(NULL));
-    //   oa.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
-    oa.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-    //    oa.register_type(static_cast<MultipleImpactNSL*>(NULL));
-    //    oa.register_type(static_cast<LagrangianCompliantR*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderLinearR*>(NULL));
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<BlockMatrix*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-    //    oa.register_type(static_cast<Equality*>(NULL));
-    //    oa.register_type(static_cast<FirstOrderR*>(NULL));
-    oa.register_type(static_cast<Moreau*>(NULL));
-    oa.register_type(static_cast<SensorEvent*>(NULL));
-    oa.register_type(static_cast<ActuatorEvent*>(NULL));
-    oa.register_type(static_cast<NonSmoothEvent*>(NULL));
-    oa.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
-    //    oa.register_type(static_cast<Event*>(NULL));
-    //    oa.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-    oa.register_type(static_cast<LagrangianDS*>(NULL));
+    siconos_io_register(oa);
 
     // dump
     DEBUG_PRINT("saving\n");
@@ -350,56 +302,7 @@ void KernelTest::t5()
   {
     boost::archive::xml_iarchive ia(ifs);
 
-    ia.register_type(static_cast<BlockVector*>(NULL));
-    //    ia.register_type(static_cast<SensorPosition*>(NULL));
-    ia.register_type(static_cast<NewtonImpactNSL*>(NULL));
-    //    ia.register_type(static_cast<NewtonEulerDS*>(NULL));
-    //    ia.register_type(static_cast<PrimalFrictionContact*>(NULL));
-    //   ia.register_type(static_cast<RelayNSL*>(NULL));
-    //   ia.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-    //    ia.register_type(static_cast<SensorEvent*>(NULL));
-    //    ia.register_type(static_cast<MLCP*>(NULL));
-
-    //    ia.register_type(static_cast<NewtonEulerRImpact*>(NULL));
-    //    ia.register_type(static_cast<QP*>(NULL));
-    //    ia.register_type(static_cast<LagrangianR*>(NULL));
-    ia.register_type(static_cast<LagrangianLinearTIR*>(NULL));
-    ia.register_type(static_cast<SimpleVector*>(NULL));
-    //    ia.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-    //    ia.register_type(static_cast<NewtonEulerR*>(NULL));
-    //    ia.register_type(static_cast<EventDriven*>(NULL));
-    ia.register_type(static_cast<TimeStepping*>(NULL));
-    ia.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-    //    ia.register_type(static_cast<GenericMechanical*>(NULL));
-    ia.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
-    //    ia.register_type(static_cast<Lsodar*>(NULL));
-    //    ia.register_type(static_cast<Relay*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-    //    ia.register_type(static_cast<MLCP2*>(NULL));
-    //    ia.register_type(static_cast<OneStepNSProblem*>(NULL));
-    ia.register_type(static_cast<LCP*>(NULL));
-    //    ia.register_type(static_cast<LinearOSNS*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderType2R*>(NULL));
-    //   ia.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
-    ia.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-    //    ia.register_type(static_cast<MultipleImpactNSL*>(NULL));
-    //    ia.register_type(static_cast<LagrangianCompliantR*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearR*>(NULL));
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<BlockMatrix*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-    //    ia.register_type(static_cast<Equality*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderR*>(NULL));
-    ia.register_type(static_cast<Moreau*>(NULL));
-    //    ia.register_type(static_cast<ActuatorEvent*>(NULL));
-    //    ia.register_type(static_cast<Event*>(NULL));
-    //    ia.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-    ia.register_type(static_cast<SensorEvent*>(NULL));
-    ia.register_type(static_cast<ActuatorEvent*>(NULL));
-    ia.register_type(static_cast<NonSmoothEvent*>(NULL));
-    ia.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
+    siconos_io_register(ia);
 
     DEBUG_PRINT("loading\n");
     ia >> NVP(bouncingBallFromFile);
@@ -424,56 +327,7 @@ void KernelTest::t6()
   {
     boost::archive::xml_iarchive ia(ifs);
 
-    ia.register_type(static_cast<BlockVector*>(NULL));
-    //    ia.register_type(static_cast<SensorPosition*>(NULL));
-    ia.register_type(static_cast<NewtonImpactNSL*>(NULL));
-    //    ia.register_type(static_cast<NewtonEulerDS*>(NULL));
-    //    ia.register_type(static_cast<PrimalFrictionContact*>(NULL));
-    //   ia.register_type(static_cast<RelayNSL*>(NULL));
-    //   ia.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-    //    ia.register_type(static_cast<SensorEvent*>(NULL));
-    //    ia.register_type(static_cast<MLCP*>(NULL));
-
-    //    ia.register_type(static_cast<NewtonEulerRImpact*>(NULL));
-    //    ia.register_type(static_cast<QP*>(NULL));
-    //    ia.register_type(static_cast<LagrangianR*>(NULL));
-    ia.register_type(static_cast<LagrangianLinearTIR*>(NULL));
-    ia.register_type(static_cast<SimpleVector*>(NULL));
-    //    ia.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-    //    ia.register_type(static_cast<NewtonEulerR*>(NULL));
-    //    ia.register_type(static_cast<EventDriven*>(NULL));
-    ia.register_type(static_cast<TimeStepping*>(NULL));
-    ia.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-    //    ia.register_type(static_cast<GenericMechanical*>(NULL));
-    ia.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
-    //    ia.register_type(static_cast<Lsodar*>(NULL));
-    //    ia.register_type(static_cast<Relay*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-    //    ia.register_type(static_cast<MLCP2*>(NULL));
-    //    ia.register_type(static_cast<OneStepNSProblem*>(NULL));
-    ia.register_type(static_cast<LCP*>(NULL));
-    //    ia.register_type(static_cast<LinearOSNS*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderType2R*>(NULL));
-    //   ia.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
-    ia.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-    //    ia.register_type(static_cast<MultipleImpactNSL*>(NULL));
-    //    ia.register_type(static_cast<LagrangianCompliantR*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearR*>(NULL));
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<BlockMatrix*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-    //    ia.register_type(static_cast<Equality*>(NULL));
-    //    ia.register_type(static_cast<FirstOrderR*>(NULL));
-    ia.register_type(static_cast<Moreau*>(NULL));
-    //    ia.register_type(static_cast<ActuatorEvent*>(NULL));
-    //    ia.register_type(static_cast<Event*>(NULL));
-    //    ia.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-    ia.register_type(static_cast<SensorEvent*>(NULL));
-    ia.register_type(static_cast<ActuatorEvent*>(NULL));
-    ia.register_type(static_cast<NonSmoothEvent*>(NULL));
-    ia.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
+    siconos_io_register(ia);
 
     DEBUG_PRINT("loading\n");
     ia >> NVP(bouncingBall);

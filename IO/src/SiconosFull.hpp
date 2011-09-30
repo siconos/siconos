@@ -305,3 +305,63 @@ void serialize(Archive& ar, SiconosVector& v, unsigned int version)
 }
 }
 }
+
+
+/** derived type registration in archive
+\param an archive
+*/
+
+template <class Archive>
+void siconos_io_register(Archive& ar)
+{
+  ar.register_type(static_cast<BlockVector*>(NULL));
+  //    ar.register_type(static_cast<SensorPosition*>(NULL));
+  ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
+  //    ar.register_type(static_cast<NewtonEulerDS*>(NULL));
+  //    ar.register_type(static_cast<PrimalFrictionContact*>(NULL));
+  //   ar.register_type(static_cast<RelayNSL*>(NULL));
+  //   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+  //    ar.register_type(static_cast<SensorEvent*>(NULL));
+  //    ar.register_type(static_cast<MLCP*>(NULL));
+
+  //    ar.register_type(static_cast<NewtonEulerRImpact*>(NULL));
+  //    ar.register_type(static_cast<QP*>(NULL));
+  //    ar.register_type(static_cast<LagrangianR*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+  ar.register_type(static_cast<SimpleVector*>(NULL));
+  //    ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+  //    ar.register_type(static_cast<NewtonEulerR*>(NULL));
+  //    ar.register_type(static_cast<EventDriven*>(NULL));
+  ar.register_type(static_cast<TimeStepping*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+  //    ar.register_type(static_cast<GenericMechanical*>(NULL));
+  ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
+  //    ar.register_type(static_cast<Lsodar*>(NULL));
+  //    ar.register_type(static_cast<Relay*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+  //    ar.register_type(static_cast<MLCP2*>(NULL));
+  //    ar.register_type(static_cast<OneStepNSProblem*>(NULL));
+  ar.register_type(static_cast<LCP*>(NULL));
+  //    ar.register_type(static_cast<LinearOSNS*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderType2R*>(NULL));
+  //   ar.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
+  ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
+  //    ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
+  //    ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  ar.register_type(static_cast<SimpleMatrix*>(NULL));
+  ar.register_type(static_cast<BlockMatrix*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
+  //    ar.register_type(static_cast<Equality*>(NULL));
+  //    ar.register_type(static_cast<FirstOrderR*>(NULL));
+  ar.register_type(static_cast<Moreau*>(NULL));
+  //    ar.register_type(static_cast<ActuatorEvent*>(NULL));
+  //    ar.register_type(static_cast<Event*>(NULL));
+  //    ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+  ar.register_type(static_cast<SensorEvent*>(NULL));
+  ar.register_type(static_cast<ActuatorEvent*>(NULL));
+  ar.register_type(static_cast<NonSmoothEvent*>(NULL));
+  ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
+  ar.register_type(static_cast<LagrangianDS*>(NULL));
+}

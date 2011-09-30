@@ -20,6 +20,10 @@
 
 #include <debug.h>
 
+
+/** register class serialization in boost namespace
+    \param a class name
+ */
 #define REGISTER_BOOST_SERIALIZATION(C)                                 \
   namespace boost { namespace serialization                             \
   {                                                                     \
@@ -28,22 +32,26 @@
       siconos_io(ar, v, version);                                       \
   }                                                                     \
  
+
+/** internal macro */
 #define INTERNAL_SICONOS_SERIALIZATION_NVP(object,member)               \
   ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(member), object.member)
 
-/* serialization is not splitted */
+/** internal macro */
 #define INTERNAL_SICONOS_IO_SERIALIZE(r,o,m) \
   ar & INTERNAL_SICONOS_SERIALIZATION_NVP(o,m);
 
+/** internal macro */
 #define INTERNAL_SICONOS_IO_SERIALIZE_BASE(r,o,b)                       \
   ar & ::boost::serialization::make_nvp(                                \
     BOOST_PP_STRINGIZE(b),                                              \
     ::boost::serialization::base_object<b>(o) );                        \
  
 /** base class members registration
-    \param class name
-    \param members sequence (as a boost sequence (member1)(member2) ...)
-*/
+ *  \param class name
+ *  \param members sequence (as a boost preprocessor sequence
+ *   (member1)(member2)x...)
+ */
 #define SICONOS_IO_REGISTER(CLASS,MEMBERS)                              \
   template<class Archive>                                               \
   void siconos_io(Archive & ar, CLASS & o, const unsigned int version) \
@@ -104,12 +112,26 @@
 
 #include <boost/preprocessor/tuple/elem.hpp>
 
+/** internal macro */
 #define SERIALIZE_I(r,T,M)                                              \
-  BOOST_PP_TUPLE_ELEM(2,0,T) & ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(M), BOOST_PP_TUPLE_ELEM(2,1,T) . M);
+  BOOST_PP_TUPLE_ELEM(2,0,T) & \
+  ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(M), \
+                                   BOOST_PP_TUPLE_ELEM(2,1,T) . M);
 
+/** serialize structure members
+ * \param a structure instance
+ * \param a boost preprocessor sequence of members
+ * \param an archive
+ */
 #define SERIALIZE(S,MEMBERS, ARCHIVE)                       \
   BOOST_PP_SEQ_FOR_EACH(SERIALIZE_I, (ARCHIVE, S), MEMBERS)
 
+/** serialize C array inside structure
+ * \param array dimension
+ * \param a struct instance
+ * \param array member
+ * \param an archive
+ */
 #define SERIALIZE_C_ARRAY(DIM, STRUCT, ARRAY, ARCHIVE)                   \
   if (Archive::is_loading::value)                                       \
   {                                                                     \

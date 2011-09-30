@@ -502,3 +502,4 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_pluginJacqDotFInt)
                                (_pluginJacqNNL)
                                (_pluginJacqDotNNL))
+

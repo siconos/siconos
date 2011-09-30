@@ -63,6 +63,10 @@ def name(t):
 # classes in siconos_namespace
 class_names = dict()
 
+# class name of classes with a least a base (for the boost archive
+# registration)
+with_base = []
+
 print "// generated with the command : {0}".format(' '.join(sys.argv))
 
 
@@ -83,30 +87,40 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
     # with the serializabe tag
     # (could not find friend functions with pygccxml)
     if class_ is not None and \
-           is_serializable(class_) and not \
-           unwanted(class_.name) and \
+           is_serializable(class_) and \
            ( typedef or not \
              declarations.templates.is_instantiation(class_.name) ):
 
-        # print registration macros depending on inheritance
-        if class_.bases == []:
-            print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
-        else:
-            serializable_bases = \
-                               reduce(lambda r,b:
-                                      r + [b.related_class] if is_serializable(b.related_class)
-                                      and b.related_class.parent.name == siconos_namespace
-                                      else r, class_.bases, [])
-            if len(serializable_bases) > 0:
-                print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
-                ''.join(['({0})'.format(c.name) for c in serializable_bases]))
-            else:
+        if not unwanted(class_.name):
+
+            with_base += [ class_.name ]
+
+            # print registration macros depending on inheritance
+            if class_.bases == []:
                 print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
+            else:
+                serializable_bases = \
+                                   reduce(lambda r,b:
+                                          r + [b.related_class] if is_serializable(b.related_class)
+                                          and b.related_class.parent.name == siconos_namespace
+                                          else r, class_.bases, [])
+                if len(serializable_bases) > 0:
+                    print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
+                    ''.join(['({0})'.format(c.name) for c in serializable_bases]))
+                else:
+                    print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
 
-        variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
+            variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
 
-        print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
+            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
 
 
+# filtering is not correct at this point : some unwanted classes are necessary
+# (the ones in SiconosFull.hpp) others not (xml)
+# some leads to compilation errors.
+#print
+#print 'template <class Archive>'
+#print 'void siconos_io_register(Archive& ar)'
+#print '{{\n{0}\n}}'.format('\n'.join('  ar.register_type(static_cast<{0}*>(NULL));'.format(x) for x in with_base))
 
 
