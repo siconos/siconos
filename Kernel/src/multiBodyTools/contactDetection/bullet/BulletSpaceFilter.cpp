@@ -18,6 +18,7 @@
 */
 
 #include "BulletSpaceFilter.hpp"
+#include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
@@ -76,6 +77,8 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
   _broadphase.reset(new BulletBroadPhase(*_worldAabbMin, *_worldAabbMax));
 
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase, &*_collisionConfiguration));
+
+  btGImpactCollisionAlgorithm::registerAlgorithm(&*_dispatcher);
 
   _collisionWorld->getDispatchInfo().m_useContinuous = false;
 

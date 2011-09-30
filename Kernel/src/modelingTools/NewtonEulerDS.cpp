@@ -465,7 +465,10 @@ NewtonEulerDS* NewtonEulerDS::convert(DynamicalSystem* ds)
 
 void NewtonEulerDS::resetNonSmoothPart()
 {
-  _p[1]->zero();
+  if (_p[1])
+    _p[1]->zero();
+  else
+    _p[1].reset(new SimpleVector(_n));
 }
 
 
