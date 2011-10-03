@@ -309,7 +309,8 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
 
       assert(pos < dimRow);
       assert(col < dimColumn);
-
+      assert(indexSet->properties(*ei).lower_block);
+      assert(indexSet->properties(*ei).upper_block);
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet->properties(*ei).upper_block);

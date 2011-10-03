@@ -19,10 +19,10 @@
 
 
 /*!\file
-  C++ input file, D1MinusLinear-Time-Stepping version
+  C++ input file, Moreau-Time-Stepping version
   T. Schindler, V. Acary
 
-  Slider-crank simulation with a D1MinusLinear-Time-Stepping scheme
+  Slider-crank simulation with a Moreau-Time-Stepping scheme
 
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
@@ -117,15 +117,14 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::D1MinusLinear OSI(new D1MinusLinear(slider));
+    SP::Moreau OSI(new Moreau(slider, 1.));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
 
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeStepping s(new TimeStepping(t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
-    s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
 
     // =========================== End of model definition ===========================
 
@@ -144,7 +143,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
 
-    dataPlot(0, 0) =  sliderWithClearance->t0();
+    dataPlot(0, 0) = sliderWithClearance->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*q)(1);
     dataPlot(0, 3) = (*q)(2);
@@ -155,8 +154,6 @@ int main(int argc, char* argv[])
     dataPlot(0, 8) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 2
     dataPlot(0, 9) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 3
     dataPlot(0, 10) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 4
-    dataPlot(0, 11) = l1 * cos((*q)(0)) + l2 * cos((*q)(1)); // x slider
-    dataPlot(0, 12) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)); // y slider
     dataPlot(0, 11) = l1 * cos((*q)(0)) + l2 * cos((*q)(1)); // x slider
     dataPlot(0, 12) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)); // y slider
 
@@ -175,7 +172,7 @@ int main(int argc, char* argv[])
       s->advanceToEvent();
 
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->nextTime();
+      dataPlot(k, 0) = s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
       dataPlot(k, 3) = (*q)(2);
