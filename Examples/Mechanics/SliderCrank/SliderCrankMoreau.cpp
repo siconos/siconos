@@ -121,7 +121,6 @@ int main(int argc, char* argv[])
     SP::Moreau OSI(new Moreau(slider, 0.5));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new LCP());
-    SP::OneStepNSProblem force(new LCP());
 
     SP::TimeStepping s(new TimeStepping(t));
     s->insertIntegrator(OSI);

@@ -98,7 +98,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // this set, depending on y values.
   // for i=3: a special update is made for the right forces only considering active left forces
   // -> assert has been adapted
-  // -> not active constacts have to be removed before updateIndexSet(2)
+  // -> not active contacts have to be removed before updateIndexSet(2)
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
