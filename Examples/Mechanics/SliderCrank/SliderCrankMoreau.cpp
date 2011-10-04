@@ -41,14 +41,15 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 0.1;        // final computation time
-    double h = 0.0005;     // time step
+    double T = 0.15;       // final computation time
+    double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
     double l2 = 0.3060;
     double a = 0.05;
     double b = 0.025;
+    double c = 0.001;
 
     // contact parameters
     double e1 = 0.4;
@@ -117,7 +118,7 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::Moreau OSI(new Moreau(slider, 1.));
+    SP::Moreau OSI(new Moreau(slider, 0.5));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
@@ -144,18 +145,18 @@ int main(int argc, char* argv[])
     SP::SiconosVector v = slider->velocity();
 
     dataPlot(0, 0) = sliderWithClearance->t0();
-    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 1) = (*q)(0) / (2.*M_PI); // crank revolution
     dataPlot(0, 2) = (*q)(1);
     dataPlot(0, 3) = (*q)(2);
     dataPlot(0, 4) = (*v)(0);
     dataPlot(0, 5) = (*v)(1);
     dataPlot(0, 6) = (*v)(2);
-    dataPlot(0, 7) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 1
-    dataPlot(0, 8) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 2
-    dataPlot(0, 9) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 3
-    dataPlot(0, 10) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 4
-    dataPlot(0, 11) = l1 * cos((*q)(0)) + l2 * cos((*q)(1)); // x slider
-    dataPlot(0, 12) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)); // y slider
+    dataPlot(0, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
+    dataPlot(0, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
+    dataPlot(0, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
+    dataPlot(0, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+    dataPlot(0, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
+    dataPlot(0, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -173,18 +174,18 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) = s->nextTime();
-      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 1) = (*q)(0) / (2.*M_PI); // crank revolution
       dataPlot(k, 2) = (*q)(1);
       dataPlot(k, 3) = (*q)(2);
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
       dataPlot(k, 6) = (*v)(2);
-      dataPlot(k, 7) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 1
-      dataPlot(k, 8) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)); // y corner 2
-      dataPlot(k, 9) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 3
-      dataPlot(k, 10) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)); // y corner 4
-      dataPlot(k, 11) = l1 * cos((*q)(0)) + l2 * cos((*q)(1)); // x slider
-      dataPlot(k, 12) = l1 * sin((*q)(0)) + l2 * sin((*q)(1)); // y slider
+      dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
+      dataPlot(k, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
+      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
+      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+      dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
+      dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
 
       s->processEvents();
       ++show_progress;
