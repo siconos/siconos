@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 0.15;       // final computation time
+    double T = 0.14;       // final computation time
     double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
@@ -52,14 +52,18 @@ int main(int argc, char* argv[])
     double c = 0.001;
 
     // contact parameters
-    double e1 = 0.4;
-    double e2 = 0.4;
-    double e3 = 0.4;
-    double e4 = 0.4;
-    //double mu1 = 0.01;
-    //double mu2 = 0.01;
-    //double mu3 = 0.01;
-    //double mu4 = 0.01;
+    double eN1 = 0.4;
+    double eN2 = 0.4;
+    double eN3 = 0.4;
+    double eN4 = 0.4;
+    double eT1 = 0.;
+    double eT2 = 0.;
+    double eT3 = 0.;
+    double eT4 = 0.;
+    double mu1 = 0.01;
+    double mu2 = 0.01;
+    double mu3 = 0.01;
+    double mu4 = 0.01;
 
     // initial conditions
     SP::SimpleVector q0(new SimpleVector(nDof));
@@ -86,24 +90,24 @@ int main(int argc, char* argv[])
     // --- Interactions---
     // -------------------
     // -- corner 1 --
-    SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
+    SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eN1, eT1, mu1, 2));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
-    SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
+    SP::Interaction inter1(new Interaction(2, nslaw1, relation1, 1));
 
     // -- corner 2 --
-    SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
+    SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(eN2, eT2, mu2, 2));
     SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
-    SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
+    SP::Interaction inter2(new Interaction(2, nslaw2, relation2, 2));
 
     // -- corner 3 --
-    SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(e3));
+    SP::NonSmoothLaw nslaw3(new NewtonImpactFrictionNSL(eN3, eT3, mu3, 2));
     SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
-    SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
+    SP::Interaction inter3(new Interaction(2, nslaw3, relation3, 3));
 
     // -- corner 4 --
-    SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(e4));
+    SP::NonSmoothLaw nslaw4(new NewtonImpactFrictionNSL(eN4, eT4, mu4, 2));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
-    SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
+    SP::Interaction inter4(new Interaction(2, nslaw4, relation4, 4));
 
     // -------------
     // --- Model ---
@@ -120,7 +124,7 @@ int main(int argc, char* argv[])
     // ----------------
     SP::Moreau OSI(new Moreau(slider, 0.5));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::OneStepNSProblem impact(new LCP());
+    SP::OneStepNSProblem impact(new FrictionContact(2));
 
     SP::TimeStepping s(new TimeStepping(t));
     s->insertIntegrator(OSI);

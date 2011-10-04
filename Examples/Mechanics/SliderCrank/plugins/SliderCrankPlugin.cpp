@@ -138,48 +138,76 @@ extern "C" void jacobianFIntqDot(double time, unsigned int sizeOfq, const double
 
 extern "C" void g1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) + b * cos(q[2]));
+  g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) + b * cos(q[2])); // normal
+  g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) - a * cos(q[2]) - b * sin(q[2]); // tangential
 }
 
 extern "C" void W1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
+  // Jacobian of g1 (columnwise)
   W[0] = -l1 * cos(q[0]);
-  W[1] = -l2 * cos(q[1]);
-  W[2] = a * cos(q[2]) + b * sin(q[2]);
+  W[1] = -l1 * sin(q[0]);
+
+  W[2] = -l2 * cos(q[1]);
+  W[3] = -l2 * sin(q[1]);
+
+  W[4] = a * cos(q[2]) + b * sin(q[2]);
+  W[5] = a * sin(q[2]) - b * cos(q[2]);
 }
 
 extern "C" void g2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) + b * cos(q[2]));
+  g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) + b * cos(q[2])); // normal
+  g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) + a * cos(q[2]) - b * sin(q[2]); // tangential
 }
 
 extern "C" void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
+  // Jacobian of g2 (columnwise)
   W[0] = -l1 * cos(q[0]);
-  W[1] = -l2 * cos(q[1]);
-  W[2] = -a * cos(q[2]) + b * sin(q[2]);
+  W[1] = -l1 * sin(q[0]);
+
+  W[2] = -l2 * cos(q[1]);
+  W[3] = -l2 * sin(q[1]);
+
+  W[4] = -a * cos(q[2]) + b * sin(q[2]);
+  W[5] = -a * sin(q[2]) - b * cos(q[2]);
 }
 
 extern "C" void g3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) - b * cos(q[2]);
+  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) - b * cos(q[2]); // normal
+  g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) - a * cos(q[2]) + b * sin(q[2]); // tangential
 }
 
 extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
+  // Jacobian of g3 (columnwise)
   W[0] = l1 * cos(q[0]);
-  W[1] = l2 * cos(q[1]);
-  W[2] = -a * cos(q[2]) + b * sin(q[2]);
+  W[1] = -l1 * sin(q[0]);
+
+  W[2] = l2 * cos(q[1]);
+  W[3] = -l2 * sin(q[1]);
+
+  W[4] = -a * cos(q[2]) + b * sin(q[2]);
+  W[5] = a * sin(q[2]) + b * cos(q[2]);
 }
 
 extern "C" void g4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
-  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) - b * cos(q[2]);
+  g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) - b * cos(q[2]); // normal
+  g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) + a * cos(q[2]) + b * sin(q[2]); // tangential
 }
 
 extern "C" void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* W, unsigned int sizeZ, double* z)
 {
+  // Jacobian of g4 (columnwise)
   W[0] = l1 * cos(q[0]);
-  W[1] = l2 * cos(q[1]);
-  W[2] = a * cos(q[2]) + b * sin(q[2]);
+  W[1] = -l1 * sin(q[0]);
+
+  W[2] = l2 * cos(q[1]);
+  W[3] = -l2 * sin(q[1]);
+
+  W[4] = a * cos(q[2]) + b * sin(q[2]);
+  W[5] = -a * sin(q[2]) + b * cos(q[2]);
 }
