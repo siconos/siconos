@@ -40,8 +40,9 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10.;                  // final computation time
-    double h = 0.005;                // time step
-    double position_init = 0.0;      // initial position for lowest bead.
+    double h = 1e-5;                 // time step
+    double hplot = 0.005;            // plot step size (larger than time step)
+    double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // Ball radius
     double m = 1;                    // Ball mass
@@ -124,16 +125,17 @@ int main(int argc, char* argv[])
     cout << "====> Initialisation ..." << endl << endl;
     bouncingBall->initialize(s);
     int N = (int)((T - t0) / h); // Number of time steps
+    int Nplot = (int)((T - t0) / hplot); // Number of plot steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;
-    SimpleMatrix dataPlot(N + 1, outputSize);
+    SimpleMatrix dataPlot(Nplot + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(2);
-    SP::SiconosVector lambda = inter->lambda(2);
+    SP::SiconosVector p = ball->p(1);
+    SP::SiconosVector lambda = inter->lambda(1);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
@@ -156,18 +158,21 @@ int main(int argc, char* argv[])
       s->advanceToEvent();
 
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->nextTime();
-      dataPlot(k, 1) = (*q)(0);
-      dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*p)(0);
-      dataPlot(k, 4) = (*lambda)(0);
+      if (fmod(s->nextTime(), hplot) < h)
+      {
+        dataPlot(k, 0) =  s->nextTime();
+        dataPlot(k, 1) = (*q)(0);
+        dataPlot(k, 2) = (*v)(0);
+        dataPlot(k, 3) = (*p)(0);
+        dataPlot(k, 4) = (*lambda)(0);
+        k++;
+      }
 
       s->processEvents();
       ++show_progress;
-      k++;
     }
 
-    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << endl << "End of computation - Number of iterations done: " << N - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
@@ -175,16 +180,16 @@ int main(int argc, char* argv[])
     ioMatrix io("result_tdg.dat", "ascii");
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
-    //    SimpleMatrix dataPlotRef(dataPlot);
-    //    dataPlotRef.zero();
-    //    ioMatrix ref("result.ref", "ascii");
-    //    ref.read(dataPlotRef);
-    //
-    //    if((dataPlot-dataPlotRef).normInf() > 1e-12)
-    //    {
-    //      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //      return 1;
-    //    }
+    //SimpleMatrix dataPlotRef(dataPlot);
+    //dataPlotRef.zero();
+    //ioMatrix ref("result.ref", "ascii");
+    //ref.read(dataPlotRef);
+
+    //if((dataPlot-dataPlotRef).normInf() > 1e-8)
+    //{
+    //  std::cout << "Warning. The results are rather different from the reference file." << std::endl;
+    //  return 1;
+    //}
   }
 
   catch (SiconosException e)
