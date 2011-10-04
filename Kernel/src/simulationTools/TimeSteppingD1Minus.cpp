@@ -272,6 +272,18 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * calculate local impulse (Lambda_{k+1}^+)
   updateIndexSet(1);
 
+
+  // MB. indices must be recomputed
+  // as we deal with dynamic graphs, vertices and edges are stored
+  // in lists for fast add/remove during updateIndexSet(i)
+  // we need indices of list elements to build the OSNS Matrix so we
+  // need an update if graph has changed.
+
+  // this should be done in updateIndexSet(i) for all integrators only
+  // if a graph has changed.
+  model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
+  model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
+
   if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
   {
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)

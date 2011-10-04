@@ -256,6 +256,19 @@ double D1MinusLinear::computeResidu()
 
     simulationLink->updateIndexSet(3); // special update to consider only contacts which have been active at the beginning of the time-step
 
+    // MB. indices must be recomputed
+    // as we deal with dynamic graphs, vertices and edges are stored
+    // in lists for fast add/remove during updateIndexSet(i)
+    // we need indices of list elements to build the OSNS Matrix so we
+    // need an update if graph has changed.
+
+    // this should be done in updateIndexSet(i) for all integrators only
+    // if a graph has changed.
+    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
+    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
+    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_vertices_indices();
+    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_edges_indices();
+
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
       (*it)->relation()->computeJach(t);
