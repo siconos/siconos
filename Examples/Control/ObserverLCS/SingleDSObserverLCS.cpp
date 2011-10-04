@@ -46,7 +46,6 @@ int main(int argc, char* argv[])
 
     SimpleMatrix hatA(2, 2);
     hatA = A     -   prod(L, G);
-    cout << "A-LG" << endl;
     TildeA(2, 2) = hatA(0, 0);
     TildeA(2, 3) = hatA(0, 1);
     TildeA(3, 2) = hatA(1, 0);
@@ -106,7 +105,6 @@ int main(int argc, char* argv[])
 
     InteractionsSet allInteractions;
     allInteractions.insert(myProcessInteraction);
-    cout << "tutu " << endl;
 
     // NonSmoothDynamicalSystem
     SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(allDS, allInteractions));
@@ -197,7 +195,7 @@ int main(int argc, char* argv[])
     ioMatrix ref("SingleDSObserverLCS.ref", "ascii");
     ref.read(dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-09)
     {
 
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
