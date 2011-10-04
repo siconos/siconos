@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     double l2 = 0.3060;
     double a = 0.05;
     double b = 0.025;
-    double c = 0.001;
+    double c = 0.;//0.001;
 
     // contact parameters
     double e1 = 0.4;
@@ -66,8 +66,8 @@ int main(int argc, char* argv[])
     SP::SimpleVector v0(new SimpleVector(nDof));
     q0->zero();
     v0->zero();
-    (*v0)(0) = 150.;
-    (*v0)(1) = -75.;
+    (*v0)(0) = 0.;//150.;
+    (*v0)(1) = 0.;//-75.;
 
     // -------------------------
     // --- Dynamical systems ---
