@@ -26,6 +26,8 @@
 
 #include "Simulation.hpp"
 
+const double DEFAULT_TOL_D1MINUS  = 1e-8;
+
 /** TimeSteppingD1Minus Timestepping Strategy
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -72,9 +74,8 @@ public:
   /** updateIndexSet using current y and lambda values of interactions
    *  \param unsigned int: number of the set to be updated
    *  0 : ALL interactions (NEVER)
-   *  1 : ACTIVE interactions
-   *  2 : STAYING ACTIVE interactions
-   *  3 : SPECIAL update - right forces occur only if contact on the left side has been closed
+   *  1 : ACTIVE interactions for IMPACTS
+   *  2 : ACTIVE interactions for CONTACTS
    */
   virtual void updateIndexSet(unsigned int);
 

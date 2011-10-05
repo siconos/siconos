@@ -27,6 +27,8 @@
 using namespace std;
 using namespace RELATION;
 
+bool DEBUG_D1MINUSLINEAR = false;
+
 struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
   OneStepNSProblem *osnsp;
@@ -68,12 +70,19 @@ void D1MinusLinear::initialize()
 
 double D1MinusLinear::computeResidu()
 {
+  if (DEBUG_D1MINUSLINEAR) cout << "COMPUTERESIDU" << endl;
+
   double t = simulationLink->nextTime(); // end of the time step
   double told = simulationLink->startingTime(); // beginning of the time step
   double h = simulationLink->timeStep(); // time step length
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
   SP::InteractionsSet allInteractions = simulationLink->model()->nonSmoothDynamicalSystem()->interactions(); // all Interactions
 
+  if (DEBUG_D1MINUSLINEAR) cout << "nextTime: " << t << endl;
+  if (DEBUG_D1MINUSLINEAR) cout << "startingTime: " << told << endl;
+  if (DEBUG_D1MINUSLINEAR) cout << "time step size: " << h << endl;
+
+  if (DEBUG_D1MINUSLINEAR) cout << endl << "LEFT SIDE" << endl;
   // -- LEFT SIDE --
   // calculate acceleration without contact force
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -88,6 +97,15 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
     SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
     SP::SiconosMatrix Mold = d->mass();
+
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree after initialization" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "qold" << endl;
+    if (DEBUG_D1MINUSLINEAR) qold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "vold" << endl;
+    if (DEBUG_D1MINUSLINEAR) vold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "Mold" << endl;
+    if (DEBUG_D1MINUSLINEAR) Mold->display();
 
     // Lagrangian Nonlinear Systems
     if (dsType == Type::LagrangianDS)
@@ -127,6 +145,9 @@ double D1MinusLinear::computeResidu()
     }
 
     Mold->PLUForwardBackwardInPlace(*workFree); // contains left (right limit) acceleration without contact force
+
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree (acceleration without contact force)" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
   }
 
   // solve a LCP at acceleration level
@@ -153,6 +174,7 @@ double D1MinusLinear::computeResidu()
     }
   }
 
+  if (DEBUG_D1MINUSLINEAR) cout << endl << "ADVANCE TO RIGHT SIDE" << endl;
   // ADVANCE TO RIGHT
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -170,28 +192,62 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains velocity v_{k+1}^- and not free velocity
     residuFree->zero();
     v->zero();
+
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree (acceleration without contact force)" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "qold" << endl;
+    if (DEBUG_D1MINUSLINEAR) qold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "vold" << endl;
+    if (DEBUG_D1MINUSLINEAR) vold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "Mold" << endl;
+    if (DEBUG_D1MINUSLINEAR) Mold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "residuFree after initialization" << endl;
+    if (DEBUG_D1MINUSLINEAR) residuFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "v after initialization" << endl;
+    if (DEBUG_D1MINUSLINEAR) v->display();
+
     if (d->p(2))
     {
       scal(-0.5 * h, *(d->p(2)), *residuFree, false);
       scal(h, *(d->p(2)), *v, false);
 
-      cout << "LEFT FORCE" << endl;
-      cout << (*(d->p(2)))(0) << endl;
+      if (DEBUG_D1MINUSLINEAR) cout << "p:" << endl;
+      if (DEBUG_D1MINUSLINEAR) d->p(2)->display();
 
       Mold->PLUForwardBackwardInPlace(*residuFree);
       Mold->PLUForwardBackwardInPlace(*v);
     }
+
+    if (DEBUG_D1MINUSLINEAR) cout << "residuFree with contact velocity" << endl;
+    if (DEBUG_D1MINUSLINEAR) residuFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "v with contact velocity" << endl;
+    if (DEBUG_D1MINUSLINEAR) v->display();
 
     *residuFree -= 0.5 * h**workFree;
 
     *v += h**workFree;
     *v += *vold;
 
+    if (DEBUG_D1MINUSLINEAR) cout << "residuFree with full velocity" << endl;
+    if (DEBUG_D1MINUSLINEAR) residuFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "v with full velocity" << endl;
+    if (DEBUG_D1MINUSLINEAR) v->display();
+
     SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
     *q = *qold;
+
+    if (DEBUG_D1MINUSLINEAR) cout << "q after initialization" << endl;
+    if (DEBUG_D1MINUSLINEAR) q->display();
+
     scal(0.5 * h, *vold + *v, *q, false);
+
+    if (DEBUG_D1MINUSLINEAR) cout << "Mold:" << endl;
+    if (DEBUG_D1MINUSLINEAR) Mold->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "q" << endl;
+    if (DEBUG_D1MINUSLINEAR) q->display();
   }
 
+  if (DEBUG_D1MINUSLINEAR) cout << endl << "RIGHT SIDE" << endl;
   // -- RIGHT SIDE --
   // calculate acceleration without contact force
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -206,6 +262,15 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector q = d->q(); // contains position q_{k+1}
     SP::SiconosVector v = d->velocity(); // contains velocity v_{k+1}^- and not free velocity
     SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
+
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree after initialization" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "q" << endl;
+    if (DEBUG_D1MINUSLINEAR) q->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "v" << endl;
+    if (DEBUG_D1MINUSLINEAR) v->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "M" << endl;
+    if (DEBUG_D1MINUSLINEAR) M->display();
 
     // Lagrangian Nonlinear Systems
     if (dsType == Type::LagrangianDS)
@@ -245,7 +310,19 @@ double D1MinusLinear::computeResidu()
       }
     }
 
+    if (DEBUG_D1MINUSLINEAR) cout << "M" << endl;
+    if (DEBUG_D1MINUSLINEAR) M->display();
+
     M->PLUForwardBackwardInPlace(*workFree); // contains right (left limit) acceleration without contact force
+
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree (acceleration without contact force)" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "q" << endl;
+    if (DEBUG_D1MINUSLINEAR) q->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "v" << endl;
+    if (DEBUG_D1MINUSLINEAR) v->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "M" << endl;
+    if (DEBUG_D1MINUSLINEAR) M->display();
   }
 
   // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
@@ -254,20 +331,20 @@ double D1MinusLinear::computeResidu()
     for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
       simulationLink->updateOutput(level);
 
-    simulationLink->updateIndexSet(3); // special update to consider only contacts which have been active at the beginning of the time-step
-
-    // MB. indices must be recomputed
+    // special update to consider only contacts which have been active at the beginning of the time-step
+    //
+    // Maurice Bremond: indices must be recomputed
     // as we deal with dynamic graphs, vertices and edges are stored
     // in lists for fast add/remove during updateIndexSet(i)
     // we need indices of list elements to build the OSNS Matrix so we
-    // need an update if graph has changed.
-
+    // need an update if graph has changed
     // this should be done in updateIndexSet(i) for all integrators only
-    // if a graph has changed.
-    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
-    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
-    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_vertices_indices();
-    simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_edges_indices();
+    // if a graph has changed
+    simulationLink->updateIndexSets();
+    //simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
+    //simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
+    //simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_vertices_indices();
+    //simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2)->update_edges_indices();
 
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
@@ -290,6 +367,7 @@ double D1MinusLinear::computeResidu()
     }
   }
 
+  if (DEBUG_D1MINUSLINEAR) cout << endl << "RESIDU" << endl;
   // -- RESIDU --
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -304,20 +382,25 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector residuFree = (*it)->residuFree(); // POINTER CONSTRUCTOR : contains residu without nonsmooth effect
     *residuFree -= 0.5 * h**workFree;
 
+    if (DEBUG_D1MINUSLINEAR) cout << "workFree (acceleration without contact force)" << endl;
+    if (DEBUG_D1MINUSLINEAR) workFree->display();
+    if (DEBUG_D1MINUSLINEAR) cout << "M" << endl;
+    if (DEBUG_D1MINUSLINEAR) M->display();
+
     if (d->p(2))
     {
       SP::SiconosVector dummy(new SimpleVector(*(d->p(2)))); // value = contact force
       M->PLUForwardBackwardInPlace(*dummy);
       *residuFree -= 0.5 * h**dummy;
 
-      cout << "RIGHT FORCE" << endl;
-      cout << (*(d->p(2)))(0) << endl;
+      if (DEBUG_D1MINUSLINEAR) cout << "p:" << endl;
+      if (DEBUG_D1MINUSLINEAR) d->p(2)->display();
     }
 
     *residuFree = prod(*M, *residuFree);
 
-    cout << "RESIDU FREE" << endl;
-    cout << (*residuFree)(0) << endl;
+    if (DEBUG_D1MINUSLINEAR) cout << "residuFree" << endl;
+    if (DEBUG_D1MINUSLINEAR) residuFree->display();
   }
 
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
@@ -456,8 +539,9 @@ void D1MinusLinear::updateState(unsigned int level)
       SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
       M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
       *v += *dummy; // add free velocity
-      cout << "RIGHT IMPULSE" << endl;
-      cout << (*(d->p(1)))(0) << endl;
+      if (DEBUG_D1MINUSLINEAR) cout << "RIGHT IMPULSE" << endl;
+      if (DEBUG_D1MINUSLINEAR) cout << (*(d->p(1)))(0) << endl;
+      if (DEBUG_D1MINUSLINEAR) throw(1);
     }
   }
 }

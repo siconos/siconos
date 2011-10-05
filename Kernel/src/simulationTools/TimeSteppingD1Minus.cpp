@@ -30,6 +30,8 @@
 using namespace std;
 using namespace RELATION;
 
+bool DEBUG_TIMESTEPPINGD1MINUS = false;
+
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for UnitaryRelationsGraph from Topology
@@ -115,30 +117,41 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
   SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0); // ALL UnitaryRelations : formula (8.30) of Acary2008
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // ACTIVE UnitaryRelations : formula (8.31) of Acary2008
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2); // STAYING ACTIVE UnitaryRelations : formula (8.32) of Acary2008
+  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // ACTIVE UnitaryRelations for IMPACTS
+  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2); // ACTIVE UnitaryRelations for CONTACTS
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
 
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSETS BEFORE UPDATE" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 0" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet0->display();
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 1" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet1->display();
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 2" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet2->display();
 
   UnitaryRelationsGraph::VIterator uipend, uip;
 
   for (tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
     SP::UnitaryRelation urp = indexSet0->bundle(*uip);
-    if (i == 1) // ACTIVE?
+
+    if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {
-      double y = urp->getYRef(0); // position
+      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "UPDATE INDEXSET 1" << endl;
+
+      double y = (*(urp->y(0)))(0); // current position
+      double yOld = (*(urp->yOld(0)))(0); // old position
+
+      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "y= " << y << endl;
+      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "yOld= " << yOld << endl;
 
       if (!indexSet1->is_vertex(urp))
       {
-        if (y <= 0.)
+        if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
         {
           // if UnitaryRelation has not been active in the previous calculation and now becomes active
           indexSet1->copy_vertex(urp, *indexSet0);
@@ -147,70 +160,49 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       }
       else
       {
-        if (y > 0.)
-        {
-          // if UnitaryRelation has been active in the previous calculation and now becomes in-active we do not consider a topology change on velocity level to detect impacts due to closing contacts
-          indexSet1->remove_vertex(urp);
-          urp->lambda(1)->zero(); // impuls is zero
-        }
+        indexSet1->remove_vertex(urp);
+        urp->lambda(1)->zero(); // impuls is zero
       }
     }
-    else if (i == 2) // STAYING ACTIVE
+    else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
     {
-      if (indexSet1->is_vertex(urp)) // if UnitaryRelation is active
-      {
-        double y = urp->getYRef(1); // velocity
+      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "UPDATE INDEXSET 2" << endl;
 
-        if (!indexSet2->is_vertex(urp))
-        {
-          if (y <= 0.)
-          {
-            // if UnitaryRelation has not been staying active in the previous calculation and now becomes staying active
-            indexSet2->copy_vertex(urp, *indexSet0);
-            topo->setHasChanged(true);
-          }
-        }
-        else
-        {
-          if (y > 0.)
-          {
-            // if UnitaryRelation has been staying active in the previous calculation and now does not stay active
-            indexSet2->remove_vertex(urp);
-            topo->setHasChanged(true);
-            urp->lambda(2)->zero(); // force is zero
-          }
-        }
-      }
-      else
+      double y = (*(urp->y(0)))(0); // current position
+
+      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "y= " << y << endl;
+
+      if (indexSet2->is_vertex(urp))
       {
-        if (indexSet2->is_vertex(urp))
+        if (y > DEFAULT_TOL_D1MINUS)
         {
-          // if UnitaryRelation is in-active and has been staying active in previous calculation
+          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
           indexSet2->remove_vertex(urp);
           topo->setHasChanged(true);
           urp->lambda(2)->zero(); // force is zero
         }
       }
-    }
-    else if (i == 3) // RIGHT FORCES ONLY IF CONTACT HAS BEEN CLOSED AT LEFT SIDE
-    {
-      double y = urp->getYRef(0); // position
-
-      if (indexSet1->is_vertex(urp))
+      else
       {
-        if (y > 0.)
+        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(urp))
         {
-          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
-          indexSet1->remove_vertex(urp);
-          urp->lambda(1)->zero(); // impuls is zero
+          // if UnitaryRelation has is active but has not become active recently
+          indexSet2->copy_vertex(urp, *indexSet0);
+          topo->setHasChanged(true);
         }
       }
-
-      updateIndexSet(2);
     }
     else
       RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
   }
+
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSETS AFTER UPDATE" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 0" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet0->display();
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 1" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet1->display();
+  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 2" << endl;
+  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet2->display();
 }
 
 void TimeSteppingD1Minus::update(unsigned int levelInput)
@@ -270,30 +262,28 @@ void TimeSteppingD1Minus::advanceToEvent()
   // event (impulse) calculation only when there has been a topology change (here: closing contact)
   // * calculate gap velocity using free velocity with OSI
   // * calculate local impulse (Lambda_{k+1}^+)
-  updateIndexSet(1);
-
-
-  // MB. indices must be recomputed
+  //
+  // Maurice Bremond: indices must be recomputed
   // as we deal with dynamic graphs, vertices and edges are stored
   // in lists for fast add/remove during updateIndexSet(i)
   // we need indices of list elements to build the OSNS Matrix so we
-  // need an update if graph has changed.
-
+  // need an update if graph has changed
   // this should be done in updateIndexSet(i) for all integrators only
-  // if a graph has changed.
-  model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
-  model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
+  // if a graph has changed
+  //updateIndexSet(1);
+  //model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
+  //model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
 
-  if (model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
-  {
-    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    {
-      (*itOsns)->setHasBeUpdated(false);
-    }
+  //if(model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+  //{
+  //  for(OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+  //  {
+  //    (*itOsns)->setHasBeUpdated(false);
+  //  }
+  //}
 
-    if (!_allNSProblems->empty())
-      computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-  }
+  if (!_allNSProblems->empty())
+    computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)
