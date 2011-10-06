@@ -24,6 +24,7 @@
 
 #ifndef D1MINUSLINEAR_H
 #define D1MINUSLINEAR_H
+#define DEBUG_MESSAGES
 
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"

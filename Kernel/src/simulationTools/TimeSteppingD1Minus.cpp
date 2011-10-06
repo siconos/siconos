@@ -24,13 +24,10 @@
 #include "UnitaryRelation.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
-
-#include <debug.h>
+#include "debug.h"
 
 using namespace std;
 using namespace RELATION;
-
-bool DEBUG_TIMESTEPPINGD1MINUS = false;
 
 void TimeSteppingD1Minus::initOSNS()
 {
@@ -125,13 +122,10 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSETS BEFORE UPDATE" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 0" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet0->display();
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 1" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet1->display();
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 2" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet2->display();
+  DEBUG_PRINT("\nINDEXSETS BEFORE UPDATE\n");
+  DEBUG_EXPR(indexSet0->display());
+  DEBUG_EXPR(indexSet1->display());
+  DEBUG_EXPR(indexSet2->display());
 
   UnitaryRelationsGraph::VIterator uipend, uip;
 
@@ -141,13 +135,13 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
     if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {
-      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "UPDATE INDEXSET 1" << endl;
+      DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
 
       double y = (*(urp->y(0)))(0); // current position
       double yOld = (*(urp->yOld(0)))(0); // old position
 
-      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "y= " << y << endl;
-      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "yOld= " << yOld << endl;
+      DEBUG_PRINTF("y= %f\n", y);
+      DEBUG_PRINTF("yOld= %f\n", yOld);
 
       if (!indexSet1->is_vertex(urp))
       {
@@ -166,11 +160,11 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     }
     else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
     {
-      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "UPDATE INDEXSET 2" << endl;
+      DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
 
       double y = (*(urp->y(0)))(0); // current position
 
-      if (DEBUG_TIMESTEPPINGD1MINUS) cout << "y= " << y << endl;
+      DEBUG_PRINTF("y= %f\n", y);
 
       if (indexSet2->is_vertex(urp))
       {
@@ -196,13 +190,10 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
   }
 
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSETS AFTER UPDATE" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 0" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet0->display();
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 1" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet1->display();
-  if (DEBUG_TIMESTEPPINGD1MINUS) cout << "INDEXSET 2" << endl;
-  if (DEBUG_TIMESTEPPINGD1MINUS) indexSet2->display();
+  DEBUG_PRINT("\nINDEXSETS AFTER UPDATE\n");
+  DEBUG_EXPR(indexSet0->display());
+  DEBUG_EXPR(indexSet1->display());
+  DEBUG_EXPR(indexSet2->display());
 }
 
 void TimeSteppingD1Minus::update(unsigned int levelInput)
