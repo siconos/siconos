@@ -1659,7 +1659,15 @@ void Moreau::updateState(unsigned int level)
       if (level != LEVELMAX)
       {
         // To compute v, we solve W(v - vfree) = p
+
+        // may not be initialized if interactions are lately inserted
+        if (not d->p(level))
+        {
+          d->initializeNonSmoothInput(level);
+        }
+
         assert(d->p(level));
+
 
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
