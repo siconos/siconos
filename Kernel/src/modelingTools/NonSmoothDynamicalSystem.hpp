@@ -81,7 +81,7 @@ public:
   /** constructor from minimum data.
    *  \param: a pointer to DynamicalSystem
    *  \param: a pointer to Interaction
-   *  \param: a bool
+   *  \param: a bool isBVP to specify if the problem is a BVP or an IVP (default an IVP)
    */
   NonSmoothDynamicalSystem(SP::DynamicalSystem, SP::Interaction = SP::Interaction(), const bool& = false);
 
@@ -89,14 +89,14 @@ public:
    *  between pointers of the two sets.
    *  \param: a set of DS
    *  \param: a set of Interactions
-   *  \param: a bool
+   *  \param: a bool isBVP to specify if the problem is a BVP or an IVP (default an IVP)
    */
   NonSmoothDynamicalSystem(DynamicalSystemsSet&, InteractionsSet&, const bool& = false);
 
   /** constructor from data (only DS, no Interactions)
    *  between pointers of the two sets.
    *  \param: a set of DS
-   *  \param: a bool
+   *  \param: a bool isBVP to specify if the problem is a BVO or an IVP (default an IVP)
    */
   NonSmoothDynamicalSystem(DynamicalSystemsSet&, const bool& = false);
 
