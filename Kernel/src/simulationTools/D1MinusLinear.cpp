@@ -252,6 +252,7 @@ double D1MinusLinear::computeResidu()
     if (dsType == Type::LagrangianDS)
     {
       d->computeMass();
+      M->resetLU();
       if (d->forces())
       {
         d->computeForces(t, q, v);
@@ -508,7 +509,7 @@ void D1MinusLinear::updateState(unsigned int level)
       *v += *dummy; // add free velocity
       DEBUG_PRINT("\nRIGHT IMPULSE\n");
       DEBUG_PRINTF("%f\n", (*(d->p(1)))(0));
-      DEBUG_EXPR(throw(1));
+      //DEBUG_EXPR(throw(1));
     }
   }
 }
