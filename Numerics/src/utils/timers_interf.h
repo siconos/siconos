@@ -32,7 +32,10 @@
 #endif
 
 #define HAVE_FFTW_CYCLE_H
+
+#ifndef _BSD_SOURCE
 #define _BSD_SOURCE
+#endif
 
 #ifdef WITH_TIMERS
 #if(                               \
