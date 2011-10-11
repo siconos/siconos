@@ -82,7 +82,7 @@ void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
 
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td), impactOccuredLastTimeStep(false)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -95,9 +95,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
   // To update IndexSet i: add or remove UnitaryRelations from
   // this set, depending on y values.
-  // for i=3: a special update is made for the right forces only considering active left forces
-  // -> assert has been adapted
-  // -> not active contacts have to be removed before updateIndexSet(2)
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -105,7 +102,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  assert(i < topo->indexSetsSize() + 1 &&
+  assert(i < topo->indexSetsSize() &&
          "TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not exist.");
   // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
   assert(i > 0 &&
@@ -135,6 +132,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
     if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {
+      impactOccuredLastTimeStep = false;
       DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
 
       double y = (*(urp->y(0)))(0); // current position
@@ -155,6 +153,8 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       else
       {
         indexSet1->remove_vertex(urp);
+        topo->setHasChanged(true);
+        impactOccuredLastTimeStep = true;
         urp->lambda(1)->zero(); // impuls is zero
       }
     }
@@ -178,7 +178,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       }
       else
       {
-        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(urp))
+        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(urp) && !impactOccuredLastTimeStep)
         {
           // if UnitaryRelation has is active but has not become active recently
           indexSet2->copy_vertex(urp, *indexSet0);

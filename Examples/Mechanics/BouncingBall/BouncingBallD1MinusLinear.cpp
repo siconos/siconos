@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10.;                  // final computation time
-    double h = 1e-5;                 // time step
+    double h = 5e-4;                 // time step
     double hplot = 0.005;            // plot step size (larger than time step)
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.

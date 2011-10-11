@@ -47,6 +47,9 @@ private:
   /** default constructor */
   TimeSteppingD1Minus() {}
 
+  /** boolean to consider impact case for contact at the beginning of new time step **/
+  bool impactOccuredLastTimeStep;
+
 protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   virtual void initOSNS();

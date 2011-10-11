@@ -26,7 +26,7 @@
 #define D1MINUSLINEAR_H
 
 #ifdef DEBUG_D1MINUSLINEAR
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 #endif
 
 #include "OneStepIntegrator.hpp"
@@ -85,13 +85,13 @@ public:
   virtual void initialize();
 
   /** return the maximum of all norms for the residus of DS
-   *  \post{ds->residuFree will be calculated, ds->p() contains new position, ds->velocity contains predicted velocity}
+   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
   virtual double computeResidu();
 
   /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
-   *  \post{ds->velocity contains free velocity}
+   *  \post{ds->velocity contains predicted velocity}
    */
   virtual void computeFreeState();
 
