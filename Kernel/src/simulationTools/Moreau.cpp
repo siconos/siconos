@@ -1656,19 +1656,8 @@ void Moreau::updateState(unsigned int level)
       bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
 
-      if (level != LEVELMAX)
+      if (d->p(level))
       {
-        // To compute v, we solve W(v - vfree) = p
-
-        // may not be initialized if interactions are lately inserted
-        if (not d->p(level))
-        {
-          d->initializeNonSmoothInput(level);
-        }
-
-        assert(d->p(level));
-
-
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
           for (vector<unsigned int>::iterator
@@ -1678,13 +1667,13 @@ void Moreau::updateState(unsigned int level)
             v->setValue(*itindex, 0.0);
         W->PLUForwardBackwardInPlace(*v);
 
-
         *v +=  * ds->workFree();
       }
       else
       {
         *v =  * ds->workFree();
       }
+
 
       int bc = 0;
       SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
