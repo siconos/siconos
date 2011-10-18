@@ -118,7 +118,7 @@ lambda_ = inter.lambda_(1)
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = ball.q()[0]
 dataPlot[0, 2] = ball.velocity()[0]
-dataPlot[0, 3] = ball.p(2)[0]
+dataPlot[0, 3] = ball.p(1)[0]
 dataPlot[0, 4] = inter.lambda_(1)
 
 k = 1
@@ -130,7 +130,7 @@ while(s.nextTime() < T):
     dataPlot[k, 0] = s.nextTime()
     dataPlot[k, 1] = ball.q()[0]
     dataPlot[k, 2] = ball.velocity()[0]
-    dataPlot[k, 3] = ball.p(2)[0]
+    dataPlot[k, 3] = ball.p(1)[0]
     dataPlot[k, 4] = inter.lambda_(1)[0]
 
     k += 1
