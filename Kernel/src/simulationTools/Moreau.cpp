@@ -1655,8 +1655,8 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector v = d->velocity();
       bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
 
-
-      if (d->p(level))
+      // level == LEVELMAX => p(level) does not even exists (segfault)
+      if (level != LEVELMAX && d->p(level))
       {
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
