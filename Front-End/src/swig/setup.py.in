@@ -87,11 +87,9 @@ class test_Siconos(Command):
         pass
 
     def run(self):
-        import os
+        from subprocess import call
         # hu?
-        os.environ["PYTHONPATH"] = "${CMAKE_BINARY_DIR}/src/swig"
-        os.system("py.test Siconos/tests")
-
+        retcode = call("py.test" + " Siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig"})
 
 class run_benchmarks(Command):
     """Runs all SymPy benchmarks"""
