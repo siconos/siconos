@@ -400,6 +400,15 @@ public:
   {
     return _levelMaxForOutput;
   };
+  inline unsigned int levelMinForInput() const
+  {
+    return _levelMinForInput;
+  };
+
+  inline unsigned int levelMaxForInput() const
+  {
+    return _levelMaxForInput;
+  };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
    *  \param a string, the name of the osns
