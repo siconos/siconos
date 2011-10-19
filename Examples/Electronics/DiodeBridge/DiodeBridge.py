@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # /* Siconos-sample , Copyright INRIA 2005-2011.
 #  * Siconos is a program dedicated to modeling, simulation and control
@@ -20,7 +21,7 @@
 # //-----------------------------------------------------------------------
 # //
 # //  DiodeBridge  : sample of an electrical circuit involving :
-# //	- a linear dynamical system consisting of an LC oscillator (1 µF , 10 mH)
+# //	- a linear dynamical system consisting of an LC oscillator
 # //	- a non smooth system (a 1000 Ohm resistor supplied through a 4 diodes bridge) in parallel
 # //	  with the oscillator
 # //
@@ -55,16 +56,146 @@ Rvalue = 1e3    # resistance
 Vinit = 10.0    # initial voltage
 Modeltitle = "DiodeBridge"
 
-
 from matplotlib.pyplot import subplot, title, plot, grid, show
 
-from Siconos.Kernel import FirstOrderLinearDS
+from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, ComplementarityConditionNSL, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+
 from numpy import array, eye, empty
 
-init_state = array([1,0]) 
+#
+# dynamical system
+#
+init_state = array([Vinit,0]) 
+print init_state
 
-init_state[0] = Vinit
-
-A = array([[0,-1./Cvalue],[1./Lvalue,0]])
+A = array([[0,-1.0/Cvalue],
+           [1.0/Lvalue,0]])
 
 LSDiodeBridge=FirstOrderLinearDS(init_state, A)
+
+#
+# Interactions
+#
+
+C = array([[0,0],[0,0],[-1.0,0],[1.0,0]])
+D = array([[1.0/Rvalue,1.0/Rvalue,-1,0],[1.0/Rvalue,1.0/Rvalue,0,-1],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]])
+B = array([[0.0,0.0,-1.0/Cvalue,1.0/Cvalue],[0.0,0.0,0.0,0.0]])
+print A
+print B
+print C
+print D
+
+LTIRDiodeBridge=FirstOrderLinearTIR(C,B)
+LTIRDiodeBridge.setDPtr(D)
+
+nslaw=ComplementarityConditionNSL(4)
+InterDiodeBridge=Interaction(4, nslaw,LTIRDiodeBridge,1)
+InterDiodeBridge.insert(LSDiodeBridge)
+
+#
+# Model
+#
+
+DiodeBridge=Model(t0,T,Modeltitle)
+#   add the dynamical system in the non smooth dynamical system
+DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+#   link the interaction and the dynamical system
+DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge,LSDiodeBridge)
+
+
+#
+# Simulation
+#
+
+# (1) OneStepIntegrators
+theta = 0.5
+aOSI = Moreau(LSDiodeBridge,theta)
+ 
+# (2) Time discretisation
+aTiDisc = TimeDiscretisation(t0,h_step)
+
+# (3) Non smooth problem
+aLCP = LCP()
+
+# (4) Simulation setup with (1) (2) (3)
+aTS = TimeStepping(aTiDisc,aOSI,aLCP)
+
+# end of model definition
+
+#
+# computation
+#
+
+# simulation initialization
+DiodeBridge.initialize(aTS)
+
+k = 0
+h = aTS.timeStep();
+# Number of time steps
+N = (T-t0)/h
+
+
+# Get the values to be plotted 
+# ->saved in a matrix dataPlot
+
+dataPlot = empty((N+1,7))
+
+x = LSDiodeBridge.x()
+y = InterDiodeBridge.y(0)
+lambda_ = InterDiodeBridge.lambda_(0)
+
+# For the initial time step: 
+#  time
+dataPlot[0, 0] = t0
+#  inductor voltage
+dataPlot[0, 1] = x[0]
+# inductor current
+dataPlot[0, 2] = x[1]
+# diode R1 current
+dataPlot[0, 3] = y[0]
+# diode R1 voltage
+dataPlot[0, 4] = -lambda_[0]
+# diode F2 voltage 
+dataPlot[0, 5] = -lambda_[1]
+# diode F1 current
+dataPlot[0, 6] = -lambda_[2]
+print lambda_
+print dataPlot
+
+# time loop
+k = 1
+#while(aTS.nextTime() < T):
+while (k < 2):
+    aTS.computeOneStep()
+
+    dataPlot[k, 0] = aTS.nextTime()
+    dataPlot[k, 1] = x[0]
+    dataPlot[k, 2] = x[1]
+    dataPlot[k, 3] = y[0]
+    dataPlot[k, 4] = lambda_[0]
+
+    k += 1
+    aTS.nextStep()
+    print aTS.nextTime()
+    
+#
+# plots
+#
+subplot(411)
+title('inductor voltage')
+plot(dataPlot[:,0], dataPlot[:,1])
+grid()
+subplot(412)
+title('inductor current')
+plot(dataPlot[:,0], dataPlot[:,2])
+grid()
+subplot(413)
+title('diode R1 current')
+plot(dataPlot[:,0], dataPlot[:,3])
+grid()
+subplot(414)
+title('diode R1 voltage')
+plot(dataPlot[:,0], dataPlot[:,4])
+grid()
+show()
+
