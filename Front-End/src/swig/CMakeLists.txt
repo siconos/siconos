@@ -1,6 +1,8 @@
 FIND_PACKAGE(SWIG REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
 
+FIND_PACKAGE(PythonInterp)
+
 FIND_PACKAGE(PythonLibs)
 
 MESSAGE("PYTHON LIBRARIES : ${PYTHON_LIBRARIES}")
@@ -35,6 +37,8 @@ COMPILE_WITH(BLAS REQUIRED)
 CONFIGURE_FILE(setup.py.in setup.py)
 
 CONFIGURE_FILE(runtest.py.in ${CMAKE_BINARY_DIR}/src/swig/runtest.py)
+
+find_python_module(pytest REQUIRED)
 
 SUBDIRS(Siconos)
 
