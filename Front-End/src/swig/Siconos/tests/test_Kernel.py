@@ -137,13 +137,13 @@ def test_bouncing_ball():
     dataPlot[0, 0] = t0
     dataPlot[0, 1] = ball.q()[0]
     dataPlot[0, 2] = ball.velocity()[0]
-    dataPlot[0, 3] = ball.p(2)[0]
+    dataPlot[0, 3] = ball.p(1)[0]
     dataPlot[0, 4] = inter.lambda_(1)
 
     dataPlot_d[0, 0] = t0
     dataPlot_d[0, 1] = ball_d.q()[0]
     dataPlot_d[0, 2] = ball_d.velocity()[0]
-    dataPlot_d[0, 3] = ball_d.p(2)[0]
+    dataPlot_d[0, 3] = ball_d.p(1)[0]
     dataPlot_d[0, 4] = inter_d.lambda_(1)
 
     k = 1
@@ -156,13 +156,13 @@ def test_bouncing_ball():
         dataPlot[k, 0] = s.nextTime()
         dataPlot[k, 1] = ball.q()[0]
         dataPlot[k, 2] = ball.velocity()[0]
-        dataPlot[k, 3] = ball.p(2)[0]
+        dataPlot[k, 3] = ball.p(1)[0]
         dataPlot[k, 4] = inter.lambda_(1)[0]
 
         dataPlot_d[k, 0] = s_d.nextTime()
         dataPlot_d[k, 1] = ball_d.q()[0]
         dataPlot_d[k, 2] = ball_d.velocity()[0]
-        dataPlot_d[k, 3] = ball_d.p(2)[0]
+        dataPlot_d[k, 3] = ball_d.p(1)[0]
         dataPlot_d[k, 4] = inter_d.lambda_(1)[0]
 
         assert dataPlot[k,1] == dataPlot_d[k,1]
