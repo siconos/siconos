@@ -113,8 +113,8 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
   if (newInteraction)
   {
     allInteractionsLocal->insert(newInteraction);
+    mIsLinear = (mIsLinear && newInteraction->relation()->isLinear());
   }
-  mIsLinear = (mIsLinear && newInteraction->relation()->isLinear());
 
   // === build topology ===
   _topology.reset(new Topology(allDSLocal, allInteractionsLocal));
