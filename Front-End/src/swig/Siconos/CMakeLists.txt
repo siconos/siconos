@@ -165,7 +165,7 @@ CONFIGURE_FILE(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
 CONFIGURE_FILE(config/doxy.config.in ${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config)
 
-CONFIGURE_FILE(doxy2swig.py doxy2swig.py COPYONLY)
+CONFIGURE_FILE(doxy2swig.py  ${CMAKE_CURRENT_BINARY_DIR}/doxy2swig.py COPYONLY)
 
 INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/__init__.py 
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
