@@ -93,7 +93,7 @@
   }
   else
   {
-    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
     if (!array)
     {
@@ -103,7 +103,7 @@
     else
     {
       if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_contiguous(array)) SWIG_fail;
+          !require_native(array) || !require_fortran(array)) SWIG_fail;
       
       SP::SimpleVector tmp;
       tmp.reset(new SimpleVector(array_size(array,0)));
@@ -145,7 +145,7 @@
   }
   else
   {
-    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
     if (!array)
     {
@@ -155,7 +155,7 @@
     else
     {
       if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_contiguous(array)) SWIG_fail;
+          !require_native(array) || !require_fortran(array)) SWIG_fail;
       
       SP::SimpleVector tmp;
       tmp.reset(new SimpleVector(array_size(array,0)));
@@ -290,9 +290,9 @@
     // try a conversion from numpy
     PyArrayObject* array = NULL;
     int is_new_object;
-    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     if (!require_dimensions(array,1) ||
-        !require_native(array) || !require_contiguous(array)) throw Swig::DirectorMethodException();
+        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
     
     SP::SimpleVector tmp;
     tmp.reset(new SimpleVector(array_size(array,0)));
@@ -326,9 +326,9 @@
     // try a conversion from numpy
     PyArrayObject* array = NULL;
     int is_new_object;
-    array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
     if (!require_dimensions(array,2) ||
-        !require_native(array) || !require_contiguous(array)) throw Swig::DirectorMethodException();
+        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
     
 
     SP::SimpleMatrix tmp;
@@ -354,10 +354,10 @@
 %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
   // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
   if (!array || !require_dimensions(array,2) ||
-      !require_native(array) || !require_contiguous(array)) SWIG_fail;
+      !require_native(array) || !require_fortran(array)) SWIG_fail;
 
   SP::SimpleMatrix tmp;
   tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
@@ -369,10 +369,10 @@
 %typemap(in) boost::shared_ptr<SimpleMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
   // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
   if (!array || !require_dimensions(array,2) ||
-      !require_native(array) || !require_contiguous(array)) SWIG_fail;
+      !require_native(array) || !require_fortran(array)) SWIG_fail;
 
   SP::SimpleMatrix tmp;
   tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
