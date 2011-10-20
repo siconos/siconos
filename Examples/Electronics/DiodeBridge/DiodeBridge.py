@@ -61,7 +61,7 @@ from matplotlib.pyplot import subplot, title, plot, grid, show
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, ComplementarityConditionNSL, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
 
 from numpy import array, eye, empty
-
+import numpy as np
 #
 # dynamical system
 #
@@ -69,7 +69,7 @@ init_state = array([Vinit,0])
 print init_state
 
 A = array([[0,-1.0/Cvalue],
-           [1.0/Lvalue,0]])
+           [1.0/Lvalue,0]], order='FORTRAN')
 
 LSDiodeBridge=FirstOrderLinearDS(init_state, A)
 
@@ -77,9 +77,13 @@ LSDiodeBridge=FirstOrderLinearDS(init_state, A)
 # Interactions
 #
 
-C = array([[0,0],[0,0],[-1.0,0],[1.0,0]])
-D = array([[1.0/Rvalue,1.0/Rvalue,-1,0],[1.0/Rvalue,1.0/Rvalue,0,-1],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]])
-B = array([[0.0,0.0,-1.0/Cvalue,1.0/Cvalue],[0.0,0.0,0.0,0.0]])
+C = array([[0,0],[0,0],[-1.0,0],[1.0,0]],order='FORTRAN')
+D = array([[1.0/Rvalue,1.0/Rvalue,-1,0],[1.0/Rvalue,1.0/Rvalue,0,-1],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]],order='FORTRAN')
+B = array([[0.0,0.0,-1.0/Cvalue,1.0/Cvalue],[0.0,0.0,0.0,0.0]],order='FORTRAN')
+
+# C = np.transpose(C)
+# D = np.transpose(D)
+# B = np.transpose(B)
 print A
 print B
 print C
@@ -143,36 +147,50 @@ dataPlot = empty((N+1,7))
 x = LSDiodeBridge.x()
 y = InterDiodeBridge.y(0)
 lambda_ = InterDiodeBridge.lambda_(0)
-
+k=0
 # For the initial time step: 
 #  time
 dataPlot[0, 0] = t0
+dataPlot[k, 0] = aTS.nextTime()
 #  inductor voltage
-dataPlot[0, 1] = x[0]
+dataPlot[k, 1] = LSDiodeBridge.x()[0]
 # inductor current
-dataPlot[0, 2] = x[1]
+dataPlot[k, 2] = LSDiodeBridge.x()[1]
 # diode R1 current
-dataPlot[0, 3] = y[0]
+    #print InterDiodeBridge.y(0)[0]
+    #print y[0]
+dataPlot[k, 3] = InterDiodeBridge.y(0)[0]
 # diode R1 voltage
-dataPlot[0, 4] = -lambda_[0]
+dataPlot[k, 4] = - InterDiodeBridge.lambda_(0)[0]
 # diode F2 voltage 
-dataPlot[0, 5] = -lambda_[1]
+dataPlot[k, 5] = - InterDiodeBridge.lambda_(0)[1]
 # diode F1 current
-dataPlot[0, 6] = -lambda_[2]
-print lambda_
+dataPlot[k, 6] = - InterDiodeBridge.lambda_(0)[2]
+
 print dataPlot
 
 # time loop
 k = 1
 #while(aTS.nextTime() < T):
-while (k < 2):
+while (k < N+1):
+    
     aTS.computeOneStep()
-
+    #aLCP.display()
     dataPlot[k, 0] = aTS.nextTime()
-    dataPlot[k, 1] = x[0]
-    dataPlot[k, 2] = x[1]
-    dataPlot[k, 3] = y[0]
-    dataPlot[k, 4] = lambda_[0]
+    #  inductor voltage
+    dataPlot[k, 1] = LSDiodeBridge.x()[0]
+    # inductor current
+    dataPlot[k, 2] = LSDiodeBridge.x()[1]
+    # diode R1 current
+    #print InterDiodeBridge.y(0)[0]
+    #print y[0]
+    dataPlot[k, 3] = InterDiodeBridge.y(0)[0]
+    # diode R1 voltage
+    dataPlot[k, 4] = - InterDiodeBridge.lambda_(0)[0]
+    # diode F2 voltage 
+    dataPlot[k, 5] = - InterDiodeBridge.lambda_(0)[1]
+    # diode F1 current
+    dataPlot[k, 6] = - InterDiodeBridge.lambda_(0)[2]
 
     k += 1
     aTS.nextStep()

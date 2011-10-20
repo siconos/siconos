@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     {
       // solve ...
       aTS->computeOneStep();
-
+      aLCP->display();
       // --- Get values to be plotted ---
       // time
       dataPlot(k, 0) = aTS->nextTime();
