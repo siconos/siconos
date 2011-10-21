@@ -4423,16 +4423,19 @@ void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int s
 
     if (numY == 1 && numX == 1)
     {
+
+      assert(y->dense() != x->dense());
+
       if (numA == 1)
-        *y->dense() += prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 2)
-        *y->dense() += prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 3)
-        *y->dense() += prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 4)
-        *y->dense() += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else //if(numA==5)
-        *y->dense() += prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
     }
     else // x and y sparse
     {
@@ -4501,16 +4504,19 @@ void private_addprod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int st
 
     if (numY == 1 && numX == 1)
     {
+
+      assert(y->dense() != x->dense());
+
       if (numA == 1)
-        *y->dense() += prod(ublas::subrange(trans(*A->dense()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->dense()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 2)
-        *y->dense() += prod(ublas::subrange(trans(*A->triang()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->triang()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 3)
-        *y->dense() += prod(ublas::subrange(trans(*A->sym()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sym()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 4)
-        *y->dense() += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else //if(numA==5)
-        *y->dense() += prod(ublas::subrange(trans(*A->banded()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->banded()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
     }
     else // x and y sparse
     {
@@ -4576,16 +4582,19 @@ void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsi
 
     if (numY == 1 && numX == 1)
     {
+
+      assert(y->dense() != x->dense());
+
       if (numA == 1)
-        *y->dense() += a * prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += a * prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 2)
-        *y->dense() += a * prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += a * prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 3)
-        *y->dense() += a * prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += a * prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else if (numA == 4)
-        *y->dense() += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
       else //if(numA==5)
-        *y->dense() += a * prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+        noalias(*y->dense()) += a * prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
     }
     else // x and y sparse
     {
@@ -4766,6 +4775,8 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
             {
               if (numY != 1)
                 SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              assert(y.dense() != x.dense());
 
               if (numA == 1)
                 noalias(*y.dense()) = ublas::prod(*A.dense(), *x.dense());
