@@ -6,8 +6,6 @@
 
 #PIPOL fedora-core13 02:00
 
-#PIPOL kvm-linux 02:00
-
 #PIPOL ubuntu-lucid 02:00
 
 #PIPOL ubuntu-karmic 02:00
@@ -406,7 +404,7 @@ nightly_build Examples Release
 nightly_test Examples Release
 nightly_submit Examples Release
 #
-case $PIPOL_IMAGE in fedora-core13)
+case $PIPOL_IMAGE in ubuntu-karmic)
         nightly_memcheck Examples Release
         nightly_submit Examples Release
         ;;
