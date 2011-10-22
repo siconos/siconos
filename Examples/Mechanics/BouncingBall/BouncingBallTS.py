@@ -113,13 +113,24 @@ N = (T-t0)/h
 
 dataPlot = empty((N+1,5))
 
+
+#
+# numpy pointers on dense Siconos vectors
+#
+q = ball.q()
+v = ball.velocity()
+p = ball.p(1)
 lambda_ = inter.lambda_(1)
 
+
+#
+# initial data
+#
 dataPlot[0, 0] = t0
-dataPlot[0, 1] = ball.q()[0]
-dataPlot[0, 2] = ball.velocity()[0]
-dataPlot[0, 3] = ball.p(1)[0]
-dataPlot[0, 4] = inter.lambda_(1)
+dataPlot[0, 1] = q[0]
+dataPlot[0, 2] = v[0]
+dataPlot[0, 3] = p[0]
+dataPlot[0, 4] = lambda_[0]
 
 k = 1
 
@@ -128,10 +139,10 @@ while(s.nextTime() < T):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()
-    dataPlot[k, 1] = ball.q()[0]
-    dataPlot[k, 2] = ball.velocity()[0]
-    dataPlot[k, 3] = ball.p(1)[0]
-    dataPlot[k, 4] = inter.lambda_(1)[0]
+    dataPlot[k, 1] = q[0]
+    dataPlot[k, 2] = v[0]
+    dataPlot[k, 3] = p[0]
+    dataPlot[k, 4] = lambda_[0]
 
     k += 1
     s.nextStep()
