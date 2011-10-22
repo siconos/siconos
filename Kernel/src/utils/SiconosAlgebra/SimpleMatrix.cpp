@@ -2603,7 +2603,10 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   }
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
-  *(B.dense()) = ublas::column(tmpB, 0);
+  else
+  {
+    noalias(*(B.dense())) = ublas::column(tmpB, 0);
+  }
 }
 
 void SimpleMatrix::resetLU()
