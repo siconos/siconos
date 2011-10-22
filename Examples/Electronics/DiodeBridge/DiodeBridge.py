@@ -58,18 +58,18 @@ Modeltitle = "DiodeBridge"
 
 from matplotlib.pyplot import subplot, title, plot, grid, show
 
-from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, ComplementarityConditionNSL, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
+                           ComplementarityConditionNSL, Interaction,\
+                           Model, Moreau, TimeDiscretisation, LCP,  \
+                           TimeStepping
 
-from numpy import array, eye, empty
-import numpy as np
 #
 # dynamical system
 #
-init_state = array([Vinit,0]) 
-print init_state
+init_state = [Vinit,0] 
 
-A = array([[0,-1.0/Cvalue],
-           [1.0/Lvalue,0]], order='FORTRAN')
+A = [[0,          -1.0/Cvalue],
+     [1.0/Lvalue, 0          ]]
 
 LSDiodeBridge=FirstOrderLinearDS(init_state, A)
 
@@ -77,17 +77,18 @@ LSDiodeBridge=FirstOrderLinearDS(init_state, A)
 # Interactions
 #
 
-C = array([[0,0],[0,0],[-1.0,0],[1.0,0]],order='FORTRAN')
-D = array([[1.0/Rvalue,1.0/Rvalue,-1,0],[1.0/Rvalue,1.0/Rvalue,0,-1],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]],order='FORTRAN')
-B = array([[0.0,0.0,-1.0/Cvalue,1.0/Cvalue],[0.0,0.0,0.0,0.0]],order='FORTRAN')
+C = [[0.,   0.],
+     [0,    0.],
+     [-1.,  0.],
+     [1.,   0.]]
 
-# C = np.transpose(C)
-# D = np.transpose(D)
-# B = np.transpose(B)
-print A
-print B
-print C
-print D
+D = [[1./Rvalue, 1./Rvalue, -1.,  0.],
+     [1./Rvalue, 1./Rvalue,  0., -1.],
+     [1.,        0.,         0.,  0.],
+     [0.,        1.,         0.,  0.]]
+
+B = [[0.,        0., -1./Cvalue, 1./Cvalue],
+     [0.,        0.,  0.,        0.       ]]
 
 LTIRDiodeBridge=FirstOrderLinearTIR(C,B)
 LTIRDiodeBridge.setDPtr(D)
@@ -99,10 +100,11 @@ InterDiodeBridge.insert(LSDiodeBridge)
 #
 # Model
 #
-
 DiodeBridge=Model(t0,T,Modeltitle)
+
 #   add the dynamical system in the non smooth dynamical system
 DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+
 #   link the interaction and the dynamical system
 DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge,LSDiodeBridge)
 
