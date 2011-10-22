@@ -172,25 +172,29 @@ print dataPlot
 # time loop
 k = 1
 #while(aTS.nextTime() < T):
+
+x = LSDiodeBridge.x()
+y = InterDiodeBridge.y(0)
+lambda_ = InterDiodeBridge.lambda_(0)
+
+
 while (k < N+1):
     
     aTS.computeOneStep()
     #aLCP.display()
     dataPlot[k, 0] = aTS.nextTime()
     #  inductor voltage
-    dataPlot[k, 1] = LSDiodeBridge.x()[0]
+    dataPlot[k, 1] = x[0]
     # inductor current
-    dataPlot[k, 2] = LSDiodeBridge.x()[1]
+    dataPlot[k, 2] = x[1]
     # diode R1 current
-    #print InterDiodeBridge.y(0)[0]
-    #print y[0]
-    dataPlot[k, 3] = InterDiodeBridge.y(0)[0]
+    dataPlot[k, 3] = y[0]
     # diode R1 voltage
-    dataPlot[k, 4] = - InterDiodeBridge.lambda_(0)[0]
+    dataPlot[k, 4] = - lambda_[0]
     # diode F2 voltage 
-    dataPlot[k, 5] = - InterDiodeBridge.lambda_(0)[1]
+    dataPlot[k, 5] = - lambda_[1]
     # diode F1 current
-    dataPlot[k, 6] = - InterDiodeBridge.lambda_(0)[2]
+    dataPlot[k, 6] = - lambda_[2]
 
     k += 1
     aTS.nextStep()
