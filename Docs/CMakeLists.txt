@@ -21,7 +21,7 @@ Siconos/Docs provides the main user documentation.")
 
 COMPILE_WITH(Doxygen REQUIRED)
 
-SICONOS_PROJECT(Docs 3 3 0)
+SICONOS_PROJECT(Docs 3 4 0)
 
 # main documentation specificities
 SET(DOCUMENTATION_DIRECTORIES

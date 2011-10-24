@@ -34,4 +34,4 @@ IF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")
     "g++, gfortran, libatlas-base-dev, libatlas-headers, libboost-dev, libboost-graph-dev, libgmp3-dev, libxml2-dev, siconos-numerics")
 ENDIF(PIPOL_IMAGE MATCHES "lenny\\|ubuntu")  
 
-SICONOS_PROJECT(Kernel 3 3 0)
+SICONOS_PROJECT(Kernel 3 4 0)
