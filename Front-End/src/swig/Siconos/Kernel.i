@@ -138,7 +138,7 @@
     int i;
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
-      return NULL;
+      return 0;
     }
     
     assert(ptr);
@@ -149,11 +149,11 @@
       if (!PyInt_Check(o)) {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-        return NULL;
+        return 0;
       }
       
       if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
-        return NULL;
+        return 0;
       
       ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
       
@@ -325,12 +325,7 @@ KERNEL_REGISTRATION();
 KERNEL_REGISTRATION();
 
 
-
-
-
 %fragment("StdSequenceTraits");
 
 %fragment("StdMapTraits");
-
-
 

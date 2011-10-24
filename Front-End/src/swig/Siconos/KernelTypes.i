@@ -500,6 +500,24 @@
 }
 
 
+//PyArray_UpdateFlags does not seem to have any effect
+//>>> r = K.FirstOrderLinearTIR()
+//>>> r.setCPtr([[1,2,3],[4,5,6]])
+//>>> C=r.C()
+//>>> C.flags
+//  C_CONTIGUOUS : True
+//  F_CONTIGUOUS : False            <---- !!!
+//  OWNDATA : False
+//  WRITEABLE : True
+//  ALIGNED : True
+//  UPDATEIFCOPY : False
+//
+//
+// with this macro : ok
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
 
 %typemap(out) boost::shared_ptr<SiconosMatrix> (bool upcall=false)
 {
@@ -537,8 +555,10 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
       // warning shared_ptr counter lost here du to getArray()
-      $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
-      PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+      $result = FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+
+      // see comments about PyArray_UpdateFlags above
+      PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);
     }
     else
     {
@@ -584,8 +604,10 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
       // warning shared_ptr counter lost here du to getArray()
-      $result = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
-      PyArray_UpdateFlags((PyArrayObject *)$result, NPY_FORTRAN);
+      $result = FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+
+      // see comments about PyArray_UpdateFlags above
+      PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);
     }
     else
     {
