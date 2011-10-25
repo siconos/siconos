@@ -150,11 +150,12 @@ protected:
 
   /** The residu y of the newton iterations*/
   SP::SiconosVector _Residuy;
+
   /*value of h at the current newton iteration*/
   SP::SiconosVector _h_alpha;
 
+  /** \f$ \nabla_{\lambda} h(..)\f$ */
   SP::SiconosMatrix _jachlambda;
-
 
   /** basic constructor
    *  \param a string that gives the type of the relation

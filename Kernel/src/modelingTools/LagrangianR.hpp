@@ -40,7 +40,7 @@ class SimpleVector;
  *
  *  Class name = type+subType.
  *
- * If y = h(...), all the gradients of are handled by G object.
+ * If y = h(...), all the gradients of h are handled by G object.
  * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
  *
  * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
@@ -70,13 +70,10 @@ protected:
   */
   ACCEPT_SERIALIZATION(LagrangianR);
 
-
-
   /** Jacobian matrices of H */
   SP::SiconosMatrix _jachq;
   SP::SiconosMatrix _jachqDot;
   //SP::SiconosMatrix _jachlambda;
-
 
   /** basic constructor
       \param the sub-type of the relation

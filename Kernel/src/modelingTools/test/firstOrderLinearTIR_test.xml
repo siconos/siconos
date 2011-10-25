@@ -33,23 +33,66 @@
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<Interaction_Definition>
-			<Interaction number='1' Id='test-of-rel'>
-				<size>2</size>
-					<DS_Concerned all='true'/>
-					<Interaction_Content>		
-					<FirstOrderRelation type ="LinearTI">
-                                        <C matrixFile="matC.dat"/>
-                                        <D matrixFile="matD.dat"/>
-	                                <B matrixFile="matB.dat"/>
-  	                                <F matrixFile="matF.dat"/>
-                                        <e vectorSize = '2'>0.1 0.1</e>
-                                       </FirstOrderRelation>			
-					<NewtonImpactLaw>
-						<e>0.9</e>
-						<size>1</size>				
-					</NewtonImpactLaw>
-				</Interaction_Content>	
-			</Interaction>				
+		  <Interaction number='1' Id='test-of-rel'>
+			<size>1</size>
+			<DS_Concerned all='true'/>
+			<Interaction_Content>		
+			  <FirstOrderRelation type ="LinearTI">
+                <C matrixRowSize='1' matrixColSize='6'>	
+				  <row>0.5 0.5  0.5 0.5 0.5 0.5</row>
+				</C>
+                <D matrixRowSize='1' matrixColSize='2'>
+				  <row>3 2</row>
+				</D>
+				<B matrixRowSize='6' matrixColSize='1'>	
+				  <row>1</row>
+				  <row>2</row>
+				  <row>3</row>
+				  <row>4</row>
+				  <row>5</row>
+				  <row>6</row>
+				</B>
+				<F matrixRowSize='1' matrixColSize='1'>
+				  <row>12</row>
+				</F>
+                <e vectorSize = '1'>0.1</e>
+              </FirstOrderRelation>			
+			  <NewtonImpactLaw>
+				<e>0.9</e>
+				<size>1</size>				
+			  </NewtonImpactLaw>
+			</Interaction_Content>	
+		  </Interaction>				
+		  <Interaction number='2' Id='test-of-rel2'>
+			<size>1</size>
+			<DS_Concerned all='true'/>
+			<Interaction_Content>		
+			  <FirstOrderRelation type ="LinearTI">
+                <C matrixRowSize='1' matrixColSize='6'>	
+				  <row>1 1 1 1 1 1</row>
+				</C>
+                <D matrixRowSize='1' matrixColSize='2'>
+				  <row>1 0</row>
+				</D>
+				<B matrixRowSize='6' matrixColSize='1'>	
+				  <row>1</row>
+				  <row>2</row>
+				  <row>3</row>
+				  <row>4</row>
+				  <row>5</row>
+				  <row>6</row>
+				</B>
+				<F matrixRowSize='1' matrixColSize='1'>
+				  <row>12</row>
+				</F>
+                <e vectorSize = '1'>0.1</e>
+              </FirstOrderRelation>			
+			  <NewtonImpactLaw>
+				<e>0.9</e>
+				<size>1</size>				
+			  </NewtonImpactLaw>
+			</Interaction_Content>	
+		  </Interaction>				
 		</Interaction_Definition>		
 	</NSDS>
 </SiconosModel>

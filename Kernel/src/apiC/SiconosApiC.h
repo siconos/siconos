@@ -7,7 +7,7 @@
 #define EXTERN extern
 #endif
 
-/*! \file SiconosApiC.hpp
+/*! \file SiconosApiC.h
 \brief API C for Scilab Interface.
 */
 
