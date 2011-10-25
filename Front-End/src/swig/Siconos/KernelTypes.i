@@ -20,6 +20,24 @@
 // SWIG interface for Siconos Kernel types
 
 
+//PyArray_UpdateFlags does not seem to have any effect
+//>>> r = K.FirstOrderLinearTIR()
+//>>> r.setCPtr([[1,2,3],[4,5,6]])
+//>>> C=r.C()
+//>>> C.flags
+//  C_CONTIGUOUS : True
+//  F_CONTIGUOUS : False            <---- !!!
+//  OWNDATA : False
+//  WRITEABLE : True
+//  ALIGNED : True
+//  UPDATEIFCOPY : False
+//
+//
+// with this macro : ok
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
 
 // check on input : a numpy array or a SiconosVector
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
@@ -81,10 +99,10 @@
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
-      // taken from generated code, we assume we should never get here
-      assert(false);
+      // taken from generated code
       tempshared1 = *reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
       delete reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+      $1 = tempshared1;
     } 
     else {
       smartarg1 = reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
@@ -133,10 +151,10 @@
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
-      // taken from generated code, we assume we should never get here
-      assert(false);
+      // taken from generated code
       tempshared1 = *reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
       delete reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
+      $1 = tempshared1;
     } 
     else {
       smartarg1 = reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
@@ -177,8 +195,11 @@
     {
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
-      // warning shared_ptr counter lost here du to getArray()
-      $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SiconosVector>* linked_array = new
+        SharedPyArrayObject<SP::SiconosVector>($1_name, 
+                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray()));
+      $input = (PyObject*) linked_array;
     }
     else
     {
@@ -203,8 +224,11 @@
     {
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
-      // warning shared_ptr counter lost here du to getArray()
-      $input = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SimpleVector>* linked_array = new
+        SharedPyArrayObject<SP::SimpleVector>($1_name, 
+                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray()));
+      $input = (PyObject*) linked_array;
     }
     else
     {
@@ -230,8 +254,11 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // warning shared_ptr counter lost here du to getArray()
-      $input = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SiconosMatrix>* linked_array = new
+        SharedPyArrayObject<SP::SiconosMatrix>($1_name, 
+                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1_name->getArray()));
+       $input = (PyObject*) linked_array;
       PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
     }
     else
@@ -259,8 +286,11 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // warning shared_ptr counter lost here du to getArray()
-      $input = PyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SiconosMatrix>* linked_array = new
+        SharedPyArrayObject<SP::SiconosMatrix>($1_name, 
+                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1_name->getArray()));
+      $input = (PyObject*) linked_array;
       PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
     }
     else
@@ -381,6 +411,7 @@
   $1 = tmp;
  }
 
+
 %inline %{
   // SWIG_DIRECTOR_CAST cannot be use on non polymorphic data type
   // (i.e. classes without at least one virtual method) so we have to
@@ -443,8 +474,11 @@
 
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
-      // warning shared_ptr counter lost here du to getArray()
-      $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SiconosVector>* linked_array = new
+        SharedPyArrayObject<SP::SiconosVector>($1, 
+                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray()));
+      $result = (PyObject*) linked_array;
     }
     else
     {
@@ -488,8 +522,11 @@
 
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
-      // warning shared_ptr counter lost here du to getArray()
-      $result = PyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SimpleVector>* linked_array = new
+        SharedPyArrayObject<SP::SimpleVector>($1, 
+                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray()));
+      $result = (PyObject*) linked_array;
     }
     else
     {
@@ -498,26 +535,6 @@
     }
   }
 }
-
-
-//PyArray_UpdateFlags does not seem to have any effect
-//>>> r = K.FirstOrderLinearTIR()
-//>>> r.setCPtr([[1,2,3],[4,5,6]])
-//>>> C=r.C()
-//>>> C.flags
-//  C_CONTIGUOUS : True
-//  F_CONTIGUOUS : False            <---- !!!
-//  OWNDATA : False
-//  WRITEABLE : True
-//  ALIGNED : True
-//  UPDATEIFCOPY : False
-//
-//
-// with this macro : ok
-#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
-  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
-              data, 0, NPY_FARRAY, NULL)
-
 
 %typemap(out) boost::shared_ptr<SiconosMatrix> (bool upcall=false)
 {
@@ -554,8 +571,11 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // warning shared_ptr counter lost here du to getArray()
-      $result = FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SiconosMatrix>* linked_array = new
+        SharedPyArrayObject<SP::SiconosMatrix>($1, 
+                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray()));
+      $result = (PyObject*) linked_array;
 
       // see comments about PyArray_UpdateFlags above
       PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);
@@ -603,8 +623,12 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // warning shared_ptr counter lost here du to getArray()
-      $result = FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray());
+
+      // copy shared ptr reference in a wrapped PyArray
+      SharedPyArrayObject<SP::SimpleMatrix>* linked_array = new
+        SharedPyArrayObject<SP::SimpleMatrix>($1, 
+                                              FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray()));
+       $result = (PyObject*) linked_array;
 
       // see comments about PyArray_UpdateFlags above
       PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);

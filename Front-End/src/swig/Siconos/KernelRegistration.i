@@ -74,5 +74,6 @@
   PY_REGISTER(SimpleVector);                      \
   PY_REGISTER(BlockVector);                       \
   PY_REGISTER(InteractionsSet);                   \
-  PY_REGISTER(BoundaryCondition);
+  PY_REGISTER(BoundaryCondition);                 \
+  PY_REGISTER(ioMatrix);
 

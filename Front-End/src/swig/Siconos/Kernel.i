@@ -211,6 +211,8 @@ namespace boost
 %include "SiconosVisitables.hpp"
 %import "SiconosVisitor.hpp"
 %import "SiconosSerialization.hpp"
+%import "ioObject.hpp"
+%include "ioMatrix.hpp"
 
 %import "SiconosGraph.hpp"
 
@@ -289,6 +291,23 @@ KERNEL_REGISTRATION();
 
 %import "RelationNamespace.hpp";
 
+%inline 
+%{
+  template <class T>
+  class SharedPyArrayObject : public PyArrayObject
+  {
+  private:
+    T ref;
+  public:
+    SharedPyArrayObject(T v, PyObject* a) : ref(v), PyArrayObject(*((PyArrayObject *)a)) {};
+  };
+  
+
+  const SP::SimpleVector getVector(SP::SimpleVector v)
+  {
+    return v;
+  };
+%}
 
 
 // include registered headers
@@ -308,6 +327,8 @@ KERNEL_REGISTRATION();
 %template (dspv) std::vector<std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> > >;
 
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
+
+%template (ioMatrix) ioObject<SiconosMatrix>; 
 
 // not sufficient
 %ignore Question<bool>;

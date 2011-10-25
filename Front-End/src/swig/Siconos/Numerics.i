@@ -147,19 +147,19 @@
   int i;
   if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
-      return NULL;
+      return 0;
   }
   for (i =0; i <  PyObject_Length(input); i++) {
       PyObject *o = PySequence_GetItem(input,i);
       if (!PyInt_Check(o)) {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-        return NULL;
+        return 0;
       }
       ptr[i] = (int) PyInt_AsLong(o);
 
       if (ptr[i] == -1 && PyErr_Occurred())
-        return NULL;
+        return 0;
       Py_DECREF(o);
   }
   return 1;
@@ -172,7 +172,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   int i;
   if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
-      return NULL;
+      return 0;
   }
 
   for (i =0; i < PyObject_Length(input); i++) {
@@ -180,12 +180,12 @@ static int convert_darray(PyObject *input, double *ptr) {
       if (!PyFloat_Check(o)) {
          Py_XDECREF(o);
          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of floats");
-         return NULL;
+         return 0;
       }
       ptr[i] = PyFloat_AsDouble(o);
 
       if (ptr[i] == -1 && PyErr_Occurred())
-        return NULL;
+        return 0;
 
       Py_DECREF(o);
   }
