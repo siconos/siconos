@@ -144,6 +144,7 @@ N = (T-t0)/h
 # Get the values to be plotted 
 # ->saved in a matrix dataPlot
 
+from numpy import empty
 dataPlot = empty((N+1,7))
 
 x = LSDiodeBridge.x()
