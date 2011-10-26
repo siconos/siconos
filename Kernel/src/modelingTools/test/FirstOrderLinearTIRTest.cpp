@@ -32,9 +32,8 @@ void FirstOrderLinearTIRTest::setUp()
   D.reset(new SimpleMatrix("matD.dat", true));
   B.reset(new SimpleMatrix("matB.dat", true));
   F.reset(new SimpleMatrix("matF.dat", true));
-  e.reset(new SimpleVector(2));
+  e.reset(new SimpleVector(1));
   (*e)(0) = 0.1;
-  (*e)(1) = 0.1;
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;

@@ -173,6 +173,7 @@ IF(WITH_TESTING)
   # used in ldwrap.c.in
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
 
+
   # Siconos Algebra
   BEGIN_TEST(utils/SiconosAlgebra/test)
 

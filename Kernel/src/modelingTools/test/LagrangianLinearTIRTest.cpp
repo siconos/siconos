@@ -31,9 +31,8 @@ void LagrangianLinearTIRTest::setUp()
   C.reset(new SimpleMatrix("matC.dat", true));
   D.reset(new SimpleMatrix("matD.dat", true));
   F.reset(new SimpleMatrix("matF.dat", true));
-  e.reset(new SimpleVector(2));
+  e.reset(new SimpleVector(1));
   (*e)(0) = 0.1;
-  (*e)(1) = 0.1;
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;
@@ -126,25 +125,25 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
-// data constructor (5)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR5()
-{
-  cout << "--> Test: constructor 5: obsolet" << endl;
-  //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*D,*F,*e));
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType()==RELATION::Lagrangian, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType()==RELATION::LinearTIR, true);
-  cout << "--> Constructor 5 test ended with success." << endl;
-}
+// // data constructor (5)
+// void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR5()
+// {
+//   cout << "--> Test: constructor 5: obsolet" << endl;
+// //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*D,*F,*e));
+// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType()==RELATION::Lagrangian, true);
+// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType()==RELATION::LinearTIR, true);
+//    cout << "--> Constructor 5 test ended with success." << endl;
+// }
 
-// data constructor (6)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR6()
-{
-  cout << "--> Test: constructor 6: obsolet" << endl;
-  //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*e));
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType()==RELATION::Lagrangian, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType()==RELATION::LinearTIR, true);
-  cout << "--> Constructor 5 test ended with success." << endl;
-}
+// // data constructor (6)
+// void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR6()
+// {
+//   cout << "--> Test: constructor 6: obsolet" << endl;
+// //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*e));
+// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType()==RELATION::Lagrangian, true);
+// //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType()==RELATION::LinearTIR, true);
+//   cout << "--> Constructor 5 test ended with success." << endl;
+// }
 
 // set C as a matrix and then plug it
 

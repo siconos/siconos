@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 #ifndef __FirstOrderLinearTIRTest__
 #define __FirstOrderLinearTIRTest__
 
@@ -31,7 +31,7 @@ class FirstOrderLinearTIRTest : public CppUnit::TestFixture
 
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(FirstOrderLinearTIRTest);
 
 
