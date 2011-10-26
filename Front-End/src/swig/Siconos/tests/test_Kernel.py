@@ -172,7 +172,6 @@ def test_bouncing_ball():
         s_d.nextStep()
         print s.nextTime()
 
-
 def test_C():
     class Rel(K.LagrangianScleronomousR):
         pass
@@ -182,5 +181,18 @@ def test_C():
     r.setJachqPtr(j)
 
     import numpy as np
+
+    # C is transposed()
+    r.C()
+
     assert np.max(r.C() - array([[1,2,3],[4,5,6]])) == 0.
     assert np.max(r.C() - array([[0,2,3],[4,5,6]])) == 1.
+
+    r.setJachqPtr(r.C())
+
+    r.C()
+
+    assert np.max(r.C() - array([[1,2,3],[4,5,6]])) == 0.
+    assert np.max(r.C() - array([[0,2,3],[4,5,6]])) == 1.
+
+

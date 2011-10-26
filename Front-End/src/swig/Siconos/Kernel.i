@@ -291,22 +291,90 @@ KERNEL_REGISTRATION();
 
 %import "RelationNamespace.hpp";
 
-%inline 
 %{
-  template <class T>
-  class SharedPyArrayObject : public PyArrayObject
+
+  //#define DEBUG_MESSAGES 1
+  #include <debug.h>
+
+  // when we call FPyArray_SimpleNewFromData with a $1->getArray() we
+  // lost the shared pointer count, so we can be in the case where the
+  // memory pointed by a shared ptr is erased after the call
+  // FPyArray_SimpleNewFromData (=>segfault...)
+
+  // here we keep another shared pointer on the original shared ptr
+  // (i.e. we do an incref) associated with the memory from
+  // FPyArray_SimpleNewFromData
+
+  // we need to register a PyCObject (deprecated for python >= 2.7 see
+  // PyCapsule) in order to call the destruction function
+  // sharedPyArrayDelete
+
+
+  // a non templated proxy for pyArraObject so we can cast to it
+  struct PyArrayObjectProxy
   {
-  private:
-    T ref;
-  public:
-    SharedPyArrayObject(T v, PyObject* a) : ref(v), PyArrayObject(*((PyArrayObject *)a)) {};
+    // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
+    boost::shared_ptr<void> ref;
+
+    PyArrayObject* array;
+
+    PyArrayObjectProxy(boost::shared_ptr<void> v, PyArrayObject* a) : ref(v), array(a) {}
+    
+
+    ~PyArrayObjectProxy()
+    {
+      DEBUG_PRINT("~PyArrayObjectProxy()\n");
+      //    ref.reset(); // destructor called
+    }
+
   };
   
+  // the templated wrapper can be avoided by a static_pointer_cast
+  template <class T>
+  struct SharedPyArrayObject : public PyArrayObjectProxy
+  {
 
+    SharedPyArrayObject(boost::shared_ptr<T> v, PyObject* pa) : 
+      PyArrayObjectProxy(boost::static_pointer_cast<void>(v),(PyArrayObject *)pa) 
+    {
+      DEBUG_PRINTF("new reference : pointer is %ld\n",boost::static_pointer_cast<T>(ref).use_count());
+    };
+
+  };
+
+
+  /* the PyCObject deleter */
+
+  /* note PyCObject is deprecated for Python >= 2.7 ... */
+  static  void sharedPyArrayDelete(void * o)
+  {
+    DEBUG_PRINT("sharedPyArrayDelete\n");
+
+    delete static_cast<PyArrayObjectProxy *>(o);
+    return;
+  };
+
+%}
+
+%inline
+%{
+
+  
+  /* for testing purpose : without the PyCObject stuff the python
+   * wrapper fail on this, the numpy vector points on a deleted
+   * memory!*/
   const SP::SimpleVector getVector(SP::SimpleVector v)
   {
     return v;
   };
+  
+  /* to make swig define SWIGTYPE_p_PyArrayObject */
+  const PyArrayObject* getVector(PyArrayObject* v)
+  {
+    return v;
+  };
+  
+
 %}
 
 
@@ -330,13 +398,13 @@ KERNEL_REGISTRATION();
 
 %template (ioMatrix) ioObject<SiconosMatrix>; 
 
+
 // not sufficient
 %ignore Question<bool>;
 %template (qbool) Question<bool>;
 
 %ignore Question<unsigned int>;
 %template (quint) Question<unsigned int>;
-
 
 // suppress warning
 %ignore  boost::enable_shared_from_this< Hashed >;
