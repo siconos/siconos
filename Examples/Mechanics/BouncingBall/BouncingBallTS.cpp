@@ -159,9 +159,6 @@ int main(int argc, char* argv[])
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
-      SP::SimpleVector yy = boost::static_pointer_cast<SimpleVector>(inter->y(0));
-      double *yp = yy->getArray();
-      std::cout << yy << "," << yy->getArray() << std::endl;
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
