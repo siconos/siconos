@@ -66,6 +66,10 @@
 #include <boost/typeof/typeof.hpp>
 
 #include <assert.h>
+
+#define DEBUG_MESSAGES 1
+#include <debug.h>
+
 %} 
 
 // mandatory !
@@ -292,10 +296,6 @@ KERNEL_REGISTRATION();
 %import "RelationNamespace.hpp";
 
 %{
-
-  //#define DEBUG_MESSAGES 1
-  #include <debug.h>
-
   // when we call FPyArray_SimpleNewFromData with a $1->getArray() we
   // lost the shared pointer count, so we can be in the case where the
   // memory pointed by a shared ptr is erased after the call
@@ -310,47 +310,37 @@ KERNEL_REGISTRATION();
   // sharedPyArrayDelete
 
 
-  // a non templated proxy for pyArraObject so we can cast to it
-  struct PyArrayObjectProxy
+  struct SharedPointerKeeper
   {
     // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
     boost::shared_ptr<void> ref;
 
-    PyArrayObject* array;
-
-    PyArrayObjectProxy(boost::shared_ptr<void> v, PyArrayObject* a) : ref(v), array(a) {}
-    
-
-    ~PyArrayObjectProxy()
+    SharedPointerKeeper(boost::shared_ptr<void> v) : ref(v) 
     {
-      DEBUG_PRINT("~PyArrayObjectProxy()\n");
+      DEBUG_PRINTF("SharedPointerKeeper : use_count %ld",v.use_count());
+    };
+
+    ~SharedPointerKeeper()
+    {
+      DEBUG_PRINT("~SharedPointerKeeper()\n");
       //    ref.reset(); // destructor called
     }
 
   };
   
-  // the templated wrapper can be avoided by a static_pointer_cast
-  template <class T>
-  struct SharedPyArrayObject : public PyArrayObjectProxy
-  {
-
-    SharedPyArrayObject(boost::shared_ptr<T> v, PyObject* pa) : 
-      PyArrayObjectProxy(boost::static_pointer_cast<void>(v),(PyArrayObject *)pa) 
-    {
-      DEBUG_PRINTF("new reference : pointer is %ld\n",boost::static_pointer_cast<T>(ref).use_count());
-    };
-
-  };
-
-
-  /* the PyCObject deleter */
+  /* the PyCObject deleter 
+     example: 
+     SharedPointerKeeper* savedSharePtr = 
+       new SharedPointerKeeper(boost::static_pointer_cast<void>(mysharedptr));
+     PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);      
+  */
 
   /* note PyCObject is deprecated for Python >= 2.7 ... */
-  static  void sharedPyArrayDelete(void * o)
+  static  void sharedPointerKeeperDelete(void * o)
   {
-    DEBUG_PRINT("sharedPyArrayDelete\n");
+    DEBUG_PRINT("sharedPointerKeeperDelete\n");
 
-    delete static_cast<PyArrayObjectProxy *>(o);
+    delete static_cast<SharedPointerKeeper *>(o);
     return;
   };
 

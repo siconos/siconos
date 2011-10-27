@@ -39,6 +39,19 @@
               data, 0, NPY_FARRAY, NULL)
 
 
+// copy shared ptr reference in a base PyCObject 
+#define PYARRAY_FROM_SHARED_DATA(NDIM,DIMS,NAME,RESULT)                 \
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
+                                                 DIMS,                  \
+                                                 NPY_DOUBLE,            \
+                                                 NAME->getArray());     \
+  SharedPointerKeeper* savedSharedPointer = new                         \
+    SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
+  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
+    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
+                          &sharedPointerKeeperDelete);                  \
+  RESULT = pyarray
+
 
 %typemap(in) PyArrayObject* {
    $1 = (PyArrayObject*) $input;
@@ -202,14 +215,8 @@
     {
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SiconosVector>* linked_array = new
-        SharedPyArrayObject<SiconosVector>($1_name, 
-                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $input = (PyObject *) linked_array->array;
 
+      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1_name,$input);
     }
     else
     {
@@ -234,13 +241,9 @@
     {
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SimpleVector>* linked_array = new
-        SharedPyArrayObject<SimpleVector>($1_name, 
-                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1_name->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $input = (PyObject *) linked_array->array;
+
+      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1_name,$input);
+
     }
     else
     {
@@ -266,15 +269,8 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SiconosMatrix>* linked_array = new
-        SharedPyArrayObject<SiconosMatrix>($1_name, 
-                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1_name->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $input = (PyObject *) linked_array->array;
 
-      PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
+      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1_name,$input);
     }
     else
     {
@@ -301,15 +297,8 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SiconosMatrix>* linked_array = new
-        SharedPyArrayObject<SiconosMatrix>($1_name, 
-                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1_name->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $input = (PyObject *) linked_array->array;
 
-      PyArray_UpdateFlags((PyArrayObject *)$input, NPY_FORTRAN);
+      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1_name,$input);
     }
     else
     {
@@ -492,13 +481,8 @@
 
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SiconosVector>* linked_array = new
-        SharedPyArrayObject<SiconosVector>($1, 
-                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $result = (PyObject *) linked_array->array;
+
+      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1,$result);
     }
     else
     {
@@ -542,13 +526,8 @@
 
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SimpleVector>* linked_array = new
-        SharedPyArrayObject<SimpleVector>($1, 
-                                               FPyArray_SimpleNewFromData(1,this_vector_dim,NPY_DOUBLE,$1->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $result = (PyObject *) linked_array->array;
+
+      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1,$result);
     }
     else
     {
@@ -593,16 +572,8 @@
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SiconosMatrix>* linked_array = new
-        SharedPyArrayObject<SiconosMatrix>($1, 
-                                               FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray()));
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $result = (PyObject *) linked_array->array;
 
-      // see comments about PyArray_UpdateFlags above
-      PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);
+      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1,$result);
     }
     else
     {
@@ -648,17 +619,7 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      // copy shared ptr reference in a wrapped PyArray
-      SharedPyArrayObject<SimpleMatrix>* linked_array = new
-        SharedPyArrayObject<SimpleMatrix>($1, 
-                                              FPyArray_SimpleNewFromData(2,this_matrix_dim,NPY_DOUBLE,$1->getArray()));
-    
-      linked_array->array->base = PyCObject_FromVoidPtr((void*) linked_array, &sharedPyArrayDelete);
-      //SWIG_AcquirePtr((PyObject *)linked_array, SWIG_POINTER_DISOWN);
-      $result = (PyObject *) linked_array->array;
-
-      // see comments about PyArray_UpdateFlags above
-      PyArray_UpdateFlags((PyArrayObject *)$result, (PyArray_FLAGS((PyArrayObject *)$result))|NPY_CONTIGUOUS|NPY_FORTRAN);
+      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1,$result);
     }
     else
     {
