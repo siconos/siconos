@@ -67,7 +67,7 @@
 
 #include <assert.h>
 
-#define DEBUG_MESSAGES 1
+//#define DEBUG_MESSAGES 1
 #include <debug.h>
 
 %} 
