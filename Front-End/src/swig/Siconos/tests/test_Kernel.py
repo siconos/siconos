@@ -2,16 +2,38 @@
 
 
 def test_getVector():
-    from Siconos.Kernel import getVector
+    from Siconos.Kernel import getVector, SimpleVector
     from numpy import array
 
-    assert getVector([1,2,3]).all() == array([1,2,3]).all()
+    assert (getVector([1,2,3]) == array([1,2,3])).all()
+
+    v = SimpleVector(3)
+    v.setValue(0,1)
+    v.setValue(1,2)
+    v.setValue(2,4)
+
+    assert (getVector(v) != array([1,2,3])).any()
+
+    assert (getVector(v) == array([1,2,4])).all()
+    
 
 def test_getMatrix():
-    from Siconos.Kernel import getMatrix
+    from Siconos.Kernel import getMatrix, SimpleMatrix
     from numpy import array
     
-    assert getMatrix([[1,2,3]]).all() == array([[1,2,3]]).all()
+    assert (getMatrix([[1,2,3]]) == array([[1,2,3]])).all()
+
+    m = SimpleMatrix(1,3)
+
+    m.setValue(0,0,1)
+
+    m.setValue(0,1,2)
+
+    m.setValue(0,2,3)
+    
+    assert (getMatrix(m) == array([[1,2,3]])).all()
+
+    assert (getMatrix(m) != array([[1,0,3]])).any()
 
 
 def test_LagrangianDS_setMassPtr():
@@ -25,7 +47,7 @@ def test_LagrangianDS_setMassPtr():
 
     lds.setMassPtr([[1,2,3],[4,5,6]])
     
-    assert lds.mass().all() == array([[1,2,3],[4,5,6]]).all()
+    assert (lds.mass() == array([[1,2,3],[4,5,6]])).all()
     
 
 def test_LagrangianScleronomousR_setJachqPtr():
