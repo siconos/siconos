@@ -68,13 +68,6 @@ ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
 
-#
-# compilation setup 
-#
-#IF(CXX_HAVE_FRIEND_INJECTION)
-#  APPEND_FLAGS(CMAKE_CXX_FLAGS "-ffriend-injection")
-#ENDIF(CXX_HAVE_FRIEND_INJECTION)
-
 # Disable warnings with intel compiler due (mainly) to visitors visit function overloading
 if(CMAKE_CXX_COMPILER)
   include(TestCXXAcceptsFlag)
@@ -130,18 +123,18 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
+# Plugin library for tests
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
-
+# MODULE rather than SHARED for Macosx compatibility. 
 ADD_LIBRARY(TestPlugin MODULE plugin/test/TestPlugin.cpp)
 SET_TARGET_PROPERTIES(TestPlugin 
   PROPERTIES PREFIX ""
   OUTPUT_NAME plugin/test/TestPlugin)
-
-INSTALL(TARGETS TestPlugin 
-  LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
+# Note Franck. Is it really necessary to install it? I Don't think so ...
+#INSTALL(TARGETS TestPlugin 
+#  LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
-
 
 # do not skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -172,8 +165,7 @@ IF(WITH_TESTING)
 
   # used in ldwrap.c.in
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
-
-
+  
   # Siconos Algebra
   BEGIN_TEST(utils/SiconosAlgebra/test)
 
