@@ -30,7 +30,7 @@ h = 0.005   # time step
 r = 0.1     # ball radius
 g = 9.81    # gravity
 m = 1       # ball mass
-e = 0.8     # restitution coeficient
+e = 0.9     # restitution coeficient
 theta = 0.5 # theta scheme
 
 
