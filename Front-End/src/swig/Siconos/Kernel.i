@@ -317,7 +317,7 @@ KERNEL_REGISTRATION();
 
     SharedPointerKeeper(boost::shared_ptr<void> v) : ref(v) 
     {
-      DEBUG_PRINTF("SharedPointerKeeper : use_count %ld",v.use_count());
+      DEBUG_PRINTF("SharedPointerKeeper : use_count %ld\n",v.use_count());
     };
 
     ~SharedPointerKeeper()
@@ -350,13 +350,20 @@ KERNEL_REGISTRATION();
 %{
 
   
-  /* for testing purpose : without the PyCObject stuff the python
+  /* Note: without the PyCObject stuff the python
    * wrapper fail on this, the numpy vector points on a deleted
    * memory!*/
-  const SP::SimpleVector getVector(SP::SimpleVector v)
+  
+  const SP::SiconosVector getVector(SP::SimpleVector v)
   {
     return v;
   };
+
+  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
+  {
+    return v;
+  };
+  
   
   /* to make swig define SWIGTYPE_p_PyArrayObject */
   const PyArrayObject* getVector(PyArrayObject* v)
