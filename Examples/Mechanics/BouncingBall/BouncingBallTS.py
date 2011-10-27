@@ -19,21 +19,18 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 #
 
-
-from matplotlib.pyplot import subplot, title, plot, grid, show
-
 from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
      LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
 
 from numpy import array, eye, empty
 
 t0 = 0      # start time
-T = 5      # end time
+T = 10      # end time
 h = 0.005   # time step
 r = 0.1     # ball radius
 g = 9.81    # gravity
 m = 1       # ball mass
-e = 0.9     # restitution coeficient
+e = 0.8     # restitution coeficient
 theta = 0.5 # theta scheme
 
 
@@ -111,7 +108,7 @@ N = (T-t0)/h
 # Get the values to be plotted 
 # ->saved in a matrix dataPlot
 
-dataPlot = empty((N+1,5))
+dataPlot = empty((N,5))
 
 
 #
@@ -147,9 +144,24 @@ while(s.nextTime() < T):
     k += 1
     s.nextStep()
     print s.nextTime()
+
+#
+# comparison with the reference file
+#
+from Siconos.Kernel import SimpleMatrix, getMatrix
+from numpy.linalg import norm
+
+ref = getMatrix(SimpleMatrix("result.ref"))
+
+if (norm(dataPlot - ref) > 1e-12):
+    print("Warning. The result is rather different from the reference file.")
+
+
 #
 # plots
 #
+from matplotlib.pyplot import subplot, title, plot, grid, show
+
 subplot(411)
 title('position')
 plot(dataPlot[:,0], dataPlot[:,1])
@@ -167,3 +179,6 @@ plot(dataPlot[:,0], dataPlot[:,4])
 title('lambda')
 grid()
 show()
+
+
+    

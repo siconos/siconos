@@ -159,6 +159,9 @@ int main(int argc, char* argv[])
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
+      SP::SimpleVector yy = boost::static_pointer_cast<SimpleVector>(inter->y(0));
+      double *yp = yy->getArray();
+      std::cout << yy << "," << yy->getArray() << std::endl;
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
@@ -182,7 +185,7 @@ int main(int argc, char* argv[])
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       return 1;
     }
 
