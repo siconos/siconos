@@ -133,15 +133,15 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 LIBRARY_PROJECT_SETUP()
 
-# F95 Cmake Bug
-CONFIGURE_FILE(SiconosNumerics.h  DPCG.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  DPCGS.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  DSOLBT.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  DUSOL.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  if.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 
-CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY) 
+# F95 Cmake Bug. No more needed? 
+#CONFIGURE_FILE(SiconosNumerics.h  DPCG.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  DPCGS.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  DSOLBT.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  DUSOL.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  if.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 
+#CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY) 
 
 # The library tests
 

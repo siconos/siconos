@@ -2,9 +2,6 @@
 # Common setup
 #
 
-# before everything
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
-
 # an encourage to out of source builds 
 INCLUDE(OutOfSourcesBuild)
 
@@ -14,39 +11,7 @@ INCLUDE(SiconosTools)
 MACRO(SICONOS_PROJECT 
     _PROJECT_NAME 
     MAJOR_VERSION MINOR_VERSION PATCH_VERSION)
-
-  # Set cmake policies (cmake >= 2.6)
-  IF(COMMAND CMAKE_POLICY)
-
-    CMAKE_POLICY(VERSION 2.6.0)
-
-    # minimum version required
-    CMAKE_POLICY(SET CMP0000 NEW) 
-
-    # CMAKE_BACKWARDS_COMPATIBILITY should no longer be used
-    CMAKE_POLICY(SET CMP0001 NEW) 
-    
-    # logical target names must be globally unique
-    CMAKE_POLICY(SET CMP0002 NEW) 
-    
-    # Libraries linked via full path no longer produce linker searchs
-    # paths
-    CMAKE_POLICY(SET CMP0003 NEW)
-
-    # Libraries linked may not have leading or trailing white space
-    CMAKE_POLICY(SET CMP0004 NEW) 
-                               
-    # Preprocessor definition values are now escaped automatically.
-    CMAKE_POLICY(SET CMP0005 NEW)
-
-    # Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.
-    CMAKE_POLICY(SET CMP0006 NEW)
-    
-    #list command no longer ignores empty elements.
-    CMAKE_POLICY(SET CMP0007 NEW)
-
-  ENDIF(COMMAND CMAKE_POLICY)
-
+  
   # Build options
   # Static and shared libs : defaults
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
@@ -57,7 +22,6 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_DOCUMENTATION "Build doxygen documentation with 'make doc'" OFF)
   OPTION(WITH_TESTING "Enable 'make test' target" ON)
   OPTION(WITH_TIMERS "Enable timers" OFF)
-  OPTION(HAVE_FORTRAN_LIBRARIES "Fortran libraries are known (Otherwise try to find them)" ON)
   OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
   OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
 
@@ -182,7 +146,7 @@ MACRO(SICONOS_PROJECT
     ENDIF(WITH_TESTS_COVERAGE)
 
     INCLUDE(CTest)
-    ENABLE_TESTING()
+    ENABLE_TESTING()  # Useless? done in CTest.cmake
   
   ENDIF(WITH_TESTING)
   # The library build stuff
@@ -248,15 +212,12 @@ MACRO(SICONOS_PROJECT
       INSTALL(FILES ${_F} DESTINATION share/${PROJECT_PACKAGE_NAME})
     ENDFOREACH(_F ${_SFILES})
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config/xmlschema)
-
+  
   # Sources
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
-    SUBDIRS(src)
+    add_subdirectory(src)
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
-
-  # To save build settings
-  INCLUDE(CMakeExportBuildSettings)
-
+  
   # Packaging
   INCLUDE(InstallRequiredSystemLibraries)
   

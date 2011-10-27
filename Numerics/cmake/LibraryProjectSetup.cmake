@@ -106,17 +106,14 @@ MACRO(LIBRARY_PROJECT_SETUP)
 
   #
   # On Mac OS : 
-  #
-  IF(APPLE)
+  #  Note Franck : I have commented the following lines, test purpose. It seems to work
+  # without these on SnowLeopard and above ...To be confirmed
+  #IF(APPLE)
     # 1 : do not use defaults system libraries (i.e not fortran lapack lib but atlas/lapack lib)
-    SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-search_paths_first,-single_module")
-    SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -Wl,-search_paths_first")
-    SET(CMAKE_SHARED_LINKER_FLAGS "-read_only_relocs suppress")
-    IF(FORTRAN_COMPILER_LIB_DIRECTORIES)
-      # 2 : the runtime libraries of the fortran compiler are needed
-      REMEMBER_LINK_DIRECTORIES("${FORTRAN_COMPILER_LIB_DIRECTORIES}")
-    ENDIF(FORTRAN_COMPILER_LIB_DIRECTORIES)
-  ENDIF(APPLE)
+    #SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-search_paths_first,-single_module")
+    #SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -Wl,-search_paths_first")
+    #SET(CMAKE_SHARED_LINKER_FLAGS "-read_only_relocs suppress")
+  #ENDIF(APPLE)
 
   IF(_ALL_FILES)
     IF(BUILD_STATIC_LIBS)
@@ -126,19 +123,8 @@ MACRO(LIBRARY_PROJECT_SETUP)
     IF(BUILD_SHARED_LIBS)
       ADD_LIBRARY(${PROJECT_NAME}_shared  SHARED ${_ALL_FILES})
     ENDIF(BUILD_SHARED_LIBS)
-    
-    IF(APPLE)
-      IF(FORTRAN_LIBRARIES)
-        IF(BUILD_STATIC_LIBS)
-          TARGET_LINK_LIBRARIES(${PROJECT_NAME}_static ${FORTRAN_LIBRARIES})
-        ENDIF(BUILD_STATIC_LIBS)
-        IF(BUILD_SHARED_LIBS)
-          TARGET_LINK_LIBRARIES(${PROJECT_NAME}_shared ${FORTRAN_LIBRARIES})
-        ENDIF(BUILD_SHARED_LIBS)
-      ENDIF(FORTRAN_LIBRARIES)
-    ENDIF(APPLE)
 
-    APPEND_Fortran_FLAGS("-w")
+    APPEND_Fortran_FLAGS("-w") # gnu specific ...
     
     IF(BUILD_STATIC_LIBS)
       SET_TARGET_PROPERTIES(${PROJECT_NAME}_static PROPERTIES 
