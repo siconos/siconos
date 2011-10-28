@@ -73,7 +73,6 @@
 %} 
 // common declarations with Numerics
 
-%include "SolverOptions.h"
 %include Common.i
 
 // mandatory !
@@ -232,8 +231,6 @@ namespace boost
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
-// what's wrong with this ignore ??
-%ignore PURE_DEF;
 %include "Tools.hpp"
 
 %include "addons.hpp"
@@ -274,14 +271,8 @@ namespace boost
 %shared_ptr(TYPE); 
 %enddef
 
-
  // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
-
-
-%template() boost::shared_ptr<SolverOptions>;
-%shared_ptr(SolverOptions);
-
 
 // ignores
 
@@ -442,9 +433,29 @@ KERNEL_REGISTRATION();
 %include "X.hpp";
 %enddef
 
+%shared_ptr(_SolverOptions);
+
+TYPEDEF_SPTR(_SolverOptions);
+
+%include "SolverOptions.h"
+
+%extend _SolverOptions
+{
+  _SolverOptions()
+    {
+      _SolverOptions *SO;
+      SO = (_SolverOptions *) malloc(sizeof(_SolverOptions));
+      return SO;
+    }
+
+  ~_SolverOptions() 
+    { 
+      deleteSolverOptions(self);
+    }
+};
+
 
 KERNEL_REGISTRATION();
-
 
 %fragment("StdSequenceTraits");
 
