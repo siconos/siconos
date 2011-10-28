@@ -287,7 +287,7 @@ void frictionContact3D_globalAlartCurnier(
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
-  unsigned int erritermax = options->iparam[1];
+  unsigned int erritermax = options->iparam[7];
 
   assert(itermax > 0);
 
@@ -510,13 +510,13 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 7;
-  options->dSize = 5;
+  options->iSize = 8;
+  options->dSize = 8;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
@@ -527,6 +527,8 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   options->iparam[5] = 1;    // mpi goes on
   //options->iparam[6] => & DMUMPS_STRUC_C
 
+
+  options->iparam[7] = 1; // erritermax
   options->dparam[0] = 1e-3;
 
   options->internalSolvers = NULL;
@@ -787,7 +789,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
-  unsigned int erritermax = options->iparam[1];
+  unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) options->iparam[6];
 
@@ -939,6 +941,8 @@ void frictionContact3D_sparseGlobalAlartCurnier(
              iter, options->dparam[1]);
     }
   }
+
+  iparam[1] = iter;
 
 #ifdef DUMP_PROBLEM
   if (info[0])

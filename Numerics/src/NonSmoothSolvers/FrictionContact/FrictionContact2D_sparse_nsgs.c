@@ -117,7 +117,7 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
   /* Global Solver parameters*/
   int itermax = options[0].iparam[0];
   double tolerance = options[0].dparam[0];
-  int erritermax = options[0].iparam[1];
+  int erritermax = options[0].iparam[7];
 
   /* warning needed */
   if (erritermax > itermax || erritermax < 1) erritermax = 0;
@@ -240,13 +240,13 @@ int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 8;
+  options->dSize = 8;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
