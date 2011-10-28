@@ -77,3 +77,26 @@ def test_LagrangianScleronomousR_setJachqPtr():
     assert np.max(r.C() - array([[0,2,3],[4,5,6]])) == 1.
 
 
+def test_SolverOption():
+    
+    from Siconos.Kernel import LCP
+
+    lcp = LCP()
+
+    i0 = lcp.numericsSolverOptions().iparam[0]
+
+    lcp.numericsSolverOptions().iparam[0] = i0+1
+
+    assert lcp.numericsSolverOptions().iparam[0] != i0
+
+    assert lcp.numericsSolverOptions().iparam[0] == i0+1
+    
+    d0 = lcp.numericsSolverOptions().dparam[0]
+
+    lcp.numericsSolverOptions().dparam[0] = 0.5 * d0
+
+
+    assert lcp.numericsSolverOptions().dparam[0] !=  d0
+    
+    assert lcp.numericsSolverOptions().dparam[0] ==  0.5 * d0
+
