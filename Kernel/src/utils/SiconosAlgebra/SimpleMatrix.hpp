@@ -60,7 +60,7 @@ class SimpleVector;
  *
  *
  */
-class SimpleMatrix: public SiconosMatrix  , public boost::enable_shared_from_this<SimpleMatrix>
+class SimpleMatrix: public SiconosMatrix
 {
 protected:
   /** serialization hooks
