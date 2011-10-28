@@ -86,12 +86,12 @@ public:
    *  the vector
    *  \return unsigned int
    */
-  virtual unsigned int size() const PURE_DEF;
+  virtual unsigned int size() const = 0;
 
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  virtual unsigned int getNum() const PURE_DEF;
+  virtual unsigned int getNum() const = 0;
 
   /** get the number of SimpleVector-Blocks - only usefull for BlockVector.
    *  \return unsigned int
@@ -126,21 +126,21 @@ public:
    *  SimpleVector, default = 0)
    *  \return a DenseVect
    */
-  virtual const DenseVect getDense(unsigned int = 0) const PURE_DEF;
+  virtual const DenseVect getDense(unsigned int = 0) const = 0;
 
   /** get the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless
    *  for SimpleVector, default = 0)
    *  \return a SparseVect
    */
-  virtual const SparseVect getSparse(unsigned int = 0) const PURE_DEF;
+  virtual const SparseVect getSparse(unsigned int = 0) const = 0;
 
   /** get a pointer to the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless
    *  for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  virtual DenseVect* dense(unsigned int = 0) const PURE_DEF;
+  virtual DenseVect* dense(unsigned int = 0) const = 0;
 
   /** get a pointer to the ublas embedded vector if it's type is
    *  Sparse
@@ -148,73 +148,73 @@ public:
    *  (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  virtual SparseVect* sparse(unsigned int = 0) const PURE_DEF;
+  virtual SparseVect* sparse(unsigned int = 0) const = 0;
 
   /** return the array of double values of the vector
    *  \param unsigned int: vector position (only for block vector)
    *  \return double* : the pointer on the array
    */
-  virtual double* getArray(unsigned int = 0) const PURE_DEF;
+  virtual double* getArray(unsigned int = 0) const = 0;
 
   /** get block starting at "pos" (first argument) and write it in v (second arg)
    *  \param pos an int, position of the first element of the required block
    *  \param v a SP::SiconosVector, in-out parameter.
    */
-  //  virtual void getBlock(unsigned int, SP::SiconosVector) const PURE_DEF;
+  //  virtual void getBlock(unsigned int, SP::SiconosVector) const = 0;
 
   /** sets all the values of the vector to 0.0
    */
-  virtual void zero() PURE_DEF;
+  virtual void zero() = 0;
 
   /** resize the vector with nbcol columns. The existing elements of the vector are preseved when specified.
    *  \param: dim of the resized vector
    *  \param: a bool, true if old values are preserved else false. Default = true.
    *  \exception for Block Vector, resizing not allowed.
    */
-  virtual void resize(unsigned int, bool = true) PURE_DEF;
+  virtual void resize(unsigned int, bool = true) = 0;
 
   /** compute the infinite norm of the vector
    *  \return a double
    */
-  virtual double normInf() const PURE_DEF;
+  virtual double normInf() const = 0;
 
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  virtual double norm2() const PURE_DEF ;
+  virtual double norm2() const = 0 ;
 
   /** display data on standard output
    */
-  virtual void display(void)const PURE_DEF;
+  virtual void display(void)const = 0;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SP::SiconosVector vector(unsigned int) PURE_DEF;
+  virtual SP::SiconosVector vector(unsigned int) = 0;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SPC::SiconosVector vector(unsigned int) const PURE_DEF;
+  virtual SPC::SiconosVector vector(unsigned int) const = 0;
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param i, unsigned int, block number (0 for SimpleVector)
    * \param v, a SiconosVector
    */
-  virtual void setVector(unsigned int, const SiconosVector&) PURE_DEF;
+  virtual void setVector(unsigned int, const SiconosVector&) = 0;
 
   /** set SiconosVector number i (pointer link) with v (second arg) - Useful only for BlockVector
    * \param i, unsigned int: block number (0 for SimpleVector)
    * \param v, a pointer to a SiconosVector
    */
-  virtual void setVectorPtr(unsigned int, SP::SiconosVector) PURE_DEF;
+  virtual void setVectorPtr(unsigned int, SP::SiconosVector) = 0;
 
   /** set all values of the vector component to input value.
    * \param a double
    */
-  virtual void fill(double) PURE_DEF;
+  virtual void fill(double) = 0;
 
   /** reserved to BlockVector - get the index tab
    * \return a standard vector of int
@@ -237,7 +237,7 @@ public:
 
   /** put data of the vector into a string
    */
-  virtual const std::string toString() const PURE_DEF;
+  virtual const std::string toString() const = 0;
 
   /* Note: in the following functions, index is a general one;
    that means that for a SimpleVector v, v(i) is index i element but
@@ -248,73 +248,73 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  virtual double getValue(unsigned int) const PURE_DEF;
+  virtual double getValue(unsigned int) const = 0;
 
   /** set the element at position i in the vector.
    *  \param an unsigned int i
    *  \param the value
    */
-  virtual void setValue(unsigned int, double) PURE_DEF;
+  virtual void setValue(unsigned int, double) = 0;
 
   /** get the element at position i in the vector
    *  \param an integer i
    *  \return a double
    */
-  virtual double& operator()(unsigned int) PURE_DEF;
+  virtual double& operator()(unsigned int) = 0;
 
   /** get the element at position i in the vector
    *  \param an integer i
    *  \return a double
    */
-  virtual double operator()(unsigned int) const PURE_DEF;
+  virtual double operator()(unsigned int) const = 0;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  virtual SP::SiconosVector operator [](unsigned int) PURE_DEF;
+  virtual SP::SiconosVector operator [](unsigned int) = 0;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  virtual SPC::SiconosVector operator [](unsigned int) const PURE_DEF;
+  virtual SPC::SiconosVector operator [](unsigned int) const = 0;
 
   /** assignment
    *  \param SiconosVector : the vector to be copied
    */
-  virtual SiconosVector& operator = (const SiconosVector&) PURE_DEF;
+  virtual SiconosVector& operator = (const SiconosVector&) = 0;
 
   /** assignment
    *  \param a DenseVect : the vector to be copied
    */
-  virtual SiconosVector& operator = (const DenseVect&) PURE_DEF;
+  virtual SiconosVector& operator = (const DenseVect&) = 0;
 
   /** assignment
    *  \param a DenseVect : the vector to be copied
    */
-  virtual SiconosVector& operator = (const SparseVect&) PURE_DEF;
+  virtual SiconosVector& operator = (const SparseVect&) = 0;
 
   /** operator +=
    *  \param SiconosVector : a vector to add
    */
-  virtual SiconosVector& operator +=(const SiconosVector&) PURE_DEF;
+  virtual SiconosVector& operator +=(const SiconosVector&) = 0;
 
 
   /** operator -=
    *  \param SiconosVector : a vector to subtract
    */
-  virtual SiconosVector& operator -=(const SiconosVector&) PURE_DEF;
+  virtual SiconosVector& operator -=(const SiconosVector&) = 0;
 
   /** multiply the current vector with a double scalar
    *  \param a double
    */
-  virtual SiconosVector& operator *= (double s) PURE_DEF;
+  virtual SiconosVector& operator *= (double s) = 0;
 
   /** divide the current vector with a double scalar
    *  \param a double
    */
-  virtual SiconosVector& operator /= (double s) PURE_DEF;
+  virtual SiconosVector& operator /= (double s) = 0;
 
   /** reserved to BlockVector - Insert a subvector in this vector: allocation and copy
    *  \param SiconosVector& v : the vector to be inserted

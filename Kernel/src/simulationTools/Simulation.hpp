@@ -225,7 +225,7 @@ public:
   // GETTERS/SETTERS
 
   /* type name of the instance */
-  virtual std::string typeName() PURE_DEF;
+  virtual std::string typeName() = 0;
 
   /** get the name of the Simulation
    *  \return string : the name of the Simulation

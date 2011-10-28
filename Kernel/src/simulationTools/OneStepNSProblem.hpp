@@ -402,12 +402,12 @@ public:
   /** compute extra-diagonal unitaryBlock-matrix
    *  \param an edge descriptor
    */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&) PURE_DEF;
+  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&) = 0;
 
   /** compute diagonal unitary block
    * \param a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&) PURE_DEF;
+  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&) = 0;
 
   /** compute DSBlocks if necessary (this depends on the type of
       OSNS, on the indexSets ...)

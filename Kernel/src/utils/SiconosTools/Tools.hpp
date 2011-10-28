@@ -114,12 +114,6 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
     *obj = val;
 }
 
-/* a modifiable pure virtual definition to solve problems with boost
-   python and pure virtual operators */
-#ifndef PURE_DEF
-#define PURE_DEF =0
-#endif
-
 #include "SiconosPointers.hpp"
 /** Graph -> Set conversion */
 template <class S, class G>
