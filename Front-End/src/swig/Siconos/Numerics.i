@@ -617,12 +617,56 @@
 
 %extend SolverOptions
 {
+
+  SolverOptions* makeSolverOptions(FrictionContactProblem* fcp, FRICTION_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    switch(id)
+    {
+    case SICONOS_FRICTION_2D_NSGS:
+    case SICONOS_FRICTION_2D_NLGS:
+    case SICONOS_FRICTION_2D_PGS:
+    case SICONOS_FRICTION_2D_CPG:
+    case SICONOS_FRICTION_2D_LATIN:
+    {
+      frictionContact2D_setDefaultSolverOptions(SO, id);
+      break;
+    }      
+    // 3D
+    default:
+    {
+      frictionContact3D_setDefaultSolverOptions(SO, id);
+    }
+    }
+    
+    return SO;
+  }
+
   SolverOptions()
     {
       SolverOptions *SO;
       SO = (SolverOptions *) malloc(sizeof(SolverOptions));
       return SO;
     }
+
+  SolverOptions(LinearComplementarityProblem* lcp, LCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    linearComplementarity_setDefaultSolverOptions(lcp, SO, id);
+    return SO;
+  }
+
+  SolverOptions(FRICTION_SOLVER id)
+  {
+    return SolverOptions_makeSolverOptions(NULL, NULL, id);
+  }
+
+  SolverOptions(FrictionContactProblem* fcp, FRICTION_SOLVER id)
+  {
+    return SolverOptions_makeSolverOptions(NULL, fcp, id);
+  }
 
   ~SolverOptions() 
     { 

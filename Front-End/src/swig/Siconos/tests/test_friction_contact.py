@@ -133,8 +133,7 @@ def globalAlartCurnier(problem, reaction, velocity, options):
 def test_fc3dnsgs():
     N.setNumericsVerbose(2)
     FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions()
-    N.frictionContact3D_setDefaultSolverOptions(SO,N.SICONOS_FRICTION_3D_NSGS)
+    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSGS)
     r=N.frictionContact3D_nsgs(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r 
@@ -143,8 +142,7 @@ def test_fc3dnsgs():
 def test_fc3dglobalac_simple_case():
     N.setNumericsVerbose(2)
     FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions()
-    N.frictionContact3D_setDefaultSolverOptions(SO,N.SICONOS_FRICTION_3D_GLOBALAC)
+    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_GLOBALAC)
     
     r=N.frictionContact3D_globalAlartCurnier(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
@@ -156,9 +154,8 @@ def test_fc3dglobalac_full():
     print 'problem dimension :',problem.dimension
     print 'number of contacts : ', problem.numberOfContacts
 
-    SO=N.SolverOptions()
+    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_GLOBALAC)
 
-    N.frictionContact3D_setDefaultSolverOptions(SO,N.SICONOS_FRICTION_3D_GLOBALAC)
     SO.iparam[1]=1
 
     reactions = matrix(zeros(problem.dimension*problem.numberOfContacts)).transpose()
@@ -171,4 +168,6 @@ def test_fc3dglobalac_full():
 
     i=N.frictionContact3D_globalAlartCurnier(problem,reactions,velocities, SO)
 
+    print 'iter=', iter
+    print 'iter=', SO.iparam[7]
     assert SO.dparam[1]  == err
