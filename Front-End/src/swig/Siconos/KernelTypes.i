@@ -711,6 +711,7 @@
 %template() boost::shared_ptr<std::vector<unsigned int> >;
 
 
+
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
 %apply (boost::shared_ptr<SimpleVector>) { (SP::SimpleVector) };
 

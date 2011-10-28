@@ -71,6 +71,10 @@
 #include <debug.h>
 
 %} 
+// common declarations with Numerics
+
+%include "SolverOptions.h"
+%include Common.i
 
 // mandatory !
 %rename (lambda_) lambda;
@@ -254,8 +258,30 @@ namespace boost
 %enddef
 
 
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%rename  (__getitem__) TYPE ## ::operator[];
+%rename  (__add__) TYPE ## ::operator+;
+%rename  (__mul__) TYPE ## ::operator*;
+%rename  (__div__) TYPE ## ::operator/;
+%rename  (__iadd__) TYPE ## ::operator+=;
+%rename  (__imul__) TYPE ## ::operator*=;
+%rename  (__idiv__) TYPE ## ::operator/=;
+%rename  (__eq__) TYPE ## ::operator==;
+%rename  (__ne__) TYPE ## ::operator!=;
+%rename  (__copy__) TYPE ## ::operator=;
+%ignore boost::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) boost::enable_shared_from_this<TYPE>;
+%shared_ptr(TYPE); 
+%enddef
+
+
  // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
+
+
+%template() boost::shared_ptr<SolverOptions>;
+%shared_ptr(SolverOptions);
+
 
 // ignores
 
@@ -375,13 +401,7 @@ KERNEL_REGISTRATION();
 %}
 
 
-// include registered headers
-
-#undef PY_REGISTER
-%define PY_REGISTER(X)
-%include "X.hpp";
-%enddef
-
+// needed templates
 
 %template (InteractionsSet) SiconosSet<Interaction,double*>;
 
@@ -406,6 +426,21 @@ KERNEL_REGISTRATION();
 // suppress warning
 %ignore  boost::enable_shared_from_this< Hashed >;
 %template (sharedHashed) boost::enable_shared_from_this< Hashed >;
+
+
+
+// include registered headers
+
+#undef PY_REGISTER
+%define PY_REGISTER(X)
+%include "X.hpp";
+%enddef
+
+
+#undef PY_REGISTER_WITHOUT_DIRECTOR
+%define PY_REGISTER_WITHOUT_DIRECTOR(X)
+%include "X.hpp";
+%enddef
 
 
 KERNEL_REGISTRATION();
