@@ -73,9 +73,9 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
       SET_TESTS_PROPERTIES(${_EXE} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 	  # Note Franck : I try to set DYLD ... useless for the moment
-      set_test_properties(${_EXE} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=@LD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=@LD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
       if(APPLE)
-		set_test_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=@DYLD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
+		set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=@DYLD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
 	  endif()
 	  
       IF(${_EXE}_PROPERTIES)
