@@ -170,6 +170,7 @@ public:
    */
   void display() const;
 
-};
 
+};
+DEFINE_SPTR(ControlManager)
 #endif
