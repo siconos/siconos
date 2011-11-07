@@ -179,8 +179,8 @@ int main(int argc, char* argv[])
 
     //Creation du control et ajout du Sensor et Actuator
     SP::ControlManager control(new ControlManager(RX90));
-    control->addSensor(1, Sampling);
-    control->addActuator(1, delay);
+    control->addSensor(2, Sampling);
+    control->addActuator(2, delay);
     (*(control->getActuators().begin()))->addSensorPtr(*((control->getSensors()).begin()));
 
     SP::TimeStepping s(new TimeStepping(t));

@@ -23,7 +23,7 @@
 // @brief Compute the voltage required to follow the reference trajectory
 //
 #include <iostream>
-#include <string>
+#include <cstring>
 
 #include <boost/numeric/bindings/atlas/clapack.hpp>
 #include <boost/numeric/ublas/io.hpp>

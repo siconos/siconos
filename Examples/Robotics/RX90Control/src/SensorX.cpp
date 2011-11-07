@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SensorX.h"
-#include "SensorFactory.h"
-#include "ioMatrix.h"
-#include "DynamicalSystem.h"
-#include "Model.h"
-#include "TimeDiscretisation.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "LagrangianDS.h"
+#include "SensorX.hpp"
+#include "SensorFactory.hpp"
+#include "ioMatrix.hpp"
+#include "DynamicalSystem.hpp"
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "LagrangianDS.hpp"
 
 using namespace std;
 using namespace SensorFactory;
@@ -31,12 +31,12 @@ using namespace SensorFactory;
 SensorX::SensorX(): Sensor()
 {}
 
-SensorX::SensorX(int name, TimeDiscretisation* t): Sensor(name, t)
+SensorX::SensorX(int name, SP::TimeDiscretisation t): Sensor(name, t)
 {}
 
 SensorX::~SensorX()
 {
-  delete storedX;
+  storedX.reset();
 }
 
 void SensorX::initialize()
@@ -49,14 +49,14 @@ void SensorX::initialize()
   //pour y associer notre vecteur de données.
 
   //Comme on veut récuperer un vecteur a un temps donné, on créer une copie dans un autre vecteur
-  storedX.reset(new SimpleVector(model->nonSmoothDynamicalSystem()->getDynamicalSystemPtr(0)->getN());
-                (data[eSensor])["StoredX"] = storedX;
+  storedX.reset(new SimpleVector(model()->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getN()));
+  (_data[_eSensor])["StoredX"] = storedX;
 }
 
-              void SensorX::capture()
+void SensorX::capture()
 {
   //capture du vecteur d'état
-  *storedX = model->nonSmoothDynamicalSystem()->getDynamicalSystemPtr(0)->getX();
+  storedX = model()->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->x();
 }
 
 SensorX* SensorX::convert(Sensor* s)

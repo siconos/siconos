@@ -181,20 +181,20 @@ void reduceVector(vector<bool> & vec, vector<bool> & index)
 * Vector expansion           *
 *********************************************************/
 
-void expandVector(double * tab, vector<double> & vector, vector<int> & index)
+void expandVector(double * tab, vector<double> & vec, vector<int> & index)
 {
   //  if(vector2.size()>vector1.size() || vector2.size()!=index.size())
   //    std::cout << "Wrong size...\n";
   //  else
   if (index.size() > 0)
-    for (unsigned int i = 0; i < vector.size(); i++)
-      tab[index[i]] = vector[i];
+    for (unsigned int i = 0; i < vec.size(); i++)
+      tab[index[i]] = vec[i];
   else
-    for (unsigned int i = 0; i < vector.size(); i++)
-      tab[i] = vector[i];
+    for (unsigned int i = 0; i < vec.size(); i++)
+      tab[i] = vec[i];
 }
 
-void expandVector(double * tab, vector<double> & vector, vector<bool> & index)
+void expandVector(double * tab, vector<double> & vec, vector<bool> & index)
 {
   //  if(vector.size()>index.size() && index.size()>0)
   //    std::cout << "Wrong size...\n";
@@ -205,14 +205,14 @@ void expandVector(double * tab, vector<double> & vector, vector<bool> & index)
     for (unsigned int i = 0; i < index.size(); i++)
       if (index[i])
       {
-        tab[i] = vector[k];
+        tab[i] = vec[k];
         k++;
       }
   }
   else
   {
-    for (unsigned int i = 0; i < vector.size(); i++)
-      tab[i] = vector[i];
+    for (unsigned int i = 0; i < vec.size(); i++)
+      tab[i] = vec[i];
   }
 }
 

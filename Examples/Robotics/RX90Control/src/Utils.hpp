@@ -110,6 +110,6 @@ void expandVector(double * tab, vector<double> & vector2, vector<int> & index);
  * @param[in] vector (vector)
  * @param[in] index (int) <em> dim size of tab </em>
  */
-void expandVector(double * tab, vector<double> & vector, vector<bool> & index);
+void expandVector(double * tab, vector<double> & vec, vector<bool> & index);
 
 #endif /* __Kernel_Utils_hpp */

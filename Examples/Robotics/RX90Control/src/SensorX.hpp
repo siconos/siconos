@@ -17,58 +17,65 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file DelayedSampledActuator.h
-  An example on how to implement a user-defined actuator.
+/*! \file SensorX.h
+  A specific sensor, to capture q vector ("position") in Lagrangian systems.
+  Used as an example on how to implement new user-sensors.
 */
 
-#ifndef DelayedSampledActuator_H
-#define DelayedSampledActuator_H
+#ifndef SensorX_H
+#define SensorX_H
 
-#include "Actuator.h"
+#include "Sensor.hpp"
 
-class SiconosMatrix;
+class SimpleVector;
 
-/** \class DelayedSampledActuator
- *  \brief Specific Actuator used as an example on how to implement a user-defined actuator.
+/** \class SensorX
+ *  \brief Specific Sensor to get position
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
- *  \date (Creation) february 09, 2007
+ *  \date (Creation) february 01, 2007
  *
+ * A specific sensor, to capture q vector ("position") in Lagrangian systems.
+ * Used as an example on how to implement new user-sensors.
  *
  */
-class DelayedSampledActuator : public Actuator
+class SensorX : public Sensor
 {
 private:
 
   /** Default constructor
    */
-  DelayedSampledActuator();
+  SensorX();
+
+  /** A copy vector of X at the last capture time
+   */
+  SP::SiconosVector storedX;
 
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
+   * \param a string, the type of the Sensor, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  DelayedSampledActuator(int, TimeDiscretisation*);
+  SensorX(int, SP::TimeDiscretisation);
 
   /** Destructor
    */
-  ~DelayedSampledActuator();
+  ~SensorX();
 
   /** initialize sensor data.
    */
   void initialize();
 
-  /** capture data when the ActuatorEvent is processed ( for example set data[ActuatorEvent]=... )
+  /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */
-  void actuate();
+  void capture();
 
   /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Actuator*
+   *  \param Sensor*
    * \return a pointer on the derived type
    */
-  static DelayedSampledActuator* convert(Actuator* s);
+  static SensorX* convert(Sensor* s);
 };
 
 #endif
