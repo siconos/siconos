@@ -63,15 +63,16 @@ int main(int argc, char* argv[])
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
-    q0(1) = PI / 3;
-    q0(2) = -PI / 6;
-    q0(4) = PI / 6;
-    v0(0) = -0.34;
-    v0(3) = 0.59;
-    v0(5) = -0.34;
+    SP::SiconosVector q0(new SimpleVector(nDof));
+    SP::SiconosVector v0(new SimpleVector(nDof));
+    q0->zero();
+    v0->zero();
+    (*q0)(1) = PI / 3;
+    (*q0)(2) = -PI / 6;
+    (*q0)(4) = PI / 6;
+    (*v0)(0) = -0.34;
+    (*v0)(3) = 0.59;
+    (*v0)(5) = -0.34;
 
 
     SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
@@ -79,11 +80,11 @@ int main(int argc, char* argv[])
     // external plug-in
     //    arm->setComputeMassFunction("RX90Plugin.so","mass");
     arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
-    arm->setComputeJacobianNNLFunction(1, "RX90Plugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "RX90Plugin.so", "jacobianNNLq");
+    arm->setComputeJacobianNNLqFunction("RX90Plugin.so", "jacobianVNNL");
+    arm->setComputeJacobianNNLqDotFunction("RX90Plugin.so", "jacobianNNLq");
     arm->setComputeFIntFunction("RX90Plugin.so", "U");
-    arm->setComputeJacobianFIntFunction(1, "RX90Plugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntFunction(0, "RX90Plugin.so", "jacobFintQ");
+    arm->setComputeJacobianFIntqFunction("RX90Plugin.so", "jacobFintV");
+    arm->setComputeJacobianFIntqDotFunction("RX90Plugin.so", "jacobFintQ");
 
     // creating Z parameter computed in Actuators and used in FInt
     SP::SimpleVector torques(new SimpleVector(nDof));
@@ -105,30 +106,46 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
 
-    SimpleMatrix H(12, 6);
-    SimpleVector b(12);
-    H.zero();
+    std::vector<SP::SiconosMatrix> Hvector(12);
+    std::vector<SP::SiconosVector> bvector(12);
+
+
+    SP::SiconosVector b(new SimpleVector(12));
     for (unsigned int i = 0; i < nDof; i++)
     {
-      H(2 * i, i) = 1;
-      H(2 * i + 1, i) = -1;
-    }
-    b(0) = PI * 167.0 / 180.0;
-    b(1) = b(0);
-    b(2) = PI * 137.5 / 180.0;
-    b(3) = b(2);
-    b(4) = PI * 142.5 / 180.0;
-    b(5) = b(4);
-    b(6) = PI * 270.0 / 180.0;
-    b(7) = b(6);
-    b(8) = PI * 112.5 / 180.0;
-    b(9) = b(8);
-    b(10) = PI * 270.0 / 180.0;
-    b(11) = b(10);
-    SP::Relation relation(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter(new Interaction("butée", allDS, 0, 12, nslaw, relation));
+      Hvector[2 * i].reset(new SimpleMatrix(1, 6));
+      Hvector[2 * i + 1].reset(new SimpleMatrix(1, 6));
+      Hvector[2 * i]->zero();
+      Hvector[2 * i + 1]->zero();
+      (*(Hvector[2 * i]))(0, i) = 1;
+      (*(Hvector[2 * i + 1]))(0, i) = -1;
 
-    allInteractions.insert(inter);
+    }
+
+
+    (*b)(0) = PI * 167.0 / 180.0;
+    (*b)(1) = (*b)(0);
+    (*b)(2) = PI * 137.5 / 180.0;
+    (*b)(3) = (*b)(2);
+    (*b)(4) = PI * 142.5 / 180.0;
+    (*b)(5) = (*b)(4);
+    (*b)(6) = PI * 270.0 / 180.0;
+    (*b)(7) = (*b)(6);
+    (*b)(8) = PI * 112.5 / 180.0;
+    (*b)(9) = (*b)(8);
+    (*b)(10) = PI * 270.0 / 180.0;
+    (*b)(11) = (*b)(10);
+    std::vector<SP::Relation> relationVector(12);
+    std::vector<SP::Interaction> interactionVector(12);
+    for (unsigned int i = 0; i < 2 * nDof; i++)
+    {
+      bvector[i].reset(new SimpleVector(1));
+      // (*(bvector[i])) (1) = *b(i);
+      (bvector[i])->setValue(0, (*b)(i));
+      relationVector[i].reset(new LagrangianLinearTIR(Hvector[i], bvector[i]));
+      interactionVector[i].reset(new Interaction("butée", allDS, i, 1, nslaw, relationVector[i]));
+      allInteractions.insert(interactionVector[i]);
+    }
 
     // -------------
     // --- Model ---
@@ -150,18 +167,20 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation Sampling(new TimeDiscretisation(t0, 2 * h));
 
     unsigned int N = (unsigned int)((T - t0) / h + 1);
-    SP::vector<double>tmp(new vector<double>(N));
+
+    std::vector<double> *tmp = new vector<double>(N);
+
     (*tmp)[0] = t0;
     for (unsigned int i = 1; i < tmp->size() - 1; i++)
       (*tmp)[i] = t0 + (i - 1) * 2 * h + 6e-3;
     (*tmp)[tmp->size() - 1] = T;
 
-    SP::TimeDiscretisation delay(new TimeDiscretisation(*tmp, RX90));
+    SP::TimeDiscretisation delay(new TimeDiscretisation(*tmp));
 
     //Creation du control et ajout du Sensor et Actuator
     SP::ControlManager control(new ControlManager(RX90));
-    control->addSensor(2, sampling);
-    control->addActuator(2, delay);
+    control->addSensor(1, Sampling);
+    control->addActuator(1, delay);
     (*(control->getActuators().begin()))->addSensorPtr(*((control->getSensors()).begin()));
 
     SP::TimeStepping s(new TimeStepping(t));
@@ -170,14 +189,8 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(arm, 0.5));
     s->insertIntegrator(OSI);
 
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-15; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnsp(new LCP(mySolver));
+    SP::OneStepNSProblem osnsp(new LCP(SICONOS_LCP_LEMKE));
     s->insertNonSmoothProblem(osnsp);
 
     cout << "=== End of model loading === " << endl;
@@ -224,6 +237,7 @@ int main(int argc, char* argv[])
       s->advanceToEvent();
       s->processEvents();
       // get current time step
+      std::cout << k << std::endl;
       if (abs(s->startingTime() - (k + 1)*h) < 1e-12)
       {
         k++;
