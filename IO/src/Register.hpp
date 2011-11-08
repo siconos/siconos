@@ -84,10 +84,10 @@
   namespace boost { namespace serialization {                           \
       template<class Archive>                                           \
       void serialize(Archive & ar, CLASS & o, const unsigned int version) \
-  {                                                                     \
-    DEBUG_PRINTF("serialize %s\n", BOOST_PP_STRINGIZE(CLASS));          \
-    siconos_io(ar,o,version);                                           \
-  };                                                                    \
+      {                                                                 \
+        DEBUG_PRINTF("serialize %s\n", BOOST_PP_STRINGIZE(CLASS));      \
+        siconos_io(ar,o,version);                                       \
+      };                                                                \
     }}
 
 /** derived class with multiple inheritance registration
@@ -143,7 +143,4 @@
     ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
   }
 #endif
-
-
-
 

@@ -184,6 +184,8 @@ void KernelTest::t4()
 }
 
 
+#include "Dump.hpp"
+
 using namespace std;
 void KernelTest::t5()
 {
@@ -281,33 +283,9 @@ void KernelTest::t5()
   bouncingBall->initialize(s);
 
 
-  std::ofstream ofs("BouncingBall1.xml");
-  {
-    boost::archive::xml_oarchive oa(ofs);
+  Siconos::IO::save(bouncingBall, "BouncingBall1.xml");
 
-    SP::SolverOptions so;
-
-    siconos_io_register(oa);
-
-    // dump
-    DEBUG_PRINT("saving\n");
-    oa << NVP(bouncingBall);
-  }
-
-
-
-  SP::Model bouncingBallFromFile(new Model());
-
-  std::ifstream ifs("BouncingBall1.xml");
-  {
-    boost::archive::xml_iarchive ia(ifs);
-
-    siconos_io_register(ia);
-
-    DEBUG_PRINT("loading\n");
-    ia >> NVP(bouncingBallFromFile);
-  }
-
+  SP::Model bouncingBallFromFile = Siconos::IO::load("BouncingBall1.xml");
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -321,107 +299,97 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall(new Model());
+  SP::Model bouncingBall = Siconos::IO::load("BouncingBall1.xml");
 
-  std::ifstream ifs("BouncingBall1.xml");
+  try
   {
-    boost::archive::xml_iarchive ia(ifs);
+    double T = bouncingBall->finalT();
+    double t0 = bouncingBall->t0();
+    double h = bouncingBall->simulation()->timeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
 
-    siconos_io_register(ia);
 
-    DEBUG_PRINT("loading\n");
-    ia >> NVP(bouncingBall);
 
-    try
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
+                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
+
+    SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+
+
+    // --- Get the values to be plotted ---
+    // -> saved in a matrix dataPlot
+    unsigned int outputSize = 5;
+    SimpleMatrix dataPlot(N + 1, outputSize);
+
+
+
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(1);
+    SP::SiconosVector lambda = inter->lambda(1);
+
+    dataPlot(0, 0) = bouncingBall->t0();
+    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 2) = (*v)(0);
+    dataPlot(0, 3) = (*p)(0);
+    dataPlot(0, 4) = (*lambda)(0);
+    // --- Time loop ---
+    cout << "====> Start computation ... " << endl << endl;
+    // ==== Simulation loop - Writing without explicit event handling =====
+    int k = 1;
+    boost::progress_display show_progress(N);
+
+    boost::timer time;
+    time.restart();
+
+    while (s->nextTime() < T)
     {
-      double T = bouncingBall->finalT();
-      double t0 = bouncingBall->t0();
-      double h = bouncingBall->simulation()->timeStep();
-      int N = (int)((T - t0) / h); // Number of time steps
+      s->computeOneStep();
 
-
-
-      SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
-                              (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
-
-      SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
-      SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
-
-
-      // --- Get the values to be plotted ---
-      // -> saved in a matrix dataPlot
-      unsigned int outputSize = 5;
-      SimpleMatrix dataPlot(N + 1, outputSize);
-
-
-
-      SP::SiconosVector q = ball->q();
-      SP::SiconosVector v = ball->velocity();
-      SP::SiconosVector p = ball->p(1);
-      SP::SiconosVector lambda = inter->lambda(1);
-
-      dataPlot(0, 0) = bouncingBall->t0();
-      dataPlot(0, 1) = (*q)(0);
-      dataPlot(0, 2) = (*v)(0);
-      dataPlot(0, 3) = (*p)(0);
-      dataPlot(0, 4) = (*lambda)(0);
-      // --- Time loop ---
-      cout << "====> Start computation ... " << endl << endl;
-      // ==== Simulation loop - Writing without explicit event handling =====
-      int k = 1;
-      boost::progress_display show_progress(N);
-
-      boost::timer time;
-      time.restart();
-
-      while (s->nextTime() < T)
-      {
-        s->computeOneStep();
-
-        // --- Get values to be plotted ---
-        dataPlot(k, 0) =  s->nextTime();
-        dataPlot(k, 1) = (*q)(0);
-        dataPlot(k, 2) = (*v)(0);
-        dataPlot(k, 3) = (*p)(0);
-        dataPlot(k, 4) = (*lambda)(0);
-        s->nextStep();
-        ++show_progress;
-        k++;
-      }
-      cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
-      cout << "Computation Time " << time.elapsed()  << endl;
-
-      // --- Output files ---
-      cout << "====> Output file writing ..." << endl;
-      ioMatrix io("result.dat", "ascii");
-      dataPlot.resize(k, outputSize);
-      io.write(dataPlot, "noDim");
-      // Comparison with a reference file
-      SimpleMatrix dataPlotRef(dataPlot);
-      dataPlotRef.zero();
-      ioMatrix ref("result.ref", "ascii");
-      ref.read(dataPlotRef);
-
-      if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-      {
-        std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-        CPPUNIT_ASSERT(false);
-      }
-
+      // --- Get values to be plotted ---
+      dataPlot(k, 0) =  s->nextTime();
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*p)(0);
+      dataPlot(k, 4) = (*lambda)(0);
+      s->nextStep();
+      ++show_progress;
+      k++;
     }
+    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << "Computation Time " << time.elapsed()  << endl;
 
-    catch (SiconosException e)
+    // --- Output files ---
+    cout << "====> Output file writing ..." << endl;
+    ioMatrix io("result.dat", "ascii");
+    dataPlot.resize(k, outputSize);
+    io.write(dataPlot, "noDim");
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix ref("result.ref", "ascii");
+    ref.read(dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-      cout << e.report() << endl;
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       CPPUNIT_ASSERT(false);
     }
-    catch (...)
-    {
-      cout << "Exception caught in BouncingBallTS.cpp" << endl;
-      CPPUNIT_ASSERT(false);
-
-    }
-
 
   }
+
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    CPPUNIT_ASSERT(false);
+  }
+  catch (...)
+  {
+    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+    CPPUNIT_ASSERT(false);
+
+  }
+
+
 }

@@ -1,19 +1,20 @@
+
+#ifndef SiconosFull_hpp
+#define SiconosFull_hpp
+
 #include "Register.hpp"
 
 #include <boost/typeof/typeof.hpp>
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
-CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
-
-
 #include <SiconosKernel.hpp>
 #include "SiconosFullGenerated.hpp"
 
 /* hand written */
 
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosVector)
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosMatrix)
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosVector);
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosMatrix);
 
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
@@ -364,3 +365,5 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
 }
+
+#endif
