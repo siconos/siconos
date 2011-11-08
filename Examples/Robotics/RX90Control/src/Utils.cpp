@@ -115,6 +115,31 @@ vector<double> reduceVector(vector<double> & vec, vector<int> & index)
   return ret;
 }
 
+matrix_column<matrix<double, column_major> > reduceVector(matrix_column<matrix<double, column_major> > & vec, vector<int> & index)
+{
+
+  matrix<double, column_major> toto(vec.size(), 1);
+  matrix_column<matrix<double, column_major> > ret(toto, 1);
+
+  if (vec.size() < index.size())
+  {
+    std::cout << "Wrong size...\n";
+    return ret;
+  }
+
+  if (index.size() > 0)
+  {
+    toto.resize(index.size(), 1);
+    for (unsigned int i = 0; i < index.size(); i++)
+      ret[i] = vec[index[i]];
+    return ret;
+  }
+
+  toto.resize(vec.size(), 1);
+  ret = vec;
+  return ret;
+}
+
 
 vector<double> reduceVector(vector<double, array_adaptor<double> > & vec, vector<int> & index)
 {

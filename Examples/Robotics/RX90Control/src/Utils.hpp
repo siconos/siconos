@@ -76,6 +76,8 @@ vector<double> reduceVector(vector<double> & vec, vector<int> & index);
  */
 vector<double> reduceVector(vector<double, array_adaptor<double> > & vec, vector<int> & index);
 
+matrix_column<matrix<double, column_major> > reduceVector(matrix_column<matrix<double, column_major> > & vec, vector<int> & index);
+
 /**
  * Reduce the input vector to the given index
  *

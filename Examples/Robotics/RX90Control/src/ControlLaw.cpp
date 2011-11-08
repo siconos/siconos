@@ -35,7 +35,20 @@ extern "C" {
 #include "LagrangianModel.h"
 #include "LagrangianDefinitions.h"
 }
+#include "KernelConfig.h"
 
+#ifndef FRAMEWORK_BLAS
+#define OUTSIDE_FRAMEWORK_BLAS
+#endif
+
+//#undef HAVE_ATLAS
+#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#include <boost/numeric/bindings/atlas/clapack.hpp>
+namespace lapack = boost::numeric::bindings::atlas;
+#else
+#include <boost/numeric/bindings/lapack/lapack.hpp>
+namespace lapack = boost::numeric::bindings::lapack;
+#endif
 #include "KernelDefinitions.hpp"
 #include "Utils.hpp"
 
@@ -105,7 +118,12 @@ extern "C" void controlLaw(double * t, double * q, double * qdot, int * NDOF, in
 
   vector<double> sDesired(*NDOF);
   vector<double> sdotDesired(*NDOF);
-  vector<double> sddotDesired(*NDOF);
+  matrix<double, column_major> sddotDesiredMATRIX(*NDOF, 1);
+  matrix_column<matrix<double, column_major> > sddotDesired(sddotDesiredMATRIX, 1);
+
+  //vector<double> sddotDesired(*NDOF);
+
+
 
   trajectory(t, &(sDesired[0]), &(sdotDesired[0]), &(sddotDesired[0]), &contacts);
 
@@ -129,9 +147,10 @@ extern "C" void controlLaw(double * t, double * q, double * qdot, int * NDOF, in
 
   //qddot = inv(H)*v;
   vector<int> ipiv(*NDOF);
-  boost::numeric::bindings::atlas::getrf(H, ipiv);
-  boost::numeric::bindings::atlas::getri(H, ipiv);
-  sddotDesired = prod(H, sddotDesired);
+  // lapack::getrf(H, ipiv);
+  // sddotDesired = prod(H, sddotDesired);
+
+  lapack::gesv(H, ipiv, sddotDesiredMATRIX);
 
   //D = M*qddot(ActiveDOF) + N + FAdditionnal;
   sddotDesired = reduceVector(sddotDesired, activeDOF);
