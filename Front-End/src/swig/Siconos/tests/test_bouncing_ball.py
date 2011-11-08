@@ -87,6 +87,17 @@ def test_bouncing_ball1():
     # simulation initialization
     bouncingBall.initialize(s)
 
+    #
+    # save and load data from xml and .dat
+    #
+    try:
+        from Siconos.Kernel import save
+
+        save(bouncingBall,"bouncingBall.xml")
+        save(bouncingBall,"bouncingBall.dat")
+
+    except:
+        print "Warning : could not import save from Siconos.Kernel"
 
     # the number of time steps
     N = (T-t0)/h
@@ -140,6 +151,18 @@ def test_bouncing_ball1():
     ref = getMatrix(SimpleMatrix("result.ref"))
 
     assert (norm(dataPlot - ref) < 1e-12)
+
+
+def test_bouncing_ball_from_xml():
+    
+    assert False # just have to load from xml...
+
+
+def test_bouncing_ball_from_binary():
+    
+    assert False # just have to load from .dat...
+
+
 
 
 def test_bouncing_ball2():

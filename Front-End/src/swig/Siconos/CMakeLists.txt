@@ -127,7 +127,8 @@ SWIG_LINK_LIBRARIES(Numerics ${PYTHON_LIBRARIES}
 
 SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES} 
   ${SiconosKernel_LIBRARIES} 
-  ${SiconosNumerics_LIBRARIES} 
+  ${SiconosNumerics_LIBRARIES}
+  ${SiconosIO_LIBRARIES}
   ${FORTRAN_LIBRARIES} 
   ${Boost_LIBRARIES})
 

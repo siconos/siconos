@@ -1,1 +1,1 @@
-#
+#cmakedefine HAVE_SICONOS_IO

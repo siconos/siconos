@@ -46,7 +46,7 @@
 #undef c_pow
 #undef c_abs
 #endif
-#include "SiconosKernel.hpp"
+#include <SiconosKernel.hpp>
 #include "Disk.hpp"
 #include "Circle.hpp"
 #include "DiskDiskR.hpp"
@@ -70,6 +70,10 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
+#include "FrontEndConfig.h"
+#ifdef HAVE_SICONOS_IO
+#include <Siconos/IO/Dump.hpp>
+#endif
 %} 
 // common declarations with Numerics
 
@@ -456,6 +460,12 @@ TYPEDEF_SPTR(_SolverOptions);
 
 
 KERNEL_REGISTRATION();
+
+%include "FrontEndConfig.h";
+
+#ifdef HAVE_SICONOS_IO
+%include "Siconos/IO/Dump.hpp";
+#endif
 
 %fragment("StdSequenceTraits");
 
