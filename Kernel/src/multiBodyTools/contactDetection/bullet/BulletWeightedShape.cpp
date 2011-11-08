@@ -31,6 +31,8 @@ BulletWeightedShape::BulletWeightedShape(SP::btCollisionShape shape, const doubl
 
   _inertia.reset(new SimpleMatrix(3, 3));
 
+  _inertia->zero();
+
   (*_inertia)(0, 0) = localinertia[0];
   (*_inertia)(1, 1) = localinertia[1];
   (*_inertia)(2, 2) = localinertia[2];

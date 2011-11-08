@@ -143,7 +143,7 @@ void BulletSpaceFilter::buildInteractions(double time)
     {
 
       btVector3 center;
-      double radius;
+      btScalar radius;
 
       obA->getCollisionShape()->getBoundingSphere(center, radius);
       double contactThreshold = radius * .1;
