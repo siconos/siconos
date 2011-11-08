@@ -87,9 +87,9 @@ public:
     */
   EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
-  /** defaut constructor
+  /** defaut constructor (needed for serialization)
   */
-  // EventDriven() {};
+  EventDriven() {};
 
   /** destructor
   */

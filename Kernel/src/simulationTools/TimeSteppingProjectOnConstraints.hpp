@@ -72,6 +72,11 @@ public:
                                    SP::OneStepNSProblem osnspb_velo,
                                    SP::OneStepNSProblem osnspb_pos);
 
+
+  /** default constructor
+   */
+  TimeSteppingProjectOnConstraints() {};
+
   virtual ~TimeSteppingProjectOnConstraints();
 
   virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);

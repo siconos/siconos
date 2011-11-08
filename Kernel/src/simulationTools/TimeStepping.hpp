@@ -46,11 +46,6 @@ private:
   */
   ACCEPT_SERIALIZATION(TimeStepping);
 
-
-  /** Default Constructor
-  */
-  TimeStepping() {};
-
   // /** compute LevelMin */
   // void initLevelMin();
 
@@ -100,6 +95,12 @@ protected:
   /** initialisation specific to TimeStepping for Interactions.
    */
   void initializeInteraction(SP::Interaction inter);
+
+
+  /** Default Constructor
+   */
+  TimeStepping() {};
+
 public:
 
   /** Constructor with the time-discretisation.

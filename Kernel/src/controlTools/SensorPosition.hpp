@@ -64,6 +64,11 @@ public:
    */
   SensorPosition(int, SP::TimeDiscretisation);
 
+
+  /** default constructor.
+   */
+  SensorPosition() {};
+
   /** Destructor
    */
   ~SensorPosition();
