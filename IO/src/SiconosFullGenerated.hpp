@@ -77,10 +77,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_fExt)
                                (_forces)
                                (_jacobianvFL)
-                               (_jacobianqDotForces)
-                               (computeFIntPtr)
-                               (computeJacobianFIntqPtr)
-                               (computeJacobianFIntqDotPtr))
+                               (_jacobianqDotForces))
 SICONOS_IO_REGISTER_WITH_BASES(PrimalFrictionContact, (LinearOSNS),
                                (_contactProblemDim)
                                (_sizeLocalOutput)
@@ -118,7 +115,7 @@ SICONOS_IO_REGISTER_WITH_BASES(MLCP, (LinearOSNS),
                                (_m)
                                (_curBlock))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingD1Minus, (Simulation),
-                              )
+                               (impactOccuredLastTimeStep))
 SICONOS_IO_REGISTER_WITH_BASES(FrictionContact, (LinearOSNS),
                                (_contactProblemDim)
                                (_mu)
@@ -199,7 +196,6 @@ SICONOS_IO_REGISTER(Interaction,
                     (_lowerLevelForInput)
                     (_upperLevelForInput)
                     (_interactionSize)
-                    (_numberOfRelations)
                     (_sizeOfDS)
                     (_sizeZ)
                     (_absolutePosition)
@@ -281,6 +277,7 @@ SICONOS_IO_REGISTER(Simulation,
                     (_tout)
                     (_allOSI)
                     (_osiMap)
+                    (_interactionOsiMap)
                     (_allNSProblems)
                     (_model)
                     (_levelMinForOutput)
@@ -502,4 +499,3 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_pluginJacqDotFInt)
                                (_pluginJacqNNL)
                                (_pluginJacqDotNNL))
-
