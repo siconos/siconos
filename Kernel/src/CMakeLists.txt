@@ -44,7 +44,6 @@ SET(SiconosKernel_DIRS
 SET(SiconosKernel_Unstable_SRCS 
   simulationTools/PrimalFrictionContact.cpp
   simulationTools/MLCP2.cpp
-  simulationTools/OSNSMultipleImpact.cpp
   )
 
 
