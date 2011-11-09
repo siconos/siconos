@@ -255,8 +255,8 @@ void PivotJointR::computeh(double t)
   y->setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
   y->setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
 
-  std::cout << "PivotJoint computeH:\n";
-  y->display();
+  // std::cout<<"PivotJoint computeH:\n";
+  // y->display();
   /*proj_with_q*/
   for (unsigned int ii = 0; ii < y->size(); ii++)
     _yProj->setValue(ii, y->getValue(ii));
