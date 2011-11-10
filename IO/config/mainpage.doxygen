@@ -1,0 +1,10 @@
+/** \mainpage Siconos IO - API Documentation
+\anchor doxyIO
+\section doxyIOIntro Introduction
+
+\b IO is a Siconos package for the input and output of Siconos data.
+
+At the moment, it only provides a full restart functionality through
+functions to save and load a Siconos Model from files.
+
+*/
