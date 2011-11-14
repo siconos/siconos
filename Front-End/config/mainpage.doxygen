@@ -1,0 +1,24 @@
+/** \mainpage Siconos Front-End - API Documentation
+\anchor doxyFrontEnd
+\section doxyFrontEndIntro Introduction
+
+\b Front-End is a Siconos package that provides Kernel and Numerics
+interfaces to scripting languages.
+
+It currently offers an interface to python.
+
+example of basic python usage :
+
+>>> from Siconos.Kernel import Moreau
+>>> help(Moreau)
+
+>>> from Siconos.Numerics import lcp_pgs
+>>> help(lcp_pgs)
+
+Documentation remains to be written.
+
+You may have a look at examples : BouncingBallTS.py,  DiodeBridge.py
+and tests under tests directory
+
+
+*/

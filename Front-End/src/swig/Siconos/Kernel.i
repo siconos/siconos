@@ -445,7 +445,7 @@ TYPEDEF_SPTR(_SolverOptions);
 
 %extend _SolverOptions
 {
-  _SolverOptions()
+   _SolverOptions* _SolverOptions()
     {
       _SolverOptions *SO;
       SO = (_SolverOptions *) malloc(sizeof(_SolverOptions));

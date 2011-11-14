@@ -56,3 +56,21 @@ ADD_CUSTOM_TARGET(distutils-install
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/FrontEndConfig.h DESTINATION include/Siconos/FrontEnd)
+
+
+# To have a full print of variables, use -DPRINT_ENV=ON
+message(STATUS "\n============================================ Summary ============================================")
+message(STATUS "${PROJECT_NAME} version ${VERSION} is now ready for compilation and installation.")
+message(STATUS "To proceed run 'make' and 'make install' and optionaly 'make test'.")
+message(STATUS " C++ Compiler : ${CMAKE_CXX_COMPILER}")
+message(STATUS " C Compiler : ${CMAKE_C_COMPILER}")
+message(STATUS " Compilation mode is : ${CMAKE_BUILD_TYPE}")
+message(STATUS " Code Sources are in : ${CMAKE_SOURCE_DIR}")
+message(STATUS " The project will be installed in ${CMAKE_INSTALL_PREFIX}")
+message(STATUS " The Numerics library used is : ${SiconosNumerics_FOUND}")
+message(STATUS " The Kernel library used is : ${SiconosKernel_FOUND}")
+message(STATUS " The Python libraries are : ${PYTHON_LIBRARIES}")
+message(STATUS " The Python includes are : ${PYTHON_INCLUDE_DIR}")
+message(STATUS " To get more information about dependencies, config or else, ")
+message(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
+message(STATUS "=================================================================================================\n")
