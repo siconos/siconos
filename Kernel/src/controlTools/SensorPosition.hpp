@@ -60,9 +60,10 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param an int, the type of the Sensor, which corresponds to the class type
-   * \param a TimeDiscretisation*, (linked to a model).
+   * \param a pointer to TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param a pointer to a model
    */
-  SensorPosition(int, SP::TimeDiscretisation);
+  SensorPosition(int, SP::TimeDiscretisation, SP::Model);
 
 
   /** default constructor.

@@ -29,7 +29,7 @@ using namespace std;
 Sensor::Sensor(): _type(0), _id("none")
 {}
 
-Sensor::Sensor(int name, SP::TimeDiscretisation t): _type(name), _id("none"), _timeDiscretisation(t)
+Sensor::Sensor(int name, SP::TimeDiscretisation t, SP::Model m): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
 {}
 
 Sensor::~Sensor()
@@ -48,14 +48,14 @@ void Sensor::initialize()
 // i.e. add eSensor into the EventsManager of the simulation
 void Sensor::recordInSimulation()
 {
-  model()->simulation()->eventsManager()->insertEvent(_eSensor);
+  _model->simulation()->eventsManager()->insertEvent(_eSensor);
 }
 
 void Sensor::display() const
 {
   cout << "=====> Sensor of type " << _type << ", named " << _id ;
   if (_model)
-    cout << " and linked to model named " << model()->title() << "." << endl;
+    cout << " and linked to model named " << _model->title() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "======" << endl ;

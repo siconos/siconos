@@ -143,6 +143,19 @@ public:
    */
   SP::Sensor addAndRecordSensor(int, SP::TimeDiscretisation);
 
+  /** Add an existing Sensor to the Manager
+   * \param a pointer to the Sensor
+   */
+  void addSensorPtr(SP::Sensor);
+
+  /** To add, initialize an existing Sensor in the manager and record
+   * it in the simulation This function is only useful to add a new
+   * Sensor after the initialization of the manager else call
+   * addSensor()
+   * \param a pointer to a Sensor
+   */
+  void addAndRecordSensorPtr(SP::Sensor);
+
   /** To build and add a new Actuator in the Manager
    * \param the type (int) of the Actuator
    * \param the TimeDiscretisation of the Actuator
@@ -150,7 +163,7 @@ public:
    */
   SP::Actuator addActuator(int, SP::TimeDiscretisation);
 
-  /** To build, add, initialize a new Actuator in the Manager and
+  /** To build, add, initialize a new Actuator in the manager and
    * record it in the simulation This function is only useful to add a
    * new Actuator after the initialization of the manager else call
    * addActuator()
@@ -160,6 +173,18 @@ public:
    */
   SP::Actuator addAndRecordActuator(int, SP::TimeDiscretisation);
 
+  /** Add an existing Actuator to the manager
+   * \param a pointer to an Actuator
+   */
+  void addActuatorPtr(SP::Actuator);
+
+  /** To add, initialize an existing Actuator in the manager and record
+   * it in the simulation This function is only useful to add a new
+   * Actuator after the initialization of the manager otherwise call
+   * addActuator()
+   * \param a pointer to an Actuator
+   */
+  void addAndRecordActuatorPtr(SP::Actuator);
 
 
   /** initialize sensor data.

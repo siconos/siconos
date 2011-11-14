@@ -34,16 +34,17 @@ Actuator::Actuator(): _type(0), _id("none")
   _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t): _type(name), _id("none")
+Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::Model m): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
 {
   _allDS.reset(new DynamicalSystemsSet());
   _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t, const Sensors& sensorList): _type(name), _id("none")
+Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::Model m, const Sensors& sensorList): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
 {
   _allDS.reset(new DynamicalSystemsSet());
   _allSensors.reset(new Sensors());
+  addSensors(sensorList);
 }
 
 Actuator::~Actuator()
@@ -98,14 +99,14 @@ void Actuator::initialize()
 // i.e. add eActuator into the EventsManager of the simulation
 void Actuator::recordInSimulation()
 {
-  model()->simulation()->eventsManager()->insertEvent(_eActuator);
+  _model->simulation()->eventsManager()->insertEvent(_eActuator);
 }
 
 void Actuator::display() const
 {
   cout << "=====> Actuator of type " << _type << ", named " << _id ;
-  if (model())
-    cout << " and linked to model named " << model()->title() << "." << endl;
+  if (_model)
+    cout << " and linked to model named " << _model->title() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;

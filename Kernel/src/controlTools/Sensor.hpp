@@ -100,7 +100,7 @@ typedef std::map<SP::Event, VectorMap>  DataSet;
    (data[myEvent])["myDS_X"] =
    model->nonSmoothDynamicalSystem()->dynamicalSystem()->x()
 
-   See \ref UMSiconosControl for details on how to define its own Sensor.
+   See \ref SicControl for details on how to define its own Sensor.
 
  */
 class Sensor : public boost::enable_shared_from_this<Sensor>
@@ -142,9 +142,10 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param int, the type of the Sensor, which corresponds to the class type
-   * \param a TimeDiscretisation*, (linked to a model).
+   * \param a pointer to a TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param a pointer to a model
    */
-  Sensor(int, SP::TimeDiscretisation);
+  Sensor(int, SP::TimeDiscretisation, SP::Model);
 
   /** destructor
    */

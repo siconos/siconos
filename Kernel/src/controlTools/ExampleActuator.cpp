@@ -23,7 +23,7 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-ExampleActuator::ExampleActuator(int name, SP::TimeDiscretisation t): Actuator(name, t)
+ExampleActuator::ExampleActuator(int name, SP::TimeDiscretisation t, SP::Model m): Actuator(name, t, m)
 {}
 
 void ExampleActuator::initialize()

@@ -34,8 +34,8 @@ namespace ActuatorFactory
 {
 
 /** A pointer to function, returning a pointer to Actuator, built
-    with its type (ie class name) and a pointer to Model.*/
-typedef SP::Actuator(*object_creator)(int, SP::TimeDiscretisation) ;
+    with its type (ie class name), a pointer to a TimeDiscretisation and a Model.*/
+typedef SP::Actuator(*object_creator)(int, SP::TimeDiscretisation, SP::Model);
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -44,9 +44,9 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t)
+template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t, SP::Model m)
 {
-  return boost::shared_ptr<SubType>(new SubType(name, t));
+  return boost::shared_ptr<SubType>(new SubType(name, t, m));
 }
 
 /** Registry Class for sensors.
@@ -61,10 +61,10 @@ template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t)
  *     ActuatorFactory::Registry&
  *     regActuator(ActuatorFactory::Registry::get()) ;
  *
- *     Actuator * yourActuator = regActuator.instantiate(sensorType, timeD );
+ *     Actuator * yourActuator = regActuator.instantiate(sensorType, timeD, m);
  *
  * With sensorType a string, the name of the class of your Actuator
- * (expl: "ActuatorPosition") and timeD a TimeDiscretisation*.
+ * (expl: "ActuatorPosition"), timeD a SP::TimeDiscretisation and m a SP::Model.
  *
  */
 class Registry
@@ -90,8 +90,9 @@ public :
   /** Function to instantiate a new Actuator
    * \param an int, the name of the object added (type name!)
    * \param a pointer to a TimeDiscretisation.
+   * \param a pointer to the model
    */
-  SP::Actuator instantiate(int, SP::TimeDiscretisation);
+  SP::Actuator instantiate(int, SP::TimeDiscretisation, SP::Model);
 } ;
 
 /** Registration Class for sensors.

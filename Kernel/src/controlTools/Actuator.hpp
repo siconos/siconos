@@ -132,17 +132,19 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a TimeDiscretisation*, (linked to a model).
+   * \param an integer, the type of the Actuator, which corresponds to the class type
+   * \param a pointer to a TimeDiscretisation, (/!\ it should not be used elsewhere !)
+   * \param a pointer to a model
    */
-  Actuator(int, SP::TimeDiscretisation);
+  Actuator(int, SP::TimeDiscretisation, SP::Model);
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a TimeDiscretisation*, (linked to a model).
-   * \param a Sensor linked to this Actuator.
+   * \param an integer, the type of the Actuator, which corresponds to the class type
+   * \param a pointer TimeDiscretisation, (/!\ it should not be used elsewhere !).
+   * \param a pointer to a model
+   * \param Sensors linked to this Actuator.
    */
-  Actuator(int, SP::TimeDiscretisation, const Sensors&);
+  Actuator(int, SP::TimeDiscretisation, SP::Model, const Sensors&);
 
   /** destructor
    */

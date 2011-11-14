@@ -60,35 +60,58 @@ void ControlManager::initialize()
 SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  return (* (_allSensors.insert(regSensor.instantiate(type, t))).first);
+  return (* (_allSensors.insert(regSensor.instantiate(type, t, _model))).first);
 }
 
 SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t)
 {
-  double currentTime = model()->simulation()->nextTime();
+  double currentTime = _model->simulation()->nextTime();
   while (t->currentTime() < currentTime)
     t->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t))).first;
+  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t, _model))).first;
   tmp->initialize();
   tmp->recordInSimulation();
-
   return tmp;
 }
 
 SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  return (* (_allActuators.insert(regActuator.instantiate(type, t))).first);
+  return (* (_allActuators.insert(regActuator.instantiate(type, t, _model))).first);
 }
 
 SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t))).first;
+  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t, _model))).first;
   tmp->initialize();
   tmp->recordInSimulation();
   return tmp;
+}
+
+void ControlManager::addSensorPtr(SP::Sensor s)
+{
+  _allSensors.insert(s);
+}
+
+void ControlManager::addAndRecordSensorPtr(SP::Sensor s)
+{
+  _allSensors.insert(s);
+  s->initialize();
+  s->recordInSimulation();
+}
+
+void ControlManager::addActuatorPtr(SP::Actuator act)
+{
+  _allActuators.insert(act);
+}
+
+void ControlManager::addAndRecordActuatorPtr(SP::Actuator act)
+{
+  _allActuators.insert(act);
+  act->initialize();
+  act->recordInSimulation();
 }
 
 void ControlManager::display() const

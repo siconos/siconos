@@ -44,9 +44,10 @@ public:
 
   /** Constructor with a TimeDiscretisation.
    * \param an int, the type of the Actuator, which corresponds to the class type
-   * \param a TimeDiscretisation*, (linked to a model).
+   * \param a pointer to a TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param a pointer to a Model
    */
-  ExampleActuator(int, SP::TimeDiscretisation);
+  ExampleActuator(int, SP::TimeDiscretisation, SP::Model);
 
   /** Destructor
    */
