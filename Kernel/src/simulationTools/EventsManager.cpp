@@ -81,7 +81,6 @@ void EventsManager::preUpdate()
     {
       _hasNS = false;
     }
-    //
     if ((*it) == _currentEvent)
     {
       _allEvents.insert(*it);
@@ -299,7 +298,8 @@ void EventsManager::GeneralProcessEvents()
 
   if (it_current != bckUp.end()) // the _currentEvent is in the list (_currentEvent is in the same range of the _ENonSmooth)
   {
-    // In this case, we suppose that all the events other than _ENonSmooth have been processed before. We need process only the _ENonSmooth
+    // In this case, we suppose that all the events other than _ENonSmooth have been processed before.
+    // We need process only the _ENonSmooth
     _ENonSmooth->process(simulation());
   }
   else  // _currentEvent is not in the list
