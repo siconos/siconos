@@ -41,6 +41,8 @@ struct compareEvent
     const mpz_t *t1 = e1->getTimeOfEvent();
     const mpz_t *t2 = e2->getTimeOfEvent();
     int res = mpz_cmp(*t1, *t2); // res>0 if t1>t2, 0 if t1=t2 else res<0.
+    if (res == 0)
+      res = e1->getType() - e2->getType();
     return (res < 0);
   }
 };
