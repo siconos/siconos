@@ -287,11 +287,14 @@ void EventsManager::GeneralProcessEvents()
   // may result in invalidation of iterator and hazardous results.
   // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
   EventsContainer bckUp(rangeNew.first, rangeNew.second);
-  // Ckeck if the _ENonSmooth is in the list of events to be processed
-  EventsContainer::iterator it_nonSmooth = bckUp.find(_ENonSmooth);
-  if (it_nonSmooth == bckUp.end())
+  if (_hasNS)
   {
-    RuntimeException::selfThrow("EventsManager::GeneralProcessEvents, _ENonSmooth is not in the list of events to be processed.");
+    // Ckeck if the _ENonSmooth is in the list of events to be processed
+    EventsContainer::iterator it_nonSmooth = bckUp.find(_ENonSmooth);
+    if (it_nonSmooth == bckUp.end())
+    {
+      RuntimeException::selfThrow("EventsManager::GeneralProcessEvents, _ENonSmooth is not in the list of events to be processed.");
+    }
   }
   // Check if the current event is in the list of events to be processed
   EventsContainer::iterator it_current = bckUp.find(_currentEvent);
