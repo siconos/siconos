@@ -357,6 +357,8 @@ void EventsManager::GeneralProcessEvents()
     _ETD->setTime(simulation()->getTkp1());
     _allEvents.insert(_ETD);
   }
+  // free memory
+  mpz_clear(delta_time);
   //
   _allEvents.insert(_currentEvent);
   update();

@@ -146,7 +146,8 @@ public:
    */
   inline void setTime(double time)
   {
-    dTime = time ;
+    dTime = time;
+    mpz_clear(timeOfEvent);
     mpz_init_set_d(timeOfEvent, ceil(dTime / tick));
   };
 
