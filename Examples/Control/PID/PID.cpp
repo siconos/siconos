@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 
     SP::EventsManager eventsManager = s->eventsManager();
     //    eventsManager->display();
-    int N = (int)(3 * (T - t0) / h); // Number of time steps
+    int N = (int)(3 * (T - t0) / h + 10); // Number of time steps
     //    int N = 10000;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
