@@ -36,4 +36,4 @@ void SensorEvent::update()
   setTime(sensor()->timeDiscretisation()->currentTime());
 }
 
-AUTO_REGISTER_EVENT(4, SensorEvent);
+AUTO_REGISTER_EVENT(3, SensorEvent);

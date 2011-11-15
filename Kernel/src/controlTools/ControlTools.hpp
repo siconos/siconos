@@ -27,4 +27,6 @@
 #include "ExampleActuator.hpp"
 #include "ActuatorEvent.hpp"
 #include "ControlManager.hpp"
-
+#include "controlSensor.hpp"
+#include "linearSensor.hpp"
+#include "sampledPIDActuator.hpp"

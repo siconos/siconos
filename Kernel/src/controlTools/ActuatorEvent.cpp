@@ -36,5 +36,5 @@ void ActuatorEvent::update()
   setTime(actuator()->timeDiscretisation()->currentTime());
 }
 
-AUTO_REGISTER_EVENT(3, ActuatorEvent);
+AUTO_REGISTER_EVENT(4, ActuatorEvent);
 
