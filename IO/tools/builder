@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 SiconosKernel.hpp
+# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 > ../src/SiconosFullGenerated.hpp 
 
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
@@ -35,15 +35,20 @@ for opt, arg in opts:
         sys.exit(0)
 
 
-if len(args) <> 1:
+if len(args) <> 0:
     usage()
     sys.exit(1)        
 
-input_header = args[0]    
+input_headers = [ "SiconosKernel.hpp",
+                  "Circle.hpp", "CircleCircleR.hpp", "CircularDS.hpp", "Disk.hpp", "DiskDiskR.hpp",
+                  "DiskMovingPlanR.hpp", "DiskPlanR.hpp",
+                  "SphereLDS.hpp", "SphereLDSPlanR.hpp", "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
+                  "SphereNEDSPlanR.hpp", "SphereNEDSSphereNEDSR.hpp",
+                  "SiconosBodies.hpp", "SpaceFilter.hpp", "ExternalBody.hpp" ]
 
 config = parser.config_t( include_paths=include_paths )
 
-decls = parser.parse( [input_header], config )
+decls = parser.parse( input_headers, config )
 global_ns = declarations.get_global_namespace( decls )
 
 

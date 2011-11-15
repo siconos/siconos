@@ -30,23 +30,24 @@
 /** \namespace Siconos::IO
     the place for non templated Siconos IO functions
 */
-
 namespace Siconos
 {
 namespace IO
 {
 
-/** save a Siconos Model into a file
- *  \param model
- *  \param filename with extension : .xml, .dat (binary archive)
+/** save a Siconos Model with the full simulation state into a
+ *  file
+ * \param model
+ * \param filename with extension : .xml, .dat (binary archive)
  */
 void save(SP::Model model, std::string filename);
 
-/** load Siconos Model from file
+/** load a Siconos Model with the full simulation state from file
  * \param filename
  * \return a SP::Model
  */
 SP::Model load(std::string filename);
+
 }
 }
 

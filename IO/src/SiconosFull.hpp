@@ -27,6 +27,23 @@
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
 #include <SiconosKernel.hpp>
+#include <Circle.hpp>
+#include <CircleCircleR.hpp>
+#include <CircularDS.hpp>
+#include <Disk.hpp>
+#include <DiskDiskR.hpp>
+#include <DiskMovingPlanR.hpp>
+#include <DiskPlanR.hpp>
+#include <SphereLDS.hpp>
+#include <SphereLDSPlanR.hpp>
+#include <SphereLDSSphereLDSR.hpp>
+#include <SphereNEDS.hpp>
+#include <SphereNEDSPlanR.hpp>
+#include <SphereNEDSSphereNEDSR.hpp>
+#include <SiconosBodies.hpp>
+#include <SpaceFilter.hpp>
+#include <ExternalBody.hpp>
+
 #include "SiconosFullGenerated.hpp"
 
 /* hand written */
@@ -382,6 +399,10 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
+
+  ar.register_type(static_cast<CircularDS*>(NULL));
+  ar.register_type(static_cast<CircularR*>(NULL));
+
 }
 
 #endif
