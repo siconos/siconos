@@ -24,7 +24,6 @@
 #ifndef linearSensor_H
 #define linearSensor_H
 
-#include "controlSensor.hpp"
 #include "SiconosKernel.hpp"
 
 class SiconosMatrix;

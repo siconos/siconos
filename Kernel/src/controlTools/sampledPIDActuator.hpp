@@ -26,8 +26,6 @@
 
 #include "SiconosKernel.hpp"
 #include <boost/circular_buffer.hpp>
-// to be removed
-#include "controlSensor.hpp"
 
 class sampledPIDActuator : public Actuator
 {
