@@ -51,7 +51,25 @@
 #include "SphereNEDSPlanR.hpp"
 #include "ExternalBody.hpp"
 
+#ifndef __GCCXML__
 #include <tr1/unordered_set>
+#else
+/* gccxml fail to parse some gcc 4.3 builtins, so we provide a fake
+ * unordered_multiset*/
+namespace std
+{
+namespace tr1
+{
+template<class A, class B>
+class unordered_multiset
+{
+public:
+  typedef void iterator;
+};
+}
+}
+#endif
+
 #include <boost/throw_exception.hpp>
 #include <boost/functional/hash.hpp>
 

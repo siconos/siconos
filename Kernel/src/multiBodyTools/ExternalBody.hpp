@@ -21,9 +21,10 @@
 /*! \file ExternalBody.hpp
   \brief External visitable lagrangian class.
 */
-
 #ifndef ExternalBody_hpp
 #define ExternalBody_hpp
+
+#include <LagrangianDS.hpp>
 
 DEFINE_SPTR(SpaceFilter);
 
