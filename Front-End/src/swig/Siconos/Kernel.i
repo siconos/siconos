@@ -464,7 +464,7 @@ KERNEL_REGISTRATION();
 %include "FrontEndConfig.h";
 
 #ifdef HAVE_SICONOS_IO
-%include "Siconos/IO/Dump.hpp";
+%include "Siconos/IO/SiconosRestart.hpp";
 #endif
 
 %fragment("StdSequenceTraits");
