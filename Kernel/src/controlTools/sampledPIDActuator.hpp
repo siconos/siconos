@@ -34,13 +34,13 @@ private:
   sampledPIDActuator();
 
   /** error vector */
-  boost::shared_ptr<boost::circular_buffer<SimpleVector> > _err;
+  boost::shared_ptr<boost::circular_buffer<double> > _err;
 
   /** dimension of the state space */
-  unsigned int _n;
+  unsigned int _nDim;
 
   /** reference we are tracking */
-  SP::SimpleVector _ref;
+  double _ref;
 
   /** control variable */
   SP::SimpleVector _u;
@@ -49,7 +49,7 @@ private:
   SP::SimpleVector _K;
 
   /** the sensor that feed the controller */
-  boost::shared_ptr<controlSensor> _s;
+  SP::controlSensor _sensor;
 
   /** the dynamical system we are controlling */
   SP::FirstOrderLinearDS _DS;
@@ -105,13 +105,12 @@ public:
   void setKPtr(SP::SimpleVector);
 
   /** Set the value of _ref to newValue
-   * \param a SimpleVector
+   * \param a double
    */
-  void setRef(const SimpleVector&);
-
-  /** Set _ref to pointer newPtr
-   */
-  void setRefPtr(SP::SimpleVector);
+  void inline setRef(const double newValue)
+  {
+    _ref = newValue;
+  }
 
   /** Encapsulates an operation of dynamic casting. Needed by Python interface.
   * \param Actuator*

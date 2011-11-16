@@ -48,21 +48,23 @@ void sampledPIDActuator::initialize()
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
 
-  _s = dynamic_pointer_cast<controlSensor>(*(_allSensors->begin()));
-  if (_s == NULL)
+  _sensor = dynamic_pointer_cast<controlSensor>(*(_allSensors->begin()));
+  if (_sensor == NULL)
   {
     RuntimeException::selfThrow("sampledPIDActuator::initialize - the given sensor is not a controlSensor");
   }
   else
   {
-    _n = _s->getYDim();
+    _nDim = _DS->getN();
 
     // initialize _err
-    _err.reset(new boost::circular_buffer<SimpleVector> (3));
+    _err.reset(new boost::circular_buffer<double> (3));
     for (unsigned int i = 0; i < 3; i++)
-      (*_err).push_front(SimpleVector(_n, 0));
+      (*_err).push_front(0.0);
 
-    _u.reset(new SimpleVector(_n, 0));
+    _u.reset(new SimpleVector(_nDim, 0));
+    // to have immediatly the right SP
+    _DS->setb(_u);
   }
 }
 
@@ -76,11 +78,11 @@ void sampledPIDActuator::actuate()
 
   // Compute the new error
 
-  (*_err).push_front(*_ref - (*_s->y()));
+  (*_err).push_front(_ref - (*_sensor->y())(0));
 
   // compute the new control and update it
-  (*_u) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
-           (-1 - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
+  (*_u)(1) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
+              (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
   _DS->setb(_u);
 }
 
@@ -114,39 +116,6 @@ void sampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
   else
   {
     _K = newPtr;
-  }
-}
-
-void sampledPIDActuator::setRef(const SimpleVector& newValue)
-{
-  // check dimensions ...
-  if (newValue.size() != _n)
-  {
-    RuntimeException::selfThrow("sampledPIDActuator::setRef - inconstency between the size of the reference and the output of the observer");
-  }
-  else
-  {
-    if (_ref)
-    {
-      *_ref = newValue;
-    }
-    else
-    {
-      _ref.reset(new SimpleVector(newValue));
-    }
-  }
-}
-
-void sampledPIDActuator::setRefPtr(SP::SimpleVector newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size() != _n)
-  {
-    RuntimeException::selfThrow("sampledPIDActuator::setRef - inconstency between the size of the reference and the output of the observer");
-  }
-  else
-  {
-    _ref = newPtr;
   }
 }
 

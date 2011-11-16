@@ -73,7 +73,7 @@ void linearSensor::initialize()
   _dataPlot.reset(new SimpleMatrix(_nSteps + 1, 1 + rowC));
   _k = 0;
   // -> event
-  _storedY.reset(new SimpleVector(nDim));
+  _storedY.reset(new SimpleVector(rowC));
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
   _YDim = rowC;
