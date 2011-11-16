@@ -118,18 +118,11 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping processSimulation(new TimeStepping(processTD));
+    SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::Moreau processIntegrator(new Moreau(processDS, theta));
     processSimulation->insertIntegrator(processIntegrator);
-
-    // -- OneStepNsProblem --
-    SP::LCP processLCP(new LCP());
-
-    SP::Relay processOSNSPB(new Relay(SICONOS_RELAY_PGS));
-    processSimulation->insertNonSmoothProblem(processOSNSPB);
-
 
     // -------------
     // --- Model controller ---
