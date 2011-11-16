@@ -41,13 +41,12 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for the system
     double t0 = 0;                   // initial computation time
-    double T = 10;                  // final computation time
-    double h = 0.005;                // time step
+    double T = 100;                  // final computation time
+    double h = 0.05;                // time step
     double position_init = 10;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
-
-    SP::SimpleVector xFinal(new SimpleVector(2, 0));
+    double xFinal = 0;              // final value
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -98,17 +97,21 @@ int main(int argc, char* argv[])
     SP::ControlManager control(new ControlManager(process));
 
     // use a controlSensor
-    SP::SimpleMatrix C(new SimpleMatrix(2, 2));
-    C->eye();
-    SP::SimpleMatrix D(new SimpleMatrix(2, 2, 0));
+    SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
+    (*C)(0, 0) = 1;
+    SP::SimpleMatrix D(new SimpleMatrix(1, 2, 0));
     SP::linearSensor sens(new linearSensor(100, tSensor, process, C, D));
     control->addSensorPtr(sens);
     // add the PID controller
     SP::SimpleVector K(new SimpleVector(3, 0));
-    (*K)(0) = 1.1;
-    (*K)(1) = .5;
+    (*K)(0) = .25;
+    (*K)(1) = .125;
+    (*K)(2) = 2;
     SP::sampledPIDActuator act = static_pointer_cast<sampledPIDActuator>(control->addActuator(100, tActuator));
     act->addSensorPtr(sens);
+
+    // To store the nextEvent
+    SP::Event nextEvent;
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
@@ -121,25 +124,23 @@ int main(int argc, char* argv[])
     // Initialize the model and the controlManager
     process->initialize(s);
     control->initialize();
-    act->setRef(*xFinal);
+    act->setRef(xFinal);
     act->setK(*K);
 
     SP::EventsManager eventsManager = s->eventsManager();
-    //    eventsManager->display();
-    int N = (int)(3 * (T - t0) / h + 10); // Number of time steps
-    //    int N = 10000;
+    int N = (int)((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 3;
+    unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector xProc = doubleIntegrator->x();
-
+    SP::SiconosVector u = doubleIntegrator->b();
     dataPlot(0, 0) = process->t0();
     dataPlot(0, 1) = (*xProc)(0);
     dataPlot(0, 2) = (*xProc)(1);
-    //    dataPlot(0, 3) = (*yProc)(0);
-    //    dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 3) = (*u)(0);
+    dataPlot(0, 4) = (*u)(1);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -152,13 +153,21 @@ int main(int argc, char* argv[])
     while (s->nextTime() < T)
     {
       s->computeOneStep();
+      nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
+      // the following check prevents saving the same data multiple times
+      // XXX what happends if we have NS Events ?
+      if (nextEvent->getType() == 1)
+      {
+        dataPlot(k, 0) =  s->nextTime();
+        dataPlot(k, 1) = (*xProc)(0);
+        dataPlot(k, 2) = (*xProc)(1);
+        dataPlot(k, 3) = (*u)(0);
+        dataPlot(k, 4) = (*u)(1);
+        ++show_progress;
+        k++;
+      }
       s->nextStep();
-      ++show_progress;
-      k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
