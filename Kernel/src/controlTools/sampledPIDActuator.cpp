@@ -83,7 +83,6 @@ void sampledPIDActuator::actuate()
   // compute the new control and update it
   (*_u)(1) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
-  _DS->setb(_u);
 }
 
 void sampledPIDActuator::setK(const SimpleVector& newValue)

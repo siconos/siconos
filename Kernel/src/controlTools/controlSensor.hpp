@@ -49,6 +49,10 @@ protected:
   unsigned int _YDim;
   /** A vector for the current value of the output */
   SP::SimpleVector _storedY;
+  /** pointer to the DynamicalSystem we are measuring */
+  SP::DynamicalSystem _DS;
+  /** pointer to the state of the DynamicalSystem */
+  SP::SiconosVector _DSx;
 
 public:
 

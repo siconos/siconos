@@ -50,7 +50,8 @@ void linearSensor::initialize()
   unsigned int rowC = _matC->size(0);
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
-  unsigned int nDim = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getN();
+  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
+  unsigned int nDim = _DS->getN();
   if (colC != nDim)
   {
     char err[200];
@@ -77,12 +78,13 @@ void linearSensor::initialize()
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
   _YDim = rowC;
-  *_storedY = prod((*_matC), _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getx());
+  _DSx = _DS->x();
+  *_storedY = prod(*_matC, *_DSx);
 }
 
 void linearSensor::capture()
 {
-  *_storedY = prod((*_matC), _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getx());
+  *_storedY = prod(*_matC, *_DSx);
   (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
   _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
