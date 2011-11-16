@@ -17,29 +17,21 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file Dump.hpp
+/*! \file Restart.hpp
   \brief provides pre-compiled functions for a full Siconos Model
   serialization through libSiconosIO library */
 
-#ifndef Dump_hpp
-#define Dump_hpp
+#ifndef SICONOSRESTART_HPP
+#define SICONOSRESTART_HPP
 
-#include "SiconosFull.hpp"
-
-
-/** \namespace Siconos::IO
-    the place for non templated Siconos IO functions
-*/
 namespace Siconos
-{
-namespace IO
 {
 
 /** save a Siconos Model with the full simulation state into a
  *  file
  * \param model
- * \param filename with extension : .xml, .dat (binary archive)
- */
+   * \param filename with extension : .xml, .dat (binary archive)
+   */
 void save(SP::Model model, std::string filename);
 
 /** load a Siconos Model with the full simulation state from file
@@ -49,7 +41,5 @@ void save(SP::Model model, std::string filename);
 SP::Model load(std::string filename);
 
 }
-}
-
 
 #endif

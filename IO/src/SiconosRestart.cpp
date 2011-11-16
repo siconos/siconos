@@ -17,7 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "Dump.hpp"
+#include "SiconosFull.hpp"
+#include "SiconosRestart.hpp"
 
 #include <boost/filesystem.hpp>
 
@@ -29,8 +30,6 @@
 
 
 namespace Siconos
-{
-namespace IO
 {
 
 /** save Siconos model into a file
@@ -52,7 +51,7 @@ void save(SP::Model model, std::string filename)
     {
       boost::archive::binary_oarchive oa(ofs);
       siconos_io_register(oa);
-      oa << NVP(model);  // remove NVP
+      oa << NVP(model);  // fix: NVP not necessary for binary archives
     }
   }
 }
@@ -82,6 +81,5 @@ SP::Model load(std::string filename)
 
     }
   }
-}
 }
 }

@@ -1,4 +1,3 @@
-
 #include "KernelTest.hpp"
 
 
@@ -11,6 +10,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
+CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
 void KernelTest::setUp() {};
 void KernelTest::tearDown() {};
@@ -184,7 +184,7 @@ void KernelTest::t4()
 }
 
 
-#include "Dump.hpp"
+#include "SiconosRestart.hpp"
 
 using namespace std;
 void KernelTest::t5()
@@ -283,9 +283,9 @@ void KernelTest::t5()
   bouncingBall->initialize(s);
 
 
-  Siconos::IO::save(bouncingBall, "BouncingBall1.xml");
+  Siconos::save(bouncingBall, "BouncingBall1.xml");
 
-  SP::Model bouncingBallFromFile = Siconos::IO::load("BouncingBall1.xml");
+  SP::Model bouncingBallFromFile = Siconos::load("BouncingBall1.xml");
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -299,7 +299,7 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall = Siconos::IO::load("BouncingBall1.xml");
+  SP::Model bouncingBall = Siconos::load("BouncingBall1.xml");
 
   try
   {

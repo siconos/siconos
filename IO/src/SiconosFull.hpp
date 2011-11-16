@@ -48,8 +48,10 @@
 
 /* hand written */
 
+
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosVector);
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosMatrix);
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(DynamicalSystem);
 
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 

@@ -12,6 +12,7 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BasicTest);
 
+
 class point
 {
 public:
@@ -237,3 +238,47 @@ void BasicTest::t4()
 
 }
 
+class A
+{
+public:
+  virtual void get() = 0;
+
+  int labelA;
+};
+
+class B : public A
+{
+public:
+  void get() { };
+  int labelB;
+};
+
+SICONOS_IO_REGISTER(A, (labelA));
+SICONOS_IO_REGISTER_WITH_BASE(B, A, (labelB));
+
+void BasicTest::t5()
+{
+
+  B b, bl;
+  b.labelA = 1;
+  b.labelB = 2;
+
+
+  std::ofstream ofs("t5.xml");
+  CPPUNIT_ASSERT(ofs.good());
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    boost::serialization::serialize(oa, b, 0);
+  }
+
+  std::ifstream ifs("t5.xml");
+  CPPUNIT_ASSERT(ifs.good());
+  {
+    boost::archive::xml_iarchive ia(ifs);
+    boost::serialization::serialize(ia, bl, 0);
+  }
+
+  CPPUNIT_ASSERT((bl.labelA == b.labelA));
+  CPPUNIT_ASSERT((bl.labelB == b.labelB));
+
+}
