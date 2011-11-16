@@ -202,7 +202,6 @@ void Simulation::updateIndexSets()
   // Warning, I0 is not updated and must remain unchanged !
   unsigned int nindexsets = model()->nonSmoothDynamicalSystem()
                             ->topology()->indexSetsSize();
-
   if (nindexsets > 1)
   {
     for (unsigned int i = 1; i < nindexsets ; ++i)
@@ -228,15 +227,17 @@ void Simulation::updateInteractions()
 
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
+  if (!allInteractions->isEmpty())
+  {
+    double time = model()->currentTime(); // init with current model time
 
-  double time = model()->currentTime(); // init with current model time
+    ComputeLevelsForInputAndOutput();
 
-  ComputeLevelsForInputAndOutput();
+    std::for_each(allInteractions->begin(), allInteractions->end(),
+                  boost::bind(&Interaction::initialize, _1, time));
 
-  std::for_each(allInteractions->begin(), allInteractions->end(),
-                boost::bind(&Interaction::initialize, _1, time));
-
-  initOSNS();
+    initOSNS();
+  }
 
 }
 
@@ -284,24 +285,30 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //  have been declared
   {
     ComputeLevelsForInputAndOutput();
-
-    if (_levelsAreComputed)
+    if (allInteractions->isEmpty())
     {
-      topo->indexSetsResize(_levelMaxForOutput + 1);
+      topo->indexSetsResize(0);
     }
     else
     {
-      topo->indexSetsResize(LEVELMAX);
-      // ComputeLevelsForInputAndOutput will resize the indexSets when some interactions appear
+      if (_levelsAreComputed)
+      {
+        topo->indexSetsResize(_levelMaxForOutput + 1);
+      }
+      else
+      {
+        topo->indexSetsResize(LEVELMAX);
+        // ComputeLevelsForInputAndOutput will resize the indexSets when some interactions appear
+      }
+
+      std::for_each(allInteractions->begin(), allInteractions->end(),
+                    boost::bind(&Interaction::initialize, _1, _tinit));
+
+      for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
+        topo->resetIndexSetPtr(i);
+      // Initialize OneStepNSProblem: in derived classes specific functions.
+      initOSNS();
     }
-
-    std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, _tinit));
-
-    for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
-      topo->resetIndexSetPtr(i);
-    // Initialize OneStepNSProblem: in derived classes specific functions.
-    initOSNS();
   }
 
 
@@ -710,8 +717,17 @@ void Simulation::ComputeLevelsForInputAndOutput()
 {
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
+  if (allInteractions->isEmpty())
+  {
+    _levelMinForInput = 0;
+    _levelMaxForInput = 0;
+    _levelMinForOutput = 0;
+    _levelMaxForOutput = 0;
 
-  if (not _staticLevels or not _levelsAreComputed)
+    _levelsAreComputed = true;
+    model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput);
+  }
+  else if (not _staticLevels or not _levelsAreComputed)
   {
     _levelMinForInput = LEVELMAX;
     _levelMaxForInput = 0;
