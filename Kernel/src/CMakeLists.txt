@@ -222,6 +222,13 @@ IF(WITH_TESTING)
 
   END_TEST()
 
+  BEGIN_TEST(multiBodyTools/test)
+
+  NEW_TEST(testMultiBodyTools MultiBodyTest.cpp)
+
+  END_TEST()
+
+
 ENDIF(WITH_TESTING)
 
 #
