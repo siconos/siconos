@@ -14,6 +14,7 @@ class KernelTest : public CppUnit::TestFixture
   CPPUNIT_TEST(t4);
   CPPUNIT_TEST(t5);
   CPPUNIT_TEST(t6);
+  CPPUNIT_TEST(t7);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -24,6 +25,7 @@ class KernelTest : public CppUnit::TestFixture
   void t4();
   void t5();
   void t6();
+  void t7();
 
 public:
   void setUp();

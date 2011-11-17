@@ -56,7 +56,7 @@ def is_serializable(c):
     return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr',s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans',s)
     return m != None
 
 def name(t):
@@ -98,7 +98,8 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
 
         if not unwanted(class_.name):
 
-            with_base += [ class_.name ]
+            if not class_.is_abstract:
+                with_base += [ class_.name ]
 
             # print registration macros depending on inheritance
             if class_.bases == []:
@@ -123,9 +124,9 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
 # filtering is not correct at this point : some unwanted classes are necessary
 # (the ones in SiconosFull.hpp) others not (xml)
 # some leads to compilation errors.
-#print
-#print 'template <class Archive>'
-#print 'void siconos_io_register(Archive& ar)'
-#print '{{\n{0}\n}}'.format('\n'.join('  ar.register_type(static_cast<{0}*>(NULL));'.format(x) for x in with_base))
+print
+print 'template <class Archive>'
+print 'void siconos_io_register(Archive& ar)'
+print '{{\n{0}\n}}'.format('\n'.join('  ar.register_type(static_cast<{0}*>(NULL));'.format(x) for x in with_base))
 
 

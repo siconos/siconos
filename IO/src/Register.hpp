@@ -31,6 +31,10 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
+#include <boost/serialization/hash_set.hpp>
+
+#include "boost/serialization/unordered_set.hpp"
+
 #include <boost/serialization/list.hpp>
 
 #include <boost/graph/adj_list_serialize.hpp>

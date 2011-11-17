@@ -78,15 +78,6 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_forces)
                                (_jacobianvFL)
                                (_jacobianqDotForces))
-SICONOS_IO_REGISTER_WITH_BASES(PrimalFrictionContact, (LinearOSNS),
-                               (_contactProblemDim)
-                               (_sizeLocalOutput)
-                               (_localVelocity)
-                               (_localReaction)
-                               (_tildeLocalVelocity)
-                               (H)
-                               (_mu)
-                               (primalFrictionContact_driver))
 SICONOS_IO_REGISTER(OSNSMatrix,
                     (dimRow)
                     (dimColumn)
@@ -116,10 +107,6 @@ SICONOS_IO_REGISTER_WITH_BASES(MLCP, (LinearOSNS),
                                (_curBlock))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingD1Minus, (Simulation),
                                (impactOccuredLastTimeStep))
-SICONOS_IO_REGISTER_WITH_BASES(FrictionContact, (LinearOSNS),
-                               (_contactProblemDim)
-                               (_mu)
-                               (_frictionContact_driver))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianR, (Relation),
                                (_jachq)
                                (_jachqDot))
@@ -337,8 +324,6 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderNonLinearDS),
                                (_b)
                                (_pluginA)
                                (_pluginb))
-SICONOS_IO_REGISTER_WITH_BASES(MLCP2, (MLCP),
-                               (mFirstCall))
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS, (OneStepNSProblem),
                                (_w)
                                (_z)
@@ -353,14 +338,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
                                (_constraintTolUnilateral)
                                (_doProj)
                                (_doOnlyProj))
-SICONOS_IO_REGISTER_WITH_BASES(Lsodar, (OneStepIntegrator),
-                               (intData)
-                               (rtol)
-                               (atol)
-                               (rwork)
-                               (iwork)
-                               (jroot)
-                               (xWork))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR, (LagrangianR),
                                (_hDot)
                                (_pluginhDot)
@@ -613,10 +590,14 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSSphereNEDSR, (NewtonEulerFrom3DLocalFra
                                (r2)
                                (r1pr2))
 SICONOS_IO_REGISTER(SiconosBodies,
-                    (_moving_plans)
                     (_plans)
                     (_model)
                     (_playground))
+SICONOS_IO_REGISTER(Hashed,
+                    (body)
+                    (i)
+                    (j)
+                    (k))
 SICONOS_IO_REGISTER(SpaceFilter,
                     (_bboxfactor)
                     (_cellsize)
@@ -624,5 +605,83 @@ SICONOS_IO_REGISTER(SpaceFilter,
                     (_nsds)
                     (_nslaw)
                     (_plans)
-                    (_moving_plans)
                     (_hash_table))
+
+template <class Archive>
+void siconos_io_register_generated(Archive& ar)
+{
+  ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<NonSmoothEvent*>(NULL));
+  ar.register_type(static_cast<BlockMatrix*>(NULL));
+  ar.register_type(static_cast<BlockVector*>(NULL));
+  ar.register_type(static_cast<SensorPosition*>(NULL));
+  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
+  ar.register_type(static_cast<ControlManager*>(NULL));
+  ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
+  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
+  ar.register_type(static_cast<OSNSMatrix*>(NULL));
+  ar.register_type(static_cast<RelayNSL*>(NULL));
+  ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+  ar.register_type(static_cast<UnitaryRelation*>(NULL));
+  ar.register_type(static_cast<SensorEvent*>(NULL));
+  ar.register_type(static_cast<MLCP*>(NULL));
+  ar.register_type(static_cast<TimeSteppingD1Minus*>(NULL));
+  ar.register_type(static_cast<SchatzmanPaoli*>(NULL));
+  ar.register_type(static_cast<BlockCSRMatrix*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+  ar.register_type(static_cast<Moreau2*>(NULL));
+  ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<LCP*>(NULL));
+  ar.register_type(static_cast<NewtonEulerR*>(NULL));
+  ar.register_type(static_cast<EventDriven*>(NULL));
+  ar.register_type(static_cast<TimeStepping*>(NULL));
+  ar.register_type(static_cast<Interaction*>(NULL));
+  ar.register_type(static_cast<Topology*>(NULL));
+  ar.register_type(static_cast<SiconosException*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearTIDS*>(NULL));
+  ar.register_type(static_cast<SiconosMemory*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+  ar.register_type(static_cast<GenericMechanical*>(NULL));
+  ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
+  ar.register_type(static_cast<Model*>(NULL));
+  ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
+  ar.register_type(static_cast<Relay*>(NULL));
+  ar.register_type(static_cast<ComplementarityConditionNSL*>(NULL));
+  ar.register_type(static_cast<EqualityConditionNSL*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+  ar.register_type(static_cast<FirstOrderType2R*>(NULL));
+  ar.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
+  ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
+  ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
+  ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
+  ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
+  ar.register_type(static_cast<TimeDiscretisation*>(NULL));
+  ar.register_type(static_cast<BoundaryCondition*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
+  ar.register_type(static_cast<Equality*>(NULL));
+  ar.register_type(static_cast<Moreau*>(NULL));
+  ar.register_type(static_cast<ActuatorEvent*>(NULL));
+  ar.register_type(static_cast<MLCPProjectOnConstraints*>(NULL));
+  ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
+  ar.register_type(static_cast<PluggedObject*>(NULL));
+  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+  ar.register_type(static_cast<EventsManager*>(NULL));
+  ar.register_type(static_cast<LagrangianDS*>(NULL));
+  ar.register_type(static_cast<Circle*>(NULL));
+  ar.register_type(static_cast<CircularDS*>(NULL));
+  ar.register_type(static_cast<CircleCircleR*>(NULL));
+  ar.register_type(static_cast<CircularR*>(NULL));
+  ar.register_type(static_cast<Disk*>(NULL));
+  ar.register_type(static_cast<DiskDiskR*>(NULL));
+  ar.register_type(static_cast<DiskMovingPlanR*>(NULL));
+  ar.register_type(static_cast<DiskPlanR*>(NULL));
+  ar.register_type(static_cast<SphereLDS*>(NULL));
+  ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
+  ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));
+  ar.register_type(static_cast<SphereNEDS*>(NULL));
+  ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
+  ar.register_type(static_cast<SphereNEDSSphereNEDSR*>(NULL));
+  ar.register_type(static_cast<Hashed*>(NULL));
+  ar.register_type(static_cast<SpaceFilter*>(NULL));
+}

@@ -48,16 +48,13 @@
 
 /* hand written */
 
-
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosVector);
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(SiconosMatrix);
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(DynamicalSystem);
-
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
 SICONOS_IO_REGISTER(RelationData, (block)(blockProj)(source)(target));
 
 SICONOS_IO_REGISTER(SystemData, (upper_block)(lower_block)(upper_blockProj)(lower_blockProj));
+
+SICONOS_IO_REGISTER(SiconosVector,)
 
 BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 
@@ -120,6 +117,22 @@ void siconos_io(Archive& ar, std::basic_ofstream<char>&v , unsigned int version)
 {
   // do nothing
 }
+
+template <class Archive>
+void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
+{
+  SERIALIZE(v, (_contactProblemDim)(_mu)(_numerics_solver_options)(_numerics_solver_id), ar);
+
+  if (Archive::is_loading::value)
+  {
+    if (v._contactProblemDim == 2)
+      v._frictionContact_driver = &frictionContact2D_driver;
+    else
+      v._frictionContact_driver = &frictionContact3D_driver;
+  }
+
+}
+
 
 
 template <class Archive>
@@ -186,13 +199,6 @@ void siconos_io(Archive & ar, SimpleVector & v, unsigned int version)
 }
 
 template <class Archive>
-void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
-{
-
-}
-
-
-template <class Archive>
 void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
 {
   ar & boost::serialization::make_nvp("num", m.num);
@@ -248,6 +254,12 @@ namespace boost
 {
 namespace serialization
 {
+
+template <class Archive>
+void serialize(Archive& ar, FrictionContact& v, unsigned int version)
+{
+  siconos_io(ar, v, version);
+}
 
 template <class Archive>
 void serialize(Archive& ar, __mpz_struct& v, unsigned int version)
@@ -335,76 +347,28 @@ void serialize(Archive& ar, SimpleMatrix& m, unsigned int version)
   siconos_io(ar, m, version);
 }
 
-template <class Archive>
-void serialize(Archive& ar, SiconosVector& v, unsigned int version)
-{
-  siconos_io(ar, v, version);
-}
 }
 }
 
-
-/** derived type registration in archive
-\param an archive
-*/
 
 template <class Archive>
 void siconos_io_register(Archive& ar)
 {
-  ar.register_type(static_cast<BlockVector*>(NULL));
-  ar.register_type(static_cast<SensorPosition*>(NULL));
-  ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
-  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
-  //    ar.register_type(static_cast<PrimalFrictionContact*>(NULL));
-  ar.register_type(static_cast<RelayNSL*>(NULL));
-  ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-  ar.register_type(static_cast<SensorEvent*>(NULL));
-  ar.register_type(static_cast<MLCP*>(NULL));
-  ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
-  ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
-  //    ar.register_type(static_cast<QP*>(NULL));
-  //    ar.register_type(static_cast<LagrangianR*>(NULL));
-  ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
-  ar.register_type(static_cast<SimpleVector*>(NULL));
-  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-  ar.register_type(static_cast<NewtonEulerR*>(NULL));
-  ar.register_type(static_cast<EventDriven*>(NULL));
-  ar.register_type(static_cast<TimeStepping*>(NULL));
-  ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-  ar.register_type(static_cast<GenericMechanical*>(NULL));
-  ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-  ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
-  //    ar.register_type(static_cast<Lsodar*>(NULL)); --> SA:: serialization issue!
-  ar.register_type(static_cast<Relay*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-  //    ar.register_type(static_cast<MLCP2*>(NULL));
-  //    ar.register_type(static_cast<OneStepNSProblem*>(NULL));
-  ar.register_type(static_cast<LCP*>(NULL));
-  //    ar.register_type(static_cast<LinearOSNS*>(NULL));
-  ar.register_type(static_cast<FirstOrderType2R*>(NULL));
-  ar.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
-  ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-  ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
-  ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  siconos_io_register_generated(ar);
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
-  ar.register_type(static_cast<BlockMatrix*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-  ar.register_type(static_cast<Equality*>(NULL));
-  //    ar.register_type(static_cast<FirstOrderR*>(NULL));
-  ar.register_type(static_cast<Moreau*>(NULL));
-  ar.register_type(static_cast<ActuatorEvent*>(NULL));
-  //    ar.register_type(static_cast<Event*>(NULL));
-  ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-  ar.register_type(static_cast<SensorEvent*>(NULL));
-  ar.register_type(static_cast<ActuatorEvent*>(NULL));
-  ar.register_type(static_cast<NonSmoothEvent*>(NULL));
-  ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
-  ar.register_type(static_cast<LagrangianDS*>(NULL));
-
-  ar.register_type(static_cast<CircularDS*>(NULL));
-  ar.register_type(static_cast<CircularR*>(NULL));
-
+  ar.register_type(static_cast<SimpleVector*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
+  //  ar.register_type(static_cast<_SolverOptions*>(NULL));
+  ar.register_type(static_cast<LinearComplementarityProblem*>(NULL));
+  ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
+  ar.register_type(static_cast<NumericsMatrix*>(NULL));
+  ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
+  ar.register_type(static_cast<UnitaryRelationsGraph*>(NULL));
+  //  ar.register_type(static_cast<PluginHandle*>(NULL));
+  ar.register_type(static_cast<InteractionsSet*>(NULL));
+  ar.register_type(static_cast<__mpz_struct*>(NULL));
+  ar.register_type(static_cast<FrictionContact*>(NULL));
 }
 
 #endif

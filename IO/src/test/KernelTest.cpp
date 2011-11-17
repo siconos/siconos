@@ -393,3 +393,34 @@ void KernelTest::t6()
 
 
 }
+
+void KernelTest::t7()
+{
+
+  SP::DynamicalSystem ds1, ds2;
+
+  SP::SiconosVector q(new SimpleVector());
+  SP::SiconosVector v(new SimpleVector());
+
+  ds1.reset(new Disk(1, 1, q, v));
+
+  ds2.reset(new Disk(2, 2, q, v));
+
+  std::ofstream ofs("Kernelt7.xml");
+  {
+    boost::archive::xml_oarchive oa(ofs);
+    siconos_io_register(oa);
+    oa << NVP(ds1);
+  }
+
+  std::ifstream ifs("Kernelt7.xml");
+  {
+    boost::archive::xml_iarchive ia(ifs);
+    siconos_io_register(ia);
+    ia >> NVP(ds2);
+  }
+
+  CPPUNIT_ASSERT(boost::static_pointer_cast<Disk>(ds1)->getRadius() ==
+                 boost::static_pointer_cast<Disk>(ds2)->getRadius());
+}
+
