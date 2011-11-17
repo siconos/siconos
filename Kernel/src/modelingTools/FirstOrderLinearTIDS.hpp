@@ -68,7 +68,7 @@ private:
 
   /** default constructor
    */
-  FirstOrderLinearTIDS();
+  FirstOrderLinearTIDS() {};
 
 public:
 

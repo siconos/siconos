@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
+/* Siconos-Kernel, Copyright INRIA 2005-2011.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
 */
 #ifndef BOUNDARYCONDITION_HPP
 #define BOUNDARYCONDITION_HPP
@@ -28,18 +28,19 @@ typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
 TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int);
 
 /** \class BoundaryCondition
- *  \brief This class models simple boundary conditions for prescribing the velocities
- *   in a Dynamical System. A simple boundary condition is considered to fix a component \f$ j \f$ of *   the velocity vector, i.e., \f$ v_j(t) = bc(t)\f$ where \f$ bc(t)\f$ is a given function of time.
+ *  \brief This class models simple boundary conditions for
+ *   prescribing the velocities in a Dynamical System. A simple
+ *   boundary condition is considered to fix a component \f$ j \f$ of
+ *   * the velocity vector, i.e., \f$ v_j(t) = bc(t)\f$ where \f$
+ *   bc(t)\f$ is a given function of time.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.2.0.
  *  \date (Re-Creation) September 2010
- *
  *
  */
 class BoundaryCondition
 {
 public:
-
 
   /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
    *  \brief Basic constructor
@@ -48,12 +49,14 @@ public:
 
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
-  /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices,  SP::SimpleVector newVelocityValues);
+  /** \fn BoundaryCondition(std::vector<unsigned int> *
+   * newVelocityIndices, SP::SimpleVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
    *  \param the indices of the velocity subjected to prescribed velocities
    *  \param the values of the prescribed velocities
    */
-  BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,  SP::SimpleVector newVelocityValues);
+  BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
+                    SP::SimpleVector newVelocityValues);
 
   /** destructor */
   virtual ~BoundaryCondition();
@@ -109,14 +112,19 @@ protected:
 
   /* Indices of the prescribed component of the velocity vector */
   SP::UnsignedIntVector _velocityIndices;
+
   /* Values of the prescribed component of the velocity vector */
   SP::SimpleVector _prescribedVelocity;
+
   /* Old values of the prescribed component of the velocity vector */
   SP::SimpleVector _prescribedVelocityOld;
+
   /*plugin defining the function V(t)*/
   SP::PluggedObject _pluginPrescribedVelocity;
+
   //   /*Link to the precribed DynamicalSystem*/
   //   SP::DynamicalSystem _DS;
 };
+
 TYPEDEF_SPTR(BoundaryCondition);
 #endif // BOUNDARYCONDITION_HPP

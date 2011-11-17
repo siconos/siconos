@@ -39,6 +39,8 @@ protected:
   double massValue;
   double I;
 
+  SphereLDS() {};
+
 public:
 
   SphereLDS(double, double, SP::SiconosVector, SP::SiconosVector);

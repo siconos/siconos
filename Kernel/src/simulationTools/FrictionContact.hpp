@@ -85,6 +85,10 @@ protected:
 
   SP::FrictionContactProblem _numerics_problem;
 
+  /** default constructor
+   */
+  FrictionContact() {};
+
 public:
 
   /** xml constructor

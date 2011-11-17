@@ -84,6 +84,10 @@ private:
 
   bool mFirstCall;
 
+  /** default constuctor
+   */
+  MLCP2() {};
+
 public:
 
   /** constructor from data

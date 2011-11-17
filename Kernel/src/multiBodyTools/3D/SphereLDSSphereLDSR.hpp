@@ -36,7 +36,7 @@ private:
 
   double r1, r2, r1pr2;
 
-  SphereLDSSphereLDSR();
+  SphereLDSSphereLDSR() {};
 
 public:
 

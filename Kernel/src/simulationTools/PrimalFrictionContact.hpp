@@ -102,6 +102,10 @@ protected:
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   PFC_Driver primalFrictionContact_driver;
 
+  /** default constructor */
+  PrimalFrictionContact() {};
+
+
 public:
 
   /** xml constructor

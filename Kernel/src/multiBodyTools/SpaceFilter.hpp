@@ -51,24 +51,21 @@
 #include "SphereNEDSPlanR.hpp"
 #include "ExternalBody.hpp"
 
-#ifndef __GCCXML__
-#include <tr1/unordered_set>
-#else
-/* gccxml fail to parse some gcc 4.3 builtins, so we provide a fake
- * unordered_multiset*/
-namespace std
-{
-namespace tr1
-{
-template<class A, class B>
-class unordered_multiset
-{
-public:
-  typedef void iterator;
-};
-}
-}
-#endif
+//#ifndef __GCCXML__
+//#include <tr1/unordered_set>
+//#else
+///* gccxml fail to parse some gcc 4.3 builtins, so we provide a fake
+// * unordered_multiset*/
+//namespace std { namespace tr1 {
+//    template<class A, class B>
+//    class unordered_multiset {
+//    public:
+//      typedef void iterator;
+//    };
+//  }}
+//#endif
+
+#include <boost/unordered_set.hpp>
 
 #include <boost/throw_exception.hpp>
 #include <boost/functional/hash.hpp>
@@ -77,6 +74,13 @@ public:
  */
 class Hashed : public boost::enable_shared_from_this<Hashed>
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(Hashed);
+
+  Hashed() {};
+
 public:
   SP::DynamicalSystem body;
   int i;
@@ -94,7 +98,7 @@ public:
 
 DEFINE_SPTR(Hashed);
 
-typedef std::tr1::unordered_multiset < SP::Hashed,
+typedef boost::unordered_multiset < SP::Hashed,
         boost::hash<SP::Hashed> > space_hash;
 
 typedef ublas::matrix < FTime, ublas::column_major,

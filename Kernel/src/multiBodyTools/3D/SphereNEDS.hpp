@@ -38,6 +38,8 @@ protected:
 
   double radius;
 
+  SphereNEDS() {};
+
 public:
 
   SphereNEDS(double, double, SP::SiconosMatrix, SP::SiconosVector, SP::SiconosVector);

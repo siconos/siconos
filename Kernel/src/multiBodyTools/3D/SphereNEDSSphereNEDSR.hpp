@@ -37,7 +37,7 @@ private:
 
   double r1, r2, r1pr2;
 
-  SphereNEDSSphereNEDSR();
+  SphereNEDSSphereNEDSR() {};
 
 public:
 

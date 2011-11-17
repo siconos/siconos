@@ -36,7 +36,7 @@ private:
 
   double ar1mr2;
 
-  CircleCircleR();
+  CircleCircleR() {};
 
 public:
 

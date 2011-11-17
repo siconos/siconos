@@ -892,7 +892,7 @@ bool operator ==(interPair const& a, interPair const& b)
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
 {
 
-  typedef std::tr1::unordered_multiset < interPair,
+  typedef boost::unordered_multiset < interPair,
           boost::hash<interPair> > interPairs;
 
   SP::SpaceFilter parent;
@@ -1130,9 +1130,6 @@ void SpaceFilter::buildInteractions(double time)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
-
-  // should be done on the fly. Linear time anyway.
-  //_nsds->topology()->computeRelativeDegrees();
 
 }
 
