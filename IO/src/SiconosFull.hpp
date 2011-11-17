@@ -131,6 +131,9 @@ void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
       v._frictionContact_driver = &frictionContact3D_driver;
   }
 
+  ar & boost::serialization::make_nvp("LinearOSNS",
+                                      boost::serialization::base_object<LinearOSNS>(v));
+
 }
 
 
