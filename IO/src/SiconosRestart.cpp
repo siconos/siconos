@@ -38,22 +38,31 @@ namespace Siconos
  */
 void save(SP::Model model, std::string filename)
 {
-  std::ofstream ofs(filename.c_str());
+  boost::filesystem::path tempf =
+    boost::filesystem::path(filename + ".tmp");
+
+  boost::filesystem::path destf =
+    boost::filesystem::path(filename);
+
+  std::ofstream ofs(tempf.c_str());
   {
-    if (boost::filesystem::path(filename).extension() == ".xml")
+    if (destf.extension() == ".xml")
     {
       boost::archive::xml_oarchive oa(ofs);
       siconos_io_register(oa);
       oa << NVP(model);
     }
 
-    else if (boost::filesystem::path(filename).extension() == ".dat")
+    else if (destf.extension() == ".bin")
     {
       boost::archive::binary_oarchive oa(ofs);
       siconos_io_register(oa);
       oa << NVP(model);  // fix: NVP not necessary for binary archives
     }
   }
+
+  // atomic
+  boost::filesystem::rename(tempf, destf);
 }
 
 /** load Siconos model from file
@@ -72,7 +81,7 @@ SP::Model load(std::string filename)
       ia >> NVP(model);
       return model;
     }
-    else if (boost::filesystem::path(filename).extension() == ".dat")
+    else if (boost::filesystem::path(filename).extension() == ".bin")
     {
       boost::archive::binary_iarchive ia(ifs);
       siconos_io_register(ia);
