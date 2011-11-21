@@ -227,7 +227,7 @@ void Simulation::updateInteractions()
 
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
-  if (!allInteractions->isEmpty())
+  if (!_allNSProblems->empty())
   {
     double time = model()->currentTime(); // init with current model time
 
@@ -285,7 +285,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //  have been declared
   {
     ComputeLevelsForInputAndOutput();
-    if (allInteractions->isEmpty())
+    if (_allNSProblems->empty())
     {
       topo->indexSetsResize(0);
     }
@@ -717,13 +717,8 @@ void Simulation::ComputeLevelsForInputAndOutput()
 {
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
-  if (allInteractions->isEmpty())
+  if (_allNSProblems->empty())
   {
-    _levelMinForInput = 0;
-    _levelMaxForInput = 0;
-    _levelMinForOutput = 0;
-    _levelMaxForOutput = 0;
-
     _levelsAreComputed = true;
     model()->nonSmoothDynamicalSystem()->topology()->indexSetsResize(_levelMaxForOutput);
   }
