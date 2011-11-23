@@ -17,23 +17,39 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <stdio.h>
-#include <stdlib.h>]
+#include <stdlib.h>
 #include <string.h>
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
 
-int main(void)
+int write_test_fclib(char * filename)
 {
   printf("\n Start of test \n");
-  int info = 0 ;
-
-  char filename[50] = "./data/Confeti-ex03-Fc3D-SBM.dat";
   printf("Test on %s\n", filename);
+  int info = 0;
+  int sizeoffilename = strlen(filename);
+  printf("sizeoffilemane %d\n",  sizeoffilename);
+  char  extension[4];
+  strncpy(extension, &filename[sizeoffilename - 4], 4);
+  char * basename;
 
+  if (strcmp(extension, ".dat") == 0)
+  {
+    basename = (char *)malloc((sizeoffilename + 1) * sizeof(char *));
+    strcpy(basename, filename);
+    strncpy(&basename[sizeoffilename - 4], ".hdf5", 5);
+    printf("basename %s\n",  basename);
+
+  }
+  else
+  {
+    printf("Wrong file name extension %s\n", extension);
+    return 0;
+  }
 
   /* Remove file if it exists */
-  FILE * foutput = fopen("./data/Confeti-ex03-Fc3D-SBM.hdf5", "w");
+  FILE * foutput = fopen(basename, "w");
   fclose(foutput);
 
 
@@ -43,11 +59,14 @@ int main(void)
 
   info = frictionContact_newFromFile(problem, f);
 
-  int n = 50;
+  int n = 100;
   char * title = (char *)malloc(n * sizeof(char *));
   strcpy(title, "Confeti-ex03-Fc3D-SBM");
   char * description = (char *)malloc(n * sizeof(char *));
-  strcpy(description, " rewriting siconos test ./data/Confeti-ex03-Fc3D-SBM.dat");
+
+  strcat(description, "Rewriting Siconos Numerics test ");
+  strcat(description, filename);
+  strcat(description, " in FCLIB format");
   char * math_info = (char *)malloc(n * sizeof(char *));
   strcpy(math_info,  "unknown");
 
@@ -55,10 +74,45 @@ int main(void)
                               title,
                               description,
                               math_info,
-                              "./data/Confeti-ex03-Fc3D-SBM.hdf5");
+                              basename);
 
 
   freeFrictionContact_problem(problem);
   printf("\n End of test \n");
   return info;
 }
+
+int main(int argc, char *argv[])
+{
+  int info;
+  printf("argc %i\n", argc);
+  if (argc == 1)
+  {
+    info = write_test_fclib("./data/Confeti-ex03-Fc3D-SBM.dat");
+  }
+  else if (argc == 2)
+  {
+    // We assume argv[1] is a filename to open
+    FILE *file = fopen(argv[1], "r");
+
+    /* fopen returns 0, the NULL pointer, on failure */
+    if (file == 0)
+    {
+      printf("Could not open file\n");
+    }
+    else
+    {
+      info = write_test_fclib(argv[1]);
+    }
+
+  }
+  else
+  {
+    printf("usage: %s filename", argv[0]);
+  }
+
+  return info;
+}
+
+
+
