@@ -24,6 +24,14 @@ SET(SiconosIO_INSTALL_INCLUDE_DIR include/Siconos/IO)
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/IOConfig.h DESTINATION include/Siconos/IO)
 
+# boost patch
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_load_imp.hpp
+  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_collections_save_imp.hpp
+  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_map.hpp
+  ${CMAKE_SOURCE_DIR}/src/boost/serialization/unordered_set.hpp
+  DESTINATION include/Siconos/IO/boost/serialization)
+
 IF(WITH_TESTING)
   COMPILE_WITH(CppUnit REQUIRED)
 ENDIF(WITH_TESTING)
