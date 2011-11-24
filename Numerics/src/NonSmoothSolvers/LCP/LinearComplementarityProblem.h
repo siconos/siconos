@@ -20,27 +20,22 @@
 #define LCP_PROBLEM_H
 
 /*!\file LinearComplementarityProblem.h
-  \brief Structure used to define a Linear Complementarity Problem
-
-  \author Franck Perignon
 */
 
 /*! \page LCProblem Linear Complementarity problems (LCP)
-  \section lcpIntro The problem
-  Find \f$(z,w)\f$ such that:\n
-
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  M \ z + q = w \\
-  0 \le w \perp z \ge 0 \\
-  \end{array}
-  \right.
-  \f$
-
-  \f$ w, z, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix.
-
-  \section lcpSolversList Available solvers
+ * \section lcpIntro The problem
+ *   Find \f$(z,w)\f$ such that:\n
+ *   \f$
+ *   \left\lbrace
+ *   \begin{array}{l}
+ *   M \ z + q = w \\[1mm]
+ *   0 \le w \perp z \ge 0 \\[1mm]
+ *   \end{array}
+ *   \right.
+ *   \f$
+ *
+ * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
+ *  \section lcpSolversList Available solvers
 
   The solvers and their parameters are described in \ref LCPSolvers . \n
   Use the generic function lcp_driver() to call one the the specific solvers listed below:
@@ -66,28 +61,57 @@
 
 #include "NumericsMatrix.h"
 
-/** Linear Complementarity Problem elements
-    \param size dim of the problem
-    \param M matrix of the LCP
-    \param q vector
+/** \struct LinearComplementarityProblem LinearComplementarityProblem.h
+ *  \brief structure that contains a Linear Complementarity Problem
+ *   Find \f$(z,w)\f$ such that:\n
+ *   \f$
+ *   \left\lbrace
+ *   \begin{array}{l}
+ *   M \ z + q = w \\[1mm]
+ *   0 \le w \perp z \ge 0 \\[1mm]
+ *   \end{array}
+ *   \right.
+ *   \f$
+ *
+ * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
  */
 typedef struct
 {
-  int size;
-  NumericsMatrix* M;
-  double * q;
+
+  int size; /**<  size of the problem */
+  NumericsMatrix* M ;/**< M matrix of the LCP (see the mathematical description)*/
+  double * q;/**< vector of the LCP (see the mathematical description)*/
 } LinearComplementarityProblem;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+  /** \fn void LinearComplementarity_display(LinearComplementarityProblem* p)
+   *  \brief function to display a LinearComplementarityProblem
+   *  \param pointer to a LinearComplementarityProblem to display
+   */
   void LinearComplementarity_display(LinearComplementarityProblem* p);
 
+  /** \fn int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file)
+   *  \brief function to write in a file a LinearComplementarityProblem
+   *  \param pointer to a LinearComplementarityProblem to print
+   *  \param pointer to a FILE
+   */
   int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file);
 
+  /** \fn  int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file)
+   *  \brief function to read and create a LinearComplementarityProblem
+   *   from a file
+   *  \param pointer to a LinearComplementarityProblem to create
+   *  \param pointer to a FILE
+   */
   int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
+  /** \fn  void freeLinearComplementarity_problem(LinearComplementarityProblem* problem)
+   *  \brief function to delete a LinearComplementarityProblem
+   *  \param pointer to a LinearComplementarityProblem to delete
+   */
   void freeLinearComplementarity_problem(LinearComplementarityProblem* problem);
 #ifdef __cplusplus
 }

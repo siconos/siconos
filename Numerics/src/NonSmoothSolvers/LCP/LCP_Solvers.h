@@ -22,8 +22,7 @@
 /*!\file LCP_Solvers.h
   \brief Subroutines for the resolution of Linear Complementarity Problems.\n
 
-  \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
+  \author siconos-team@lists.gforge.inria.fr
 */
 
 /*! \page LCPSolvers Linear Complementarity Problems Solvers
@@ -38,7 +37,7 @@ For each solver, the input argument are:
 
 Remark: when filterOn parameter (from SolverOptions) is different from 0, lcp_compute_error() is called at the end of the
 process to check the validity of the solution. This function needs a tolerance value and returns an error. \n
-In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that \n
+In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that \ag-sen
 means that they are not required inputs, and that if filter is on, some default values will be used.
 
 \section lcpLemke lexico Lemke
@@ -194,7 +193,9 @@ extern "C"
 {
 #endif
 
-  /** General interface to solvers for Linear Complementarity Problems
+  /** \fn   int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+   *
+   General interface to solvers for Linear Complementarity Problems
     \param[in] problem the LinearComplementarityProblem structure which handles the problem (M,q)
     \param[in,out] z a n-vector of doubles which contains the solution of the problem.
     \param[in,out] w a n-vector of doubles which contains the solution of the problem.
