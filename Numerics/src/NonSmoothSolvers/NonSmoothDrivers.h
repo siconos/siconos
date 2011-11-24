@@ -16,36 +16,6 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-/*! \page NSDrivers  Non-Smooth Solvers
-
-Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.\n
-
-For each type of problem, a generic interface function (driver) is provided. \n
-The main arguments of this driver are:
- - a structure of type XXXProblem (XXX being the formulation type: LinearComplementarityProblem, FrictionContactProblem ...), which holds the vectors and matrices used to formalize the problem, \n
- - the unknowns \n
- - a structure of type SolverOptions, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
- - a NumericsOptions structure, used to define global options (verbose mode ...)
-
-To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
-
-All the drivers interfaces are defined in the file NonSmoothDrivers.h .\n
-Each type of formulation is defined in a structure in the file XXXProblem.h .
-
-\section NSSpackContents Contents
-\subpage LCProblem \n\n
-\subpage MLCProblem \n\n
-\subpage NCProblem \n\n
-\subpage fcProblem \n\n
-\subpage RelayProblem \n\n
-\subpage QPSolvers\n\n
-
-Moreover, details on matrix storage in Numerics can be found in:
-\subpage NumericsMatrixPage \n
-
-Other functions and useful tools related to NonSmoothSolvers are listed in NSSTools.h.
-
-*/
 
 /*!\file NonSmoothDrivers.h
   \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
