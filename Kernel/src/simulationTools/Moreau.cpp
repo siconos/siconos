@@ -1687,10 +1687,13 @@ void Moreau::updateState(unsigned int level)
           _WBoundaryConditionsMap[ds]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
-          value += (d->p(level))->getValue(*itindex);
+          if (level != LEVELMAX && d->p(level))
+          {
+            value += (d->p(level))->getValue(*itindex);
+          }
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.
-             A complete computation of the residue should be better */
+             A complete computation of the residu should be better */
           d->reactionToBoundaryConditions()->setValue(bc, value) ;
           bc++;
         }
@@ -1810,8 +1813,13 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 
-  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
+  double gamma = 1.0 / 2.0;
+  if (_useGamma)
+  {
+    gamma = _gamma;
+  }
+  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  y += gamma * h * yDot;
   assert(!isnan(y));
   if (y <= 0)
     DEBUG_PRINTF("Moreau::addInteractionInIndexSet ACTIVATE.\n");
@@ -1825,9 +1833,13 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   double h = simulationLink->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-
-  DEBUG_PRINTF("Moreau::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + 0.5 * h * yDot);
-  y += 0.5 * h * yDot;
+  double gamma = 1.0 / 2.0;
+  if (_useGamma)
+  {
+    gamma = _gamma;
+  }
+  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  y += gamma * h * yDot;
   assert(!isnan(y));
   if (y > 0)
     DEBUG_PRINTF("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");

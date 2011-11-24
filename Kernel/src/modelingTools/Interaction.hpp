@@ -595,6 +595,7 @@ public:
   */
   inline const SimpleVector getLambda(const unsigned int i) const
   {
+    assert(_lambda[i]);
     return *(_lambda[i]);
   }
 
@@ -603,6 +604,7 @@ public:
   */
   inline SP::SiconosVector lambda(const unsigned int i) const
   {
+    assert(_lambda[i]);
     return _lambda[i];
   }
 
