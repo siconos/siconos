@@ -173,7 +173,7 @@ void EventsManager::display() const
 {
   cout << "=== EventsManager data display ===" << endl;
   if (simulation())
-    cout << "- This manager belongs to the simulation named \" " <<
+    cout << "- This manager belongs to the simulation named \"" <<
          simulation()->name() << "\", of type " <<
          Type::name(*simulation()) << "." << endl;
   else

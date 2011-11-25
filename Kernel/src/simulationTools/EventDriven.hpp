@@ -74,9 +74,15 @@ public:
 
 
   /** defaut constructor
-   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   *  \param a SP::timeDiscretisation
    */
   EventDriven(SP::TimeDiscretisation td);
+
+  /** constructor with data
+   *  \param a SP::timeDiscretisation
+   *  \param an int (number of NSProblem)
+   */
+  EventDriven(SP::TimeDiscretisation, int);
 
   /** constructor with XML object of the EventDriven
     \param SimulationXML* : the XML object corresponding
