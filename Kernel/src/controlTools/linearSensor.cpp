@@ -71,7 +71,7 @@ void linearSensor::initialize()
   // -> saved in a matrix data
   // XXX with a variable TimeStep, we're screwed
   unsigned int _nSteps = (_model->finalT() - model()->t0()) / _timeDiscretisation->currentTimeStep();
-  _dataPlot.reset(new SimpleMatrix(_nSteps + 1, 1 + rowC));
+  _dataPlot.reset(new SimpleMatrix(_nSteps + 10, 1 + rowC));
   _k = 0;
   // -> event
   _storedY.reset(new SimpleVector(rowC));
