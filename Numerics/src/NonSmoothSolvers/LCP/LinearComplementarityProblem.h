@@ -24,17 +24,25 @@
 
 /*! \page LCProblem Linear Complementarity problems (LCP)
  * \section lcpIntro The problem
+ *  The Linear Complementarity problems (LCP) is defined by
+ *
  *   Find \f$(z,w)\f$ such that:\n
- *   \f$
- *   \left\lbrace
- *   \begin{array}{l}
- *   M \ z + q = w \\[1mm]
- *   0 \le w \perp z \ge 0 \\[1mm]
- *   \end{array}
- *   \right.
- *   \f$
+ *   \f{equation*}{
+ *   \begin{cases}
+ *   M \ z + q = w \\
+ *   0 \le w \perp z \ge 0 \\
+ *   \end{cases}
+ *   \f}
  *
  * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
+ *
+ * The notation $x \perp y$ means that $x^Ty =0$. Inequalities involving vectors
+ * are understood to hold component-wise.
+ *
+ * From more details on theory and analysis of LCP, we refer to
+ *
+ * R.W. Cottle, J.S. Pang, and R.E. Stone. <i>The Linear Complementarity Problem.</i> Academic Press, Inc., Boston, MA, 1992.
+ *
  *  \section lcpSolversList Available solvers
 
   The solvers and their parameters are described in \ref LCPSolvers . \n
@@ -62,18 +70,18 @@
 #include "NumericsMatrix.h"
 
 /** \struct LinearComplementarityProblem LinearComplementarityProblem.h
- *  \brief structure that contains a Linear Complementarity Problem
+ *  \brief Structure that contains and defines  \ref LCProblem
+ *
  *   Find \f$(z,w)\f$ such that:\n
- *   \f$
- *   \left\lbrace
- *   \begin{array}{l}
- *   M \ z + q = w \\[1mm]
- *   0 \le w \perp z \ge 0 \\[1mm]
- *   \end{array}
- *   \right.
- *   \f$
+ *   \f{equation*}{
+ *   \begin{cases}
+ *   M \ z + q = w \\
+ *   0 \le w \perp z \ge 0 \\
+ *   \end{cases}
+ *   \f}
  *
  * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
+ * See \ref LCProblem for more details.
  */
 typedef struct
 {

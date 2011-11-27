@@ -5,17 +5,50 @@
 \b Numerics is a package of Siconos dedicated to low-level algorithms,
 written in C and Fortran, used to solve non-smooth problems. \n
 
-It can be used as a stand alone library but its functions are rather
-supposed to be called from Kernel.
+It can be used as a stand-alone library thanks to its C API.
 
 \section doxyNumericsContents Contents
+\subsection nonsmoothsolvers Non-Smooth Solvers
 
-        - \b netlib: routines imported from netlib collection (see
-           http://www.netlib.org/)\n
+Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.\n
 
-	- \subpage NSDrivers
+\subpage LCProblem \n\n
+\subpage MLCProblem \n\n
+\subpage NCProblem \n\n
+\subpage fcProblem \n\n
+\subpage RelayProblem \n\n
+\subpage QPSolvers\n\n
 
-\section doxyNumericsAbout About 
+For each type of problem, a generic interface function (driver) is provided. \n
+
+The main arguments of this driver are:
+ - a structure of type XXXProblem (XXX being the formulation type: LinearComplementarityProblem, FrictionContactProblem ...), which holds the vectors and matrices used to formalize the problem, \n
+ - the unknowns \n
+ - a structure of type SolverOptions, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
+ - a NumericsOptions structure, used to define global options (verbose mode ...)
+
+All the drivers interfaces are defined in the file NonSmoothDrivers.h .\n
+Each type of formulation is defined in a structure in the file XXXProblem.h .
+
+
+Moreover, details on matrix storage in Numerics can be found in:
+\subpage NumericsMatrixPage \n
+
+Other functions and useful tools related to NonSmoothSolvers are listed in NSSTools.h.
+
+\subsection netlib External Routines 
+
+Imports from <a href="http://www.netlib.org/">netlib</a> collection 
+<ul>
+<li>ODEPACK</li>
+</ul>
+
+\subsection requirements Requirements
+<ul>
+<li>C and FORTRAN Compiler </li>
+<li>BLAS, LAPACK/ATLAS </li>
+</ul>
+
 
 
 */
