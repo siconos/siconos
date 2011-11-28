@@ -47,7 +47,7 @@ private:
    *  As input: 1 if first call, else 2
    *  As output: 2 if no root found, else 3
    */
-  int istate;
+  int _istate;
 
   /** an epsilon to define the contraint g for Urs in IndexSet[1]
   */
@@ -108,6 +108,16 @@ public:
   };
 
   /* Getters and setters */
+  /** Set value to _istate */
+  inline void SetIstate(int newValue)
+  {
+    _istate = newValue;
+  }
+  /** Get value of _istate */
+  inline double istate()
+  {
+    return _istate;
+  }
   /** Set value to _epsilon */
   inline void SetToleranceED(double var)
   {

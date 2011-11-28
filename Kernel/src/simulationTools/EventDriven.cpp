@@ -42,7 +42,7 @@ using namespace RELATION;
 EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
                          SP::DynamicalSystemsSet dsList,
                          SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), istate(1)
+  Simulation(strxml, t0, T, dsList, interList), _istate(1)
 {
   // === One Step NS Problem === We read data in the xml output
   // (mainly Interactions concerned and solver) and assign them to
@@ -80,12 +80,12 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
-EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), istate(1)
+EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1)
 {
   (*_allNSProblems).resize(SICONOS_OSNSP_ED_NUMBER);
 };
 
-EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), istate(1)
+EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1)
 {
   (*_allNSProblems).resize(nb);
 };
@@ -562,9 +562,9 @@ void EventDriven::advanceToEvent()
   // next time step or first root of the 'g' function found by
   // integrator (Lsodar)
 
-  // if istate == 1 => first call. It this case we suppose that _tinit
+  // if _istate == 1 => first call. It this case we suppose that _tinit
   // and _tend have been initialized before
-  if (istate == 2 || istate == 3)
+  if (_istate == 2 || _istate == 3)
   {
     _tinit = _eventsManager->startingTime();
     _tend =  _eventsManager->nextTime();
@@ -582,15 +582,18 @@ void EventDriven::advanceToEvent()
 
     //====================================================================================
     //    std::cout << " Start of Lsodar integration" << std::endl;
-    (*it)->integrate(_tinit, _tend, _tout, istate); // integrate must
+    (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
     //    std::cout << " End of Lsodar integration" << std::endl;
-    // return a flag (istate) telling if _tend has been  reached or not.
+    // return a flag (_istate) telling if _tend has been  reached or not.
+    //====================================================================================
+
     if (_printStat)
     {
       statOut << " =================> Results after advanceToEvent <================= " << endl;
       statOut << " Starting time: " << _tinit << endl;
+      statOut << " _istate " << _istate << endl;
     }
-    if (istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
+    if (_istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
