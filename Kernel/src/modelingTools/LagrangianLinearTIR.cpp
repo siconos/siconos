@@ -134,7 +134,6 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
 {
   // get y and lambda of the interaction
   SP::SiconosVector y = interaction()->y(derivativeNumber);
-  SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
   prod(*_jachq, *data[q0 + derivativeNumber], *y);
@@ -148,7 +147,10 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
   }
 
   if (_jachlambda)
+  {
+    SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
     prod(*_jachlambda, *lambda, *y, false) ;
+  }
 
 
 }

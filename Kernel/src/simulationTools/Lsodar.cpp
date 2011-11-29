@@ -442,7 +442,7 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   SP::SiconosVector Xq;
   SP::SiconosVector Yp;
   SP::SiconosVector Xfree;
-  SP::SiconosVector lambda;
+  //  SP::SiconosVector lambda;
   SP::SiconosVector H_alpha;
 
 
@@ -477,7 +477,7 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
 
 
-  lambda = UR->interaction()->lambda(0);
+  //  lambda = UR->interaction()->lambda(0);
   H_alpha = UR->interaction()->relation()->Halpha();
 
   if (relationType == Lagrangian)
