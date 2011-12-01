@@ -56,7 +56,9 @@ Rvalue = 1e3    # resistance
 Vinit = 10.0    # initial voltage
 Modeltitle = "DiodeBridge"
 
-from matplotlib.pyplot import subplot, title, plot, grid, show
+withPlot=True
+if (withPlot) :
+    from matplotlib.pyplot import subplot, title, plot, grid, show
 
 from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
@@ -202,25 +204,25 @@ while (k < N+1):
     k += 1
     aTS.nextStep()
     print aTS.nextTime()
-    
-#
-# plots
-#
-subplot(411)
-title('inductor voltage')
-plot(dataPlot[:,0], dataPlot[:,1])
-grid()
-subplot(412)
-title('inductor current')
-plot(dataPlot[:,0], dataPlot[:,2])
-grid()
-subplot(413)
-title('diode R1 current')
-plot(dataPlot[:,0], dataPlot[:,3])
-grid()
-subplot(414)
-title('diode R1 voltage')
-plot(dataPlot[:,0], dataPlot[:,4])
-grid()
-show()
+if (withPlot) :    
+    #
+    # plots
+    #
+    subplot(411)
+    title('inductor voltage')
+    plot(dataPlot[:,0], dataPlot[:,1])
+    grid()
+    subplot(412)
+    title('inductor current')
+    plot(dataPlot[:,0], dataPlot[:,2])
+    grid()
+    subplot(413)
+    title('diode R1 current')
+    plot(dataPlot[:,0], dataPlot[:,3])
+    grid()
+    subplot(414)
+    title('diode R1 voltage')
+    plot(dataPlot[:,0], dataPlot[:,4])
+    grid()
+    show()
 
