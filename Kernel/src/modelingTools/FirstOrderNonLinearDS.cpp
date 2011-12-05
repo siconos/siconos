@@ -186,6 +186,8 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
 
   _x[0].reset(new SimpleVector(*_x0));
   _x[1].reset(new SimpleVector(_n));
+  _f.reset(new SimpleVector(_n));
+  _jacobianfx.reset(new SimpleMatrix(_n, _n));
   //mG
   _g_alpha.reset(new SimpleVector(_n));
   _residur.reset(new SimpleVector(_n));
