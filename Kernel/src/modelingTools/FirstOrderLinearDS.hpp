@@ -284,6 +284,7 @@ public:
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \warning z is not taken into account when computing the RHS
    */
   void computeRhs(double, bool  = false);
 

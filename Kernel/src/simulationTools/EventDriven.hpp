@@ -109,7 +109,7 @@ public:
 
   /* Getters and setters */
   /** Set value to _istate */
-  inline void SetIstate(int newValue)
+  inline void setIstate(int newValue)
   {
     _istate = newValue;
   }
@@ -119,12 +119,12 @@ public:
     return _istate;
   }
   /** Set value to _epsilon */
-  inline void SetToleranceED(double var)
+  inline void setToleranceED(double var)
   {
     TOL_ED = var;
   }
   /** Get value of _epsilon */
-  inline double ToleranceED()
+  inline double toleranceED()
   {
     return TOL_ED;
   }
