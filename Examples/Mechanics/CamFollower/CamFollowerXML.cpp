@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     double T = CamFollower->finalT();
     double t0 = CamFollower->t0();
     double h = S->timeStep();
-    int N = (int)((T - t0) / h);
+    int N = ceil((T - t0) / h);
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

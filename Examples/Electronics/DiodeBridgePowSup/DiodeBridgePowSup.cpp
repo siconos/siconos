@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
     k = 0;
     double h = aTS->timeStep();
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = ceil((T - t0) / h); // Number of time steps
     cout << "Number of time steps = " << N << endl;
     tinst = k * h_step;
 

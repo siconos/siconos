@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     act->setK(*K);
 
     SP::EventsManager eventsManager = s->eventsManager();
-    int N = (int)((T - t0) / h + 10); // Number of time steps
+    int N = ceil((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;

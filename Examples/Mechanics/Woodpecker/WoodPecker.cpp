@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 
 
     int k = 0;
-    int N = (int)((T - t0) / h);
+    int N = ceil((T - t0) / h);
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7;

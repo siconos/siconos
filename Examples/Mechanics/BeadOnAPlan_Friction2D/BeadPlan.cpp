@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     double t0 = oscillator->t0();
     double T = oscillator->finalT();
     double h = s->timeStep();
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = (int)((T - t0) / h);
+    int N = ceil((T - t0) / h);
     cout << "Number of time step" << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

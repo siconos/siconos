@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     cout << " -----> End of initialization." << endl;
 
     double h = StratCircuitRLCD->timeStep();
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = ceil((T - t0) / h); // Number of time steps
     int k = 0;
 
     // --- Get the values to be plotted ---

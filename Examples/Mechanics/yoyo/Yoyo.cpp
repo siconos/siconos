@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     double h = 0.001;       // pas de discrétisation du temps
     const double theta = 0.5;   // coefficient pour le générateur de simulation
     double e = 0; // coefficient de restitution
-    int N = (int)((T - t0) / h);
+    int N = ceil((T - t0) / h);
 
 
     // déclarations

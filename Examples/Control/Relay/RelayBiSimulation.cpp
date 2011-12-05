@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
-    int N = (int)((T - t0) / h) + 10; // Number of time steps
+    int N = ceil((T - t0) / h) + 10; // Number of time steps
     SimpleMatrix dataPlot(N, outputSize);
 
     SP::SiconosVector xProc = processDS->x();

@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
     bouncingBall->initialize(s);
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = ceil((T - t0) / h); // Number of time steps
     int Nplot = (int)((T - t0) / hplot); // Number of plot steps
 
     // --- Get the values to be plotted ---
