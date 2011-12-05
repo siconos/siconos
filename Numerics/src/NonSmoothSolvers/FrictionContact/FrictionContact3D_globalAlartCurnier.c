@@ -733,10 +733,12 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
 
-  mumps_id->ICNTL(1) = -1;
-  mumps_id->ICNTL(2) = -1;
-  mumps_id->ICNTL(3) = -1;
+  //  mumps_id->ICNTL(1)=-1;
+  //  mumps_id->ICNTL(2)=-1;
+  //  mumps_id->ICNTL(3)=-1;
   mumps_id->ICNTL(4) = 0;
+  mumps_id->ICNTL(10) = 1;
+  mumps_id->ICNTL(11) = 1;
 
   mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
   // ok for a cube on a plane & four contact points
@@ -877,6 +879,17 @@ void frictionContact3D_sparseGlobalAlartCurnier(
       /*if (verbose>0)*/
       printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
 
+
+    //    if (verbose>0)
+    {
+
+      printf("mumps : condition number %g\n", mumps_id->rinfog[9]);
+      printf("mumps : component wise scaled residual %g\n", mumps_id->rinfog[6]);
+      printf("mumps : \n");
+
+    }
+
+
     // line search
     double alpha = 1;
     int info_ls = globalLineSearchSparseGP(problemSize, reaction, velocity, problem->mu, rho, F, A, B,
@@ -942,7 +955,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     }
   }
 
-  iparam[1] = iter;
+  options->iparam[1] = iter;
 
 #ifdef DUMP_PROBLEM
   if (info[0])

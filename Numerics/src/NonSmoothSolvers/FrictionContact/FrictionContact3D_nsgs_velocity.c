@@ -155,7 +155,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
   printf("----------------------------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Error = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
-
+  iparam[7] = iter;
 
   /***** Free memory *****/
   (*freeSolver)();
@@ -173,13 +173,13 @@ int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(SolverOptions* optio
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 8;
+  options->dSize = 8;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
