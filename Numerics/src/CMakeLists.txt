@@ -79,9 +79,15 @@ IF(WITH_MUMPS)
 ENDIF(WITH_MUMPS)
 
 IF(WITH_FCLIB)
-   COMPILE_WITH(FCLIB REQUIRED)   
- #  APPEND_FLAGS(CMAKE_C_FLAGS "-DWITH_FCLIB")	
-ENDIF(WITH_FCLIB)
+  COMPILE_WITH(FCLIB REQUIRED)   
+  IF(FCLIB_NOTFOUND)
+    # try the package stuff
+    # need FCLib_DIR !!
+    COMPILE_WITH(FCLib 1.0 REQUIRED)
+  ENDIF()
+  #  APPEND_FLAGS(CMAKE_C_FLAGS "-DWITH_FCLIB")	
+ENDIF()
+
 
 IF(C_HAVE_C99)
   APPEND_FLAGS(CMAKE_C_FLAGS "-std=c99")
@@ -91,12 +97,6 @@ IF(C_HAVE_WALL)
   APPEND_FLAGS(CMAKE_C_FLAGS "-Wall")
 ENDIF(C_HAVE_WALL)
 
-IF(WITH_FCLIB)
-  COMPILE_WITH(FCLib 1.0 REQUIRED)
-#  include_directories(${FCLib_INCLUDE_DIRS})
-#  set(LIBS ${LIBS} ${FCLib_LIBRARY})
-#  display(LIBS)
-endif()
 
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
