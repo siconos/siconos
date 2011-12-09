@@ -139,52 +139,24 @@ DiodeBridge.initialize(aTS)
 
 k = 0
 h = aTS.timeStep();
+print "Timestep : ",h
 # Number of time steps
 N = (T-t0)/h
-
+print "Number of steps : ",N
 
 # Get the values to be plotted 
 # ->saved in a matrix dataPlot
 
 from numpy import empty
-dataPlot = empty((N+1,7))
+dataPlot = empty([N+1,8])
 
 x = LSDiodeBridge.x()
+print "Initial state : ",x
 y = InterDiodeBridge.y(0)
-lambda_ = InterDiodeBridge.lambda_(0)
-k=0
-# For the initial time step: 
-#  time
-dataPlot[0, 0] = t0
-dataPlot[k, 0] = aTS.nextTime()
-#  inductor voltage
-dataPlot[k, 1] = LSDiodeBridge.x()[0]
-# inductor current
-dataPlot[k, 2] = LSDiodeBridge.x()[1]
-# diode R1 current
-    #print InterDiodeBridge.y(0)[0]
-    #print y[0]
-dataPlot[k, 3] = InterDiodeBridge.y(0)[0]
-# diode R1 voltage
-dataPlot[k, 4] = - InterDiodeBridge.lambda_(0)[0]
-# diode F2 voltage 
-dataPlot[k, 5] = - InterDiodeBridge.lambda_(0)[1]
-# diode F1 current
-dataPlot[k, 6] = - InterDiodeBridge.lambda_(0)[2]
-
-print dataPlot
-
-# time loop
-k = 1
-#while(aTS.nextTime() < T):
-
-x = LSDiodeBridge.x()
-y = InterDiodeBridge.y(0)
+print "First y : ",y
 lambda_ = InterDiodeBridge.lambda_(0)
 
-
-while (k < N+1):
-    
+while (k < N):    
     aTS.computeOneStep()
     #aLCP.display()
     dataPlot[k, 0] = aTS.nextTime()
@@ -199,30 +171,32 @@ while (k < N+1):
     # diode F2 voltage 
     dataPlot[k, 5] = - lambda_[1]
     # diode F1 current
-    dataPlot[k, 6] = - lambda_[2]
-
+    dataPlot[k, 6] = lambda_[2]
+    # resistor current
+    dataPlot[k, 7] = y[0] + lambda_[2]
     k += 1
     aTS.nextStep()
-    print aTS.nextTime()
-if (withPlot) :    
+
+if (withPlot) :
     #
     # plots
     #
     subplot(411)
     title('inductor voltage')
-    plot(dataPlot[:,0], dataPlot[:,1])
+    plot(dataPlot[0:k-1,0], dataPlot[0:k-1,1])
     grid()
     subplot(412)
     title('inductor current')
-    plot(dataPlot[:,0], dataPlot[:,2])
+    plot(dataPlot[0:k-1,0], dataPlot[0:k-1,2])
     grid()
     subplot(413)
-    title('diode R1 current')
-    plot(dataPlot[:,0], dataPlot[:,3])
+    title('diode R1 (blue) and F2 (green) voltage')
+    plot(dataPlot[0:k-1,0], -dataPlot[0:k-1,4])
+    plot(dataPlot[0:k-1,0], dataPlot[0:k-1,5])
     grid()
     subplot(414)
-    title('diode R1 voltage')
-    plot(dataPlot[:,0], dataPlot[:,4])
+    title('resistor current')
+    plot(dataPlot[0:k-1,0], dataPlot[0:k-1,7])
     grid()
     show()
 
