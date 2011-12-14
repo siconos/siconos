@@ -32,7 +32,11 @@
 #define DEBUG_WHERESTR  "%s"
 #define DEBUG_WHEREARG  ""
 #endif
+#ifdef DEBUG_STDOUT
+#define DEBUG_INTERNAL_PRINTF(...)       printf(__VA_ARGS__);
+#else
 #define DEBUG_INTERNAL_PRINTF(...)       fprintf(stderr, __VA_ARGS__);
+#endif
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
 #define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
