@@ -34,7 +34,7 @@ MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
 
 // Constructor from a set of data
 MLCP::MLCP(const int newNumericsSolverId):
-  LinearOSNS(newNumericsSolverId, "MLCP", "unamed")
+  LinearOSNS(newNumericsSolverId, "MLCP", "unnamed")
 {
   _numerics_solver_options->solverId = newNumericsSolverId;
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);

@@ -333,12 +333,12 @@ public:
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
    */
-  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /**

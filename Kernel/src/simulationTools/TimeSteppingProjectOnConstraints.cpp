@@ -24,7 +24,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
 
-#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
@@ -33,8 +33,9 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
-  _constraintTol = 1e-4;
-  _constraintTolUnilateral = 1e-8;
+  _constraintTol = 1e-06;
+  _constraintTolUnilateral = 1e-08;
+  _projectionMaxIteration = 20;
   _doProj = 1;
   _doOnlyProj = 0;
 }
@@ -47,9 +48,12 @@ TimeSteppingProjectOnConstraints::~TimeSteppingProjectOnConstraints()
 void TimeSteppingProjectOnConstraints::initOSNS()
 {
   TimeStepping::initOSNS();
+
+  /* VA : Why the level min and max are set here */
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(1);
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(1);
 }
+
 void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned int maxStep)
 {
 #ifdef TSPROJ_DEBUG
@@ -59,7 +63,10 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(criterion, maxStep);
 #ifdef TSPROJ_DEBUG
-  cout << "TimeStepping::newtonSolve end : nbit=" << getNewtonNbSteps() << "\n";
+  cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
+  cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
+  cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
+  cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
 #endif
   if (!_doProj)
     return;
@@ -78,7 +85,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     *(neds->deltaq()) = *(neds->q());
   }
   bool runningNewton = false;
-  int cmp = 0;
+  unsigned int cmp = 0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++){
   //   double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
@@ -96,6 +103,13 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
   // }
   SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
   UnitaryRelationsGraph::VIterator aVi, viend;
+
+  double maxViolationEquality = -1e24;
+  double minViolationEquality = +1e24;
+  double maxViolationUnilateral = -1e24;
+  double minViolationUnilateral = +1e24;
+
+
   for (boost::tie(aVi, viend) = indexSet->vertices();
        aVi != viend; ++aVi)
   {
@@ -106,6 +120,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
       double criteria = interac->y(0)->getValue(0);
+      if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+      if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
       //printf("TSProj newton criteria unilateral  %e.\n",criteria);
       if (criteria < - _constraintTolUnilateral)
       {
@@ -118,6 +134,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     else
     {
       //printf("TSProj newton criteria  %e.\n",interac->y(0)->normInf());
+      if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
+      if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
       if (interac->y(0)->normInf() > _constraintTol)
       {
         runningNewton = true;
@@ -128,8 +146,17 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     }
   }
 
+#ifdef TSPROJ_DEBUG
+  printf("TSProj newton min/max criteria before projection\n");
+  printf("TSProj newton min criteria equality =  %e.\n", minViolationEquality);
+  printf("TSProj newton max criteria equality =  %e.\n", maxViolationEquality);
+  printf("TSProj newton max criteria unilateral =  %e.\n", maxViolationUnilateral);
+  printf("TSProj newton min criteria unilateral =  %e.\n", minViolationUnilateral);
+#endif
 
-  while (runningNewton && cmp < 10)
+
+
+  while (runningNewton && cmp < _projectionMaxIteration)
   {
     cmp++;
     //printf("TimeSteppingProjectOnConstraints Newton step = %d\n",cmp);
@@ -152,13 +179,19 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       if (dsType != Type::NewtonEulerDS)
         RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
       SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
-      neds->normalizeq();
+      //neds->normalizeq();
       neds->updateT();
     }
 
     updateWorldFromDS();
 
     runningNewton = false;
+    double maxViolationEquality = -1e24;
+    double minViolationEquality = +1e24;
+    double maxViolationUnilateral = -1e24;
+    double minViolationUnilateral = +1e24;
+
+
 
     for (boost::tie(aVi, viend) = indexSet->vertices();
          aVi != viend; ++aVi)
@@ -171,6 +204,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
           Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
       {
         double criteria = interac->y(0)->getValue(0);
+        if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+        if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
         if (criteria < - _constraintTolUnilateral)
         {
           runningNewton = true;
@@ -181,6 +216,8 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       }
       else
       {
+        if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
+        if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
         if (interac->y(0)->normInf() > _constraintTol)
         {
           runningNewton = true;
@@ -189,8 +226,16 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #endif
         }
       }
-    }
 
+
+    }
+#ifdef TSPROJ_DEBUG
+    printf("TSProj newton min/max criteria projection it %d\n", cmp);
+    printf("TSProj newton min criteria equality =  %e.\n", minViolationEquality);
+    printf("TSProj newton max criteria equality =  %e.\n", maxViolationEquality);
+    printf("TSProj newton max criteria unilateral =  %e.\n", maxViolationUnilateral);
+    printf("TSProj newton min criteria unilateral =  %e.\n", minViolationUnilateral);
+#endif
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
@@ -202,8 +247,29 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
     //  (*it)->relation()->computeh(getTkp1());
     //}
   }
-  /*The following reduces the velocity because the position step increase the energy of the system. This formulation works only with simple systems.To activate it, comment the next line.*/
+#ifdef TSPROJ_DEBUG
+  cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
+#endif
+
   return;
+
+  /*The following reduces the velocity because the position step increase the energy of the system. This formulation works only with simple systems.To activate it, comment the next line.*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
@@ -315,54 +381,4 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 #endif
 
 }
-bool TimeSteppingProjectOnConstraints::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  double y = ur->getYRef(i - 1);
-  double yDot = ur->getYRef(1);
-#ifdef TSPROJ_DEBUG
-  printf("TSProjectOnConstraints::predictorDeactivate yref=%e, yDot=%e\n", y, yDot);
-#endif
-  //y += 0.5*h*yDot;
-  assert(!isnan(y));
-  bool res = (y > 1e-7);
-  if (res)
-  {
-    SP::NewtonEulerFrom1DLocalFrameR  aR = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR>(ur->interaction()->relation());
-    aR->_isOnContact = false;
-  }
-#ifdef TSPROJ_DEBUG
-  if (res)
-  {
-    printf("TimeSteppingProjectOnConstraints::predictorDeactivate DEACTIVATE\n");
-  }
-#endif
 
-  return res;
-}
-
-bool TimeSteppingProjectOnConstraints::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
-{
-  //return TimeStepping::predictorActivate(ur,i);
-  double h = timeStep();
-  double y = ur->getYRef(i - 1);
-  double yDot = ur->getYRef(1);
-#ifdef TSPROJ_DEBUG
-  printf("TSProjectOnConstraints::predictorActivate yref=%e, yDot=%e\n", y, yDot);
-#endif
-  y += 0.5 * h * yDot;
-  assert(!isnan(y));
-  bool res = (y <= 0);
-  if (res)
-  {
-    SP::NewtonEulerFrom1DLocalFrameR  aR = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR>(ur->interaction()->relation());
-    aR->_isOnContact = true;
-  }
-#ifdef TSPROJ_DEBUG
-  if (y <= 0)
-  {
-    printf("TimeSteppingProjectOnConstraints::predictorActivate ACTIVATE y=%e\n", y);
-  }
-#endif
-  //printf("TS::predictorActivate y=%e\n",y);
-  return res;
-}

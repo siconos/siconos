@@ -1822,7 +1822,7 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y <= 0)
-    DEBUG_PRINTF("Moreau::addInteractionInIndexSet ACTIVATE.\n");
+    DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
   return (y <= 0);
 }
 
@@ -1842,7 +1842,7 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y > 0)
-    DEBUG_PRINTF("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
   return (y > 0);
 }
 

@@ -71,6 +71,13 @@ private:
   /** Number of steps perfomed is the Newton Loop */
   unsigned int _newtonNbSteps;
 
+  /** unsigned int  _newtonOptions
+   *  option in the Newon iteration
+   *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
+   * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
+   */
+
+  unsigned int _newtonOptions;
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -81,12 +88,7 @@ private:
   double _newtonResiduRMax;
 
 
-  /** unsigned int  _newtonOptions
-   *  option in the Newon iteration
-   *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will force a single iteration of the Newton Solver
-   * SICONOS_TS_NONLINEAR (default) will perform the newton iteration up to convergence
-   */
-  unsigned int _newtonOptions;
+
 protected:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
   */

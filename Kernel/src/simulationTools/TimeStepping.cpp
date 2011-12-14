@@ -50,11 +50,12 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 TimeStepping::TimeStepping(SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
 {
 
   _computeResiduY = false;
   _computeResiduR = false;
+
 
   if (osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
@@ -63,7 +64,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 }
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
+  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
 {
   _computeResiduY = false;
   _computeResiduR = false;
@@ -75,7 +76,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
                            double T, SP::DynamicalSystemsSet dsList,
                            SP::InteractionsSet interList):
-  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR)
+  Simulation(strxml, t0, T, dsList, interList), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonOptions(SICONOS_TS_NONLINEAR), _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0)
 {
   _computeResiduY = false;
   _computeResiduR = false;

@@ -52,6 +52,8 @@ protected:
    */
   double _constraintTolUnilateral;
 
+  /** Default maximum number of Newton iteration*/
+  unsigned int _projectionMaxIteration;
 
   /** disabled or enabled projection (Debug Projection) */
   unsigned int _doProj;
@@ -79,8 +81,6 @@ public:
 
   virtual ~TimeSteppingProjectOnConstraints();
 
-  virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
-  virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
   virtual void updateWorldFromDS()
   {
     ;
@@ -89,6 +89,12 @@ public:
   {
     _constraintTol = v;
   }
+
+  inline void setProjectionMaxIteration(unsigned int v)
+  {
+    _projectionMaxIteration = v;
+  }
+
   inline void setDoProj(unsigned int v)
   {
     _doProj = v;

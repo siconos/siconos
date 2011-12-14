@@ -211,8 +211,9 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   }
 
   currentUnitaryBlock->zero();
-
+#ifdef MLCPPROJ_DEBUG
   cout << "compute DiagUnitary block" << endl;
+#endif
   // loop over the common DS
   bool endl = false;
   for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
@@ -280,9 +281,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     }
 
 #endif
-
+#ifdef MLCPPROJ_DEBUG
     cout << "MLCPProjectOnConstraints::computeUnitaryBlock unitaryBlock " << endl;
     currentUnitaryBlock->display();
+#endif
   }
 }
 
@@ -575,10 +577,10 @@ void MLCPProjectOnConstraints::postCompute()
 
       k += neds->getDim();
       itDS++;
-
+#ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postCompute ds %d, q updated\n", NumDS);
       (ner->getq())->display();
-
+#endif
       NumDS++;
 
     }
