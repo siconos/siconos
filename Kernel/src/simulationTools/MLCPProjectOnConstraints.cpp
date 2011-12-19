@@ -511,9 +511,10 @@ void MLCPProjectOnConstraints::postCompute()
     setBlock(*_z, aBuff, yProj->size(), pos, 0);
     /*Now, update the ds's dof throw the relation*/
     //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
+#ifdef MLCPPROJ_DEBUG
     printf("MLCPP lambda of ur is pos =%i :", pos);
     aBuff->display();
-
+#endif
 
     DSIterator itDS;
     Index coord(8);
