@@ -85,9 +85,15 @@ public:
   {
     ;
   }
+
   inline void setConstraintTol(double v)
   {
     _constraintTol = v;
+  }
+
+  inline void setConstraintTolUnilateral(double v)
+  {
+    _constraintTolUnilateral = v;
   }
 
   inline void setProjectionMaxIteration(unsigned int v)
@@ -103,6 +109,10 @@ public:
   {
     _doOnlyProj = v;
   }
+
+
+
+
 
   /** newton algorithm
    * \param double, convergence criterion
