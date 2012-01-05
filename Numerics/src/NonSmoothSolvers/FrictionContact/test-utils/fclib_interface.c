@@ -27,7 +27,6 @@
 
 FrictionContactProblem* frictionContact_fclib_read(const char *path)
 {
-  int info = 0;
 
   struct fclib_local   *fclib_problem;
 
@@ -50,13 +49,17 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
 
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
-  problem->M->storageType == 1; /* sparse */
+  problem->M->storageType = 1; /* sparse */
   problem->M->matrix0 = NULL;
   problem->M->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
 
-  int res = sparseToSBM(problem->dimension, problem->M->matrix1, fclib_problem->W);
+  problem->M->matrix1->block = NULL;
+  problem->M->matrix1->index1_data = NULL;
+  problem->M->matrix1->index2_data = NULL;
 
-  /* ... */
+  sparseToSBM(problem->dimension, (SparseMatrix*)fclib_problem->W, problem->M->matrix1);
+
+  return problem;
 
 }
 

@@ -19,6 +19,8 @@
 #ifndef FCLIB_INTERFACE_H
 #define FCLIB_INTERFACE_H
 
+#include "NumericsConfig.h"
+
 #ifdef __cplusplus
 extern "C"
 {

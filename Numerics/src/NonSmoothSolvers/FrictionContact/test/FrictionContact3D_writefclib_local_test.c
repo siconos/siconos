@@ -58,6 +58,7 @@ int write_test_fclib(char * filename)
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
 
   info = frictionContact_newFromFile(problem, f);
+  fclose(f);
 
   int n = 100;
   char * title = (char *)malloc(n * sizeof(char *));
@@ -76,8 +77,31 @@ int write_test_fclib(char * filename)
                               math_info,
                               basename);
 
+  /* read fclib problem */
+  FrictionContactProblem* problem_from_file = frictionContact_fclib_read(basename);
+
+  printSBM(problem->M->matrix1);
+
+  printSBM(problem_from_file->M->matrix1);
+
+  info += !(problem_from_file->M->matrix1->filled1 == problem->M->matrix1->filled1);
+  info += !(problem_from_file->M->matrix1->filled2 == problem->M->matrix1->filled2);
+
+  for (size_t i = 0; i < problem_from_file->M->matrix1->filled1; i++)
+  {
+    info += !(problem_from_file->M->matrix1->index1_data[i] == problem->M->matrix1->index1_data[i]);
+  }
+
+  for (size_t i = 0; i < problem_from_file->M->matrix1->filled2; i++)
+  {
+    info += !(problem_from_file->M->matrix1->index2_data[i] == problem->M->matrix1->index2_data[i]);
+  }
 
   freeFrictionContact_problem(problem);
+  free(basename);
+  free(title);
+  free(description);
+  free(math_info);
   printf("\n End of test \n");
   return info;
 }

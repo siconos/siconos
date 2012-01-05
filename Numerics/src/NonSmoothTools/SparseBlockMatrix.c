@@ -1484,7 +1484,7 @@ int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatr
 }
 
 
-/* a basic iterator for different kind of sparse
+/* a basic iterator scheme for different kind of sparse
  * matrices (csc, csr, triplet) */
 typedef struct
 {
@@ -1493,64 +1493,116 @@ typedef struct
   int first;
   int second;
   int third;
+  const SparseMatrix* const mat;
 } sparse_matrix_iterator;
 
-
-int sparseNext(sparse_matrix_iterator* it,
-               const SparseMatrix* const sparseMat)
+sparse_matrix_iterator sparseMatrixBegin(const SparseMatrix* const sparseMat)
 {
-  if (sparseMat->nz >= 0) /* triplet */
+  if (sparseMat->nz >= 0)
   {
-    if (it->counter1 < sparseMat->nz)
+    sparse_matrix_iterator i = { 0, -1, 0, 0, 0, sparseMat};
+    return i;
+  }
+  else if (sparseMat->nz == -1)
+  {
+    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, 0, sparseMat };
+    return i;
+  }
+  else if (sparseMat->nz == -2)
+  {
+    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, 0, sparseMat };
+    return i;
+  }
+
+  assert(0);
+  sparse_matrix_iterator z;
+  return z;
+}
+
+int sparseMatrixNext(sparse_matrix_iterator* it)
+{
+  if (it->mat->nz >= 0) /* triplet */
+  {
+    assert(it->counter2 == -1);
+
+    if (it->counter1 < it->mat->nz)
     {
-      it->first = sparseMat->p[it->counter1];
-      it->second = sparseMat->i[it->counter1];
-      it->third = sparseMat->x[it->counter1];
+      it->first = it->mat->p[it->counter1];
+      it->second = it->mat->i[it->counter1];
+      it->third = it->mat->x[it->counter1];
 
       it->counter1++;
 
-      return 0;
+      return 1;
     }
     else
     {
-      return 1; /* stop */
+      return 0; /* stop */
     }
   }
-  else if (sparseMat->nz == -1) /* csc */
+  else if (it->mat->nz == -1) /* csc */
   {
-    if (it->counter1 < sparseMat->n)
+    if (it->counter1 < it->mat->n)
     {
-      if (it->counter2 < sparseMat->p[it->counter1])
+      if (it->counter2 < it->mat->p[it->counter1 + 1])
       {
-        it->first = sparseMat->i[it->counter2];
+        it->first = it->mat->i[it->counter2];
         it->second = it->counter1;
-        it->third = sparseMat->x[it->second * sparseMat->m + it->first];
+        it->third = it->mat->x[it->counter2];
         it->counter2++;
-        return 0;
+        return 1;
       }
       else
       {
-        it->counter2 = 0;
-        it->first = sparseMat->i[it->counter2];
-        it->second = it->counter1;
-        it->third = sparseMat->x[it->second * sparseMat->m + it->first];
-
         it->counter1++;
+        it->counter2 = it->mat->p[it->counter1];
 
-        return 0;
+        it->first = it->mat->i[it->counter2];
+        it->second = it->counter1;
+        it->third = it->mat->x[it->counter2];
+
+        it->counter2++;
+        return 1;
       }
     }
     else
     {
-      return 1; /* stop */
+      return 0; /* stop */
     }
   }
-  else if (sparseMat->nz == -2) /* csr */
+  else if (it->mat->nz == -2) /* csr */
   {
-    /* ... */
+    if (it->counter1 < it->mat->m)
+    {
+      if (it->counter2 < it->mat->p[it->counter1 + 1])
+      {
+        it->first = it->counter1;
+        it->second = it->mat->i[it->counter2];
+        it->third = it->mat->x[it->counter2];
+        it->counter2++;
+        return 1;
+      }
+      else
+      {
+        it->counter1++;
+        it->counter2 = it->mat->p[it->counter1];
+
+        it->first = it->counter1;
+        it->second = it->mat->i[it->counter2];
+        it->third = it->mat->x[it->counter2];
+
+        it->counter2++;
+        return 1;
+      }
+    }
+    else
+    {
+      return 0; /* stop */
+    }
   }
 
-  return 1;
+  assert(0);
+  return 0;
 }
 
 int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
@@ -1569,20 +1621,20 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   A->blocknumber0 = bnrow;
   A->blocknumber1 = bncol;
 
-  assert(A->blocksize0 == NULL);
+  //  assert(A->blocksize0 == NULL);
   A->blocksize0 = (unsigned int*) malloc(A->blocknumber0 * sizeof(unsigned int));
 
-  assert(A->blocksize1 == NULL);
+  //  assert(A->blocksize1 == NULL);
   A->blocksize1 = (unsigned int*) malloc(A->blocknumber1 * sizeof(unsigned int));
 
   for (unsigned int i = 0; i < A->blocknumber0; i++)
   {
-    A->blocksize0[i] = i * blocksize;
+    A->blocksize0[i] = (i + 1) * blocksize;
   }
 
   for (unsigned int i = 0; i < A->blocknumber1; i++)
   {
-    A->blocksize1[i] = i * blocksize;
+    A->blocksize1[i] = (i + 1) * blocksize;
   }
 
   /* we have to find non empty blocks */
@@ -1593,8 +1645,8 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   int* blocknum;
 
   /* 1: find blockindexmax (<= bnrow + bncol * bnrow) & blocklinemax */
-  for (sparse_matrix_iterator it = { 0, 0, 0, 0, 0};
-       sparseNext(&it, sparseMat);)
+  for (sparse_matrix_iterator it = sparseMatrixBegin(sparseMat);
+       sparseMatrixNext(&it);)
   {
     int row = it.first;
     int col = it.second;
@@ -1606,17 +1658,17 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
     if (blockindex > blockindexmax)
     {
-      blockindexmax = blockindex;
+      blockindexmax = blockindex + 1;
     };
 
     if (brow > blocklinemax)
     {
-      blocklinemax = brow;
+      blocklinemax = brow + 1;
     }
   }
 
-  assert(blockindexmax <= bnrow + bncol * bnrow);
-  assert(blocklinemax <= bnrow);
+  assert(blockindexmax <= bnrow + bncol * bnrow + 1);
+  assert(blocklinemax <= bnrow + 1);
 
 
   /* 2: allocate temporary memory for blocknumbers & blocklines */
@@ -1633,8 +1685,8 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   }
 
   /* 3: flag non empty blocks & lines */
-  for (sparse_matrix_iterator it = { 0, 0, 0, 0, 0};
-       sparseNext(&it, sparseMat);)
+  for (sparse_matrix_iterator it = sparseMatrixBegin(sparseMat);
+       sparseMatrixNext(&it);)
   {
     int row = it.first;
     int col = it.second;
@@ -1644,7 +1696,10 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
     int blockindex = brow + bcol * bnrow;
 
+    assert(blockindex < blockindexmax);
     blocknum[blockindex] = 1;
+
+    assert(brow < blocklinemax);
     blockline[brow] = 1;
 
   }
@@ -1662,7 +1717,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   }
 
   /* 5: allocate memory for contiguous blocks */
-  assert(A->block == NULL);
+  //  assert (A->block == NULL);
 
   A->block = (double **) malloc(A->nbblocks * sizeof(double *));
   for (int i = 0; i < A->nbblocks; i++)
@@ -1692,6 +1747,11 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   A->index1_data = (size_t*) malloc(A->filled1 * sizeof(size_t));
   A->index2_data = (size_t*) malloc(A->filled2 * sizeof(size_t));
 
+  for (size_t i = 0; i < A->filled1; i++)
+  {
+    A->index1_data[i] = 0;
+  }
+
   for (size_t i = 0; i < A->filled2; i++)
   {
     A->index2_data[i] = 0;
@@ -1699,8 +1759,8 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
   /* 8: fill index1_data & index2_data & copy values in contiguous
    * blocks */
-  for (sparse_matrix_iterator it = { 0, 0, 0, 0, 0};
-       sparseNext(&it, sparseMat);)
+  for (sparse_matrix_iterator it = sparseMatrixBegin(sparseMat);
+       sparseMatrixNext(&it);)
   {
     int row = it.first;
     int col = it.second;
