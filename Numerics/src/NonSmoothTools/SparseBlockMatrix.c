@@ -1647,11 +1647,18 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
       assert(birow + bicol * blocksize <= blocksize * blocksize);  /* obvious */
 
-      /* index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1] */
+      /* index1_data[rowNumber]<= blockNumber */
       if (A->index1_data[brow] < blocknum[blockindex])
       {
         A->index1_data[brow] = blocknum[blockindex];
       }
+
+      /* blockNumber <index1_data[rowNumber+1] */
+      if (blocknum[blockindex] >= A->index1_data[brow + 1])
+      {
+        A->index1_data[brow + 1] = blocknum[blockindex] + 1;
+      }
+
 
       A->index2_data[blocknum[blockindex]] = bcol;
 
