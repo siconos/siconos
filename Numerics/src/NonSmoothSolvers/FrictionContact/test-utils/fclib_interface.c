@@ -23,7 +23,42 @@
 
 
 #ifdef WITH_FCLIB
-#include "/Users/acary/Softs/fclib/trunk/src/fclib.h"
+#include <fclib.h>
+
+FrictionContactProblem* frictionContact_fclib_read(const char *path)
+{
+  int info = 0;
+
+  struct fclib_local   *fclib_problem;
+
+  fclib_problem = fclib_read_local(path);
+
+  if (fclib_problem == NULL)
+  {
+    return NULL;
+  }
+
+  FrictionContactProblem* problem;
+
+  problem = malloc(sizeof(FrictionContactProblem));
+
+  problem->dimension = fclib_problem->spacedim;
+  problem->mu = fclib_problem->mu;
+  problem->q = fclib_problem->q;
+
+  problem->numberOfContacts = fclib_problem->W->m / fclib_problem->spacedim; /* cf fclib spec */
+
+  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+
+  problem->M->storageType == 1; /* sparse */
+  problem->M->matrix0 = NULL;
+  problem->M->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+
+  int res = sparseToSBM(problem->dimension, problem->M->matrix1, fclib_problem->W);
+
+  /* ... */
+
+}
 
 int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * math_info,
                                 const char *path)

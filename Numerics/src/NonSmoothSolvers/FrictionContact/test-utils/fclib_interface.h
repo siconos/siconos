@@ -24,10 +24,14 @@ extern "C"
 {
 #endif
 
+#ifdef WITH_FCLIB
+  FrictionContactProblem* frictionContact_fclib_read(const char *path);
+
   int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description,
                                   char * math_info,
                                   const char *path);
 
+#endif
 
 #ifdef __cplusplus
 }

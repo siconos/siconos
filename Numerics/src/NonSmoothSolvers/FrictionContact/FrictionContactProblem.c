@@ -57,6 +57,8 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
+  /* fix: problem->M->storageType unitialized ! */
+
   newFromFile(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));

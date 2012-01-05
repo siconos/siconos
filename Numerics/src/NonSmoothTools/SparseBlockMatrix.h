@@ -26,30 +26,49 @@
 #include <SparseMatrix.h>
 
 /*!\file SparseBlockMatrix.h
-  \brief Structure definition and functions related to SparseBlockStructuredMatrix
+  \brief Structure definition and functions related to
+  SparseBlockStructuredMatrix
+
   \author Pascal Denoyelle and Franck Perignon and Co
 */
 
 /** Structure to store sparse block matrices with square diagonal
-    blocks
+    blocks.
+
+    Note: the sparse format is the same as the one used by Boost C++
+    library to store compressed sparse row matrices. The same member
+    names have been adopted in order to simplify usage from Siconos
+    Kernel : filled1, filled2, index1_data, index2_data.
+    Reference :
+    http://ublas.sourceforge.net/refdoc/classboost_1_1numeric_1_1ublas_1_1compressed__matrix.html
+
     \param nbblocks         : the total number of non null blocks
     \param **block : *block contains the double values of one block in
                       Fortran storage (column by column) **block is
     the list of non null blocks
-
-    \param blocknumber0           : the first dimension of the block matrix (number of block rows)
-    \param blocknumber1           : the second dimension of the block matrix (number of block columns)
-    \param *blocksize0            : the list of sums of the number of rows of the first column of blocks of M: blocksize0[i] = blocksize0[i-1] + ni,\n
-    ni being the number of rows of the  block at  row i
-    *blocksize1       : the list of sums of the number of columns of the first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
-    ni being the number of columns of the block at  column i
+    \param blocknumber0 : the first dimension of the block matrix
+    (number of block rows)
+    \param blocknumber1 : the second dimension of the block matrix
+    (number of block columns)
+    \param *blocksize0 : the list of sums of the number of rows of the
+    first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
+    ni,\n ni being the number of rows of the block at row i
+    *blocksize1 : the list of sums of the number of columns of the
+    first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
+    ni being the number of columns of the block at column i
     \param filled1 : number of non empty lines + 1
     \param filled2 : number of non null blocks
-    \param index1_data : index1_data is of size filled1 = number of non empty lines + 1. A block with number blockNumber inside a row numbered rowNumber verify : index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1]
-    \param index2_data : index2_data is of size filled2  index2_data[blockNumber] -> columnNumber.
+    \param index1_data : index1_data is of size filled1 = number of
+    non empty lines + 1. A block with number blockNumber inside a row
+    numbered rowNumber verify : index1_data[rowNumber]<= blockNumber
+    <index1_data[rowNumber+1]
+
+    \param index2_data : index2_data is of size filled2
+    index2_data[blockNumber] -> columnNumber.
 
 
-    Related functions: prodSBM(), subRowProdSBM(), freeSBM(), printSBM, getDiagonalBlockPos()
+    Related functions: prodSBM(), subRowProdSBM(), freeSBM(),
+    printSBM, getDiagonalBlockPos()
  * If we consider the matrix M and the right-hand-side q defined as
  *
  * \f$
@@ -69,13 +88,16 @@
  *
  * then
  * - the number of non null blocks is 6 (nbblocks=6)
- * - the number of rows of blocks is 3 (blocknumber0 =3) and the number of columns of blocks is 3 (blocknumber1 =3)
- * - the vector blocksize0  is equal to {4,6,8} and the vector blocksize1  is equal to {4,6,8}
+ * - the number of rows of blocks is 3 (blocknumber0 =3) and the
+     number of columns of blocks is 3 (blocknumber1 =3)
+ * - the vector blocksize0 is equal to {4,6,8} and the vector
+     blocksize1 is equal to {4,6,8}
  * - the integer filled1 is equal to 4
  * - the integer filled2 is equal to 6
  * - the vector index1_data is equal to {0,2,4,6}
  * - the vector index2_data is equal to {0,1,1,2,0,2}
- * - the block contains all non null block matrices stored in Fortran order (column by column) as\n
+ * - the block contains all non null block matrices stored in Fortran
+     order (column by column) as\n
  *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
  *   block[1] = {3,4,0,0,-1,1,0,6}\n
  *   ...\n
@@ -136,6 +158,7 @@ extern "C"
                const double* const x, double beta, double* y);
 
   /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
+
      \param[in] alpha coefficient
      \param[in] A, the matrix to be multiplied
      \param[in] B, the matrix to be multiplied
@@ -261,6 +284,14 @@ extern "C"
   \param[in] M the SparseBlockStructuredMatrix matrix
   \param[in] pointer on the filled dense Matrix
   */
+
+  /** Copy a Sparse Matrix into a SBM, with fixed blocksize
+      \param[in] the blocksize
+      \param[in] pointer on the Sparse Matrix
+      \param[in-out] pointer on an empty SparseBlockStructuredMatrix
+  */
+  int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A);
+
 
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 
