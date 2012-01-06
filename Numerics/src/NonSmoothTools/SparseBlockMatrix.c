@@ -1492,7 +1492,7 @@ typedef struct
   int counter2;
   int first;
   int second;
-  int third;
+  double third;
   const SparseMatrix* const mat;
 } sparse_matrix_iterator;
 
@@ -1500,17 +1500,17 @@ sparse_matrix_iterator sparseMatrixBegin(const SparseMatrix* const sparseMat)
 {
   if (sparseMat->nz >= 0)
   {
-    sparse_matrix_iterator i = { 0, -1, 0, 0, 0, sparseMat};
+    sparse_matrix_iterator i = { 0, -1, 0, 0, NAN, sparseMat};
     return i;
   }
   else if (sparseMat->nz == -1)
   {
-    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, 0, sparseMat };
+    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, NAN, sparseMat };
     return i;
   }
   else if (sparseMat->nz == -2)
   {
-    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, 0, sparseMat };
+    sparse_matrix_iterator i = { 0, sparseMat->p[0], 0, 0, NAN, sparseMat };
     return i;
   }
 
@@ -1654,14 +1654,14 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     int brow = row / blocksize;
     int bcol = col / blocksize;
 
-    int blockindex = brow + bcol * bnrow;
+    int blockindex = brow * bncol + bcol;
 
-    if (blockindex > blockindexmax)
+    if (it.third && (blockindex > blockindexmax - 1))
     {
       blockindexmax = blockindex + 1;
     };
 
-    if (brow > blocklinemax)
+    if (it.third && brow > (blocklinemax - 1))
     {
       blocklinemax = brow + 1;
     }
@@ -1676,12 +1676,12 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   blockline = (int *) malloc(blocklinemax * sizeof(int));
   for (int i = 0; i < blockindexmax; i++)
   {
-    blocknum[i] = 0;
+    blocknum[i] = -1;
   }
 
   for (int i = 0; i < blocklinemax; i++)
   {
-    blockline[i] = 0;
+    blockline[i] = -1;
   }
 
   /* 3: flag non empty blocks & lines */
@@ -1694,30 +1694,32 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     int brow = row / blocksize;
     int bcol = col / blocksize;
 
-    int blockindex = brow + bcol * bnrow;
+    int blockindex = brow * bncol + bcol;
 
-    assert(blockindex < blockindexmax);
-    blocknum[blockindex] = 1;
-
-    assert(brow < blocklinemax);
-    blockline[brow] = 1;
-
+    if (it.third)
+    {
+      assert(blockindex < blockindexmax);
+      blocknum[blockindex] = -2;
+      assert(brow < blocklinemax);
+      blockline[brow] = -2;
+    }
   }
 
   /* 4: count non empty blocks */
   A->nbblocks = 0;
   for (int i = 0; i < blockindexmax; i++)
   {
-    assert(blocknum[i] == 0 || blocknum[i] == 1);
+    assert(blocknum[i] == -1 || blocknum[i] == -2);
 
-    if (blocknum[i] == 1)
+    if (blocknum[i] == -2)
     {
+      printf("blocknum[%d] = %d\n", i, A->nbblocks);
       blocknum[i] = A->nbblocks++;
     }
   }
 
   /* 5: allocate memory for contiguous blocks */
-  //  assert (A->block == NULL);
+  assert(A->block == NULL);
 
   A->block = (double **) malloc(A->nbblocks * sizeof(double *));
   for (int i = 0; i < A->nbblocks; i++)
@@ -1732,9 +1734,9 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
   for (int i = 0; i < blocklinemax; i++)
   {
-    assert(blockline[i] == 0 || blockline[i] == 1);
+    assert(blockline[i] == -1 || blockline[i] == -2);
 
-    if (blockline[i] == 1)
+    if (blockline[i] == -2)
     {
       A->filled1++;
     }
@@ -1749,7 +1751,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
   for (size_t i = 0; i < A->filled1; i++)
   {
-    A->index1_data[i] = 0;
+    A->index1_data[i] = blockindexmax + 1;
   }
 
   for (size_t i = 0; i < A->filled2; i++)
@@ -1768,29 +1770,37 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     int brow = row / blocksize;
     int bcol = col / blocksize;
 
-    int blockindex = brow + bcol * bnrow;
+    int blockindex = brow * bncol + bcol;
 
     int birow = row % blocksize; /* block inside row */
     int bicol = col % blocksize; /* block inside column */
 
+    A->index1_data[A->filled1] = A->filled2 - 1;
+    A->index1_data[A->filled1 - 1] = A->filled2 - 1;
+
     assert(birow + bicol * blocksize <= blocksize * blocksize);  /* obvious */
 
-    /* index1_data[rowNumber]<= blockNumber */
-    if (A->index1_data[brow] < blocknum[blockindex])
+    if ((blockindex < blockindexmax) && (blocknum[blockindex] >= 0))
     {
-      A->index1_data[brow] = blocknum[blockindex];
+
+      assert(blockindex < blockindexmax);
+
+      printf("row=%d,col=%d,index1_data[%d]=%ld,blocknum[%d]=%d\n", row, col, brow, A->index1_data[brow], blockindex, blocknum[blockindex]);
+
+      assert(blocknum[blockindex] < A->nbblocks);
+      assert(blocknum[blockindex] < A->filled2);
+      /* this is an non empty block */
+
+      /* index1_data[rowNumber]<= blockNumber */
+      if (A->index1_data[brow] > blocknum[blockindex])
+      {
+        A->index1_data[brow] = blocknum[blockindex];
+      }
+
+      A->index2_data[blocknum[blockindex]] = bcol;
+
+      A->block[blocknum[blockindex]][birow + bicol * blocksize] = it.third;
     }
-
-    /* blockNumber <index1_data[rowNumber+1] */
-    if (blocknum[blockindex] >= A->index1_data[brow + 1])
-    {
-      A->index1_data[brow + 1] = blocknum[blockindex] + 1;
-    }
-
-    A->index2_data[blocknum[blockindex]] = bcol;
-
-    A->block[blocknum[blockindex]][birow + bicol * blocksize] = it.third;
-
   }
 
   /* 9: free temp memory */
