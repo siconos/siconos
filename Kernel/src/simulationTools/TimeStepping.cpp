@@ -629,7 +629,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       }
     }
     if (!isNewtonConverge)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps  reached." << endl ;
+      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
     else if (info)
       cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
     //    else

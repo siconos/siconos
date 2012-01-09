@@ -41,7 +41,7 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 #define SICONOS_TS_NONLINEAR 3
 class TimeStepping : public Simulation
 {
-private:
+protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(TimeStepping);
@@ -88,8 +88,6 @@ private:
   double _newtonResiduRMax;
 
 
-
-protected:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
   */
   virtual void initOSNS();

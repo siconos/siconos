@@ -19,26 +19,24 @@
 /*! \file
   Time-Stepping simulation with projections on constraints
 */
-#ifndef TIMESTEPPINGPROJECTONCONSTRAINTS_H
-#define TIMESTEPPINGPROJECTONCONSTRAINTS_H
+#ifndef TIMESTEPPINGCOMBINEDPROJECTION_H
+#define TIMESTEPPINGCOMBINEDPROJECTION_H
 
 #include "TimeStepping.hpp"
-
-
 
 /** Time-Stepping scheme
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Aug 2010
+ *  \version (Creation) 3.4.0.
+ *  \date (Creation) January 2012
  *
  */
-class TimeSteppingProjectOnConstraints : public TimeStepping
+class TimeSteppingCombinedProjection : public TimeStepping
 {
 protected:
   /** serialization hooks
    */
-  ACCEPT_SERIALIZATION(TimeSteppingProjectOnConstraints);
+  ACCEPT_SERIALIZATION(TimeSteppingCombinedProjection);
 
   virtual void initOSNS();
 
@@ -55,9 +53,11 @@ protected:
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
 
-  /** disabled or enabled projection (Debug Projection) */
-  unsigned int _doProj;
-  unsigned int _doOnlyProj;
+  /** Default maximum number of Newton iteration*/
+  unsigned int _numberIteration;
+
+  /** disabled or enabled combined projection (Debug Projection) */
+  unsigned int _doCombinedProj;
 
 
 public:
@@ -69,17 +69,17 @@ public:
      \param a one step non smooth problem for the velocity formulation
      \param a one step non smooth problem for the position formulation
   */
-  TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
-                                   SP::OneStepIntegrator osi,
-                                   SP::OneStepNSProblem osnspb_velo,
-                                   SP::OneStepNSProblem osnspb_pos);
+  TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
+                                 SP::OneStepIntegrator osi,
+                                 SP::OneStepNSProblem osnspb_velo,
+                                 SP::OneStepNSProblem osnspb_pos);
 
 
   /** default constructor
    */
-  TimeSteppingProjectOnConstraints() {};
+  TimeSteppingCombinedProjection() {};
 
-  virtual ~TimeSteppingProjectOnConstraints();
+  virtual ~TimeSteppingCombinedProjection();
 
   virtual void updateWorldFromDS()
   {
@@ -101,23 +101,22 @@ public:
     _projectionMaxIteration = v;
   }
 
-  inline void setDoProj(unsigned int v)
+  inline void setDoCombinedProj(unsigned int v)
   {
-    _doProj = v;
+    _doCombinedProj = v;
   }
-  inline void setDoOnlyProj(unsigned int v)
+
+  unsigned int numberIteration()
   {
-    _doOnlyProj = v;
+    return _numberIteration;
   }
 
   /**
    */
   void advanceToEvent();
-
-
-  /*
+  /**
    */
-  void computeCriteria(bool * runningProjection);
+  void computeCriteria(bool *);
 
   /** visitors hook
    */
@@ -125,7 +124,7 @@ public:
 
 };
 
-DEFINE_SPTR(TimeSteppingProjectOnConstraints);
+DEFINE_SPTR(TimeSteppingCombinedProjection);
 
 #endif // TIMESTEPPINGPROJECTONCONSTRAINTS_H
 
