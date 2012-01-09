@@ -183,9 +183,10 @@
 }
 
 // vectors of size problem_size from given *Problem as first input
+// no conversion => inout array
 %typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object) {
 
-  array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+  array = obj_to_array_no_conversion($input, NPY_DOUBLE);
   
   npy_intp array_len[2] = {0,0};
 
@@ -386,6 +387,13 @@
   
 }
 
+// info param
+%typemap(in, numinputs=0) (int *info) (int temp_info = -1)
+{
+  // a default initialization : solver may stop if *info = 0 (checkTrivialCase)
+  // checkTrivialCase => better if directly in solvers, not in driver.
+  $1 = &temp_info;
+}
 
 // 3x3 matrices
 
