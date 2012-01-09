@@ -34,9 +34,16 @@
 #undef c_abs
 #endif
 #include "SiconosNumerics.h"
+#include "NumericsConfig.h"
 #include "SolverOptions.h"
+#include "FrictionContactProblem.h"
+#include "FrictionContact3D_Solvers.h"
+#include "Friction_cst.h"
 #include "frictionContact_test_function.h"
+#include "FrictionContact3D_AlartCurnier.h"
+#include "FrictionContact3D_globalAlartCurnier.h"
 #include "FrictionContact3D_compute_error.h"
+#include "fclib_interface.h"
 %}
 
 %inline %{
@@ -66,7 +73,8 @@
   }
 %}
   
-
+// needed macros
+%include "NumericsConfig.h"
 
 
 // more convenient
@@ -761,6 +769,7 @@
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_globalAlartCurnier.h"
 %include "FrictionContact3D_compute_error.h"
+%include "fclib_interface.h"
 
 %extend FrictionContactProblem
 {
