@@ -29,7 +29,7 @@ int write_test_fclib(char * filename)
   printf("Test on %s\n", filename);
   int info = 0;
   int sizeoffilename = strlen(filename);
-  printf("sizeoffilemane %d\n",  sizeoffilename);
+  printf("sizeoffilename %d\n",  sizeoffilename);
   char  extension[4];
   strncpy(extension, &filename[sizeoffilename - 4], 4);
   char * basename;
@@ -78,23 +78,33 @@ int write_test_fclib(char * filename)
                               basename);
 
   /* read fclib problem */
+  FrictionContactProblem* problem1 = frictionContact_fclib_read(basename);
+
+  frictionContact_fclib_write(problem1,
+                              title,
+                              description,
+                              math_info,
+                              basename);
+
+
   FrictionContactProblem* problem_from_file = frictionContact_fclib_read(basename);
 
-  printSBM(problem->M->matrix1);
+
+  printSBM(problem1->M->matrix1);
 
   printSBM(problem_from_file->M->matrix1);
 
-  info += !(problem_from_file->M->matrix1->filled1 == problem->M->matrix1->filled1);
-  info += !(problem_from_file->M->matrix1->filled2 == problem->M->matrix1->filled2);
+  info += !(problem_from_file->M->matrix1->filled1 == problem1->M->matrix1->filled1);
+  info += !(problem_from_file->M->matrix1->filled2 == problem1->M->matrix1->filled2);
 
   for (size_t i = 0; i < problem_from_file->M->matrix1->filled1; i++)
   {
-    info += !(problem_from_file->M->matrix1->index1_data[i] == problem->M->matrix1->index1_data[i]);
+    info += !(problem_from_file->M->matrix1->index1_data[i] == problem1->M->matrix1->index1_data[i]);
   }
 
   for (size_t i = 0; i < problem_from_file->M->matrix1->filled2; i++)
   {
-    info += !(problem_from_file->M->matrix1->index2_data[i] == problem->M->matrix1->index2_data[i]);
+    info += !(problem_from_file->M->matrix1->index2_data[i] == problem1->M->matrix1->index2_data[i]);
   }
 
   freeFrictionContact_problem(problem);

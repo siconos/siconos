@@ -44,6 +44,8 @@
   Two different storages are available for M: dense and sparse block.
 
  */
+#include "NumericsConfig.h"
+
 #ifdef __cplusplus
 extern "C"
 {
