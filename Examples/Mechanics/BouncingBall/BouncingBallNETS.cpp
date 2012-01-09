@@ -193,7 +193,8 @@ int main(int argc, char* argv[])
 #else
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 #endif
-    //SP::TimeStepping s(new TimeStepping(t,OSI,osnspb));
+    s->setNewtonTolerance(1e-4);
+    s->setNewtonMaxIteration(10);
 
     // =========================== End of model definition ===========================
 
@@ -244,7 +245,7 @@ int main(int argc, char* argv[])
     while (s->nextTime() < T)
     {
       //      s->computeOneStep();
-      s->newtonSolve(1e-4, 10);
+      s->advanceToEvent();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
