@@ -571,7 +571,6 @@
   free($1);
 }
 
-/* FIX : segfault with SBMtoSparse
 %typemap(out) (NumericsMatrix* M) {
   npy_intp dims[2];
   dims[0] = $1->size0;
@@ -586,12 +585,11 @@
   else if($1->matrix1)
   {
     // matrix is sparse : return opaque pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
   }
   else
     SWIG_fail;
  }
-*/
 
 %typemap(out) (double* q) {
   npy_intp dims[2];
@@ -670,6 +668,46 @@
                                                  NPY_DOUBLE,            
                                                  $1);
   $result = pyarray;
+}
+
+// conversion python string -> FILE
+%typemap(in) (FILE *file)
+{
+  // %typemap(in) (FILE *file)
+  $1 = fopen(PyString_AsString($input), "r");
+  if (!$1)
+  {
+    SWIG_exception_fail(SWIG_IOError, 
+                        "in method '" 
+                        BOOST_PP_STRINGIZE($symname)
+                        "cannot fopen file");
+  }
+}
+
+%typemap(freearg) (FILE *file)
+{
+  // %typemap(freearg) (FILE *file)
+  fclose($1);
+}
+
+%typemap(in, numinputs=0) (SparseBlockStructuredMatrix* const M) 
+{
+  $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+}
+
+%typemap(argout) (SparseBlockStructuredMatrix* const M)
+{
+  $result = SWIG_Python_AppendOutput($result,
+                                     SWIG_NewPointerObj(SWIG_as_voidptr($1), 
+                                                        SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
+}
+
+%newobject newFromFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
+
+%typemap(newfree) (SparseBlockStructuredMatrix* const M)
+{
+  // %typemap(newfree) (SparseBlockStructuredMatrix* const M)
+  free($1);
 }
 
 // signatures
