@@ -36,6 +36,7 @@
 #include "SiconosNumerics.h"
 #include "NumericsConfig.h"
 #include "SolverOptions.h"
+#include "SparseBlockMatrix.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact3D_Solvers.h"
 #include "Friction_cst.h"
@@ -44,6 +45,8 @@
 #include "FrictionContact3D_globalAlartCurnier.h"
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
+
+#include <boost/preprocessor/stringize.hpp>
 %}
 
 %inline %{
@@ -564,9 +567,11 @@
 }
 
 %typemap(freearg) (NumericsMatrix* A) {
-    free($1);
+  // %typemap(freearg) (NumericsMatrix* A)
+  free($1);
 }
 
+/* FIX : segfault with SBMtoSparse
 %typemap(out) (NumericsMatrix* M) {
   npy_intp dims[2];
   dims[0] = $1->size0;
@@ -578,9 +583,15 @@
     if (!array || !require_fortran(array)) SWIG_fail;
     $result = obj;
   }
+  else if($1->matrix1)
+  {
+    // matrix is sparse : return opaque pointer
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+  }
   else
     SWIG_fail;
  }
+*/
 
 %typemap(out) (double* q) {
   npy_intp dims[2];
@@ -601,6 +612,66 @@
 %apply (NumericsMatrix *A) { (NumericsMatrix *m) };
 %apply (NumericsMatrix *A) { (NumericsMatrix *M) };
 
+// SBM handling
+
+
+%typemap(in) (const SparseBlockStructuredMatrix* const A) 
+  (npy_intp dims[2])
+{
+  int res1=0;
+  int newmem = 0;
+  void* temp = 0;
+  res1 = SWIG_ConvertPtr($input, &temp, SWIGTYPE_p_SparseBlockStructuredMatrix, 0 |  0);
+  if (!SWIG_IsOK(res1)) 
+  {
+    SWIG_exception_fail(SWIG_ArgError(res1), 
+                        "in method '" 
+                        BOOST_PP_STRINGIZE($symname)
+                        "', argument " "1"" of type '" "SparseBlockStructuredMatrix *""'");
+  };
+  SparseBlockStructuredMatrix* A = (SparseBlockStructuredMatrix *) 0;
+  A = reinterpret_cast< SparseBlockStructuredMatrix * >(temp);
+  assert(A);
+  dims[0] = A->blocksize0[A->blocknumber0-1];
+  dims[1] = A->blocksize0[A->blocknumber0-1];
+  $1 = A;
+}
+
+%typemap(in, numinputs=0) (double *denseMat)
+{
+  // %typemap(in, numinputs=0) (double *denseMat)
+  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
+  // ... but
+}
+
+%typemap(check) (double *denseMat) 
+{
+  // yes! ...  %typemap(check) (double *denseMat) 
+  // before %typemap(in) (const SparseBlockStructuredMatrix* const A) 
+  // ... what a mess
+  $1 = (double *) malloc(dims1[0] * dims1[1] * sizeof(double));
+}
+
+
+// FIX: do not work
+%newobject SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
+%typemap(newfree) (double *denseMat)
+{
+  // %typemap(newfree) (double *denseMat)
+  free($1);
+}
+
+
+%typemap(argout) (double *denseMat) 
+{
+  
+  PyObject* pyarray = FPyArray_SimpleNewFromData(2,                
+                                                 dims1,                  
+                                                 NPY_DOUBLE,            
+                                                 $1);
+  $result = pyarray;
+}
+
 // signatures
 %feature("autodoc", 1);
 
@@ -609,6 +680,7 @@
  
 
 // LCP
+%include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
