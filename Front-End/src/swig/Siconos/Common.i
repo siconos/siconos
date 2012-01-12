@@ -191,3 +191,36 @@ static int convert_darray(PyObject *input, double *ptr) {
 
   $result = PyArray_SimpleNewFromData(1,this_dparam_dim,NPY_DOUBLE,pdparam);
  }
+
+
+//PyArray_UpdateFlags does not seem to have any effect
+//>>> r = K.FirstOrderLinearTIR()
+//>>> r.setCPtr([[1,2,3],[4,5,6]])
+//>>> C=r.C()
+//>>> C.flags
+//  C_CONTIGUOUS : True
+//  F_CONTIGUOUS : False            <---- !!!
+//  OWNDATA : False
+//  WRITEABLE : True
+//  ALIGNED : True
+//  UPDATEIFCOPY : False
+//
+//
+// with this macro : ok
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
+
+// copy shared ptr reference in a base PyCObject 
+#define PYARRAY_FROM_SHARED_DATA(NDIM,DIMS,NAME,RESULT)                 \
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
+                                                 DIMS,                  \
+                                                 NPY_DOUBLE,            \
+                                                 NAME->getArray());     \
+  SharedPointerKeeper* savedSharedPointer = new                         \
+    SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
+  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
+    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
+                          &sharedPointerKeeperDelete);                  \
+  RESULT = pyarray
