@@ -410,6 +410,7 @@ KERNEL_REGISTRATION();
 
 %template (ioMatrix) ioObject<SiconosMatrix>; 
 
+%template(unsignedintv) boost::shared_ptr<std::vector<unsigned int> >;
 
 // not sufficient
 %ignore Question<bool>;

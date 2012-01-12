@@ -213,11 +213,23 @@ static int convert_darray(PyObject *input, double *ptr) {
 
 
 // copy shared ptr reference in a base PyCObject 
-#define PYARRAY_FROM_SHARED_DATA(NDIM,DIMS,NAME,RESULT)                 \
+#define PYARRAY_FROM_SHARED_SICONOS_DATA(TYPE,NDIM,DIMS,NAME,RESULT)    \
   PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
                                                  DIMS,                  \
-                                                 NPY_DOUBLE,            \
+                                                 TYPE,                  \
                                                  NAME->getArray());     \
+  SharedPointerKeeper* savedSharedPointer = new                         \
+    SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
+  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
+    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
+                          &sharedPointerKeeperDelete);                  \
+  RESULT = pyarray
+
+#define PYARRAY_FROM_SHARED_STL_VECTOR(TYPE,NDIM,DIMS,NAME,RESULT)      \
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
+                                                 DIMS,                  \
+                                                 TYPE,                  \
+                                                 &(*NAME)[0]);          \
   SharedPointerKeeper* savedSharedPointer = new                         \
     SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
   reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \

@@ -100,3 +100,16 @@ def test_SolverOption():
     
     assert lcp.numericsSolverOptions().dparam[0] ==  0.5 * d0
 
+
+def test_BoundaryCondition():
+    from Siconos.Kernel import BoundaryCondition
+
+    B = BoundaryCondition([1,2,3])
+
+    print B
+
+    print B.velocityIndices()
+
+    B.velocityIndices()[2]=5
+
+    assert (B.velocityIndices() == [1, 2, 5]).all()

@@ -266,7 +266,7 @@
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
 
-      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1_name,$input);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
     }
     else
     {
@@ -292,7 +292,7 @@
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1_name->size();
 
-      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1_name,$input);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
 
     }
     else
@@ -320,7 +320,7 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1_name,$input);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1_name,$input);
     }
     else
     {
@@ -348,7 +348,7 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1_name,$input);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1_name,$input);
     }
     else
     {
@@ -500,7 +500,7 @@
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
 
-      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1,$result);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1,$result);
     }
     else
     {
@@ -545,7 +545,7 @@
       npy_intp this_vector_dim[1];
       this_vector_dim[0]=$1->size();
 
-      PYARRAY_FROM_SHARED_DATA(1,this_vector_dim,$1,$result);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1,$result);
     }
     else
     {
@@ -591,7 +591,7 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1,$result);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1,$result);
     }
     else
     {
@@ -637,7 +637,7 @@
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      PYARRAY_FROM_SHARED_DATA(2,this_matrix_dim,$1,$result);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1,$result);
     }
     else
     {
@@ -646,6 +646,54 @@
     }
   }
 }
+
+
+%typemap(out) boost::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
+{
+  // %typemap(out) boost::shared_ptr<SimpleVector>
+
+  // compile time test to reproduce swig director test. swig does not
+  // seem to provides facilities to customize this
+  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
+  // variable.
+  typedef BOOST_TYPEOF(arg1) self_type;
+
+  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
+    DirectorCast<self_type >,
+    DirectorNoCast<self_type > >::type CastMaybe;
+  
+  CastMaybe cast_maybe;
+  
+  Swig::Director* l_director = cast_maybe.value(arg1);
+  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
+
+  // call from director?
+  if (l_upcall)
+  {
+    // result from C++ method, return the pointer
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_std__vectorT_unsigned_int_std__allocatorT_unsigned_int_t_t_const_t,  0 );
+  }
+  // call from python : return numpy from SimpleVector
+  else
+  {
+    if ($1)
+    {
+      // /!\ need check for a dense vector!
+
+      npy_intp this_vector_dim[1];
+      this_vector_dim[0]=$1->size();
+
+      PYARRAY_FROM_SHARED_STL_VECTOR(NPY_UINT,1,this_vector_dim,$1,$result);
+    }
+    else
+    {
+      Py_INCREF(Py_None);
+      $result = Py_None;
+    }
+  }
+}
+
+
 
 // check on input : a python sequence
 %typecheck(SWIG_TYPECHECK_INTEGER)
