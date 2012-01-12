@@ -215,6 +215,14 @@
 
  }
 
+%typemap(freearg) (double *z)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
+
+
 // list of matrices problemSizex3
 %typemap(in) (double *blocklist3x3) (PyArrayObject* array=NULL, int is_new_object) {
 
@@ -263,6 +271,12 @@
   $1 = (double *) array_data(array);
 
  }
+
+%typemap(freearg) (double *blocklist3x3)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
 
 
 // matrices problemSizexproblemSize
@@ -314,6 +328,12 @@
 
  }
 
+%typemap(freearg) (double *blockarray3x3)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
 // vectors of size problem_size from problemSize as first input
 %typemap(in) (double *blocklist3) (PyArrayObject* array=NULL, int is_new_object) {
 
@@ -361,7 +381,11 @@
 
  }
 
-
+%typemap(freearg) (double *blocklist3)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
 
 // vectors of size problem_size
 
@@ -494,9 +518,13 @@
     $1 = (double *) array_data(array);
     
   }
-  
-    
  }
+
+%typemap(freearg) (double *mu)
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
 
 
 // other names that must be transformed this way
@@ -566,9 +594,16 @@
   $1 = nummat;
 }
 
+%typemap(freearg) (double *z)
+{
+ 
+}
+
 %typemap(freearg) (NumericsMatrix* A) {
   // %typemap(freearg) (NumericsMatrix* A)
-  free($1);
+  free(nummat$argnum);
+  if (is_new_object$argnum && array$argnum)
+  { Py_DECREF(array$argnum); }
 }
 
 %typemap(out) (NumericsMatrix* M) {
@@ -700,14 +735,6 @@
   $result = SWIG_Python_AppendOutput($result,
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), 
                                                         SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
-}
-
-%newobject newFromFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
-
-%typemap(newfree) (SparseBlockStructuredMatrix* const M)
-{
-  // %typemap(newfree) (SparseBlockStructuredMatrix* const M)
-  free($1);
 }
 
 // signatures

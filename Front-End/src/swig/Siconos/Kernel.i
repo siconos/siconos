@@ -310,7 +310,8 @@ KERNEL_REGISTRATION();
 %ignore getInvMSimple;
 %ignore getInvMBlock;
 
-
+// we do not need visitor hook
+%ignore visit;
 
 %include "SiconosAlgebra.hpp"
 

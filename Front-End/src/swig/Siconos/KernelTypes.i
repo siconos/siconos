@@ -120,6 +120,12 @@
   }
 }
 
+%typemap(freearg) boost::shared_ptr<SiconosVector>
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
 // numpy or SP::SimpleVector on input -> SP::SimpleVector
 %typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int is_new_object)
 {
@@ -172,6 +178,12 @@
   }
 }
 
+%typemap(freearg) boost::shared_ptr<SimpleVector>
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
 // numpy or SP::Siconosmatrix on input -> SP::SiconosMatrix
 %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) 
 {
@@ -214,6 +226,12 @@
   }
 }
 
+%typemap(freearg) boost::shared_ptr<SiconosMatrix>
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
+
 // numpy or SP::SimpleMatrix on input -> SP::SimpleMatrix
 %typemap(in) boost::shared_ptr<SimpleMatrix> (PyArrayObject* array=NULL, int is_new_object) {
 
@@ -254,6 +272,12 @@
     $1 = tmp;
   }
  }
+
+%typemap(freearg) boost::shared_ptr<SimpleMatrix>
+{
+  if (is_new_object$argnum && array$argnum)
+    { Py_DECREF(array$argnum); }
+}
 
 // director input : SP::SiconosVector -> numpy
 %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
