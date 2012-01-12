@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     ioMatrix ref("BouncingBallEDXml.ref", "ascii");
     ref.read(dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if ((dataPlot - dataPlotRef).normInf() > 1e-11)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
