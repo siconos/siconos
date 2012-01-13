@@ -25,74 +25,47 @@
 }
 
 
-
-// check on input : a numpy array or a SiconosVector
+//////////////////////////////////////////////////////////////////////////////
+// check on input : a numpy array or a TYPE
+%define TYPECHECK(TYPE,SWIGTYPE)
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SiconosVector>)
+(TYPE)
 {
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SiconosVector>)
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0);
+  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE, 0);
   int state = SWIG_CheckState(res);
   $1 = is_array($input) || PySequence_Check($input) || state;
 }
+%enddef
+//////////////////////////////////////////////////////////////////////////////
 
-// check on input : a numpy array or a SimpleVector
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SimpleVector>)
-{
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SimpleVector>)
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t, 0);
-  int state = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || state;
-}
-
-// check on input : a numpy array or a SiconosMatrix
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SiconosMatrix>)
-{
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SiconosMatrix>)
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t, 0);
-  int state = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || state;
-}
-
-// check on input : a numpy array or a SimpleMatrix
-%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
-(boost::shared_ptr<SimpleMatrix>)
-{
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (boost::shared_ptr<SimpleMatrix>)
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t, 0);
-  int state = SWIG_CheckState(res);
-  $1 = is_array($input) || PySequence_Check($input) || state;
-}
-
-
-
-// numpy or SP::SiconosVector on input -> SP::SiconosVector
-%typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int is_new_object)
+//////////////////////////////////////////////////////////////////////////////
+%define TYPEMAP_VECTOR(TYPE,SWIGTYPE)
+// numpy or TYPE on input -> TYPE 
+%typemap(in,fragment="NumPy_Fragments") TYPE (PyArrayObject* array=NULL, int is_new_object)
 {
   // %typemap(in,fragment="NumPy_Fragments")
-  // %boost::shared_ptr<SiconosVector> (PyArrayObject* array=NULL, int
+  // %TYPE (PyArrayObject* array=NULL, int
   // %is_new_object)
   void *argp1=0;
   int res1=0;
   int newmem = 0;
-  boost::shared_ptr< SiconosVector > tempshared1 ;
-  boost::shared_ptr< SiconosVector > *smartarg1 = 0 ;
+  TYPE tempshared1 ;
+  TYPE *smartarg1 = 0 ;
  
-  // try a conversion from a SiconosVector
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t, 0 |  0 , &newmem);
+  // try a conversion from TYPE
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE, 0 |  0 , &newmem);
   if (SWIG_IsOK(res1)) 
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
       // taken from generated code
-      tempshared1 = *reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
-      delete reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+      tempshared1 = *reinterpret_cast< TYPE * >(argp1);
+      delete reinterpret_cast< TYPE * >(argp1);
       $1 = tempshared1;
     } 
     else {
-      smartarg1 = reinterpret_cast< boost::shared_ptr< SiconosVector > * >(argp1);
+      smartarg1 = reinterpret_cast< TYPE * >(argp1);
       $1 = *smartarg1;
     }
   }
@@ -120,100 +93,117 @@
   }
 }
 
-%typemap(freearg) boost::shared_ptr<SiconosVector>
+%typemap(freearg) TYPE
 {
   if (is_new_object$argnum && array$argnum)
     { Py_DECREF(array$argnum); }
 }
 
-// numpy or SP::SimpleVector on input -> SP::SimpleVector
-%typemap(in,fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int is_new_object)
+// director input : TYPE -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") TYPE ()
 {
-  // %typemap(in,fragment="NumPy_Fragments")
-  // %boost::shared_ptr<SimpleVector> (PyArrayObject* array=NULL, int
-  // %is_new_object)
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  boost::shared_ptr< SimpleVector > tempshared1 ;
-  boost::shared_ptr< SimpleVector > *smartarg1 = 0 ;
- 
-  // try a conversion from a SimpleVector
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t, 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
+  // %typemap(directorin, fragment="NumPy_Fragments") TYPE ()
+  if($1_name)
   {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    if (ask<IsDense>(*$1_name))
     {
-      // taken from generated code
-      tempshared1 = *reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
-      delete reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
-      $1 = tempshared1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< boost::shared_ptr< SimpleVector > * >(argp1);
-      $1 = *smartarg1;
+      npy_intp this_vector_dim[1];
+      this_vector_dim[0]=$1_name->size();
+
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
+    }
+    else
+    {
+      // not a dense vector : no conversion
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE,  0 );  
     }
   }
   else
   {
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-
-    if (!array)
-    {
-      void *argp;
-      SWIG_fail; // not implemented : $1 = type_conv($input) (type check done above)
-    }
-    else
-    {
-      if (!require_dimensions(array,1) ||
-          !require_native(array) || !require_fortran(array)) SWIG_fail;
-      
-      SP::SimpleVector tmp;
-      tmp.reset(new SimpleVector(array_size(array,0)));
-      // copy : with SimpleVector based on resizable std::vector there is
-      // no other way
-      memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
-      $1 = tmp;
-    }
+    Py_INCREF(Py_None);
+    $input = Py_None;
   }
 }
 
-%typemap(freearg) boost::shared_ptr<SimpleVector>
+%typemap(out) TYPE
 {
-  if (is_new_object$argnum && array$argnum)
-    { Py_DECREF(array$argnum); }
-}
+  // %typemap(out) TYPE
 
-// numpy or SP::Siconosmatrix on input -> SP::SiconosMatrix
-%typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object) 
+  // compile time test to reproduce swig director test. swig does not
+  // seem to provides facilities to customize this
+  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
+  // variable.
+  typedef BOOST_TYPEOF(arg1) self_type;
+
+  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
+    DirectorCast<self_type >,
+    DirectorNoCast<self_type > >::type CastMaybe;
+  
+  CastMaybe cast_maybe;
+  
+  Swig::Director* l_director = cast_maybe.value(arg1);
+  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
+
+  // call from director?
+  if (l_upcall)
+  {
+    // result from C++ method, return the pointer
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE,  0 );
+  }
+  // call from python : return numpy from SiconosVector
+  else
+  {
+    if ($1)
+    {
+      // /!\ need check for a dense vector!
+
+      npy_intp this_vector_dim[1];
+      this_vector_dim[0]=$1->size();
+
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1,$result);
+    }
+    else
+    {
+      Py_INCREF(Py_None);
+      $result = Py_None;
+    }
+  }
+}
+%enddef
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+%define TYPEMAP_MATRIX(TYPE,SWIGTYPE)
+// numpy or TYPE on input -> TYPE
+%typemap(in) TYPE (PyArrayObject* array=NULL, int is_new_object) 
 {
 
   void *argp1=0;
   int res1=0;
   int newmem = 0;
-  boost::shared_ptr< SiconosMatrix > tempshared1 ;
-  boost::shared_ptr< SiconosMatrix > *smartarg1 = 0 ;
+  TYPE tempshared1 ;
+  TYPE *smartarg1 = 0 ;
 
    // try a conversion from a SiconosMatrix
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t, 0 |  0 , &newmem);
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE, 0 |  0 , &newmem);
   if (SWIG_IsOK(res1)) 
   {
     if (newmem & SWIG_CAST_NEW_MEMORY) 
     {
       // taken from generated code
-      tempshared1 = *reinterpret_cast< boost::shared_ptr< SiconosMatrix > * >(argp1);
-      delete reinterpret_cast< boost::shared_ptr< SiconosMatrix > * >(argp1);
+      tempshared1 = *reinterpret_cast< TYPE * >(argp1);
+      delete reinterpret_cast< TYPE * >(argp1);
       $1 = tempshared1;
     } 
     else {
-      smartarg1 = reinterpret_cast< boost::shared_ptr< SiconosMatrix > * >(argp1);
+      smartarg1 = reinterpret_cast< TYPE * >(argp1);
       $1 = *smartarg1;
     }
   }
   else
   {
-    // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
+    // %typemap(in) TYPE (PyArrayObject* array=NULL, int is_new_object)
+    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
     if (!array || !require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array)) SWIG_fail;
@@ -226,114 +216,14 @@
   }
 }
 
-%typemap(freearg) boost::shared_ptr<SiconosMatrix>
+%typemap(freearg) TYPE
 {
   if (is_new_object$argnum && array$argnum)
     { Py_DECREF(array$argnum); }
 }
 
-// numpy or SP::SimpleMatrix on input -> SP::SimpleMatrix
-%typemap(in) boost::shared_ptr<SimpleMatrix> (PyArrayObject* array=NULL, int is_new_object) {
-
-  void *argp1=0;
-  int res1=0;
-  int newmem = 0;
-  boost::shared_ptr< SimpleMatrix > tempshared1 ;
-  boost::shared_ptr< SimpleMatrix > *smartarg1 = 0 ;
-
-  // try a conversion from a SimpleMatrix
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t, 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
-  {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
-    {
-      // taken from generated code
-      tempshared1 = *reinterpret_cast< boost::shared_ptr< SimpleMatrix > * >(argp1);
-      delete reinterpret_cast< boost::shared_ptr< SimpleMatrix > * >(argp1);
-      $1 = tempshared1;
-    } 
-    else {
-      smartarg1 = reinterpret_cast< boost::shared_ptr< SimpleMatrix > * >(argp1);
-      $1 = *smartarg1;
-    }
-  }
-  else
-  {
-    // %typemap(in) boost::shared_ptr<SiconosMatrix> (PyArrayObject* array=NULL, int is_new_object)
-    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
-    
-    if (!array || !require_dimensions(array,2) ||
-        !require_native(array) || !require_fortran(array)) SWIG_fail;
-    
-    SP::SimpleMatrix tmp;
-    tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
-    // copy this is due to SimpleMatrix based on resizable std::vector
-    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
-    $1 = tmp;
-  }
- }
-
-%typemap(freearg) boost::shared_ptr<SimpleMatrix>
-{
-  if (is_new_object$argnum && array$argnum)
-    { Py_DECREF(array$argnum); }
-}
-
-// director input : SP::SiconosVector -> numpy
-%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
-{
-  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
-  if($1_name)
-  {
-    if (ask<IsDense>(*$1_name))
-    {
-      npy_intp this_vector_dim[1];
-      this_vector_dim[0]=$1_name->size();
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
-    }
-    else
-    {
-      // not a dense vector : no conversion
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t,  0 );  
-    }
-  }
-  else
-  {
-    Py_INCREF(Py_None);
-    $input = Py_None;
-  }
-}
-
-// director input : SP::SimpleVector -> numpy
-%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> ()
-{
-  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleVector> ()
-  if($1_name)
-  {
-    if (ask<IsDense>(*$1_name))
-    {
-      npy_intp this_vector_dim[1];
-      this_vector_dim[0]=$1_name->size();
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1_name,$input);
-
-    }
-    else
-    {
-      // not a dense vector : no conversion
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t,  0 );  
-    }
-  }
-  else
-  {
-    Py_INCREF(Py_None);
-    $input = Py_None;
-  }
-}
-
-// director input : SP::SiconosMatrix -> numpy
-%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
+// director input : TYPE -> numpy
+%typemap(directorin, fragment="NumPy_Fragments") TYPE ()
 {
   // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
   if ($1_name)
@@ -349,7 +239,7 @@
     else
     {
       // not a dense matrix : no conversion
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t,  0 );  
+      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE,  0 );  
     }
 
   }
@@ -360,32 +250,53 @@
   }
 }
 
-// director input : SP::SimpleMatrix -> numpy
-%typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleMatrix> ()
+%typemap(out) TYPE (bool upcall=false)
 {
-  // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SimpleMatrix> ()
-  if ($1_name)
+  // %typemap(out) TYPE
+
+  // compile time test to reproduce swig director test. swig does not
+  // seem to provides facilities to customize this
+  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
+  // variable.
+  typedef BOOST_TYPEOF(arg1) self_type;
+
+  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
+    DirectorCast<self_type >,
+    DirectorNoCast<self_type > >::type CastMaybe;
+  
+  CastMaybe cast_maybe;
+  
+  Swig::Director* l_director = cast_maybe.value(arg1);
+  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
+
+  // call from director?
+  if (l_upcall)
   {
-    if (($1_name).getNum() == 1)
+    // result from C++ method, return the pointer
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE,  0 );
+  }
+  // call from python : return numpy from SiconosMatrix
+  else
+  {
+    if ($1)
     {
+      // /!\ need check for a dense matrix!
+
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
       this_matrix_dim[1]=$1->size(1);
 
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1_name,$input);
+      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1,$result);
     }
     else
     {
-      // not a dense matrix : no conversion
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&$1_name), SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t,  0 );  
+      Py_INCREF(Py_None);
+      $result = Py_None;
     }
   }
-  else
-  {
-    Py_INCREF(Py_None);
-    $input = Py_None;
-  }
 }
+%enddef
+//////////////////////////////////////////////////////////////////////////////
 
 // director output : PyObject -> SP::SiconosVector 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosVector> ()
@@ -486,190 +397,6 @@
     }
   };
 %}  
-  
-
-
-%typemap(out) boost::shared_ptr<SiconosVector>
-{
-  // %typemap(out) boost::shared_ptr<SiconosVector>
-
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
-
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-  
-  CastMaybe cast_maybe;
-  
-  Swig::Director* l_director = cast_maybe.value(arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
-
-  // call from director?
-  if (l_upcall)
-  {
-    // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t,  0 );
-  }
-  // call from python : return numpy from SiconosVector
-  else
-  {
-    if ($1)
-    {
-      // /!\ need check for a dense vector!
-
-      npy_intp this_vector_dim[1];
-      this_vector_dim[0]=$1->size();
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1,$result);
-    }
-    else
-    {
-      Py_INCREF(Py_None);
-      $result = Py_None;
-    }
-  }
-}
-
-%typemap(out) boost::shared_ptr<SimpleVector> (bool upcall=false)
-{
-  // %typemap(out) boost::shared_ptr<SimpleVector>
-
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
-
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-  
-  CastMaybe cast_maybe;
-  
-  Swig::Director* l_director = cast_maybe.value(arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
-
-  // call from director?
-  if (l_upcall)
-  {
-    // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t,  0 );
-  }
-  // call from python : return numpy from SimpleVector
-  else
-  {
-    if ($1)
-    {
-      // /!\ need check for a dense vector!
-
-      npy_intp this_vector_dim[1];
-      this_vector_dim[0]=$1->size();
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,1,this_vector_dim,$1,$result);
-    }
-    else
-    {
-      Py_INCREF(Py_None);
-      $result = Py_None;
-    }
-  }
-}
-
-%typemap(out) boost::shared_ptr<SiconosMatrix> (bool upcall=false)
-{
-  // %typemap(out) boost::shared_ptr<SiconosMatrix>
-
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
-
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-  
-  CastMaybe cast_maybe;
-  
-  Swig::Director* l_director = cast_maybe.value(arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
-
-  // call from director?
-  if (l_upcall)
-  {
-    // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t,  0 );
-  }
-  // call from python : return numpy from SiconosMatrix
-  else
-  {
-    if ($1)
-    {
-      // /!\ need check for a dense matrix!
-
-      npy_intp this_matrix_dim[2];
-      this_matrix_dim[0]=$1->size(0);
-      this_matrix_dim[1]=$1->size(1);
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1,$result);
-    }
-    else
-    {
-      Py_INCREF(Py_None);
-      $result = Py_None;
-    }
-  }
-}
-
-%typemap(out) boost::shared_ptr<SimpleMatrix> (bool upcall=false)
-{
-  // %typemap(out) boost::shared_ptr<SimpleMatrix>
-
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
-
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-  
-  CastMaybe cast_maybe;
-  
-  Swig::Director* l_director = cast_maybe.value(arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
-
-  // call from director?
-  if (l_upcall)
-  {
-    // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t,  0 );
-  }
-  // call from python : return numpy from SiconosMatrix
-  else
-  {
-    if ($1)
-    {
-      // /!\ need check for a dense matrix!
-
-      npy_intp this_matrix_dim[2];
-      this_matrix_dim[0]=$1->size(0);
-      this_matrix_dim[1]=$1->size(1);
-
-      PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE,2,this_matrix_dim,$1,$result);
-    }
-    else
-    {
-      Py_INCREF(Py_None);
-      $result = Py_None;
-    }
-  }
-}
 
 
 %typemap(out) boost::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
@@ -739,7 +466,16 @@
   $1 = temp; // temp deallocation is done at object destruction
              // thanks to shared ptr ref counting
 }
-  
+
+
+TYPECHECK(boost::shared_ptr<SiconosVector>, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t);
+TYPECHECK(boost::shared_ptr<SimpleVector>,  SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t);
+TYPECHECK(boost::shared_ptr<SiconosMatrix>, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t);
+TYPECHECK(boost::shared_ptr<SimpleMatrix>, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t);
+TYPEMAP_VECTOR(boost::shared_ptr<SiconosVector>, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t);
+TYPEMAP_VECTOR(boost::shared_ptr<SimpleVector>, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t);
+TYPEMAP_MATRIX(boost::shared_ptr<SiconosMatrix>, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t);
+TYPEMAP_MATRIX(boost::shared_ptr<SimpleMatrix>, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t);  
 // needed?
 // from C++ to python 
 %template() boost::shared_ptr<SiconosVector>;
