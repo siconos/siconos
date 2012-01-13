@@ -43,7 +43,7 @@ typedef VectorMap::iterator VectorMapIterator;
 typedef VectorMap::const_iterator VectorMapConstIterator;
 
 /** The object used to store data in the Sensor. To each Event corresponds a Data */
-typedef std::map<SP::Event, VectorMap>  DataSet;
+//typedef std::map<SP::Event, VectorMap>  DataSet;
 
 /** Sensor Base Class
 
@@ -118,7 +118,7 @@ protected:
   std::string _id;
 
   /** data list - Each vector of data is identified with a string. */
-  DataSet _data;
+  //  DataSet _data;
 
   /** The model linked to this sensor */
   SP::Model _model;
@@ -202,10 +202,8 @@ public:
   /** get all the data saved for this sensor
    *  \return a DataSet
    */
-  inline const DataSet getData() const
-  {
-    return _data;
-  };
+  //  inline const DataSet getData() const
+  //  {return _data;};
 
   /** initialize sensor data.
    */

@@ -127,5 +127,5 @@ public:
    */
   static linearSensor* convert(Sensor* s);
 };
-DEFINE_SPTR(linearSensor)
+TYPEDEF_SPTR(linearSensor)
 #endif
