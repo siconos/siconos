@@ -35,6 +35,12 @@
   PY_REGISTER(FirstOrderLinearTIR);               \
   PY_REGISTER(FirstOrderType1R);                  \
   PY_REGISTER(FirstOrderType2R);                  \
+  PY_REGISTER(linearSensor)                       \
+  PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                           \
+  PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                            \
+  PY_REGISTER_WITHOUT_DIRECTOR(controlSensor)                            \
+  PY_REGISTER(sampledPIDActuator)                 \
+  PY_REGISTER(ControlManager)                     \
   PY_REGISTER(Interaction);                       \
   PY_REGISTER(TimeDiscretisation);                \
   PY_REGISTER(OneStepNSProblem);                  \
