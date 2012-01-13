@@ -215,7 +215,7 @@ public:
       - Note: no id.
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
-   *  \param int : the value of interactionSize
+   *  \param int size of the interaction (interactionSize), i.e, the size of the input and output
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
    */
@@ -224,7 +224,7 @@ public:
    *  \param string: the id of this Interaction
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
-   *  \param int : the value of interactionSize
+   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
    */
@@ -233,7 +233,7 @@ public:
   /** constructor with a set of data - Note: no id.
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
-   *  \param int : the value of interactionSize
+   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
    */
@@ -243,14 +243,14 @@ public:
    *  \param string: the id of this Interaction
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
-   *  \param int : the value of interactionSize
+   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
    */
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
 
   /** constructor with no data
-   *  \param int : the value of interactionSize
+   *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
    *  \param int : the number of this Interaction (default 0)
