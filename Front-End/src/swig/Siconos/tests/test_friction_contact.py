@@ -10,15 +10,15 @@ NC = 1
 
 M = eye(3*NC)
 
-q = array([-1, 1, 3])
+q = array([-1., 1., 3.])
 
 mu = array([0.1]);
 
-z = array([0,0,0])
+z = array([0.,0.,0.])
 
-reactions = array([0,0,0])
+reactions = array([0.,0.,0.])
 
-velocities = array([0,0,0])
+velocities = array([0.,0.,0.])
 
 
 # gp linesearch

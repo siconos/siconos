@@ -846,10 +846,23 @@
       M->storageType = 0;
       M->size0 = array_size(array,0);
       M->size1 = array_size(array,1);
-      M->matrix0 = (double *) array_data(array);
+      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
+      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
       LC->size = M->size0;
       LC->M = M;
-      LC->q = (double *) array_data(vector);
+      LC->q = (double *) malloc(M->size0*sizeof(double));
+      memcpy(LC->q,array_data(vector),M->size0*sizeof(double));
+
+      // python mem management
+      if(is_new_object1 && array)
+      {
+        Py_DECREF(array);
+      }
+
+      if(is_new_object2 && vector)
+      {
+        Py_DECREF(vector);
+      }
 
       return LC;
 
@@ -858,7 +871,7 @@
 
   ~LinearComplementarityProblem()
   {
-    free($self->M);
+    freeLinearComplementarityProblem($self);
   }
 
 };
@@ -913,10 +926,11 @@
 
 %extend FrictionContactProblem
 {
+
   FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
 
-      int is_new_object1, is_new_object2, is_new_object3; // useless here ?
+      int is_new_object1, is_new_object2, is_new_object3; 
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
@@ -929,24 +943,42 @@
       M->storageType = 0;
       M->size0 = array_size(array,0);
       M->size1 = array_size(array,1);
-      M->matrix0 = (double *) array_data(array);
+      M->matrix0 = (double *) malloc(M->size0*M->size1*sizeof(double));
+      memcpy(M->matrix0,array_data(array),M->size0*M->size1*sizeof(double));
       FC->dimension = (int) PyInt_AsLong(dim);
       FC->numberOfContacts = M->size0 / FC->dimension;
       FC->M = M;
-      FC->q = (double *) array_data(vector);
-      FC->mu = (double *) array_data(mu_vector);
-     
+      FC->q = (double *) malloc(M->size0*sizeof(double));
+      memcpy(FC->q,array_data(vector),M->size0*sizeof(double));
+      FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
+      memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
+   
+
+      // python mem management
+      if(is_new_object1 && array)
+      {
+        Py_DECREF(array);
+      }
+  
+      if(is_new_object2 && vector)
+      {
+        Py_DECREF(vector);
+      }
+
+      if(is_new_object3 && mu_vector)
+      {
+        Py_DECREF(mu_vector);
+      }
+
       return FC;
     }
 
   ~FrictionContactProblem()
   {
-    free($self->M);
+    freeFrictionContactProblem($self);
   }
 
 };
-
-
 
 
 // some extensions but numpy arrays should be used instead 

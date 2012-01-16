@@ -113,3 +113,6 @@ def test_BoundaryCondition():
     B.velocityIndices()[2]=5
 
     assert (B.velocityIndices() == [1, 2, 5]).all()
+
+def test_Sensor():
+    pass

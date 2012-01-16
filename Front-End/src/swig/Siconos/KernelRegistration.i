@@ -1,3 +1,5 @@
+// Warning: 
+// You have to PY_REGISTER base classe before derivated classes
 #undef PY_REGISTER
 #define KERNEL_REGISTRATION()                                           \
   PY_REGISTER(NonSmoothLaw);                                            \
