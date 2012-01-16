@@ -107,7 +107,7 @@ int write_test_fclib(char * filename)
     info += !(problem_from_file->M->matrix1->index2_data[i] == problem1->M->matrix1->index2_data[i]);
   }
 
-  freeFrictionContact_problem(problem);
+  freeFrictionContactProblem(problem);
   free(basename);
   free(title);
   free(description);

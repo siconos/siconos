@@ -1784,9 +1784,6 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     {
 
       assert(blockindex < blockindexmax);
-
-      printf("row=%d,col=%d,index1_data[%d]=%ld,blocknum[%d]=%d\n", row, col, brow, A->index1_data[brow], blockindex, blocknum[blockindex]);
-
       assert(blocknum[blockindex] < A->nbblocks);
       assert(blocknum[blockindex] < A->filled2);
       /* this is an non empty block */

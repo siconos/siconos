@@ -188,7 +188,7 @@ int main(void)
 
     info = test_Series_nsgs(testproblem, tol[i], localtol[i], nLocalSolver[i], localSolverList[i]);
 
-    freeFrictionContact_problem(testproblem);
+    freeFrictionContactProblem(testproblem);
 
   }
   /*   for (int i =0 ; i< ntestfile; i++) free(testfile[i]); */

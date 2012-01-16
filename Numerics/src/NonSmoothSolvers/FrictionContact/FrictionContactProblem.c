@@ -77,7 +77,7 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   return 0;
 }
 
-void freeFrictionContact_problem(FrictionContactProblem* problem)
+void freeFrictionContactProblem(FrictionContactProblem* problem)
 {
 
   freeNumericsMatrix(problem->M);

@@ -123,7 +123,7 @@ extern "C"
 
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
 
-  void freeFrictionContact_problem(FrictionContactProblem* problem);
+  void freeFrictionContactProblem(FrictionContactProblem* problem);
 
 #ifdef __cplusplus
 }

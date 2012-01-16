@@ -228,6 +228,7 @@ extern "C"
       \param M the matrix to be displayed
   */
   void displayRawbyRaw(const NumericsMatrix* const m);
+
   /*
    *get the diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] m a NumericsMatrix
@@ -237,7 +238,6 @@ extern "C"
    * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
    *   In case of sparce case **Bout contains the resulting block (from the SBM).
    */
-
   void getDiagonalBlock(NumericsMatrix* m, int numBlockLin, int numLin, int size, double **Bout);
 
 #ifdef __cplusplus

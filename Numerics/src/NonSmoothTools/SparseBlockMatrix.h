@@ -280,10 +280,7 @@ extern "C"
   */
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 
-  /** Copy a SBM into a Dense Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix
-  \param[in] pointer on the filled dense Matrix
-  */
+
 
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
       \param[in] the blocksize
@@ -292,7 +289,10 @@ extern "C"
   */
   int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A);
 
-
+  /** Copy a SBM into a Dense Matrix
+  \param[in] M the SparseBlockStructuredMatrix matrix
+  \param[in] pointer on the filled dense Matrix
+  */
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 
   /** Copy a SBM into a Sparse (CSR) Matrix
