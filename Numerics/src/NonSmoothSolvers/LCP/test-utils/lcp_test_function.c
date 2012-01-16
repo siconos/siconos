@@ -250,7 +250,7 @@ int lcp_test_function(FILE * f, int solverId)
 
   free(options);
 
-  freeLinearComplementarity_problem(problem);
+  freeLinearComplementarityProblem(problem);
   printf("End of test.\n");
 
 
@@ -319,7 +319,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   deleteSolverOptions(options);
   free(options);
 
-  freeLinearComplementarity_problem(problem);
+  freeLinearComplementarityProblem(problem);
   fclose(foutput);
 
   return info;

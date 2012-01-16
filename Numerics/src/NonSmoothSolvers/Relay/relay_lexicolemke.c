@@ -83,7 +83,7 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   /*        printf("\n"); */
   free(zlcp);
   free(wlcp);
-  freeLinearComplementarity_problem(lcp_problem);
+  freeLinearComplementarityProblem(lcp_problem);
 
 }
 

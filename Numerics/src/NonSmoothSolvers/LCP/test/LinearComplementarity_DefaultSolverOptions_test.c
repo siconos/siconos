@@ -94,7 +94,7 @@ int main(void)
 
 
 
-  freeLinearComplementarity_problem(problem);
+  freeLinearComplementarityProblem(problem);
   free(options);
 
 

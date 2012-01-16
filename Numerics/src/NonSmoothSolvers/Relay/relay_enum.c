@@ -82,7 +82,7 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   /*        printf("\n"); */
   free(zlcp);
   free(wlcp);
-  freeLinearComplementarity_problem(lcp_problem);
+  freeLinearComplementarityProblem(lcp_problem);
 
 }
 

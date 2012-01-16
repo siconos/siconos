@@ -116,11 +116,11 @@ extern "C"
    */
   int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
-  /** \fn  void freeLinearComplementarity_problem(LinearComplementarityProblem* problem)
+  /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
    *  \brief function to delete a LinearComplementarityProblem
    *  \param pointer to a LinearComplementarityProblem to delete
    */
-  void freeLinearComplementarity_problem(LinearComplementarityProblem* problem);
+  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
 #ifdef __cplusplus
 }
 #endif

@@ -94,7 +94,7 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   return 1;
 }
 
-void freeLinearComplementarity_problem(LinearComplementarityProblem* problem)
+void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
   freeNumericsMatrix(problem->M);
   free(problem->M);
