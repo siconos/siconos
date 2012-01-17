@@ -131,8 +131,8 @@ protected:
   /** bool to check if a ControlManager is associated to the simulation */
   bool _hasCM;
 
-  /** unsigned long int variable to check if two events are so close or not */
-  static unsigned long int GapLimit2Events;
+  /** unsigned long int variable to check if two events are too close */
+  static unsigned long int _GapLimit2Events;
 
   /** Creates and adds a new Event in the allEvents list
    *  \return false if Event already exists
@@ -155,15 +155,16 @@ public:
    */
   ~EventsManager() {};
 
-  /** set the gap limit between two events */
+  /** Set the gap limit between two events */
   inline void setGapLimitEvents(unsigned long int var)
   {
-    GapLimit2Events = var;
+    _GapLimit2Events = var;
   };
-  /**Set the gap limit between two events  */
+
+  /** Get the gap limit between two events  */
   inline unsigned long int getGapLimitEvents()
   {
-    return GapLimit2Events;
+    return _GapLimit2Events;
   };
 
   /** initialize current, next events and the events stack.

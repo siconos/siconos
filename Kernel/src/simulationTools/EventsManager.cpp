@@ -38,7 +38,7 @@ EventsManager::EventsManager(): _hasNS(false), _hasCM(false)
 {}
 
 
-unsigned long int EventsManager::GapLimit2Events = GAPLIMIT_DEFAULT;
+unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
 
 void EventsManager::initialize(SP::Simulation sim)
@@ -351,7 +351,7 @@ void EventsManager::GeneralProcessEvents()
   if (mpz_cmp_ui(delta_time, 0) < 0)
     RuntimeException::selfThrow("EventsManager::GeneralProcessEvents, the time of current event must be smaller than the time of ETD event.");
 
-  if (mpz_cmp_ui(delta_time, GapLimit2Events) <= 0) // _currentEvent is so close to _ETD
+  if (mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0) // _currentEvent is so close to _ETD
   {
     simulation()->timeDiscretisation()->increment();
     _ETD->setTime(simulation()->getTkp1());
