@@ -20,13 +20,25 @@
 \brief Include files related to controlTools.
 */
 
+// Sensors - generic
 #include "SensorFactory.hpp"
 #include "SensorPosition.hpp"
 #include "SensorEvent.hpp"
+#include "controlSensor.hpp"
+// Sensors - available
+#include "linearSensor.hpp"
+
+// Actuator - generic
 #include "ActuatorFactory.hpp"
 #include "ExampleActuator.hpp"
 #include "ActuatorEvent.hpp"
-#include "ControlManager.hpp"
-#include "controlSensor.hpp"
-#include "linearSensor.hpp"
+#include "commonSMC.hpp"
+// Actuator - available
 #include "sampledPIDActuator.hpp"
+#include "linearSMC.hpp"
+#include "linearChatteringSMC.hpp"
+#include "linearSMC_OT2.hpp"
+
+// Misc
+#include "ControlManager.hpp"
+
