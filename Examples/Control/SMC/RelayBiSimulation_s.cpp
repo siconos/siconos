@@ -41,40 +41,27 @@ int main(int argc, char* argv[])
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
-  SP::SimpleVector Csurface(new SimpleVector(2, 0));
-  (*Csurface)(1) = 1;
+  SP::SimpleMatrix Csurface(new SimpleMatrix(2, 2));
+  Csurface->eye();
 
   // Dynamical Systems
-  SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
+  SP::ControlFirstOrderLinearDS controlProcess(new ControlFirstOrderLinearDS(t0, T, h, x0, A));
+  SP::FirstOrderLinearDS processDS = controlProcess->processDS();
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
+  controlProcess->initialize();
+  SP::Model controlModel = controlProcess->model();
 
-  // -------------
-  // --- Model process ---
-  // -------------
-  SP::Model process(new Model(t0, T));
-  process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
-
-  // ------------------
-  // --- Simulation ---
-  // ------------------
   // TimeDiscretisation
-  SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
   SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, hControl));
   SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, hControl));
-  // == Creation of the Simulation ==
-  SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
-  processSimulation->setName("plant simulation");
-  // -- OneStepIntegrators --
-  SP::Moreau processIntegrator(new Moreau(processDS, theta));
-  processSimulation->insertIntegrator(processIntegrator);
 
   // Control stuff
-  SP::ControlManager control(new ControlManager(process));
+  SP::ControlManager control(new ControlManager(controlModel));
   // use a controlSensor
-  SP::linearSensor sens(new linearSensor(100, tSensor, process, sensorC, sensorD));
+  SP::linearSensor sens(new linearSensor(100, tSensor, controlModel, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::linearChatteringSMC act = static_pointer_cast<linearChatteringSMC>(control->addActuator(103, tActuator));
+  SP::linearSMC act = static_pointer_cast<linearSMC>(control->addActuator(101, tActuator));
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -85,8 +72,9 @@ int main(int argc, char* argv[])
 
   cout << "====> Simulation initialisation ..." << endl << endl;
   // initialise the process and the ControlManager
-  process->initialize(processSimulation);
   control->initialize();
+  // Get the simulation
+  SP::TimeStepping processSimulation = controlProcess->simulation();
   // Only now we can add the surface
   act->setCsurfacePtr(Csurface);
 
@@ -97,7 +85,7 @@ int main(int argc, char* argv[])
   SP::SiconosVector xProc = processDS->x();
   // Save data in a matrix dataPlot
   SimpleMatrix dataPlot(N, outputSize);
-  dataPlot(0, 0) = process->t0(); // Initial time of the model
+  dataPlot(0, 0) = controlModel->t0(); // Initial time of the model
   dataPlot(0, 1) = (*xProc)(0);
   dataPlot(0, 2) = (*xProc)(1);
 
@@ -129,14 +117,14 @@ int main(int argc, char* argv[])
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("RelayBiSimulationChat.dat", "ascii");
+  ioMatrix io("RelayBiSimulation_s.dat", "ascii");
   dataPlot.resize(k, outputSize);
   io.write(dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("RelayBiSimulationChat.ref", "ascii");
+  ioMatrix ref("RelayBiSimulation.ref", "ascii");
   ref.read(dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 

@@ -25,82 +25,87 @@ from math import ceil
 from numpy.linalg import norm
 
 # variable declaration
+ndof = 2   # Number of degrees of freedom of your system
 t0 = 0.0   # start time
-T = 100    # end time
-h = 0.05;  # time step
-xFinal = 0 # target position
+T = 1    # end time
+h = 1.0e-4  # time step for simulation
+hControl = 1.0e-2 # time step for control
+Xinit = 1.0 # initial position
 theta = 0.5
 N = ceil((T-t0)/h + 10) # number of time steps
-outputSize = 5 # number of variable to store at each time step
+outputSize = 3 # number of variable to store at each time step
 
 # Matrix declaration
-A = zeros((2,2))
-A[0,1] = 1
-B = zeros(2)
-x0 = [10.,10.]
-C = [[1., 0]] # we have to specify ndmin=2, so it's understood as
-D = [[0, 0]]  # a matrix and not a vector
-K = [.25, .125, 2]
+A = zeros((ndof,ndof))
+x0 = [Xinit, -Xinit]
+sensorC = eye(ndof)
+sensorD = zeros((ndof,ndof))
+Csurface = [0, 1.0]
+
+# Simple check
+if h > hControl:
+    print "hControl must be bigger than h"
+    exit(1)
 
 # Declaration of the Dynamical System
-doubleIntegrator = FirstOrderLinearTIDS(x0, A, B)
+processDS = FirstOrderLinearDS(x0, A)
+processDS.setComputebFunction("RelayPlugin.so","computeB")
 # Model
 process = Model(t0, T)
-process.nonSmoothDynamicalSystem().insertDynamicalSystem(doubleIntegrator)
-# Declaration of the integrator
-OSI = Moreau(doubleIntegrator, theta)
+process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
 # time discretisation
-t = TimeDiscretisation(t0, h)
-tSensor = TimeDiscretisation(t0, h)
-tActuator = TimeDiscretisation(t0, h)
-s = TimeStepping(t, 0)
-s.insertIntegrator(OSI)
-
+processTD = TimeDiscretisation(t0, h)
+tSensor = TimeDiscretisation(t0, hControl)
+tActuator = TimeDiscretisation(t0, hControl)
+# Creation of the Simulation
+processSimulation = TimeStepping(processTD, 0)
+processSimulation.setName("plant simulation")
+# Declaration of the integrator
+processIntegrator = Moreau(processDS, theta)
+processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)
-sens = linearSensor(100, tSensor, process, C, D)
+sens = linearSensor(100, tSensor, process, sensorC, sensorD)
 control.addSensorPtr(sens)
-act = sampledPIDActuator(100, tActuator, process)
+act = linearChatteringSMC(103, tActuator, process)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
 # Initialization 
-process.initialize(s)
+process.initialize(processSimulation)
 control.initialize()
-act.setRef(xFinal)
-act.setKPtr(K)
+act.setCsurfacePtr(Csurface)
 # This is not working right now
 #eventsManager = s.eventsManager()
 
 # Matrix for data storage
-dataPlot = empty((3*N+3, outputSize))
-dataPlot[0, 0] = process.t0()
-dataPlot[0, 1] = doubleIntegrator.x()[0]
-dataPlot[0, 2] = doubleIntegrator.x()[1]
-dataPlot[0, 3] = doubleIntegrator.b()[0]
-dataPlot[0, 4] = doubleIntegrator.b()[1]
+dataPlot = empty((3*(N+1), outputSize))
+#dataPlot[0, 0] = processDS.t0()
+dataPlot[0, 0] = t0
+dataPlot[0, 1] = processDS.x()[0]
+dataPlot[0, 2] = processDS.x()[1]
 
 # Main loop
 k = 1
-while(s.nextTime() < T):
-    s.computeOneStep()
-    dataPlot[k, 0] = s.nextTime()
-    dataPlot[k, 1] = doubleIntegrator.x()[0]
-    dataPlot[k, 2] = doubleIntegrator.x()[1]
-    dataPlot[k, 3] = doubleIntegrator.b()[0]
-    dataPlot[k, 4] = doubleIntegrator.b()[1]
+while(processSimulation.nextTime() < T):
+    processSimulation.computeOneStep()
+    dataPlot[k, 0] = processSimulation.nextTime()
+    dataPlot[k, 1] = processDS.x()[0]
+    dataPlot[k, 2] = processDS.x()[1]
     k += 1
-    s.nextStep()
-    print s.nextTime()
+    processSimulation.nextStep()
+    print processSimulation.nextTime()
+# Resize matrix
+dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('output.txt', dataPlot)
+savetxt('RelayBiSimulationChat-py.dat', dataPlot)
 # Plot interesting data
 subplot(211)
-title('position')
+title('x1')
 plot(dataPlot[:,0], dataPlot[:,1])
 grid()
 subplot(212)
-title('velocity')
+title('x2')
 plot(dataPlot[:,0], dataPlot[:,2])
 grid()
 show()

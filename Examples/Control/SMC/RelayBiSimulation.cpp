@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
   SimpleMatrix dataPlot(N, outputSize);
   dataPlot(0, 0) = process->t0(); // Initial time of the model
   dataPlot(0, 1) = (*xProc)(0);
+  dataPlot(0, 2) = (*xProc)(1);
 
   SP::EventsManager eventsManager = processSimulation->eventsManager();
 
