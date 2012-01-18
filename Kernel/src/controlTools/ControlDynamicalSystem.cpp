@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,32 +15,29 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-/*! \file SiconosKernel.hpp
-\brief Include files related to controlTools.
-*/
+ */
+#include "ControlDynamicalSystem.hpp"
 
-// Sensors - generic
-#include "SensorFactory.hpp"
-#include "SensorPosition.hpp"
-#include "SensorEvent.hpp"
-#include "controlSensor.hpp"
-// Sensors - available
-#include "linearSensor.hpp"
+using namespace std;
 
-// Actuator - generic
-#include "ActuatorFactory.hpp"
-#include "ExampleActuator.hpp"
-#include "ActuatorEvent.hpp"
-#include "commonSMC.hpp"
-// Actuator - available
-#include "sampledPIDActuator.hpp"
-#include "linearSMC.hpp"
-#include "linearChatteringSMC.hpp"
-#include "linearSMC_OT2.hpp"
+ControlDynamicalSystem::ControlDynamicalSystem(double t0, double T, double h):
+  _t0(t0), _T(T), _h(h), _theta(0.5)
+{
+}
 
-// Misc
-#include "ControlManager.hpp"
+void ControlDynamicalSystem::setTheta(unsigned int newTheta)
+{
+  _theta = newTheta;
+}
 
-// sugar
-#include "ControlFirstOrderLinearDS.hpp"
+void ControlDynamicalSystem::initialize()
+{
+  _model.reset(new Model(_t0, _T));
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS);
+  _processTD.reset(new TimeDiscretisation(_t0, _h));
+  _processSimulation.reset(new TimeStepping(_processTD, 0));
+  _processSimulation->setName("plant simulation");
+  _processIntegrator.reset(new Moreau(_processDS, _theta));
+  _processSimulation->insertIntegrator(_processIntegrator);
+  _model->initialize(_processSimulation);
+}

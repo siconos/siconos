@@ -39,10 +39,16 @@
   PY_REGISTER(FirstOrderType2R);                                        \
   PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                                \
   PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                                  \
-  PY_REGISTER_WITHOUT_DIRECTOR(controlSensor)                           \
+  PY_REGISTER(controlSensor)                                            \
   PY_REGISTER(linearSensor)                                             \
   PY_REGISTER(sampledPIDActuator)                                  \
+  PY_REGISTER(commonSMC)                                           \
+  PY_REGISTER(linearSMC)                                           \
+  PY_REGISTER(linearChatteringSMC)                                 \
+  PY_REGISTER(linearSMC_OT2)                                       \
   PY_REGISTER(ControlManager)                                      \
+  PY_REGISTER(ControlDynamicalSystem)                              \
+  PY_REGISTER(ControlFirstOrderLinearDS)                           \
   PY_REGISTER(Interaction);                                        \
   PY_REGISTER(TimeDiscretisation);                                 \
   PY_REGISTER(OneStepNSProblem);                                   \

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,32 +15,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-/*! \file SiconosKernel.hpp
-\brief Include files related to controlTools.
-*/
+ */
 
-// Sensors - generic
-#include "SensorFactory.hpp"
-#include "SensorPosition.hpp"
-#include "SensorEvent.hpp"
-#include "controlSensor.hpp"
-// Sensors - available
-#include "linearSensor.hpp"
-
-// Actuator - generic
-#include "ActuatorFactory.hpp"
-#include "ExampleActuator.hpp"
-#include "ActuatorEvent.hpp"
-#include "commonSMC.hpp"
-// Actuator - available
-#include "sampledPIDActuator.hpp"
-#include "linearSMC.hpp"
-#include "linearChatteringSMC.hpp"
-#include "linearSMC_OT2.hpp"
-
-// Misc
-#include "ControlManager.hpp"
-
-// sugar
 #include "ControlFirstOrderLinearDS.hpp"
+
+using namespace std;
+
+ControlFirstOrderLinearDS::ControlFirstOrderLinearDS(double t0, double T, double h,
+    SP::SiconosVector x0, SP::SiconosMatrix A):
+  ControlDynamicalSystem(t0, T, h), _x0(x0), _A(A)
+{
+  _processDS.reset(new FirstOrderLinearDS(_x0, _A));
+}
+
+void ControlFirstOrderLinearDS::initialize()
+{
+  ControlDynamicalSystem::initialize();
+}
