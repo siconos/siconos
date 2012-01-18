@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file DynamicalSystem.hpp
-  \brief Abstract class - General interface for all Dynamical Systems.
+/*! \file Plugin.hpp
+  \brief Class to deal with functions given as C functions
 */
 
 #ifndef PLUGIN_HPP
