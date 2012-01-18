@@ -55,14 +55,6 @@ void SensorPosition::capture()
   (*_dataPlot)(_k, 2) = (*_model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->x())(3);
   _k++;
 }
-
-SensorPosition* SensorPosition::convert(Sensor* s)
-{
-  SensorPosition* sp = dynamic_cast<SensorPosition*>(s);
-  return sp;
-}
-
-
 AUTO_REGISTER_SENSOR(1, SensorPosition);
 
 

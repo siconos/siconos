@@ -89,11 +89,4 @@ void linearSensor::capture()
   _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
 }
-
-linearSensor* linearSensor::convert(Sensor* s)
-{
-  linearSensor* sp = dynamic_cast<linearSensor*>(s);
-  return sp;
-}
-
 AUTO_REGISTER_SENSOR(100, linearSensor);

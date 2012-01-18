@@ -72,15 +72,6 @@ public:
   {
     return _storedY;
   };
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Sensor*
-   * \return a pointer on the derived type
-   */
-  static controlSensor* convert(Sensor* s)
-  {
-    return dynamic_cast<controlSensor*>(s);
-  };
 };
 DEFINE_SPTR(controlSensor)
 #endif

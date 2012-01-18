@@ -79,12 +79,6 @@ public:
    * \param a SP::SimpleVector
    */
   void setCsurfacePtr(SP::SimpleVector);
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   * \param Actuator*
-   * \return a pointer on the derived type
-   */
-  static linearChatteringSMC* convert(Actuator* s);
 };
 DEFINE_SPTR(linearChatteringSMC)
 #endif

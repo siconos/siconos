@@ -60,12 +60,6 @@ public:
   /** capture data when the ActuatorEvent is processed ( for example set data[ActuatorEvent]=... )
    */
   void actuate();
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Actuator*
-   * \return a pointer on the derived type
-   */
-  static ExampleActuator* convert(Actuator* s);
 };
 
 #endif

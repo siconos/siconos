@@ -117,10 +117,4 @@ void sampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
     _K = newPtr;
   }
 }
-
-sampledPIDActuator* sampledPIDActuator::convert(Actuator* s)
-{
-  return dynamic_cast<sampledPIDActuator*>(s);
-}
-
 AUTO_REGISTER_ACTUATOR(100, sampledPIDActuator);

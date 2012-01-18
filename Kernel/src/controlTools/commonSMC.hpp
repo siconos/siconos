@@ -99,12 +99,6 @@ public:
   /** Compute the new control law at each event
    */
   virtual void actuate() = 0;
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   * \param Actuator*
-   * \return a pointer on the derived type
-   */
-  static commonSMC* convert(Actuator* s);
 };
 DEFINE_SPTR(commonSMC)
 #endif

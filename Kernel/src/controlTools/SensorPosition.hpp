@@ -81,12 +81,6 @@ public:
   /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */
   void capture();
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Sensor*
-   * \return a pointer on the derived type
-   */
-  static SensorPosition* convert(Sensor* s);
 };
 
 #endif

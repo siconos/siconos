@@ -47,13 +47,6 @@ void ExampleActuator::actuate()
     (*itDS)->setzPtr(myZ);
 
 }
-
-ExampleActuator* ExampleActuator::convert(Actuator* s)
-{
-  ExampleActuator* sp = dynamic_cast<ExampleActuator*>(s);
-  return sp;
-}
-
 AUTO_REGISTER_ACTUATOR(1, ExampleActuator);
 
 

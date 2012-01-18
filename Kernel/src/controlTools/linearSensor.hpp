@@ -120,12 +120,6 @@ public:
   {
     _matD = D;
   };
-
-  /** Encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Sensor*
-   * \return a pointer on the derived type
-   */
-  static linearSensor* convert(Sensor* s);
 };
 TYPEDEF_SPTR(linearSensor)
 #endif
