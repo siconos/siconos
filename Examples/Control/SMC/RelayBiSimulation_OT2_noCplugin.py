@@ -24,6 +24,17 @@ from numpy import array, eye, empty, zeros, savetxt
 from math import ceil, sin
 from numpy.linalg import norm
 
+class MyFOLDS(FirstOrderLinearDS):
+    def computeRhs(self, time, boolean = False):
+        super(MyFOLDS, self).computeRhs(time)
+        self.computeb(time)
+        self.setRhsPtr(self.rhs() + self.b())
+    def computeb(self, time):
+        t = sin(50*time)
+        u = [t + self.z()[0]]
+        u.append(-t + self.z()[1])
+        self.setb(u)
+
 # variable declaration
 ndof = 2   # Number of degrees of freedom of your system
 t0 = 0.0   # start time
@@ -48,8 +59,8 @@ if h > hControl:
     exit(1)
 
 # Declaration of the Dynamical System
-processDS = FirstOrderLinearDS(x0, A)
-processDS.setComputebFunction("RelayPlugin.so","computeB")
+processDS = MyFOLDS(x0, A)
+processDS.setb([0, 0])
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
@@ -90,6 +101,8 @@ dataPlot[0, 4] = processDS.z()[1]
 # Main loop
 k = 1
 while(processSimulation.nextTime() < T):
+    # this is needed, otw b is never updated
+    processDS.computeRhs(processSimulation.nextTime())
     processSimulation.computeOneStep()
     dataPlot[k, 0] = processSimulation.nextTime()
     dataPlot[k, 1] = processDS.x()[0]
@@ -102,7 +115,7 @@ while(processSimulation.nextTime() < T):
 # Resize matrix
 dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('RelayBiSimulation_OT2-py.dat', dataPlot)
+savetxt('RelayBiSimulation_OT2_noCplugin-py.dat', dataPlot)
 # Plot interesting data
 subplot(411)
 title('x1')
@@ -123,6 +136,8 @@ show()
 
 # TODO
 # compare with the reference
-#ref = getMatrix(SimpleMatrix("result.ref"))
-#if (norm(dataPlot - ref[1:,:]) > 1e-12):
+#ref = getMatrix(SimpleMatrix("RelayBiSimulation_OT2-py.ref"))
+#if (norm(dataPlot - ref) > 1e-12):
+#    print dataPlot - ref
+#    print norm(dataPlot - ref)
 #    print("Warning. The result is rather different from the reference file.")
