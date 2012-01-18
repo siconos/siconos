@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("RelayBiSimulation.ref", "ascii");
+  ioMatrix ref("RelayBiSimulation-SMC.ref", "ascii");
   ref.read(dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 
