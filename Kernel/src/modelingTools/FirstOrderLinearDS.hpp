@@ -279,7 +279,7 @@ public:
 
   /** default function to compute vector b
    */
-  void computeb(double);
+  virtual void computeb(double);
 
   /** Default function to the right-hand side term
    *  \param double time : current time

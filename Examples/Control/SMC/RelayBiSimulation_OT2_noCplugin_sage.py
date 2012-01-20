@@ -18,6 +18,15 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
+# We have first to import sage, so it won't shadow some function (like plot...)
+# You need the env. variable DOT_SAGE to point to the right location !
+import sys
+from sage.all import *
+# this is needed since sage uses mpfr by default ...
+RealNumber = float
+Integer = int
+
+# Other import
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation,\
     TimeStepping, Moreau, ControlManager, linearSensor, linearSMC_OT2,\
     getMatrix, SimpleMatrix
@@ -26,10 +35,15 @@ from numpy import array, eye, empty, zeros, savetxt
 from math import ceil, sin
 from numpy.linalg import norm
 
+# Some stupid symbolic computations
+x = var('x')
+g = vector((-cos(50*x), cos(50*x)))/50
+f = g.diff(x)
+
 # Derive our own version of FirstOrderLinearDS
+
 class MyFOLDS(FirstOrderLinearDS):
     def computeb(self, time):
-        t = sin(50*time)
         tmpz = self.z()
         # XXX fix this !
         if len(tmpz) != 2:
@@ -37,7 +51,7 @@ class MyFOLDS(FirstOrderLinearDS):
             return
         # XXX we need to find a smarter way to do things here
         # we need to convert from vector (sage) to arrayish
-        u = [t, -t] + tmpz
+        u = array(f(x=time).list(), dtype = float) + tmpz
         self.setb(u)
 
 # variable declaration
@@ -118,7 +132,7 @@ while(processSimulation.nextTime() < T):
 # Resize matrix
 dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('RelayBiSimulation_OT2_noCplugin-py.dat', dataPlot)
+savetxt('RelayBiSimulation_OT2_noCplugin_sage-py.dat', dataPlot)
 # Plot interesting data
 subplot(411)
 title('x1')

@@ -17,7 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
-
+from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+    TimeStepping, Moreau, ControlManager, linearSensor, linearSMC_OT2
 from Siconos.Kernel import *
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
