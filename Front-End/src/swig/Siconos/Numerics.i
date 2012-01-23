@@ -36,6 +36,7 @@
 #include "SiconosNumerics.h"
 #include "NumericsConfig.h"
 #include "SolverOptions.h"
+#include "SparseMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact3D_Solvers.h"
@@ -739,16 +740,143 @@
                                                         SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
 }
 
+#define GET_INT(OBJ,VAR)                                                \
+  if(!PyInt_Check(OBJ))                                                 \
+  {                                                                     \
+    throw(std::invalid_argument(BOOST_PP_STRINGIZE(OBJ: expecting an int))); \
+  }                                                                     \
+  VAR = PyInt_AsLong(OBJ)
+
+// need a PySequence_Check
+#define GET_INTS(OBJ,INDEX,VAR)                                          \
+  PyObject *_TEMP##VAR = PySequence_GetItem(OBJ,INDEX);                 \
+  if (!PyInt_Check(_TEMP##VAR))                                         \
+  {                                                                     \
+    Py_XDECREF(_TEMP##VAR);                                             \
+    throw(std::invalid_argument(BOOST_PP_STRINGIZE(OBJ: expecting an int))); \
+  }                                                                     \
+  VAR = PyInt_AsLong(_TEMP##VAR);                                   \
+  Py_DECREF(_TEMP##VAR)
+
+
+%typemap(in) (SparseMatrix* M) 
+  (PyObject *shape_,
+   PyObject *nnz_,
+   PyObject *data_,
+   PyObject *indices_,
+   PyObject *indptr_,
+   int is_new_object1, 
+   int is_new_object2,
+   int is_new_object3,
+   PyArrayObject *array_data_,
+   PyArrayObject *array_indices_,
+   PyArrayObject *array_indptr_,
+   SparseMatrix *M)
+{
+  try
+  {
+    M = (SparseMatrix *) malloc(sizeof(SparseMatrix));      
+    
+    PyObject *obj = $input;
+    
+    shape_ = PyObject_GetAttrString(obj,"shape");
+    nnz_ = PyObject_GetAttrString(obj,"nnz");
+    data_ = PyObject_GetAttrString(obj,"data");
+    indices_ = PyObject_GetAttrString(obj,"indices");
+    indptr_ = PyObject_GetAttrString(obj,"indptr");
+
+    int dim0, dim1, nzmax;
+    GET_INTS(shape_,0,dim0);
+    GET_INTS(shape_,1,dim1);
+//      GET_INT(nnz,nzmax); fail: type is numpy.int32!
+    nzmax = PyInt_AsLong(nnz_);
+    
+    array_data_ = obj_to_array_allow_conversion(data_, NPY_DOUBLE, &is_new_object1);
+    array_indices_ = obj_to_array_allow_conversion(indices_, NPY_INT32, &is_new_object2);
+    array_indptr_ = obj_to_array_allow_conversion(indptr_, NPY_INT32, &is_new_object3);
+    
+    M->m = dim0;
+    M->n = dim1;
+    
+    M->nzmax = nzmax;
+    
+    M->nz = -2; // csr only for the moment
+    
+    M->p = (int *) malloc(M->m+1 * sizeof(int));
+    M->i = (int *) malloc(M->nzmax * sizeof(int));
+    M->x = (double *) malloc(M->nzmax * sizeof(double));
+    
+    for(unsigned int i = 0; i < M->m+1; i++)
+    {
+      M->p[i] = ((int *) array_data(array_indptr_)) [i];
+    }
+    
+    for(unsigned int i = 0; i< M->nzmax; i++)
+    {
+      M->i[i] = ((int *) array_data(array_indices_)) [i];
+    }
+    
+    memcpy(M->x, (double *) array_data(array_data_), M->nzmax * sizeof(double));
+    
+    $1 = M;
+  }
+  catch (const std::invalid_argument& e)
+  {
+    SWIG_exception(SWIG_ValueError, e.what());
+  }
+}
+
+%typemap(freearg) (SparseMatrix* M)
+{
+
+  Py_XDECREF(shape_$argnum);
+  Py_XDECREF(nnz_$argnum);
+  Py_XDECREF(data_$argnum);
+  Py_XDECREF(indices_$argnum);
+  Py_XDECREF(indptr_$argnum);
+  
+  if (array_data_$argnum && is_new_object1$argnum)
+  {
+    Py_DECREF(array_data_$argnum);
+  }
+  
+  if (array_indptr_$argnum && is_new_object2$argnum)
+  {
+    Py_DECREF(array_indptr_$argnum);
+  }
+  
+  if (array_indices_$argnum && is_new_object3$argnum)
+  {
+    Py_DECREF(array_indices_$argnum);
+  }
+  freeSparse(M$argnum);
+}
+
+%apply (SparseMatrix *M) {(const SparseMatrix const * m)};
+
+%apply (SparseMatrix *M) {(SparseMatrix const * m)};
+
+%apply (SparseMatrix *M) {(const SparseMatrix * m)};
+
+%apply (SparseMatrix *M) {(SparseMatrix * m)};
+
+%apply (SparseMatrix *M) {(const SparseMatrix const *sparseMat)};
+
+%apply (SparseMatrix *M) {(SparseMatrix *sparseMat)};
+
+
 // signatures
 %feature("autodoc", 1);
 
 // generated docstrings from doxygen xml output
 %include Numerics-docstrings.i
  
-
-// LCP
+ // Matrices
+%include "SparseMatrix.h"
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
+
+// LCP
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
 %include "lcp_cst.h"
@@ -826,7 +954,7 @@
 
   ~SolverOptions() 
     { 
-      deleteSolverOptions(self);
+      deleteSolverOptions($self);
     }
 };
 
@@ -911,6 +1039,10 @@
     SWIG_fail;
  }
 
+
+
+
+
 // FrictionContact
 %ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
                           //instead of *iparam, *dparam).
@@ -991,10 +1123,10 @@
       
       // return pointer : free by std swig destructor
       M = (NumericsMatrix *) malloc(sizeof(NumericsMatrix));
-      M->storageType=0;
+      M->storageType = 0;
       M->size0 = nrows;
       M->size1 = ncols;
-      M->matrix0=data;
+      M->matrix0 = data;
       return M;
     }
 
@@ -1052,3 +1184,131 @@
 }; 
 
 
+#define GET_ATTR(OBJ,ATTR)                                              \
+  ATTR = PyObject_GetAttrString(OBJ,BOOST_PP_STRINGIZE(ATTR));          \
+  if(!ATTR)                                                             \
+  {                                                                     \
+    throw(std::invalid_argument(BOOST_PP_STRINGIZE(need a ATTR attr))); \
+  }
+
+
+
+%extend SparseMatrix
+{
+  %fragment("NumPy_Fragments");
+
+  // from a scipy.sparse csr
+  SparseMatrix(PyObject *obj)
+  {
+
+    PyObject *shape,*nnz,*data,*indices,*indptr;
+    int is_new_object1, is_new_object2, is_new_object3;
+    PyArrayObject *array_data, *array_indices, *array_indptr;
+    SparseMatrix* M;
+
+    try
+    {
+
+      M = (SparseMatrix *) malloc(sizeof(SparseMatrix));      
+      
+      GET_ATTR(obj,shape);
+      GET_ATTR(obj,nnz);
+      GET_ATTR(obj,data);
+      GET_ATTR(obj,indices);
+      GET_ATTR(obj,indptr);
+      
+      int dim0, dim1, nzmax;
+
+      GET_INTS(shape,0,dim0);
+      GET_INTS(shape,1,dim1);
+//      GET_INT(nnz,nzmax); fail: type is numpy.int32!
+      nzmax = PyInt_AsLong(nnz);
+
+      array_data = obj_to_array_allow_conversion(data, NPY_DOUBLE, &is_new_object1);
+      array_indices = obj_to_array_allow_conversion(indices, NPY_INT32, &is_new_object2);
+      array_indptr = obj_to_array_allow_conversion(indptr, NPY_INT32, &is_new_object3);
+      
+      M->m = dim0;
+      M->n = dim1;
+
+      M->nzmax = nzmax;
+
+      M->nz = -2; // csr only for the moment
+      
+      M->p = (int *) malloc(M->m+1 * sizeof(int));
+      M->i = (int *) malloc(M->nzmax * sizeof(int));
+      M->x = (double *) malloc(M->nzmax * sizeof(double));
+
+      for(unsigned int i = 0; i < M->m+1; i++)
+      {
+        M->p[i] = ((int *) array_data(array_indptr)) [i];
+      }
+
+      for(unsigned int i = 0; i< M->nzmax; i++)
+      {
+        M->i[i] = ((int *) array_data(array_indices)) [i];
+      }
+     
+      memcpy(M->x, (double *) array_data(array_data), M->nzmax * sizeof(double));
+
+      Py_DECREF(shape);
+      Py_DECREF(nnz);
+      Py_DECREF(data);
+      Py_DECREF(indices);
+      Py_DECREF(indptr);
+
+      if (array_data && is_new_object1)
+      {
+        Py_DECREF(array_data);
+      }
+
+      if (array_indptr && is_new_object2)
+      {
+        Py_DECREF(array_indptr);
+      }
+
+      if (array_indices && is_new_object3)
+      {
+        Py_DECREF(array_indices);
+      }
+      
+
+      return M;
+    }
+    catch (const std::invalid_argument& e)
+    {
+      Py_XDECREF(shape);
+      Py_XDECREF(nnz);
+      Py_XDECREF(data);
+      Py_XDECREF(indices);
+      Py_XDECREF(indptr);
+
+      if (array_data && is_new_object1)
+      {
+        Py_DECREF(array_data);
+      }
+      
+      if (array_indptr && is_new_object2)
+      {
+        Py_DECREF(array_indptr);
+      }
+      
+      if (array_indices && is_new_object3)
+      {
+        Py_DECREF(array_indices);
+      }
+      
+      assert(!M->p);
+      assert(!M->i);
+      assert(!M->x);
+      assert(M);
+      free(M);
+      throw(e);
+    }
+  }
+
+  ~SparseMatrix()
+  {
+    freeSparse($self);
+  }
+}
