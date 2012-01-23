@@ -32,14 +32,15 @@ class ControlFirstOrderLinearDS : public ControlDynamicalSystem
 private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(ControlFirstOrderLinearDS);
-  /** default constructor */
-  ControlFirstOrderLinearDS();
 
 protected:
   /** Initial state \f$x_0\f$ */
   SP::SiconosVector _x0;
   /** A matrix */
   SP::SiconosMatrix _A;
+
+  /** default constructor */
+  ControlFirstOrderLinearDS() {};
 
 public:
   /** Constructor with the minimal set of data

@@ -36,10 +36,11 @@ class ControlDynamicalSystem : public boost::enable_shared_from_this<ControlDyna
 private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(ControlDynamicalSystem);
+
+protected:
   /** default constructor */
   ControlDynamicalSystem() {};
 
-protected:
   /** Constructor with the minimal set of data
    * \param a double, the starting time \f$t_0\f$
    * \param a double, the end time T
