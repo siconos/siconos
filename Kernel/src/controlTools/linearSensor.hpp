@@ -59,6 +59,10 @@ private:
   /** Number of time steps*/
   unsigned int _nSteps;
 
+  /** Default constructor
+   */
+  linearSensor() {};
+
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
@@ -76,6 +80,7 @@ public:
    * \param a SP::SiconosMatrix D (optional)
    */
   linearSensor(int, SP::TimeDiscretisation, SP::Model, SP::SimpleMatrix, SP::SimpleMatrix);
+
 
   /** Destructor
    */

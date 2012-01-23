@@ -54,6 +54,10 @@ protected:
   /** pointer to the state of the DynamicalSystem */
   SP::SiconosVector _DSx;
 
+  /* Default constructor
+   */
+  controlSensor() {};
+
 public:
 
   controlSensor(int name, SP::TimeDiscretisation t, SP::Model m): Sensor(name, t, m) {}
