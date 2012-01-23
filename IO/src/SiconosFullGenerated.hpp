@@ -1,4 +1,7 @@
 // generated with the command : ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
+SICONOS_IO_REGISTER_WITH_BASES(ControlFirstOrderLinearDS, (ControlDynamicalSystem),
+                               (_x0)
+                               (_A))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR, (NewtonEulerR),
                                (_isOnContact)
                                (_Pc1)
@@ -134,6 +137,22 @@ SICONOS_IO_REGISTER_WITH_BASES(Moreau2, (Moreau),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR, (NewtonEulerFrom1DLocalFrameR),
                               )
+SICONOS_IO_REGISTER_WITH_BASES(commonSMC, (Actuator),
+                               (_nDim)
+                               (_indx)
+                               (_u)
+                               (_Csurface)
+                               (_sensor)
+                               (_DS)
+                               (_initDone)
+                               (_curDeltaT)
+                               (_B)
+                               (_D)
+                               (_relationSMC)
+                               (_sign)
+                               (_interactionSMC)
+                               (_lambda)
+                               (_xController))
 SICONOS_IO_REGISTER_WITH_BASES(LCP, (LinearOSNS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
@@ -149,8 +168,18 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
                                (_contactForce)
                                (_jachqT))
 SICONOS_IO_REGISTER_WITH_BASES(EventDriven, (Simulation),
-                               (istate)
+                               (_istate)
                                (TOL_ED))
+SICONOS_IO_REGISTER(ControlDynamicalSystem,
+                    (_t0)
+                    (_T)
+                    (_h)
+                    (_theta)
+                    (_processDS)
+                    (_model)
+                    (_processTD)
+                    (_processSimulation)
+                    (_processIntegrator))
 SICONOS_IO_REGISTER(OneStepNSProblem,
                     (_id)
                     (_sizeOutput)
@@ -169,10 +198,10 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping, (Simulation),
                                (_newtonTolerance)
                                (_newtonMaxIteration)
                                (_newtonNbSteps)
+                               (_newtonOptions)
                                (_newtonResiduDSMax)
                                (_newtonResiduYMax)
-                               (_newtonResiduRMax)
-                               (_newtonOptions))
+                               (_newtonResiduRMax))
 SICONOS_IO_REGISTER(Interaction,
                     (_initialized)
                     (_id)
@@ -227,7 +256,6 @@ SICONOS_IO_REGISTER(DynamicalSystem,
 SICONOS_IO_REGISTER(Sensor,
                     (_type)
                     (_id)
-                    (_data)
                     (_model)
                     (_timeDiscretisation)
                     (_eSensor))
@@ -298,6 +326,11 @@ SICONOS_IO_REGISTER(Model,
                     (_author)
                     (_description)
                     (_date))
+SICONOS_IO_REGISTER_WITH_BASES(controlSensor, (Sensor),
+                               (_YDim)
+                               (_storedY)
+                               (_DS)
+                               (_DSx))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS, (DynamicalSystem),
                                (_M)
                                (_f)
@@ -336,6 +369,7 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR),
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
                                (_constraintTol)
                                (_constraintTolUnilateral)
+                               (_projectionMaxIteration)
                                (_doProj)
                                (_doOnlyProj))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR, (LagrangianR),
@@ -446,7 +480,14 @@ SICONOS_IO_REGISTER(EventsManager,
                     (_simulation)
                     (_hasNS)
                     (_hasCM)
-                    (GapLimit2Events))
+                    (_GapLimit2Events))
+SICONOS_IO_REGISTER_WITH_BASES(linearSensor, (controlSensor),
+                               (_data)
+                               (_dataPlot)
+                               (_k)
+                               (_matC)
+                               (_matD)
+                               (_nSteps))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)
@@ -610,6 +651,7 @@ SICONOS_IO_REGISTER(SpaceFilter,
 template <class Archive>
 void siconos_io_register_generated(Archive& ar)
 {
+  ar.register_type(static_cast<ControlFirstOrderLinearDS*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<BlockMatrix*>(NULL));
@@ -634,6 +676,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<LCP*>(NULL));
   ar.register_type(static_cast<NewtonEulerR*>(NULL));
   ar.register_type(static_cast<EventDriven*>(NULL));
+  ar.register_type(static_cast<ControlDynamicalSystem*>(NULL));
   ar.register_type(static_cast<TimeStepping*>(NULL));
   ar.register_type(static_cast<Interaction*>(NULL));
   ar.register_type(static_cast<Topology*>(NULL));
@@ -667,6 +710,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<EventsManager*>(NULL));
+  ar.register_type(static_cast<linearSensor*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<Circle*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));
