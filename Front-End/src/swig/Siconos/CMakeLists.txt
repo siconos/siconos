@@ -208,6 +208,7 @@ ADD_TEST(sparse ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_D
 ADD_TEST(Kernel ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
 ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
 ADD_TEST(bouncing_ball ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
+ADD_TEST(smc ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
 
 SET_TESTS_PROPERTIES(lcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
 SET_TESTS_PROPERTIES(sparse PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
