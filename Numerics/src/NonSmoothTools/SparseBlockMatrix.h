@@ -223,7 +223,7 @@ extern "C"
       \param M the matrix to be displayed
       \param filename the corresponding name of the file
    */
-  void newFromFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
+  void newFromFileSBM(SparseBlockStructuredMatrix* const outSBM, FILE *file);
 
   /** print in file  of the matrix content in Scilab format for each block
       \param M the matrix to be displayed
@@ -287,7 +287,7 @@ extern "C"
       \param[in] pointer on the Sparse Matrix
       \param[in-out] pointer on an empty SparseBlockStructuredMatrix
   */
-  int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A);
+  int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
   /** Copy a SBM into a Dense Matrix
   \param[in] M the SparseBlockStructuredMatrix matrix
@@ -299,7 +299,7 @@ extern "C"
   \param[in] M the SparseBlockStructuredMatrix matrix
   \param[in] pointer on the filled sparse Matrix
   */
-  int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
+  int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat);
 
   /** initMemory of a Sparse (CSR) Matrix form a SBM matrix
   \param[in] M the SparseBlockStructuredMatrix matrix

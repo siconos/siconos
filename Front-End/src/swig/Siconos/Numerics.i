@@ -196,7 +196,7 @@
 
 // vectors of size problem_size from given *Problem as first input
 // no conversion => inout array XXX FIX issue here
-%typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object = 0) {
+%typemap(in) (double *z) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
 
@@ -227,7 +227,7 @@
 
 
 // list of matrices problemSizex3
-%typemap(in) (double *blocklist3x3) (PyArrayObject* array=NULL, int is_new_object) {
+%typemap(in) (double *blocklist3x3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
@@ -283,7 +283,7 @@
 
 
 // matrices problemSizexproblemSize
-%typemap(in) (double *blockarray3x3) (PyArrayObject* array=NULL, int is_new_object) {
+%typemap(in) (double *blockarray3x3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
@@ -338,7 +338,7 @@
 }
 
 // vectors of size problem_size from problemSize as first input
-%typemap(in) (double *blocklist3) (PyArrayObject* array=NULL, int is_new_object) {
+%typemap(in) (double *blocklist3) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   array = obj_to_array_contiguous_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 
@@ -503,7 +503,7 @@
 
 
 // vectors of size numberOfContacts
-%typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object) {
+%typemap(in) (double *mu) (PyArrayObject* array=NULL, int is_new_object=0) {
 
   npy_intp array_len[2] = {0,0};
 
@@ -609,7 +609,7 @@
   { Py_DECREF(array$argnum); }
 }
 
-%typemap(out) (NumericsMatrix* M) {
+%typemap(argout) (NumericsMatrix* M) {
   npy_intp dims[2];
   dims[0] = $1->size0;
   dims[1] = $1->size1;
@@ -694,7 +694,10 @@
 %typemap(newfree) (double *denseMat)
 {
   // %typemap(newfree) (double *denseMat)
-  free($1);
+  if($1)
+  {
+    free($1);
+  }
 }
 
 
@@ -709,7 +712,7 @@
 }
 
 // conversion python string -> FILE
-%typemap(in) (FILE *file)
+%typemap(in) (FILE *file=NULL)
 {
   // %typemap(in) (FILE *file)
   $1 = fopen(PyString_AsString($input), "r");
@@ -725,20 +728,28 @@
 %typemap(freearg) (FILE *file)
 {
   // %typemap(freearg) (FILE *file)
-  fclose($1);
+  if($1)
+  {
+    fclose($1);
+  }
 }
 
-%typemap(in, numinputs=0) (SparseBlockStructuredMatrix* const M) 
+%typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM) 
 {
   $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+  $1->block = NULL;
+  $1->index1_data = NULL;
+  $1->index2_data = NULL;
+
 }
 
-%typemap(argout) (SparseBlockStructuredMatrix* const M)
+%typemap(argout) (SparseBlockStructuredMatrix* outSBM)
 {
   $result = SWIG_Python_AppendOutput($result,
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), 
                                                         SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
 }
+
 
 #define GET_INT(OBJ,VAR)                                                \
   if(!PyInt_Check(OBJ))                                                 \
@@ -759,19 +770,84 @@
   Py_DECREF(_TEMP##VAR)
 
 
+%typemap(in) (const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat)
+{
+  void *swig_arp;
+  int swig_res = SWIG_ConvertPtr($input,&swig_arp,SWIGTYPE_p_SparseBlockStructuredMatrix, 0 | 0);
+
+  if (SWIG_IsOK(swig_res))
+  {
+    $1 = (SparseBlockStructuredMatrix*) swig_arp;
+    $2 = (SparseMatrix*) malloc(sizeof(SparseMatrix));
+    SBMtoSparseInitMemory($1,$2);
+  }
+  else
+    SWIG_fail;
+}
+
+
+%typemap(argout) (SparseMatrix *outSparseMat)
+{
+
+  SparseMatrix *M=$1;
+
+  /* get sys.modules dict */
+  PyObject* sys_mod_dict = PyImport_GetModuleDict();
+  
+  /* get the csr module object */
+  PyObject* csr_mod = PyMapping_GetItemString(sys_mod_dict, (char *)"scipy.sparse.csr");
+  
+  npy_intp this_M_x_dims[1];
+  this_M_x_dims[0] = M->nzmax;
+
+  npy_intp this_M_i_dims[1];
+  this_M_i_dims[0] = M->nzmax;
+
+  npy_intp this_M_p_dims[1];
+  this_M_p_dims[0] = M->m+1;
+
+  PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
+
+  PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT,M->i);
+
+  PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT,M->p);
+
+  PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->n),PyInt_FromLong(M->m));
+
+  PyObject* out_nnz = PyInt_FromLong(M->nzmax);
+
+  /* call the class inside the __main__ module */
+  PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
+
+  if(out_csr)
+  {
+    PyObject_SetAttrString(out_csr,"data",out_data);
+    PyObject_SetAttrString(out_csr,"indices",out_indices);
+    PyObject_SetAttrString(out_csr,"indptr",out_indptr);
+    PyObject_SetAttrString(out_csr,"nnz",out_nnz);
+    
+    $result = out_csr;
+  }
+  else
+  {
+    SWIG_fail;
+  }
+
+}
+
 %typemap(in) (SparseMatrix* M) 
   (PyObject *shape_,
    PyObject *nnz_,
    PyObject *data_,
    PyObject *indices_,
    PyObject *indptr_,
-   int is_new_object1, 
-   int is_new_object2,
-   int is_new_object3,
+   int is_new_object1=0, 
+   int is_new_object2=0,
+   int is_new_object3=0,
    PyArrayObject *array_data_,
    PyArrayObject *array_indices_,
    PyArrayObject *array_indptr_,
-   SparseMatrix *M)
+   SparseMatrix *M=NULL)
 {
   try
   {
@@ -849,7 +925,10 @@
   {
     Py_DECREF(array_indices_$argnum);
   }
-  freeSparse(M$argnum);
+  if(M$argnum)
+  {
+    freeSparse(M$argnum);
+  }
 }
 
 %apply (SparseMatrix *M) {(const SparseMatrix const * m)};
@@ -963,7 +1042,8 @@
   LinearComplementarityProblem(PyObject *o1, PyObject *o2)
     {
 
-      int is_new_object1, is_new_object2;
+      int is_new_object1=0;
+      int is_new_object2=0;
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2); 
       LinearComplementarityProblem *LC;
@@ -1062,7 +1142,9 @@
   FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
 
-      int is_new_object1, is_new_object2, is_new_object3; 
+      int is_new_object1=0;
+      int is_new_object2=0;
+      int is_new_object3=0; 
 
       PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
       PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
@@ -1202,7 +1284,9 @@
   {
 
     PyObject *shape,*nnz,*data,*indices,*indptr;
-    int is_new_object1, is_new_object2, is_new_object3;
+    int is_new_object1=0;
+    int is_new_object2=0;
+    int is_new_object3=0;
     PyArrayObject *array_data, *array_indices, *array_indptr;
     SparseMatrix* M;
 
