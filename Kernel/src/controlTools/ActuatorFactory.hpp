@@ -34,8 +34,8 @@ namespace ActuatorFactory
 {
 
 /** A pointer to function, returning a pointer to Actuator, built
-    with its type (ie class name), a pointer to a TimeDiscretisation and a Model.*/
-typedef SP::Actuator(*object_creator)(int, SP::TimeDiscretisation, SP::Model);
+    with a SP::TimeDiscretisation and a SP::DynamicalSystem.*/
+typedef SP::Actuator(*object_creator)(SP::TimeDiscretisation, SP::DynamicalSystem);
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -44,12 +44,12 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t, SP::Model m)
+template<class SubType> SP::Actuator factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
-  return boost::shared_ptr<SubType>(new SubType(name, t, m));
+  return boost::shared_ptr<SubType>(new SubType(t, ds));
 }
 
-/** Registry Class for sensors.
+/** Registry Class for Actuators.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -61,10 +61,10 @@ template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t,
  *     ActuatorFactory::Registry&
  *     regActuator(ActuatorFactory::Registry::get()) ;
  *
- *     Actuator * yourActuator = regActuator.instantiate(sensorType, timeD, m);
+ *     Actuator * yourActuator = regActuator.instantiate(sensorType, timeD, ds);
  *
  * With sensorType a string, the name of the class of your Actuator
- * (expl: "ActuatorPosition"), timeD a SP::TimeDiscretisation and m a SP::Model.
+ * (expl: "ActuatorPosition"), timeD a SP::TimeDiscretisation and ds a SP::DynamicalSystem.
  *
  */
 class Registry
@@ -82,20 +82,21 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param an int, the name of the object added
-   * \param an object creator
+   * \param name the type of the added Actuator
+   * \param creator object creator
    */
-  void add(int, object_creator);
+  void add(int name, object_creator creator);
 
   /** Function to instantiate a new Actuator
-   * \param an int, the name of the object added (type name!)
-   * \param a pointer to a TimeDiscretisation.
-   * \param a pointer to the model
+   * \param name the type of the added Actuator.
+   * \param t a SP::TimeDiscretisation.
+   * \param ds a SP::DynamicalSystem ds that will be linked to this Actuator
+   * \return SP::Actuator to the created Actuator
    */
-  SP::Actuator instantiate(int, SP::TimeDiscretisation, SP::Model);
+  SP::Actuator instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 } ;
 
-/** Registration Class for sensors.
+/** Registration Class for Actuators.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -110,10 +111,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param an int, the name of the object to be registered
-   * \param an object creator
+   * \param name the type of the added Actuator
+   * \param creator object creator
    */
-  Registration(int, object_creator) ;
+  Registration(int name, object_creator creator) ;
 } ;
 
 #define AUTO_REGISTER_ACTUATOR(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
@@ -121,16 +122,3 @@ public :
 // end of namespace ActuatorFactory
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-

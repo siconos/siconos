@@ -17,58 +17,62 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "sampledPIDActuator.hpp"
+#include "SampledPIDActuator.hpp"
 using namespace std;
 using namespace ActuatorFactory;
 
-sampledPIDActuator::sampledPIDActuator(int name, SP::TimeDiscretisation t, SP::Model m): Actuator(name, t, m)
+SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(100, t, ds)
 {
 }
 
-sampledPIDActuator::sampledPIDActuator(int name, SP::TimeDiscretisation t, SP::Model m, const Sensors& sensorList): Actuator(name, t, m)
+SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): Actuator(100, t, ds, sensorList)
 {
 }
 
-sampledPIDActuator::~sampledPIDActuator()
+SampledPIDActuator::~SampledPIDActuator()
 {
 }
 
-void sampledPIDActuator::initialize()
+void SampledPIDActuator::initialize(SP::Model m)
 {
-  Actuator::initialize();
+  Actuator::initialize(m);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
-  // XXX see how to check this
-  _DS = dynamic_pointer_cast<FirstOrderLinearDS>(_model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
-  if (_DS == NULL)
+  // We can use the Visitor mighty power to check if we have the right type
+  Type::Siconos dsType;
+  dsType = Type::value(*_DS);
+  if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
   {
-    RuntimeException::selfThrow("The control of nonlinear System is not yet implemented");
-  }
-
-  // Get the dimension of the output
-  // XXX What if there is more than one sensor ...
-
-  _sensor = dynamic_pointer_cast<controlSensor>(*(_allSensors->begin()));
-  if (_sensor == NULL)
-  {
-    RuntimeException::selfThrow("sampledPIDActuator::initialize - the given sensor is not a controlSensor");
+    RuntimeException::selfThrow("SampledPIDActuator is not yet implemented for system of type" + dsType);
   }
   else
   {
-    _nDim = _DS->getN();
+    SP::FirstOrderLinearDS FOLDS = static_pointer_cast<FirstOrderLinearDS>(_DS);
 
-    // initialize _err
-    _err.reset(new boost::circular_buffer<double> (3));
-    for (unsigned int i = 0; i < 3; i++)
-      (*_err).push_front(0.0);
 
-    _u.reset(new SimpleVector(_nDim, 0));
-    // to have immediatly the right SP
-    _DS->setb(_u);
+    // Get the dimension of the output
+    // XXX What if there is more than one sensor ...
+
+    _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+    if (_sensor == NULL)
+    {
+      RuntimeException::selfThrow("SampledPIDActuator::initialize - the given sensor is not a ControlSensor");
+    }
+    else
+    {
+      // initialize _err
+      _err.reset(new boost::circular_buffer<double> (3));
+      for (unsigned int i = 0; i < 3; i++)
+        (*_err).push_front(0.0);
+
+      _u.reset(new SimpleVector(_nDim, 0));
+      // to have immediatly the right SP
+      FOLDS->setb(_u);
+    }
   }
 }
 
-void sampledPIDActuator::actuate()
+void SampledPIDActuator::actuate()
 {
   // We have to distinguish two cases : linear or nonlinear
   // TODO support the nonlinear case
@@ -85,12 +89,12 @@ void sampledPIDActuator::actuate()
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
 }
 
-void sampledPIDActuator::setK(const SimpleVector& newValue)
+void SampledPIDActuator::setK(const SimpleVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != 3)
   {
-    RuntimeException::selfThrow("sampledPIDActuator::setK - the size of K is not 3");
+    RuntimeException::selfThrow("SampledPIDActuator::setK - the size of K is not 3");
   }
   else
   {
@@ -105,16 +109,16 @@ void sampledPIDActuator::setK(const SimpleVector& newValue)
   }
 }
 
-void sampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
+void SampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != 3)
   {
-    RuntimeException::selfThrow("sampledPIDActuator::setKPtr - the size of K is not 3");
+    RuntimeException::selfThrow("SampledPIDActuator::setKPtr - the size of K is not 3");
   }
   else
   {
     _K = newPtr;
   }
 }
-AUTO_REGISTER_ACTUATOR(100, sampledPIDActuator);
+AUTO_REGISTER_ACTUATOR(100, SampledPIDActuator);

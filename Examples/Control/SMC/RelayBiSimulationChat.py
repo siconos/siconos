@@ -18,7 +18,7 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, Moreau, ControlManager, linearSensor, linearChatteringSMC
+    TimeStepping, Moreau, ControlManager, LinearSensor, LinearChatteringSMC
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil
@@ -32,7 +32,7 @@ h = 1.0e-4  # time step for simulation
 hControl = 1.0e-2 # time step for control
 Xinit = 1.0 # initial position
 theta = 0.5
-N = ceil((T-t0)/h + 10) # number of time steps
+N = 2*ceil((T-t0)/h) # number of time steps
 outputSize = 3 # number of variable to store at each time step
 
 # Matrix declaration
@@ -40,7 +40,7 @@ A = zeros((ndof,ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
 sensorD = zeros((ndof,ndof))
-Csurface = [0, 1.0]
+Csurface = [[0, 1.0]]
 
 # Simple check
 if h > hControl:
@@ -65,21 +65,21 @@ processIntegrator = Moreau(processDS, theta)
 processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)
-sens = linearSensor(100, tSensor, process, sensorC, sensorD)
+sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 control.addSensorPtr(sens)
-act = linearChatteringSMC(103, tActuator, process)
+act = LinearChatteringSMC(tActuator, processDS)
+act.setCsurfacePtr(Csurface)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
 # Initialization 
 process.initialize(processSimulation)
 control.initialize()
-act.setCsurfacePtr(Csurface)
 # This is not working right now
 #eventsManager = s.eventsManager()
 
 # Matrix for data storage
-dataPlot = empty((3*(N+1), outputSize))
+dataPlot = empty((N, outputSize))
 #dataPlot[0, 0] = processDS.t0()
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = processDS.x()[0]

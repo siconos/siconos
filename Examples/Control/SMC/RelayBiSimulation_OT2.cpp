@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
-  SP::SimpleVector Csurface(new SimpleVector(2, 0));
-  (*Csurface)(1) = 1;
+  SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
+  (*Csurface)(0, 1) = 1;
 
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
@@ -71,10 +71,11 @@ int main(int argc, char* argv[])
   // Control stuff
   SP::ControlManager control(new ControlManager(process));
   // use a controlSensor
-  SP::linearSensor sens(new linearSensor(100, tSensor, process, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::linearSMC_OT2 act = static_pointer_cast<linearSMC_OT2>(control->addActuator(104, tActuator));
+  SP::LinearSMCOT2 act = static_pointer_cast<LinearSMCOT2>(control->addActuator(104, tActuator));
+  act->setCsurfacePtr(Csurface);
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -87,12 +88,10 @@ int main(int argc, char* argv[])
   // initialise the process and the ControlManager
   process->initialize(processSimulation);
   control->initialize();
-  // Only now we can add the surface
-  act->setCsurfacePtr(Csurface);
 
   // --- Get the values to be plotted ---
   unsigned int outputSize = 5; // number of required data
-  int N = (int)((T - t0) / h) + 10; // Number of time steps
+  unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
 
   SP::SiconosVector xProc = processDS->x();
   SP::SiconosVector uProc = processDS->z();

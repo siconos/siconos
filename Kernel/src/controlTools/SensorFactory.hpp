@@ -33,8 +33,8 @@
 namespace SensorFactory
 {
 
-/** A pointer to function, returning a pointer to Sensor, built with its type (ie class name) and a pointer to Model.*/
-typedef SP::Sensor(*object_creator)(int, SP::TimeDiscretisation, SP::Model) ;
+/** A pointer to function, returning a SP::Sensor, built with its type (ie class name) and a SP::DynamicalSystem.*/
+typedef SP::Sensor(*object_creator)(SP::TimeDiscretisation, SP::DynamicalSystem) ;
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -43,9 +43,9 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::Sensor factory(int name, SP::TimeDiscretisation t, SP::Model m)
+template<class SubType> SP::Sensor factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
-  return boost::shared_ptr<SubType>(new SubType(name, t, m));
+  return boost::shared_ptr<SubType>(new SubType(t, ds));
 }
 
 /** Registry Class for sensors.
@@ -57,9 +57,9 @@ template<class SubType> SP::Sensor factory(int name, SP::TimeDiscretisation t, S
  * Sensor factory.
  * Use:
  *     SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
- *     SP::Sensor yourSensor = regSensor.instantiate(sensorType, timeD, myModel);
+ *     SP::Sensor yourSensor = regSensor.instantiate(sensorType, timeD, myDS);
  * With sensorType a string, the name of the class of your Sensor (expl: "SensorPosition"), timeD a SP::TimeDiscretisation and
- * myModel a SP::Model.
+ * myDS a SP::DynamicalSystem.
  *
  */
 class Registry
@@ -77,17 +77,18 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param an int, the name of the object added
-   * \param an object creator
+   * \param name the type of the added Sensor
+   * \param creator object creator
    */
-  void add(int, object_creator);
+  void add(int name, object_creator object);
 
   /** Function to instantiate a new Sensor
-   * \param a string, the name of the object added (type name!)
-   * \param a pointer to a TimeDiscretisation.
-   * \param a pointer to a model
+   * \param name the type of the Sensor we want to instantiate
+   * \param t a SP::TimeDiscretisation.
+   * \param ds a SP::DynamicalSystem that will be linked to this Sensor
+   * \param a SP::Sensor to the created Sensor
    */
-  SP::Sensor instantiate(int, SP::TimeDiscretisation, SP::Model);
+  SP::Sensor instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
 } ;
 
@@ -106,10 +107,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param an int, the name of the object to be registered
-   * \param an object creator
+   * \param name the type of the added Sensor
+   * \param creator object creator
    */
-  Registration(int, object_creator) ;
+  Registration(int name, object_creator object) ;
 } ;
 
 #define AUTO_REGISTER_SENSOR(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
@@ -117,16 +118,3 @@ public :
 // end of namespace SensorFactory
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-

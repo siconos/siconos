@@ -27,10 +27,11 @@
 #include "Tools.hpp"
 #include "SiconosAlgebra.hpp"
 #include "EventsManager.hpp"
+#include "DynamicalSystem.hpp"
 
 class SiconosVector;
 #include "TimeDiscretisation.hpp"
-class Model;
+class DynamicalSystem;
 class Event;
 
 /** A map that links a string to a pointer to SiconosVector. */
@@ -110,19 +111,20 @@ protected:
   */
   ACCEPT_SERIALIZATION(Sensor);
 
-
   /** type of the Sensor */
   int _type;
 
   /** id of the Sensor */
   std::string _id;
 
-  /** data list - Each vector of data is identified with a string. */
-  //  DataSet _data;
-
-  /** The model linked to this sensor */
+  /** SP::Model */
   SP::Model _model;
-
+  /** pointer to the DynamicalSystem we are measuring */
+  SP::DynamicalSystem _DS;
+  /** pointer to the state of the DynamicalSystem */
+  SP::SiconosVector _DSx;
+  /** The dimension of the state space of _DS */
+  unsigned int _nDim;
   /** A time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
 
@@ -141,18 +143,18 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param int, the type of the Sensor, which corresponds to the class type
-   * \param a pointer to a TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a pointer to a model
+   * \param name the type of the Sensor, which corresponds to the class type.
+   * \param t the SP::TimeDiscretisation used by this Sensor (/!\ it should not be used elsewhere !).
+   * \param ds the SP::DynamicalSystem we observe.
    */
-  Sensor(int, SP::TimeDiscretisation, SP::Model);
+  Sensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** destructor
    */
   virtual ~Sensor();
 
   /** set id of the Sensor
-   *  \param a string
+   *  \param newId the id of the Sensor
    */
   inline void setId(const std::string& newId)
   {
@@ -175,16 +177,16 @@ public:
     return _type;
   };
 
-  /** get the Model linked to this Sensor
-   *  \return a pointer to Model
+  /** get the DynamicalSystem linked to this Sensor
+   *  \return SP::DynamicalSystem
    */
-  inline SP::Model model() const
+  inline SP::DynamicalSystem getDS() const
   {
-    return _model;
+    return _DS;
   };
 
   /** get the TimeDiscretisation linked to this Sensor
-  *  \return a pointer to TimeDiscretisation.
+  *  \return SP::TimeDiscretisation.
   */
   inline SP::TimeDiscretisation timeDiscretisation() const
   {
@@ -192,7 +194,7 @@ public:
   };
 
   /** get the Event associated with this sensor
-   *  \return an Event*
+   *  \return a SP::Event
    */
   inline SP::Event event() const
   {
@@ -206,8 +208,9 @@ public:
   //  {return _data;};
 
   /** initialize sensor data.
+   * \param m the SP::Model containing the EventsManager
    */
-  virtual void initialize();
+  virtual void initialize(SP::Model m);
 
   /** Add the sensor into the simulation EventsManager.
    */

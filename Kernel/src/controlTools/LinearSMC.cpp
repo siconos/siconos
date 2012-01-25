@@ -17,72 +17,67 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "linearSMC.hpp"
+#include "LinearSMC.hpp"
 using namespace std;
 using namespace ActuatorFactory;
 
-linearSMC::linearSMC(int name, SP::TimeDiscretisation t, SP::Model m): Actuator(name, t, m)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(101, t, ds)
 {
 }
 
-linearSMC::linearSMC(int name, SP::TimeDiscretisation t, SP::Model m, const Sensors& sensorList): Actuator(name, t, m)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(101, t, ds, sensorList)
 {
 }
 
-linearSMC::~linearSMC()
+LinearSMC::~LinearSMC()
 {
 }
 
-void linearSMC::initialize()
+void LinearSMC::initialize(SP::Model m)
 {
-  Actuator::initialize();
+  CommonSMC::initialize(m);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
-  // XXX see how to check this
-  _DS = dynamic_pointer_cast<FirstOrderLinearDS>(_model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
-  if (_DS == NULL)
+  // We can use the Visitor mighty power to check if we have the right type
+  Type::Siconos dsType;
+  dsType = Type::value(*_DS);
+  if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
   {
-    RuntimeException::selfThrow("The control of nonlinear System is not yet implemented");
+    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
   }
 
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
 
-  _sensor = dynamic_pointer_cast<controlSensor>(*(_allSensors->begin()));
+  _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
-    RuntimeException::selfThrow("linearSMC::initialize - the given sensor is not a controlSensor");
+    RuntimeException::selfThrow("LinearSMC::initialize - the given sensor is not a ControlSensor");
   }
   else
   {
-    _nDim = _sensor->getYDim();
-
-    // XXX TO REMOVE
-    _t0 = 0;
-    _T = 1;
+    _t0 = _model->t0();
+    _T = _model->finalT();
     // create the SMC Model
     _SMC.reset(new Model(_t0, _T));
     // create the DS for the controller
     SP::SimpleMatrix _A(new SimpleMatrix(_nDim, _nDim));
     _A->zero();
-    _DS_SMC.reset(new FirstOrderLinearDS(_DS->x0(), _A));
+    _DS_SMC.reset(new FirstOrderLinearDS(static_pointer_cast<SiconosVector>(_DS->x0()), _A));
     //    _DS_SMC->setComputebFunction("RelayPlugin.so","computeB");
     // create the interaction
-    // XXX This is completly wrong if _nDim != _nInter
-    unsigned int _nInter = 2; // XXX sooooo wrong
-    _B.reset(new SimpleMatrix(_nDim, _nInter));
+    _B.reset(new SimpleMatrix(_nDim, _sDim));
     _B->eye();
     (*_B) *= 2;
-    SP::SimpleMatrix _D(new SimpleMatrix(_nInter, _nInter));
+    SP::SimpleMatrix _D(new SimpleMatrix(_sDim, _sDim));
     _D->zero();
-    // dumb value
-    _Csurface.reset(new SimpleMatrix(_nInter, _nDim));
-    _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
+
+    _relationSMC.reset(new FirstOrderLinearR(_Csurface, _B));
     _relationSMC->setDPtr(_D);
     // XXX Where to put this ? What does this variable mean ?
     unsigned int nslawSize = 2;
     _nsLawSMC.reset(new RelayNSL(nslawSize));
-    _interactionSMC.reset(new Interaction(_nInter, _nsLawSMC, _relationSMC));
+    _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
     _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
     _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
     double _hSMC = 0.01;
@@ -109,16 +104,16 @@ void linearSMC::initialize()
     _u.reset(new SimpleVector(_nDim, 0));
 
     // XXX really stupid stuff
-    sampledControl.reset(new SimpleVector(2));
-    sampledControl->zero();
-    _DS->setzPtr(sampledControl);
+    _sampledControl.reset(new SimpleVector(2));
+    _sampledControl->zero();
+    _DS->setzPtr(_sampledControl);
     //    _DS_SMC->setzPtr(sampledControl);
   }
   _indx = 0;
   _initDone = true;
 }
 
-void linearSMC::actuate()
+void LinearSMC::actuate()
 {
   if (_indx > 0)
   {
@@ -135,46 +130,14 @@ void linearSMC::actuate()
   _simulationSMC->computeOneStep();
   //  _interactionSMC->display();
   // compute the new control and update it
-  prod(1.0, *_B, *_lambda, *sampledControl, true);  // XXX bad
+  prod(1.0, *_B, *_lambda, *_sampledControl, true);  // XXX bad
   //  prod(1.0, *_B, *_lambda, *_u, true);
   //  _DS->setb(_u);
-  //  sampledControl->display();
+  //  _sampledControl->display();
   _indx++;
 
 }
 
-void linearSMC::setCsurface(const SiconosMatrix& newValue)
-{
-  // check dimensions ...
-  if (newValue.size(1) != _nDim || newValue.size(0) != 2)
-  {
-    RuntimeException::selfThrow("linearSMC::setCsurface - inconstency between the size of the dimension of the state space and Csurface");
-  }
-  else
-  {
-    if (_Csurface)
-    {
-      *_Csurface = newValue;
-    }
-    else
-    {
-      _Csurface.reset(new SimpleMatrix(newValue));
-    }
-  }
-}
 
-void linearSMC::setCsurfacePtr(SP::SiconosMatrix newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size(1) != _nDim || newPtr->size(0) != 2)
-  {
-    RuntimeException::selfThrow("linearSMC::setCsurfacePtr - inconstency between the size of the dimension of the state space and Csurface");
-  }
-  else
-  {
-    _Csurface = newPtr;
-    _relationSMC->setCPtr(_Csurface);
-  }
-}
 
-AUTO_REGISTER_ACTUATOR(101, linearSMC);
+AUTO_REGISTER_ACTUATOR(101, LinearSMC);

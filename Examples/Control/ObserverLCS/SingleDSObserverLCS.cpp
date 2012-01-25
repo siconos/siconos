@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
     ObserverLCS->initialize(s);
 
     int k = 0; // Current step
-    int N = ceil((T - t0) / h); // Number of time steps
+    unsigned int N = ceil((T - t0) / h); // Number of time steps
     unsigned int outputSize = 10; // number of required data
     SimpleMatrix dataPlot(N, outputSize);
     SP::SiconosVector processLambda = myProcessInteraction->lambda(0);

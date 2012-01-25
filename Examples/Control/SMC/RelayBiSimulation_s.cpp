@@ -48,19 +48,19 @@ int main(int argc, char* argv[])
   SP::FirstOrderLinearDS processDS = controlProcess->processDS();
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
   controlProcess->initialize();
-  SP::Model controlModel = controlProcess->model();
 
   // TimeDiscretisation
   SP::TimeDiscretisation tSensor(new TimeDiscretisation(t0, hControl));
   SP::TimeDiscretisation tActuator(new TimeDiscretisation(t0, hControl));
 
   // Control stuff
-  SP::ControlManager control(new ControlManager(controlModel));
+  SP::ControlManager control = controlProcess->CM();
   // use a controlSensor
-  SP::linearSensor sens(new linearSensor(100, tSensor, controlModel, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::linearSMC act = static_pointer_cast<linearSMC>(control->addActuator(101, tActuator));
+  SP::LinearSMC act = static_pointer_cast<LinearSMC>(control->addActuator(101, tActuator));
+  act->setCsurfacePtr(Csurface);
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -70,64 +70,32 @@ int main(int argc, char* argv[])
   // --- Simulation initialization ---
 
   cout << "====> Simulation initialisation ..." << endl << endl;
-  // initialise the process and the ControlManager
+  // initialise the ControlManager
   control->initialize();
-  // Get the simulation
-  SP::TimeStepping processSimulation = controlProcess->simulation();
-  // Only now we can add the surface
-  act->setCsurfacePtr(Csurface);
-
-  // --- Get the values to be plotted ---
-  unsigned int outputSize = 3; // number of required data
-  int N = (int)((T - t0) / h) + 10; // Number of time steps
-
-  SP::SiconosVector xProc = processDS->x();
-  // Save data in a matrix dataPlot
-  SimpleMatrix dataPlot(N, outputSize);
-  dataPlot(0, 0) = controlModel->t0(); // Initial time of the model
-  dataPlot(0, 1) = (*xProc)(0);
-  dataPlot(0, 2) = (*xProc)(1);
-
-  SP::EventsManager eventsManager = processSimulation->eventsManager();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
-  int k = 0; // Current step
+  controlProcess->run();
   // Simulation loop
-  boost::progress_display show_progress(N);
-  boost::timer time;
-  time.restart();
-  SP::Event nextEvent;
-  while (processSimulation->nextTime() < T)
-  {
-    processSimulation->computeOneStep();
-    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
-    if (nextEvent->getType() == 1)
-    {
-      k++;
-      dataPlot(k, 0) = processSimulation->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
-      ++show_progress;
-    }
-    processSimulation->nextStep();
-  }
-  cout << endl << "Computation Time " << time.elapsed()  << endl;
 
-  // --- Output files ---
+  cout << endl << "Computation Time " << controlProcess->elapsedTime()  << endl;
+  SP::SimpleMatrix dataPlot = controlProcess->data();
+  // We are only interested in the state
+  dataPlot->resize(dataPlot->size(0), 3);
+
+  // ==== Output files ====
   cout << "====> Output file writing ..." << endl;
   ioMatrix io("RelayBiSimulation_s.dat", "ascii");
-  dataPlot.resize(k, outputSize);
-  io.write(dataPlot, "noDim");
+  io.write(*dataPlot, "noDim");
 
   // Comparison with a reference file
-  SimpleMatrix dataPlotRef(dataPlot);
+  SimpleMatrix dataPlotRef(*dataPlot);
   dataPlotRef.zero();
   ioMatrix ref("RelayBiSimulation-SMC.ref", "ascii");
   ref.read(dataPlotRef);
-  std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+  std::cout << (*dataPlot - dataPlotRef).normInf() << std::endl;
 
-  if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+  if ((*dataPlot - dataPlotRef).normInf() > 1e-12)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
     return 1;

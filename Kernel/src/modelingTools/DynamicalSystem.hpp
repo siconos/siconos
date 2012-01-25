@@ -74,7 +74,7 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
    to set some perturbation parameters, or to control the system (z
    will be set by some actuators) or anything else.
 
-   with \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
+   with \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
 
   Operators and the functions used to compute them:
 

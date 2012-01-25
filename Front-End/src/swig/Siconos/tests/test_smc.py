@@ -3,7 +3,7 @@
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation,\
-            TimeStepping, Moreau, ControlManager, linearSensor, linearSMC_OT2,\
+            TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2,\
             getMatrix, SimpleMatrix
     from matplotlib.pyplot import subplot, title, plot, grid, show
     from numpy import array, eye, empty, zeros, savetxt
@@ -66,10 +66,10 @@ def test_smc1():
     processSimulation.insertIntegrator(processIntegrator)
     # Actuator, Sensor & ControlManager
     control = ControlManager(process)
-    sens = linearSensor(tSensor, processDS, sensorC, sensorD)
+    sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 
     control.addSensorPtr(sens)
-    act = linearSMC_OT2(tActuator, processDS)
+    act = LinearSMCOT2(tActuator, processDS)
     act.setCsurfacePtr(Csurface)
     act.addSensorPtr(sens)
     control.addActuatorPtr(act)
@@ -106,8 +106,8 @@ def test_smc1():
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation,\
-            ControlFirstOrderLinearDS, ControlManager, linearSensor, \
-            linearSMC_OT2, getMatrix, SimpleMatrix
+            ControlFirstOrderLinearDS, ControlManager, LinearSensor, \
+            LinearSMCOT2, getMatrix, SimpleMatrix
     from matplotlib.pyplot import subplot, title, plot, grid, show
     from numpy import array, eye, empty, zeros, savetxt
     from math import ceil, sin
@@ -162,9 +162,9 @@ def test_smc2():
     tActuator = TimeDiscretisation(t0, hControl)
     # Actuator, Sensor & ControlManager
     control = controlProcess.CM();
-    sens = linearSensor(tSensor, processDS, sensorC, sensorD)
+    sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
     control.addSensorPtr(sens)
-    act = linearSMC_OT2(tActuator, processDS)
+    act = LinearSMCOT2(tActuator, processDS)
     act.setCsurfacePtr(Csurface)
     act.addSensorPtr(sens)
     control.addActuatorPtr(act)

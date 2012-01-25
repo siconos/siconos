@@ -19,7 +19,7 @@
 
 #include "Sensor.hpp"
 #include "SensorEvent.hpp"
-#include "Model.hpp"
+#include "DynamicalSystem.hpp"
 #include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
@@ -29,15 +29,18 @@ using namespace std;
 Sensor::Sensor(): _type(0), _id("none")
 {}
 
-Sensor::Sensor(int name, SP::TimeDiscretisation t, SP::Model m): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
-{}
+Sensor::Sensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
+{
+  _nDim = _DS->getN();
+}
 
 Sensor::~Sensor()
 {}
 
-void Sensor::initialize()
+void Sensor::initialize(SP::Model m)
 {
-  // == Create an event linked to the present Actuator. ==
+  _model = m;
+  // == Create an event linked to the present Sensor. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), 3);
@@ -54,10 +57,10 @@ void Sensor::recordInSimulation()
 void Sensor::display() const
 {
   cout << "=====> Sensor of type " << _type << ", named " << _id ;
-  if (_model)
-    cout << " and linked to model named " << _model->title() << "." << endl;
+  if (_DS)
+    cout << " and linked to the DynamicalSystem number " << _DS->number() << "." << endl;
   else
-    cout << " and not linked to a model." << endl;
+    cout << " and not linked to a DynamicalSystem." << endl;
   cout << "======" << endl ;
   cout << endl;
 }

@@ -30,8 +30,12 @@ void ControlDynamicalSystem::setTheta(unsigned int newTheta)
   _theta = newTheta;
 }
 
-void ControlDynamicalSystem::initialize()
+void ControlDynamicalSystem::initialize(SP::SiconosVector x0)
 {
+  _x0 = x0;
+  _nDim = _x0->size();
+
+  // Simulation part
   _model.reset(new Model(_t0, _T));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_processDS);
   _processTD.reset(new TimeDiscretisation(_t0, _h));
@@ -40,4 +44,62 @@ void ControlDynamicalSystem::initialize()
   _processIntegrator.reset(new Moreau(_processDS, _theta));
   _processSimulation->insertIntegrator(_processIntegrator);
   _model->initialize(_processSimulation);
+
+  // Control part
+  _CM.reset(new ControlManager(_model));
+
+  // Output
+  _N = ceil((_T - _t0) / _h) + 10; // Number of time steps
+  _dataM.reset(new SimpleMatrix(_N, 2 * _nDim + 1)); // we save all the states and the control
+}
+
+
+void ControlDynamicalSystem::addSensorPtr(SP::Sensor newSensor)
+{
+  _CM->addSensorPtr(newSensor);
+}
+
+void ControlDynamicalSystem::addActuatorPtr(SP::Actuator newActuator)
+{
+  _CM->addActuatorPtr(newActuator);
+}
+
+void ControlDynamicalSystem::run()
+{
+  SP::SiconosVector xProc = _processDS->x();
+  SP::SiconosVector uProc = _processDS->z();
+  (*_dataM)(0, 0) = _t0;
+  for (unsigned int i = 0; i < _nDim; i++)
+  {
+    (*_dataM)(0, i + 1) = (*xProc)(i);
+    (*_dataM)(0, _nDim + i + 1) = (*uProc)(i);
+  }
+
+  SP::EventsManager eventsManager = _processSimulation->eventsManager();
+  unsigned int k = 0;
+  boost::progress_display show_progress(_N);
+  boost::timer time;
+  time.restart();
+  SP::Event nextEvent;
+
+  while (_processSimulation->nextTime() < _T)
+  {
+    _processSimulation->computeOneStep();
+    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
+    if (nextEvent->getType() == 1)
+    {
+      k++;
+      (*_dataM)(k, 0) = _processSimulation->nextTime();
+      for (unsigned int i = 0; i < _nDim; i++)
+      {
+        (*_dataM)(k, i + 1) = (*xProc)(i);
+        (*_dataM)(k, _nDim + i + 1) = (*uProc)(i);
+      }
+      ++show_progress;
+    }
+    _processSimulation->nextStep();
+  }
+
+  _elapsedTime = time.elapsed();
+  _dataM->resize(k, 2 * _nDim + 1);
 }

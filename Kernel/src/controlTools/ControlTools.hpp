@@ -22,22 +22,20 @@
 
 // Sensors - generic
 #include "SensorFactory.hpp"
-#include "SensorPosition.hpp"
 #include "SensorEvent.hpp"
-#include "controlSensor.hpp"
+#include "ControlSensor.hpp"
 // Sensors - available
-#include "linearSensor.hpp"
+#include "LinearSensor.hpp"
 
 // Actuator - generic
 #include "ActuatorFactory.hpp"
-#include "ExampleActuator.hpp"
 #include "ActuatorEvent.hpp"
-#include "commonSMC.hpp"
+#include "CommonSMC.hpp"
 // Actuator - available
-#include "sampledPIDActuator.hpp"
-#include "linearSMC.hpp"
-#include "linearChatteringSMC.hpp"
-#include "linearSMC_OT2.hpp"
+#include "SampledPIDActuator.hpp"
+#include "LinearSMC.hpp"
+#include "LinearChatteringSMC.hpp"
+#include "LinearSMCOT2.hpp"
 
 // Misc
 #include "ControlManager.hpp"

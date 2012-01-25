@@ -17,24 +17,22 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file linearSMC_OT2.hpp
+/*! \file LinearSMCOT2.hpp
   \brief General interface to define a sliding mode controller with
   disturbance compensation. Reference: Su, W.C.; Drakunov, S.; Özgüner, Ü.
   An O(T2) boundary layer in sliding mode for sampled-data systems
   */
 
-#ifndef linearSMC_OT2_H
-#define linearSMC_OT2_H
+#ifndef LinearSMCOT2_H
+#define LinearSMCOT2_H
 
 #include "SiconosKernel.hpp"
 
-//XXX: to be removed
-#include "commonSMC.hpp"
-class linearSMC_OT2 : public commonSMC
+class LinearSMCOT2 : public CommonSMC
 {
 private:
   /** default constructor */
-  linearSMC_OT2();
+  LinearSMCOT2() {};
   /** Current value of the state (\f$ x_k\f$)*/
   SP::SimpleVector _X;
   /** Predicted current value of the state (\f$ \hat{x}_k = \Phi x_{k-1} + \Gamma u_{k-1}\f$)*/
@@ -67,46 +65,33 @@ private:
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
    */
-  linearSMC_OT2(int, SP::TimeDiscretisation, SP::Model);
+  LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
-   * \param a set of Sensor linked to this Actuator.
+   * \param t SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
+   * \param sensorList a set of Sensor linked to this Actuator.
    */
-  linearSMC_OT2(int, SP::TimeDiscretisation, SP::Model, const Sensors&);
+  LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
 
   /** destructor
   */
-  virtual ~linearSMC_OT2();
+  virtual ~LinearSMCOT2();
 
   /** initialize actuator data.
+   * \param m a SP::Model
   */
-  virtual void initialize();
+  void initialize(SP::Model m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
-   * \f$u_k = u_{k-1} + c_1e_k + c_2e_{k-1} + c_3e_{k-2}\f$, where
-   * \f{align*}c_1 &= K_P - \frac{K_D}/{\Delta t} + K_I \Delta t \\
-   * c_2 &= -1 - \frac{2K_D}/{\Delta t} \\
-   * c_3 &= \frac{K_D}/{\Delta t} \f{align*}
+   * TODO
    */
   void actuate();
 
-  /** Set the value of _Csurface to newValue
-   * * \param a SimpleVector newValue
-   */
-  void setCsurface(const SimpleVector&);
-
-  /** Set _Csurface to pointer newPtr
-   * \param a SP::SimpleVector
-   */
-  void setCsurfacePtr(SP::SimpleVector);
 };
-DEFINE_SPTR(linearSMC_OT2)
+DEFINE_SPTR(LinearSMCOT2)
 #endif

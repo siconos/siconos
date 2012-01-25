@@ -19,7 +19,7 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, Moreau, ControlManager, linearSensor, linearSMC
+    TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMC
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil
@@ -66,16 +66,16 @@ processIntegrator = Moreau(processDS, theta)
 processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)
-sens = linearSensor(100, tSensor, process, sensorC, sensorD)
+sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 control.addSensorPtr(sens)
-act = linearSMC(101, tActuator, process)
+act = LinearSMC(tActuator, processDS)
+act.setCsurfacePtr(Csurface)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
 # Initialization 
 process.initialize(processSimulation)
 control.initialize()
-act.setCsurfacePtr(Csurface)
 # This is not working right now
 #eventsManager = s.eventsManager()
 

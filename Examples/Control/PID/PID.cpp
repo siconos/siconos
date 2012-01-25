@@ -26,8 +26,8 @@
 */
 
 #include "SiconosKernel.hpp"
-#include "sampledPIDActuator.hpp"
-#include "linearSensor.hpp"
+#include "SampledPIDActuator.hpp"
+#include "LinearSensor.hpp"
 
 using namespace std;
 
@@ -100,14 +100,14 @@ int main(int argc, char* argv[])
     SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
     (*C)(0, 0) = 1;
     SP::SimpleMatrix D(new SimpleMatrix(1, 2, 0));
-    SP::linearSensor sens(new linearSensor(100, tSensor, process, C, D));
+    SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C, D));
     control->addSensorPtr(sens);
     // add the PID controller
     SP::SimpleVector K(new SimpleVector(3, 0));
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
-    SP::sampledPIDActuator act = static_pointer_cast<sampledPIDActuator>(control->addActuator(100, tActuator));
+    SP::SampledPIDActuator act = static_pointer_cast<SampledPIDActuator>(control->addActuator(100, tActuator));
     act->addSensorPtr(sens);
 
     // To store the nextEvent
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     act->setK(*K);
 
     SP::EventsManager eventsManager = s->eventsManager();
-    int N = ceil((T - t0) / h + 10); // Number of time steps
+    unsigned int N = ceil((T - t0) / h + 10); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;

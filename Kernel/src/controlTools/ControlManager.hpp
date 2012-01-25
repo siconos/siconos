@@ -26,6 +26,8 @@
 
 #include "Actuator.hpp"
 
+#define getDSFromModel(nb) _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(nb)
+
 class Actuator;
 class Sensor;
 class Model;
@@ -72,7 +74,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(ControlManager);
 
-
   /** A list of Sensors */
   Sensors _allSensors;
 
@@ -94,16 +95,16 @@ protected:
 public:
 
   /** Constructor with a Model, to which control will be applied.
-   * \param a SP::Model
+   * \param m the SP::Model we want to control
    */
-  ControlManager(SP::Model);
+  ControlManager(SP::Model m);
 
   /** destructor
    */
   virtual ~ControlManager();
 
   /** get the Model linked to this ControlManager
-   *  \return a pointer to Model
+   *  \return a SP::Model
    */
   inline SP::Model model() const
   {
@@ -127,64 +128,68 @@ public:
   };
 
   /** To build and add a new Sensor in the Manager
-   * \param the type (int) of the Sensor
-   * \param the TimeDiscretisation of the Sensor
-   * \return a pointer to the added Sensor
+   * \param name the type of the Sensor
+   * \param t the SP::TimeDiscretisation of the Sensor
+   * \param number the index of the DynamicalSystem we want to observe
+   * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addSensor(int, SP::TimeDiscretisation);
+  SP::Sensor addSensor(int name, SP::TimeDiscretisation t, unsigned int number = 0);
 
   /** To build, add, initialize a new Sensor in the Manager and record
    * it in the simulation This function is only useful to add a new
    * Sensor after the initialization of the manager else call
    * addSensor()
-   * \param the type (int) of the Sensor
-   * \param the TimeDiscretisation of the Sensor
-   * \return a pointer to the added Sensor
+   * \param name the type (int) of the Sensor
+   * \param t the SP::TimeDiscretisation of the Sensor
+   * \param number the index of the DynamicalSystem we want to observe
+   * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addAndRecordSensor(int, SP::TimeDiscretisation);
+  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation t, unsigned int number = 0);
 
   /** Add an existing Sensor to the Manager
-   * \param a pointer to the Sensor
+   * \param s a SP::Sensor to the Sensor we want to add
    */
-  void addSensorPtr(SP::Sensor);
+  void addSensorPtr(SP::Sensor s);
 
   /** To add, initialize an existing Sensor in the manager and record
    * it in the simulation This function is only useful to add a new
    * Sensor after the initialization of the manager else call
    * addSensor()
-   * \param a pointer to a Sensor
+   * \param s a SP::Sensor to the Sensor we want to add
    */
-  void addAndRecordSensorPtr(SP::Sensor);
+  void addAndRecordSensorPtr(SP::Sensor s);
 
   /** To build and add a new Actuator in the Manager
-   * \param the type (int) of the Actuator
-   * \param the TimeDiscretisation of the Actuator
-   * \return a pointer to the added Actuator
+   * \param name the type of the Actuator
+   * \param t the SP::TimeDiscretisation of the Actuator
+   * \param number the index of the DynamicalSystem we want to act on
+   * \return a SP::ACtuator to the added Actuator
    */
-  SP::Actuator addActuator(int, SP::TimeDiscretisation);
+  SP::Actuator addActuator(int name, SP::TimeDiscretisation t, unsigned int number = 0);
 
   /** To build, add, initialize a new Actuator in the manager and
    * record it in the simulation This function is only useful to add a
    * new Actuator after the initialization of the manager else call
    * addActuator()
-   * \param the type (int) of the Actuator
-   * \param the TimeDiscretisation of the Actuator
-   * \return a pointer to the added Actuator
+   * \param name the type of the Actuator
+   * \param t the SP::TimeDiscretisation of the Actuator
+   * \param number the index of the DynamicalSystem we want to act on
+   * \return a SP::Actuator to the added Actuator
    */
-  SP::Actuator addAndRecordActuator(int, SP::TimeDiscretisation);
+  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, unsigned int number = 0);
 
   /** Add an existing Actuator to the manager
-   * \param a pointer to an Actuator
+   * \param act a SP::Actuator to the Actuator we want to add
    */
-  void addActuatorPtr(SP::Actuator);
+  void addActuatorPtr(SP::Actuator act);
 
   /** To add, initialize an existing Actuator in the manager and record
    * it in the simulation This function is only useful to add a new
    * Actuator after the initialization of the manager otherwise call
    * addActuator()
-   * \param a pointer to an Actuator
+   * \param act a SP::Actuator to the Actuator we want to add
    */
-  void addAndRecordActuatorPtr(SP::Actuator);
+  void addAndRecordActuatorPtr(SP::Actuator act);
 
 
   /** initialize sensor data.

@@ -44,16 +44,19 @@ protected:
 
 public:
   /** Constructor with the minimal set of data
-   * \param a double, the starting time \f$t_0\f$
-   * \param a double, the end time T
-   * \param a double, the simulation time step
-   * \param a SP::SiconosVector, \f$x_0\f$
-   * \param a SP::SiconosMatrix, matrix A */
-  ControlFirstOrderLinearDS(double , double , double , SP::SiconosVector, SP::SiconosMatrix);
+   * \param t0 the starting time (\f$t_0\f$)
+   * \param T the end time T
+   * \param h the simulation time step
+   * \param x0 a SP::SiconosVector
+   * \param A a SP::SiconosMatrix
+   */
+  ControlFirstOrderLinearDS(double t0, double T, double h, SP::SiconosVector x0, SP::SiconosMatrix A);
+
   /** destructor */
   virtual ~ControlFirstOrderLinearDS() {};
+
   /** Initialization */
-  void initialize();
+  virtual void initialize();
 
   /** Return the _processDS */
   SP::FirstOrderLinearDS processDS() const

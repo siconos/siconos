@@ -34,16 +34,20 @@ Actuator::Actuator(): _type(0), _id("none")
   _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::Model m): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
+Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
 {
   _allDS.reset(new DynamicalSystemsSet());
   _allSensors.reset(new Sensors());
+  addDynamicalSystemPtr(ds);
+  _nDim = ds->getN();
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::Model m, const Sensors& sensorList): _type(name), _id("none"), _model(m), _timeDiscretisation(t)
+Actuator::Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): _type(name), _id("none"), _DS(ds), _timeDiscretisation(t)
 {
   _allDS.reset(new DynamicalSystemsSet());
   _allSensors.reset(new Sensors());
+  addDynamicalSystemPtr(ds);
+  _nDim = ds->getN();
   addSensors(sensorList);
 }
 
@@ -84,8 +88,9 @@ void Actuator::addDynamicalSystemPtr(SP::DynamicalSystem newDS)
   _allDS->insert(newDS);
 }
 
-void Actuator::initialize()
+void Actuator::initialize(SP::Model m)
 {
+  _model = m;
   // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
@@ -105,10 +110,6 @@ void Actuator::recordInSimulation()
 void Actuator::display() const
 {
   cout << "=====> Actuator of type " << _type << ", named " << _id ;
-  if (_model)
-    cout << " and linked to model named " << _model->title() << "." << endl;
-  else
-    cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;
   for (SensorsIterator itS = _allSensors->begin(); itS != _allSensors->end(); ++itS)
     (*itS)->display();

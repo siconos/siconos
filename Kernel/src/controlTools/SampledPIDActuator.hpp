@@ -17,27 +17,28 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file sampledPIDActuator.hpp
+/*! \file SampledPIDActuator.hpp
   \brief General interface to define an actuator
 */
 
-#ifndef sampledPIDActuator_H
-#define sampledPIDActuator_H
+#ifndef SampledPIDActuator_H
+#define SampledPIDActuator_H
 
 #include "SiconosKernel.hpp"
 #include <boost/circular_buffer.hpp>
 
-class sampledPIDActuator : public Actuator
+class SampledPIDActuator : public Actuator
 {
 private:
   /** default constructor */
-  sampledPIDActuator();
+  SampledPIDActuator() {};
+
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SampledPIDActuator);
 
   /** error vector */
   boost::shared_ptr<boost::circular_buffer<double> > _err;
-
-  /** dimension of the state space */
-  unsigned int _nDim;
 
   /** reference we are tracking */
   double _ref;
@@ -49,68 +50,65 @@ private:
   SP::SimpleVector _K;
 
   /** the sensor that feed the controller */
-  SP::controlSensor _sensor;
-
-  /** the dynamical system we are controlling */
-  SP::FirstOrderLinearDS _DS;
+  SP::ControlSensor _sensor;
 
   /** boolean to determined if the controller has been correctly initialized */
   bool _initDone;
 
-  /** current \f$\Deltat\f$ (or timeStep) */
+  /** current \f$ \Delta t\f$ (or timeStep) */
   double _curDeltaT;
 
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !).
+   * \param ds the SP::DynamicalSystem we are controlling
    */
-  sampledPIDActuator(int, SP::TimeDiscretisation, SP::Model);
+  SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
-   * \param a set of Sensor linked to this Actuator.
+   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !).
+   * \param ds the SP::DynamicalSystem we are controlling
+   * \param sensorList set of Sensor linked to this SampledPIDActuator.
    */
-  sampledPIDActuator(int, SP::TimeDiscretisation, SP::Model, const Sensors&);
+  SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
 
   /** destructor
    */
-  virtual ~sampledPIDActuator();
+  virtual ~SampledPIDActuator();
 
   /** initialize actuator data.
+   * \param m a SP::Model
    */
-  virtual void initialize();
+  void initialize(SP::Model m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
-   * \f$u_k = u_{k-1} + c_1e_k + c_2e_{k-1} + c_3e_{k-2}\f$, where
-   * \f{align*}c_1 &= K_P - \frac{K_D}/{\Delta t} + K_I \Delta t \\
-   * c_2 &= -1 - \frac{2K_D}/{\Delta t} \\
-   * c_3 &= \frac{K_D}/{\Delta t} \f{align*}
+   * \f$ u_k = u_{k-1} + c_1 e_k + c_2 e_{k-1} + c_3 e_{k-2} \f$ , where
+   * \f{align*} c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
+   * c_2 &= -1 - \frac{2K_D}{\Delta t} \\
+   * c_3 &= \frac{K_D}{\Delta t} \\
+   * \f{align*}
    */
   void actuate();
 
   /** Set the value of _K to newValue
-   * * \param a SimpleVector \f$[K_P, K_I, K_D]\f$
+   * * \param newValue SimpleVector \f$ [K_P, K_I, K_D] \f$
    */
-  void setK(const SimpleVector&);
+  void setK(const SimpleVector& newValue);
 
   /** Set _K to pointer newPtr
-   * \param a SP::SimpleVector
+   * \param newPtr SP::SimpleVector f$ [K_P, K_I, K_D] \f$
    */
-  void setKPtr(SP::SimpleVector);
+  void setKPtr(SP::SimpleVector newPtr);
 
   /** Set the value of _ref to newValue
-   * \param a double
+   * \param newValue
    */
   void inline setRef(const double newValue)
   {
     _ref = newValue;
   }
 };
-DEFINE_SPTR(sampledPIDActuator)
+DEFINE_SPTR(SampledPIDActuator)
 #endif

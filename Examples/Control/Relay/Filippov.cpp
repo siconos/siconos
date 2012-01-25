@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7; // number of required data
-    int N = ceil((T - t0) / h); // Number of time steps
+    unsigned int N = ceil((T - t0) / h); // Number of time steps
 
     SimpleMatrix dataPlot(N, outputSize);
 
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
 
     // *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
-    int k = 0; // Current step
+    unsigned int k = 0; // Current step
 
     // Simulation loop
     boost::timer time;

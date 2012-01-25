@@ -20,7 +20,7 @@
 
 from Siconos.Kernel import *
 from matplotlib.pyplot import subplot, title, plot, grid, show
-from numpy import array, eye, empty, zeros, savetxt
+from numpy import array, eye, empty, zeros, savetxt, resize
 from math import ceil
 from numpy.linalg import norm
 
@@ -52,46 +52,29 @@ controlProcess = ControlFirstOrderLinearDS(t0, T, h, x0, A)
 processDS = controlProcess.processDS();
 processDS.setComputebFunction("RelayPlugin.so","computeB")
 controlProcess.initialize()
-controlModel = controlProcess.model()
-processSimulation = controlProcess.simulation()
 
 # time discretisation
 tSensor = TimeDiscretisation(t0, hControl)
 tActuator = TimeDiscretisation(t0, hControl)
 # Actuator, Sensor & ControlManager
-control = ControlManager(controlModel)
-sens = linearSensor(100, tSensor, controlModel, sensorC, sensorD)
+control = controlProcess.CM();
+sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 control.addSensorPtr(sens)
-act = linearSMC(101, tActuator, controlModel)
+act = LinearSMC(tActuator, processDS)
+act.setCsurfacePtr(Csurface)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
 # Initialization
 control.initialize()
-act.setCsurfacePtr(Csurface)
-# This is not working right now
-#eventsManager = s.eventsManager()
 
-# Matrix for data storage
-dataPlot = empty((3*(N+1), outputSize))
-dataPlot[0, 0] = t0
-dataPlot[0, 1] = processDS.x()[0]
-dataPlot[0, 2] = processDS.x()[1]
-
-# Main loop
-k = 1
-while(processSimulation.nextTime() < T):
-    processSimulation.computeOneStep()
-    dataPlot[k, 0] = processSimulation.nextTime()
-    dataPlot[k, 1] = processDS.x()[0]
-    dataPlot[k, 2] = processDS.x()[1]
-    k += 1
-    processSimulation.nextStep()
-#    print processSimulation.nextTime()
-# Resize
-dataPlot.resize(k, outputSize)
+# Run the simulation
+controlProcess.run();
+# get the results
+tmpData = controlProcess.data()
+dataPlot = tmpData[:,0:3]
 # Save to disk
-savetxt('RelayBiSimulation-py.dat', dataPlot)
+savetxt('RelayBiSimulation_s-py.dat', dataPlot)
 # Plot interesting data
 subplot(211)
 title('x1')
@@ -102,8 +85,9 @@ title('x2')
 plot(dataPlot[:,0], dataPlot[:,2])
 grid()
 show()
-# TODO
 # compare with the reference
-#ref = getMatrix(SimpleMatrix("result.ref"))
-#if (norm(dataPlot - ref[1:,:]) > 1e-12):
-#    print("Warning. The result is rather different from the reference file.")
+ref = getMatrix(SimpleMatrix("RelayBiSimulation-SMC.ref"))
+print('\n')
+print(norm(dataPlot - ref))
+if (norm(dataPlot - ref) > 1e-12):
+    print("Warning. The result is rather different from the reference file.")

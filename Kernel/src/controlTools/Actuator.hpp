@@ -98,9 +98,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(Actuator);
 
-
   /** type of the Actuator */
   int _type;
+
+  /** dimension of the state space */
+  unsigned int _nDim;
 
   /** id of the Actuator */
   std::string _id;
@@ -110,6 +112,9 @@ protected:
 
   /** Dynamical Systems list: all the systems on which this actuator may act. */
   SP::DynamicalSystemsSet _allDS;
+
+  /** the dynamical system we are controlling */
+  SP::DynamicalSystem _DS;
 
   /** The model linked to this actuator */
   SP::Model  _model;
@@ -132,26 +137,26 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param an integer, the type of the Actuator, which corresponds to the class type
-   * \param a pointer to a TimeDiscretisation, (/!\ it should not be used elsewhere !)
-   * \param a pointer to a model
+   * \param name the type of the Actuator, which corresponds to the class type
+   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem it acts on
    */
-  Actuator(int, SP::TimeDiscretisation, SP::Model);
+  Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Constructor with a TimeDiscretisation.
-   * \param an integer, the type of the Actuator, which corresponds to the class type
-   * \param a pointer TimeDiscretisation, (/!\ it should not be used elsewhere !).
-   * \param a pointer to a model
-   * \param Sensors linked to this Actuator.
+   * \param name the type of the Actuator, which corresponds to the class type.
+   * \param t a SP::TimeDiscretisation, (/!\ it should not be used elsewhere !).
+   * \param ds the SP::DynamicalSystem it acts on.
+   * \param sensorList a set of Sensor linked to this Actuator.
    */
-  Actuator(int, SP::TimeDiscretisation, SP::Model, const Sensors&);
+  Actuator(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
 
   /** destructor
    */
   virtual ~Actuator();
 
   /** set id of the Actuator
-   *  \param a string
+   *  \param newId the new id.
    */
   inline void setId(const std::string& newId)
   {
@@ -167,7 +172,7 @@ public:
   };
 
   /** get the type of the Actuator (ie class name)
-   *  \return a string
+   *  \return an integer
    */
   inline int getType() const
   {
@@ -183,14 +188,14 @@ public:
   };
 
   /** Ass a set of Sensors into this actuator.
-   *  \param a Sensors object (list of Sensor)
+   *  \param newSensors a Sensors object (list of Sensor)
    */
-  void addSensors(const Sensors&);
+  void addSensors(const Sensors& newSensors);
 
   /** add a Sensor in the actuator.
-   *  \param a pointer to Sensor
+   *  \param newSensor a Sensor that will be connected to the Actuator
    */
-  void addSensorPtr(SP::Sensor);
+  void addSensorPtr(SP::Sensor newSensor);
 
   /** get all the Dynamical Systems linked to this actuator.
    *  \return a DynamicalSystemsSet.
@@ -201,17 +206,17 @@ public:
   };
 
   /** Add a set of DynamicalSystem into this actuator.
-   *  \param a DynamicalSystemsSet.
+   *  \param newDSs a DynamicalSystemsSet
    */
-  void addDynamicalSystems(const DynamicalSystemsSet&);
+  void addDynamicalSystems(const DynamicalSystemsSet& newDSs);
 
   /** add a DynamicalSystem into the actuator.
-   *  \param a pointer to DynamicalSystem
+   *  \param newDS a SP::DynamicalSystem
    */
-  void addDynamicalSystemPtr(SP::DynamicalSystem);
+  void addDynamicalSystemPtr(SP::DynamicalSystem newDS);
 
   /** get the Model linked to this Actuator
-   *  \return a pointer to Model
+   *  \return SP::Model.
    */
   inline SP::Model model() const
   {
@@ -219,7 +224,7 @@ public:
   };
 
   /** get the TimeDiscretisation linked to this Actuator
-  *  \return a pointer to TimeDiscretisation.
+  *  \return SP::TimeDiscretisation.
   */
   inline SP::TimeDiscretisation timeDiscretisation() const
   {
@@ -227,7 +232,7 @@ public:
   };
 
   /** get the Event associated with this actuator
-   *  \return an Event*
+   *  \return an SP::Event
    */
   inline SP::Event event() const
   {
@@ -235,8 +240,9 @@ public:
   };
 
   /** initialize actuator data.
+   * \param m a SP::Model
    */
-  virtual void initialize();
+  virtual void initialize(SP::Model m);
 
   /** Add the actuator into the simulation EventsManager.
    */

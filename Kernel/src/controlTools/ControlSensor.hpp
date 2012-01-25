@@ -17,50 +17,50 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file controlSensor.hpp
+/*! \file ControlSensor.hpp
  * A generic control sensor
 */
 
-#ifndef controlSensor_H
-#define controlSensor_H
+#ifndef ControlSensor_H
+#define ControlSensor_H
 
 #include "SiconosKernel.hpp"
 
 class SiconosMatrix;
 class SimpleMatrix;
-/** \class controlSensor
+/** \class ControlSensor
  *  \brief Generic control Sensor to get the output of the system
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.3.0.
+ *  \version 3.4.0.
  *  \date (Creation) november 09, 2011
  *
  * A generic control sensor
  *
  */
-class controlSensor : public Sensor
+class ControlSensor : public Sensor
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(controlSensor);
+  ACCEPT_SERIALIZATION(ControlSensor);
 
 protected:
   /** Dimension of the output */
   unsigned int _YDim;
   /** A vector for the current value of the output */
   SP::SimpleVector _storedY;
-  /** pointer to the DynamicalSystem we are measuring */
-  SP::DynamicalSystem _DS;
-  /** pointer to the state of the DynamicalSystem */
-  SP::SiconosVector _DSx;
 
-  /* Default constructor
+  /** Default constructor
    */
-  controlSensor() {};
+  ControlSensor() {};
+  /** Simple constructor
+   * \param name the type of the Sensor
+   * \param t the SP::TimeDiscretisation to use
+   * \param ds the SP::DynamicalSystem it observes
+   */
+  ControlSensor(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Sensor(name, t, ds) {}
 
 public:
-
-  controlSensor(int name, SP::TimeDiscretisation t, SP::Model m): Sensor(name, t, m) {}
   /** Get the dimension of the output
    * \return an unsigned int
    */
@@ -70,12 +70,12 @@ public:
   };
 
   /** Get a pointer to the output
-   * \return pointer
+   * \return SP::SimpleVector to the output
    */
   inline SP::SimpleVector y() const
   {
     return _storedY;
   };
 };
-DEFINE_SPTR(controlSensor)
+DEFINE_SPTR(ControlSensor)
 #endif

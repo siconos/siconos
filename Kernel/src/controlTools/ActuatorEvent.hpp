@@ -41,18 +41,17 @@ private:
   */
   ACCEPT_SERIALIZATION(ActuatorEvent);
 
-
   /** The actuator linked to the present event */
   SP::Actuator _actuator;
 
   /** Default constructor */
-  ActuatorEvent(): Event(0.0, 3) {};
+  ActuatorEvent(): Event(0.0, 4) {};
 
 public:
 
   /** constructor with time value as a parameter
-   *  \param a double
-   *  \param a string, type of Event
+   *  \param time the time of the Event
+   *  \param name the type of Event
    */
   ActuatorEvent(double time, int name): Event(time, name) {};
 
@@ -68,21 +67,20 @@ public:
     return _actuator;
   };
 
-  /** set the TimeDiscretisation linked to this Actuator
-   *  \param a pointer to TimeDiscretisation.
+  /** set the Actuator linked to this ActuatorEvent
+   *  \param newActuator the Actuator associated with this Event.
    */
   void setActuatorPtr(SP::Actuator newActuator)
   {
     _actuator = newActuator;
   };
 
-  /**
-   *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
+  /** Call the actuate method of the Actuator
+   *  \param sim ignored argument.
    */
-  void process(SP::Simulation);
+  void process(SP::Simulation sim);
 
-  /** Increment time of the present event according to
-      the time discretisation of the linked Actuator
+  /** Increment the time discretisation of the linked Actuator
   */
   void update();
 };

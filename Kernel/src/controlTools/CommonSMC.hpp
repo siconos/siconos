@@ -17,25 +17,34 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file commonSMC.hpp
-  \brief General interface to define an actuator
+/*! \file CommonSMC.hpp
+  \brief General interface to define a sliding mode actuator
   */
 
-#ifndef commonSMC_H
-#define commonSMC_H
+#ifndef CommonSMC_H
+#define CommonSMC_H
 
-#include "SiconosKernel.hpp"
+#include "SimulationTools.hpp"
+#include "ModelingTools.hpp"
+#include "Actuator.hpp"
 #include <boost/circular_buffer.hpp>
 
-class commonSMC : public Actuator
+#ifndef ControlSensor_H
+DEFINE_SPTR(ControlSensor)
+#endif
+
+class CommonSMC : public Actuator
 {
 private:
-  /** default constructor */
-  // commonSMC();
-  ACCEPT_SERIALIZATION(commonSMC);
+  /** serialization hooks */
+  ACCEPT_SERIALIZATION(CommonSMC);
+
 protected:
-  /** dimension of the output */
-  unsigned int _nDim;
+  /** default constructor */
+  CommonSMC() {};
+
+  /** codimension size */
+  unsigned int _sDim;
 
   /** index for saving data */
   unsigned int _indx;
@@ -43,19 +52,16 @@ protected:
   /** control variable */
   SP::SimpleVector _u;
 
-  /** the vector defining the surface (\f$ s = Cx\f$) */
-  SP::SimpleVector _Csurface;
+  /** the vector defining the surface (\f$ s = Cx \f$) */
+  SP::SiconosMatrix _Csurface;
 
   /** the sensor that feed the controller */
-  SP::controlSensor _sensor;
-
-  /** the dynamical system we are controlling */
-  SP::FirstOrderLinearDS _DS;
+  SP::ControlSensor _sensor;
 
   /** boolean to determined if the controller has been correctly initialized */
   bool _initDone;
 
-  /** current \f$\Deltat\f$ (or timeStep) */
+  /** current \f$\Delta t\f$ (or timeStep) */
   double _curDeltaT;
 
   /** matrix describing the relation between the control value and sgn(s) */
@@ -82,23 +88,39 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
-   * \param an integer, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
+   * \param name the type of the SMC Actuator
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
    */
-  commonSMC(int i, SP::TimeDiscretisation t, SP::Model m): Actuator(i, t, m) {}
+  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(name, t, ds) {}
 
   /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
-   * \param a set of Sensor linked to this Actuator.
+   * \param name the type of the SMC Actuator
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
+   * \param sensorList the set of Sensor linked to this Actuator.
    */
-  commonSMC(int i, SP::TimeDiscretisation t, SP::Model m, const Sensors& s): Actuator(i, t, m, s) {}
+  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): Actuator(name, t, ds, sensorList) {}
 
   /** Compute the new control law at each event
    */
   virtual void actuate() = 0;
+
+  /** Initialization
+   * \param m a SP::Model
+   */
+  virtual void initialize(SP::Model m);
+
+  /** Set the value of _Csurface to newValue
+    * * \param newValue the new value for _Csurface
+    */
+  void setCsurface(const SiconosMatrix& newValue);
+
+  /** Set _Csurface to pointer newPtr
+   * \param newPtr a SP::SiconosMatrix containing the new value for _Csurface
+   */
+  void setCsurfacePtr(SP::SiconosMatrix newPtr);
+
 };
-DEFINE_SPTR(commonSMC)
+DEFINE_SPTR(CommonSMC)
 #endif

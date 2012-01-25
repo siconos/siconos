@@ -46,13 +46,13 @@ private:
   SP::Sensor _sensor;
 
   /** Default constructor */
-  SensorEvent(): Event(0.0, 4) {};
+  SensorEvent(): Event(0.0, 3) {};
 
 public:
 
   /** constructor with time value as a parameter
-   *  \param a double
-   *  \param a string, type of Event
+   *  \param time the starting time of the Event
+   *  \param name the type of the Event
    */
   SensorEvent(double time, int name): Event(time, name) {};
 
@@ -61,25 +61,25 @@ public:
   ~SensorEvent() {};
 
   /** get the Sensor linked to this Event
-   *  \return a pointer to Sensor
+   *  \return a SP::Sensor to the Sensor
    */
   inline SP::Sensor sensor() const
   {
     return _sensor;
   };
 
-  /** set the TimeDiscretisation linked to this Sensor
-   *  \param a pointer to TimeDiscretisation.
+  /** set the Sensor linked to this Event
+   *  \param newSensor the SP::Sensor
    */
   void setSensorPtr(SP::Sensor newSensor)
   {
     _sensor = newSensor;
   };
 
-  /**
-   *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
+  /** Call the capture method of the linked Sensor
+   *  \param sim a SP::Simulation (ignored).
    */
-  void process(SP::Simulation);
+  void process(SP::Simulation sim);
 
   /** Increment time of the present event according to
       the time discretisation of the linked Actuator

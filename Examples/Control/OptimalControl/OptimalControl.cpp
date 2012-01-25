@@ -35,12 +35,12 @@ int main()
   int * intWorkingMem = 0;
 
   int freq = 1000;
-  int Nfreq = 0;
+  unsigned int Nfreq = 0;
   int cmp = 0;
   int cmp10 = 0;
 
-  int NbDataMax = 10000;
-  int NData = 0;
+  unsigned int NbDataMax = 10000;
+  unsigned int NData = 0;
 
   /************************************************************/
   /************************************************************/
@@ -65,7 +65,7 @@ int main()
 
   double sT = 1;
   double sStep = 0.1e-4;
-  int NBStep = (int) floor(sT / sStep);
+  unsigned int NBStep = floor(sT / sStep);
   //NBStep =2;
 
   //  NBStep = 3;

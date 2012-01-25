@@ -30,5 +30,5 @@ ControlFirstOrderLinearDS::ControlFirstOrderLinearDS(double t0, double T, double
 
 void ControlFirstOrderLinearDS::initialize()
 {
-  ControlDynamicalSystem::initialize();
+  ControlDynamicalSystem::initialize(_x0);
 }

@@ -17,18 +17,18 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file linearSensor.hpp
+/*! \file LinearSensor.hpp
  * A generic linear sensor, to capture the output y defined as y = Cx + Du
 */
 
-#ifndef linearSensor_H
-#define linearSensor_H
+#ifndef LinearSensor_H
+#define LinearSensor_H
 
 #include "SiconosKernel.hpp"
 
 class SiconosMatrix;
 class SimpleMatrix;
-/** \class linearSensor
+/** \class LinearSensor
  *  \brief Common linear Sensor to get output of the system
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.3.0.
@@ -37,13 +37,12 @@ class SimpleMatrix;
  * A generic linear sensor, to capture the output y defined as y = Cx + Du
  *
  */
-class linearSensor : public controlSensor
+class LinearSensor : public ControlSensor
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(linearSensor);
-
+  ACCEPT_SERIALIZATION(LinearSensor);
 
   /** A matrix for output */
   SP::SiconosMatrix _data;
@@ -61,41 +60,39 @@ private:
 
   /** Default constructor
    */
-  linearSensor() {};
+  LinearSensor() {};
 
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
-   * \param an int, the type of the Sensor, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem it observes
    */
-  linearSensor(int, SP::TimeDiscretisation, SP::Model);
+  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Constructor with a TimeDiscretisation, a Model and two matrices.
-   * \param an int, the type of the Sensor, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
-   * \param a SP::SiconosMatrix C
-   * \param a SP::SiconosMatrix D (optional)
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem it observes.
+   * \param C a SP::SiconosMatrix.
+   * \param D a SP::SiconosMatrix (optional).
    */
-  linearSensor(int, SP::TimeDiscretisation, SP::Model, SP::SimpleMatrix, SP::SimpleMatrix);
-
+  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix C, SP::SimpleMatrix D);
 
   /** Destructor
    */
-  ~linearSensor();
+  ~LinearSensor();
 
-  /** initialize sensor data.
+  /** initialize sensor data
+   * \param m a SP::Model
    */
-  void initialize();
+  void initialize(SP::Model m);
 
   /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */
   void capture();
 
   /** Set the C matrix.
-   * \param a SimpleMatrix
+   * \param C a SimpleMatrix
    */
   void setC(const SimpleMatrix& C)
   {
@@ -103,7 +100,7 @@ public:
   };
 
   /** Set the C matrix
-   * \param a SP::SimpleMatrix
+   * \param C a SP::SimpleMatrix
    */
   void setCPtr(SP::SimpleMatrix C)
   {
@@ -111,7 +108,7 @@ public:
   };
 
   /** Set the D matrix
-   * \param a SimpleMatrix
+   * \param D a SimpleMatrix
    */
   void setD(const SimpleMatrix& D)
   {
@@ -119,12 +116,12 @@ public:
   };
 
   /** Set the D matrix
-   * \param a SP::SimpleMatrix
+   * \param D a SP::SimpleMatrix
    */
   void setDPtr(SP::SimpleMatrix D)
   {
     _matD = D;
   };
 };
-TYPEDEF_SPTR(linearSensor)
+TYPEDEF_SPTR(LinearSensor)
 #endif

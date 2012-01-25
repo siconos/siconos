@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
-    int N = ceil((T - t0) / h); // Number of time steps
+    unsigned int N = ceil((T - t0) / h); // Number of time steps
 
     SimpleMatrix dataPlot(N, outputSize);
 

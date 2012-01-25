@@ -17,68 +17,58 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file linearChatteringSMC.hpp
+/*! \file LinearChatteringSMC.hpp
   \brief General interface to define an actuator
   */
 
-#ifndef linearChatteringSMC_H
-#define linearChatteringSMC_H
+#ifndef LinearChatteringSMC_H
+#define LinearChatteringSMC_H
 
 #include "SiconosKernel.hpp"
 #include <boost/circular_buffer.hpp>
 
-//XXX: to be removed
-#include "commonSMC.hpp"
-class linearChatteringSMC : public commonSMC
+class LinearChatteringSMC : public CommonSMC
 {
 private:
   /** default constructor */
-  linearChatteringSMC();
+  LinearChatteringSMC() {};
 
-  double _s;
+  /** serialization hooks */
+  ACCEPT_SERIALIZATION(LinearChatteringSMC);
+
+  /** sign of Cx*/
+  SP::SiconosVector _s;
+
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
+   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
    */
-  linearChatteringSMC(int, SP::TimeDiscretisation, SP::Model);
+  LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
   /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
-   * \param a string, the type of the Actuator, which corresponds to the class type
-   * \param a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
-   * \param a SP::Model
-   * \param a set of Sensor linked to this Actuator.
+   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
+   * \param sensorList a set of Sensor linked to this Actuator.
    */
-  linearChatteringSMC(int, SP::TimeDiscretisation, SP::Model, const Sensors&);
+  LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
 
   /** destructor
   */
-  virtual ~linearChatteringSMC();
+  virtual ~LinearChatteringSMC();
 
   /** initialize actuator data.
+   * \param m a SP::Model
   */
-  virtual void initialize();
+  void initialize(SP::Model m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
-   * \f$u_k = u_{k-1} + c_1e_k + c_2e_{k-1} + c_3e_{k-2}\f$, where
-   * \f{align*}c_1 &= K_P - \frac{K_D}/{\Delta t} + K_I \Delta t \\
-   * c_2 &= -1 - \frac{2K_D}/{\Delta t} \\
-   * c_3 &= \frac{K_D}/{\Delta t} \f{align*}
+   * TODO
    */
   void actuate();
 
-  /** Set the value of _Csurface to newValue
-   * * \param a SimpleVector newValue
-   */
-  void setCsurface(const SimpleVector&);
-
-  /** Set _Csurface to pointer newPtr
-   * \param a SP::SimpleVector
-   */
-  void setCsurfacePtr(SP::SimpleVector);
 };
-DEFINE_SPTR(linearChatteringSMC)
+DEFINE_SPTR(LinearChatteringSMC)
 #endif

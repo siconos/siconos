@@ -44,7 +44,7 @@ void ControlManager::initialize()
   for (SensorsIterator itS = _allSensors.begin();
        itS != _allSensors.end(); ++itS)
   {
-    (*itS)->initialize();
+    (*itS)->initialize(_model);
     (*itS)->recordInSimulation();
   }
   // Initialize all the Actuators and insert their events into the
@@ -52,40 +52,40 @@ void ControlManager::initialize()
   for (ActuatorsIterator itA = _allActuators.begin();
        itA != _allActuators.end(); ++itA)
   {
-    (*itA)->initialize();
+    (*itA)->initialize(_model);
     (*itA)->recordInSimulation();
   }
 }
 
-SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t)
+SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t, unsigned int number)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  return (* (_allSensors.insert(regSensor.instantiate(type, t, _model))).first);
+  return (* (_allSensors.insert(regSensor.instantiate(type, t, getDSFromModel(number)))).first);
 }
 
-SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t)
+SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t, unsigned int number)
 {
   double currentTime = _model->simulation()->nextTime();
   while (t->currentTime() < currentTime)
     t->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t, _model))).first;
-  tmp->initialize();
+  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t, getDSFromModel(number)))).first;
+  tmp->initialize(_model);
   tmp->recordInSimulation();
   return tmp;
 }
 
-SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t)
+SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t, unsigned int number)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  return (* (_allActuators.insert(regActuator.instantiate(type, t, _model))).first);
+  return (* (_allActuators.insert(regActuator.instantiate(type, t, getDSFromModel(number)))).first);
 }
 
-SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t)
+SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t, unsigned int number)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t, _model))).first;
-  tmp->initialize();
+  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t, getDSFromModel(number)))).first;
+  tmp->initialize(_model);
   tmp->recordInSimulation();
   return tmp;
 }
@@ -98,7 +98,7 @@ void ControlManager::addSensorPtr(SP::Sensor s)
 void ControlManager::addAndRecordSensorPtr(SP::Sensor s)
 {
   _allSensors.insert(s);
-  s->initialize();
+  s->initialize(_model);
   s->recordInSimulation();
 }
 
@@ -110,7 +110,7 @@ void ControlManager::addActuatorPtr(SP::Actuator act)
 void ControlManager::addAndRecordActuatorPtr(SP::Actuator act)
 {
   _allActuators.insert(act);
-  act->initialize();
+  act->initialize(_model);
   act->recordInSimulation();
 }
 

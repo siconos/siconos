@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     cout << "End of model initialisation" << endl;
 
     int k = 0;
-    int N = ceil((T - t0) / h); // Number of time steps
+    unsigned int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

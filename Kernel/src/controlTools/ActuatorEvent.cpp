@@ -23,7 +23,7 @@
 using namespace std;
 using namespace EventFactory;
 
-void ActuatorEvent::process(SP::Simulation)
+void ActuatorEvent::process(SP::Simulation sim)
 {
   _actuator->actuate();
 }

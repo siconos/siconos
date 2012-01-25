@@ -36,7 +36,7 @@ void Registry::add(int name, object_creator creator)
   factory_map[name] = creator;
 }
 
-SP::Sensor Registry::instantiate(int name, SP::TimeDiscretisation t, SP::Model m)
+SP::Sensor Registry::instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
@@ -44,7 +44,7 @@ SP::Sensor Registry::instantiate(int name, SP::TimeDiscretisation t, SP::Model m
     RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + name);
 
   // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
-  return (it->second)(name, t, m) ;  // run our factory
+  return (it->second)(t, ds) ;  // run our factory
 }
 
 Registration::Registration(int name, object_creator creator)

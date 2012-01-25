@@ -36,15 +36,15 @@ void Registry::add(int name, object_creator creator)
   factory_map[name] = creator;
 }
 
-SP::Actuator Registry::instantiate(int name, SP::TimeDiscretisation t, SP::Model m)
+SP::Actuator Registry::instantiate(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
   if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) failed, no class named: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) failed, no class numbered: " + name);
 
   // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
-  return (it->second)(name, t, m) ;  // run our factory
+  return (it->second)(t, ds) ;  // run our factory
 }
 
 Registration::Registration(int name, object_creator creator)
