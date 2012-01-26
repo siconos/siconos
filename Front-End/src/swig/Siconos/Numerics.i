@@ -737,6 +737,8 @@
 %typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM) 
 {
   $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+  if(!$1) SWIG_fail;
+
   $1->block = NULL;
   $1->index1_data = NULL;
   $1->index2_data = NULL;
@@ -745,6 +747,8 @@
 
 %typemap(argout) (SparseBlockStructuredMatrix* outSBM)
 {
+  if(!$1) SWIG_fail;
+
   $result = SWIG_Python_AppendOutput($result,
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), 
                                                         SWIGTYPE_p_SparseBlockStructuredMatrix, 0));
@@ -779,6 +783,8 @@
   {
     $1 = (SparseBlockStructuredMatrix*) swig_arp;
     $2 = (SparseMatrix*) malloc(sizeof(SparseMatrix));
+    if(!$2) SWIG_fail;
+
     SBMtoSparseInitMemory($1,$2);
   }
   else
@@ -807,16 +813,21 @@
   this_M_p_dims[0] = M->m+1;
 
   PyObject* out_data = PyArray_SimpleNewFromData(1,this_M_x_dims,NPY_DOUBLE,M->x);
+  if(!out_data) SWIG_fail;
 
   PyObject* out_indices = PyArray_SimpleNewFromData(1,this_M_i_dims,NPY_INT,M->i);
+  if(!out_indices) SWIG_fail;
 
   PyObject* out_indptr = PyArray_SimpleNewFromData(1,this_M_p_dims,NPY_INT,M->p);
+  if(!out_indptr) SWIG_fail;
 
   PyObject* out_shape = PyTuple_Pack(2,PyInt_FromLong(M->n),PyInt_FromLong(M->m));
+  if(!out_shape) SWIG_fail;
 
   PyObject* out_nnz = PyInt_FromLong(M->nzmax);
+  if(!out_nnz) SWIG_fail;
 
-  /* call the class inside the __main__ module */
+  /* call the class inside the csr module */
   PyObject* out_csr = PyObject_CallMethodObjArgs(csr_mod, PyString_FromString((char *)"csr_matrix"), out_shape, NULL);
 
   if(out_csr)
@@ -824,8 +835,13 @@
     PyObject_SetAttrString(out_csr,"data",out_data);
     PyObject_SetAttrString(out_csr,"indices",out_indices);
     PyObject_SetAttrString(out_csr,"indptr",out_indptr);
-    PyObject_SetAttrString(out_csr,"nnz",out_nnz);
-    
+
+#ifndef NDEBUG
+    PyObject *auto_nnz = PyObject_GetAttrString(out_csr,"nnz");
+    assert(PyInt_AsLong(auto_nnz) == M->nzmax);
+    Py_XDECREF(auto_nnz);
+#endif
+
     $result = out_csr;
   }
   else
@@ -852,7 +868,8 @@
   try
   {
     M = (SparseMatrix *) malloc(sizeof(SparseMatrix));      
-    
+    if(!M) SWIG_fail;
+
     PyObject *obj = $input;
     
     shape_ = PyObject_GetAttrString(obj,"shape");
@@ -878,16 +895,21 @@
     
     M->nz = -2; // csr only for the moment
     
-    M->p = (int *) malloc(M->m+1 * sizeof(int));
+    M->p = (int *) malloc((M->m+1) * sizeof(int));
+    if(!M->p) SWIG_fail;
+
     M->i = (int *) malloc(M->nzmax * sizeof(int));
+    if(!M->i) SWIG_fail;
+
     M->x = (double *) malloc(M->nzmax * sizeof(double));
-    
-    for(unsigned int i = 0; i < M->m+1; i++)
+    if(!M->x) SWIG_fail;
+
+    for(unsigned int i = 0; i < (M->m+1); i++)
     {
       M->p[i] = ((int *) array_data(array_indptr_)) [i];
     }
     
-    for(unsigned int i = 0; i< M->nzmax; i++)
+    for(unsigned int i = 0; i < M->nzmax; i++)
     {
       M->i[i] = ((int *) array_data(array_indices_)) [i];
     }
@@ -943,6 +965,14 @@
 
 %apply (SparseMatrix *M) {(SparseMatrix *sparseMat)};
 
+
+%inline
+%{
+  void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM)
+  {
+    outSBM=M;
+  }
+%}
 
 // signatures
 %feature("autodoc", 1);
@@ -1319,11 +1349,11 @@
 
       M->nz = -2; // csr only for the moment
       
-      M->p = (int *) malloc(M->m+1 * sizeof(int));
+      M->p = (int *) malloc((M->m+1) * sizeof(int));
       M->i = (int *) malloc(M->nzmax * sizeof(int));
       M->x = (double *) malloc(M->nzmax * sizeof(double));
 
-      for(unsigned int i = 0; i < M->m+1; i++)
+      for(unsigned int i = 0; i < (M->m+1); i++)
       {
         M->p[i] = ((int *) array_data(array_indptr)) [i];
       }

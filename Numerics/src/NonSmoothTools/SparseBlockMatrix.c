@@ -5,7 +5,9 @@
 #include "LA.h"
 #include <math.h>
 #include "misc.h"
+#include "debug.h"
 
+#define DEBUG_MESSAGES 1
 
 unsigned int NUMERICS_SBM_FREE_BLOCK = 1 << 2;
 unsigned int NUMERICS_SBM_FREE_SBM = 1 << 3;
@@ -1527,6 +1529,8 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
 
     if (it->counter1 < it->mat->nz)
     {
+      assert(it->counter1 >= 0);
+
       it->first = it->mat->p[it->counter1];
       it->second = it->mat->i[it->counter1];
       it->third = it->mat->x[it->counter1];
@@ -1546,6 +1550,10 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
     {
       if (it->counter2 < it->mat->p[it->counter1 + 1])
       {
+        /* next line */
+        assert(it->counter2 >= 0);
+        assert(it->counter2 < it->mat->nzmax);
+
         it->first = it->mat->i[it->counter2];
         it->second = it->counter1;
         it->third = it->mat->x[it->counter2];
@@ -1554,21 +1562,35 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
       }
       else
       {
+        /* next column */
         it->counter1++;
+
+        assert(it->counter1 >= 0);
+        assert(it->counter1 < (it->mat->n + 1));
         it->counter2 = it->mat->p[it->counter1];
 
-        it->first = it->mat->i[it->counter2];
-        it->second = it->counter1;
-        it->third = it->mat->x[it->counter2];
+        DEBUG_PRINTF("it->counter1 = %d, it->counter2 = %d\n", it->counter1, it->counter2);
 
-        it->counter2++;
-        return 1;
+        if (it->counter2 < it->mat->nzmax)
+        {
+
+          assert(it->counter2 >= 0);
+          assert(it->counter2 < it->mat->nzmax);
+
+          it->first = it->mat->i[it->counter2];
+          it->second = it->counter1;
+          it->third = it->mat->x[it->counter2];
+
+          it->counter2++;
+          return 1;
+        }
+        else
+        {
+          return 0; /* stop */
+        }
       }
     }
-    else
-    {
-      return 0; /* stop */
-    }
+    return 0; /* stop */
   }
   else if (it->mat->nz == -2) /* csr */
   {
@@ -1576,6 +1598,11 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
     {
       if (it->counter2 < it->mat->p[it->counter1 + 1])
       {
+        /* next column */
+
+        assert(it->counter2 >= 0);
+        assert(it->counter2 < it->mat->nzmax);
+
         it->first = it->counter1;
         it->second = it->mat->i[it->counter2];
         it->third = it->mat->x[it->counter2];
@@ -1584,15 +1611,32 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
       }
       else
       {
+        /* next line */
         it->counter1++;
+
+        assert(it->counter1 >= 0);
+        assert(it->counter1 < (it->mat->m + 1));
+
         it->counter2 = it->mat->p[it->counter1];
 
-        it->first = it->counter1;
-        it->second = it->mat->i[it->counter2];
-        it->third = it->mat->x[it->counter2];
+        DEBUG_PRINTF("it->counter1 = %d, it->counter2 = %d\n", it->counter1, it->counter2);
 
-        it->counter2++;
-        return 1;
+        if (it->counter2 < it->mat->nzmax)
+        {
+          assert(it->counter2 >= 0);
+          assert(it->counter2 < it->mat->nzmax);
+
+          it->first = it->counter1;
+          it->second = it->mat->i[it->counter2];
+          it->third = it->mat->x[it->counter2];
+
+          it->counter2++;
+          return 1;
+        }
+        else
+        {
+          return 0; /* stop */
+        }
       }
     }
     else
@@ -1667,9 +1711,8 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     }
   }
 
-  assert(blockindexmax <= bnrow + bncol * bnrow + 1);
-  assert(blocklinemax <= bnrow + 1);
-
+  // assert(blockindexmax <= bnrow + bncol * bnrow + 1);
+  // assert(blocklinemax <= bnrow + 1);
 
   /* 2: allocate temporary memory for blocknumbers & blocklines */
   blocknum = (int *) malloc(blockindexmax * sizeof(int));
@@ -1775,8 +1818,8 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
     int birow = row % blocksize; /* block inside row */
     int bicol = col % blocksize; /* block inside column */
 
-    A->index1_data[A->filled1] = A->filled2 - 1;
-    A->index1_data[A->filled1 - 1] = A->filled2 - 1;
+    A->index1_data[A->filled1] = A->filled2;
+    A->index1_data[A->filled1 - 1] = A->filled2;
 
     assert(birow + bicol * blocksize <= blocksize * blocksize);  /* obvious */
 
