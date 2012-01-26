@@ -176,4 +176,10 @@ def test_smc2():
     controlProcess.run();
     # get the results
     tmpData = controlProcess.data()
-
+    dataPlot = tmpData
+    # compare with the reference
+    ref = getMatrix(SimpleMatrix("smc_2.ref"))
+    print("%e" % norm(dataPlot - ref))
+    if (norm(dataPlot - ref) > 1e-12):
+        print dataPlot - ref
+        print("ERROR: The result is rather different from the reference file.")
