@@ -165,7 +165,7 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeh(double);
+  virtual void computeh(double);
 
   /** default function to compute jacobianH
    *  \param double : current time
@@ -264,6 +264,13 @@ public:
   /** main relation members display
    */
   void display() const;
+
+  /** return a block vector containing ths dynamical system's dof.*/
+  SP::SiconosVector q()
+  {
+    return data[q0];
+  }
+
 
 };
 TYPEDEF_SPTR(LagrangianR);

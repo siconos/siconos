@@ -62,6 +62,8 @@ public:
   virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
   virtual void computeqBlock(SP::UnitaryRelation, unsigned int);
   virtual void postCompute();
+  virtual void postComputeLagrangianR(SP::UnitaryRelation, unsigned int);
+  virtual void postComputeNewtonEulerR(SP::UnitaryRelation, unsigned int);
 
 };
 

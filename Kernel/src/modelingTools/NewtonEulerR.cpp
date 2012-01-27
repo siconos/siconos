@@ -26,7 +26,7 @@
 
 using namespace std;
 
-//#define NER_DEBUG
+#define NER_DEBUG
 
 
 void NewtonEulerR::initComponents()
@@ -65,6 +65,11 @@ void NewtonEulerR::initComponents()
   SP::SiconosVector vaux = interaction()->y(0);
   SP::SiconosVector vaux2 = (*vaux)[0];
   _yProj = boost::static_pointer_cast<SimpleVector>((*(interaction()->y(0)))[0]);
+#ifdef NER_DEBUG
+  std::cout << "\n NewtonEulerR::initComponents() " << std::endl;
+  _yProj->display();
+  interaction()->y(0)->display();
+#endif
 }
 
 void NewtonEulerR::initialize(SP::Interaction inter)

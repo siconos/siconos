@@ -31,6 +31,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents()
   NewtonEulerFrom1DLocalFrameR::initComponents();
   /*keep only the distance.*/
   /*Warning, in current version, user of FC3D has to set _y and _yProj in the computeh */
+  // _yProj is resized since _yProj = interaction->y(0) after NewtonEulerR::initComponents();
   _yProj.reset(new SimpleVector(1));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
@@ -51,9 +52,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
 #ifdef NEFC3D_DEBUG
   printf("contact normal:\n");
   _Nc->display();
-  printf("point de contact :\n");
+  printf("contact point :\n");
   _Pc1->display();
-  printf("center of masse :\n");
+  printf("center of mass :\n");
   d1->q()->display();
 #endif
   double t[6];

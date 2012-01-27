@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 /*! \file
-  Time-Stepping simulation with projections on constraints
+  Time-Stepping simulation with combined  projections/activations
 */
 #ifndef TIMESTEPPINGCOMBINEDPROJECTION_H
 #define TIMESTEPPINGCOMBINEDPROJECTION_H
@@ -126,7 +126,7 @@ public:
 
 DEFINE_SPTR(TimeSteppingCombinedProjection);
 
-#endif // TIMESTEPPINGPROJECTONCONSTRAINTS_H
+#endif // TIMESTEPPINGCOMBINEDPROJECTION_H
 
 
 

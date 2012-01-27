@@ -19,10 +19,13 @@
 #include <assert.h>
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Tools.hpp"
+#include "RelationTypes.hpp"
 #include "NewtonEulerR.hpp"
+#include "LagrangianR.hpp"
 
 using namespace std;
-
+using namespace RELATION;
+#define OSNSMPROJ_DEBUG
 
 
 OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor):
@@ -56,15 +59,42 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
   // UR in indexSet
   dim = 0;
   UnitaryRelationsGraph::VIterator vd, vdend;
+#ifdef OSNSMPROJ_DEBUG
+  std::cout << "indexSet :" << indexSet << std::endl;
+  indexSet->display();
+#endif
   for (boost::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
     //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
+#ifdef OSNSMPROJ_DEBUG
+    std::cout << " dim :" << dim << std::endl;
+    std::cout << "vd :" << *vd << std::endl;
+    assert(indexSet->properties(*vd).blockProj);
+#endif
+
+
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
     SP::UnitaryRelation UR = indexSet->bundle(*vd);
-    SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
-    unsigned int nslawSize = nR->yProj()->size();
+    RELATION::TYPES relationType = UR->getRelationType();
+    unsigned int nslawSize;
+    if (relationType == NewtonEuler)
+    {
+      SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
+      nslawSize = nR->yProj()->size();
+    }
+    else if (relationType == Lagrangian)
+    {
+      nslawSize = UR->interaction()->nonSmoothLaw()->size();
+    }
+    else
+    {
+      RuntimeException::selfThrow(" OSNSMatrixProjectOnConstraints::updateSizeAndPositions - relation type is not from Lagragian type neither NewtonEuler.");
+    }
+
+
+
     dim += nslawSize;
     assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
   }
@@ -108,11 +138,16 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
     // === Loop through "active" Unitary Relations (ie present in
     // indexSets[level]) ===
     UnitaryRelationsGraph::VIterator vi, viend;
+#ifdef OSNSMPROJ_DEBUG
+    std::cout << "indexSet :" << indexSet << std::endl;
+    indexSet->display();
+#endif
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::UnitaryRelation ur = indexSet->bundle(*vi);
       pos = ur->absolutePositionProj();
+      assert(indexSet->properties(*vi).blockProj);
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).blockProj);
     }

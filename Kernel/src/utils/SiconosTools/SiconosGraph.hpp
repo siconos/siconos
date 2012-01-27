@@ -744,7 +744,9 @@ public:
     for (boost::tie(vi, viend) = vertices();
          vi != viend; ++vi)
     {
-      std::cout << "bundle : "
+      std::cout << "vertex :"
+                << *vi
+                << ", bundle :"
                 << bundle(*vi)
                 << ", index : "
                 << index(*vi)

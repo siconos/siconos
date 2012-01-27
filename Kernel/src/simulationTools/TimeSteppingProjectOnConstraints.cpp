@@ -24,7 +24,8 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
 
-//#define TSPROJ_DEBUG
+#define TSPROJ_DEBUG
+//#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
@@ -33,9 +34,9 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
-  _constraintTol = 1e-06;
+  _constraintTol = 1e-04;
   _constraintTolUnilateral = 1e-08;
-  _projectionMaxIteration = 20;
+  _projectionMaxIteration = 10;
   _doProj = 1;
   _doOnlyProj = 0;
 
@@ -79,6 +80,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
 #endif
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+
+#ifdef TSPROJ_CORRECTIONVELOCITIES
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
@@ -88,6 +92,8 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
+#endif
+
   bool runningProjection = false;
   unsigned int cmp = 0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
@@ -111,8 +117,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   while (runningProjection && cmp < _projectionMaxIteration)
   {
     cmp++;
-    //printf("TimeSteppingProjectOnConstraints Newton step = %d\n",cmp);
-
+#ifdef TSPROJ_DEBUG
+    printf("TimeSteppingProjectOnConstraints projection step = %d\n", cmp);
+#endif
     info = 0;
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
@@ -129,11 +136,19 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
       Type::Siconos dsType = Type::value(*ds);
-      if (dsType != Type::NewtonEulerDS)
-        RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
-      SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
-      neds->normalizeq();
-      neds->updateT();
+      if (dsType == Type::NewtonEulerDS)
+      {
+        SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+        neds->normalizeq();
+        neds->updateT();
+      }
+      else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+      {
+
+      }
+      else
+        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+
     }
 
     updateWorldFromDS();
@@ -156,7 +171,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 #endif
 
   return;
-
+  //#ifdef TSPROJ_CORRECTIONVELOCITIES
   //   /*The following reduces the velocity because the position step increase the energy of the system. This formulation works only with simple systems.To activate it, comment the next line.*/
 
   //   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -264,7 +279,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //         updateOutput(level);
   //     }
   //   }
-
+  //#endif
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
 #endif
@@ -274,7 +289,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 {
 
-  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   UnitaryRelationsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -289,7 +304,7 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   {
     SP::UnitaryRelation UR = indexSet->bundle(*aVi);
     SP::Interaction interac = UR->interaction();
-    interac->relation()->computeh(getTkp1());
+    interac->relation()->computeOutput(getTkp1(), 0);
     interac->relation()->computeJach(getTkp1());
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
