@@ -28,7 +28,7 @@
 #include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 static double sBallRadius = 0.1;
-//#define WITH_PROJ
+#define WITH_PROJ
 #define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
@@ -279,7 +279,11 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
+#ifdef WITH_PROJ
+    ioMatrix ref("resultNETS-WITHPROJ.ref", "ascii");
+#else
     ioMatrix ref("resultNETS.ref", "ascii");
+#endif
     ref.read(dataPlotRef);
     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
