@@ -325,15 +325,7 @@ void TimeStepping::initOSNS()
     initializeInteraction(indexSet0->bundle(*ui)->interaction());
 
 
-    // creates a POINTER link between workX[ds] (xfree) and the
-    // corresponding unitaryBlock in each UR for each ds of the
-    // current UR.
-    for (itDS = ur->interaction()->dynamicalSystemsBegin();
-         itDS != ur->interaction()->dynamicalSystemsEnd(); ++itDS)
-    {
-      //osi = osiMap[*itDS];
-      ur->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-    }
+
   }
 
 

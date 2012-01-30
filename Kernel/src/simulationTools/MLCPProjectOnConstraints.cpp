@@ -83,7 +83,7 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
     {
       SP::UnitaryRelation UR = indexSet->bundle(*vi);
       RELATION::TYPES relationType = UR->getRelationType();
-      unsigned int nslawSize;
+      unsigned int nslawSize = 0;
       if (relationType == NewtonEuler)
       {
         SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
@@ -124,8 +124,8 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
     {
       SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
       SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
-      unsigned int nslawSize1;
-      unsigned int nslawSize2;
+      unsigned int nslawSize1 = 0;
+      unsigned int nslawSize2 = 0;
       if (UR1->getRelationType() != UR2->getRelationType())
       {
         RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - unable to mix relation types");
@@ -221,7 +221,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
-  unsigned int nslawSize;
+  unsigned int nslawSize = 0;
   RELATION::TYPES relationType = UR->getRelationType();
   if (relationType == NewtonEuler)
   {

@@ -281,8 +281,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // === IndexSets building ===
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
-  //  if( !allInteractions->isEmpty() ) // ie if some Interactions
-  //  have been declared
+  if (!allInteractions->isEmpty())  // ie if some Interactions
+    //  have been declared
   {
     ComputeLevelsForInputAndOutput();
     if (_allNSProblems->empty())
