@@ -240,6 +240,8 @@ int main(int argc, char* argv[])
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i + 1]);
             s->ComputeLevelsForInputAndOutput(interOfBeads[i]);
             interOfBeads[i]->initialize(s->nextTime());
+
+
             relationOfBeads[i]->interaction();
 
             //std::cout << "Contact declared= " << ncontact << std::endl;
@@ -288,7 +290,8 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix ref("result.ref", "ascii");
     ref.read(dataPlotRef);
-
+    cout << "====> Comparison with reference file ..." << endl;
+    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
