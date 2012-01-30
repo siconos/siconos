@@ -147,7 +147,6 @@ int main(int argc, char* argv[])
     }
 
     // // link the interaction and the dynamical system
-    columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
     //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i]);
@@ -181,6 +180,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Initialisation ..." << endl << endl;
     columnOfBeads->initialize(s);
+
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -198,7 +198,6 @@ int main(int argc, char* argv[])
       //      dataPlot(0,3+i*4) = (beads[i]->p(1))->getValue(0);
     }
 
-    dataPlot(0, nBeads * 2) = (inter->lambda(1))->getValue(0);;
     // for (unsigned int i =1; i< nBeads; i++)
     // {
     // dataPlot(0,4+i*4) = (interOfBeads[i-1]->lambda(1))->getValue(0);
@@ -213,6 +212,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     int ncontact = 1 ;
+    bool isempty = false;
     while (s->nextTime() < T)
     {
 
@@ -224,10 +224,32 @@ int main(int argc, char* argv[])
         //std::cout <<((beads[i])->q())->getValue(0)<<std::endl;
         //std::cout <<((beads[i+1])->q())->getValue(0)<<std::endl;
 
+        if (abs(((beads[i])->q())->getValue(0)) < alert)
+        {
+          if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
+          {
+            isempty = true;
+          }
+          columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
+          s->ComputeLevelsForInputAndOutput(inter);
+          inter->initialize(s->nextTime());
+          if (isempty)
+          {
+            s->initOSNS();
+            isempty = false;
+          }
+        }
+
+
+
         if (abs(((beads[i])->q())->getValue(0) - ((beads[i + 1])->q())->getValue(0)) < alert)
         {
           //std::cout << "Alert distance for declaring contact = ";
           //std::cout << abs(((beads[i])->q())->getValue(0)-((beads[i+1])->q())->getValue(0))   <<std::endl;
+          if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
+          {
+            isempty = true;
+          }
           if (!interOfBeads[i].get())
           {
             ncontact++;
@@ -240,9 +262,14 @@ int main(int argc, char* argv[])
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i + 1]);
             s->ComputeLevelsForInputAndOutput(interOfBeads[i]);
             interOfBeads[i]->initialize(s->nextTime());
-
+            if (isempty)
+            {
+              s->initOSNS();
+              isempty = false;
+            }
 
             relationOfBeads[i]->interaction();
+
 
             //std::cout << "Contact declared= " << ncontact << std::endl;
           }
@@ -263,7 +290,6 @@ int main(int argc, char* argv[])
         dataPlot(k, 1 + i * 2) = (beads[i]->q())->getValue(0);
         dataPlot(k, 2 + i * 2) = (beads[i]->velocity())->getValue(0);
       }
-      dataPlot(k, 2 * nBeads) = (inter->lambda(1))->getValue(0);
       // for (unsigned int i =1; i< nBeads; i++)
       // {
       //   dataPlot(k,4+i*4) = (interOfBeads[i-1]->lambda(1))->getValue(0);
