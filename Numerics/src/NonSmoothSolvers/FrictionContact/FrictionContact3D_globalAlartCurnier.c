@@ -281,6 +281,17 @@ void frictionContact3D_globalAlartCurnier(
   assert(problem->mu);
   assert(problem->M);
 
+  if (!problem->M->matrix0)
+  {
+    frictionContact3D_sparseGlobalAlartCurnier(
+      problem,
+      reaction,
+      velocity,
+      info,
+      options);
+    return;
+  }
+
   assert(problem->M->matrix0);
 
   unsigned int problemSize = 3 * problem->numberOfContacts;
@@ -733,12 +744,12 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
 
-  //  mumps_id->ICNTL(1)=-1;
-  //  mumps_id->ICNTL(2)=-1;
-  //  mumps_id->ICNTL(3)=-1;
-  mumps_id->ICNTL(4) = 0;
-  mumps_id->ICNTL(10) = 1;
-  mumps_id->ICNTL(11) = 1;
+  mumps_id->ICNTL(1) = -1;
+  mumps_id->ICNTL(2) = -1;
+  mumps_id->ICNTL(3) = -1;
+  //  mumps_id->ICNTL(4)=0;
+  //  mumps_id->ICNTL(10)=1;
+  //  mumps_id->ICNTL(11)=1;
 
   mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
   // ok for a cube on a plane & four contact points
@@ -794,7 +805,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) options->iparam[6];
-
+  z
   assert(itermax > 0);
   assert(nzmax > 0);
 
@@ -880,7 +891,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
       printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
 
 
-    //    if (verbose>0)
+    if (verbose > 0)
     {
 
       printf("mumps : condition number %g\n", mumps_id->rinfog[9]);
@@ -984,4 +995,21 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
 }
 
-#endif /*WITH_MUMPS*/
+#else /*WITH_MUMPS*/
+
+void frictionContact3D_sparseGlobalAlartCurnierInit(
+  SolverOptions *SO)
+{
+  fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
+}
+
+void frictionContact3D_sparseGlobalAlartCurnier(
+  FrictionContactProblem* problem,
+  double *reaction,
+  double *velocity,
+  int *info,
+  SolverOptions *options)
+{
+  fprintf(stderr, "The sparse global Alart & Curnier solver needs -DWITH_MUMPS for the compilation of Siconos/Numerics\n");
+}
+#endif

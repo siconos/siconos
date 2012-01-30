@@ -78,7 +78,6 @@ extern "C"
   int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
     SolverOptions* options);
 
-#ifdef WITH_MUMPS
   void frictionContact3D_sparseGlobalAlartCurnierInit(
     SolverOptions *SO);
 
@@ -88,7 +87,6 @@ extern "C"
     double *velocity,
     int *info,
     SolverOptions *options);
-#endif
 
 #ifdef __cplusplus
 }

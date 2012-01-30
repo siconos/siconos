@@ -50,6 +50,9 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
   problem->M->storageType = 1; /* sparse */
+  problem->M->size0 = fclib_problem->W->m;
+  problem->M->size1 = fclib_problem->W->n;
+
   problem->M->matrix0 = NULL;
   problem->M->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
 
