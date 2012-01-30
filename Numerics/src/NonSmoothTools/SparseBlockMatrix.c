@@ -5,9 +5,8 @@
 #include "LA.h"
 #include <math.h>
 #include "misc.h"
+//#define DEBUG_MESSAGES 1
 #include "debug.h"
-
-#define DEBUG_MESSAGES 1
 
 unsigned int NUMERICS_SBM_FREE_BLOCK = 1 << 2;
 unsigned int NUMERICS_SBM_FREE_SBM = 1 << 3;
@@ -1756,7 +1755,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
     if (blocknum[i] == -2)
     {
-      printf("blocknum[%d] = %d\n", i, A->nbblocks);
+      DEBUG_PRINTF("blocknum[%d] = %d\n", i, A->nbblocks);
       blocknum[i] = A->nbblocks++;
     }
   }
@@ -1792,6 +1791,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   A->index1_data = (size_t*) malloc(A->filled1 * sizeof(size_t));
   A->index2_data = (size_t*) malloc(A->filled2 * sizeof(size_t));
 
+
   for (size_t i = 0; i < A->filled1; i++)
   {
     A->index1_data[i] = blockindexmax + 1;
@@ -1807,31 +1807,34 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   for (sparse_matrix_iterator it = sparseMatrixBegin(sparseMat);
        sparseMatrixNext(&it);)
   {
+
     int row = it.first;
     int col = it.second;
 
+    assert(row < sparseMat->m);
+    assert(col < sparseMat->n);
+
     int brow = row / blocksize;
     int bcol = col / blocksize;
+
+    assert(brow < bnrow);
+    assert(bcol < bncol);
 
     int blockindex = brow * bncol + bcol;
 
     int birow = row % blocksize; /* block inside row */
     int bicol = col % blocksize; /* block inside column */
 
-    A->index1_data[A->filled1] = A->filled2;
     A->index1_data[A->filled1 - 1] = A->filled2;
-
-    assert(birow + bicol * blocksize <= blocksize * blocksize);  /* obvious */
 
     if ((blockindex < blockindexmax) && (blocknum[blockindex] >= 0))
     {
 
-      assert(blockindex < blockindexmax);
-      assert(blocknum[blockindex] < A->nbblocks);
-      assert(blocknum[blockindex] < A->filled2);
       /* this is an non empty block */
 
       /* index1_data[rowNumber]<= blockNumber */
+
+      assert(brow < A->filled1);
       if (A->index1_data[brow] > blocknum[blockindex])
       {
         A->index1_data[brow] = blocknum[blockindex];
@@ -1839,6 +1842,13 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
 
       A->index2_data[blocknum[blockindex]] = bcol;
 
+      assert(birow + bicol * blocksize <= blocksize * blocksize);
+
+      assert(blockindex < blockindexmax);
+      assert(blocknum[blockindex] < A->nbblocks);
+      assert(blocknum[blockindex] < A->filled2);
+
+      DEBUG_PRINTF("A->block[blocknum[blockindex=%d]=%d][birow=%d + bicol=%d * blocksize=%d] = it.third=%g\n", blockindex, blocknum[blockindex], birow, bicol, blocksize, it.third);
       A->block[blocknum[blockindex]][birow + bicol * blocksize] = it.third;
     }
   }

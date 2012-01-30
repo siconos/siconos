@@ -842,7 +842,7 @@
     Py_XDECREF(auto_nnz);
 #endif
 
-    $result = out_csr;
+    $result = SWIG_Python_AppendOutput($result,out_csr);
   }
   else
   {
@@ -852,18 +852,18 @@
 }
 
 %typemap(in) (SparseMatrix* M) 
-  (PyObject *shape_,
-   PyObject *nnz_,
-   PyObject *data_,
-   PyObject *indices_,
-   PyObject *indptr_,
+  (PyObject *shape_ = NULL,
+   PyObject *nnz_ = NULL,
+   PyObject *data_ = NULL,
+   PyObject *indices_ = NULL,
+   PyObject *indptr_ = NULL,
    int is_new_object1=0, 
    int is_new_object2=0,
    int is_new_object3=0,
-   PyArrayObject *array_data_,
-   PyArrayObject *array_indices_,
-   PyArrayObject *array_indptr_,
-   SparseMatrix *M=NULL)
+   PyArrayObject *array_data_ = NULL,
+   PyArrayObject *array_indices_ = NULL,
+   PyArrayObject *array_indptr_ = NULL,
+   SparseMatrix *M = NULL)
 {
   try
   {

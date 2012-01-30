@@ -1,5 +1,9 @@
 # sparseToSBM
 # scipy csr => 1x1 block
+from numpy import finfo, double
+eps = finfo(double).eps
+
+
 def test_from_csr1():
 
     from Siconos.Numerics import sparseToSBM, getValueSBM
@@ -53,26 +57,61 @@ def test_from_csr2():
 
 
 def test_SBMtoSparse1():
-    from Siconos.Numerics import sparseToSBM, getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
+    from Siconos.Numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
     from scipy.sparse.csr import csr_matrix
 
     SBM=newFromFileSBM('SBM1.dat')
 
     printSBM(SBM)
 
-    A = SBMtoSparse(SBM)
+    r,A = SBMtoSparse(SBM)
 
     for i in range(A.shape[0]):
         for j in range(A.shape[1]):
-            assert A[i,j] == getValueSBM(SBM,i,j)
+            assert abs(A[i,j] - getValueSBM(SBM,i,j)) < eps
 
 
+def test_sparseToSBM1():
+    from Siconos.Numerics import sparseToSBM,getValueSBM, newFromFileSBM, printSBM, SBMtoSparse
+    from scipy.sparse import csr_matrix, lil_matrix
 
+    A = lil_matrix((100, 100))
+    A.setdiag(range(100))
+    A[0, :10] = range(10)
+    A[1, 10:20] = A[0, :10]
 
-#v,R = sparseToSBM(3,A)
+    M = csr_matrix(A)
 
-#printSBM(R)
+    v,SBM=sparseToSBM(2,M)
 
-#RA = SBMtoSparse(R)
+    for i in range(M.shape[0]):
+        for j in range(M.shape[1]):
+            print i,j, getValueSBM(SBM,i,j), M[i,j]
+            assert abs(getValueSBM(SBM,i,j) - M[i,j]) < eps
+
+def test_SBMtoSparseToSBM():
+
+    from Siconos.Numerics import getValueSBM, newFromFileSBM, printSBM, SBMtoSparse, sparseToSBM
+    from scipy.sparse.csr import csr_matrix
+
+    SBM1=newFromFileSBM('SBM1.dat')
+
+    printSBM(SBM1)
+
+    r,SPARSE = SBMtoSparse(SBM1)
+
+    v,SBM2 = sparseToSBM(3,SPARSE)
+
+    printSBM(SBM2)
+
+    assert SBM1.nbblocks == SBM2.nbblocks
+    assert SBM1.blocknumber0 == SBM2.blocknumber0
+    assert SBM1.blocknumber1 == SBM2.blocknumber1
+
+    for i in range(SPARSE.shape[0]):
+        for j in range(SPARSE.shape[1]):
+            print i,j, getValueSBM(SBM1,i,j), getValueSBM(SBM2,i,j)
+            assert (getValueSBM(SBM1,i,j) - getValueSBM(SBM2,i,j)) < eps
+
 
 
