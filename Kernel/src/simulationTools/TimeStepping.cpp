@@ -590,8 +590,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     update(_levelMinForInput);
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
-
-    saveYandLambdaInMemory();
+    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+      saveYandLambdaInMemory();
   }
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -617,7 +617,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
-        saveYandLambdaInMemory();
+        if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+          saveYandLambdaInMemory();
       }
     }
     if (!isNewtonConverge)

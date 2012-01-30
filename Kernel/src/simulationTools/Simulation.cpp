@@ -367,11 +367,14 @@ void Simulation::saveInMemory()
     (*it)->saveInMemory();
 
   // Save OSNS state (Interactions) in Memory.
-  OSNSIterator itOsns;
-  for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+  if (!model()->nonSmoothDynamicalSystem()->interactions()->isEmpty())
   {
-    (*itOsns)->saveInMemory();
-    (*itOsns)->saveTimeStepInMemory();
+    OSNSIterator itOsns;
+    for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
+    {
+      (*itOsns)->saveInMemory();
+      (*itOsns)->saveTimeStepInMemory();
+    }
   }
 }
 

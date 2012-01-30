@@ -180,9 +180,6 @@ protected:
   struct SetupLevels;
   friend class Simulation::SetupLevels;
 
-  /** initialisation for OneStepNSProblem.
-   */
-  virtual void initOSNS() = 0;
 
   /** default constructor.
    */
@@ -558,6 +555,11 @@ public:
    * with default parameters if any particular settings has been done
    */
   virtual void run();
+
+  /** initialisation for OneStepNSProblem.
+   */
+  virtual void initOSNS() = 0;
+
 
   /** step from current event to next event of EventsManager
    */

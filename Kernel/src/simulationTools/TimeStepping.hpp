@@ -88,9 +88,7 @@ protected:
   double _newtonResiduRMax;
 
 
-  /** initialisation specific to TimeStepping for OneStepNSProblem.
-  */
-  virtual void initOSNS();
+
 
   /** initialisation specific to TimeStepping for Interactions.
    */
@@ -102,6 +100,10 @@ protected:
   TimeStepping() {};
 
 public:
+
+  /** initialisation specific to TimeStepping for OneStepNSProblem.
+  */
+  virtual void initOSNS();
 
   /** Constructor with the time-discretisation.
    *  \param a pointer to a timeDiscretisation (linked to the model
