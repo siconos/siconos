@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace RELATION;
-#define MLCPPROJ_DEBUG
+//#define MLCPPROJ_DEBUG
 
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
@@ -99,13 +99,11 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       }
 
 #ifdef MLCPPROJ_DEBUG
-
       cout << "\nMLCPProjectOnConstraints::updateUnitaryBlocks()" << endl;
       std::cout << "indexSet :" << indexSet << std::endl;
       indexSet->display();
       std::cout << "vi :" << *vi << std::endl;
       std::cout << "indexSet->properties(*vi).blockProj: before" << indexSet->properties(*vi).blockProj << std::endl;
-
 #endif
 
 
@@ -134,14 +132,14 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       }
 
       RELATION::TYPES relationType = UR1->getRelationType();
-      if (relationType != NewtonEuler)
+      if (relationType == NewtonEuler)
       {
         SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
         nslawSize1 = nR1->yProj()->size();
         SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
         nslawSize2 = nR2->yProj()->size();
       }
-      else if (relationType != Lagrangian)
+      else if (relationType == Lagrangian)
       {
         nslawSize1 = UR1->interaction()->nonSmoothLaw()->size();
         nslawSize2 = UR2->interaction()->nonSmoothLaw()->size();
@@ -205,8 +203,10 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
         reset(new SimpleMatrix(*(indexSet->properties(*ei).lower_blockProj)));
         indexSet->properties(*ei).upper_blockProj->trans();
       }
+#ifdef MLCPPROJ_DEBUG
       printf("MLCPP upper: %i %i\n", indexSet->properties(*ei).upper_blockProj->size(0), indexSet->properties(*ei).upper_blockProj->size(1));
       printf("MLCPP lower: %i %i\n", indexSet->properties(*ei).lower_blockProj->size(0), indexSet->properties(*ei).lower_blockProj->size(1));
+#endif
 
     }
 

@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace RELATION;
-#define OSNSMPROJ_DEBUG
+//#define OSNSMPROJ_DEBUG
 
 
 OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor):

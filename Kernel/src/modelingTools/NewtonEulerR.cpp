@@ -26,7 +26,7 @@
 
 using namespace std;
 
-#define NER_DEBUG
+//#define NER_DEBUG
 
 
 void NewtonEulerR::initComponents()

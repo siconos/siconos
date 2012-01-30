@@ -24,7 +24,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
 
-#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
