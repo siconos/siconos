@@ -197,6 +197,13 @@ private:
    */
   Simulation& operator=(const Simulation&);
 
+  /** compute for the first time the _level* variables
+   * \warning it should only be called during initialize, if there are Interactions.
+   * Otherwise, call the overloaded method when addind a Relation
+   */
+  void computeLevelsForInputAndOutput();
+
+
 public:
 
   /** default constructor
@@ -640,20 +647,18 @@ public:
    */
   void processEvents();
 
-  /**
+  /** Update the _level* attributes
+   * \param inter a new SP::Interaction
+   * \param init bool to determine if we are in the initialisation phase
    */
-  void ComputeLevelsForInputAndOutput();
-
-  /**
-   */
-  void ComputeLevelsForInputAndOutput(SP::Interaction);
+  void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
 
   /** set staticLevels
-   * \param bool : if levels are to be computed a each iterations
+   * \param b decides whether levels should be computed at each iteration
    */
-  void setStaticLevels(bool v)
+  void setStaticLevels(bool b)
   {
-    _staticLevels = true;
+    _staticLevels = b;
   }
 
   /** visitors hook

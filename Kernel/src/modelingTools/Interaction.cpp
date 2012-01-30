@@ -288,7 +288,7 @@ void Interaction::initializeMemory()
   // the levels _lowerLevelForOutput and _upperLevelForOutput to size Y
   // and the levels _lowerLevelForInput and _upperLevelForInput to size  Lambda.
   // this depends on many criteria (simulation type, osi type, ds type, nonsmooth type)
-  // and they are computed in Simulation::ComputeLevelsForInputAndOutput
+  // and they are computed in Simulation::computeLevelsForInputAndOutput
 
   // Memory allocation for y and lambda
 

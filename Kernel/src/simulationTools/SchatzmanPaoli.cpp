@@ -1051,6 +1051,20 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
     {
 
       assert(Xfree);
+      if (Xfree->size() == 0)
+      {
+        // creates a POINTER link between workX[ds] (xfree) and the
+        // corresponding unitaryBlock in each UR for each ds of the
+        // current UR.
+        ConstDSIterator itDS;
+        for (itDS = mainInteraction->dynamicalSystemsBegin();
+             itDS != mainInteraction->dynamicalSystemsEnd();
+             ++itDS)
+        {
+          //osi = osiMap[*itDS];
+          mainInteraction->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
+        }
+      }
       assert(Yp);
       assert(Xq);
 

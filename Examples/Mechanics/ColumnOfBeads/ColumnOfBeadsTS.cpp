@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     int ncontact = 1 ;
-    bool isempty = false;
+    bool wasEmpty = false;
     while (s->nextTime() < T)
     {
 
@@ -228,15 +228,15 @@ int main(int argc, char* argv[])
         {
           if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
           {
-            isempty = true;
+            wasEmpty = true;
           }
           columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-          s->ComputeLevelsForInputAndOutput(inter);
+          s->computeLevelsForInputAndOutput(inter);
           inter->initialize(s->nextTime());
-          if (isempty)
+          if (wasEmpty)
           {
             s->initOSNS();
-            isempty = false;
+            wasEmpty = false;
           }
         }
 
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
           //std::cout << abs(((beads[i])->q())->getValue(0)-((beads[i+1])->q())->getValue(0))   <<std::endl;
           if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
           {
-            isempty = true;
+            wasEmpty = true;
           }
           if (!interOfBeads[i].get())
           {
@@ -260,12 +260,12 @@ int main(int argc, char* argv[])
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i]);
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i + 1]);
-            s->ComputeLevelsForInputAndOutput(interOfBeads[i]);
+            s->computeLevelsForInputAndOutput(interOfBeads[i]);
             interOfBeads[i]->initialize(s->nextTime());
-            if (isempty)
+            if (wasEmpty)
             {
               s->initOSNS();
-              isempty = false;
+              wasEmpty = false;
             }
 
             relationOfBeads[i]->interaction();
