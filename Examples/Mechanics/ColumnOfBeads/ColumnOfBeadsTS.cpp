@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     int ncontact = 1 ;
-    bool wasEmpty = false;
+    bool isOSNSinitialized = false;
     while (s->nextTime() < T)
     {
 
@@ -226,17 +226,13 @@ int main(int argc, char* argv[])
 
         if (abs(((beads[i])->q())->getValue(0)) < alert)
         {
-          if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
-          {
-            wasEmpty = true;
-          }
           columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
           s->computeLevelsForInputAndOutput(inter);
           inter->initialize(s->nextTime());
-          if (wasEmpty)
+          if (!isOSNSinitialized)
           {
             s->initOSNS();
-            wasEmpty = false;
+            isOSNSinitialized = true;
           }
         }
 
@@ -246,10 +242,6 @@ int main(int argc, char* argv[])
         {
           //std::cout << "Alert distance for declaring contact = ";
           //std::cout << abs(((beads[i])->q())->getValue(0)-((beads[i+1])->q())->getValue(0))   <<std::endl;
-          if (columnOfBeads->nonSmoothDynamicalSystem()->interactions()->isEmpty())
-          {
-            wasEmpty = true;
-          }
           if (!interOfBeads[i].get())
           {
             ncontact++;
@@ -262,10 +254,10 @@ int main(int argc, char* argv[])
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i + 1]);
             s->computeLevelsForInputAndOutput(interOfBeads[i]);
             interOfBeads[i]->initialize(s->nextTime());
-            if (wasEmpty)
+            if (!isOSNSinitialized)
             {
               s->initOSNS();
-              wasEmpty = false;
+              isOSNSinitialized = true;
             }
 
             relationOfBeads[i]->interaction();
