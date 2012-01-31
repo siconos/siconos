@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("result.ref", "ascii");
+    ioMatrix ref("result-ProjectOnConstraints.ref", "ascii");
     ref.read(dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
