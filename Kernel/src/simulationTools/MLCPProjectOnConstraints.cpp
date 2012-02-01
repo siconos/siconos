@@ -82,26 +82,8 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
          vi != viend; ++vi)
     {
       SP::UnitaryRelation UR = indexSet->bundle(*vi);
-      RELATION::TYPES relationType = UR->getRelationType();
-      unsigned int nslawSizew = 0;
-      if (relationType == NewtonEuler)
-      {
-        SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
-        nslawSizew = nR->yProj()->size();
-      }
-      else if (relationType == Lagrangian)
-      {
-        nslawSizew = UR->interaction()->nonSmoothLaw()->size();
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
-      }
-
       unsigned int nslawSize = 0;
       nslawSize = computeSizeForProjection(UR->interaction());
-      assert(nslawSize == nslawSizew);
-
 
 #ifdef MLCPPROJ_DEBUG
       cout << "\nMLCPProjectOnConstraints::updateUnitaryBlocks()" << endl;
@@ -110,7 +92,6 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       std::cout << "vi :" << *vi << std::endl;
       std::cout << "indexSet->properties(*vi).blockProj: before" << indexSet->properties(*vi).blockProj << std::endl;
 #endif
-
 
       if (! indexSet->properties(*vi).blockProj)
       {
@@ -131,48 +112,12 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
       unsigned int nslawSize1 = 0;
       unsigned int nslawSize2 = 0;
-      if (UR1->getRelationType() != UR2->getRelationType())
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - unable to mix relation types");
-      }
-
-      RELATION::TYPES relationType = UR1->getRelationType();
-      if (relationType == NewtonEuler)
-      {
-        SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
-        nslawSize1 = nR1->yProj()->size();
-        SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
-        nslawSize2 = nR2->yProj()->size();
-      }
-      else if (relationType == Lagrangian)
-      {
-        nslawSize1 = UR1->interaction()->nonSmoothLaw()->size();
-        nslawSize2 = UR2->interaction()->nonSmoothLaw()->size();
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagragian type neither NewtonEuler.");
-      }
-
-      unsigned int nslawSize1w = nslawSize1;
-      unsigned int nslawSize2w = nslawSize2;
-      nslawSize1 = 0;
-      nslawSize2 = 0;
       nslawSize1 = computeSizeForProjection(UR1->interaction());
-      assert(nslawSize1 == nslawSize1w);
       nslawSize2 = computeSizeForProjection(UR2->interaction());
-      assert(nslawSize2 == nslawSize2w);
-
-
-
-
 
       // Memory allocation if needed
-      // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-      // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
       unsigned int isrc = indexSet->index(indexSet->source(*ei));
       unsigned int itar = indexSet->index(indexSet->target(*ei));
-
       if (itar > isrc) // upper block
       {
         if (! indexSet->properties(*ei).upper_blockProj)
@@ -188,13 +133,11 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
         }
       }
 
-
+      // Computation of the diagonal block
       computeUnitaryBlock(*ei);
-
 
       // allocation for transposed block
       // should be avoided
-
       if (itar > isrc) // upper block has been computed
       {
         // if (!indexSet->properties(*ei).lower_blockProj)
@@ -239,21 +182,9 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
   unsigned int nslawSize = 0;
-  RELATION::TYPES relationType = UR->getRelationType();
-  if (relationType == NewtonEuler)
-  {
-    SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
-    nslawSize = nR->yProj()->size();
-  }
-  else if (relationType == Lagrangian)
-  {
-    nslawSize = UR->interaction()->nonSmoothLaw()->size();
-  }
-  else
-  {
-    RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
-  }
-  // unsigned int nslawSize = UR->getNonSmoothLawSizeProjectOnConstraints();
+  nslawSize = computeSizeForProjection(UR->interaction());
+
+
 #ifdef MLCPPROJ_DEBUG
   cout << "\nMLCPProjectOnConstraints::computeDiagonalUnitaryBlock" << endl;
   std::cout << "levelMin()" << levelMin() << std::endl;
@@ -307,7 +238,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     if (Type::value(*ds) == Type::LagrangianLinearTIDS ||
         Type::value(*ds) == Type::LagrangianDS)
     {
-      if (relationType != Lagrangian)
+      if (UR->getRelationType() != Lagrangian)
       {
         RuntimeException::selfThrow(
           "MLCPProjectOnConstraints::computeDiagonalUnitaryBlock - relation is not of type Lagrangian with a LagrangianDS.");
@@ -355,7 +286,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     else if (Type::value(*ds) == Type::NewtonEulerDS)
     {
 
-      if (relationType != NewtonEuler)
+      if (UR->getRelationType() != NewtonEuler)
       {
         RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalUnitaryBlock - relation is not from NewtonEulerR.");
       }
@@ -450,15 +381,12 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     unsigned int index1 = indexSet->index(indexSet->source(ed));
     unsigned int index2 = indexSet->index(indexSet->target(ed));
 
-    SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
-    unsigned int nslawSize1 = nR1->yProj()->size();
+    unsigned int nslawSize1 = 0;
+    nslawSize1 = computeSizeForProjection(UR1->interaction());
+    unsigned int nslawSize2 = 0;
+    nslawSize2 = computeSizeForProjection(UR2->interaction());
 
-    SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
-    unsigned int nslawSize2 = nR2->yProj()->size();
 
-
-    // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-    // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
 
     /*
       DynamicalSystemsSet commonDS;
@@ -556,14 +484,12 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 
     assert(UR);
     RELATION::TYPES relationType = UR->getRelationType();
+    unsigned int sizeY = computeSizeForProjection(UR->interaction());
+
+
     if (relationType == NewtonEuler)
     {
-      SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
-      unsigned int sizeY = nR->yProj()->size();
-
-      // unsigned int sizeY = UR->getNonSmoothLawSizeProjectOnConstraints();
-      SP::Relation R = UR->interaction()->relation();
-      SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+      SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation()));
       for (unsigned int i = 0; i < sizeY; i++)
         _q->setValue(pos + i, ner->yProj()->getValue(UR->getRelativePosition() + i));
 #ifdef MLCPPROJ_DEBUG
@@ -573,7 +499,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     }
     else if (relationType == Lagrangian)
     {
-      unsigned int sizeY =   UR->interaction()->nonSmoothLaw()->size();
       for (unsigned int i = 0; i < sizeY; i++)
         _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
 #ifdef MLCPPROJ_DEBUG
@@ -585,9 +510,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     {
       RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
     }
-
-
   }
+
   void MLCPProjectOnConstraints::postCompute()
   {
     _hasBeUpdated = true;
@@ -757,11 +681,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   }
   void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::UnitaryRelation ur, unsigned int pos)
   {
-    //unsigned int nslawSize = nR->yProj()->size();
-
-    // unsigned int nslawSize = ur->getNonSmoothLawSizeProjectOnConstraints();
-
-
     // Get Y and Lambda for the current Unitary Relation
     //y = ur->y(levelMin());
     //lambda = ur->lambda(levelMin());
@@ -771,11 +690,9 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     // saved in y !!
     //setBlock(*_z, lambda, lambda->size(), pos, 0);
 
-    SP::Relation R = ur->interaction()->relation();
-    Type::Siconos RType = Type::value(*R);
-    if (RType != Type::NewtonEulerR)
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - R is not from NewtonEulerR.");
-    SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+    unsigned int sizeY = computeSizeForProjection(ur->interaction());
+
+    SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation()));
 #ifdef MLCPPROJ_DEBUG
     printf("MLCPProjectOnConstraints::postCompute ner->jachq \n");
     ner->jachq()->display();
@@ -786,9 +703,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     printf("MLCPProjectOnConstraints::postCompute q before update\n");
     (ner->getq())->display();
 #endif
-    SP::SimpleVector yProj = ner->yProj();
-    SP::SimpleVector aBuff(new SimpleVector(yProj->size()));
-    setBlock(*_z, aBuff, yProj->size(), pos, 0);
+
+
+    SP::SimpleVector aBuff(new SimpleVector(sizeY));
+    setBlock(*_z, aBuff, sizeY, pos, 0);
     /*Now, update the ds's dof throw the relation*/
     //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
 #ifdef MLCPPROJ_DEBUG
@@ -902,9 +820,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     {
       if (relationType == NewtonEuler)
       {
-        SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
-        if (ri->_isOnContact)
-          equalitySize = 1;
+        // SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
+        // if(ri->_isOnContact)
+        //   equalitySize = 1;
+        equalitySize = 1;
       }
       else if (relationType == Lagrangian)
       {
@@ -935,7 +854,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
         relationType2 == NewtonEuler)
     {
       SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
-      nslawSize1 = nR1->yProj()->size();
+      nslawSize1 = _nR1->yProj()->size();
+      assert(nR1->yProj()->size() == nslawSize1);
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::computeOptions() yProj\n");
       nR1->yProj()->display();
