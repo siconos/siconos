@@ -37,6 +37,7 @@ protected:
 public:
 
   virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
+  virtual void computeOptionsOLD(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
 
   /** constructor from data
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n

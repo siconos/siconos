@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace RELATION;
-//#define MLCPPROJ_DEBUG
+#define MLCPPROJ_DEBUG
 
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
@@ -808,12 +808,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     relationType = inter->relation()->getType();
     unsigned int nslawSize = inter->nonSmoothLaw()->size();
 
-    unsigned int equalitySize =  0;
-    if (Type::value(*(inter->nonSmoothLaw()))
-        == Type::MixedComplementarityConditionNSL)
-      equalitySize =  MixedComplementarityConditionNSL::convert(inter->nonSmoothLaw())->getEqualitySize();
-    else if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
-      equalitySize = nslawSize;
+    unsigned int size =  nslawSize;
 
     if (Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
         Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
@@ -823,11 +818,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
         // SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
         // if(ri->_isOnContact)
         //   equalitySize = 1;
-        equalitySize = 1;
+        size = 1;
       }
       else if (relationType == Lagrangian)
       {
-        equalitySize = 1;
+        size = 1;
       }
       else
       {
@@ -835,13 +830,13 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       }
     }
 
-    return equalitySize;
+    return size;
 
   }
 
 
 
-  void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+  void MLCPProjectOnConstraints::computeOptionsOLD(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   {
     //  printf("MLCPProjectOnConstraints::computeOptions\n");
     // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
@@ -854,7 +849,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
         relationType2 == NewtonEuler)
     {
       SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
-      nslawSize1 = _nR1->yProj()->size();
+      nslawSize1 = nR1->yProj()->size();
       assert(nR1->yProj()->size() == nslawSize1);
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::computeOptions() yProj\n");
@@ -873,12 +868,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     {
       RuntimeException::selfThrow("MLCPProjectOnConstraints::computeOptions - relation type is not from Lagragian type neither NewtonEuler.");
     }
-
-
-
-    // unsigned int nslawSize1 = UR1->getNonSmoothLawSizeProjectOnConstraints();
-    // unsigned int nslawSize2 = UR2->getNonSmoothLawSizeProjectOnConstraints();
-
 
 
     unsigned int equalitySize1 =  0;
@@ -918,7 +907,9 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       }
     }
 
-
+#ifdef MLCPPROJ_DEBUG
+    printf("MLCPProjectOnConstraints::computeOptions()\n");
+#endif
     if (UR1 == UR2)
     {
       //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
@@ -933,6 +924,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       {
         _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
         _numerics_problem.blocksIsComp[_curBlock] = 0;
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "_curBlock : " << _curBlock << std::endl;
+        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << "] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
+        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << "] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+#endif
         _curBlock++;
       }
       /*add a complementarity block.*/
@@ -940,7 +936,94 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       {
         _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
         _numerics_problem.blocksIsComp[_curBlock] = 1;
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "_curBlock : " << _curBlock << std::endl;
+        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << " ] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
+        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << " ] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+#endif
         _curBlock++;
+
       }
     }
+#ifdef MLCPPROJ_DEBUG
+    std::cout << "_m : " << _m << std::endl;
+    std::cout << "_n : " << _n << std::endl;
+#endif
+
+
+  }
+  void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+  {
+    //  printf("MLCPProjectOnConstraints::computeOptions\n");
+    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+    RELATION::TYPES relationType1;
+    relationType1 = UR1->getRelationType();
+    // Retrieve size of Y (projected variable)
+    unsigned int sizeY1;
+    sizeY1 = computeSizeForProjection(UR1->interaction());
+
+    // Compute the number of equalities
+    unsigned int equalitySize1 =  sizeY1; //default behavior
+
+    if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
+        Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
+    {
+      equalitySize1 = 0;
+    }
+    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+             == Type::MixedComplementarityConditionNSL)
+    {
+      equalitySize1 =
+        MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+    }
+
+    // Compute the number of inequalities
+    unsigned int inequalitySize1 =  sizeY1 - equalitySize1;
+
+
+
+    if (UR1 == UR2)
+    {
+      //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+      _m += inequalitySize1;
+      _n += equalitySize1;
+      //    _m=0;
+      //_n=6;
+      if (_curBlock > MLCP_NB_BLOCKS - 2)
+        printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
+      /*add an equality block.*/
+
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::computeOptions()\n");
+#endif
+
+      if (equalitySize1 > 0)
+      {
+        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+        _numerics_problem.blocksIsComp[_curBlock] = 0;
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "_curBlock : " << _curBlock << std::endl;
+        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << " ] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
+        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << " ] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+#endif
+        _curBlock++;
+      }
+      /*add a complementarity block.*/
+      if (inequalitySize1 > 0)
+      {
+        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + inequalitySize1;
+        _numerics_problem.blocksIsComp[_curBlock] = 1;
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "_curBlock : " << _curBlock << std::endl;
+        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << "] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
+        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << "] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+#endif
+        _curBlock++;
+
+      }
+    }
+#ifdef MLCPPROJ_DEBUG
+    std::cout << "_m : " << _m << std::endl;
+    std::cout << "_n : " << _n << std::endl;
+#endif
   }
