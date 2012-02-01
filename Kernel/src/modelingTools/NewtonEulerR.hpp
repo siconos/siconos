@@ -83,7 +83,6 @@ protected:
   /**vector e*/
   SP::SiconosVector _e;
   /*Used for the projection formulation*/
-  SP::SimpleVector _yProj;
 
   /**vector of contact forces, ie: _contactForce = B \lambda. Useful for the end user.*/
   SP::SimpleVector _contactForce;
@@ -130,10 +129,6 @@ public:
     return _jachq;
   }
   //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
-  inline SP::SimpleVector yProj()
-  {
-    return _yProj;
-  }
   inline void setJachq(SP::SimpleMatrix newJachq)
   {
     _jachq = newJachq;

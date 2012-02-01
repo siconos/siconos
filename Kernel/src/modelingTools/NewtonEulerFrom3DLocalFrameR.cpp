@@ -30,9 +30,6 @@ void NewtonEulerFrom3DLocalFrameR::initComponents()
 {
   NewtonEulerFrom1DLocalFrameR::initComponents();
   /*keep only the distance.*/
-  /*Warning, in current version, user of FC3D has to set _y and _yProj in the computeh */
-  // _yProj is resized since _yProj = interaction->y(0) after NewtonEulerR::initComponents();
-  _yProj.reset(new SimpleVector(1));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;

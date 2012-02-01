@@ -24,8 +24,18 @@
 #define MLCPProjectOnConstraints_H
 
 #include "MLCP.hpp"
-
-
+#include "OSNSMatrixProjectOnConstraints.hpp"
+/** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
+ *
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 3.3.0.
+ *  \date (Creation) 01, 2011
+ *
+ * This class is devoted to the formalization and the resolution of the
+ * Mixed Linear Complementarity Problem (MLCP) for the specific problem
+ * of the projection onto the constraints in Mechanics
+ *
+ */
 class MLCPProjectOnConstraints : public MLCP
 {
 protected:
@@ -33,11 +43,13 @@ protected:
   */
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
 
-
 public:
 
+  /** compute the number of inequality and equality for a given tuple of URs
+   * update the global number of equality(_n) and inequality (_m)
+   * set up _numerics_problem parameters (blocksLine and blocksIsComp )
+   */
   virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
-  virtual void computeOptionsOLD(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
 
   /** constructor from data
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
@@ -67,10 +79,6 @@ public:
   virtual void postComputeNewtonEulerR(SP::UnitaryRelation, unsigned int);
 
 
-  /** compute the size of the vector to project for a given Interaction.
-  *  \param SP::Interaction inter the corresponding interaction
-  */
-  unsigned int computeSizeForProjection(SP::Interaction inter);
 
 };
 

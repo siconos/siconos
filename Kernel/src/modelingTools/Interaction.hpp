@@ -763,15 +763,6 @@ public:
   */
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
-  // /** returns the signifiant size for the projection on constraints
-  //  *  \return an unsigned int
-  //  */
-  // unsigned int getNonSmoothLawSizeProjectOnConstraints() const
-  // {
-  //     SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(relation());
-  //     return nR->yProj()->size();
-  // };
-
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */

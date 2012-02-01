@@ -74,7 +74,14 @@ private:
   void NIcomputeJachqTFromContacts(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
 public:
 
+  /** V.A. boolean _isOnCOntact ?? Why is it public members ?
+   *  seems parametrize the projection algorithm
+   *  the projection is done on the surface $y=0$ or on $y \geq 0$
+   */
   bool _isOnContact;
+
+  /** constructorx
+   */
   NewtonEulerFrom1DLocalFrameR():
     NewtonEulerR(), _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
     _Nc(new SimpleVector(3))

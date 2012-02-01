@@ -77,23 +77,8 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
 
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
     SP::UnitaryRelation UR = indexSet->bundle(*vd);
-    RELATION::TYPES relationType = UR->getRelationType();
-    unsigned int nslawSize;
-    if (relationType == NewtonEuler)
-    {
-      SP::NewtonEulerR  nR = boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation());
-      nslawSize = nR->yProj()->size();
-    }
-    else if (relationType == Lagrangian)
-    {
-      nslawSize = UR->interaction()->nonSmoothLaw()->size();
-    }
-    else
-    {
-      RuntimeException::selfThrow(" OSNSMatrixProjectOnConstraints::updateSizeAndPositions - relation type is not from Lagragian type neither NewtonEuler.");
-    }
 
-
+    unsigned int nslawSize = computeSizeForProjection(UR->interaction());
 
     dim += nslawSize;
     assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
@@ -200,4 +185,36 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
 unsigned int OSNSMatrixProjectOnConstraints::getPositionOfUnitaryBlock(SP::UnitaryRelation UR) const
 {
   return UR->absolutePositionProj();
+}
+
+unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)
+{
+  RELATION::TYPES relationType;
+  relationType = inter->relation()->getType();
+  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+
+  unsigned int size =  nslawSize;
+
+  if (Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
+      Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
+  {
+    if (relationType == NewtonEuler)
+    {
+      // SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
+      // if(ri->_isOnContact)
+      //   equalitySize = 1;
+      size = 1;
+    }
+    else if (relationType == Lagrangian)
+    {
+      size = 1;
+    }
+    else
+    {
+      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeSizeForProjection. relation is not o the right type. neither Lagrangian nor NewtonEuler ");
+    }
+  }
+
+  return size;
+
 }

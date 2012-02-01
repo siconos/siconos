@@ -58,20 +58,17 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVe
 void PivotJointR::initComponents()
 {
   KneeJointR::initComponents();
-  if (_d2)
-  {
-    //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
-    //proj_with_q    _yProj.reset(new SimpleVector(7));
-    _yProj.reset(new SimpleVector(5));
-  }
-  else
-  {
-    //proj_with_q  _jachqProj.reset(new SimpleMatrix(6,7));
-    //proj_with_q    _yProj.reset(new SimpleVector(6));
-    _yProj.reset(new SimpleVector(5));
-  }
+  //if (_d2){
+  //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
+  //proj_with_q    _yProj.reset(new SimpleVector(7));
+  //_yProj.reset(new SimpleVector(5));
+  // }else{
+  //proj_with_q  _jachqProj.reset(new SimpleMatrix(6,7));
+  //proj_with_q    _yProj.reset(new SimpleVector(6));
+  //_yProj.reset(new SimpleVector(5));
+  // }
   //proj_with_q  _jachqProj->zero();
-  _yProj->zero();
+  //_yProj->zero();
 }
 void PivotJointR::buildA1A2()
 {
@@ -258,8 +255,8 @@ void PivotJointR::computeh(double t)
   // std::cout<<"PivotJoint computeH:\n";
   // y->display();
   /*proj_with_q*/
-  for (unsigned int ii = 0; ii < y->size(); ii++)
-    _yProj->setValue(ii, y->getValue(ii));
+  //for (unsigned int ii=0; ii<y->size();ii++)
+  //  _yProj->setValue(ii,y->getValue(ii));
   //    _yProj->setValue(5,q10*q10+q11*q11+q12*q12+q13*q13 -1.0);
   //   if (_d2){
   //  _yProj->setValue(6,q20*q20+q21*q21+q22*q22+q23*q23 -1.0);

@@ -159,8 +159,6 @@ void  NewtonEulerFrom1DLocalFrameR::initComponents()
   NewtonEulerR::initComponents();
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   _jachq.reset(new SimpleMatrix(1, _qsize));
-  // _yProj is resized since _yProj = interaction->y(0) after NewtonEulerR::initComponents();
-  _yProj.reset(new SimpleVector(1));
   _Mabs_C.reset(new SimpleMatrix(1, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(1, 3));

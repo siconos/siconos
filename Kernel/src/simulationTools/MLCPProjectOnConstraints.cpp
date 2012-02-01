@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace RELATION;
-#define MLCPPROJ_DEBUG
+//#define MLCPPROJ_DEBUG
 
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
@@ -83,7 +83,8 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
     {
       SP::UnitaryRelation UR = indexSet->bundle(*vi);
       unsigned int nslawSize = 0;
-      nslawSize = computeSizeForProjection(UR->interaction());
+      nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                  (_M)->computeSizeForProjection(UR->interaction());
 
 #ifdef MLCPPROJ_DEBUG
       cout << "\nMLCPProjectOnConstraints::updateUnitaryBlocks()" << endl;
@@ -112,8 +113,10 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
       unsigned int nslawSize1 = 0;
       unsigned int nslawSize2 = 0;
-      nslawSize1 = computeSizeForProjection(UR1->interaction());
-      nslawSize2 = computeSizeForProjection(UR2->interaction());
+      nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                   (_M)->computeSizeForProjection(UR1->interaction());
+      nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                   (_M)->computeSizeForProjection(UR2->interaction());
 
       // Memory allocation if needed
       unsigned int isrc = indexSet->index(indexSet->source(*ei));
@@ -182,7 +185,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
   unsigned int nslawSize = 0;
-  nslawSize = computeSizeForProjection(UR->interaction());
+  nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+              (_M)->computeSizeForProjection(UR->interaction());
 
 
 #ifdef MLCPPROJ_DEBUG
@@ -382,9 +386,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     unsigned int index2 = indexSet->index(indexSet->target(ed));
 
     unsigned int nslawSize1 = 0;
-    nslawSize1 = computeSizeForProjection(UR1->interaction());
+    nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                 (_M)->computeSizeForProjection(UR1->interaction());
     unsigned int nslawSize2 = 0;
-    nslawSize2 = computeSizeForProjection(UR2->interaction());
+    nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                 (_M)->computeSizeForProjection(UR2->interaction());
 
 
 
@@ -483,33 +489,14 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   {
 
     assert(UR);
-    RELATION::TYPES relationType = UR->getRelationType();
-    unsigned int sizeY = computeSizeForProjection(UR->interaction());
-
-
-    if (relationType == NewtonEuler)
-    {
-      SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(UR->interaction()->relation()));
-      for (unsigned int i = 0; i < sizeY; i++)
-        _q->setValue(pos + i, ner->yProj()->getValue(UR->getRelativePosition() + i));
+    unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                         (_M)->computeSizeForProjection(UR->interaction());
+    for (unsigned int i = 0; i < sizeY; i++)
+      _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
 #ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::computeqBlock, _q from yProj\n");
-      _q->display();
+    printf("MLCPProjectOnConstraints::computeqBlock, _q from y(0)\n");
+    _q->display();
 #endif
-    }
-    else if (relationType == Lagrangian)
-    {
-      for (unsigned int i = 0; i < sizeY; i++)
-        _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::computeqBlock, _q from y(0)\n");
-      _q->display();
-#endif
-    }
-    else
-    {
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
-    }
   }
 
   void MLCPProjectOnConstraints::postCompute()
@@ -690,7 +677,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     // saved in y !!
     //setBlock(*_z, lambda, lambda->size(), pos, 0);
 
-    unsigned int sizeY = computeSizeForProjection(ur->interaction());
+    unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                         (_M)->computeSizeForProjection(ur->interaction());
 
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation()));
 #ifdef MLCPPROJ_DEBUG
@@ -802,156 +790,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 #endif
   }
 
-  unsigned int MLCPProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)
-  {
-    RELATION::TYPES relationType;
-    relationType = inter->relation()->getType();
-    unsigned int nslawSize = inter->nonSmoothLaw()->size();
-
-    unsigned int size =  nslawSize;
-
-    if (Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
-        Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
-    {
-      if (relationType == NewtonEuler)
-      {
-        // SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
-        // if(ri->_isOnContact)
-        //   equalitySize = 1;
-        size = 1;
-      }
-      else if (relationType == Lagrangian)
-      {
-        size = 1;
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeSizeForProjection. relation is not o the right type. neither Lagrangian nor NewtonEuler ");
-      }
-    }
-
-    return size;
-
-  }
-
-
-
-  void MLCPProjectOnConstraints::computeOptionsOLD(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
-  {
-    //  printf("MLCPProjectOnConstraints::computeOptions\n");
-    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-    RELATION::TYPES relationType1, relationType2;
-    relationType1 = UR1->getRelationType();
-    relationType2 = UR2->getRelationType();
-    unsigned int nslawSize1;
-    unsigned int nslawSize2;
-    if (relationType1 == NewtonEuler &&
-        relationType2 == NewtonEuler)
-    {
-      SP::NewtonEulerR  nR1 = boost::static_pointer_cast<NewtonEulerR>(UR1->interaction()->relation());
-      nslawSize1 = nR1->yProj()->size();
-      assert(nR1->yProj()->size() == nslawSize1);
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::computeOptions() yProj\n");
-      nR1->yProj()->display();
-#endif
-      SP::NewtonEulerR  nR2 = boost::static_pointer_cast<NewtonEulerR>(UR2->interaction()->relation());
-      nslawSize2 = nR2->yProj()->size();
-    }
-    else if (relationType1 == Lagrangian &&
-             relationType2 == Lagrangian)
-    {
-      nslawSize1 = UR1->interaction()->nonSmoothLaw()->size();
-      nslawSize2 = UR2->interaction()->nonSmoothLaw()->size();
-    }
-    else
-    {
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeOptions - relation type is not from Lagragian type neither NewtonEuler.");
-    }
-
-
-    unsigned int equalitySize1 =  0;
-    unsigned int equalitySize2 =  0;
-    if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-        == Type::MixedComplementarityConditionNSL)
-      equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL)
-      equalitySize1 = nslawSize1;
-
-    if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
-        == Type::MixedComplementarityConditionNSL)
-      equalitySize2 = MixedComplementarityConditionNSL::
-                      convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
-    else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
-             == Type::EqualityConditionNSL)
-      equalitySize2 = nslawSize2;
-
-    if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
-        Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
-    {
-      if (relationType1 == NewtonEuler &&
-          relationType2 == NewtonEuler)
-      {
-        SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (UR1->interaction()->relation());
-        if (ri->_isOnContact)
-          equalitySize1 = nslawSize1;
-      }
-      else if (relationType1 == Lagrangian &&
-               relationType2 == Lagrangian)
-      {
-        equalitySize1 = nslawSize1;
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeOptions");
-      }
-    }
-
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::computeOptions()\n");
-#endif
-    if (UR1 == UR2)
-    {
-      //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-      _m += nslawSize1 - equalitySize1;
-      _n += equalitySize1;
-      //    _m=0;
-      //_n=6;
-      if (_curBlock > MLCP_NB_BLOCKS - 2)
-        printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
-      /*add an equality block.*/
-      if (equalitySize1 > 0)
-      {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 0;
-#ifdef MLCPPROJ_DEBUG
-        std::cout << "_curBlock : " << _curBlock << std::endl;
-        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << "] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
-        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << "] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
-#endif
-        _curBlock++;
-      }
-      /*add a complementarity block.*/
-      if (nslawSize1 - equalitySize1 > 0)
-      {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 1;
-#ifdef MLCPPROJ_DEBUG
-        std::cout << "_curBlock : " << _curBlock << std::endl;
-        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << " ] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
-        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << " ] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
-#endif
-        _curBlock++;
-
-      }
-    }
-#ifdef MLCPPROJ_DEBUG
-    std::cout << "_m : " << _m << std::endl;
-    std::cout << "_n : " << _n << std::endl;
-#endif
-
-
-  }
   void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   {
     //  printf("MLCPProjectOnConstraints::computeOptions\n");
@@ -960,7 +798,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     relationType1 = UR1->getRelationType();
     // Retrieve size of Y (projected variable)
     unsigned int sizeY1;
-    sizeY1 = computeSizeForProjection(UR1->interaction());
+    sizeY1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+             (_M)->computeSizeForProjection(UR1->interaction());
 
     // Compute the number of equalities
     unsigned int equalitySize1 =  sizeY1; //default behavior
