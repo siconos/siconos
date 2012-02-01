@@ -65,6 +65,12 @@ public:
   virtual void postComputeLagrangianR(SP::UnitaryRelation, unsigned int);
   virtual void postComputeNewtonEulerR(SP::UnitaryRelation, unsigned int);
 
+
+  /** compute the size of the vector to project for a given Interaction.
+  *  \param SP::Interaction inter the corresponding interaction
+  */
+  unsigned int computeSizeForProjection(SP::Interaction inter);
+
 };
 
 TYPEDEF_SPTR(MLCPProjectOnConstraints);

@@ -26,13 +26,13 @@ set multiplot
 set size winratio,winheight
 
 set origin 0.0,winheight*2.0+heightoff
-set ylabel "m" 1
+set ylabel 'm' 
 plot\
 "result-gp.dat" u 1:2 t "Ball position" w l,\
 "result-gp.dat" u 1:8 t "plane position " w l
 
 set origin 0.0,winheight*1.0+heightoff
-set ylabel "m/s" 1
+set ylabel "m/s" 
 plot\
 "result-gp.dat" u 1:3 t "Ball Velocity" w l,\
 "result-gp.dat" u 1:9 t "plane Velocity" w l
@@ -42,9 +42,9 @@ set format
 set xtics axis
 set xlabel "time in s"
 set origin 0.0,0.0+heightoff
-set ylabel "A" 1
+set ylabel "A" 
 
-set ylabel "N s " 1
+set ylabel "N s " 
 plot\
 "result-gp.dat" u 1:4 t "contact impulse" w l,\
 "result-gp.dat" u 1:12 t "reaction impulse on plane" w l
