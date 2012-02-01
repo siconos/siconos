@@ -46,7 +46,7 @@ public:
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
     double hpc = fabs(data[q0]->getValue(0)) - sBallRadius;
     y->setValue(0, hpc);
-    ner->yProj()->setValue(0, hpc);
+    //    ner->yProj()->setValue(0,hpc);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
