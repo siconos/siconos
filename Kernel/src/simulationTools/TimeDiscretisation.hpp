@@ -23,7 +23,6 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "SiconosPointers.hpp"
 #include "TimeDiscretisationXML.hpp"
 #include <vector>
 
@@ -73,25 +72,25 @@ private:
 
 
   /** Default value for the time step (tk+1 - tk) */
-  double h;
+  double _h;
 
   /** Number of current time step (Simulation runs between steps k and k+1) */
-  unsigned int k;
+  unsigned int _k;
 
   /** vector of time values at each step (=> size = n1+n2+1 - Default size = 2 - Max size= nSteps+1) */
-  TkVector tk;
+  TkVector _tk;
 
   /** the XML object linked to the TimeDiscretisation to read XML data */
   SP::TimeDiscretisationXML _timeDiscretisationXML;
 
   /** Indic. flag which sets the way the time-discretisation is built.*/
-  int tdCase;
+  int _tdCase;
 
   /** index in tk which corresponds to the current time step (tk[pos] = t[k]) -
       Required since the size of tk depends on tdCase.
       tdCase = 1 => pos = k - tdCase = 2 => pos = 0 .
   */
-  int pos;
+  int _pos;
 
   /** default constructor (private => no copy nor pass-by value)
    */
@@ -129,53 +128,75 @@ public:
    */
   TimeDiscretisation(double, double);
 
+  /** Copy constructor
+   * \param td the TimeDiscretisation to copy
+   */
+  TimeDiscretisation(const TimeDiscretisation& td);
+
   // Destructor
   ~TimeDiscretisation();
 
   // --- GETTERS/SETTERS ---
 
   /** get the time step
-   *  \return the value of t[k+1] - t[k], the current time step
+   *  \return a double the value of _t[k+1] - _t[k], the current time step
    */
-  double currentTimeStep() const
+  inline double currentTimeStep() const
   {
-    return h;
+    return _h;
   };
 
-  /** set current h (ie tk+1 - tk)
-   *  \param the new value for h.
+  inline unsigned int getK() const
+  {
+    return _k;
+  };
+
+  inline int getTDCase() const
+  {
+    return _tdCase;
+  };
+
+  /** set current _h (ie tk+1 - tk)
+   *  \param the new value for _h.
    *  Warning: if the TimeDiscretisation has been built
-   *  with a complete tk vector (tdCase = 1), a call to this function
-   *  will switch to tdCase = 2, ie h = newH for all future steps (until a new set of h)
+   *  with a complete _tk vector (_tdCase = 1), a call to this function
+   *  will switch to _tdCase = 2, ie _h = newH for all future steps (until a new set of _h)
    */
   void setCurrentTimeStep(double);
 
+  inline const TkVector & getTk() const
+  {
+    return _tk;
+  };
   /** get the value of tk at step k
-   *  \return a double
+   * \param ind the step
+   * \return a double
    */
   inline double getTk(unsigned int ind) const
   {
-    return tk.at(ind);
-  }
-
-  /** set current h (ie tk+1 - tk)
-   *  \param the new value for h.
-   *  Warning: if the TimeDiscretisation has been built
-   *  with a complete tk vector (tdCase = 1), a call to this function
-   *  will switch to tdCase = 2, ie h = newH for all future steps (until a new set of h)
-   */
-  void setTk(const TkVector&);
-
-  /** Get the current time instant value ( tk[pos] ) */
-  double currentTime() const
-  {
-    return tk[pos];
+    return _tk.at(ind);
   };
 
-  /** Get time instant value at index k+1 ( tk[pos+1] ) */
-  double nextTime() const
+  /** set the TKVector _tk
+   *  \param newTk the new value for _tk
+   *  \warning it will szitch _tdCase to 1
+   */
+  void setTk(const TkVector& newTk);
+
+  /** Get the current time instant value ( _tk[pos] )
+   * \return a double : _tk[pos]
+   */
+  inline double currentTime() const
   {
-    return tk[pos + 1];
+    return _tk[_pos];
+  };
+
+  /** Get time instant value at index k+1 ( _tk[pos+1] )
+   *  \return a double : _tk[pos+1]
+   */
+  inline double nextTime() const
+  {
+    return _tk[_pos + 1];
   };
 
   /** get the TimeDiscretisationXML of the TimeDiscretisation
@@ -187,7 +208,7 @@ public:
   }
 
   /** set the TimeDiscretisationXML of the TimeDiscretisation
-   *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
+   *  \param timediscrxml a SP::TimeDiscretisationXML
    */
   inline void setTimeDiscretisationXMLPtr(SP::TimeDiscretisationXML timediscrxml)
   {
@@ -210,6 +231,6 @@ public:
   void saveTimeDiscretisationToXML();
 };
 
-DEFINE_SPTR(TimeDiscretisation);
+//DEFINE_SPTR(TimeDiscretisation);
 
 #endif // TIMEDISCRETISATION_H

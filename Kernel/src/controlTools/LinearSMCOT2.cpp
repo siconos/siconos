@@ -41,68 +41,79 @@ void LinearSMCOT2::initialize(SP::Model m)
   // We can use the Visitor mighty power to check if we have the right type
   Type::Siconos dsType;
   dsType = Type::value(*_DS);
-  if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
+  if (dsType == Type::FirstOrderLinearDS)
   {
-    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + dsType);
+    _DSPhi.reset(new FirstOrderLinearDS(*(static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DSPred.reset(new FirstOrderLinearDS(*(static_pointer_cast<FirstOrderLinearDS>(_DS))));
+  }
+  else if (dsType == Type::FirstOrderLinearTIDS)
+  {
+    _DSPhi.reset(new FirstOrderLinearTIDS(*(static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DSPred.reset(new FirstOrderLinearTIDS(*(static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
   }
   else
   {
-    SP::FirstOrderLinearDS FOLDS = static_pointer_cast<FirstOrderLinearDS>(_DS);
-    // Get the dimension of the output
-    // XXX What if there is more than one sensor ...
-
-    _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
-    if (_sensor == NULL)
-    {
-      RuntimeException::selfThrow("LinearSMCOT2::initialize - the given sensor is not a ControlSensor");
-    }
-    else
-    {
-      _u.reset(new SimpleVector(_nDim, 0));
-
-      // XXX really stupid stuff
-      _DS->setzPtr(_u);
-    }
-    _indx = 0;
-    _initDone = true;
-    //  _Phi.reset(new SimpleMatrix(_nDim, _nDim));
-    //  _Phi->eye();
-    //  _Xold.reset(new SimpleVector(_nDim));
-    //  *_Xold = *(_sensor->y());
-    double _t0 = _model->t0();
-    double _T = _model->finalT();
-    // XXX and everything breaks if this not a constant ...
-    double _hSMC = _timeDiscretisation->currentTimeStep();
-    _XPhi.reset(new SimpleVector(_nDim));
-    (*_XPhi) = _DS->getX0();
-    _DSPhi.reset(new FirstOrderLinearDS(_XPhi, FOLDS->A()));
-    _DSPhi->setXPtr(_XPhi);
-    _Xhat.reset(new SimpleVector(_nDim));
-    *_Xhat = _DS->getX0();
-    _DSPred.reset(new FirstOrderLinearDS(_Xhat, FOLDS->A()));
-    _DSPred->setXPtr(_Xhat);
-    _DSPred->setb(_u);
-
-    _Xhat.reset(new SimpleVector(_nDim, 0));
-    _DSPred->setXPtr(_Xhat);
-    _modelPhi.reset(new Model(_t0, _T));
-    _timeDPhi.reset(new TimeDiscretisation(_t0, _hSMC));
-    _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
-    _PhiOSI.reset(new Lsodar(_DSPhi));
-    _simulPhi.reset(new EventDriven(_timeDPhi, 0));
-    _simulPhi->insertIntegrator(_PhiOSI);
-    _modelPhi->initialize(_simulPhi);
-    // Integration for Gamma
-    _modelPred.reset(new Model(_t0, _T));
-    _PredOSI.reset(new Lsodar(_DSPred));
-    _timeDPred.reset(new TimeDiscretisation(_t0, _hSMC));
-    _simulPred.reset(new EventDriven(_timeDPred, 0));
-    _simulPred->insertIntegrator(_PredOSI);
-    _modelPred->initialize(_simulPred);
-
-    _X = _sensor->y();
-
+    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + dsType);
   }
+
+  // We have to reset _pluginb
+  _DSPhi->setComputebFunction(NULL);
+  _DSPred->setComputebFunction(NULL);
+  // XXX What if there is more than one sensor ...
+
+  _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+  if (_sensor == NULL)
+  {
+    RuntimeException::selfThrow("LinearSMCOT2::initialize - the given sensor is not a ControlSensor");
+  }
+  else
+  {
+    _u.reset(new SimpleVector(_nDim, 0));
+
+    // XXX really stupid stuff
+    _DS->setzPtr(_u);
+  }
+  _indx = 0;
+  //  _Phi.reset(new SimpleMatrix(_nDim, _nDim));
+  //  _Phi->eye();
+  //  _Xold.reset(new SimpleVector(_nDim));
+  //  *_Xold = *(_sensor->y());
+  double _t0 = _model->t0();
+  double _T = _model->finalT();
+
+  _timeDPhi.reset(new TimeDiscretisation(*_timeDiscretisation));
+  _timeDPred.reset(new TimeDiscretisation(*_timeDiscretisation));
+
+  //  _XPhi.reset(new SimpleVector(_nDim));
+  //  (*_XPhi) = _DS->getX0();
+  //  _DSPhi->setXPtr(_XPhi);
+  _XPhi = _DSPhi->x();
+
+  //  _Xhat.reset(new SimpleVector(_nDim));
+  //  *_Xhat = _DS->getX0();
+  // _DSPred->setXPtr(_Xhat);
+  _Xhat = _DSPred->x();
+  _DSPred->setb(_u);
+
+  //  _Xhat.reset(new SimpleVector(_nDim, 0));
+  //  _DSPred->setXPtr(_Xhat);
+
+  _modelPhi.reset(new Model(_t0, _T));
+  _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
+  _PhiOSI.reset(new Lsodar(_DSPhi));
+  _simulPhi.reset(new EventDriven(_timeDPhi, 0));
+  _simulPhi->insertIntegrator(_PhiOSI);
+  _modelPhi->initialize(_simulPhi);
+  // Integration for Gamma
+  _modelPred.reset(new Model(_t0, _T));
+  _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
+  _PredOSI.reset(new Lsodar(_DSPred));
+  _simulPred.reset(new EventDriven(_timeDPred, 0));
+  _simulPred->insertIntegrator(_PredOSI);
+  _modelPred->initialize(_simulPred);
+
+  _X = _sensor->y();
+
 }
 
 void LinearSMCOT2::actuate()
@@ -111,6 +122,7 @@ void LinearSMCOT2::actuate()
   // Get current value of the state
   // Update it
   *_XPhi = *_X;
+
   // We change the values of the state each time, so we need to change istate to 3
   // The first time, istate has to be 1 for initialization purposes
   // See Lsodar.cpp for the meaning of istate

@@ -65,13 +65,10 @@ private:
   SP::MemoryContainer _vectorMemory;
 
   /** link to the XML for SiconosMemory objects */
-  SP::SiconosMemoryXML memoryXML;
+  SP::SiconosMemoryXML _memoryXML;
 
   /** default constructor, private. */
   SiconosMemory() {};
-
-  /** Copy constructor, private */
-  SiconosMemory(const SiconosMemory&);
 
   /** Assignment, private */
   const SiconosMemory& operator=(const SiconosMemory&);
@@ -101,6 +98,11 @@ public:
    * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
   SiconosMemory(const unsigned int, const MemoryContainer&);
+
+  /** Copy constructor
+   * \param Mem a SiconosMemory
+   */
+  SiconosMemory(const SiconosMemory& Mem);
 
   /** destructor */
   ~SiconosMemory();
@@ -152,11 +154,11 @@ public:
   };
 
   /** Allows to get the SiconosMemoryXML of the SiconosMemory
-   *  \return SiconosMemoryXML* : the object SiconosMemoryXML of the SiconosMemory
+   *  \return the object SiconosMemoryXML of the SiconosMemory
    */
-  inline SP::SiconosMemoryXML getSiconosMemoryXML()
+  inline SP::SiconosMemoryXML getSiconosMemoryXML() const
   {
-    return memoryXML;
+    return _memoryXML;
   }
 
   /** puts a SiconosVector into the memory

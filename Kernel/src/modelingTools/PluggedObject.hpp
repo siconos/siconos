@@ -1,3 +1,22 @@
+/* Siconos-Kernel, Copyright INRIA 2005-2011.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ */
+
 #ifndef PluggedObject_H
 #define PluggedObject_H
 
@@ -9,28 +28,14 @@
   \brief utilities for plugin definition to compute matrices or vectors from user-defined functions.
 */
 
-/** Tool to connect a vector or a matrix to a plugin
-
-    This object derived from SimpleMatrix or SimpleVector and handle a pointer to function
-    connected to the function defined by pluginName.
-
-    pluginName = "fileName:functionName", fileName being the name of the file, without extension, which
-    contains the function functionName.
-
-    The first template parameter defines the type of the function pointer, and the second the base class
-    type (ie SimpleMatrix or SimpleVector).
-
-*/
 class PluggedObject
 {
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(PluggedObject);
-
-
-
-  std::string pluginName;
+  /** Plugin name of the form "fileName:functionName" */
+  std::string _pluginName;
 
 public:
 
@@ -39,23 +44,31 @@ public:
 
   /** Default Constructor
    */
-  PluggedObject(): pluginName("unplugged")
+  PluggedObject(): _pluginName("unplugged")
   {
     fPtr = 0;
   }
 
-  /** Constructor with the plugin name */
-  PluggedObject(const std::string& name): pluginName(name)
+  /** Constructor with the plugin name
+   * \param name a string of the form "fileName:functionName", without an extension for pluginFile
+   */
+  PluggedObject(const std::string& name): _pluginName(name)
   {
     fPtr = 0;
     setComputeFunction();
   }
 
+  /** Copy constructor
+   * \param PO a PluggedObject we are going to copy
+  */
+  PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName()), fPtr(PO.fPtr) {};
+
   /** bool to checked if a function is properly connected to the current object
+   * \return a boolean, true if fPtr is set
    */
-  bool isPlugged() const
+  inline bool isPlugged() const
   {
-    return fPtr;
+    return (fPtr != 0);
   }
 
   /** destructor
@@ -63,50 +76,56 @@ public:
   ~PluggedObject() {};
 
   /** Connect a function to fPtr
-   \param pluginPath: name of the file where the function is defined (WITH extension)
-   \param functionName: name of the function to be connected
+   \param pluginPath name of the file where the function is defined (WITH extension)
+   \param functionName name of the function to be connected
   */
   void setComputeFunction(const std::string& pluginPath, const std::string& functionName)
   {
     SSL::setFunction(&fPtr, pluginPath, functionName);
-    pluginName = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
+    _pluginName = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
   }
+
+  /* Connect a function to fPtr
+   * \param plugin a string of the form "fileName:functionName,  without an extension for pluginFile"
+   */
   void setComputeFunction(const std::string& plugin)
   {
     SSL::setFunction(&fPtr, SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    pluginName = plugin;
+    _pluginName = plugin;
   }
 
-  /** Connect pluginName to fPtr => pluginName must have been set before !!
+  /** Connect _pluginName to fPtr
+   * \warning _pluginName must have been set before !
    */
   void setComputeFunction()
   {
-    assert(pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
-    SSL::setFunction(&fPtr, SSL::getPluginName(pluginName), SSL::getPluginFunctionName(pluginName));
+    assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
+    SSL::setFunction(&fPtr, SSL::getPluginName(_pluginName), SSL::getPluginFunctionName(_pluginName));
   }
 
   /** Connect input function to fPtr
-      \param a T functionPtr
+      \param functionPtr a pointer to a C function
    */
-  void setComputeFunction(void* functionPtr)
+  inline void setComputeFunction(void* functionPtr)
   {
     fPtr = functionPtr;
-    pluginName = "Unknown";
+    _pluginName = "Unknown";
   }
 
   /** Return the name of the plugin used to compute fPtr
+   * \return _pluginName (a std::string)
    */
-  std::string getPluginName() const
+  inline std::string getPluginName() const
   {
-    return pluginName;
+    return _pluginName;
   }
 
   /** Set the name of the plugin function
-      \param string of the form pluginFile:functionName, without extension for pluginFile
+      \param name a string of the form "pluginFile:functionName", without extension for pluginFile
   */
-  void setPluginName(std::string& name)
+  inline void setPluginName(std::string& name)
   {
-    pluginName = name;
+    _pluginName = name;
   }
 
 };

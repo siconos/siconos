@@ -213,6 +213,7 @@ DEFINE_SPTR(MixedComplementarityConditionNSL);
 TYPEDEF_SPTR(MixedLinearComplementarityProblem);
 
 DEFINE_SPTR(TimeDiscretisationXML);
+DEFINE_SPTR(TimeDiscretisation);
 
 TYPEDEF_SAPTR(integer);
 TYPEDEF_SPTR(integer);

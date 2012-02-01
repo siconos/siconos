@@ -34,16 +34,22 @@ int main(int argc, char* argv[])
   // Note: r = Blambda, B defines in relation below.
 
   // Matrix declaration
+  // For the DynamycalSystem
   SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof, 0));
   SP::SiconosVector x0(new SimpleVector(ndof));
   (*x0)(0) = Xinit;
   (*x0)(1) = -Xinit;
+  // For the Sensor
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
+  // For the Actuator
   SP::SimpleMatrix Csurface(new SimpleMatrix(2, 2));
   Csurface->eye();
-
+  SP::SimpleMatrix Brel(new SimpleMatrix(2, 2));
+  Brel->eye();
+  *(Brel) *= 2;
+  SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
@@ -76,6 +82,8 @@ int main(int argc, char* argv[])
   // add the sliding mode controller
   SP::LinearSMC act = static_pointer_cast<LinearSMC>(control->addActuator(101, tActuator));
   act->setCsurfacePtr(Csurface);
+  act->setBPtr(Brel);
+  act->setDPtr(Drel);
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -138,10 +146,10 @@ int main(int argc, char* argv[])
   ioMatrix ref("RelayBiSimulation-SMC.ref", "ascii");
   ref.read(dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-
   if ((dataPlot - dataPlotRef).normInf() > 1e-12)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    (dataPlot - dataPlotRef).display();
     return 1;
   }
 

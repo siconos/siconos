@@ -138,6 +138,15 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
   checkDynamicalSystem();
 }
 
+// Copy constructor
+FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstOrderNonLinearDS(FOLDS)
+{
+  _A.reset(new SimpleMatrix(*(FOLDS.A())));
+  _b.reset(new SimpleVector(*(FOLDS.b())));
+  _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
+  _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
+}
+
 bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
 {
   bool output = DynamicalSystem::checkDynamicalSystem();

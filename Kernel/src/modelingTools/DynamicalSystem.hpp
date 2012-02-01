@@ -274,6 +274,10 @@ public:
    */
   DynamicalSystem(unsigned int newN);
 
+  /** Copy constructor
+   * \param ds the DynamicalSystem to copy
+   */
+  DynamicalSystem(const DynamicalSystem & ds);
   // ===== DESTRUCTOR =====
 
   /** destructor
@@ -351,9 +355,12 @@ public:
   inline SP::SiconosVector x0() const
   {
     return _x0;
-  }
+  };
 
-  inline const double& normRef()
+  /** get _normRef
+   * \return a reference to _normRef
+   */
+  inline const double& normRef() const
   {
     return _normRef;
   };
@@ -644,15 +651,15 @@ public:
   /** get the vector of temporary saved vector
    *  \return a VectorOfVectors (map that links string to vectors)
    */
-  inline VectorOfVectors getWorkVector()
+  inline VectorOfVectors getWorkVector() const
   {
     return _workV;
   }
 
   /** get a temporary saved vector, ref by id
-   *  \return a std vector
+   *  \return a SP::SiconosVector
    */
-  inline SP::SiconosVector getWorkVector(const WorkNames& id)
+  inline SP::SiconosVector getWorkVector(const WorkNames& id) const
   {
     return _workV[id];
   }
@@ -845,6 +852,30 @@ public:
   virtual void preparStep() {};
 
   virtual void endStep() {};
+
+  /** Get _pluging
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginG() const
+  {
+    return _pluging;
+  };
+
+  /** Get _pluginJacgx
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginJacGX() const
+  {
+    return _pluginJacgx;
+  };
+
+  /** Get _pluginJacxDotG
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginJacXDotG() const
+  {
+    return _pluginJacxDotG;
+  };
 
   /** visitors hook
    */

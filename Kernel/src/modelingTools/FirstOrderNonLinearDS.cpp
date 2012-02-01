@@ -211,6 +211,41 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
 
   checkDynamicalSystem();
 }
+
+// Copy constructor
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS): DynamicalSystem(FONLDS)
+{
+  // Always initialized
+  _fold.reset(new SimpleVector(*(FONLDS.fold())));
+  _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
+
+  // Not always initialized
+  if (FONLDS.M())
+    _M.reset(new SimpleMatrix(*(FONLDS.M())));
+  if (FONLDS.f())
+    _f.reset(new SimpleVector(*(FONLDS.f())));
+  if (FONLDS.jacobianfx())
+    _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
+
+  // plugins are always initialized
+  _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
+  _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
+  _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
+
+  // data - not always initialized
+  if (FONLDS.residur())
+    _residur.reset(new SimpleVector(*(FONLDS.residur())));
+  if (FONLDS.gAlpha())
+    _g_alpha.reset(new SimpleVector(*(FONLDS.gAlpha())));
+  if (FONLDS.xp())
+    _xp.reset(new SimpleVector(*(FONLDS.xp())));
+  if (FONLDS.xq())
+    _xq.reset(new SimpleVector(*(FONLDS.xq())));
+  if (FONLDS.invM())
+    _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
+}
+
+
 void FirstOrderNonLinearDS::zeroPlugin()
 {
   // DynamicalSystem::zeroPlugin();

@@ -21,11 +21,17 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(101, t, ds)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(101, t, ds), _thetaSMC(0.5)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(101, t, ds, sensorList)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
+  CommonSMC(101, t, ds), _B(B), _D(D), _thetaSMC(0.5)
+{
+}
+
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(101, t, ds, sensorList),
+  _thetaSMC(0.5)
 {
 }
 
@@ -41,14 +47,28 @@ void LinearSMC::initialize(SP::Model m)
   // We can use the Visitor mighty power to check if we have the right type
   Type::Siconos dsType;
   dsType = Type::value(*_DS);
-  if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
+  // create the DS for the controller
+  // if the DS we use is different from the DS we are controlling
+  // when we want for instant to see how well the controller behaves
+  // if the plant model is not exact, we can use the setSimulatedDS
+  // method
+  if (dsType == Type::FirstOrderLinearDS)
+  {
+    _DS_SMC.reset(new FirstOrderLinearDS(*(static_pointer_cast<FirstOrderLinearDS>(_DS))));
+  }
+  else if (dsType == Type::FirstOrderLinearTIDS)
+  {
+    _DS_SMC.reset(new FirstOrderLinearTIDS(*(static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+  }
+  else
   {
     RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
   }
+  // We have to reset the _pluginb
+  _DS_SMC->setComputebFunction(NULL);
 
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-
   _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
@@ -56,36 +76,22 @@ void LinearSMC::initialize(SP::Model m)
   }
   else
   {
-    _t0 = _model->t0();
-    _T = _model->finalT();
+    double t0 = _model->t0();
+    double T = _model->finalT();
     // create the SMC Model
-    _SMC.reset(new Model(_t0, _T));
-    // create the DS for the controller
-    SP::SimpleMatrix _A(new SimpleMatrix(_nDim, _nDim));
-    _A->zero();
-    _DS_SMC.reset(new FirstOrderLinearDS(static_pointer_cast<SiconosVector>(_DS->x0()), _A));
-    //    _DS_SMC->setComputebFunction("RelayPlugin.so","computeB");
+    _SMC.reset(new Model(t0, T));
     // create the interaction
-    _B.reset(new SimpleMatrix(_nDim, _sDim));
-    _B->eye();
-    (*_B) *= 2;
-    SP::SimpleMatrix _D(new SimpleMatrix(_sDim, _sDim));
-    _D->zero();
-
     _relationSMC.reset(new FirstOrderLinearR(_Csurface, _B));
     _relationSMC->setDPtr(_D);
-    // XXX Where to put this ? What does this variable mean ?
-    unsigned int nslawSize = 2;
-    _nsLawSMC.reset(new RelayNSL(nslawSize));
+    _nsLawSMC.reset(new RelayNSL(_sDim));
     _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
     _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
     _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
-    double _hSMC = 0.01;
-    _tD_SMC.reset(new TimeDiscretisation(_t0, _hSMC));
+    // Copy the TD
+    _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
     // Set up the simulation
     _simulationSMC.reset(new TimeStepping(_tD_SMC));
     _simulationSMC->setName("linear sliding mode controller simulation");
-    _thetaSMC = 0.5;
     _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
     _simulationSMC->insertIntegrator(_integratorSMC);
     // OneStepNsProblem
@@ -98,19 +104,16 @@ void LinearSMC::initialize(SP::Model m)
 
     // Handy
     _eventsManager = _simulationSMC->eventsManager();
-    _lambda.reset(new SimpleVector(nslawSize));
+    _lambda.reset(new SimpleVector(_sDim));
     _lambda = _interactionSMC->lambda(0);
     _xController = _DS_SMC->x();
     _u.reset(new SimpleVector(_nDim, 0));
 
     // XXX really stupid stuff
-    _sampledControl.reset(new SimpleVector(2));
-    _sampledControl->zero();
+    _sampledControl.reset(new SimpleVector(_nDim, 0));
     _DS->setzPtr(_sampledControl);
-    //    _DS_SMC->setzPtr(sampledControl);
   }
   _indx = 0;
-  _initDone = true;
 }
 
 void LinearSMC::actuate()
@@ -119,25 +122,11 @@ void LinearSMC::actuate()
   {
     *(_DS_SMC->x()) = *(_sensor->y()); // XXX this is sooo wrong
     _simulationSMC->nextStep();
-    //    cout << "current time: " << _tD_SMC->currentTime() << endl;
   }
-  //    cout << "output from sensor: ";
-  //    _sensor->y()->display();
-  //    cout << endl;
-
-  //  if ((*_sensor->y())(0) < 0 )
-  //    cout << " Change of control";
   _simulationSMC->computeOneStep();
-  //  _interactionSMC->display();
-  // compute the new control and update it
-  prod(1.0, *_B, *_lambda, *_sampledControl, true);  // XXX bad
-  //  prod(1.0, *_B, *_lambda, *_u, true);
-  //  _DS->setb(_u);
-  //  _sampledControl->display();
+  prod(1.0, *_B, *_lambda, *_sampledControl, true);
   _indx++;
 
 }
-
-
 
 AUTO_REGISTER_ACTUATOR(101, LinearSMC);

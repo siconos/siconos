@@ -24,9 +24,9 @@ using namespace std;
 
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
-  h(0.0), k(0), _timeDiscretisationXML(tdXML), tdCase(0), pos(0)
+  _h(0.0), _k(0), _timeDiscretisationXML(tdXML), _tdCase(0), _pos(0)
 {
-  if (! _timeDiscretisationXML)
+  if (!_timeDiscretisationXML)
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
 
   // XML inputs: 3 possibilities
@@ -45,29 +45,29 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   // --- Read the data ---
   if (hasH) // T is useless
   {
-    h = _timeDiscretisationXML->geth();
-    tk.reserve(2);
-    tk.push_back(t0);
-    tk.push_back(t0 + h);
-    tdCase = 2;
+    _h = _timeDiscretisationXML->geth();
+    _tk.reserve(2);
+    _tk.push_back(t0);
+    _tk.push_back(t0 + _h);
+    _tdCase = 2;
   }
   else if (hasNSteps) // t0 and T are required
   {
     unsigned int nSteps = _timeDiscretisationXML->getN();
     assert(T > t0 && "TimeDiscretisation xml constructor error: final time is less or equal to initial time.");
-    h = (T - t0) / nSteps;
-    tk.reserve(2);
-    tk.push_back(t0);
-    tk.push_back(t0 + h);
-    tdCase = 2;
+    _h = (T - t0) / nSteps;
+    _tk.reserve(2);
+    _tk.push_back(t0);
+    _tk.push_back(t0 + _h);
+    _tdCase = 2;
   }
   else if (hasTk) // neither t0 nor T is required.
   {
     // Read tk
-    _timeDiscretisationXML->getTk(tk);
-    h = tk[1] - tk[0];
-    pos = k;
-    tdCase = 1;
+    _timeDiscretisationXML->getTk(_tk);
+    _h = _tk[1] - _tk[0];
+    _pos = _k;
+    _tdCase = 1;
   }
   else
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - No input data.");
@@ -81,75 +81,90 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
 // hk is deduced from tk.
 // In this case, the complete vector tk is saved in the class.
 TimeDiscretisation::TimeDiscretisation(const TkVector& newTk):
-  h(0.0), k(0), tdCase(1), pos(k)
+  _h(0.0), _k(0), _tdCase(1), _pos(_k)
 {
-  tk = newTk;
-  h = tk[1] - tk[0];
+  _tk = newTk;
+  _h = _tk[1] - _tk[0];
 }
 
-// INPUTS: nSteps, t0, T  -
+// INPUTS: nSteps, t0, T
 // => tdCase = 2. Only two values are saved for tk.
 TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
-  h(0.0), k(0), tdCase(2), pos(0)
+  _h(0.0), _k(0), _tdCase(2), _pos(0)
 {
-  h = (T - t0) / nSteps;
-  tk.reserve(2);
-  tk.push_back(t0);
-  tk.push_back(t0 + h);
+  _h = (T - t0) / nSteps;
+  _tk.reserve(2);
+  _tk.push_back(t0);
+  _tk.push_back(t0 + _h);
 }
 
 // INPUTS: t0 and h
 // => tdCase = 2. Only two values are saved for tk.
 TimeDiscretisation::TimeDiscretisation(double t0, double newH):
-  h(newH), k(0), tdCase(2), pos(0)
+  _h(newH), _k(0), _tdCase(2), _pos(0)
 {
-  tk.reserve(2);
-  tk.push_back(t0);
-  tk.push_back(t0 + h);
+  _tk.reserve(2);
+  _tk.push_back(t0);
+  _tk.push_back(t0 + _h);
 }
+
+
+// Copy constructor
+TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
+{
+  _h = td.currentTimeStep();
+  _k = td.getK();
+  _tdCase = getTDCase();
+  // the magic formula is in the header file
+  _pos = _tdCase == 1 ? _k : 0;
+  _tk = td.getTk();
+  if (td.timeDiscretisationXML())
+    _timeDiscretisationXML.reset(new TimeDiscretisationXML(*(td.timeDiscretisationXML())));
+}
+
 
 // --- Destructor ---
 TimeDiscretisation::~TimeDiscretisation()
 {
-  tk.clear();
+  _tk.clear();
 }
 
 void TimeDiscretisation::setCurrentTimeStep(double newH)
 {
-  h = newH;
-  if (tdCase == 1)
+  _h = newH;
+  if (_tdCase == 1)
   {
     cout << "TimeDiscretisation::setCurrentTimeStep(newH) Warning: you change the time step whereas the Time Discretisation was built with a complete tk vector. This will result in a change in all future time steps: from now on, h = newH until next call to this function. " << endl;
-    tdCase = 2;
-    tk[0] = tk[k];
-    pos = 0;
-    tk.resize(2);
+    _tdCase = 2;
+    _tk[0] = _tk[_k];
+    _pos = 0;
+    _tk.resize(2);
   }
-  tk[pos + 1] = tk[pos] + h;
+  _tk[_pos + 1] = _tk[_pos] + _h;
 }
 
-void TimeDiscretisation::setTk(const TkVector& newValue)
+void TimeDiscretisation::setTk(const TkVector& newTk)
 {
-  tk.clear();
-  tk = newValue;
-  tdCase = 1;
-  pos = 0;
-  k = 0;
-  h = tk[1] - tk[0];
+  _tk.clear();
+  _tk = newTk;
+  _tdCase = 1;
+  _pos = 0;
+  _k = 0;
+  _h = _tk[1] - _tk[0];
 }
 
 void TimeDiscretisation::increment()
 {
-  k++;
-  if (tdCase == 1) // h is deduced from tk
+  _k++;
+  if (_tdCase == 1) // h is deduced from tk
   {
-    pos = k;
-    h = tk[pos + 1] - tk[pos];
+    _pos = _k;
+    _h = _tk[_pos + 1] - _tk[_pos];
   }
   else // tk+1 is build with tk and h
   {
-    tk[pos] = tk[pos + 1];
-    tk[pos + 1] = tk[pos] + h;
+    _tk[_pos] = _tk[_pos + 1];
+    _tk[_pos + 1] = _tk[_pos] + _h;
   }
 }
 
@@ -157,7 +172,7 @@ void TimeDiscretisation::increment()
 void TimeDiscretisation::display() const
 {
   cout << "====> Time Disretisation :" << endl;
-  cout << " current time step starts from " << tk[pos] << " and ends at " << tk[pos + 1] << endl;
+  cout << " current time step starts from " << _tk[_pos] << " and ends at " << _tk[_pos + 1] << endl;
   cout << "====" << endl;
 }
 
@@ -167,10 +182,9 @@ void TimeDiscretisation::saveTimeDiscretisationToXML()
 {
   RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML -Not yet properly implemented");
 
-
   if (_timeDiscretisationXML)
   {
-    _timeDiscretisationXML->setH(h);
+    _timeDiscretisationXML->setH(_h);
     //_timeDiscretisationXML->setTkNode(*tk);
   }
   else RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML - TimeDiscretisationXML object not exists");

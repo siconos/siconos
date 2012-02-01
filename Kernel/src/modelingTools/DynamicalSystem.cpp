@@ -79,7 +79,49 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   _r.reset(new SimpleVector(getDim()));
 }
 
+// Copy constructor
+DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
+  _number(count++)
+{
+  // The following data should always be initialize
+  _n = ds.getN();
+  _normRef = ds.normRef();
+  _x0.reset(new SimpleVector(*(ds.x0())));
+  _residuFree.reset(new SimpleVector(*(ds.residuFree())));
+  _r.reset(new SimpleVector(*(ds.r())));
+  _x.resize(2);
+  _x[0].reset(new SimpleVector(*(ds.x())));
+  _x[1].reset(new SimpleVector(*(ds.rhs())));
 
+  // These  were not always initialised
+  if (ds.jacobianRhsx())
+    _jacxRhs.reset(new SimpleMatrix(*(ds.jacobianRhsx())));
+  if (ds.jacobianXG())
+    _jacgx.reset(new SimpleMatrix(*(ds.jacobianXG())));
+  if (ds.jacobianXDotG())
+    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
+  if (ds.z())
+    _z.reset(new SimpleVector(*(ds.z())));
+  if (ds.g())
+    _g.reset(new SimpleVector(*(ds.g())));
+  if (ds.dynamicalSystemXML())
+    _dsxml.reset(new DynamicalSystemXML(*(ds.dynamicalSystemXML())));
+
+  _pluging.reset(new PluggedObject(*(ds.getPluginG())));
+  _pluginJacgx.reset(new PluggedObject(*(ds.getPluginJacGX())));
+  _pluginJacxDotG.reset(new PluggedObject(*(ds.getPluginJacXDotG())));
+
+  _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
+  _stepsInMemory = ds.getStepsInMemory();
+
+  _workV.resize(sizeWorkV);
+
+  _workV[local_buffer].reset(new SimpleVector(*(ds.getWorkVector(local_buffer))));
+  //  _workV[sizeWorkV].reset(new SimpleVector(*(ds.getWorkVector(sizeWorkV))));
+  // XXX See how to implement the copy of _workMatrix
+
+  _workFree.reset(new SimpleVector(*(ds.workFree())));
+}
 bool DynamicalSystem::checkDynamicalSystem()
 {
   bool output = true;

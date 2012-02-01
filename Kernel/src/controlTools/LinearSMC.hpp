@@ -36,48 +36,50 @@ private:
   /** default constructor */
   LinearSMC() {};
 
-  /** t0 for the controller */
-  double _t0;
-
-  /** T final for the controller */
-  double _T;
-
+  /** B Matrix in the Interaction */
+  SP::SiconosMatrix _B;
+  /** D Matrix in the Interaction */
+  SP::SiconosMatrix _D;
   /** the Model for the controller */
   SP::Model _SMC;
-
-  /** the dynamical system for the controller */
+  /** the DynamicalSystem for the controller */
   SP::FirstOrderLinearDS _DS_SMC;
-
+  /** the TimeDiscretisation for the controller */
   SP::TimeDiscretisation _tD_SMC;
   /** Simulation for the controller */
   SP::TimeStepping _simulationSMC;
-
   /** Integrator for the controller */
   SP::Moreau _integratorSMC;
-
   /** Theta for the controller */
   double _thetaSMC;
-
   /** LCP for the controller */
   SP::LCP _LCP_SMC;
-
   /** OneStepNsProblem for the controller */
   SP::Relay _OSNSPB_SMC;
-
+  /** SP::SiconosVector containing the control */
   SP::SiconosVector _sampledControl;
-
+  /** SP::EventsManager of the SMC Simulation */
   SP::EventsManager _eventsManager;
-
+  /** SP::NonSmoothLaw for computing the control law */
   SP::NonSmoothLaw _nsLawSMC;
+
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
+  /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    */
   LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
 
-  /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
+  /** Constructor with a TimeDiscretisation and a DynamicalSystem.
+   * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
+   * \param B the B matrix in the FirstOrderLinearR
+   * \param D the D matrix in the FirstOrderLinearR
+   */
+  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D);
+
+  /** Constructor with a TimeDiscretisation, a DynamicalSystem and a set of Sensor.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    * \param sensorList a set of Sensor linked to this Actuator.
@@ -98,6 +100,37 @@ public:
    * TODO
    */
   void actuate();
+
+  /** Set the B matrix
+   * \param B the new B matrix
+  */
+  inline void setB(SiconosMatrix & B)
+  {
+    _B.reset(new SimpleMatrix(B));
+  };
+  /** Set the B matrix
+   * \param B the new B matrix
+  */
+  inline void setBPtr(SP::SiconosMatrix B)
+  {
+    _B = B;
+  };
+
+  /** Set the D matrix
+   * \param D the new D matrix
+  */
+  inline void setD(SiconosMatrix & D)
+  {
+    _D.reset(new SimpleMatrix(D));
+  };
+  /** Set the D matrix
+   * \param D the new D matrix
+  */
+  inline void setDPtr(SP::SiconosMatrix D)
+  {
+    _D = D;
+  };
+
 
 };
 DEFINE_SPTR(LinearSMC)

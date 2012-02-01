@@ -62,7 +62,6 @@ void LinearChatteringSMC::initialize(SP::Model m)
     _DS->setzPtr(_u);
   }
   _indx = 0;
-  _initDone = true;
   _s.reset(new SimpleVector(_sDim));
 }
 

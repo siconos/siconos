@@ -140,6 +140,11 @@ public:
    */
   FirstOrderLinearDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
 
+  /** Copy constructor
+   * \param FOLDS the original FirstOrderLinearDS we want to copy
+   */
+  FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS);
+
   /** destructor */
   virtual ~FirstOrderLinearDS() {};
 
@@ -314,6 +319,14 @@ public:
     return 1.0;
   }
 
+  inline SP::PluggedObject getPluginA() const
+  {
+    return _pluginA;
+  };
+  inline SP::PluggedObject getPluginB() const
+  {
+    return _pluginb;
+  };
   /** encapsulates an operation of dynamic casting. Needed by Python
       interface.
    *  \param DynamicalSystem* : the system which must be converted

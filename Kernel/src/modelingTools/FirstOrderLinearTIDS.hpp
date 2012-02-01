@@ -92,6 +92,11 @@ public:
    */
   FirstOrderLinearTIDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
 
+  /** Copy constructor
+   * \param FOLTIDS the FirstOrderLinearTIDS to copy
+   */
+  FirstOrderLinearTIDS(const FirstOrderLinearTIDS & FOLTIDS): FirstOrderLinearDS(FOLTIDS) {};
+
   /** destructor */
   ~FirstOrderLinearTIDS() {};
 

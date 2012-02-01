@@ -41,8 +41,8 @@ const std::string SM_MEMORY = "Memory";
  */
 class SiconosMemoryXML
 {
-  xmlNodePtr memoryNode;
-  xmlNodePtr parentNode;
+  xmlNodePtr _memoryNode;
+  xmlNodePtr _parentNode;
 
 private:
   /** serialization hooks
@@ -51,14 +51,12 @@ private:
 
 
   /** Return a vector of SiconosVector computed from a memory node
-  *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
   *   \return A  deque of SiconosVector
   */
   SP::MemoryContainer getVectorMemoryValue();
 
-  /** Change values of a memoryNode from a deque<SiconosVector>
-  *   \param memoryNode : the memory node you want to set
-  *   \param memory : the memory you want to copy the value in the memoryNode
+  /** Change values of a _memoryNode from a deque<SiconosVector>
+  *   \param memory : the memory you want to copy the value in the _memoryNode
   *   \exception XMLException
   */
   void setVectorMemoryValue(const MemoryContainer& memory);
@@ -68,8 +66,17 @@ private:
 
 public:
 
-  /** Basic construcor */
-  SiconosMemoryXML(xmlNodePtr memoryNode, xmlNodePtr parentNode = NULL, const std::string& name = "default");
+  /** Basic constructor
+   * \param newMemoryNode a xmlNodePtr
+   * \param newParentNode a xmlNodePtr (optional)
+   * \param name a string (optional)
+   */
+  SiconosMemoryXML(xmlNodePtr newMemoryNode, xmlNodePtr newParentNode = NULL, const std::string& name = "default");
+
+  /* Copy constructor
+   * \param MemXML a SiconosMemoryXML to copy
+   */
+  SiconosMemoryXML(const SiconosMemoryXML & MemXML);
 
   /** Destructor */
   ~SiconosMemoryXML() {};
@@ -87,7 +94,7 @@ public:
   */
   inline int getSiconosMemorySize()
   {
-    return SiconosDOMTreeTools::getAttributeValue<int>(memoryNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(_memoryNode, NUMBER_ATTRIBUTE);
   }
 
   /** allows to set the vector of SiconosVector of a SiconosMemory in the XML
@@ -103,7 +110,7 @@ public:
   */
   inline void setSiconosMemorySize(const unsigned int& s)
   {
-    SiconosDOMTreeTools::setIntegerAttributeValue(memoryNode, SM_MEMORYSIZE, s);
+    SiconosDOMTreeTools::setIntegerAttributeValue(_memoryNode, SM_MEMORYSIZE, s);
   }
 
   /** determines if the SiconosMemoryXML contains memory objects
@@ -111,20 +118,27 @@ public:
   */
   inline bool hasMemory()
   {
-    return SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
+    return SiconosDOMTreeTools::findNodeChild(_memoryNode, SM_MEMORY);
   }
 
   /** returns the xmlNode of the SiconosMemoryXML
-  *  \return xmlNode* : the value of the xmlNode of the SiconosMemoryXML
+  *  \return _memoryNode
   */
-  inline xmlNodePtr getSiconosMemoryXMLNode()
+  inline xmlNodePtr getSiconosMemoryXMLNode() const
   {
-    return memoryNode;
+    return _memoryNode;
   }
 
+  /** returns the xmlNode of the SiconosMemoryXML
+  *  \return _parentNode
+  */
+  inline xmlNodePtr getSiconosParentXMLNode() const
+  {
+    return _parentNode;
+  }
 
   /** deletes the nodes which won't be used (when there's more than maxSize = nbGoodNode SiconosVector in the SiconosMemory)
-  */
+   */
   void deleteUnusedMemoryNodes(const int&);
 
 };

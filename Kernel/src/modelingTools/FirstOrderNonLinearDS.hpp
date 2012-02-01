@@ -178,6 +178,10 @@ public:
    */
   FirstOrderNonLinearDS(const SiconosVector&, const std::string&, const std::string&);
 
+  /** Copy consctructor
+   * \param FONLDS the FirstOrderNonLinearDS to copy
+   */
+  FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS);
   // ===== DESTRUCTOR =====
 
   /** destructor
@@ -300,7 +304,7 @@ public:
   void setF(const PVF&);
   */
   /** set f to pointer newPtr
-   *  \param a SP to plugged vector
+   *  \param newPtr a SP::SiconosVector
    */
   inline void setFPtr(SP::SiconosVector newPtr)
   {
@@ -314,7 +318,7 @@ public:
   inline const PMJF getJacobianfx() const { return *jacobianfx; }
   */
   /** get jacobianfx
-   *  \return pointer on a plugged-matrix
+   *  \return SP::SiconosMatrix
    */
   virtual SP::SiconosMatrix jacobianfx() const
   {
@@ -497,6 +501,31 @@ public:
   {
     return _xq;
   };
+
+  /** Get _pluginf
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginF() const
+  {
+    return _pluginf;
+  };
+
+  /** Get _pluginJacxf
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginJacxf() const
+  {
+    return _pluginJacxf;
+  };
+
+  /** Get _pluginM
+   * \return a SP::PluggedObject
+   */
+  inline SP::PluggedObject getPluginM() const
+  {
+    return _pluginM;
+  };
+
   /*
    * get the Xfree work vector.
    */

@@ -20,22 +20,31 @@
 #include "TimeDiscretisationXML.hpp"
 
 TimeDiscretisationXML::TimeDiscretisationXML(xmlNodePtr timeDiscretisationNode):
-  rootNode(timeDiscretisationNode), hNode(NULL), NNode(NULL), tkNode(NULL)
+  _rootNode(timeDiscretisationNode), _hNode(NULL), _NNode(NULL), _tkNode(NULL)
 {
   xmlNodePtr node;
   if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_H)))
-    hNode = node;
+    _hNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_N)))
-    NNode = node;
+    _NNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_TK)))
-    tkNode = node;
+    _tkNode = node;
 
 }
 
-void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNodePtr node, TimeDiscretisation* td)
+TimeDiscretisationXML::TimeDiscretisationXML(const TimeDiscretisationXML & tdXML)
 {
-  rootNode = node;
+  TimeDiscretisationXML(tdXML.getRootNode());
 }
+
+
+void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNodePtr node, SP::TimeDiscretisation td)
+{
+  _rootNode = node;
+  XMLException::selfThrow("TimeDiscretisationXML::updateTimeDiscretisationXML - \
+      The implementation of this method is not finished !!!");
+}
+
 

@@ -22,32 +22,39 @@
 using namespace std;
 
 SiconosMemoryXML::SiconosMemoryXML(xmlNodePtr newMemoryNode, xmlNodePtr newParentNode, const string& name):
-  memoryNode(newMemoryNode), parentNode(newParentNode)
+  _memoryNode(newMemoryNode), _parentNode(newParentNode)
 {
   /*
-   * if parent == NULL, the parent node is not defined because the memoryNode exists
-   * otherwise, we must create the SiconosMemoryNode with the parentNode
+   * if parent == NULL, the parent node is not defined because the _memoryNode exists
+   * otherwise, we must create the SiconosMemoryNode with the _parentNode
    */
-  if (!parentNode)
+  if (!_parentNode)
   {
-    if (!memoryNode)
+    if (!_memoryNode)
       XMLException::selfThrow("SiconosMemoryXML - constructor : element '" + name + "' not found, memoryNode == NULL and parentNode == NULL.");
   }
   else if (name != "default")
   {
     // we create the node for the memory with no attributes
     xmlNodePtr node;
-    node = xmlNewChild(parentNode, NULL, BAD_CAST name.c_str(), NULL);
+    node = xmlNewChild(_parentNode, NULL, BAD_CAST name.c_str(), NULL);
     xmlNewProp(node, (xmlChar*)(SM_MEMORYSIZE.c_str()), (xmlChar*)"0");
-    memoryNode = node;
+    _memoryNode = node;
   }
   else XMLException::selfThrow("SiconosMemoryXML - constructor : illegal tag name.");
 }
 
+// Copy constructor
+SiconosMemoryXML::SiconosMemoryXML(const SiconosMemoryXML & MemXML):
+  _memoryNode(MemXML.getSiconosMemoryXMLNode()), _parentNode(MemXML.getSiconosParentXMLNode())
+{
+}
+
+
 SP::MemoryContainer SiconosMemoryXML::getVectorMemoryValue()
 {
   SP::MemoryContainer v;
-  xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
+  xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(_memoryNode, SM_MEMORY);
 
   int cpt = 0;
   while (node)
@@ -61,7 +68,7 @@ SP::MemoryContainer SiconosMemoryXML::getVectorMemoryValue()
 
 void SiconosMemoryXML::setVectorMemoryValue(const MemoryContainer& memory)
 {
-  xmlNodePtr oldNode = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
+  xmlNodePtr oldNode = SiconosDOMTreeTools::findNodeChild(_memoryNode, SM_MEMORY);
   xmlNodePtr node; /* oldNode is the node before node */
   string stringValue;
   stringstream sstr;
@@ -86,7 +93,7 @@ void SiconosMemoryXML::setVectorMemoryValue(const MemoryContainer& memory)
 
   while ((i < memory.size()) && (memory[i]->size() > 0)) //not enought nodes in the DOM tree to save memory
   {
-    if (! oldNode) node = xmlNewChild(memoryNode, NULL, BAD_CAST SM_MEMORY.c_str(), NULL);
+    if (! oldNode) node = xmlNewChild(_memoryNode, NULL, BAD_CAST SM_MEMORY.c_str(), NULL);
     else node = xmlNewNode(NULL, BAD_CAST SM_MEMORY.c_str());
 
     stringValue = memory[i]->toString();
@@ -99,7 +106,7 @@ void SiconosMemoryXML::setVectorMemoryValue(const MemoryContainer& memory)
 
 void SiconosMemoryXML::deleteUnusedMemoryNodes(const int& nbGoodNode)
 {
-  xmlNodePtr  node = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
+  xmlNodePtr  node = SiconosDOMTreeTools::findNodeChild(_memoryNode, SM_MEMORY);
   xmlNodePtr  tmp;
 
   for (int i = 0; i < nbGoodNode; i++)

@@ -36,21 +36,21 @@ SiconosMemory::SiconosMemory(const unsigned int newValue):
 
 // from xml file + optional value of _maxSize
 SiconosMemory::SiconosMemory(SP::SiconosMemoryXML memXML):
-  _maxSize(0), _nbVectorsInMemory(0), memoryXML(memXML)
+  _maxSize(0), _nbVectorsInMemory(0), _memoryXML(memXML)
 {
 
-  if (!memoryXML)
+  if (!_memoryXML)
     SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: xml file==NULL");
 
-  _maxSize = memoryXML->getSiconosMemorySize();
+  _maxSize = _memoryXML->getSiconosMemorySize();
   _vectorMemory.reset(new MemoryContainer);
   _vectorMemory->reserve(_maxSize);
 
-  if (!memoryXML->hasMemory())
+  if (!_memoryXML->hasMemory())
     SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: no memory node found.");
 
   // get memory from xml file
-  _vectorMemory =  memoryXML->getSiconosMemoryVector();
+  _vectorMemory =  _memoryXML->getSiconosMemoryVector();
   _nbVectorsInMemory = _vectorMemory->size();
 }
 
@@ -87,6 +87,28 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryConta
         _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*V[i])));
     }
   }
+}
+
+//Copy constructor
+SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
+{
+  _maxSize = Mem.getMemorySize();
+  _nbVectorsInMemory = Mem.nbVectorsInMemory();
+  _vectorMemory.reset(new MemoryContainer);
+  _vectorMemory->reserve(_maxSize);
+  // XXX is this correct ?
+  const MemoryContainer VtoCopy = *(Mem.vectorMemory());
+  for (unsigned int i = 0; i < VtoCopy.size(); i++)
+  {
+    if (VtoCopy[i]->isBlock())
+      _vectorMemory->push_back(SP::BlockVector(new BlockVector(*VtoCopy[i])));
+    else
+      _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*VtoCopy[i])));
+  }
+  // this was not always initialised
+  if (Mem.getSiconosMemoryXML())
+    _memoryXML.reset(new SiconosMemoryXML(*(Mem.getSiconosMemoryXML())));
+
 }
 
 // Destructor
@@ -148,6 +170,6 @@ void SiconosMemory::display() const
 
 void SiconosMemory::saveMemorySizeToXML()
 {
-  if (memoryXML) memoryXML->setSiconosMemorySize(_maxSize);
-  else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - memoryXML object == NULL");
+  if (_memoryXML) _memoryXML->setSiconosMemorySize(_maxSize);
+  else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - _memoryXML object == NULL");
 }

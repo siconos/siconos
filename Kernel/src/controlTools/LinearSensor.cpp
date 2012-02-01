@@ -36,8 +36,6 @@ LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP:
 LinearSensor::~LinearSensor()
 {
   cout << "LinearSensor destructor called" << endl;
-  //  ioMatrix io("resultSensor.dat", "ascii");
-  //  io.write(*_dataPlot,"noDim");
 }
 
 void LinearSensor::initialize(SP::Model m)

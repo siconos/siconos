@@ -36,9 +36,9 @@ private:
   /** Current value of the state (\f$ x_k\f$)*/
   SP::SimpleVector _X;
   /** Predicted current value of the state (\f$ \hat{x}_k = \Phi x_{k-1} + \Gamma u_{k-1}\f$)*/
-  SP::SimpleVector _Xhat;
+  SP::SiconosVector _Xhat;
   /** Next value of the state only with the influence of the dynamic \f$ \XPhi = \Phi x_k\f$*/
-  SP::SimpleVector _XPhi;
+  SP::SiconosVector _XPhi;
   /** Model for the computation of _XPhi*/
   SP::Model _modelPhi;
   /** DynamicalSystem for the computation of _XPhi*/
