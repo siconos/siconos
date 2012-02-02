@@ -177,10 +177,12 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     io.write(dataPlot, "noDim");
     // Comparison with a reference file
+    cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix ref("result-ProjectOnConstraints.ref", "ascii");
     ref.read(dataPlotRef);
+    std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

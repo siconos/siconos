@@ -46,7 +46,6 @@ public:
     SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
     double hpc = fabs(data[q0]->getValue(0)) - sBallRadius;
     y->setValue(0, hpc);
-    //    ner->yProj()->setValue(0,hpc);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
@@ -185,7 +184,7 @@ int main(int argc, char* argv[])
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new GenericMechanical());
 #ifdef WITH_PROJ
-    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM, 1.0));
 #endif
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef WITH_PROJ
@@ -277,6 +276,7 @@ int main(int argc, char* argv[])
     io.write(dataPlot, "noDim");
 
     // Comparison with a reference file
+    cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 #ifdef WITH_PROJ
@@ -285,7 +285,8 @@ int main(int argc, char* argv[])
     ioMatrix ref("resultNETS.ref", "ascii");
 #endif
     ref.read(dataPlotRef);
-    //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
+    std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The results is rather different from the reference file. err = " << (dataPlot - dataPlotRef).normInf() << std::endl;
