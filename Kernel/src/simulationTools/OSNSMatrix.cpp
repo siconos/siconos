@@ -19,7 +19,7 @@
 #include <assert.h>
 #include "OSNSMatrix.hpp"
 #include "Tools.hpp"
-
+//#define OSNSM_DEBUG
 using namespace std;
 
 void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
@@ -29,7 +29,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
 
   // For a unitaryBlock (diagonal or extra diagonal) corresponding to
   // a Unitary Relation, we need to know the position of its first
-  // element in the full-matrix M. This position depends on the
+  // element in the full-matrix M. This position dep`ends on the
   // previous unitaryBlocks sizes.
   //
   // positions are saved in a map<SP::UnitaryRelation, unsigned int>,
@@ -287,6 +287,10 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
+#ifdef OSNSMPROJ_DEBUG
+      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix block: %i %i\n", indexSet->properties(*vi).block->size(0), indexSet->properties(*vi).block->size(1));
+#endif
     }
 
 
@@ -309,6 +313,13 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, bool update)
 
       assert(pos < dimRow);
       assert(col < dimColumn);
+
+#ifdef OSNSM_DEBUG
+      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_block->size(0), indexSet->properties(*ei).upper_block->size(1));
+      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_block->size(0), indexSet->properties(*ei).lower_block->size(1));
+#endif
+
       assert(indexSet->properties(*ei).lower_block);
       assert(indexSet->properties(*ei).upper_block);
       boost::static_pointer_cast<SimpleMatrix>(M1)

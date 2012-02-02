@@ -79,7 +79,9 @@ public:
     _alpha = newval;
   };
 
-
+  /** Display the set of blocks for  a given indexSet
+   */
+  void displayBlocks(SP::UnitaryRelationsGraph indexSet);
 
   /** print the data to the screen
   */
@@ -89,12 +91,43 @@ public:
     ;
   }
   virtual void initOSNSMatrix();
+
+  /** compute unitaryBlocks if necessary (this depends on the type of
+   * OSNS, on the indexSets ...)
+   */
   virtual void updateUnitaryBlocks();
+
+  /** compute unitaryBlocks if necessary (this depends on the type of
+   * OSNS, on the indexSets ...)
+   */
+  virtual void updateUnitaryBlocksOLD();
+
+  /** compute diagonal unitary block
+   * \param const UnitaryRelationsGraph::VDescriptor a vertex descriptor
+   */
   virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+
+  /** compute diagonal unitary block
+   * \param const UnitaryRelationsGraph::VDescriptor a vertex descriptor
+   */
   virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+
+  /** To compute a part of the "q" vector of the OSNS
+      \param SP::UnitaryRelation, the UR which corresponds to the considered block
+      \param unsigned int, the position of the first element of yOut to be set
+  */
   virtual void computeqBlock(SP::UnitaryRelation, unsigned int);
+
+  /** post-treatment for  MLCPProjectOnConstraints
+   */
   virtual void postCompute();
+
+  /** post-treatment for  MLCPProjectOnConstraints for LagrangianR
+   */
   virtual void postComputeLagrangianR(SP::UnitaryRelation, unsigned int);
+
+  /** post-treatment for  MLCPProjectOnConstraints for NewtonEulerR
+   */
   virtual void postComputeNewtonEulerR(SP::UnitaryRelation, unsigned int);
 
 

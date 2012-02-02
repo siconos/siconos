@@ -197,7 +197,6 @@ int MLCP::compute(double time)
     //displayNM(_numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
-    displayMLCP(&_numerics_problem);
     try
     {
       //  display();

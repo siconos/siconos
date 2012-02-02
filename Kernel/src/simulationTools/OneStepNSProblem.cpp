@@ -27,7 +27,7 @@
 #include "Moreau.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
-
+//#define OSNS_DEBUG
 using namespace std;
 OneStepNSProblem::OneStepNSProblem():
   _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
@@ -387,6 +387,54 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
       }
     }
+  }
+
+#ifdef OSNS_DEBUG
+  displayBlocks(indexSet);
+#endif
+
+
+}
+
+void OneStepNSProblem::displayBlocks(SP::UnitaryRelationsGraph indexSet)
+{
+
+  std::cout <<  "OneStepNSProblem::displayBlocks(SP::UnitaryRelationsGraph indexSet) " << std::endl;
+  UnitaryRelationsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = indexSet->vertices();
+       vi != viend; ++vi)
+  {
+    SP::UnitaryRelation UR = indexSet->bundle(*vi);
+    if (indexSet->properties(*vi).block)
+    {
+      indexSet->properties(*vi).block->display();
+    }
+
+    UnitaryRelationsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+         oei != oeiend; ++oei)
+    {
+      UnitaryRelationsGraph::EDescriptor ed1, ed2;
+      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+
+      if (indexSet->properties(ed1).upper_block)
+      {
+        indexSet->properties(ed1).upper_block->display();
+      }
+      if (indexSet->properties(ed1).lower_block)
+      {
+        indexSet->properties(ed1).lower_block->display();
+      }
+      if (indexSet->properties(ed2).upper_block)
+      {
+        indexSet->properties(ed2).upper_block->display();
+      }
+      if (indexSet->properties(ed2).lower_block)
+      {
+        indexSet->properties(ed2).lower_block->display();
+      }
+    }
+
   }
 }
 

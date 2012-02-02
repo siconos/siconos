@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace RELATION;
-#define MLCPPROJ_DEBUG
+//#define MLCPPROJ_DEBUG
 
 
 
@@ -59,8 +59,218 @@ void MLCPProjectOnConstraints::display() const
   cout << "======= m " << _m << " _n " << _n << endl;
   LinearOSNS::display();
 }
-
 void MLCPProjectOnConstraints::updateUnitaryBlocks()
+{
+  // The present functions checks various conditions and possibly
+  // compute unitaryBlocks matrices.
+  //
+  // Let URi and URj be two Unitary Relations.
+  //
+  // Things to be checked are:
+  //  1 - is the topology time invariant?
+  //  2 - does unitaryBlocks[URi][URj] already exists (ie has been
+  //  computed in a previous time step)?
+  //  3 - do we need to compute this unitaryBlock? A unitaryBlock is
+  //  to be computed if URi and URj are in IndexSet1 AND if URi and
+  //  URj have common DynamicalSystems.
+  //
+  // The possible cases are:
+  //
+  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
+  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the
+  //    unitaryBlock.
+  //  - If 1==false, 2 is not checked, and the unitaryBlock is
+  //    computed if 3==true.
+  //
+
+  // Get index set from Simulation
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
+
+
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+
+  // we put diagonal informations on vertices
+  // self loops with bgl are a *nightmare* at the moment
+  // (patch 65198 on standard boost install)
+
+  if (indexSet->properties().symmetric)
+  {
+    RuntimeException::selfThrow
+    (" MLCPProjectOnConstraints::updateUnitaryBlocks() - not yet implemented for symmetric case");
+  }
+  else // not symmetric => follow out_edges for each vertices
+  {
+    if (!_hasBeUpdated)
+    {
+      //      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
+      _n = 0;
+      _m = 0;
+      _curBlock = 0;
+    }
+    UnitaryRelationsGraph::VIterator vi, viend;
+    for (boost::tie(vi, viend) = indexSet->vertices();
+         vi != viend; ++vi)
+    {
+
+      SP::UnitaryRelation UR = indexSet->bundle(*vi);
+      unsigned int nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                               (_M)->computeSizeForProjection(UR->interaction());
+
+      if (! indexSet->properties(*vi).blockProj)
+      {
+        indexSet->properties(*vi).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
+      }
+
+      if (!isLinear || !_hasBeUpdated)
+      {
+        computeDiagonalUnitaryBlock(*vi);
+      }
+
+      /* unitaryBlock must be zeroed at init */
+      std::vector<bool> initialized;
+      initialized.resize(indexSet->edges_number());
+      std::fill(initialized.begin(), initialized.end(), false);
+
+      /* on a undirected graph, out_edges gives all incident edges */
+      UnitaryRelationsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+           oei != oeiend; ++oei)
+      {
+
+        /* on adjoint graph there is at most 2 edges between source and target */
+        UnitaryRelationsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+
+        assert(*oei == ed1 || *oei == ed2);
+
+        /* the first edge as the lower index */
+        assert(indexSet->index(ed1) <= indexSet->index(ed2));
+
+        SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*oei));
+        SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*oei));
+
+        // Memory allocation if needed
+        unsigned int nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                                  (_M)->computeSizeForProjection(UR1->interaction());
+        unsigned int nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                                  (_M)->computeSizeForProjection(UR2->interaction());
+        unsigned int isrc = indexSet->index(indexSet->source(*oei));
+        unsigned int itar = indexSet->index(indexSet->target(*oei));
+
+        SP::SiconosMatrix currentUnitaryBlock;
+
+        if (itar > isrc) // upper block
+        {
+          if (! indexSet->properties(ed1).upper_blockProj)
+          {
+            indexSet->properties(ed1).upper_blockProj.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            if (ed2 != ed1)
+              indexSet->properties(ed2).upper_blockProj = indexSet->properties(ed1).upper_blockProj;
+          }
+          currentUnitaryBlock = indexSet->properties(ed1).upper_blockProj;
+
+        }
+        else  // lower block
+        {
+          if (! indexSet->properties(ed1).lower_blockProj)
+          {
+            indexSet->properties(ed1).lower_blockProj.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            if (ed2 != ed1)
+              indexSet->properties(ed2).lower_blockProj = indexSet->properties(ed1).lower_blockProj;
+          }
+          currentUnitaryBlock = indexSet->properties(ed1).lower_blockProj;
+        }
+
+
+        if (!initialized[indexSet->index(ed1)])
+        {
+          initialized[indexSet->index(ed1)] = true;
+          currentUnitaryBlock->zero();
+        }
+
+
+        if (!isLinear || !_hasBeUpdated)
+        {
+          if (isrc != itar)
+            computeUnitaryBlock(*oei);
+        }
+
+        // // allocation for transposed block
+        // // should be avoided
+        // if(itar > isrc)  // upper block has been computed
+        // {
+        //   indexSet->properties(ed1).lower_blockProj.reset(new SimpleMatrix(*(indexSet->properties(ed1).upper_blockProj)));
+        //   indexSet->properties(ed1).lower_blockProj->trans();
+        //   //          indexSet->properties(*ei).lower_blockProj->trans(*indexSet->properties(*ei).upper_blockProj);
+        //   if(ed2!=ed1)
+        //     indexSet->properties(ed2).lower_blockProj = indexSet->properties(ed1).lower_blockProj;
+        // }
+        // else
+        // {
+        //   assert(itar < isrc);    // lower block has been computed
+        //   indexSet->properties(ed1).upper_blockProj.
+        //     reset(new SimpleMatrix(*(indexSet->properties(ed1).lower_blockProj)));
+        //   indexSet->properties(ed1).upper_blockProj->trans();
+        //   if(ed2!=ed1)
+        //     indexSet->properties(ed1).upper_blockProj = indexSet->properties(ed1).upper_blockProj;
+        // }
+
+
+
+
+
+
+      }
+    }
+  }
+#ifdef MLCPPROJ_DEBUG
+  displayBlocks(indexSet);
+#endif
+
+}
+void MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet)
+{
+
+  std::cout <<  "MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet) " << std::endl;
+  UnitaryRelationsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = indexSet->vertices();
+       vi != viend; ++vi)
+  {
+    SP::UnitaryRelation UR = indexSet->bundle(*vi);
+    if (indexSet->properties(*vi).blockProj)
+    {
+      indexSet->properties(*vi).blockProj->display();
+    }
+
+    UnitaryRelationsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+         oei != oeiend; ++oei)
+    {
+      UnitaryRelationsGraph::EDescriptor ed1, ed2;
+      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+
+      if (indexSet->properties(ed1).upper_blockProj)
+      {
+        indexSet->properties(ed1).upper_blockProj->display();
+      }
+      if (indexSet->properties(ed1).lower_blockProj)
+      {
+        indexSet->properties(ed1).lower_blockProj->display();
+      }
+      if (indexSet->properties(ed2).upper_blockProj)
+      {
+        indexSet->properties(ed2).upper_blockProj->display();
+      }
+      if (indexSet->properties(ed2).lower_blockProj)
+      {
+        indexSet->properties(ed2).lower_blockProj->display();
+      }
+    }
+
+  }
+}
+void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
 {
 
   /** V.A. Is the followoing line  very general ? _levelMin ? */

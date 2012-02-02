@@ -23,8 +23,7 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
-
-#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
@@ -112,7 +111,6 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //     runningNewton=true;
   // }
 
-  std::cout << model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() << std::endl;
   if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
     computeCriteria(&runningProjection);
 

@@ -389,6 +389,10 @@ public:
     ;
   }
 
+  /** Display the set of blocks for  a given indexSet
+   */
+  virtual void displayBlocks(SP::UnitaryRelationsGraph indexSet);
+
   /** compute unitaryBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
    */

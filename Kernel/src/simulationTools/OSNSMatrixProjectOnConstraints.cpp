@@ -135,6 +135,10 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
       assert(indexSet->properties(*vi).blockProj);
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).blockProj);
+#ifdef OSNSMPROJ_DEBUG
+      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix block: %i %i\n", indexSet->properties(*vi).blockProj->size(0), indexSet->properties(*vi).blockProj->size(1));
+#endif
     }
 
 
@@ -157,10 +161,12 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
 
       assert(pos < dimRow);
       assert(col < dimColumn);
-      //printf("OSNSMatrix M1: %i %i",M1->size(0),M1->size(1));
-      //printf("OSNSMatrix upper: %i %i",indexSet->properties(*ei).upper_blockProj->size(0),indexSet->properties(*ei).upper_blockProj->size(1));
-      //printf("OSNSMatrix lower: %i %i",indexSet->properties(*ei).lower_blockProj->size(0),indexSet->properties(*ei).lower_blockProj->size(1));
 
+#ifdef OSNSMPROJ_DEBUG
+      printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
+      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_blockProj->size(0), indexSet->properties(*ei).upper_blockProj->size(1));
+      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_blockProj->size(0), indexSet->properties(*ei).lower_blockProj->size(1));
+#endif
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
