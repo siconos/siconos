@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace RELATION;
+#define LINEAROSNS_DEBUG
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
 {
 }
@@ -181,6 +182,19 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
   {
     DS1 = indexSet->properties(vd).source;
     DS2 = DS1;
+
+
+    // #ifdef LINEAROSNS_DEBUG
+    //   cout<<"\nLinearOSNS::computeDiagonalUnitaryBlock"<<endl;
+    //   std::cout << "levelMin()" << levelMin()<<std::endl;
+    //   std::cout << "indexSet :"<< indexSet << std::endl;
+    //   std::cout << "vd :"<< vd << std::endl;
+    //   indexSet->display();
+    //   std::cout << "DS1 :" << std::endl;
+    //   DS1->display();
+    //   std::cout << "DS2 :" << std::endl;
+    //   DS2->display();
+    // #endif
 
 
     UnitaryRelationsGraph::OEIterator oei, oeiend;
@@ -328,7 +342,10 @@ void LinearOSNS::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescr
       //*currentUnitaryBlock *=h;
       //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
       //        currentUnitaryBlock->display();
-
+#ifdef LINEAROSNS_DEBUG
+      std::cout << "LinearOSNS::computeDiagonalUnitaryBlock : DiagUnitaryBlock" << std::endl;
+      currentUnitaryBlock->display();
+#endif
     }
 
 
@@ -496,6 +513,10 @@ void LinearOSNS::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& e
     centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
     //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
     prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+#ifdef LINEAROSNS_DEBUG
+    std::cout << "LinearOSNS::computeUnitaryBlock : currentUnitaryBlock" << std::endl;
+    currentUnitaryBlock->display();
+#endif
   }
   else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
 

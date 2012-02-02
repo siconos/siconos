@@ -214,6 +214,14 @@ public:
     return _URG[num];
   };
 
+  /** get a pointer to the graph at level num of Unitary Relations
+   *  \return a SP::UnitaryRelationsGraph
+   */
+  inline unsigned int numberOfIndexSet()
+  {
+    return _URG.size();
+  };
+
   /** reset graph at level num of Unitary Relations
    *  \return a SP::UnitaryRelationsGraph
    */

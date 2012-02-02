@@ -24,7 +24,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
 
-//#define TSPROJ_DEBUG
+#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
@@ -112,7 +112,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //     runningNewton=true;
   // }
 
-  computeCriteria(&runningProjection);
+  std::cout << model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() << std::endl;
+  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
+    computeCriteria(&runningProjection);
 
   while (runningProjection && cmp < _projectionMaxIteration)
   {
@@ -289,7 +291,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 {
 
-  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
   UnitaryRelationsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -310,6 +312,10 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
       double criteria = interac->y(0)->getValue(0);
+#ifdef TSPROJ_DEBUG
+      printf("unilatreal interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
+#endif
+
       if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
       if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
       if (criteria < - _constraintTolUnilateral)

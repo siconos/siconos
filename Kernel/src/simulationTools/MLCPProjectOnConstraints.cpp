@@ -30,7 +30,9 @@
 
 using namespace std;
 using namespace RELATION;
-//#define MLCPPROJ_DEBUG
+#define MLCPPROJ_DEBUG
+
+
 
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
@@ -40,9 +42,11 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
   _m = 0;
   _curBlock = 0;
 }
+
+
 // Constructor from a set of data
-MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId):
-  MLCP(newNumericsSolverId)
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId, double alphaval):
+  MLCP(newNumericsSolverId), _alpha(alphaval)
 {
   _levelMin = 1;
   _levelMax = 1;
@@ -64,116 +68,130 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
   //  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(0);
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
-
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
   //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeUpdated: "<<_hasBeUpdated<<endl;
 
-  if (!_hasBeUpdated || !isLinear)
+
+  if (indexSet->properties().symmetric)
   {
-    if (!_hasBeUpdated)
+    RuntimeException::selfThrow
+    ("MLCPProjectOnConstraints::updateUnitaryBlocks() - symmetric case for the indexSet is not yet implemented");
+  }
+  else // not symmetric => follow out_edges for each vertices
+  {
+    if (!_hasBeUpdated || !isLinear)
     {
-      //      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
-      _n = 0;
-      _m = 0;
-      _curBlock = 0;
-    }
-    UnitaryRelationsGraph::VIterator vi, viend;
-    for (boost::tie(vi, viend) = indexSet->vertices();
-         vi != viend; ++vi)
-    {
-      SP::UnitaryRelation UR = indexSet->bundle(*vi);
-      unsigned int nslawSize = 0;
-      nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                  (_M)->computeSizeForProjection(UR->interaction());
-
-#ifdef MLCPPROJ_DEBUG
-      cout << "\nMLCPProjectOnConstraints::updateUnitaryBlocks()" << endl;
-      std::cout << "indexSet :" << indexSet << std::endl;
-      indexSet->display();
-      std::cout << "vi :" << *vi << std::endl;
-      std::cout << "indexSet->properties(*vi).blockProj: before" << indexSet->properties(*vi).blockProj << std::endl;
-#endif
-
-      if (! indexSet->properties(*vi).blockProj)
+      if (!_hasBeUpdated)
       {
-        indexSet->properties(*vi).blockProj.reset(new SimpleMatrix(nslawSize, nslawSize));
+        //      printf("MLCPProjectOnConstraints::updateUnitaryBlocks must be updated.\n");
+        _n = 0;
+        _m = 0;
+        _curBlock = 0;
       }
-#ifdef MLCPPROJ_DEBUG
-      std::cout << "indexSet->properties(*vi).blockProj: after" << indexSet->properties(*vi).blockProj << std::endl;
-#endif
-      computeDiagonalUnitaryBlock(*vi);
-    }
-
-
-    UnitaryRelationsGraph::EIterator ei, eiend;
-    for (boost::tie(ei, eiend) = indexSet->edges();
-         ei != eiend; ++ei)
-    {
-      SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
-      SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
-      unsigned int nslawSize1 = 0;
-      unsigned int nslawSize2 = 0;
-      nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                   (_M)->computeSizeForProjection(UR1->interaction());
-      nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                   (_M)->computeSizeForProjection(UR2->interaction());
-
-      // Memory allocation if needed
-      unsigned int isrc = indexSet->index(indexSet->source(*ei));
-      unsigned int itar = indexSet->index(indexSet->target(*ei));
-      if (itar > isrc) // upper block
+      UnitaryRelationsGraph::VIterator vi, viend;
+      for (boost::tie(vi, viend) = indexSet->vertices();
+           vi != viend; ++vi)
       {
-        if (! indexSet->properties(*ei).upper_blockProj)
+        SP::UnitaryRelation UR = indexSet->bundle(*vi);
+        unsigned int sizeY = 0;
+        sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                (_M)->computeSizeForProjection(UR->interaction());
+
+        // #ifdef MLCPPROJ_DEBUG
+        //       cout<<"\nMLCPProjectOnConstraints::updateUnitaryBlocks()"<<endl;
+        //       std::cout << "indexSet :"<< indexSet << std::endl;
+        //       indexSet->display();
+        //       std::cout << "vi :"<< *vi << std::endl;
+        //       std::cout << "indexSet->properties(*vi).blockProj: before"<< indexSet->properties(*vi).blockProj << std::endl;
+        // #endif
+
+        if (! indexSet->properties(*vi).blockProj)
         {
-          indexSet->properties(*ei).upper_blockProj.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          indexSet->properties(*vi).blockProj.reset(new SimpleMatrix(sizeY, sizeY));
         }
+        // #ifdef MLCPPROJ_DEBUG
+        //       std::cout << "indexSet->properties(*vi).blockProj: after"<< indexSet->properties(*vi).blockProj << std::endl;
+        // #endif
+
+        computeDiagonalUnitaryBlock(*vi);
       }
-      else  // lower block
+
+
+
+
+
+      UnitaryRelationsGraph::EIterator ei, eiend;
+      for (boost::tie(ei, eiend) = indexSet->edges();
+           ei != eiend; ++ei)
       {
-        if (! indexSet->properties(*ei).lower_blockProj)
+        SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(*ei));
+        SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(*ei));
+        unsigned int sizeY1 = 0;
+        unsigned int sizeY2 = 0;
+        sizeY1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                 (_M)->computeSizeForProjection(UR1->interaction());
+        sizeY2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                 (_M)->computeSizeForProjection(UR2->interaction());
+
+        // Memory allocation if needed
+        unsigned int isrc = indexSet->index(indexSet->source(*ei));
+        unsigned int itar = indexSet->index(indexSet->target(*ei));
+        if (itar > isrc) // upper block
         {
-          indexSet->properties(*ei).lower_blockProj.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+          if (! indexSet->properties(*ei).upper_blockProj)
+          {
+            indexSet->properties(*ei).upper_blockProj.reset(new SimpleMatrix(sizeY1, sizeY2));
+          }
         }
-      }
+        else  // lower block
+        {
+          if (! indexSet->properties(*ei).lower_blockProj)
+          {
+            indexSet->properties(*ei).lower_blockProj.reset(new SimpleMatrix(sizeY1, sizeY2));
+          }
+        }
 
-      // Computation of the diagonal block
-      computeUnitaryBlock(*ei);
+        // Computation of the diagonal block
+        computeUnitaryBlock(*ei);
 
-      // allocation for transposed block
-      // should be avoided
-      if (itar > isrc) // upper block has been computed
-      {
-        // if (!indexSet->properties(*ei).lower_blockProj)
-        //   {
-        //     indexSet->properties(*ei).lower_blockProj.
-        //  reset(new SimpleMatrix(indexSet->properties(*ei).upper_blockProj->size(1),
-        //             indexSet->properties(*ei).upper_blockProj->size(0)));
-        //   }
-        indexSet->properties(*ei).lower_blockProj.reset(new SimpleMatrix(*(indexSet->properties(*ei).upper_blockProj)));
-        indexSet->properties(*ei).lower_blockProj->trans();
-        //          indexSet->properties(*ei).lower_blockProj->trans(*indexSet->properties(*ei).upper_blockProj);
+        // allocation for transposed block
+        // should be avoided
+        if (itar > isrc) // upper block has been computed
+        {
+          // if (!indexSet->properties(*ei).lower_blockProj)
+          //   {
+          //     indexSet->properties(*ei).lower_blockProj.
+          //  reset(new SimpleMatrix(indexSet->properties(*ei).upper_blockProj->size(1),
+          //             indexSet->properties(*ei).upper_blockProj->size(0)));
+          //   }
+          indexSet->properties(*ei).lower_blockProj.reset(new SimpleMatrix(*(indexSet->properties(*ei).upper_blockProj)));
+          indexSet->properties(*ei).lower_blockProj->trans();
+          //          indexSet->properties(*ei).lower_blockProj->trans(*indexSet->properties(*ei).upper_blockProj);
+        }
+        else
+        {
+          assert(itar < isrc);    // lower block has been computed
+          // if (!indexSet->properties(*ei).upper_blockProj)
+          //   {
+          //     indexSet->properties(*ei).upper_blockProj.
+          //  reset(new SimpleMatrix(indexSet->properties(*ei).lower_blockProj->size(1),
+          //             indexSet->properties(*ei).lower_blockProj->size(0)));
+          //   }
+          indexSet->properties(*ei).upper_blockProj.
+          reset(new SimpleMatrix(*(indexSet->properties(*ei).lower_blockProj)));
+          indexSet->properties(*ei).upper_blockProj->trans();
+        }
+        // #ifdef MLCPPROJ_DEBUG
+        //             printf("MLCPP upper: %i %i\n",indexSet->properties(*ei).upper_blockProj->size(0),indexSet->properties(*ei).upper_blockProj->size(1));
+        //             printf("MLCPP lower: %i %i\n",indexSet->properties(*ei).lower_blockProj->size(0),indexSet->properties(*ei).lower_blockProj->size(1));
+        // #endif
+
       }
-      else
-      {
-        assert(itar < isrc);    // lower block has been computed
-        // if (!indexSet->properties(*ei).upper_blockProj)
-        //   {
-        //     indexSet->properties(*ei).upper_blockProj.
-        //  reset(new SimpleMatrix(indexSet->properties(*ei).lower_blockProj->size(1),
-        //             indexSet->properties(*ei).lower_blockProj->size(0)));
-        //   }
-        indexSet->properties(*ei).upper_blockProj.
-        reset(new SimpleMatrix(*(indexSet->properties(*ei).lower_blockProj)));
-        indexSet->properties(*ei).upper_blockProj->trans();
-      }
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPP upper: %i %i\n", indexSet->properties(*ei).upper_blockProj->size(0), indexSet->properties(*ei).upper_blockProj->size(1));
-      printf("MLCPP lower: %i %i\n", indexSet->properties(*ei).lower_blockProj->size(0), indexSet->properties(*ei).lower_blockProj->size(1));
-#endif
 
     }
 
   }
+
 }
 
 void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
@@ -184,21 +202,25 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::UnitaryRelation UR = indexSet->bundle(vd);
 
-  unsigned int nslawSize = 0;
-  nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-              (_M)->computeSizeForProjection(UR->interaction());
+  unsigned int sizeY = 0;
+  sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+          (_M)->computeSizeForProjection(UR->interaction());
 
 
-#ifdef MLCPPROJ_DEBUG
-  cout << "\nMLCPProjectOnConstraints::computeDiagonalUnitaryBlock" << endl;
-  std::cout << "levelMin()" << levelMin() << std::endl;
-  std::cout << "indexSet :" << indexSet << std::endl;
-  std::cout << "vd :" << vd << std::endl;
-  indexSet->display();
-#endif
+  // #ifdef MLCPPROJ_DEBUG
+  //   cout<<"\nMLCPProjectOnConstraints::computeDiagonalUnitaryBlock"<<endl;
+  //   std::cout << "levelMin()" << levelMin()<<std::endl;
+  //   std::cout << "indexSet :"<< indexSet << std::endl;
+  //   std::cout << "vd :"<< vd << std::endl;
+  //   indexSet->display();
+  //   std::cout << "DS1 :" << std::endl;
+  //   DS1->display();
+  //   std::cout << "DS2 :" << std::endl;
+  //   DS2->display();
+  // #endif
 
-  assert(indexSet->properties(vd).blockProj->size(0) == nslawSize);
-  assert(indexSet->properties(vd).blockProj->size(1) == nslawSize);
+  assert(indexSet->properties(vd).blockProj->size(0) == sizeY);
+  assert(indexSet->properties(vd).blockProj->size(1) == sizeY);
 
   SP::SiconosMatrix currentUnitaryBlock = indexSet->properties(vd).blockProj;
   if (!_hasBeUpdated)
@@ -230,6 +252,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   // type and the non smooth law.
 
 
+
+
   currentUnitaryBlock->zero();
 
   // loop over the common DS
@@ -251,7 +275,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 
       SP::LagrangianDS lds = (boost::static_pointer_cast<LagrangianDS>(ds));
       unsigned int sizeDS = lds->getDim();
-      leftUnitaryBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
+      leftUnitaryBlock.reset(new SimpleMatrix(sizeY, sizeDS));
       UR->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
 
       if (lds->boundaryConditions()) // V.A. Should we do that ?
@@ -261,8 +285,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
              itindex != lds->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
-          // (nslawSize,sizeDS));
-          SP::SiconosVector coltmp(new SimpleVector(nslawSize));
+          // (sizeY,sizeDS));
+          SP::SiconosVector coltmp(new SimpleVector(sizeY));
           coltmp->zero();
           leftUnitaryBlock->setCol(*itindex, *coltmp);
         }
@@ -282,10 +306,6 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
       //*currentUnitaryBlock *=h;
-#ifdef MLCPPROJ_DEBUG
-      cout << "MLCPProjectOnConstraints::computeUnitaryBlock unitaryBlock" << endl;
-      currentUnitaryBlock->display();
-#endif
     }
     else if (Type::value(*ds) == Type::NewtonEulerDS)
     {
@@ -303,7 +323,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       workT->trans();
       SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
       prod(*workT, *T, *workT2, true);
-      leftUnitaryBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
+      leftUnitaryBlock.reset(new SimpleMatrix(sizeY, sizeDS));
       UR->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
       SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
       cout << "LinearOSNS : leftUBlock\n";
@@ -322,7 +342,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
         workT->trans();
         SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
         prod(*workT, *T, *workT2, true);
-        leftUnitaryBlock1.reset(new SimpleMatrix(nslawSize, sizeDS));
+        leftUnitaryBlock1.reset(new SimpleMatrix(sizeY, sizeDS));
         UR->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
         leftUnitaryBlock.reset(new SimpleMatrix(1, sizeDS));
         for (unsigned int ii = 0; ii < sizeDS; ii++)
@@ -340,10 +360,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       else
       {
         unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-        leftUnitaryBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
+        leftUnitaryBlock.reset(new SimpleMatrix(sizeY, sizeDS));
         UR->getLeftUnitaryBlockForDSProjectOnConstraints(ds, leftUnitaryBlock);
         SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
-        //cout<<"LinearOSNS nslawSize="<<nslawSize<<": leftUBlock\n";
+        //cout<<"LinearOSNS sizeY="<<sizeY<<": leftUBlock\n";
         //work->display();
         work->trans();
         prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
@@ -357,7 +377,7 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
 
 #endif
 #ifdef MLCPPROJ_DEBUG
-      cout << "MLCPProjectOnConstraints::computeUnitaryBlock DiagunitaryBlock " << endl;
+      std::cout << "MLCPProjectOnConstraints::computeDiagonalUnitaryBlock DiagunitaryBlock " << std::endl;
       currentUnitaryBlock->display();
 #endif
     }
@@ -385,12 +405,12 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     unsigned int index1 = indexSet->index(indexSet->source(ed));
     unsigned int index2 = indexSet->index(indexSet->target(ed));
 
-    unsigned int nslawSize1 = 0;
-    nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                 (_M)->computeSizeForProjection(UR1->interaction());
-    unsigned int nslawSize2 = 0;
-    nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                 (_M)->computeSizeForProjection(UR2->interaction());
+    unsigned int sizeY1 = 0;
+    sizeY1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+             (_M)->computeSizeForProjection(UR1->interaction());
+    unsigned int sizeY2 = 0;
+    sizeY2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+             (_M)->computeSizeForProjection(UR2->interaction());
 
 
 
@@ -403,6 +423,8 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       assert (*itDS == ds);
       }
     */
+    MapOfDSMatrices centralUnitaryBlocks;
+    getOSIMaps(UR1, centralUnitaryBlocks);
 
     SP::SiconosMatrix currentUnitaryBlock;
 
@@ -412,11 +434,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     {
       //     if (! indexSet->properties(ed).upper_block)
       //     {
-      //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+      //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(indexSet->properties(ed).upper_blockProj->size(0) == nslawSize1);
-      assert(indexSet->properties(ed).upper_blockProj->size(1) == nslawSize2);
+      assert(indexSet->properties(ed).upper_blockProj->size(0) == sizeY1);
+      assert(indexSet->properties(ed).upper_blockProj->size(1) == sizeY2);
 
       currentUnitaryBlock = indexSet->properties(ed).upper_blockProj;
     }
@@ -424,11 +446,11 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     {
       //     if (! indexSet->properties(ed).lower_block)
       //     {
-      //       indexSet->properties(ed).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+      //       indexSet->properties(ed).lower_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(indexSet->properties(ed).lower_blockProj->size(0) == nslawSize1);
-      assert(indexSet->properties(ed).lower_blockProj->size(1) == nslawSize2);
+      assert(indexSet->properties(ed).lower_blockProj->size(0) == sizeY1);
+      assert(indexSet->properties(ed).lower_blockProj->size(1) == sizeY2);
 
       currentUnitaryBlock = indexSet->properties(ed).lower_blockProj;
     }
@@ -446,423 +468,468 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
     // type and the non smooth law.
     relationType1 = UR1->getRelationType();
     relationType2 = UR2->getRelationType();
-    if (relationType1 != NewtonEuler ||
-        relationType2 != NewtonEuler)
-      RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
-
-    // ==== First Order Relations - Specific treatment for diagonal
-    // _unitaryBlocks ===
-    assert(UR1 != UR2);
-    currentUnitaryBlock->zero();
+    if (relationType1 == NewtonEuler &&
+        relationType2 == NewtonEuler)
+    {
+      assert(UR1 != UR2);
+      currentUnitaryBlock->zero();
 #ifdef MLCPPROJ_WITH_CT
-    unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getDim();
-    leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-    UR1->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
-    SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(ds));
-    SP::SimpleMatrix T = neds->T();
-    SP::SimpleMatrix workT(new SimpleMatrix(*T));
-    workT->trans();
-    SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
-    prod(*workT, *T, *workT2, true);
-    rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-    UR2->getLeftUnitaryBlockForDS(ds, rightUnitaryBlock);
-    rightUnitaryBlock->trans();
-    workT2->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-    prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-
-#else
-
-    unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-    leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-    UR1->getLeftUnitaryBlockForDSProjectOnConstraints(ds, leftUnitaryBlock);
-    SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(ds));
-    rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-    UR2->getLeftUnitaryBlockForDSProjectOnConstraints(ds, rightUnitaryBlock);
-    rightUnitaryBlock->trans();
-    prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-
-#endif
-
-  }
-
-  void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
-  {
-
-    assert(UR);
-    unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                         (_M)->computeSizeForProjection(UR->interaction());
-    for (unsigned int i = 0; i < sizeY; i++)
-      _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::computeqBlock, _q from y(0)\n");
-    _q->display();
-#endif
-  }
-
-  void MLCPProjectOnConstraints::postCompute()
-  {
-    _hasBeUpdated = true;
-    // This function is used to set y/lambda values using output from
-    // lcp_driver (w,z).  Only UnitaryRelations (ie Interactions) of
-    // indexSet(leveMin) are concerned.
-
-    // === Get index set from Topology ===
-    SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-
-    // y and lambda vectors
-    SP::SiconosVector lambda;
-    SP::SiconosVector y;
-
-    // === Loop through "active" Unitary Relations (ie present in
-    // indexSets[1]) ===
-    /** We chose to do a small step in view of stabilized the algorithm.*/
-    double alpha = 0.2;
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute damping value = %f\n", alpha);
-#endif
-    (*_z) *= alpha;
-    unsigned int pos = 0;
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute _z\n");
-    _z->display();
-    display();
-#endif
-
-
-
-    UnitaryRelationsGraph::VIterator ui, uiend;
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute BEFORE UPDATE:\n");
-    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
-    {
-      SP::UnitaryRelation ur = indexSet->bundle(*ui);
-      RELATION::TYPES relationType = ur->getRelationType();
-      if (relationType == NewtonEuler)
-      {
-        SP::Relation R = ur->interaction()->relation();
-        SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
-        ner->computeh(0);
-        ner->getq()->display();
-      }
-      else if (relationType == Lagrangian)
-      {
-        ur->interaction()->relation()->computeOutput(0.0, 0);
-        for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
-             it != ur->interaction()->dynamicalSystemsEnd();
-             ++it)
-        {
-          SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
-          lds->q()->display();
-        }
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - relation type is not from Lagrangian type neither NewtonEuler.");
-      }
-    }
-#endif
-
-
-    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
-    {
-
-      SP::UnitaryRelation ur = indexSet->bundle(*ui);
-      // Get the relative position of UR-unitaryBlock in the vector w
-      // or z
-      pos = _M->getPositionOfUnitaryBlock(ur);
-      RELATION::TYPES relationType = ur->getRelationType();
-      if (relationType == NewtonEuler)
-      {
-        postComputeNewtonEulerR(ur, pos);
-      }
-      else if (relationType == Lagrangian)
-      {
-        postComputeLagrangianR(ur, pos);
-
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
-      }
-
-    }
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute AFTER UPDATE:\n");
-    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
-    {
-      SP::UnitaryRelation ur = indexSet->bundle(*ui);
-      RELATION::TYPES relationType = ur->getRelationType();
-      if (relationType == NewtonEuler)
-      {
-        SP::Relation R = ur->interaction()->relation();
-        SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
-        ner->computeh(0);
-        ner->getq()->display();
-      }
-      else if (relationType == Lagrangian)
-      {
-        ur->interaction()->relation()->computeOutput(0.0, 0);
-        for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
-             it != ur->interaction()->dynamicalSystemsEnd();
-             ++it)
-        {
-          SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
-          lds->q()->display();
-        }
-      }
-      else
-      {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - relation type is not from Lagrangian type neither NewtonEuler.");
-      }
-    }
-#endif
-
-
-  }
-
-  void MLCPProjectOnConstraints::postComputeLagrangianR(SP::UnitaryRelation ur, unsigned int pos)
-  {
-
-    SP::LagrangianR  lr = boost::static_pointer_cast<LagrangianR>(ur->interaction()->relation());
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postComputeLagrangian lr->jachq \n");
-    lr->jachq()->display();
-#endif
-
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
-    for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
-         it != ur->interaction()->dynamicalSystemsEnd();
-         ++it)
-    {
-      SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
-      lds->q()->display();
-    }
-#endif
-    unsigned int nslawSize = ur->interaction()->nonSmoothLaw()->size();
-    SP::SimpleVector aBuff(new SimpleVector(nslawSize));
-    setBlock(*_z, aBuff, nslawSize, pos, 0);
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPP lambda of ur is pos =%i :", pos);
-    aBuff->display();
-#endif
-
-
-
-    // aBuff should nornally be in lambda[corectlevel]
-    // The update of the position in DS should be made in Moreau::upateState or ProjectedMoreau::updateState
-    SP::SiconosMatrix J = lr->jachq();
-    SP::SimpleMatrix aux(new SimpleMatrix(*J));
-    aux->trans();
-    prod(*aux, *aBuff, *(lr->q()), false);
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
-    _z->display();
-    printf("MLCPProjectOnConstraints::postComputeLagrangianR updated\n");
-    (lr->q())->display();
-#endif
-
-
-
-    //RuntimeException::selfThrow("MLCPProjectOnConstraints::postComputeLagrangianR() - not yet implemented");
-  }
-  void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::UnitaryRelation ur, unsigned int pos)
-  {
-    // Get Y and Lambda for the current Unitary Relation
-    //y = ur->y(levelMin());
-    //lambda = ur->lambda(levelMin());
-    // Copy _w/_z values, starting from index pos into y/lambda.
-
-    //      setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
-    // saved in y !!
-    //setBlock(*_z, lambda, lambda->size(), pos, 0);
-
-    unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                         (_M)->computeSizeForProjection(ur->interaction());
-
-    SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation()));
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute ner->jachq \n");
-    ner->jachq()->display();
-    ner->jachqT()->display();
-#endif
-
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postCompute q before update\n");
-    (ner->getq())->display();
-#endif
-
-
-    SP::SimpleVector aBuff(new SimpleVector(sizeY));
-    setBlock(*_z, aBuff, sizeY, pos, 0);
-    /*Now, update the ds's dof throw the relation*/
-    //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPP lambda of ur is pos =%i :", pos);
-    aBuff->display();
-#endif
-
-    DSIterator itDS;
-    Index coord(8);
-#ifdef MLCPPROJ_WITH_CT
-    unsigned int k = 0;
-    unsigned int NumDS = 0;
-    SP::SiconosMatrix J = ner->jachqT();
-    //printf("J\n");
-    //J->display();
-
-    SP::SimpleMatrix aux(new SimpleMatrix(*J));
-    aux->trans();
-
-    itDS = ur->interaction()->dynamicalSystemsBegin();
-    while (itDS != ur->interaction()->dynamicalSystemsEnd())
-    {
-      SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
-      k += neds->getqDim();
-      itDS++;
-    }
-    SP::SimpleVector deltaqG(new SimpleVector(k));
-    // prod(*aux,*aBuff,*vel,true);
-    k = 0;
-    deltaqG->zero();
-
-    itDS = ur->interaction()->dynamicalSystemsBegin();
-    while (itDS != ur->interaction()->dynamicalSystemsEnd())
-    {
-      Type::Siconos dsType = Type::value(**itDS);
-      if (dsType != Type::NewtonEulerDS)
-        RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not from NewtonEulerDS.");
-      SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
-
-      SP::SimpleVector vel(new SimpleVector(neds->getDim()));
-      SP::SimpleVector deltaQ(new SimpleVector(neds->getqDim()));
-      coord[0] = k;
-      coord[1] = k + neds->getDim();
-      coord[2] = 0;
-      coord[3] = aux->size(1);
-      coord[4] = 0;
-      coord[5] = aux->size(1);
-      coord[6] = 0;
-      coord[7] = neds->getDim();
-      subprod(*aux   , *aBuff, *vel, coord, true);
+      unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getDim();
+      leftUnitaryBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
+      UR1->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
+      SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(ds));
       SP::SimpleMatrix T = neds->T();
       SP::SimpleMatrix workT(new SimpleMatrix(*T));
       workT->trans();
       SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
       prod(*workT, *T, *workT2, true);
+      rightUnitaryBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
+      UR2->getLeftUnitaryBlockForDS(ds, rightUnitaryBlock);
+      rightUnitaryBlock->trans();
+      workT2->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+      prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
 
-      workT2->PLUForwardBackwardInPlace(*vel);
-      prod(*T, *vel, *deltaQ);
-
-      for (unsigned int ii = 0; ii < neds->getqDim(); ii++)
-      {
-        ner->getq()->setValue(k + ii,
-                              deltaQ->getValue(ii) +
-                              ner->getq()->getValue(k + ii));
-        deltaqG->setValue(k + ii, deltaQ->getValue(ii) + deltaqG->getValue(k + ii));
-      }
-
-      k += neds->getDim();
-      itDS++;
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::postCompute ds %d, q updated\n", NumDS);
-      (ner->getq())->display();
-#endif
-      NumDS++;
-
-    }
-    printf("MLCPProjectOnConstraints deltaqG:\n");
-    deltaqG->display();
 #else
 
-    SP::SiconosMatrix J = ner->jachq();
-    SP::SimpleMatrix aux(new SimpleMatrix(*J));
-    aux->trans();
-    prod(*aux, *aBuff, *(ner->getq()), false);
-#endif
-
-
-#ifdef MLCPPROJ_DEBUG
-    printf("MLCPProjectOnConstraints::postComputeNewtonR _z\n");
-    _z->display();
-    printf("MLCPProjectOnConstraints::postComputeNewtonR q updated\n");
-    (ner->getq())->display();
-#endif
-  }
-
-  void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
-  {
-    //  printf("MLCPProjectOnConstraints::computeOptions\n");
-    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-    RELATION::TYPES relationType1;
-    relationType1 = UR1->getRelationType();
-    // Retrieve size of Y (projected variable)
-    unsigned int sizeY1;
-    sizeY1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-             (_M)->computeSizeForProjection(UR1->interaction());
-
-    // Compute the number of equalities
-    unsigned int equalitySize1 =  sizeY1; //default behavior
-
-    if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
-        Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
-    {
-      equalitySize1 = 0;
+      unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+      leftUnitaryBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
+      UR1->getLeftUnitaryBlockForDSProjectOnConstraints(ds, leftUnitaryBlock);
+      SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(ds));
+      rightUnitaryBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
+      UR2->getLeftUnitaryBlockForDSProjectOnConstraints(ds, rightUnitaryBlock);
+      rightUnitaryBlock->trans();
+      prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
     }
-    else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
-             == Type::MixedComplementarityConditionNSL)
-    {
-      equalitySize1 =
-        MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-    }
-
-    // Compute the number of inequalities
-    unsigned int inequalitySize1 =  sizeY1 - equalitySize1;
-
-
-
-    if (UR1 == UR2)
-    {
-      //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-      _m += inequalitySize1;
-      _n += equalitySize1;
-      //    _m=0;
-      //_n=6;
-      if (_curBlock > MLCP_NB_BLOCKS - 2)
-        printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
-      /*add an equality block.*/
-
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::computeOptions()\n");
 #endif
-
-      if (equalitySize1 > 0)
+      else if (relationType1 == Lagrangian &&
+               relationType2 == Lagrangian)
       {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 0;
+        unsigned int sizeDS =  ds->getDim();
+        leftUnitaryBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
+        UR1->getLeftUnitaryBlockForDS(ds, leftUnitaryBlock);
+
+        Type::Siconos dsType = Type::value(*ds);
+        if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+        {
+          SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+
+          if (d->boundaryConditions()) // V.A. Should we do that ?
+          {
+            for (vector<unsigned int>::iterator itindex =
+                   d->boundaryConditions()->velocityIndices()->begin() ;
+                 itindex != d->boundaryConditions()->velocityIndices()->end();
+                 ++itindex)
+            {
+              // (sizeY1,sizeDS));
+              SP::SiconosVector coltmp(new SimpleVector(sizeY1));
+              coltmp->zero();
+              leftUnitaryBlock->setCol(*itindex, *coltmp);
+            }
+          }
+        }
+
+        // UR1 != UR2
+        rightUnitaryBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
+        UR2->getLeftUnitaryBlockForDS(ds, rightUnitaryBlock);
+
+        // Warning: we use getLeft for Right unitaryBlock
+        // because right = transpose(left) and because of
+        // size checking inside the getBlock function, a
+        // getRight call will fail.
+        rightUnitaryBlock->trans();
+        centralUnitaryBlocks[ds]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+        //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+        prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
 #ifdef MLCPPROJ_DEBUG
-        std::cout << "_curBlock : " << _curBlock << std::endl;
-        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << " ] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
-        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << " ] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+        std::cout << "MLCPProjectOnConstraints::computeUnitaryBlock : currentUnitaryBlock" << std::endl;
+        currentUnitaryBlock->display();
 #endif
-        _curBlock++;
       }
-      /*add a complementarity block.*/
-      if (inequalitySize1 > 0)
-      {
-        _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + inequalitySize1;
-        _numerics_problem.blocksIsComp[_curBlock] = 1;
+
+      else
+        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+
+    }
+
+    void MLCPProjectOnConstraints::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
+    {
+
+      assert(UR);
+      unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                           (_M)->computeSizeForProjection(UR->interaction());
+      for (unsigned int i = 0; i < sizeY; i++)
+        _q->setValue(pos + i, UR->interaction()->y(0)->getValue(UR->getRelativePosition() + i));
 #ifdef MLCPPROJ_DEBUG
-        std::cout << "_curBlock : " << _curBlock << std::endl;
-        std::cout << "_numerics_problem.blocksLine[" << _curBlock + 1 << "] : " << _numerics_problem.blocksLine[_curBlock + 1] << std::endl;
-        std::cout << "_numerics_problem.blocksIsComp[" << _curBlock << "] : " << _numerics_problem.blocksIsComp[_curBlock] << std::endl;
+      printf("MLCPProjectOnConstraints::computeqBlock, _q from y(0)\n");
+      _q->display();
 #endif
-        _curBlock++;
+    }
+
+    void MLCPProjectOnConstraints::postCompute()
+    {
+      _hasBeUpdated = true;
+      // This function is used to set y/lambda values using output from
+      // lcp_driver (w,z).  Only UnitaryRelations (ie Interactions) of
+      // indexSet(leveMin) are concerned.
+
+      // === Get index set from Topology ===
+      SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+
+      // y and lambda vectors
+      SP::SiconosVector lambda;
+      SP::SiconosVector y;
+
+      // === Loop through "active" Unitary Relations (ie present in
+      // indexSets[1]) ===
+      /** We chose to do a small step _alpha in view of stabilized the algorithm.*/
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postCompute damping value = %f\n", _alpha);
+#endif
+      (*_z) *= _alpha;
+      unsigned int pos = 0;
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postCompute _z\n");
+      _z->display();
+      display();
+#endif
+
+
+
+      UnitaryRelationsGraph::VIterator ui, uiend;
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postCompute BEFORE UPDATE:\n");
+      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      {
+        SP::UnitaryRelation ur = indexSet->bundle(*ui);
+        RELATION::TYPES relationType = ur->getRelationType();
+        if (relationType == NewtonEuler)
+        {
+          SP::Relation R = ur->interaction()->relation();
+          SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+          ner->computeh(0);
+          ner->getq()->display();
+        }
+        else if (relationType == Lagrangian)
+        {
+          ur->interaction()->relation()->computeOutput(0.0, 0);
+          for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
+               it != ur->interaction()->dynamicalSystemsEnd();
+               ++it)
+          {
+            SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
+            lds->q()->display();
+          }
+        }
+        else
+        {
+          RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - relation type is not from Lagrangian type neither NewtonEuler.");
+        }
+      }
+#endif
+
+
+      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      {
+
+        SP::UnitaryRelation ur = indexSet->bundle(*ui);
+        // Get the relative position of UR-unitaryBlock in the vector w
+        // or z
+        pos = _M->getPositionOfUnitaryBlock(ur);
+        RELATION::TYPES relationType = ur->getRelationType();
+        if (relationType == NewtonEuler)
+        {
+          postComputeNewtonEulerR(ur, pos);
+        }
+        else if (relationType == Lagrangian)
+        {
+          postComputeLagrangianR(ur, pos);
+
+        }
+        else
+        {
+          RuntimeException::selfThrow("MLCPProjectOnConstraints::computeUnitaryBlock - relation type is not from Lagrangian type neither NewtonEuler.");
+        }
 
       }
-    }
 #ifdef MLCPPROJ_DEBUG
-    std::cout << "_m : " << _m << std::endl;
-    std::cout << "_n : " << _n << std::endl;
+      printf("MLCPProjectOnConstraints::postCompute AFTER UPDATE:\n");
+      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      {
+        SP::UnitaryRelation ur = indexSet->bundle(*ui);
+        RELATION::TYPES relationType = ur->getRelationType();
+        if (relationType == NewtonEuler)
+        {
+          SP::Relation R = ur->interaction()->relation();
+          SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
+          ner->computeh(0);
+          ner->getq()->display();
+        }
+        else if (relationType == Lagrangian)
+        {
+          ur->interaction()->relation()->computeOutput(0.0, 0);
+          for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
+               it != ur->interaction()->dynamicalSystemsEnd();
+               ++it)
+          {
+            SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
+            lds->q()->display();
+          }
+        }
+        else
+        {
+          RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - relation type is not from Lagrangian type neither NewtonEuler.");
+        }
+      }
 #endif
-  }
+
+
+    }
+
+    void MLCPProjectOnConstraints::postComputeLagrangianR(SP::UnitaryRelation ur, unsigned int pos)
+    {
+
+      SP::LagrangianR  lr = boost::static_pointer_cast<LagrangianR>(ur->interaction()->relation());
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postComputeLagrangian lr->jachq \n");
+      lr->jachq()->display();
+#endif
+
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
+      for (DSIterator it = ur->interaction()->dynamicalSystemsBegin();
+           it != ur->interaction()->dynamicalSystemsEnd();
+           ++it)
+      {
+        SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
+        lds->q()->display();
+      }
+#endif
+      unsigned int sizeY = ur->interaction()->nonSmoothLaw()->size();
+      SP::SimpleVector aBuff(new SimpleVector(sizeY));
+      setBlock(*_z, aBuff, sizeY, pos, 0);
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPP lambda of ur is pos =%i :", pos);
+      aBuff->display();
+#endif
+
+
+
+      // aBuff should nornally be in lambda[corectlevel]
+      // The update of the position in DS should be made in Moreau::upateState or ProjectedMoreau::updateState
+      SP::SiconosMatrix J = lr->jachq();
+      SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      aux->trans();
+      prod(*aux, *aBuff, *(lr->q()), false);
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
+      _z->display();
+      printf("MLCPProjectOnConstraints::postComputeLagrangianR updated\n");
+      (lr->q())->display();
+#endif
+
+
+
+      //RuntimeException::selfThrow("MLCPProjectOnConstraints::postComputeLagrangianR() - not yet implemented");
+    }
+    void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::UnitaryRelation ur, unsigned int pos)
+    {
+      // Get Y and Lambda for the current Unitary Relation
+      //y = ur->y(levelMin());
+      //lambda = ur->lambda(levelMin());
+      // Copy _w/_z values, starting from index pos into y/lambda.
+
+      //      setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+      // saved in y !!
+      //setBlock(*_z, lambda, lambda->size(), pos, 0);
+
+      unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                           (_M)->computeSizeForProjection(ur->interaction());
+
+      SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(ur->interaction()->relation()));
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postCompute ner->jachq \n");
+      ner->jachq()->display();
+      ner->jachqT()->display();
+#endif
+
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postCompute q before update\n");
+      (ner->getq())->display();
+#endif
+
+
+      SP::SimpleVector aBuff(new SimpleVector(sizeY));
+      setBlock(*_z, aBuff, sizeY, pos, 0);
+      /*Now, update the ds's dof throw the relation*/
+      //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPP lambda of ur is pos =%i :", pos);
+      aBuff->display();
+#endif
+
+      DSIterator itDS;
+      Index coord(8);
+#ifdef MLCPPROJ_WITH_CT
+      unsigned int k = 0;
+      unsigned int NumDS = 0;
+      SP::SiconosMatrix J = ner->jachqT();
+      //printf("J\n");
+      //J->display();
+
+      SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      aux->trans();
+
+      itDS = ur->interaction()->dynamicalSystemsBegin();
+      while (itDS != ur->interaction()->dynamicalSystemsEnd())
+      {
+        SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
+        k += neds->getqDim();
+        itDS++;
+      }
+      SP::SimpleVector deltaqG(new SimpleVector(k));
+      // prod(*aux,*aBuff,*vel,true);
+      k = 0;
+      deltaqG->zero();
+
+      itDS = ur->interaction()->dynamicalSystemsBegin();
+      while (itDS != ur->interaction()->dynamicalSystemsEnd())
+      {
+        Type::Siconos dsType = Type::value(**itDS);
+        if (dsType != Type::NewtonEulerDS)
+          RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not from NewtonEulerDS.");
+        SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
+
+        SP::SimpleVector vel(new SimpleVector(neds->getDim()));
+        SP::SimpleVector deltaQ(new SimpleVector(neds->getqDim()));
+        coord[0] = k;
+        coord[1] = k + neds->getDim();
+        coord[2] = 0;
+        coord[3] = aux->size(1);
+        coord[4] = 0;
+        coord[5] = aux->size(1);
+        coord[6] = 0;
+        coord[7] = neds->getDim();
+        subprod(*aux   , *aBuff, *vel, coord, true);
+        SP::SimpleMatrix T = neds->T();
+        SP::SimpleMatrix workT(new SimpleMatrix(*T));
+        workT->trans();
+        SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
+        prod(*workT, *T, *workT2, true);
+
+        workT2->PLUForwardBackwardInPlace(*vel);
+        prod(*T, *vel, *deltaQ);
+
+        for (unsigned int ii = 0; ii < neds->getqDim(); ii++)
+        {
+          ner->getq()->setValue(k + ii,
+                                deltaQ->getValue(ii) +
+                                ner->getq()->getValue(k + ii));
+          deltaqG->setValue(k + ii, deltaQ->getValue(ii) + deltaqG->getValue(k + ii));
+        }
+
+        k += neds->getDim();
+        itDS++;
+#ifdef MLCPPROJ_DEBUG
+        printf("MLCPProjectOnConstraints::postCompute ds %d, q updated\n", NumDS);
+        (ner->getq())->display();
+#endif
+        NumDS++;
+
+      }
+      printf("MLCPProjectOnConstraints deltaqG:\n");
+      deltaqG->display();
+#else
+
+      SP::SiconosMatrix J = ner->jachq();
+      SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      aux->trans();
+      prod(*aux, *aBuff, *(ner->getq()), false);
+#endif
+
+
+#ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postComputeNewtonR _z\n");
+      _z->display();
+      printf("MLCPProjectOnConstraints::postComputeNewtonR q updated\n");
+      (ner->getq())->display();
+#endif
+    }
+
+    void MLCPProjectOnConstraints::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+    {
+      //  printf("MLCPProjectOnConstraints::computeOptions\n");
+      // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+      RELATION::TYPES relationType1;
+      relationType1 = UR1->getRelationType();
+      // Retrieve size of Y (projected variable)
+      unsigned int sizeY1;
+      sizeY1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+               (_M)->computeSizeForProjection(UR1->interaction());
+
+      // Compute the number of equalities
+      unsigned int equalitySize1 =  sizeY1; //default behavior
+
+      if (Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
+          Type::value(*(UR1->interaction()->nonSmoothLaw())) == Type::NewtonImpactNSL)
+      {
+        equalitySize1 = 0;
+      }
+      else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+               == Type::MixedComplementarityConditionNSL)
+      {
+        equalitySize1 =
+          MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+      }
+
+      // Compute the number of inequalities
+      unsigned int inequalitySize1 =  sizeY1 - equalitySize1;
+
+
+
+      if (UR1 == UR2)
+      {
+        //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+        _m += inequalitySize1;
+        _n += equalitySize1;
+        //    _m=0;
+        //_n=6;
+        if (_curBlock > MLCP_NB_BLOCKS - 2)
+          printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
+        /*add an equality block.*/
+
+        // #ifdef MLCPPROJ_DEBUG
+        //   printf("MLCPProjectOnConstraints::computeOptions()\n");
+        // #endif
+
+        if (equalitySize1 > 0)
+        {
+          _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+          _numerics_problem.blocksIsComp[_curBlock] = 0;
+          // #ifdef MLCPPROJ_DEBUG
+          //       std::cout << "_curBlock : " << _curBlock <<std::endl;
+          //       std::cout << "_numerics_problem.blocksLine["<<_curBlock+1 <<" ] : " << _numerics_problem.blocksLine[_curBlock+1] <<std::endl;
+          //       std::cout << "_numerics_problem.blocksIsComp["<<_curBlock <<" ] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+          // #endif
+
+          _curBlock++;
+        }
+        /*add a complementarity block.*/
+        if (inequalitySize1 > 0)
+        {
+          _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + inequalitySize1;
+          _numerics_problem.blocksIsComp[_curBlock] = 1;
+          // #ifdef MLCPPROJ_DEBUG
+          //       std::cout << "_curBlock : " << _curBlock <<std::endl;
+          //       std::cout << "_numerics_problem.blocksLine["<<_curBlock+1<< "] : " << _numerics_problem.blocksLine[_curBlock+1] <<std::endl;
+          //       std::cout << "_numerics_problem.blocksIsComp["<<_curBlock<< "] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+          // #endif
+
+          _curBlock++;
+
+        }
+      }
+      // #ifdef MLCPPROJ_DEBUG
+      //   std::cout << "_m : " << _m <<std::endl;
+      //   std::cout << "_n : " << _n <<std::endl;
+      // #endif
+    }

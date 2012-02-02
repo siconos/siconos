@@ -43,6 +43,8 @@ protected:
   */
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
 
+  double _alpha;
+
 public:
 
   /** compute the number of inequality and equality for a given tuple of URs
@@ -51,16 +53,33 @@ public:
    */
   virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
 
+
   /** constructor from data
-  *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-  *  (optional, default = NULL => read .opt file in Numerics)
-  *  \param String: id of the problem (default = "unamed")
-  */
-  MLCPProjectOnConstraints(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM);
+   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
+   *  (optional, default = NULL => read .opt file in Numerics)
+   *  \param String: id of the problem (default = "unamed")
+   */
+  MLCPProjectOnConstraints(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 
   /** destructor
   */
   ~MLCPProjectOnConstraints() {};
+
+  /** getter for alpha
+  */
+  double alpha()
+  {
+    return _alpha;
+  };
+
+  /** setter for alpha
+  */
+  void setAlpha(double newval)
+  {
+    _alpha = newval;
+  };
+
+
 
   /** print the data to the screen
   */
