@@ -110,20 +110,20 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   // Reference: interaction.
   unsigned int sizeZ = interaction()->getSizez();
 
-  assert((Jachx->size(0) == sizeY && Jachx->size(1) == interaction()->getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((Jachx->size(0) == interaction()->getSizeOfY() && Jachx->size(1) == interaction()->getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((Jacglambda->size(1) == sizeY && Jacglambda->size(0) == interaction()->getSizez()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((Jacglambda->size(1) == interaction()->getSizeOfY() && Jacglambda->size(0) == interaction()->getSizez()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
   if (_jachlambda)
-    assert((_jachlambda->size(0) == sizeY || _jachlambda->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+    assert((_jachlambda->size(0) == interaction()->getSizeOfY() || _jachlambda->size(1) == interaction()->getSizeOfY()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
   if (_F)
-    assert(((_F->size(0) != sizeY) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != interaction()->getSizeOfY()) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
-    assert(_e->size() == sizeY && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+    assert(_e->size() == interaction()->getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
   _workZ.reset(new SimpleVector(sizeZ));
 }
