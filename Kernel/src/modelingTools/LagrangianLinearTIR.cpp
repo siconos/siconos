@@ -102,9 +102,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
 void LagrangianLinearTIR::initComponents()
 {
   unsigned int sizeY = interaction()->getSizeOfY();
-  unsigned int sizeDS = interaction()->getSizeOfDS();
 
-  assert((_jachq) ? (_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) : 1 &&
+  assert((_jachq) ? (_jachq->size(1) ==  interaction()->getSizeOfDS() && _jachq->size(0) == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
   assert((_jachlambda) ? (_jachlambda->size(0) == sizeY && _jachlambda->size(1) != sizeY) : 1 &&

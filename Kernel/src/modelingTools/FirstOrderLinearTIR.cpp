@@ -108,13 +108,11 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = interaction()->getSizeOfY();
-  unsigned int sizeX = interaction()->getSizeOfDS();
   unsigned int sizeZ = interaction()->getSizez();
 
-  assert((Jachx->size(0) == sizeY && Jachx->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((Jachx->size(0) == sizeY && Jachx->size(1) == interaction()->getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((Jacglambda->size(1) == sizeY && Jacglambda->size(0) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((Jacglambda->size(1) == sizeY && Jacglambda->size(0) == interaction()->getSizez()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 

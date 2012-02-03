@@ -27,13 +27,9 @@
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "LagrangianLinearTIDS.hpp"
 
-
 using namespace std;
 using namespace RELATION;
 //#define MLCPPROJ_DEBUG
-
-
-
 
 void MLCPProjectOnConstraints::initOSNSMatrix()
 {
@@ -195,31 +191,6 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
           if (isrc != itar)
             computeUnitaryBlock(*oei);
         }
-
-        // // allocation for transposed block
-        // // should be avoided
-        // if(itar > isrc)  // upper block has been computed
-        // {
-        //   indexSet->properties(ed1).lower_blockProj.reset(new SimpleMatrix(*(indexSet->properties(ed1).upper_blockProj)));
-        //   indexSet->properties(ed1).lower_blockProj->trans();
-        //   //          indexSet->properties(*ei).lower_blockProj->trans(*indexSet->properties(*ei).upper_blockProj);
-        //   if(ed2!=ed1)
-        //     indexSet->properties(ed2).lower_blockProj = indexSet->properties(ed1).lower_blockProj;
-        // }
-        // else
-        // {
-        //   assert(itar < isrc);    // lower block has been computed
-        //   indexSet->properties(ed1).upper_blockProj.
-        //     reset(new SimpleMatrix(*(indexSet->properties(ed1).lower_blockProj)));
-        //   indexSet->properties(ed1).upper_blockProj->trans();
-        //   if(ed2!=ed1)
-        //     indexSet->properties(ed1).upper_blockProj = indexSet->properties(ed1).upper_blockProj;
-        // }
-
-
-
-
-
 
       }
     }
