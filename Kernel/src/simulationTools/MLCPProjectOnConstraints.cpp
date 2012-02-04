@@ -84,6 +84,13 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
 
 
+  // It seems that index() in not update in Index(0)
+  // see comment in void Simulation::updateIndexSets()
+  if (_levelMin == 0)
+  {
+    indexSet->update_vertices_indices();
+    indexSet->update_edges_indices();
+  }
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
@@ -204,39 +211,75 @@ void MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet)
 {
 
   std::cout <<  "MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet) " << std::endl;
+  std::cout << "                          indexSet :" << indexSet << std::endl;
+
+
   UnitaryRelationsGraph::VIterator vi, viend;
   for (boost::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
     SP::UnitaryRelation UR = indexSet->bundle(*vi);
+    std::cout << "                          vertex :" << *vi << std::endl;
+    std::cout << "                          bundle :" << indexSet->bundle(*vi) << std::endl;
+
     if (indexSet->properties(*vi).blockProj)
     {
+      std::cout << "                          blockProj ";
       indexSet->properties(*vi).blockProj->display();
     }
 
     UnitaryRelationsGraph::OEIterator oei, oeiend;
+
+
+
     for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
          oei != oeiend; ++oei)
     {
-      UnitaryRelationsGraph::EDescriptor ed1, ed2;
-      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      unsigned int isrc = indexSet->index(indexSet->source(*oei));
+      unsigned int itar = indexSet->index(indexSet->target(*oei));
+      std::cout << "                          isrc :" << isrc << std::endl;
+      std::cout << "                          itar :" << itar << std::endl;
 
+
+      UnitaryRelationsGraph::EDescriptor ed1, ed2;
+      std::cout << "                          outedges :" << *oei << std::endl;
+      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2  << std::endl;
+      std::cout << "                          (ed1).upper_blockProj : ";
       if (indexSet->properties(ed1).upper_blockProj)
       {
+        std::cout << indexSet->properties(ed1).upper_blockProj << "   :" ;
         indexSet->properties(ed1).upper_blockProj->display();
       }
+      else
+        std::cout << "NULL " << std::endl;
+
+      std::cout << "                          (ed1).lower_blockProj : ";
       if (indexSet->properties(ed1).lower_blockProj)
       {
+        std::cout << indexSet->properties(ed1).lower_blockProj << "   :" ;
         indexSet->properties(ed1).lower_blockProj->display();
       }
+      else
+        std::cout << "NULL " << std::endl;
+
+      std::cout << "                          (ed2).upper_blockProj : ";
       if (indexSet->properties(ed2).upper_blockProj)
       {
+        std::cout << indexSet->properties(ed2).upper_blockProj << "   :" ;
         indexSet->properties(ed2).upper_blockProj->display();
       }
+      else
+        std::cout << "NULL" << std::endl;
+
+      std::cout << "                          (ed2).lower_blockProj : ";
       if (indexSet->properties(ed2).lower_blockProj)
       {
+        std::cout << indexSet->properties(ed2).lower_blockProj << "   :" ;
         indexSet->properties(ed2).lower_blockProj->display();
       }
+      else
+        std::cout << "NULL" << std::endl;
     }
 
   }
@@ -244,9 +287,6 @@ void MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet)
 void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
 {
 
-  /** V.A. Is the followoing line  very general ? _levelMin ? */
-  //  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(_levelMin);
-  //  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(0);
   SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
@@ -388,17 +428,17 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
           (_M)->computeSizeForProjection(UR->interaction());
 
 
-  // #ifdef MLCPPROJ_DEBUG
-  //   cout<<"\nMLCPProjectOnConstraints::computeDiagonalUnitaryBlock"<<endl;
-  //   std::cout << "levelMin()" << levelMin()<<std::endl;
-  //   std::cout << "indexSet :"<< indexSet << std::endl;
-  //   std::cout << "vd :"<< vd << std::endl;
-  //   indexSet->display();
-  //   std::cout << "DS1 :" << std::endl;
-  //   DS1->display();
-  //   std::cout << "DS2 :" << std::endl;
-  //   DS2->display();
-  // #endif
+#ifdef MLCPPROJ_DEBUG
+  cout << "\nMLCPProjectOnConstraints::computeDiagonalUnitaryBlock" << endl;
+  std::cout << "levelMin()" << levelMin() << std::endl;
+  std::cout << "indexSet :" << indexSet << std::endl;
+  std::cout << "vd :" << vd << std::endl;
+  indexSet->display();
+  // std::cout << "DS1 :" << std::endl;
+  // DS1->display();
+  // std::cout << "DS2 :" << std::endl;
+  // DS2->display();
+#endif
 
   assert(indexSet->properties(vd).blockProj->size(0) == sizeY);
   assert(indexSet->properties(vd).blockProj->size(1) == sizeY);

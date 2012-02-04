@@ -28,16 +28,20 @@ using namespace std;
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
     SP::OneStepIntegrator osi,
     SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos)
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int level)
   : TimeStepping(td, osi, osnspb_velo)
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
+
+  _indexSetLevelForProjection = level;
   _constraintTol = 1e-04;
   _constraintTolUnilateral = 1e-08;
   _projectionMaxIteration = 10;
   _doProj = 1;
   _doOnlyProj = 0;
+
 
 }
 
@@ -50,9 +54,8 @@ void TimeSteppingProjectOnConstraints::initOSNS()
 {
   TimeStepping::initOSNS();
 
-  /* VA : Why the level min and max are set here ? */
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(1);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(1);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMin(_indexSetLevelForProjection);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(_indexSetLevelForProjection);
 }
 
 void TimeSteppingProjectOnConstraints::advanceToEvent()
@@ -111,7 +114,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //     runningNewton=true;
   // }
 
-  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
+  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
 
   while (runningProjection && cmp < _projectionMaxIteration)
@@ -160,6 +163,10 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
     if (info)
       cout << "TimeSteppingProjectOnConstraints2 project on constraints failed." << endl ;
+#ifdef TSPROJ_DEBUG
+    cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << cmp << "\n";
+#endif
+
     //cout<<"during projection before normalizing of q:\n";
     //for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     //{
@@ -289,7 +296,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 {
 
-  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
   UnitaryRelationsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -340,9 +347,10 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   }
 #ifdef TSPROJ_DEBUG
   printf("TSProj newton min/max criteria projection\n");
-  printf("TSProj newton min criteria equality =  %e.\n", minViolationEquality);
-  printf("TSProj newton max criteria equality =  %e.\n", maxViolationEquality);
-  printf("TSProj newton max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  printf("TSProj newton min criteria unilateral =  %e.\n", minViolationUnilateral);
+  std::cout << "                 runningProjection"  << *runningProjection << std::endl;
+  printf("              min criteria equality =  %e.\n", minViolationEquality);
+  printf("              max criteria equality =  %e.\n", maxViolationEquality);
+  printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
+  printf("              min criteria unilateral =  %e.\n", minViolationUnilateral);
 #endif
 }

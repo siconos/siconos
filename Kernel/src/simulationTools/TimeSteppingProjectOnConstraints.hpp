@@ -42,9 +42,12 @@ protected:
 
   virtual void initOSNS();
 
-  /** tolerance for the violation of the equality
-   *  constraints at the  position level.
+  /** level of IndexSet on whoich we project (default =1 (activated contact))
    */
+  unsigned int _indexSetLevelForProjection;
+  /** tolerance for the violation of the equality
+  *  constraints at the  position level.
+  */
   double _constraintTol;
 
   /** tolerance for the violation of the unilateral
@@ -72,7 +75,8 @@ public:
   TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
                                    SP::OneStepIntegrator osi,
                                    SP::OneStepNSProblem osnspb_velo,
-                                   SP::OneStepNSProblem osnspb_pos);
+                                   SP::OneStepNSProblem osnspb_pos,
+                                   unsigned int _level = 1);
 
 
   /** default constructor
