@@ -91,8 +91,8 @@ extern "C"
 
   /** relay_nlgs is a projected Gauss-Seidel solver for relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -108,8 +108,8 @@ extern "C"
 
   /** relay_lexicolemke is a Lemke solver for  relay problems.\n
      * \param[in] problem structure that represents the Relay (M, q...)
-     * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-     * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+     * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+     * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -125,8 +125,8 @@ extern "C"
 
   /** relay_nlgs is enum solver for  relay problems.\n
      * \param[in] problem structure that represents the Relay (M, q...)
-     * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-     * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+     * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+     * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -142,8 +142,8 @@ extern "C"
 
   /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.\n
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -159,8 +159,8 @@ extern "C"
 
   /** pr_latin is a specific latin solver for primal relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -173,8 +173,8 @@ extern "C"
 
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -186,20 +186,20 @@ extern "C"
 
   /**  dr_nlgs is a specific nlgs (Non Linear Gauss Seidel) solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
    2 = Nul diagonal term\n
-   \author Nineb Sheherazade.
+   * \param[in,out] options :\n
   */
   void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** pr_gsnl is a specific gsnl (Gauss Seidel Non Linear)solver for relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n

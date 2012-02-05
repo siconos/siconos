@@ -56,55 +56,57 @@ extern "C"
 #endif
 
   /** Initialize friction-contact 3D Alart-Curnier formulation
+      \param problem the global problem to solve
+      \param localproblem the local problem to solve
   */
-  void frictionContact3D_AC_initialize(FrictionContactProblem*, FrictionContactProblem*);
+  void frictionContact3D_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem);
 
   /** Update friction-contact 3D problem: formalize local problem for one contact
-      \param number (position in global matrix) of the considered
-      contact
-      \param global reaction (only the block corresponding to the
-      current contact will be modified,
+      \param problem the global problem to solve
+      \param localproblem the local problem to solve
+      \param number (position in global matrix) of the considered contact
+      \param reaction global reaction (only the block corresponding to the
+      current contact will be modified
+      \param options of the solver
 
       the rest is used to formalize the local problem)
   */
-  void frictionContact3D_AC_update(int, FrictionContactProblem* , FrictionContactProblem* , double *, SolverOptions* options);
+  void frictionContact3D_AC_update(int number, FrictionContactProblem* problem, FrictionContactProblem* localproblem ,
+                                   double * reaction, SolverOptions* options);
 
   /** Retrieve global reaction vector using local problem solution
-      \param number (position in global matrix) of the considered contact
-      \param global reaction
+      \param contactnumber (position in global matrix) of the considered contact
+      \param reaction global reaction
   */
-  void frictionContact3D_AC_post(int, double *);
+  void frictionContact3D_AC_post(int contactnumber, double * reaction);
 
   /** Computes F function used in Newton process for Alart-Curnier formulation
       \param size of the local problem
-      \param local reaction
-      \param in-out F vector
-      \param bool = 1 (true) if the problem is uptodate (ie if F or
+      \param localreaction
+      \param[in,out] F vector
+      \param up2Date boolean = 1 (true) if the problem is uptodate (ie if F or
       its jacobian have already been computed for the current local
       problem)
    */
-  void F_AC(int, double *, double *, int);
+  void F_AC(int size, double * localreaction, double * F, int up2Date);
 
   /** Computes the jacobian of F function used in Newton process for
    * Alart-Curnier formulation
       \param size of the local problem
-      \param local reaction
-      \param in-out jacobianF matrix
-      \param bool = 1 (true) if the problem is uptodate (ie if F or
+      \param localreaction
+      \param[in,out] jacobianF matrix
+      \param  up2Date boolean = 1 (true) if the problem is uptodate (ie if F or
       its jacobian have already been computed for the current local
       problem)
   */
-  void jacobianF_AC(int, double *, double *, int);
+  void jacobianF_AC(int size, double * localreaction, double * jacobianF, int up2Date);
 
   /** Computes FGlobal function with Alart-Curnier formulation, but
    * for all contacts (ie FGlobal = [F(contact)])
-      \param global reaction
-      \param in-out FGlobal vector
-      \param bool = 1 (true) if the problem is uptodate (ie if F or
-      its jacobian have already been computed for the current local
-      problem)
+      \param reaction : global reaction
+      \param[in,out] FGlobal vector
   */
-  void computeFGlobal_AC(double*, double*);
+  void computeFGlobal_AC(double* reaction, double* FGlobal);
 
   /** free memory for friction contact 3D Alart-Curnier solver */
   void frictionContact3D_AC_free();

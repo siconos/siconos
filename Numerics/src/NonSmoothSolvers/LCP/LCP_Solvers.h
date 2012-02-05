@@ -221,15 +221,15 @@ extern "C"
 
   /** lcp_qp uses a quadratic programm formulation for solving a LCP
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    *                0 : convergence  / minimization sucessfull\n
    *                1 : Too Many iterations\n
    *              2 : Accuracy insuficient to satisfy convergence criterion\n
    *                5 : Length of working array insufficient\n
    *                Other : The constraints are inconstent\n
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    *
    * \author Vincent Acary
    */
@@ -242,14 +242,14 @@ extern "C"
 
   /** lcp_cpg is a CPG (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0: convergence\n
    1: iter = itermax\n
    2: negative diagonal term\n
    3: pWp nul
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    *
    \author Mathieu Renouf.
   */
@@ -263,13 +263,13 @@ extern "C"
 
   /** lcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for LCP.\n
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   \param[in-out] options structure used to define the solver and its parameters.
+   \param[in,out] options structure used to define the solver and its parameters.
   */
   void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -280,13 +280,13 @@ extern "C"
 
   /** lcp_rpgs (Regularized Projected Gauss-Seidel ) is a solver for LCP, able to handle matrices with null diagonal terms.\n
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    *
 
    \author Mathieu Renouf & Pascal Denoyelle
@@ -303,13 +303,13 @@ extern "C"
 
   /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    \todo use the relax parameter
    \todo add test
    \todo add a vector of relaxation parameter wtith an auto sizing (see SOR algorithm for linear solver.)
@@ -325,15 +325,15 @@ extern "C"
 
   /** lcp_nsqp use a quadratic programm formulation for solving an non symmetric LCP
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    *                0 : convergence  / minimization sucessfull\n
    *                1 : Too Many iterations\n
    *            2 : Accuracy insuficient to satisfy convergence criterion\n
    *                5 : Length of working array insufficient\n
    *                Other : The constraints are inconstent\n
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    *
    * \author Vincent Acary
    *
@@ -348,14 +348,14 @@ extern "C"
 
   /** lcp_latin (LArge Time INcrements) is a basic latin solver for LCP.
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : Cholesky Factorization failed \n
    3 : nul diagonal term\n
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
 
    \author Nineb Sheherazade.
   */
@@ -368,14 +368,14 @@ extern "C"
 
   /** lcp_latin_w (LArge Time INcrements) is a basic latin solver with relaxation for LCP.\n
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : Cholesky Factorization failed \n
    3 : nul diagonal term\n
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    *
 
    \author Nineb Sheherazade.
@@ -392,13 +392,13 @@ extern "C"
       Choice of pivot variable is performed via lexicographic ordering \n
       Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
       * \param[in] problem structure that represents the LCP (M, q...)
-      * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-      * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
       * \param[out] info an integer which returns the termination value:\n
       0 : convergence\n
       1 : iter = itermax\n
       2 : negative diagonal term\n
-      * \param[in-out] options structure used to define the solver and its parameters.
+      * \param[in,out] options structure used to define the solver and its parameters.
       *
       \param dparamLCP  On enter/return a vetor of doubles (not used).\n
 
@@ -426,8 +426,8 @@ extern "C"
 
       References: Alart & Curnier 1990, Pang 1990
       * \param[in] problem structure that represents the LCP (M, q...)
-      * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-      * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
       * \param[out] info an integer which returns the termination value:\n
       0 : convergence\n
       1 : iter = itermax\n
@@ -437,7 +437,7 @@ extern "C"
       *              2 : Accuracy insuficient to satisfy convergence criterion\n
       *                5 : Length of working array insufficient\n
       *                Other : The constraints are inconstent\n
-      * \param[in-out] options structure used to define the solver and its parameters.
+      * \param[in,out] options structure used to define the solver and its parameters.
       *
       \author Vincent Acary
 
@@ -468,14 +468,14 @@ extern "C"
    * References: Alart & Curnier 1990, Pang 1990
    *
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    *                0 - convergence\n
    *                1 - iter = itermax\n
    *                2 - negative diagonal term\n
    *
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    * \author Vincent Acary
    *
    * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
@@ -492,13 +492,13 @@ extern "C"
 
   /**
    * \param[in] problem structure that represents the LCP (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
 
    \author Olivier Bonnefon
   */
@@ -511,12 +511,12 @@ extern "C"
 
   /**
   * \param[in] problem structure that represents the LCP (M, q...)
-  * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-  * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+  * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+  * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
   * \param[out] info an integer which returns the termination value:\n
   0 : success\n
   1 : failed\n
-  * \param[in-out] options structure used to define the solver and its parameters.
+  * \param[in,out] options structure used to define the solver and its parameters.
 
   \author Olivier Bonnefon
   */
@@ -525,13 +525,13 @@ extern "C"
   void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   /**
   * \param[in] problem structure that represents the LCP (M, q...)
-  * \param[in-out] options structure used to define the solver and its parameters.
+  * \param[in,out] options structure used to define the solver and its parameters.
   * \param[in] If withMemAlloc is not 0, then the necessary work memory is allocated.
   */
   void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc);
   /**
   * \param[in] problem structure that represents the LCP (M, q...)
-  * \param[in-out] options structure used to define the solver and its parameters.
+  * \param[in,out] options structure used to define the solver and its parameters.
   * \param[in] If withMemAlloc is not 0, then the work memory is free.
   */
   void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc);
@@ -545,12 +545,12 @@ extern "C"
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)
    * \param[in] problem structure that represents the LCP (M, q...). M must be a SparseBlockStructuredMatrix
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param info an integer which returns the termination value:\n
    0 : convergence\n
    >0 : failed, depends on local solver
-   * \param[in-out] options structure used to define the solver and its parameters.
+   * \param[in,out] options structure used to define the solver and its parameters.
    \param[in] numberOfSolvers size of the vector options, ie number of solvers \n
    (if numberOfSolvers>1, options[0] represent the global (block) solver and options[i>0] the local ones).
    * \author Mathieu Renouf, Pascal Denoyelle, Franck Perignon

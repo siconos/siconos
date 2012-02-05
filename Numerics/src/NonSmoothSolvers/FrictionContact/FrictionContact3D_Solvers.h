@@ -77,24 +77,24 @@ extern "C"
 #endif
 
   /** General interface to solvers for friction-contact 3D problem
-  \param[in] , the structure which handles the Friction-Contact problem
-  \param[in-out] , reaction global vector (n)
-  \param[in-out] , velocity global vector (n)
+  \param[in] problem the structure which handles the Friction-Contact problem
+  \param[in,out] reaction global vector (n)
+  \param[in,out] velocity global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
-  \param[in] general options for Numerics (verbose mode ...)
+  \param[in] global_options for Numerics (verbose mode ...)
   \return result (0 if successful otherwise 1).
   */
   int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
-      \param SolverOptions * the pointer to the options to set
-      \param int the identifier of the solver
+      \param options the pointer to the options to set
+      \param solverId the identifier of the solver
   */
-  int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int);
+  int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
-      \param problem, the friction-contact 3D problem to solve
+      \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
@@ -190,7 +190,7 @@ extern "C"
   int frictionContact3D_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options);
 
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
-      \param problem, the friction-contact 3D problem to solve
+      \param problem : the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
@@ -201,7 +201,7 @@ extern "C"
   void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for DSFP
-    \param SolverOptions ** the pointer to the array of options to set
+    \param options the pointer to the array of options to set
   */
   int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
@@ -238,19 +238,19 @@ extern "C"
   int frictionContact3D_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for AlartCurnierNewton
-    \param SolverOptions ** the pointer to the array of options to set
+    \param options the pointer to the array of options to set
   */
   int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
-      \param FrictionContactProblem*  the problem
+      \param problem FrictionContactProblem*  the problem
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
-      \param int vector of parameters (max. iteration number ...)
-      \param double vector of parameters (tolerance ...)
-      \return int =0 if a trivial solution has been found, else = -1
+      \param iparam int vector of parameters (max. iteration number ...)
+      \param dparam double vector of parameters (tolerance ...)
+      \return info  =0 if a trivial solution has been found, else = -1
   */
-  int checkTrivialCase(FrictionContactProblem* , double*, double*, int*, double*);
+  int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, int* iparam, double* dparam);
 
 #ifdef __cplusplus
 }

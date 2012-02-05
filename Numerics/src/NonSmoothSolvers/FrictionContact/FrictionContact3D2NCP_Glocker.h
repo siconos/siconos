@@ -55,40 +55,44 @@ extern "C"
 {
 #endif
 
-  /** Initialize some parameters required for the formulation
-     \param size of the problem (number of contacts X 3), n
-     \param the global matrix M
-     \param the global vector q
-     \param the global vector mu of the friction coefficients (size = n/3)
+  /** Initialize some parameters required for the formulation as
+     the size of the problem (number of contacts X 3), n
+     the the global matrix M
+     the the global vector q
+     the global vector mu of the friction coefficients (size = n/3)
+     \param problem the global problem
+     \param localproblem the local problem
   */
   void NCPGlocker_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem);
 
   /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
      operators required for the Glocker formulation
-     \param the number of the considered contact (its position in global M)
-     \param the global reaction vector (size n)
+     \param problem the global problem
+     \param localproblem the local problem
+     \param pos the number of the considered contact (its position in global M)
+     \param options
   */
-  void NCPGlocker_update(int, FrictionContactProblem* problem, FrictionContactProblem* localproblem,  double*, SolverOptions* options);
+  void NCPGlocker_update(int, FrictionContactProblem* problem, FrictionContactProblem* localproblem,  double* pos, SolverOptions* options);
 
   /** Retrieve global reaction values after solving, from computed "reactionGlocker".
-     \param the number of the considered contact
-     \param the global reaction (in-out parameter)
+     \param contactnumber the number of the considered contact
+     \param[in,out] reaction he global reaction (in-out parameter)
   */
-  void NCPGlocker_post(int, double *);
+  void NCPGlocker_post(int contactnumber, double * reaction);
 
   /** To compute F
-     \param the resulting FOut, in-out parameter (warning: must be null on input)
-     \param up2Date, bool to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
+     \param[in,out] FOut the resulting FOut (warning: must be null on input)
+     \param up2Date  boolean variable to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
      the considered local problem has not changed, else false.
   */
-  void computeFGlocker(double **, int);
+  void computeFGlocker(double ** FOut, int up2Date);
 
   /** To compute jacobianF
-     \param the resulting jacobianFOut, in-out parameter (warning: must be null on input)
-     \param up2Date, bool to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
+     \param[in,out] jacobianFOut the resulting (warning: must be null on input)
+     \param up2Date Boolean variable to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
      the considered local problem has not changed, else false.
   */
-  void computeJacobianFGlocker(double **, int);
+  void computeJacobianFGlocker(double ** jacobianFOut, int up2Date);
 
   /** compute NCP error for Fischer-Burmeister formulation **/
   double Compute_NCP_error1(int contact, double error);

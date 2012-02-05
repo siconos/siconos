@@ -56,8 +56,8 @@ extern "C"
 
   /** General interface to solvers for friction-contact 3D problem
   \param[in] , the structure which handles the generic mechanical problem
-  \param[in-out] , reaction global vector (n)
-  \param[in-out] , velocity global vector (n)
+  \param[in,out] , reaction global vector (n)
+  \param[in,out] , velocity global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
                  option->iparam[0]:nb max of iterations
      option->iparam[1]:0 without 'LS' 1 with.
@@ -77,7 +77,7 @@ extern "C"
   /* Insert a problem in the GenericMechanicalProblem pGMP. The memory of the elematary block is not managed. The user has to ensure it.
      In the case of SICONOS, the Kernel ensure this allocation in building the global problem. In other words, the matrix0 is shared with the global NumericsMatrix,
      the plug is done in the function genericMechanicalProblem_GS (ie: localProblem->M->matrix0= m->block[diagBlockNumber];)
-   \param[in-out], pGMP a pointer.
+   \param[in,out], pGMP a pointer.
    \param[in], problemType, type of the added sub-problem (either SICONOS_NUMERICS_PROBLEM_LCP, SICONOS_NUMERICS_PROBLEM_EQUALITY or SICONOS_NUMERICS_PROBLEM_FC3D)
    \param[in], size of the formulation (dim of the LCP, or dim of the linear system, 3 for the fc3d)
    \ return the localProblem (either lcp, linearSystem of fc3d
@@ -89,12 +89,12 @@ extern "C"
   void displayGMP(GenericMechanicalProblem * pGMP);
   /*Builder of options, it supposes that options is not NULL.
    \param [in] id, not used in current version
-   \param [in-out] options, the filled options.(by default LEMKE and Quartic)
+   \param [in,out] options, the filled options.(by default LEMKE and Quartic)
    */
   void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id);
   /*To print a GenericMechanicalProblem in a file.
     \param[in] problem, the printed problem.
-    \param[in-out] output file.
+    \param[in,out] output file.
    */
   void genericMechanical_printInFile(GenericMechanicalProblem*  problem, FILE* file);
   /*To build a GenericMechanicalProblem from a file.

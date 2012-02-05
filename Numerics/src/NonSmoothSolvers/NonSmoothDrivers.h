@@ -78,8 +78,8 @@ extern "C"
 
   /** General interface to solvers for friction-contact 2D problem
       \param[in] , the structure which handles the Friction-Contact problem
-      \param[in-out] , reaction global vector (n)
-      \param[in-out] , velocity global vector (n)
+      \param[in,out] , reaction global vector (n)
+      \param[in,out] , velocity global vector (n)
       \param[in,out] options structure used to define the solver(s) and their parameters
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).

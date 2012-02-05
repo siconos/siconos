@@ -37,6 +37,7 @@ extern "C"
       \param z vector
       \param w vector
       \param tolerance value for error computation
+      \param options
       \param[in,out] error value
    */
   void FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
@@ -45,6 +46,7 @@ extern "C"
       \param z vector
       \param w vector
       \param mu coeficient of friction
+      \param options
       \param[in,out] error value
    */
   void FrictionContact3D_unitary_compute_and_add_error(double z[3] , double w[3], double mu, double * error);
@@ -52,6 +54,7 @@ extern "C"
       \param problem the structure which defines the friction-contact problem
       \param z vector
       \param w vector
+      \param options
       \param tolerance value for error computation
       \param[in,out] error value
    */
@@ -64,6 +67,7 @@ extern "C"
       \param z vector
       \param w vector
       \param tolerance value for error computation
+      \param options
       \param[in,out] error value
    */
   void FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);

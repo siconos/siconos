@@ -21,7 +21,7 @@
 
 #include "NumericsConfig.h"
 
-/*!\file timers.h
+/*!\file timers_interf.h
   \brief A common interface to different timers, see test/testop3x3.c for examples
 */
 

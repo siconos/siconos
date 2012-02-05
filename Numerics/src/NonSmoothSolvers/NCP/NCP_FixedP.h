@@ -21,7 +21,7 @@
 #define Fixe_H
 #include "NonSmoothNewton.h"
 
-/*!\file Fixed_Point.h
+/*!\file NCP_FixedP.h
 
   \author Houari Khenous, 31/05/2008
 */

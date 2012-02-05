@@ -32,7 +32,7 @@ extern "C"
 
   /** Search for the max. element of a vector
       \param[in] x, the vector
-      \param[in-out] solution, value of the greatest element of x
+      \param[in,out] solution, value of the greatest element of x
       \param[in] n, size of x
   */
   void max_part(double*, double*, int);
@@ -46,7 +46,7 @@ extern "C"
 
   /** Search for the min. element of a vector
       \param[in] x, the vector
-      \param[in-out] solution, value of the smallest element of x
+      \param[in,out] solution, value of the smallest element of x
       \param[in] n, size of x
   */
   void min_part(double*, double*, int);
@@ -60,14 +60,14 @@ extern "C"
 
   /** Positive part values of the components of a vector
       \param[in] x, the vector
-      \param[in-out] solution, vector of positive part values of x components
+      \param[in,out] solution, vector of positive part values of x components
       \param[in] n, size of x
   */
   void pos_part(double*, double*, int);
 
   /** Absolute values of the components of a vector
       \param[in] x, the vector
-      \param[in-out] solution, vector of absolute values of x components
+      \param[in,out] solution, vector of absolute values of x components
       \param[in] n, size of x
   */
   void abs_part(double*, double*, int);

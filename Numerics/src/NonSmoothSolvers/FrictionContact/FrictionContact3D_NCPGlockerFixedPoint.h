@@ -19,7 +19,7 @@
 #ifndef FRICTIONCONTACT3DNCPGlockerFixedPoint_H
 #define FRICTIONCONTACT3DNCPGlockerFixedPoint_H
 
-/*!\file FrictionContact3D_FixedP.h
+/*!\file FrictionContact3D_NCPGlockerFixedPoint.h
   \brief Typedef and functions declarations related to NCP-Fixed Point solver for 3 dimension frictional contact problems.
   \author Houari Khenous
   Each solver must have 4 functions in its interface:

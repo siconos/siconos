@@ -151,7 +151,7 @@ extern "C"
       \param[in] A, the matrix to be multiplied
       \param[in] x, the vector to be multiplied
       \param[in] beta coefficient
-      \param[in-out] y, the resulting vector
+      \param[in,out] y, the resulting vector
   */
   void prodSBM(unsigned int sizeX, unsigned int sizeY,
                double alpha, const SparseBlockStructuredMatrix* const A,
@@ -163,7 +163,7 @@ extern "C"
      \param[in] A, the matrix to be multiplied
      \param[in] B, the matrix to be multiplied
     \param[in] beta coefficient
-     \param[in-out] C, the resulting matrix
+     \param[in,out] C, the resulting matrix
   */
   void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A,
                   const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
@@ -171,7 +171,7 @@ extern "C"
   /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
     \param[in] A, the matrix to be multiplied
     \param[in] B, the matrix to be multiplied
-    \param[in-out] C, the resulting matrix
+    \param[in,out] C, the resulting matrix
   */
   void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
 
@@ -181,7 +181,7 @@ extern "C"
       \param[in] currentRowNumber, number of the required row of blocks
       \param[in] A, the matrix to be multiplied
       \param[in] x, the vector to be multiplied
-      \param[in-out] y, the resulting vector
+      \param[in,out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
   void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
@@ -192,7 +192,7 @@ extern "C"
       \param[in] currentRowNumber, number of the required row of blocks
       \param[in] A, the matrix to be multiplied
       \param[in] x, the vector to be multiplied
-      \param[in-out] y, the resulting vector
+      \param[in,out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
   void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
@@ -276,7 +276,7 @@ extern "C"
   int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B);
 
   /** Inverse (in place) a square diagonal block matrix
-  \param[in-out] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param[in,out] M the SparseBlockStructuredMatrix matrix to be inversed
   */
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 
@@ -285,7 +285,7 @@ extern "C"
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
       \param[in] the blocksize
       \param[in] pointer on the Sparse Matrix
-      \param[in-out] pointer on an empty SparseBlockStructuredMatrix
+      \param[in,out] pointer on an empty SparseBlockStructuredMatrix
   */
   int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
