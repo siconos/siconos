@@ -180,6 +180,7 @@ extern "C"
    1 = no convergence,\n
    2 = Cholesky factorization failed,\n
    3 = Nul diagonal term\n
+   \param options
    \author Nineb Sheherazade.
   */
   void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)  ;

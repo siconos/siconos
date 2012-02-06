@@ -38,33 +38,29 @@ extern "C"
 {
 #endif
   /** Initialize friction-contact 3D Path solver
-      \param dim. of the global problem
-      \param matrix M of the global problem
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-      \param  SolverOptions * options of the solver
+   * \param problem to solve
+   * \param localproblem to solve
+   * \param localsolver_options of the solver
    */
-  void frictionContact3D_Path_initialize(FrictionContactProblem * problem , FrictionContactProblem * localproblem, SolverOptions *);
+  void frictionContact3D_Path_initialize(FrictionContactProblem * problem , FrictionContactProblem * localproblem, SolverOptions * localsolver_options);
 
   /** solve friction-contact 3D problem with Path
-      \param number (position in global matrix) of the considered contact
-      \param dim. of the global problem
-      \param global reaction (only the block corresponding to the current contact will be modified,
-      \param vector of int parameters (max iteration numnber ...)
-      \param  SolverOptions * options of the solver
+   * \param localproblem to solve
+   * \param reaction
+   * \param options of the solver
    */
-  int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double*, SolverOptions*);
+  int frictionContact3D_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions* options);
 
   /** free memory for friction contact 3D Path solver */
   void frictionContact3D_Path_free();
 
-  /** solve friction-contact 3D problem with Path
-      \param dimension of the global problem
-      \param velocity vector (in-out)
-      \param global reaction vector
-      \param output error
-  */
-  void frictionContact3D_Path_computeError(int, double*, double*, double *);
+  /**  compute error for  friction-contact 3D problem with Path
+   * \param dimension of the global problem
+   * \param[in,out] velocity vector (\warning in-out parameter )
+   * \param reaction vector
+   * \param output_error
+   */
+  void frictionContact3D_Path_computeError(int dimension, double* velocity, double* reaction, double * output_error);
 
 #ifdef __cplusplus
 }

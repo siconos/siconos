@@ -355,8 +355,6 @@ char * idToName(int Id)
     /*FRICTION_2D*/
   case SICONOS_FRICTION_2D_NSGS:
     return SICONOS_FRICTION_2D_NSGS_STR;
-  case SICONOS_FRICTION_2D_NLGS:
-    return SICONOS_FRICTION_2D_NLGS_STR;
   case SICONOS_FRICTION_2D_PGS:
     return SICONOS_FRICTION_2D_PGS_STR;
   case SICONOS_FRICTION_2D_CPG:
@@ -504,8 +502,6 @@ int nameToId(char * pName)
   /*FRICTION_2D*/
   else if (strcmp(SICONOS_FRICTION_2D_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_2D_NSGS;
-  else if (strcmp(SICONOS_FRICTION_2D_NLGS_STR, pName) == 0)
-    return SICONOS_FRICTION_2D_NLGS;
   else if (strcmp(SICONOS_FRICTION_2D_PGS_STR, pName) == 0)
     return SICONOS_FRICTION_2D_PGS;
   else if (strcmp(SICONOS_FRICTION_2D_CPG_STR, pName) == 0)

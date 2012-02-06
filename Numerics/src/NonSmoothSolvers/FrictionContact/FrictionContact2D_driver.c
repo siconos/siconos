@@ -25,7 +25,6 @@
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
 char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-char *  SICONOS_FRICTION_2D_NLGS_STR  = "F2D_NLGS";
 char *  SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 char *  SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
 char *  SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
@@ -101,13 +100,12 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
     switch (options->solverId)
     {
       /****** NLGS algorithm ******/
-    case SICONOS_FRICTION_2D_NLGS:
     case SICONOS_FRICTION_2D_PGS:
     case SICONOS_FRICTION_2D_NSGS:
     {
       if (verbose)
         printf(" ========================== Call NLGS solver for Friction-Contact 2D problem ==========================\n");
-      FrictionContact2D_nlgs(problem, reaction, velocity, &info, options);
+      FrictionContact2D_nsgs(problem, reaction, velocity, &info, options);
       break;
     }
     /****** CPG algorithm ******/

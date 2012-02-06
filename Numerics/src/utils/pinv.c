@@ -181,7 +181,6 @@ double pinv(double * A, int n, int m, double tolerance)
   free(S);
   return conditioning;
 #else
-#include <stdio.h>
   numericsError("pinv", "DGESVD not found");
   return 0.0;
 #endif

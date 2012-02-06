@@ -73,7 +73,6 @@ double cond(double * A, int n, int m)
 
   return conditioning;
 #else
-#include <stdio.h>
   fprintf(stderr, "Numerics. cond.c dgesvd not found\n");
   return 0.0;
 #endif

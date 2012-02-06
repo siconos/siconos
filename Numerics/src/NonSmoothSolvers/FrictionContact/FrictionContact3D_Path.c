@@ -130,7 +130,7 @@ void frictionContact3D_Path_free()
   (*freeSolver)();
 }
 
-void frictionContact3D_Path_computeError(int n, double* velocity, double*reaction, double * error)
+void frictionContact3D_Path_computeError(int n, double* velocity, double* reaction, double * error)
 {
   /*   int numberOfContacts = n/3; */
   /*   int sizeGlobal = numberOfContacts*FSize; */

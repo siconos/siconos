@@ -32,21 +32,6 @@ unsigned int NUMERICS_GMP_FREE_GMP = 1 << 3;
 /* void * solverLCP; */
 /* void * solverMLCP; */
 
-/** GenericMechanicalProblem
-    \param numberOfBlockLine The number of line of blocks.
-    \param M A sparse blocks matrix.
-    \param q A dense vector.
-    \param problems An array of pointer on Numerics problem, either FrictionContactProblem, LinearSystemProblem, MixedLinearComplementarityProblem or LinearComplementarityProblem.
-    Each of them contain only the parameters value that can not be decuced from the corresponding block lines (n and m for the MLCP, mu and e for the Friction problem). The size is numberOfBlockLine.
-    \param problemsType
- */
-
-/** Remark:
-
-    The M and q contains de matrices of the problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
-
-
- */
 GenericMechanicalProblem * buildEmptyGenericMechanicalProblem()
 {
   GenericMechanicalProblem * paux = malloc(sizeof(GenericMechanicalProblem));

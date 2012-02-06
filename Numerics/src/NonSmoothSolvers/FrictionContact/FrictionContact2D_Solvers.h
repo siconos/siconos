@@ -92,12 +92,12 @@ extern "C"
        \param[in,out] info termination value
        \param[in,out] options structure
   */
-  void FrictionContact2D_nlgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
+  void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LATIN
   \param options  the pointer to the options to set
   */
-  int frictionContact2D_nlgs_setDefaultSolverOptions(SolverOptions* options);
+  int frictionContact2D_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
   /**  latin solver for primal contact problem with friction in the 2D case.
        \param[in] problem the friction-contact problem

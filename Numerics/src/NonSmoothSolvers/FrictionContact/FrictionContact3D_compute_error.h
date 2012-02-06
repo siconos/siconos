@@ -46,7 +46,6 @@ extern "C"
       \param z vector
       \param w vector
       \param mu coeficient of friction
-      \param options
       \param[in,out] error value
    */
   void FrictionContact3D_unitary_compute_and_add_error(double z[3] , double w[3], double mu, double * error);

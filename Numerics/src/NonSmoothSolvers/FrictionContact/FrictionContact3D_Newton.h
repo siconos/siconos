@@ -38,33 +38,29 @@ extern "C"
 {
 #endif
   /** Initialize friction-contact 3D Newton solver
-      \param dim. of the global problem
-      \param matrix M of the global problem
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-      \param  SolverOptions * options of the solver
-
+   * \param problem to solve
+   * \param localproblem to solve
+   * \param options of the solver
    */
-  void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions *);
+  void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
 
   /** solve friction-contact 3D problem with Newton
-      \param the local problem to solve
-      \param local reaction
-      \param  SolverOptions * options of the solver
-      return 0 iff successful.
+   * \param localproblem to solve
+   * \param options of the solver
+   * \return 0 iff successful.
    */
-  int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions *);
+  int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
 
   /** free memory for friction contact 3D Newton solver */
   void frictionContact3D_Newton_free();
 
-  /** solve friction-contact 3D problem with Newton
-      \param dimension of the global problem
-      \param velocity vector (in-out)
-      \param global reaction vector
-      \param output error
-  */
-  void frictionContact3D_Newton_computeError(int, double*, double*, double *);
+  /** compute error for friction-contact 3D problem with Newton
+   *  \param dimension of the global problem
+   *   \param[in,out] velocity vector (\warning in-out parameter )
+   *   \param reaction global reaction vector
+   *   \param output_error
+   */
+  void frictionContact3D_Newton_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 
 #ifdef __cplusplus
 }

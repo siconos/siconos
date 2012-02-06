@@ -19,8 +19,6 @@
 
 /*!\file NonSmoothDrivers.h
   \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
-  \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
   \todo solve_qp does not exist
 
   Use FrictionContact3D tools.

@@ -27,17 +27,16 @@
 /* void * solverLCP; */
 /* void * solverMLCP; */
 
-/** GenericMechanicalProblem
-    \param numberOfBlockLine The number of line of blocks.
-    \param M A sparse blocks matrix.
-    \param q A dense vector.
- */
-
-/** Remark:
-
-    The M and q contains de matrices of the problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
-
-
+/** \struct GenericMechanicalProblem GenericMechanicalProblem.h
+ *  \param numberOfBlockLine The number of  line of blocks.
+ *   \param M a sparse blocks matrix.
+ *   \param q a dense vector.
+ *   \param size sizes of the local problems (needed in the dense case)
+ *   \param nextProblem the list of the next problems
+ *   \param prevProblem the list of the previous problems
+ *   Remark:
+ *   The M and q contains the matrices of the GMP problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
+ *
  */
 typedef struct _listNumericsProblem
 {
@@ -50,8 +49,24 @@ typedef struct _listNumericsProblem
 } listNumericsProblem;
 
 
-/*ONLY q and M must be allocated/free by the users, the others fields are private:
-  DO NOT FILL THIS STRUCTURE BY YOURSELF, BUT USE THE buildEmptyGenericMechanicalProblem, addProblem and freeGenericMechanicalProblem FUNCTIONS.
+/** \struct GenericMechanicalProblem GenericMechanicalProblem.h
+ * \param numberOfBlockLine The number of  line of blocks.
+ * \param M : NumericsMatrix sparseblock matrix set by the user
+ * \param q : dense vector set by the user
+ * \param size : maximal size of local problem
+ * \param maxLocalSize "private" manage by addProblem
+ * \param firstListElem "private" manage by addProblem
+ * \param lastListElem  "private" manage by addProblem
+ *
+ *  Remark:
+ *  The M and q contains the matrices of the GMP problem.
+ *  The sub problems (problems) has also a M and q member usfull for the computation of the local error.
+ *
+ * ONLY q and M must be allocated/free by the users, the others fields are private:
+ * DO NOT FILL THIS STRUCTURE BY YOURSELF, BUT USE THE
+ * - buildEmptyGenericMechanicalProblem() ,
+ * - addProblem() ,
+ * - and freeGenericMechanicalProblem() FUNCTIONS.
  */
 typedef struct
 {

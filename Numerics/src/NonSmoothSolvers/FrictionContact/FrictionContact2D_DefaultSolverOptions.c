@@ -34,12 +34,12 @@ int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, int solver
   case SICONOS_FRICTION_2D_NSGS:
   {
     info =    frictionContact2D_sparse_nsgs_setDefaultSolverOptions(options);
+    /* info =    frictionContact2D_nsgs_setDefaultSolverOptions(options); */
     break;
   }
   case SICONOS_FRICTION_2D_PGS:
-  case SICONOS_FRICTION_2D_NLGS:
   {
-    info =    frictionContact2D_nlgs_setDefaultSolverOptions(options);
+    info =    frictionContact2D_nsgs_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_FRICTION_2D_CPG:

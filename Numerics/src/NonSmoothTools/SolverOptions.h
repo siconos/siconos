@@ -37,7 +37,7 @@ SolverOptions main components are:
 Check each type of formulation of the problem to find which solvers are available and what are the required parameters. \n
 See for example:
  - \ref LCPSolvers
- - \ref FrictionContact3DSolvers
+ - \ref FC3DSolvers
 
 As an example, consider \ref LCProblem : \n
 M is a NumericsMatrix and can be saved as a double* or as a SparseBlockStructuredMatrix.\n
@@ -66,7 +66,8 @@ In that case options must be a vector of SolverOptions, with:\n
  - options[0] the definition for the global "block" solver
  - options[i], i>0, the solvers used for each local problem.
 
-\bf Example with a LCP:
+
+Example with a LCP:
 \code
 // First define a vector of options
 int nbSolvers = 3;
@@ -114,9 +115,10 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 
 #include "NumericsOptions.h"
 
-/** Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
+/** \struct  SolverOptions SolverOptions.h
+ Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
-    \param solverName name of the solver
+    \param solverId Id of the solver (see )
     \param numberOfSolvers : the number of internal or local solvers used by the solver
     \param iSize size of vectors iparam \n
     \param iparam a list of int parameters (depends on each solver, see solver doc.)

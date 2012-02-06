@@ -40,34 +40,32 @@ extern "C"
 
   void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date);
 
+
   /** Initialize friction-contact 3D Fixed Point solver
-      \param dim. of the global problem
-      \param matrix M of the global problem
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-      \param  SolverOptions * options of the solver
-  */
-  void frictionContact3D_FixedP_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions *);
+   * \param problem to solve
+   * \param localproblem to solve
+   * \param localsolver_options of the solver
+   */
+  void frictionContact3D_FixedP_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions * localsolver_options);
 
   /** solve friction-contact 3D problem with Fixed Point
-      \param number (position in global matrix) of the considered contact
-      \param dim. of the global problem
-      \param global reaction (only the block corresponding to the current contact will be modified,
-      \param  SolverOptions * options of the solver
+      \param localproblem to solve
+      \param reaction (only the block corresponding to the current contact will be modified,
+      \param  options of the solver
       return 0 iff successful
    */
-  int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* , SolverOptions *);
+  int frictionContact3D_FixedP_solve(FrictionContactProblem * localproblem , double* reaction , SolverOptions * options);
 
   /** free memory for friction contact 3D Fixed Point solver */
   void frictionContact3D_FixedP_free();
 
-  /** solve friction-contact 3D problem with Fixed Point
-      \param dimension of the global problem
-      \param velocity vector (in-out)
-      \param global reaction vector
-      \param output error
+  /** compute error for friction-contact 3D problem with Fixed Point
+   * \param dimension of the global problem
+   * \param[in,out] velocity vector (\warning in-out parameter )
+   * \param reaction vector
+   * \param output_error
   */
-  void frictionContact3D_Path_computeError(int, double*, double*, double *);
+  void frictionContact3D_Path_computeError(int dimension, double* velocity, double* reaction, double * output_error);
 
 #ifdef __cplusplus
 }

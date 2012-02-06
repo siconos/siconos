@@ -24,7 +24,7 @@
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
-void FrictionContact2D_nlgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
@@ -282,16 +282,16 @@ void FrictionContact2D_nlgs(FrictionContactProblem* problem , double *reaction ,
 
 
 }
-int frictionContact2D_nlgs_setDefaultSolverOptions(SolverOptions *options)
+int frictionContact2D_nsgs_setDefaultSolverOptions(SolverOptions *options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the Latin Solver\n");
+    printf("Set the Default SolverOptions for the 2D NSGS Solver\n");
   }
 
   /*  strcpy(options->solverName,"NLGS");*/
-  options->solverId = SICONOS_FRICTION_2D_NLGS;
+  options->solverId = SICONOS_FRICTION_2D_NSGS;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;

@@ -55,9 +55,9 @@ extern "C"
 #endif
 
   /** General interface to solvers for friction-contact 3D problem
-  \param[in] , the structure which handles the generic mechanical problem
-  \param[in,out] , reaction global vector (n)
-  \param[in,out] , velocity global vector (n)
+  \param[in] problem the structure which handles the generic mechanical problem
+  \param[in,out]  reaction global vector (n)
+  \param[in,out]  velocity global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
                  option->iparam[0]:nb max of iterations
      option->iparam[1]:0 without 'LS' 1 with.

@@ -23,7 +23,7 @@
 extern "C"
 {
 #endif
-  /** projectionOnCylinder Projection onto the positive Cylinder of radius R  \f$K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq R \}
+  /** projectionOnCylinder Projection onto the positive Cylinder of radius R  \f$  \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq R \} \f$
   \param[in,out] the vector to be projected
   \param[in] R the radius of the cone
   */

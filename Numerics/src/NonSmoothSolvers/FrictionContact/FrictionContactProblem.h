@@ -18,17 +18,17 @@
 #ifndef FRICTIONCONTACTPROBLEM_H
 #define FRICTIONCONTACTPROBLEM_H
 
-/*! \page fcProblem Friction-contact problems (2 or 3-dimensional)
+/*! \page fcProblem Friction-contact problems (2D or 3D)
  *
- * \section fcIntro The problem
+ * \section fcIntro Problem statement
  *  Given
  * <ul>
- *   <li> a symmetric positive semi--definite  matrix \f${M} \in {{\mathrm{I\!R}}}^{m \times m} \f$ </li>
- *   <li> a vector \f$ {q} \in {{\mathrm{I\!R}}}^m\f$</li>
+ *   <li> a symmetric positive semi--definite  matrix \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$ </li>
+ *   <li> a vector \f$ {q} \in {{\mathrm{I\!R}}}^n\f$</li>
  *   <li> a vector of coefficients of friction \f$\mu \in{{\mathrm{I\!R}}}^{n_c}\f$</li>
  *</ul>
- * the (reduced or dual) frictional contact problem  is to find two vectors \f$u\in{{\mathrm{I\!R}}}^m\f$,
- * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^m\f$,
+ * the (reduced or dual) frictional contact problem  is to find two vectors \f$u\in{{\mathrm{I\!R}}}^n\f$,
+ * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^n\f$,
  * the contact forces denoted by \f$\mathrm{FC}(W,q,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
@@ -45,11 +45,14 @@
  * \f}
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
  *
- * The Coulomb's friction law with the Signorini condition for the unilateral contact written in terms of second order complementarity condition
+ * The modified local velocity \f$\widehat u \f$ is not considered as an unknown since it can obtained uniquely
+ * from the local velocity \f$u\f$.
+ * Coulomb's friction law with Signorini's condition for the unilateral contact written in terms
+ * of second order complementarity condition
  * \f{eqnarray}{
  *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
  * \f}
- * can be interpret usually as
+ * can be interpreted in a more usual form
  *
  * \f{eqnarray}{
  * \begin{cases}
@@ -58,56 +61,100 @@
  *  u_T \neq 0 \Rightarrow r_T = - \mu |r_n| \frac{u_T }{\|u_T\|}  \quad\quad\text{ Sliding mode}
  * \end{cases}
  * \f}
+ *
+ * This problem models any instance of discretized frictional contact problem obtained from
+ * <ul>
+ * <li>the time-discretization  of dynamics contact problems with event-capturing of event-tracking schemes, </li>
+ * <li>the time-discretization  of quasi-static contact problems, </li>
+ * <li>the modeling  of static contact problems. In this last case, \f$u\f$ plays the role of the relative displacement at contact  </li>
+ * </ul>
+ *
+ * The problem is stored and given to the solver in Siconos/Numerics tahnks to
+ *  a C structure FrictionContactProblem .
+ *
+ *  \section fc3DSolversList Available solvers for Friction Contact 3D (see Friction_cst.h)
+ * Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
+ *
+ * <ul>
+ *
+ * <li> frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver.
+ *       SolverId : SICONOS_FRICTION_3D_NSGS =500, </li>
+ *
+ * <li> frictionContact3D_nsgs_velocity() : non-smooth Gauss-Seidel solver  based on velocity updates
+ *       SolverId : SICONOS_FRICTION_3D_NSGSV =501, </li>
+ *
+ * <li> frictionContact3D_proximal() : Proximal point solver for friction-contact 3D problem
+ *       SolverId : SICONOS_FRICTION_3D_PROX =502,</li>
+ *
+ * <li> frictionContact3D_TrescaFixedPoint() : Fixed point solver for friction-contact
+ *      3D problem based on the Tresca problem with fixed friction threshold
+ *       SolverId : SICONOS_FRICTION_3D_TFP =503,</li>
+ *
+ * <li> frictionContact3D_globalAlartCurnier() : Global Alart--Curnier solver
+ *       SolverId : SICONOS_FRICTION_3D_GLOBALAC =504,</li>
+ *
+ * <li> frictionContact3D_DeSaxceFixedPoint() : Fixed Point solver for friction-contact 3D problem
+ *      based on the De Saxce Formulation
+ *        SolverId : SICONOS_FRICTION_3D_DSFP=505, </li>
+ *
+ * <li> frictionContact3D_ExtraGradient() : Extra Gradient solver for friction-contact 3D problem
+ *        based on the De Saxce Formulation</li>
+ *        SolverId : SICONOS_FRICTION_3D_EG=506, </li>
+ *
+ * <li> frictionContact3D_HyperplaneProjection() : Hyperplane Projection solver for friction-contact 3D
+ *         problem based on the De Saxce Formulation
+ *        SolverId : SICONOS_FRICTION_3D_HP=507, </li>
+ *
+ * </ul>
+ * (see the functions/solvers list in FrictionContact3D_Solvers.h)
+ *
+ * \section fc3DParam Required and optional parameters
+ * FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver()
+ * function thanks to a SolverOptions structure. \n
+ *
+ * \section fc2DSolversList Available solvers for Friction Contact 2D
+ * <ul>
+ * <li> FrictionContact2D_nsgs(), Non Linear Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =400,
+ * </li>
+ * <li> FrictionContact2D_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_NSGS =401,
+ * </li>
+ * <li> FrictionContact2D_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =402,
+ * </li>
+ * <li> FrictionContact2D_latin(), latin solver. SolverId SICONOS_FRICTION_2D_NSGS =403, </li>
+ * </ul>
+ *
+ */
 
 
-  \section fc3DSolversList Available solvers for Friction Contact 3D
-  Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
-
-  <ul>
-
-  <li> frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver: SolverId : </li>
-  <li> frictionContact3D_nsgs_velocity() : non-smooth Gauss-Seidel solver  based on velocity updates</li>
-  <li> frictionContact3D_proximal() : Proximal point solver for friction-contact 3D problem</li>
-  <li> frictionContact3D_TrescaFixedPoint() </li>
-  <li> frictionContact3D_ProjectedGradientOnCylinder()</li>
-  <li> frictionContact3D_DeSaxceFixedPoint()</li>
-  <li> frictionContact3D_ExtraGradient()</li>
-  <li> frictionContact3D_HyperplaneProjection()</li>
-  </li>  frictionContact3D_AlartCurnierNewton()</li>
-  </ul>
-  (see the functions/solvers list in FrictionContact3D_Solvers.h)
-
-  \section fc3DParam Required and optional parameters
-  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a SolverOptions structure. \n
-  They are:\n
-     - the name of the solver (ex: NSGS), used to switch to the right solver function
-     - iparam[0]: max. number of iterations allowed
-     - iparam[1]:
-     - dparam[0]: tolerance
-     - isStorageSparse: 1 if a SparseBlockStructuredMatrix is used for M, else 0 (double* storage)
-
-  \section fc2DSolversList Available solvers for Friction Contact 2D
-
-  - pfc_2D_latin(), latin solver
-  - pfc_2D_nlgs(), Non Linear Gauss Seidel solver
-  - pfc_2D_cpg(), conjugated projected gradient solver
-  - dfc_2D_latin(), latin solver
-
-*/
-
-/*!\file FrictionContactProblem.h
+/*!\File FrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
-  \author Franck Perignon.
 */
 
 #include "NumericsMatrix.h"
 
-/** The structure that defines a Friction-Contact (3D or 2D) problem
-    \param dimension dimension of the contact space (3D or 2D )
-    \param numberOfContacts the number of contacts
-    \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
-    \param q vector (n)
-    \param mu vector of friction coefficients (size: numberOfContacts)
+/** \struct FrictionContactProblem
+ *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem
+ *  \f$\mathrm{FC}(W,q,\mu)\f$  such that
+ * \f{eqnarray*}{
+ * \begin{cases}
+ *   u = M r + q \\
+ *    \hat u = u +\left[
+ *      \left[\begin{array}{c}
+ *          \mu^\alpha \|u^\alpha_{T}\|\\
+ *         0 \\
+ *         0
+ *        \end{array}\right]^T, \alpha = 1 \ldots n_c
+ *    \right]^T \\ \                                \
+ *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
+ * \end{cases}
+ * \f}
+ *   \param dimension dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D )
+ *   \param numberOfContacts the number of contacts \f$ n_c \f$
+ *   \param M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+ *    a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure
+ *   \param q  \f${q} \in {{\mathrm{I\!R}}}^{n} \f$,
+ *   \param mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
+ *      (\f$ n_c =\f$ numberOfContacts)
 */
 typedef struct
 {
@@ -123,10 +170,21 @@ typedef struct
 extern "C"
 {
 #endif
+  /** print a FrictionContactProblem in a file (numerics .dat format)
+   * \param problem the problem to print out
+   * \param file the dest file
+   */
   int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
 
+  /** read a FrictionContactProblem in a file (numerics .dat format)
+   * \param problem the problem to read
+   * \param file the target file
+   */
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
 
+  /** free a FrictionContactProblem
+   * \param problem the problem to free
+   */
   void freeFrictionContactProblem(FrictionContactProblem* problem);
 
 #ifdef __cplusplus
