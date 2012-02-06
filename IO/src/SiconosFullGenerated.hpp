@@ -1,4 +1,4 @@
-// generated with the command : ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
+// generated with the command : ../tools/builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
 SICONOS_IO_REGISTER_WITH_BASES(ControlFirstOrderLinearDS, (ControlDynamicalSystem),
                                (_x0)
                                (_A))
@@ -14,6 +14,8 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR, (NewtonEulerR),
                                (_AUX2))
 SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent, (Event),
                               )
+SICONOS_IO_REGISTER_WITH_BASES(OSNSMatrixProjectOnConstraints, (OSNSMatrix),
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix, (SiconosMatrix),
                                (_mat)
                                (_tabRow)
@@ -22,10 +24,6 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockVector, (SiconosVector),
                                (_sizeV)
                                (vect)
                                (_tabIndex))
-SICONOS_IO_REGISTER_WITH_BASES(SensorPosition, (Sensor),
-                               (_nSteps)
-                               (_dataPlot)
-                               (_k))
 SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
                     (BVP)
                     (_topology)
@@ -57,6 +55,20 @@ SICONOS_IO_REGISTER(ControlManager,
                     (_model))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL, (NonSmoothLaw),
                                (_e))
+SICONOS_IO_REGISTER_WITH_BASES(LinearSMC, (CommonSMC),
+                               (_B)
+                               (_D)
+                               (_SMC)
+                               (_DS_SMC)
+                               (_tD_SMC)
+                               (_simulationSMC)
+                               (_integratorSMC)
+                               (_thetaSMC)
+                               (_LCP_SMC)
+                               (_OSNSPB_SMC)
+                               (_sampledControl)
+                               (_eventsManager)
+                               (_nsLawSMC))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_v)
                                (_v0)
@@ -81,6 +93,9 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS, (DynamicalSystem),
                                (_forces)
                                (_jacobianvFL)
                                (_jacobianqDotForces))
+SICONOS_IO_REGISTER_WITH_BASES(ControlSensor, (Sensor),
+                               (_YDim)
+                               (_storedY))
 SICONOS_IO_REGISTER(OSNSMatrix,
                     (dimRow)
                     (dimColumn)
@@ -94,6 +109,27 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL, (NonSmoothLaw),
                                (_ub))
 SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL, (NonSmoothLaw),
                                (EqualitySize))
+SICONOS_IO_REGISTER_WITH_BASES(CommonSMC, (Actuator),
+                               (_sDim)
+                               (_indx)
+                               (_u)
+                               (_Csurface)
+                               (_sensor)
+                               (_initDone)
+                               (_curDeltaT)
+                               (_B)
+                               (_D)
+                               (_relationSMC)
+                               (_sign)
+                               (_interactionSMC)
+                               (_lambda)
+                               (_xController))
+SICONOS_IO_REGISTER(TimeDiscretisation,
+                    (_h)
+                    (_k)
+                    (_tk)
+                    (_tdCase)
+                    (_pos))
 SICONOS_IO_REGISTER(UnitaryRelation,
                     (_mainInteraction))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
@@ -120,6 +156,8 @@ SICONOS_IO_REGISTER_WITH_BASES(SchatzmanPaoli, (OneStepIntegrator),
                                (_gamma)
                                (_useGamma)
                                (_useGammaForRelation))
+SICONOS_IO_REGISTER_WITH_BASES(LinearChatteringSMC, (CommonSMC),
+                               (_s))
 SICONOS_IO_REGISTER(SiconosMatrix,
                     (dimRow)
                     (dimCol)
@@ -137,22 +175,20 @@ SICONOS_IO_REGISTER_WITH_BASES(Moreau2, (Moreau),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR, (NewtonEulerFrom1DLocalFrameR),
                               )
-SICONOS_IO_REGISTER_WITH_BASES(commonSMC, (Actuator),
-                               (_nDim)
-                               (_indx)
+SICONOS_IO_REGISTER_WITH_BASES(LinearSensor, (ControlSensor),
+                               (_data)
+                               (_dataPlot)
+                               (_k)
+                               (_matC)
+                               (_matD)
+                               (_nSteps))
+SICONOS_IO_REGISTER_WITH_BASES(SampledPIDActuator, (Actuator),
+                               (_ref)
                                (_u)
-                               (_Csurface)
+                               (_K)
                                (_sensor)
-                               (_DS)
                                (_initDone)
-                               (_curDeltaT)
-                               (_B)
-                               (_D)
-                               (_relationSMC)
-                               (_sign)
-                               (_interactionSMC)
-                               (_lambda)
-                               (_xController))
+                               (_curDeltaT))
 SICONOS_IO_REGISTER_WITH_BASES(LCP, (LinearOSNS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
@@ -164,7 +200,6 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
                                (_jachqDot)
                                (_jachlambda)
                                (_e)
-                               (_yProj)
                                (_contactForce)
                                (_jachqT))
 SICONOS_IO_REGISTER_WITH_BASES(EventDriven, (Simulation),
@@ -175,11 +210,17 @@ SICONOS_IO_REGISTER(ControlDynamicalSystem,
                     (_T)
                     (_h)
                     (_theta)
+                    (_elapsedTime)
+                    (_N)
+                    (_nDim)
+                    (_x0)
+                    (_dataM)
                     (_processDS)
                     (_model)
                     (_processTD)
                     (_processSimulation)
-                    (_processIntegrator))
+                    (_processIntegrator)
+                    (_CM))
 SICONOS_IO_REGISTER(OneStepNSProblem,
                     (_id)
                     (_sizeOutput)
@@ -257,6 +298,9 @@ SICONOS_IO_REGISTER(Sensor,
                     (_type)
                     (_id)
                     (_model)
+                    (_DS)
+                    (_DSx)
+                    (_nDim)
                     (_timeDiscretisation)
                     (_eSensor))
 SICONOS_IO_REGISTER(Topology,
@@ -269,9 +313,11 @@ SICONOS_IO_REGISTER(Topology,
                     (_symmetric))
 SICONOS_IO_REGISTER(Actuator,
                     (_type)
+                    (_nDim)
                     (_id)
                     (_allSensors)
                     (_allDS)
+                    (_DS)
                     (_model)
                     (_timeDiscretisation)
                     (_eActuator))
@@ -326,11 +372,6 @@ SICONOS_IO_REGISTER(Model,
                     (_author)
                     (_description)
                     (_date))
-SICONOS_IO_REGISTER_WITH_BASES(controlSensor, (Sensor),
-                               (_YDim)
-                               (_storedY)
-                               (_DS)
-                               (_DSx))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS, (DynamicalSystem),
                                (_M)
                                (_f)
@@ -367,6 +408,7 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS, (OneStepNSProblem),
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR),
                                (jacgx))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
+                               (_indexSetLevelForProjection)
                                (_constraintTol)
                                (_constraintTolUnilateral)
                                (_projectionMaxIteration)
@@ -385,12 +427,6 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR),
                                (_pluginJachq)
                                (_pluginJachlambda))
-SICONOS_IO_REGISTER(TimeDiscretisation,
-                    (h)
-                    (k)
-                    (tk)
-                    (tdCase)
-                    (pos))
 SICONOS_IO_REGISTER(NonSmoothLaw,
                     (_size)
                     (_sizeProjectOnConstraints))
@@ -425,7 +461,7 @@ SICONOS_IO_REGISTER(Event,
 SICONOS_IO_REGISTER_WITH_BASES(ActuatorEvent, (Event),
                                (_actuator))
 SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints, (MLCP),
-                              )
+                               (_alpha))
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (Impulse_variable)
                                (Time_variable)
@@ -463,7 +499,7 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (SizeDataSave)
                                (_IsImpactEnd))
 SICONOS_IO_REGISTER(PluggedObject,
-                    (pluginName))
+                    (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL, (NonSmoothLaw),
                                (_en)
                                (_et)
@@ -481,13 +517,6 @@ SICONOS_IO_REGISTER(EventsManager,
                     (_hasNS)
                     (_hasCM)
                     (_GapLimit2Events))
-SICONOS_IO_REGISTER_WITH_BASES(linearSensor, (controlSensor),
-                               (_data)
-                               (_dataPlot)
-                               (_k)
-                               (_matC)
-                               (_matD)
-                               (_nSteps))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_ndof)
                                (_q)
@@ -643,10 +672,11 @@ SICONOS_IO_REGISTER(SpaceFilter,
                     (_bboxfactor)
                     (_cellsize)
                     (_interID)
-                    (_nsds)
+                    (_model)
                     (_nslaw)
                     (_plans)
-                    (_hash_table))
+                    (_hash_table)
+                    (_osnsinit))
 
 template <class Archive>
 void siconos_io_register_generated(Archive& ar)
@@ -654,25 +684,30 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<ControlFirstOrderLinearDS*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
+  ar.register_type(static_cast<OSNSMatrixProjectOnConstraints*>(NULL));
   ar.register_type(static_cast<BlockMatrix*>(NULL));
   ar.register_type(static_cast<BlockVector*>(NULL));
-  ar.register_type(static_cast<SensorPosition*>(NULL));
   ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<ControlManager*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
+  ar.register_type(static_cast<LinearSMC*>(NULL));
   ar.register_type(static_cast<NewtonEulerDS*>(NULL));
   ar.register_type(static_cast<OSNSMatrix*>(NULL));
   ar.register_type(static_cast<RelayNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+  ar.register_type(static_cast<TimeDiscretisation*>(NULL));
   ar.register_type(static_cast<UnitaryRelation*>(NULL));
   ar.register_type(static_cast<SensorEvent*>(NULL));
   ar.register_type(static_cast<MLCP*>(NULL));
   ar.register_type(static_cast<TimeSteppingD1Minus*>(NULL));
   ar.register_type(static_cast<SchatzmanPaoli*>(NULL));
+  ar.register_type(static_cast<LinearChatteringSMC*>(NULL));
   ar.register_type(static_cast<BlockCSRMatrix*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
   ar.register_type(static_cast<Moreau2*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<LinearSensor*>(NULL));
+  ar.register_type(static_cast<SampledPIDActuator*>(NULL));
   ar.register_type(static_cast<LCP*>(NULL));
   ar.register_type(static_cast<NewtonEulerR*>(NULL));
   ar.register_type(static_cast<EventDriven*>(NULL));
@@ -698,7 +733,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
   ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
-  ar.register_type(static_cast<TimeDiscretisation*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
@@ -710,7 +744,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<EventsManager*>(NULL));
-  ar.register_type(static_cast<linearSensor*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<Circle*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));

@@ -56,7 +56,8 @@ def is_serializable(c):
     return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans',s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err',s)
+    # note _err -> boost::circular_buffer issue with serialization
     return m != None
 
 def name(t):
