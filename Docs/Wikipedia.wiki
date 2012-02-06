@@ -35,6 +35,24 @@ modeling and simulating nonsmooth dynanical systems. The software is based on 3 
 
 ==References==
 <references/>
+* {{citation
+    |last1=Acary
+    |first1=Vincent
+    |last2=Brogliato
+    |first2=Bernard
+    |title=Numerical Methods for Nonsmooth Dynamical Systems
+    |journal=Lecture Notes in Applied and Computational Mechanics
+    |year=2008
+    |volume=35 }}
+* [http://hal.inria.fr/inria-00162911/en] {{citation
+    |last1=Acary
+    |first1=Vincent
+    |last2=Perignon
+    |first2=Franck
+    |title=An introduction to Siconos.
+    |journal=INRIA Technical Report], pp. 45. RT-0340
+    |year=2007 }}
+* [http://haltools.inrialpes.fr/Public/afficheRequetePubli.php?auteur_exp=acary&CB_auteur=oui&CB_titre=oui&CB_article=oui&css_prive=http://bipop.inrialpes.fr/people/acary/CSShal.css&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&ordre_aff=TA&__utma=197383159.1567354679.1253654614.1255333653.1255379940.8&__utmz=197383159.1255333653.7.3.utmccn=(organic)|utmcsr=google|utmctr=jean%20acary%20monerie|utmcmd=organic&menu=Export&Fen=Aff&css=http://bipop.inrialpes.fr/people/acary/CSShal.css] other related publications
 
 ==External links==
 *[http://siconos.gforge.inria.fr The official Siconos site]
