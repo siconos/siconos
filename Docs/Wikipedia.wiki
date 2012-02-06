@@ -35,7 +35,7 @@ modeling and simulating nonsmooth dynanical systems. The software is based on 3 
 
 ==References==
 <references/>
-* {{citation
+*[http://www.springer.com/materials/mechanics/book/978-3-540-75391-9]{{citation
     |last1=Acary
     |first1=Vincent
     |last2=Brogliato
