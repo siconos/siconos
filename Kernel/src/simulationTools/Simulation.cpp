@@ -226,26 +226,6 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 
 }
 
-// WE have to remove this ASAP
-void Simulation::updateInteractions()
-{
-
-  SP::InteractionsSet allInteractions =
-    model()->nonSmoothDynamicalSystem()->interactions();
-  if (!_allNSProblems->empty())
-  {
-    double time = model()->currentTime(); // init with current model time
-
-    computeLevelsForInputAndOutput();
-
-    std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, time));
-
-    initOSNS();
-  }
-
-}
-
 void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===

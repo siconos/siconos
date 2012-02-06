@@ -64,76 +64,81 @@ void DisksViewer::draw()
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
-  SP::UnitaryRelationsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
+  SP::UnitaryRelationsGraph I1;
   SP::Interaction interaction;
   SP::Relation relation;
 
-
-  // calibration
-  UnitaryRelationsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
+  if (Siconos_->model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
   {
-    lbdmax = fmax(I1->bundle(*ui)->interaction()->lambdaOld(1)->getValue(0), lbdmax);
-  }
+    I1 = Siconos_->model()->simulation()->indexSet(1);
 
-  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
-  {
-    interaction = I1->bundle(*ui)->interaction();
-    relation = interaction->relation();
-
-    lbd = interaction->lambdaOld(1)->getValue(0);
-
-    // screen width of interaction
-    w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
-
-    involvedDS = interaction->dynamicalSystems();
-
-    // disk/disk
-    itDS = involvedDS->begin();
-
-    SP::DynamicalSystem d1 = *itDS;
-
-    SP::SiconosVector q1 = ask<ForPosition>(*d1);
-
-    float x1 = (*q1)(0);
-    float y1 = (*q1)(1);
-    float r1 = ask<ForRadius>(*d1);
-
-
-    if (involvedDS->size() == 2)
+    // calibration
+    UnitaryRelationsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
     {
-      SP::DynamicalSystem d2;
-      d2 = *++itDS;
-      SP::SiconosVector q2 = ask<ForPosition>(*d2);
-      float x2 = (*q2)(0);
-      float y2 = (*q2)(1);
-      float r2 = ask<ForRadius>(*d2);
-
-      float d = hypotf(x1 - x2, y1 - y2);
-
-      glPushMatrix();
-
-      glColor3f(.0f, .0f, .0f);
-      drawRec(x1, y1, x1 + (x2 - x1)*r1 / d, y1 + (y2 - y1)*r1 / d, w);
-      drawRec(x2, y2, x2 + (x1 - x2)*r2 / d, y2 + (y1 - y2)*r2 / d, w);
-
-      glPopMatrix();
+      lbdmax = fmax(I1->bundle(*ui)->interaction()->lambdaOld(1)->getValue(0), lbdmax);
     }
 
-    else
+    for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
     {
-      SP::SiconosMatrix jachq = ask<ForJachq>(*relation);
-      double jx = jachq->getValue(0, 0);
-      double jy = jachq->getValue(0, 1);
-      double dj = hypot(jx, jy);
+      interaction = I1->bundle(*ui)->interaction();
+      relation = interaction->relation();
 
-      glPushMatrix();
+      lbd = interaction->lambdaOld(1)->getValue(0);
 
-      glColor3f(.0f, .0f, .0f);
-      drawRec(x1, y1, x1 - r1 * jx / dj, y1 - r1 * jy / dj, w);
-      glPopMatrix();
+      // screen width of interaction
+      w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
+
+      involvedDS = interaction->dynamicalSystems();
+
+      // disk/disk
+      itDS = involvedDS->begin();
+
+      SP::DynamicalSystem d1 = *itDS;
+
+      SP::SiconosVector q1 = ask<ForPosition>(*d1);
+
+      float x1 = (*q1)(0);
+      float y1 = (*q1)(1);
+      float r1 = ask<ForRadius>(*d1);
+
+
+      if (involvedDS->size() == 2)
+      {
+        SP::DynamicalSystem d2;
+        d2 = *++itDS;
+        SP::SiconosVector q2 = ask<ForPosition>(*d2);
+        float x2 = (*q2)(0);
+        float y2 = (*q2)(1);
+        float r2 = ask<ForRadius>(*d2);
+
+        float d = hypotf(x1 - x2, y1 - y2);
+
+        glPushMatrix();
+
+        glColor3f(.0f, .0f, .0f);
+        drawRec(x1, y1, x1 + (x2 - x1)*r1 / d, y1 + (y2 - y1)*r1 / d, w);
+        drawRec(x2, y2, x2 + (x1 - x2)*r2 / d, y2 + (y1 - y2)*r2 / d, w);
+
+        glPopMatrix();
+      }
+
+      else
+      {
+        SP::SiconosMatrix jachq = ask<ForJachq>(*relation);
+        double jx = jachq->getValue(0, 0);
+        double jy = jachq->getValue(0, 1);
+        double dj = hypot(jx, jy);
+
+        glPushMatrix();
+
+        glColor3f(.0f, .0f, .0f);
+        drawRec(x1, y1, x1 - r1 * jx / dj, y1 - r1 * jy / dj, w);
+        glPopMatrix();
+      }
     }
   }
+
 
   for (unsigned int i = 0; i < GETNDS(Siconos_); i++)
   {

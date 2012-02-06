@@ -62,8 +62,6 @@ void Spheres::init()
   // --- Dynamical systems && interactions ---
   // -----------------------------------------
 
-  unsigned int j;
-  int interCounter = 0;
 
   double R;
   double m;
@@ -173,7 +171,7 @@ void Spheres::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 3));
 
-    _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _model, nslaw, _plans, _moving_plans));
 
     _model->initialize(simulation_);
 

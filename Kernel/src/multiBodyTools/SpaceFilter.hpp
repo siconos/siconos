@@ -125,8 +125,8 @@ protected:
   /** interaction counter */
   unsigned int _interID;
 
-  /** the whole NonSmoothDynamicalSystem */
-  SP::NonSmoothDynamicalSystem _nsds;
+  /** the siconos model */
+  SP::Model _model;
 
   /** only one nslaw */
   SP::NonSmoothLaw _nslaw;
@@ -139,6 +139,9 @@ protected:
 
   /* the hash table */
   space_hash _hash_table;
+
+  /* kee track of one step ns integrator initialization */
+  bool _osnsinit;
 
   void _PlanCircularFilter(double A, double B, double C,
                            double xCenter, double yCenter, double width,
@@ -193,21 +196,21 @@ public:
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds,
+              SP::Model model,
               SP::NonSmoothLaw nslaw,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans) :
     _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _nsds(nsds), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans)
+    _model(model), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans), _osnsinit(false)
   {};
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds,
+              SP::Model model,
               SP::NonSmoothLaw nslaw,
               SP::SiconosMatrix plans) :
     _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _nsds(nsds), _nslaw(nslaw), _plans(plans)
+    _model(model), _nslaw(nslaw), _plans(plans), _osnsinit(false)
   {};
 
   SpaceFilter()
@@ -241,11 +244,11 @@ public:
     return _cellsize;
   };
 
-  /** get non smooth dynamical system
+  /** get the model
    */
-  SP::NonSmoothDynamicalSystem nsds()
+  SP::Model model()
   {
-    return _nsds;
+    return _model;
   };
 
 
@@ -278,9 +281,14 @@ public:
   double minDistance(SP::Hashed h);
 
 
+  /** insert a new interaction
+   *  \param inter the new interaction
+  */
+  void insertInteraction(SP::Interaction inter);
 
-  /** search potential interactions
-   *
+
+  /** broadphase contact detection: add interactions in indexSet 0
+   *  \param the current time
    */
   virtual void buildInteractions(double);
 

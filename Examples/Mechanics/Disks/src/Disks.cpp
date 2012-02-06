@@ -28,6 +28,7 @@
 #include <SiconosKernel.hpp>
 #include <SiconosPointers.hpp>
 
+#include <Siconos/IO/SiconosRestart.hpp>
 
 #include "Disks.hpp"
 
@@ -219,7 +220,7 @@ void Disks::init()
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
 
-    osnspb_->numericsSolverOptions()->iparam[0] = 10000; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
     // iterations
     osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
     // iterations
@@ -246,9 +247,9 @@ void Disks::init()
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.9, 2));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.3, 2));
 
-    _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _model, nslaw, _plans, _moving_plans));
 
     _model->initialize(simulation_);
 
@@ -281,11 +282,11 @@ void Disks::compute()
 
     _playground->buildInteractions(_model->currentTime());
 
-    _model->simulation()->updateInteractions();
-
     _model->simulation()->advanceToEvent();
 
     _model->simulation()->processEvents();
+
+    //    Siconos::save(_model, "Disks.bin");
 
   }
 

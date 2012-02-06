@@ -29,6 +29,8 @@
 class Spheres : public SiconosBodies
 {
   void init();
+
+  void compute();
 };
 
 

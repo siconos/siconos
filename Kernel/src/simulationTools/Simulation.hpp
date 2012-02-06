@@ -530,9 +530,6 @@ public:
   */
   void initialize(SP::Model, bool = true);
 
-  /** Update simulation if some interactions are modified */
-  void updateInteractions();
-
   /** Set OSI (DS) non-smooth part to zero.
    */
   void reset();

@@ -53,7 +53,7 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(BulletDS, q());
 };
 
-BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
+BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
                                      SP::NonSmoothLaw nslaw,
                                      SP::btVector3 aabbMin,
                                      SP::btVector3 aabbMax) :
@@ -62,7 +62,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
   _worldAabbMax(aabbMax)
 {
 
-  _nsds = nsds;
+  _model = model;
   _nslaw = nslaw;
 
   _staticObjects.reset(new std::vector<SP::btCollisionObject>());
@@ -82,7 +82,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds,
 
   _collisionWorld->getDispatchInfo().m_useContinuous = false;
 
-  DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
+  DynamicalSystemsGraph& dsg = *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   boost::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi)
@@ -111,7 +111,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   std::map<int, bool> activeInteractions;
 
-  SP::UnitaryRelationsGraph indexSet0 = _nsds->topology()->indexSet(0);
+  SP::UnitaryRelationsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   UnitaryRelationsGraph::VIterator ui0, ui0end, v0next;
   boost::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
@@ -279,13 +279,17 @@ void BulletSpaceFilter::buildInteractions(double time)
             inter->insert(dsa);
             inter->insert(dsb);
             cpoint->m_userPersistentData = &*inter;
-            _nsds->topology()->insertInteraction(inter);
+            model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
+            model()->simulation()->computeLevelsForInputAndOutput(inter);
+            inter->initialize(model()->simulation()->nextTime());
           }
           else
           {
             inter->insert(dsa);
             cpoint->m_userPersistentData = &*inter;
-            _nsds->topology()->insertInteraction(inter);
+            model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
+            model()->simulation()->computeLevelsForInputAndOutput(inter);
+            inter->initialize(model()->simulation()->nextTime());
           }
         }
 
@@ -326,7 +330,7 @@ void BulletSpaceFilter::buildInteractions(double time)
       DEBUG_PRINTF("remove contact %p, lifetime %d\n",
                    &*ask<ForContactPoint>(*(ur0.interaction()->relation())),
                    ask<ForContactPoint>(*(ur0.interaction()->relation()))->getLifeTime());
-      _nsds->removeInteraction(ur0.interaction());
+      model()->nonSmoothDynamicalSystem()->removeInteraction(ur0.interaction());
     }
 
   }

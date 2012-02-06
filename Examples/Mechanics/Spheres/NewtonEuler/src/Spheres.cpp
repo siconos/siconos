@@ -27,6 +27,8 @@
 // Siconos
 #include <SiconosKernel.hpp>
 
+#include <Siconos/IO/SiconosRestart.hpp>
+//#include <Siconos/IO/SiconosVTKOutput.hpp>
 #include "Spheres.hpp"
 
 using namespace std;
@@ -172,7 +174,7 @@ void Spheres::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.0, 0.0, 0.6, 3));
 
-    _playground.reset(new SpaceFilter(3, 6, _model->nonSmoothDynamicalSystem(), nslaw, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _model, nslaw, _plans, _moving_plans));
 
     _model->initialize(simulation_);
 
@@ -190,6 +192,35 @@ void Spheres::init()
   }
 }
 
+
+void Spheres::compute()
+{
+  //  static SiconosVTKOutput output = SiconosVTKOutput(_model,"Spheres.xml");
+
+  try
+  {
+
+    _playground->buildInteractions(_model->currentTime());
+
+    _model->simulation()->advanceToEvent();
+
+    _model->simulation()->processEvents();
+
+    //    output.update();
+
+    //    output.write();
+
+  }
+
+  catch (SiconosException e)
+  {
+    std::cout << e.report() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "Exception caught in SiconosBodies::compute()" << std::endl;
+  }
+}
 
 
 // =========================== End of model definition ===========================

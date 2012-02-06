@@ -54,7 +54,7 @@ protected:
   SP::BulletBroadPhase _broadphase;
 
 public:
-  BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw,
+  BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw,
                     SP::btVector3 aabbMin, SP::btVector3 aabbMax);
 
   SP::BulletBroadPhase broadphase() const

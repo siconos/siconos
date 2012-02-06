@@ -28,8 +28,6 @@ void SiconosBodies::compute()
 
     _playground->buildInteractions(_model->currentTime());
 
-    _model->simulation()->updateInteractions();
-
     _model->simulation()->advanceToEvent();
 
     _model->simulation()->processEvents();
