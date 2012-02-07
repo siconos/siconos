@@ -69,7 +69,7 @@
  * <li>the modeling  of static contact problems. In this last case, \f$u\f$ plays the role of the relative displacement at contact  </li>
  * </ul>
  *
- * The problem is stored and given to the solver in Siconos/Numerics tahnks to
+ * The problem is stored and given to the solver in Siconos/Numerics thanks to
  *  a C structure FrictionContactProblem .
  *
  *  \section fc3DSolversList Available solvers for Friction Contact 3D (see Friction_cst.h)
