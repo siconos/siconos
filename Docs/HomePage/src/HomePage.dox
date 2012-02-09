@@ -1,24 +1,45 @@
 /** \mainpage Welcome
 \anchor siconosHomePage
 
-Siconos is a scientific computing software dedicated to
- <b>Non Smooth Dynamical Systems (NSDS)</b>.
 
-Most of the  well known of NSDS are adressed, that are:
-<ul>
-  <li> Hybrid systems and switched systems</li>     
-  <li> Mechanical systems with contact, impact and friction</li>
-  <li> Electrical circuits with ideal and piecewise linear components</li>
-  <li> Differential inclusions and Complementarity systems</li>
-  <li> Sliding mode control and Optimal Control with state constraints </li>
-</ul>
-
-
-<img class="left" src="../HomePage/buck_resistor.png"/>
-<img class="left" src="../HomePage/C60_saladyn.png"/>   
 \htmlonly
 <div class="image">
-<a href="https://www.inrialpes.fr/sed/people/bremond/files/SomeBoxes.avi"> <img class="left" src="../HomePage/snapshot-0827.png"/> </a>
+<img  width="250" height="200" src="../HomePage/buck.png"/>
+<img width="250" height="200"  src="../HomePage/C60.png"/>   
+<img width="250" height="200"  src="../HomePage/snapshot-1247.png"/>   
+<a href="https://www.inrialpes.fr/sed/people/bremond/files/SomeBoxes.avi"> <img width="250" height="200"  src="../HomePage/snapshot-0827.png"/> </a>
 </div>
 \endhtmlonly
+
+SICONOS is an Open Source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :
+<ul>
+<li> Mechanical systems (Rigid body or solid) with Unilateral contact and Coulomb friction as we find in Non-smooth mechanics, Contact dynamics or Granular material.</li>
+<li>Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components Power converter, Rectifier ,Phase-locked loop (PLL) or Analog-to-digital converter</li>
+<li>Sliding mode control systems</li>
+</ul>
+Other applications are found in Systems and Control (hybrid systems, differential inclusions, optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), Biology (Gene regulatory network), Fluid Mechanics and Computer graphics, ....
+
+
+The software is based on 3 main components :
+<ul>
+<li> <a href="../Numerics/index.html">Siconos/Numerics </a> (C API). Collection of low-level algorithms for solving basic Algebra ans optimization problem arising in the simulation of nonsmooth dynamical systems:
+<ul>	
+<li>Linear complementarity problem (LCP)</li>
+<li>Mixed linear complementarity problem (MLCP)</li>
+<li>Nonlinear complementarity problem (NCP)</li>
+<li>Quadratic programming problems (QP)</li>
+<li>Friction-contact problems (2D or 3D) (Second-order cone programming (SOCP))</li>
+<li>Primal or Dual Relay problems</li>
+</ul>
+</li>
+<li> <a href="../Kernel/index.html">Siconos/Kernel</a>. API C++ that allows one to model and simulate the NonSmooth dynamical systems. it contains :
+<ul>	
+<li>Dynamical systems classes : first order one, Lagrangian systems, Newton-Euler systems</li>
+<li>Nonsmooth laws : complementarity, Relay, FrictionContact, impact</li>
+</ul>
+</li>
+<li>Siconos/Front-end (API Python) Mainly an auto-generated SWIG interface of the API C++ which a special support for data structure.</li>
+<ul>
+
+
 */
