@@ -556,6 +556,7 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
 #define JOB_END -2
 #define USE_COMM_WORLD -987654
 #define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
 
 void computeSparseAWpB(
   unsigned int problemSize,
@@ -744,16 +745,25 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   mumps_id->comm_fortran = USE_COMM_WORLD;
   dmumps_c(mumps_id);
 
-  mumps_id->ICNTL(1) = -1;
-  mumps_id->ICNTL(2) = -1;
-  mumps_id->ICNTL(3) = -1;
-  //  mumps_id->ICNTL(4)=0;
-  //  mumps_id->ICNTL(10)=1;
-  //  mumps_id->ICNTL(11)=1;
+  if (verbose > 0)
+  {
+    mumps_id->ICNTL(4) = 0;
+    mumps_id->ICNTL(10) = 1;
+    mumps_id->ICNTL(11) = 1;
+  }
+  else
+  {
+    mumps_id->ICNTL(1) = -1;
+    mumps_id->ICNTL(2) = -1;
+    mumps_id->ICNTL(3) = -1;
+  }
 
   mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
   // ok for a cube on a plane & four contact points
   // computeAlartCurnierSTD != generated in this case...
+
+  //mumps_id->CNTL(3) = ...;
+  //mumps_id->CNTL(5) = ...;
 
   // process on mpi rank > 0
   if (SO->iparam[4])
@@ -805,7 +815,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) options->iparam[6];
-  z
+
   assert(itermax > 0);
   assert(nzmax > 0);
 

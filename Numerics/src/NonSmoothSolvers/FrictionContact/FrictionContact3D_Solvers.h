@@ -245,11 +245,10 @@ extern "C"
       \param problem FrictionContactProblem*  the problem
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
-      \param iparam int vector of parameters (max. iteration number ...)
-      \param dparam double vector of parameters (tolerance ...)
+      \param options the pointer to the array of options to set
       \return info  =0 if a trivial solution has been found, else = -1
   */
-  int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, int* iparam, double* dparam);
+  int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
 #ifdef __cplusplus
 }

@@ -151,7 +151,7 @@ int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double
 
 }
 
-int checkTrivialCasePrimal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, int* iparam, double* dparam)
+int checkTrivialCasePrimal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
 {
   /* norm of vector q */
   /*   double qs = DNRM2( n , q , 1 ); */

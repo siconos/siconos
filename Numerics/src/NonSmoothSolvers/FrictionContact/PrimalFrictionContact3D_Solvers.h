@@ -81,11 +81,11 @@ extern "C"
        \param q global vector (n)
        \param velocity global vector (n), in-out parameter
        \param reaction global vector (n), in-out parameters
-       \param int vector of parameters (max. iteration number ...)
-       \param double vector of parameters (tolerance ...)
+       \param globalVelocity the velocity in global coordinates
+       \param options the pointer to the array of options to set
        \return int =0 if a trivial solution has been found, else = -1
    */
-  int checkTrivialCasePrimal(int, double*, double*, double*, double*, int*, double*);
+  int checkTrivialCasePrimal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
       \param problem, the friction-contact 3D problem to solve

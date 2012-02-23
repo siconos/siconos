@@ -66,7 +66,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  /*   *info = checkTrivialCase(n, q,velocity, reaction, iparam, dparam); */
+  /*   *info = checkTrivialCase(n, q,velocity, reaction, options); */
 
   if (*info == 0)
     return;

@@ -82,7 +82,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  *info = checkTrivialCasePrimal(n, q, velocity, reaction, globalVelocity, iparam, dparam);
+  *info = checkTrivialCasePrimal(n, q, velocity, reaction, globalVelocity, options);
 
   if (*info == 0)
     return;
