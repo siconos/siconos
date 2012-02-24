@@ -1018,7 +1018,7 @@
     switch(id)
     {
     case SICONOS_FRICTION_2D_NSGS:
-    case SICONOS_FRICTION_2D_NLGS:
+   
     case SICONOS_FRICTION_2D_PGS:
     case SICONOS_FRICTION_2D_CPG:
     case SICONOS_FRICTION_2D_LATIN:
