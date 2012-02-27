@@ -22,7 +22,7 @@
 from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
      LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
 
-from numpy import array, eye, empty
+from numpy import eye, empty
 
 t0 = 0      # start time
 T = 10      # end time
@@ -33,13 +33,11 @@ m = 1       # ball mass
 e = 0.9     # restitution coeficient
 theta = 0.5 # theta scheme
 
-
-
 #
 # dynamical system
 #
-x = array([1,0,0]) # initial position
-v = array([0,0,0]) # initial velocity
+x = [1,0,0] # initial position
+v = [0,0,0] # initial velocity
 mass = eye(3)      # mass matrix
 mass[2,2]=3./5 * r * r
 
@@ -47,7 +45,7 @@ mass[2,2]=3./5 * r * r
 ball = LagrangianLinearTIDS(x, v, mass)
 
 # set external forces 
-weight = array([-m * g, 0, 0])
+weight = [-m * g, 0, 0]
 ball.setFExtPtr(weight)
 
 #
@@ -55,7 +53,7 @@ ball.setFExtPtr(weight)
 #
 
 # ball-floor
-H = array([[1,0,0]])
+H = [[1,0,0]]
 
 nslaw = NewtonImpactNSL(e)
 relation = LagrangianLinearTIR(H)
