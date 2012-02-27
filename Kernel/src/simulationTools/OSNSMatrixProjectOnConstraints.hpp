@@ -95,6 +95,10 @@ protected:
   */
   ACCEPT_SERIALIZATION(OSNSMatrixProjectOnConstraints);
 
+  /* default constructor
+   */
+  OSNSMatrixProjectOnConstraints() {};
+
   virtual void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
 public:
 

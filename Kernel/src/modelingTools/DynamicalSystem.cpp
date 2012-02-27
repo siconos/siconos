@@ -168,7 +168,8 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
-  assert(newPtr->size() == _n && "DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+  if (newPtr->size() != _n)
+    RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
   _x0 = newPtr;
   _normRef = _x0->norm2() + 1;
 }

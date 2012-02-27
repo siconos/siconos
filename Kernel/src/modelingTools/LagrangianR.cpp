@@ -50,9 +50,8 @@ void LagrangianR::initComponents()
   {
     if (_jachqDot->size(0) == 0) // if the matrix dimension are null
       _jachqDot->resize(sizeY, sizeDS);
-    else
-      assert((_jachqDot->size(1) == sizeDS && _jachqDot->size(0) == sizeY) &&
-             "LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
+    else if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
+      RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
   }
   _workX.reset(new SimpleVector(sizeDS));
   _workXdot.reset(new SimpleVector(sizeDS));

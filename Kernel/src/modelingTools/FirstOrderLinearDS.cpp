@@ -113,8 +113,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
   _f.reset(new SimpleVector(getDim()));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
-  assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
-         "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
+  if ((newA->size(0) != _n) || (newA->size(1) != _n))
+    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
   _A = newA;
   checkDynamicalSystem();
@@ -126,10 +126,11 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 {
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
-  assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
-         "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
-  assert(newB->size() == _n &&
-         "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
+  if ((newA->size(0) != _n) || (newA->size(1) != _n))
+    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
+
+  if (newB->size() != _n)
+    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
   _A = newA;
   _b = newB;
