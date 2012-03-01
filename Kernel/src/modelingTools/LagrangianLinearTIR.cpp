@@ -106,14 +106,14 @@ void LagrangianLinearTIR::initComponents()
   if (!(_jachq) || _jachq->size(1) !=  interaction()->getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  if (!(_jachlambda) || _jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY)
+  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between D matrix and the interaction.");
 
-  if (!(_e) || _e->size() != sizeY)
+  if ((_e) && _e->size() != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
-  if (!(_F) ||
-      _F->size(0) != interaction()->getSizez() || _F->size(1) != interaction()->getSizez())
+  if ((_F) && (
+        _F->size(0) != interaction()->getSizez() || _F->size(1) != interaction()->getSizez()))
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
