@@ -244,6 +244,11 @@ std::string name(const C& c)
  * SP::SiconosMatrix mass = ask<ForMass>(*ds);
  */
 
+
+/** get some value from a visitable object with the help of a
+    GeneralQuestion
+    \param v a visitable object
+ */
 template <class GeneralQuestion, class Visitable>
 typename GeneralQuestion::type ask(const Visitable& v)
 {
@@ -255,13 +260,75 @@ typename GeneralQuestion::type ask(const Visitable& v)
 
 };
 
+/** get some value from a visitable object with the help of a
+    parameterized GeneralQuestion
+    \param v a visitable object
+    \param arg the GeneralQuestion argument
+ */
+template <class GeneralQuestion, class Visitable, class Argument>
+typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg)
+{
+  GeneralQuestion t(arg);
 
-/* a generic return value visitor */
+  v.accept(t);
+
+  return t.answer;
+
+};
+
+/** apply a SiconosVisitor to a visitable object
+ * \param v a visitable object
+ */
+template <class Visitor, class Visitable>
+void apply(const Visitable& v)
+{
+  static Visitor t;
+
+  v.accept(t);
+
+};
+
+/** apply a parameterized SiconosVisitor to a visitable object
+ * \param v a visitable object
+ * \param arg the SiconosVisitor argument
+ */
+template <class VisitorWithArgument, class Visitable, class Argument>
+void apply(const Visitable& v, const Argument& arg)
+{
+  VisitorWithArgument t(arg);
+
+  v.accept(t);
+
+};
+
+/** apply a parameterized SiconosVisitor to a visitable object
+ * \param v a visitable object
+ * \param arg1 the first SiconosVisitor argument
+ * \param arg2 the second SiconosVisitor argument
+ */
+template <class VisitorWith2Arguments, class Visitable, class Argument1, class Argument2>
+void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
+{
+  VisitorWith2Arguments t(arg1, arg2);
+
+  v.accept(t);
+
+};
+
+/* use boost array for the initialization of non const reference */
+#include <boost/type_traits.hpp>
+#include <boost/array.hpp>
+
+/** a generic return value visitor */
 template <class AnswerType>
 struct Question : public SiconosVisitor
 {
   typedef AnswerType type;
   type answer;
+
+  Question() : answer(boost::array<typename boost::remove_reference<AnswerType>::type, 1>()[0])
+  {};
+  Question(AnswerType ref) : answer(ref) {};
 
 };
 
