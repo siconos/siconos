@@ -197,14 +197,15 @@ private:
    */
   Simulation& operator=(const Simulation&);
 
+
+public:
+
   /** compute for the first time the _level* variables
    * \warning it should only be called during initialize, if there are Interactions.
    * Otherwise, call the overloaded method when addind a Relation
    */
   void computeLevelsForInputAndOutput();
 
-
-public:
 
   /** default constructor
    *  \param a pointer to a timeDiscretisation (linked to the model
@@ -394,6 +395,14 @@ public:
   {
     return _allNSProblems;
   };
+
+  /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
+   *  \return an unsigned int
+   */
+  inline unsigned int numberOfOSNSProblems() const
+  {
+    return _allNSProblems->size();
+  }
 
   inline unsigned int levelMinForOutput() const
   {

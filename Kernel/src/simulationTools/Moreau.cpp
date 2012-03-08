@@ -33,6 +33,8 @@
 #include "NewtonImpactFrictionNSL.hpp"
 
 
+//#define DEBUG_MESSAGES
+//#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 using namespace std;
