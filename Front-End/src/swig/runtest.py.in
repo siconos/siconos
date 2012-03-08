@@ -4,5 +4,5 @@ import sys
 from subprocess import call
 
 
-retcode = call("py.test " + sys.argv[1], shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig"})
+retcode = call("py.test " + sys.argv[1], shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig", "PYTHONDONTWRITEBYTECODE" : "1"})
 exit(retcode)
