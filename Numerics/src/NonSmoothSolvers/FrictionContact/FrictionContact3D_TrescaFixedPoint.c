@@ -117,7 +117,8 @@ void frictionContact3D_TrescaFixedPoint(FrictionContactProblem* problem, double 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D - TFP - # Iteration %i Final Error = %14.7e\n", iter, error);
+  if (verbose > 0)
+    printf("----------------------------------- FC3D - TFP - # Iteration %i Final Error = %14.7e\n", iter, error);
   free(options->dWork);
   options->dWork = NULL;
   internalsolver_options->dWork = NULL;
