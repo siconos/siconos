@@ -175,7 +175,7 @@ static inline void add3x3(double a[9], double b[9])
 /** sub a 3x3 matrix or a vector[9]
  *\param[in] a[9]
  *\param[in,out] b[9]*/
-static inline void sub3x3(double* a, double* b)
+static inline void sub3x3(double a[9], double b[9])
 {
   OP3X3(*b++ -= *a++);
 }
@@ -183,7 +183,7 @@ static inline void sub3x3(double* a, double* b)
 /** copy a vector[3]
  *\param[in] a[3]
  *\param[out] b[3]*/
-static inline void cpy3(double* a, double* b)
+static inline void cpy3(double a[3], double b[3])
 {
   OP3(*b++ = *a++);
 }
@@ -191,7 +191,7 @@ static inline void cpy3(double* a, double* b)
 /** add a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-static inline void add3(double* a, double* b)
+static inline void add3(double a[3], double b[3])
 {
   OP3(*b++ += *a++);
 }
@@ -199,7 +199,7 @@ static inline void add3(double* a, double* b)
 /** sub a vector[3]
  *\param[in] a[3]
  *\param[in,out] b[3]*/
-static inline void sub3(double* a, double* b)
+static inline void sub3(double a[3], double b[3])
 {
   OP3(*b++ -= *a++);
 }
