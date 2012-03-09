@@ -27,7 +27,7 @@
 */
 #include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
-static double sBallRadius = 0.1;
+
 #define WITH_PROJ
 #define WITH_FC3D
 using namespace std;
@@ -36,32 +36,38 @@ using namespace std;
 #else
 #define R_CLASS NewtonEulerFrom1DLocalFrameR
 #endif
-class my_NERFC3D : public R_CLASS
+
+class my_NewtonEulerR : public R_CLASS
 {
+
+  double _sBallRadius ;
+
 public:
-  my_NERFC3D(): R_CLASS() {};
+
+  my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
+
   virtual void computeh(double t)
   {
     SP::SiconosVector y = interaction()->y(0);
-    SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
-    double hpc = fabs(data[q0]->getValue(0)) - sBallRadius;
-    y->setValue(0, hpc);
+    double height = fabs(data[q0]->getValue(0)) - _sBallRadius;
+    y->setValue(0, height);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
-    _Pc1->setValue(0, hpc);
+    _Pc1->setValue(0, height);
     _Pc1->setValue(1, data[q0]->getValue(1));
     _Pc1->setValue(2, data[q0]->getValue(2));
-    _Pc2->setValue(0, hpc);
-    _Pc2->setValue(1, data[q0]->getValue(1));
-    _Pc2->setValue(2, data[q0]->getValue(2));
-    //printf("my_NERFC3D N, Pc\n");
+
+    //_Pc2->setValue(0,hpc);
+    //_Pc2->setValue(1,data[q0]->getValue(1));
+    //_Pc2->setValue(2,data[q0]->getValue(2));
+    //printf("my_NewtonEulerR N, Pc\n");
     //_Nc->display();
     //_Pc1->display();
   }
   //ACCEPT_VISITORS();
 };
-TYPEDEF_SPTR(my_NERFC3D);
+TYPEDEF_SPTR(my_NewtonEulerR);
 
 
 
@@ -89,7 +95,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;              // theta for Moreau integrator
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
-
+    double radius = 0.1;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -144,21 +150,27 @@ int main(int argc, char* argv[])
     int nslawsize = 1;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
 #endif
-    SP::SimpleMatrix H(new SimpleMatrix(nslawsize, qDim));
-    H->zero();
-    (*H)(0, 0) = 1.0;
-#ifdef WITH_FC3D
-    (*H)(1, 1) = 1.0;
-    (*H)(2, 2) = 1.0;
-#endif
-    SP::NewtonEulerR relation0(new my_NERFC3D());
-    //SP::NewtonEulerR relation0(new SphereNEDSPlanR(0.1,1.0,0.0,0.0,0.0));
-    //SP::NewtonEulerR relation0(new NewtonEulerR());
-    relation0->setJachq(H);
-    //    relation0->setJacQH(H_block);
-    //    relation0->setJacQHT(HT_block);
-    cout << "main jacQH" << endl;
-    relation0->jachq()->display();
+
+
+    //     Version with NewtonEulerR()
+    //
+    //     SP::SimpleMatrix H(new SimpleMatrix(nslawsize,qDim));
+    //     H->zero();
+    //     (*H)(0,0) = 1.0;
+    // #ifdef WITH_FC3D
+    //     (*H)(1,1) = 1.0;
+    //     (*H)(2,2) = 1.0;
+    // #endif
+    //     //SP::NewtonEulerR relation0(new SphereNEDSPlanR(0.1,1.0,0.0,0.0,0.0));
+    //     //SP::NewtonEulerR relation0(new NewtonEulerR());
+    //     //relation0->setJachq(H);
+    //     //    relation0->setJacQH(H_block);
+    //     //    relation0->setJacQHT(HT_block);
+    //     //cout<<"main jacQH"<<endl;
+    //     //relation0->jachq()->display();
+
+    // Version with my_NewtonEulerR()
+    SP::NewtonEulerR relation0(new my_NewtonEulerR(radius));
     SP::Interaction inter(new Interaction(nslawsize, nslaw0, relation0));
 
     // -------------
@@ -251,7 +263,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
-      dataPlot(k, 5) = (*q)(3);
+      dataPlot(k, 5) = acos((*q)(3));
       dataPlot(k, 6) = relation0->contactForce()->norm2();
       dataPlot(k, 7) = (*q)(0);
       dataPlot(k, 8) = (*q)(1);
@@ -273,7 +285,7 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    io.write(dataPlot);
 
     // Comparison with a reference file
     cout << "====> Comparison with a reference file ..." << endl;
