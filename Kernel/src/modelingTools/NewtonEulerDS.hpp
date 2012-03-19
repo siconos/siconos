@@ -344,11 +344,19 @@ public:
 
 
   /** set fExt to pointer newPtr
-   *  \param a SP to a Simple vector
+   *  \param   newPtr a SP to a Simple vector
    */
   inline void setFExtPtr(SP::SimpleVector newPtr)
   {
     _fExt = newPtr;
+  }
+
+  /** set mExt to pointer newPtr
+    *  \param newPtr a SP to a Simple vector
+    */
+  inline void setMExtPtr(SP::SimpleVector newPtr)
+  {
+    _mExt = newPtr;
   }
 
 
