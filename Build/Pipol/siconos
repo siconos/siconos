@@ -2,17 +2,17 @@
 
 #PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core12 02:00
+#PIPOL fedora-core12 03:00
 
-#PIPOL fedora-core13 02:00
+#PIPOL fedora-core13 03:00
 
-#PIPOL ubuntu-lucid 02:00
+#PIPOL ubuntu-lucid 03:00
 
-#PIPOL ubuntu-karmic 02:00
+#PIPOL ubuntu-karmic 03:00
 
-#PIPOL ubuntu-maverick 02:00
+#PIPOL ubuntu-maverick 03:00
 
-#PIPOL mac 02:00
+#PIPOL mac 03:00
 
 set -x
 #set -e
@@ -399,14 +399,14 @@ esac
 ## Examples
 rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
 rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
-configure_trunk Examples Release
-nightly_build Examples Release
-nightly_test Examples Release
-nightly_submit Examples Release
+configure_trunk Examples Debug
+nightly_build Examples Debug
+nightly_test Examples Debug
+nightly_submit Examples Debug
 #
 case $PIPOL_IMAGE in ubuntu-karmic)
-        nightly_memcheck Examples Release
-        nightly_submit Examples Release
+        nightly_memcheck Examples Debug
+        nightly_submit Examples Debug
         ;;
 esac
 #
