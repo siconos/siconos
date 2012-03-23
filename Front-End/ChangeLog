@@ -21,6 +21,16 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 
+--------------------------------------------------------------------------------
+  v3.4.0 - March 2012
+--------------------------------------------------------------------------------
+	fix some make dependencies issues
+        Siconos/IO wrapping
+	fix some memory leaks (DECREF where missings)
+	use PyCObject to handle shared ptr reference counter for numpy array
+	BoundaryCondition([1,2,3]).velocityIndices() : ok
+	SolverOptions in Kernel
+	Some more tests
 
 --------------------------------------------------------------------------------
   v3.3.0 - July 2011
