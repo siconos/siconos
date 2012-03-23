@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// Siconos-Front-End , Copyright INRIA 2005-2011.
+// Siconos-Front-End , Copyright INRIA 2005-2012.
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.	
 // Siconos is a free software; you can redistribute it and/or modify
@@ -609,7 +609,7 @@
   { Py_DECREF(array$argnum); }
 }
 
-%typemap(argout) (NumericsMatrix* M) {
+%typemap(out) (NumericsMatrix* M) {
   npy_intp dims[2];
   dims[0] = $1->size0;
   dims[1] = $1->size1;
