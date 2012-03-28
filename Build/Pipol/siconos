@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
+#WAASPREPIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
 #PIPOL fedora-core12 03:00
 
@@ -356,7 +356,7 @@ configure_trunk Numerics Release
 nightly_build Numerics Release
 nightly_test Numerics Release
 nightly_submit Numerics Release
-case $PIPOL_IMAGE in fedora-core13)
+case $PIPOL_IMAGE in *fedora-core13*)
         nightly_memcheck Numerics Release
         nightly_submit Numerics Release;;
 esac
@@ -366,7 +366,7 @@ configure_trunk Kernel Release
 nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_submit Kernel Release
-case $PIPOL_IMAGE in fedora-core13)
+case $PIPOL_IMAGE in *fedora-core13*)
         nightly_memcheck Kernel Release
         nightly_submit Kernel Release;;
 esac
@@ -380,21 +380,30 @@ save_packed_1 Numerics Release
 pack_trunk Kernel Release
 save_packed_1 Kernel Release
 #
-## Coverage
-case $PIPOL_IMAGE in ubuntu-lucid)
-        setup_trunk
-        configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
-        nightly_build Numerics Debug
-        nightly_coverage Numerics Debug
-        nightly_submit Numerics Debug
 #
-        setup_trunk
-        configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
-        nightly_build Kernel Debug
-        nightly_coverage Kernel Debug
-        nightly_submit Kernel Debug
-        ;;
-esac
+## front-end
+swig_setup
+configure_trunk Front-End Release
+nightly_build Front-End Release
+nightly_test Front-End Release
+nightly_submit Front-End Release
+pack_trunk Front-End Release
+save_packed_1 Front-End Release
+#
+## Coverage
+setup_trunk
+configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Numerics Debug
+nightly_coverage Numerics Debug
+nightly_submit Numerics Debug
+install_1 Numerics Debug
+#
+setup_trunk
+configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Kernel Debug
+nightly_coverage Kernel Debug
+nightly_submit Kernel Debug
+install_1 Kernel Debug
 #
 ## Examples
 rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
@@ -404,21 +413,8 @@ nightly_build Examples Debug
 nightly_test Examples Debug
 nightly_submit Examples Debug
 #
-case $PIPOL_IMAGE in ubuntu-karmic)
-        nightly_memcheck Examples Debug
-        nightly_submit Examples Debug
-        ;;
-esac
-#
-#
-## front-end
-swig_setup
-configure_trunk Front-End Debug
-nightly_build Front-End Debug
-nightly_test Front-End Debug
-nightly_submit Front-End Debug
-pack_trunk Front-End Debug
-save_packed_1 Front-End Debug
+nightly_memcheck Examples Debug
+nightly_submit Examples Debug
 
 # end
 date
