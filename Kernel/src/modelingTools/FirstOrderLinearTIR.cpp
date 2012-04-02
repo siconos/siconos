@@ -112,7 +112,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   assert((Jachx->size(0) == interaction()->getSizeOfY() && Jachx->size(1) == interaction()->getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((Jacglambda->size(1) == interaction()->getSizeOfY() && Jacglambda->size(0) == interaction()->getSizez()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((Jacglambda->size(1) == interaction()->getSizeOfY() && Jacglambda->size(0) ==  interaction()->getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
