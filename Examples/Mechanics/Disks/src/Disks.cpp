@@ -28,7 +28,7 @@
 #include <SiconosKernel.hpp>
 #include <SiconosPointers.hpp>
 
-#include <Siconos/IO/SiconosRestart.hpp>
+//#include <Siconos/IO/SiconosRestart.hpp>
 
 #include "Disks.hpp"
 
