@@ -26,8 +26,15 @@ Do not hesitate to use the emacs mode Change Log for editing this file
   v3.4.0
 --------------------------------------------------------------------------------
 Main Changes:
-	* 
 	* serialization hooks & some minor modifications to be boost serializable
+	* controlTools: add some new Actuator (PID and various SMC) and Sensor
+	(LinearSensor). API is not fixed yet.
+	* modelingTools: add a new objets ControlDynamicalSystem and
+	ControlFirstOrderLinearSystem aiming at providing a class handling
+	most details that are of no interest for control engineers
+	* modelingTools, simulationTools: add a bunch of copy contructor
+	(First Order Systems, Timediscretisation, ...)
+	* Fix a bug in the way we compute levels
 --------------------------------------------------------------------------------
   v3.3.0
 --------------------------------------------------------------------------------
