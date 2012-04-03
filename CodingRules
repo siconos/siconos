@@ -7,6 +7,18 @@
 - SWIG is used to generate Python bindings. It processes headers files to do
   its magic. Therefore the parameter names in headers are not meaningless.
 
+* Pointers
+ - We use a lot of shared_ptr (SP in Siconos) but make sure to not abuse them
+   since they come with a cost. For instant, in most case you should not pass
+   a SP as an argument. When a variable is used only locally or temporary, it
+   also usually not needed. The same applies to private attributes in classes
+   that are really private (not used outside the class).
+
+* Debug
+ - Do not use assert in constructor. Usually you need to do checks and throw
+   an exception if something is wrong. Furthermore in python it will either
+   kill the interpreter or fail silently.
+
 * Documentation
 We are using Doxygen to document the code. Please document a function or a
 method before its signature. Doxygen uses '/**' and '*/' as delimiter.
