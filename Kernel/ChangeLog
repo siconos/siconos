@@ -35,6 +35,12 @@ Main Changes:
 	* modelingTools, simulationTools: add a bunch of copy contructor
 	(First Order Systems, Timediscretisation, ...)
 	* Fix a bug in the way we compute levels
+	* TimeSteppingProjectOnConstraints add treatment of Lagrangian system
+	Correct a bug in the construction of the Jacobian Matrix in the projection
+	operator.
+	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
+	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
+	scheme
 --------------------------------------------------------------------------------
   v3.3.0
 --------------------------------------------------------------------------------

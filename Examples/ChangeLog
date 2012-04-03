@@ -29,6 +29,7 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 	there is a corresponding Python version
 	* Control/Relay: Add a Python version of Filippov
 	* Fix casting in various examples
+	* ColumnofBeads Add a simple example with dynamic graph
 
 --------------------------------------------------------------------------------
   v3.3.0

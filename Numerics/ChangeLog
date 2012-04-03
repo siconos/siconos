@@ -31,6 +31,8 @@ Changes:
 	* Sparse Global Alart Curnier : MUMPS verbose if Numerics verbose
       	mode is on (icntl(4)=0, icntl(10)=1, icntl(11)=1)
 	* some signatures updates for swig interface
+	* *.h update Doxygen documentation.
+	* FrictionContact renumbering FrictionContact Solver
 
 --------------------------------------------------------------------------------
   v3.3.0
