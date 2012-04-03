@@ -19,7 +19,7 @@
 
 /*! \file SimpleMatrixFriends.hpp
   List of friend functions for SimpleMatrix.
-*/
+  */
 
 #ifndef __SimpleMatrixFriends__
 #define __SimpleMatrixFriends__
@@ -29,249 +29,253 @@
 DEFINE_SPTR(SimpleMatrix);
 
 /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
- * \param MIn, a SiconosMatrix*
- * \param MOut, a SiconosMatrix*
- * \param dim, an Index, dim[0], dim[1]: number of rows and columns of the sub-block
- * \param start, an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
+ * \param MIn a SPC::SiconosMatrix
+ * \param[in,out] MOut a SP::SiconosMatrix
+ * \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
+ * \param start an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
  *  start[2], start[3]: position (row, column) of the first element of the sub-block in MOut.
  */
-void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
+void setBlock(SPC::SiconosMatrix MIn, SP::SiconosMatrix MOut, const Index& dim, const Index& start);
+
 /** multiplication of a matrix by a double
- *  \param a SiconosMatrix
- *  \param a double
+ *  \param A a SiconosMatrix
+ *  \param a a double
  *  \return a SimpleMatrix
  */
-const SimpleMatrix operator * (const SiconosMatrix&, double);
+const SimpleMatrix operator * (const SiconosMatrix& A, double a);
+
 /** multiplication of a SimpleMatrix by a SimpleMatrix
  *  \param a const SiconosMatrix&
  *  \param a const SimpleMatrix&
  *  \return a const SimpleMatrix
  */
 //  const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
+
 /** multiplication of a SP::SimpleMatrix by a SP::SimpleMatrix
- *  \param a const SP::SiconosMatrix
- *  \param a const SP::SimpleMatrix
- *  \return a const SP::SimpleMatrix
+ *  \param A a SP::SiconosMatrix
+ *  \param B a SP::SimpleMatrix
+ *  \return a SP::SimpleMatrix
  */
-SP::SimpleMatrix operator * (const SP::SimpleMatrix, const SP::SimpleMatrix);
+SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B);
 
 /**
  *Default comparator
- *\param a SP::SiconosMatrix
- *\param a SP::SiconosMatrix
- * return true
+ *\param A a SimpleMatrix
+ *\param B a SimpleMatrix
+ * return true if A != B
  */
-bool operator!= (const SimpleMatrix&, const SimpleMatrix&);
+bool operator!= (const SimpleMatrix& A, const SimpleMatrix& B);
 
-/** operator += add SP::SimpleMatrix
- *  \param in/outSP::SiconosMatrix : a matrix A
- *  \param SP::SiconosMatrix : a matrix B
+/** operator += add B to A
+ *  \param[in,out] A a SP::SiconosMatrix
+ *  \param B a SP::SiconosMatrix
  */
-void operator +=(SP::SiconosMatrix, SP::SimpleMatrix);
+void operator +=(SP::SiconosMatrix A, SP::SimpleMatrix B);
 
 /** multiplication of a matrix by a double
- *  \param a double
- *  \param a SiconosMatrix
+ *  \param a a double
+ *  \param A a SiconosMatrix
  *  \return a SimpleMatrix
  */
-SimpleMatrix operator * (double , const SiconosMatrix&);
+SimpleMatrix operator * (double a, const SiconosMatrix& A);
 
 /** division of the matrix by a double
- *  \param a SiconosMatrix
- *  \param a double
+ *  \param A a SiconosMatrix
+ *  \param a a double
  *  \return a SimpleMatrix
  */
-const SimpleMatrix operator /(const SiconosMatrix&, double);
+const SimpleMatrix operator /(const SiconosMatrix& A, double a);
 
 /** Addition of two matrices, C = A+B
- * \param SiconosMatrix A
- * \param SiconosMatrix B
+ * \param A a SiconosMatrix
+ * \param B a SiconosMatrix
  * \return a SimpleMatrix C
  */
-const SimpleMatrix operator +(const SiconosMatrix&, const SiconosMatrix&);
+const SimpleMatrix operator +(const SiconosMatrix& A, const SiconosMatrix& B);
 /** Addition of two matrices, C = A+B
- * \param SP::SiconosMatrix A
- * \param SP::SiconosMatrix B
+ * \param A a SP::SiconosMatrix
+ * \param B a SP::SiconosMatrix
  * \return a SP::SimpleMatrix
  */
-SP::SimpleMatrix operator +(const SP::SimpleMatrix, const SP::SimpleMatrix);
+SP::SimpleMatrix operator +(const SP::SimpleMatrix A, const SP::SimpleMatrix B);
 //  SimpleMatrix operator +(const SimpleMatrix&,const SimpleMatrix&);
 
 /** Addition of two matrices C = A+B
- *  \param SiconosMatrix A (in)
- *  \param SiconosMatrix B (in)
- *  \param SiconosMatrix C (in-out)
+ *  \param A a SiconosMatrix
+ *  \param B a SiconosMatrix
+ *  \param[in,out] C a SiconosMatrix
  */
-void add(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+void add(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /** Subtraction of two matrices, C = A-B
- * \param SiconosMatrix A
- * \param SiconosMatrix B
- * \return a SimpleMatrix C
+ * \param A a SiconosMatrix
+ * \param B a SiconosMatrix
+ * \return a SimpleMatrix
  */
-const SimpleMatrix operator -(const SiconosMatrix&, const SiconosMatrix&);
+const SimpleMatrix operator -(const SiconosMatrix& A, const SiconosMatrix& B);
 //  const SimpleMatrix operator -(const SimpleMatrix&,const SimpleMatrix&);
 
 /** Subtraction of two matrices C = A-B
- *  \param SiconosMatrix A (in)
- *  \param SiconosMatrix B (in)
- *  \param SiconosMatrix C (in-out)
+ *  \param A a SiconosMatrix
+ *  \param B a SiconosMatrix
+ *  \param[in,out] C a SiconosMatrix
  */
-void sub(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /**: A==B when (A-B).normInf()<tolerance
- * \param SiconosMatrix A
- * \param SiconosMatrix B
+ * \param A a SiconosMatrix
+ * \param B a SiconosMatrix
  * \return a boolean
  */
-bool operator == (const SiconosMatrix&, const SiconosMatrix&);
+bool operator == (const SiconosMatrix& A, const SiconosMatrix& B);
 
-/*   /\** compute the power of the matrix (!) */
-/*    *  \return a SimpleMatrix */
-/*    *\/ */
-const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
+/** compute the power of the matrix (!)
+ * \param A a SimpleMatrix
+ * \param e the exponent (an unsigned int)
+ * \return a SimpleMatrix
+ */
+const SimpleMatrix pow(const SimpleMatrix& A, unsigned int e);
 
 /** product of two matrices, C = A*B
- *  \param SiconosMatrix A (in)
- *  \param SiconosMatrix B (in)
- *  \return SimpleMatrix C
- \param init, a bool (default = true)
-*/
-const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \return C a SimpleMatrix
+  */
+const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
 
 /** prod(A, B, C) computes C = A*B in an optimal way, or C += AB if init = false.
-    \param a SiconosMatrix, A (in)
-    \param a SiconosMatrix, B (in)
-    \param a SiconosMatrix, C (in-out)
-    \param init, a bool (default = true)
-*/
-void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool = true);
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \param[in,out] C a SiconosMatrix
+  \param init a bool (default = true)
+  */
+void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init = true);
 
 /** prod(A, B, C) computes C = A*B in an optimal way (= if init = true, else +=).
-    \param A, a SiconosMatrix
-    \param B, a SiconosMatrix
-    \param C, a SiconosMatrix
-    \param init, a bool
-*/
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \param[in,out] C a SiconosMatrix
+  \param init a bool (default = true)
+  */
 void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
 
-/*   /\** compute the product matrix-vector */
-/*    *  \return a SimpleVector */
-/*    *\/ */
-const SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
+/** prod(A, x) returns the product Ax
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \return a SimpleVector
+  */
+const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x);
 
-/** prod(A, x, y) computes y = A*x or y += A*x if init = false
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a SiconosVector, y (in-out)
-    \param init, a bool (default = true)
-*/
-void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool = true);
+/** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+  */
+void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
 
 /** prod(a, A, x, y, init) computes y = a*A*x or y += a*A*x if init = false
-    \param double, a (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a SiconosVector, y (in-out)
-    \param init, a bool (default = true)
-*/
-void prod(double, const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool = true);
+  \param a a double
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+  */
+void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
 
 /** prod(x, A, y) computes y = trans(A)*x (init = true) or y += trans(A)*x (init = false)
-    \param a SiconosVector, x (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, y (in-out)
-    \param a bool, init
-*/
-void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool = true);
+  \param x a SiconosVector
+  \param A a SiconosMatrix
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+  */
+void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool init = true);
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a SiconosVector, y (in-out)
-    \param an Index = [r0A r1A c0A c1A r0x r1x r0y r1y];
-    subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A and c1A-1;
-    The same for x and y with rix and riy.
-    \param init, a bool (default = true)
-*/
-void subprod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, const Index&, bool = true);
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param coord an Index = [r0A r1A c0A c1A r0x r1x r0y r1y];
+  subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A and c1A-1;
+  The same for x and y with rix and riy.
+  \param init a bool (default = true)
+  */
+void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init = true);
 
 /** computes y = A*x (init = true) or y += A*x (init = false)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a SiconosVector, y (in-out)
-    \param init, a bool
-*/
-void axpy_prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param init a bool
+  */
+void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init);
 
 /** prod(A, x, y) computes y = A*x, using atlas::gemv - Reserved to dense matrices and vectors.
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a SiconosVector, y (in-out)
-*/
-void gemv(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  */
+void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y);
 
 /** gemv(transA, a, A, x, b, y) computes y = a*op(A)*x + b*y
-    with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-    This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
-    \param CBLAS_TRANSPOSE, op for A
-    \param a double, a (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a double, b (in)
-    \param a SiconosVector, y (in-out)
-*/
-void gemv(CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
+  with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
+  This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
+  \param transA a CBLAS_TRANSPOSE, op for A
+  \param a a double
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param b a double
+  \param[in,out] y a SiconosVector
+  */
+void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y);
 
 /** gemv(a, A, x, b, y) computes y = a*A*x+ b*y
-    This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
-    \param a double, a (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosVector, x (in)
-    \param a double, b (in)
-    \param a SiconosVector, y (in-out)
-*/
-void gemv(double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
+  This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
+  \param a a double
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param b a double
+  \param[in,out] y a SiconosVector
+  */
+void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y);
 
 /** gemm(transA, transB, a, A, B, b, C) computes C = a*op(A)*op(B) + b*C
-    with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-    This function encapsulates atlas::gemm. Reserved to dense matrices.
-    \param CBLAS_TRANSPOSE, op for A
-    \param CBLAS_TRANSPOSE, op for B
-    \param a double, a (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosMatrix, B (in)
-    \param a double, b (in)
-    \param a SiconosMatrix, C (in-out)
-*/
-void gemm(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
+  with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
+  This function encapsulates atlas::gemm. Reserved to dense matrices.
+  \param transA a CBLAS_TRANSPOSE, op for A
+  \param transB a CBLAS_TRANSPOSE, op for B
+  \param a a double
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \param b a double
+  \param[in,out] C a SiconosMatrix
+  */
+void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C);
 
 /** gemm(a, A, B, b, C) computes C = a*A*B+ b*C
-    This function encapsulates atlas::gemm. Reserved to dense matrices.
-    \param a double, a (in)
-    \param a SiconosMatrix, A (in)
-    \param a SiconosMatrix, B (in)
-    \param a double, b (in)
-    \param a SiconosMatrix, C (in-out)
-*/
-void gemm(double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
+  This function encapsulates atlas::gemm. Reserved to dense matrices.
+  \param a a double
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \param b a double
+  \param[in,out] C a SiconosMatrix
+  */
+void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C);
 
 /** gemm(A, B, C) computes C = A*B
-    This function encapsulates atlas::gemm. Reserved to dense matrices.
-    \param a SiconosMatrix, A (in)
-    \param a SiconosMatrix, B (in)
-    \param a SiconosMatrix, C (in-out)
-*/
-void gemm(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+  This function encapsulates atlas::gemm. Reserved to dense matrices.
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \param[in,out] C a SiconosMatrix
+  */
+void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /** multiplication of a matrix by a scalar, B = a*A (init = true) or B += a*A (init = false)
- *  \param a, a double
- *  \param A, a SiconosMatrix (IN)
- *  \param B a SiconosMatrix (IN-OUT)
- *  \param init, a bool
+ *  \param a a double
+ *  \param A a SiconosMatrix
+ *  \param[in,out] B a SiconosMatrix
+ *  \param init a bool
  */
-void scal(double, const SiconosMatrix&, SiconosMatrix&, bool = true);
-
-
+void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool = true);
 
 #endif

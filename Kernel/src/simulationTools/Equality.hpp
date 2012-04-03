@@ -35,7 +35,7 @@
  *
  * This class is devoted to the formalization and the resolution of the
  * Linear system (Equality) defined by :
- *  * \f[
+ *  \f[
  * 0 = w =  q + M z
  * \f]
  * where

@@ -445,54 +445,56 @@ public:
   };
 
   /** get row index of current matrix and save it into vOut
-   *  \param unsigned int: index of required line
-   *  \param ref to SimpleVector: in-out parameter
+   *  \param index row we want to get
+   *  \param[out] vOut SimpleVector that will contain the desired row
    */
-  void getRow(unsigned int, SiconosVector&) const;
+  void getRow(unsigned int index, SiconosVector& vOut) const;
 
   /** get column index of current matrix and save it into vOut
-   *  \param unsigned int: index of required column
-   *  \param ref to SimpleVector: in-out parameter
+   *  \param index column we want to get
+   *  \param[out] vOut SimpleVector that will contain the desired column
    */
-  void getCol(unsigned int, SiconosVector&) const;
+  void getCol(unsigned int index, SiconosVector& vOut) const;
 
   /** set line row of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
+   *  \param index row we want to set
+   *  \param vIn SimpleVector containing the new row
    */
-  void setRow(unsigned int, const SiconosVector&);
+  void setRow(unsigned int index, const SiconosVector& vIn);
 
   /** set column col of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
+   *  \param index column we want to set
+   *  \param vIn a SimpleVector containing the new column
    */
-  void setCol(unsigned int, const SiconosVector&);
+  void setCol(unsigned int index, const SiconosVector& vIn);
 
   /** get column number index of current matrix, starting from element at position pos and save it into vOut
-   *  \param index, unsigned int, index of required column
-   *  \param pos, unsigned int, index of the first required element in the column
-   *  \param vOut, SP::SiconosVector
+   *  \param index index of required column
+   *  \param pos index of the first required element in the column
+   *  \param[out] vOut a SP::SiconosVector
    */
-  void getSubCol(unsigned int, unsigned int, SP::SiconosVector) const;
+  void getSubCol(unsigned int index, unsigned int pos, SP::SiconosVector vOut) const;
 
   /** get row number index of current matrix, starting from element at position pos and save it into vOut
-   *  \param index, unsigned int, index of required row
-   *  \param pos, unsigned int, index of the first required element in the row
-   *  \param vOut, SP::SiconosVector
+   *  \param index index of the required row
+   *  \param pos index of the first required element in the row
+   *  \param[out] vOut a SP::SiconosVector that will contain the sub row
    */
-  void getSubRow(unsigned int, unsigned int, SP::SiconosVector) const;
+  void getSubRow(unsigned int index, unsigned int pos, SP::SiconosVector vOut) const;
 
   /** set column number index of current matrix, starting from element at position pos, with vIn
-   *  \param index, unsigned int, index of required column
-   *  \param pos, unsigned int, index of the first required element in the column
-   *  \param vIn, SP::SiconosVector
+   *  \param index index of required column
+   *  \param pos index of the first required element in the column
+   *  \param vIn a SP::SiconosVector
    */
-  void setSubCol(unsigned int, unsigned int, SP::SiconosVector);
+  void setSubCol(unsigned int index, unsigned int pos, SP::SiconosVector vIn);
 
   /** set row number index of current matrix, starting from element at position pos, with vIn
-   *  \param index, unsigned int, index of required row
-   *  \param pos, unsigned int, index of the first required element in the row
-   *  \param vIn, SP::SiconosVector
+   *  \param index index of required row
+   *  \param pos index of the first required element in the row
+   *  \param vIn a SP::SiconosVector
    */
-  void setSubRow(unsigned int, unsigned int, SP::SiconosVector);
+  void setSubRow(unsigned int index, unsigned int pos, SP::SiconosVector vIn);
 
   /** add the input matrix to the elements starting from position i (row) and j (col).
    *  \param an unsigned int i
@@ -513,9 +515,9 @@ public:
   void trans();
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param a SiconosMatrix: the matrix to be transposed.
+   *  \param mat a SiconosMatrix: the matrix to be transposed.
    */
-  void trans(const SiconosMatrix&);
+  void trans(const SiconosMatrix& mat);
 
   /** assignment
    *  \param SiconosMatrix : the matrix to be copied
@@ -554,15 +556,15 @@ public:
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B tas input: the RHS matrix B - as output: the matrix X
    */
-  void PLUForwardBackwardInPlace(SiconosMatrix &B);
+  void PLUForwardBackwardInPlace(SiconosMatrix& B);
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
+   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
    */
-  void PLUForwardBackwardInPlace(SiconosVector &B);
+  void PLUForwardBackwardInPlace(SiconosVector& B);
 
   /** set to false all LU indicators. Useful in case of
       assignment for example.

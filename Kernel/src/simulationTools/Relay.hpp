@@ -57,7 +57,7 @@ class Simulation;
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
+ *   - Constructor from data (inputs = SP::Simulation, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
