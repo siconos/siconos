@@ -170,4 +170,4 @@ def test_fc3dglobalac_full():
 
     print 'iter=', iter
     print 'iter=', SO.iparam[7]
-    assert SO.dparam[1]  == err
+    assert (SO.dparam[1] - err) < 1e-7
