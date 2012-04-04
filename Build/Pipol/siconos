@@ -105,7 +105,7 @@ setup_3_4() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.4.0
     cd $PIPOL_WDIR/siconos/branches/3.4.0; { 
         for mod in Numerics Kernel Examples ; do 
-            svn co -r3190 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+            svn co -r3191 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
@@ -299,7 +299,7 @@ nightly_coverage() {
 
 nightly_memcheck() {
     # time consuming
-    make_1 $1 $2 ${mode}MemCheck;;
+    make_1 $1 $2 ${mode}MemCheck
 }
 
 nightly_submit() {
