@@ -104,8 +104,8 @@ setup_3_4() {
     current_dir=$PWD
     mkdir -p $PIPOL_WDIR/siconos/branches/3.4.0
     cd $PIPOL_WDIR/siconos/branches/3.4.0; { 
-        for mod in Numerics Kernel Examples ; do 
-            svn co -r3191 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+        for mod in Numerics Kernel Examples Front-End; do 
+            svn co -r3192 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
