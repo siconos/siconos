@@ -862,11 +862,11 @@ double Moreau::computeResidu()
         // computes Fext(ti)
         d->computeFExt(told);
         coeff = -h * (1 - _theta);
-        scal(coeff, *Fext, *residuFree, false); // vfree -= h*(1-_theta) * fext(ti)
+        scal(coeff, *(d->fExt()), *residuFree, false); // vfree -= h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
         coeff = -h * _theta;
-        scal(coeff, *Fext, *residuFree, false); // vfree -= h*_theta * fext(ti+1)
+        scal(coeff, *(d->fExt()), *residuFree, false); // vfree -= h*_theta * fext(ti+1)
       }
 
 
