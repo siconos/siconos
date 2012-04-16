@@ -1,3 +1,27 @@
+/* Siconos-sample , Copyright INRIA 2005-2012.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+/* !\file SMCExampleExplicit.cpp
+  \brief Two independent systems of dimension one controlled to slide
+  on \f$x = 0\f$. An explicit scheme is used
+  O. Huber
+  */
 
 #include "SiconosKernel.hpp"
 using namespace std;
@@ -42,6 +66,9 @@ int main(int argc, char* argv[])
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
+  SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
+  (*Brel)(1, 0) = 2;
+  SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
   (*Csurface)(0, 1) = 1;
 
   // Dynamical Systems
@@ -74,10 +101,11 @@ int main(int argc, char* argv[])
   SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::LinearSMCOT2 act = static_pointer_cast<LinearSMCOT2>(control->addActuator(104, tActuator));
+  SP::LinearChatteringSMC act = static_pointer_cast<LinearChatteringSMC>(control->addActuator(LINEAR_CHATTERING_SMC, tActuator));
   act->setCsurfacePtr(Csurface);
   act->addSensorPtr(sens);
-
+  act->setBPtr(Brel);
+  act->setSaturationMatrixPtr(Drel);
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
@@ -90,18 +118,15 @@ int main(int argc, char* argv[])
   control->initialize();
 
   // --- Get the values to be plotted ---
-  unsigned int outputSize = 5; // number of required data
+  unsigned int outputSize = 3; // number of required data
   unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
 
   SP::SiconosVector xProc = processDS->x();
-  SP::SiconosVector uProc = processDS->z();
   // Save data in a matrix dataPlot
   SimpleMatrix dataPlot(N, outputSize);
   dataPlot(0, 0) = process->t0(); // Initial time of the model
   dataPlot(0, 1) = (*xProc)(0);
   dataPlot(0, 2) = (*xProc)(1);
-  dataPlot(0, 3) = (*uProc)(0);
-  dataPlot(0, 4) = (*uProc)(1);
 
   SP::EventsManager eventsManager = processSimulation->eventsManager();
 
@@ -117,14 +142,12 @@ int main(int argc, char* argv[])
   {
     processSimulation->computeOneStep();
     nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
-    if (nextEvent->getType() == 1)
+    if (nextEvent->getType() == TD_EVENT)
     {
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
       dataPlot(k, 1) = (*xProc)(0);
       dataPlot(k, 2) = (*xProc)(1);
-      dataPlot(k, 3) = (*uProc)(0);
-      dataPlot(k, 4) = (*uProc)(1);
       ++show_progress;
     }
     processSimulation->nextStep();
@@ -133,14 +156,14 @@ int main(int argc, char* argv[])
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("RelayBiSimulation_OT2.dat", "ascii");
+  ioMatrix io("SMCExampleExplicit.dat", "ascii");
   dataPlot.resize(k, outputSize);
   io.write(dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("RelayBiSimulation_OT2.ref", "ascii");
+  ioMatrix ref("SMCExampleExplicit.ref", "ascii");
   ref.read(dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 

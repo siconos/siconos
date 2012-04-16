@@ -9,12 +9,6 @@ extern "C" double computeDefault(double time)
   return u;
 }
 
-
-extern "C"   void computeE(double time, unsigned int sizeOfB, double* e, unsigned int sizeOfZ, double* z)
-{
-  e[0] = 0.0;//computeDefault(time);
-}
-
 extern "C"   void computeB(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
 {
   b[0] = computeDefault(time) + z[0];

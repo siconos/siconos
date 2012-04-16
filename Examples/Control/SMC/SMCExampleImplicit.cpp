@@ -1,3 +1,27 @@
+/* Siconos-sample , Copyright INRIA 2005-2012.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+/* !\file SMCExampleImplicit.cpp
+  \brief Two independent systems of dimension one controlled to slide
+  on \f$x = 0\f$. An implicit scheme is used
+  O. Huber
+  */
 
 #include "SiconosKernel.hpp"
 using namespace std;
@@ -34,16 +58,22 @@ int main(int argc, char* argv[])
   // Note: r = Blambda, B defines in relation below.
 
   // Matrix declaration
+  // For the DynamycalSystem
   SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof, 0));
   SP::SiconosVector x0(new SimpleVector(ndof));
   (*x0)(0) = Xinit;
   (*x0)(1) = -Xinit;
+  // For the Sensor
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
-  SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
-  (*Csurface)(0, 1) = 1;
-
+  // For the Actuator
+  SP::SimpleMatrix Csurface(new SimpleMatrix(2, 2));
+  Csurface->eye();
+  SP::SimpleMatrix Brel(new SimpleMatrix(2, 2));
+  Brel->eye();
+  *(Brel) *= 2;
+  SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
   processDS->setComputebFunction("RelayPlugin.so", "computeB");
@@ -74,8 +104,10 @@ int main(int argc, char* argv[])
   SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::LinearChatteringSMC act = static_pointer_cast<LinearChatteringSMC>(control->addActuator(103, tActuator));
+  SP::LinearSMC act = static_pointer_cast<LinearSMC>(control->addActuator(LINEAR_SMC, tActuator));
   act->setCsurfacePtr(Csurface);
+  act->setBPtr(Brel);
+  act->setDPtr(Drel);
   act->addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
@@ -114,7 +146,7 @@ int main(int argc, char* argv[])
   {
     processSimulation->computeOneStep();
     nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
-    if (nextEvent->getType() == 1)
+    if (nextEvent->getType() == TD_EVENT)
     {
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
@@ -125,23 +157,24 @@ int main(int argc, char* argv[])
     processSimulation->nextStep();
   }
   cout << endl << "Computation Time " << time.elapsed()  << endl;
+  eventsManager->display();
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("RelayBiSimulationChat.dat", "ascii");
+  ioMatrix io("SMCExampleImplicit.dat", "ascii");
   dataPlot.resize(k, outputSize);
   io.write(dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("RelayBiSimulationChat.ref", "ascii");
+  ioMatrix ref("SMCExampleImplicit.ref", "ascii");
   ref.read(dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-
   if ((dataPlot - dataPlotRef).normInf() > 1e-12)
   {
     std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    (dataPlot - dataPlotRef).display();
     return 1;
   }
 

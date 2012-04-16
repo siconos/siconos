@@ -18,11 +18,10 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-    TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
-from Siconos.Kernel import *
+    TimeStepping, Moreau, ControlManager, LinearSensor, LinearChatteringSMC
 from matplotlib.pyplot import subplot, title, plot, grid, show
-from numpy import array, eye, empty, zeros, savetxt
-from math import ceil, sin
+from numpy import eye, empty, zeros, savetxt
+from math import ceil
 from numpy.linalg import norm
 
 # variable declaration
@@ -34,14 +33,15 @@ hControl = 1.0e-2 # time step for control
 Xinit = 1.0 # initial position
 theta = 0.5
 N = 2*ceil((T-t0)/h) # number of time steps
-outputSize = 5 # number of variable to store at each time step
+outputSize = 3 # number of variable to store at each time step
 
 # Matrix declaration
-A = zeros((ndof,ndof))
+A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
-sensorD = zeros((ndof,ndof))
+sensorD = zeros((ndof, ndof))
 Csurface = [[0, 1.0]]
+Brel = [[0], [2]]
 
 # Simple check
 if h > hControl:
@@ -68,8 +68,9 @@ processSimulation.insertIntegrator(processIntegrator)
 control = ControlManager(process)
 sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 control.addSensorPtr(sens)
-act = LinearSMCOT2(tActuator, processDS)
+act = LinearChatteringSMC(tActuator, processDS)
 act.setCsurfacePtr(Csurface)
+act.setBPtr(Brel)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
@@ -80,13 +81,11 @@ control.initialize()
 #eventsManager = s.eventsManager()
 
 # Matrix for data storage
-dataPlot = empty((N+1, outputSize))
+dataPlot = empty((N, outputSize))
 #dataPlot[0, 0] = processDS.t0()
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = processDS.x()[0]
 dataPlot[0, 2] = processDS.x()[1]
-dataPlot[0, 3] = processDS.z()[0]
-dataPlot[0, 4] = processDS.z()[1]
 
 # Main loop
 k = 1
@@ -95,33 +94,23 @@ while(processSimulation.nextTime() < T):
     dataPlot[k, 0] = processSimulation.nextTime()
     dataPlot[k, 1] = processDS.x()[0]
     dataPlot[k, 2] = processDS.x()[1]
-    dataPlot[k, 3] = processDS.z()[0]
-    dataPlot[k, 4] = processDS.z()[1]
     k += 1
     processSimulation.nextStep()
     print processSimulation.nextTime()
 # Resize matrix
 dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('RelayBiSimulation_OT2-py.dat', dataPlot)
+savetxt('SMCExampleExplicit-py.dat', dataPlot)
 # Plot interesting data
-subplot(411)
+subplot(211)
 title('x1')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
-subplot(412)
+subplot(212)
 title('x2')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
-subplot(413)
-title('u1')
-plot(dataPlot[:,0], dataPlot[:,3])
-grid()
-subplot(414)
-title('u2')
-plot(dataPlot[:,0], dataPlot[:,4])
 show()
-
 # TODO
 # compare with the reference
 #ref = getMatrix(SimpleMatrix("result.ref"))

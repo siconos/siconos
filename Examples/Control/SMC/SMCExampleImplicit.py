@@ -18,9 +18,10 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-from Siconos.Kernel import *
+from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+    TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMC
 from matplotlib.pyplot import subplot, title, plot, grid, show
-from numpy import array, eye, empty, zeros, savetxt, resize
+from numpy import eye, empty, zeros, savetxt
 from math import ceil
 from numpy.linalg import norm
 
@@ -36,58 +37,83 @@ N = ceil((T-t0)/h + 10) # number of time steps
 outputSize = 3 # number of variable to store at each time step
 
 # Matrix declaration
-A = zeros((ndof,ndof))
+A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
-sensorD = zeros((ndof,ndof))
+sensorD = zeros((ndof, ndof))
 Csurface = eye(ndof)
-
+Brel = eye(ndof)
+Drel = zeros((ndof, ndof))
 # Simple check
 if h > hControl:
     print "hControl must be bigger than h"
     exit(1)
 
 # Declaration of the Dynamical System
-controlProcess = ControlFirstOrderLinearDS(t0, T, h, x0, A)
-processDS = controlProcess.processDS();
+processDS = FirstOrderLinearDS(x0, A)
 processDS.setComputebFunction("RelayPlugin.so","computeB")
-controlProcess.initialize()
-
+# Model
+process = Model(t0, T)
+process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
 # time discretisation
+processTD = TimeDiscretisation(t0, h)
 tSensor = TimeDiscretisation(t0, hControl)
 tActuator = TimeDiscretisation(t0, hControl)
+# Creation of the Simulation
+processSimulation = TimeStepping(processTD, 0)
+processSimulation.setName("plant simulation")
+# Declaration of the integrator
+processIntegrator = Moreau(processDS, theta)
+processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
-control = controlProcess.CM();
+control = ControlManager(process)
 sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
 control.addSensorPtr(sens)
 act = LinearSMC(tActuator, processDS)
 act.setCsurfacePtr(Csurface)
+act.setBPtr(Brel)
+act.setDPtr(Drel)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
-# Initialization
+# Initialization 
+process.initialize(processSimulation)
 control.initialize()
+# This is not working right now
+#eventsManager = s.eventsManager()
 
-# Run the simulation
-controlProcess.run();
-# get the results
-tmpData = controlProcess.data()
-dataPlot = tmpData[:,0:3]
+# Matrix for data storage
+dataPlot = empty((3*(N+1), outputSize))
+#dataPlot[0, 0] = processDS.t0()
+dataPlot[0, 0] = t0
+dataPlot[0, 1] = processDS.x()[0]
+dataPlot[0, 2] = processDS.x()[1]
+
+# Main loop
+k = 1
+while(processSimulation.nextTime() < T):
+    processSimulation.computeOneStep()
+    dataPlot[k, 0] = processSimulation.nextTime()
+    dataPlot[k, 1] = processDS.x()[0]
+    dataPlot[k, 2] = processDS.x()[1]
+    k += 1
+    processSimulation.nextStep()
+# Resize
+dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('RelayBiSimulation_s-py.dat', dataPlot)
+savetxt('SMCExampleImplicit-py.dat', dataPlot)
 # Plot interesting data
 subplot(211)
 title('x1')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
 subplot(212)
 title('x2')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 show()
+# TODO
 # compare with the reference
-ref = getMatrix(SimpleMatrix("RelayBiSimulation-SMC.ref"))
-print('\n')
-print(norm(dataPlot - ref))
-if (norm(dataPlot - ref) > 1e-12):
-    print("Warning. The result is rather different from the reference file.")
+#ref = getMatrix(SimpleMatrix("result.ref"))
+#if (norm(dataPlot - ref[1:,:]) > 1e-12):
+#    print("Warning. The result is rather different from the reference file.")

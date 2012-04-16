@@ -18,18 +18,35 @@
 #
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 
-from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation,\
-    TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2,\
+# We have first to import sage, so it won't shadow some function (like plot...)
+# You need the env. variable DOT_SAGE to point to the right location !
+from __future__ import print_function
+
+import sys
+from sage.all import *
+# this is needed since sage uses mpfr by default ...
+RealNumber = float
+Integer = int
+
+# Other import
+from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+    TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2, \
     getMatrix, SimpleMatrix
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import array, eye, empty, zeros, savetxt
 from math import ceil, sin
 from numpy.linalg import norm
 
+
+# Some stupid symbolic computations
+x = var('x')
+g = vector((-cos(50*x), cos(50*x)))/50
+f = g.diff(x)
+
 # Derive our own version of FirstOrderLinearDS
+
 class MyFOLDS(FirstOrderLinearDS):
     def computeb(self, time):
-        t = sin(50*time)
         tmpz = self.z()
         # XXX fix this !
         if len(tmpz) != 2:
@@ -37,7 +54,7 @@ class MyFOLDS(FirstOrderLinearDS):
             return
         # XXX we need to find a smarter way to do things here
         # we need to convert from vector (sage) to arrayish
-        u = [t, -t] + tmpz
+        u = array(f(x=time).list(), dtype = float) + tmpz
         self.setb(u)
 
 # variable declaration
@@ -48,19 +65,19 @@ h = 1.0e-4  # time step for simulation
 hControl = 1.0e-2 # time step for control
 Xinit = 1.0 # initial position
 theta = 0.5
-N = 2*ceil((T-t0)/h) # number of time steps
+N = ceil((T-t0)/h + 10) # number of time steps
 outputSize = 5 # number of variable to store at each time step
 
 # Matrix declaration
-A = zeros((ndof,ndof))
+A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
-sensorD = zeros((ndof,ndof))
+sensorD = zeros((ndof, ndof))
 Csurface = [[0, 1.0]]
 
 # Simple check
 if h > hControl:
-    print "hControl must be bigger than h"
+    print("hControl must be bigger than h")
     exit(1)
 
 # Declaration of the Dynamical System
@@ -96,7 +113,7 @@ control.initialize()
 #eventsManager = s.eventsManager()
 
 # Matrix for data storage
-dataPlot = empty((N, outputSize))
+dataPlot = empty((3*(N+1), outputSize))
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = processDS.x()[0]
 dataPlot[0, 2] = processDS.x()[1]
@@ -118,28 +135,28 @@ while(processSimulation.nextTime() < T):
 # Resize matrix
 dataPlot.resize(k, outputSize)
 # Save to disk
-savetxt('RelayBiSimulation_OT2_noCplugin-py.dat', dataPlot)
+savetxt('SMCExampleImplicitOT2-noCplugin-sage-py.dat', dataPlot)
 # Plot interesting data
 subplot(411)
 title('x1')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
 subplot(412)
 title('x2')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 subplot(413)
 title('u1')
-plot(dataPlot[:,0], dataPlot[:,3])
+plot(dataPlot[:, 0], dataPlot[:, 3])
 grid()
 subplot(414)
 title('u2')
-plot(dataPlot[:,0], dataPlot[:,4])
+plot(dataPlot[:, 0], dataPlot[:, 4])
 show()
 
 # compare with the reference
-ref = getMatrix(SimpleMatrix("RelayBiSimulation_OT2-py.ref"))
-print("%e" % norm(dataPlot - ref))
+ref = getMatrix(SimpleMatrix("SMCExampleImplicitOT2-py.ref"))
+print("%19e" % norm(dataPlot - ref))
 if (norm(dataPlot - ref) > 1e-12):
-    print dataPlot - ref
+    print(dataPlot - ref)
     print("Warning. The result is rather different from the reference file.")
