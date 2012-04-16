@@ -20,10 +20,13 @@
 \brief Include files related to controlTools.
 */
 
+#include "ControlTypeDef.hpp"
+
 // Sensors - generic
 #include "SensorFactory.hpp"
 #include "SensorEvent.hpp"
 #include "ControlSensor.hpp"
+
 // Sensors - available
 #include "LinearSensor.hpp"
 

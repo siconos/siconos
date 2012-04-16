@@ -21,16 +21,16 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(101, t, ds), _thetaSMC(0.5)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC, t, ds), _thetaSMC(0.5)
 {
 }
 
 LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
-  CommonSMC(101, t, ds), _B(B), _D(D), _thetaSMC(0.5)
+  CommonSMC(LINEAR_SMC, t, ds, B, D), _thetaSMC(0.5)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(101, t, ds, sensorList),
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_SMC, t, ds, sensorList),
   _thetaSMC(0.5)
 {
 }
@@ -129,4 +129,4 @@ void LinearSMC::actuate()
 
 }
 
-AUTO_REGISTER_ACTUATOR(101, LinearSMC);
+AUTO_REGISTER_ACTUATOR(LINEAR_SMC, LinearSMC);

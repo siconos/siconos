@@ -27,10 +27,10 @@
 using namespace std;
 using namespace SensorFactory;
 
-LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds): ControlSensor(100, t, ds)
+LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, t, ds)
 {}
 
-LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD): ControlSensor(100, t, ds), _matC(matC), _matD(matD)
+LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD): ControlSensor(LINEAR_SENSOR, t, ds), _matC(matC), _matD(matD)
 {}
 
 LinearSensor::~LinearSensor()
@@ -86,4 +86,4 @@ void LinearSensor::capture()
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
 }
-AUTO_REGISTER_SENSOR(100, LinearSensor);
+AUTO_REGISTER_SENSOR(LINEAR_SENSOR, LinearSensor);

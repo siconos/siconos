@@ -21,11 +21,11 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(104, t, ds)
+LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC_OT2, t, ds)
 {
 }
 
-LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(104, t, ds, sensorList)
+LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_SMC_OT2, t, ds, sensorList)
 {
 }
 
@@ -152,4 +152,4 @@ void LinearSMCOT2::actuate()
   _simulPred->advanceToEvent();
 }
 
-AUTO_REGISTER_ACTUATOR(104, LinearSMCOT2);
+AUTO_REGISTER_ACTUATOR(LINEAR_SMC_OT2, LinearSMCOT2);

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,24 +16,28 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "ActuatorEvent.hpp"
-#include "EventFactory.hpp"
-#include "Actuator.hpp"
-#include "TimeDiscretisation.hpp"
-using namespace std;
-using namespace EventFactory;
 
-void ActuatorEvent::process(SP::Simulation sim)
-{
-  _actuator->actuate();
-}
+/*! \file
 
-void ActuatorEvent::update()
-{
-  // Increment actuator time discr. to next step
-  _actuator->timeDiscretisation()->increment();
-  // set actuator event time to new current time value
-  setTime(_actuator->timeDiscretisation()->currentTime());
-}
+Typedef for control-related objects
+*/
 
-AUTO_REGISTER_EVENT(ACTUATOR_EVENT, ActuatorEvent);
+#ifndef ControlTypeDef_H
+#define ControlTypedef_H
+
+/** Actuator types */
+#define SAMPLED_PID_ACTUATOR  100
+#define LINEAR_SMC            101
+#define LINEAR_CHATTERING_SMC 103
+#define LINEAR_SMC_OT2        104
+
+/** Sensor types */
+#define LINEAR_SENSOR         100
+
+/** Event types
+\warning Event.hpp has also to be updated
+*/
+#define SENSOR_EVENT          3
+#define ACTUATOR_EVENT        4
+
+#endif

@@ -50,9 +50,9 @@ void EventsManager::initialize(SP::Simulation sim)
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  _currentEvent = regEvent.instantiate(simulation()->getTk(), 1);
+  _currentEvent = regEvent.instantiate(simulation()->getTk(), TD_EVENT);
   _allEvents.insert(_currentEvent);
-  _ETD = regEvent.instantiate(simulation()->getTkp1(), 1);
+  _ETD = regEvent.instantiate(simulation()->getTkp1(), TD_EVENT);
   _allEvents.insert(_ETD);
   // === Set nextEvent ===
   _nextEvent = _ETD;
@@ -71,13 +71,13 @@ void EventsManager::preUpdate()
   {
     (*it)->process(simulation());
     // "synchronise" actuators/sensors events with nextEvent
-    if ((*it)->getType() == 3 || (*it)->getType() == 4)
+    if ((*it)->getType() == SENSOR_EVENT || (*it)->getType() == ACTUATOR_EVENT)
     {
       (*it)->update();
       _allEvents.insert(*it);
     }
     // With non-smooth event
-    if ((*it)->getType() == 2)
+    if ((*it)->getType() == NS_EVENT)
     {
       _hasNS = false;
     }
@@ -222,7 +222,7 @@ void EventsManager::scheduleNonSmoothEvent(double time)
   if (!_ENonSmooth)
   {
     EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-    _ENonSmooth = regEvent.instantiate(time, 2);
+    _ENonSmooth = regEvent.instantiate(time, NS_EVENT);
   }
   else
   {
@@ -335,7 +335,7 @@ void EventsManager::GeneralProcessEvents()
       _hasNS = false; // false until next insertion
     }
     // Actuator or or Sensor event
-    else if (((*it)->getType() == 3) || ((*it)->getType() == 4))
+    else if (((*it)->getType() == SENSOR_EVENT) || ((*it)->getType() == ACTUATOR_EVENT))
     {
       (*it)->update();
       _allEvents.insert(*it);

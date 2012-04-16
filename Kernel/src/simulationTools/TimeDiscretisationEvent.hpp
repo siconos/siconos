@@ -46,19 +46,19 @@ private:
 public:
 
   /** constructor with time value as a parameter
-  *  \param a double
-  *  \param an int, type of Event
+  *  \param time starting time (a double)
+  *  \param notUsed unused int
   */
-  TimeDiscretisationEvent(double, int);
+  TimeDiscretisationEvent(double time, int notUsed);
 
   /** destructor
   */
   ~TimeDiscretisationEvent();
 
   /**
-  *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
+  *  \param simulation a SP to the simulation that owns this Event (through the EventsManager)
   */
-  void process(SP::Simulation);
+  void process(SP::Simulation simulation);
 };
 
 #endif // TimeDiscretisationEvent_H

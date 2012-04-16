@@ -21,11 +21,11 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(103, t, ds)
+LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_CHATTERING_SMC, t, ds)
 {
 }
 
-LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(103, t, ds, sensorList)
+LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_CHATTERING_SMC, t, ds, sensorList)
 {
 }
 

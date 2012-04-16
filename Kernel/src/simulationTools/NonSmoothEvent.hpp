@@ -50,19 +50,19 @@ private:
 public:
 
   /** constructor with time value as a parameter
-  *  \param a double
-  *  \param an int, type of Event
+  *  \param time the time of the first event (a double)
+  *  \param notUsed unused parameter (an int)
   */
-  NonSmoothEvent(double, int);
+  NonSmoothEvent(double time, int notUsed);
 
   /** destructor
   */
   ~NonSmoothEvent();
 
   /** OSNS solving and IndexSets updating
-  *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
+  *  \param simulation a SP to the simulation that owns this Event (through the EventsManager)
   */
-  void process(SP::Simulation);
+  void process(SP::Simulation simulation);
 };
 
 #endif // NonSmoothEvent_H

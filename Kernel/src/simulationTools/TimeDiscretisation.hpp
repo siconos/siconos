@@ -83,7 +83,7 @@ private:
   /** the XML object linked to the TimeDiscretisation to read XML data */
   SP::TimeDiscretisationXML _timeDiscretisationXML;
 
-  /** Indic. flag which sets the way the time-discretisation is built.*/
+  /** Indicator flag : 1 when we have a complete vector for _tk (_h may vary), 2 when _h is fixed.*/
   int _tdCase;
 
   /** index in tk which corresponds to the current time step (tk[pos] = t[k]) -

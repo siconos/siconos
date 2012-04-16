@@ -21,11 +21,11 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(100, t, ds)
+SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(SAMPLED_PID_ACTUATOR, t, ds)
 {
 }
 
-SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): Actuator(100, t, ds, sensorList)
+SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): Actuator(SAMPLED_PID_ACTUATOR, t, ds, sensorList)
 {
 }
 
@@ -94,7 +94,7 @@ void SampledPIDActuator::setK(const SimpleVector& newValue)
   // check dimensions ...
   if (newValue.size() != 3)
   {
-    RuntimeException::selfThrow("SampledPIDActuator::setK - the size of K is not 3");
+    RuntimeException::selfThrow("SampledPIDActuator::setK - the size of K should be 3");
   }
   else
   {
@@ -114,11 +114,11 @@ void SampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
   // check dimensions ...
   if (newPtr->size() != 3)
   {
-    RuntimeException::selfThrow("SampledPIDActuator::setKPtr - the size of K is not 3");
+    RuntimeException::selfThrow("SampledPIDActuator::setKPtr - the size of K should be 3");
   }
   else
   {
     _K = newPtr;
   }
 }
-AUTO_REGISTER_ACTUATOR(100, SampledPIDActuator);
+AUTO_REGISTER_ACTUATOR(SAMPLED_PID_ACTUATOR, SampledPIDActuator);

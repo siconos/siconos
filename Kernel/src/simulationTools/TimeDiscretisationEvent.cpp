@@ -23,10 +23,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(0.0, 1)
+TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(0.0, TD_EVENT)
 {}
 
-TimeDiscretisationEvent::TimeDiscretisationEvent(double time, int): Event(time, 1)
+TimeDiscretisationEvent::TimeDiscretisationEvent(double time, int notUsed): Event(time, TD_EVENT)
 {}
 
 TimeDiscretisationEvent::~TimeDiscretisationEvent()
@@ -40,4 +40,4 @@ void TimeDiscretisationEvent::process(SP::Simulation simulation)
   simulation->saveInMemory();
 }
 
-AUTO_REGISTER_EVENT(1, TimeDiscretisationEvent);
+AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEvent);

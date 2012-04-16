@@ -23,10 +23,12 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include<math.h>
-#include<iostream> // Warning (FP): iostream must be included before gmp
-#include<gmp.h>
+#include <math.h>
+#include <iostream> // Warning (FP): iostream must be included before gmp
+#include <gmp.h>
 #include "SiconosConst.hpp"
+#include "SimulationTypeDef.hpp"
+#include "ControlTypeDef.hpp"
 #include "SiconosPointers.hpp"
 #include "SiconosSerialization.hpp"
 
@@ -54,10 +56,10 @@ const double DEFAULT_TICK = 1e-16;
  * Existing types of events:
  *  0 -> undef
  *  1 -> TimeDiscretisation
-*  2 -> NonSmooth
-*  3 -> Actuator
-*  4 -> Sensor
-*/
+ *  2 -> NonSmooth
+ *  3 -> Sensor
+ *  4 -> Actuator
+ */
 
 class Event
 {
@@ -99,10 +101,10 @@ protected:
 public:
 
   /** constructor with time value and type as input
-   *  \param double
-   *  \param an int
+   *  \param time the starting type (a double)
+   *  \param newType the Event type (an int)
    */
-  Event(double, int = 0);
+  Event(double time, int newType = 0);
 
   /** destructor
    */

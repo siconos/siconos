@@ -216,6 +216,10 @@ const int SICONOS_NB_OSNSP_TSP = 2;
 
 #define LEVELMAX 999
 
+/** Event constants */
+#define TD_EVENT 1
+#define NS_EVENT 2
+
 TYPEDEF_SPTR(OSISet);
 TYPEDEF_SPTR(OneStepNSProblems);
 

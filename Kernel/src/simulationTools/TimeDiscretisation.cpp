@@ -114,7 +114,7 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
 {
   _h = td.currentTimeStep();
   _k = td.getK();
-  _tdCase = getTDCase();
+  _tdCase = td.getTDCase();
   // the magic formula is in the header file
   _pos = _tdCase == 1 ? _k : 0;
   _tk = td.getTk();

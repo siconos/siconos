@@ -43,7 +43,7 @@ void Sensor::initialize(SP::Model m)
   // == Create an event linked to the present Sensor. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
-  _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), 3);
+  _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), SENSOR_EVENT);
   boost::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
 }
 

@@ -94,7 +94,7 @@ void Actuator::initialize(SP::Model m)
   // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
-  _eActuator = regEvent.instantiate(_timeDiscretisation->currentTime(), 4);
+  _eActuator = regEvent.instantiate(_timeDiscretisation->currentTime(), ACTUATOR_EVENT);
   boost::static_pointer_cast<ActuatorEvent>(_eActuator)->setActuatorPtr(shared_from_this());
 
   // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.

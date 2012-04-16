@@ -85,10 +85,10 @@ public:
   /** Compute the new control law at each event
    * Here we are using the following formula:
    * \f$ u_k = u_{k-1} + c_1 e_k + c_2 e_{k-1} + c_3 e_{k-2} \f$ , where
-   * \f{align*} c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
+   * \f{array} c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
    * c_2 &= -1 - \frac{2K_D}{\Delta t} \\
    * c_3 &= \frac{K_D}{\Delta t} \\
-   * \f{align*}
+   * \f{array}
    */
   void actuate();
 
