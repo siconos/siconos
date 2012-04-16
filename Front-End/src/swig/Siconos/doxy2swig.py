@@ -25,6 +25,7 @@ output will be written (the file will be clobbered).
 # Thanks:
 #   Johan Hake:  the include_function_definition feature
 #   Bill Spotz:  bug reports and testing.
+#   Sebastian Henschel:   Misc. enhancements.
 #
 ######################################################################
 
@@ -437,7 +438,7 @@ def main():
                       action='store_true',
                       default=False,
                       dest='quiet',
-                      help='be quiet and minimise output')
+                      help='be quiet and minimize output')
     
     options, args = parser.parse_args()
     if len(args) != 2:

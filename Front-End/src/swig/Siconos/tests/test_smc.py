@@ -2,13 +2,10 @@
 
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
-    from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation,\
-            TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2,\
-            getMatrix, SimpleMatrix
-    from matplotlib.pyplot import subplot, title, plot, grid, show
-    from numpy import array, eye, empty, zeros, savetxt
+    from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+            TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
+    from numpy import eye, empty, zeros
     from math import ceil, sin
-    from numpy.linalg import norm
 
     # Derive our own version of FirstOrderLinearDS
     class MyFOLDS(FirstOrderLinearDS):
@@ -36,10 +33,10 @@ def test_smc1():
     outputSize = 5 # number of variable to store at each time step
 
     # Matrix declaration
-    A = zeros((ndof,ndof))
+    A = zeros((ndof, ndof))
     x0 = [Xinit, -Xinit]
     sensorC = eye(ndof)
-    sensorD = zeros((ndof,ndof))
+    sensorD = zeros((ndof, ndof))
     Csurface = [[0, 1.0]]
 
     # Simple check
@@ -105,12 +102,11 @@ def test_smc1():
 
 #Same test, but with the simplified interface
 def test_smc2():
-    from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation,\
-            ControlFirstOrderLinearDS, ControlManager, LinearSensor, \
+    from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
+            ControlFirstOrderLinearDS, LinearSensor, \
             LinearSMCOT2, getMatrix, SimpleMatrix
-    from matplotlib.pyplot import subplot, title, plot, grid, show
-    from numpy import array, eye, empty, zeros, savetxt
-    from math import ceil, sin
+    from numpy import eye, zeros
+    from math import sin
     from numpy.linalg import norm
 
     # Derive our own version of FirstOrderLinearDS
@@ -122,8 +118,6 @@ def test_smc2():
             if len(tmpz) != 2:
                 print("DEBUG z has length ", len(tmpz))
                 return
-            # XXX we need to find a smarter way to do things here
-            # we need to convert from vector (sage) to arrayish
             u = [t, -t] + tmpz
             self.setb(u)
 
@@ -134,15 +128,12 @@ def test_smc2():
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2 # time step for control
     Xinit = 1.0 # initial position
-    theta = 0.5
-    N = ceil((T-t0)/h + 10) # number of time steps
-    outputSize = 5 # number of variable to store at each time step
 
     # Matrix declaration
-    A = zeros((ndof,ndof))
+    A = zeros((ndof, ndof))
     x0 = [Xinit, -Xinit]
     sensorC = eye(ndof)
-    sensorD = zeros((ndof,ndof))
+    sensorD = zeros((ndof, ndof))
     Csurface = [[0, 1.0]]
 
     # Simple check
@@ -161,7 +152,7 @@ def test_smc2():
     tSensor = TimeDiscretisation(t0, hControl)
     tActuator = TimeDiscretisation(t0, hControl)
     # Actuator, Sensor & ControlManager
-    control = controlProcess.CM();
+    control = controlProcess.CM()
     sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
     control.addSensorPtr(sens)
     act = LinearSMCOT2(tActuator, processDS)
@@ -173,7 +164,7 @@ def test_smc2():
     control.initialize()
 
     # Run the simulation
-    controlProcess.run();
+    controlProcess.run()
     # get the results
     tmpData = controlProcess.data()
     dataPlot = tmpData
@@ -181,5 +172,5 @@ def test_smc2():
     ref = getMatrix(SimpleMatrix("smc_2.ref"))
     print("%e" % norm(dataPlot - ref))
     if (norm(dataPlot - ref) > 1e-12):
-        print dataPlot - ref
+        print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
