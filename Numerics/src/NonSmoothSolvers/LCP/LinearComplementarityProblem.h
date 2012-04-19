@@ -36,7 +36,7 @@
  *
  * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
  *
- * The notation $x \perp y$ means that $x^Ty =0$. Inequalities involving vectors
+ * The notation \f$x \perp y\f$ means that \f$x^Ty =0\f$. Inequalities involving vectors
  * are understood to hold component-wise.
  *
  * From more details on theory and analysis of LCP, we refer to
@@ -95,30 +95,30 @@ typedef struct
 extern "C"
 {
 #endif
-  /** \fn void LinearComplementarity_display(LinearComplementarityProblem* p)
+  /** \fn void LinearComplementarity_display(LinearComplementarityProblem* problem)
    *  \brief function to display a LinearComplementarityProblem
-   *  \param pointer to a LinearComplementarityProblem to display
+   *  \param  problem pointer to a LinearComplementarityProblem to display
    */
-  void LinearComplementarity_display(LinearComplementarityProblem* p);
+  void LinearComplementarity_display(LinearComplementarityProblem* problem);
 
   /** \fn int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file)
    *  \brief function to write in a file a LinearComplementarityProblem
-   *  \param pointer to a LinearComplementarityProblem to print
-   *  \param pointer to a FILE
+   *  \param problem pointer to a LinearComplementarityProblem to print
+   *  \param file pointer to a FILE
    */
   int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file);
 
   /** \fn  int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file)
    *  \brief function to read and create a LinearComplementarityProblem
    *   from a file
-   *  \param pointer to a LinearComplementarityProblem to create
-   *  \param pointer to a FILE
+   *  \param problem pointer to a LinearComplementarityProblem to create
+   *  \param file pointer to a FILE
    */
   int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
   /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
    *  \brief function to delete a LinearComplementarityProblem
-   *  \param pointer to a LinearComplementarityProblem to delete
+   *  \param problem  pointer to a LinearComplementarityProblem to delete
    */
   void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
 #ifdef __cplusplus

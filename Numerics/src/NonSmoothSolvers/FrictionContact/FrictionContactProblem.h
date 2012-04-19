@@ -126,7 +126,7 @@
  */
 
 
-/*!\File FrictionContactProblem.h
+/*!\file FrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 

@@ -13,15 +13,16 @@ extern "C"
 {
 #endif
   /** Numerics dense matrix to Path Sparse matrix
-      \param size0, number of rows of input matrix
-      \param size1, number of columns of input matrix
+      \param size0 number of rows of input matrix
+      \param size1 number of columns of input matrix
       \param matIn matrix to convert (col. major)
       \param col_start
       \param col_len
       \param row
       \param data
   */
-  void convertToPathSparse(int size0, int size1, double* matIn, int* col_start, int* col_len, int* row, double* data);
+  void convertToPathSparse(int size0, int size1, double* matIn,
+                           int* col_start, int* col_len, int* row, double* data);
 #ifdef __cplusplus
 }
 #endif

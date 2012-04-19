@@ -145,13 +145,13 @@ extern "C"
 #endif
 
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
-      \param[in] sizeX, dim of the vectors x
-      \param[in] sizeY, dim of the vectors y
+      \param[in] sizeX dim of the vectors x
+      \param[in] sizeY dim of the vectors y
       \param[in] alpha coefficient
-      \param[in] A, the matrix to be multiplied
-      \param[in] x, the vector to be multiplied
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
       \param[in] beta coefficient
-      \param[in,out] y, the resulting vector
+      \param[in,out] y the resulting vector
   */
   void prodSBM(unsigned int sizeX, unsigned int sizeY,
                double alpha, const SparseBlockStructuredMatrix* const A,
@@ -160,68 +160,68 @@ extern "C"
   /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
 
      \param[in] alpha coefficient
-     \param[in] A, the matrix to be multiplied
-     \param[in] B, the matrix to be multiplied
+     \param[in] A the matrix to be multiplied
+     \param[in] B the matrix to be multiplied
     \param[in] beta coefficient
-     \param[in,out] C, the resulting matrix
+     \param[in,out] C the resulting matrix
   */
   void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A,
                   const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
 
   /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
-    \param[in] A, the matrix to be multiplied
-    \param[in] B, the matrix to be multiplied
-    \param[in,out] C, the resulting matrix
+    \param[in] A the matrix to be multiplied
+    \param[in] B the matrix to be multiplied
+    \param[in,out] C the resulting matrix
   */
   void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
-      \param[in] sizeX, dim of the vector x
-      \param[in] sizeY, dim of the vector y
-      \param[in] currentRowNumber, number of the required row of blocks
-      \param[in] A, the matrix to be multiplied
-      \param[in] x, the vector to be multiplied
-      \param[in,out] y, the resulting vector
-      \param[in] init, = 0 for y += Ax, =1 for y = Ax
+      \param[in] sizeX dim of the vector x
+      \param[in] sizeY dim of the vector y
+      \param[in] currentRowNumber number of the required row of blocks
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
   void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
-      \param[in] sizeX, dim of the vector x
-      \param[in] sizeY, dim of the vector y
-      \param[in] currentRowNumber, number of the required row of blocks
-      \param[in] A, the matrix to be multiplied
-      \param[in] x, the vector to be multiplied
-      \param[in,out] y, the resulting vector
-      \param[in] init, = 0 for y += Ax, =1 for y = Ax
+      \param[in] sizeX dim of the vector x
+      \param[in] sizeY dim of the vector y
+      \param[in] currentRowNumber number of the required row of blocks
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
   void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Destructor for SparseBlockStructuredMatrix objects
-      \param SparseBlockStructuredMatrix, the matrix to be destroyed.
+      \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */
-  void freeSBM(SparseBlockStructuredMatrix *);
+  void freeSBM(SparseBlockStructuredMatrix * blmat);
 
   /** Screen display of the matrix content
-      \param M the matrix to be displayed
+      \param m the matrix to be displayed
    */
-  void printSBM(const SparseBlockStructuredMatrix* const M);
+  void printSBM(const SparseBlockStructuredMatrix* const m);
 
   /** print in file  of the matrix content
-  \param M the matrix to be displayed
+  \param m the matrix to be displayed
   \param file the corresponding  file
   */
-  void printInFileSBM(const SparseBlockStructuredMatrix* const M, FILE* file);
+  void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE* file);
 
   /** read in file  of the matrix content without performing memory allocation
   \param M the matrix to be displayed
-  \param filename the corresponding name of the file
+  \param file the corresponding name of the file
   */
   void readInFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
 
   /** Create from file a SparseBlockStructuredMatrix with  memory allocation
-      \param M the matrix to be displayed
-      \param filename the corresponding name of the file
+      \param outSBM the matrix to be displayed
+      \param file the corresponding name of the file
    */
   void newFromFileSBM(SparseBlockStructuredMatrix* const outSBM, FILE *file);
 
@@ -234,9 +234,10 @@ extern "C"
 
   /** print in file  of the matrix content
    \param M the matrix to be displayed
-   \param file the corresponding file
+   \param filename the corresponding file
      */
   void printInFileNameSBM(const SparseBlockStructuredMatrix* const M, const char *filename);
+
   /** read in file  of the matrix content
   \param M the matrix to be displayed
   \param filename the corresponding name of the file
@@ -244,7 +245,7 @@ extern "C"
   void readInFileNameSBM(SparseBlockStructuredMatrix* const M, const char *filename);
 
   /** Destructor for SparseBlockStructuredMatrixPred objects
-      \param SparseBlockStructuredMatrix, the matrix to be destroyed.
+   *   \param blmatpred SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
   void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred);
 
@@ -257,14 +258,16 @@ extern "C"
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix
-     \param int row the row index
-     \return int col the column index
+     \param row the row index
+     \param col the column index
+     \return the value
   */
   double getValueSBM(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col);
+
   /** Copy of a SBM  A into B
     \param[in] A the SparseBlockStructuredMatrix matrix to be copied
     \param[out]  B the SparseBlockStructuredMatrix matrix copy of A
-    \param[in] copyBlock. if copyBlock then the content of block are copied, else only the pointers are copied.
+    \param[in] copyBlock if copyBlock then the content of block are copied, else only the pointers are copied.
   */
   int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B, unsigned int copyBlock);
 
@@ -283,45 +286,45 @@ extern "C"
 
 
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
-      \param[in] the blocksize
-      \param[in] pointer on the Sparse Matrix
-      \param[in,out] pointer on an empty SparseBlockStructuredMatrix
+      \param[in] blocksize the blocksize
+      \param[in] sparseMat pointer on the Sparse Matrix
+      \param[in,out] outSBM pointer on an empty SparseBlockStructuredMatrix
   */
   int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
   /** Copy a SBM into a Dense Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix
-  \param[in] pointer on the filled dense Matrix
+  \param[in] A the SparseBlockStructuredMatrix matrix
+  \param[in] denseMat pointer on the filled dense Matrix
   */
   void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 
   /** Copy a SBM into a Sparse (CSR) Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix
-  \param[in] pointer on the filled sparse Matrix
+  \param[in] A the SparseBlockStructuredMatrix matrix
+  \param[in] outSparseMat pointer on the filled sparse Matrix
   */
   int SBMtoSparse(const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat);
 
   /** initMemory of a Sparse (CSR) Matrix form a SBM matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix
-  \param[in] pointer on the initialized sparse Matrix
+  \param[in] A the SparseBlockStructuredMatrix matrix
+  \param[in] sparseMat pointer on the initialized sparse Matrix
   */
   int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatrix *sparseMat);
 
   /**Copy a block row of the SBM into a Dense Matrix
-  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed.
-  \param[in] the block row index copied.
-  \param[in] pointer on the filled dense Matrix.
-  \param[in] rowPos, line pos in the dense matrix.
-  \param[in] rowNb, total number of line of the dense matrix.
-  \The number of line copied is contained in M.
+  \param[in] A the SparseBlockStructuredMatrix matrix to be inversed.
+  \param[in] row the block row index copied.
+  \param[in] denseMat pointer on the filled dense Matrix.
+  \param[in] rowPos line pos in the dense matrix.
+  \param[in] rowNb total number of line of the dense matrix.
+  The number of line copied is contained in M.
   \
    */
   void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat, int rowPos, int rowNb);
 
 
   /** To free a SBM matrix (for example allocated by newFromFile).
-   * param[in] M the SparseBlockStructuredMatrix that mus be de-allocated.
-   * param[in] level: use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
+   * param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
+   * param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
    */
   void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level);
 

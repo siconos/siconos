@@ -68,7 +68,6 @@
 
 /** DGEMV - one of the matrix-vector operations y := alpha*A*x +
    beta*y, or y := alpha*A'*x + xbeta*y,
-   \param TRANS
 */
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY)       \
   ({ assert (LDA > 0);                                                 \

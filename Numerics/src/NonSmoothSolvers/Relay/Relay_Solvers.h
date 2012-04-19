@@ -40,8 +40,8 @@ Note: function names starting with dr -> dual relay, with pr: primal relay
 \section relayLatin Latin
 LArge Time INcrements solver
 
-\bf function: pr_latin() or dr_latin() \n
-\bf parameters:
+ function: pr_latin() or dr_latin() \n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
@@ -51,8 +51,8 @@ LArge Time INcrements solver
 \section relayNLGS Non-linear Gauss Seidel
 LArge Time INcrements solver
 
-\bf function: pr_nlgs() or dr_nlgs()\n
-\bf parameters:
+ function: pr_nlgs() or dr_nlgs()\n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
@@ -75,6 +75,7 @@ extern "C"
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in,out] global_options
       \return info termination value
       - 0 : successful\n
       - >0 : otherwise see each solver for more information about the log info
@@ -82,17 +83,19 @@ extern "C"
    */
   int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options);
 
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param SolverOptions * the pointer to options to set
-      \param int the identifier of the solver
+  /** set the default solver parameters and perform memory allocation for Relay
+      \param[in] problem the RelayProblem structure which handles the problem (M,q)
+      \param options the pointer to options to set
+      \param solverId int the identifier of the solver
   */
-  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int);
+  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
 
 
   /** relay_nlgs is a projected Gauss-Seidel solver for relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param options the pointer to options to set
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -102,7 +105,7 @@ extern "C"
   void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for PGS
-      \param SolverOptions * the pointer to options to set
+      \param options SolverOptions * the pointer to options to set
   */
   int relay_pgs_setDefaultSolverOptions(SolverOptions* options);
 
@@ -110,6 +113,8 @@ extern "C"
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+     * \param options
+     * \param global_options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -119,7 +124,7 @@ extern "C"
   void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for Lemke
-      \param SolverOptions * the pointer to options to set
+      \param options the pointer to options to set
   */
   int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options);
 
@@ -127,6 +132,8 @@ extern "C"
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+     * \param options
+     * \param global_options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
@@ -136,7 +143,8 @@ extern "C"
   void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
-      \param SolverOptions * the pointer to options to set
+   * \param[in] problem structure that represents the Relay (M, q...)
+   * \param options SolverOptions * the pointer to options to set
   */
   int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options);
 
@@ -144,6 +152,7 @@ extern "C"
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param options SolverOptions * the pointer to options to set
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -153,7 +162,7 @@ extern "C"
   void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
-      \param SolverOptions * the pointer to options to set
+      \param options the pointer to options to set
   */
   int relay_path_setDefaultSolverOptions(SolverOptions* options);
 
@@ -161,6 +170,7 @@ extern "C"
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param options the pointer to options to set
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -201,6 +211,7 @@ extern "C"
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param options
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
@@ -231,14 +242,15 @@ extern "C"
      * \param[in,out] z a n-vector of doubles which returns the projection
      * \param[in,out] ub a n-vector of doubles which contains the upper bounds
      * \param[in,out] lb a n-vector of doubles which contains the lower bounds
+     * \param[in,out] n size of the a n-vector
      * \return status: 0
      * \author Vincent Acary
      */
   int projectiononbox(double *z , double *lb, double * ub, int n);
 
   /** This function transform a RelayProblem into a LinearComplementarityProblem
-     * \param[in] A pointer to a Relay_problem to transform
-     * \param[out] A pointer to a LinearComplementarity_problem resulting from the reformulation
+     * \param[in] problem A pointer to a Relay_problem to transform
+     * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
      * \author Vincent Acary
      */
 

@@ -27,7 +27,7 @@
 #include "LinearComplementarityProblem.h"
 
 
-void LinearComplementarity_display(LinearComplementarityProblem* p)
+void LinearComplementarity_display(LinearComplementarityProblem* problem)
 {
 
   assert(p);

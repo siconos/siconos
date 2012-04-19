@@ -30,7 +30,7 @@
 #endif
 
 /** OP3X3(EXPR) do EXPR 9 times
- * \param a C expression that should contains self incrementing
+ * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
 #define OP3X3(EXPR)                             \
   do                                            \
@@ -47,7 +47,7 @@
   } while(0)                                    \
  
 /** OP3(EXPR) do EXPR 3 times
- * \param a C expression that should contains self incrementing
+ * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
 #define OP3(EXPR)                               \
   do                                            \
@@ -157,56 +157,58 @@
   }
 
 /** copy a 3x3 matrix or a vector[9]
- *\param[in] a[9]
- *\param[out] b[9]*/
+ * \param[in] a  a[9]
+ * \param[out] b  b[9]*/
 static inline void cpy3x3(double* a, double* b)
 {
   OP3X3(*b++ = *a++);
 }
 
 /** add a 3x3 matrix or a vector[9]
- *\param[in] a[9]
- *\param[in,out] b[9]*/
+ *\param[in] a a[9]
+ *\param[in,out]  b b[9]*/
 static inline void add3x3(double a[9], double b[9])
 {
   OP3X3(*b++ += *a++);
 }
 
 /** sub a 3x3 matrix or a vector[9]
- *\param[in] a[9]
- *\param[in,out] b[9]*/
+ *\param[in] a a[9]
+ *\param[in,out] b b[9]*/
 static inline void sub3x3(double a[9], double b[9])
 {
   OP3X3(*b++ -= *a++);
 }
 
 /** copy a vector[3]
- *\param[in] a[3]
- *\param[out] b[3]*/
+ * \param[in] a a[3]
+ * \param[out] b b[3]
+ */
 static inline void cpy3(double a[3], double b[3])
 {
   OP3(*b++ = *a++);
 }
 
 /** add a vector[3]
- *\param[in] a[3]
- *\param[in,out] b[3]*/
+ * \param[in] a a[3]
+ * \param[in,out] b b[3]*/
 static inline void add3(double a[3], double b[3])
 {
   OP3(*b++ += *a++);
 }
 
 /** sub a vector[3]
- *\param[in] a[3]
- *\param[in,out] b[3]*/
+ * \param[in] a a[3]
+ * \param[in,out] b  b[3]
+ */
 static inline void sub3(double a[3], double b[3])
 {
   OP3(*b++ -= *a++);
 }
 
 /** scalar multiplication of a matrix3x3
- * \param[in] double scalar
- * \param[in,out] b[9]
+ * \param[in] scal double scalar
+ * \param[in,out] m  m[9]
  */
 static inline void scal3x3(double scal, double m[9])
 {
@@ -214,8 +216,8 @@ static inline void scal3x3(double scal, double m[9])
 }
 
 /** scalar multiplication of a vector3
- * \param[in] double scalar
- * \param[in,out] v[3]
+ * \param[in] scal double scalar
+ * \param[in,out] v v[3]
  */
 static inline void scal3(double scal, double* v)
 {
@@ -224,8 +226,8 @@ static inline void scal3(double scal, double* v)
 
 
 /** copy & transpose a matrix
- * \param[in] *a
- * \param[out] transpose(*a)
+ * \param[in] a *a
+ * \param[out] b transpose(*a)
  */
 static inline void cpytr3x3(double* a, double* b)
 {
@@ -243,9 +245,9 @@ static inline void cpytr3x3(double* a, double* b)
 };
 
 /** matrix vector multiplication
- * \param[in] a[9]
- * \param[in] v[3]
- * \param[out] r[3]
+ * \param[in] a a[9]
+ * \param[in] v v[3]
+ * \param[out] r r[3]
  */
 static inline void mv3x3(double* a, double* v, double* r)
 {
@@ -288,9 +290,9 @@ static inline void mv3x3(double* a, double* v, double* r)
 
 
 /** add a matrix vector multiplication
- * \param[in] a[9]
- * \param[in] v[3]
- * \param[out] r[3]
+ * \param[in] a a[9]
+ * \param[in] v v[3]
+ * \param[out] r r[3]
  */
 static inline void mvp3x3(double* a, double* v, double* r)
 {
@@ -332,9 +334,9 @@ static inline void mvp3x3(double* a, double* v, double* r)
 }
 
 /** matrix matrix multiplication : c = a * b
- * \param[in] a[9]
- * \param[in] b[9]
- * \param[out] c[9]
+ * \param[in] a  a[9]
+ * \param[in] b b[9]
+ * \param[out] c c[9]
  */
 static inline void mm3x3(double* a, double* b, double* c)
 {
@@ -358,9 +360,9 @@ static inline void mm3x3(double* a, double* b, double* c)
 }
 
 /** add a matrix matrix multiplication : c += a*b
- * \param[in] a[9]
- * \param[in] b[9]
- * \param[out] c[9]
+ * \param[in] a a[9]
+ * \param[in] b b[9]
+ * \param[out] c c[9]
  */
 static inline void mmp3x3(double* a, double* b, double* c)
 {
@@ -384,9 +386,9 @@ static inline void mmp3x3(double* a, double* b, double* c)
 }
 
 /** sub a matrix matrix multiplication : c -= a*b
- * \param[in] a[9]
- * \param[in] b[9]
- * \param[out] c[9]
+ * \param[in] a a[9]
+ * \param[in] b b[9]
+ * \param[out] c c[9]
  */
 static inline void mmm3x3(double* a, double* b, double* c)
 {
@@ -410,7 +412,7 @@ static inline void mmm3x3(double* a, double* b, double* c)
 }
 
 /** determinant
- * \param[in] double* a
+ * \param[in] a double* a
  */
 static inline double det3x3(double* a)
 {
@@ -423,9 +425,9 @@ static inline double det3x3(double* a)
 
 
 /** system resolution : x <- sol(Ax = b)
- * \param[in] double a[9]
- * \param[out] double x[3]
- * \param[in] double b[3]
+ * \param[in] a double a[9]
+ * \param[out] x double x[3]
+ * \param[in] b double b[3]
  */
 static inline void solv3x3(double* a, double* x, double* b)
 {
@@ -461,8 +463,8 @@ static inline void solv3x3(double* a, double* x, double* b)
 }
 
 /** check equality : a[9] == b[9]
- * \param[in] double a[9]
- * \param[in] double b[9]
+ * \param[in] a double a[9]
+ * \param[in] b double b[9]
  */
 static inline int equal3x3(double* a, double* b)
 {
@@ -478,8 +480,8 @@ static inline int equal3x3(double* a, double* b)
 }
 
 /** check equality : a[3] == b[3]
- * \param[in] double a[3]
- * \param[in] double b[3]
+ * \param[in] a double a[3]
+ * \param[in] b double b[3]
  */
 static inline int equal3(double* a, double* b)
 {
@@ -489,9 +491,9 @@ static inline int equal3(double* a, double* b)
 }
 
 /** scalar product : c <- a.b
- * \param[in] double a[3]
- * \param[in] double b[3]
- * \return double
+ * \param[in] a double a[3]
+ * \param[in] b double b[3]
+ * \return  c double
  */
 static inline double dot3(double* a, double* b)
 {
@@ -503,9 +505,9 @@ static inline double dot3(double* a, double* b)
 };
 
 /** cross product : c <- a x b
- * \param[in] double a[3]
- * \param[in] double b[3]
- * \param[out] double c[3]
+ * \param[in] a double a[3]
+ * \param[in] b double b[3]
+ * \param[out] c double c[3]
  */
 static inline void cross3(double* a, double* b, double* c)
 {
@@ -524,7 +526,7 @@ static inline void cross3(double* a, double* b, double* c)
 
 /** norm : || a ||
  *  may underflow & overflow
- * \param[in] a[3]
+ * \param[in] a a[3]
  */
 static inline double hypot3(double* a)
 {
@@ -568,8 +570,8 @@ static inline double hypot9(double* a)
 /* \param[in] n row numbers of matrix a
  * \param[in] i0 row of first element
  * \param[in] j0 column of first element
- * \param[in] a[n,n] matrix
- * \param[out] b[9] a 3x3 matrix */
+ * \param[in] a a[n,n] matrix
+ * \param[out] b b[9] a 3x3 matrix */
 static inline void extract3x3(int n, int i0, int j0,
                               double* a, double* b)
 {
@@ -599,8 +601,8 @@ static inline void extract3x3(int n, int i0, int j0,
 /* \param[in] n row numbers of matrix a
  * \param[in] i0 row of first element
  * \param[in] j0 column of first element
- * \param[in,out] a[n,n] matrix
- * \param[in] b[9] a 3x3 matrix */
+ * \param[in,out] a  a[n,n] matrix
+ * \param[in] b b[9] a 3x3 matrix */
 static inline void insert3x3(int n, int i0, int j0,
                              double* a, double* b)
 {
@@ -628,13 +630,13 @@ static inline void insert3x3(int n, int i0, int j0,
 }
 
 /** print a matrix
- * \param double* a
+ * \param mat double* a
  */
 void print3x3(double* mat);
 
 
 /** print a vector
- * \param[in] double* v
+ * \param[in] v double* v
  */
 void print3(double* v);
 

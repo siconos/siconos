@@ -166,7 +166,7 @@ extern "C"
 #endif
 
   /** Read default parameters values for a solver and save them in a SolverOptions structure
-      \param[in] driverName, type of the considered problem \n
+      \param[in] driverType type of the considered problem \n
       0: LCP\n
       1: MLCP\n
       2: FrictionContact2D\n
@@ -174,19 +174,20 @@ extern "C"
       4: Relay\n
       5: QP\n
       6: NCP
-      \param[out] options, structure used to save the parameters
+      \param[out] options structure used to save the parameters
    */
-  void readSolverOptions(int, SolverOptions*);
+  void readSolverOptions(int driverType, SolverOptions* options);
 
   /** screen display of solver parameters
-      \param options, the structure to be diplayed
+      \param options the structure to be displayed
   */
-  void printSolverOptions(SolverOptions*);
+  void printSolverOptions(SolverOptions* options);
 
   /** delete the solver parameters :
       delete iparam and dparam;
+      \param options the structure to be destroyed
   */
-  void deleteSolverOptions(SolverOptions *);
+  void deleteSolverOptions(SolverOptions * options);
 
   int nameToId(char * pName);
   char * idToName(int Id);

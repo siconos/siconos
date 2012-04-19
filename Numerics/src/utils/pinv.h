@@ -28,6 +28,7 @@ extern "C"
   \param A the matrix to be inversed
   \param n the number of rows of A
   \param m the number of columns of A
+  \param tolerance
   */
   double pinv(double * A, int n, int m, double tolerance);
 

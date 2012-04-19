@@ -31,41 +31,10 @@ w - M z = q\\
 \f$
 
 M is an (\f$ n \times n\f$ ) matrix, q , w and z n-vector. This system of equalities and inequalities
-is solved by a prediction on the non-zero z values and linear system solving or thanks to @ref lcp solvers.
+is solved by a prediction on the non-zero z values and linear system solving or thanks to  lcp solvers.
 */
 
-/**
-   lcp_solver_pred is a generic interface allowing the call of one of the LCP solvers.
-   - At first, the signs of q elements are checked to detect the trivial case of positive q.\n
-   - Then it tries to find z by assuming that the indices of the non-zero elements
-   are the same as the previous solution (previous solutions with trivial case of q positive excepted of course).\n
-   - If q is not positive and prediction failed, the regular LCP solver is called.\n
 
-   \param[in] vec          On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the LCP matrix with a Fortran storage.
-   \param[in] q            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-   \param[in] n            On enter, an integer which represents the dimension of the LCP problem.
-   \param[in] pt           On enter, a union containing the LCP structure.
-   \n \n
-   \param[in,out] z        On enter, an initial guess for iterative LCP solvers.\n
-   On return, a n-vector of doubles which contains the solution of the problem.
-   \param[out] w           On return, a n-vector of doubles which contains the complementary solution of the problem.
-   \n
-   \param[in]     firsttime      At 1, forces the regular LCP solver to be used (for initialization purpose).
-   \param[out]    soltype        On return, indicates how the solution was found (0 : no sol,1 : q positive,2 : prediction,3 : LCP solver)
-   \param[in,out] indic          The set of indices of non-zero z values in ascending order
-   \param[in,out] indicop        The complementary set of indices of "indic".
-   \param[in,out] submatlcp      The submatrix of M defined by "indic".
-   \param[in,out] submatlcpop    The submatrix of M defined by "indicop".
-   \param[in,out] ipiv           Pivot indices in LU factorization of "submatlcp".
-   \param[in,out] sizesublcp     "submatlcp" size.
-   \param[in,out] sizesublcpop   "submatlcpop" size.
-
-   \return integer
-   - 0 : successful\n
-   - >0 : otherwise (see specific solvers for more information about the log info)
-
-   \author Nineb Sheherazade & Mathieu Renouf & Pascal Denoyelle
-*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,12 +46,14 @@ is solved by a prediction on the non-zero z values and linear system solving or 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-int lcp_solver_pred(double *vec, double *q , int *n , method_lcp *pt , double *z , double *w ,
-                    int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
-                    int *ipiv , int *sizesublcp , int *sizesublcpop ,
-                    double *subq , double *bufz , double *newz , double *workspace)
+/* int lcp_solver_pred(double *vec, double *q , int *n , method_lcp *pt , double *z , double *w , */
+/*                     int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop , */
+/*                     int *ipiv , int *sizesublcp , int *sizesublcpop , */
+/*                     double *subq , double *bufz , double *newz , double *workspace) */
+
 int lcp_solver_pred(n , method_lcp *pt , double *z , double *w ,
-                    int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
+                    int firsttime, int *soltype , int *indic , int *indicop ,
+                    double *submatlcp , double *submatlcpop ,
                     int *ipiv , int *sizesublcp , int *sizesublcpop ,
                     double *subq , double *bufz , double *newz , double *workspace)
 {

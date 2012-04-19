@@ -192,53 +192,56 @@ extern "C"
      \param filename the corresponding name of the file
   */
   void readInFileName(NumericsMatrix* const M, const char *filename);
+
   /** PrintInFile  of the matrix content
      \param M the matrix to be printed
-     \param filename the corresponding file
+     \param file filename the corresponding file
   */
 
   void printInFile(const NumericsMatrix* const M, FILE* file);
 
   /** Read in file  of the matrix content without performing memory allocation
      \param M the matrix to be read
-     \param filename the corresponding  file
+     \param file the corresponding  file
   */
   void readInFile(NumericsMatrix* const M, FILE *file);
 
   /** Create from file a NumericsMatrix with  memory allocation
      \param M the matrix to be read
-     \param filename the corresponding  file
+     \param file the corresponding  file
   */
   void newFromFile(NumericsMatrix* const M, FILE *file);
 
   /** PrintInFileForScilab  of the matrix content
    \param M the matrix to be printed
-   \param filename the corresponding file
+   \param file the corresponding file
   */
-
   void printInFileForScilab(const NumericsMatrix* const M, FILE* file);
 
   /** Read in file for scilab  of the matrix content
      \param M the matrix to be read
-     \param filename the corresponding  file
+     \param file the corresponding  file
   */
   void readInFileForScilab(NumericsMatrix* const M, FILE *file);
 
   /** Screen display raw by raw of the matrix content
-      \param M the matrix to be displayed
+      \param m the matrix to be displayed
   */
   void displayRawbyRaw(const NumericsMatrix* const m);
 
-  /*
-   *get the diagonal block of a NumericsMatrix. No allocation is done.
+  /** get the diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] m a NumericsMatrix
-   * \param[in] numBlockLin the number of the block Row. useful only in sparce case
-   * \param[in] numRow. the starting row. Useful only in dense case.
+   * \param[in] numBlockRow the number of the block Row. useful only in sparce case
+   * \param[in] numRow the starting row. Useful only in dense case.
    * \param[in] size of the diag block.Useful only in dense case.
    * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
    *   In case of sparce case **Bout contains the resulting block (from the SBM).
    */
-  void getDiagonalBlock(NumericsMatrix* m, int numBlockLin, int numLin, int size, double **Bout);
+  void getDiagonalBlock(NumericsMatrix* m,
+                        int numBlockRow,
+                        int numRow,
+                        int size,
+                        double **Bout);
 
 #ifdef __cplusplus
 }

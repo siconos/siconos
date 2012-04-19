@@ -54,25 +54,27 @@ extern "C"
   /** NCP Fischer Burmeister function, \f$ \phi(z,F(z)) \f$
       \param sizen is the number of equality constraints.
       \param sizem is the number of complementarity constraints.
-      \param vector z. The z size is sizen+sizem.
-      \param vector F(z), in arg.
-      \param vector \f$ \phi(z,F(z)) \f$, out arg.
+      \param z vector z. The z size is sizen+sizem.
+      \param F vector F(z), in arg.
+      \param phiVector vector \f$ \phi(z,F(z)) \f$, out arg.
   */
-  void phi_MCP_FB(int, int, double*, double*, double*);
+  void phi_MCP_FB(int sizen, int sizem, double* z, double* F, double* phiVector);
 
   /** Jacobian of NCP Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
       \param sizen is the number of equality constraints.
       \param sizem is the number of complementarity constraints.
-      \param vector z. The z size is sizen+sizem.
-      \param vector F(z) in arg.
-      \param \f$ \nabla_z F(z) \f$ in arg.
-      \param \f$ \nabla_z \phi(z,F(z)) \f$, out arg.
+      \param z vector z. The z size is sizen+sizem.
+      \param F vector F(z) in arg.
+      \param jacobianF \f$ \nabla_z F(z) \f$ in arg.
+      \param jacobianPhiMatrix \f$ \nabla_z \phi(z,F(z)) \f$, out arg.
   */
-  void jacobianPhi_MCP_FB(int, int , double*, double*, double*, double*);
+  void jacobianPhi_MCP_FB(int sizen, int sizem, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
+  {
+    ;
 
 
 #ifdef __cplusplus
-}
+  }
 #endif
 
 #endif

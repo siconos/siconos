@@ -31,46 +31,46 @@ extern "C"
 #endif
 
   /** Search for the max. element of a vector
-      \param[in] x, the vector
-      \param[in,out] solution, value of the greatest element of x
-      \param[in] n, size of x
+      \param[in] x the vector
+      \param[in,out] sol the  solution, value of the greatest element of x
+      \param[in] n  size of x
   */
-  void max_part(double*, double*, int);
+  void max_part(double* x, double* sol, int n);
 
   /** compare two double a and b, and return the max.
-   *  \param a, double*
-   *  \param b, double*
-   *  \param c, double*, the max
+   *  \param a  double*
+   *  \param b  double*
+   *  \param c  double*, the max
    */
-  void maxf(double*, double*, double*);
+  void maxf(double* a, double* b , double* c);
 
   /** Search for the min. element of a vector
-      \param[in] x, the vector
-      \param[in,out] solution, value of the smallest element of x
-      \param[in] n, size of x
+      \param[in] x the vector
+      \param[in,out] sol solution, value of the smallest element of x
+      \param[in] n size of x
   */
-  void min_part(double*, double*, int);
+  void min_part(double* x,  double* sol , int n);
 
   /** compare two double a and b, and return the min.
-   *  \param a, double*
-   *  \param b, double*
-   *  \param c, double*, the min
+   *  \param a double*
+   *  \param b double*
+   *  \param c double*, the min
    */
-  void minf(double*, double*, double*);
+  void minf(double* a, double* b, double* c);
 
   /** Positive part values of the components of a vector
-      \param[in] x, the vector
-      \param[in,out] solution, vector of positive part values of x components
-      \param[in] n, size of x
+      \param[in] x the vector
+      \param[in,out] sol solution vector of positive part values of x components
+      \param[in] n size of x
   */
-  void pos_part(double*, double*, int);
+  void pos_part(double* x, double* sol, int n);
 
   /** Absolute values of the components of a vector
-      \param[in] x, the vector
-      \param[in,out] solution, vector of absolute values of x components
-      \param[in] n, size of x
+      \param[in] x the vector
+      \param[in,out] sol solution, vector of absolute values of x components
+      \param[in] n size of x
   */
-  void abs_part(double*, double*, int);
+  void abs_part(double* x, double* sol, int n);
 
   /**
       Input na, a, nb, b

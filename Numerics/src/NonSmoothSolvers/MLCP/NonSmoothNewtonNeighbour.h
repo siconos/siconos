@@ -40,20 +40,8 @@ extern "C"
 {
 #endif
 
-  /** Newton solver
-   \param size of the vector z
-   \param the vector z, unknown vector, in-out argument
-   \param pointer to \f$ \phi \f$ function
-   \param pointer to \f$ \nabla_z \phi(z) \f$ function
-   \param iparam vector of int parameters:\n
-     - [0] : max. number of iterations
-     - [1] : number of iterations processed
-   \param dparam vector of double parameters:\n
-     - [0]: tolerance
-     - [1]: error
-  */
-
   double* nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork);
+
   int nonSmoothNewtonNeigh(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
 
   int nonSmoothNewtonNeigh_getNbIWork(int n, int m);

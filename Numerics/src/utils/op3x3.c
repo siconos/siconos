@@ -2,7 +2,7 @@
 
 
 /** print a matrix
- * \param double* a
+ * \param mat double* a
  */
 #include <stdio.h>
 void print3x3(double* mat)
@@ -24,7 +24,7 @@ void print3x3(double* mat)
 }
 
 /** print a vector
- * \param[in] double* v
+ * \param[in] v double*
  */
 void print3(double* v)
 {

@@ -23,8 +23,8 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-/* Linesearch */
-void linesearch_Armijo(int n, double *z, double* dir, double psi_k, double descentCondition, NewtonFunctionPtr* phi)
+void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
+                       double descentCondition, NewtonFunctionPtr* phi)
 {
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   if (phiVector == NULL)

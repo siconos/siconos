@@ -52,7 +52,7 @@
 
   here M is an (\f$ n \times n \f$)-matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
-  The solvers and their parameters are described in \ref relaySolvers . \n
+  The solvers and their parameters are described in \ref RelaySolvers . \n
 
   \section prSolversList Available solvers for primal case
 

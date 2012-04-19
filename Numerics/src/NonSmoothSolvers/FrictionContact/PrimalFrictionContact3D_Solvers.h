@@ -38,8 +38,8 @@ For each solver, the input argument are:
 
 \section pfc3Dnsgs Non-Smooth Gauss Seidel Solver
 
-\bf function: frictionContact3D_nsgs()
-\bf parameters:
+ function: frictionContact3D_nsgs()
+ parameters:
 
 
 */
@@ -61,18 +61,21 @@ extern "C"
 {
 #endif
   /** General interface to solvers for primal friction-contact 3D problem
-    \param[in] , the structure which handles the Friction-Contact problem
-    \param[in,out] , reaction global vector (n)
-    \param[in,out] , velocity global vector (n)
+    \param[in] problem the structure which handles the Friction-Contact problem
+    \param[in,out] reaction global vector (n)
+    \param[in,out] velocity global vector (n)
+    \param[in,out] globalVelocity global vector
     \param[in,out] options structure used to define the solver(s) and their parameters
-    \param[in] general options for Numerics (verbose mode ...)
+    \param[in] global_options general options for Numerics (verbose mode ...)
     \return result (0 if successful otherwise 1).
   */
-  int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, SolverOptions* options, NumericsOptions* global_options);
+  int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction ,
+                                     double *velocity, double* globalVelocity,
+                                     SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for PrimalFrictionContact3D
-      \param SolverOptions ** the pointer to the array of options to set
-      \param int identifier of the solver
+      \param options the pointer to the array of options to set
+      \param solverId int identifier of the solver
   */
   int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
@@ -88,7 +91,7 @@ extern "C"
   int checkTrivialCasePrimal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
-      \param problem, the friction-contact 3D problem to solve
+      \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param globalVelocity global vector (m), in-out parameters
@@ -109,7 +112,7 @@ extern "C"
   void  primalFrictionContact3D_globalAlartCurnier_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
   /** Proximal point solver with reformulation for friction-contact 3D problem
-    \param problem, the friction-contact 3D problem to solve
+    \param problem the friction-contact 3D problem to solve
     \param velocity global vector (n), in-out parameter
     \param reaction global vector (n), in-out parameters
     \param globalVelocity global vector (m), in-out parameters
@@ -126,7 +129,7 @@ extern "C"
   int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* options);
 
   /** Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
-     \param problem, the friction-contact 3D problem to solve
+     \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
      \param globalVelocity global vector (m), in-out parameters
@@ -142,7 +145,7 @@ extern "C"
   int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** Fied Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
-     \param problem, the friction-contact 3D problem to solve
+     \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
      \param globalVelocity global vector (m), in-out parameters
@@ -158,7 +161,7 @@ extern "C"
   int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
-        \param problem, the friction-contact 3D problem to solve
+        \param problem the friction-contact 3D problem to solve
         \param velocity global vector (n), in-out parameter
         \param reaction global vector (n), in-out parameters
         \param globalVelocity global vector (m), in-out parameters
@@ -173,7 +176,7 @@ extern "C"
 
   int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options);
   /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
-        \param problem, the friction-contact 3D problem to solve
+        \param problem the friction-contact 3D problem to solve
         \param velocity global vector (n), in-out parameter
         \param reaction global vector (n), in-out parameters
         \param globalVelocity global vector (m), in-out parameters

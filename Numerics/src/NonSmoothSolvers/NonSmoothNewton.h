@@ -39,12 +39,23 @@ typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 extern "C"
 {
 #endif
+  /** Armijo Linesearch
+   *  \param n  size of the vector z
+   *  \param z unknown vector
+   *  \param dir  search direction
+   *  \param psi_k initial value of the merit function
+   *  \param descentCondition descent condition
+   *  \param phi pointer to function used to compute phi(z)
+   */
+  void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
+                         double descentCondition, NewtonFunctionPtr* phi);
+
 
   /** Newton solver with line Search
-   \param size of the vector z
-   \param the vector z, unknown vector, in-out argument
-   \param pointer to \f$ \phi \f$ function
-   \param pointer to \f$ \nabla_z \phi(z) \f$ function
+   \param n size of the vector z
+   \param z the vector z, unknown vector, in-out argument
+   \param phi pointer to \f$ \phi \f$ function
+   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
    \param iparam vector of int parameters:\n
      - [0] : max. number of iterations
      - [1] : number of iterations processed
@@ -52,13 +63,15 @@ extern "C"
      - [0]: tolerance
      - [1]: error
   */
-  int nonSmoothNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
+  int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
+                      NewtonFunctionPtr* jacobianPhi,
+                      int* iparam, double* dparam);
 
   /** Newton solver without line Search
-  \param size of the vector z
-  \param the vector z, unknown vector, in-out argument
-  \param pointer to \f$ \phi \f$ function
-  \param pointer to \f$ \nabla_z \phi(z) \f$ function
+  \param n size of the vector z
+  \param z the vector z, unknown vector, in-out argument
+  \param phi pointer to \f$ \phi \f$ function
+  \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
   \param iparam vector of int parameters:\n
    - [0] : max. number of iterations
    - [1] : number of iterations processed
@@ -66,17 +79,10 @@ extern "C"
    - [0]: tolerance
    - [1]: error
   */
-  int nonSmoothDirectNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
+  int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
+                            NewtonFunctionPtr* jacobianPhi,
+                            int* iparam, double* dparam)
 
-  /** Armijo Linesearch
-      \param n, size of the vector z
-      \param z,
-      \param dir, search direction
-      \param psi_k, initial value of the merit function
-      \param , descent condition
-      \param , pointer to function used to compute phi(z)
-  */
-  void linesearch_Armijo(int, double*, double*, double, double, NewtonFunctionPtr*);
 
 #ifdef __cplusplus
 }

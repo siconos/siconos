@@ -66,14 +66,14 @@ extern "C"
                 double *z, double *f, double *lb, double *ub);
 
   /** Set the function used to compute f(z)
-      \param fPtr the pointed function
+      \param  myFunc the pointed function
    */
-  void setFuncEval(FuncEvalPtr);
+  void setFuncEval(FuncEvalPtr myFunc);
 
   /** Set the function used to compute \f$ \nabla_zf(z) \f$
-      \param jfPtr the pointed function
+      \param myJac the pointed function
   */
-  void setJacEval(JacEvalPtr);
+  void setJacEval(JacEvalPtr myJac);
 
 
 #ifdef __cplusplus

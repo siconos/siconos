@@ -36,8 +36,8 @@ For each solver, the input argument are:
 
 \section fc3Dnsgs Non-Smooth Gauss Seidel Solver
 
-\bf function: frictionContact3D_nsgs()
-\bf parameters:
+ function: frictionContact3D_nsgs()
+ parameters:
 
 
 */

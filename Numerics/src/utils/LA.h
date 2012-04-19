@@ -187,9 +187,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   })
 
 /** DGEMV - one of the matrix-vector operations y := alpha*A*x +
-   beta*y, or y := alpha*A'*x + xbeta*y,
-   \param TRANS
-*/
+ * beta*y, or y := alpha*A'*x + xbeta*y,
+ */
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY)       \
   ({ int C_M = M;                                                       \
     int C_N = N;                                                        \

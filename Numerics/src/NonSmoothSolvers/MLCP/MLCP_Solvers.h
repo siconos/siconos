@@ -39,8 +39,8 @@ For each solver, the input argument are:
 \section mlcpPGS PGS Solver
 Projected Gauss-Seidel solver
 
-\bf function: mlcp_pgs() \n
-\bf parameters:
+ function: mlcp_pgs() \n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - iparam[2] (in): 0 for implicit, 1 for explicit
@@ -50,8 +50,8 @@ Projected Gauss-Seidel solver
 \section mlcpRPGS RPGS Solver
 Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrices with null diagonal terms
 
-\bf function: mlcp_rpgs() \n
-\bf parameters:
+ function: mlcp_rpgs() \n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
@@ -60,8 +60,8 @@ Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrice
 
 \section mlcpPSOR PSOR Solver
 Projected Succesive over relaxation solver for MLCP. See cottle, Pang Stone Chap 5
-\bf function: mlcp_psor() \n
-\bf parameters:
+ function: mlcp_psor() \n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
@@ -70,8 +70,8 @@ Projected Succesive over relaxation solver for MLCP. See cottle, Pang Stone Chap
 
 \section mlcpRPSOR RPSOR Solver
 Regularized Projected Succesive over relaxation solver for MLCP
-\bf function: mlcp_rpsor() \n
-\bf parameters:
+ function: mlcp_rpsor() \n
+ parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
 - dparam[0] (in): tolerance
@@ -81,89 +81,89 @@ Regularized Projected Succesive over relaxation solver for MLCP
 
 \section mlcpPath Path (Ferris) Solver
 The path solver must be initialize:\n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
-\bf function: mlcp_path() \n
-\bf parameters:
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
+ function: mlcp_path() \n
+ parameters:
 - dparam[0] (in): tolerance
 
 \section mlcpENUM ENUM Solver
 The enumeratif solver must be initialize:\n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
 
-\bf function: mlcp_enum() \n
+ function: mlcp_enum() \n
 The enumeratif solver must be initialize: \n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
-\bf parameters:
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
+ parameters:
 - dparam[0] (in): a positive value, tolerane about the sign.
 - iparam[4] (in) :  use DGELS (1) or DGESV (0).
-- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function  mlcp_driver_get_dwork() . MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function  mlcp_driver_get_iwork() . MUST BE ALLOCATED BY THE USER.
 
 \section mlcpSIMPLEX SIMPLEX Solver
 The simplex solver must be initialize:\n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
 
-\bf function: mlcp_simplex() \n
+ function: mlcp_simplex() \n
 The simplex solver must be initialize: \n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
 
-\bf parameters:
+ parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
 - dparam[0] (in): A positive value, tolerance to consider that a var is null(ex: 10e-12).
 - dparam[1] (in): A positive value, tolerance to consider that complementarity holds(ex: 10e-12).
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
-- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function  mlcp_driver_get_dwork() . MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function  mlcp_driver_get_iwork() . MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_ENUM DIRECT_ENUM Solver
 The direct and enumeratif solver must be initialize: \n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
 
-\bf function: mlcp_direct_enum() \n
-\bf parameters:
+ function: mlcp_direct_enum() \n
+ parameters:
 - iparam[5] (in): Number of registered configurations.
 - iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): A positive value, tolerane about the sign.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function  mlcp_driver_get_dwork() . MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function  mlcp_driver_get_iwork() . MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_PATH DIRECT_PATH Solver
 The path solver must be initialize: \n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
 
-\bf function: mlcp_direct_path() \n
-\bf parameters:
+ function: mlcp_direct_path() \n
+ parameters:
 - iparam[5] (in): Number of registered configurations.
 - iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): Tolerance.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function  mlcp_driver_get_dwork() . MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function  mlcp_driver_get_iwork() . MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_SIMPLEX DIRECT_SIMPLEX Solver
 The direct and simplex solver must be initialize: \n
-1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
-2) Use a lot with \bf mlcp_driver() \bf.\n
-3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
-\bf function: mlcp_direct_simplex() \n
-\bf parameters:
+1) Initialize the solver with  mlcp_driver_init() .\n
+2) Use a lot with  mlcp_driver() .\n
+3) Reset the solver with  mlcp_driver_reset() .\n
+ function: mlcp_direct_simplex() \n
+ parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
 - iparam[5] (in): Number of registered configurations.
 - iparam[7] (out): Number of case the direct solved failed.
@@ -172,8 +172,8 @@ The direct and simplex solver must be initialize: \n
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function  mlcp_driver_get_dwork() . MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function  mlcp_driver_get_iwork() . MUST BE ALLOCATED BY THE USER.
 
 */
 
@@ -351,7 +351,7 @@ extern "C"
   void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** direct solver
-   * \param[in] MixedLinearComplementarityProblem* problem structure that represents the MLCP (n,mM, q...)
+   * \param[in]  problem MixedLinearComplementarityProblem* problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
@@ -479,14 +479,14 @@ extern "C"
   void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions);
   /*
     Default memory manager to free the memory located in the options.
-      \param Problem * the pointer to the array of options to set.
+      \param problem * the pointer to the array of options to set.
       \param SolverOptions * the pointer to option.
    */
   void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions);
 
   /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
-      \param Problem * the pointer to the array of options to set.
-      \param SolverOptions * the pointer to option.
+      \param problem * the pointer to the array of options to set.
+      \param pOptions SolverOptions * the pointer to option.
   */
   int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions);
   int mixedLinearComplementarity_directEnum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);

@@ -53,7 +53,7 @@ extern "C"
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] general options for Numerics (verbose mode ...)
+      \param[in] global_options  general options for Numerics (verbose mode ...)
       \return info termination value
       - 0 : successful\n
       - >0 : otherwise see each solver for more information about the log info
@@ -61,27 +61,27 @@ extern "C"
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+
   /** General interface to solver for linear system
-      \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles solution of the problem.
-      \param[out] w a n-vector of doubles which contains zeros.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] general options for Numerics (verbose mode ...)
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-      \author Vincent Acary
-  */
+        \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
+        \param[in,out] z a n-vector of doubles solution of the problem.
+        \param[out] w a n-vector of doubles which contains zeros.
+        \param[in,out] options structure used to define the solver(s) and their parameters
+        \return info termination value
+        - 0 : successful\n
+        - >0 : otherwise see each solver for more information about the log info
+        \author Vincent Acary
+    */
   int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 
   /** General interface to solvers for friction-contact 2D problem
-      \param[in] , the structure which handles the Friction-Contact problem
-      \param[in,out] , reaction global vector (n)
-      \param[in,out] , velocity global vector (n)
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] general options for Numerics (verbose mode ...)
-      \return result (0 if successful otherwise 1).
-  */
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \param[in] global_options for Numerics (verbose mode ...)
+   *  \return result (0 if successful otherwise 1).
+   */
   int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
 

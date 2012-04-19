@@ -53,20 +53,20 @@ extern "C"
 
   /** NCP Fischer Burmeister function, \f$ \phi(z,F(z)) \f$
       \param size of vector z
-      \param vector z
-      \param vector F(z)
-      \param vector \f$ \phi(z,F(z)) \f$, in-out arg.
+      \param z vector z
+      \param F vector F(z)
+      \param phiVector vector \f$ \phi(z,F(z)) \f$, in-out arg.
   */
-  void phi_FB(int, double*, double*, double*);
+  void phi_FB(int size, double* z, double* F, double* phiVector);
 
   /** Jacobian of NCP Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
       \param size of vector z
-      \param vector z
-      \param vector F(z)
-      \param \f$ \nabla_z F(z) \f$
-      \param \f$ \nabla_z \phi(z,F(z)) \f$, in-out arg.
+      \param z vector z
+      \param F vector F(z)
+      \param jacobianF \f$ \nabla_z F(z) \f$
+      \param jacobianPhiMatrix \f$ \nabla_z \phi(z,F(z)) \f$, in-out arg.
   */
-  void jacobianPhi_FB(int, double*, double*, double*, double*);
+  void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix);
 
 
 #ifdef __cplusplus

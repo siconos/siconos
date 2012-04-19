@@ -37,8 +37,8 @@ For each solver, the input argument are:
 
 \section fc2Dcpg CPG Solver
 
-\bf function: pfc_2D_cpg()
-\bf parameters:
+function: pfc_2D_cpg()
+ parameters:
   - iparam[0] (in), the maximum number of iterations allowed,
   - iparam[1] (out), the number of iterations performed by the algorithm.
   - dparam[0] (in), the tolerance required,
@@ -54,15 +54,14 @@ For each solver, the input argument are:
 extern "C"
 {
 #endif
-
   /** General interface to solvers for friction-contact 2D problem
-      \param[in] problem the structure which handles the Friction-Contact problem
-      \param[in,out] reaction global vector (n)
-      \param[in,out] velocity global vector (n)
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] global_options for Numerics (verbose mode ...)
-      \return result (0 if successful otherwise 1).
-  */
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \param[in] global_options for Numerics (verbose mode ...)
+   *  \return result (0 if successful otherwise 1).
+   */
   int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
 
