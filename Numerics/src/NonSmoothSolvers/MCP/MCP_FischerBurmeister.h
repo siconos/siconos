@@ -68,13 +68,11 @@ extern "C"
       \param jacobianF \f$ \nabla_z F(z) \f$ in arg.
       \param jacobianPhiMatrix \f$ \nabla_z \phi(z,F(z)) \f$, out arg.
   */
-  void jacobianPhi_MCP_FB(int sizen, int sizem, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
-  {
-    ;
+  void jacobianPhi_MCP_FB(int sizen, int sizem, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix);
 
 
 #ifdef __cplusplus
-  }
+}
 #endif
 
 #endif

@@ -81,7 +81,7 @@ extern "C"
   */
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,
-                            int* iparam, double* dparam)
+                            int* iparam, double* dparam);
 
 
 #ifdef __cplusplus

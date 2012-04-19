@@ -30,27 +30,28 @@
 void LinearComplementarity_display(LinearComplementarityProblem* problem)
 {
 
-  assert(p);
-  int i, n = p->size;
+  assert(problem);
+  int i, n = problem->size;
   printf("LinearComplementarityProblem Display :\n-------------\n");
-  printf("size :%d \n", p->size);
-  if (p->M)
+  printf("size :%d \n", problem->size);
+  if (problem->M)
   {
     printf("M matrix:\n");
-    display(p->M);
+    display(problem->M);
   }
   else
     printf("No M matrix:\n");
 
-  if (p->q)
+  if (problem->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, p->q[i]);
+    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   }
   else
     printf("No q vector:\n");
 
 }
+
 
 
 
