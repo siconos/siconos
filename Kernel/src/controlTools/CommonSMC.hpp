@@ -65,10 +65,10 @@ protected:
   double _curDeltaT;
 
   /** matrix describing the relation between the control value and sgn(s) */
-  SP::SimpleMatrix _B;
+  SP::SiconosMatrix _B;
 
   /** matrix describing the influence of \f$lambda\f$ on s */
-  SP::SimpleMatrix _D;
+  SP::SiconosMatrix _D;
 
   /** the Relation for the Controller */
   SP::FirstOrderLinearR _relationSMC;
@@ -85,6 +85,12 @@ protected:
   /** easy access to the state */
   SP::SiconosVector _xController;
 
+  /** Relay solver type */
+  int _numericsSolverId;
+
+  /** Numerical precision expected for the Relay solver */
+  double _precision;
+
 public:
 
   /** Constructor with a TimeDiscretisation and a Model.
@@ -92,7 +98,20 @@ public:
    * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    */
-  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(name, t, ds) {}
+  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(name, t, ds),
+    _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8) {}
+
+  /** Constructor with a TimeDiscretisation, a Model and two matrices
+   * \param name the type of the SMC Actuator
+   * \param t the SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
+   * \param ds the SP::DynamicalSystem we are controlling
+   */
+  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
+    Actuator(name, t, ds), _B(B), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8) {}
+
+  /** Compute the new control law at each event
+   */
+  virtual void actuate() = 0;
 
   /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
    * \param name the type of the SMC Actuator
@@ -100,15 +119,11 @@ public:
    * \param ds the SP::DynamicalSystem we are controlling
    * \param sensorList the set of Sensor linked to this Actuator.
    */
-  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): Actuator(name, t, ds, sensorList) {}
+  CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList):
+    Actuator(name, t, ds, sensorList), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8) {}
 
   /** Compute the new control law at each event
-   */
-  virtual void actuate() = 0;
-
-  /** Initialization
-   * \param m a SP::Model
-   */
+  */
   virtual void initialize(SP::Model m);
 
   /** Set the value of _Csurface to newValue
