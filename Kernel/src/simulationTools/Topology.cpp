@@ -342,15 +342,16 @@ void Topology::initialize()
 
 void Topology::setProperties()
 {
-  GraphData gprops;
-  gprops.symmetric = _symmetric;
-
+  DynamicalSystemsGraphProperties gdsprops(_DSG[0]);
+  UnitaryRelationsGraphProperties gurprops(_URG[0]);
+  gdsprops.symmetric = _symmetric;
+  gurprops.symmetric = _symmetric;
 
   for (unsigned int i = 0; i < _URG.size(); ++i)
   {
-    _URG[i]->properties() = gprops;
+    _URG[i]->properties() = gurprops;
   }
-  _DSG[0]->properties() = gprops;
+  _DSG[0]->properties() = gdsprops;
 
 }
 
@@ -363,6 +364,4 @@ void Topology::clear()
 
   _isTopologyUpToDate = false;
 }
-
-
 

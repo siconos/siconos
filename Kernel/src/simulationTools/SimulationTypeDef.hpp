@@ -34,6 +34,8 @@ Typedef for simulation-related objects
 #include "SiconosGraph.hpp"
 #include "SiconosPointers.hpp"
 
+#include "SiconosProperties.hpp"
+
 /** double precision machine */
 /*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
 const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
@@ -116,34 +118,75 @@ typedef std::vector<unsigned int> IndexInt;
 TYPEDEF_SPTR(IndexInt);
 
 
-// to be replaced with exterior property maps
-struct RelationData
+/** properties that are always needed */
+struct RelationProperties
 {
   SP::SiconosMatrix block;    // diagonal block
-  SP::SiconosMatrix blockProj;    // diagonal block of Projection
   SP::DynamicalSystem source;
   SP::DynamicalSystem target;
 };
 
-struct SystemData
+struct SystemProperties
 {
   SP::SiconosMatrix upper_block;   // i,j block i<j
   SP::SiconosMatrix lower_block;   // i,j block i>j
-  SP::SiconosMatrix upper_blockProj;   // i,j block i<j
-  SP::SiconosMatrix lower_blockProj;   // i,j block i>j
 };
 
-struct GraphData
+struct GraphProperties
 {
   bool symmetric;
 };
 
-typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation, SystemData , RelationData, GraphData > DynamicalSystemsGraph;
-typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem, RelationData, SystemData, GraphData > UnitaryRelationsGraph;
+
+/** the graph structure :
+ *
+ * UnitaryRelationsGraph = L(DynamicalSystemsGraph)
+ *
+ * where L is the line graph
+ * transformation */
+
+typedef SiconosGraph < SP::DynamicalSystem, SP::UnitaryRelation,
+        SystemProperties , RelationProperties,
+        GraphProperties > DynamicalSystemsGraph;
+
+typedef SiconosGraph < SP::UnitaryRelation, SP::DynamicalSystem,
+        RelationProperties, SystemProperties,
+        GraphProperties > UnitaryRelationsGraph;
+
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(UnitaryRelationsGraph);
 
+
+
+/** properties attached only to a graph type (UnitaryRelationsGraph or DynamicalSystemsGraph)
+    or optional properties */
+
+INSTALL_PROPERTIES(DynamicalSystemsGraph,
+                   ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
+// always needed -> SystemProperties
+
+
+INSTALL_PROPERTIES(UnitaryRelationsGraph,
+                   ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
+                   ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
+                   ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
+
+
+namespace Siconos
+{
+
+static inline DynamicalSystemsGraphProperties properties(DynamicalSystemsGraph& dsg)
+{
+  return *static_cast<DynamicalSystemsGraphProperties*>(&(dsg.properties()));
+}
+
+static inline UnitaryRelationsGraphProperties properties(UnitaryRelationsGraph& urg)
+{
+  return *static_cast<UnitaryRelationsGraphProperties*>(&(urg.properties()));
+}
+
+}
 // ================== Objects to handle OSI ==================
 
 
