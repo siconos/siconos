@@ -2,13 +2,11 @@
 
 #WAASPREPIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
-#PIPOL fedora-core12 03:00
-
-#PIPOL fedora-core13 03:00
-
 #PIPOL fedora-core14 03:00
 
 #PIPOL fedora-core15 03:00
+
+#PIPOL fedora-core16 03:00
 
 #PIPOL ubuntu-lucid 03:00
 
@@ -397,7 +395,6 @@ nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_memcheck Kernel Release
 nightly_submit Kernel Release
-esac
 ##
 install_1 Kernel Release
 ##
