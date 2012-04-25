@@ -72,7 +72,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
 #ifdef OSNSMPROJ_DEBUG
     std::cout << " dim :" << dim << std::endl;
     std::cout << "vd :" << *vd << std::endl;
-    assert(indexSet->properties(*vd).blockProj);
+    assert(indexSet->properties(*vd)->blockProj);
 #endif
 
 
@@ -133,12 +133,12 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
     {
       SP::UnitaryRelation ur = indexSet->bundle(*vi);
       pos = ur->absolutePositionProj();
-      assert(properties(*indexSet).blockProj[*vi]);
+      assert(properties(*indexSet)->blockProj[*vi]);
       boost::static_pointer_cast<SimpleMatrix>(M1)
-      ->setBlock(pos, pos, *(properties(*indexSet).blockProj[*vi]));
+      ->setBlock(pos, pos, *(properties(*indexSet)->blockProj[*vi]));
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
-      printf("OSNSMatrix block: %i %i\n", properties(*indexSet).blockProj[*vi]->size(0), properties(*indexSet).blockProj[*vi]->size(1));
+      printf("OSNSMatrix block: %i %i\n", properties(*indexSet)->blockProj[*vi]->size(0), properties(*indexSet)->blockProj[*vi]->size(1));
 #endif
     }
 
@@ -165,17 +165,17 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
 
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
-      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_blockProj->size(0), indexSet->properties(*ei).upper_blockProj->size(1));
-      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_blockProj->size(0), indexSet->properties(*ei).lower_blockProj->size(1));
+      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei)->upper_blockProj->size(0), indexSet->properties(*ei)->upper_blockProj->size(1));
+      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei)->lower_blockProj->size(0), indexSet->properties(*ei)->lower_blockProj->size(1));
 #endif
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
-                 *(properties(*indexSet).upper_blockProj[*ei]));
+                 *(properties(*indexSet)->upper_blockProj[*ei]));
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
-                 *properties(*indexSet).lower_blockProj[*ei]);
+                 *properties(*indexSet)->lower_blockProj[*ei]);
     }
 
   }

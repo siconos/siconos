@@ -229,7 +229,8 @@ public:
   {
     assert(num < _URG.size()) ;
     _URG[num].reset(new UnitaryRelationsGraph());
-    _URG[num]->properties().symmetric = false;
+    _URG[num]->properties().reset(new UnitaryRelationsGraphProperties(_URG[num]));
+    _URG[num]->properties()->symmetric = _symmetric;
   };
 
   /** get a pointer to the graph at level num of Dynamical System
@@ -250,7 +251,7 @@ public:
   /** resize Unitary Relations Graphs */
   inline void indexSetsResize(unsigned int i)
   {
-    return _URG.resize(i);
+    _URG.resize(i);
   };
 
   // --- isTopologyUpToDate ---

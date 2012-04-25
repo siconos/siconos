@@ -98,7 +98,7 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  if (indexSet->properties().symmetric)
+  if (indexSet->properties()->symmetric)
   {
     RuntimeException::selfThrow
     (" MLCPProjectOnConstraints::updateUnitaryBlocks() - not yet implemented for symmetric case");
@@ -121,9 +121,9 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
       unsigned int nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                (_M)->computeSizeForProjection(UR->interaction());
 
-      if (! properties(*indexSet).blockProj[*vi])
+      if (! properties(*indexSet)->blockProj[*vi])
       {
-        properties(*indexSet).blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
+        properties(*indexSet)->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
       if (!isLinear || !_hasBeUpdated)
@@ -166,24 +166,24 @@ void MLCPProjectOnConstraints::updateUnitaryBlocks()
 
         if (itar > isrc) // upper block
         {
-          if (! properties(*indexSet).upper_blockProj[ed1])
+          if (! properties(*indexSet)->upper_blockProj[ed1])
           {
-            properties(*indexSet).upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            properties(*indexSet)->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             if (ed2 != ed1)
-              properties(*indexSet).upper_blockProj[ed2] = properties(*indexSet).upper_blockProj[ed1];
+              properties(*indexSet)->upper_blockProj[ed2] = properties(*indexSet)->upper_blockProj[ed1];
           }
-          currentUnitaryBlock = properties(*indexSet).upper_blockProj[ed1];
+          currentUnitaryBlock = properties(*indexSet)->upper_blockProj[ed1];
 
         }
         else  // lower block
         {
-          if (! properties(*indexSet).lower_blockProj[ed1])
+          if (! properties(*indexSet)->lower_blockProj[ed1])
           {
-            properties(*indexSet).lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            properties(*indexSet)->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             if (ed2 != ed1)
-              properties(*indexSet).lower_blockProj[ed2] = properties(*indexSet).lower_blockProj[ed1];
+              properties(*indexSet)->lower_blockProj[ed2] = properties(*indexSet)->lower_blockProj[ed1];
           }
-          currentUnitaryBlock = properties(*indexSet).lower_blockProj[ed1];
+          currentUnitaryBlock = properties(*indexSet)->lower_blockProj[ed1];
         }
 
 
@@ -223,10 +223,10 @@ void MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet)
     std::cout << "                          vertex :" << *vi << std::endl;
     std::cout << "                          bundle :" << indexSet->bundle(*vi) << std::endl;
 
-    if (properties(*indexSet).blockProj[*vi])
+    if (properties(*indexSet)->blockProj[*vi])
     {
       std::cout << "                          blockProj ";
-      properties(*indexSet).blockProj[*vi]->display();
+      properties(*indexSet)->blockProj[*vi]->display();
     }
 
     UnitaryRelationsGraph::OEIterator oei, oeiend;
@@ -246,38 +246,38 @@ void MLCPProjectOnConstraints::displayBlocks(SP::UnitaryRelationsGraph indexSet)
       std::cout << "                          outedges :" << *oei << std::endl;
       boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
       std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2  << std::endl;
-      std::cout << "                          (ed1).upper_blockProj : ";
-      if (properties(*indexSet).upper_blockProj[ed1])
+      std::cout << "                          (ed1)->upper_blockProj : ";
+      if (properties(*indexSet)->upper_blockProj[ed1])
       {
-        std::cout << properties(*indexSet).upper_blockProj[ed1] << "   :" ;
-        properties(*indexSet).upper_blockProj[ed1]->display();
+        std::cout << properties(*indexSet)->upper_blockProj[ed1] << "   :" ;
+        properties(*indexSet)->upper_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
-      std::cout << "                          (ed1).lower_blockProj : ";
-      if (properties(*indexSet).lower_blockProj[ed1])
+      std::cout << "                          (ed1)->lower_blockProj : ";
+      if (properties(*indexSet)->lower_blockProj[ed1])
       {
-        std::cout << properties(*indexSet).lower_blockProj[ed1] << "   :" ;
-        properties(*indexSet).lower_blockProj[ed1]->display();
+        std::cout << properties(*indexSet)->lower_blockProj[ed1] << "   :" ;
+        properties(*indexSet)->lower_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
-      std::cout << "                          (ed2).upper_blockProj : ";
-      if (properties(*indexSet).upper_blockProj[ed2])
+      std::cout << "                          (ed2)->upper_blockProj : ";
+      if (properties(*indexSet)->upper_blockProj[ed2])
       {
-        std::cout << properties(*indexSet).upper_blockProj[ed2] << "   :" ;
-        properties(*indexSet).upper_blockProj[ed2]->display();
+        std::cout << properties(*indexSet)->upper_blockProj[ed2] << "   :" ;
+        properties(*indexSet)->upper_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;
 
-      std::cout << "                          (ed2).lower_blockProj : ";
-      if (properties(*indexSet).lower_blockProj[ed2])
+      std::cout << "                          (ed2)->lower_blockProj : ";
+      if (properties(*indexSet)->lower_blockProj[ed2])
       {
-        std::cout << properties(*indexSet).lower_blockProj[ed2] << "   :" ;
-        properties(*indexSet).lower_blockProj[ed2]->display();
+        std::cout << properties(*indexSet)->lower_blockProj[ed2] << "   :" ;
+        properties(*indexSet)->lower_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;
@@ -294,7 +294,7 @@ void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
   //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeUpdated: "<<_hasBeUpdated<<endl;
 
 
-  if (indexSet->properties().symmetric)
+  if (indexSet->properties()->symmetric)
   {
     RuntimeException::selfThrow
     ("MLCPProjectOnConstraints::updateUnitaryBlocks() - symmetric case for the indexSet is not yet implemented");
@@ -324,15 +324,15 @@ void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
         //       std::cout << "indexSet :"<< indexSet << std::endl;
         //       indexSet->display();
         //       std::cout << "vi :"<< *vi << std::endl;
-        //       std::cout << "properties(*indexSet).blockProj[*vi]: before"<< properties(*indexSet).blockProj[*vi] << std::endl;
+        //       std::cout << "properties(*indexSet)->blockProj[*vi]: before"<< properties(*indexSet)->blockProj[*vi] << std::endl;
         // #endif
 
-        if (! properties(*indexSet).blockProj[*vi])
+        if (! properties(*indexSet)->blockProj[*vi])
         {
-          properties(*indexSet).blockProj[*vi].reset(new SimpleMatrix(sizeY, sizeY));
+          properties(*indexSet)->blockProj[*vi].reset(new SimpleMatrix(sizeY, sizeY));
         }
         // #ifdef MLCPPROJ_DEBUG
-        //       std::cout << "properties(*indexSet).blockProj[*vi]: after"<< properties(*indexSet).blockProj[*vi] << std::endl;
+        //       std::cout << "properties(*indexSet)->blockProj[*vi]: after"<< properties(*indexSet)->blockProj[*vi] << std::endl;
         // #endif
 
         computeDiagonalUnitaryBlock(*vi);
@@ -360,16 +360,16 @@ void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
         unsigned int itar = indexSet->index(indexSet->target(*ei));
         if (itar > isrc) // upper block
         {
-          if (! properties(*indexSet).upper_blockProj[*ei])
+          if (! properties(*indexSet)->upper_blockProj[*ei])
           {
-            properties(*indexSet).upper_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
+            properties(*indexSet)->upper_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
           }
         }
         else  // lower block
         {
-          if (! properties(*indexSet).lower_blockProj[*ei])
+          if (! properties(*indexSet)->lower_blockProj[*ei])
           {
-            properties(*indexSet).lower_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
+            properties(*indexSet)->lower_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
           }
         }
 
@@ -380,32 +380,32 @@ void MLCPProjectOnConstraints::updateUnitaryBlocksOLD()
         // should be avoided
         if (itar > isrc) // upper block has been computed
         {
-          // if (!properties(*indexSet).lower_blockProj[*ei])
+          // if (!properties(*indexSet)->lower_blockProj[*ei])
           //   {
-          //     properties(*indexSet).lower_blockProj[*ei].
-          //  reset(new SimpleMatrix(properties(*indexSet).upper_blockProj[*ei]->size(1),
-          //             properties(*indexSet).upper_blockProj[*ei]->size(0)));
+          //     properties(*indexSet)->lower_blockProj[*ei].
+          //  reset(new SimpleMatrix(properties(*indexSet)->upper_blockProj[*ei]->size(1),
+          //             properties(*indexSet)->upper_blockProj[*ei]->size(0)));
           //   }
-          properties(*indexSet).lower_blockProj[*ei].reset(new SimpleMatrix(*(properties(*indexSet).upper_blockProj[*ei])));
-          properties(*indexSet).lower_blockProj[*ei]->trans();
-          //          properties(*indexSet).lower_blockProj[*ei]->trans(*properties(*indexSet).upper_blockProj[*ei]);
+          properties(*indexSet)->lower_blockProj[*ei].reset(new SimpleMatrix(*(properties(*indexSet)->upper_blockProj[*ei])));
+          properties(*indexSet)->lower_blockProj[*ei]->trans();
+          //          properties(*indexSet)->lower_blockProj[*ei]->trans(*properties(*indexSet)->upper_blockProj[*ei]);
         }
         else
         {
           assert(itar < isrc);    // lower block has been computed
-          // if (!properties(*indexSet).upper_blockProj[*ei])
+          // if (!properties(*indexSet)->upper_blockProj[*ei])
           //   {
-          //     properties(*indexSet).upper_blockProj[*ei].
-          //  reset(new SimpleMatrix(properties(*indexSet).lower_blockProj[*ei]->size(1),
-          //             properties(*indexSet).lower_blockProj[*ei]->size(0)));
+          //     properties(*indexSet)->upper_blockProj[*ei].
+          //  reset(new SimpleMatrix(properties(*indexSet)->lower_blockProj[*ei]->size(1),
+          //             properties(*indexSet)->lower_blockProj[*ei]->size(0)));
           //   }
-          properties(*indexSet).upper_blockProj[*ei].
-          reset(new SimpleMatrix(*(properties(*indexSet).lower_blockProj[*ei])));
-          properties(*indexSet).upper_blockProj[*ei]->trans();
+          properties(*indexSet)->upper_blockProj[*ei].
+          reset(new SimpleMatrix(*(properties(*indexSet)->lower_blockProj[*ei])));
+          properties(*indexSet)->upper_blockProj[*ei]->trans();
         }
         // #ifdef MLCPPROJ_DEBUG
-        //             printf("MLCPP upper: %i %i\n",properties(*indexSet).upper_blockProj[*ei]->size(0),properties(*indexSet).upper_blockProj[*ei]->size(1));
-        //             printf("MLCPP lower: %i %i\n",properties(*indexSet).lower_blockProj[*ei]->size(0),properties(*indexSet).lower_blockProj[*ei]->size(1));
+        //             printf("MLCPP upper: %i %i\n",properties(*indexSet)->upper_blockProj[*ei]->size(0),properties(*indexSet)->upper_blockProj[*ei]->size(1));
+        //             printf("MLCPP lower: %i %i\n",properties(*indexSet)->lower_blockProj[*ei]->size(0),properties(*indexSet)->lower_blockProj[*ei]->size(1));
         // #endif
 
       }
@@ -441,10 +441,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
   // DS2->display();
 #endif
 
-  assert(properties(*indexSet).blockProj[vd]->size(0) == sizeY);
-  assert(properties(*indexSet).blockProj[vd]->size(1) == sizeY);
+  assert(properties(*indexSet)->blockProj[vd]->size(0) == sizeY);
+  assert(properties(*indexSet)->blockProj[vd]->size(1) == sizeY);
 
-  SP::SiconosMatrix currentUnitaryBlock = properties(*indexSet).blockProj[vd];
+  SP::SiconosMatrix currentUnitaryBlock = properties(*indexSet)->blockProj[vd];
   if (!_hasBeUpdated)
     computeOptions(UR, UR);
   // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
@@ -659,10 +659,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(properties(*indexSet).upper_blockProj[ed]->size(0) == sizeY1);
-      assert(properties(*indexSet).upper_blockProj[ed]->size(1) == sizeY2);
+      assert(properties(*indexSet)->upper_blockProj[ed]->size(0) == sizeY1);
+      assert(properties(*indexSet)->upper_blockProj[ed]->size(1) == sizeY2);
 
-      currentUnitaryBlock = properties(*indexSet).upper_blockProj[ed];
+      currentUnitaryBlock = properties(*indexSet)->upper_blockProj[ed];
     }
     else  // lower block
     {
@@ -671,10 +671,10 @@ void MLCPProjectOnConstraints::computeDiagonalUnitaryBlock(const UnitaryRelation
       //       indexSet->properties(ed).lower_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(properties(*indexSet).lower_blockProj[ed]->size(0) == sizeY1);
-      assert(properties(*indexSet).lower_blockProj[ed]->size(1) == sizeY2);
+      assert(properties(*indexSet)->lower_blockProj[ed]->size(0) == sizeY1);
+      assert(properties(*indexSet)->lower_blockProj[ed]->size(1) == sizeY2);
 
-      currentUnitaryBlock = properties(*indexSet).lower_blockProj[ed];
+      currentUnitaryBlock = properties(*indexSet)->lower_blockProj[ed];
     }
 
 

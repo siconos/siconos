@@ -190,7 +190,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  if (indexSet->properties().symmetric)
+  if (indexSet->properties()->symmetric)
   {
     UnitaryRelationsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();

@@ -137,6 +137,8 @@ struct GraphProperties
   bool symmetric;
 };
 
+TYPEDEF_SPTR(GraphProperties);
+
 
 /** the graph structure :
  *
@@ -147,11 +149,11 @@ struct GraphProperties
 
 typedef SiconosGraph < SP::DynamicalSystem, SP::UnitaryRelation,
         SystemProperties , RelationProperties,
-        GraphProperties > DynamicalSystemsGraph;
+        SP::GraphProperties > DynamicalSystemsGraph;
 
 typedef SiconosGraph < SP::UnitaryRelation, SP::DynamicalSystem,
         RelationProperties, SystemProperties,
-        GraphProperties > UnitaryRelationsGraph;
+        SP::GraphProperties > UnitaryRelationsGraph;
 
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
@@ -173,17 +175,21 @@ INSTALL_PROPERTIES(UnitaryRelationsGraph,
                    ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 
 
+TYPEDEF_SPTR(DynamicalSystemsGraphProperties);
+TYPEDEF_SPTR(UnitaryRelationsGraphProperties);
+
+
 namespace Siconos
 {
 
-static inline DynamicalSystemsGraphProperties properties(DynamicalSystemsGraph& dsg)
+static inline SP::DynamicalSystemsGraphProperties properties(DynamicalSystemsGraph& dsg)
 {
-  return *static_cast<DynamicalSystemsGraphProperties*>(&(dsg.properties()));
+  return boost::static_pointer_cast<DynamicalSystemsGraphProperties>(dsg.properties());
 }
 
-static inline UnitaryRelationsGraphProperties properties(UnitaryRelationsGraph& urg)
+static inline SP::UnitaryRelationsGraphProperties properties(UnitaryRelationsGraph& urg)
 {
-  return *static_cast<UnitaryRelationsGraphProperties*>(&(urg.properties()));
+  return boost::static_pointer_cast<UnitaryRelationsGraphProperties>(urg.properties());
 }
 
 }
