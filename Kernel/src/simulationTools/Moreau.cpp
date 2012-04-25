@@ -1519,8 +1519,8 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
   if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
   {
-    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
-    UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, UR);
+    UR->interaction()->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 
 
