@@ -170,6 +170,7 @@ INSTALL_PROPERTIES(DynamicalSystemsGraph,
 
 
 INSTALL_PROPERTIES(UnitaryRelationsGraph,
+                   ((Vertex, bool, forControl))
                    ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
                    ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
                    ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
