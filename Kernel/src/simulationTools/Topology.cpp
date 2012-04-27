@@ -103,7 +103,7 @@ Topology::~Topology()
   clear();
 }
 
-void Topology::addInteractionInIndexSet(SP::Interaction inter)
+UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
@@ -142,6 +142,10 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   DEBUG_PRINTF("addInteractionInIndexSet systems->size() : %d\n", systems->size());
 
 
+  UnitaryRelationsGraph::VDescriptor urg_new_ve;
+
+  // only one or two ds! (otherwise we need a hyper-graph &
+  // SiconosGraph does not provide it yet)
   for (DSIterator i1ds = systems->begin(); i1ds != systems->end(); ++i1ds)
   {
     for (DSIterator i2ds = i1ds; i2ds != systems->end(); ++i2ds)
@@ -169,7 +173,6 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
           assert(!_URG[0]->is_vertex(*uri));
 
           DynamicalSystemsGraph::EDescriptor new_ed;
-          UnitaryRelationsGraph::VDescriptor urg_new_ve;
           boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
 
           // add self branches in vertex properties
@@ -216,6 +219,10 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
         }
     }
   }
+
+  // note: only one or two ds => only one vertex in URG
+  return urg_new_ve;
+
 };
 
 /* an edge is removed from _DSG graph if the corresponding vertex is
@@ -278,16 +285,17 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 };
 
-
-void Topology::insertInteraction(SP::Interaction inter)
+UnitaryRelationsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
   assert(_DSG[0]->edges_number() == _URG[0]->size());
 
   _allInteractions->insert(inter);
-  addInteractionInIndexSet(inter);
+  UnitaryRelationsGraph::VDescriptor urg_new_ve = addInteractionInIndexSet(inter);
 
   assert(_DSG[0]->edges_number() == _URG[0]->size());
+
+  return urg_new_ve;
 
 };
 

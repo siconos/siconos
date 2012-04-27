@@ -111,9 +111,10 @@ private:
   /** schedules the relations of Interaction inter into IndexSet0 (ie
   * creates the corresponding UnitaryRelations and add them into DSG
   * anr URG)
-  \param: a pointer to Interaction
+  \param  a pointer to Interaction
+  \return a vertex descriptor of the new vertex in IndexSet0
   */
-  void addInteractionInIndexSet(SP::Interaction);
+  UnitaryRelationsGraph::VDescriptor addInteractionInIndexSet(SP::Interaction);
 
   /** remove the unitary relations of the interactions from URG and
    *   DSG */
@@ -171,8 +172,9 @@ public:
   /** add an Interaction in the topology. The interaction is both
    *  added in Dynamical Systems graph and Unitary Relations Graph
    * \param a shared pointer to the interaction
+   * \return a vertex descriptor to the new vertex in IndexSet0
    */
-  void insertInteraction(SP::Interaction);
+  UnitaryRelationsGraph::VDescriptor insertInteraction(SP::Interaction);
 
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Unitary Relations Graph.
