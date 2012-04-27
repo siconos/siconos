@@ -109,9 +109,6 @@ public:
   CommonSMC(int name, SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
     Actuator(name, t, ds), _B(B), _D(D), _numericsSolverId(SICONOS_RELAY_LEMKE), _precision(1e-8) {}
 
-  /** Compute the new control law at each event
-   */
-  virtual void actuate() = 0;
 
   /** Constructor with a TimeDiscretisation, a Model and a set of Sensor.
    * \param name the type of the SMC Actuator
@@ -124,11 +121,16 @@ public:
 
   /** Compute the new control law at each event
   */
+  virtual void actuate() = 0;
+
+  /** Initialization
+   * \param m a SP::Model
+   */
   virtual void initialize(SP::Model m);
 
   /** Set the value of _Csurface to newValue
-    * * \param newValue the new value for _Csurface
-    */
+   * \param newValue the new value for _Csurface
+   */
   void setCsurface(const SiconosMatrix& newValue);
 
   /** Set _Csurface to pointer newPtr
@@ -136,6 +138,55 @@ public:
    */
   void setCsurfacePtr(SP::SiconosMatrix newPtr);
 
+  /** Set the value of _D to newValue
+   * \param newValue the new value for _D
+   */
+  void setSaturationMatrix(const SiconosMatrix& newValue);
+
+  /** Set _D to pointer newPtr
+   * \param newPtr a SP::SiconosMatrix containing the new value for _D
+   */
+  void setSaturationMatrixPtr(SP::SiconosMatrix newPtr);
+
+  /** get _lambda
+   * \return a pointer to _lambda
+   */
+  inline SP::SiconosVector lambda() const
+  {
+    return _lambda;
+  };
+
+  /** Set the B matrix
+   * \param B the new B matrix
+  */
+  inline void setB(SiconosMatrix & B)
+  {
+    _B.reset(new SimpleMatrix(B));
+  };
+
+  /** Set the B matrix
+   * \param B the new B matrix
+   */
+  inline void setBPtr(SP::SiconosMatrix B)
+  {
+    _B = B;
+  };
+
+  /** Set the solver
+   * \param newNumericsSolverId the solver for the relay
+   */
+  inline void setSolver(const int newNumericsSolverId)
+  {
+    _numericsSolverId = newNumericsSolverId;
+  };
+
+  /** Set the precision
+   * \param newPrecision a double
+   */
+  inline void setPrecision(const double newPrecision)
+  {
+    _precision = newPrecision;
+  };
 };
 DEFINE_SPTR(CommonSMC)
 #endif

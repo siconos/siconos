@@ -36,7 +36,7 @@ void CommonSMC::setCsurface(const SiconosMatrix& newValue)
   // check dimensions ...
   if (newValue.size(1) != _nDim)
   {
-    RuntimeException::selfThrow("CommonSMC::setCsurface - inconstency between the size of the dimension of the state space and Csurface");
+    RuntimeException::selfThrow("CommonSMC::setCsurface - inconstency between the dimension of the state space and Csurface");
   }
   else
   {
@@ -57,7 +57,7 @@ void CommonSMC::setCsurfacePtr(SP::SiconosMatrix newPtr)
   // check dimensions ...
   if (newPtr->size(1) != _nDim)
   {
-    RuntimeException::selfThrow("CommonSMC::setCsurfacePtr - inconstency between the size of the dimension of the state space and Csurface");
+    RuntimeException::selfThrow("CommonSMC::setCsurfacePtr - inconstency between the dimension of the state space and Csurface");
   }
   else
   {
@@ -65,3 +65,37 @@ void CommonSMC::setCsurfacePtr(SP::SiconosMatrix newPtr)
     _sDim = newPtr->size(0);
   }
 }
+
+void CommonSMC::setSaturationMatrix(const SiconosMatrix& newValue)
+{
+  // check dimensions ...
+  if (newValue.size(1) != _nDim)
+  {
+    RuntimeException::selfThrow("CommonSMC::setSaturationMatrix - inconstency between the dimension of the state space and D");
+  }
+  else
+  {
+    if (_D)
+    {
+      *_D = newValue;
+    }
+    else
+    {
+      _D.reset(new SimpleMatrix(newValue));
+    }
+  }
+}
+
+void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
+{
+  // check dimensions ...
+  if (newPtr->size(1) != _nDim)
+  {
+    RuntimeException::selfThrow("CommonSMC::setSaturationMatrixPtr - inconstency between the dimension of the state space and D");
+  }
+  else
+  {
+    _D = newPtr;
+  }
+}
+

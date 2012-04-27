@@ -66,7 +66,8 @@ void LinearSMC::initialize(SP::Model m)
   }
   // We have to reset the _pluginb
   _DS_SMC->setComputebFunction(NULL);
-
+  SP::SiconosVector dummyb(new SimpleVector(_nDim, 0));
+  _DS_SMC->setb(dummyb);
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
   _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
@@ -84,9 +85,14 @@ void LinearSMC::initialize(SP::Model m)
     _relationSMC.reset(new FirstOrderLinearR(_Csurface, _B));
     _relationSMC->setDPtr(_D);
     _nsLawSMC.reset(new RelayNSL(_sDim));
+
     _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
+    //_interactionSMC.reset(new Interaction("SMC Interation", _DS_SMC, 0, _sDim, _nsLawSMC, _relationSMC));
     _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
+    //    _SMC->nonSmoothDynamicalSystem()->insertInteraction(_interactionSMC);
     _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
+    //    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(_DS_SMC, _interactionSMC));
+    //    _SMC->setNonSmoothDynamicalSystemPtr(myNSDS);
     // Copy the TD
     _tD_SMC.reset(new TimeDiscretisation(*_timeDiscretisation));
     // Set up the simulation
@@ -95,10 +101,10 @@ void LinearSMC::initialize(SP::Model m)
     _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
     _simulationSMC->insertIntegrator(_integratorSMC);
     // OneStepNsProblem
-    _LCP_SMC.reset(new LCP());
-    _OSNSPB_SMC.reset(new Relay(SICONOS_RELAY_PGS));
+    _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
+    _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
+    //    cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] << endl;
     _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
-
     // Finally we can initialize everything ...
     _SMC->initialize(_simulationSMC);
 

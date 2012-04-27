@@ -63,21 +63,43 @@ void LinearChatteringSMC::initialize(SP::Model m)
   }
   _indx = 0;
   _s.reset(new SimpleVector(_sDim));
+  _lambda.reset(new SimpleVector(_sDim));
 }
 
 void LinearChatteringSMC::actuate()
 {
   prod(*_Csurface, *(_sensor->y()), *_s);
-  for (unsigned int i = 0; i < _sDim; i++)
+  if (_D) // we are using a saturation
   {
-    if ((*_s)(i) > 0)
-      (*_u)(_nDim - 1) = -2;
-    else if ((*_s)(i) < 0)
-      (*_u)(_nDim - 1) = 2;
-    else
-      (*_u)(_nDim - 1) = 0;
+    for (unsigned int i = 0; i < _sDim; i++)
+    {
+      if ((*_s)(i) > (*_D)(i, i))
+        (*_lambda)(i) = -1;
+      else if ((*_s)(i) < -(*_D)(i, i))
+        (*_lambda)(i) = 1;
+      else
+      {
+        if ((*_D)(i, i) != 0)
+          (*_lambda)(i) = -(*_s)(i) / (*_D)(i, i);
+        else
+          (*_lambda)(i) = 0;
+      }
+    }
   }
+  else
+  {
+    for (unsigned int i = 0; i < _sDim; i++)
+    {
+      if ((*_s)(i) > 0)
+        (*_lambda)(i) = -1;
+      else if ((*_s)(i) < 0)
+        (*_lambda)(i) = 1;
+      else
+        (*_lambda)(i) = 0;
+    }
+  }
+  prod(1.0, *_B, *_lambda, *_u);
   _indx++;
 }
 
-AUTO_REGISTER_ACTUATOR(103, LinearChatteringSMC);
+AUTO_REGISTER_ACTUATOR(LINEAR_CHATTERING_SMC, LinearChatteringSMC);

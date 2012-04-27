@@ -36,10 +36,6 @@ private:
   /** default constructor */
   LinearSMC() {};
 
-  /** B Matrix in the Interaction */
-  SP::SiconosMatrix _B;
-  /** D Matrix in the Interaction */
-  SP::SiconosMatrix _D;
   /** the Model for the controller */
   SP::Model _SMC;
   /** the DynamicalSystem for the controller */
@@ -52,8 +48,6 @@ private:
   SP::Moreau _integratorSMC;
   /** Theta for the controller */
   double _thetaSMC;
-  /** LCP for the controller */
-  SP::LCP _LCP_SMC;
   /** OneStepNsProblem for the controller */
   SP::Relay _OSNSPB_SMC;
   /** SP::SiconosVector containing the control */
@@ -101,20 +95,6 @@ public:
    */
   void actuate();
 
-  /** Set the B matrix
-   * \param B the new B matrix
-  */
-  inline void setB(SiconosMatrix & B)
-  {
-    _B.reset(new SimpleMatrix(B));
-  };
-  /** Set the B matrix
-   * \param B the new B matrix
-  */
-  inline void setBPtr(SP::SiconosMatrix B)
-  {
-    _B = B;
-  };
 
   /** Set the D matrix
    * \param D the new D matrix
