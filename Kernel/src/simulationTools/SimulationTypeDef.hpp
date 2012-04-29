@@ -164,6 +164,7 @@ TYPEDEF_SPTR(UnitaryRelationsGraph);
 /** properties attached only to a graph type (UnitaryRelationsGraph or DynamicalSystemsGraph)
     or optional properties */
 
+#ifndef SWIG
 INSTALL_PROPERTIES(DynamicalSystemsGraph,
                    ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
 // always needed -> SystemProperties
@@ -175,7 +176,7 @@ INSTALL_PROPERTIES(UnitaryRelationsGraph,
                    ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
                    ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 
-
+#endif
 TYPEDEF_SPTR(DynamicalSystemsGraphProperties);
 TYPEDEF_SPTR(UnitaryRelationsGraphProperties);
 
