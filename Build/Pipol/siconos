@@ -395,9 +395,15 @@ nightly_build Kernel Release
 nightly_test Kernel Release
 nightly_memcheck Kernel Release
 nightly_submit Kernel Release
-##
 install_1 Kernel Release
-##
+#
+configure_trunk IO Release
+nightly_build IO Release
+nightly_test IO Release
+nightly_memcheck IO Release
+nightly_submit IO Release
+install_1 IO Release
+
 ### Snapshot packages
 pack_trunk Numerics Release
 save_packed_1 Numerics Release
@@ -405,8 +411,10 @@ save_packed_1 Numerics Release
 pack_trunk Kernel Release
 save_packed_1 Kernel Release
 ##
+pack_trunk IO Release
+save_packed_1 IO Release
 ##
-### front-end
+### front-end (not with IO yet)
 swig_setup
 configure_trunk Front-End Release
 nightly_build Front-End Release
