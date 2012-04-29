@@ -50,9 +50,9 @@
 
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
-SICONOS_IO_REGISTER(RelationData, (block)(blockProj)(source)(target));
+SICONOS_IO_REGISTER(RelationProperties, (block)(source)(target));
 
-SICONOS_IO_REGISTER(SystemData, (upper_block)(lower_block)(upper_blockProj)(lower_blockProj));
+SICONOS_IO_REGISTER(SystemProperties, (upper_block)(lower_block));
 
 SICONOS_IO_REGISTER(SiconosVector,)
 
