@@ -150,7 +150,7 @@ public:
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *  \param unsigned int: the number of the set to be updated
    */
-  void updateIndexSet(unsigned int);
+  virtual void updateIndexSet(unsigned int);
 
   // /** Used by the updateIndexSet function in order to deactivate SP::UnitaryRelation.
   //  * \param SP::UnitaryRelation: SP::UnitaryRelation to be activated.

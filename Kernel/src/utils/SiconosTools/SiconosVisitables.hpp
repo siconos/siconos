@@ -26,9 +26,11 @@
   REGISTER(TimeStepping)                                     \
   REGISTER(TimeSteppingD1Minus)                              \
   REGISTER(TimeSteppingProjectOnConstraints)                 \
+  REGISTER(TimeSteppingCombinedProjection)                   \
   REGISTER(EventDriven)                                      \
   REGISTER(OneStepIntegrator)                                \
   REGISTER(Moreau)                                           \
+  REGISTER(MoreauCombinedProjectionOSI)                      \
   REGISTER(Lsodar)                                           \
   REGISTER(D1MinusLinear)                                    \
   REGISTER(SchatzmanPaoli)                                   \

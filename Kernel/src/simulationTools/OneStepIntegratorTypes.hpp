@@ -38,6 +38,8 @@ enum TYPES
   /** */
   MOREAU2,
   /** */
+  MOREAUCOMBINEDPROJECTIONOSI,
+  /** */
   D1MINUSLINEAR,
   /** */
   SCHATZMANPAOLI,
@@ -45,6 +47,7 @@ enum TYPES
 
 }
 DEFINE_SPTR(Moreau);
+DEFINE_SPTR(MoreauCombinedProjectionOSI);
 DEFINE_SPTR(Lsodar);
 DEFINE_SPTR(D1MinusLinear);
 DEFINE_SPTR(SchatzmanPaoli);

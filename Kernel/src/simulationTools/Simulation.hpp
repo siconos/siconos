@@ -657,7 +657,7 @@ public:
    * \param inter a new SP::Interaction
    * \param init bool to determine if we are in the initialisation phase
    */
-  void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
+  virtual void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
 
   /** set staticLevels
    * \param b decides whether levels should be computed at each iteration

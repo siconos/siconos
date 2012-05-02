@@ -42,12 +42,13 @@ protected:
 
   virtual void initOSNS();
 
-  /** level of IndexSet on whoich we project (default =1 (activated contact))
+  /** level of IndexSet on which we project (default =1 (activated contact))
    */
   unsigned int _indexSetLevelForProjection;
+
   /** tolerance for the violation of the equality
-  *  constraints at the  position level.
-  */
+   *  constraints at the  position level.
+   */
   double _constraintTol;
 
   /** tolerance for the violation of the unilateral

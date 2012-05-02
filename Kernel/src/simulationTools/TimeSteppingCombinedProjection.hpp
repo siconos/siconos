@@ -17,18 +17,20 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 /*! \file
-  Time-Stepping simulation with combined  projections/activations
+  Time-Stepping simulation with projections on constraints
 */
 #ifndef TIMESTEPPINGCOMBINEDPROJECTION_H
 #define TIMESTEPPINGCOMBINEDPROJECTION_H
 
 #include "TimeStepping.hpp"
 
+
+
 /** Time-Stepping scheme
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version (Creation) 3.4.0.
- *  \date (Creation) January 2012
+ *  \version 3.4.0.
+ *  \date (Creation) May 2012
  *
  */
 class TimeSteppingCombinedProjection : public TimeStepping
@@ -40,9 +42,14 @@ protected:
 
   virtual void initOSNS();
 
-  /** tolerance for the violation of the equality
-   *  constraints at the  position level.
+  /** level of IndexSet on which we project
+   *  (default =2 (subset of activated constraint with positive reactions))
    */
+  unsigned int _indexSetLevelForProjection;
+
+  /** tolerance for the violation of the equality
+  *  constraints at the  position level.
+  */
   double _constraintTol;
 
   /** tolerance for the violation of the unilateral
@@ -53,11 +60,18 @@ protected:
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
 
-  /** Default maximum number of Newton iteration*/
-  unsigned int _numberIteration;
-
-  /** disabled or enabled combined projection (Debug Projection) */
+  /** disabled or enabled projection (Debug Projection) */
   unsigned int _doCombinedProj;
+
+
+  /** Boolean to check if the index sets are stabilized in the Combined Projection Algorithm */
+  bool _isIndexSetsStable;
+
+  /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
+   *  \param unsigned int: the number of the set to be updated
+   */
+  void updateIndexSet(unsigned int);
+
 
 
 public:
@@ -72,7 +86,8 @@ public:
   TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
                                  SP::OneStepIntegrator osi,
                                  SP::OneStepNSProblem osnspb_velo,
-                                 SP::OneStepNSProblem osnspb_pos);
+                                 SP::OneStepNSProblem osnspb_pos,
+                                 unsigned int _level = 2);
 
 
   /** default constructor
@@ -80,6 +95,12 @@ public:
   TimeSteppingCombinedProjection() {};
 
   virtual ~TimeSteppingCombinedProjection();
+
+  /** Update the _level* attributes and add the specific index Set
+   * \param inter a new SP::Interaction
+   * \param init bool to determine if we are in the initialisation phase
+   */
+  void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
 
   virtual void updateWorldFromDS()
   {
@@ -106,17 +127,13 @@ public:
     _doCombinedProj = v;
   }
 
-  unsigned int numberIteration()
-  {
-    return _numberIteration;
-  }
-
   /**
    */
   void advanceToEvent();
-  /**
+
+  /*
    */
-  void computeCriteria(bool *);
+  void computeCriteria(bool * runningProjection);
 
   /** visitors hook
    */

@@ -493,6 +493,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
       }
       else if (Type::name(*_parent) == "TimeSteppingProjectOnConstraints")
       {
+        // Warning : we never enter this case !!!
         lowerLevelForOutput = 0;
         upperLevelForOutput = 1 ;
         lowerLevelForInput = 0;
@@ -503,6 +504,8 @@ struct Simulation::SetupLevels : public SiconosVisitor
     }
     else if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
+
+
       if (Type::name(*_parent) == "TimeStepping")
       {
         lowerLevelForOutput = 0;
@@ -526,6 +529,52 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _interaction->setUpperLevelForInput(upperLevelForInput);
 
     _interaction->setSteps(1);
+  };
+  void visit(const MoreauCombinedProjectionOSI& moreauCPOSI)
+  {
+    unsigned int lowerLevelForOutput = LEVELMAX;
+    unsigned int upperLevelForOutput = 0;
+    unsigned int lowerLevelForInput = LEVELMAX;
+    unsigned int upperLevelForInput = 0;
+
+    Type::Siconos dsType = Type::value(*_ds);
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+      if (Type::name(*_parent) == "TimeStepping")
+      {
+        lowerLevelForOutput = 0;
+        upperLevelForOutput = 0;
+        lowerLevelForInput = 0;
+        upperLevelForInput = 0;
+      }
+      else if (Type::name(*_parent) == "TimeSteppingCombinedProjection")
+      {
+        // Warning : we never enter this case !!!
+        lowerLevelForOutput = 0;
+        upperLevelForOutput = 1 ;
+        lowerLevelForInput = 0;
+        upperLevelForInput = 1;
+      }
+      else
+      {
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
+      }
+    }
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
+
+    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
+    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
+    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
+    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
+
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
+
+    _interaction->setSteps(1);
+
   };
   void visit(const SchatzmanPaoli&)
   {
