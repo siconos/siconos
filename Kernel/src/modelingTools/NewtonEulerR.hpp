@@ -23,6 +23,7 @@
 #define NEWTONEULERRELATION_H
 
 #include "Relation.hpp"
+#include "Interaction.hpp"
 
 class DynamicalSystem;
 class RelationXML;

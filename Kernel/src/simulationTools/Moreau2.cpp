@@ -73,7 +73,7 @@ void Moreau2::computeFreeState()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds]; // Its W Moreau matrix of iteration.
+    W = WMap[ds->number()]; // Its W Moreau matrix of iteration.
 
     if (dsType == Type::FirstOrderLinearDS)
     {

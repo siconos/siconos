@@ -23,6 +23,12 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.5.0
+--------------------------------------------------------------------------------
+Main Changes:
+	* Remove UnitaryRelation
+
+--------------------------------------------------------------------------------
   v3.4.0
 --------------------------------------------------------------------------------
 Main Changes:
@@ -41,6 +47,7 @@ Main Changes:
 	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
 	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
 	scheme
+
 --------------------------------------------------------------------------------
   v3.3.0
 --------------------------------------------------------------------------------

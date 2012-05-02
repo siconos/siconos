@@ -388,11 +388,11 @@ void Lsodar::updateState(unsigned int level)
 
 struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
-  OneStepNSProblem *osnsp;
-  SP::UnitaryRelation UR;
+  OneStepNSProblem * _osnsp;
+  SP::Interaction _inter;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
-    osnsp(p), UR(UR) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
+    _osnsp(p), _inter(inter) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -400,10 +400,10 @@ struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[1] = _inter->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *UR->yOld(osnsp->levelMin()), *(UR->yp()), subCoord, false); // q = q + e * q
+    subscal(e, *_inter->yOld(_osnsp->levelMin()), *(_inter->yp()), subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)
@@ -415,20 +415,20 @@ struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 {
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = inter->getRelationType();
+  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
 
-  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
-  unsigned int sizeY = UR->getNonSmoothLawSize();
+  unsigned int sizeY = inter->getNonSmoothLawSize();
 
-  unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->interaction();
+  unsigned int relativePosition = 0;
+  SP::Interaction mainInteraction = inter;
   Index coord(8);
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
@@ -446,9 +446,9 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   SP::SiconosVector H_alpha;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
-  Xq = UR->xq();
-  Yp = UR->yp();
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
+  Xq = inter->workXq();
+  Yp = inter->yp();
 
   /* V.A. 10/10/2010
        * Following the type of OSNS  we need to retrieve the velocity or the acceleration
@@ -459,13 +459,13 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
   {
-    Xfree  = UR->workFree();
+    Xfree  = inter->workFree();
     //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
-    Xfree = UR->workx();
+    Xfree = inter->workX();
     //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
@@ -477,8 +477,8 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
 
 
-  //  lambda = UR->interaction()->lambda(0);
-  H_alpha = UR->interaction()->relation()->Halpha();
+  //  lambda = inter->lambda(0);
+  H_alpha = inter->relation()->Halpha();
 
   if (relationType == Lagrangian)
   {
@@ -515,8 +515,8 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-        subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
       }
       else
         RuntimeException::selfThrow("Lsodar::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -526,8 +526,8 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
-        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
+        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
       }
     }
   }
@@ -535,10 +535,10 @@ void Lsodar::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
     RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for Relation of type " + relationType);
   if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
-    if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+    if (inter->getRelationType() == Lagrangian || inter->getRelationType() == NewtonEuler)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
-      UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
   }
 

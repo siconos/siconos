@@ -30,7 +30,7 @@
  *  \date Dec, 2010
  *
  * This class is an interface for relation with impact and FC3D.
- * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacoboian, this operator is use for the predictor of activation and deactivation of the UR.
+ * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacobian, this operator is use for the predictor of activation and deactivation of the Interaction.
  * The OSNSP is build using the matrix jachqT, that is computed from the point if contact pc1, pc2 and Nc.
  * Use this class consists in overload the method computeh, and children class has to set the menber pc1, pc2 and nc.
  *

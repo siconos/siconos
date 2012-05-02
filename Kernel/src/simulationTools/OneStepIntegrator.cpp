@@ -130,7 +130,7 @@ void OneStepIntegrator::computeFreeState()
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + integratorType);
 }
-void OneStepIntegrator::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+void OneStepIntegrator::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 {
   RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + integratorType);
 }

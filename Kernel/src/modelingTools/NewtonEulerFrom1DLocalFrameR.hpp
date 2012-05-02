@@ -37,7 +37,7 @@
  * contacts and the normal.  Use this class consists in overloading
  * the method computeh, by setting the menber pc1, pc2, nc and y.  The
  * matrix jachq is used both for the building of the OSNSP (with T)
- * and for the predictor of activation of deactivation of the UR.
+ * and for the predictor of activation of deactivation of the Interaction.
 *
  */
 

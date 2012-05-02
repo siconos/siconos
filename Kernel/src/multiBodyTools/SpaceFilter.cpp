@@ -235,9 +235,9 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       {
 
 
-        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->interaction()->number());
+        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
         parent->model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
       }
 
     }
@@ -339,7 +339,7 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
       if (found)
       {
         parent->model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
       }
 
     }
@@ -424,7 +424,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
       if (found)
       {
         parent->model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
       }
 
     }
@@ -571,7 +571,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
@@ -600,17 +600,17 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
       {
 
-        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->interaction()->number());
+        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
 
         model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
         break;
       }
     }
@@ -654,7 +654,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskMovingPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
@@ -681,14 +681,14 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskMovingPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
       {
         model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
         break;
       }
     }
@@ -725,7 +725,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(IsSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
@@ -752,14 +752,14 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(IsSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
       {
         model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
         break;
       }
     }
@@ -797,7 +797,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
@@ -824,14 +824,14 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->interaction()
+      DSG0->bundle(*oei)
       ->relation()->accept(isSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
       {
         model()->nonSmoothDynamicalSystem()->topology()->
-        removeInteraction(DSG0->bundle(*oei)->interaction());
+        removeInteraction(DSG0->bundle(*oei));
         break;
       }
     }

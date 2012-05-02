@@ -47,11 +47,11 @@ protected:
 
 public:
 
-  /** compute the number of inequality and equality for a given tuple of URs
+  /** compute the number of inequality and equality for a given tuple of Interactions
    * update the global number of equality(_n) and inequality (_m)
    * set up _numerics_problem parameters (blocksLine and blocksIsComp )
    */
-  virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
+  virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
 
 
   /** constructor from data
@@ -81,7 +81,7 @@ public:
 
   /** Display the set of blocks for  a given indexSet
    */
-  void displayBlocks(SP::UnitaryRelationsGraph indexSet);
+  void displayBlocks(SP::InteractionsGraph indexSet);
 
   /** print the data to the screen
   */
@@ -92,31 +92,31 @@ public:
   }
   virtual void initOSNSMatrix();
 
-  /** compute unitaryBlocks if necessary (this depends on the type of
+  /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
    */
-  virtual void updateUnitaryBlocks();
+  virtual void updateInteractionBlocks();
 
-  /** compute unitaryBlocks if necessary (this depends on the type of
+  /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
    */
-  virtual void updateUnitaryBlocksOLD();
+  virtual void updateInteractionBlocksOLD();
 
-  /** compute diagonal unitary block
-   * \param const UnitaryRelationsGraph::VDescriptor a vertex descriptor
+  /** compute diagonal Interaction block
+   * \param const InteractionsGraph::VDescriptor a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
 
-  /** compute diagonal unitary block
-   * \param const UnitaryRelationsGraph::VDescriptor a vertex descriptor
+  /** compute diagonal Interaction block
+   * \param const InteractionsGraph::VDescriptor a vertex descriptor
    */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param SP::UnitaryRelation, the UR which corresponds to the considered block
-      \param unsigned int, the position of the first element of yOut to be set
+   *  \param inter the Interaction which corresponds to the considered block
+   *  \param unsigned int, the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(SP::UnitaryRelation, unsigned int);
+  virtual void computeqBlock(SP::Interaction inter, unsigned int pos);
 
   /** post-treatment for  MLCPProjectOnConstraints
    */
@@ -124,11 +124,11 @@ public:
 
   /** post-treatment for  MLCPProjectOnConstraints for LagrangianR
    */
-  virtual void postComputeLagrangianR(SP::UnitaryRelation, unsigned int);
+  virtual void postComputeLagrangianR(SP::Interaction, unsigned int);
 
   /** post-treatment for  MLCPProjectOnConstraints for NewtonEulerR
    */
-  virtual void postComputeNewtonEulerR(SP::UnitaryRelation, unsigned int);
+  virtual void postComputeNewtonEulerR(SP::Interaction, unsigned int);
 
 
 

@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "Relation.hpp"
+#include "Interaction.hpp"
 
 using namespace std;
 

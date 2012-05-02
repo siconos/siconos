@@ -247,10 +247,10 @@ public:
   };
 
 
-  /** integrates the UnitaryRelation linked to this integrator, without taking constraints
+  /** integrates the Interaction linked to this integrator, without taking constraints
      * into account.
      */
-  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
 
   /** print the data to the screen
    */

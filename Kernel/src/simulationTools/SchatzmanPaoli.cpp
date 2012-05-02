@@ -103,9 +103,10 @@ const SimpleMatrix SchatzmanPaoli::getW(SP::DynamicalSystem ds)
   assert(ds &&
          "SchatzmanPaoli::getW(ds): ds == NULL.");
   //    return *(WMap[0]);
-  assert(WMap[ds] &&
+  unsigned int dsN = ds->number();
+  assert(WMap[dsN] &&
          "SchatzmanPaoli::getW(ds): W[ds] == NULL.");
-  return *(WMap[ds]); // Copy !!
+  return *(WMap[dsN]); // Copy !!
 }
 
 SP::SimpleMatrix SchatzmanPaoli::W(SP::DynamicalSystem ds)
@@ -114,7 +115,7 @@ SP::SimpleMatrix SchatzmanPaoli::W(SP::DynamicalSystem ds)
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
   //    RuntimeException::selfThrow("SchatzmanPaoli::W(ds): W[ds] == NULL.");
-  return WMap[ds];
+  return WMap[ds->number()];
 }
 
 void SchatzmanPaoli::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
@@ -134,18 +135,19 @@ void SchatzmanPaoli::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
     RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+  unsigned int dsN = ds->number();
   if (line != sizeW) // check consistency between newValue and dynamical system size
     RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   // Memory allocation for W, if required
-  if (!WMap[ds]) // allocate a new W if required
+  if (!WMap[dsN]) // allocate a new W if required
   {
-    WMap[ds].reset(new SimpleMatrix(newValue));
+    WMap[dsN].reset(new SimpleMatrix(newValue));
   }
   else  // or fill-in an existing one if dimensions are consistent.
   {
-    if (line == WMap[ds]->size(0) && col == WMap[ds]->size(1))
-      *(WMap[ds]) = newValue;
+    if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
+      *(WMap[dsN]) = newValue;
     else
       RuntimeException::selfThrow("SchatzmanPaoli - setW: inconsistent dimensions with problem size for given input matrix W");
   }
@@ -165,7 +167,7 @@ void SchatzmanPaoli::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
   if (line != sizeW) // check consistency between newValue and dynamical system size
     RuntimeException::selfThrow("SchatzmanPaoli::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
-  WMap[ds] = newPtr;                  // link with new pointer
+  WMap[ds->number()] = newPtr;                  // link with new pointer
 }
 
 
@@ -175,9 +177,9 @@ const SimpleMatrix SchatzmanPaoli::getWBoundaryConditions(SP::DynamicalSystem ds
   assert(ds &&
          "SchatzmanPaoli::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  assert(_WBoundaryConditionsMap[ds] &&
+  assert(_WBoundaryConditionsMap[ds->number()] &&
          "SchatzmanPaoli::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
-  return *(_WBoundaryConditionsMap[ds]); // Copy !!
+  return *(_WBoundaryConditionsMap[ds->number()]); // Copy !!
 }
 
 SP::SiconosMatrix SchatzmanPaoli::WBoundaryConditions(SP::DynamicalSystem ds)
@@ -186,7 +188,7 @@ SP::SiconosMatrix SchatzmanPaoli::WBoundaryConditions(SP::DynamicalSystem ds)
   //  return WBoundaryConditionsMap[0];
   //  if(WBoundaryConditionsMap[ds]==NULL)
   //    RuntimeException::selfThrow("SchatzmanPaoli::WBoundaryConditions(ds): W[ds] == NULL.");
-  return _WBoundaryConditionsMap[ds];
+  return _WBoundaryConditionsMap[ds->number()];
 }
 
 
@@ -247,7 +249,7 @@ void SchatzmanPaoli::initialize()
     initW(t0, *itDS);
 
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
+    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
 void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
@@ -262,7 +264,8 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
   if (!OSIDynamicalSystems->isIn(ds))
     RuntimeException::selfThrow("SchatzmanPaoli::initW(t,ds) - ds does not belong to the OSI.");
 
-  if (WMap.find(ds) != WMap.end())
+  unsigned int dsN = ds->number();
+  if (WMap.find(dsN) != WMap.end())
     RuntimeException::selfThrow("SchatzmanPaoli::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
@@ -303,8 +306,8 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-    WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
-    SP::SiconosMatrix W = WMap[ds];
+    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    SP::SiconosMatrix W = WMap[dsN];
 
     if (C)
       scal(1 / 2.0 * h * _theta, *C, *W, false); // W += 1/2.0*h*_theta *C
@@ -434,14 +437,14 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
 
   assert(ds &&
          "SchatzmanPaoli::computeW(t,ds) - ds == NULL");
-
-  assert((WMap.find(ds) != WMap.end()) &&
+  unsigned int dsN = ds->number();
+  assert((WMap.find(dsN) != WMap.end()) &&
          "SchatzmanPaoli::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   //double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
-  SP::SiconosMatrix W = WMap[ds];
+  SP::SiconosMatrix W = WMap[dsN];
 
   // 1 - Lagrangian non linear systems
   if (dsType == Type::LagrangianDS)
@@ -798,7 +801,7 @@ void SchatzmanPaoli::computeFreeState()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds]; // Its W SchatzmanPaoli matrix of iteration.
+    W = WMap[ds->number()]; // Its W SchatzmanPaoli matrix of iteration.
 
     //1 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
@@ -942,11 +945,11 @@ void SchatzmanPaoli::prepareNewtonIteration(double time)
 
 struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
-  OneStepNSProblem *osnsp;
-  SP::UnitaryRelation UR;
+  OneStepNSProblem* _osnsp;
+  SP::Interaction _inter;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
-    osnsp(p), UR(UR) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
+    _osnsp(p), _inter(inter) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -954,17 +957,17 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[1] = _inter->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
-    y_k_1 = UR->yMemory(osnsp->levelMin())->getSiconosVector(1);
+    y_k_1 = _inter->yMemory(_osnsp->levelMin())->getSiconosVector(1);
 
 
     // std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
-    subscal(e, *y_k_1, *(UR->yp()), subCoord, false);
+    subscal(e, *y_k_1, *(_inter->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -973,8 +976,8 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.en();
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
-    y_k_1 = UR->yMemory(osnsp->levelMin())->getSiconosVector(1);
-    (*UR->yp())(0) +=  e * (*y_k_1)(0);
+    y_k_1 = _inter->yMemory(_osnsp->levelMin())->getSiconosVector(1);
+    (*_inter->yp())(0) +=  e * (*y_k_1)(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -988,7 +991,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -997,14 +1000,14 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = inter->getRelationType();
+  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
 
-  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
-  unsigned int sizeY = UR->getNonSmoothLawSize();
+  unsigned int sizeY = inter->getNonSmoothLawSize();
 
-  unsigned int relativePosition = UR->getRelativePosition();
+  unsigned int relativePosition = 0;
 
 
 
@@ -1026,16 +1029,16 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
   SP::SiconosVector H_alpha;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a SchatzmanPaoli scheme is used.
-  Xq = UR->xq();
-  Yp = UR->yp();
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoli scheme is used.
+  Xq = inter->workXq();
+  Yp = inter->yp();
 
-  Xfree = UR->workFree();
+  Xfree = inter->workFree();
 
   assert(Xfree);
 
 
-  SP::Interaction mainInteraction = UR->interaction();
+  SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
@@ -1054,8 +1057,8 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
       if (Xfree->size() == 0)
       {
         // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding unitaryBlock in each UR for each ds of the
-        // current UR.
+        // corresponding interactionBlock in each Interactionfor each ds of the
+        // current Interaction.
         ConstDSIterator itDS;
         for (itDS = mainInteraction->dynamicalSystemsBegin();
              itDS != mainInteraction->dynamicalSystemsEnd();
@@ -1092,10 +1095,10 @@ void SchatzmanPaoli::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem 
 
 
 
-  if (UR->getRelationSubType() == LinearTIR)
+  if (inter->getRelationSubType() == LinearTIR)
   {
-    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
-    UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+    inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
   }
 
 
@@ -1120,7 +1123,7 @@ void SchatzmanPaoli::updateState(unsigned int level)
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
-    W = WMap[ds];
+    W = WMap[ds->number()];
     // Get the DS type
 
     Type::Siconos dsType = Type::value(*ds);
@@ -1284,7 +1287,7 @@ void SchatzmanPaoli::display()
   {
     cout << "--------------------------------" << endl;
     cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
-    if (WMap[*it]) WMap[*it]->display();
+    if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
     else cout << "-> NULL" << endl;
     cout << "--> and corresponding theta is: " << _theta << endl;
   }

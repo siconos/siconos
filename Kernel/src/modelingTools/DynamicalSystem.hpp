@@ -165,7 +165,7 @@ private:
 protected:
 
   /** An id number for the DynamicalSystem */
-  int _number;
+  unsigned int _number;
 
   /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int _n;

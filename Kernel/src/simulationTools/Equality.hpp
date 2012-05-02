@@ -47,7 +47,7 @@
  *  - the unknowns z and w
  *
  *  A Equality is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
+ *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
@@ -55,8 +55,8 @@
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
+ *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
  *
  *
  */

@@ -58,12 +58,12 @@ TYPEDEF_SPTR(FrictionContactProblem);
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
- *  Functions: initialize(), computeUnitaryBlock(), preCompute()
+ *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
+ *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
  * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
  */

@@ -29,7 +29,7 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
-#include "UnitaryRelationsSet.hpp"
+#include "InteractionsSet.hpp"
 
 #include "SiconosGraph.hpp"
 #include "SiconosPointers.hpp"
@@ -46,8 +46,8 @@ const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
 
 // ================== Objects to handle DS ==================
 
-/** Map of SiconosMatrix; key = the related DS*/
-typedef std::map<SP::DynamicalSystem, SP::SimpleMatrix> MapOfDSMatrices;
+/** Map of SP::SimpleMatrix; key = the number of the related DS*/
+typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
 
 /** Iterator through a map of matrices */
 typedef MapOfDSMatrices::iterator MatIterator;
@@ -74,44 +74,63 @@ TYPEDEF_SPTR(DS_int);
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
 
-// ================== Objects to handle UnitaryRelations ==================
+// ================== Objects that should not exists (used in ZOH) ==================
 
-/** Map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal unitaryBlock-terms in assembled matrices of LCP etc ...*/
-typedef std::map< SP::UnitaryRelation, SP::SiconosMatrix>  MapOfUnitaryMatrices;
+/** Map of TimeDiscretisation; key = the number of the related DS*/
+typedef std::map<int, SP::TimeDiscretisation> MapOfTD;
 
-/** Iterator through a MapOfUnitaryMatrices */
-typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
+/** Map of Model; key = the number of the related DS*/
+typedef std::map<int, SP::Model> MapOfModel;
 
-/** Const iterator through a MapOfUnitaryMatrices */
-typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
+/** Map of OSI; key = the number of the related DS*/
+typedef std::map<int, SP::OneStepIntegrator> MapOfOSI;
 
-/** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
-typedef std::map< SP::DynamicalSystem , MapOfUnitaryMatrices >  MapOfDSMapOfUnitaryMatrices;
+/** Map of Simulation; key = the number of the related DS*/
+typedef std::map<int, SP::Simulation> MapOfSimulation;
 
-/** Iterator through a MapOfDSMapOfUnitaryMatrices */
-typedef MapOfDSMapOfUnitaryMatrices::iterator DSUnitaryMatrixRowIterator ;
+/* * Map of DynamicalSystem; key = the number of the related DS*/
+typedef std::map<int, SP::DynamicalSystem> MapOfDS;
 
-/** Const iterator through a MapOfDSMapOfUnitaryMatrices */
-typedef MapOfDSMapOfUnitaryMatrices::const_iterator ConstDSUnitaryMatrixRowIterator ;
+typedef std::map<int, SP::SiconosVector> MapOfVectors;
+
+// ================== Objects to handle Interactions ==================
+
+/** Map of SiconosMatrices with a Interactions as a key - Used for diagonal interactionBlock-terms in assembled matrices of LCP etc ...*/
+typedef std::map< SP::Interaction, SP::SiconosMatrix>  MapOfInteractionMatrices;
+
+/** Iterator through a MapOfInteractionMatrices */
+typedef MapOfInteractionMatrices::iterator InteractionMatrixColumnIterator ;
+
+/** Const iterator through a MapOfInteractionMatrices */
+typedef MapOfInteractionMatrices::const_iterator ConstInteractionMatrixColumnIterator;
+
+/** Map of MapOfDSInteractionMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
+typedef std::map< SP::DynamicalSystem , MapOfInteractionMatrices >  MapOfDSMapOfInteractionMatrices;
+
+/** Iterator through a MapOfDSMapOfInteractionMatrices */
+typedef MapOfDSMapOfInteractionMatrices::iterator DSInteractionMatrixRowIterator ;
+
+/** Const iterator through a MapOfDSMapOfInteractionMatrices */
+typedef MapOfDSMapOfInteractionMatrices::const_iterator ConstDSInteractionMatrixRowIterator ;
 
 
 
 
-/** Map of MapOfUnitaryMapOfDSMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
-typedef std::map< SP::UnitaryRelation , MapOfDSMatrices >  MapOfUnitaryMapOfDSMatrices;
+/** Map of MapOfInteractionMapOfDSMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
+typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
 
-/** Iterator through a MapOfUnitaryMapOfDSMatrices */
-typedef MapOfUnitaryMapOfDSMatrices::iterator UnitaryDSMatrixRowIterator ;
+/** Iterator through a MapOfInteractionMapOfDSMatrices */
+typedef MapOfInteractionMapOfDSMatrices::iterator InteractionDSMatrixRowIterator ;
 
-/** Const iterator through a MapOfUnitaryMapOfDSMatrices */
-typedef MapOfUnitaryMapOfDSMatrices::const_iterator ConstUnitaryDSMatrixRowIterator ;
+/** Const iterator through a MapOfInteractionMapOfDSMatrices */
+typedef MapOfInteractionMapOfDSMatrices::const_iterator ConstInteractionDSMatrixRowIterator ;
 
-/** Vector that contains a sequel of sets of UnitaryRelations*/
-typedef std::vector< SP::UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
+/** Vector that contains a sequel of sets of Interactions*/
+typedef std::vector< SP::InteractionsSet > VectorOfSetOfInteractions;
 
-/** Map to link SP::UnitaryRelation with an int - Used for example in unitaryBlocksPositions for OSNSMatrix */
-typedef std::map< SP::UnitaryRelation , unsigned int > UR_int;
-TYPEDEF_SPTR(UR_int);
+/** Map to link SP::Interaction with an int - Used for example in interactionBlocksPositions for OSNSMatrix */
+typedef std::map< SP::Interaction , unsigned int > Interaction_int;
+TYPEDEF_SPTR(Interaction_int);
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
@@ -124,6 +143,7 @@ struct RelationProperties
   SP::SiconosMatrix block;    // diagonal block
   SP::DynamicalSystem source;
   SP::DynamicalSystem target;
+  bool forControl;            // true if the relation is used to control the DS
 };
 
 struct SystemProperties
@@ -142,26 +162,26 @@ TYPEDEF_SPTR(GraphProperties);
 
 /** the graph structure :
  *
- * UnitaryRelationsGraph = L(DynamicalSystemsGraph)
+ * InteractionsGraph = L(DynamicalSystemsGraph)
  *
  * where L is the line graph
  * transformation */
 
-typedef SiconosGraph < SP::DynamicalSystem, SP::UnitaryRelation,
+typedef SiconosGraph < SP::DynamicalSystem, SP::Interaction,
         SystemProperties , RelationProperties,
         SP::GraphProperties > DynamicalSystemsGraph;
 
-typedef SiconosGraph < SP::UnitaryRelation, SP::DynamicalSystem,
+typedef SiconosGraph < SP::Interaction, SP::DynamicalSystem,
         RelationProperties, SystemProperties,
-        SP::GraphProperties > UnitaryRelationsGraph;
+        SP::GraphProperties > InteractionsGraph;
 
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
-TYPEDEF_SPTR(UnitaryRelationsGraph);
+TYPEDEF_SPTR(InteractionsGraph);
 
 
 
-/** properties attached only to a graph type (UnitaryRelationsGraph or DynamicalSystemsGraph)
+/** properties attached only to a graph type (InteractionsGraph or DynamicalSystemsGraph)
     or optional properties */
 
 #ifndef SWIG
@@ -170,15 +190,14 @@ INSTALL_PROPERTIES(DynamicalSystemsGraph,
 // always needed -> SystemProperties
 
 
-INSTALL_PROPERTIES(UnitaryRelationsGraph,
-                   ((Vertex, bool, forControl))
+INSTALL_PROPERTIES(InteractionsGraph,
                    ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
                    ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
                    ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 
 #endif
 TYPEDEF_SPTR(DynamicalSystemsGraphProperties);
-TYPEDEF_SPTR(UnitaryRelationsGraphProperties);
+TYPEDEF_SPTR(InteractionsGraphProperties);
 
 
 namespace Siconos
@@ -189,9 +208,9 @@ static inline SP::DynamicalSystemsGraphProperties properties(DynamicalSystemsGra
   return boost::static_pointer_cast<DynamicalSystemsGraphProperties>(dsg.properties());
 }
 
-static inline SP::UnitaryRelationsGraphProperties properties(UnitaryRelationsGraph& urg)
+static inline SP::InteractionsGraphProperties properties(InteractionsGraph& ig)
 {
-  return boost::static_pointer_cast<UnitaryRelationsGraphProperties>(urg.properties());
+  return boost::static_pointer_cast<InteractionsGraphProperties>(ig.properties());
 }
 
 }

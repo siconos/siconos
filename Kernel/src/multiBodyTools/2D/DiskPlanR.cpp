@@ -123,7 +123,7 @@ void DiskPlanR::computeh(double)
 /* Note :
 
    Only the first component (normal part) of H is meaningfull for siconos
-   see comment in UnitaryRelation.cpp/getYRef
+   see comment in Interaction.cpp/getYRef
 
    The normal part (gap function) is used in updateIndexSet.
 

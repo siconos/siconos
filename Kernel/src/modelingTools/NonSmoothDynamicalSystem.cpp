@@ -31,13 +31,13 @@ using namespace RELATION;
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml):
-  BVP(false), nsdsxml(newNsdsxml), mIsLinear(true)
+  _BVP(false), _nsdsxml(newNsdsxml), _mIsLinear(true)
 {
-  assert(nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
+  assert(_nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
 
   // === DS Vector fill-in: we sweep the list of DSXML and for each of
   // them, add a new DynamicalSystem in the set allDS. ===
-  SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
+  SetOfDSXML dsList = _nsdsxml->getDynamicalSystemsXML();
   SetOfDSXML::iterator it;
   Type::Siconos type;
 
@@ -66,13 +66,13 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
     else RuntimeException::
       selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.
-    mIsLinear = (mIsLinear && (*(--allDSLocal->end()))->isLinear());
+    _mIsLinear = (_mIsLinear && (*(--allDSLocal->end()))->isLinear());
   }
 
 
 
   // ===  The same process is applied for Interactions ===
-  SetOfInteractionsXML  interactionsList = nsdsxml->getInteractionsXML();
+  SetOfInteractionsXML  interactionsList = _nsdsxml->getInteractionsXML();
   SetOfInteractionsXMLIt it2;
   CheckInsertInteraction checkInter;
 
@@ -84,7 +84,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
                  ->insert(SP::Interaction(new Interaction(*it2, allDSLocal)));
     // checkInter.first is an iterator that points to the
     // Interaction inserted into the set.
-    mIsLinear = (mIsLinear && (*checkInter.first)->relation()->isLinear());
+    _mIsLinear = (_mIsLinear && (*checkInter.first)->relation()->isLinear());
   }
 
   // === Builds topology ===
@@ -95,7 +95,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
     SP::Interaction newInteraction,
     const bool& isBVP):
-  BVP(isBVP), mIsLinear(true)
+  _BVP(isBVP), _mIsLinear(true)
 {
   // === Checks that sets are not empty ===
   if (!newDS)
@@ -109,11 +109,11 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
   allDSLocal.reset(new DynamicalSystemsSet());
   allInteractionsLocal.reset(new InteractionsSet());
   allDSLocal->insert(newDS);
-  mIsLinear = newDS->isLinear();
+  _mIsLinear = newDS->isLinear();
   if (newInteraction)
   {
     allInteractionsLocal->insert(newInteraction);
-    mIsLinear = (mIsLinear && newInteraction->relation()->isLinear());
+    _mIsLinear = (_mIsLinear && newInteraction->relation()->isLinear());
   }
 
   // === build topology ===
@@ -123,7 +123,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS,
     InteractionsSet& listOfInteractions,
     const bool& isBVP):
-  BVP(isBVP), mIsLinear(true)
+  _BVP(isBVP), _mIsLinear(true)
 {
 
   //   if( listOfInteractions.isEmpty())
@@ -138,14 +138,14 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   DSIterator itDS;
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
-    mIsLinear = ((*itDS)->isLinear() && mIsLinear);
-    if (!mIsLinear) break;
+    _mIsLinear = ((*itDS)->isLinear() && _mIsLinear);
+    if (!_mIsLinear) break;
   }
 
   for (itInter = listOfInteractions.begin(); itInter != listOfInteractions.end(); ++itInter)
   {
-    mIsLinear = ((*itInter)->relation()->isLinear() && mIsLinear);
-    if (!mIsLinear) break;
+    _mIsLinear = ((*itInter)->relation()->isLinear() && _mIsLinear);
+    if (!_mIsLinear) break;
   }
 
   SP::DynamicalSystemsSet allDSLocal;
@@ -159,7 +159,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
-  BVP(isBVP), mIsLinear(true)
+  _BVP(isBVP), _mIsLinear(true)
 {
 
   // === "copy" listOfDS/listOfInteractions in allDSLocal/allInteractions ===
@@ -174,20 +174,25 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
     allDSLocal->insert(*itDS);
-    mIsLinear = ((*itDS)->isLinear() && mIsLinear);
+    _mIsLinear = ((*itDS)->isLinear() && _mIsLinear);
   }
 
   // === build topology ===
   _topology.reset(new Topology(allDSLocal, allInteractionsLocal));
 }
 
+NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
+{
+  clear();
+};
+
 // === DynamicalSystems management ===
 
 void NonSmoothDynamicalSystem::saveNSDSToXML()
 {
-  if (nsdsxml)
+  if (_nsdsxml)
   {
-    nsdsxml->setBVP(BVP);// no need to change the value of BVP, it mustn't change anyway
+    _nsdsxml->setBVP(_BVP);// no need to change the value of BVP, it mustn't change anyway
 
     DynamicalSystemsGraph::VIterator vi;
     for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
@@ -217,9 +222,7 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
 
 SP::DynamicalSystem NonSmoothDynamicalSystem::dynamicalSystemNumber(int nb) const
 {
-  SP::DynamicalSystemsSet allDSLocal;
-
-  allDSLocal = setOfGraph<DynamicalSystemsSet>(dynamicalSystems());
+  SP::DynamicalSystemsSet allDSLocal = setOfGraph<DynamicalSystemsSet>(dynamicalSystems());
 
   // if ds number nb is not in the set ...
   assert(allDSLocal->isIn(nb) &&
@@ -231,7 +234,7 @@ SP::DynamicalSystem NonSmoothDynamicalSystem::dynamicalSystemNumber(int nb) cons
 void NonSmoothDynamicalSystem::display() const
 {
   cout << " ===== Non Smooth Dynamical System display ===== " << endl;
-  cout << "---> isBVP = " << BVP << endl;
+  cout << "---> isBVP = " << _BVP << endl;
   dynamicalSystems()->begin();
   _topology->interactions()->display();
   cout << "===================================================" << endl;
@@ -257,11 +260,15 @@ void NonSmoothDynamicalSystem::clear()
   _topology->clear();
 };
 
-NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
+void NonSmoothDynamicalSystem::setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool& isControlInteraction)
 {
-  clear();
-};
-bool NonSmoothDynamicalSystem::isLinear()
-{
-  return mIsLinear;
+  InteractionsGraph& IG0 = *_topology->indexSet0();
+  IG0.properties(vd).forControl = isControlInteraction;
 }
+void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const bool& isControlInteraction)
+{
+  InteractionsGraph::VDescriptor vd;
+  vd = _topology->insertInteraction(inter);
+  if (isControlInteraction)
+    setControlProperty(vd, isControlInteraction);
+};

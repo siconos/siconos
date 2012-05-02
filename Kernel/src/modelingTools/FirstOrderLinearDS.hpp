@@ -230,7 +230,7 @@ public:
   inline const Plugged_Vector_FTime getB() const { return *b; }
   */
   /** get b
-   *  \return pointer on a plugged vector
+   *  \return a SP::SiconosVector
    */
   inline SP::SiconosVector b() const
   {

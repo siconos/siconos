@@ -53,7 +53,7 @@ class Simulation;
  *  - a NonSmoothSolver, used to define a solver and its parameters (connected to SolverOptions structure of Numerics)
  *
  *  A Relay is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
+ *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
@@ -61,12 +61,12 @@ class Simulation;
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
- *  Functions: initialize(), computeUnitaryBlock(), preCompute()
+ *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
+ *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
  * the lcp_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (z,w); function postCompute().
  *
  *

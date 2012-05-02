@@ -61,12 +61,12 @@ typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, Solve
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
- *  Functions: initialize(), computeUnitaryBlock(), preCompute()
+ *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
+ *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the PrimalFrictionContact problem: function compute(), used to call solvers from Numerics through \n
  * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
  */
@@ -311,28 +311,28 @@ public:
     */
   void initialize(SP::Simulation);
 
-  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation
-   *  \param a pointer to UnitaryRelation
+  /** computes extra diagonal interactionBlock-matrix that corresponds to inter1 and inter2
+   *  Move this to Interaction class?
+   *  \param a pointer to Interaction
+   *  \param a pointer to Interaction
    */
-  void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  void computeInteractionBlock(SP::Interaction, SP::Interaction);
 
   /** computes DSBlock-matrix that corresponds to DS1
-   *  Move this to Unitary Relation class?
+   *  Move this to Interaction class?
    *  \param a pointer to DynamicalSystem DS1
    */
   void computeDSBlock(SP::DynamicalSystem);
 
-  /** computes  UnitaryDSBlock-matrix that corresponds to UR1 and DS2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation UR1
+  /** computes  InteractionDSBlock-matrix that corresponds to inter1 and DS2
+   *  Move this to Interaction class?
+   *  \param a pointer to Interaction inter1
    *  \param a pointer to DynamicalSystems DS2
    */
-  void computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem);
+  void computeInteractionDSBlock(SP::Interaction, SP::DynamicalSystem);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param SP::UnitaryRelation, the UR which corresponds to the considered block
+      \param SP::Interaction, the Interaction which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
   void computeqBlock(SP::DynamicalSystem, unsigned int);
@@ -343,10 +343,10 @@ public:
   void computeq(double time);
 
   /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
-      \param SP::UnitaryRelation, the UR which corresponds to the considered block
+      \param SP::Interaction, the Interaction which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeTildeLocalVelocityBlock(SP::UnitaryRelation, unsigned int);
+  void computeTildeLocalVelocityBlock(SP::Interaction, unsigned int);
 
   /** compute vector tildeLocalVelocity
    *  \param double : current time

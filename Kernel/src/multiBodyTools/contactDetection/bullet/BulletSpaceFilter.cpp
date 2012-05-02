@@ -111,15 +111,15 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   std::map<int, bool> activeInteractions;
 
-  SP::UnitaryRelationsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  UnitaryRelationsGraph::VIterator ui0, ui0end, v0next;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  InteractionsGraph::VIterator ui0, ui0end, v0next;
   boost::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {
-    UnitaryRelation& ur0 = *(indexSet0->bundle(*ui0));
+    Interaction& inter0 = *(indexSet0->bundle(*ui0));
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    contactPoints[&*ask<ForContactPoint>(*(ur0.interaction()->relation()))] = false;
+    contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))] = false;
   };
 
   unsigned int numManifolds =
@@ -320,17 +320,17 @@ void BulletSpaceFilter::buildInteractions(double time)
        ui0 != ui0end; ui0 = v0next)
   {
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    UnitaryRelation& ur0 = *(indexSet0->bundle(*ui0));
+    Interaction& inter0 = *(indexSet0->bundle(*ui0));
 
-    if (!contactPoints[&*ask<ForContactPoint>(*(ur0.interaction()->relation()))])
+    if (!contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))])
     {
 
-      //      assert (!contactPoints[&*ask<ForContactPoint>(*(ur0.interaction()->relation()))]);
+      //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))]);
 
       DEBUG_PRINTF("remove contact %p, lifetime %d\n",
-                   &*ask<ForContactPoint>(*(ur0.interaction()->relation())),
-                   ask<ForContactPoint>(*(ur0.interaction()->relation()))->getLifeTime());
-      model()->nonSmoothDynamicalSystem()->removeInteraction(ur0.interaction());
+                   &*ask<ForContactPoint>(*(inter0.relation())),
+                   ask<ForContactPoint>(*(inter0.relation()))->getLifeTime());
+      model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
     }
 
   }

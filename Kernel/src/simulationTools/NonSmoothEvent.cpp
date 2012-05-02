@@ -52,15 +52,15 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    SP::UnitaryRelationsGraph indexSet0 = simulation->indexSet(0);
+    SP::InteractionsGraph indexSet0 = simulation->indexSet(0);
     SP::DynamicalSystemsGraph dsG = simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
     DynamicalSystemsGraph::VIterator vi, viend;
 
     //
-    SP::UnitaryRelationsGraph indexSet1 = simulation->indexSet(1);
-    SP::UnitaryRelationsGraph indexSet2 = simulation->indexSet(2);
+    SP::InteractionsGraph indexSet1 = simulation->indexSet(1);
+    SP::InteractionsGraph indexSet2 = simulation->indexSet(2);
     bool found = true;
-    UnitaryRelationsGraph::VIterator ui, uiend;
+    InteractionsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
     {
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
@@ -71,8 +71,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     cout<< "-------Before processing NS events---------" << endl;
     for (boost::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
       {
-        SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-        cout << "Velocity at this UR: " << (*ur->y(1))(0) << endl;
+        SP::Interaction inter = indexSet0->bundle(*ui);
+        cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
       }
 
     for (boost::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
@@ -86,8 +86,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     if (!found)
     {
       // For Event-Driven algo., memories vectors are of size 2
-      // (ie 2 unitaryBlocks).  First unitaryBlock (pos 0, last
-      // in) for post-event values and last unitaryBlock (pos 1,
+      // (ie 2 interactionBlocks).  First interactionBlock (pos 0, last
+      // in) for post-event values and last interactionBlock (pos 1,
       // first in) for pre-event values.
 
       simulation->saveInMemory();  // To save pre-impact values
@@ -105,8 +105,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     cout<< "-------After processing NS events---------" << endl;
     for (boost::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
       {
-        SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-        cout << "Velocity at this UR: " << (*ur->y(1))(0) << endl;
+        SP::Interaction inter = indexSet0->bundle(*ui);
+        cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
       }
 
     for (boost::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)

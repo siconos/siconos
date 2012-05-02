@@ -53,33 +53,33 @@ void GenericMechanical::initialize(SP::Simulation sim)
 
 }
 
-void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
+void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
   //bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   /*Build the corresponding numerics problems*/
 
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
-  SP::UnitaryRelation UR = indexSet->bundle(vd);
+  SP::Interaction inter = indexSet->bundle(vd);
 
 #ifdef GMP_DEBUG
-  printf("GenericMechanical::computeUnitaryBlock: add problem of type ");
+  printf("GenericMechanical::computeInteractionBlock: add problem of type ");
 #endif
   if (!_hasBeUpdated)
   {
-    int size = UR->getNonSmoothLawSize();
-    if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+    int size = inter->getNonSmoothLawSize();
+    if (Type::value(*(inter->nonSmoothLaw()))
         == Type::EqualityConditionNSL)
     {
       addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
 #ifdef GMP_DEBUG
       printf(" Type::EqualityConditionNSL\n");
 #endif
-      //pAux->size= UR->getNonSmoothLawSize();
+      //pAux->size= inter->getNonSmoothLawSize();
     }
-    else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+    else if (Type::value(*(inter->nonSmoothLaw()))
              == Type::NewtonImpactNSL)
     {
       addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
@@ -87,13 +87,13 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
       printf(" Type::NewtonImpactNSL\n");
 #endif
     }
-    else if (Type::value(*(UR->interaction()->nonSmoothLaw()))
+    else if (Type::value(*(inter->nonSmoothLaw()))
              == Type::NewtonImpactFrictionNSL)
     {
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
       SP::NewtonImpactFrictionNSL nsLaw =
-        boost::static_pointer_cast<NewtonImpactFrictionNSL> (UR->interaction()->nonSmoothLaw());
+        boost::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();
@@ -103,15 +103,15 @@ void GenericMechanical::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph:
     }
     else
     {
-      RuntimeException::selfThrow("GenericMechanical::computeDiagonalUnitaryBlock- not yet implemented for that NSLAW type");
+      RuntimeException::selfThrow("GenericMechanical::computeDiagonalInteractionBlock- not yet implemented for that NSLAW type");
     }
   }
-  LinearOSNS::computeDiagonalUnitaryBlock(vd);
+  LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
-void GenericMechanical::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
+void GenericMechanical::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
-  LinearOSNS::computeUnitaryBlock(ed);
+  LinearOSNS::computeInteractionBlock(ed);
 }
 
 int GenericMechanical::compute(double time)
@@ -174,24 +174,24 @@ void GenericMechanical::display() const
 }
 
 
-void  GenericMechanical::updateUnitaryBlocks()
+void  GenericMechanical::updateInteractionBlocks()
 {
   if (!_hasBeUpdated)
   {
-    //    printf("GenericMechanical::updateUnitaryBlocks : must be updated\n");
+    //    printf("GenericMechanical::updateInteractionBlocks : must be updated\n");
     freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
     _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   }
-  LinearOSNS::updateUnitaryBlocks();
+  LinearOSNS::updateInteractionBlocks();
 }
-void  GenericMechanical::computeAllUnitaryBlocks()
+void  GenericMechanical::computeAllInteractionBlocks()
 {
   assert(0);
-  //printf("GenericMechanical::updateUnitaryBlocks : free and build a new GMP\n");
+  //printf("GenericMechanical::updateInteractionBlocks : free and build a new GMP\n");
   freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
 
-  LinearOSNS::computeAllUnitaryBlocks();
+  LinearOSNS::computeAllInteractionBlocks();
 }
 GenericMechanical::~GenericMechanical()
 {

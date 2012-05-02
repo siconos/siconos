@@ -53,7 +53,7 @@ BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow):
 }
 
 // Basic constructor
-BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet):
+BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -84,9 +84,9 @@ BlockCSRMatrix::BlockCSRMatrix(SP::DynamicalSystemsSet DSSet,
   colPos->reserve(nr);
   fill(DSSet, DSblocks);
 }
-BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet,
+BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet,
                                SP::DynamicalSystemsSet DSSet,
-                               MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
+                               MapOfInteractionMapOfDSMatrices& interactionDSBlocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -100,7 +100,7 @@ BlockCSRMatrix::BlockCSRMatrix(SP::UnitaryRelationsGraph indexSet,
   rowPos->reserve(nr);
   colPos.reset(new IndexInt());
   colPos->reserve(nr);
-  fill(indexSet, DSSet, unitaryDSblocks);
+  fill(indexSet, DSSet, interactionDSBlocks);
 }
 
 // Destructor -> see smart pointers
@@ -110,9 +110,9 @@ BlockCSRMatrix::~BlockCSRMatrix()
 }
 
 // Fill the SparseMat
-void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
+void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
 {
-  // ======> Aim: find UR1 and UR2 both in indexSets[level] and which
+  // ======> Aim: find inter1 and inter2 both in indexSets[level] and which
   // have common DynamicalSystems.  Then get the corresponding matrix
   // from map blocks.
 
@@ -126,21 +126,21 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
 
   diagSizes->resize(nr);
 
-  // === Loop through "active" Unitary Relations (ie present in
+  // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
 
   int sizeV = 0;
 
-  UnitaryRelationsGraph::VIterator vi, viend;
+  InteractionsGraph::VIterator vi, viend;
   for (boost::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
-    SP::UnitaryRelation ur = indexSet->bundle(*vi);
+    SP::Interaction inter = indexSet->bundle(*vi);
 
-    assert(ur->getNonSmoothLawSize() > 0);
+    assert(inter->getNonSmoothLawSize() > 0);
 
-    sizeV  += ur->getNonSmoothLawSize();
+    sizeV  += inter->getNonSmoothLawSize();
     (*diagSizes)[indexSet->index(*vi)] = sizeV;
     assert((*diagSizes)[indexSet->index(*vi)] > 0);
 
@@ -148,22 +148,22 @@ void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet)
       indexSet->properties(*vi).block->getArray();
   }
 
-  UnitaryRelationsGraph::EIterator ei, eiend;
+  InteractionsGraph::EIterator ei, eiend;
   for (boost::tie(ei, eiend) = indexSet->edges();
        ei != eiend; ++ei)
   {
-    UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
-    UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
-    SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
-    SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
+    InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
+    InteractionsGraph::VDescriptor vd2 = indexSet->target(*ei);
+    SP::Interaction inter1 = indexSet->bundle(vd1);
+    SP::Interaction inter2 = indexSet->bundle(vd2);
 
     assert(indexSet->index(vd1) < nr);
     assert(indexSet->index(vd2) < nr);
 
-    assert(indexSet->is_vertex(ur2));
+    assert(indexSet->is_vertex(inter2));
 
-    assert(vd2 == indexSet->descriptor(ur2));
-    assert(indexSet->index(vd2) == indexSet->index(indexSet->descriptor(ur2)));
+    assert(vd2 == indexSet->descriptor(inter2));
+    assert(indexSet->index(vd2) == indexSet->index(indexSet->descriptor(inter2)));
 
 
     unsigned int pos = indexSet->index(vd1);
@@ -187,9 +187,9 @@ void BlockCSRMatrix::fill(SP::DynamicalSystemsSet DSSet,
   (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }
 // Fill the SparseMat
-void BlockCSRMatrix::fill(SP::UnitaryRelationsGraph indexSet,
+void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet,
                           SP::DynamicalSystemsSet DSSet,
-                          MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
+                          MapOfInteractionMapOfDSMatrices& interactionDSBlocks)
 {
   RuntimeException::selfThrow
   (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");

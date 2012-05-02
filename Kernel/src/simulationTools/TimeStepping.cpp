@@ -26,7 +26,7 @@
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "OneStepIntegrator.hpp"
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
@@ -114,11 +114,11 @@ TimeStepping::~TimeStepping()
 {
 }
 
-// bool TimeStepping::predictorDeactivate(SP::UnitaryRelation ur, unsigned int i)
+// bool TimeStepping::predictorDeactivate(SP::Interaction inter, unsigned int i)
 // {
 //   double h = timeStep();
-//   double y = ur->getYRef(i-1); // for i=1 it is the position -> historic notation y
-//   double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic notation y
+//   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
 //   assert(!isnan(y));
@@ -127,11 +127,11 @@ TimeStepping::~TimeStepping()
 //   return (y>0);
 // }
 
-// bool TimeStepping::predictorActivate(SP::UnitaryRelation ur, unsigned int i)
+// bool TimeStepping::predictorActivate(SP::Interaction inter, unsigned int i)
 // {
 //   double h = timeStep();
-//   double y = ur->getYRef(i-1); // for i=1 it is the position -> historic notation y
-//   double yDot = ur->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
+//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic notation y
+//   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
 //   assert(!isnan(y));
@@ -142,12 +142,12 @@ TimeStepping::~TimeStepping()
 
 void TimeStepping::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet i: add or remove UnitaryRelations from
+  // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
-  // boost::default_color_type is used to organize update in UnitaryRelationsGraph:
-  // - white_color : undiscovered vertex (UnitaryRelation)
-  // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
-  // - black_color : discovered vertex (UnitaryRelation) together with the descendants
+  // boost::default_color_type is used to organize update in InteractionsGraph:
+  // - white_color : undiscovered vertex (Interaction)
+  // - gray_color : discovered vertex (Interaction) but searching descendants
+  // - black_color : discovered vertex (Interaction) together with the descendants
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -161,10 +161,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
   assert(i > 0 &&
          "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
-  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   assert(indexSet0);
   assert(indexSet1);
 
@@ -174,7 +174,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
 
   // Check indexSet1
-  UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
+  InteractionsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
 
   //Remove interactions from the indexSet1
@@ -182,42 +182,41 @@ void TimeStepping::updateIndexSet(unsigned int i)
   {
     ++v1next;
 
-    SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
-    if (indexSet0->is_vertex(ur1))
+    SP::Interaction inter1 = indexSet1->bundle(*ui1);
+    if (indexSet0->is_vertex(inter1))
     {
-      UnitaryRelationsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(ur1);
+      InteractionsGraph::VDescriptor inter1_descr0 = indexSet0->descriptor(inter1);
 
-      assert((indexSet0->color(ur1_descr0) == boost::white_color));
+      assert((indexSet0->color(inter1_descr0) == boost::white_color));
 
-      indexSet0->color(ur1_descr0) = boost::gray_color;
-      if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
+      indexSet0->color(inter1_descr0) = boost::gray_color;
+      if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::Interaction inter =  ur1->interaction();
-        DSIterator itDS = inter->dynamicalSystemsBegin();
-        SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
-        //if(predictorDeactivate(ur1,i))
-        if (Osi->removeInteractionInIndexSet(inter, i))
+        DSIterator itDS = inter1->dynamicalSystemsBegin();
+        SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
+        //if(predictorDeactivate(inter1,i))
+        if (Osi->removeInteractionInIndexSet(inter1, i))
         {
-          // Unitary relation is not active
+          // Interaction is not active
           // ui1 becomes invalid
-          indexSet0->color(ur1_descr0) = boost::black_color;
-          indexSet1->remove_vertex(ur1);
-          ur1->lambda(1)->zero();
+          indexSet0->color(inter1_descr0) = boost::black_color;
+          indexSet1->remove_vertex(inter1);
+          inter1->lambda(1)->zero();
           topo->setHasChanged(true);
         }
       }
     }
     else
     {
-      // UnitaryRelation is not in indexSet0 anymore.
+      // Interaction is not in indexSet0 anymore.
       // ui1 becomes invalid
-      indexSet1->remove_vertex(ur1);
+      indexSet1->remove_vertex(inter1);
       topo->setHasChanged(true);
     }
   }
 
   // indexSet0\indexSet1 scan
-  UnitaryRelationsGraph::VIterator ui0, ui0end;
+  InteractionsGraph::VIterator ui0, ui0end;
   //Add interaction in indexSet1
   for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
   {
@@ -235,31 +234,30 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
         /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-          Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+          Type::value(*(indexSet0->bundle(*ui0)->nonSmoothLaw())) == Type::EqualityConditionNSL ;
           });*/
       }
       else
       {
         assert(indexSet0->color(*ui0) == boost::white_color);
 
-        SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
-        assert(!indexSet1->is_vertex(ur0));
+        SP::Interaction inter0 = indexSet0->bundle(*ui0);
+        assert(!indexSet1->is_vertex(inter0));
         bool activate = true;
-        if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
+        if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          SP::Interaction inter =  ur0->interaction();
-          DSIterator itDS = inter->dynamicalSystemsBegin();
-          SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
-          activate = Osi->addInteractionInIndexSet(inter, i);
+          DSIterator itDS = inter0->dynamicalSystemsBegin();
+          SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
+          activate = Osi->addInteractionInIndexSet(inter0, i);
         }
         if (activate)
         {
-          assert(!indexSet1->is_vertex(ur0));
+          assert(!indexSet1->is_vertex(inter0));
 
           // vertex and edges insertion in indexSet1
-          indexSet1->copy_vertex(ur0, *indexSet0);
+          indexSet1->copy_vertex(inter0, *indexSet0);
           topo->setHasChanged(true);
-          assert(indexSet1->is_vertex(ur0));
+          assert(indexSet1->is_vertex(inter0));
         }
       }
     }
@@ -306,23 +304,23 @@ void TimeStepping::initializeInteraction(SP::Interaction inter)
 void TimeStepping::initOSNS()
 {
   // === creates links between work vector in OSI and work vector in
-  // Unitary Relations
+  // Interactions
   SP::OneStepIntegrator  osi;
 
   ConstDSIterator itDS;
 
   SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
 
-  // For each Unitary relation in I0 ...
+  // For each Interaction in I0 ...
   for (boost::tie(ui, uiend) = indexSet0->vertices();
        ui != uiend; ++ui)
   {
-    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+    SP::Interaction inter = indexSet0->bundle(*ui);
     // indexSet0->bundle(*ui)->initialize("TimeStepping");
-    initializeInteraction(indexSet0->bundle(*ui)->interaction());
+    initializeInteraction(indexSet0->bundle(*ui));
 
 
 

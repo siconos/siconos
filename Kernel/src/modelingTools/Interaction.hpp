@@ -30,17 +30,15 @@
 #include "BlockVector.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "Tools.hpp"
-#include "SiconosPointers.hpp"
-#include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
-
+#include "RelationNamespace.hpp"
+#include "Relation.hpp"
+#include "SiconosPointers.hpp"
 
 class DynamicalSystem;
 class BlockVector;
 
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
-
-
 
 /**  An Interaction describes the non-smooth interactions between some
  *  Dynamical Systems.
@@ -190,7 +188,7 @@ private:
   SP::SiconosVector _workYp;
 
   /** Work vector to save pointers to z data of the dynamical systems
-      involved in the UR.*/
+      involved in the Interaction.*/
   SP::SiconosVector _workZ;
 
 
@@ -763,6 +761,14 @@ public:
   */
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
+  /** get the size of the NonSmoothLaw of this Interaction
+   * \return the size of the NonSmoothLaw
+   */
+  inline unsigned int getNonSmoothLawSize() const
+  {
+    return _nslaw->size();
+  }
+
   /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */
@@ -848,37 +854,37 @@ public:
     return _workZ;
   };
 
-  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+  /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  void getLeftInteractionBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
 
-  /** gets the matrix used in unitaryBlock computation. Used only for the formulation projecting on the constraints.
+  /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const;
-  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+  void getLeftInteractionBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const;
+  /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
+  void getRightInteractionBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
 
-  /** gets extra unitaryBlock corresponding to the present UR (see the
-   *  top of this files for extra unitaryBlock meaning)
-   * \param a pointer to a SiconosMatrix (in-out parameter)
+  /** gets extra interactionBlock corresponding to the present Interaction (see the
+   *  top of this files for extra interactionBlock meaning)
+   * \param[in,out] InteractionBlock SP::SiconosMatrix
    */
-  void getExtraUnitaryBlock(SP::SiconosMatrix) const;
+  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const;
 
   inline double getYRef(unsigned int i) const
   {
     // get the single value used to build indexSets Warning: the
     // relativePosition depends on NsLawSize and/or type.  This means
-    // that at the time, for the unitaryBlock of y that corresponds to
+    // that at the time, for the interactionBlock of y that corresponds to
     // the present relation, the first scalar value is used.  For
     // example, for friction, normal part is in first position, followed
     // by the tangential parts.
@@ -913,6 +919,20 @@ public:
   *  \exception RuntimeException
   */
   void saveInteractionToXML();
+
+  /** returns the type of the embedded relation.
+   */
+  inline RELATION::TYPES getRelationType() const
+  {
+    return _relation->getType();
+  };
+
+  /** returns the subtype of the embedded relation.
+   */
+  inline RELATION::SUBTYPES getRelationSubType() const
+  {
+    return _relation->getSubType();
+  } ;
 
 };
 

@@ -89,8 +89,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
   if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
   {
-    SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
-    SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
+    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+    SP::InteractionsGraph indexSet2 = topo->indexSet(2);
     assert(indexSet1);
     assert(indexSet2);
 
@@ -207,8 +207,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 {
 
-  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
-  UnitaryRelationsGraph::VIterator aVi, viend;
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
+  InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
   double minViolationEquality = +1e24;
@@ -220,9 +220,8 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   for (boost::tie(aVi, viend) = indexSet->vertices();
        aVi != viend; ++aVi)
   {
-    SP::UnitaryRelation UR = indexSet->bundle(*aVi);
-    SP::Interaction interac = UR->interaction();
-    interac->relation()->computeOutput(getTkp1(), 0);
+    SP::Interaction interac = indexSet->bundle(*aVi);
+    interac->relation()->computeh(getTkp1());
     interac->relation()->computeJach(getTkp1());
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
@@ -269,12 +268,12 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
 void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet i: add or remove UnitaryRelations from
+  // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
-  // boost::default_color_type is used to organize update in UnitaryRelationsGraph:
-  // - white_color : undiscovered vertex (UnitaryRelation)
-  // - gray_color : discovered vertex (UnitaryRelation) but searching descendants
-  // - black_color : discovered vertex (UnitaryRelation) together with the descendants
+  // boost::default_color_type is used to organize update in InteractionsGraph:
+  // - white_color : undiscovered vertex (Interaction)
+  // - gray_color : discovered vertex (Interactions) but searching descendants
+  // - black_color : discovered vertex (Interaction) together with the descendants
 
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
@@ -288,11 +287,11 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   assert(i > 0 &&
          "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
-  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -304,25 +303,25 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
   // Check indexSet1
-  UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
+  InteractionsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
 
   //Remove interactions from the indexSet1
   for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
   {
     ++v1next;
-    SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
-    if (!(indexSet0->is_vertex(ur1)))
+    SP::Interaction inter1 = indexSet1->bundle(*ui1);
+    if (!(indexSet0->is_vertex(inter1)))
     {
-      // UnitaryRelation is not in indexSet0 anymore.
+      // Interactions is not in indexSet0 anymore.
       // ui1 becomes invalid
-      indexSet1->remove_vertex(ur1);
+      indexSet1->remove_vertex(inter1);
       topo->setHasChanged(true);
     }
   }
 
   // indexSet0\indexSet1 scan
-  UnitaryRelationsGraph::VIterator ui0, ui0end;
+  InteractionsGraph::VIterator ui0, ui0end;
   //Add interaction in indexSet1
   for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
   {
@@ -340,31 +339,30 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
         /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-          Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+          Type::value(*(indexSet0->bundle(*ui0)->nonSmoothLaw())) == Type::EqualityConditionNSL ;
           });*/
       }
       else
       {
         assert(indexSet0->color(*ui0) == boost::white_color);
 
-        SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
-        assert(!indexSet1->is_vertex(ur0));
+        SP::Interaction inter0 = indexSet0->bundle(*ui0);
+        assert(!indexSet1->is_vertex(inter0));
         bool activate = true;
-        if (Type::value(*(ur0->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
+        if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          SP::Interaction inter =  ur0->interaction();
-          DSIterator itDS = inter->dynamicalSystemsBegin();
-          SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
-          activate = Osi->addInteractionInIndexSet(inter, i);
+          DSIterator itDS = inter0->dynamicalSystemsBegin();
+          SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
+          activate = Osi->addInteractionInIndexSet(inter0, i);
         }
         if (activate)
         {
-          assert(!indexSet1->is_vertex(ur0));
+          assert(!indexSet1->is_vertex(inter0));
 
           // vertex and edges insertion in indexSet1
-          indexSet1->copy_vertex(ur0, *indexSet0);
+          indexSet1->copy_vertex(inter0, *indexSet0);
           topo->setHasChanged(true);
-          assert(indexSet1->is_vertex(ur0));
+          assert(indexSet1->is_vertex(inter0));
         }
       }
     }
@@ -377,23 +375,22 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
   {
     ++v1next;
-    SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
+    SP::Interaction inter1 = indexSet1->bundle(*ui1);
     bool activate = true;
-    if (Type::value(*(ur1->interaction()->nonSmoothLaw())) != Type::EqualityConditionNSL)
+    if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
     {
-      SP::Interaction inter =  ur1->interaction();
-      DSIterator itDS = inter->dynamicalSystemsBegin();
-      SP::OneStepIntegrator Osi = integratorOfInteraction(inter);
-      activate = Osi->addInteractionInIndexSet(inter, i);
+      DSIterator itDS = inter1->dynamicalSystemsBegin();
+      SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
+      activate = Osi->addInteractionInIndexSet(inter1, i);
     }
     if (activate)
     {
-      assert(!indexSet2->is_vertex(ur1));
+      assert(!indexSet2->is_vertex(inter1));
 
       // vertex and edges insertion in indexSet2
-      indexSet2->copy_vertex(ur1, *indexSet1);
+      indexSet2->copy_vertex(inter1, *indexSet1);
       topo->setHasChanged(true);
-      assert(indexSet2->is_vertex(ur1));
+      assert(indexSet2->is_vertex(inter1));
     }
   }
 

@@ -25,6 +25,7 @@
 #define FirstOrderR_H
 
 #include "Relation.hpp"
+#include "Interaction.hpp"
 
 /** Pointer to function for plug-in for operators related to output and its gradients.*/
 typedef void (*OutPtr)(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*);

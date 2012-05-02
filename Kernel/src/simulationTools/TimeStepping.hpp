@@ -152,19 +152,19 @@ public:
    */
   virtual void updateIndexSet(unsigned int);
 
-  // /** Used by the updateIndexSet function in order to deactivate SP::UnitaryRelation.
-  //  * \param SP::UnitaryRelation: SP::UnitaryRelation to be activated.
+  // /** Used by the updateIndexSet function in order to deactivate SP::Interaction.
+  //  * \param SP::Interaction: SP::Interaction to be activated.
   //  * \param unsigned int : number of the set to be updated.
-  //  * \return true iff SP::UnitaryRelation must be deactivated.
+  //  * \return true iff SP::Interaction must be deactivated.
   //  */
-  // virtual bool predictorDeactivate(SP::UnitaryRelation ur, unsigned int i);
+  // virtual bool predictorDeactivate(SP::Interaction inter, unsigned int i);
 
-  // /** Used by the updateIndexSet function in order to activate SP::UnitaryRelation.
-  //  * \param SP::UnitaryRelation: SP::UnitaryRelation to be deactivated.
+  // /** Used by the updateIndexSet function in order to activate SP::Interaction.
+  //  * \param SP::Interaction: SP::Interaction to be deactivated.
   //  * \param unsigned int : number of the set to be updated.
-  //  * \return true iff SP::UnitaryRelation must be activated.
+  //  * \return true iff SP::Interaction must be activated.
   //  */
-  // virtual bool predictorActivate(SP::UnitaryRelation ur, unsigned int i);
+  // virtual bool predictorActivate(SP::Interaction inter, unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   void nextStep();

@@ -58,7 +58,7 @@
  *  - a NonSmoothSolver, used to define a solver and its parameters (connected to SolverOptions structure of Numerics)
  *
  *  A MLCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
+ *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
@@ -66,12 +66,12 @@
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes A,B,C,D,a,b using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
- *  Functions: initialize(), computeUnitaryBlock(), preCompute()
+ *  - formalization of the problem: computes A,B,C,D,a,b using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
+ *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the problem: function compute(), used to call solvers from Numerics through \n
  * the mlcp_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (u,v,z); function postCompute().
  *
  *
@@ -116,9 +116,9 @@ public:
   /** destructor
   */
   ~MLCP() {};
-  virtual void computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2);
-  virtual void updateUnitaryBlocks();
-  virtual void computeAllUnitaryBlocks();
+  virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
+  virtual void updateInteractionBlocks();
+  virtual void computeAllInteractionBlocks();
   // --- n ---
   /** get the value of n,
   *  \return int
@@ -141,15 +141,15 @@ public:
   /** */
   virtual void reset();
 
-  /** compute extra-diagonal unitaryBlock-matrix
+  /** compute extra-diagonal interactionBlock-matrix
    *  \param an edge descriptor
    */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
 
-  /** compute diagonal unitary block
+  /** compute diagonal Interaction block
    * \param a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
 
   virtual void preCompute(double time);
 

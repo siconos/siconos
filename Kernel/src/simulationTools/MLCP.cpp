@@ -60,33 +60,33 @@ void  MLCP::reset()
 }
 
 
-void MLCP::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 {
-  // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+  // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
+  unsigned int nslawSize1 = inter1->getNonSmoothLawSize();
+  unsigned int nslawSize2 = inter2->getNonSmoothLawSize();
 
   unsigned int equalitySize1 =  0;
   unsigned int equalitySize2 =  0;
-  if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+  if (Type::value(*(inter1->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
-    equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
-  else if (Type::value(*(UR1->interaction()->nonSmoothLaw()))
+    equalitySize1 =  MixedComplementarityConditionNSL::convert(inter1->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(inter1->nonSmoothLaw()))
            == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;
 
-  if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+  if (Type::value(*(inter2->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
     equalitySize2 = MixedComplementarityConditionNSL::
-                    convert(UR2->interaction()->nonSmoothLaw())->getEqualitySize();
-  else if (Type::value(*(UR2->interaction()->nonSmoothLaw()))
+                    convert(inter2->nonSmoothLaw())->getEqualitySize();
+  else if (Type::value(*(inter2->nonSmoothLaw()))
            == Type::EqualityConditionNSL)
     equalitySize2 = nslawSize2;
 
 
-  if (UR1 == UR2)
+  if (inter1 == inter2)
   {
-    //UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+    //inter1->getExtraInteractionBlock(currentInteractionBlock);
     _m += nslawSize1 - equalitySize1;
     _n += equalitySize1;
     if (_curBlock > MLCP_NB_BLOCKS - 2)
@@ -108,32 +108,32 @@ void MLCP::computeOptions(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   }
 }
 
-void MLCP::computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor& ed)
+void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
 
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  SP::UnitaryRelation UR1 = indexSet->bundle(indexSet->source(ed));
-  SP::UnitaryRelation UR2 = indexSet->bundle(indexSet->target(ed));
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
+  SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
 
-  assert(UR1 != UR2);
+  assert(inter1 != inter2);
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   if (!_hasBeUpdated || !isLinear)
-    LinearOSNS::computeUnitaryBlock(ed);
+    LinearOSNS::computeInteractionBlock(ed);
 }
 
-void MLCP::computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor& vd)
+void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
 
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
   SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
   SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
-  SP::UnitaryRelation UR = indexSet->bundle(vd);
+  SP::Interaction inter = indexSet->bundle(vd);
 
   // commonDS here...
   if (!_hasBeUpdated)
-    computeOptions(UR, UR);
-  LinearOSNS::computeDiagonalUnitaryBlock(vd);
+    computeOptions(inter, inter);
+  LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
 void displayNM(const NumericsMatrix* const m)
@@ -254,7 +254,7 @@ void MLCP::initialize(SP::Simulation sim)
   _numerics_problem.b = 0;
   _numerics_problem.problemType = 0;
 }
-void  MLCP::updateUnitaryBlocks()
+void  MLCP::updateInteractionBlocks()
 {
   if (!_hasBeUpdated)
   {
@@ -262,13 +262,13 @@ void  MLCP::updateUnitaryBlocks()
     _m = 0;
     _n = 0;
   }
-  LinearOSNS::updateUnitaryBlocks();
+  LinearOSNS::updateInteractionBlocks();
 }
-void  MLCP::computeAllUnitaryBlocks()
+void  MLCP::computeAllInteractionBlocks()
 {
   assert(0);
   _curBlock = 0;
   _m = 0;
   _n = 0;
-  LinearOSNS::computeAllUnitaryBlocks();
+  LinearOSNS::computeAllInteractionBlocks();
 }

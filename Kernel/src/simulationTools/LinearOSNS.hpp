@@ -99,19 +99,19 @@ protected:
 public:
 
   /** xml constructor
-      \param SP::OneStepNSProblemXML : the XML linked-object
-      \param string, ns problem type            \
+      \param onestepnspbxml the XML linked-object
+      \param namens problem type
   */
-  LinearOSNS(SP::OneStepNSProblemXML, const std::string&);
+  LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml, const std::string& name);
 
   /** constructor from data
-      \param int, numerics_solver identifier
-      \param string, ns problem type    \
-      \param String: id of the problem (default = "unamed")
+      \param numericsSolverId the numerics_solver identifier
+      \param name the ns problem type
+      \param newId the id of the problem (default = "unamed")
   */
-  LinearOSNS(const int,
-             const std::string&,
-             const std::string& = "unamed");
+  LinearOSNS(const int numericsSolverId,
+             const std::string& name,
+             const std::string& newId = "unamed");
 
   /** destructor
    */
@@ -119,7 +119,7 @@ public:
 
   // --- W ---
   /** get the value of w, the initial state of the DynamicalSystem
-   *  \return SimpleVector
+   *  \return a SimpleVector
    *  \warning: SiconosVector is an abstract class => can not be an
    *  lvalue => return SimpleVector
    */
@@ -137,12 +137,12 @@ public:
   }
 
   /** set the value of w to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue the new SiconosVector
    */
   void setW(const SiconosVector&);
 
   /** set w to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr the new SP::SiconosVector
    */
   inline void setWPtr(SP::SiconosVector newPtr)
   {
@@ -169,12 +169,12 @@ public:
   }
 
   /** set the value of z to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue a SiconosVector
    */
-  void setz(const SiconosVector&);
+  void setz(const SiconosVector& newValue);
 
   /** set z to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr a SP::SiconosVector
    */
   inline void setzPtr(SP::SiconosVector newPtr)
   {
@@ -192,12 +192,12 @@ public:
   }
 
   /** set the value of M to newValue
-   *  \param newValue OSNSMatrix
+   *  \param newValue a OSNSMatrix
    */
-  void setM(const OSNSMatrix&);
+  void setM(const OSNSMatrix& newValue);
 
   /** set M to pointer newPtr
-   *  \param newPtr OSNSMatrix*
+   *  \param newPtr a SP::OSNSMatrix
    */
   inline void setMPtr(SP::OSNSMatrix newPtr)
   {
@@ -224,7 +224,7 @@ public:
   }
 
   /** set q to pointer newPtr
-   *  \param SP::SiconosVector  newPtr
+   *  \param newPtr a SP::SiconosVector
    */
   inline void setq(SP::SiconosVector newPtr)
   {
@@ -237,9 +237,11 @@ public:
     return _MStorageType;
   };
 
-  /** set which type of storage will be used for M - Note that this
-      function does not allocate any memory for M, it just sets an
-      indicator for future use */
+  /** set which type of storage will be used for M
+   * \warning this function does not allocate any memory for M,
+   * it just sets an indicator for future use
+   * \param i an integer
+   */
   inline void setMStorageType(int i)
   {
     _MStorageType = i;
@@ -251,42 +253,41 @@ public:
   /** initialize the _M matrix */
   virtual void initOSNSMatrix();
   /** To initialize the LinearOSNS problem(computes topology ...)
-      \param the simulation, owner of this OSNSPB
+      \param sim the simulation owning this OSNSPB
   */
-  virtual void initialize(SP::Simulation);
+  virtual void initialize(SP::Simulation sim);
 
-  /** compute extra-diagonal unitaryBlock-matrix
-   *  \param an edge descriptor
+  /** compute extra-diagonal interactionBlock-matrix
+   *  \param ed an edge descriptor
    */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed);
 
-  /** compute diagonal unitary block
-   * \param a vertex descriptor
+  /** compute diagonal Interaction block
+   * \param vd a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param SP::UnitaryRelation, the UR which corresponds to the considered block
-      \param unsigned int, the position of the first element of yOut to be set
+      \param inter the SP::Interaction which corresponds to the considered block
+      \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(SP::UnitaryRelation, unsigned int);
+  virtual void computeqBlock(SP::Interaction inter, unsigned int pos);
 
   /** compute vector q
-   *  \param double : current time
+   *  \param time the current time
    */
-  void computeq(double);
+  void computeq(double time);
 
   /** pre-treatment for LinearOSNS
-   *  \param double : current time
-   *  \return void
+   *  \param time the current time
    */
-  virtual void preCompute(double);
+  virtual void preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return int, information about the solver convergence.
+   *  \param time the current time
+   *  \return information about the solver convergence.
    */
-  virtual int compute(double) = 0;
+  virtual int compute(double time) = 0;
 
   /** post-treatment for LinearOSNS
    */
@@ -303,7 +304,9 @@ public:
 
   /** set if if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
-      size */
+      size
+    * \param val true if we keep the previous values
+    */
   void setKeepLambdaAndYState(bool val)
   {
     _keepLambdaAndYState = val ;

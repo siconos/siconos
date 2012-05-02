@@ -30,20 +30,20 @@ using namespace RELATION;
 
 struct D1MinusLinear::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
-  OneStepNSProblem *osnsp;
-  SP::UnitaryRelation UR;
+  OneStepNSProblem* _osnsp;
+  SP::Interaction _inter;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) : osnsp(p), UR(UR) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) : _osnsp(p), _inter(inter) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
     double e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[1] = _inter->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *(UR->y_k(osnsp->levelMin())), *(UR->yp()), subCoord, false);
+    subscal(e, *(_inter->y_k(_osnsp->levelMin())), *(_inter->yp()), subCoord, false);
   }
 };
 
@@ -395,15 +395,15 @@ void D1MinusLinear::computeFreeState()
   }
 }
 
-void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* osnsp)
+void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp)
 {
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
 
   // get relation and non smooth law information
-  RELATION::TYPES relationType = UR->getRelationType(); // relation
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-  unsigned int relativePosition = UR->getRelativePosition();
-  unsigned int sizeY = UR->getNonSmoothLawSize(); // related NSL
+  RELATION::TYPES relationType = inter->getRelationType(); // relation
+  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  unsigned int relativePosition = 0;
+  unsigned int sizeY = inter->getNonSmoothLawSize(); // related NSL
 
   Index coord(8);
   coord[0] = relativePosition;
@@ -416,22 +416,22 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
   coord[7] = sizeY;
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
   SP::SiconosVector Xfree; // free degree of freedom
-  SP::SiconosVector Yp = UR->yp(); // POINTER CONSTRUCTOR : contains output
+  SP::SiconosVector Yp = inter->yp(); // POINTER CONSTRUCTOR : contains output
 
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    Xfree = UR->workx();
+    Xfree = inter->workX();
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    Xfree  = UR->workFree();
+    Xfree  = inter->workFree();
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
 
   // calculate data of interaction
-  SP::Interaction mainInteraction = UR->interaction();
+  SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
@@ -469,8 +469,8 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-        subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false);
+        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
       }
       else
         RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
@@ -479,14 +479,14 @@ void D1MinusLinear::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem* 
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->computeNonLinearH2dot(simulation()->getTkp1());
-        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(UR->interaction()->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
       }
     }
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, UR));
-      UR->interaction()->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
   }
   else

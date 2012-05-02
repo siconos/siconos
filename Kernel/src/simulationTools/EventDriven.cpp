@@ -21,7 +21,7 @@
 #include "SimulationXML.hpp"
 #include "OneStepNSProblemXML.hpp"
 #include "SimulationXML.hpp"
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "Lsodar.hpp"
 #include "LCP.hpp"
 #include "Model.hpp"
@@ -94,7 +94,7 @@ double EventDriven::TOL_ED = DEFAULT_TOL_ED;
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet i: add or remove UnitaryRelations from
+  // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
   assert(!_model.expired());
@@ -109,11 +109,11 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(i > 0  &&
          "EventDriven::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
-  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -122,22 +122,22 @@ void EventDriven::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
 
-  UnitaryRelationsGraph::VIterator uibegin, uipend, uip;
+  InteractionsGraph::VIterator uibegin, uipend, uip;
   boost::tie(uibegin, uipend) = indexSet0->vertices();
   // loop over all vextice of the indexSet[i-1]
   for (uip = uibegin; uip != uipend; ++uip)
   {
-    SP::UnitaryRelation urp = indexSet0->bundle(*uip);
+    SP::Interaction inter = indexSet0->bundle(*uip);
     if (i == 1) // IndexSet[1]
     {
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
-      double y = urp->getYRef(0); // output to define the IndexSets at this UR
+      double y = inter->getYRef(0); // output to define the IndexSets at this Interaction
       /*
          if (i == 1)
          {
-         cout << "Id of UR: " << urp->interaction()->number() << endl;
-         cout << "Output of level 0 at this UR: " << y << endl;
+         cout << "Id of Interaction: " << inter->number() << endl;
+         cout << "Output of level 0 at this Interaction: " << y << endl;
          cout << endl;
          }
          */
@@ -145,52 +145,52 @@ void EventDriven::updateIndexSet(unsigned int i)
       {
         RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
       }
-      // 1 - If the UR is not yet in the set
-      if (!indexSet1->is_vertex(urp)) // UR is not yet in the indexSet[i]
+      // 1 - If the Interaction is not yet in the set
+      if (!indexSet1->is_vertex(inter)) // Interaction is not yet in the indexSet[i]
       {
         if (fabs(y) <= TOL_ED)
         {
           // vertex and edges insertions
-          indexSet1->copy_vertex(urp, *indexSet0);
+          indexSet1->copy_vertex(inter, *indexSet0);
         }
       }
-      else // if the UR was already in the set
+      else // if the Interaction was already in the set
       {
         if (fabs(y) > TOL_ED)
         {
-          indexSet1->remove_vertex(urp); // remove the UR from IndexSet[1]
-          urp->lambda(1)->zero(); // reset the lambda[1] to zero
+          indexSet1->remove_vertex(inter); // remove the Interaction from IndexSet[1]
+          inter->lambda(1)->zero(); // reset the lambda[1] to zero
         }
       }
     }
     else if (i == 2) // IndexSet[2]
     {
-      if (indexSet1->is_vertex(urp)) // UR is in the indexSet[1]
+      if (indexSet1->is_vertex(inter)) // Interaction is in the indexSet[1]
       {
-        double y = urp->getYRef(1); // output of level 1 at this UR
-        if (!indexSet2->is_vertex(urp)) // UR is not yet in the indexSet[2]
+        double y = inter->getYRef(1); // output of level 1 at this Interaction
+        if (!indexSet2->is_vertex(inter)) // Interaction is not yet in the indexSet[2]
         {
           if (fabs(y) <= TOL_ED)
           {
             // vertex and edges insertions
-            indexSet2->copy_vertex(urp, *indexSet0);
+            indexSet2->copy_vertex(inter, *indexSet0);
           }
         }
-        else // if the UR was already in the set
+        else // if the Interaction was already in the set
         {
           if (fabs(y) > TOL_ED)
           {
-            indexSet2->remove_vertex(urp); // remove the UR from IndexSet[1]
-            urp->lambda(2)->zero(); // reset the lambda[i] to zero
+            indexSet2->remove_vertex(inter); // remove the Interaction from IndexSet[1]
+            inter->lambda(2)->zero(); // reset the lambda[i] to zero
           }
         }
       }
-      else // UR is not in the indexSet[1]
+      else // Interaction is not in the indexSet[1]
       {
-        if (indexSet2->is_vertex(urp)) // UR is in the indexSet[2]
+        if (indexSet2->is_vertex(inter)) // Interaction is in the indexSet[2]
         {
-          indexSet2->remove_vertex(urp); // remove the UR from IndexSet[2]
-          urp->lambda(2)->zero(); // reset the lambda[i] to zero
+          indexSet2->remove_vertex(inter); // remove the Interaction from IndexSet[2]
+          inter->lambda(2)->zero(); // reset the lambda[i] to zero
         }
       }
     }
@@ -208,27 +208,27 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
 
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
+  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
-  UnitaryRelationsGraph::VIterator ui, uiend, vnext;
+  InteractionsGraph::VIterator ui, uiend, vnext;
   boost::tie(ui, uiend) = indexSet2->vertices();
 
   for (vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
 
-    SP::UnitaryRelation ur = indexSet2->bundle(*ui);
-    double gamma = ur->getYRef(2);
-    double F     = ur->getLambdaRef(2);
+    SP::Interaction inter = indexSet2->bundle(*ui);
+    double gamma = inter->getYRef(2);
+    double F     = inter->getLambdaRef(2);
     if (fabs(F) < TOL_ED)
-      indexSet2->remove_vertex(ur);
+      indexSet2->remove_vertex(inter);
     else if ((gamma < -TOL_ED) || (F < -TOL_ED))
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for UR of indexSet[2] must be higher or equal to zero.");
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interactionof indexSet[2] must be higher or equal to zero.");
     else if (((fabs(gamma) > TOL_ED) && (fabs(F) > TOL_ED)))
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
   }
@@ -276,18 +276,18 @@ void EventDriven::initOSNS()
     }
   }
 
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
-  // For each Unitary relation in I0 ...
+  // For each Interaction in I0 ...
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     // indexSet0->bundle(*ui)->initialize("EventDriven");
-    initializeInteraction(indexSet0->bundle(*ui)->interaction());
+    initializeInteraction(indexSet0->bundle(*ui));
   }
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
@@ -324,7 +324,7 @@ void EventDriven::initOSNS()
 
     //====================================== added by Son Nguyen ===================================
     // Detect NonSmoothEvent at the beginning of the simulation
-    SP::UnitaryRelationsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
     assert(indexSet1);
     if (indexSet1->size() >  0) // There is one non-smooth event to be added
     {
@@ -462,15 +462,15 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, lambda;
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
-  // Solve LCP at acceleration level to calculate the lambda[2] at UR of indexSet[2]
+  // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
   //
   double t = *time;
@@ -494,12 +494,12 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   //
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
-    nsLawSize = ur->getNonSmoothLawSize();
-    y = ur->y(0);   // output y at this UR
-    ydot = ur->y(1); // output of level 1 at this UR
-    lambda = ur->lambda(2); // input of level 2 at this UR
-    if (!(indexSet2->is_vertex(ur))) // if UR is not in the indexSet[2]
+    SP::Interaction inter = indexSet0->bundle(*ui);
+    nsLawSize = inter->getNonSmoothLawSize();
+    y = inter->y(0);   // output y at this Interaction
+    ydot = inter->y(1); // output of level 1 at this Interaction
+    lambda = inter->lambda(2); // input of level 2 at this Interaction
+    if (!(indexSet2->is_vertex(inter))) // if Interaction is not in the indexSet[2]
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {
@@ -521,7 +521,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
         k++;
       }
     }
-    else // If UR is in the indexSet[2]
+    else // If Interaction is in the indexSet[2]
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {

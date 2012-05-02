@@ -20,7 +20,7 @@
 #include "PrimalFrictionContact.hpp"
 #include "FrictionContactXML.hpp"
 #include "Simulation.hpp"
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relation.hpp"
@@ -79,8 +79,8 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   OneStepNSProblem::initialize(sim);
 
   updateDSBlocks(); //blocks of M
-  // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
-  updateUnitaryDSBlocks(); // blocks of H
+  // updateInteractionDSBlocks(); This computation is not made because, we that InteractionDSBlocks =H^T
+  updateInteractionDSBlocks(); // blocks of H
 
   // Connect to the right function according to dim. of the problem
   if (_contactProblemDim == 2)
@@ -120,10 +120,10 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   // get topology
   SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
 
-  // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
+  // Note that interactionBlocks is up to date since updateInteractionBlocks has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  SP::UnitaryRelationsGraph I0 = topology->indexSet0();
+  SP::InteractionsGraph I0 = topology->indexSet0();
   _mu.reset(new MuStorage());
   _mu->reserve(I0->size());
 
@@ -151,10 +151,10 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
 
 }
 
-void PrimalFrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+void PrimalFrictionContact::computeInteractionBlock(SP::Interaction inter1, SP::Interaction inter2)
 {
-  // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
-  // How unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
+  // Computes matrix interactionBlocks[inter1][inter2] (and allocates memory if necessary) if inter1 and inter2 have commond DynamicalSystem.
+  // How interactionBlocks are computed depends explicitely on the type of Relation of each Interaction.
 
 }
 
@@ -183,23 +183,23 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
     RuntimeException::selfThrow("PrimalFrictionContact::computeDSBlocks. nNot yet implemented for Integrator of type " + osiType);
 }
 
-/** computes  DSUnitaryBlock-matrix that corresponds to UR1 and DS2
- *  Move this to Unitary Relation class?
- *  \param a pointer to UnitaryRelation UR1
+/** computes  DSInteractionBlock-matrix that corresponds to inter1 and DS2
+ *  Move this to Interaction class?
+ *  \param a pointer to Interaction inter1
  *  \param a pointer to DynamicalSystems DS2
  */
-void PrimalFrictionContact::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS)
+void PrimalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem DS)
 {
   unsigned int sizeDS = (DS)->getDim();
-  unsigned int nslawSize = UR->getNonSmoothLawSize();
-  RELATION::TYPES relationType = UR->getRelationType();
+  unsigned int nslawSize = inter->getNonSmoothLawSize();
+  RELATION::TYPES relationType = inter->getRelationType();
 
   if (relationType == Lagrangian)
   {
-    unitaryDSBlocks[UR][DS].reset(new SimpleMatrix(nslawSize, sizeDS));
-    UR->getLeftUnitaryBlockForDS(DS, unitaryDSBlocks[UR][DS]);
+    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(nslawSize, sizeDS));
+    inter->getLeftInteractionBlockForDS(DS, interactionDSBlocks[inter][DS]);
   }
-  else RuntimeException::selfThrow("PrimalFrictionContact::computeUnitaryDSBlock not yet implemented for relation of type " + relationType);
+  else RuntimeException::selfThrow("PrimalFrictionContact::computeInteractionDSBlock not yet implemented for relation of type " + relationType);
 }
 
 void PrimalFrictionContact::computeq(const double time)
@@ -235,23 +235,23 @@ void PrimalFrictionContact::computeqBlock(SP::DynamicalSystem DS, unsigned int p
     RuntimeException::selfThrow("PrimalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
   }
 }
-void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation UR, unsigned int pos)
+void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos)
 {
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-  string nslawType = UR->getNonSmoothLawType();
+  RELATION::TYPES relationType = inter->getRelationType();
+  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
+  string nslawType = inter->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
 
-  SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
   string osiType = simulation->integratorOfDS(ds)->getType();
 
-  unsigned int sizeY = UR->getNonSmoothLawSize();
+  unsigned int sizeY = inter->getNonSmoothLawSize();
   Index coord(8);
 
-  unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->interaction();
+  unsigned int relativePosition = 0;
+  SP::Interaction mainInteraction = inter;
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -260,7 +260,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   coord[7] = pos + sizeY;
 
   SP::SiconosMatrix  H;
-  SP::SiconosVector workX = UR->workx();
+  SP::SiconosVector workX = inter->workX;
   if (osiType == MOREAU2)
   {
   }
@@ -268,7 +268,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
     RuntimeException::selfThrow("PrimalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == Lagrangian)
+  if (inter->getRelationType() == Lagrangian)
   {
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
@@ -280,15 +280,15 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
       if (simulationType == "TimeStepping")
       {
         subCoord[0] = 0;
-        subCoord[1] = UR->getNonSmoothLawSize();
+        subCoord[1] = inter->getNonSmoothLawSize();
         subCoord[2] = pos;
         subCoord[3] = pos + subCoord[1];
-        subscal(e, *UR->yOld(levelMin), *q, subCoord, false);
+        subscal(e, *inter->yOld(levelMin), *q, subCoord, false);
       }
       else if (simulationType == "EventDriven")
       {
         subCoord[0] = pos;
-        subCoord[1] = pos + UR->getNonSmoothLawSize();
+        subCoord[1] = pos + inter->getNonSmoothLawSize();
         subCoord[2] = pos;
         subCoord[3] = subCoord[1];
         subscal(e, *_tildeLocalVelocity, *_tildeLocalVelocity, subCoord, false); // _tildeLocalVelocity = _tildeLocalVelocity + e * _tildeLocalVelocity
@@ -303,7 +303,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
 
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
-        (*_tildeLocalVelocity)(pos) +=  e * (*UR->yOld(levelMin))(0);
+        (*_tildeLocalVelocity)(pos) +=  e * (*inter->yOld(levelMin))(0);
 
       else RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
@@ -320,14 +320,14 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
     _tildeLocalVelocity->resize(_sizeLocalOutput);
   _tildeLocalVelocity->zero();
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
+  // === Loop through "active" Interactions (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  UnitaryRelationsIterator itCurrent;
+  InteractionsIterator itCurrent;
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    pos = H->getPositionOfUnitaryBlock(*itCurrent);
+    pos = H->getPositionOfInteractionBlock(*itCurrent);
     computeTildeLocalVelocityBlock((*itCurrent), pos);
   }
 
@@ -345,22 +345,22 @@ void PrimalFrictionContact::preCompute(const double time)
   // Get topology
   SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
-  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
+  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
 
   if (!_hasBeUpdated)
   {
-    // Computes new unitaryBlocks if required
-    updateUnitaryBlocks();
+    // Computes new interactionBlocks if required
+    updateInteractionBlocks();
     updateDSBlocks(); //blocks of M
-    // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
-    updateUnitaryDSBlocks(); // blocks of H
+    // updateInteractionDSBlocks(); This computation is not made because, we that InteractionDSBlocks =H^T
+    updateInteractionDSBlocks(); // blocks of H
 
 
 
     // Updates matrix M
-    SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
+    SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
     M->fill(allDS, DSBlocks);
-    H->fill(indexSet, allDS, unitaryDSBlocks);
+    H->fill(indexSet, allDS, interactionDSBlocks);
     _sizeOutput = M->size();
     _sizeLocalOutput = H->size();
 
@@ -391,8 +391,8 @@ void PrimalFrictionContact::preCompute(const double time)
 
     // Update mu
     _mu->clear();
-    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-      _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->interaction()->nonSmoothLaw())->getMu());
+    for (ConstInteractionsIterator itI = indexSet->begin(); itI != indexSet->end(); ++itI)
+      _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itI)->nonSmoothLaw())->getMu());
   }
 
   // Computes q
@@ -458,27 +458,27 @@ int PrimalFrictionContact::compute(double time)
 void PrimalFrictionContact::postCompute()
 {
   // This function is used to set y/lambda values using output from primalfrictioncontact_driver
-  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
+  // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
+  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
 
   // y and lambda vectors
   SP::SiconosVector  y, lambda;
 
-  //   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
+  //   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
 
-  //   for(UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent!=  indexSet->end(); ++itCurrent)
+  //   for(InteractionsIterator itCurrent = indexSet->begin(); itCurrent!=  indexSet->end(); ++itCurrent)
   //     {
-  //       // size of the unitaryBlock that corresponds to the current UnitaryRelation
+  //       // size of the interactionBlock that corresponds to the current Interaction
   //       nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-  //       // Get the relative position of UR-unitaryBlock in the vector velocity or reaction
-  //       pos = H->getPositionOfUnitaryBlock(*itCurrent);
+  //       // Get the relative position of inter-interactionBlock in the vector velocity or reaction
+  //       pos = H->getPositionOfInteractionBlock(*itCurrent);
 
-  //       // Get Y and Lambda for the current Unitary Relation
+  //       // Get Y and Lambda for the current Interaction
   //       y = (*itCurrent)->y(levelMin);
   //       lambda = (*itCurrent)->lambda(levelMin);
 

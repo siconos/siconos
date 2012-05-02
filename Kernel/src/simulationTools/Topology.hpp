@@ -25,18 +25,18 @@
 
 #include "SiconosConst.hpp"
 #include "InteractionsSet.hpp"
-#include "UnitaryRelationsSet.hpp"
+//#include "InteractionsSet.hpp"
 #include "SimulationTypeDef.hpp"
 
 class NonSmoothDynamicalSystem;
 class Interaction;
 class DynamicalSystem;
 class SiconosMatrix;
-class UnitaryRelation;
+class Interaction;
 
 
 /**  This class describes the topology of the non-smooth dynamical
- *  system. It holds all the "potential" Unitary Relations".
+ *  system. It holds all the "potential" Interactions".
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -59,7 +59,7 @@ class UnitaryRelation;
  *
  * Insertion of an Interaction into the set indexSet0:
  * addInteractionInIndexSet(SP::Interaction inter) for each relation
- * of the interaction, it creates a new UnitaryRelation and inserts it
+ * of the interaction, it creates a new Interaction and inserts it
  * into indexSet0 It also counts the total number of "constraints" in
  * the system.
  *
@@ -81,9 +81,9 @@ private:
   /** dynamical systems graphs */
   std::vector<SP::DynamicalSystemsGraph> _DSG;
 
-  /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph
+  /** Interaction graphs (_IG[0]=L[DSG[0]], L is the line graph
       transformation) */
-  std::vector<SP::UnitaryRelationsGraph> _URG;
+  std::vector<SP::InteractionsGraph> _IG;
 
   /** check if topology has been updated since nsds modifications
       occur */
@@ -93,7 +93,7 @@ private:
   bool _hasChanged;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
-      all nslaw sizes of Unitary Relations of IndexSet0.*/
+      all nslaw sizes of Interactions of IndexSet0.*/
   unsigned int _numberOfConstraints;
 
 
@@ -109,16 +109,18 @@ private:
   // === PRIVATE FUNCTIONS ===
 
   /** schedules the relations of Interaction inter into IndexSet0 (ie
-  * creates the corresponding UnitaryRelations and add them into DSG
-  * anr URG)
-  \param  a pointer to Interaction
+  * creates the corresponding Interactions and add them into _DSG
+  * and _IG)
+  \param  inter the Interaction to add
   \return a vertex descriptor of the new vertex in IndexSet0
   */
-  UnitaryRelationsGraph::VDescriptor addInteractionInIndexSet(SP::Interaction);
+  InteractionsGraph::VDescriptor addInteractionInIndexSet(SP::Interaction inter);
 
-  /** remove the unitary relations of the interactions from URG and
-   *   DSG */
-  void removeInteractionFromIndexSet(SP::Interaction);
+  /** remove the Interactions of the interactions from _IG and
+   * _DSG
+   * \param inter the Interaction to remove
+   */
+  void removeInteractionFromIndexSet(SP::Interaction inter);
 
   /** default constructor
   */
@@ -129,15 +131,15 @@ public:
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** constructor from InteractionSet
-  * \param: a SP::InteractionSet
+  * \param a SP::InteractionSet
   */
-  Topology(SP::InteractionsSet);
+  Topology(SP::InteractionsSet interSet);
 
   /** constructor from dynamical systems and interaction sets
-  * \param: a SP::DynamicalSystemsSet
-  * \param: a SP::InteractionsSet
+  * \param newDSset a SP::DynamicalSystemsSet
+  * \param newInteractions a SP::InteractionsSet
   */
-  Topology(SP::DynamicalSystemsSet, SP::InteractionsSet);
+  Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions);
 
 
   /** destructor */
@@ -164,102 +166,105 @@ public:
 
 
   /** check if Interaction inter is in the set
-   *  \param a shared pointer to Interaction
+   *  \param inter an Interaction
    *  \return a bool
    */
-  bool hasInteraction(SP::Interaction) const;
+  bool hasInteraction(SP::Interaction inter) const;
 
   /** add an Interaction in the topology. The interaction is both
-   *  added in Dynamical Systems graph and Unitary Relations Graph
+   *  added in Dynamical Systems graph and Interactions Graph
    * \param a shared pointer to the interaction
    * \return a vertex descriptor to the new vertex in IndexSet0
    */
-  UnitaryRelationsGraph::VDescriptor insertInteraction(SP::Interaction);
+  InteractionsGraph::VDescriptor insertInteraction(SP::Interaction inter);
 
   /** remove an Interaction from the topology. The interaction is
-   *  removed from Dynamical Systems graph and Unitary Relations Graph.
+   *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
-   *  \param a shared pointer to the interaction
+   *  \param inter the interaction to remove
    */
-  void removeInteraction(SP::Interaction);
+  void removeInteraction(SP::Interaction inter);
 
   /** add a dynamical system
-   * \param a shared pointer to a dynamical system
+   * \param ds the dynamical system to add
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** remove a dynamical system
-   * \param a shared pointer to a dynamical system
+   * \param ds the dynamical system to remove
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   /** link a dynamical system to a relation
-   * \param a SP::Interaction
-   * \param a SP::DynamicalSystem
+   * \param inter a SP::Interaction
+   * \param ds a SP::DynamicalSystem
    */
-  void link(SP::Interaction, SP::DynamicalSystem);
+  void link(SP::Interaction inter, SP::DynamicalSystem ds);
 
-  /** get a pointer to the graph of all Unitary Relations.
-   *  \return a SP::UnitaryRelationsGraph
+  /** get a pointer to the graph of all Interactions.
+   *  \return a SP::InteractionsGraph
    */
-  inline SP::UnitaryRelationsGraph indexSet0()
+  inline SP::InteractionsGraph indexSet0()
   {
-    return _URG[0];
+    return _IG[0];
   }
 
-  /** get a pointer to the graph at level num of Unitary Relations
-   *  \return a SP::UnitaryRelationsGraph
+  /** get a pointer to the graph at level num of Interactions
+   *  \return a SP::InteractionsGraph
    */
-  inline SP::UnitaryRelationsGraph indexSet(unsigned int num)
+  inline SP::InteractionsGraph indexSet(unsigned int num)
   {
-    assert(num < _URG.size()) ;
-    return _URG[num];
+    assert(num < _IG.size()) ;
+    return _IG[num];
   };
 
-  /** get a pointer to the graph at level num of Unitary Relations
-   *  \return a SP::UnitaryRelationsGraph
+  /** get a pointer to the graph at level num of Interactions
+   *  \return a SP::InteractionsGraph
    */
   inline unsigned int numberOfIndexSet()
   {
-    return _URG.size();
+    return _IG.size();
   };
 
-  /** reset graph at level num of Unitary Relations
-   *  \return a SP::UnitaryRelationsGraph
+  /** reset graph at level num of Interactions
+   *  \return a SP::InteractionsGraph
    */
   inline void resetIndexSetPtr(unsigned int num)
   {
-    assert(num < _URG.size()) ;
-    _URG[num].reset(new UnitaryRelationsGraph());
-    _URG[num]->properties().reset(new UnitaryRelationsGraphProperties(_URG[num]));
-    _URG[num]->properties()->symmetric = _symmetric;
+    assert(num < _IG.size()) ;
+    _IG[num].reset(new InteractionsGraph());
+    _IG[num]->properties().reset(new InteractionsGraphProperties(_IG[num]));
+    _IG[num]->properties()->symmetric = _symmetric;
   };
 
   /** get a pointer to the graph at level num of Dynamical System
-   *  \return a SP::DynamicalSystemsGraph
+   * \param num the level
+   *\return a SP::DynamicalSystemsGraph
    */
-  inline SP::DynamicalSystemsGraph dSG(unsigned int num)
+  inline SP::DynamicalSystemsGraph dSG(unsigned int num) const
   {
     assert(num < _DSG.size()) ;
     return _DSG[num];
   };
 
-  /** get the number of Unitary Relations Graphs */
-  inline unsigned int indexSetsSize()
+  /** get the number of Interactions Graphs */
+  inline unsigned int indexSetsSize() const
   {
-    return _URG.size();
+    return _IG.size();
   };
 
-  /** resize Unitary Relations Graphs */
-  inline void indexSetsResize(unsigned int i)
+  /** resize Interactions Graphs
+   * \param newSize the new size
+   */
+  inline void indexSetsResize(unsigned int newSize)
   {
-    _URG.resize(i);
+    _IG.resize(newSize);
   };
 
   // --- isTopologyUpToDate ---
 
   /** set isTopologyUpToDate to val
-  *  \param a bool
+  *  \param val a bool
   */
   inline void setUpToDate(const bool val)
   {
@@ -269,7 +274,7 @@ public:
   /** check if topology has been updated since modifications occurs on nsds
   *  \return a bool
   */
-  inline bool isUpToDate()
+  inline bool isUpToDate() const
   {
     return _isTopologyUpToDate;
   }
@@ -277,7 +282,7 @@ public:
   // --- _hasChanged ---
 
   /** set _hasChanged to val
-  *  \param a bool
+  *  \param val a bool
   */
   inline void setHasChanged(const bool val)
   {
@@ -287,7 +292,7 @@ public:
   /** check
   *  \return a bool
   */
-  inline bool hasChanged()
+  inline bool hasChanged() const
   {
     return _hasChanged;
   }
@@ -295,7 +300,7 @@ public:
   /** get the total number of scalar constraints
   *  \return an unsigned int
   */
-  inline unsigned int numberOfConstraints()
+  inline unsigned int numberOfConstraints() const
   {
     return _numberOfConstraints;
   };
@@ -307,7 +312,7 @@ public:
   void clear();
 
   /** set symmetry in the blocks computation
-   * \param a bool
+   * \param val a bool
    */
 
   void setSymmetric(bool val)

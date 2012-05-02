@@ -57,7 +57,7 @@
  *  - the unknowns u,v and z
  *
  *  A MLCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
- *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
+ *  IndexSets from simulation are used to know which constraints (Interaction) are active or not. \n
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
@@ -65,12 +65,12 @@
  * Main functions:
  *
  * \b Main functions:
- *  - formalization of the problem: computes A,B,C,D,a,b using the set of "active" UnitaryRelations from the simulation and \n
+ *  - formalization of the problem: computes A,B,C,D,a,b using the set of "active" Interactions from the simulation and \n
  *  the block-matrices saved in the field blocks.\n
  *  Functions: initialize(), computeBlock(), preCompute()
  *  - solving of the problem: function compute(), used to call solvers from Numerics through \n
  * the mlcp_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction using \n
  *  ouput results from the solver (u,v,z); function postCompute().
  *
  *
@@ -117,10 +117,10 @@ public:
   *  \return void
   */
   virtual void preCompute(double);
-  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  virtual void computeInteractionBlock(SP::Interaction, SP::Interaction);
   virtual void computeDSBlock(SP::DynamicalSystem);
-  virtual void computeUnitaryDSBlock(SP::UnitaryRelation , SP::DynamicalSystem);
-  virtual void computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation);
+  virtual void computeInteractionDSBlock(SP::Interaction , SP::DynamicalSystem);
+  virtual void computeDSInteractionBlock(SP::DynamicalSystem, SP::Interaction);
   virtual void updateM();
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time

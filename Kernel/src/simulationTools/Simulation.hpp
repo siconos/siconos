@@ -27,7 +27,7 @@
 #include "Tools.hpp"
 #include "SimulationTypeDef.hpp"
 #include "TimeDiscretisation.hpp"
-#include "UnitaryRelationsSet.hpp"
+#include "InteractionsSet.hpp"
 #include "EventsManager.hpp"
 #include "SiconosPointers.hpp"
 #include "InteractionsSet.hpp"
@@ -104,7 +104,7 @@ protected:
 
   /** index sets vector (indexSets[0] is the set where y[0]=0,
       indexSets[1] where y[0] = 0 and y[1]=0 and so on */
-  //std::vector<UnitaryRelationsGraph> indexSets;
+  //std::vector<InteractionsGraph> indexSets;
 
   /** the non smooth problems (each problem is identified thanks to
       its id) */
@@ -379,9 +379,9 @@ public:
 
 
   /** get a pointer to indexSets[i]
-   *  \return a UnitaryRelationsSet
+   *  \return a InteractionsSet
    */
-  SP::UnitaryRelationsGraph indexSet(unsigned int i)
+  SP::InteractionsGraph indexSet(unsigned int i)
   {
     return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
   };

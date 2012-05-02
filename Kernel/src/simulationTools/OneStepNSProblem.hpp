@@ -31,7 +31,7 @@
 
 class Simulation;
 class DynamicalSystem;
-class UnitaryRelation;
+class Interaction;
 class SiconosMatrix;
 TYPEDEF_SPTR(NumericsOptions);
 TYPEDEF_SPTR(SolverOptions);
@@ -77,12 +77,12 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  specific functions (only setNumericsVerboseMode() at the time).
  *
  *
- * Remark: UnitaryMatrixRowIterator will be used to iterate through
- *  what corresponds to rows of unitaryBlocks (a row for a
- *  UnitaryRelation, named URrow) and for a row,
- *  UnitaryMatrixColumnIterator will be used to iterate through
- *  columns, ie through all the UnitaryRelations that are linked to
- *  URrow.
+ * Remark: InteractionMatrixRowIterator will be used to iterate through
+ *  what corresponds to rows of interactionBlocks (a row for a
+ *  Interaction, named interRow) and for a row,
+ *  InteractionMatrixColumnIterator will be used to iterate through
+ *  columns, ie through all the Interactions that are linked to
+ *  interRow.
  *
  */
 class OneStepNSProblem
@@ -391,27 +391,27 @@ public:
 
   /** Display the set of blocks for  a given indexSet
    */
-  virtual void displayBlocks(SP::UnitaryRelationsGraph indexSet);
+  virtual void displayBlocks(SP::InteractionsGraph indexSet);
 
-  /** compute unitaryBlocks if necessary (this depends on the type of
+  /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
    */
-  virtual void updateUnitaryBlocks();
+  virtual void updateInteractionBlocks();
 
-  /** computes all diagonal and extra-diagonal unitaryBlock-matrices
+  /** computes all diagonal and extra-diagonal interactionBlock-matrices
    *  useless ?
    */
-  virtual void computeAllUnitaryBlocks();
+  virtual void computeAllInteractionBlocks();
 
-  /** compute extra-diagonal unitaryBlock-matrix
+  /** compute extra-diagonal interactionBlock-matrix
    *  \param an edge descriptor
    */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&) = 0;
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&) = 0;
 
-  /** compute diagonal unitary block
+  /** compute diagonal Interaction block
    * \param a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&) = 0;
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&) = 0;
 
   /** compute DSBlocks if necessary (this depends on the type of
       OSNS, on the indexSets ...)
@@ -438,7 +438,7 @@ public:
   }
 
   /** computes DSBlock-matrix that corresponds to DS1
-   *  Move this to Unitary Relation class?
+   *  Move this to Interaction class?
    *  \param a pointer to DynamicalSystem DS1
    */
   virtual void computeDSBlock(SP::DynamicalSystem);
@@ -477,12 +477,12 @@ public:
    */
   virtual void saveNSProblemToXML() = 0;
 
-  /** get the OSI-related matrices used to compute the current Unitary
-   * Relation unitaryBlock (Ex: for Moreau, W)
-   *  \param a pointer to UnitaryRelation
+  /** get the OSI-related matrices used to compute the current InteractionBlock
+   * (Ex: for Moreau, W)
+   *  \param a pointer to Interaction
    *  \param a MapOfDSMatrices(in-out parameter)
    */
-  virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&);
+  virtual void getOSIMaps(SP::Interaction inter, MapOfDSMatrices&);
 
   /** visitors hook
    */

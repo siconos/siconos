@@ -100,7 +100,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   unsigned int cmp = 0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++){
-  //   double criteria = (*it)->relation()->interaction()->y(0)->getValue(0);
+  //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
   //     SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> ((*it)->relation());
@@ -296,8 +296,8 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 {
 
-  SP::UnitaryRelationsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
-  UnitaryRelationsGraph::VIterator aVi, viend;
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
+  InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
   double minViolationEquality = +1e24;
@@ -309,8 +309,8 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   for (boost::tie(aVi, viend) = indexSet->vertices();
        aVi != viend; ++aVi)
   {
-    SP::UnitaryRelation UR = indexSet->bundle(*aVi);
-    SP::Interaction interac = UR->interaction();
+    SP::Interaction inter = indexSet->bundle(*aVi);
+    SP::Interaction interac = inter;
     interac->relation()->computeOutput(getTkp1(), 0);
     interac->relation()->computeJach(getTkp1());
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||

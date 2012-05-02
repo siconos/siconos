@@ -26,7 +26,6 @@
 
 #include "SimpleVector.hpp"
 #include "SimpleMatrix.hpp"
-#include "Interaction.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
 #include "Plugin.hpp"
@@ -35,9 +34,12 @@
 #include "RelationNamespace.hpp"
 #include "PluggedObject.hpp"
 #include <boost/weak_ptr.hpp>
+#include "DynamicalSystemsSet.hpp"
+//#include "Interaction.hpp"
 
 class SimpleVector;
 class SimpleMatrix;
+class Interaction;
 
 /** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA

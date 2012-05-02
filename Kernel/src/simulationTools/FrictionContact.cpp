@@ -96,7 +96,7 @@ void FrictionContact::initialize(SP::Simulation sim)
   SP::Topology topology =
     simulation()->model()->nonSmoothDynamicalSystem()->topology();
 
-  // Note that unitaryBlocks is up to date since updateUnitaryBlocks
+  // Note that interactionBlocks is up to date since updateInteractionBlocks
   // has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
@@ -112,13 +112,13 @@ void FrictionContact::initialize(SP::Simulation sim)
   if (!interactions()->isEmpty())
   {
     // Get index set from Simulation
-    SP::UnitaryRelationsGraph indexSet =
+    SP::InteractionsGraph indexSet =
       simulation()->indexSet(levelMin());
-    UnitaryRelationsGraph::VIterator ui, uiend;
+    InteractionsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
-                     (indexSet->bundle(*ui)->interaction()->nonSmoothLaw())->mu());
+                     (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
     }
   }
 
@@ -143,12 +143,12 @@ int FrictionContact::compute(double time)
     return info;
   }
 
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
+  InteractionsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
-                   (indexSet->bundle(*ui)->interaction()->nonSmoothLaw())->mu());
+                   (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
   // --- Call Numerics driver ---
   // Inputs:

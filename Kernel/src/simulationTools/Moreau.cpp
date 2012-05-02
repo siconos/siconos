@@ -171,12 +171,13 @@ void Moreau::insertDynamicalSystem(SP::DynamicalSystem ds)
 }
 const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
 {
+  int dsN = ds->number();
   assert(ds &&
          "Moreau::getW(ds): ds == NULL.");
   //    return *(WMap[0]);
-  assert(WMap[ds] &&
+  assert(WMap[dsN] &&
          "Moreau::getW(ds): W[ds] == NULL.");
-  return *(WMap[ds]); // Copy !!
+  return *(WMap[dsN]); // Copy !!
 }
 
 SP::SimpleMatrix Moreau::W(SP::DynamicalSystem ds)
@@ -185,7 +186,7 @@ SP::SimpleMatrix Moreau::W(SP::DynamicalSystem ds)
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
   //    RuntimeException::selfThrow("Moreau::W(ds): W[ds] == NULL.");
-  return WMap[ds];
+  return WMap[ds->number()];
 }
 
 void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
@@ -205,18 +206,19 @@ void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
     RuntimeException::selfThrow("Moreau::setW(newVal,ds) - ds == NULL.");
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+  unsigned int dsN = ds->number();
   if (line != sizeW) // check consistency between newValue and dynamical system size
     RuntimeException::selfThrow("Moreau::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
   // Memory allocation for W, if required
-  if (!WMap[ds]) // allocate a new W if required
+  if (!WMap[dsN]) // allocate a new W if required
   {
-    WMap[ds].reset(new SimpleMatrix(newValue));
+    WMap[dsN].reset(new SimpleMatrix(newValue));
   }
   else  // or fill-in an existing one if dimensions are consistent.
   {
-    if (line == WMap[ds]->size(0) && col == WMap[ds]->size(1))
-      *(WMap[ds]) = newValue;
+    if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
+      *(WMap[dsN]) = newValue;
     else
       RuntimeException::selfThrow("Moreau - setW: inconsistent dimensions with problem size for given input matrix W");
   }
@@ -236,7 +238,7 @@ void Moreau::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
   if (line != sizeW) // check consistency between newValue and dynamical system size
     RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
 
-  WMap[ds] = newPtr;                  // link with new pointer
+  WMap[ds->number()] = newPtr;                  // link with new pointer
 }
 
 
@@ -246,9 +248,10 @@ const SimpleMatrix Moreau::getWBoundaryConditions(SP::DynamicalSystem ds)
   assert(ds &&
          "Moreau::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  assert(_WBoundaryConditionsMap[ds] &&
+  unsigned int dsN = ds->number();
+  assert(_WBoundaryConditionsMap[dsN] &&
          "Moreau::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
-  return *(_WBoundaryConditionsMap[ds]); // Copy !!
+  return *(_WBoundaryConditionsMap[dsN]); // Copy !!
 }
 
 SP::SiconosMatrix Moreau::WBoundaryConditions(SP::DynamicalSystem ds)
@@ -257,7 +260,7 @@ SP::SiconosMatrix Moreau::WBoundaryConditions(SP::DynamicalSystem ds)
   //  return WBoundaryConditionsMap[0];
   //  if(WBoundaryConditionsMap[ds]==NULL)
   //    RuntimeException::selfThrow("Moreau::WBoundaryConditions(ds): W[ds] == NULL.");
-  return _WBoundaryConditionsMap[ds];
+  return _WBoundaryConditionsMap[ds->number()];
 }
 
 
@@ -277,7 +280,7 @@ void Moreau::initialize()
     initW(t0, *itDS);
 
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
+    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
   }
 }
 void Moreau::initW(double t, SP::DynamicalSystem ds)
@@ -291,8 +294,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
   if (!OSIDynamicalSystems->isIn(ds))
     RuntimeException::selfThrow("Moreau::initW(t,ds) - ds does not belong to the OSI.");
-
-  if (WMap.find(ds) != WMap.end())
+  unsigned int dsN = ds->number();
+  if (WMap.find(dsN) != WMap.end())
     RuntimeException::selfThrow("Moreau::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
@@ -321,16 +324,16 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
     if (d->M())
       //      *W = *d->M();
-      WMap[ds].reset(new SimpleMatrix(*d->M()));
+      WMap[dsN].reset(new SimpleMatrix(*d->M()));
 
     else
     {
       //W->eye();
       // WMap[ds].reset(new SimpleMatrix(sizeW,sizeW,Siconos::IDENTITY));
-      WMap[ds].reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
-      WMap[ds]->eye();
+      WMap[dsN].reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
+      WMap[dsN]->eye();
     }
-    SP::SiconosMatrix W = WMap[ds];
+    SP::SiconosMatrix W = WMap[dsN];
 
 
     // d->computeJacobianfx(t); // Computation of JacxF is not required here
@@ -356,9 +359,9 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
-    WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
-    SP::SiconosMatrix W = WMap[ds];
+    SP::SiconosMatrix W = WMap[dsN];
 
     if (C)
       scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
@@ -377,8 +380,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-    WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
-    SP::SiconosMatrix W = WMap[ds];
+    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    SP::SiconosMatrix W = WMap[dsN];
 
     if (C)
       scal(h * _theta, *C, *W, false); // W += h*_theta *C
@@ -396,7 +399,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    WMap[ds].reset(new SimpleMatrix(3, 3));
+    WMap[dsN].reset(new SimpleMatrix(3, 3));
   }
   else RuntimeException::selfThrow("Moreau::initW - not yet implemented for Dynamical system type :" + dsType);
 
@@ -422,14 +425,13 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
     RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
-
+  unsigned int dsN = ds->number();
 
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   {
 
 
-
-    if (_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end())
+    if (_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end())
       RuntimeException::selfThrow("Moreau::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
     // Memory allocation for WBoundaryConditions
@@ -438,7 +440,7 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
     unsigned int numberBoundaryConditions = d->boundaryConditions()->velocityIndices()->size();
-    _WBoundaryConditionsMap[ds].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    _WBoundaryConditionsMap[dsN].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
     computeWBoundaryConditions(ds);
   }
   else
@@ -459,14 +461,13 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
          "Moreau::computeWBoundaryConditions(t,ds) - ds == NULL");
 
   Type::Siconos dsType = Type::value(*ds);
-
+  unsigned int dsN = ds->number();
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   {
-
-    assert((_WBoundaryConditionsMap.find(ds) != _WBoundaryConditionsMap.end()) &&
+    assert((_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end()) &&
            "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
-    SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+    SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[dsN];
 
     SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
 
@@ -481,7 +482,7 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
          ++itindex)
     {
 
-      WMap[ds]->getCol(*itindex, *columntmp);
+      WMap[dsN]->getCol(*itindex, *columntmp);
       /*\warning we assume that W is symmetric in the Lagrangian case
         we store only the column and not the row */
 
@@ -490,8 +491,8 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
       columntmp->zero();
       (*columntmp)(*itindex) = diag;
 
-      WMap[ds]->setCol(*itindex, *columntmp);
-      WMap[ds]->setRow(*itindex, *columntmp);
+      WMap[dsN]->setCol(*itindex, *columntmp);
+      WMap[dsN]->setRow(*itindex, *columntmp);
 
       columnindex ++;
     }
@@ -510,14 +511,14 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
   assert(ds &&
          "Moreau::computeW(t,ds) - ds == NULL");
-
-  assert((WMap.find(ds) != WMap.end()) &&
+  unsigned int dsN = ds->number();
+  assert((WMap.find(dsN) != WMap.end()) &&
          "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
-  SP::SiconosMatrix W = WMap[ds];
+  SP::SiconosMatrix W = WMap[dsN];
 
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS)
@@ -788,7 +789,7 @@ double Moreau::computeResidu()
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
         SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
 
         for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -911,7 +912,7 @@ double Moreau::computeResidu()
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
+        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
         SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
 
         for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -1029,7 +1030,7 @@ void Moreau::computeFreeState()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds]; // Its W Moreau matrix of iteration.
+    W = WMap[ds->number()]; // Its W Moreau matrix of iteration.
 
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
@@ -1263,11 +1264,11 @@ void Moreau::prepareNewtonIteration(double time)
 
 struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
-  OneStepNSProblem *osnsp;
-  SP::UnitaryRelation UR;
+  OneStepNSProblem * _osnsp;
+  SP::Interaction _inter;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::UnitaryRelation UR) :
-    osnsp(p), UR(UR) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
+    _osnsp(p), _inter(inter) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -1275,10 +1276,10 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.e();
     Index subCoord(4);
     subCoord[0] = 0;
-    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[1] = _inter->getNonSmoothLawSize();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *UR->y_k(osnsp->levelMin()), *(UR->yp()), subCoord, false);
+    subscal(e, *_inter->y_k(_osnsp->levelMin()), *(_inter->yp()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -1286,7 +1287,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*UR->yp())(0) +=  e * (*UR->y_k(osnsp->levelMin()))(0);
+    (*_inter->yp())(0) +=  e * (*_inter->y_k(_osnsp->levelMin()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -1300,7 +1301,7 @@ struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 };
 
 
-void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
+void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -1309,14 +1310,14 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = inter->getRelationType();
+  RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
 
-  SP::DynamicalSystem ds = *(UR->interaction()->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
 
-  unsigned int sizeY = UR->getNonSmoothLawSize();
+  unsigned int sizeY = inter->getNonSmoothLawSize();
 
-  unsigned int relativePosition = UR->getRelativePosition();
+  unsigned int relativePosition = 0;
 
 
 
@@ -1337,23 +1338,23 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
   SP::SiconosVector H_alpha;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
-  Xq = UR->xq();
-  Yp = UR->yp();
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
+  Xq = inter->workXq();
+  Yp = inter->yp();
 
-  Xfree = UR->workFree();
+  Xfree = inter->workFree();
 
   assert(Xfree);
 
 
-  SP::Interaction mainInteraction = UR->interaction();
+  SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
 
   if (relationType == FirstOrder && relationSubType == Type2R)
   {
     SP::SiconosVector lambda;
-    lambda = UR->interaction()->lambda(0);
+    lambda = inter->lambda(0);
     C = mainInteraction->relation()->C();
     D = mainInteraction->relation()->D();
     assert(lambda);
@@ -1378,7 +1379,7 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
     {
       RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
-    H_alpha = UR->interaction()->relation()->Halpha();
+    H_alpha = inter->relation()->Halpha();
     assert(H_alpha);
     *Yp += *H_alpha;
   }
@@ -1394,8 +1395,8 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
       if (Xfree->size() == 0)
       {
         // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding unitaryBlock in each UR for each ds of the
-        // current UR.
+        // corresponding interactionBlock in each Interactionfor each ds of the
+        // current Interaction.
         ConstDSIterator itDS;
         for (itDS = mainInteraction->dynamicalSystemsBegin();
              itDS != mainInteraction->dynamicalSystemsEnd();
@@ -1429,8 +1430,8 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
       if (Xfree->size() == 0)
       {
         // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding unitaryBlock in each UR for each ds of the
-        // current UR.
+        // corresponding interactionBlock in each Interactionfor each ds of the
+        // current Interaction.
         ConstDSIterator itDS;
         for (itDS = mainInteraction->dynamicalSystemsBegin();
              itDS != mainInteraction->dynamicalSystemsEnd();
@@ -1475,8 +1476,8 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
       {
         if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->computehDot(simulation()->getTkp1());
-          subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(UR->interaction()->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+          boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+          subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
         }
         else
           RuntimeException::selfThrow("Moreau::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
@@ -1508,7 +1509,7 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
       if (F)
       {
-        SP::SiconosVector  workZ = UR->workz();
+        SP::SiconosVector  workZ = inter->workZ();
         coord[3] = F->size(1);
         coord[5] = F->size(1);
         subprod(*F, *workZ, *Yp, coord, false);
@@ -1517,10 +1518,10 @@ void Moreau::computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp)
 
   }
 
-  if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
+  if (inter->getRelationType() == Lagrangian || inter->getRelationType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, UR);
-    UR->interaction()->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
+    inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 
 
@@ -1537,7 +1538,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
-    W = WMap[ds];
+    W = WMap[ds->number()];
     Type::Siconos dsType = Type::value(*ds);
 
     if (dsType == Type::LagrangianLinearTIDS)
@@ -1610,7 +1611,7 @@ void Moreau::updateState(unsigned int level)
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
-    W = WMap[ds];
+    W = WMap[ds->number()];
     // Get the DS type
 
     Type::Siconos dsType = Type::value(*ds);
@@ -1714,7 +1715,7 @@ void Moreau::updateState(unsigned int level)
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
-          _WBoundaryConditionsMap[ds]->getCol(bc, *columntmp);
+          _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
           if (level != LEVELMAX && d->p(level))
@@ -1888,7 +1889,7 @@ void Moreau::display()
   {
     cout << "--------------------------------" << endl;
     cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
-    if (WMap[*it]) WMap[*it]->display();
+    if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
     else cout << "-> NULL" << endl;
     cout << "--> and corresponding theta is: " << _theta << endl;
   }

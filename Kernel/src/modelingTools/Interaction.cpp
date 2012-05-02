@@ -308,7 +308,7 @@ void Interaction::initializeMemory()
 
 
 
-  // get the dimension of the non smooth law, ie the size of a unitary blocks (one per relation)
+  // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
   relation()->initializeMemory();
 
@@ -738,7 +738,7 @@ void Interaction::saveInteractionToXML()
 }
 
 
-void Interaction::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
 {
 
   unsigned int k = 0;
@@ -757,8 +757,8 @@ void Interaction::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMa
   }
 
   // check dimension (1)
-  if ((*itDS)->getDim() != UnitaryBlock->size(1))
-    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+  if ((*itDS)->getDim() != InteractionBlock->size(1))
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
 
   SP::SiconosMatrix originalMatrix;
 
@@ -780,23 +780,23 @@ void Interaction::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMa
     originalMatrix = r->jachqT();
   }
   else
-    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
 
-  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
-  // dim of the sub-unitaryBlock
+  // copy sub-interactionBlock of originalMatrix into InteractionBlock
+  // dim of the sub-interactionBlock
   Index subDim(2);
-  subDim[0] = UnitaryBlock->size(0);
-  subDim[1] = UnitaryBlock->size(1);
+  subDim[0] = InteractionBlock->size(0);
+  subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in UnitaryBlock
+  // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = 0; //_relativePosition;
   subPos[1] = k;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
-void Interaction::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
 {
   unsigned int k = 0;
   unsigned int NumDS = 0;
@@ -806,11 +806,11 @@ void Interaction::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSyst
 
   Type::Siconos dsType = Type::value(*ds);
   if (dsType != Type::NewtonEulerDS)
-    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject- ds is not from NewtonEulerDS.");
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");
 
   RELATION::TYPES relationType = relation()->getType();
   if (relationType != NewtonEuler)
-    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject- relation is not from NewtonEulerR.");
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- relation is not from NewtonEulerR.");
 
   // look for ds and its position in G
   while (*itDS != ds && itDS != dynamicalSystemsEnd())
@@ -822,8 +822,8 @@ void Interaction::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSyst
 
   // check dimension (1)
   unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
-  if (sizeDS != UnitaryBlock->size(1))
-    RuntimeException::selfThrow("Interaction::getLeftUnitaryBlockForDSForProject(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+  if (sizeDS != InteractionBlock->size(1))
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
 
 
   SP::SiconosMatrix originalMatrix;
@@ -832,21 +832,21 @@ void Interaction::getLeftUnitaryBlockForDSProjectOnConstraints(SP::DynamicalSyst
   //proj_with_q originalMatrix = r->jachqProj();
   originalMatrix = r->jachq();
 
-  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
-  // dim of the sub-unitaryBlock
+  // copy sub-interactionBlock of originalMatrix into InteractionBlock
+  // dim of the sub-interactionBlock
   Index subDim(2);
-  subDim[0] = UnitaryBlock->size(0);
-  subDim[1] = UnitaryBlock->size(1);
+  subDim[0] = InteractionBlock->size(0);
+  subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in UnitaryBlock
+  // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = 0;//_relativePosition;
   subPos[1] = k;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
-void Interaction::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
+void Interaction::getRightInteractionBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix InteractionBlock) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -860,8 +860,8 @@ void Interaction::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosM
   }
 
   // check dimension (1)
-  if ((*itDS)->getDim() != UnitaryBlock->size(0))
-    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
+  if ((*itDS)->getDim() != InteractionBlock->size(0))
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
 
 
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
@@ -873,58 +873,57 @@ void Interaction::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosM
   }
   else if (relationType == Lagrangian || relationType == NewtonEuler)
   {
-    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS, call not permit " + relationType);
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, call not permit " + relationType);
   }
   else
-    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + relationType);
 
   if (! originalMatrix)
-    RuntimeException::selfThrow("Interaction::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
 
-  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
-  // dim of the sub-unitaryBlock
+  // copy sub-interactionBlock of originalMatrix into InteractionBlock
+  // dim of the sub-interactionBlock
   Index subDim(2);
-  subDim[0] = UnitaryBlock->size(0);
-  subDim[1] = UnitaryBlock->size(1);
+  subDim[0] = InteractionBlock->size(0);
+  subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in UnitaryBlock
+  // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = k;
   subPos[1] = 0;//_relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
+  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
+void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const
 {
-  // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that
+  // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
   // coupling between relations through D must be taken into account
   // thanks to the nslaw (by "increasing" its dimension).
 
-  SP::SiconosMatrix D;
+  SP::SiconosMatrix D = relation()->jachlambda();
   //  if(relation()->getNumberOfJacobiansForH()>1)
-  D = relation()->jachlambda();
 
-  if (! D)
+  if (!D)
   {
-    UnitaryBlock->zero();
-    return; //ie no extra unitaryBlock
+    InteractionBlock->zero();
+    return; //ie no extra interactionBlock
   }
 
-  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
-  // dim of the sub-unitaryBlock
+  // copy sub-interactionBlock of originalMatrix into InteractionBlock
+  // dim of the sub-interactionBlock
   Index subDim(2);
-  subDim[0] = UnitaryBlock->size(0);
-  subDim[1] = UnitaryBlock->size(1);
+  subDim[0] = InteractionBlock->size(0);
+  subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in UnitaryBlock
+  // and of first element to be set in InteractionBlock
   Index subPos(4);
   subPos[0] = 0;//_relativePosition;
   subPos[1] = 0;//_relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(D, UnitaryBlock, subDim, subPos);
+  setBlock(D, InteractionBlock, subDim, subPos);
 }
 

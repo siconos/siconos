@@ -43,23 +43,23 @@ OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 }
 
 void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
-    SP::UnitaryRelationsGraph indexSet)
+    SP::InteractionsGraph indexSet)
 {
   // === Description ===
 
-  // For a unitaryBlock (diagonal or extra diagonal) corresponding to
-  // a Unitary Relation, we need to know the position of its first
+  // For a interactionBlock (diagonal or extra diagonal) corresponding to
+  // a Interaction, we need to know the position of its first
   // element in the full-matrix M. This position depends on the
-  // previous unitaryBlocks sizes.
+  // previous interactionBlocks sizes.
   //
-  // positions are saved in a map<SP::UnitaryRelation, unsigned int>,
-  // named unitaryBlocksPositions.
+  // positions are saved in a map<SP::Interaction, unsigned int>,
+  // named interactionBlocksPositions.
   //
 
   // Computes real size of the current matrix = sum of the dim. of all
-  // UR in indexSet
+  // Interactionin indexSet
   dim = 0;
-  UnitaryRelationsGraph::VIterator vd, vdend;
+  InteractionsGraph::VIterator vd, vdend;
 #ifdef OSNSMPROJ_DEBUG
   std::cout << "indexSet :" << indexSet << std::endl;
   indexSet->display();
@@ -68,7 +68,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
-    //    (*unitaryBlocksPositions)[indexSet->bundle(*vd)] = dim;
+    //    (*interactionBlocksPositions)[indexSet->bundle(*vd)] = dim;
 #ifdef OSNSMPROJ_DEBUG
     std::cout << " dim :" << dim << std::endl;
     std::cout << "vd :" << *vd << std::endl;
@@ -77,22 +77,22 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
 
 
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
-    SP::UnitaryRelation UR = indexSet->bundle(*vd);
+    SP::Interaction inter = indexSet->bundle(*vd);
 
-    unsigned int nslawSize = computeSizeForProjection(UR->interaction());
+    unsigned int nslawSize = computeSizeForProjection(inter);
 
     dim += nslawSize;
     assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
   }
 }
 
-void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bool update)
+void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool update)
 {
   assert(indexSet);
 
   if (update)
   {
-    // Computes dimRow and unitaryBlocksPositions according to indexSet
+    // Computes dimRow and interactionBlocksPositions according to indexSet
     updateSizeAndPositions(dimColumn, indexSet);
     dimRow = dimColumn;
   }
@@ -114,16 +114,16 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
       }
     }
 
-    // ======> Aim: find UR1 and UR2 both in indexSet and which have
+    // ======> Aim: find inter1 and inter2 both in indexSet and which have
     // common DynamicalSystems.  Then get the corresponding matrix
-    // from map unitaryBlocks, and copy it into M
+    // from map interactionBlocks, and copy it into M
 
     unsigned int pos = 0, col = 0; // index position used for
-    // unitaryBlock copy into M, see
+    // interactionBlock copy into M, see
     // below.
-    // === Loop through "active" Unitary Relations (ie present in
+    // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
-    UnitaryRelationsGraph::VIterator vi, viend;
+    InteractionsGraph::VIterator vi, viend;
 #ifdef OSNSMPROJ_DEBUG
     std::cout << "indexSet :" << indexSet << std::endl;
     indexSet->display();
@@ -131,8 +131,8 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
     for (boost::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
-      SP::UnitaryRelation ur = indexSet->bundle(*vi);
-      pos = ur->absolutePositionProj();
+      SP::Interaction inter = indexSet->bundle(*vi);
+      pos = inter->absolutePositionProj();
       assert(properties(*indexSet)->blockProj[*vi]);
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *(properties(*indexSet)->blockProj[*vi]));
@@ -143,21 +143,21 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
     }
 
 
-    UnitaryRelationsGraph::EIterator ei, eiend;
+    InteractionsGraph::EIterator ei, eiend;
     for (boost::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
-      UnitaryRelationsGraph::VDescriptor vd1 = indexSet->source(*ei);
-      UnitaryRelationsGraph::VDescriptor vd2 = indexSet->target(*ei);
+      InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
+      InteractionsGraph::VDescriptor vd2 = indexSet->target(*ei);
 
-      SP::UnitaryRelation ur1 = indexSet->bundle(vd1);
-      SP::UnitaryRelation ur2 = indexSet->bundle(vd2);
+      SP::Interaction inter1 = indexSet->bundle(vd1);
+      SP::Interaction inter2 = indexSet->bundle(vd2);
 
-      pos =  ur1->absolutePositionProj();//(*unitaryBlocksPositions)[ur1];
+      pos =  inter1->absolutePositionProj();//(*interactionBlocksPositions)[inter1];
 
-      assert(indexSet->is_vertex(ur2));
+      assert(indexSet->is_vertex(inter2));
 
-      col =  ur2->absolutePositionProj();//(*unitaryBlocksPositions)[ur2];
+      col =  inter2->absolutePositionProj();//(*interactionBlocksPositions)[inter2];
 
 
       assert(pos < dimRow);
@@ -189,9 +189,9 @@ void OSNSMatrixProjectOnConstraints::fill(SP::UnitaryRelationsGraph indexSet, bo
   if (update)
     convert();
 }
-unsigned int OSNSMatrixProjectOnConstraints::getPositionOfUnitaryBlock(SP::UnitaryRelation UR) const
+unsigned int OSNSMatrixProjectOnConstraints::getPositionOfInteractionBlock(SP::Interaction inter) const
 {
-  return UR->absolutePositionProj();
+  return inter->absolutePositionProj();
 }
 
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)

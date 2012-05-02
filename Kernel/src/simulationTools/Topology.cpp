@@ -20,7 +20,7 @@
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "EqualityConditionNSL.hpp"
 
 #include <boost/bind.hpp>
@@ -38,10 +38,10 @@
 Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
-  _URG.resize(1);
+  _IG.resize(1);
   _DSG.resize(1);
 
-  _URG[0].reset(new UnitaryRelationsGraph());
+  _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
 
   _allInteractions.reset(new InteractionsSet());
@@ -52,10 +52,10 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
   _numberOfConstraints(0), _symmetric(false)
 {
 
-  _URG.resize(1);
+  _IG.resize(1);
   _DSG.resize(1);
 
-  _URG[0].reset(new UnitaryRelationsGraph());
+  _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
 
   _allInteractions.reset(new InteractionsSet());
@@ -76,10 +76,10 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
   _numberOfConstraints(0), _symmetric(false)
 {
 
-  _URG.resize(1);
+  _IG.resize(1);
   _DSG.resize(1);
 
-  _URG[0].reset(new UnitaryRelationsGraph());
+  _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
 
   _allInteractions.reset(new InteractionsSet());
@@ -103,12 +103,12 @@ Topology::~Topology()
   clear();
 }
 
-UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interaction inter)
+InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
-  // Creates UnitaryRelations corresponding to inter and add them into
-  // _URG
+  // Creates Interactions corresponding to inter and add them into
+  // _IG
 
   // First, we get the number of relations in the interaction.  This
   // corresponds to inter->getNumberOfRelations but since Interaction
@@ -121,28 +121,28 @@ UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Intera
     RuntimeException::selfThrow("Topology::addInteractionInIndexSet - m > 1. Obsolete !");
 
   // vector of the Interaction
-  UnitaryRelationsGraph::EDescriptor ur_current_edge;
+  InteractionsGraph::EDescriptor inter_current_edge;
 
-  UnitaryRelationsGraph::EDescriptor ds_current_edge;
+  InteractionsGraph::EDescriptor ds_current_edge;
 
   SP::DynamicalSystemsSet systems = inter->dynamicalSystems();
 
   _numberOfConstraints += m * nsLawSize;
 
   // _DSG is the hyper forest : (vertices : dynamical systems, edges :
-  // unitary relations)
+  // Interactions)
   //
-  // _URG is the hyper graph : (vertices : unitary relations, edges :
+  // _IG is the hyper graph : (vertices : Interactions, edges :
   // dynamical systems)
 
-  // _URG = L(_DSG),  L is the line graph transformation
+  // _IG = L(_DSG),  L is the line graph transformation
 
 
   // for all couples of ds in the interaction
   DEBUG_PRINTF("addInteractionInIndexSet systems->size() : %d\n", systems->size());
 
 
-  UnitaryRelationsGraph::VDescriptor urg_new_ve;
+  InteractionsGraph::VDescriptor ig_new_ve;
 
   // only one or two ds! (otherwise we need a hyper-graph &
   // SiconosGraph does not provide it yet)
@@ -151,13 +151,13 @@ UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Intera
     for (DSIterator i2ds = i1ds; i2ds != systems->end(); ++i2ds)
     {
 
-      // build the unitary relations
-      std::vector<SP::UnitaryRelation> current_urs;
-      for (unsigned int i = 0, pos = 0; i < m; ++i, pos += nsLawSize)
-      {
-        SP::UnitaryRelation UR(new UnitaryRelation(inter, pos, i));
-        current_urs.push_back(UR);
-      };
+      // build the Interactions
+      //      std::vector<SP::Interaction> current_interSet;
+      //      for (unsigned int i=0, pos=0; i<m; ++i, pos += nsLawSize)
+      //      {
+      //        SP::Interaction inter(new Interaction(inter,pos,i));
+      //        current_interSet.push_back(inter);
+      //      };
 
       // one DS in the interaction is a special case : a self branch
       if ((i1ds == i2ds) && inter->dynamicalSystems()->size() == 1)
@@ -166,24 +166,24 @@ UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Intera
         dsgv = _DSG[0]->add_vertex(*i1ds);
 
         // this may be a multi edges graph
-        for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
-             uri != current_urs.end(); ++uri)
+        //        for (std::vector<SP::Interaction>::iterator itI = current_interSet.begin();
+        //             itI != current_interSet.end(); ++itI)
         {
-          assert(!_DSG[0]->is_edge(dsgv, dsgv, *uri));
-          assert(!_URG[0]->is_vertex(*uri));
+          assert(!_DSG[0]->is_edge(dsgv, dsgv, inter));
+          assert(!_IG[0]->is_vertex(inter));
 
           DynamicalSystemsGraph::EDescriptor new_ed;
-          boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
+          boost::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
 
           // add self branches in vertex properties
           // note : boost graph SEGFAULT on self branch removal
           // see https://svn.boost.org/trac/boost/ticket/4622
-          _URG[0]->properties(urg_new_ve).source = *i1ds;
-          _URG[0]->properties(urg_new_ve).target = *i1ds;
+          _IG[0]->properties(ig_new_ve).source = *i1ds;
+          _IG[0]->properties(ig_new_ve).target = *i1ds;
 
-          assert(_URG[0]->bundle(urg_new_ve) == *uri);
-          assert(_URG[0]->is_vertex(*uri));
-          assert(_DSG[0]->is_edge(dsgv, dsgv, *uri));
+          assert(_IG[0]->bundle(ig_new_ve) == inter);
+          assert(_IG[0]->is_vertex(inter));
+          assert(_DSG[0]->is_edge(dsgv, dsgv, inter));
         }
       }
       else
@@ -196,55 +196,54 @@ UnitaryRelationsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Intera
           dsgv2 = _DSG[0]->add_vertex(*i2ds);
 
           // this may be a multi edges graph
-          for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
-               uri != current_urs.end(); ++uri)
+          //          for (std::vector<SP::Interaction>::iterator itI = current_interSet.begin();
+          //               itI != current_interSet.end(); ++itI)
           {
-            assert(!_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
-            assert(!_URG[0]->is_vertex(*uri));
+            assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
+            assert(!_IG[0]->is_vertex(inter));
 
             DynamicalSystemsGraph::EDescriptor new_ed;
-            UnitaryRelationsGraph::VDescriptor urg_new_ve;
-            boost::tie(new_ed, urg_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, *uri, *_URG[0]);
+            boost::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
 
             // add self branches in vertex properties
             // note : boost graph SEGFAULT on self branch removal
             // see https://svn.boost.org/trac/boost/ticket/4622
-            _URG[0]->properties(urg_new_ve).source = *i1ds;
-            _URG[0]->properties(urg_new_ve).target = *i2ds;
+            _IG[0]->properties(ig_new_ve).source = *i1ds;
+            _IG[0]->properties(ig_new_ve).target = *i2ds;
 
-            assert(_URG[0]->bundle(urg_new_ve) == *uri);
-            assert(_URG[0]->is_vertex(*uri));
-            assert(_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+            assert(_IG[0]->bundle(ig_new_ve) == inter);
+            assert(_IG[0]->is_vertex(inter));
+            assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
           }
         }
     }
   }
 
-  // note: only one or two ds => only one vertex in URG
-  return urg_new_ve;
+  // note: only one or two ds => only one vertex in IG
+  return ig_new_ve;
 
 };
 
 /* an edge is removed from _DSG graph if the corresponding vertex is
-   removed from the adjoint graph (_URG)
+   removed from the adjoint graph (_IG)
 */
 struct VertexIsRemoved
 {
   VertexIsRemoved(SP::Interaction I,
-                  SP::DynamicalSystemsGraph sg, SP::UnitaryRelationsGraph asg) :
-    _I(I), __DSG(sg), __URG(asg) {};
+                  SP::DynamicalSystemsGraph sg, SP::InteractionsGraph asg) :
+    _I(I), __DSG(sg), __IG(asg) {};
   bool operator()(DynamicalSystemsGraph::EDescriptor ed)
   {
 
-    if (__URG->is_vertex(__DSG->bundle(ed)))
+    if (__IG->is_vertex(__DSG->bundle(ed)))
     {
-      UnitaryRelationsGraph::VDescriptor uvd = __URG->descriptor(__DSG->bundle(ed));
+      InteractionsGraph::VDescriptor ivd = __IG->descriptor(__DSG->bundle(ed));
 
-      if (__URG->bundle(uvd)->interaction() == _I)
+      if (__IG->bundle(ivd) == _I)
       {
-        __URG->remove_vertex(__DSG->bundle(ed));
+        __IG->remove_vertex(__DSG->bundle(ed));
 
-        assert(__URG->size() == __DSG->edges_number() - 1);
+        assert(__IG->size() == __DSG->edges_number() - 1);
 
         return true;
       }
@@ -260,12 +259,12 @@ struct VertexIsRemoved
   }
   SP::Interaction _I;
   SP::DynamicalSystemsGraph __DSG;
-  SP::UnitaryRelationsGraph __URG;
+  SP::InteractionsGraph __IG;
 };
 
 
-/* remove an interaction : remove edges (unitary relation) from _DSG if
-   corresponding vertices are removed from _URG */
+/* remove an interaction : remove edges (Interaction) from _DSG if
+   corresponding vertices are removed from _IG */
 void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
 
@@ -275,7 +274,7 @@ void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
   {
     _DSG[0]->remove_out_edge_if
     (_DSG[0]->descriptor(*ids),
-     VertexIsRemoved(inter, _DSG[0], _URG[0]));
+     VertexIsRemoved(inter, _DSG[0], _IG[0]));
   };
 };
 
@@ -285,29 +284,29 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 };
 
-UnitaryRelationsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter)
+InteractionsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
-  assert(_DSG[0]->edges_number() == _URG[0]->size());
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 
   _allInteractions->insert(inter);
-  UnitaryRelationsGraph::VDescriptor urg_new_ve = addInteractionInIndexSet(inter);
+  InteractionsGraph::VDescriptor ig_new_ve = addInteractionInIndexSet(inter);
 
-  assert(_DSG[0]->edges_number() == _URG[0]->size());
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 
-  return urg_new_ve;
+  return ig_new_ve;
 
 };
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
-  assert(_DSG[0]->edges_number() == _URG[0]->size());
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 
   _allInteractions->erase(inter);
   removeInteractionFromIndexSet(inter);
 
-  assert(_DSG[0]->edges_number() == _URG[0]->size());
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 };
 
 void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
@@ -350,10 +349,10 @@ void Topology::initialize()
 
 void Topology::setProperties()
 {
-  for (unsigned int i = 0; i < _URG.size(); ++i)
+  for (unsigned int i = 0; i < _IG.size(); ++i)
   {
-    _URG[i]->properties().reset(new UnitaryRelationsGraphProperties(_URG[i]));
-    _URG[i]->properties()->symmetric = _symmetric;
+    _IG[i]->properties().reset(new InteractionsGraphProperties(_IG[i]));
+    _IG[i]->properties()->symmetric = _symmetric;
   }
   _DSG[0]->properties().reset(new DynamicalSystemsGraphProperties(_DSG[0]));
   _DSG[0]->properties()->symmetric = _symmetric;
@@ -363,7 +362,7 @@ void Topology::clear()
 {
   _allInteractions->clear();
 
-  _URG.clear();
+  _IG.clear();
   _DSG.clear();
 
   _isTopologyUpToDate = false;

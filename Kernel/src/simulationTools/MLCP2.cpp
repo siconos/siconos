@@ -45,13 +45,13 @@ void MLCP2::initialize(SP::Simulation simulation)
   else
     printf("DSSet is not empty\n");
   updateDSBlocks();
-  updateDSUnitaryBlocks();
+  updateDSInteractionBlocks();
   DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
-  updateUnitaryDSBlocks();
+  updateInteractionDSBlocks();
   DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
@@ -63,12 +63,12 @@ void MLCP2::initialize(SP::Simulation simulation)
 }
 void MLCP2::updateM()
 {
-  SP::UnitaryRelationsGraph URSet = simulation->indexSet(levelMin);
-  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::InteractionsGraph IG = simulation->indexSet(levelMin);
+  SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (!M)
   {
-    // Creates and fills M using UR of indexSet
-    M.reset(new OSNSMatrix(URSet, DSSet, unitaryBlocks,  DSBlocks, DSUnitaryBlocks,  unitaryDSBlocks, MStorageType));
+    // Creates and fills M using Interactionof indexSet
+    M.reset(new OSNSMatrix(IG, DSSet, interactionBlocks,  DSBlocks, DSInteractionBlocks,  interactionDSBlocks, MStorageType));
 
     numerics_problem.M = M->getNumericsMatrix().get();
     numerics_problem.A = 0;
@@ -84,17 +84,17 @@ void MLCP2::updateM()
   else
   {
     M->setStorageType(MStorageType);
-    M->fill(URSet, unitaryBlocks);
+    M->fill(IG, interactionBlocks);
 
   }
   sizeOutput = M->size();
 }
 
-// void MLCP2::updateUnitaryBlocks()
+// void MLCP2::updateInteractionBlocks()
 // {
-//   SP::UnitaryRelationsSet indexSet;
+//   SP::InteractionsSet indexSet;
 //   bool isTimeInvariant;
-//   UnitaryRelationsIterator itUR1, itUR2;
+//   InteractionsIterator itinter1, itinter2;
 //   DSIterator itDS;
 
 //   // Get index set from Simulation
@@ -103,15 +103,15 @@ void MLCP2::updateM()
 //   isTimeInvariant = simulation->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
 //   if (!isTimeInvariant || mFirstCall){
-//     for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
-//       computeblock(&(*itUR1));
+//     for(itinter1 = indexSet->begin(); itinter1!=indexSet->end();++itinter1){
+//       computeblock(&(*itinter1));
 //     }
 //     DynamicalSystemsSet * allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 //     for(itDS=allDS->begin(); itDS!= allDS->end(); ++itDS){
 //       computeblock(&(*itDS));
-//       for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
-//  computeblock(&(*itDS),&(*itUR1));
-//  computeblock(&(*itUR1),&(*itDS));
+//       for(itinter1 = indexSet->begin(); itinter1!=indexSet->end();++itinter1){
+//  computeblock(&(*itDS),&(*itinter1));
+//  computeblock(&(*itinter1),&(*itDS));
 //       }
 //     }
 //   }
@@ -138,38 +138,38 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
   }
 }
 
-// // fill unitaryBlocks : D
-void MLCP2::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
+// // fill interactionBlocks : D
+void MLCP2::computeInteractionBlock(SP::Interaction inter1, SP::Interaction inter2)
 {
-  if (!unitaryBlocks[UR1][UR1])
+  if (!interactionBlocks[inter1][inter1])
   {
-    unitaryBlocks[UR1][UR1].reset(new SimpleMatrix(UR1->getNonSmoothLawSize(), UR1->getNonSmoothLawSize()));
-    m += UR1->getNonSmoothLawSize();
+    interactionBlocks[inter1][inter1].reset(new SimpleMatrix(inter1->getNonSmoothLawSize(), inter1->getNonSmoothLawSize()));
+    m += inter1->getNonSmoothLawSize();
   }
-  UR1->getExtraUnitaryBlock(unitaryBlocks[UR1][UR1]);
+  inter1->getExtraInteractionBlock(interactionBlocks[inter1][inter1]);
 }
 
 
-// fill unitaryDSBlocks : C
-void MLCP2::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS)
+// fill interactionDSBlocks : C
+void MLCP2::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem DS)
 {
-  if (unitaryDSBlocks[UR][DS] == 0)
+  if (interactionDSBlocks[inter][DS] == 0)
   {
-    unitaryDSBlocks[UR][DS].reset(new SimpleMatrix(UR->getNonSmoothLawSize(), DS->getDim()));
+    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(inter->getNonSmoothLawSize(), DS->getDim()));
   }
-  UR->getLeftUnitaryBlockForDS(DS, unitaryDSBlocks[UR][DS]);
+  inter->getLeftInteractionBlockForDS(DS, interactionDSBlocks[inter][DS]);
 }
 
-//fill DSUnitaryBlocks with B
-void MLCP2::computeDSUnitaryBlock(SP::DynamicalSystem DS, SP::UnitaryRelation UR)
+//fill DSInteractionBlocks with B
+void MLCP2::computeDSInteractionBlock(SP::DynamicalSystem DS, SP::Interaction inter)
 {
   double h = simulation->timeStep();
-  if (!DSUnitaryBlocks[DS][UR])
+  if (!DSInteractionBlocks[DS][inter])
   {
-    DSUnitaryBlocks[DS][UR].reset(new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize()));
+    DSInteractionBlocks[DS][inter].reset(new SimpleMatrix(DS->getDim(), inter->getNonSmoothLawSize()));
   }
-  UR->getRightUnitaryBlockForDS(DS, DSUnitaryBlocks[DS][UR]);
-  *(DSUnitaryBlocks[DS][UR]) *= h;
+  inter->getRightInteractionBlockForDS(DS, DSInteractionBlocks[DS][inter]);
+  *(DSInteractionBlocks[DS][inter]) *= h;
 
 }
 
@@ -181,19 +181,19 @@ void MLCP2::computeq(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsGraph indexSet = simulation->indexSet(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+  SP::InteractionsGraph indexSet = simulation->indexSet(levelMin);
+  // === Loop through "active" Interactions (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // *itCurrent is a SP::UnitaryRelation.
+    // *itCurrent is a SP::Interaction.
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    pos = M->getPositionOfInteractionBlock(*itCurrent);
     //update e(ti+1)
-    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->interaction()->relation())->e();
+    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
     boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
   }
   SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -230,14 +230,14 @@ void MLCP2::preCompute(double time)
 
   if (!topology->isTimeInvariant() || !simulation->model()->nonSmoothDynamicalSystem()->isLinear())
   {
-    // Computes new unitaryBlocks if required
-    updateUnitaryBlocks();
+    // Computes new interactionBlocks if required
+    updateInteractionBlocks();
 
     // Updates matrix M
-    SP::UnitaryRelationsSet URSet = simulation->indexSet(levelMin);
+    SP::InteractionsSet interSet = simulation->indexSet(levelMin);
     SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
     //fill M block
-    M->fill(URSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
+    M->fill(interSet, DSSet, interactionBlocks, DSBlocks, DSInteractionBlocks, interactionDSBlocks);
     sizeOutput = M->size();
 
     // Checks z and w sizes and reset if necessary
@@ -321,27 +321,27 @@ int MLCP2::compute(double time)
 void MLCP2::postCompute()
 {
   // This function is used to set y/lambda values using output from lcp_driver (w,z).
-  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
+  // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
+  SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
 
   // y and lambda vectors
   SP::SiconosVector lambda, y, x;
 
-  // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
+  // === Loop through "active" Interactions (ie present in indexSets[1]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
 
-  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  for (InteractionsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // size of the block that corresponds to the current UnitaryRelation
+    // size of the block that corresponds to the current Interaction
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-block in the vector w or z
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    // Get the relative position of inter-block in the vector w or z
+    pos = M->getPositionOfInteractionBlock(*itCurrent);
 
-    // Get Y and Lambda for the current Unitary Relation
+    // Get Y and Lambda for the current Interaction
     y = (*itCurrent)->y(levelMin);
     lambda = (*itCurrent)->lambda(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.

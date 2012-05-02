@@ -21,7 +21,7 @@
 #include "D1MinusLinear.hpp"
 #include "TimeDiscretisation.hpp"
 #include "Topology.hpp"
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "debug.h"
@@ -31,15 +31,15 @@ using namespace RELATION;
 
 void TimeSteppingD1Minus::initOSNS()
 {
-  // initialize OSNS for UnitaryRelationsGraph from Topology
+  // initialize OSNS for InteractionsGraph from Topology
   assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
   SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    initializeInteraction(indexSet0->bundle(*ui)->interaction());
+    initializeInteraction(indexSet0->bundle(*ui));
   }
 
   // there is at least one OSNP
@@ -93,7 +93,7 @@ TimeSteppingD1Minus::~TimeSteppingD1Minus()
 
 void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet i: add or remove UnitaryRelations from
+  // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
   assert(!_model.expired());
@@ -108,11 +108,11 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   assert(i > 0 &&
          "TimeSteppingD1Minus::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
-  // For all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0); // ALL UnitaryRelations : formula (8.30) of Acary2008
-  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1); // ACTIVE UnitaryRelations for IMPACTS
-  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2); // ACTIVE UnitaryRelations for CONTACTS
+  SP::InteractionsGraph indexSet0 = topo->indexSet(0); // ALL Interactions : formula (8.30) of Acary2008
+  SP::InteractionsGraph indexSet1 = topo->indexSet(1); // ACTIVE Interactions for IMPACTS
+  SP::InteractionsGraph indexSet2 = topo->indexSet(2); // ACTIVE Interactions for CONTACTS
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -124,64 +124,64 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_EXPR(indexSet1->display());
   DEBUG_EXPR(indexSet2->display());
 
-  UnitaryRelationsGraph::VIterator uipend, uip;
+  InteractionsGraph::VIterator uipend, uip;
 
   for (tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
-    SP::UnitaryRelation urp = indexSet0->bundle(*uip);
+    SP::Interaction inter = indexSet0->bundle(*uip);
 
     if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {
       impactOccuredLastTimeStep = false;
       DEBUG_PRINT("\nUPDATE INDEXSET 1\n");
 
-      double y = (*(urp->y(0)))(0); // current position
-      double yOld = (*(urp->yOld(0)))(0); // old position
+      double y = (*(inter->y(0)))(0); // current position
+      double yOld = (*(inter->yOld(0)))(0); // old position
 
       DEBUG_PRINTF("y= %f\n", y);
       DEBUG_PRINTF("yOld= %f\n", yOld);
 
-      if (!indexSet1->is_vertex(urp))
+      if (!indexSet1->is_vertex(inter))
       {
         if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
         {
-          // if UnitaryRelation has not been active in the previous calculation and now becomes active
-          indexSet1->copy_vertex(urp, *indexSet0);
+          // if Interaction has not been active in the previous calculation and now becomes active
+          indexSet1->copy_vertex(inter, *indexSet0);
           topo->setHasChanged(true);
         }
       }
       else
       {
-        indexSet1->remove_vertex(urp);
+        indexSet1->remove_vertex(inter);
         topo->setHasChanged(true);
         impactOccuredLastTimeStep = true;
-        urp->lambda(1)->zero(); // impuls is zero
+        inter->lambda(1)->zero(); // impuls is zero
       }
     }
     else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
     {
       DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
 
-      double y = (*(urp->y(0)))(0); // current position
+      double y = (*(inter->y(0)))(0); // current position
 
       DEBUG_PRINTF("y= %f\n", y);
 
-      if (indexSet2->is_vertex(urp))
+      if (indexSet2->is_vertex(inter))
       {
         if (y > DEFAULT_TOL_D1MINUS)
         {
-          // if UnitaryRelation has been active in the previous calculation and now becomes in-active
-          indexSet2->remove_vertex(urp);
+          // if Interaction has been active in the previous calculation and now becomes in-active
+          indexSet2->remove_vertex(inter);
           topo->setHasChanged(true);
-          urp->lambda(2)->zero(); // force is zero
+          inter->lambda(2)->zero(); // force is zero
         }
       }
       else
       {
-        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(urp) && !impactOccuredLastTimeStep)
+        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
         {
-          // if UnitaryRelation has is active but has not become active recently
-          indexSet2->copy_vertex(urp, *indexSet0);
+          // if Interaction has is active but has not become active recently
+          indexSet2->copy_vertex(inter, *indexSet0);
           topo->setHasChanged(true);
         }
       }

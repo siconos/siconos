@@ -22,7 +22,7 @@
 #define NSDS_H
 
 /** Available Dynamical Systems types*/
-enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
+//enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
 #include "SiconosPointers.hpp"
 #include "InteractionsSet.hpp"
@@ -51,54 +51,52 @@ private:
 
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
-  bool BVP;
+  bool _BVP;
 
   /** the topology of the system */
   SP::Topology _topology;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
-  SP::NonSmoothDynamicalSystemXML nsdsxml;
+  SP::NonSmoothDynamicalSystemXML _nsdsxml;
 
   /** default constructor
    */
-  NonSmoothDynamicalSystem(): BVP(false) {};
+  NonSmoothDynamicalSystem(): _BVP(false) {};
 
-private:
-
-  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
+  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds);
 
   /** False is one of the interaction is non-linear.
    */
-  bool mIsLinear;
+  bool _mIsLinear;
 
 public:
 
   /** xml constructor
    *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
-  NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML);
+  NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemXML newNsdsxml);
 
   /** constructor from minimum data.
-   *  \param: a pointer to DynamicalSystem
-   *  \param: a pointer to Interaction
-   *  \param: a bool isBVP to specify if the problem is a BVP or an IVP (default an IVP)
+   *  \param newDS a pointer to a DynamicalSystem
+   *  \param newInteraction a pointer to ab Interaction (optional)
+   *  \param isBVP specify if the problem is a BVP or an IVP (default an IVP)
    */
-  NonSmoothDynamicalSystem(SP::DynamicalSystem, SP::Interaction = SP::Interaction(), const bool& = false);
+  NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, SP::Interaction newInteraction = SP::Interaction(), const bool& isBVP = false);
 
   /** constructor from data - Warning: DS and Interactions are not copied, but links are created
    *  between pointers of the two sets.
-   *  \param: a set of DS
-   *  \param: a set of Interactions
-   *  \param: a bool isBVP to specify if the problem is a BVP or an IVP (default an IVP)
+   *  \param listOfDS set of DynamicalSystems
+   *  \param listOfInteractions set of Interactions
+   *  \param isBVP specify if the problem is a BVP or an IVP (default an IVP)
    */
-  NonSmoothDynamicalSystem(DynamicalSystemsSet&, InteractionsSet&, const bool& = false);
+  NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP = false);
 
   /** constructor from data (only DS, no Interactions)
    *  between pointers of the two sets.
-   *  \param: a set of DS
-   *  \param: a bool isBVP to specify if the problem is a BVO or an IVP (default an IVP)
-   */
-  NonSmoothDynamicalSystem(DynamicalSystemsSet&, const bool& = false);
+   *  \param listOfDS set of DynamicalSystems
+   *  \param isBVP specify if the problem is a BVO or an IVP (default an IVP)
+   *  */
+  NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP = false);
 
   /** destructor
    */
@@ -111,7 +109,7 @@ public:
    */
   inline bool isBVP() const
   {
-    return BVP;
+    return _BVP;
   }
 
   /** get problem type (true if IVP)
@@ -119,15 +117,15 @@ public:
    */
   inline bool isIVP() const
   {
-    return !BVP;
+    return !_BVP;
   }
 
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
-   *  \param bool : true if BVP, false otherwise
+   *  \param newBvp true if BVP, false otherwise
    */
   inline void setBVP(const bool& newBvp)
   {
-    BVP = newBvp;
+    _BVP = newBvp;
   }
 
   // === DynamicalSystems management ===
@@ -137,16 +135,16 @@ public:
    */
   inline unsigned int getNumberOfDS() const
   {
-    return topology()->dSG(0)->size();
-  };
+    return _topology->dSG(0)->size();
+  }
 
   /** get all the DynamicalSystem of the NonSmoothDynamicalSystem
    *  problem
-   * \return a DynamicalSystemsSet *
+   * \return a SP::DynamicalSystemsSet
    */
   inline const SP::DynamicalSystemsGraph dynamicalSystems() const
   {
-    return topology()->dSG(0);
+    return _topology->dSG(0);
   }
 
   // === Interactions management ===
@@ -168,57 +166,54 @@ public:
   }
 
   /** add an interaction to the system
-   * \param a shared pointer to the interaction
+   * \param inter a pointer to the interaction to insert
+   * \param isControlInteraction true if the interaction is used for controling a DS
    */
-  void insertInteraction(SP::Interaction inter)
-  {
-    _topology->insertInteraction(inter);
-  };
+  void insertInteraction(SP::Interaction inter, const bool& isControlInteraction = false);
 
 
   /** remove an interaction to the system
-   * \param a shared pointer to the interaction
+   * \param inter a pointer to the interaction to remove
    */
-  void removeInteraction(SP::Interaction inter)
+  inline void removeInteraction(SP::Interaction inter)
   {
     _topology->removeInteraction(inter);
   };
 
   /** add a dynamical system
-   * \param a shared pointer to a dynamical system
+   * \param ds a pointer to the system to remove
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds)
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->insertDynamicalSystem(ds);
-    mIsLinear = ((ds)->isLinear() && mIsLinear);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
 
   /** remove a dynamical system
    * \param a shared pointer to a dynamical system
    */
-  void removeDynamicalSystem(SP::DynamicalSystem ds)
+  inline void removeDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->removeDynamicalSystem(ds);
   };
 
   /** link an interaction to a dynamical system
-   * \param a SP::Interaction
-   * \param a SP::DynamicalSystem
+   * \param inter a SP::Interaction
+   * \param ds a SP::DynamicalSystem
    */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds)
+  inline void link(SP::Interaction inter, SP::DynamicalSystem ds)
   {
     _topology->link(inter, ds);
-    mIsLinear = ((inter)->relation()->isLinear() && mIsLinear);
+    _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
   };
 
 
   /** get Dynamical system number I
-      -   *  \param the identifier of the DynamicalSystem to get
-      -   *  \return a pointer on DynamicalSystem
-  */
-  SP::DynamicalSystem dynamicalSystemNumber(int) const ;
-
+   * \param nb the identifier of the DynamicalSystem to get
+   * \return a pointer on DynamicalSystem
+   */
+  SP::DynamicalSystem dynamicalSystemNumber(int nb) const;
 
   /** get the topology of the system
    *  \return a pointer on Topology
@@ -234,16 +229,15 @@ public:
   inline SP::NonSmoothDynamicalSystemXML nonSmoothDynamicalSystemXML()
   const
   {
-    return nsdsxml;
+    return _nsdsxml;
   }
 
   /** set the xml linked object
-   *  \param NonSmoothDynamicalSystemXML* : a pointer on
-   *  NonSmoothDynamicalSystemXML* to link
+   *  \param newNsdsxml a pointer on NonSmoothDynamicalSystemXML to link
    */
   inline void setNonSmoothDynamicalSystemXMLPtr(SP::NonSmoothDynamicalSystemXML newNsdsxml)
   {
-    nsdsxml = newNsdsxml;
+    _nsdsxml = newNsdsxml;
   }
 
   // --- OTHER FUNCTIONS ---
@@ -261,24 +255,32 @@ public:
    *  the DSs
    *  \return a double
    */
-  double nsdsConvergenceIndicator() ;
+  double nsdsConvergenceIndicator();
 
   /** return false is one of the interations is not linear.  else
    *  return true.
    *  \return a bool
    */
-  bool isLinear();
+  inline bool isLinear() const
+  {
+    return _mIsLinear;
+  };
 
   void clear();
 
   /** set symmetry in the blocks computation
-   * \param a bool
+   * \param val a bool
    */
   void setSymmetric(bool val)
   {
     topology()->setSymmetric(val);
   }
 
+  /** specify id the given Interaction is for controlling the DS
+   * \param vd the descriptor of the Interaction owning the Interaction
+   * \param isControlInteraction true if the Interaction is used for control purposes
+   **/
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool& isControlInteraction);
 };
 
 #endif

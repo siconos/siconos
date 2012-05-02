@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  *
  * Note: the size of this non smooth law is one by default, but can be set to any value.
- * Size > 1 is usefull when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
- * interaction and one unitary relation.
+ * Size > 1 is useful when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
+ * interaction.
  */
 /*! \file MixedComplementarityConditionNSL.hpp
 
@@ -57,12 +57,12 @@ public:
   *  \param: size of the non smooth law
   *  \param: size of the equality relation
   */
-  MixedComplementarityConditionNSL(unsigned int, unsigned int);
+  MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize);
 
   /** constructor with XML object of the parent class NonSmoothLaw
-  *  \param NonSmoothLawXML* : the XML object corresponding
+  *  \param nslawxml the corresponding XML object
   */
-  MixedComplementarityConditionNSL(SP::NonSmoothLawXML);
+  MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml);
 
   /** Destructor */
   ~MixedComplementarityConditionNSL();
@@ -86,10 +86,10 @@ public:
   };
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param NonSmoothLaw* : the law which must be converted
+  *  \param nslaw the law which must be converted
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
-  static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nsl);
+  static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nslaw);
 
   /** Visitors hook
    */

@@ -64,8 +64,8 @@ private:
 
   unsigned int n;
   double tol;
-  SP::UnitaryRelationsSet indexSet;
-  MapOfMapOfUnitaryMatrices blocks;
+  SP::InteractionsSet indexSet;
+  MapOfMapOfInteractionMatrices blocks;
   Model * temp ;
 public:
   void setUp();

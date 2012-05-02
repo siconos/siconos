@@ -220,7 +220,7 @@ void Simulation::updateIndexSets()
 
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
-  if (((*_allNSProblems)[Id]))
+  if (_allNSProblems->size() > 0 && ((*_allNSProblems)[Id]))
     RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
   (*_allNSProblems)[Id] = osns;
 

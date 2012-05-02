@@ -57,14 +57,14 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix);
  * - two int, the number of blocks in a row and the number of non null blocks.
  *
  * Each block of the current object represents the connection between
- * two coupled Unitary Relations, \n (for example for Lagrangian
+ * two coupled Interactions, \n (for example for Lagrangian
  * systems, a single \f$ H W^{-1} H^t \f$ block or for first order
  * systems \f$ hCW^{-1}B \f$ ...) \n
  *
- * This objects is built using an index set of SP::UnitaryRelation,
+ * This objects is built using an index set of SP::Interaction,
  * that represents the "active" constraints in the OSNS problem and a
- * map<UR* u1, <UR* u2, SiconosMatrix* block> >, block being the link
- * between u1 and u2. Only UR present in the index set are picked out
+ * map<SP::Interaction u1, <SP::Interaction u2, SP::SiconosMatrix block> >, block being the link
+ * between u1 and u2. Only Interaction present in the index set are picked out
  * in the map.
  *
  *  A convert method is also implemented to create a
@@ -143,23 +143,23 @@ public:
   BlockCSRMatrix(unsigned int);
 
   /** Constructor from index set and map
-      \param SP::UnitaryRelation, the index set of the active
+      \param SP::Interaction, the index set of the active
       constraints
   */
-  BlockCSRMatrix(SP::UnitaryRelationsGraph);
+  BlockCSRMatrix(SP::InteractionsGraph);
 
   /** Constructor from DynamicalSystemsSet and map
       \param DynamicalSystemsSet*, the index set of the active constraints
-      \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
+      \param MapOfDSMatrices, the list of matrices linked to a couple of SP::Interaction
   */
   BlockCSRMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&);
 
   /** Constructor from DynamicalSystemsSet and map
-    \param SP::UnitaryRelation, the index set of the active constraints
+    \param SP::Interaction, the index set of the active constraints
      \param DynamicalSystemsSet*, the index set of the active constraints
-     \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
+     \param MapOfDSMatrices, the list of matrices linked to a couple of SP::Interaction
   */
-  BlockCSRMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
+  BlockCSRMatrix(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&);
 
   /** destructor
    */
@@ -208,10 +208,10 @@ public:
   };
 
   /** fill the current class using an index set
-      \param UnitaryRelationsGraph*, the index set of the active
+      \param InteractionsGraph*, the index set of the active
       constraints
   */
-  void fill(SP::UnitaryRelationsGraph);
+  void fill(SP::InteractionsGraph);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the set of DynamicalSystem
@@ -222,12 +222,12 @@ public:
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the set of DynamicalSystem
-       \param UnitaryRelationsGraph*, the index set of the active
+       \param InteractionsGraph*, the index set of the active
        constraints
-       \param MapOfUnitaryMapOfDSMatrices, the list of matrices linked
+       \param MapOfInteractionMapOfDSMatrices, the list of matrices linked
        to a DynamicalSystem
    */
-  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
+  void fill(SP::InteractionsGraph, SP::DynamicalSystemsSet, MapOfInteractionMapOfDSMatrices&);
 
   /** fill the numerics structure numericsMatSparse using MBlockCSR */
   void convert();

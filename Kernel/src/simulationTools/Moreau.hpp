@@ -328,7 +328,7 @@ public:
    * taking into account the nonsmooth input) plus the possible contribution of
    * the nslaw
    */
-  virtual void computeFreeOutput(SP::UnitaryRelation UR, OneStepNSProblem * osnsp);
+  virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i

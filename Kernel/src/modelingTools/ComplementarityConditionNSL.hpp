@@ -18,7 +18,7 @@
  *
  * Note: the size of this non smooth law is one by default, but can be set to any value.
  * Size > 1 is usefull when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
- * interaction and one unitary relation.
+ * interaction and one Interaction.
  */
 /*! \file ComplementarityConditionNSL.hpp
 

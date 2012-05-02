@@ -43,33 +43,33 @@ Relay::Relay(const int newNumericsSolverId , const std::string& newId):
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
 {
-  Relay *parent;
-  SP::UnitaryRelation UR;
-  unsigned int pos;
+  Relay* _parent;
+  SP::Interaction _inter;
+  unsigned int _pos;
 
 
-  _BoundsNSLEffect(Relay *p, SP::UnitaryRelation UR, unsigned int pos) :
-    parent(p), UR(UR), pos(pos) {};
+  _BoundsNSLEffect(Relay *p, SP::Interaction inter, unsigned int pos) :
+    _parent(p), _inter(inter), _pos(pos) {};
 
   void visit(const RelayNSL& nslaw)
   {
 
     // cout << "Relay::_BoundsNSLEffect visit"  << endl;
-    for (unsigned int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  _inter->getNonSmoothLawSize(); i++)
     {
-      (*(parent->lb()))(pos + i) =
+      (*(_parent->lb()))(_pos + i) =
         nslaw.lb();
-      (*(parent->ub()))(pos + i) =
+      (*(_parent->ub()))(_pos + i) =
         nslaw.ub();
     }
   }
 
   void visit(const ComplementarityConditionNSL& nslaw)
   {
-    for (unsigned int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    for (unsigned int i = 0; i <  _inter->getNonSmoothLawSize(); i++)
     {
-      (*(parent->lb()))(pos + i) = 0.0;
-      (*(parent->ub()))(pos + i) = 1e+24;
+      (*(_parent->lb()))(_pos + i) = 0.0;
+      (*(_parent->ub()))(_pos + i) = 1e+24;
     }
 
 
@@ -111,7 +111,7 @@ int Relay::compute(double time)
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
-  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+  SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
 
   //cout << " _sizeOutput =" <<_sizeOutput << endl;
   if (_lb->size() != _sizeOutput)
@@ -126,16 +126,16 @@ int Relay::compute(double time)
   }
 
   unsigned int pos = 0;
-  UnitaryRelationsGraph::VIterator ui, uiend;
+  InteractionsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    SP::UnitaryRelation ur = indexSet->bundle(*ui);
+    SP::Interaction inter = indexSet->bundle(*ui);
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    pos = _M->getPositionOfUnitaryBlock(ur);
-    SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, ur, pos));
-    ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
+    pos = _M->getPositionOfInteractionBlock(inter);
+    SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
+    inter->nonSmoothLaw()->accept(*NSLEffect);
   }
 
 

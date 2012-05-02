@@ -21,7 +21,7 @@ Include files related to simulationTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
-#include "UnitaryRelation.hpp"
+//#include "Interaction.hpp"
 #include "Topology.hpp"
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"

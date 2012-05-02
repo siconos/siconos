@@ -143,7 +143,7 @@ void Model::initialize(SP::Simulation simulation)
 
   assert(_strat && "Model::initialize() error - The simulation object of this model is null.");
 
-  // === topology init (computes UnitaryRelation sets, relative degrees ...) ===
+  // === topology init (computes Interaction sets, relative degrees ...) ===
   _nsds->topology()->initialize();
 
   // === Simulation init ===

@@ -42,26 +42,26 @@
  * OSNS classes (LCP ...) and to leave it into this class. \n
  *
  * Two main functions:
- * - fill(indexSet, unitaryBlocks): fill the matrix using a list of
- *   "active" UnitaryRelation, in indexSet, and a
- *   MapOfMapOfUnitaryMatrices, unitaryBlocks, which determines
- *   which UR are connected or not (ie have common DynamicalSystem).
+ * - fill(indexSet, interactionBlocks): fill the matrix using a list of
+ *   "active" Interaction, in indexSet, and a
+ *   MapOfMapOfInteractionMatrices, interactionBlocks, which determines
+ *   which Interaction are connected or not (ie have common DynamicalSystem).
  *   - convert(): fill the NumericsMatrix structure (indeed only
  *   pointers links to the components of the present class)
  *
  * Note that OSNSMatrix are square.
  *
  *  For example, if in a LCP, constraints of interest are
- *  indexSet={UR2,UR3,UR8,UR12}, whith common DynamicalSystem between
+ *  indexSet={inter2,inter3,inter8,inter12}, whith common DynamicalSystem between
  *  2 and 3, 2 and 8 and 8 and 12.
 
- *  unitaryBlocks contains matrices for all (URi,URj) which have
- *  common DS, for (URi,URj) in I0, the set of all UnitaryRelation.
+ *  interactionBlocks contains matrices for all (interi,interj) which have
+ *  common DS, for (interi,interj) in I0, the set of all Interaction.
 
- *  (for details on how unitaryBlocks is computed see OneStepNSProblem.h).
+ *  (for details on how interactionBlocks is computed see OneStepNSProblem.h).
  *
- * We denote unitaryBlocks[URi][URj] = mij \n Then, a call to
- * fill(indexSet, unitaryBlock) results in a matrix which looks like:
+ * We denote interactionBlocks[interi][interj] = mij \n Then, a call to
+ * fill(indexSet, interactionBlock) results in a matrix which looks like:
  *
  * \f{eqnarray*}
  M=\left\lbrace\begin{array}{cccc}
@@ -77,13 +77,13 @@
  *
  *  - full matrix in a SiconosMatrix (storageType = 0). In this case,
  *  for each call to fill(), the SiconosMatrix M is resized
- *  according  to the sizes of the UR present in indexSet and then
- *  all the required unitaryBlocks mij are COPIED into M.
+ *  according  to the sizes of the Interaction present in indexSet and then
+ *  all the required interactionBlocks mij are COPIED into M.
  *
  *  - Sparse Block Storage (storageType = 1): corresponds to
  *  SparseBlockStructuredMatrix structure of Numerics. Only non-null
- *  unitaryBlocks are saved in the matrix M and there is no copy of
- *  sub-unitaryBlocks, only links thanks to pointers.
+ *  interactionBlocks are saved in the matrix M and there is no copy of
+ *  sub-interactionBlocks, only links thanks to pointers.
  *
  */
 
@@ -99,13 +99,13 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
-  virtual void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
+  virtual void updateSizeAndPositions(unsigned int&, SP::InteractionsGraph);
 public:
 
 
   /** Constructor with dimRow and DimColumn of the matrix
       \param n and m sizes of the rectangle matrix
-      \param stor storage type (0:dense, 1:sparse unitaryBlock)
+      \param stor storage type (0:dense, 1:sparse interactionBlock)
   */
   OSNSMatrixProjectOnConstraints(unsigned int, unsigned int, int);
 
@@ -120,12 +120,12 @@ public:
   virtual ~OSNSMatrixProjectOnConstraints();
 
 
-  /** fill the current class using an index set and a map of unitaryBlocks
-      \param UnitaryRelationsGraph*, the index set of the active constraints
+  /** fill the current class using an index set and a map of interactionBlocks
+      \param InteractionsGraph*, the index set of the active constraints
   */
-  virtual void fill(SP::UnitaryRelationsGraph, bool updateSize = true);
+  virtual void fill(SP::InteractionsGraph, bool updateSize = true);
 
-  virtual unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
+  virtual unsigned int getPositionOfInteractionBlock(SP::Interaction) const;
 };
 
 DEFINE_SPTR(OSNSMatrixProjectOnConstraints);

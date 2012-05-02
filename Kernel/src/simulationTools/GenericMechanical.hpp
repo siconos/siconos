@@ -39,12 +39,12 @@ TYPEDEF_SPTR(GenericMechanicalProblem);
  * This class is devoted to contains of a set of Non-Smooth Problem.
  *
  * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
- *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
- *  Functions: initialize(), computeUnitaryBlock(), preCompute()
+ *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+ *  the interactionBlock-matrices saved in the field interactionBlocks.\n
+ *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the GenericMechanical problem: function compute(), used to call solvers from Numerics through \n
  * the genericMechanical_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
  */
@@ -90,20 +90,20 @@ public:
    */
   int compute(double time);
 
-  /** compute extra-diagonal unitaryBlock-matrix
+  /** compute extra-diagonal interactionBlock-matrix
     *  \param an edge descriptor
     */
-  virtual void computeUnitaryBlock(const UnitaryRelationsGraph::EDescriptor&);
+  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor&);
 
-  /** compute diagonal unitary block
+  /** compute diagonal Interaction block
    * \param a vertex descriptor
    */
-  virtual void computeDiagonalUnitaryBlock(const UnitaryRelationsGraph::VDescriptor&);
+  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&);
 
   /** print the data to the screen */
   void display() const;
-  void computeAllUnitaryBlocks();
-  void updateUnitaryBlocks();
+  void computeAllInteractionBlocks();
+  void updateInteractionBlocks();
 
   /** visitors hook
    */
