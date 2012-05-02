@@ -61,7 +61,7 @@ setup_trunk() {
     current_dir=$PWD
     mkdir -p $PIPOL_WDIR/siconos/trunk
     cd $PIPOL_WDIR/siconos/trunk; { 
-        for mod in Numerics Kernel Examples Front-End; do 
+        for mod in Numerics Kernel Examples Front-End IO; do 
             [ -d $mod ] || svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
             cd $mod; { 
                 svn update -r $local_revision
