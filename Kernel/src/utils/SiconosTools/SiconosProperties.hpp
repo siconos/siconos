@@ -105,7 +105,7 @@ class Properties
 
 private:
 
-  boost::shared_ptr<G> _g;
+  G& _g;
   boost::shared_ptr< std::vector<T> > _store;
   int _stamp;
 
@@ -125,7 +125,7 @@ public:
       \param g a SiconosGraph
   */
 
-  Properties(boost::shared_ptr<G> g)
+  Properties(G& g)
     : _g(g), _store(new std::vector<T>()), _stamp(0)
   {}
 
@@ -138,36 +138,36 @@ public:
   {
 
     /* a stamp is used to know if indices have been updated */
-    if (_g->stamp() != _stamp)
+    if (_g.stamp() != _stamp)
     {
-      _stamp = _g->stamp();
+      _stamp = _g.stamp();
 
-      int k = access.size(*_g);
+      int k = access.size(_g);
 
       /* this new store is used as a fifo */
       typename std::vector<T> new_store(k);
 
       k--;
-      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(*_g).begin();
-           vi != access.indexModified(*_g).end(); ++vi)
+      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
+           vi != access.indexModified(_g).end(); ++vi)
       {
-        typename boost::property_traits<OldIndexMap>::value_type oi = _g->old_index(*vi);
+        typename boost::property_traits<OldIndexMap>::value_type oi = _g.old_index(*vi);
         new_store[k--] = (*_store)[oi];
       }
-      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(*_g).begin();
-           vi != access.indexModified(*_g).end(); ++vi)
+      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
+           vi != access.indexModified(_g).end(); ++vi)
       {
-        typename boost::property_traits<IndexMap>::value_type i = _g->index(*vi);
+        typename boost::property_traits<IndexMap>::value_type i = _g.index(*vi);
         (*_store)[i] = new_store.back();
         new_store.pop_back();
       };
     };
 
-    typename boost::property_traits<IndexMap>::value_type i = _g->index(v);
+    typename boost::property_traits<IndexMap>::value_type i = _g.index(v);
     if (static_cast<unsigned>(i) >= _store->size())
     {
       // _store->resize(i+1, T()); faster with large size
-      _store->resize(access.size(*_g), T());
+      _store->resize(access.size(_g), T());
     }
 
     return (*_store)[i];
@@ -184,7 +184,7 @@ template<typename T, typename G>
 class VertexProperties : public Properties<T, G, typename G::VIndexAccess>
 {
 public:
-  VertexProperties(boost::shared_ptr<G> g) : Properties<T, G, typename G::VIndexAccess>(g)
+  VertexProperties(G& g) : Properties<T, G, typename G::VIndexAccess>(g)
   {};
 };
 
@@ -196,7 +196,7 @@ template<typename T, typename G>
 class EdgeProperties : public Properties<T, G, typename G::EIndexAccess>
 {
 public:
-  EdgeProperties(boost::shared_ptr<G> g) : Properties<T, G, typename G::EIndexAccess>(g)
+  EdgeProperties(G& g) : Properties<T, G, typename G::EIndexAccess>(g)
   {};
 };
 
@@ -204,7 +204,7 @@ public:
   \param g the graph
 */
 template<typename T, typename G>
-VertexProperties<T, G> vertexProperties(boost::shared_ptr<G> g)
+VertexProperties<T, G> vertexProperties(G& g)
 {
   return VertexProperties<T, G>(g);
 };
@@ -213,7 +213,7 @@ VertexProperties<T, G> vertexProperties(boost::shared_ptr<G> g)
   \param g the graph
 */
 template<typename T, typename G>
-EdgeProperties<T, G> edgeProperties(boost::shared_ptr<G> g)
+EdgeProperties<T, G> edgeProperties(G& g)
 {
   return EdgeProperties<T, G>(g);
 };
@@ -228,7 +228,7 @@ class SubProperties
 private:
   typedef Properties<T, G, IndexMap> RefProperties;
   RefProperties _properties;
-  boost::shared_ptr<G> _g;
+  G& _g;
 
   typedef typename boost::property_traits<IndexMap>::key_type  key_type;
   typedef T value_type;
@@ -238,12 +238,12 @@ private:
 
 public:
 
-  SubProperties(RefProperties& p, boost::shared_ptr<G> g)
+  SubProperties(RefProperties& p, G& g)
     : _properties(p), _g(g) {}
 
   reference operator[](const key_type& v)
   {
-    return _properties[_g->descriptor0(v)];
+    return _properties[_g.descriptor0(v)];
   }
 
 };
@@ -254,7 +254,7 @@ class VertexSubProperties : public SubProperties<T, G, typename G::VIndexAccess>
 public:
   typedef Properties<T, G, typename G::VIndexAccess> RefProperties;
 
-  VertexSubProperties(RefProperties& p, boost::shared_ptr<G> g) : SubProperties<T, G, typename G::VIndexAccess>(p, g)
+  VertexSubProperties(RefProperties& p, G& g) : SubProperties<T, G, typename G::VIndexAccess>(p, g)
   {};
 };
 
@@ -264,7 +264,7 @@ class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess>
 public:
   typedef Properties<T, G, typename G::EIndexAccess> RefProperties;
 
-  EdgeSubProperties(RefProperties& p, boost::shared_ptr<G> g) : SubProperties<T, G, typename G::EIndexAccess>(p, g)
+  EdgeSubProperties(RefProperties& p, G& g) : SubProperties<T, G, typename G::EIndexAccess>(p, g)
   {};
 };
 
@@ -281,35 +281,16 @@ public:
 #define I_DECLARE_MEMBERS(r,gt,p) \
   Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt> BOOST_PP_TUPLE_ELEM(3,2,p);
 
-#define I_SUB_DECLARE_MEMBERS(r,gt,p)                                   \
-  Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),SubProperties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt> BOOST_PP_TUPLE_ELEM(3,2,p);
-
 #define I_CONS_MEMBERS(r,gt,p) \
-  BOOST_PP_TUPLE_ELEM(3,2,p) ( Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(g) ),
-
-#define I_SUB_CONS_MEMBERS(r,gt,p) \
-  BOOST_PP_TUPLE_ELEM(3,2,p) ( Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),SubProperties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(gp -> BOOST_PP_TUPLE_ELEM(3,2,p),g) ),
+  BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(*this)),
 
 
-#define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                       \
-  struct BOOST_PP_CAT(GraphType,GraphProperties) : public GraphProperties \
-  {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
+#define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                 \
+  BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
+  bool dummy;                                                           \
                                                                         \
-    bool dummy;                                                         \
-                                                                        \
-    BOOST_PP_CAT(GraphType, GraphProperties)(SP:: BOOST_PP_CAT(GraphType, Graph) g) : \
-      BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(false) {}; \
-  };                                                                    \
-  struct BOOST_PP_CAT(GraphType, SubGraphProperties) : public GraphProperties \
-  {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(I_SUB_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
-                                                                        \
-    bool dummy;                                                         \
-                                                                        \
-    BOOST_PP_CAT(GraphType, SubGraphProperties)(boost:: shared_ptr < BOOST_PP_CAT(GraphType,GraphProperties) > gp, SP:: BOOST_PP_CAT(GraphType, Graph) g) : \
-      BOOST_PP_SEQ_FOR_EACH(I_SUB_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(false) {}; \
-  };
-
+  BOOST_PP_CAT(GraphType, Graph)() :                                    \
+    BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(true) {}; \
+ 
 
 #endif

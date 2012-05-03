@@ -121,9 +121,9 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       unsigned int nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                (_M)->computeSizeForProjection(inter);
 
-      if (! properties(*indexSet)->blockProj[*vi])
+      if (! indexSet->blockProj[*vi])
       {
-        properties(*indexSet)->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
+        indexSet->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
       if (!isLinear || !_hasBeUpdated)
@@ -166,24 +166,24 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
         if (itar > isrc) // upper block
         {
-          if (! properties(*indexSet)->upper_blockProj[ed1])
+          if (! indexSet->upper_blockProj[ed1])
           {
-            properties(*indexSet)->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            indexSet->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             if (ed2 != ed1)
-              properties(*indexSet)->upper_blockProj[ed2] = properties(*indexSet)->upper_blockProj[ed1];
+              indexSet->upper_blockProj[ed2] = indexSet->upper_blockProj[ed1];
           }
-          currentInteractionBlock = properties(*indexSet)->upper_blockProj[ed1];
+          currentInteractionBlock = indexSet->upper_blockProj[ed1];
 
         }
         else  // lower block
         {
-          if (! properties(*indexSet)->lower_blockProj[ed1])
+          if (! indexSet->lower_blockProj[ed1])
           {
-            properties(*indexSet)->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            indexSet->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             if (ed2 != ed1)
-              properties(*indexSet)->lower_blockProj[ed2] = properties(*indexSet)->lower_blockProj[ed1];
+              indexSet->lower_blockProj[ed2] = indexSet->lower_blockProj[ed1];
           }
-          currentInteractionBlock = properties(*indexSet)->lower_blockProj[ed1];
+          currentInteractionBlock = indexSet->lower_blockProj[ed1];
         }
 
 
@@ -223,10 +223,10 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
     std::cout << "                          vertex :" << *vi << std::endl;
     std::cout << "                          bundle :" << indexSet->bundle(*vi) << std::endl;
 
-    if (properties(*indexSet)->blockProj[*vi])
+    if (indexSet->blockProj[*vi])
     {
       std::cout << "                          blockProj ";
-      properties(*indexSet)->blockProj[*vi]->display();
+      indexSet->blockProj[*vi]->display();
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
@@ -247,37 +247,37 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
       boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
       std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2  << std::endl;
       std::cout << "                          (ed1)->upper_blockProj : ";
-      if (properties(*indexSet)->upper_blockProj[ed1])
+      if (indexSet->upper_blockProj[ed1])
       {
-        std::cout << properties(*indexSet)->upper_blockProj[ed1] << "   :" ;
-        properties(*indexSet)->upper_blockProj[ed1]->display();
+        std::cout << indexSet->upper_blockProj[ed1] << "   :" ;
+        indexSet->upper_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
       std::cout << "                          (ed1)->lower_blockProj : ";
-      if (properties(*indexSet)->lower_blockProj[ed1])
+      if (indexSet->lower_blockProj[ed1])
       {
-        std::cout << properties(*indexSet)->lower_blockProj[ed1] << "   :" ;
-        properties(*indexSet)->lower_blockProj[ed1]->display();
+        std::cout << indexSet->lower_blockProj[ed1] << "   :" ;
+        indexSet->lower_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
       std::cout << "                          (ed2)->upper_blockProj : ";
-      if (properties(*indexSet)->upper_blockProj[ed2])
+      if (indexSet->upper_blockProj[ed2])
       {
-        std::cout << properties(*indexSet)->upper_blockProj[ed2] << "   :" ;
-        properties(*indexSet)->upper_blockProj[ed2]->display();
+        std::cout << indexSet->upper_blockProj[ed2] << "   :" ;
+        indexSet->upper_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;
 
       std::cout << "                          (ed2)->lower_blockProj : ";
-      if (properties(*indexSet)->lower_blockProj[ed2])
+      if (indexSet->lower_blockProj[ed2])
       {
-        std::cout << properties(*indexSet)->lower_blockProj[ed2] << "   :" ;
-        properties(*indexSet)->lower_blockProj[ed2]->display();
+        std::cout << indexSet->lower_blockProj[ed2] << "   :" ;
+        indexSet->lower_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;
@@ -324,15 +324,15 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
         //       std::cout << "indexSet :"<< indexSet << std::endl;
         //       indexSet->display();
         //       std::cout << "vi :"<< *vi << std::endl;
-        //       std::cout << "properties(*indexSet)->blockProj[*vi]: before"<< properties(*indexSet)->blockProj[*vi] << std::endl;
+        //       std::cout << "indexSet->blockProj[*vi]: before"<< indexSet->blockProj[*vi] << std::endl;
         // #endif
 
-        if (! properties(*indexSet)->blockProj[*vi])
+        if (! indexSet->blockProj[*vi])
         {
-          properties(*indexSet)->blockProj[*vi].reset(new SimpleMatrix(sizeY, sizeY));
+          indexSet->blockProj[*vi].reset(new SimpleMatrix(sizeY, sizeY));
         }
         // #ifdef MLCPPROJ_DEBUG
-        //       std::cout << "properties(*indexSet)->blockProj[*vi]: after"<< properties(*indexSet)->blockProj[*vi] << std::endl;
+        //       std::cout << "indexSet->blockProj[*vi]: after"<< indexSet->blockProj[*vi] << std::endl;
         // #endif
 
         computeDiagonalInteractionBlock(*vi);
@@ -360,16 +360,16 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
         unsigned int itar = indexSet->index(indexSet->target(*ei));
         if (itar > isrc) // upper block
         {
-          if (! properties(*indexSet)->upper_blockProj[*ei])
+          if (! indexSet->upper_blockProj[*ei])
           {
-            properties(*indexSet)->upper_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
+            indexSet->upper_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
           }
         }
         else  // lower block
         {
-          if (! properties(*indexSet)->lower_blockProj[*ei])
+          if (! indexSet->lower_blockProj[*ei])
           {
-            properties(*indexSet)->lower_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
+            indexSet->lower_blockProj[*ei].reset(new SimpleMatrix(sizeY1, sizeY2));
           }
         }
 
@@ -380,32 +380,32 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
         // should be avoided
         if (itar > isrc) // upper block has been computed
         {
-          // if (!properties(*indexSet)->lower_blockProj[*ei])
+          // if (!indexSet->lower_blockProj[*ei])
           //   {
-          //     properties(*indexSet)->lower_blockProj[*ei].
-          //  reset(new SimpleMatrix(properties(*indexSet)->upper_blockProj[*ei]->size(1),
-          //             properties(*indexSet)->upper_blockProj[*ei]->size(0)));
+          //     indexSet->lower_blockProj[*ei].
+          //  reset(new SimpleMatrix(indexSet->upper_blockProj[*ei]->size(1),
+          //             indexSet->upper_blockProj[*ei]->size(0)));
           //   }
-          properties(*indexSet)->lower_blockProj[*ei].reset(new SimpleMatrix(*(properties(*indexSet)->upper_blockProj[*ei])));
-          properties(*indexSet)->lower_blockProj[*ei]->trans();
-          //          properties(*indexSet)->lower_blockProj[*ei]->trans(*properties(*indexSet)->upper_blockProj[*ei]);
+          indexSet->lower_blockProj[*ei].reset(new SimpleMatrix(*(indexSet->upper_blockProj[*ei])));
+          indexSet->lower_blockProj[*ei]->trans();
+          //          indexSet->lower_blockProj[*ei]->trans(*indexSet->upper_blockProj[*ei]);
         }
         else
         {
           assert(itar < isrc);    // lower block has been computed
-          // if (!properties(*indexSet)->upper_blockProj[*ei])
+          // if (!indexSet->upper_blockProj[*ei])
           //   {
-          //     properties(*indexSet)->upper_blockProj[*ei].
-          //  reset(new SimpleMatrix(properties(*indexSet)->lower_blockProj[*ei]->size(1),
-          //             properties(*indexSet)->lower_blockProj[*ei]->size(0)));
+          //     indexSet->upper_blockProj[*ei].
+          //  reset(new SimpleMatrix(indexSet->lower_blockProj[*ei]->size(1),
+          //             indexSet->lower_blockProj[*ei]->size(0)));
           //   }
-          properties(*indexSet)->upper_blockProj[*ei].
-          reset(new SimpleMatrix(*(properties(*indexSet)->lower_blockProj[*ei])));
-          properties(*indexSet)->upper_blockProj[*ei]->trans();
+          indexSet->upper_blockProj[*ei].
+          reset(new SimpleMatrix(*(indexSet->lower_blockProj[*ei])));
+          indexSet->upper_blockProj[*ei]->trans();
         }
         // #ifdef MLCPPROJ_DEBUG
-        //             printf("MLCPP upper: %i %i\n",properties(*indexSet)->upper_blockProj[*ei]->size(0),properties(*indexSet)->upper_blockProj[*ei]->size(1));
-        //             printf("MLCPP lower: %i %i\n",properties(*indexSet)->lower_blockProj[*ei]->size(0),properties(*indexSet)->lower_blockProj[*ei]->size(1));
+        //             printf("MLCPP upper: %i %i\n",indexSet->upper_blockProj[*ei]->size(0),indexSet->upper_blockProj[*ei]->size(1));
+        //             printf("MLCPP lower: %i %i\n",indexSet->lower_blockProj[*ei]->size(0),indexSet->lower_blockProj[*ei]->size(1));
         // #endif
 
       }
@@ -440,8 +440,8 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // std::cout << "DS2 :" << std::endl;
   // DS2->display();
 #endif
-  assert(properties(*indexSet)->blockProj[vd]);
-  SP::SiconosMatrix currentInteractionBlock = properties(*indexSet)->blockProj[vd];
+  assert(indexSet->blockProj[vd]);
+  SP::SiconosMatrix currentInteractionBlock = indexSet->blockProj[vd];
 
 
   assert(currentInteractionBlock->size(0) == sizeY);
@@ -661,10 +661,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(properties(*indexSet)->upper_blockProj[ed]->size(0) == sizeY1);
-      assert(properties(*indexSet)->upper_blockProj[ed]->size(1) == sizeY2);
+      assert(indexSet->upper_blockProj[ed]->size(0) == sizeY1);
+      assert(indexSet->upper_blockProj[ed]->size(1) == sizeY2);
 
-      currentInteractionBlock = properties(*indexSet)->upper_blockProj[ed];
+      currentInteractionBlock = indexSet->upper_blockProj[ed];
     }
     else  // lower block
     {
@@ -673,10 +673,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //       indexSet->properties(ed).lower_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(properties(*indexSet)->lower_blockProj[ed]->size(0) == sizeY1);
-      assert(properties(*indexSet)->lower_blockProj[ed]->size(1) == sizeY2);
+      assert(indexSet->lower_blockProj[ed]->size(0) == sizeY1);
+      assert(indexSet->lower_blockProj[ed]->size(1) == sizeY2);
 
-      currentInteractionBlock = properties(*indexSet)->lower_blockProj[ed];
+      currentInteractionBlock = indexSet->lower_blockProj[ed];
     }
 
 

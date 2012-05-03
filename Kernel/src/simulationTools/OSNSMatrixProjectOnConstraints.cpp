@@ -133,12 +133,12 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
     {
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePositionProj();
-      assert(properties(*indexSet)->blockProj[*vi]);
+      assert(indexSet->blockProj[*vi]);
       boost::static_pointer_cast<SimpleMatrix>(M1)
-      ->setBlock(pos, pos, *(properties(*indexSet)->blockProj[*vi]));
+      ->setBlock(pos, pos, *(indexSet->blockProj[*vi]));
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
-      printf("OSNSMatrix block: %i %i\n", properties(*indexSet)->blockProj[*vi]->size(0), properties(*indexSet)->blockProj[*vi]->size(1));
+      printf("OSNSMatrix block: %i %i\n", indexSet->blockProj[*vi]->size(0), indexSet->blockProj[*vi]->size(1));
 #endif
     }
 
@@ -171,11 +171,11 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
-                 *(properties(*indexSet)->upper_blockProj[*ei]));
+                 *(indexSet->upper_blockProj[*ei]));
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
-                 *properties(*indexSet)->lower_blockProj[*ei]);
+                 *(indexSet->lower_blockProj[*ei]));
     }
 
   }

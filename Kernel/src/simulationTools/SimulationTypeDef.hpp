@@ -171,50 +171,30 @@ struct DynamicalSystemsGraph : public SiconosGraph < SP::DynamicalSystem, SP::In
     SystemProperties , RelationProperties,
     SP::GraphProperties >
 {
+
+  /** optional properties : memory is allocated only on first access */
+  INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
+                           ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
+  // always needed -> SystemProperties
 };
 
 struct InteractionsGraph : public SiconosGraph < SP::Interaction, SP::DynamicalSystem,
     RelationProperties, SystemProperties,
     SP::GraphProperties >
 {
+  /** optional properties : memory is allocated only on first access */
+  INSTALL_GRAPH_PROPERTIES(Interactions,
+                           ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
+                           ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
+                           ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 };
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(InteractionsGraph);
 
-/** properties attached only to a graph type (InteractionsGraph or DynamicalSystemsGraph)
-    or optional properties */
-
-#ifndef SWIG
-INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
-                         ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
-// always needed -> SystemProperties
 
 
-INSTALL_GRAPH_PROPERTIES(Interactions,
-                         ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
-                         ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
-                         ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 
-#endif
-TYPEDEF_SPTR(DynamicalSystemsGraphProperties);
-TYPEDEF_SPTR(InteractionsGraphProperties);
-
-namespace Siconos
-{
-
-
-static inline SP::DynamicalSystemsGraphProperties properties(DynamicalSystemsGraph& dsg)
-{
-  return boost::static_pointer_cast<DynamicalSystemsGraphProperties>(dsg.properties());
-}
-
-static inline SP::InteractionsGraphProperties properties(InteractionsGraph& ig)
-{
-  return boost::static_pointer_cast<InteractionsGraphProperties>(ig.properties());
-}
-
-}
 // ================== Objects to handle OSI ==================
 
 

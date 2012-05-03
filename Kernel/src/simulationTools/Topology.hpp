@@ -233,16 +233,13 @@ public:
   {
     assert(num < _IG.size()) ;
 
-    assert(_IG[num]);
-    assert(_IG[num]->properties());
-
     // .. global properties may be defined here with
     // InteractionsSubGraphProperties(), see SiconosProperties.hpp
     // VertexSubProperties or EdgeSubProperties and the macros
     // INSTALL_GRAPH_PROPERTIES
 
     _IG[num].reset(new InteractionsGraph());
-    _IG[num]->properties().reset(new InteractionsGraphProperties(_IG[num]));
+    _IG[num]->properties().reset(new GraphProperties());
 
     _IG[num]->properties()->symmetric = _symmetric;
 
