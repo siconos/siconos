@@ -22,11 +22,6 @@ std::vector<SP::DynamicalSystem> dynamicalSystemsVector()
   return std::vector<SP::DynamicalSystem>();
 }
 
-std::vector<SP::UnitaryRelation> UnitaryRelationsVector()
-{
-  return std::vector<SP::UnitaryRelation>();
-}
-
 std::vector<std::pair<SP::DynamicalSystem, SP::DynamicalSystem> >
 graphLayout(SP::DynamicalSystemsGraph dsg)
 {

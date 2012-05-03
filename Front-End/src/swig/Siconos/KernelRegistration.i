@@ -20,7 +20,6 @@
   PY_REGISTER(FirstOrderLinearDS);                                      \
   PY_REGISTER(FirstOrderLinearTIDS);                                    \
   PY_REGISTER(Relation);                                                \
-  PY_REGISTER(UnitaryRelation);                                         \
   PY_REGISTER(LagrangianR);                                             \
   PY_REGISTER(LagrangianLinearTIR);                                     \
   PY_REGISTER(LagrangianRheonomousR);                                   \
