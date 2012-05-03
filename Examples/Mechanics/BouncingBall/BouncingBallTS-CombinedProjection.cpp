@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(ball, theta));
+    SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(ball, theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -117,8 +117,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    unsigned int levelForProjection = 1; //(default =1)
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
+    SP::TimeStepping s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
 
     // =========================== End of model definition ===========================
 
@@ -156,6 +155,11 @@ int main(int argc, char* argv[])
 
     while (s->nextTime() < T)
     {
+
+      for (int toto = 0; toto < 3; toto++)
+        std::cout << "============> Step Number : " << k << "======================"  << std::endl;
+
+
       s->computeOneStep();
 
       // --- Get values to be plotted ---
@@ -180,18 +184,8 @@ int main(int argc, char* argv[])
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    if (levelForProjection == 1)
-    {
-      ioMatrix ref("result-ProjectOnConstraints.ref", "ascii");
-      ref.read(dataPlotRef);
-    }
-    else
-    {
-      ioMatrix ref("result-ProjectOnConstraints-level0.ref", "ascii");
-      ref.read(dataPlotRef);
-    }
-
-
+    ioMatrix ref("result-ProjectOnConstraints.ref", "ascii");
+    ref.read(dataPlotRef);
     std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
