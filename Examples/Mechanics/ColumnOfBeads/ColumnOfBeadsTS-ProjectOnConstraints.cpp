@@ -171,7 +171,8 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+    unsigned int levelForProjection = 0; //(default =1)
+    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
 
     // =========================== End of model definition ===========================
 
@@ -309,8 +310,16 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("result-WITHPROJ.ref", "ascii");
-    ref.read(dataPlotRef);
+    if (levelForProjection == 1)
+    {
+      ioMatrix ref("result-WITHPROJ.ref", "ascii");
+      ref.read(dataPlotRef);
+    }
+    else if (levelForProjection == 0)
+    {
+      ioMatrix ref("result-WITHPROJ-level0.ref", "ascii");
+      ref.read(dataPlotRef);
+    }
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
