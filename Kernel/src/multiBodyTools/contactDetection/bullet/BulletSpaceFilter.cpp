@@ -320,16 +320,16 @@ void BulletSpaceFilter::buildInteractions(double time)
        ui0 != ui0end; ui0 = v0next)
   {
     ++v0next;  // trick to iterate on a dynamic bgl graph
-    Interaction& inter0 = *(indexSet0->bundle(*ui0));
+    SP::Interaction inter0 = indexSet0->bundle(*ui0);
 
-    if (!contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))])
+    if (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))])
     {
 
-      //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))]);
+      //      assert (!contactPoints[&*ask<ForContactPoint>(*(inter0->relation()))]);
 
       DEBUG_PRINTF("remove contact %p, lifetime %d\n",
-                   &*ask<ForContactPoint>(*(inter0.relation())),
-                   ask<ForContactPoint>(*(inter0.relation()))->getLifeTime());
+                   &*ask<ForContactPoint>(*(inter0->relation())),
+                   ask<ForContactPoint>(*(inter0->relation()))->getLifeTime());
       model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
     }
 

@@ -48,6 +48,8 @@ using namespace boost;
 
 enum vertex_old_index_t { vertex_old_index };
 enum edge_old_index_t { edge_old_index };
+enum vertex_descriptor0_t { vertex_descriptor0 };
+enum edge_descriptor0_t { edge_descriptor0 };
 enum vertex_properties_t { vertex_properties };
 enum edge_properties_t { edge_properties };
 enum graph_properties_t { graph_properties };
@@ -56,6 +58,8 @@ namespace boost
 {
 BOOST_INSTALL_PROPERTY(vertex, old_index);
 BOOST_INSTALL_PROPERTY(edge, old_index);
+BOOST_INSTALL_PROPERTY(vertex, descriptor0);
+BOOST_INSTALL_PROPERTY(edge, descriptor0);
 BOOST_INSTALL_PROPERTY(vertex, properties);
 BOOST_INSTALL_PROPERTY(edge, properties);
 BOOST_INSTALL_PROPERTY(graph, properties);
@@ -78,13 +82,15 @@ public:
          default_color_type ,
          property < vertex_index_t, size_t,
          property < vertex_old_index_t, size_t,
-         property< vertex_properties_t , VProperties > > > > > ,
+         property < vertex_descriptor0_t, void *,
+         property< vertex_properties_t , VProperties > > > > > > ,
          property < edge_bundle_t, E,
          property < edge_color_t ,
          default_color_type ,
          property < edge_index_t, size_t,
          property < edge_old_index_t, size_t,
-         property< edge_properties_t , EProperties > > > > > ,
+         property < edge_descriptor0_t, void *,
+         property< edge_properties_t , EProperties > > > > > > ,
          property < graph_properties_t, GProperties > >
          graph_t;
 
@@ -368,6 +374,16 @@ public:
     return get(edge_properties, g)[ed];
   };
 
+  inline VDescriptor descriptor0(const VDescriptor& vd)
+  {
+    return get(vertex_descriptor0, g)[vd];
+  }
+
+  inline EDescriptor descriptor0(const EDescriptor& ed)
+  {
+    return get(edge_descriptor0, g)[ed];
+  }
+
   inline bool is_vertex(const V& vertex)
   {
     return (vertex_descriptor.find(vertex) != vertex_descriptor.end());
@@ -477,6 +493,7 @@ public:
 
     VDescriptor descr = add_vertex(vertex_bundle);
     properties(descr) = og.properties(og.descriptor(vertex_bundle));
+    //descriptor0(descr) = og.descriptor(vertex_bundle);
 
     assert(bundle(descr) == vertex_bundle);
 
@@ -499,6 +516,9 @@ public:
         EDescriptor edescr =
           add_edge(descr, descriptor(og.bundle(ognext_descr)),
                    og.bundle(*ogoei));
+
+        properties(edescr) = og.properties(*ogoei);
+        //descriptor0(edescr) = *ogoei;
 
         assert(bundle(edescr) == og.bundle(*ogoei));
       }
@@ -800,6 +820,7 @@ public:
   void clear()
   {
     g.clear();
+    vertex_descriptor.clear();
   };
 
   VMap vertex_descriptor_map()

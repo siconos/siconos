@@ -156,13 +156,41 @@ template<typename T, typename G>
 VertexProperties<T, G> vertexProperties(boost::shared_ptr<G> g)
 {
   return VertexProperties<T, G>(g);
-}
+};
 
 template<typename T, typename G>
 EdgeProperties<T, G> edgeProperties(boost::shared_ptr<G> g)
 {
   return EdgeProperties<T, G>(g);
-}
+};
+
+template<typename T, typename G, typename IndexMap>
+class SubProperties
+{
+private:
+  typedef Properties<T, G, IndexMap> RefProperties;
+  RefProperties _properties;
+  boost::shared_ptr<G> _g;
+
+  typedef typename boost::property_traits<IndexMap>::key_type  key_type;
+  typedef T value_type;
+  typedef typename std::iterator_traits <
+  typename std::vector<T>::iterator >::reference reference;
+  typedef boost::lvalue_property_map_tag category;
+
+public:
+
+  SubProperties(RefProperties& p, boost::shared_ptr<G> g)
+    : _properties(p), _g(g) {}
+
+  reference operator[](const key_type& v)
+  {
+    return _properties[_g->properties(v)->descriptor0];
+  }
+
+};
+
+
 
 }
 
