@@ -167,41 +167,42 @@ TYPEDEF_SPTR(GraphProperties);
  * where L is the line graph
  * transformation */
 
-typedef SiconosGraph < SP::DynamicalSystem, SP::Interaction,
-        SystemProperties , RelationProperties,
-        SP::GraphProperties > DynamicalSystemsGraph;
+struct DynamicalSystemsGraph : public SiconosGraph < SP::DynamicalSystem, SP::Interaction,
+    SystemProperties , RelationProperties,
+    SP::GraphProperties >
+{
+};
 
-typedef SiconosGraph < SP::Interaction, SP::DynamicalSystem,
-        RelationProperties, SystemProperties,
-        SP::GraphProperties > InteractionsGraph;
-
+struct InteractionsGraph : public SiconosGraph < SP::Interaction, SP::DynamicalSystem,
+    RelationProperties, SystemProperties,
+    SP::GraphProperties >
+{
+};
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(InteractionsGraph);
-
-
 
 /** properties attached only to a graph type (InteractionsGraph or DynamicalSystemsGraph)
     or optional properties */
 
 #ifndef SWIG
-INSTALL_PROPERTIES(DynamicalSystemsGraph,
-                   ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
+INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
+                         ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
 // always needed -> SystemProperties
 
 
-INSTALL_PROPERTIES(InteractionsGraph,
-                   ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
-                   ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
-                   ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
+INSTALL_GRAPH_PROPERTIES(Interactions,
+                         ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
+                         ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
+                         ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
 
 #endif
 TYPEDEF_SPTR(DynamicalSystemsGraphProperties);
 TYPEDEF_SPTR(InteractionsGraphProperties);
 
-
 namespace Siconos
 {
+
 
 static inline SP::DynamicalSystemsGraphProperties properties(DynamicalSystemsGraph& dsg)
 {

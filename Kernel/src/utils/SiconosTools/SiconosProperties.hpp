@@ -1,11 +1,32 @@
-// Copyright (C) Vladimir Prus 2003.
-// Distributed under the Boost Software License, Version 1.0. (See
-// accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-//
-// See http://www.boost.org/libs/graph/vector_property_map.html for
-// documentation.
-//
+/* Siconos-Kernel, Copyright INRIA 2005-2011.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ */
+
+/*! \file SiconosProperties.hpp
+
+  \brief Exterior properties to vertices or edges of a SiconosGraph
+  can be attach with Siconos::Properties. These properties are
+  referenced with vertices or edges indices. update_vertices_indices()
+  or update_edges_indices() must have been done after any vertices or
+  edges insertion or deletion.
+
+*/
+
 
 #ifndef SICONOS_PROPERTIES_HPP
 #define SICONOS_PROPERTIES_HPP
@@ -23,6 +44,7 @@ namespace Siconos
 /* a templated way to access edge or vertex with the help of
  * boost::mpl::if_ */
 
+/** get vertex needed data */
 template<typename G>
 struct VertexAccess
 {
@@ -42,6 +64,7 @@ struct VertexAccess
 
 };
 
+/** get edge needed data */
 template<typename G>
 struct EdgeAccess
 {
@@ -61,6 +84,7 @@ struct EdgeAccess
 };
 
 
+/** choose vertex or edge access according to IndexMap */
 template<typename G, typename IndexMap>
 struct VertexOrEdge
 {
@@ -70,8 +94,11 @@ struct VertexOrEdge
 };
 
 
-/* the properties structure, from boost::vector_property_map */
-
+/** the general properties structure, from boost::vector_property_map :
+ \param T the property data type
+ \param G the graph type
+ \param IndexMap the index map, should be either G::VIndexAccess or G:EIndexAccess
+*/
 template<typename T, typename G, typename IndexMap>
 class Properties
 {
@@ -94,17 +121,30 @@ public:
   typename std::vector<T>::iterator >::reference reference;
   typedef boost::lvalue_property_map_tag category;
 
+  /** constructor from a SiconosGraph
+      \param g a SiconosGraph
+  */
+
   Properties(boost::shared_ptr<G> g)
     : _g(g), _store(new std::vector<T>()), _stamp(0)
   {}
 
+
+  /** data access from a SiconosGraph vertex descriptor or edge
+      descriptor :
+      \param v a SiconosGraph::VDescriptor or
+      SiconosGraph::EDescriptor according to IndexMap type */
   reference operator[](const key_type& v)
   {
+
+    /* a stamp is used to know if indices have been updated */
     if (_g->stamp() != _stamp)
     {
       _stamp = _g->stamp();
 
       int k = access.size(*_g);
+
+      /* this new store is used as a fifo */
       typename std::vector<T> new_store(k);
 
       k--;
@@ -135,6 +175,11 @@ public:
 
 };
 
+
+/** vertex property structure:
+    \param T the property data type
+    \param G the graph type
+ */
 template<typename T, typename G>
 class VertexProperties : public Properties<T, G, typename G::VIndexAccess>
 {
@@ -143,6 +188,10 @@ public:
   {};
 };
 
+/** edge property structure:
+    \param T the property data type
+    \param G the graph type
+ */
 template<typename T, typename G>
 class EdgeProperties : public Properties<T, G, typename G::EIndexAccess>
 {
@@ -151,18 +200,27 @@ public:
   {};
 };
 
-
+/** function to build a VertexProperties from one template parameter
+  \param g the graph
+*/
 template<typename T, typename G>
 VertexProperties<T, G> vertexProperties(boost::shared_ptr<G> g)
 {
   return VertexProperties<T, G>(g);
 };
 
+/** function to build a EdgeProperties from one template parameter
+  \param g the graph
+*/
 template<typename T, typename G>
 EdgeProperties<T, G> edgeProperties(boost::shared_ptr<G> g)
 {
   return EdgeProperties<T, G>(g);
 };
+
+
+/** global properties : they may be attached to main graph and may be
+ * referenced from subgraphs. They are not used for the moment */
 
 template<typename T, typename G, typename IndexMap>
 class SubProperties
@@ -185,11 +243,30 @@ public:
 
   reference operator[](const key_type& v)
   {
-    return _properties[_g->properties(v)->descriptor0];
+    return _properties[_g->descriptor0(v)];
   }
 
 };
 
+template<typename T, typename G>
+class VertexSubProperties : public SubProperties<T, G, typename G::VIndexAccess>
+{
+public:
+  typedef Properties<T, G, typename G::VIndexAccess> RefProperties;
+
+  VertexSubProperties(RefProperties& p, boost::shared_ptr<G> g) : SubProperties<T, G, typename G::VIndexAccess>(p, g)
+  {};
+};
+
+template<typename T, typename G>
+class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess>
+{
+public:
+  typedef Properties<T, G, typename G::EIndexAccess> RefProperties;
+
+  EdgeSubProperties(RefProperties& p, boost::shared_ptr<G> g) : SubProperties<T, G, typename G::EIndexAccess>(p, g)
+  {};
+};
 
 
 }
@@ -204,20 +281,35 @@ public:
 #define I_DECLARE_MEMBERS(r,gt,p) \
   Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt> BOOST_PP_TUPLE_ELEM(3,2,p);
 
+#define I_SUB_DECLARE_MEMBERS(r,gt,p)                                   \
+  Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),SubProperties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt> BOOST_PP_TUPLE_ELEM(3,2,p);
+
 #define I_CONS_MEMBERS(r,gt,p) \
   BOOST_PP_TUPLE_ELEM(3,2,p) ( Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(g) ),
 
+#define I_SUB_CONS_MEMBERS(r,gt,p) \
+  BOOST_PP_TUPLE_ELEM(3,2,p) ( Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),SubProperties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(gp -> BOOST_PP_TUPLE_ELEM(3,2,p),g) ),
 
-#define INSTALL_PROPERTIES(GraphType, PROPERTIES)                       \
-  struct BOOST_PP_CAT(GraphType,Properties) : public GraphProperties    \
+
+#define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                       \
+  struct BOOST_PP_CAT(GraphType,GraphProperties) : public GraphProperties \
   {                                                                     \
-    BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, GraphType, PROPERTIES);    \
+    BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
                                                                         \
     bool dummy;                                                         \
                                                                         \
-    GraphType##Properties(SP:: GraphType g) :                           \
-      BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, GraphType, PROPERTIES) dummy(false) {}; \
-  }
+    BOOST_PP_CAT(GraphType, GraphProperties)(SP:: BOOST_PP_CAT(GraphType, Graph) g) : \
+      BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(false) {}; \
+  };                                                                    \
+  struct BOOST_PP_CAT(GraphType, SubGraphProperties) : public GraphProperties \
+  {                                                                     \
+    BOOST_PP_SEQ_FOR_EACH(I_SUB_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
+                                                                        \
+    bool dummy;                                                         \
+                                                                        \
+    BOOST_PP_CAT(GraphType, SubGraphProperties)(boost:: shared_ptr < BOOST_PP_CAT(GraphType,GraphProperties) > gp, SP:: BOOST_PP_CAT(GraphType, Graph) g) : \
+      BOOST_PP_SEQ_FOR_EACH(I_SUB_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(false) {}; \
+  };
 
 
 #endif

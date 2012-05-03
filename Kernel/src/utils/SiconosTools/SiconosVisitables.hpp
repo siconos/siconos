@@ -58,6 +58,10 @@
   REGISTER(LagrangianLinearTIR)                              \
   REGISTER(NewtonEulerDS)                                    \
   REGISTER(NewtonEulerR)                                     \
+  REGISTER(DynamicalSystemsGraph)                            \
+  REGISTER(InteractionsGraph)                                \
+  REGISTER(DynamicalSystemsSubGraph)                         \
+  REGISTER(InteractionsSubGraph)                             \
   REGISTER(BulletR)                                          \
   REGISTER(BulletRImpact)                                    \
   REGISTER(Lmgc2DR)                                          \

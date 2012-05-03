@@ -57,6 +57,7 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
 
   _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
+  setProperties();
 
   _allInteractions.reset(new InteractionsSet());
 
@@ -81,6 +82,7 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
 
   _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
+  setProperties();
 
   _allInteractions.reset(new InteractionsSet());
 
@@ -341,19 +343,24 @@ bool Topology::hasInteraction(SP::Interaction inter) const
 
 void Topology::initialize()
 {
-
-
   _isTopologyUpToDate = true;
-
 }
 
 void Topology::setProperties()
 {
-  for (unsigned int i = 0; i < _IG.size(); ++i)
+  _IG[0]->properties().reset(new InteractionsGraphProperties(_IG[0]));
+
+  for (unsigned int i = 1; i < _IG.size(); ++i)
   {
     _IG[i]->properties().reset(new InteractionsGraphProperties(_IG[i]));
+    // .. global properties may be defined here with
+    // InteractionsSubGraphProperties(), see SiconosProperties.hpp
+    // VertexSubProperties or EdgeSubProperties and the macros
+    // INSTALL_GRAPH_PROPERTIES
+
     _IG[i]->properties()->symmetric = _symmetric;
   }
+
   _DSG[0]->properties().reset(new DynamicalSystemsGraphProperties(_DSG[0]));
   _DSG[0]->properties()->symmetric = _symmetric;
 }

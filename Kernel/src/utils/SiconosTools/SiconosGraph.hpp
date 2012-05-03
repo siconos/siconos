@@ -20,13 +20,16 @@
 /*! \file SiconosGraph.hpp
   Template class to define a graph of Siconos object.
 
+  Note: this need documentation
+
 */
+
+#ifndef SICONOS_GRAPH_HPP
+#define SICONOS_GRAPH_HPP
+
 #ifndef BOOST_NO_HASH
 #define BOOST_NO_HASH
 #endif
-
-#ifndef SiconosGraph_H
-#define SiconosGraph_H
 
 #include <boost/config.hpp>
 #include <boost/version.hpp>
@@ -74,6 +77,14 @@ public:
 
   /* note : OutEdgeList as multisetS => cannot compile remove_out_edge_if :
      /usr/include/boost/graph/detail/adjacency_list.hpp:440: error: passing 'const ... */
+  typedef adjacency_list<listS, listS, undirectedS> proxy_graph_t;
+
+  typedef typename
+  graph_traits<proxy_graph_t>::edge_descriptor EDescriptor;
+
+  typedef typename
+  graph_traits<proxy_graph_t>::vertex_descriptor VDescriptor;
+
 
   typedef adjacency_list <
   listS, listS, undirectedS,
@@ -82,14 +93,14 @@ public:
          default_color_type ,
          property < vertex_index_t, size_t,
          property < vertex_old_index_t, size_t,
-         property < vertex_descriptor0_t, void *,
+         property < vertex_descriptor0_t, VDescriptor,
          property< vertex_properties_t , VProperties > > > > > > ,
          property < edge_bundle_t, E,
          property < edge_color_t ,
          default_color_type ,
          property < edge_index_t, size_t,
          property < edge_old_index_t, size_t,
-         property < edge_descriptor0_t, void *,
+         property < edge_descriptor0_t, EDescriptor,
          property< edge_properties_t , EProperties > > > > > > ,
          property < graph_properties_t, GProperties > >
          graph_t;
@@ -104,11 +115,11 @@ public:
   typedef typename
   graph_traits<graph_t>::vertex_iterator VIterator;
 
-  typedef typename
-  graph_traits<graph_t>::edge_descriptor EDescriptor;
+  //  typedef typename
+  //  graph_traits<graph_t>::edge_descriptor EDescriptor;
 
-  typedef typename
-  graph_traits<graph_t>::vertex_descriptor VDescriptor;
+  //  typedef typename
+  //  graph_traits<graph_t>::vertex_descriptor VDescriptor;
 
   typedef typename
   graph_traits<graph_t>::out_edge_iterator OEIterator;
@@ -374,12 +385,12 @@ public:
     return get(edge_properties, g)[ed];
   };
 
-  inline VDescriptor descriptor0(const VDescriptor& vd)
+  inline VDescriptor& descriptor0(const VDescriptor& vd)
   {
     return get(vertex_descriptor0, g)[vd];
   }
 
-  inline EDescriptor descriptor0(const EDescriptor& ed)
+  inline EDescriptor& descriptor0(const EDescriptor& ed)
   {
     return get(edge_descriptor0, g)[ed];
   }
@@ -493,7 +504,7 @@ public:
 
     VDescriptor descr = add_vertex(vertex_bundle);
     properties(descr) = og.properties(og.descriptor(vertex_bundle));
-    //descriptor0(descr) = og.descriptor(vertex_bundle);
+    descriptor0(descr) = og.descriptor(vertex_bundle);
 
     assert(bundle(descr) == vertex_bundle);
 
@@ -518,7 +529,7 @@ public:
                    og.bundle(*ogoei));
 
         properties(edescr) = og.properties(*ogoei);
-        //descriptor0(edescr) = *ogoei;
+        descriptor0(edescr) = *ogoei;
 
         assert(bundle(edescr) == og.bundle(*ogoei));
       }
