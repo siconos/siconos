@@ -544,9 +544,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
       if (Type::name(*_parent) == "TimeStepping")
       {
         lowerLevelForOutput = 0;
-        upperLevelForOutput = 0;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 0;
+        upperLevelForOutput = 1;
+        lowerLevelForInput = 1;
+        upperLevelForInput = 1;
       }
       else if (Type::name(*_parent) == "TimeSteppingCombinedProjection")
       {

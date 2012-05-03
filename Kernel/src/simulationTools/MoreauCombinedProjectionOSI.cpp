@@ -48,7 +48,7 @@ bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter
     double y = (inter->y(0))->getValue(0); // y(0) is the position
     DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
     if (y <= 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indeSet level = %i.\n", i);
+      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
     return (y <= 0);
   }
   else if (i == 2)  //  special index for the projection
@@ -56,7 +56,7 @@ bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter
     double lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for Moreau scheme
     DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
     if (lambda > 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indeSet level = %i.\n", i);
+      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
     return (lambda > 0);
   }
   return(0);

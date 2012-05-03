@@ -87,7 +87,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
   // It seems that index() in not update in Index(0)
   // see comment in void Simulation::updateIndexSets()
-  if (_levelMin == 0)
+  //if (_levelMin==0)
   {
     indexSet->update_vertices_indices();
     indexSet->update_edges_indices();
@@ -440,11 +440,13 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // std::cout << "DS2 :" << std::endl;
   // DS2->display();
 #endif
-
-  assert(properties(*indexSet)->blockProj[vd]->size(0) == sizeY);
-  assert(properties(*indexSet)->blockProj[vd]->size(1) == sizeY);
-
+  assert(properties(*indexSet)->blockProj[vd]);
   SP::SiconosMatrix currentInteractionBlock = properties(*indexSet)->blockProj[vd];
+
+
+  assert(currentInteractionBlock->size(0) == sizeY);
+  assert(currentInteractionBlock->size(1) == sizeY);
+
   if (!_hasBeUpdated)
     computeOptions(inter, inter);
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if

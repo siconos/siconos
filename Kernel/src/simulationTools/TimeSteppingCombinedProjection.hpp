@@ -95,6 +95,11 @@ public:
   TimeSteppingCombinedProjection() {};
 
   virtual ~TimeSteppingCombinedProjection();
+  /** compute for the first time the _level* variables
+   * \warning it should only be called during initialize, if there are Interactions.
+   * Otherwise, call the overloaded method when addind a Relation
+   */
+  void computeLevelsForInputAndOutput();
 
   /** Update the _level* attributes and add the specific index Set
    * \param inter a new SP::Interaction

@@ -27,11 +27,11 @@
 
 
 using namespace std;
-//#define TSPROJ_DEBUG
-//#define CORRECTIONSVELOCITIES
+#define TSPROJ_DEBUG
+
 
 #define DEBUG_MESSAGES
-#define DEBUG_WHERE_MESSAGES
+//#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 
@@ -47,6 +47,11 @@ TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(SP::TimeDiscretis
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
 
   _indexSetLevelForProjection = level;
+  if (_indexSetLevelForProjection != 2)
+  {
+    RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection level not equal to 2 is not yet implemented.  ");
+
+  }
   _constraintTol = 1e-04;
   _constraintTolUnilateral = 1e-08;
   _projectionMaxIteration = 10;
@@ -68,11 +73,26 @@ void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput(SP::Interact
   {
     SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
     unsigned int indxSize = topo->indexSetsSize();
+    if (indxSize == _indexSetLevelForProjection)
+    {
+      topo->indexSetsResize(indxSize + 1);
+      topo->resetIndexSetPtr(indxSize);
+    }
+  }
+}
+
+void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput()
+{
+  Simulation::computeLevelsForInputAndOutput();
+  // Add the  specific indexSets
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  unsigned int indxSize = topo->indexSetsSize();
+  if (indxSize == _indexSetLevelForProjection)
+  {
     topo->indexSetsResize(indxSize + 1);
     topo->resetIndexSetPtr(indxSize);
   }
 }
-
 
 
 void TimeSteppingCombinedProjection::initOSNS()
@@ -98,15 +118,26 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     indexSet2->clear();
   }
 
-
+#ifdef TSPROJ_DEBUG
+  int kindexset = 0 ;
+#endif
   while (!_isIndexSetsStable)
   {
+#ifdef TSPROJ_DEBUG
+    kindexset++ ;
+    cout << "TimeSteppingCombinedProjection::advanceToEvent begin :\n";
+    cout << "TimeSteppingCombinedProjection::advanceToEvent kindexset =" << kindexset << "  :\n";
+#endif
+
+
+
     if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       updateIndexSet(1);
     }
     else
       _isIndexSetsStable = true;
+
     /** First step, Solve the standard velocity formulation.*/
 #ifdef TSPROJ_DEBUG
     cout << "TimeStepping::newtonSolve begin :\n";
@@ -221,7 +252,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
-    interac->relation()->computeh(getTkp1());
+    interac->relation()->computeOutput(getTkp1(), 0);
     interac->relation()->computeJach(getTkp1());
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
@@ -265,7 +296,6 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 #endif
 }
 
-
 void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 {
   // To update IndexSet i: add or remove Interactions from
@@ -289,6 +319,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
+
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
@@ -298,110 +329,132 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false);
 
+  _isIndexSetsStable = true ;
+
+
+
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %i\n", (int)(indexSet0->size()));
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
-  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
 
-  //Remove interactions from the indexSet1
-  for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
-  {
-    ++v1next;
-    SP::Interaction inter1 = indexSet1->bundle(*ui1);
-    if (!(indexSet0->is_vertex(inter1)))
-    {
-      // Interactions is not in indexSet0 anymore.
-      // ui1 becomes invalid
-      indexSet1->remove_vertex(inter1);
-      topo->setHasChanged(true);
-    }
-  }
 
-  // indexSet0\indexSet1 scan
-  InteractionsGraph::VIterator ui0, ui0end;
-  //Add interaction in indexSet1
-  for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+  if (i == 1)
   {
-    if (indexSet0->color(*ui0) == boost::black_color)
+    DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
+    indexSet1->display();
+    //Remove interactions from the indexSet1
+    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
-      // reset
-      indexSet0->color(*ui0) = boost::white_color ;
-    }
-    else
-    {
-      if (indexSet0->color(*ui0) == boost::gray_color)
+      ++v1next;
+      SP::Interaction inter1 = indexSet1->bundle(*ui1);
+      if (indexSet0->is_vertex(inter1))
       {
-        // reset
-        indexSet0->color(*ui0) = boost::white_color;
-
-        assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
-        /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-          Type::value(*(indexSet0->bundle(*ui0)->nonSmoothLaw())) == Type::EqualityConditionNSL ;
-          });*/
+        InteractionsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(inter1);
+        assert((indexSet0->color(ur1_descr0) == boost::white_color));
+        indexSet0->color(ur1_descr0) = boost::gray_color;
       }
       else
       {
-        assert(indexSet0->color(*ui0) == boost::white_color);
+        // Interactions is not in indexSet0 anymore.
+        // ui1 becomes invalid
+        indexSet1->remove_vertex(inter1);
+        topo->setHasChanged(true);
+        _isIndexSetsStable = false;
+      }
+    }
+    // indexSet0\indexSet1 scan
+    InteractionsGraph::VIterator ui0, ui0end;
+    //Add interaction in indexSet1
+    for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+    {
+      if (indexSet0->color(*ui0) == boost::black_color)
+      {
+        // reset
+        indexSet0->color(*ui0) = boost::white_color ;
+      }
+      else
+      {
+        if (indexSet0->color(*ui0) == boost::gray_color)
+        {
+          // reset
+          indexSet0->color(*ui0) = boost::white_color;
 
-        SP::Interaction inter0 = indexSet0->bundle(*ui0);
-        assert(!indexSet1->is_vertex(inter0));
-        bool activate = true;
-        if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
-        {
-          DSIterator itDS = inter0->dynamicalSystemsBegin();
-          SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
-          activate = Osi->addInteractionInIndexSet(inter0, i);
+          assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
+          /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
+            Type::value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw())) == Type::EqualityConditionNSL ;
+            });*/
         }
-        if (activate)
+        else
         {
+          assert(indexSet0->color(*ui0) == boost::white_color);
+
+          SP::Interaction inter0 = indexSet0->bundle(*ui0);
+          DEBUG_PRINTF("update IndexSets middle : indexSet1 size : %i\n", (int)(indexSet1->size()));
+          DEBUG_PRINTF("indexSet1->is_vertex(inter0) : %i\n", indexSet1->is_vertex(inter0));
+
+
           assert(!indexSet1->is_vertex(inter0));
 
-          // vertex and edges insertion in indexSet1
-          indexSet1->copy_vertex(inter0, *indexSet0);
-          topo->setHasChanged(true);
-          assert(indexSet1->is_vertex(inter0));
+          bool activate = true;
+          if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
+          {
+
+            DSIterator itDS = inter0->dynamicalSystemsBegin();
+            SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
+            activate = Osi->addInteractionInIndexSet(inter0, i);
+          }
+          if (activate)
+          {
+            assert(!indexSet1->is_vertex(inter0));
+
+            // vertex and edges insertion in indexSet1
+            indexSet1->copy_vertex(inter0, *indexSet0);
+            topo->setHasChanged(true);
+            _isIndexSetsStable = false ;
+            assert(indexSet1->is_vertex(inter0));
+          }
         }
       }
     }
-  }
+    assert(indexSet1->size() <= indexSet0->size());
+    DEBUG_PRINTF("update indexSets end : indexSet0 size : %i\n", (int)(indexSet0->size()));
+    DEBUG_PRINTF("update IndexSets end : indexSet1 size : %i\n", (int)(indexSet1->size()));
+  } // i==1
 
-  assert(indexSet1->size() <= indexSet0->size());
-
-  indexSet2->clear();
-  // Scan indexSet1
-  for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+  if (i == 2)
   {
-    ++v1next;
-    SP::Interaction inter1 = indexSet1->bundle(*ui1);
-    bool activate = true;
-    if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
-    {
-      DSIterator itDS = inter1->dynamicalSystemsBegin();
-      SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
-      activate = Osi->addInteractionInIndexSet(inter1, i);
-    }
-    if (activate)
-    {
-      assert(!indexSet2->is_vertex(inter1));
+    indexSet2->clear();
+    DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
-      // vertex and edges insertion in indexSet2
-      indexSet2->copy_vertex(inter1, *indexSet1);
-      topo->setHasChanged(true);
-      assert(indexSet2->is_vertex(inter1));
+    // Scan indexSet1
+    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+    {
+      ++v1next;
+      SP::Interaction inter1 = indexSet1->bundle(*ui1);
+      bool activate = true;
+      if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
+      {
+        DSIterator itDS = inter1->dynamicalSystemsBegin();
+        SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
+        activate = Osi->addInteractionInIndexSet(inter1, i);
+      }
+      if (activate)
+      {
+        assert(!indexSet2->is_vertex(inter1));
+
+        // vertex and edges insertion in indexSet2
+        indexSet2->copy_vertex(inter1, *indexSet1);
+        topo->setHasChanged(true);
+        _isIndexSetsStable = false;
+        assert(indexSet2->is_vertex(inter1));
+      }
     }
+    DEBUG_PRINTF("update IndexSets end : indexSet0 size : %i\n", (int)(indexSet0->size()));
+    DEBUG_PRINTF("update IndexSets end : indexSet2 size : %i\n", (int)(indexSet2->size()));
+
   }
-
-
-
-
-
-
-  DEBUG_PRINTF("update indexSets end : indexSet0 size : %i\n", (int)(indexSet0->size()));
-  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %i\n", (int)(indexSet1->size()));
-  DEBUG_PRINTF("update IndexSets end : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
 
 }

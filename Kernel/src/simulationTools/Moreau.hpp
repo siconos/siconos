@@ -117,8 +117,8 @@ public:
   Moreau(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Theta value
+   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param theta value of the parameter
    */
   Moreau(SP::DynamicalSystem, double);
 
