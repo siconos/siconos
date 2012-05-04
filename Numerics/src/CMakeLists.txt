@@ -19,6 +19,7 @@ SET(SiconosNumerics_VERSION "${VERSION}")
 SET(SiconosNumerics_DIRS
   ..
   .
+  hairer/
   netlib/odepack
   netlib/dftemplates
   NonSmoothSolvers
@@ -161,7 +162,10 @@ IF(WITH_TESTING)
   NEW_TEST(odepacktest9 DLSOIBT-test.f)
   NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
   END_TEST()
- 
+
+  BEGIN_TEST(hairer/test)
+  NEW_TEST(dr_iso1 dr_iso.f)
+  END_TEST()
 
   BEGIN_TEST(NonSmoothTools/test) 
   #NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)

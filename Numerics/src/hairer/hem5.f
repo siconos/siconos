@@ -1,0 +1,2289 @@
+C**********************************************************
+      SUBROUTINE HEM5(NQ,NV,NU,NL,FPROB, 
+     &                T,Q,V,U,A,RLAM,TEND,H,
+     &                RTOL,ATOL,ITOL,
+     &                SOLOUT,IOUT,
+     &                WK,LWK,IWK,LIWK,IDID)
+C-----------------------------------------------------------------------
+C    NUMERICAL SOLUTION OF A CONSTRAINED MECHANICAL SYSTEM                
+C                                                                         
+C                 q' = T(q,t)v                                         
+C           M(t,q)v' = f(t,q,v,u) - L(q,v,u,t)*lamda                    
+C                 0  = H(t,q)v + k(t,q) 
+C                 u' = d(q,v,u,lambda,t)  
+C 
+C
+C    THE LOCAL ERROR ESTIMATION AND THE STEP SIZE CONTROL IS BASED ON
+C    EMBEDDED FORMULAS OF ORDERS 5 AND 3. THIS METHOD IS PROVIDED WITH
+C    TWO DENSE OUTPUT  OF ORDER 4.  
+C
+C         !!!      VERSION WITH MA28   !!!                          
+C                                                                        
+C     AUTHOR:  V. BRASEY
+C              UNIVERSITE DE GENEVE, DEPT. DE MATHEMATIQUES
+C              CH-1211 GENEVE 24, SWITZERLAND 
+C              E-MAIL: BRASEY@DIVSUN.UNIGE.CH, HAIRER@DIVSUN.UNIGE.CH 
+C     
+C     DESCRIPTION OF THIS CODE IS GIVEN IN:
+C         V. BRASEY , HALF-EXPLICIT METHOD FOR SEMI-EXPLICIT DIFFERENTIAL-
+C              ALGEBRAIC EQUATIONS OF INDEX 2. THESIS, 1994 
+C              UNIV. DE GENEVE, SECT. DE MATHEMATIQUES.
+C         (SEE ALSO ENCLOSED USER-GUIDE)
+C      
+C     VERSION OF JUNE 8, 1994
+C
+C     MANY THANKS TO CH. ENGSTLER FOR CORRECTIONS AND SUGGESTIONS
+C          
+C     DIMENSIONS
+C     ----------
+C 
+C    NQ (SIZE OF POSITION VECTOR)
+C    NV (SIZE OF VELOCITY VECTOR, NQ>=NV)
+C    NL (SIZE OF LAGRANGE MULTIPLIER VECTOR) 
+C    NU (SIZE OF EXTERNAL DYNAMIC VECTOR) 
+C    IWK(1) = LDG (SPARSE ALGEBRA: NON ZERO ENTRIES)
+C    IWK(2) = LDF 
+C
+C 
+C     SOPHISTICATED SETTING OF PARAMETERS
+C     -----------------------------------
+C              SEVERAL PARAMETERS OF THE CODE ARE TUNED TO MAKE IT WORK 
+C              WELL. THEY MAY BE DEFINED BY SETTING WK(1),..,WK(8)
+C              AS WELL AS IWK(11) .. IWK(16) DIFFERENT FROM ZERO.
+C              FOR ZERO INPUT, THE CODE CHOOSES DEFAULT VALUES:
+C
+C    IWK(11)  THIS IS THE MAXIMAL NUMBER OF ALLOWED STEPS.
+C              THE DEFAULT VALUE (FOR IWK(11)=0) IS 100000.
+C
+C    IWK(12)  SWITCH FOR A PROJECTION TO ENSURE CONSISTENT INITIAL VALUE
+C              FOR IWK(12)=1 AN INITIAL PROJECTION IS PERFORMED.
+C              NO PROJECTION IS DONE IF IWK(12)=0.
+C              THE DEFAULT VALUE FOR IWK(12) IS 0. 
+C
+C    IWK(13)  FOR IWK(13).GT.0 IT IS THE NUMBER OF STEPS BETWEEN 
+C              TWO PROJECTIONS ON THE MANIFOLD  DEFINED BY 0 = g(q,t).
+C              FOR IWK(13).LE.0 NO PROECTION IS PERFORMED.
+C              THE DEFAULT VALUE FOR IWK(13) IS 0.
+C
+C    IWK(14)  MODE (=0: FULL LINEAR ALGEBRA WITH DEC, =1: IDEM WITH FL,
+C                     =2: FULL LINEAR ALGEBRA WITH DGETRF, =3: FL
+C                     =4: SPARSE, =5: IDEM WITH FL)
+C
+C    IWK(15)  IACC (=1: COMPUTE THE ACCELERATION)
+C
+C    IWK(16)  IGIIN (=1: COMPUTE NUMERICALLY GII)
+C
+C
+C    IWK(21->29)  IPAR
+C    IPAR(1) = IWK(21) = NMRC (SIZE OF A BLOCK OF AM)
+C    IPAR(2) = IWK(22) = NBLK (NUMBER OF BLOCK OF AM)
+C    IPAR(3) = IWK(23) = NPGP (0 IF GP AS THE SAME PATTERN AS PREVIOUS CALL)
+C    IPAR(4) = IWK(24) = NPFL (0 IF FL AS THE SAME PATTERN AS PREVIOUS CALL)
+C    IPAR(5) = IWK(25) = IS (SIZE OF INTEGER WORK SPACE FOR MA28 (MIN 13*NM))
+C    IPAR(6) = IWK(26) = IXS (SIZE OF REAL WORK SPACE FOR MA28 (MIN NM+4*NZA))
+C    IPAR(7) = IWK(27) = PREVL
+C    IPAR(8) = IWK(28) = IO
+C    IPAR(9) = FLAG TO INDICATE IF UMDFAC HAS BEEN CALLED AT LEAST ONCE
+C
+C    IWK(31->38) ISTAT
+C    ISTAT(1) = IWK(31) = NSTEP
+C    ISTAT(2) = IWK(32) = NACCPT
+C    ISTAT(3) = IWK(33) = NREJCT
+C    ISTAT(4) = IWK(34) = NFCN
+C    ISTAT(5) = IWK(35) = NGQCN
+C    ISTAT(6) = IWK(36) = NAMAT
+C    ISTAT(7) = IWK(37) = NDEC
+C    ISTAT(8) = IWK(38) = NSOL
+C ---    NFCN      NUMBER OF f - EVALUATIONS
+C ---    NGCN      NUMBER OF g - EVALUATIONS
+C ---    NSTEP     NUMBER OF ALL COMPUTED STEPS
+C ---    NACCPT    NUMBER OF ACCEPTED STEPS
+C ---    NREJCT    NUMBER OF REJECTED STEPS (AFTER AT LEAST ONE STEP
+C                  HAS BEEN ACCEPTED)
+C ---    NDEC      NUMBER OF LU-DECOMPOSITIONS
+C ---    NSOL      NUMBER OF FORWARD-BACKWARD SUBSTITUTIONS
+C    IWK(41->41+NM-1) = IP
+C    IWK(29->29+NM+2*LDG-1) = INDG(1..2*LDG)
+C    IWK(29+NM+2*LDG..) = INDG1(1..2*LDG)
+C    IWK(29+NM+4*LDG..) = INDG2(1..2*LDG)
+C    IWK(29+NM+6*LDG..) = INDGD(1..2*LDG)
+C    IWK(29+NM+8*LDG..) = INDFL(1..2*LDF)
+C    IWK(29+NM+4*LDG+2*LDF..) = INDAM(1..2*NZA)
+C    IUMF(1) = IWK(29+NM+4*LDG+2*LDF+2*NZA..) = IKEEP(1..5*NM)
+C    IUMF(IIK) = IWK(29+NM+4*LDG+2*LDF+4*NZA+5*NM..) = IW(1..8*NM)
+C    IWK(ICONT) = IDOWK 
+C
+C    WK(1)   UROUND, THE ROUNDING UNIT, DEFAULT 1.D-16.
+C
+C    WK(2)   THE SAFETY FACTOR IN STEP SIZE PREDICTION,
+C              DEFAULT 0.85D0.
+C
+C    WK(3), WK(4)   PARAMETERS FOR STEP SIZE SELECTION
+C              THE NEW STEP SIZE IS CHOSEN SUBJECT TO THE RESTRICTION
+C                 WK(3) <= HNEW/HOLD <= WK(4).
+C              DEFAULT VALUES: WK(3)=0.2D0, WK(4)=10.D0
+C
+C    WK(6)   MAXIMAL STEP SIZE, DEFAULT TEND-T.
+C
+C    WK(7) = BETA, DEFAULT 0.D0
+C
+C    WK(8) = ALPHA, DEFAULT 1/5
+C
+C----------------------------------------------------------------------
+C    XLA(1..NZA) = AVALUE(1..4*NZA)
+C    XUMF(IXW) = XLA(1+2*NZA..) = W(NM)
+C    LXLA = 4*NZA +NM
+C
+C-----------------------------------------------------------------------
+C     FPROB
+C     -----
+C
+C     0 -> UDOT
+C     1 -> f,M,QDOT,(FL)
+C     2 -> QDOT
+C     3 -> gt
+C     4 -> g
+C     5 -> f,(GII)
+C     6 -> GQ,gt
+C     7 -> (GII),f,M
+C     8 -> f,M,(FL)
+C     9 -> M
+C     10 -> gt,GQ,M,QDOT,(FL)
+C     11 -> gt,GQ,M
+C--------------------------------------------------------------------------
+C     OUTPUT PARAMETERS 
+C     ----------------- 
+C     T           T-VALUE FOR WHICH THE SOLUTION HAS BEEN COMPUTED
+C                 (AFTER SUCCESSFUL RETURN T=TEND).
+C
+C     Q(N)        NUMERICAL APPROXIMATION OF POSITION VECTOR AT T.
+C 
+C     V(N)        NUMERICAL APPROXIMATION OF VELOCITY VECTOR AT T.
+C 
+C     H           PREDICTED STEP SIZE OF THE LAST ACCEPTED STEP.
+C
+C     IDID        REPORTS ON SUCCESSFULNESS UPON RETURN:
+C                   IDID= 1  COMPUTATION SUCCESSFUL,
+C                   IDID=-1  INPUT IS NOT CONSISTENT,
+C                   IDID=-2  LARGER NMAX IS NEEDED,
+C                   IDID=-3  STEP SIZE BECOMES TOO SMALL,
+C                   IDID=-4  MATRIX IS SINGULAR.
+C                   IDID=-5  INITIAL PROJECTION: NO CONVERGENCE  C-----------------------------------------------------------------------
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+C          DECLARATIONS 
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Q(NQ),V(NV),U(NU),A(NV),RLAM(NL) 
+      DIMENSION ATOL(1),RTOL(1),WK(LWK),IWK(LIWK)
+      LOGICAL ARRET
+      EXTERNAL FPROB,SOLOUT
+C *** *** *** *** *** *** ***
+C        SETTING THE PARAMETERS 
+C *** *** *** *** *** *** ***
+      ARRET=.FALSE.
+      MODE=IWK(14)
+C -------- MODE, THE CHOICE OF LINEAR ALGEBRA
+      IF ((IWK(14).LE.-1).OR.(IWK(14).GE.6)) THEN
+        WRITE(6,*)' WRONG CHOICE OF IWK(14) (MODE):'
+     &             ,IWK(14)
+        ARRET=.TRUE.
+      ELSE 
+        MODE=IWK(14)
+      END IF
+      LDG = IWK(1)  
+      LDF = IWK(2)
+      NM=NV+NL   
+      NMRC = IWK(21)
+      NBLK = IWK(22)
+      NZA = NBLK*NMRC**2+LDF+LDG
+      IF (MODE.EQ.4) LDF=LDG 
+      IF (MODE.GE.4) THEN
+        IF (LDG.LE.0) THEN
+          WRITE(6,*)' IWK(1) (LDG) MUST BE POSITIVE'
+          ARRET=.TRUE.
+        END IF
+        IF (LDF.LE.0) THEN
+          WRITE(6,*)' IWK(2) (LDF) MUST BE POSITIVE'
+          ARRET=.TRUE.
+        END IF
+        IF ((NMRC.EQ.0).OR.(NBLK.EQ.0)) THEN
+          WRITE(6,*)' IWK(21) (NMRC) AND IWK(22) (NBLK) MUST
+     &        BE POSITIVE'
+          ARRET=.TRUE.
+        END IF
+        IF (IWK(28).EQ.0) IWK(28)=6
+        IF (IWK(25).LT.13*NM) THEN
+           WRITE(6,*)' INTEGER WORK SPACE (IWK(25))
+     &           FOR MA28 TOO SMALL'
+           IWK(25)=13*NM
+        END IF
+        IF (IWK(26).LT.(4*NZA+NM)) THEN
+           WRITE(6,*)' REAL WORK SPACE (IWK(26))
+     &           FOR MA28 TOO SMALL'
+           IWK(26)=4*NZA+NM
+        END IF
+      END IF
+      IF (MODE.LE.3) THEN
+        LDG=NL
+        LDF=NV
+        LDA=NM 
+        NDIM=NV
+        MDIM=NL
+        NMDIM=NM
+      ELSE
+        LDA = NBLK*NMRC
+        NDIM=1
+        MDIM=1
+        NMDIM=NMRC
+      END IF
+C -------- NMAX , THE MAXIMAL NUMBER OF STEPS -----
+      IF(IWK(11).EQ.0)THEN
+        NMAX=100000
+      ELSE
+        NMAX=IWK(11)
+      END IF
+C -------- IPCIV    SWITCH FOR INITIAL PROECTION
+      IF (IWK(12).EQ.1) THEN
+        IPCIV=1
+      ELSE
+        IPCIV=0
+      ENDIF
+C -------- IGII AND IACC
+      IF (IWK(15).EQ.1) THEN
+        IACC=1
+      ELSE
+        IACC=0
+      ENDIF
+      IF (IWK(16).EQ.1) THEN
+        IGII=1
+      ELSE
+        IGII=0
+      ENDIF
+C -------- IPRO    NUMBERS OF STEPS BETWEEN TWO PROECTIONS
+      IPROJ = IWK(13)
+C -------- UROUND   SMALLEST NUMBER SATISFYING 1.D0+UROUND>1.D0  
+      IF(WK(1).EQ.0.D0)THEN
+        UROUND=1.D-16
+      ELSE
+        UROUND=WK(1)
+        IF(UROUND.LE.1.D-35.OR.UROUND.GE.1.D0)THEN
+         WRITE(6,*)' WHICH MACHINE DO YOU HAVE? YOUR UROUND WAS:'
+     &                            ,WK(1)
+         ARRET=.TRUE.
+        END IF
+      END IF
+C -------  SAFETY FACTOR -------------
+      IF(WK(2).EQ.0.D0)THEN
+        SAFE=0.9D0
+      ELSE
+        SAFE=WK(2)
+        IF(SAFE.GE.1.D0.OR.SAFE.LE.1.D-4)THEN
+         WRITE(6,*)' CURIOUS INPUT FOR SAFETY FACTOR WK(2)='
+     &                            ,WK(2)
+         ARRET=.TRUE.
+        END IF
+      END IF
+C -------  FAC1,FAC2     PARAMETERS FOR STEP SIZE SELECTION
+      IF(WK(3).EQ.0.D0)THEN
+        F1=0.2D0
+      ELSE
+        F1=WK(3)
+      END IF
+      IF(WK(4).EQ.0.D0)THEN
+        F2=10.D0
+      ELSE
+        F2=WK(4)
+      END IF
+C -------- MAXIMAL STEP SIZE
+      IF(WK(6).EQ.0.D0)THEN
+        HMAX=TEND-T
+      ELSE
+        HMAX=WK(6)
+      END IF 
+C -------- GUSTAFFSON STRATEGIE
+      BETA = WK(7)
+      IF(WK(8).EQ.0.D0)THEN
+        ALPHA = 1/5.d0
+      ELSE
+        ALPHA=WK(8)
+      END IF 
+C -- WK SPACE
+      LXUMF = NM
+      LIUMF = 13*NM+4*nza
+      LIPAR = 9
+      LISTA = 9
+      LRDO = 8+6*(NQ+NV+NU)+NM+2*LDG*NDIM+LDA*NMDIM+NL+
+     &       LDF*MDIM+NZA+LXUMF
+      LIDO = 10+NM+LIPAR+LIUMF+4*LDG+2*LDF+2*NZA
+C ------- PREPARE THE ENTRY-POINTS FOR THE ARRAYS IN WK -----
+      IQ1 = 11
+      IQ2 = IQ1+NQ  
+      IQ3 = IQ2+NQ
+      IQ4 = IQ3+NQ
+      IQ5 = IQ4+NQ
+      IQ6 = IQ5+NQ
+      IQ7 = IQ6+NQ
+      IQDOT1 = IQ7+NQ
+      IQDOT2 = IQDOT1+NQ
+      IQDOT3 = IQDOT2+NQ
+      IQDOT4 = IQDOT3+NQ
+      IQDOT5 = IQDOT4+NQ
+      IQDOT6 = IQDOT5+NQ
+      IQDOT7 = IQDOT6+NQ
+      IQDOT = IQDOT7+NQ
+      IV1 = IQDOT+NQ
+      IV2 = IV1+NV  
+      IV3 = IV2+NV
+      IV4 = IV3+NV
+      IV5 = IV4+NV
+      IV6 = IV5+NV
+      IV7 = IV6+NV
+      IU1 = IV7+NV
+      IU2 = IU1+NU
+      IU3 = IU2+NU
+      IU4 = IU3+NU
+      IU5 = IU4+NU
+      IU6 = IU5+NU
+      IU7 = IU6+NU
+      IVP1 = IU7+NU
+      IVP2 = IVP1+NV  
+      IVP3 = IVP2+NV
+      IVP4 = IVP3+NV
+      IVP5 = IVP4+NV
+      IVP6 = IVP5+NV
+      IVP7 = IVP6+NV
+      IXL = IVP7+NV
+      IUDOT1 = IXL+NL
+      IUDOT2 = IUDOT1+NU
+      IUDOT3 = IUDOT2+NU
+      IUDOT4 = IUDOT3+NU
+      IUDOT5 = IUDOT4+NU
+      IUDOT6 = IUDOT5+NU
+      IUDOT7 = IUDOT6+NU
+      IUDOT = IUDOT7+NU
+      IGQ = IUDOT+NU
+      IGQ0 = IGQ+LDG*NDIM
+      IGQ1 = IGQ0+LDG*NDIM 
+      IB = IGQ1+LDG*NDIM
+      IX0 = IB+LDA*NMDIM
+      ITEMP = IX0+NM
+      IAM = ITEMP +NV
+      IGT = IAM+LDA*NMDIM 
+      IG = IGT+NL
+      IFL = IG+NL
+      IAV = IFL+LDF*MDIM
+      IXUMF = IAV+2*NZA
+      IBD=IXUMF+LXUMF
+      ICQ = IBD+LDA*NMDIM
+      ICV = ICQ+5*NQ
+      ICU = ICV+5*NV
+      IGD = ICU+5*NU
+      IGTD = IGD+LDG*NDIM
+      IXD = IGTD+NL
+      IQD = IXD+NM
+      IVD = IQD+NQ
+      IUD = IVD+NV 
+      IVP = IUD+NU
+      IDO = IVP+NV
+C ------ TOTAL STORAGE REQUIREMENT -----------
+      IS=IDO+LRDO
+      IF(IS.GT.LWK)THEN
+       WRITE(6,*)' INSUFFICIENT STORAGE FOR WK, MIN. LWK=',IS
+       ARRET=.TRUE.
+      END IF
+C ------- PREPARE THE ENTRY-POINTS FOR THE ARRAYS IN IWK -----
+      IPA = 21
+      ISTAT = 31
+      IIP = 41
+      ING = 41+NM
+      ING0 = ING+2*LDG
+      ING1 = ING0+2*LDG
+      INGD = ING1+2*LDG
+      INFL = INGD+2*LDG
+      INAM = INFL+2*LDF
+      INUMF =INAM+2*NZA
+      ICONT = INUMF+LIUMF	
+C ------ TOTAL STORAGE REQUIREMENT -----------
+      IS=ICONT+LIDO
+      IF(IS.GT.LIWK)THEN
+       WRITE(6,*)' INSUFFICIENT STORAGE FOR IWK, MIN. LIWK=',IS
+       ARRET=.TRUE.
+      END IF
+C ------ WHEN A FAIL HAS OCCURED, WE RETURN WITH IDID=-1
+      IF (ARRET) THEN
+       IDID=-1
+       RETURN
+      END IF
+C -------- CALL TO CORE INTEGRATOR ------------
+      CALL HCOR(NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,NZA,LRDO,LIDO,LIPAR,
+     & LISTA,LIUMF,LXUMF,LDG,LDF,LDA,MODE,NMAX,IPCIV,IPROJ,IOUT,
+     & IGII,IACC,ITOL,IWK(IPA),IWK(ISTAT),IWK(IIP),IWK(ING),
+     & IWK(ING0),IWK(ING1),IWK(INGD),IWK(INFL),IWK(INAM),IWK(INUMF),
+     & IWK(ICONT),FPROB,SOLOUT,UROUND,T,TEND,H,HMAX,RTOL,ATOL,SAFE,
+     & ALPHA,BETA,F1,F2,Q,V,U,A,RLAM,WK(IQ1),WK(IQ2),WK(IQ3), 
+     & WK(IQ4),WK(IQ5),WK(IQ6),WK(IQ7),WK(IQDOT1),WK(IQDOT2),
+     & WK(IQDOT3),WK(IQDOT4),WK(IQDOT5),WK(IQDOT6),
+     & WK(IQDOT7),WK(IQDOT),WK(IV1),WK(IV2),WK(IV3),WK(IV4),
+     & WK(IV5),WK(IV6),WK(IV7),WK(IU1),WK(IU2),WK(IU3),
+     & WK(IU4),WK(IU5),WK(IU6),WK(IU7),WK(IVP1),WK(IVP2),
+     & WK(IVP3),WK(IVP4),WK(IVP5),WK(IVP6),WK(IVP7),WK(IXL),
+     & WK(IUDOT1),WK(IUDOT2),WK(IUDOT3),WK(IUDOT4),WK(IUDOT5),
+     & WK(IUDOT6),WK(IUDOT7),WK(IUDOT),WK(IGQ),WK(IGQ0),
+     & WK(IGQ1),WK(IB),WK(IX0),WK(ITEMP),WK(IAM),
+     & WK(IGT),WK(IG),WK(IFL),WK(IAV),WK(IXUMF),WK(IBD),
+     & WK(ICQ),WK(ICV),WK(ICU),WK(IGD),WK(IGTD),WK(IXD),
+     & WK(IQD),WK(IVD),WK(IUD),WK(IVP),WK(IDO))
+C ----------- RETURN -----------
+      RETURN
+      END
+C
+C
+C  ----- ... AND HERE IS THE CORE INTEGRATOR  ----------
+C
+      SUBROUTINE HCOR(NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,NZA,LRDO,
+     & LIDO,LIPAR,LISTA,LIUMF,LXUMF,LDG,LDF,LDA,MODE,NMAX,
+     & IPCIV,IPROJ,IOUT,IGII,IACC,ITOL,IPAR,ISTAT,IP,INDG,
+     & INDG0,INDG1,INDGD,INDFL,INDA,IUMF,IDOWK,FPROB,SOLOUT,
+     & UROUND,T,TEND,H,HMAX,RTOL,ATOL,SAFE,ALPHA,BETA,
+     & FAC1,FAC2,Q,V,U,A,RLAM,Q1,Q2,Q3,Q4,Q5,Q6,Q7,
+     & QDOT1,QDOT2,QDOT3,QDOT4,QDOT5,QDOT6,QDOT7,QDOT,V1,
+     & V2,V3,V4,V5,V6,V7,U1,U2,U3,U4,U5,U6,U7,VP1,VP2,
+     & VP3,VP4,VP5,VP6,VP7,XL,UDOT1,UDOT2,UDOT3,UDOT4,
+     & UDOT5,UDOT6,UDOT7,UDOT,GQ,GQ0,GQ1,B,X0,TEMP,
+     & AM,GT,G,FL,AVALUE,XUMF,BD,CONTQ,CONTV,CONTU,
+     & GD,GTD,XD,QD,VD,UD,VP,DOWK)
+C ----------------------------------------------------------
+C     CORE INTEGRATOR FOR HEM5
+C     PARAMETERS SAME AS IN HEM5 WITH WORKSPACE ADDED 
+C ---------------------------------------------------------- 
+C         DECLARATIONS 
+C ---------------------------------------------------------- 
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Q(NQ),Q1(NQ),Q2(NQ),Q3(NQ),Q4(NQ),Q5(NQ)
+      DIMENSION Q6(NQ),Q7(NQ),V(NV),V1(NV),V2(NV),V3(NV)
+      DIMENSION V4(NV),V5(NV),V6(NV),V7(NV),VP1(NV),VP2(NV)
+      DIMENSION VP3(NV),VP4(NV),VP5(NV),VP6(NV),VP7(NV)
+      DIMENSION GQ(LDG,NDIM),GQ0(LDG,NDIM),GQ1(LDG,NDIM)
+      DIMENSION B(LDA,NMDIM),AM(LDA,NMDIM),INDG(2*LDG)
+      DIMENSION X0(NM),IP(NM),TEMP(NV),AVALUE(2*NZA),IDOWK(LIDO)
+      DIMENSION GT(NL),G(NL),B10(4),CONTQ(5*NQ),CONTV(5*NV)
+      DIMENSION GTD(NL),XD(NM),QD(NQ),VD(NV),VP(NV),DOWK(LRDO) 
+      DIMENSION ATOL(1),RTOL(1),XUMF(LXUMF),FL(LDF,MDIM)
+      DIMENSION GD(LDG,NDIM),BD(LDA,NMDIM),IPAR(LIPAR)
+      DIMENSION INDG0(2*LDG),INDG1(2*LDG),INDGD(2*LDG),A(NV)
+      DIMENSION INDFL(2*LDF),INDA(2*NZA),IUMF(LIUMF),ISTAT(LISTA)
+      DIMENSION UDOT1(NU),UDOT2(NU),UDOT3(NU),UDOT4(NU)
+      DIMENSION UDOT5(NU),UDOT6(NU),UDOT7(NU),UDOT(NU),RLAM(NL)
+      DIMENSION QDOT1(NQ),QDOT2(NQ),QDOT3(NQ),QDOT4(NQ)
+      DIMENSION QDOT5(NQ),QDOT6(NQ),QDOT7(NQ),QDOT(NQ)
+      DIMENSION U(NU),U1(NU),U2(NU),U3(NU),U4(NU),U5(NU)
+      DIMENSION U6(NU),U7(NU),CONTU(5*NU),UD(NU),XL(NL)
+      LOGICAL REJECT,ACCEPT,LAST  
+      EXTERNAL FPROB,SOLOUT
+C *** *** *** *** *** *** ***
+C  INITIALISATIONS
+C *** *** *** *** *** *** *** 
+       CALL COEF(C2,C3,C4,C5,C6,C7,C10,A21,A31,A32,
+     &    A41,A42,A43,A51,A52,A53,A54,A61,A62,A63,A64,A65,
+     &    A71,A72,A73,A74,A75,A76,A81,A82,A83,A84,A85,A86,
+     &    A87,A106,A107,A109,B1,B2,B3,B4,B5,B6,B7,B8,
+     &    D14,D15,D16,D17,D18,D19,D24,D25,D26,D27,D28,D29, 
+     &    D34,D35,D36,D37,D38,D39,D44,D45,D46,D47,D48,D49) 
+      B10(1)=D19
+      B10(2)=D29
+      B10(3)=D39
+      B10(4)=D49
+      DO I=1,9
+        ISTAT(I)=0
+      END DO
+      NSTEP=0
+      NQ2=2*NQ
+      NQ3=3*NQ
+      NQ4=4*NQ
+      NV2=2*NV
+      NV3=3*NV
+      NV4=4*NV
+      NU2=2*NU
+      NU3=3*NU
+      NU4=4*NU
+      NQVU=NQ+NV+NU
+      NQVU2=2*NQVU
+      NQVU3=3*NQVU
+      NQVU4=4*NQVU
+      NBLK = IPAR(2)
+      NMRC = IPAR(1)
+cc
+CC      ipar(3)=1
+cc
+      IPAR(9)=1
+C --  NBS : COUNTS THE STEPS BETWEEN THE PROJECTIONS
+      NBS = 0  
+      LAST=.FALSE.
+      ACCEPT = .TRUE.
+      REJECT=.FALSE.
+      FACOLD=1.D0 
+      FACC1=1.D0/FAC1
+      FACC2=1.D0/FAC2
+      POSNEG=SIGN(1.D0,TEND-T)
+      IRTRN=1
+      HMAX=ABS(HMAX)
+      H=MIN(MAX(1.D-4,ABS(H)),HMAX)
+      H=SIGN(H,POSNEG)
+      TOLD=T
+      CALL FPROB(10,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &      IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &      INDFL(LDF+1),T,Q,V,U,XL,
+     &      G,GQ,X0(1),X0(NV+1),GT,FL,QDOT1,UDOT1,B)
+      ISTAT(5)=1
+      ISTAT(6)=1
+C --- PROJECTION TO ENSURE CONSISTENT INITIAL VALUES
+      IF ((IPCIV.EQ.1).OR.(IOUT.EQ.2)) THEN
+        CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,
+     &         NZA,LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG,
+     &         INDG,INDFL,INDA,IP,IUMF,XUMF,
+     &         B,GQ,GQ,FL,AVALUE,IER)
+        IF (IER.NE.0) GOTO 176
+        IF (IPCIV.EQ.1) THEN
+          CALL APROJ(MODE,NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,
+     *         NBLK,NMRC,LDG,LDF,LDA,NZA,LIPAR,LIUMF,LXUMF,
+     *         LISTA,ISTAT,IPAR,IUMF,INDA,INDG,INDFL,FL,XUMF,
+     *         AVALUE,T,FPROB,Q,Q,Q2,QD,V,V,V2,U,XL,UDOT,G,GT,
+     *         GQ,AM,B,X0,IP,ATOL,RTOL,ITOL,ACCEPT)
+          ISTAT(6) = ISTAT(6)+2 
+          ISTAT(5) = ISTAT(5)+1 
+          IF (.NOT.(ACCEPT)) GOTO 179
+        END IF
+        IF (IOUT.EQ.2) THEN 
+          CALL FPROB(5,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &       IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &       INDFL(LDF+1),T,Q,V,U,XL,
+     &       G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+          IF (IGII.EQ.1) CALL GIINUM(MODE,NQ,NV,NU,NL,NDIM,
+     &       MDIM,NMDIM,NM,
+     &       LDG,LDF,LDA,NBLK,NMRC,IPAR(3),IPAR(4),INDG,INDGD,
+     &       INDFL,T,UROUND,FPROB,Q,QD,QDOT1,V,U,GQ,GD,GT,GTD,
+     &       FL,AM,X0(NV+1),G)
+          CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &       IP,NZA,AVALUE,XUMF,B,X0,VP,XL)
+          ISTAT(4)=1
+          ISTAT(9)=1
+        END IF
+      ENDIF
+      IF(IOUT.GE.1) THEN
+        DOWK(1)=TOLD
+        DOWK(2)=H
+        CALL SOLOUT(MODE,ISTAT(2)+1,NQ,NV,NU,NL,LDG,LDF,LDA,
+     &       LRDO,LIDO,FPROB,Q,V,U,DOWK,IDOWK)
+      END IF
+C --  FIRST STAGE : V1 AND Q1 CONTAIN THE INITIAL VALUES
+      DO  I=1,NV
+        Q1(I) = Q(I)
+        V1(I) = V(I)
+      END DO
+      DO I=NV+1,NQ
+        Q1(I) = Q(I)
+      END DO   
+      DO I=1,NU
+        U1(I) = U(I)
+      END DO   
+C --- BASIC INTEGRATION STEP  
+ 909  IF(NSTEP.GT.NMAX) GOTO 178
+      IF (0.1D0*ABS(H).LE.ABS(T)*UROUND) GOTO 177
+      IF((T+H-TEND)*POSNEG.GT.0.D0) THEN
+        H=TEND-T
+        LAST=.TRUE.
+      END IF
+      ISTAT(1)=ISTAT(1)+1 
+      ACCEPT = .TRUE.
+C --  2d STAGE
+      CALL FPROB(8,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &    IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &    INDFL(LDF+1),T,Q1,V1,U1,XL,
+     &    G,GQ,X0(1),X0(NV+1),GT,FL,QDOT1,UDOT1,B)
+      DO  I=1,NQ
+        Q2(I) = Q1(I) + H*A21*QDOT1(I)
+      END DO
+      TCH = T+C2*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q2,V2,U2,XL,
+     &     G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT1,UDOT1,B)
+      FAC = -1.D0/(H*A21)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG1,
+     &     GQ1,FAC,V1,GT,X0(NV+1))
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,
+     &     NZA,LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG,INDG1,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ,GQ1,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &            IP,NZA,AVALUE,XUMF,B,X0,VP1,XL)
+cc
+      ipar(3)=0
+cc
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q1,V1,U1,XL,
+     &     G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT1,UDOT1,B)
+      DO  I=1,NU
+        U2(I) = U1(I) + H*A21*UDOT1(I)
+      END DO
+      DO  I=1,NV
+        V2(I) = V1(I) + H*A21*VP1(I)
+        TEMP(I) = V1(I) + H*A31*VP1(I)
+      END DO
+C - II.3D STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q2,V2,U2,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT2,UDOT2,B)
+      DO  I=1,NQ
+        Q3(I) = Q1(I) + H*(A31*QDOT1(I)+A32*QDOT2(I))
+      END DO
+      TCH = T+C3*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT3,UDOT3,B)
+      FAC = -1.D0/(H*A32)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG0,
+     &     GQ0,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,
+     &     NZA,LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDG0,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GQ0,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &     IP,NZA,AVALUE,XUMF,B,X0,VP2,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C2*H,Q2,V2,U2,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT2,UDOT2,B)
+      DO  I=1,NU
+        U3(I) = U1(I) + H*(A31*UDOT1(I)+A32*UDOT2(I))
+      END DO
+      DO  I=1,NV
+        V3(I) = TEMP(I) + H*A32*VP2(I)
+        TEMP(I) = V1(I) + H*(A41*VP1(I)+A42*VP2(I))
+      END DO
+C - II. 4TH STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT3,UDOT3,B)
+      DO  I=1,NQ
+        Q4(I) = Q1(I) + H*(A41*QDOT1(I)+A42*QDOT2(I)+A43*QDOT3(I))
+      END DO
+      TCH = T+C4*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q4,V4,U4,XL,
+     &     G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT4,UDOT4,B)
+      FAC = -1.D0/(H*A43)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG1,
+     &     GQ1,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG1,INDFL,
+     &     INDA,IP,IUMF,XUMF,B,GQ0,GQ1,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &     IP,NZA,AVALUE,XUMF,B,X0,VP3,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C3*H,Q3,V3,U3,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT3,UDOT3,B)
+      DO  I=1,NU
+        U4(I) = U1(I) + H*(A41*UDOT1(I)+A42*UDOT2(I)+A43*UDOT3(I))
+      END DO
+      DO  I=1,NV
+        V4(I) = TEMP(I) + H*A43*VP3(I)
+        TEMP(I) = V1(I) + H*(A51*VP1(I)+A52*VP2(I)
+     &                     +A53*VP3(I))
+
+      END DO
+C - II. 5TH STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q4,V4,U4,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT4,UDOT4,B)
+      DO  I=1,NQ
+        Q5(I) = Q1(I)+H*(A51*QDOT1(I)+A52*QDOT2(I)
+     &                +A53*QDOT3(I)+A54*QDOT4(I))
+      END DO
+      TCH = T+C5*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q5,V5,U5,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT5,UDOT5,B)
+      FAC = -1.D0/(H*A54)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG0,
+     &     GQ0,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDG0,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GQ0,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &     IP,NZA,AVALUE,XUMF,B,X0,VP4,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C4*H,Q4,V4,U4,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT4,UDOT4,B)
+      DO  I=1,NU
+        U5(I) = U1(I)+H*(A51*UDOT1(I)+A52*UDOT2(I)
+     &                   +A53*UDOT3(I)+A54*UDOT4(I)) 
+      END DO
+      DO I=1,NV
+        V5(I) = TEMP(I) + H*A54*VP4(I)
+        TEMP(I) = V1(I) + H*(A61*VP1(I)+A62*VP2(I)
+     &                 +A63*VP3(I)+A64*VP4(I))
+      END DO
+C - II. 6TH STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q5,V5,U5,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT5,UDOT5,B)
+      DO  I=1,NQ
+        Q6(I) = Q1(I) + H*(A61*QDOT1(I)+A62*QDOT2(I)+
+     &           A63*QDOT3(I)+A64*QDOT4(I)+A65*QDOT5(I))
+      END DO
+      TCH = T+C6*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q6,V6,U6,XL,
+     &     G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT6,UDOT6,B)
+      FAC = -1.D0/(H*A65)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG1,
+     &     GQ1,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG1,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ0,GQ1,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,X0,VP5,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C5*H,Q5,V5,U5,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT5,UDOT5,B)
+      DO  I=1,NU
+        U6(I) = U1(I)+H*(A61*UDOT1(I)+A62*UDOT2(I)+
+     &           A63*UDOT3(I)+A64*UDOT4(I)+A65*UDOT5(I))
+      END DO
+      DO I=1,NV
+        V6(I) = TEMP(I) + H*A65*VP5(I)
+        TEMP(I) = V1(I) + H*(A71*VP1(I)+A72*VP2(I)
+     &            +A73*VP3(I)+A74*VP4(I)+A75*VP5(I))
+      END DO
+C - II. 7TH STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q6,V6,U6,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT6,UDOT6,B)
+      DO  I=1,NQ
+        Q7(I) = Q1(I) +  H*(A71*QDOT1(I)+A72*QDOT2(I)+
+     &         A73*QDOT3(I)+A74*QDOT4(I)+A75*QDOT5(I)+
+     &         A76*QDOT6(I))
+      END DO
+      TCH = T+C7*H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q7,V7,U7,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT7,UDOT7,B)
+      FAC = -1.D0/(H*A76)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG0,
+     &     GQ0,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDG0,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GQ0,FL,AVALUE,IER)
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,X0,VP6,XL)
+      IF (IER.NE.0) GOTO 176
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C6*H,Q6,V6,U6,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT6,UDOT6,B)
+      DO  I=1,NU
+        U7(I) = U1(I)+ H*(A71*UDOT1(I)+A72*UDOT2(I)+
+     &          A73*UDOT3(I)+A74*UDOT4(I)+A75*UDOT5(I)+
+     &          A76*UDOT6(I))
+      END DO
+      DO I=1,NV
+        V7(I) = TEMP(I) + H*A76*VP6(I)
+        TEMP(I) = V1(I) + H*(A81*VP1(I)+A82*VP2(I)
+     &      +A83*VP3(I)+A84*VP4(I)+A85*VP5(I)+A86*VP6(I))
+      END DO
+C - II. 8TH STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,Q7,V7,U7,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT7,UDOT7,B)
+      DO  I=1,NQ
+        Q2(I) = Q1(I) + H*(A81*QDOT1(I)+A82*QDOT2(I)+
+     &          A83*QDOT3(I)+A84*QDOT4(I)+A85*QDOT5(I)
+     &          +A86*QDOT6(I)+A87*QDOT7(I))
+      END DO
+      TH = T+H
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TH,Q2,V2,U2,XL,
+     &     G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT2,UDOT2,B)
+      FAC = -1.D0/(H*A87)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG1,
+     &     GQ1,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG1,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ0,GQ1,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,X0,VP7,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+C7*H,Q7,V7,U7,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT7,UDOT7,B)
+      DO  I=1,NU
+        U2(I) = U1(I)+  H*(A81*UDOT1(I)+A82*UDOT2(I)+
+     &         A83*UDOT3(I)+A84*UDOT4(I)+A85*UDOT5(I)
+     &          +A86*UDOT6(I)+A87*UDOT7(I))
+      END DO
+      DO I=1,NV
+        V2(I) = TEMP(I) + H*A87*VP7(I)
+        TEMP(I) = V1(I) + H*(B4*VP4(I)+B5*VP5(I)
+     &                 +B6*VP6(I)+B7*VP7(I))
+      END DO             
+C - II. LAST STAGE
+      CALL FPROB(1,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TH,Q2,V2,U2,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT2,UDOT2,B)
+      DO  I=1,NQ
+        Q(I) = Q1(I) +H*(B4*QDOT4(I)+B5*QDOT5(I)+B6*QDOT6(I)
+     &              +B7*QDOT7(I)+B8*QDOT2(I)) 
+      END DO
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TH,Q,V,U,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+      FAC = -1.D0/(H*B8)
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG0,
+     &     GQ0,FAC,TEMP,GT,X0(NV+1))	
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDG0,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GQ0,FL,AVALUE,IER)
+      IF (IER.NE.0) GOTO 176
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,X0,VP2,XL)
+      CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TH,Q2,V2,U2,XL,
+     &     G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT2,UDOT2,B)
+      DO  I=1,NU
+        U(I) = U1(I)+H*(B4*UDOT4(I)+B5*UDOT5(I)+B6*UDOT6(I)
+     &            +B7*UDOT7(I)+B8*UDOT2(I)) 
+      END DO
+      DO I=1,NV
+        V(I) = TEMP(I) + H*B8*VP2(I)
+      END DO
+C -- STATISTICS
+      ISTAT(4) = ISTAT(4)+8
+      ISTAT(5) = ISTAT(5)+8
+      ISTAT(6) = ISTAT(6)+8
+      ISTAT(8) = ISTAT(8)+8
+C --- ERROR ESTIMATION  
+      ERR1 = 0.D0
+      ERR2 = 0.D0
+      DO  I=1,NV
+        IF (ITOL.EQ.0) THEN
+          SK1 = ATOL(1)+RTOL(1)*MAX(DABS(Q(I)),ABS(Q1(I)))
+          SK2 = ATOL(1)+RTOL(1)*MAX(DABS(V(I)),ABS(V1(I)))
+        ELSE
+          SK1 = ATOL(I)+RTOL(I)*MAX(ABS(Q(I)),ABS(Q1(I)))
+          SK2 = ATOL(NQ+I)+RTOL(NQ+I)*MAX(ABS(V(I)),ABS(V1(I)))
+        END IF
+        ERR1 = ERR1+((Q(I)-Q2(I))/SK1)**2+
+     *         ((V(I)-V2(I))/SK2)**2
+        QII= Q1(I)+H*(2.5D0*QDOT7(I)-1.5D0*QDOT2(I))
+        VII= V1(I)+H*(2.5D0*VP7(I)-1.5D0*VP2(I))
+        ERR2 = ERR2+((Q(I)-QII)/SK1)**2+
+     *              ((V(I)-VII)/SK2)**2
+      END DO
+      DO  I=NV+1,NQ
+        IF (ITOL.EQ.0) THEN
+          SK1 = ATOL(1)+RTOL(1)*MAX(DABS(Q(I)),ABS(Q1(I)))
+        ELSE
+          SK1 = ATOL(I)+RTOL(I)*MAX(ABS(Q(I)),ABS(Q1(I)))
+        END IF
+        ERR1 = ERR1+((Q(I)-Q2(I))/SK1)**2
+        QII= Q1(I)+H*(2.5D0*QDOT7(I)-1.5D0*QDOT2(I))
+        ERR2 = ERR2+((Q(I)-QII)/SK1)**2
+      END DO
+      NQV=NQ+NV
+      DO  I=1,NU
+        IF (ITOL.EQ.0) THEN
+          SK1 = ATOL(1)+RTOL(1)*MAX(DABS(U(I)),ABS(U1(I)))
+        ELSE
+          SK1 = ATOL(NQV+I)+RTOL(NQV+I)*MAX(ABS(U(I)),ABS(U1(I)))
+        END IF
+        ERR1 = ERR1+((U(I)-U2(I))/SK1)**2
+        UII= U1(I)+H*(2.5D0*UDOT7(I)-1.5D0*UDOT2(I))
+        ERR2 = ERR2+((U(I)-UII)/SK1)**2
+      END DO
+      ERR1 = SQRT(ERR1/(NQV+NU))  
+      ERR2 = SQRT(ERR2/(NQV+NU))
+      ERR =ERR1+0.01D0*ERR2
+c  
+      EPS=1.D-13
+      IF (ERR.LT.EPS) THEN
+        HNEW=1.2D0*H
+        GOTO 222
+      END IF
+      ERR=(ERR1**2)/ERR
+C --- COMPUTATION OF HNEW WITH GUSTAFSSON STABILIZATION
+      FAC11=ERR**ALPHA
+      FAC=FAC11/FACOLD**BETA
+C --- WE REQUIRE  FAC1 <= HNEW/H <= FAC2
+      FAC=MAX(FACC2,MIN(FACC1,FAC/SAFE))
+      HNEW=H/FAC 
+      IF (ERR.GT.1.D0) ACCEPT=.FALSE.
+c
+ 222  CONTINUE 
+c
+      IF (ACCEPT) THEN 
+        NBS = NBS+1
+        IF (NBS.EQ.IPROJ) THEN
+          NBS = 0
+C -- PROJECTION ON MANIFOLD DEFINED BY g(q,t)=0
+          CALL APROJ(MODE,NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,NBLK,
+     *         NMRC,LDG,LDF,LDA,NZA,LIPAR,LIUMF,LXUMF,LISTA,
+     *         ISTAT,IPAR,IUMF,INDA,INDG0,INDFL,FL,XUMF,
+     *         AVALUE,T,FPROB,Q,Q1,Q2,QD,V,V1,V2,U,XL,UDOT,
+     *         G,GT,GQ0,AM,B,X0,IP,ATOL,RTOL,ITOL,ACCEPT)
+           ISTAT(6) = ISTAT(6)+2 
+           ISTAT(5) = ISTAT(5)+1 
+        END IF 
+        IF (ACCEPT) THEN
+C --- STEP IS ACCEPTED  
+         FACOLD=MAX(ERR,1.D-4)
+         ISTAT(2)=ISTAT(2)+1
+         CALL FPROB(2,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &        IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &        INDFL(LDF+1),TH,Q,V,U,XL,
+     &        G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+         IF ((IOUT.EQ.1).OR.(IOUT.EQ.2)) THEN 
+C --- COMPUTE INTERMEDIATE SUM FOR DENSE OUTPUT ONLY 
+          DO I=1,NV
+           TEMP(I) = V1(I) + H*(A106*VP6(I)+A107*VP7(I))
+          END DO
+          CALL FPROB(8,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TH,Q,V,U,XL,
+     &         G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+          DO  I=1,NQ
+           Q3(I) = Q1(I) +H*(A106*QDOT6(I)+A107*QDOT7(I)
+     &             +A109*QDOT(I))
+          END DO
+          TCH = T+C10*H
+          CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &         G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+          FAC = -1.D0/(H*A109)
+          CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG1,
+     &         GQ1,FAC,TEMP,GT,X0(NV+1))	
+          CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &         LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG1,
+     &         INDFL,INDA,IP,IUMF,XUMF,B,GQ0,GQ1,FL,AVALUE,IER)
+          IF (IER.NE.0) GOTO 176
+          CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,
+     &         IP,NZA,AVALUE,XUMF,B,X0,VP1,XL)
+          CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TH,Q,V,U,XL,
+     &         G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+          DO  I=1,NU
+            U3(I) = U1(I)+H*(A106*UDOT6(I)+A107*UDOT7(I)
+     &             +A109*UDOT(I))
+          END DO
+          DO  I=1,NV
+            V3(I) = TEMP(I) + H*A109*VP1(I)
+          END DO 
+          CALL FPROB(2,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &          G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT3,UDOT3,B)
+          DO  I=1,NQ 
+            CONTQ(I) = Q1(I)
+            CONTQ(I+NQ)= D14*QDOT4(I)+D15*QDOT5(I)+D16*QDOT6(I)+
+     &              D17*QDOT7(I)+D18*QDOT2(I)+D19*QDOT3(I)
+            CONTQ(I+NQ2)= D24*QDOT4(I)+D25*QDOT5(I)+D26*QDOT6(I)+
+     &              D27*QDOT7(I)+D28*QDOT2(I)+D29*QDOT3(I)
+            CONTQ(I+NQ3)= D34*QDOT4(I)+D35*QDOT5(I)+D36*QDOT6(I)+
+     &              D37*QDOT7(I)+D38*QDOT2(I)+D39*QDOT3(I)
+            CONTQ(I+NQ4)= D44*QDOT4(I)+D45*QDOT5(I)+D46*QDOT6(I)+
+     &              D47*QDOT7(I)+D48*QDOT2(I)+D49*QDOT3(I)
+          END DO
+          DO I=1,NV
+            CONTV(I)= V1(I)
+            CONTV(I+NV)= D14*VP4(I)+D15*VP5(I)+D16*VP6(I)
+     &              +D17*VP7(I)+D18*VP2(I)
+            CONTV(I+NV2)= D24*VP4(I)+D25*VP5(I)+D26*VP6(I)
+     &              +D27*VP7(I)+D28*VP2(I)
+            CONTV(I+NV3)= D34*VP4(I)+D35*VP5(I)+D36*VP6(I)
+     &              +D37*VP7(I)+D38*VP2(I)
+            CONTV(I+NV4)= D44*VP4(I)+D45*VP5(I)+D46*VP6(I)
+     &              +D47*VP7(I)+D48*VP2(I)
+          END DO
+C-- STATISTICS
+          ISTAT(4)=ISTAT(4)+1
+          ISTAT(5)=ISTAT(5)+1 
+          ISTAT(6)=ISTAT(6)+1
+          ISTAT(8)=ISTAT(8)+1
+        END IF
+        IF (IOUT.EQ.1) THEN
+          CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &         G,GQ0,X0(1),X0(NV+1),GT,FL,QDOT3,UDOT3,B)
+          DO I=1,NU 
+            CONTU(I)= U1(I)
+            CONTU(I+NU)= D14*UDOT4(I)+D15*UDOT5(I)+D16*UDOT6(I)
+     &              +D17*UDOT7(I)+D18*UDOT2(I)+D19*UDOT3(I)
+            CONTU(I+NU2)= D24*UDOT4(I)+D25*UDOT5(I)+D26*UDOT6(I)
+     &              +D27*UDOT7(I)+D28*UDOT2(I)+D29*UDOT3(I)
+            CONTU(I+NU3)= D34*UDOT4(I)+D35*UDOT5(I)+D36*UDOT6(I)
+     &              +D37*UDOT7(I)+D38*UDOT2(I)+D39*UDOT3(I)
+            CONTU(I+NU4)= D44*UDOT4(I)+D45*UDOT5(I)+D46*UDOT6(I)
+     &              +D47*UDOT7(I)+D48*UDOT2(I)+D49*UDOT3(I)
+          END DO
+          CALL CPCT(MODE,NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,LDG,LDF,
+     &         LDA,NZA,LIPAR,LXUMF,LIUMF,LRDO,LIDO,IUMF,IPAR,
+     &         ISTAT,INDG1,INDFL,IP,IDOWK,H,T,TCH,B10,CONTQ,
+     &         CONTV,CONTU,Q3,V3,U3,GQ1,FL,AVALUE,XUMF,DOWK)
+          CALL SOLOUT(MODE,ISTAT(2)+1,NQ,NV,NU,NL,LDG,LDF,LDA,LRDO,
+     &         LIDO,FPROB,Q,V,U,DOWK,IDOWK)
+        END IF
+C --- COMPUTE THE ACCELERATION
+        IF((IACC.EQ.1).OR.(IOUT.EQ.2)) THEN
+          DO I=1,NU 
+            CONTU(I)= U1(I)
+            CONTU(I+NU)= D14*UDOT4(I)+D15*UDOT5(I)+D16*UDOT6(I)
+     &              +D17*UDOT7(I)+D18*UDOT2(I)
+            CONTU(I+NU2)= D24*UDOT4(I)+D25*UDOT5(I)+D26*UDOT6(I)
+     &              +D27*UDOT7(I)+D28*UDOT2(I)
+            CONTU(I+NU3)= D34*UDOT4(I)+D35*UDOT5(I)+D36*UDOT6(I)
+     &              +D37*UDOT7(I)+D38*UDOT2(I)
+            CONTU(I+NU4)= D44*UDOT4(I)+D45*UDOT5(I)+D46*UDOT6(I)
+     &              +D47*UDOT7(I)+D48*UDOT2(I)
+          END DO
+          CALL FPROB(7,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG1(1),INDG1(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TH,Q,V,U,XL,
+     &         G,GQ1,X0(1),X0(NV+1),GT,FL,QDOT1,UDOT1,B)
+          IF (IGII.EQ.1) THEN
+           CALL GIINUM(MODE,NQ,NV,NU,NL,NDIM,MDIM,NMDIM,NM,
+     &          LDG,LDF,LDA,NBLK,NMRC,IPAR(3),IPAR(4),INDG0,
+     &          INDGD,INDFL,TH,UROUND,FPROB,Q,QD,QDOT,V,U,GQ0,
+     &          GD,GT,GTD,FL,AM,X0(NV+1),G)
+          END IF
+          CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &         LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG0,
+     &         INDFL,INDA,IP,IUMF,XUMF,B,GQ0,GQ0,FL,AVALUE,IER)
+          IF (IER.NE.0) GOTO 176
+          CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &         NZA,AVALUE,XUMF,B,X0,VP1,XL)
+          ISTAT(4)=ISTAT(4)+1
+          ISTAT(6)=ISTAT(6)+1
+          ISTAT(8)=ISTAT(8)+1
+        END IF
+        IF (IACC.EQ.1) THEN
+          DO I=1,NV
+            A(I)=VP1(I)
+          END DO
+          DO I=1,NL
+            RLAM(I)=XL(I)
+          END DO
+        END IF
+        IF (IOUT.EQ.2) THEN
+C -- COMPUTE Q ,V AND U AT S=THETA
+          S=0.540179418d0
+          TSH=T+S*H
+          BS=S*(B10(1)+S*(B10(2)+S*(B10(3)+S*B10(4)))) 
+          DO J=1,NV
+           QD(J)=CONTQ(J)+H*S*(CONTQ(J+NQ)+S*(CONTQ(J+NQ2)+
+     &       S*(CONTQ(J+NQ3)+S*CONTQ(J+NQ4))))
+           VD(J)=CONTV(J)+H*S*(CONTV(J+NV)+S*(CONTV(J+NV2)+
+     &       S*(CONTV(J+NV3)+S*CONTV(J+NV4))))
+          END DO  
+          DO J=NV+1,NQ
+           QD(J)=CONTQ(J)+H*S*(CONTQ(J+NQ)+S*(CONTQ(J+NQ2)+
+     &       S*(CONTQ(J+NQ3)+S*CONTQ(J+NQ4))))
+          END DO  
+          DO J=1,NU
+           UD(J)=CONTU(J)+H*S*(CONTU(J+NU)+S*(CONTU(J+NU2)+
+     &       S*(CONTU(J+NU3)+S*CONTU(J+NU4))))
+          END DO  
+          CALL FPROB(8,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &         G,GQ0,XD(1),XD(NV+1),GT,FL,QDOT3,UDOT3,B)
+          CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDGD(1),INDGD(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TSH,QD,VD,UD,XL,
+     &         G,GD,XD(1),XD(NV+1),GTD,FL,QDOT3,UDOT3,B)
+          FAC = -1.D0/(H*BS)
+          CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDGD,
+     &         GD,FAC,VD,GTD,XD(NV+1))	
+          CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &         LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDGD,
+     &         INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GD,FL,AVALUE,IER)
+          IF (IER.NE.0) GOTO 176
+          CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &         NZA,AVALUE,XUMF,B,XD,XD,XL)
+          CALL FPROB(0,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &         IPAR(3),IPAR(4),INDG0(1),INDG0(LDG+1),INDFL(1),
+     &         INDFL(LDF+1),TCH,Q3,V3,U3,XL,
+     &         G,GQ0,XD(1),XD(NV+1),GT,FL,QDOT3,UDOT3,B)
+          DO J=1,NU
+            UD(J)=UD(J)+H*BS*UDOT3(J)
+          END DO
+          DO J=1,NV
+            VD(J)=VD(J)+H*BS*XD(J)
+          END DO
+C-- STATISTICS
+          ISTAT(4)=ISTAT(4)+1
+          ISTAT(5)=ISTAT(5)+1
+          ISTAT(6)=ISTAT(6)+1
+          ISTAT(8)=ISTAT(8)+1
+C --- PREPARES DOWK
+          DO I=1,NV
+            IP2=I+2
+            DOWK(IP2)=Q1(I)
+            DOWK(IP2+NQVU)=QDOT1(I)
+            DOWK(IP2+NQVU2)=QDOT(I)
+            DOWK(IP2+NQVU3)=QD(I)-Q1(I)
+            DOWK(IP2+NQVU4)=Q(I)-Q1(I)
+            IP3=IP2+NQ
+            DOWK(IP3)=V1(I)
+            DOWK(IP3+NQVU)=VP1(I)
+            DOWK(IP3+NQVU2)=VP(I)
+            DOWK(IP3+NQVU3)=VD(I)-V1(I)
+            DOWK(IP3+NQVU4)=V(I)-V1(I) 
+          END DO 
+          DO I=NV+1,NQ
+            IP2=I+2
+            DOWK(IP2)=Q1(I)
+            DOWK(IP2+NQVU)=QDOT1(I)
+            DOWK(IP2+NQVU2)=QDOT(I)
+            DOWK(IP2+NQVU3)=QD(I)-Q1(I)
+            DOWK(IP2+NQVU4)=Q(I)-Q1(I)
+          END DO
+          NNN=NQ+NV+2
+          DO I=1,NU
+            IP4=NNN+I
+            DOWK(IP4)=U1(I)
+            DOWK(IP4+NQVU)=UDOT1(I)
+            DOWK(IP4+NQVU2)=UDOT(I)
+            DOWK(IP4+NQVU3)=UD(I)-U1(I)
+            DOWK(IP4+NQVU4)=U(I)-U1(I)
+          END DO
+          DOWK(1)=T
+          DOWK(2)=H 
+          CALL SOLOUT(MODE,ISTAT(2)+1,NQ,NV,NU,NL,LDG,LDF,LDA,LRDO,
+     &            LIDO,FPROB,Q,V,U,DOWK,IDOWK)
+        END IF
+        IF(IOUT.EQ.3) THEN
+          DOWK(1)=T
+          DOWK(2)=H
+          CALL SOLOUT(MODE,ISTAT(2)+1,NQ,NV,NU,NL,LDG,LDF,LDA,
+     &       LRDO,LIDO,FPROB,Q,V,U,DOWK,IDOWK)
+        END IF
+        IF (IRTRN.LT.0) GOTO 176
+        IF(ABS(HNEW).GT.HMAX)HNEW=POSNEG*HMAX  
+        IF(REJECT)HNEW=POSNEG*MIN(ABS(HNEW),ABS(H))
+        REJECT=.FALSE. 
+        TOLD=T
+        T=TH 
+        IF (LAST) THEN
+           IDID=1
+           RETURN
+        END IF
+        DO I=1,NV
+          Q1(I) = Q(I)
+          QDOT1(I) = QDOT(I)
+          V1(I) = V(I) 
+          VP(I) = VP1(I)
+        END DO
+        DO I=NV+1,NQ
+          Q1(I) = Q(I)
+          QDOT1(I) = QDOT(I)
+        END DO
+        DO I=1,NU
+          U1(I) = U(I)
+        END DO
+        DO I=1,LDG
+          DO  J=1,NDIM
+            GQ(I,J) = GQ0(I,J)
+          END DO
+          INDG(I)=INDG0(I)
+          INDG(LDG+I)=INDG0(LDG+I)
+        END DO
+      ELSE  
+C -- STEP IS REJECTED AFTER A PROJECTION
+        HNEW=0.7D0*H
+        REJECT=.TRUE.
+        IF (ISTAT(2).GE.1) ISTAT(3)=ISTAT(3)+1
+       END IF
+       ELSE
+C --- STEP IS REJECTED WITHOUT PROJECTION
+        HNEW=H/DMIN1(FACC1,FAC11/SAFE)
+        REJECT=.TRUE.  
+        IF(ISTAT(2).GE.1)ISTAT(3)=ISTAT(3)+1
+      END IF
+      H = HNEW 
+      LAST=.FALSE.
+      GOTO 909
+C --- FAIL EXIT
+ 176  CONTINUE
+      WRITE(6,979)T   
+      WRITE(6,*) ' MATRIX IN ASET IS  SINGULAR, IER=',IER
+      IDID=-4
+      RETURN
+ 177  CONTINUE
+      WRITE(6,979)T   
+      WRITE(6,*) ' STEP SIZE T0O SMALL, H=',H
+      IDID=-3
+      RETURN
+ 178  CONTINUE
+      WRITE(6,979)T   
+      WRITE(6,*) ' MORE THAN NMAX =',NMAX,'STEPS ARE NEEDED' 
+      IDID=-2
+      RETURN
+C --- EXIT CAUSED BY SOLOUT
+ 179  CONTINUE
+      WRITE(6,979)T
+      WRITE(6,*) 'INITIAL PROJECTION: NO CONVERGENCE' 
+      IDID=-5
+      RETURN
+ 979  FORMAT(' EXIT OF HEM5 AT X=',E18.4) 
+      END
+C*****************************************************************
+      SUBROUTINE GIINUM(MODE,NQ,NV,NU,NL,NDIM,MDIM,NMDIM,NM, 
+     &  LDG,LDF,LDA,NBLK,NMRC,NPGP,NPFL,INDG,INDGD,INDFL,T,
+     &  UROUND,FPROB,Q,QD,QDOT,V,U,GQ,GQD,GT,GTD,
+     &  FL,B,GII,RES)
+      IMPLICIT REAL*8(A-H,O-Z)
+      EXTERNAL FPROB
+      DIMENSION INDG(2*LDG),INDGD(2*LDG),Q(NQ),QD(NQ)
+      DIMENSION QDOT(NQ),V(NV),U(NU),GQ(LDG,NDIM)
+      DIMENSION GQD(LDG,NDIM),GT(NL),GTD(NL),FL(LDF,MDIM)
+      DIMENSION B(LDA,NMDIM),GII(NL),RES(NL),INDFL(2*LDF)
+      DA=DSQRT(UROUND)
+      CALL FPROB(3,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     NPGP,NPFL,INDGD(1),INDGD(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q,V,U,RES,
+     &     RES,GQD,V,RES,GT,FL,QDOT,U,B)
+      DO I=1,NQ
+        QD(I)=Q(I)+DA*QDOT(I)
+      END DO
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     NPGP,NPFL,INDGD(1),INDGD(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,QD,V,U,RES,
+     &     RES,GQD,V,RES,GTD,FL,QDOT,U,B)
+      CALL GPM2(MODE,NV,NL,NDIM,MDIM,LDG,INDG,INDGD,
+     &     UROUND,GQ,GQD,V,RES)
+      DO I=1,NL
+        GII(I)=RES(I)+(GTD(I)-GT(I))/DA
+      END DO
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     NPGP,NPFL,INDGD(1),INDGD(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T+DA,Q,V,U,
+     &     RES,RES,GQD,V,RES,GTD,FL,QDOT,U,B)
+      CALL GPM2(MODE,NV,NL,NDIM,MDIM,LDG,INDG,INDGD,
+     &     UROUND,GQ,GQD,V,RES)
+      DO I=1,NL
+        GII(I)=-(GII(I)+RES(I)+(GTD(I)-GT(I))/DA)
+      END DO
+      RETURN
+      END
+C**********************************************************
+      SUBROUTINE GPM2(MODE,N,M,NDIM,MDIM,LDG,INDG,INDGD,
+     &                UROUND,GQ,GQD,V,RES)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION INDG(2*LDG),INDGD(2*LDG),GQ(LDG,NDIM)
+      DIMENSION GQD(LDG,NDIM),V(N),RES(M)
+      DA=DSQRT(UROUND)
+      IF ((MODE.GE.0).AND.(MODE.LE.3)) THEN
+        GOTO 10
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE
+        STOP ' GPM2: INVALID MODE'
+      ENDIF
+ 10   CONTINUE
+      DO I=1,M
+        SUM=0.D0
+        DO J=1,N
+          SUM=SUM+(GQD(I,J)-GQ(I,J))*V(J)/DA
+        END DO
+        RES(I)=SUM
+      END DO
+      RETURN
+ 20   CONTINUE
+      DO I=1,M
+        RES(I)=0.D0
+      END DO
+      DO K=1,LDG
+        I=INDG(K)
+        J=INDG(LDG+K)
+        RES(I)=RES(I)+(GQD(K,1)-GQ(K,1))*V(J)/DA
+      END DO
+      RETURN
+      END
+C*******************************************************************
+C*   SUBROUTINE ASET  CONSTRUCTS AND DECOMPOSES THE MATRIX     
+C*       WITH :
+C*                       |  AM    G0^t |                                   
+C*                   B = |             |                                   
+C*                       |  G1      0  |   
+C*     
+C*******************************************************************
+      SUBROUTINE ASET(MODE,N,M,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,
+     &  NZA,LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG0,INDG1,
+     &  INDFL,INDA,IP,IUMF,XUMF,B,G0,G1,FL,AVALUE,IER)
+      IMPLICIT LOGICAL (A-Z)
+      INTEGER MODE,N,M,NM,NDIM,MDIM,NMDIM,LDG,LDF,LDA,IP(NM),
+     &  LIPAR,LIUMF,LXUMF,IPAR(LIPAR),IUMF(LIUMF),INDG0(2*LDG),
+     &  INDG1(2*LDG),INDFL(2*LDF),NZA,INDA(2*NZA),IIRN,IICN,IIK,
+     &  IREFAC,I,J,LISTA,ISTAT(LISTA),IER,LICN,IIW,ERROR,IICNM1
+      DOUBLE PRECISION B(LDA,NMDIM),G0(LDG,NDIM),G1(LDG,NDIM),
+     &  AVALUE(2*NZA),XUMF(LXUMF),FL(LDF,MDIM)
+C    For a description of the internal parameters of the package
+C    see: Harwell Subroutine Library Specification
+C                  
+C
+      INTEGER LP, MP, IRNCP, ICNCP, MINIRN, MINICN, IRANK, IDISP(2)
+      LOGICAL QBLOCK, QGROW, QABRT1, QABRT2
+      DOUBLE PRECISION EPSMA, RMIN, RESID,THRSH1,THRSH2
+C
+      COMMON /MA28ED/ LP, MP, QBLOCK, QGROW
+      COMMON /MA28FD/ EPSMA, RMIN, RESID, IRNCP, ICNCP, MINIRN, MINICN,
+     $     IRANK, QABRT1, QABRT2
+      COMMON /MA28GD/ IDISP
+C
+C                       Description see Harwell Subroutine
+C                       Library Specification
+C
+      SAVE /MA28ED/, /MA28FD/, /MA28GD/
+C
+      IER=0
+      IF (MODE.EQ.0) THEN
+        GOTO 10
+      ELSE IF (MODE.EQ.1) THEN
+        GOTO 15
+      ELSE IF (MODE.EQ.2) THEN
+        GOTO 17
+      ELSE IF (MODE.EQ.3) THEN
+        GOTO 18
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE
+        STOP ' ASET: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      DO  I=1,N
+        DO  J=1,M
+          B(I,N+J) = G0(J,I)
+        END DO
+      END DO
+      DO  I=1,M
+        DO  J=1,N
+          B(N+I,J) = G1(I,J)
+        END DO
+        DO  J=1,M
+          B(N+I,N+J) = 0.D0
+        END DO
+      END DO
+      CALL DEC(NM,NM,B,IP,IER)
+      ISTAT(7)=ISTAT(7)+1
+      RETURN
+ 15   CONTINUE
+      DO  I=1,N
+        DO  J=1,M
+          B(I,N+J) = FL(I,J)
+        END DO
+      END DO
+      DO  I=1,M
+        DO  J=1,N
+          B(N+I,J) = G1(I,J)
+        END DO
+        DO  J=1,M
+          B(N+I,N+J) = 0.D0
+        END DO
+      END DO
+      CALL DEC(NM,NM,B,IP,IER)
+      ISTAT(7)=ISTAT(7)+1
+      RETURN
+ 17   CONTINUE
+      DO  I=1,N
+        DO  J=1,M
+          B(I,N+J) = G0(J,I)
+        END DO
+      END DO
+      DO  I=1,M
+        DO  J=1,N
+          B(N+I,J) = G1(I,J)
+        END DO
+        DO  J=1,M
+          B(N+I,N+J) = 0.D0
+        END DO
+      END DO
+      CALL DGETRF(NM,NM,B,NM,IP,IER)
+      ISTAT(7)=ISTAT(7)+1
+      RETURN
+ 18   CONTINUE
+      DO  I=1,N
+        DO  J=1,M
+          B(I,N+J) = FL(I,J)
+        END DO
+      END DO
+      DO  I=1,M
+        DO  J=1,N
+          B(N+I,J) = G1(I,J)
+        END DO
+        DO  J=1,M
+          B(N+I,N+J) = 0.D0
+        END DO
+      END DO
+      CALL DGETRF(NM,NM,B,NM,IP,IER)
+      ISTAT(7)=ISTAT(7)+1
+      RETURN
+ 20   CONTINUE
+C
+C
+C
+C  RAPPEL INDG(1->LDG)=LIGNE, INDG(LDG+1->2*LDG)=COLONNE
+C
+C
+      THRSH1 = 1.D-2         
+      THRSH2 = 1.D-6  
+      LICN=2*NZA 
+      IIRN=1
+      IICN=IIRN+LICN
+      IIK=IICN+LICN
+      IIW=IIK+5*NM
+      IICNM1=IICN-1
+C ??      IFDEC = 0
+      EPSMA =DMIN1 (1.D0, 10.D0*THRSH2)
+C
+      IF (IPAR(9).EQ.0) THEN
+        IREFAC=IPAR(3)+IPAR(4)
+      ELSE
+        IPAR(9)=0
+        IREFAC=1
+      ENDIF
+ 100  CALL ACOPY(MODE,IPAR(1),IPAR(2),LDG,LDF,LDA,NZA,N,NMDIM,
+     &     INDG0,INDG1,INDFL,INDA,AVALUE,B,G0,G1,FL)
+       IF (IREFAC.GT.0) THEN
+C         WRITE(6,*)'MA28AD'
+         DO I=1,NZA
+          IUMF(I)=INDA(I)
+          IUMF(IICNM1+I)=INDA(NZA+I)
+         END DO
+         CALL MA28AD(NM,NZA,AVALUE,LICN,IUMF(IIRN),LICN,IUMF(IICN),
+     &        THRSH1,IUMF(IIK),IUMF(IIW),XUMF,ERROR)
+         ISTAT(7)=ISTAT(7)+1
+      ELSE
+         CALL MA28BD(NM,NZA,AVALUE,LICN,INDA(1),INDA(NZA+1),IUMF(IICN),
+     &           IUMF(IIK),IUMF(IIW),XUMF,ERROR )
+         ISTAT(7)=ISTAT(7)+1
+         IF(ERROR.LT.0) THEN
+           WRITE(6,*)'ERROR IN UMDREFAC'
+           IREFAC=1
+           GOTO 100
+         END IF
+         IF(RMIN.LT.THRSH2) THEN
+           IREFAC=1
+           WRITE(6,*)'RMIN TOO SMALL'
+           GOTO 100
+         END IF
+      END IF
+      RETURN
+      END  
+C
+C*******************************************************************
+C*   SUBROUTINE GPMULT COMPUTES FAC*(AG*VECT+GT) = RES
+C******************************************************************
+      SUBROUTINE GPMULT(MODE,NDIM,N,M,LDG,INDG,
+     &  AG,FAC,VECT,GT,RES)
+      IMPLICIT LOGICAL (A-Z)
+      INTEGER MODE,NDIM,N,M,LDG,INDG(2*LDG),
+     &  I,J,K
+      DOUBLE PRECISION AG(LDG,NDIM),VECT(N),GT(M),
+     &  RES(M),FAC,SUM
+      IF ((MODE.GE.0).AND.(MODE.LE.3)) THEN
+        GOTO 10
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE
+        STOP ' GPMULT: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      DO I=1,M
+        SUM=0.D0
+        DO J=1,N
+          SUM=SUM+AG(I,J)*VECT(J)
+        END DO
+        RES(I)=FAC*(SUM+GT(I))
+      END DO
+      RETURN
+ 20   CONTINUE
+      DO I=1,M
+        RES(I)=FAC*GT(I)
+      END DO
+      DO K=1,LDG
+        I=INDG(K)
+        J=INDG(LDG+K)
+        RES(I)=RES(I)+FAC*AG(K,1)*VECT(J)
+      END DO
+      RETURN
+      END
+C*******************************************************************
+C*   SUBROUTINE AMULT COMPUTES FAC*AM*VECT = RES
+C******************************************************************
+      SUBROUTINE AMULT(MODE,N,NMDIM,LDA,NBLK,NMRC,FAC,AM,VECT,RES)
+      IMPLICIT LOGICAL (A-Z)
+      INTEGER MODE,N,NMDIM,NBLK,NMRC,I,J,K,KN,LDA
+      DOUBLE PRECISION AM(LDA,NMDIM),VECT(N),FAC,SUM,RES(N)
+      IF ((MODE.GE.0).AND.(MODE.LE.3)) THEN
+        GOTO 10
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE
+        STOP ' AMULT: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      DO I=1,N
+        SUM=0.D0
+        DO J=1,N
+          SUM=SUM+AM(I,J)*VECT(J)
+        END DO
+        RES(I)=FAC*SUM
+      END DO
+      RETURN
+ 20   CONTINUE
+      DO K=1,NBLK
+        KN=(K-1)*NMRC
+        DO I=1,NMRC
+          SUM=0.D0
+          DO J=1,NMRC
+            SUM=SUM+AM(KN+I,J)*VECT(KN+J)
+          END DO
+          RES(KN+I)=FAC*SUM
+        END DO
+      END DO
+      RETURN
+      END
+C*******************************************************************
+C*    SUBROUTINE ACOPY
+C*******************************************************************
+      SUBROUTINE ACOPY(MODE,NMRC,NBLK,LDG,LDF,LDA,NZA,N,NMDIM,
+     & INDG1,INDG2,INDFL,INDA,AVALUE,AM,G1,G2,FL)
+      IMPLICIT LOGICAL (A-Z)
+      INTEGER MODE,NMRC,NBLK,LDG,LDF,LDA,NZA,N,NMDIM,NMNB,I,J,K,
+     &  L,KN,INDG1(2*LDG),INDG2(2*LDG),INDA(2*NZA),INDFL(2*LDF)
+      DOUBLE PRECISION AVALUE(2*NZA),G1(LDG),G2(LDG),
+     &  AM(LDA,NMDIM),FL(LDF)
+      IF (MODE.EQ.4) THEN
+        GOTO 10
+      ELSE IF (MODE.EQ.5) THEN
+        GOTO 20
+      ELSE
+        STOP ' ACOPY: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      NMNB=NMRC*NBLK
+      L=0
+      DO K=1,NBLK
+        KN=(K-1)*NMRC
+        DO i=1,NMRC
+          DO j=1,NMRC
+            L=L+1
+            AVALUE(L)=AM(I+KN,J)
+            INDA(L)=KN+I
+            INDA(NZA+L)=KN+J
+          END DO
+        END DO
+      END DO
+      DO I=1,LDG
+        L=L+1
+        AVALUE(L)=G1(I)
+        INDA(L)=INDG1(LDG+I)
+        INDA(NZA+L)=NMNB+INDG1(I)	
+        L=L+1
+        AVALUE(L)=G2(I)
+        INDA(L)=NMNB+INDG2(I)
+        INDA(NZA+L)=INDG2(LDG+I)
+      END DO
+      RETURN
+ 20   CONTINUE
+      NMNB=NMRC*NBLK
+      L=0
+      DO K=1,NBLK
+        KN=(K-1)*NMRC
+        DO i=1,NMRC
+          DO j=1,NMRC
+            L=L+1
+            AVALUE(L)=AM(I+KN,J)
+            INDA(L)=KN+I
+            INDA(NZA+L)=KN+J
+          END DO
+        END DO
+      END DO
+      DO I=1,LDF
+        L=L+1
+        AVALUE(L)=FL(I)
+        INDA(L)=INDFL(I)
+        INDA(NZA+L)=NMNB+INDFL(LDF+I)
+      END DO
+      DO I=1,LDG	
+        L=L+1
+        AVALUE(L)=G2(I)
+        INDA(L)=NMNB+INDG2(I)
+        INDA(NZA+L)=INDG2(LDG+I)
+      END DO
+      RETURN
+      END	
+C*******************************************************************
+C*   SUBROUTINE ASOL SOLVES THE SYSTEM B*X0=R
+C*       WITH THE MATRIX B DECOMPOSED IN ASET
+C*       AND MOVES THE RESULT X0(I=1,..,N)   -> RES(I)                      
+C*******************************************************************
+      SUBROUTINE ASOL(MODE,NM,N,M,LIPAR,LIUMF,LXUMF,IPAR,
+     &    IUMF,IP,NZA,AVALUE,XUMF,B,X0,RES1,RES2)
+      IMPLICIT LOGICAL (A-Z)
+      INTEGER MODE,N,NM,NZA,LIPAR,LIUMF,LXUMF,IPAR(LIPAR),
+     &  IUMF(LIUMF),IP(NM),IIW,I,M,LICN,IICN,IIK,MTYPE
+      DOUBLE PRECISION B(NM,NM),X0(NM),RES1(N),RES2(M),XUMF(LXUMF),
+     &  AVALUE(2*NZA)
+C -- umfpack variables:
+C      INTEGER MTYPE
+C
+      IF ((MODE.EQ.0).OR.(MODE.EQ.1)) THEN
+        GOTO 10
+      ELSE IF ((MODE.EQ.2).OR.(MODE.EQ.3)) THEN
+        GOTO 15
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE 
+        STOP ' ASOL: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      CALL SOL(NM,NM,B,X0,IP)
+      GOTO 100
+ 15   CONTINUE
+      CALL DGETRS('N',NM,1,B,NM,IP,X0,NM,IER)
+      GOTO 100
+ 20   CONTINUE
+      LICN=2*NZA
+      IICN=1+LICN
+      IIK=IICN+LICN
+      IIW=IIK+5*NM
+      MTYPE=1
+      CALL MA28CD(NM,AVALUE,LICN,IUMF(IICN),IUMF(IIK),X0,
+     &   XUMF,MTYPE)
+ 100   CONTINUE
+      DO  I=1,N
+        RES1(I) = X0(I)
+      END DO
+      DO  I=1,M
+        RES2(I) = X0(N+I)
+      END DO
+      RETURN
+      END	
+C***********************************************************
+C*  SUBROUTINE PRO  PROJECTION ON THE MANIFOLD DEFINED
+C*                     BY {g(q) = 0} 
+C*               
+C*     SOLVES BY NEWTON ITERATIONS A NON LINEAR SYSTEM
+C***********************************************************
+      SUBROUTINE APROJ(MODE,NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,
+     *   NBLK,NMRC,LDG,LDF,LDA,NZA,LIPAR,LIUMF,LXUMF,LISTA,
+     *   ISTAT,IPAR,IUMF,INDA,INDG,INDFL,FL,XUMF,AVALUE,T,
+     *   FPROB,Q,Q1,Q2,QDOT,V,V1,V2,U,XL,UDOT, G,GT,GQ,AM,
+     *   B,X0,IP,ATOL,RTOL,ITOL,ACCEPT)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Q(NQ),Q1(NQ),Q2(NQ),QDOT(NQ),V(NV),V1(NV)
+      DIMENSION AM(LDA,NMDIM),G(NL),B(LDA,NMDIM),V2(NV),U(NU)
+      DIMENSION X0(NM),GQ(LDG,NDIM),GT(NL),UDOT(NU),XL(NL)
+      DIMENSION IP(NM),ATOL(1),RTOL(1),INDG(2*LDG),ISTAT(LISTA)
+      DIMENSION INDFL(2*LDF),FL(LDF,MDIM),IPAR(LIPAR),IUMF(LIUMF)
+      DIMENSION INDA(2*NZA),XUMF(LXUMF),AVALUE(2*NZA)
+      EXTERNAL FPROB
+      LOGICAL ACCEPT
+      CALL FPROB(9,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q,V,U,XL,
+     &     G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,AM)
+C --- INITIAL PREPARATION  ------------------------------------
+      ERROLD=1.D20 
+      FAC = -1.D0
+      DO I=1,NV
+        Q2(I)=Q(I)
+        V2(I)=0.D0
+      END DO
+      DO I=NV+1,NQ
+        Q2(I)=Q(I)
+      END DO
+      K=0
+      ITMAX = 5
+      EPS = 1.d-2
+C --- COMPUTE DEFECT IN  G    --------------------------------------
+      CALL FPROB(4,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q,V,U,XL,
+     &     G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+      DO  I=1,NV
+        X0(I)=0.D0
+      END DO
+      DO  I=1,NL
+        X0(NV+I)=-G(I)
+      END DO 
+ 106  CALL  ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &      NZA,AVALUE,XUMF,B,X0,X0,XL)
+      ISTAT(8)=ISTAT(8)+1
+      DO I=1,NV
+        V2(I)=V2(I)+X0(I)
+      END DO
+      CALL FPROB(2,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q,X0,U,XL,
+     &     G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+      DO I=1,NQ
+        Q2(I)=Q2(I)+QDOT(I)
+      END DO
+      ERR=0.d0
+      DO  I=1,NQ      
+      IF (ITOL.EQ.0) THEN
+        SK=ATOL(1)+RTOL(1)*MAX(ABS(Q(I)),ABS(Q1(I)))
+      ELSE
+        SK=ATOL(I)+RTOL(I)*MAX(ABS(Q(I)),ABS(Q1(I)))
+      ENDIF
+      ERR = ERR+(QDOT(I)/SK)**2
+      END DO
+      ERR=SQRT(ERR/NQ)
+C
+C ---    TEST FOR CONVERGENCE    --------------------------------------
+C
+      IF(ERR.LT.EPS) GOTO 200
+      IF(ERR.GE.ERROLD*2.D0 .OR. K.GE.ITMAX) THEN
+        WRITE(6,*)'NO CONVERGENCE IN PROJECTION'
+C ---    NO CONVERGENCE STEP IS REJECTED   --------------------------------------------
+        ACCEPT = .FALSE.
+        RETURN
+      ENDIF
+C
+C ---    NEXT ITERATION    --------------------------------------------
+C
+      ERROLD=ERR
+      K=K+1 
+      CALL FPROB(4,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q2,V,U,XL,
+     &     G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+      CALL AMULT(MODE,NV,NMDIM,LDA,NBLK,NMRC,FAC,AM,V2,X0)
+      DO  I=1,NL
+        X0(NV+I)=-G(I)
+      END DO
+      GOTO 106
+ 200  CONTINUE
+C
+c ---    PROJECTION OF VELOCITY     -----------------------------------
+c
+cc
+cc
+      DO  I=1,NQ
+        Q(I)=Q2(I)
+      END DO
+      CALL FPROB(11,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDG(1),INDG(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),T,Q,V,U,XL,
+     &     G,GQ,X0(1),X0(NV+1),GT,FL,QDOT,UDOT,B)
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,
+     &     NZA,LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG,INDG,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ,GQ,FL,AVALUE,IER)
+      IF (IER.NE.0) THEN
+        WRITE(6,*)'MATRIX SINGULAR IN APROJ'
+        ACCEPT=.FALSE.
+        RETURN
+      END IF
+      DO I=1,NV
+        X0(I)=0.D0
+      END DO
+      FAC=-1.D0
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDG,
+     &     GQ,FAC,V,GT,X0(NV+1))
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,X0,X0,XL)
+      ISTAT(8)=ISTAT(8)+1
+      DO I=1,NV
+         V(I)=V(I)+X0(I)
+      END DO
+C -- ERROR ESTIMATION 
+      ERR=0.d0
+      DO I=1,NV
+        IF (ITOL.EQ.0) THEN
+          SK=ATOL(1)+RTOL(1)*MAX(ABS(V(I)),ABS(V1(I)))
+        ELSE
+          SK=ATOL(I+NQ)+RTOL(I+NQ)*MAX(ABS(V(I)),ABS(V1(I)))
+        ENDIF
+        ERR = ERR+(X0(I)/SK)**2
+      END DO
+      ERR=SQRT(ERR/NV)
+      IF(ERR.GT.EPS)ACCEPT=.FALSE.
+      IF(ERR.GT.EPS)write(6,*)'reject after proj',err
+      RETURN
+      END
+C 
+C*************************************************************** 
+C
+C                       DENSE OUTPUT
+C
+C***************************************************************
+      FUNCTION CTQ4(MODE,I,NQ,NV,NU,NL,LDG,LDF,LDA,LRDO,
+     &              LIDO,IDOWK,X,DOWK,FPROB)
+C ----------------------------------------------------------
+C     THIS FUNCTION CAN BE USED FOR CONINUOUS OUTPUT IN CONECTION
+C     WITH THE OUTPUT-SUBROUTINE FOR HEM5. IT PROVIDES AN
+C     APPROXIMATION TO THE I-TH COMPONENT OF THE Q-SOLUTION AT X.
+C ----------------------------------------------------------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION DOWK(LRDO),IDOWK(LIDO)
+      EXTERNAL FPROB
+      XOLD=DOWK(1)
+      H=DOWK(2)
+      N=NQ
+      NN=7+N
+      NN2=NN+N
+      NN3=NN2+N
+      NN4=NN3+N 
+      S=(X-XOLD)/H
+      CTQ4=DOWK(I+7)+H*S*(DOWK(I+NN)+S*(DOWK(I+NN2)+
+     &      S*(DOWK(I+NN3)+S*DOWK(I+NN4))))
+      RETURN
+      END
+C
+      FUNCTION CT4(MODE,I,NQ,NV,NU,NL,LDG,LDF,LDA,LRDO,
+     &              LIDO,IDOWK,X,DOWK,FPROB)
+C ----------------------------------------------------------
+C     THIS FUNCTION CAN BE USED FOR CONINUOUS OUTPUT IN CONECTION
+C     WITH THE OUTPUT-SUBROUTINE FOR HEM5. IT PROVIDES AN
+C     APPROXIMATION TO THE I-TH COMPONENT OF THE (Q,V)-SOLUTION AT X.
+C      SET  (1<=I<=N FOR Q(I) AND N<I<=2N FOR V(I-N))
+C ----------------------------------------------------------
+      IMPLICIT REAL*8 (A-H,O-Z)   
+      DIMENSION DOWK(LRDO),IDOWK(LIDO)
+      EXTERNAL FPROB 
+      NM=NV+NL
+      LIPAR = IDOWK(1)
+      IPA = NM+2
+      NMRC=IDOWK(IPA)
+      NBLK=IDOWK(IPA+1)
+      NZA = NBLK*NMRC**2+LDF+LDG
+      IF (MODE.LE.3) THEN
+        NDIM=NV
+        MDIM=NL
+        NMDIM=NM
+      ELSE
+        NDIM=1
+        MDIM=1
+        NMDIM=NMRC
+      END IF
+      ICQ=8
+      ICV=ICQ+5*NQ
+      ICU=ICV+5*NV
+      IQD=ICU+5*NU
+      IVD=IQD+NQ
+      IUD=IVD+NV
+      IGQ1=IUD+NU
+      IGD=IGQ1+LDG*NDIM
+      IB=IGD+LDG*NDIM
+      IXD=IB+LDA*NMDIM
+      IGTD=IXD+NM
+      IFL = IGTD+NL
+      IAV = IFL+LDF*MDIM
+      IXU = IAV+2*NZA
+      IST = IPA+LIPAR
+      ING1 = IST+9
+      INGD = ING1+2*LDG
+      INGF = INGD+2*LDG
+      INA = INGF+2*LDF
+      INU = INA+2*NZA
+      LIUMF = 13*NM+4*NZA
+      LXUMF = NM
+      CALL CMAT4(MODE,I,NQ,NV,NU,NL,NDIM,MDIM,NMDIM,LDG,LDF,LDA,
+     &  NZA,LIUMF,LXUMF,LIPAR,IDOWK(2),IDOWK(IPA),IDOWK(IST),
+     &  IDOWK(ING1),IDOWK(INGD),IDOWK(INGF),IDOWK(INA),IDOWK(INU),
+     &  FPROB,X,DOWK(1),DOWK(2),DOWK(3),DOWK(4),DOWK(ICQ),
+     &  DOWK(ICV),DOWK(ICU),DOWK(IQD),DOWK(IVD),DOWK(IUD), 
+     &  DOWK(IGQ1),DOWK(IGD),DOWK(IB),DOWK(IXD),DOWK(IGTD),
+     &  DOWK(IFL),DOWK(IAV),DOWK(IXU),RES)
+      CT4=RES
+      RETURN
+      END   
+C 
+      SUBROUTINE CMAT4(MODE,I,NQ,NV,NU,NL,NDIM,MDIM,NMDIM,LDG,
+     &  LDF,LDA,NZA,LIUMF,LXUMF,LIPAR,IP,IPAR,ISTAT,INDG1,INDGD,
+     &  INDFL,INDA,IUMF,FPROB,X,XOLD,H,TCH,COEFF,CONTQ,CONTV,
+     &  CONTU,QD,VD,UD,GQ1,GD,B,XD,GTD,FL,AVALUE,XUMF,RES)
+      IMPLICIT REAL*8 (A-H,O-Z) 
+      DIMENSION B(LDA,NMDIM),CONTQ(5*NQ),CONTV(5*NV),COEFF(4)
+      DIMENSION GD(LDG,NDIM),GTD(NL),XD(NV+NL),QD(NQ),VD(NV)
+      DIMENSION IP(NV+NL),ISTAT(9),GQ1(LDG,NDIM)
+      DIMENSION FL(LDF,MDIM),IUMF(LIUMF),XUMF(LXUMF)
+      DIMENSION INDG1(2*LDG),INDGD(2*LDG),INDFL(2*LDF)
+      DIMENSION INDA(2*NZA),AVALUE(2*NZA),IPAR(LIPAR)
+      DIMENSION UD(NU),CONTU(5*NU)
+      EXTERNAL FPROB
+      EPS = 1.D-12
+      S=(X-XOLD)/H
+      LISTA=9
+      NQ2=NQ*2
+      NQ3=NQ*3
+      NQ4=NQ*4 
+      NV2=NV*2
+      NV3=NV*3
+      NV4=NV*4 
+      NU2=NU*2
+      NU3=NU*3
+      NU4=NU*4 
+      NM=NV+NL
+      NMRC = IPAR(1)
+      NBLK =IPAR(2)
+      B10=S*(COEFF(1)+S*(COEFF(2)+S*(COEFF(3)+S*COEFF(4)))) 
+C -- CDUM
+      IF (S.LT.EPS) GOTO 10
+c -- qd et vd contiennent q3 et v3
+      CALL FPROB(8,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDGD(1),INDGD(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),TCH,QD,VD,UD,XL,
+     &     G,GD,XD(1),XD(NV+1),GTD,FL,QD,UD,B)
+      DO J=1,NV
+        QD(J)=CONTQ(J)+H*S*(CONTQ(J+NQ)+S*(CONTQ(J+NQ2)+
+     &      S*(CONTQ(J+NQ3)+S*CONTQ(J+NQ4))))
+        VD(J)=CONTV(J)+H*S*(CONTV(J+NV)+S*(CONTV(J+NV2)+
+     &      S*(CONTV(J+NV3)+S*CONTV(J+NV4))))
+        XD(J)=H*B10*XD(J)
+      END DO  
+      DO J=NV+1,NQ
+        QD(J)=CONTQ(J)+H*S*(CONTQ(J+NQ)+S*(CONTQ(J+NQ2)+
+     &      S*(CONTQ(J+NQ3)+S*CONTQ(J+NQ4))))
+      END DO  
+      DO J=1,NU
+        UD(J)=CONTU(J)+H*S*(CONTU(J+NU)+S*(CONTU(J+NU2)+
+     &      S*(CONTU(J+NU3)+S*CONTU(J+NU4))))
+      END DO  
+      CALL FPROB(6,NQ,NV,NU,NL,LDG,LDF,LDA,NBLK,NMRC,
+     &     IPAR(3),IPAR(4),INDGD(1),INDGD(LDG+1),INDFL(1),
+     &     INDFL(LDF+1),X,QD,VD,UD,XL,
+     &     G,GD,XD(1),XD(NV+1),GTD,FL,QD,UD,B)
+      FAC = -1.D0
+      CALL GPMULT(MODE,NDIM,NV,NL,LDG,INDGD,
+     &     GD,FAC,VD,GTD,XD(NV+1))
+      CALL ASET(MODE,NV,NL,NM,NMDIM,NDIM,MDIM,LDG,LDF,LDA,NZA,
+     &     LIPAR,LIUMF,LXUMF,LISTA,ISTAT,IPAR,INDG1,INDGD,
+     &     INDFL,INDA,IP,IUMF,XUMF,B,GQ1,GD,FL,AVALUE,IER)
+      IF (IER.NE.0) THEN
+         WRITE(6,*)'MATRIX SINGULAR IN CMAT4'
+         RETURN
+      END IF
+      CALL ASOL(MODE,NM,NV,NL,LIPAR,LIUMF,LXUMF,IPAR,IUMF,IP,
+     &     NZA,AVALUE,XUMF,B,XD,XD,XL)
+      DO J=1,NV
+        VD(J)=VD(J)+XD(J)
+      END DO 
+ 10   CONTINUE
+      IF (I.LE.NQ) THEN
+        RES=QD(I) 
+      ELSE
+        IF (I.LE.NQ+NV) THEN
+          RES=VD(I-NQ)
+        ELSE
+          RES=UD(I-NQ-NV)
+        END IF
+      END IF
+C -- STATISTICS
+      ISTAT(4)=ISTAT(4)+1
+      ISTAT(5)=ISTAT(5)+1
+      ISTAT(6)=ISTAT(6)+1
+      ISTAT(8)=ISTAT(8)+1
+       RETURN
+      END
+C******************************************************************
+C --- FUNCTION FOR DENSE OUTPUT -- IT IS BASED ON HERMITE
+C                INTERPOLATION
+      FUNCTION POL(MODE,I,NQ,NV,NU,NL,LDG,LDF,LDA,LRDO,
+     &              LIDO,IDOWK,X,DOWK,FPROB)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION DOWK(LRDO),IDOWK(LIDO)
+      XOLD = DOWK(1) 
+      H= DOWK(2)
+      S=(X-XOLD)/H
+      NQVU=NQ+NV+NU
+      NQVU2=2*NQVU
+      NQVU3=3*NQVU
+      NQVU4=4*NQVU
+      CALL COPOL(S,CP1,CP2,CP3,CP4) 
+      IP2=I+2
+      POL=DOWK(IP2)+H*CP1*DOWK(IP2+NQVU)+H*CP2*DOWK(IP2+NQVU2)+
+     &      CP3*DOWK(IP2+NQVU3)+CP4*DOWK(IP2+NQVU4)
+      RETURN
+      END
+C******************************************************************
+C --- COEFFICIENTS FOR HERMITE POLYNOMIAL
+      SUBROUTINE COPOL(X,CP1,CP2,CP3,CP4)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      T=0.540179418D0
+      XM1=(X-1.D0)
+      TMX=(T-X)
+      FAC=X*XM1 
+      DEN1=T
+      DEN2 =  0.4598205820000000D0
+      DEN3 =  6.1695413425555630D-02
+      DEN4 =  0.2114349676308187D0
+      P1 =  -1.285336261107544D0
+      P2 =  3.416412392738363D0
+      P3 =  -1.919641164000000D0
+      CP1 =FAC*XM1*TMX/DEN1 
+      CP2 =-FAC*X*TMX/DEN2 
+      CP3 =FAC**2/DEN3 
+      CP4 =X**2*(P1+X*(P2+X*P3))/DEN4 
+      RETURN
+      END
+C 
+C********************************************************************
+C --- COMPACTS SEVERAL VECTORS AND MATRIX IN A BIG ONE: CDUM
+      SUBROUTINE CPCT(MODE,NQ,NV,NU,NL,NM,NDIM,MDIM,NMDIM,LDG,LDF,
+     & LDA,NZA,LIPAR,LXUMF,LIUMF,LR,LI,IUMF,IPAR,ISTAT,INDG1,
+     & INDFL,IP,IDUM,H,TOLD,TCH,B10,CONTQ,CONTV,CONTU,
+     & Q,V,U,GQ,FL,AVALUE,XUMF,CDUM)
+      IMPLICIT REAL*8(A-H,O-Z)
+      DIMENSION B10(4),CONTQ(5*NQ),CDUM(LR),CONTV(5*NV)
+      DIMENSION Q(NQ),V(NV),FL(LDF,MDIM),AVALUE(2*NZA)
+      DIMENSION IP(NM),INDG1(2*LDG),INDFL(2*LDF),IDUM(LI)
+      DIMENSION IPAR(LIPAR),IUMF(LIUMF),U(NU),ISTAT(9)
+      DIMENSION CONTU(5*NU),GQ(LDG,NDIM),XUMF(LXUMF)
+C -- THE ENTRY POINTS FOR CDUM
+      NQ2=2*NQ
+      NQ3=3*NQ
+      NQ4=4*NQ
+      NV2=2*NV
+      NV3=3*NV
+      NV4=4*NV
+      NU2=2*NU
+      NU3=3*NU
+      NU4=4*NU
+      IC1=7
+      IC2=7+NQ
+      IC3=IC2+NQ
+      IC4=IC3+NQ
+      IC5=IC4+NQ
+      IC6=IC5+NQ
+      IC7=IC6+NV
+      IC8=IC7+NV
+      IC9=IC8+NV
+      IC10=IC9+NV
+      IC11=IC10+NV
+      IC12=IC11+NU
+      IC13=IC12+NU
+      IC14 =IC13+NU	
+      IC15 =IC14+NU	
+      IC16 =IC15+NU	
+      IC17 =IC16+NQ	
+      IC18 =IC17+NV	
+      IC19 =IC18+NU
+      IC20=IC19+2*LDG*NDIM+LDA*NMDIM+NM+NL
+      IC21=IC20+LDF*MDIM
+      IC22=IC21+2*NZA	
+C -- THE CONTAIN OF CDUM
+      CDUM(1)=TOLD
+      CDUM(2)=H
+      CDUM(3)=TCH
+      DO I=1,4
+        CDUM(3+I)=B10(I)
+      END DO
+      IF ((MODE.GE.0).AND.(MODE.LE.3)) THEN
+        GOTO 10
+      ELSE IF ((MODE.EQ.4).OR.(MODE.EQ.5)) THEN
+        GOTO 20
+      ELSE
+        STOP ' CPCT: INVALID MODE'
+      END IF
+ 10   CONTINUE
+      DO I=1,NV
+        CDUM(IC1+I)=CONTQ(I)
+        CDUM(IC2+I)=CONTQ(I+NQ)
+        CDUM(IC3+I)=CONTQ(I+NQ2)
+        CDUM(IC4+I)=CONTQ(I+NQ3)
+        CDUM(IC5+I)=CONTQ(I+NQ4)
+        CDUM(IC6+I)=CONTV(I)
+        CDUM(IC7+I)=CONTV(I+NV)
+        CDUM(IC8+I)=CONTV(I+NV2)
+        CDUM(IC9+I)=CONTV(I+NV3)
+        CDUM(IC10+I)=CONTV(I+NV4)
+        CDUM(IC16+I)=Q(I)
+        CDUM(IC17+I)=V(I)
+	DO J=1,NL
+          IMJ=(I-1)*NL+J
+	  JNI=(J-1)*NV+I
+	  CDUM(IC19+IMJ)=GQ(J,I)
+ 	  CDUM(IC20+JNI)=FL(I,J)
+	END DO
+      END DO
+      GOTO 100
+ 20   CONTINUE
+      DO I=1,NV
+        CDUM(IC1+I)=CONTQ(I)
+        CDUM(IC2+I)=CONTQ(I+NQ)
+        CDUM(IC3+I)=CONTQ(I+NQ2)
+        CDUM(IC4+I)=CONTQ(I+NQ3)
+        CDUM(IC5+I)=CONTQ(I+NQ4)
+        CDUM(IC6+I)=CONTV(I)
+        CDUM(IC7+I)=CONTV(I+NV)
+        CDUM(IC8+I)=CONTV(I+NV2)
+        CDUM(IC9+I)=CONTV(I+NV3)
+        CDUM(IC10+I)=CONTV(I+NV4)
+        CDUM(IC16+I)=Q(I)
+        CDUM(IC17+I)=V(I)
+      END DO
+      DO I=1,LDG
+        CDUM(IC19+I)=GQ(I,1)
+      END DO
+      DO I=1,LDF
+        CDUM(IC20+I)=FL(I,1)
+      END DO
+ 100  CONTINUE
+      DO I=NV+1,NQ
+        CDUM(IC1+I)=CONTQ(I)
+        CDUM(IC2+I)=CONTQ(I+NQ)
+        CDUM(IC3+I)=CONTQ(I+NQ2)
+        CDUM(IC4+I)=CONTQ(I+NQ3)
+        CDUM(IC5+I)=CONTQ(I+NQ4)
+        CDUM(IC16+I)=Q(I)
+      END DO
+      DO I=1,NU
+        CDUM(IC11+I)=CONTU(I)
+        CDUM(IC12+I)=CONTU(I+NU)
+        CDUM(IC13+I)=CONTU(I+NU2)
+        CDUM(IC14+I)=CONTU(I+NU3)
+        CDUM(IC15+I)=CONTU(I+NU4)
+        CDUM(IC18+I)=U(I)
+       END DO
+      DO I=1,LXUMF
+	CDUM(IC22+I)=XUMF(I)
+      END DO
+C -- ENTRY POINTS FOR IDUM
+      IPA = NM+1
+      IST=IPA+LIPAR
+      IG1=IST+9
+      IFL=IG1+4*LDG
+      IUM=IFL+2*LDF+2*NZA
+C -- THE CONTAIN OF IDUM
+      IDUM(1)=LIPAR
+      DO I=1,NM
+	IDUM(I+1)=IP(I)
+      END DO
+      DO I=1,LIPAR
+	IDUM(IPA+I)=IPAR(I)
+      END DO
+      DO I=1,9
+	IDUM(IST+I)=ISTAT(I)
+      END DO
+      DO I=1,2*LDG
+        IDUM(IG1+I)=INDG1(I)
+      END DO	
+      DO I=1,2*LDF
+        IDUM(IFL+I)=INDFL(I)
+      END DO
+      DO I=1,LIUMF
+      IDUM(IUM+I)=IUMF(I)
+      END DO
+      RETURN
+      END
+C***********************************************************************	
+C --- COEFFICIENTS OF THE METHOD 
+        SUBROUTINE COEF(C2,C3,C4,C5,C6,C7,C10,A21,A31,A32,
+     &         A41,A42,A43,A51,A52,A53,A54,A61,A62,A63,A64,A65,
+     &         A71,A72,A73,A74,A75,A76,A81,A82,A83,A84,A85,A86,
+     &         A87,A106,A107,A109,B1,B2,B3,B4,B5,B6,B7,B8,
+     &         D14,D15,D16,D17,D18,D19,D24,D25,D26,D27,D28,D29, 
+     &         D34,D35,D36,D37,D38,D39,D44,D45,D46,D47,D48,D49)
+       IMPLICIT REAL*8 (A-H,O-Z)
+      C2 =   0.1000000000000000D+00
+      C3 =   0.1500000000000000D+00
+      C4 =   0.3614787346573635D+00
+      C5 =   0.8535584335486351D-01
+      C6 =   0.5000000000000000D+00
+      C7 =   0.8000000000000000D+00
+      A21 =   0.1000000000000000D+00
+      A31 =   0.3749999999999999D-01
+      A32 =   0.1125000000000000D+00
+      A41 =   0.3222169236216038D+00
+      A42 =  -0.1188883322987607D+01
+      A43 =   0.1228145134023366D+01
+      A51 =  -0.3501123898129943D-01
+      A52 =   0.3725420601086163D+00
+      A53 =  -0.2721053535582034D+00
+      A54 =   0.1993037578575077D-01
+      A61 =  -0.5576547055042005D+00
+      A62 =   0.1367307289645883D+01
+      A63 =  -0.1732236360460725D+01
+      A64 =   0.4587772007467548D+00
+      A65 =   0.9638065755722880D+00
+      A71 =   0.8654517193566155D-01
+      A72 =  -0.8810082847945416D-01
+      A73 =   0.1981275547329404D+00
+      A74 =  -0.4645422679331083D+00
+      A75 =   0.1615170091109488D+00
+      A76 =   0.9064533606330119D+00
+      A81 =   0.0000000000000000D+00
+      A82 =   0.0000000000000000D+00
+      A83 =   0.0000000000000000D+00
+      A84 =   0.3624477248753816D+01
+      A85 =  -0.4617724189181256D+00
+      A86 =  -0.3198024628164272D+01
+      A87 =   0.1035319798328740D+01
+      B1 =   0.0000000000000000D+00
+      B2 =   0.0000000000000000D+00
+      B3 =   0.0000000000000000D+00
+      B4 =   0.2467760667636791D+00
+      B5 =   0.2106594087489728D+00
+      B6 =   0.1769218149125021D+00
+      B7 =   0.3064446444147922D+00
+      B8 =   0.5919806516005373D-01 
+C-- COEFF FOR DENSE OUTPUT
+      C10 =   0.05D0
+      A106 =  0.2519444444444446D0
+      A107 =  -0.3861111111111117D0
+      A109 =  0.1841666666666670D0
+      D14 =  -0.2661262387118526D0
+      D15 =  -0.4784628694418738D0
+      D16 =  -8.4922471157927090D-02
+      D17 =  0.2500588298423810D0
+      D18 =  -0.1047577768468651D0
+      D19 =  1.684210526316138D0
+      D24 =  2.963408265225625D0
+      D25 =  5.405521925140019D0
+      D26 =  0.9129165649477744D0
+      D27 =  -2.963932600778991D0
+      D28 =  1.261033213890067D0
+      D29 =  -7.578947368424495D0
+      D34 =  -4.141333547260734D0
+      D35 =  -8.533017606960350D0
+      D36 =  -0.8633784567714418D0
+      D37 =  6.403467289689607D0
+      D38 =  -2.971000836599169D0
+      D39 =  10.10526315790209D0
+      D44 =  1.690827587510642D0
+      D45 =  3.816617960011145D0
+      D46 =  0.2123061778941055D0
+      D47 =  -3.383148874338215D0
+      D48 =  1.873923464716025D0
+      D49 =  -4.210526315793703D0
+      RETURN
+      END                                      
