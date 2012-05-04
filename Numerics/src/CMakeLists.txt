@@ -165,6 +165,7 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(hairer/test)
   NEW_TEST(dr_iso1 dr_iso.f)
+  NEW_TEST(dr_iso1sp dr_isosp.f)
   END_TEST()
 
   BEGIN_TEST(NonSmoothTools/test) 
