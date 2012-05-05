@@ -84,14 +84,6 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
 
-
-  // It seems that index() in not update in Index(0)
-  // see comment in void Simulation::updateIndexSets()
-  //if (_levelMin==0)
-  {
-    indexSet->update_vertices_indices();
-    indexSet->update_edges_indices();
-  }
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices

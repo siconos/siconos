@@ -44,6 +44,9 @@ Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
   _IG[0].reset(new InteractionsGraph());
   _DSG[0].reset(new DynamicalSystemsGraph());
 
+  _IG[0]->update_vertices_indices();
+  _IG[0]->update_edges_indices();
+
   _allInteractions.reset(new InteractionsSet());
 }
 
@@ -349,6 +352,8 @@ void Topology::initialize()
 void Topology::setProperties()
 {
   _IG[0]->properties().reset(new GraphProperties());
+  _IG[0]->update_vertices_indices();
+  _IG[0]->update_edges_indices();
 
   for (unsigned int i = 1; i < _IG.size(); ++i)
   {
@@ -359,10 +364,17 @@ void Topology::setProperties()
     // INSTALL_GRAPH_PROPERTIES
 
     _IG[i]->properties()->symmetric = _symmetric;
+
+    _IG[i]->update_vertices_indices();
+    _IG[i]->update_edges_indices();
   }
 
   _DSG[0]->properties().reset(new GraphProperties());
   _DSG[0]->properties()->symmetric = _symmetric;
+
+  _DSG[0]->update_vertices_indices();
+  _DSG[0]->update_edges_indices();
+
 }
 
 void Topology::clear()

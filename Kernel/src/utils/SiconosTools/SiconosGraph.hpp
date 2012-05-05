@@ -768,16 +768,15 @@ public:
       if (index(*vi) != i && index(*vi) != std::numeric_limits<size_t>::max())
       {
         _vertex_index_modified.push_back(*vi);
-      }
-      if (index(*vi) != std::numeric_limits<size_t>::max())
-      {
         old_index(*vi) = index(*vi);
       }
       else
       {
-        old_index(*vi) = i;
+        old_index(*vi) = std::numeric_limits<size_t>::max(); // old_index not needed
       }
       index(*vi) = i;
+
+      assert(index(*vi) != old_index(*vi));
     }
     _stamp++;
   };
@@ -793,19 +792,17 @@ public:
       if (index(*ei) != i && index(*ei) != std::numeric_limits<size_t>::max())
       {
         _edge_index_modified.push_back(*ei);
-      }
-      if (index(*ei) != std::numeric_limits<size_t>::max())
-      {
         old_index(*ei) = index(*ei);
       }
       else
       {
-        old_index(*ei) = i;
+        old_index(*ei) = std::numeric_limits<size_t>::max(); // old_index not needed
       }
-
-      old_index(*ei) = index(*ei);
       index(*ei) = i;
+
+      assert(index(*ei) != old_index(*ei));
     }
+    _stamp++;
   };
 
   EIndexAccess edges_indices()

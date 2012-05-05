@@ -171,7 +171,6 @@ struct DynamicalSystemsGraph : public SiconosGraph < SP::DynamicalSystem, SP::In
     SystemProperties , RelationProperties,
     SP::GraphProperties >
 {
-
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
                            ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
@@ -184,9 +183,9 @@ struct InteractionsGraph : public SiconosGraph < SP::Interaction, SP::DynamicalS
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(Interactions,
-                           ((Vertex, SP::SiconosMatrix, blockProj))        // ProjectOnConstraint
-                           ((Edge, SP::SiconosMatrix, upper_blockProj))    // idem
-                           ((Edge, SP::SiconosMatrix, lower_blockProj)));  // idem
+                           ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
+                           ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
+                           ((Edge, SP::SimpleMatrix, lower_blockProj)));  // idem
 };
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);

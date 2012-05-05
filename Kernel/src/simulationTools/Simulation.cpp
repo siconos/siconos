@@ -203,9 +203,10 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 
 void Simulation::updateIndexSets()
 {
-  // Warning, I0 is not updated and must remain unchanged !
-  unsigned int nindexsets = model()->nonSmoothDynamicalSystem()
-                            ->topology()->indexSetsSize();
+
+  // update I0 indices
+  unsigned int nindexsets = model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize();
+
   if (nindexsets > 1)
   {
     for (unsigned int i = 1; i < nindexsets ; ++i)
@@ -213,7 +214,6 @@ void Simulation::updateIndexSets()
       updateIndexSet(i);
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_vertices_indices();
       model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
-
     }
   }
 }

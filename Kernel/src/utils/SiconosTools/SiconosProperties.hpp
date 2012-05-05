@@ -36,9 +36,38 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/static_assert.hpp>
 #include <vector>
+#include <queue>
+
+#include <boost/mpl/bool.hpp>
+#include <boost/type_traits.hpp>
 
 namespace Siconos
 {
+
+/** some local type traits */
+template <typename T>
+struct IsSharedPtr : boost::mpl::false_ {};
+
+template <typename T>
+struct IsSharedPtr<boost::shared_ptr<T> > : boost::mpl::true_ {};
+
+template <typename T>
+struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {};
+
+
+template <typename T>
+struct RemovePointer
+{
+  typedef T type;
+};
+
+template <typename T>
+struct RemovePointer<boost::shared_ptr<T> >
+{
+  typedef T type;
+};
+
+
 
 
 /* a templated way to access edge or vertex with the help of
@@ -62,6 +91,11 @@ struct VertexAccess
     return g.vertices_number();
   }
 
+  bool isElem(G& g, typename G::VDescriptor& vd)
+  {
+    return g.is_vertex(g.bundle(vd));
+  }
+
 };
 
 /** get edge needed data */
@@ -81,6 +115,11 @@ struct EdgeAccess
   {
     return g.edges_number();
   }
+
+  bool isElem(G& g, typename G::EDescriptor& ed)
+  {
+    return g.is_edge(g.source(ed), g.target(ed), g.bundle(ed));
+  }
 };
 
 
@@ -91,6 +130,75 @@ struct VertexOrEdge
   typedef typename boost::mpl::if_ < boost::is_same<typename G::VIndexAccess, IndexMap>,
           VertexAccess<G> ,
           EdgeAccess<G>  >::type Access;
+};
+
+/** swap data */
+template <typename T>
+struct SwapPointedValues
+{
+
+  typedef SwapPointedValues type;
+
+  void operator()(T a, T b)
+  {
+    //note: if T is abstract, swap(T& a, T&b) must be implemented
+    using std::swap;
+    swap(*a, *b);
+  }
+};
+
+
+template <typename T>
+struct SwapValues
+{
+
+  typedef SwapValues type;
+
+  void operator()(T&a, T&b)
+  {
+    using std::swap;
+    swap(a, b);
+  }
+};
+
+template <typename T>
+struct SwapProperties
+{
+  typedef typename boost::mpl::if_ < IsPointer<T>,
+          SwapPointedValues<T>,
+          SwapValues<T> >::type type;
+};
+
+template <typename T>
+struct GetPointedValue
+{
+  typedef GetPointedValue type;
+
+  typename RemovePointer<T>::type& operator()(T a)
+  {
+    return *a;
+  }
+};
+
+template <typename T>
+struct GetValue
+{
+  typedef GetValue type;
+
+  T& operator()(T& a)
+  {
+    return a;
+  }
+};
+
+template <typename T>
+struct GetProperty
+{
+
+  typedef typename boost::mpl::if_ < IsPointer<T>,
+          GetPointedValue<T>,
+          GetValue<T> >::type type;
+
 };
 
 
@@ -126,7 +234,7 @@ public:
   */
 
   Properties(G& g)
-    : _g(g), _store(new std::vector<T>()), _stamp(0)
+    : _g(g), _store(new std::vector<T>()), _stamp(-1)
   {}
 
 
@@ -137,40 +245,55 @@ public:
   reference operator[](const key_type& v)
   {
 
-    /* a stamp is used to know if indices have been updated */
+    // 1. resize data store if necessary
+    typename boost::property_traits<IndexMap>::value_type iv = _g.index(v);
+
+    if (static_cast<unsigned>(iv) >= _store->size())
+    {
+      // _store->resize(iv+1, T()); faster with large size
+      _store->resize(access.size(_g), T());
+    }
+
+
+    /* 2. a stamp is used to know if indices have been updated */
     if (_g.stamp() != _stamp)
     {
       _stamp = _g.stamp();
 
-      int k = access.size(_g);
-
       /* this new store is used as a fifo */
-      typename std::vector<T> new_store(k);
+      typename std::queue<typename RemovePointer<T>::type > new_store;
+      typename GetProperty<T>::type getProperty;
 
-      k--;
       for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
            vi != access.indexModified(_g).end(); ++vi)
       {
+        assert(access.isElem(_g, *vi));
+        assert(_g.old_index(*vi) != _g.index(*vi));
         typename boost::property_traits<OldIndexMap>::value_type oi = _g.old_index(*vi);
-        new_store[k--] = (*_store)[oi];
+        assert(oi < _store->size());
+
+        new_store.push(getProperty((*_store)[oi]));
       }
+
       for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
            vi != access.indexModified(_g).end(); ++vi)
       {
         typename boost::property_traits<IndexMap>::value_type i = _g.index(*vi);
-        (*_store)[i] = new_store.back();
-        new_store.pop_back();
+        assert(i < _store->size());
+
+        typename SwapProperties<typename RemovePointer<T>::type>::type swapProperties;
+
+        swapProperties(getProperty((*_store)[i]), new_store.front());
+
+        new_store.pop();
       };
+
+      assert(new_store.size() == 0);
+
     };
 
-    typename boost::property_traits<IndexMap>::value_type i = _g.index(v);
-    if (static_cast<unsigned>(i) >= _store->size())
-    {
-      // _store->resize(i+1, T()); faster with large size
-      _store->resize(access.size(_g), T());
-    }
-
-    return (*_store)[i];
+    // 3. return data
+    return (*_store)[iv];
   };
 
 };

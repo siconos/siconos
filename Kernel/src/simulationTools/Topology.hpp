@@ -242,6 +242,8 @@ public:
     _IG[num]->properties().reset(new GraphProperties());
 
     _IG[num]->properties()->symmetric = _symmetric;
+    _IG[num]->update_vertices_indices();
+    _IG[num]->update_edges_indices();
 
   };
 
