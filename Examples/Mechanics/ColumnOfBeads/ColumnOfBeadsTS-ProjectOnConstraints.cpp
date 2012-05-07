@@ -30,7 +30,12 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+
+
+
+
+
+int withLevel(unsigned int mylevel)
 {
   try
   {
@@ -171,7 +176,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    unsigned int levelForProjection = 0; //(default =1)
+    unsigned int levelForProjection = mylevel; //(default =1)
     SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
 
     // =========================== End of model definition ===========================
@@ -342,3 +347,14 @@ int main(int argc, char* argv[])
 
 
 }
+
+
+int main(int argc, char* argv[])
+{
+  int info ;
+  info = withLevel(0);
+  if (info == 1) return info;
+  info = withLevel(1);
+  return info;
+}
+
