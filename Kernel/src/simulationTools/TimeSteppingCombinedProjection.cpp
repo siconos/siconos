@@ -27,10 +27,10 @@
 
 
 using namespace std;
-#define TSPROJ_DEBUG
+//#define TSPROJ_DEBUG
 
 
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -103,6 +103,48 @@ void TimeSteppingCombinedProjection::initOSNS()
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setLevelMax(_indexSetLevelForProjection);
 }
 
+
+
+void TimeSteppingCombinedProjection::advanceToEventOLD()
+{
+  //   computeInitialResidu();
+  //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
+  //   prepareNewtonIteration();
+  //   // solve ...
+  //   computeFreeState();
+  //   int info = 0;
+  //   if (!_allNSProblems->empty())
+  //     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+  //   // Check output from solver (convergence or not ...)
+  //   if (!checkSolverOutput)
+  //     DefaultCheckSolverOutput(info);
+  //   else
+  //     checkSolverOutput(info, this);
+  //   // Update
+  //   update(_levelMin);
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+
+  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+  {
+    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+    SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+    assert(indexSet1);
+    assert(indexSet2);
+
+    indexSet1->clear();
+    indexSet2->clear();
+  }
+
+
+  newtonSolve(_newtonTolerance, _newtonMaxIteration);
+
+
+
+}
+
+
+
+
 void TimeSteppingCombinedProjection::advanceToEvent()
 {
   _isIndexSetsStable = false;
@@ -113,6 +155,28 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     SP::InteractionsGraph indexSet2 = topo->indexSet(2);
     assert(indexSet1);
     assert(indexSet2);
+
+    InteractionsGraph::VIterator ui, uiend, vnext;
+
+    // zeroing the lambda of indexSet1
+    boost::tie(ui, uiend) = indexSet1->vertices();
+    for (vnext = ui; ui != uiend; ui = vnext)
+    {
+      ++vnext;
+      SP::Interaction inter1 = indexSet1->bundle(*ui);
+      inter1->lambda(1)->zero();
+    }
+
+    // // zeroing the lambda of indexSet2
+    // boost::tie(ui,uiend) = indexSet2->vertices();
+    // for(vnext = ui; ui != uiend; ui = vnext)
+    // {
+    //   ++vnext;
+    //   SP::Interaction inter2 = indexSet2->bundle(*ui);
+    //   inter2->lambda(0)->zero();
+    // }
+
+
 
     indexSet1->clear();
     indexSet2->clear();
@@ -127,16 +191,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     kindexset++ ;
     cout << "TimeSteppingCombinedProjection::advanceToEvent begin :\n";
     cout << "TimeSteppingCombinedProjection::advanceToEvent kindexset =" << kindexset << "  :\n";
-#endif
-
-
-
-    if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    if (kindexset > 20)
     {
-      updateIndexSet(1);
+      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection kindexset >20  ");
     }
-    else
-      _isIndexSetsStable = true;
+
+#endif
 
     /** First step, Solve the standard velocity formulation.*/
 #ifdef TSPROJ_DEBUG
@@ -149,12 +209,9 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
     cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
 #endif
-    if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
-    {
-      updateIndexSet(2);
-    }
-    if (!_doCombinedProj)
-      return;
+
+    //if(!_doCombinedProj)
+    //  return;
     int info = 0;
 
     /** Second step, Perform the projection on constraints.*/
@@ -170,9 +227,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
     if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    {
+      updateIndexSet(2);
       computeCriteria(&runningProjection);
+    }
 
-    while (runningProjection && cmp < _projectionMaxIteration)
+
+
+    while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
     {
       cmp++;
 #ifdef TSPROJ_DEBUG
@@ -227,18 +289,31 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //{
       //  (*it)->relation()->computeh(getTkp1());
       //}
-    }
+    } // end while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
+
+
+
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingCombinedProjection::newtonSolve end projection:\n";
 #endif
-  }
+
+    if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    {
+      updateIndexSet(1);
+    }
+  } // end  while (!_isIndexSetsStable)
+
   return;
 }
 
 void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 {
 
+  // SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
   SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
+
+
+
   InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -259,7 +334,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
     {
       double criteria = interac->y(0)->getValue(0);
 #ifdef TSPROJ_DEBUG
-      printf("unilatreal interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
+      printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
 #endif
 
       if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
@@ -329,21 +404,18 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false);
 
-  _isIndexSetsStable = true ;
-
-
-
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %i\n", (int)(indexSet0->size()));
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
   boost::tie(ui1, ui1end) = indexSet1->vertices();
 
-
   if (i == 1)
   {
+    _isIndexSetsStable = true ;
+
     DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
-    indexSet1->display();
+    // indexSet1->display();
     //Remove interactions from the indexSet1
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
@@ -355,15 +427,21 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
         assert((indexSet0->color(ur1_descr0) == boost::white_color));
         indexSet0->color(ur1_descr0) = boost::gray_color;
       }
-      else
-      {
-        // Interactions is not in indexSet0 anymore.
-        // ui1 becomes invalid
-        indexSet1->remove_vertex(inter1);
-        topo->setHasChanged(true);
-        _isIndexSetsStable = false;
-      }
+      // else
+      // {
+      //   // Interactions is not in indexSet0 anymore.
+      //   // ui1 becomes invalid
+      //   indexSet1->remove_vertex(inter1);
+      //   topo->setHasChanged(true);
+      //   _isIndexSetsStable=false;
+      // }
     }
+
+
+
+
+
+
     // indexSet0\indexSet1 scan
     InteractionsGraph::VIterator ui0, ui0end;
     //Add interaction in indexSet1
@@ -391,16 +469,11 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
           assert(indexSet0->color(*ui0) == boost::white_color);
 
           SP::Interaction inter0 = indexSet0->bundle(*ui0);
-          DEBUG_PRINTF("update IndexSets middle : indexSet1 size : %i\n", (int)(indexSet1->size()));
-          DEBUG_PRINTF("indexSet1->is_vertex(inter0) : %i\n", indexSet1->is_vertex(inter0));
-
-
           assert(!indexSet1->is_vertex(inter0));
 
           bool activate = true;
           if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
-
             DSIterator itDS = inter0->dynamicalSystemsBegin();
             SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
             activate = Osi->addInteractionInIndexSet(inter0, i);
@@ -447,7 +520,6 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
         // vertex and edges insertion in indexSet2
         indexSet2->copy_vertex(inter1, *indexSet1);
         topo->setHasChanged(true);
-        _isIndexSetsStable = false;
         assert(indexSet2->is_vertex(inter1));
       }
     }
