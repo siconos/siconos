@@ -31,6 +31,8 @@
 #ifndef SICONOS_PROPERTIES_HPP
 #define SICONOS_PROPERTIES_HPP
 
+#include "SiconosSerialization.hpp"
+
 #include <boost/property_map/property_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpl/eval_if.hpp>
@@ -211,8 +213,7 @@ template<typename T, typename G, typename IndexMap>
 class Properties
 {
 
-private:
-
+public:
   G& _g;
   boost::shared_ptr< std::vector<T> > _store;
   int _stamp;
@@ -296,6 +297,12 @@ public:
     return (*_store)[iv];
   };
 
+protected:
+  typedef void serializable;
+  template<typename Archive>
+  friend void Siconos::siconos_io(Archive&, Properties<T, G, IndexMap>&, const unsigned int);
+  friend class boost::serialization::access;
+
 };
 
 
@@ -309,6 +316,12 @@ class VertexProperties : public Properties<T, G, typename G::VIndexAccess>
 public:
   VertexProperties(G& g) : Properties<T, G, typename G::VIndexAccess>(g)
   {};
+
+protected:
+  typedef void serializable;
+  template<typename Archive>
+  friend void Siconos::siconos_io(Archive&, VertexProperties<T, G>&, const unsigned int);
+  friend class boost::serialization::access;
 };
 
 /** edge property structure:
@@ -321,6 +334,12 @@ class EdgeProperties : public Properties<T, G, typename G::EIndexAccess>
 public:
   EdgeProperties(G& g) : Properties<T, G, typename G::EIndexAccess>(g)
   {};
+
+protected:
+  typedef void serializable;
+  template<typename Archive>
+  friend void Siconos::siconos_io(Archive&, EdgeProperties<T, G>&, const unsigned int);
+  friend class boost::serialization::access;
 };
 
 /** function to build a VertexProperties from one template parameter
@@ -402,10 +421,10 @@ public:
 #include <boost/preprocessor/cat.hpp>
 
 #define I_DECLARE_MEMBERS(r,gt,p) \
-  Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt> BOOST_PP_TUPLE_ELEM(3,2,p);
+  Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)> BOOST_PP_TUPLE_ELEM(3,2,p);
 
 #define I_CONS_MEMBERS(r,gt,p) \
-  BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), gt>(*this)),
+  BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)>(*static_cast<BOOST_PP_CAT(_,gt)*>(this))),
 
 
 #define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                 \

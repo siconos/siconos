@@ -157,7 +157,7 @@ double D1MinusLinear::computeResidu()
     {
       for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
       {
-        (*itOsns)->setHasBeUpdated(false);
+        (*itOsns)->setHasBeenUpdated(false);
       }
     }
 
@@ -328,7 +328,7 @@ double D1MinusLinear::computeResidu()
     {
       for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
       {
-        (*itOsns)->setHasBeUpdated(false);
+        (*itOsns)->setHasBeenUpdated(false);
       }
     }
 

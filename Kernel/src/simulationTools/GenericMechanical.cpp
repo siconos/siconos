@@ -67,7 +67,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
 #ifdef GMP_DEBUG
   printf("GenericMechanical::computeInteractionBlock: add problem of type ");
 #endif
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
   {
     int size = inter->getNonSmoothLawSize();
     if (Type::value(*(inter->nonSmoothLaw()))
@@ -119,7 +119,7 @@ int GenericMechanical::compute(double time)
   int info = 0;
   // --- Prepare data for GenericMechanical computing ---
   preCompute(time);
-  _hasBeUpdated = true;
+  _hasBeenUpdated = true;
   /*
     La matrice _M est construite.  Ici, il faut construire les
     sous-problemes, c'est a dire completer les champs des
@@ -176,7 +176,7 @@ void GenericMechanical::display() const
 
 void  GenericMechanical::updateInteractionBlocks()
 {
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
   {
     //    printf("GenericMechanical::updateInteractionBlocks : must be updated\n");
     freeGenericMechanicalProblem(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);

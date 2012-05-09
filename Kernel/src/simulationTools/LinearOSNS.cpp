@@ -623,7 +623,7 @@ void LinearOSNS::preCompute(double time)
   if (_levelMin == LEVELMAX)
     return;
 
-  if (!_hasBeUpdated || !isLinear)
+  if (!_hasBeenUpdated || !isLinear)
   {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
@@ -631,7 +631,7 @@ void LinearOSNS::preCompute(double time)
     // Updates matrix M
     SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
     //    _M->fill(indexSet);
-    _M->fill(indexSet, !_hasBeUpdated);
+    _M->fill(indexSet, !_hasBeenUpdated);
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 

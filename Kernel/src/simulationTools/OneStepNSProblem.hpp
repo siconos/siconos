@@ -158,7 +158,7 @@ protected:
   SP::NumericsOptions _numerics_options;
 
   /*During Newton it, this flag allow to update the numerics matrices only once if necessary.*/
-  bool _hasBeUpdated;
+  bool _hasBeenUpdated;
 
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -423,18 +423,18 @@ public:
   void computeAllDSBlocks();
 
   /**
-   * return _hasBeUpdated
+   * return _hasBeenUpdated
    */
-  bool hasBeUpdated()
+  bool hasBeenUpdated()
   {
-    return _hasBeUpdated;
+    return _hasBeenUpdated;
   }
   /**
-   * to set _hasBeUpdated.
+   * to set _hasBeenUpdated.
    */
-  void setHasBeUpdated(bool v)
+  void setHasBeenUpdated(bool v)
   {
-    _hasBeUpdated = v;
+    _hasBeenUpdated = v;
   }
 
   /** computes DSBlock-matrix that corresponds to DS1

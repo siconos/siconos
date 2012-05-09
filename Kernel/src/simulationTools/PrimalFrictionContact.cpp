@@ -347,7 +347,7 @@ void PrimalFrictionContact::preCompute(const double time)
   SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   SP::InteractionsSet indexSet = simulation->indexSet(levelMin);
 
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
   {
     // Computes new interactionBlocks if required
     updateInteractionBlocks();

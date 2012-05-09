@@ -118,7 +118,7 @@ void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
   assert(inter1 != inter2);
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
-  if (!_hasBeUpdated || !isLinear)
+  if (!_hasBeenUpdated || !isLinear)
     LinearOSNS::computeInteractionBlock(ed);
 }
 
@@ -131,7 +131,7 @@ void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&
   SP::Interaction inter = indexSet->bundle(vd);
 
   // commonDS here...
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
     computeOptions(inter, inter);
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
@@ -173,7 +173,7 @@ int MLCP::compute(double time)
 {
   // --- Prepare data for MLCP computing ---
   preCompute(time);
-  //  _hasBeUpdated=true;
+  //  _hasBeenUpdated=true;
 #ifdef MLCP_DEBUG
   printf("MLCP::compute m n :%d,%d\n", _n, _m);
 #endif
@@ -256,7 +256,7 @@ void MLCP::initialize(SP::Simulation sim)
 }
 void  MLCP::updateInteractionBlocks()
 {
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
   {
     _curBlock = 0;
     _m = 0;

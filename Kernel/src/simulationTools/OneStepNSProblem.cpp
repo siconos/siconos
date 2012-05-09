@@ -30,7 +30,7 @@
 //#define OSNS_DEBUG
 using namespace std;
 OneStepNSProblem::OneStepNSProblem():
-  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;
@@ -41,7 +41,7 @@ OneStepNSProblem::OneStepNSProblem():
 OneStepNSProblem::OneStepNSProblem(const string& pbType,
                                    SP::OneStepNSProblemXML osnspbxml):
 /*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -71,7 +71,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
 }
 OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
   _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
-  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
   if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -100,7 +100,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -115,7 +115,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
 }
 
 OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -128,7 +128,7 @@ OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSol
 
 }
 OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
-  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeUpdated(false)
+  _numerics_solver_id(newNumericsSolverId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
   // Numerics general options
@@ -190,7 +190,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  if (indexSet->properties()->symmetric)
+  if (indexSet->properties().symmetric)
   {
     InteractionsGraph::VIterator vi, viend;
     for (boost::tie(vi, viend) = indexSet->vertices();
@@ -203,7 +203,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || !_hasBeUpdated)
+      if (!isLinear || !_hasBeenUpdated)
       {
         computeDiagonalInteractionBlock(*vi);
       }
@@ -265,7 +265,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         currentInteractionBlock->zero();
       }
 
-      if (!isLinear || !_hasBeUpdated)
+      if (!isLinear || !_hasBeenUpdated)
       {
         computeInteractionBlock(*ei);
 
@@ -313,7 +313,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || !_hasBeUpdated)
+      if (!isLinear || !_hasBeenUpdated)
       {
         computeDiagonalInteractionBlock(*vi);
       }
@@ -379,7 +379,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         }
 
 
-        if (!isLinear || !_hasBeUpdated)
+        if (!isLinear || !_hasBeenUpdated)
         {
           if (isrc != itar)
             computeInteractionBlock(*oei);

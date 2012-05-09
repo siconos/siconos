@@ -548,7 +548,7 @@ void   TimeStepping::prepareNewtonIteration()
   if (topoHasChanged)
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->setHasBeUpdated(false);
+      (*itOsns)->setHasBeenUpdated(false);
     }
 
 }

@@ -269,7 +269,7 @@ void TimeSteppingD1Minus::advanceToEvent()
   //{
   //  for(OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
   //  {
-  //    (*itOsns)->setHasBeUpdated(false);
+  //    (*itOsns)->setHasBeenUpdated(false);
   //  }
   //}
 

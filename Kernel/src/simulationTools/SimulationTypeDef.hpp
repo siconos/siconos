@@ -138,23 +138,29 @@ TYPEDEF_SPTR(IndexInt);
 
 
 /** properties that are always needed */
-struct RelationProperties
+struct InteractionProperties
 {
   SP::SiconosMatrix block;    // diagonal block
   SP::DynamicalSystem source;
   SP::DynamicalSystem target;
   bool forControl;            // true if the relation is used to control the DS
+
+  ACCEPT_SERIALIZATION(InteractionProperties);
 };
 
 struct SystemProperties
 {
   SP::SiconosMatrix upper_block;   // i,j block i<j
   SP::SiconosMatrix lower_block;   // i,j block i>j
+
+  ACCEPT_SERIALIZATION(SystemProperties);
 };
 
 struct GraphProperties
 {
   bool symmetric;
+
+  ACCEPT_SERIALIZATION(GraphProperties);
 };
 
 TYPEDEF_SPTR(GraphProperties);
@@ -167,25 +173,35 @@ TYPEDEF_SPTR(GraphProperties);
  * where L is the line graph
  * transformation */
 
-struct DynamicalSystemsGraph : public SiconosGraph < SP::DynamicalSystem, SP::Interaction,
-    SystemProperties , RelationProperties,
-    SP::GraphProperties >
+typedef SiconosGraph < SP::DynamicalSystem, SP::Interaction,
+        SystemProperties, InteractionProperties,
+        GraphProperties > _DynamicalSystemsGraph;
+
+typedef SiconosGraph < SP::Interaction, SP::DynamicalSystem,
+        InteractionProperties, SystemProperties,
+        GraphProperties > _InteractionsGraph;
+
+struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
                            ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
   // always needed -> SystemProperties
+
+  /** serialization hooks */
+  ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
 };
 
-struct InteractionsGraph : public SiconosGraph < SP::Interaction, SP::DynamicalSystem,
-    RelationProperties, SystemProperties,
-    SP::GraphProperties >
+struct InteractionsGraph : public _InteractionsGraph
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(Interactions,
                            ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
                            ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
                            ((Edge, SP::SimpleMatrix, lower_blockProj)));  // idem
+
+  /** serialization hooks */
+  ACCEPT_SERIALIZATION(InteractionsGraph);
 };
 
 TYPEDEF_SPTR(DynamicalSystemsGraph);

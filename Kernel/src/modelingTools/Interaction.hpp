@@ -194,14 +194,16 @@ private:
 
   // === PRIVATE FUNCTIONS ===
 
-  /** default constructor */
-  Interaction() {};
+
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
   Interaction(const Interaction& inter);
 
 public:
+
+  /** default constructor */
+  Interaction() {};
 
   /** constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding

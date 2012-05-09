@@ -394,12 +394,12 @@ void OSNSMultipleImpact::PreComputeImpact()
   //2. Compute matrix _M
   SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  if (!_hasBeUpdated || !isLinear)
+  if (!_hasBeenUpdated || !isLinear)
   {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
     // Updates matrix M
-    _M->fill(indexSet, !_hasBeUpdated);
+    _M->fill(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->size();
   }
   if (Ncontact != _sizeOutput)

@@ -102,14 +102,14 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
 
-  if (indexSet->properties()->symmetric)
+  if (indexSet->properties().symmetric)
   {
     RuntimeException::selfThrow
     (" MLCPProjectOnConstraints::updateInteractionBlocks() - not yet implemented for symmetric case");
   }
   else // not symmetric => follow out_edges for each vertices
   {
-    if (!_hasBeUpdated)
+    if (!_hasBeenUpdated)
     {
       //      printf("MLCPProjectOnConstraints::updateInteractionBlocks must be updated.\n");
       _n = 0;
@@ -130,7 +130,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         indexSet->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || !_hasBeUpdated)
+      if (!isLinear || !_hasBeenUpdated)
       {
         computeDiagonalInteractionBlock(*vi);
       }
@@ -198,7 +198,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         }
 
 
-        if (!isLinear || !_hasBeUpdated)
+        if (!isLinear || !_hasBeenUpdated)
         {
           if (isrc != itar)
             computeInteractionBlock(*oei);
@@ -295,19 +295,19 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
   SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeUpdated: "<<_hasBeUpdated<<endl;
+  //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
 
 
-  if (indexSet->properties()->symmetric)
+  if (indexSet->properties().symmetric)
   {
     RuntimeException::selfThrow
     ("MLCPProjectOnConstraints::updateInteractionBlocks() - symmetric case for the indexSet is not yet implemented");
   }
   else // not symmetric => follow out_edges for each vertices
   {
-    if (!_hasBeUpdated || !isLinear)
+    if (!_hasBeenUpdated || !isLinear)
     {
-      if (!_hasBeUpdated)
+      if (!_hasBeenUpdated)
       {
         //      printf("MLCPProjectOnConstraints::updateInteractionBlocks must be updated.\n");
         _n = 0;
@@ -451,7 +451,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   assert(currentInteractionBlock->size(0) == sizeY);
   assert(currentInteractionBlock->size(1) == sizeY);
 
-  if (!_hasBeUpdated)
+  if (!_hasBeenUpdated)
     computeOptions(inter, inter);
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
   // necessary) if inter1 and inter2 have commond DynamicalSystem.  How
@@ -795,7 +795,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     void MLCPProjectOnConstraints::postCompute()
     {
-      _hasBeUpdated = true;
+      _hasBeenUpdated = true;
       // This function is used to set y/lambda values using output from
       // lcp_driver (w,z).  Only Interactions (ie Interactions) of
       // indexSet(leveMin) are concerned.

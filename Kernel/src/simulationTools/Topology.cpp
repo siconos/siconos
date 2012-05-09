@@ -351,26 +351,23 @@ void Topology::initialize()
 
 void Topology::setProperties()
 {
-  _IG[0]->properties().reset(new GraphProperties());
   _IG[0]->update_vertices_indices();
   _IG[0]->update_edges_indices();
 
   for (unsigned int i = 1; i < _IG.size(); ++i)
   {
-    _IG[i]->properties().reset(new GraphProperties());
     // .. global properties may be defined here with
     // InteractionsSubGraphProperties(), see SiconosProperties.hpp
     // VertexSubProperties or EdgeSubProperties and the macros
     // INSTALL_GRAPH_PROPERTIES
 
-    _IG[i]->properties()->symmetric = _symmetric;
+    _IG[i]->properties().symmetric = _symmetric;
 
     _IG[i]->update_vertices_indices();
     _IG[i]->update_edges_indices();
   }
 
-  _DSG[0]->properties().reset(new GraphProperties());
-  _DSG[0]->properties()->symmetric = _symmetric;
+  _DSG[0]->properties().symmetric = _symmetric;
 
   _DSG[0]->update_vertices_indices();
   _DSG[0]->update_edges_indices();
