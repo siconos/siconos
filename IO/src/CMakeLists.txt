@@ -87,7 +87,12 @@ LIBRARY_PROJECT_SETUP()
 
 SET(TEST_WRAP TRUE)
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/test/result.ref test/result.ref COPYONLY)
+
 IF(WITH_TESTING)
+
+  ENABLE_TESTING()
+
 
   # the main test driver
   SET(TEST_MAIN test/TestMain.cpp)

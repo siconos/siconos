@@ -25,9 +25,9 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockVector, (SiconosVector),
                                (vect)
                                (_tabIndex))
 SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
-                    (BVP)
+                    (_BVP)
                     (_topology)
-                    (mIsLinear))
+                    (_mIsLinear))
 SICONOS_IO_REGISTER(Relation,
                     (_pluginh)
                     (_pluginJachx)
@@ -56,15 +56,12 @@ SICONOS_IO_REGISTER(ControlManager,
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL, (NonSmoothLaw),
                                (_e))
 SICONOS_IO_REGISTER_WITH_BASES(LinearSMC, (CommonSMC),
-                               (_B)
-                               (_D)
                                (_SMC)
                                (_DS_SMC)
                                (_tD_SMC)
                                (_simulationSMC)
                                (_integratorSMC)
                                (_thetaSMC)
-                               (_LCP_SMC)
                                (_OSNSPB_SMC)
                                (_sampledControl)
                                (_eventsManager)
@@ -123,15 +120,14 @@ SICONOS_IO_REGISTER_WITH_BASES(CommonSMC, (Actuator),
                                (_sign)
                                (_interactionSMC)
                                (_lambda)
-                               (_xController))
+                               (_xController)
+                               (_precision))
 SICONOS_IO_REGISTER(TimeDiscretisation,
                     (_h)
                     (_k)
                     (_tk)
                     (_tdCase)
                     (_pos))
-SICONOS_IO_REGISTER(UnitaryRelation,
-                    (_mainInteraction))
 SICONOS_IO_REGISTER_WITH_BASES(SensorEvent, (Event),
                                (_sensor))
 SICONOS_IO_REGISTER(OneStepIntegrator,
@@ -146,6 +142,8 @@ SICONOS_IO_REGISTER_WITH_BASES(MLCP, (LinearOSNS),
                                (_curBlock))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingD1Minus, (Simulation),
                                (impactOccuredLastTimeStep))
+SICONOS_IO_REGISTER(GraphProperties,
+                    (symmetric))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianR, (Relation),
                                (_jachq)
                                (_jachqDot))
@@ -232,7 +230,7 @@ SICONOS_IO_REGISTER(OneStepNSProblem,
                     (_maxSize)
                     (_CPUtime)
                     (_nbIter)
-                    (_hasBeUpdated))
+                    (_hasBeenUpdated))
 SICONOS_IO_REGISTER_WITH_BASES(TimeStepping, (Simulation),
                                (_computeResiduY)
                                (_computeResiduR)
@@ -306,7 +304,7 @@ SICONOS_IO_REGISTER(Sensor,
 SICONOS_IO_REGISTER(Topology,
                     (_allInteractions)
                     (_DSG)
-                    (_URG)
+                    (_IG)
                     (_isTopologyUpToDate)
                     (_hasChanged)
                     (_numberOfConstraints)
@@ -329,6 +327,11 @@ SICONOS_IO_REGISTER(SiconosMemory,
                     (_maxSize)
                     (_nbVectorsInMemory)
                     (_vectorMemory))
+SICONOS_IO_REGISTER(InteractionProperties,
+                    (block)
+                    (source)
+                    (target)
+                    (forControl))
 SICONOS_IO_REGISTER(Simulation,
                     (_name)
                     (_timeDiscretisation)
@@ -353,6 +356,9 @@ SICONOS_IO_REGISTER(Simulation,
                     (_useRelativeConvergenceCriterion)
                     (_relativeConvergenceCriterionHeld)
                     (_relativeConvergenceTol))
+SICONOS_IO_REGISTER(SystemProperties,
+                    (upper_block)
+                    (lower_block))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS, (LagrangianDS),
                                (_K)
                                (_C))
@@ -427,6 +433,13 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR),
                                (_pluginJachq)
                                (_pluginJachlambda))
+SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection, (TimeStepping),
+                               (_indexSetLevelForProjection)
+                               (_constraintTol)
+                               (_constraintTolUnilateral)
+                               (_projectionMaxIteration)
+                               (_doCombinedProj)
+                               (_isIndexSetsStable))
 SICONOS_IO_REGISTER(NonSmoothLaw,
                     (_size)
                     (_sizeProjectOnConstraints))
@@ -438,6 +451,13 @@ SICONOS_IO_REGISTER(BoundaryCondition,
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR, (FirstOrderR),
                                (_F)
                                (_e))
+SICONOS_IO_REGISTER_WITH_BASES(InteractionsGraph, (_InteractionsGraph),
+                               (blockProj)
+                               (upper_blockProj)
+                               (lower_blockProj)
+                               (dummy))
+SICONOS_IO_REGISTER_WITH_BASES(MoreauCombinedProjectionOSI, (Moreau),
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR),
                                (_F)
                                (_e))
@@ -460,6 +480,9 @@ SICONOS_IO_REGISTER(Event,
                     (tick))
 SICONOS_IO_REGISTER_WITH_BASES(ActuatorEvent, (Event),
                                (_actuator))
+SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph, (_DynamicalSystemsGraph),
+                               (OSI)
+                               (dummy))
 SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints, (MLCP),
                                (_alpha))
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
@@ -696,10 +719,10 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<RelayNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<TimeDiscretisation*>(NULL));
-  ar.register_type(static_cast<UnitaryRelation*>(NULL));
   ar.register_type(static_cast<SensorEvent*>(NULL));
   ar.register_type(static_cast<MLCP*>(NULL));
   ar.register_type(static_cast<TimeSteppingD1Minus*>(NULL));
+  ar.register_type(static_cast<GraphProperties*>(NULL));
   ar.register_type(static_cast<SchatzmanPaoli*>(NULL));
   ar.register_type(static_cast<LinearChatteringSMC*>(NULL));
   ar.register_type(static_cast<BlockCSRMatrix*>(NULL));
@@ -718,6 +741,8 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<SiconosException*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIDS*>(NULL));
   ar.register_type(static_cast<SiconosMemory*>(NULL));
+  ar.register_type(static_cast<InteractionProperties*>(NULL));
+  ar.register_type(static_cast<SystemProperties*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
   ar.register_type(static_cast<GenericMechanical*>(NULL));
   ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
@@ -733,12 +758,16 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
   ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
+  ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  ar.register_type(static_cast<InteractionsGraph*>(NULL));
+  ar.register_type(static_cast<MoreauCombinedProjectionOSI*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
   ar.register_type(static_cast<Equality*>(NULL));
   ar.register_type(static_cast<Moreau*>(NULL));
   ar.register_type(static_cast<ActuatorEvent*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
   ar.register_type(static_cast<MLCPProjectOnConstraints*>(NULL));
   ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
   ar.register_type(static_cast<PluggedObject*>(NULL));

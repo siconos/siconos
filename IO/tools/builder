@@ -56,7 +56,7 @@ def is_serializable(c):
     return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosGraph|SiconosSet|DynamicalSystemsSet|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err',s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err',s)
     # note _err -> boost::circular_buffer issue with serialization
     return m != None
 
@@ -73,20 +73,33 @@ class_names = dict()
 # registration)
 with_base = []
 
-print "// generated with the command : {0}".format(' '.join(sys.argv))
 
+# a typedef table to replace templated class by their typedefs in
+# macros call
+typedef = dict()
+for t in global_ns.typedefs():
+    typedef[str(t._type)] = name(t)
+
+def replace_by_typedef(some_type):
+    if typedef.has_key(str(some_type)):
+        rep_typedef = typedef[str(some_type)]
+        if not '<' in rep_typedef:
+            return rep_typedef
+    return str(some_type)
+
+print "// generated with the command : {0}".format(' '.join(sys.argv))
 
 for type_ in filter(lambda c: c.parent.name == siconos_namespace,
                     itertools.chain(global_ns.classes(), global_ns.typedefs())):
 
-    typedef = False
+    is_typedef = False
 
     if isinstance(type_,declarations.class_t):
         class_names[declarations.full_name(type_)] = type_
         class_ = type_
     elif isinstance(type_,declarations.typedef_t):
         try:
-            typedef=True
+            is_typedef=True
             class_ = class_names['::' + str(type_.type)]
         except:
             class_ = None
@@ -94,7 +107,7 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
     # (could not find friend functions with pygccxml)
     if class_ is not None and \
            is_serializable(class_) and \
-           ( typedef or not \
+           ( is_typedef or not \
              declarations.templates.is_instantiation(class_.name) ):
 
         if not unwanted(class_.name):
@@ -113,7 +126,7 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
                                           else r, class_.bases, [])
                 if len(serializable_bases) > 0:
                     print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
-                    ''.join(['({0})'.format(c.name) for c in serializable_bases]))
+                    ''.join(['({0})'.format(replace_by_typedef(c.name)) for c in serializable_bases]))
                 else:
                     print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
 

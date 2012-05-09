@@ -50,10 +50,6 @@
 
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
-SICONOS_IO_REGISTER(RelationProperties, (block)(source)(target));
-
-SICONOS_IO_REGISTER(SystemProperties, (upper_block)(lower_block));
-
 SICONOS_IO_REGISTER(SiconosVector,)
 
 BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
@@ -75,7 +71,7 @@ void siconos_io(Archive& ar, InteractionsSet& v, unsigned int)
 
 
 template <class Archive>
-void siconos_io(Archive& ar, DynamicalSystemsGraph& v, unsigned int version)
+void siconos_io(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
 {
 
   ar & boost::serialization::make_nvp("g", v.g);
@@ -92,7 +88,7 @@ void siconos_io(Archive& ar, DynamicalSystemsGraph& v, unsigned int version)
 }
 
 template <class Archive>
-void siconos_io(Archive& ar, UnitaryRelationsGraph& v, unsigned int version)
+void siconos_io(Archive& ar, _InteractionsGraph& v, unsigned int version)
 {
 
   ar & boost::serialization::make_nvp("g", v.g);
@@ -252,6 +248,37 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
                                        boost::serialization::base_object<SiconosMatrix>(m));
 }
 
+#define MAKE_SICONOS_IO_PROPERTIES(CLASS)                               \
+  template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::VertexProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+  }                                                                     \
+  template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::VertexProperties<CLASS, _InteractionsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+  }                                                                     \
+  template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::EdgeProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+  }                                                                     \
+  template<class Archive>                                               \
+  void siconos_io(Archive& ar, Siconos::EdgeProperties<CLASS, _InteractionsGraph>& p, unsigned int version) \
+  {                                                                     \
+    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+  }                                                                     \
+ 
+namespace Siconos
+{
+MAKE_SICONOS_IO_PROPERTIES(SP::OneStepIntegrator);
+MAKE_SICONOS_IO_PROPERTIES(SP::SimpleMatrix);
+MAKE_SICONOS_IO_PROPERTIES(SP::SimpleVector);
+MAKE_SICONOS_IO_PROPERTIES(double);
+MAKE_SICONOS_IO_PROPERTIES(int);
+MAKE_SICONOS_IO_PROPERTIES(bool);
+}
 
 namespace boost
 {
@@ -284,14 +311,14 @@ void serialize(Archive& ar, PluginHandle& v, unsigned int version)
 }
 
 template <class Archive>
-void serialize(Archive& ar, UnitaryRelationsGraph& v, unsigned int version)
+void serialize(Archive& ar, _InteractionsGraph& v, unsigned int version)
 {
   siconos_io(ar, v, version);
 }
 
 
 template <class Archive>
-void serialize(Archive& ar, DynamicalSystemsGraph& v, unsigned int version)
+void serialize(Archive& ar, _DynamicalSystemsGraph& v, unsigned int version)
 {
   siconos_io(ar, v, version);
 }
@@ -350,6 +377,31 @@ void serialize(Archive& ar, SimpleMatrix& m, unsigned int version)
   siconos_io(ar, m, version);
 }
 
+template <class Archive, class T>
+void serialize(Archive& ar, Siconos::VertexProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
+{
+  Siconos::siconos_io(ar, p, version);
+}
+
+template <class Archive, class T>
+void serialize(Archive& ar, Siconos::EdgeProperties<T, _DynamicalSystemsGraph>& p, unsigned int version)
+{
+  siconos_io(ar, p, version);
+}
+
+template <class Archive, class T>
+void serialize(Archive& ar, Siconos::VertexProperties<T, _InteractionsGraph>& p, unsigned int version)
+{
+  siconos_io(ar, p, version);
+}
+
+template <class Archive, class T>
+void serialize(Archive& ar, Siconos::EdgeProperties<T, _InteractionsGraph>& p, unsigned int version)
+{
+  siconos_io(ar, p, version);
+}
+
+
 }
 }
 
@@ -367,7 +419,7 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<NumericsMatrix*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
-  ar.register_type(static_cast<UnitaryRelationsGraph*>(NULL));
+  ar.register_type(static_cast<InteractionsGraph*>(NULL));
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<InteractionsSet*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
