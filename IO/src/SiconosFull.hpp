@@ -418,8 +418,8 @@ void siconos_io_register(Archive& ar)
   ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
   ar.register_type(static_cast<NumericsMatrix*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
-  ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
-  ar.register_type(static_cast<InteractionsGraph*>(NULL));
+  ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
+  ar.register_type(static_cast<_InteractionsGraph*>(NULL));
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<InteractionsSet*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));

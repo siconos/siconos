@@ -83,7 +83,7 @@ for t in global_ns.typedefs():
 def replace_by_typedef(some_type):
     if typedef.has_key(str(some_type)):
         rep_typedef = typedef[str(some_type)]
-        if not '<' in rep_typedef:
+        if not '<' in rep_typedef: # replace only if not a template
             return rep_typedef
     return str(some_type)
 
