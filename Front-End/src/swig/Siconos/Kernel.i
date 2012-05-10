@@ -227,6 +227,11 @@ namespace boost
 
 %import "SiconosGraph.hpp"
 
+%import "SiconosProperties.hpp"
+
+ /* swig has difficulties with this macro in SiconosProperties */
+#undef INSTALL_GRAPH_PROPERTIES
+#define INSTALL_GRAPH_PROPERTIES(X,Y)
 %include "SimulationTypeDef.hpp" 
 
 %include "InteractionsSet.hpp"
