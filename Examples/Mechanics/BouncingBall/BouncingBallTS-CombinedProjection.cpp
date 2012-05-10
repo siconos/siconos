@@ -166,6 +166,7 @@ int main(int argc, char* argv[])
       //  std::cout <<"============> Step Number : " << k << "======================"  <<std::endl;
 
 
+
       s->computeOneStep();
 
       // --- Get values to be plotted ---
