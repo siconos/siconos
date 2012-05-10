@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                  // final computation time
+    double T = 2.0;                  // final computation time
     double h = 0.0005;                // time step
-    double position_init = 1.0;      // initial position for lowest bead.
+    double position_init = 0.2;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
 
     // Number of Beads
     unsigned int nBeads = 10;
-    double initialGap = 0.2;
-    double alert = 0.05;
+    double initialGap = 0.25;
+    double alert = 0.5;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
     SP::SiconosVector b(new SimpleVector(1));
-    (*b)(0) = R;
+    (*b)(0) = -R;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H, b));
@@ -215,8 +215,6 @@ int main(int argc, char* argv[])
     bool isOSNSinitialized = false;
     while (s->nextTime() < T)
     {
-
-
       // Rough contact detection
       for (unsigned int i = 0; i < nBeads - 1; i++)
       {

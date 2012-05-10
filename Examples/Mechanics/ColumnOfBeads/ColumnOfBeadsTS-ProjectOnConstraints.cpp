@@ -45,9 +45,9 @@ int withLevel(unsigned int mylevel)
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                  // final computation time
+    double T = 2.0;                  // final computation time
     double h = 0.0005;                // time step
-    double position_init = 1.0;      // initial position for lowest bead.
+    double position_init = 0.2;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
@@ -61,8 +61,8 @@ int withLevel(unsigned int mylevel)
 
     // Number of Beads
     unsigned int nBeads = 10;
-    double initialGap = 0.2;
-    double alert = 0.05;
+    double initialGap = 0.25;
+    double alert = 0.5;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
