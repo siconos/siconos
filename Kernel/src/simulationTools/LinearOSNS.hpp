@@ -312,6 +312,11 @@ public:
     _keepLambdaAndYState = val ;
   }
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
+
 };
 
 TYPEDEF_SPTR(LinearOSNS);

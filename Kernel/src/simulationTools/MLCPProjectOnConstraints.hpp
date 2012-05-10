@@ -45,6 +45,11 @@ protected:
 
   double _alpha;
 
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
+  bool _doProjOnEquality;
+
+
+
 public:
 
   /** compute the number of inequality and equality for a given tuple of Interactions
@@ -78,6 +83,13 @@ public:
   {
     _alpha = newval;
   };
+
+  inline void setDoProjOnEquality(bool v)
+  {
+    _doProjOnEquality = v;
+  }
+
+
 
   /** Display the set of blocks for  a given indexSet
    */
@@ -130,7 +142,9 @@ public:
    */
   virtual void postComputeNewtonEulerR(SP::Interaction, unsigned int);
 
-
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 
 };
 

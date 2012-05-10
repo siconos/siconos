@@ -18,20 +18,7 @@
  */
 #include "MoreauCombinedProjectionOSI.hpp"
 #include "Simulation.hpp"
-// #include "Model.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "NewtonEulerDS.hpp"
-// #include "LagrangianLinearTIDS.hpp"
-// #include "FirstOrderLinearTIDS.hpp"
-// #include "NewtonEulerR.hpp"
-// #include "LagrangianRheonomousR.hpp"
-// #include "FirstOrderLinearTIR.hpp"
-// #include "FirstOrderLinearR.hpp"
-// #include "NewtonImpactNSL.hpp"
-// #include "MultipleImpactNSL.hpp"
-// #include "NewtonImpactFrictionNSL.hpp"
-
-
+//#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
@@ -57,7 +44,8 @@ bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter
     DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
     if (lambda > 0)
       DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-    return (lambda > 0);
+    //    return (lambda > 0);
+    return true;
   }
   return(0);
 }

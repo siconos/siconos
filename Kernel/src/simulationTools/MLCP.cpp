@@ -23,7 +23,7 @@
 
 using namespace std;
 using namespace RELATION;
-//#define MLCP_DEBUG
+//define MLCP_DEBUG
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
   LinearOSNS(onestepnspbxml, "MLCP")
@@ -199,9 +199,11 @@ int MLCP::compute(double time)
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     try
     {
-      //  display();
       info = mlcp_driver(&_numerics_problem, _z->getArray(), _w->getArray(),
                          &*_numerics_solver_options, &*_numerics_options);
+#ifdef MLCP_DEBUG
+      display();
+#endif
     }
     catch (...)
     {

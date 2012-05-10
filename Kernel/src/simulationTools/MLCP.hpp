@@ -174,6 +174,10 @@ public:
    */
   static MLCP* convert(OneStepNSProblem* osnsp);
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
 };
 
 TYPEDEF_SPTR(MLCP);

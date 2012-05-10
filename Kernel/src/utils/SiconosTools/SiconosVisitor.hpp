@@ -49,8 +49,6 @@
 
    Type::name(c)  : the name of the Type::value as a std::string
 
-
-
 */
 
 #include "SiconosPointers.hpp"

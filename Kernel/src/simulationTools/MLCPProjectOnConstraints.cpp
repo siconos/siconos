@@ -38,6 +38,8 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
   _n = 0;
   _m = 0;
   _curBlock = 0;
+  _doProjOnEquality = false;
+
 }
 
 
@@ -918,11 +920,11 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       SP::LagrangianR  lr = boost::static_pointer_cast<LagrangianR>(inter->relation());
 #ifdef MLCPPROJ_DEBUG
+      printf("MLCPProjectOnConstraints::postComputeLagrangian inter->y(0)\n");
+      inter->y(0)->display();
       printf("MLCPProjectOnConstraints::postComputeLagrangian lr->jachq \n");
       lr->jachq()->display();
-#endif
 
-#ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
       for (DSIterator it = inter->dynamicalSystemsBegin();
            it != inter->dynamicalSystemsEnd();
@@ -931,6 +933,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
         lds->q()->display();
       }
+
 #endif
       unsigned int sizeY = inter->nonSmoothLaw()->size();
       SP::SimpleVector aBuff(new SimpleVector(sizeY));
@@ -940,10 +943,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       aBuff->display();
 #endif
 
-
-
-      // aBuff should nornally be in lambda[corectlevel]
-      // The update of the position in DS should be made in Moreau::upateState or ProjectedMoreau::updateState
+      // \warning aBuff should normally be in lambda[0]
+      // The update of the position in DS should be made
+      //  in Moreau::upateState or ProjectedMoreau::updateState
       SP::SiconosMatrix J = lr->jachq();
       SP::SimpleMatrix aux(new SimpleMatrix(*J));
       aux->trans();
@@ -1100,7 +1102,14 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       if (Type::value(*(inter1->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
           Type::value(*(inter1->nonSmoothLaw())) == Type::NewtonImpactNSL)
       {
-        equalitySize1 = 0;
+        if (_doProjOnEquality)
+        {
+          equalitySize1 = sizeY1;
+        }
+        else
+        {
+          equalitySize1 = 0;
+        }
       }
       else if (Type::value(*(inter1->nonSmoothLaw()))
                == Type::MixedComplementarityConditionNSL)

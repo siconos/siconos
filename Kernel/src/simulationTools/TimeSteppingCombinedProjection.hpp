@@ -40,8 +40,6 @@ protected:
    */
   ACCEPT_SERIALIZATION(TimeSteppingCombinedProjection);
 
-  virtual void initOSNS();
-
   /** level of IndexSet on which we project
    *  (default =2 (subset of activated constraint with positive reactions))
    */
@@ -57,12 +55,28 @@ protected:
    */
   double _constraintTolUnilateral;
 
+
+  /** maximum violation for the violation of the unilateral
+   *  constraints at the  position level.
+   */
+  double _maxViolationUnilateral;
+
+  /** maximum violation for the violation of the equality
+   *  constraints at the  position level.
+   */
+  double _maxViolationEquality;
+
+
+
+
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
 
   /** disabled or enabled projection (Debug Projection) */
-  unsigned int _doCombinedProj;
+  bool _doCombinedProj;
 
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
+  bool _doCombinedProjOnEquality;
 
   /** Boolean to check if the index sets are stabilized in the Combined Projection Algorithm */
   bool _isIndexSetsStable;
@@ -73,8 +87,16 @@ protected:
   void updateIndexSet(unsigned int);
 
 
+  struct _SimulationEffectOnOSNSP;
+  friend class _SimulationEffectOnOSNSP;
+
 
 public:
+
+  virtual void initOSNS();
+
+
+
 
   /** Constructor with the time-discretisation.
   *  \param a pointer to a timeDiscretisation (linked to the model
@@ -122,6 +144,16 @@ public:
     _constraintTolUnilateral = v;
   }
 
+  inline double maxViolationUnilateral()
+  {
+    return _maxViolationUnilateral;
+  }
+  inline double maxViolationEquality()
+  {
+    return _maxViolationEquality;
+  }
+
+
   inline void setProjectionMaxIteration(unsigned int v)
   {
     _projectionMaxIteration = v;
@@ -131,6 +163,12 @@ public:
   {
     _doCombinedProj = v;
   }
+
+  inline bool doCombinedProjOnEquality()
+  {
+    return _doCombinedProjOnEquality;
+  }
+
 
   /**
    */
