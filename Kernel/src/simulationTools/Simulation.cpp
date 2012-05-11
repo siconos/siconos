@@ -484,14 +484,14 @@ struct Simulation::SetupLevels : public SiconosVisitor
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
 
-      if (Type::name(*_parent) == "TimeStepping")
+      if (Type::value(*_parent) == Type::TimeStepping)
       {
         lowerLevelForOutput = 0;
         upperLevelForOutput = 1 ;
         lowerLevelForInput = 1;
         upperLevelForInput = 1;
       }
-      else if (Type::name(*_parent) == "TimeSteppingProjectOnConstraints")
+      else if (Type::value(*_parent) == Type::TimeSteppingProjectOnConstraints)
       {
         // Warning : we never enter this case !!!
         lowerLevelForOutput = 0;
@@ -506,7 +506,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     {
 
 
-      if (Type::name(*_parent) == "TimeStepping")
+      if (Type::value(*_parent) == Type::TimeStepping)
       {
         lowerLevelForOutput = 0;
         upperLevelForOutput = 0;
@@ -530,6 +530,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setSteps(1);
   };
+
   void visit(const MoreauCombinedProjectionOSI& moreauCPOSI)
   {
     unsigned int lowerLevelForOutput = LEVELMAX;
@@ -541,14 +542,14 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
-      if (Type::name(*_parent) == "TimeStepping")
+      if (Type::value(*_parent) == Type::TimeStepping)
       {
         lowerLevelForOutput = 0;
         upperLevelForOutput = 1;
         lowerLevelForInput = 1;
         upperLevelForInput = 1;
       }
-      else if (Type::name(*_parent) == "TimeSteppingCombinedProjection")
+      else if (Type::value(*_parent) == Type::TimeSteppingCombinedProjection)
       {
         // Warning : we never enter this case !!!
         lowerLevelForOutput = 0;
@@ -588,7 +589,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
 
-      if (Type::name(*_parent) == "TimeStepping")
+      if (Type::value(*_parent) == Type::TimeStepping)
       {
         lowerLevelForOutput = 0;
         upperLevelForOutput = 0;
@@ -630,7 +631,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
     {
 
 
-      if (Type::name(*_parent) == "TimeSteppingD1Minus")
+      if (Type::value(*_parent) == Type::TimeSteppingD1Minus)
       {
         lowerLevelForOutput = 0;
         upperLevelForOutput = 2 ;
@@ -672,7 +673,7 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
     {
-      if (Type::name(*_parent) == "EventDriven")
+      if (Type::value(*_parent) == Type::EventDriven)
       {
         Type::Siconos nslType = Type::value(*_nonSmoothLaw);
 

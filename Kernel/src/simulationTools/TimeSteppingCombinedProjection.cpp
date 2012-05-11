@@ -143,7 +143,7 @@ void TimeSteppingCombinedProjection::initOSNS()
   // better with visitor but I am not able to fix it.
   //_SimulationEffectOnOSNSP simulationEffectOnOSNSP(this);
   //osnspb_pos->accept(simulationEffectOnOSNSP);
-  if (Type::name(*osnspb_pos) ==     "MLCPProjectOnConstraints")
+  if (Type::value(*osnspb_pos) ==     Type::MLCPProjectOnConstraints)
   {
     //std::cout << "Type::name(*osnspb_pos) "<< Type::name(*osnspb_pos) <<std::endl;
     MLCPProjectOnConstraints * toto = static_cast<MLCPProjectOnConstraints*>(osnspb_pos.get());
