@@ -30,7 +30,9 @@
 
 using namespace std;
 
+
 int main(int argc, char* argv[])
+
 {
   try
   {
@@ -42,7 +44,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 2.0;                  // final computation time
     double h = 0.0005;                // time step
-    double position_init = .2;      // initial position for lowest bead.
+    double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
@@ -57,7 +59,7 @@ int main(int argc, char* argv[])
     // Number of Beads
     unsigned int nBeads = 10;
     double initialGap = 0.25;
-    double alert = 0.5;
+    double alert = 0.02;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -107,7 +109,8 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H, b));
 
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter;
+
 
     // beads/beads interactions
     SP::SiconosMatrix HOfBeads(new SimpleMatrix(1, 2 * nDof));
@@ -158,9 +161,6 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-
-
-
     SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(theta));
     for (unsigned int i = 0; i < nBeads; i++)
     {
@@ -171,9 +171,10 @@ int main(int argc, char* argv[])
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP());
-    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints());
+    SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
+
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeStepping s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
 
     // =========================== End of model definition ===========================
 
@@ -214,49 +215,57 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    int ncontact = 1 ;
+    int ncontact = 0 ;
     bool isOSNSinitialized = false;
-
-    double maxViolationUnilateral = 0.0;
-    double maxViolationEquality = 0.0;
-
-
     while (s->nextTime() < T)
-      //    while (s->nextTime() < T and k <487)
     {
-      // for( int toto=0; toto<3;toto++)
-      //    std::cout <<"============> Step Number : " << k << "======================"  <<std::endl;
+      // for( int toto=0; toto<1;toto++)
+      //   std::cout <<"============> Step Number : " << k << "======================"  <<std::endl;
 
       // Rough contact detection
       for (unsigned int i = 0; i < nBeads - 1; i++)
       {
         //beads[i]->display();1
-        //std::cout <<((beads[i])->q())->getValue(0)<<std::endl;
-        //std::cout <<((beads[i+1])->q())->getValue(0)<<std::endl;
+        // std::cout << "Beads["<<i<<"] position "<<((beads[i])->q())->getValue(0)<<std::endl;
+        // std::cout << "Beads["<<i+1<<"] position " <<((beads[i+1])->q())->getValue(0)<<std::endl;       std::cout << "Distance between Beads["<<i<<"] and ["<<i+1<<"]  " << ((beads[i+1])->q())->getValue(0)- ((beads[i])->q())->getValue(0)<<std::endl;
 
-        if (abs(((beads[i])->q())->getValue(0)) < alert)
+        if (abs(((beads[i])->q())->getValue(0) - R) < alert)
         {
-          columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-          s->computeLevelsForInputAndOutput(inter);
-          inter->initialize(s->nextTime());
-          if (!isOSNSinitialized)
-          {
-            s->initOSNS();
 
-            isOSNSinitialized = true;
+          if (!inter)
+          {
+
+            ncontact++;
+            // std::cout << "Number of contact = " << ncontact << std::endl;
+
+            inter.reset(new Interaction(1, nslaw, relation));
+            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
+            s->computeLevelsForInputAndOutput(inter);
+            inter->initialize(s->nextTime());
+
+
+            if (!isOSNSinitialized)
+            {
+              s->initOSNS();
+              isOSNSinitialized = true;
+            }
+            inter->computeOutput(s->nextTime(), 0);
+            assert(inter->y(0)->getValue(0) >= 0);
+            // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
+
           }
         }
 
 
 
-        if (abs(((beads[i])->q())->getValue(0) - ((beads[i + 1])->q())->getValue(0)) < alert)
+        if (abs(((beads[i + 1])->q())->getValue(0) - ((beads[i])->q())->getValue(0) - 2 * R) < alert)
         {
           //std::cout << "Alert distance for declaring contact = ";
           //std::cout << abs(((beads[i])->q())->getValue(0)-((beads[i+1])->q())->getValue(0))   <<std::endl;
           if (!interOfBeads[i].get())
           {
             ncontact++;
-            //           std::cout << "Number of contact = " << ncontact << std::endl;
+            // std::cout << "Number of contact = " << ncontact << std::endl;
 
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
@@ -270,6 +279,11 @@ int main(int argc, char* argv[])
               s->initOSNS();
               isOSNSinitialized = true;
             }
+
+            interOfBeads[i]->computeOutput(s->nextTime(), 0);
+            // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
+            assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
+
 
             relationOfBeads[i]->interaction();
 
@@ -287,12 +301,7 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       // osnspb->display();
       // osnspb_pos->display();
-      maxViolationUnilateral = s->maxViolationUnilateral();
-      maxViolationEquality = s->maxViolationEquality();
-
-
-
-      // --- Get values to be plotted ---;
+      // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       for (unsigned int i = 0; i < nBeads; i++)
       {
@@ -314,7 +323,7 @@ int main(int argc, char* argv[])
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
-    cout << "maxViolationUnilateral = " << maxViolationUnilateral << endl;
+
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
@@ -323,8 +332,10 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
+
     ioMatrix ref("result-WITHCOMBINEDPROJ.ref", "ascii");
     ref.read(dataPlotRef);
+
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
@@ -347,3 +358,5 @@ int main(int argc, char* argv[])
 
 
 }
+
+

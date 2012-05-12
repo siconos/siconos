@@ -47,7 +47,7 @@ int withLevel(unsigned int mylevel)
     double t0 = 0;                   // initial computation time
     double T = 2.0;                  // final computation time
     double h = 0.0005;                // time step
-    double position_init = 0.2;      // initial position for lowest bead.
+    double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
     double R = 0.1; // Ball radius
@@ -62,7 +62,7 @@ int withLevel(unsigned int mylevel)
     // Number of Beads
     unsigned int nBeads = 10;
     double initialGap = 0.25;
-    double alert = 0.5;
+    double alert = 0.02;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
@@ -107,12 +107,13 @@ int withLevel(unsigned int mylevel)
     SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
     SP::SiconosVector b(new SimpleVector(1));
-    (*b)(0) = R;
+    (*b)(0) = -R;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H, b));
 
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter;
+
 
     // beads/beads interactions
     SP::SiconosMatrix HOfBeads(new SimpleMatrix(1, 2 * nDof));
@@ -218,7 +219,7 @@ int withLevel(unsigned int mylevel)
 
     boost::timer time;
     time.restart();
-    int ncontact = 1 ;
+    int ncontact = 0 ;
     bool isOSNSinitialized = false;
     while (s->nextTime() < T)
     {
@@ -229,31 +230,46 @@ int withLevel(unsigned int mylevel)
       for (unsigned int i = 0; i < nBeads - 1; i++)
       {
         //beads[i]->display();1
-        //std::cout <<((beads[i])->q())->getValue(0)<<std::endl;
-        //std::cout <<((beads[i+1])->q())->getValue(0)<<std::endl;
+        // std::cout << "Beads["<<i<<"] position "<<((beads[i])->q())->getValue(0)<<std::endl;
+        // std::cout << "Beads["<<i+1<<"] position " <<((beads[i+1])->q())->getValue(0)<<std::endl;       std::cout << "Distance between Beads["<<i<<"] and ["<<i+1<<"]  " << ((beads[i+1])->q())->getValue(0)- ((beads[i])->q())->getValue(0)<<std::endl;
 
-        if (abs(((beads[i])->q())->getValue(0)) < alert)
+        if (abs(((beads[i])->q())->getValue(0) - R) < alert)
         {
-          columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-          s->computeLevelsForInputAndOutput(inter);
-          inter->initialize(s->nextTime());
-          if (!isOSNSinitialized)
+
+          if (!inter)
           {
-            s->initOSNS();
-            isOSNSinitialized = true;
+
+            ncontact++;
+            // std::cout << "Number of contact = " << ncontact << std::endl;
+
+            inter.reset(new Interaction(1, nslaw, relation));
+            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
+            s->computeLevelsForInputAndOutput(inter);
+            inter->initialize(s->nextTime());
+
+
+            if (!isOSNSinitialized)
+            {
+              s->initOSNS();
+              isOSNSinitialized = true;
+            }
+            inter->computeOutput(s->nextTime(), 0);
+            assert(inter->y(0)->getValue(0) >= 0);
+            // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
+
           }
         }
 
 
 
-        if (abs(((beads[i])->q())->getValue(0) - ((beads[i + 1])->q())->getValue(0)) < alert)
+        if (abs(((beads[i + 1])->q())->getValue(0) - ((beads[i])->q())->getValue(0) - 2 * R) < alert)
         {
           //std::cout << "Alert distance for declaring contact = ";
           //std::cout << abs(((beads[i])->q())->getValue(0)-((beads[i+1])->q())->getValue(0))   <<std::endl;
           if (!interOfBeads[i].get())
           {
             ncontact++;
-            //           std::cout << "Number of contact = " << ncontact << std::endl;
+            // std::cout << "Number of contact = " << ncontact << std::endl;
 
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
@@ -267,6 +283,11 @@ int withLevel(unsigned int mylevel)
               s->initOSNS();
               isOSNSinitialized = true;
             }
+
+            interOfBeads[i]->computeOutput(s->nextTime(), 0);
+            // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
+            assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
+
 
             relationOfBeads[i]->interaction();
 
