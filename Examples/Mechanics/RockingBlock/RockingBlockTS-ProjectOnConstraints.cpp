@@ -6,7 +6,7 @@ using namespace std;
 #define PI 3.14159
 #define GGearth  9.8100
 //---------------------------------Decalre global variables ---------------------------------------------------
-double LengthBlock = 1.0;        // Length of the rocking block
+double LengthBlock = 1.;        // Length of the rocking block
 double HeightBlock = 1.5;        // Height of the rocking block
 unsigned int Nfreedom = 3;       // Number of degrees of freedom
 unsigned int Ncontact = 2;       // Number of contacts
@@ -111,10 +111,9 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(allDS, 0.50001));
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
+    SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());
     //4. Simulation with (1), (2), (3)
-    SP::TimeStepping TSscheme(new TimeStepping(TimeDiscret));
-    TSscheme->insertIntegrator(OSI);
-    TSscheme->insertNonSmoothProblem(impact);
+    SP::TimeStepping TSscheme(new TimeSteppingProjectOnConstraints(TimeDiscret, OSI, impact, impact_pos, 0));
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
@@ -139,7 +138,7 @@ int main(int argc, char* argv[])
     boost::progress_display show_progress(NpointSave);
     while (k < NpointSave)
     {
-      TSscheme->newtonSolve(criterion, maxIter);
+      TSscheme->computeOneStep();
       DataPlot(k, 0) = TSscheme->nextTime();
       DataPlot(k, 1) = (*PosBlock)(0); //Position X
       DataPlot(k, 2) = (*PosBlock)(1); //Position Y
