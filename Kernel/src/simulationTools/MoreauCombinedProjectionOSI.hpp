@@ -75,6 +75,12 @@ public:
    */
   MoreauCombinedProjectionOSI(SP::DynamicalSystem ds, double theta) : Moreau(ds, theta) {}  ;
 
+  /** constructor from a minimum set of data
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param theta value for all these DS.
+   */
+  MoreauCombinedProjectionOSI(DynamicalSystemsSet& dsSet, double theta) :     Moreau(dsSet, theta) {}   ;
+
   /** destructor
    */
   virtual ~MoreauCombinedProjectionOSI() {};
