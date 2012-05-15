@@ -211,16 +211,17 @@ public:
   */
 
   /** set A to pointer newPtr
-   *  \param a plugged matrix SP
+   *  \param newPtr a SP::SiconosMatrix
    */
   inline void setAPtr(SP::SiconosMatrix newPtr)
   {
     _A = newPtr;
   }
-  inline void setA(SP::SiconosMatrix newPtr)
-  {
-    _A = newPtr;
-  }
+
+  /** set A to a new matrix
+   * \param newA the new A matrix
+   **/
+  void setA(const SiconosMatrix& newA);
 
   // --- b ---
 
@@ -319,14 +320,37 @@ public:
     return 1.0;
   }
 
+  /** Get _pluginA */
   inline SP::PluggedObject getPluginA() const
   {
     return _pluginA;
   };
+
+  /** Get _pluginB */
   inline SP::PluggedObject getPluginB() const
   {
     return _pluginb;
   };
+
+  /** Set _pluginA
+   * \param newPluginA the new plugin
+   */
+  inline void setPluginA(SP::PluggedObject newPluginA)
+  {
+    _pluginA = newPluginA;
+  };
+
+  /** Set _pluginB
+   * \param newPluginB the new plugin
+   */
+  inline void setPluginB(SP::PluggedObject newPluginB)
+  {
+    _pluginb = newPluginB;
+  };
+
+  /** Reset all the plugins */
+  virtual void zeroPlugin();
+
   /** encapsulates an operation of dynamic casting. Needed by Python
       interface.
    *  \param DynamicalSystem* : the system which must be converted

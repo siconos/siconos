@@ -133,6 +133,14 @@ public:
    */
   void display() const;
 
+  /** Dumb function, there is no plugin here
+   * \param time unused
+   */
+  virtual void updatePlugins(double time)
+  {
+    ;
+  };
+
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param SP::DynamicalSystem : the system which must be converted
    * \return a pointer on the dynamical system if it is of the right type, NULL otherwise

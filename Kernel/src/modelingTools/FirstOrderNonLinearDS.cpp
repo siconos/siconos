@@ -220,23 +220,26 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
   _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
 
   // Not always initialized
+  if (_pluginf)
+    _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
+  if (_pluginJacxf)
+    _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
+  if (FONLDS.gAlpha())
+    _g_alpha.reset(new SimpleVector(*(FONLDS.gAlpha())));
+  if (FONLDS.jacobianfx())
+    _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
+
   if (FONLDS.M())
     _M.reset(new SimpleMatrix(*(FONLDS.M())));
   if (FONLDS.f())
     _f.reset(new SimpleVector(*(FONLDS.f())));
-  if (FONLDS.jacobianfx())
-    _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
 
-  // plugins are always initialized
-  _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
-  _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
-  _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
+  if (_pluginM)
+    _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
 
   // data - not always initialized
   if (FONLDS.residur())
     _residur.reset(new SimpleVector(*(FONLDS.residur())));
-  if (FONLDS.gAlpha())
-    _g_alpha.reset(new SimpleVector(*(FONLDS.gAlpha())));
   if (FONLDS.xp())
     _xp.reset(new SimpleVector(*(FONLDS.xp())));
   if (FONLDS.xq())

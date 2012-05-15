@@ -194,8 +194,8 @@ protected:
       f(x,t) + r \f$) */
   SP::SiconosMatrix _jacxRhs;
 
-  SP::SiconosMatrix _jacgx;
-  SP::SiconosMatrix _jacxDotG;
+  //  SP::SiconosMatrix _jacgx;
+  //  SP::SiconosMatrix _jacxDotG;
   //  SP::SiconosMatrix jacobianZG;
 
   /** Arbitrary algebraic values vector, z, discret state of the
@@ -570,14 +570,8 @@ public:
       \param index of the desired jacobian
       *  \return pointer on a plugged-matrix
       */
-  inline SP::SiconosMatrix jacobianXG() const
-  {
-    return _jacgx;
-  }
-  inline SP::SiconosMatrix jacobianXDotG() const
-  {
-    return _jacxDotG;
-  }
+  //  inline SP::SiconosMatrix jacobianXG() const { return _jacgx; }
+  //  inline SP::SiconosMatrix jacobianXDotG() const { return _jacxDotG; }
   //  inline SP::SiconosMatrix jacobianZG() const { return jacobianZG; }
 
   /** set the value of jacobianG to newValue
@@ -590,14 +584,8 @@ public:
       \param index of the desired jacobian
       *  \param a plugged matrix SP
       */
-  inline void setJacobianXGPtr(SP::SiconosMatrix newPtr)
-  {
-    _jacgx = newPtr;
-  }
-  inline void setJacobianXDotGPtr(SP::SiconosMatrix newPtr)
-  {
-    _jacxDotG = newPtr;
-  }
+  //  inline void setJacobianXGPtr( SP::SiconosMatrix newPtr) {_jacgx = newPtr;}
+  //  inline void setJacobianXDotGPtr( SP::SiconosMatrix newPtr) {_jacxDotG = newPtr;}
   //  inline void setJacobianZGPtr( SP::SiconosMatrix newPtr) {jacobianZG = newPtr;}
 
   // X memory

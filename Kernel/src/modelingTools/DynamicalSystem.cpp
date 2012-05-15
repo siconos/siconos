@@ -96,10 +96,10 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   // These  were not always initialised
   if (ds.jacobianRhsx())
     _jacxRhs.reset(new SimpleMatrix(*(ds.jacobianRhsx())));
-  if (ds.jacobianXG())
-    _jacgx.reset(new SimpleMatrix(*(ds.jacobianXG())));
-  if (ds.jacobianXDotG())
-    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
+  //  if (ds.jacobianXG())
+  //    _jacgx.reset(new SimpleMatrix(*(ds.jacobianXG())));
+  //  if (ds.jacobianXDotG())
+  //    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
   if (ds.z())
     _z.reset(new SimpleVector(*(ds.z())));
   if (ds.g())
@@ -107,21 +107,26 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   if (ds.dynamicalSystemXML())
     _dsxml.reset(new DynamicalSystemXML(*(ds.dynamicalSystemXML())));
 
-  _pluging.reset(new PluggedObject(*(ds.getPluginG())));
-  _pluginJacgx.reset(new PluggedObject(*(ds.getPluginJacGX())));
-  _pluginJacxDotG.reset(new PluggedObject(*(ds.getPluginJacXDotG())));
+  if (_pluging)
+    _pluging.reset(new PluggedObject(*(ds.getPluginG())));
+  if (_pluginJacgx)
+    _pluginJacgx.reset(new PluggedObject(*(ds.getPluginJacGX())));
+  if (_pluginJacxDotG)
+    _pluginJacxDotG.reset(new PluggedObject(*(ds.getPluginJacXDotG())));
 
   _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
   _stepsInMemory = ds.getStepsInMemory();
 
   _workV.resize(sizeWorkV);
 
-  _workV[local_buffer].reset(new SimpleVector(*(ds.getWorkVector(local_buffer))));
+  if (ds.getWorkVector(local_buffer))
+    _workV[local_buffer].reset(new SimpleVector(*(ds.getWorkVector(local_buffer))));
   //  _workV[sizeWorkV].reset(new SimpleVector(*(ds.getWorkVector(sizeWorkV))));
   // XXX See how to implement the copy of _workMatrix
 
   _workFree.reset(new SimpleVector(*(ds.workFree())));
 }
+
 bool DynamicalSystem::checkDynamicalSystem()
 {
   bool output = true;
@@ -247,18 +252,18 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 
 }
 
-void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
-{
-  // check dimensions ...
-  if (newValue.size(0) != _n || newValue.size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
-
-  if (_jacxRhs)
-    *_jacxRhs = newValue;
-
-  else
-    _jacxRhs.reset(new SimpleMatrix(newValue));
-}
+//void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
+//{
+//  // check dimensions ...
+//  if(newValue.size(0)!= _n || newValue.size(1)!= _n)
+//    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
+//
+//  if( _jacxRhs )
+//    *_jacxRhs = newValue;
+//
+//  else
+//    _jacxRhs.reset(new SimpleMatrix(newValue));
+//}
 
 void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
@@ -364,16 +369,14 @@ void DynamicalSystem::computeg(double time)
     ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
 }
 
-void DynamicalSystem::computeJacobianXG(double time)
-{
-  if (_pluginJacgx->fPtr)
-    ((FPtr6) _pluginJacgx->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacgx)(0, 0), _z->size(), &(*_z)(0));
-}
-void DynamicalSystem::computeJacobianDotXG(double time)
-{
-  if (_pluginJacxDotG->fPtr)
-    ((FPtr6)(_pluginJacxDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxDotG)(0, 0), _z->size(), &(*_z)(0));
-}
+//void DynamicalSystem::computeJacobianXG(double time){
+//  if (_pluginJacgx->fPtr)
+//    ((FPtr6) _pluginJacgx->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacgx)(0,0), _z->size(), &(*_z)(0));
+//}
+//void DynamicalSystem::computeJacobianDotXG(double time){
+//  if (_pluginJacxDotG->fPtr)
+//    ((FPtr6) (_pluginJacxDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxDotG)(0,0), _z->size(), &(*_z)(0));
+//}
 // void DynamicalSystem::computeJacobianZG(double time){
 //   if (pluginJacobianXGPtr)
 //     pluginJacobianZGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0,0), z->size(), &(*z)(0));

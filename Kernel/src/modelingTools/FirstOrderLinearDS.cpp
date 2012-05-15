@@ -143,9 +143,15 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstOrderNonLinearDS(FOLDS)
 {
   _A.reset(new SimpleMatrix(*(FOLDS.A())));
-  _b.reset(new SimpleVector(*(FOLDS.b())));
-  _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
-  _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
+
+  if (_b)
+    _b.reset(new SimpleVector(*(FOLDS.b())));
+
+  if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
+  {
+    _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
+    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
+  }
 }
 
 bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
@@ -333,4 +339,22 @@ void FirstOrderLinearDS::computef(double time, SP::SiconosVector x2)
   {
     *_f += *_b;
   }
+}
+
+void FirstOrderLinearDS::setA(const SiconosMatrix& newA)
+{
+  if (_A)
+    *_A = newA;
+  else
+    _A.reset(new SimpleMatrix(newA));
+}
+
+void FirstOrderLinearDS::zeroPlugin()
+{
+  if (_pluginM)
+    _pluginM.reset(new PluggedObject());
+  if (_pluginA)
+    _pluginA.reset(new PluggedObject());
+  if (_pluginb)
+    _pluginb.reset(new PluggedObject());
 }

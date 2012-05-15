@@ -109,9 +109,6 @@ protected:
     *  @param  : a vector of parameters, z
     */
   SP::PluggedObject _pluginf;
-  //  FNLDSPtrfct _computeFPtr;
-  //  std::string _pluginNameComputeFPtr;
-
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    * @param time : current time
@@ -159,7 +156,6 @@ protected:
   */
   FirstOrderNonLinearDS(SP::SiconosVector);
   FirstOrderNonLinearDS(const SiconosVector& SiconosVector);
-  virtual void zeroPlugin();
 
 public:
 
@@ -526,6 +522,8 @@ public:
     return _pluginM;
   };
 
+  /** Reset the PluggedObjects */
+  virtual void zeroPlugin();
   /*
    * get the Xfree work vector.
    */
