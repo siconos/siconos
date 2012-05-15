@@ -33,7 +33,12 @@
 
 #include "SiconosSerialization.hpp"
 
+#if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
+#else
+#include <boost/property_map.hpp>
+#endif
+
 #include <boost/shared_ptr.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/static_assert.hpp>
