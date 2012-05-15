@@ -22,7 +22,7 @@ double TimeInitial = 0.0;        // Initial time of the simulation
 double TimeFinal =  2.0;     // Final time of the simulation
 double StepSize = 0.01;         // Time step size
 unsigned int NpointSave = 200;   //
-unsigned int SizeOutput = 7;     //
+unsigned int SizeOutput = 9;     //
 double criterion = 0.05;
 unsigned int maxIter = 20000;
 //==========================================================================================================
@@ -132,6 +132,21 @@ int main(int argc, char* argv[])
     DataPlot(0, 4) = (*VelBlock)(0); // Velocity Vx
     DataPlot(0, 5) = (*VelBlock)(1); // Velocity Vy
     DataPlot(0, 6) = (*VelBlock)(2); // Angular velocity
+
+    SP::SiconosVector tmp(new SimpleVector(Nfreedom));
+    prod(*Mass, *VelBlock, *tmp, true);
+    double kineticEnergy = 0.5 * inner_prod(*VelBlock, *tmp);
+    DataPlot(0, 7) = kineticEnergy;
+
+    SP::SiconosVector PosRef(new SimpleVector(Nfreedom));
+    (*PosRef)(0) = 0.0;
+    (*PosRef)(1) = HeightBlock / 2.0;
+    (*PosRef)(2) = 0.0;
+    double potentialEnergy = -1.0 * inner_prod(*PosBlock - *PosRef, *ForceExtern);
+    DataPlot(0, 8) = potentialEnergy;
+
+
+
     //----------------------------------- Simulation starts ----------------------------------------------------------
     cout << "====> Start computation ... " << endl << endl;
     unsigned int k = 1;
@@ -146,6 +161,13 @@ int main(int argc, char* argv[])
       DataPlot(k, 4) = (*VelBlock)(0); // Velocity Vx
       DataPlot(k, 5) = (*VelBlock)(1); // Velocity Vy
       DataPlot(k, 6) = (*VelBlock)(2); // Velocity Vtheta
+
+      prod(*Mass, *VelBlock, *tmp, true);
+      kineticEnergy = 0.5 * inner_prod(*VelBlock, *tmp);
+      DataPlot(k, 7) = kineticEnergy;
+
+      potentialEnergy = -1.0 * inner_prod(*PosBlock - *PosRef, *ForceExtern);
+      DataPlot(k, 8) = potentialEnergy;
       // go to the next time step
       k++;
       ++show_progress;
