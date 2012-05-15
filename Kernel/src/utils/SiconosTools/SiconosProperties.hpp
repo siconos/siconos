@@ -297,12 +297,16 @@ public:
     return (*_store)[iv];
   };
 
-protected:
   typedef void serializable;
-  template<typename Archive>
-  friend void Siconos::siconos_io(Archive&, Properties<T, G, IndexMap>&, const unsigned int);
-  friend class boost::serialization::access;
 
+  /* Note: compilation with clang fail on this. And friend
+   * Siconos::siconos_io is not recognized anyway (attributes are public)
+
+  protected:
+    template<typename Archive>
+    friend void Siconos::siconos_io(Archive&, Properties<T,G,IndexMap>&, const unsigned int);
+    friend class boost::serialization::access;
+  */
 };
 
 
@@ -317,11 +321,15 @@ public:
   VertexProperties(G& g) : Properties<T, G, typename G::VIndexAccess>(g)
   {};
 
-protected:
+
   typedef void serializable;
-  template<typename Archive>
-  friend void Siconos::siconos_io(Archive&, VertexProperties<T, G>&, const unsigned int);
-  friend class boost::serialization::access;
+
+  /*
+  protected:
+    template<typename Archive>
+    friend void Siconos::siconos_io(Archive&, VertexProperties<T,G>&, const unsigned int);
+    friend class boost::serialization::access;
+  */
 };
 
 /** edge property structure:
@@ -335,11 +343,15 @@ public:
   EdgeProperties(G& g) : Properties<T, G, typename G::EIndexAccess>(g)
   {};
 
-protected:
+
   typedef void serializable;
-  template<typename Archive>
-  friend void Siconos::siconos_io(Archive&, EdgeProperties<T, G>&, const unsigned int);
-  friend class boost::serialization::access;
+
+  /*
+  protected:
+    template<typename Archive>
+    friend void Siconos::siconos_io(Archive&, EdgeProperties<T,G>&, const unsigned int);
+    friend class boost::serialization::access;
+  */
 };
 
 /** function to build a VertexProperties from one template parameter

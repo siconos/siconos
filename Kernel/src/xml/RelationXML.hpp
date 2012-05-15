@@ -27,6 +27,7 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "RelationNamespace.hpp"
 #include "SimpleVector.hpp"
+#include "SimpleMatrix.hpp"
 
 using RELATION::TYPES;
 using RELATION::SUBTYPES;
