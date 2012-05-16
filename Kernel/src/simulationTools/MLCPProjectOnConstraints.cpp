@@ -162,9 +162,9 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
         // Memory allocation if needed
         unsigned int nslawSize1 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                                  (_M)->computeSizeForProjection(inter);
+                                  (_M)->computeSizeForProjection(inter1);
         unsigned int nslawSize2 = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                                  (_M)->computeSizeForProjection(inter);
+                                  (_M)->computeSizeForProjection(inter2);
         unsigned int isrc = indexSet->index(indexSet->source(*oei));
         unsigned int itar = indexSet->index(indexSet->target(*oei));
 
@@ -667,8 +667,18 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //       indexSet->properties(ed).upper_block.reset(new SimpleMatrix(sizeY1, sizeY2));
       //     }
 
-      assert(indexSet->upper_blockProj[ed]->size(0) == sizeY1);
-      assert(indexSet->upper_blockProj[ed]->size(1) == sizeY2);
+      currentInteractionBlock = indexSet->upper_blockProj[ed];
+#ifdef MLCPPROJ_DEBUG
+      std::cout << "MLCPProjectOnConstraints::computeInteractionBlock currentInteractionBlock " << std::endl;
+      currentInteractionBlock->display();
+      std::cout << "currentInteractionBlock->size(0) " << currentInteractionBlock->size(0)  << std::endl;
+      std::cout << "currentInteractionBlock->size(1) " << currentInteractionBlock->size(1)  << std::endl;
+#endif
+      assert(currentInteractionBlock->size(0) == sizeY1);
+      assert(currentInteractionBlock->size(1) == sizeY2);
+
+
+
 
       currentInteractionBlock = indexSet->upper_blockProj[ed];
     }
