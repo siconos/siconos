@@ -774,8 +774,8 @@ public:
   /** default function to compute the gradient of g
    *  \param double time : the current time
    */
-  void computeJacobianXG(double);
-  void computeJacobianDotXG(double);
+  //  void computeJacobianXG(double);
+  //  void computeJacobianDotXG(double);
 
   /**
    *default function to update the plugins functions using a new time:

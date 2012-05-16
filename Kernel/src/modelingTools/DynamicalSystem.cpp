@@ -252,18 +252,18 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 
 }
 
-//void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
-//{
-//  // check dimensions ...
-//  if(newValue.size(0)!= _n || newValue.size(1)!= _n)
-//    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
-//
-//  if( _jacxRhs )
-//    *_jacxRhs = newValue;
-//
-//  else
-//    _jacxRhs.reset(new SimpleMatrix(newValue));
-//}
+void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
+{
+  // check dimensions ...
+  if (newValue.size(0) != _n || newValue.size(1) != _n)
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
+
+  if (_jacxRhs)
+    *_jacxRhs = newValue;
+
+  else
+    _jacxRhs.reset(new SimpleMatrix(newValue));
+}
 
 void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
