@@ -60,15 +60,15 @@
   REGISTER(LagrangianLinearTIR)                   \
   REGISTER(NewtonEulerDS)                         \
   REGISTER(NewtonEulerR)                          \
-  REGISTER(DynamicalSystemsGraph)                 \
-  REGISTER(InteractionsGraph)                     \
-  REGISTER(DynamicalSystemsSubGraph)              \
-  REGISTER(InteractionsSubGraph)                  \
   REGISTER(BulletR)                               \
   REGISTER(BulletRImpact)                         \
   REGISTER(Lmgc2DR)                               \
   REGISTER(SpaceFilter)                           \
   REGISTER(BulletSpaceFilter)                     \
+  REGISTER_STRUCT(DynamicalSystemsGraph)          \
+  REGISTER_STRUCT(InteractionsGraph)              \
+  REGISTER_STRUCT(DynamicalSystemsSubGraph)       \
+  REGISTER_STRUCT(InteractionsSubGraph)           \
   REGISTER_BASE(ExternalBody, LagrangianDS)       \
   REGISTER_BASE_EXTERN(Lmgc2DDS, LagrangianDS)    \
   REGISTER_BASE_EXTERN(Lmgc2DDSK, LagrangianDS)   \

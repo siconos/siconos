@@ -216,11 +216,11 @@ void PrimalFrictionContact::computeq(const double time)
   for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    computeqBlock((*itDS), pos);
+    computeqBlockDS((*itDS), pos);
   }
 }
 
-void PrimalFrictionContact::computeqBlock(SP::DynamicalSystem DS, unsigned int pos)
+void PrimalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int pos)
 {
   SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
   string osiType = Osi->getType();

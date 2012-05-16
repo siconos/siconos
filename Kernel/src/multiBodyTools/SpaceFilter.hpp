@@ -182,15 +182,15 @@ protected:
   struct _DiskDistance;
 
 
-  friend class SpaceFilter::_CircularFilter;
-  friend class SpaceFilter::_SphereLDSFilter;
-  friend class SpaceFilter::_SphereNEDSFilter;
-  friend class SpaceFilter::_BodyHash;
-  friend class SpaceFilter::_FindInteractions;
-  friend class SpaceFilter::_IsSameDiskPlanR;
-  friend class SpaceFilter::_IsSameDiskMovingPlanR;
-  friend class SpaceFilter::_IsSameSpherePlanR;
-  friend class SpaceFilter::_DiskDistance;
+  friend struct SpaceFilter::_CircularFilter;
+  friend struct SpaceFilter::_SphereLDSFilter;
+  friend struct SpaceFilter::_SphereNEDSFilter;
+  friend struct SpaceFilter::_BodyHash;
+  friend struct SpaceFilter::_FindInteractions;
+  friend struct SpaceFilter::_IsSameDiskPlanR;
+  friend struct SpaceFilter::_IsSameDiskMovingPlanR;
+  friend struct SpaceFilter::_IsSameSpherePlanR;
+  friend struct SpaceFilter::_DiskDistance;
 
 public:
 

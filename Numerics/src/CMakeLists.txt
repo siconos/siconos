@@ -98,6 +98,9 @@ IF(C_HAVE_WALL)
   APPEND_FLAGS(CMAKE_C_FLAGS "-Wall")
 ENDIF(C_HAVE_WALL)
 
+IF(C_HAVE_WEXTRA)
+ APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wextra -Wno-unused-parameter")
+ENDIF(C_HAVE_WEXTRA)
 
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange

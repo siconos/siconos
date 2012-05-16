@@ -94,7 +94,7 @@ protected:
    */
 
   struct _BoundsNSLEffect;
-  friend class _BoundsNSLEffect;
+  friend struct _BoundsNSLEffect;
 
 
 

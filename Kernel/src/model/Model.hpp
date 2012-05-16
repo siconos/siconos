@@ -69,7 +69,7 @@ private:
 
   /** Copy constructor => private, no copy nor pass-by value for Model
    */
-  Model(const Model&) {};
+  //  Model(const Model&){};
 
   /** assignment operator => forbidden
    */

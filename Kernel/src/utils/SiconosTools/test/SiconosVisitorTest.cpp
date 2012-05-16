@@ -30,13 +30,15 @@ void SiconosVisitorTest::tearDown()
 {
 }
 
-struct DynamicalSystem
+class DynamicalSystem
 {
+public:
   VIRTUAL_ACCEPT_VISITORS();
 };
 
-struct LagrangianDS : public DynamicalSystem
+class LagrangianDS : public DynamicalSystem
 {
+public:
   ACCEPT_STD_VISITORS();
 };
 

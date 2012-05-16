@@ -24,7 +24,7 @@
 #ifndef __SimpleVectorFriends__
 #define __SimpleVectorFriends__
 
-class VectorNum;
+struct VectorNum;
 
 class SimpleMatrix;
 

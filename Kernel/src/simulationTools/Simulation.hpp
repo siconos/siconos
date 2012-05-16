@@ -178,7 +178,7 @@ protected:
    *
    */
   struct SetupLevels;
-  friend class Simulation::SetupLevels;
+  friend struct Simulation::SetupLevels;
 
 
   /** default constructor.

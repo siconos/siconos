@@ -408,13 +408,13 @@ public:
   friend void  getMin(const SimpleVector&, double &, unsigned int &);
   */
 
-  friend class VectorNum;
+  friend struct VectorNum;
 
-  friend class IsDense;
+  friend struct IsDense;
 
-  friend class IsSparse;
+  friend struct IsSparse;
 
-  friend class IsBlock;
+  friend struct IsBlock;
 
   ACCEPT_STD_VISITORS();
 

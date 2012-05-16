@@ -41,6 +41,8 @@ SET(SiconosKernel_DIRS
 #
 # Unstable sources
 #
+# If you want to compile those, don't forget to uncomment the
+# include in SimulationTools.hpp
 SET(SiconosKernel_Unstable_SRCS 
   simulationTools/PrimalFrictionContact.cpp
   simulationTools/MLCP2.cpp
@@ -67,24 +69,31 @@ ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
 
-# Disable warnings with intel compiler due (mainly) to visitors visit function overloading
 if(CMAKE_CXX_COMPILER)
-  include(TestCXXAcceptsFlag)
-  CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" disable_warning)
-  CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" DALIGNEDERROR)
-# Disable warnings with intel compiler due (mainly) to visitors visit function overloading
-  if(disable_warning)
+ include(TestCXXAcceptsFlag)
+ CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" disable_warning)
+ CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" DALIGNEDERROR)
+ if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  if(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+   # Disable warnings with intel compiler due (mainly) to visitors visit function overloading
+   if(disable_warning)
     append_cxx_flags("-diag-disable 654")
-  endif(disable_warning)
-# Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
-  if(DALIGNEDERROR)
-    if(NOT CMAKE_COMPILER_IS_GNUCXX)
-      append_cxx_flags("-D__aligned__=ignored")
-    endif(NOT CMAKE_COMPILER_IS_GNUCXX)
-  endif(DALIGNEDERROR)
-IF(C_HAVE_WALL)
- APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wall")
-ENDIF(C_HAVE_WALL)
+   endif(disable_warning)
+   # Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
+   # This issue have been solved with ICC >= 12.1
+   if(NOT ICCOK)
+    if(DALIGNEDERROR)
+     append_cxx_flags("-D__aligned__=ignored")
+    endif(DALIGNEDERROR)
+   endif(NOT ICCOK)
+  endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+ endif(NOT CMAKE_COMPILER_IS_GNUCXX)
+ IF(C_HAVE_WALL)
+  APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wall")
+ ENDIF(C_HAVE_WALL)
+ IF(C_HAVE_WEXTRA)
+  APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wextra -Wno-unused-parameter")
+ ENDIF(C_HAVE_WEXTRA)
 
 endif(CMAKE_CXX_COMPILER)
 

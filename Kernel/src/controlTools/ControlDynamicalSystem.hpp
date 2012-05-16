@@ -95,7 +95,7 @@ public:
   /** Initialize the ControlDynamicalSystem, instantiate all objects
    * \param x0 starting point
    */
-  virtual void initialize(SP::SiconosVector x0);
+  void initialize(SP::SiconosVector x0);
 
   /** Add a Sensor
    * \param newSensor the SP::Sensor to be added

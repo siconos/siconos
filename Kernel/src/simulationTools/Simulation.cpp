@@ -386,7 +386,7 @@ void Simulation::saveSimulationToXML()
 void Simulation::updateInput(unsigned int level)
 {
   // To compute input(level) (ie with lambda[level]) for all Interactions.
-  assert(level >= 0);
+  //  assert(level>=0);
 
   //  double time = nextTime();
   double time = model()->currentTime();
@@ -409,7 +409,7 @@ void Simulation::updateInput(unsigned int level)
 void Simulation::updateOutput(unsigned int level)
 {
   // To compute output(level) (ie with y[level]) for all Interactions.
-  assert(level >= 0);
+  //  assert(level>=0);
 
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();

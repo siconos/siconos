@@ -72,6 +72,10 @@ typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, Solve
  */
 class PrimalFrictionContact : public LinearOSNS
 {
+private:
+  /** default constructor */
+  PrimalFrictionContact() {};
+
 protected:
   /** serialization hooks
   */
@@ -101,10 +105,6 @@ protected:
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   PFC_Driver primalFrictionContact_driver;
-
-  /** default constructor */
-  PrimalFrictionContact() {};
-
 
 public:
 
@@ -260,7 +260,7 @@ public:
   /** set the value of H to newValue
    *  \param  newValue
    */
-  void setH(const OSNSMatrix &);
+  void setH(const OSNSMatrix &) {}
 
   /** set H to pointer newPtr
    *  \param  SP::OSNSMatrix newPtr
@@ -335,7 +335,7 @@ public:
       \param SP::Interaction, the Interaction which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeqBlock(SP::DynamicalSystem, unsigned int);
+  void computeqBlockDS(SP::DynamicalSystem, unsigned int);
 
   /** compute vector q
    *  \param double : current time

@@ -59,7 +59,7 @@ protected:
 
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
-  friend class _NSLEffectOnFreeOutput;
+  friend struct _NSLEffectOnFreeOutput;
 
   /** default constructor */
   D1MinusLinear() {};

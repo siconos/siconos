@@ -287,7 +287,7 @@ void TimeSteppingD1Minus::advanceToEvent()
 
 void TimeSteppingD1Minus::updateInput(unsigned int level)
 {
-  assert(level >= 0);
+  //  assert(level>=0);
 
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();

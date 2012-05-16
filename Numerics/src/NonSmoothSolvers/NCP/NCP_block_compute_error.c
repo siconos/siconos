@@ -38,7 +38,7 @@ void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q ,
 
   /* Computes error */
   for (int i = 0 ; i < n ; i++)
-    error += abs(z[i] + w[i]) - (z[i] + w[i]);
+    error += fabs(z[i] + w[i]) - (z[i] + w[i]);
 
   *err = error / normq;
 

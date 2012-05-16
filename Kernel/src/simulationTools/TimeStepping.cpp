@@ -428,9 +428,9 @@ void TimeStepping::computeInitialResidu()
 
   if (!allInteractions->isEmpty())
   {
-    assert(_levelMinForOutput >= 0);
+    //    assert(_levelMinForOutput >=0);
     assert(_levelMaxForOutput >= _levelMinForOutput);
-    assert(_levelMinForInput >= 0);
+    //    assert(_levelMinForInput >=0);
     assert(_levelMaxForInput >= _levelMinForInput);
 
 

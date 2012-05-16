@@ -292,9 +292,9 @@ void Interaction::initializeMemory()
 
   // Memory allocation for y and lambda
 
-  assert(_upperLevelForOutput >= 0);
+  //  assert(_upperLevelForOutput >=0);
   assert(_upperLevelForOutput >= _lowerLevelForOutput);
-  assert(_upperLevelForInput >= 0);
+  //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
   // in order to simplify we size from 0 to _upperLevelForXXX

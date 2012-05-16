@@ -1446,7 +1446,7 @@ int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem, doubl
 
   double Tol = dparam[0];
   double itermax = iparam[0];
-  double LSitermax = iparam[1];
+  int LSitermax = iparam[1];
 
 
   int i, j, k, inew;

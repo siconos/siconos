@@ -116,11 +116,11 @@ void LagrangianR::LinkData()
 
 
 
-void LagrangianR::LinkDataFromMemory(unsigned memoryLevel)
+void LagrangianR::LinkDataFromMemory(unsigned int memoryLevel)
 {
 
 
-  assert(memoryLevel >= 0);
+  //  assert(memoryLevel>=0);
 
   DSIterator it;
   data[q0].reset(new BlockVector()); // displacement

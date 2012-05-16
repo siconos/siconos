@@ -88,7 +88,7 @@ protected:
 
 
   struct _SimulationEffectOnOSNSP;
-  friend class _SimulationEffectOnOSNSP;
+  friend struct _SimulationEffectOnOSNSP;
 
 
 public:

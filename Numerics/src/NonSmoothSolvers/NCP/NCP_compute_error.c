@@ -52,7 +52,7 @@ void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose,
   error = 0.;
   for (i = 0 ; i < n ; i++)
   {
-    error += abs(z[i] + w[i]) - (z[i] + w[i]);
+    error += fabs(z[i] + w[i]) - (z[i] + w[i]);
   }
 
   incx  = 1;

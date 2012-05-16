@@ -88,9 +88,9 @@ protected:
   struct _TimeSteppingNSLEffect;
   struct _EventDrivenNSLEffect;
   struct _NSLEffectOnSim;
-  friend class _TimeSteppingNSLEffect;
-  friend class _EventDrivenNSLEffect;
-  friend class _NSLEffectOnSim;
+  friend struct _TimeSteppingNSLEffect;
+  friend struct _EventDrivenNSLEffect;
+  friend struct _NSLEffectOnSim;
 
   /** default constructor (private)
    */

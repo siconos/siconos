@@ -103,7 +103,7 @@ private:
   /** initializations ( time invariance) from non
       smooth laws kind */
   struct SetupFromNslaw;
-  friend class Topology::SetupFromNslaw;
+  friend struct Topology::SetupFromNslaw;
 
 
   // === PRIVATE FUNCTIONS ===

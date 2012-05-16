@@ -56,7 +56,7 @@ public:
   virtual ~ControlFirstOrderLinearDS() {};
 
   /** Initialization */
-  virtual void initialize();
+  void initialize();
 
   /** Return the _processDS */
   SP::FirstOrderLinearDS processDS() const
