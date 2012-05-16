@@ -373,9 +373,9 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
+  Lsodar& lsodar = static_cast<Lsodar&>(*osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  lsodar->fillXWork(sizeOfX, x);
+  lsodar.fillXWork(sizeOfX, x);
 
   double t = *time;
   model()->setCurrentTime(t);
@@ -392,19 +392,18 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     //ds, with the new value of input.  lsodar->computeRhs(t);
   }
   // update the DS of the OSI.
-  lsodar->computeRhs(t);
+  lsodar.computeRhs(t);
   //  for the DS state, ie the ones computed by lsodar (x above)
   // Update Index sets? No !!
 
   // Get the required value, ie xdot for output.
-  SP::SiconosVector xtmp2; // The Right-Hand side
   DSIterator it;
   unsigned int i = 0;
-  for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
+  for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
   {
-    xtmp2 = (*it)->rhs(); // Pointer link !
+    SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
-      xdot[i++] = (*xtmp2)(j);
+      xdot[i++] = xtmp2(j);
   }
 
   //std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
@@ -418,7 +417,7 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
                                     doublereal *jacob)
 {
   if (osi->getType() != OSI::LSODAR)
-    RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+    RuntimeException::selfThrow("EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 

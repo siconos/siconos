@@ -34,17 +34,16 @@ void FirstOrderR::initDSLinks()
   data[ds_xp].reset(new BlockVector());
   data[g_alpha].reset(new BlockVector());
 
-  SP::FirstOrderNonLinearDS ds;
   for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
-    ds = boost::static_pointer_cast<FirstOrderNonLinearDS> (*it);
-    data[x]->insertPtr(ds->x());
-    data[z]->insertPtr(ds->z());
-    data[r]->insertPtr(ds->r());
-    data[residu_r]->insertPtr(ds->residur());
-    data[g_alpha]->insertPtr(ds->gAlpha());
-    data[ds_xp]->insertPtr(ds->xp());
+    FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
+    data[x]->insertPtr(ds.x());
+    data[z]->insertPtr(ds.z());
+    data[r]->insertPtr(ds.r());
+    data[residu_r]->insertPtr(ds.residur());
+    data[g_alpha]->insertPtr(ds.gAlpha());
+    data[ds_xp]->insertPtr(ds.xp());
     //      data[Blambda]->insertPtr( ds->bLambda());
 
   }
