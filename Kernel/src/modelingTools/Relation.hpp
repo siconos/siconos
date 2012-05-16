@@ -497,7 +497,89 @@ public:
    */
   virtual void LinkDataFromMemory(unsigned int) {};
 
+  /** Check if _pluginh is correctly set */
+  inline bool ishPlugged() const
+  {
+    return _pluginh->isPlugged();
+  };
 
+  /** Check if _pluginJachx is correctly set */
+  inline bool isJachxPlugged() const
+  {
+    return _pluginJachx->isPlugged();
+  };
+
+  /** Check if _pluginJachlambda is correctly set */
+  inline bool isJachlambdaPlugged() const
+  {
+    return _pluginJachlambda->isPlugged();
+  };
+
+  /** Check if _pluging is correctly set */
+  inline bool isgPlugged() const
+  {
+    return _pluging->isPlugged();
+  };
+
+  /** Check if _pluginJacLg is correctly set */
+  inline bool isJacLgPlugged() const
+  {
+    return _pluginJacLg->isPlugged();
+  };
+
+  /** Check if _pluginf is correctly set */
+  inline bool isfPlugged() const
+  {
+    return _pluginf->isPlugged();
+  };
+
+  /** Check if _plugine is correctly set */
+  inline bool isePlugged() const
+  {
+    return _plugine->isPlugged();
+  };
+
+  /** Get _pluginh */
+  inline SP::PluggedObject getPluginh() const
+  {
+    return _pluginh;
+  };
+
+  /** Get _pluginJachx */
+  inline SP::PluggedObject getPluginJachx() const
+  {
+    return _pluginJachx;
+  };
+
+  /** Get _pluginJachlambda */
+  inline SP::PluggedObject getPluginJachlambda() const
+  {
+    return _pluginJachlambda;
+  };
+
+  /** Get _pluging */
+  inline SP::PluggedObject getPluging() const
+  {
+    return _pluging;
+  };
+
+  /** Get _pluginJacLg */
+  inline SP::PluggedObject getPluginJacLg() const
+  {
+    return _pluginJacLg;
+  };
+
+  /** Get _pluginf */
+  inline SP::PluggedObject getPluginf() const
+  {
+    return _pluginf;
+  };
+
+  /** Get _plugine */
+  inline SP::PluggedObject getPlugine() const
+  {
+    return _plugine;
+  };
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Relation);

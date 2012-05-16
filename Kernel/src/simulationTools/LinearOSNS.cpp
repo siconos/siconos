@@ -23,6 +23,7 @@
 #include "Model.hpp"
 #include "Moreau.hpp"
 #include "Lsodar.hpp"
+#include "ZeroOrderHold.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -286,17 +287,26 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       }
 
 
-      // centralInteractionBlock contains a lu-factorized matrix and we solve
-      // centralInteractionBlock * X = rightInteractionBlock with PLU
-      centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      // for ZOH, we have a different formula ...
+      if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
+      {
+        *rightInteractionBlock = *static_pointer_cast<ZeroOrderHold>(Osi)->Psi(*ds);
+        prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+      }
+      else
+      {
+        // centralInteractionBlock contains a lu-factorized matrix and we solve
+        // centralInteractionBlock * X = rightInteractionBlock with PLU
+        centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
-      //      integration of r with theta method removed
-      //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
-      //gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
-      *leftInteractionBlock *= h;
+        //      integration of r with theta method removed
+        //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
+        //gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
+        *leftInteractionBlock *= h;
 
-      prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
-      //left = C, right = inv(W).B
+        prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+        //left = C, right = inv(W).B
+      }
 
     }
     else if (relationType == Lagrangian ||
@@ -549,7 +559,8 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
   if (osiType == OSI::MOREAU ||
       osiType == OSI::LSODAR ||
       osiType == OSI::D1MINUSLINEAR ||
-      osiType == OSI::SCHATZMANPAOLI)
+      osiType == OSI::SCHATZMANPAOLI ||
+      osiType == OSI::ZOH)
   {
     Osi->computeFreeOutput(inter , this);
     setBlock(*inter->yp(), _q, sizeY , 0, pos);

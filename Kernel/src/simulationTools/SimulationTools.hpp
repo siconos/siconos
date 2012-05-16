@@ -48,6 +48,7 @@ Note that not all files from the current location are listed below, since some o
 #include "Moreau2.hpp"
 #include "D1MinusLinear.hpp"
 #include "SchatzmanPaoli.hpp"
+#include "ZeroOrderHold.hpp"
 #include "Relay.hpp"
 #include "NonSmoothEvent.hpp"
 #include "TimeDiscretisationEvent.hpp"

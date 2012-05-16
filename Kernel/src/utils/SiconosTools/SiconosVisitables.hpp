@@ -34,6 +34,7 @@
   REGISTER(Lsodar)                                \
   REGISTER(D1MinusLinear)                         \
   REGISTER(SchatzmanPaoli)                        \
+  REGISTER(ZeroOrderHold)                         \
   REGISTER(OneStepNSProblem)                      \
   REGISTER(LinearOSNS)                            \
   REGISTER(LCP)                                   \

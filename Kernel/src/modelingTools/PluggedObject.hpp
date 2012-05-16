@@ -31,9 +31,13 @@
 class PluggedObject
 {
 private:
+
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(PluggedObject);
+
+protected:
+
   /** Plugin name of the form "fileName:functionName" */
   std::string _pluginName;
 
@@ -47,7 +51,7 @@ public:
   PluggedObject(): _pluginName("unplugged")
   {
     fPtr = 0;
-  }
+  };
 
   /** Constructor with the plugin name
    * \param name a string of the form "fileName:functionName", without an extension for pluginFile
@@ -56,7 +60,7 @@ public:
   {
     fPtr = 0;
     setComputeFunction();
-  }
+  };
 
   /** Copy constructor
    * \param PO a PluggedObject we are going to copy
@@ -69,7 +73,7 @@ public:
   inline bool isPlugged() const
   {
     return (fPtr != 0);
-  }
+  };
 
   /** destructor
    */
@@ -83,7 +87,7 @@ public:
   {
     SSL::setFunction(&fPtr, pluginPath, functionName);
     _pluginName = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
-  }
+  };
 
   /* Connect a function to fPtr
    * \param plugin a string of the form "fileName:functionName,  without an extension for pluginFile"
@@ -92,7 +96,7 @@ public:
   {
     SSL::setFunction(&fPtr, SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     _pluginName = plugin;
-  }
+  };
 
   /** Connect _pluginName to fPtr
    * \warning _pluginName must have been set before !
@@ -101,7 +105,7 @@ public:
   {
     assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
     SSL::setFunction(&fPtr, SSL::getPluginName(_pluginName), SSL::getPluginFunctionName(_pluginName));
-  }
+  };
 
   /** Connect input function to fPtr
       \param functionPtr a pointer to a C function
@@ -110,7 +114,7 @@ public:
   {
     fPtr = functionPtr;
     _pluginName = "Unknown";
-  }
+  };
 
   /** Return the name of the plugin used to compute fPtr
    * \return _pluginName (a std::string)
@@ -118,15 +122,15 @@ public:
   inline std::string getPluginName() const
   {
     return _pluginName;
-  }
+  };
 
   /** Set the name of the plugin function
       \param name a string of the form "pluginFile:functionName", without extension for pluginFile
   */
-  inline void setPluginName(std::string& name)
+  inline void setPluginName(const std::string& name)
   {
     _pluginName = name;
-  }
+  };
 
 };
 TYPEDEF_SPTR(PluggedObject);

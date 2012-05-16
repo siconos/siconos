@@ -43,6 +43,8 @@ enum TYPES
   D1MINUSLINEAR,
   /** */
   SCHATZMANPAOLI,
+  /**  */
+  ZOH
 };
 
 }
@@ -51,4 +53,5 @@ DEFINE_SPTR(MoreauCombinedProjectionOSI);
 DEFINE_SPTR(Lsodar);
 DEFINE_SPTR(D1MinusLinear);
 DEFINE_SPTR(SchatzmanPaoli);
+DEFINE_SPTR(ZeroOrderHold);
 #endif

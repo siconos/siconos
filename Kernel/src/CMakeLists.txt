@@ -237,6 +237,14 @@ IF(WITH_TESTING)
 
   END_TEST()
 
+  # Simulation tests
+  BEGIN_TEST(simulationTools/test)
+
+  NEW_TEST(testSimulationTools ZOHTest.cpp)
+
+  END_TEST()
+
+
 
 ENDIF(WITH_TESTING)
 

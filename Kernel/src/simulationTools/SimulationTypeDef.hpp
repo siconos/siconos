@@ -77,21 +77,23 @@ typedef MapOfDouble::iterator DoubleIterator;
 // ================== Objects that should not exists (used in ZOH) ==================
 
 /** Map of TimeDiscretisation; key = the number of the related DS*/
-typedef std::map<int, SP::TimeDiscretisation> MapOfTD;
+typedef std::map<unsigned int, SP::TimeDiscretisation> MapOfTD;
 
 /** Map of Model; key = the number of the related DS*/
-typedef std::map<int, SP::Model> MapOfModel;
+typedef std::map<unsigned int, SP::Model> MapOfModel;
 
 /** Map of OSI; key = the number of the related DS*/
-typedef std::map<int, SP::OneStepIntegrator> MapOfOSI;
+typedef std::map<unsigned int, SP::OneStepIntegrator> MapOfOSI;
 
 /** Map of Simulation; key = the number of the related DS*/
-typedef std::map<int, SP::Simulation> MapOfSimulation;
+typedef std::map<unsigned int, SP::Simulation> MapOfSimulation;
 
 /* * Map of DynamicalSystem; key = the number of the related DS*/
-typedef std::map<int, SP::DynamicalSystem> MapOfDS;
+typedef std::map<unsigned int, SP::DynamicalSystem> MapOfDS;
 
-typedef std::map<int, SP::SiconosVector> MapOfVectors;
+typedef std::map<unsigned int, SP::SiconosVector> MapOfVectors;
+
+typedef std::map<unsigned int, SP::Relation> MapOfRelation;
 
 // ================== Objects to handle Interactions ==================
 

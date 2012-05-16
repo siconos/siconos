@@ -27,6 +27,7 @@
 #include "Moreau.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
+#include "ZeroOrderHold.hpp"
 //#define OSNS_DEBUG
 using namespace std;
 OneStepNSProblem::OneStepNSProblem():
@@ -601,6 +602,10 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
 
       centralInteractionBlocks[itN].reset(new SimpleMatrix(*((boost::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
+    }
+    else if (osiType == OSI::ZOH)
+    {
+      centralInteractionBlocks[itN] = (boost::static_pointer_cast<ZeroOrderHold>(Osi))->Phi(**itDS);
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
