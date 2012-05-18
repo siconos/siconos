@@ -522,7 +522,7 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   options->isSet = 1;
   options->filterOn = 1;
   options->iSize = 8;
-  options->dSize = 8;
+  options->dSize = 9;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
@@ -736,7 +736,7 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
   DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
 
   // SO with void pointers ?
-  SO->iparam[6] = (int) mumps_id;
+  SO->dparam[7] = (long) mumps_id;
 
   // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
   mumps_id->job = JOB_INIT;
@@ -764,21 +764,6 @@ void frictionContact3D_sparseGlobalAlartCurnierInit(
 
   //mumps_id->CNTL(3) = ...;
   //mumps_id->CNTL(5) = ...;
-
-  // process on mpi rank > 0
-  if (SO->iparam[4])
-  {
-    //!\\ pseudo flag <-- but iparam[5] is not shared => mpi_send
-    while (SO->iparam[5])
-    {
-      mumps_id->job = 6;
-      dmumps_c(mumps_id);
-    }
-
-    mumps_id->job = JOB_END;
-    dmumps_c(mumps_id);
-    exit(0);
-  }
 }
 
 void frictionContact3D_sparseGlobalAlartCurnier(
@@ -814,7 +799,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) options->iparam[6];
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
 
   assert(itermax > 0);
   assert(nzmax > 0);
