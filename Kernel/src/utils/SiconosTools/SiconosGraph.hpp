@@ -31,9 +31,11 @@
 #define BOOST_NO_HASH
 #endif
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
 
 #include <boost/config.hpp>
 #include <boost/version.hpp>
@@ -49,7 +51,9 @@
 
 #include <boost/static_assert.hpp>
 
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
 #include "SiconosSerialization.hpp"
 
