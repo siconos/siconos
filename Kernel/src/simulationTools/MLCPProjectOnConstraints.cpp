@@ -83,16 +83,24 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
   //    computed if 3==true.
   //
 
+#ifdef MLCPPROJ_DEBUG
+  std::cout <<  " " << std::endl;
+  std::cout <<  "===================================================" << std::endl;
+  std::cout <<  "MLCPProjectOnConstraints::updateInteractionBlocks()" << std::endl;
+#endif
+
+
+
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
 
   // It seems that index() in not update in Index(0)
   // see comment in void Simulation::updateIndexSets()
   //if (_levelMin==0)
-  {
-    indexSet->update_vertices_indices();
-    indexSet->update_edges_indices();
-  }
+  // {
+  //    indexSet->update_vertices_indices();
+  //    indexSet->update_edges_indices();
+  // }
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
@@ -129,6 +137,9 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
       if (! indexSet->blockProj[*vi])
       {
+#ifdef MLCPPROJ_DEBUG
+        std::cout <<  "Allocation of blockProj of size " << nslawSize << " x " << nslawSize << " for interaction " << inter->getId() <<  std::endl;
+#endif
         indexSet->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
@@ -155,7 +166,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         assert(*oei == ed1 || *oei == ed2);
 
         /* the first edge as the lower index */
-        assert(indexSet->index(ed1) <= indexSet->index(ed2));
+        assert(indexSet->index(ed1) == indexSet->index(ed2));
 
         SP::Interaction inter1 = indexSet->bundle(indexSet->source(*oei));
         SP::Interaction inter2 = indexSet->bundle(indexSet->target(*oei));
@@ -175,21 +186,58 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           if (! indexSet->upper_blockProj[ed1])
           {
             indexSet->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+#ifdef MLCPPROJ_DEBUG
+            std::cout <<  "Allocation of upper_blockProj " <<  indexSet->upper_blockProj[ed1].get() << " of edge " << ed1 << " of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
+#endif
+
             if (ed2 != ed1)
               indexSet->upper_blockProj[ed2] = indexSet->upper_blockProj[ed1];
           }
+#ifdef MLCPPROJ_DEBUG
+          else
+            std::cout <<  "No Allocation of upper_blockProj of size " << nslawSize1 << " x " << nslawSize2 <<  std::endl;
+#endif
           currentInteractionBlock = indexSet->upper_blockProj[ed1];
+#ifdef MLCPPROJ_DEBUG
+          std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0) << std::endl;
+          std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1) << std::endl;
 
+          std::cout << "inter1->display() " << inter1->getId() << std::endl;
+          //inter1->display();
+
+          std::cout << "inter2->display() " << inter2->getId() << std::endl;
+          //inter2->display();
+#endif
         }
         else  // lower block
         {
           if (! indexSet->lower_blockProj[ed1])
           {
+
+#ifdef MLCPPROJ_DEBUG
+            std::cout <<  "Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
+#endif
             indexSet->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             if (ed2 != ed1)
               indexSet->lower_blockProj[ed2] = indexSet->lower_blockProj[ed1];
           }
+#ifdef MLCPPROJ_DEBUG
+          else
+            std::cout <<  "No Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 <<  std::endl;
+#endif
           currentInteractionBlock = indexSet->lower_blockProj[ed1];
+#ifdef MLCPPROJ_DEBUG
+          std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0) << std::endl;
+          std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1) << std::endl;
+
+
+          std::cout << "inter1->display() " << inter1->getId() << std::endl;
+          //inter1->display();
+
+          std::cout << "inter2->display() " << inter2->getId() << std::endl;
+          //inter2->display();
+#endif
+
         }
 
 
@@ -625,6 +673,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     // operators (G for lagrangian relation for example) have been
     // computed through plug-in mechanism.
 
+#ifdef MLCPPROJ_DEBUG
+    std::cout << "MLCPProjectOnConstraints::computeInteractionBlock currentInteractionBlock start " << std::endl;
+#endif
     // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
     SP::InteractionsGraph indexSet = simulation()->indexSet(_levelMin);
 
@@ -670,17 +721,19 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       currentInteractionBlock = indexSet->upper_blockProj[ed];
 #ifdef MLCPPROJ_DEBUG
       std::cout << "MLCPProjectOnConstraints::computeInteractionBlock currentInteractionBlock " << std::endl;
-      currentInteractionBlock->display();
-      std::cout << "currentInteractionBlock->size(0) " << currentInteractionBlock->size(0)  << std::endl;
-      std::cout << "currentInteractionBlock->size(1) " << currentInteractionBlock->size(1)  << std::endl;
+      //    currentInteractionBlock->display();
+      std::cout << "sizeY1 " << sizeY1  << std::endl;
+      std::cout << "sizeY2 " << sizeY2  << std::endl;
+      std::cout <<  "upper_blockProj " <<  indexSet->upper_blockProj[ed].get() << " of edge " << ed << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
+      //std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+      //inter1->display();
+      //std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+      //inter2->display();
+
 #endif
       assert(currentInteractionBlock->size(0) == sizeY1);
       assert(currentInteractionBlock->size(1) == sizeY2);
 
-
-
-
-      currentInteractionBlock = indexSet->upper_blockProj[ed];
     }
     else  // lower block
     {

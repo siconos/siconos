@@ -72,9 +72,9 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
 #ifdef OSNSMPROJ_DEBUG
     std::cout << " dim :" << dim << std::endl;
     std::cout << "vd :" << *vd << std::endl;
-    assert(indexSet->properties(*vd)->blockProj);
-#endif
 
+#endif
+    assert(indexSet->blockProj[*vd]);
 
     indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
     SP::Interaction inter = indexSet->bundle(*vd);
@@ -165,8 +165,8 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
 
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
-      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei)->upper_blockProj->size(0), indexSet->properties(*ei)->upper_blockProj->size(1));
-      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei)->lower_blockProj->size(0), indexSet->properties(*ei)->lower_blockProj->size(1));
+      printf("OSNSMatrix upper: %i %i\n", (indexSet->upper_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
+      printf("OSNSMatrix lower: %i %i\n", (indexSet->lower_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
 #endif
 
       boost::static_pointer_cast<SimpleMatrix>(M1)
@@ -196,6 +196,13 @@ unsigned int OSNSMatrixProjectOnConstraints::getPositionOfInteractionBlock(SP::I
 
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)
 {
+#ifdef OSNSMPROJ_DEBUG
+  std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)" << std::endl;
+#endif
+
+
+
+
   RELATION::TYPES relationType;
   relationType = inter->relation()->getType();
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
@@ -211,17 +218,25 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;
+#ifdef OSNSMPROJ_DEBUG
+      std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and  relationType NewtonEuler. size=1" << std::endl;
+#endif
     }
     else if (relationType == Lagrangian)
     {
       size = 1;
+#ifdef OSNSMPROJ_DEBUG
+      std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and relationType Lagrangian. size=1" << std::endl;
+#endif
     }
     else
     {
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeSizeForProjection. relation is not o the right type. neither Lagrangian nor NewtonEuler ");
+      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeSizeForProjection. relation is not of the right type. neither Lagrangian nor NewtonEuler ");
     }
   }
-
+#ifdef OSNSMPROJ_DEBUG
+  std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : size= " << size << std::endl;
+#endif
   return size;
 
 }

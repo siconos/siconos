@@ -200,6 +200,31 @@ void TimeStepping::updateIndexSet(unsigned int i)
           // Interaction is not active
           // ui1 becomes invalid
           indexSet0->color(inter1_descr0) = boost::black_color;
+
+          indexSet1->blockProj._store->erase(*ui1);
+
+          InteractionsGraph::OEIterator oei, oeiend;
+          for (boost::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+               oei != oeiend; ++oei)
+          {
+            InteractionsGraph::EDescriptor ed1, ed2;
+            boost::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+            if (ed2 != ed1)
+            {
+              indexSet1->upper_blockProj._store->erase(ed1);
+              indexSet1->lower_blockProj._store->erase(ed1);
+
+              indexSet1->upper_blockProj._store->erase(ed2);
+              indexSet1->lower_blockProj._store->erase(ed2);
+            }
+            else
+            {
+              indexSet1->upper_blockProj._store->erase(ed1);
+              indexSet1->lower_blockProj._store->erase(ed1);
+            }
+          }
+
+
           indexSet1->remove_vertex(inter1);
           inter1->lambda(1)->zero();
           topo->setHasChanged(true);
@@ -210,6 +235,28 @@ void TimeStepping::updateIndexSet(unsigned int i)
     {
       // Interaction is not in indexSet0 anymore.
       // ui1 becomes invalid
+      indexSet1->blockProj._store->erase(*ui1);
+      InteractionsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+           oei != oeiend; ++oei)
+      {
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+        if (ed2 != ed1)
+        {
+          indexSet1->upper_blockProj._store->erase(ed1);
+          indexSet1->lower_blockProj._store->erase(ed1);
+
+          indexSet1->upper_blockProj._store->erase(ed2);
+          indexSet1->lower_blockProj._store->erase(ed2);
+        }
+        else
+        {
+          indexSet1->upper_blockProj._store->erase(ed1);
+          indexSet1->lower_blockProj._store->erase(ed1);
+        }
+      }
+
       indexSet1->remove_vertex(inter1);
       topo->setHasChanged(true);
     }

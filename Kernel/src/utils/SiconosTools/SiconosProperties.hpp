@@ -218,13 +218,10 @@ struct GetProperty
  \param IndexMap the index map, should be either G::VIndexAccess or G:EIndexAccess
 */
 template<typename T, typename G, typename IndexMap>
+
+
 class Properties
 {
-
-public:
-  G& _g;
-  boost::shared_ptr< std::vector<T> > _store;
-  int _stamp;
 
 public:
   typedef typename VertexOrEdge<G, IndexMap>::Access Access;
@@ -238,12 +235,19 @@ public:
   typename std::vector<T>::iterator >::reference reference;
   typedef boost::lvalue_property_map_tag category;
 
+
+public:
+  G& _g;
+  boost::shared_ptr< std::map<key_type, T> > _store;
+  int _stamp;
+
+
   /** constructor from a SiconosGraph
       \param g a SiconosGraph
   */
 
   Properties(G& g)
-    : _g(g), _store(new std::vector<T>()), _stamp(-1)
+    : _g(g), _store(new std::map<key_type, T>()), _stamp(-1)
   {}
 
 
@@ -253,56 +257,7 @@ public:
       SiconosGraph::EDescriptor according to IndexMap type */
   reference operator[](const key_type& v)
   {
-
-    // 1. resize data store if necessary
-    typename boost::property_traits<IndexMap>::value_type iv = _g.index(v);
-
-    if (static_cast<unsigned>(iv) >= _store->size())
-    {
-      // _store->resize(iv+1, T()); faster with large size
-      _store->resize(access.size(_g), T());
-    }
-
-
-    /* 2. a stamp is used to know if indices have been updated */
-    if (_g.stamp() != _stamp)
-    {
-      _stamp = _g.stamp();
-
-      /* this new store is used as a fifo */
-      typename std::queue<typename RemovePointer<T>::type > new_store;
-      typename GetProperty<T>::type getProperty;
-
-      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
-           vi != access.indexModified(_g).end(); ++vi)
-      {
-        assert(access.isElem(_g, *vi));
-        assert(_g.old_index(*vi) != _g.index(*vi));
-        typename boost::property_traits<OldIndexMap>::value_type oi = _g.old_index(*vi);
-        assert(oi < _store->size());
-
-        new_store.push(getProperty((*_store)[oi]));
-      }
-
-      for (typename std::vector<typename Access::descriptor>::iterator vi = access.indexModified(_g).begin();
-           vi != access.indexModified(_g).end(); ++vi)
-      {
-        typename boost::property_traits<IndexMap>::value_type i = _g.index(*vi);
-        assert(i < _store->size());
-
-        typename SwapProperties<typename RemovePointer<T>::type>::type swapProperties;
-
-        swapProperties(getProperty((*_store)[i]), new_store.front());
-
-        new_store.pop();
-      };
-
-      assert(new_store.size() == 0);
-
-    };
-
-    // 3. return data
-    return (*_store)[iv];
+    return (*_store)[v];
   };
 
   typedef void serializable;

@@ -297,6 +297,14 @@ public:
     _id = newId;
   }
 
+  /** set the id of this Interaction
+   *  \param the string  to set the id
+   */
+  inline void setId(const std::string& newId)
+  {
+    _id = newId;
+  }
+
   /** get the value of number
    *  \return the value of number
    */

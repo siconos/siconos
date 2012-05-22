@@ -337,7 +337,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         assert(*oei == ed1 || *oei == ed2);
 
         /* the first edge as the lower index */
-        assert(indexSet->index(ed1) <= indexSet->index(ed2));
+        assert(indexSet->index(ed1) == indexSet->index(ed2));
 
         SP::Interaction inter1 = indexSet->bundle(indexSet->source(*oei));
         SP::Interaction inter2 = indexSet->bundle(indexSet->target(*oei));
