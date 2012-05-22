@@ -49,7 +49,7 @@ IF(VTK_FOUND)
   ENDIF()
   SET(SiconosIO_LINK_LIBRARIES "${SiconosIO_LINK_LIBRARIES};vtkIO;vtkCommon;vtkGraphics;vtkRendering")
 ENDIF()
-
+COMPILE_WITH(ATLAS)
 
 FIND_PACKAGE(Boost COMPONENTS serialization REQUIRED)
 

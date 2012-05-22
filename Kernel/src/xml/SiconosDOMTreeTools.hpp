@@ -24,6 +24,10 @@
 #ifndef __SICONOSDOMTREETOOLS__
 #define __SICONOSDOMTREETOOLS__
 
+// For gccxml -- xhub
+#include <cstddef>
+using std::ptrdiff_t;
+
 #include "SiconosConst.hpp"
 #include "XMLTagsName.hpp"
 #include "XMLException.hpp"
