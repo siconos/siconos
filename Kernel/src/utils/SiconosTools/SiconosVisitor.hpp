@@ -169,7 +169,7 @@ struct FindType
 #undef REGISTER
 #define REGISTER(X)             \
   virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
-  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                       \
+  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
 #undef REGISTER_STRUCT
@@ -184,6 +184,7 @@ struct FindType
 struct SiconosVisitor
 {
   SICONOS_VISITABLES()
+  virtual ~SiconosVisitor() {};
 };
 
 /* some functions in Type namespace */
