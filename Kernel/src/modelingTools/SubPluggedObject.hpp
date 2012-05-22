@@ -63,7 +63,7 @@ public:
   {
     _pluginName = "Sub" + PO.getPluginName();
     _tmpMat.reset(new SimpleMatrix(n, p));
-#if (__GNUG__ && !( __clang__ || __INTEL_COMPILER))
+#if (__GNUG__ && !( __clang__ || __INTEL_COMPILER || __APPLE__ ))
     fPtr = (void *)&SubPluggedObject::computeAndExtract;
     _parentfPtr = PO.fPtr;
 #else
@@ -74,10 +74,8 @@ public:
   /** Copy constructor
    * \param SPO a PluggedObject we are going to copy
   */
-  SubPluggedObject(const SubPluggedObject& SPO): _indx(SPO.getIndex()), _p(SPO.getp())
+  SubPluggedObject(const SubPluggedObject& SPO): PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
   {
-    _pluginName = SPO.getPluginName();
-    fPtr = SPO.fPtr;
     _parentfPtr = SPO.getParentfPtr();
     _tmpMat.reset(new SimpleMatrix(SPO.getTmpMat()));
   }
