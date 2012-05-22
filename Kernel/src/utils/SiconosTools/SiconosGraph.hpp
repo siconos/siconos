@@ -40,6 +40,13 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
+
+/* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
+ * in some boost headers, so we specify which one we want. It seems
+ * that there is no difference anyway:
+ * http://stackoverflow.com/questions/5813700/difference-between-size-t-and-stdsize-t */
+using std::size_t;
+
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
