@@ -279,8 +279,6 @@ SICONOS_IO_REGISTER(DynamicalSystem,
                     (_normRef)
                     (_x)
                     (_jacxRhs)
-                    (_jacgx)
-                    (_jacxDotG)
                     (_z)
                     (_g)
                     (_pluging)
@@ -404,6 +402,22 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderNonLinearDS),
                                (_b)
                                (_pluginA)
                                (_pluginb))
+SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHold, (OneStepIntegrator),
+                               (_constH)
+                               (_PhiMap)
+                               (_PsiMap)
+                               (_xNext)
+                               (_DSPhiMap)
+                               (_DSPsiMap)
+                               (_TDPhiMap)
+                               (_TDPsiMap)
+                               (_modelPhiMap)
+                               (_modelPsiMap)
+                               (_PhiOSIMap)
+                               (_PsiOSIMap)
+                               (_simulPhiMap)
+                               (_simulPsiMap)
+                               (_useGammaForRelation))
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS, (OneStepNSProblem),
                                (_w)
                                (_z)
@@ -437,8 +451,11 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection, (TimeStepping),
                                (_indexSetLevelForProjection)
                                (_constraintTol)
                                (_constraintTolUnilateral)
+                               (_maxViolationUnilateral)
+                               (_maxViolationEquality)
                                (_projectionMaxIteration)
                                (_doCombinedProj)
+                               (_doCombinedProjOnEquality)
                                (_isIndexSetsStable))
 SICONOS_IO_REGISTER(NonSmoothLaw,
                     (_size)
@@ -484,7 +501,8 @@ SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph, (_DynamicalSystemsGraph),
                                (OSI)
                                (dummy))
 SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints, (MLCP),
-                               (_alpha))
+                               (_alpha)
+                               (_doProjOnEquality))
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (Impulse_variable)
                                (Time_variable)
@@ -752,6 +770,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<ComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<EqualityConditionNSL*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
+  ar.register_type(static_cast<ZeroOrderHold*>(NULL));
   ar.register_type(static_cast<FirstOrderType2R*>(NULL));
   ar.register_type(static_cast<TimeSteppingProjectOnConstraints*>(NULL));
   ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
