@@ -131,7 +131,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
     if (info)
     {
-      cout << "TimeSteppingProjectOnConstraints1 project on constraints failed." << endl ;
+      cout << " TimeSteppingProjectOnConstraints::advanceToEvent() project on constraints. solver failed." << endl ;
       return;
     }
 
@@ -150,7 +150,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
       }
       else
-        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
 
@@ -161,8 +161,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
-    if (info)
-      cout << "TimeSteppingProjectOnConstraints2 project on constraints failed." << endl ;
+
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << cmp << "\n";
 #endif
@@ -172,7 +171,14 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //{
     //  (*it)->relation()->computeh(getTkp1());
     //}
+  }// end while(runningProjection && cmp < _projectionMaxIteration)
+  if (cmp == _projectionMaxIteration)
+  {
+    cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
   }
+
+
+
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
 #endif

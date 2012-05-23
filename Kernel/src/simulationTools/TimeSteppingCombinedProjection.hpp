@@ -72,6 +72,9 @@ protected:
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
 
+  /** Default maximum number of index set activation iteration*/
+  unsigned int _kIndexSetMax;
+
   /** disabled or enabled projection (Debug Projection) */
   bool _doCombinedProj;
 

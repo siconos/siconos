@@ -57,9 +57,10 @@ TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(SP::TimeDiscretis
   }
   _constraintTol = 1e-04;
   _constraintTolUnilateral = 1e-08;
-  _projectionMaxIteration = 10;
+  _projectionMaxIteration = 50;
+  _kIndexSetMax = 50;
   _doCombinedProj = true;
-  _doCombinedProjOnEquality = true;
+  _doCombinedProjOnEquality = false;
   _isIndexSetsStable = false;
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
@@ -295,9 +296,9 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
 
-    if (kindexset > 20)
+    if (kindexset > _kIndexSetMax)
     {
-      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection kindexset >20  ");
+      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection kindexset >  _kIndexSetMax ");
     }
 
 #endif
@@ -405,12 +406,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #endif
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
+
       if (info)
       {
-        cout << "TimeSteppingCombinedProjection1 project on constraints failed." << endl ;
+        cout << " TimeSteppingCombinedProjection::advanceToEvent() project on constraints. solver failed." << endl ;
         return;
       }
-
       for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
       {
         SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
@@ -426,7 +427,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
         }
         else
-          RuntimeException::selfThrow("TimeSteppingCombinedProjection :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
       }
 
@@ -437,8 +438,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
       //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
       //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
-      if (info)
-        cout << "TimeSteppingCombinedProjection2 project on constraints failed." << endl ;
+
 #ifdef TSPROJ_DEBUG
       cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << cmp << "\n";
 #endif
@@ -449,7 +449,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //  (*it)->relation()->computeh(getTkp1());
       //}
     } // end while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
-
+    if (cmp == _projectionMaxIteration)
+    {
+      cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
+      printf("              max criteria equality =  %e.\n", _maxViolationEquality);
+      printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
+    }
 
 
 #ifdef TSPROJ_DEBUG
@@ -503,7 +508,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 #endif
 
-  } // end  while (!_isIndexSetsStable)
+  }// end  while (!_isIndexSetsStable)
 
   return;
 }
