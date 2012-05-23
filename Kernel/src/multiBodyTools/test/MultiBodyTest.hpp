@@ -32,7 +32,7 @@ private:
   // tests to be done ...
   CPPUNIT_TEST(t1);
 
-  //  CPPUNIT_TEST(t2);
+  CPPUNIT_TEST(t2);
 
   //  CPPUNIT_TEST(t3);
 

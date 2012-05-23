@@ -279,7 +279,7 @@ void BulletSpaceFilter::buildInteractions(double time)
             inter->insert(dsa);
             inter->insert(dsb);
             cpoint->m_userPersistentData = &*inter;
-            model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
+            insertInteraction(inter);
             model()->simulation()->computeLevelsForInputAndOutput(inter);
             inter->initialize(model()->simulation()->nextTime());
           }
@@ -287,7 +287,7 @@ void BulletSpaceFilter::buildInteractions(double time)
           {
             inter->insert(dsa);
             cpoint->m_userPersistentData = &*inter;
-            model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
+            insertInteraction(inter);
             model()->simulation()->computeLevelsForInputAndOutput(inter);
             inter->initialize(model()->simulation()->nextTime());
           }

@@ -33,6 +33,7 @@
 #include "FrictionContact.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
+//#define DEBUG_MESSAGES 1
 
 #include <debug.h>
 
@@ -170,8 +171,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
@@ -192,7 +193,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(inter1_descr0) = boost::gray_color;
       if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        DSIterator itDS = inter1->dynamicalSystemsBegin();
         SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
         //if(predictorDeactivate(inter1,i))
         if (Osi->removeInteractionInIndexSet(inter1, i))
@@ -293,7 +293,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
         bool activate = true;
         if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          DSIterator itDS = inter0->dynamicalSystemsBegin();
           SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
           activate = Osi->addInteractionInIndexSet(inter0, i);
         }
@@ -312,8 +311,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   assert(indexSet1->size() <= indexSet0->size());
 
-  DEBUG_PRINTF("update indexSets end : indexSet0 size : %d\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
 }
 
 // void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
@@ -648,8 +647,18 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       computeFreeState();
       if (info)
         cout << "new loop because of info\n" << endl;
-      if (!_allNSProblems->empty())
+
+      // if there is not any Interaction at
+      // the beginning of the simulation _allNSProblems may not be
+      // empty here (check with SpaceFilter and one disk not on
+      // the ground : MultiBodyTest::t2)
+
+      // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
+      // is also relevant here.
+      if (!_allNSProblems->empty() && !allInteractions->isEmpty())
+      {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+      }
       if (info)
         cout << "info!" << endl;
       // Check output from solver (convergence or not ...)

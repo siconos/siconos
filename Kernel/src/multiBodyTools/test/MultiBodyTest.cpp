@@ -66,7 +66,11 @@
 class Disks : public SiconosBodies, public boost::enable_shared_from_this<Disks>
 {
 public:
-  void init();
+  void init()
+  {
+    assert(false);
+  };
+  void init(std::string);
 };
 
 TYPEDEF_SPTR(Disks);
@@ -110,7 +114,7 @@ double DC(double t)
 
 
 // ================= Creation of the model =======================
-void Disks::init()
+void Disks::init(std::string disks_input)
 {
 
   SP::TimeDiscretisation timedisc_;
@@ -207,7 +211,7 @@ void Disks::init()
 
 
     SP::SiconosMatrix Disks;
-    Disks.reset(new SimpleMatrix("disks.dat", true));
+    Disks.reset(new SimpleMatrix(disks_input, true));
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
@@ -325,17 +329,19 @@ void MultiBodyTest::tearDown()
 {
 }
 
+
+// multiples disks
 void MultiBodyTest::t1()
 {
   SP::Disks disks(new Disks());
 
-  disks->init();
+  disks->init("disks.dat");
 
 
   // just try to run a simulation
   // if something is broken with SpaceFilter
   // an exception may occurs
-  for (unsigned int i = 0; i < 2; ++i)
+  for (unsigned int i = 0; i < 20; ++i)
   {
     disks->compute();
   }
@@ -344,10 +350,26 @@ void MultiBodyTest::t1()
 
 }
 
-// commented
-
+// one disque without interaction at the beginning
 void MultiBodyTest::t2()
 {
+  SP::Disks disks(new Disks());
+
+  disks->init("disks-nointer.dat");
+
+
+  // just try to run a simulation
+  // if something is broken with SpaceFilter
+  // an exception may occurs
+  // test fail with rev 3146
+  for (unsigned int i = 0; i < 20; ++i)
+  {
+    disks->compute();
+  }
+
+  CPPUNIT_ASSERT(1);
+
+
 }
 
 void MultiBodyTest::t3()
