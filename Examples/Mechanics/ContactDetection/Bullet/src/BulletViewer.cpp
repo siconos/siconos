@@ -168,64 +168,69 @@ void BulletViewer::draw()
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
-  SP::UnitaryRelationsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
   SP::Interaction interaction;
   SP::Relation relation;
 
 
   // calibration
-  UnitaryRelationsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
+  if (Siconos_->model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() >= 2)
   {
-    lbdmax = fmax(I1->bundle(*ui)->interaction()->lambdaOld(1)->getValue(0), lbdmax);
-  }
+    SP::InteractionsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
 
-  for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
-  {
-    interaction = I1->bundle(*ui)->interaction();
-    relation = interaction->relation();
-
-    involvedDS = interaction->dynamicalSystems();
-
-    itDS = involvedDS->begin();
-
-    SP::DynamicalSystem d1 = *itDS;
-
-    SP::SiconosVector q1 = ask<ForPosition>(*d1);
-
+    InteractionsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
     {
-      SimpleVector& cf = *ask<ForContactForce>(*relation);
-      double cfn = cf.norm2();
+      lbdmax = fmax(I1->bundle(*ui)->lambdaOld(1)->getValue(0), lbdmax);
+    }
 
-      w = fmax(.3, cfn / fmax(lbdmax, cfn));
+    for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
+    {
+      interaction = I1->bundle(*ui);
+      relation = interaction->relation();
+
+      involvedDS = interaction->dynamicalSystems();
+
+      itDS = involvedDS->begin();
+
+      SP::DynamicalSystem d1 = *itDS;
+
+      SP::SiconosVector q1 = ask<ForPosition>(*d1);
+
+      {
+        SimpleVector& cf = *ask<ForContactForce>(*relation);
+        double cfn = cf.norm2();
+
+        w = fmax(.3, cfn / fmax(lbdmax, cfn));
 
 
-      btManifoldPoint& cpoint = *ask<ForContactPoint>(*relation);
+        btManifoldPoint& cpoint = *ask<ForContactPoint>(*relation);
 
-      //      printf("cpoint.getDistance():%g\n",cpoint.getDistance());
+        //      printf("cpoint.getDistance():%g\n",cpoint.getDistance());
 
-      btVector3 posa = cpoint.getPositionWorldOnA();
-      btVector3 posb = cpoint.getPositionWorldOnB();
-      btVector3 dirf(cf(0), cf(1), cf(2));
-      btVector3 endf = posa + dirf.normalize() * w;
-      btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 4.;
+        btVector3 posa = cpoint.getPositionWorldOnA();
+        btVector3 posb = cpoint.getPositionWorldOnB();
+        btVector3 dirf(cf(0), cf(1), cf(2));
+        btVector3 endf = posa + dirf.normalize() * w;
+        btVector3 cnB = posb + cpoint.m_normalWorldOnB.normalize() / 4.;
 
-      //      printf("dist(posb,posa):%g\n",sqrt((posb-posa).dot(posb-posa)));
+        //      printf("dist(posb,posa):%g\n",sqrt((posb-posa).dot(posb-posa)));
 
-      glPushMatrix();
-      glColor3f(.80, 0, 0);
-      glLineWidth(2.);
-      QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
-      glPopMatrix();
+        glPushMatrix();
+        glColor3f(.80, 0, 0);
+        glLineWidth(2.);
+        QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
+        glPopMatrix();
 
-      glPushMatrix();
-      glColor3f(0, .80, 0);
-      glLineWidth(1.);
-      QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .03, 10.);
-      glPopMatrix();
+        glPushMatrix();
+        glColor3f(0, .80, 0);
+        glLineWidth(1.);
+        QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .03, 10.);
+        glPopMatrix();
 
+      }
     }
   }
+
 
   for (unsigned int i = 0; i < GETNDS(Siconos_); i++)
   {

@@ -118,7 +118,7 @@ void BulletBodies::init()
     {
       for (unsigned int j = 0; j < N; ++j)
       {
-        for (unsigned int k = 0; k < 2; ++k)
+        for (unsigned int k = 0; k < 3; ++k)
         {
 
           SP::SimpleVector position(new SimpleVector(7));
@@ -212,7 +212,7 @@ void BulletBodies::init()
     SP::btVector3 aabbmax(new btVector3(100, 100, 100));
     SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
 
-    _playground.reset(new BulletSpaceFilter(_model->nonSmoothDynamicalSystem(),
+    _playground.reset(new BulletSpaceFilter(_model,
                                             nslaw, aabbmin, aabbmax));
 
     // -- Time discretisation --
