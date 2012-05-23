@@ -96,11 +96,11 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
   // It seems that index() in not update in Index(0)
   // see comment in void Simulation::updateIndexSets()
-  //if (_levelMin==0)
-  // {
-  //    indexSet->update_vertices_indices();
-  //    indexSet->update_edges_indices();
-  // }
+  if (_levelMin == 0)
+  {
+    indexSet->update_vertices_indices();
+    indexSet->update_edges_indices();
+  }
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
@@ -148,13 +148,41 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         computeDiagonalInteractionBlock(*vi);
       }
 
-      /* interactionBlock must be zeroed at init */
-      std::vector<bool> initialized;
-      initialized.resize(indexSet->edges_number());
-      std::fill(initialized.begin(), initialized.end(), false);
+
+
+
+
 
       /* on a undirected graph, out_edges gives all incident edges */
       InteractionsGraph::OEIterator oei, oeiend;
+      /* interactionBlock must be zeroed at init */
+      std::map<SP::SiconosMatrix, bool> initialized;
+      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+           oei != oeiend; ++oei)
+      {
+        /* on adjoint graph there is at most 2 edges between source and target */
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        if (indexSet->upper_blockProj[ed1])
+        {
+          initialized[indexSet->upper_blockProj[ed1]] = false;
+        }
+        // if(indexSet->lower_blockProj[ed2])
+        // {
+        //   initialized[indexSet->lower_blockProj[ed1]] = false;
+        // }
+
+        if (indexSet->upper_blockProj[ed1])
+        {
+          initialized[indexSet->upper_blockProj[ed2]] = false;
+        }
+        // if(indexSet->lower_blockProj[ed2])
+        // {
+        //   initialized[indexSet->lower_blockProj[ed2]] = false;
+        // }
+      }
+
+
       for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
@@ -186,6 +214,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           if (! indexSet->upper_blockProj[ed1])
           {
             indexSet->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            initialized[indexSet->upper_blockProj[ed1]] = false;
 #ifdef MLCPPROJ_DEBUG
             std::cout <<  "Allocation of upper_blockProj " <<  indexSet->upper_blockProj[ed1].get() << " of edge " << ed1 << " of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
 #endif
@@ -218,6 +247,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
             std::cout <<  "Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
 #endif
             indexSet->lower_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            initialized[indexSet->lower_blockProj[ed1]] = false;
             if (ed2 != ed1)
               indexSet->lower_blockProj[ed2] = indexSet->lower_blockProj[ed1];
           }
@@ -226,6 +256,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
             std::cout <<  "No Allocation of lower_blockProj of size " << nslawSize1 << " x " << nslawSize2 <<  std::endl;
 #endif
           currentInteractionBlock = indexSet->lower_blockProj[ed1];
+
 #ifdef MLCPPROJ_DEBUG
           std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0) << std::endl;
           std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1) << std::endl;
@@ -241,9 +272,12 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         }
 
 
-        if (!initialized[indexSet->index(ed1)])
+
+        //assert(indexSet->index(ed1));
+
+        if (!initialized[currentInteractionBlock])
         {
-          initialized[indexSet->index(ed1)] = true;
+          initialized[currentInteractionBlock] = true;
           currentInteractionBlock->zero();
         }
 
