@@ -319,13 +319,40 @@ void OneStepNSProblem::updateInteractionBlocks()
         computeDiagonalInteractionBlock(*vi);
       }
 
-      /* interactionBlock must be zeroed at init */
-      std::vector<bool> initialized;
-      initialized.resize(indexSet->edges_number());
-      std::fill(initialized.begin(), initialized.end(), false);
-
       /* on a undirected graph, out_edges gives all incident edges */
       InteractionsGraph::OEIterator oei, oeiend;
+      /* interactionBlock must be zeroed at init */
+      std::map<SP::SiconosMatrix, bool> initialized;
+      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+           oei != oeiend; ++oei)
+      {
+        /* on adjoint graph there is at most 2 edges between source and target */
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        if (indexSet->properties(ed1).upper_block)
+        {
+          initialized[indexSet->properties(ed1).upper_block] = false;
+        }
+        // if(indexSet->properties(ed2).upper_block)
+        // {
+        //   initialized[indexSet->properties(ed2).upper_block] = false;
+        // }
+
+        if (indexSet->properties(ed1).lower_block)
+        {
+          initialized[indexSet->properties(ed1).lower_block] = false;
+        }
+        // if(indexSet->properties(ed2).lower_block)
+        // {
+        //   initialized[indexSet->properties(ed2).lower_block] = false;
+        // }
+
+      }
+
+
+
+
+
       for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
@@ -355,6 +382,7 @@ void OneStepNSProblem::updateInteractionBlocks()
           if (! indexSet->properties(ed1).upper_block)
           {
             indexSet->properties(ed1).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            initialized[indexSet->properties(ed1).upper_block] = false;
             if (ed2 != ed1)
               indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
           }
@@ -366,6 +394,7 @@ void OneStepNSProblem::updateInteractionBlocks()
           if (! indexSet->properties(ed1).lower_block)
           {
             indexSet->properties(ed1).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
+            initialized[indexSet->properties(ed1).lower_block] = false;
             if (ed2 != ed1)
               indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
           }
@@ -373,9 +402,9 @@ void OneStepNSProblem::updateInteractionBlocks()
         }
 
 
-        if (!initialized[indexSet->index(ed1)])
+        if (!initialized[currentInteractionBlock])
         {
-          initialized[indexSet->index(ed1)] = true;
+          initialized[currentInteractionBlock] = true;
           currentInteractionBlock->zero();
         }
 

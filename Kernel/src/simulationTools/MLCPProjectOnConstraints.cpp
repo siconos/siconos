@@ -31,7 +31,7 @@ using namespace std;
 using namespace RELATION;
 using namespace Siconos;
 //#define MLCPPROJ_DEBUG
-
+//#define MLCPPROJ_WITH_CT
 void MLCPProjectOnConstraints::initOSNSMatrix()
 {
   _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _MStorageType));
@@ -167,14 +167,14 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         {
           initialized[indexSet->upper_blockProj[ed1]] = false;
         }
-        // if(indexSet->lower_blockProj[ed2])
+        // if(indexSet->upper_blockProj[ed2])
         // {
-        //   initialized[indexSet->lower_blockProj[ed1]] = false;
+        //   initialized[indexSet->upper_blockProj[ed1]] = false;
         // }
 
-        if (indexSet->upper_blockProj[ed1])
+        if (indexSet->lower_blockProj[ed1])
         {
-          initialized[indexSet->upper_blockProj[ed2]] = false;
+          initialized[indexSet->lower_blockProj[ed2]] = false;
         }
         // if(indexSet->lower_blockProj[ed2])
         // {
@@ -628,7 +628,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
       SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(ds));
 #ifdef MLCPPROJ_WITH_CT
-
       unsigned int sizeDS = neds->getDim();
       SP::SimpleMatrix T = neds->T();
       SP::SimpleMatrix workT(new SimpleMatrix(*T));
@@ -878,6 +877,8 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     }
 
+
+
     void MLCPProjectOnConstraints::computeqBlock(SP::Interaction inter, unsigned int pos)
     {
 
@@ -1032,7 +1033,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
 
 #endif
-      unsigned int sizeY = inter->nonSmoothLaw()->size();
+      //unsigned int sizeY = inter->nonSmoothLaw()->size();
+      unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                           (_M)->computeSizeForProjection(inter);
       SP::SimpleVector aBuff(new SimpleVector(sizeY));
       setBlock(*_z, aBuff, sizeY, pos, 0);
 #ifdef MLCPPROJ_DEBUG
@@ -1040,6 +1043,19 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       aBuff->display();
 #endif
 
+      DSIterator itDS = inter->dynamicalSystemsBegin();
+      while (itDS != inter->dynamicalSystemsEnd())
+      {
+        Type::Siconos dsType = Type::value(**itDS);
+        if ((dsType != Type::LagrangianDS) and
+            (dsType != Type::LagrangianLinearTIDS))
+        {
+          std:: cout << dsType << std::endl;
+          std:: cout << Type::name(**itDS);
+          RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
+        }
+        itDS++;
+      }
       // \warning aBuff should normally be in lambda[0]
       // The update of the position in DS should be made
       //  in Moreau::upateState or ProjectedMoreau::updateState
