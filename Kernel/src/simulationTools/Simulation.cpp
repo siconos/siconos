@@ -39,8 +39,8 @@
 #include "Relay.hpp"
 
 // for Debug
+//#define DEBUG_MESSAGES
 #include <debug.h>
-// #define DEBUG_MESSAGES 1
 
 using namespace std;
 
@@ -783,6 +783,11 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
         topo->resetIndexSetPtr(i);
     }
   }
+  DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
+  DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
+  DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
+  DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
+
 }
 
 void Simulation::computeLevelsForInputAndOutput()

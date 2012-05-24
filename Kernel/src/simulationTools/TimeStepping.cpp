@@ -631,7 +631,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    update(_levelMinForInput);
+    update(_levelMaxForInput);
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
@@ -667,7 +667,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       else
         checkSolverOutput(info, this);
 
-      update(_levelMinForInput);
+      update(_levelMaxForInput);
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {

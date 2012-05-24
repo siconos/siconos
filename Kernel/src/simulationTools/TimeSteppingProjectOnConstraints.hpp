@@ -126,7 +126,7 @@ public:
 
   /** visitors hook
    */
-  //ACCEPT_STD_VISITORS();
+  ACCEPT_STD_VISITORS();
 
 };
 
