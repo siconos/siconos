@@ -1031,16 +1031,29 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
         lds->q()->display();
       }
-
 #endif
+
+
+
       //unsigned int sizeY = inter->nonSmoothLaw()->size();
+
+      // y and lambda vectors
+      SP::SiconosVector lambda = inter->lambda(0);
+      SP::SiconosVector y = inter->y(0);
       unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                            (_M)->computeSizeForProjection(inter);
+      // Copy _w/_z values, starting from index pos into y/lambda.
+
+      //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+      setBlock(*_z, lambda, sizeY, pos, 0);
+
       SP::SimpleVector aBuff(new SimpleVector(sizeY));
       setBlock(*_z, aBuff, sizeY, pos, 0);
+
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPP lambda of Interaction is pos =%i :", pos);
       aBuff->display();
+      lambda->display();
 #endif
 
       DSIterator itDS = inter->dynamicalSystemsBegin();
@@ -1050,19 +1063,26 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         if ((dsType != Type::LagrangianDS) and
             (dsType != Type::LagrangianLinearTIDS))
         {
-          std:: cout << dsType << std::endl;
-          std:: cout << Type::name(**itDS);
           RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
         }
         itDS++;
       }
+
+      // WARNING : Must not be done here. and should be called with the correc time.
+      // compute p(0)
+      inter->computeInput(0.0 , 0);
+
       // \warning aBuff should normally be in lambda[0]
       // The update of the position in DS should be made
       //  in Moreau::upateState or ProjectedMoreau::updateState
       SP::SiconosMatrix J = lr->jachq();
       SP::SimpleMatrix aux(new SimpleMatrix(*J));
       aux->trans();
-      prod(*aux, *aBuff, *(lr->q()), false);
+      prod(*aux, *lambda, *(lr->q()), false);
+      //prod(*aux,*aBuff,*(lr->q()),false);
+
+
+
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
       _z->display();

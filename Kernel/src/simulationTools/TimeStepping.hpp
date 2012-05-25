@@ -167,7 +167,7 @@ public:
   // virtual bool predictorActivate(SP::Interaction inter, unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
-  void nextStep();
+  virtual void nextStep();
 
   /** update input, state of each dynamical system and output
    *  \param lambda order used to compute input

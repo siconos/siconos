@@ -86,6 +86,9 @@ public:
 
   virtual ~TimeSteppingProjectOnConstraints();
 
+
+
+
   virtual void updateWorldFromDS()
   {
     ;
@@ -119,6 +122,8 @@ public:
    */
   void advanceToEvent();
 
+
+  void nextStep();
 
   /*
    */

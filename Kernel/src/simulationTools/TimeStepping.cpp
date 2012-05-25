@@ -226,6 +226,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
 
           indexSet1->remove_vertex(inter1);
+          /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero if they are removed from the IndexSet*/
           inter1->lambda(1)->zero();
           topo->setHasChanged(true);
         }
@@ -481,7 +482,7 @@ void TimeStepping::computeInitialResidu()
 
 
     updateOutput(_levelMinForOutput);
-    updateInput(_levelMinForInput);
+    updateInput(_levelMaxForInput);
   }
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();

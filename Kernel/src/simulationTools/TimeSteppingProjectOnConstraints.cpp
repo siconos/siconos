@@ -61,6 +61,23 @@ void TimeSteppingProjectOnConstraints::initOSNS()
   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMax(_levelMaxForInput);
 }
 
+void TimeSteppingProjectOnConstraints::nextStep()
+{
+  TimeStepping::nextStep();
+
+
+  // Zeroing Lambda Muliplier of indexSet()
+
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  InteractionsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet->bundle(*ui);
+    inter->lambda(0)->zero();
+  }
+
+}
+
 void TimeSteppingProjectOnConstraints::advanceToEvent()
 {
   /** First step, Solve the standard velocity formulation.*/
