@@ -101,6 +101,7 @@ IF(DOXYGEN_FOUND)
   #
   SET(SWIG_MODULE_Kernel_EXTRA_DEPS
     KernelTypes.i
+    KernelBullet.i
     KernelRegistration.i
     Common.i
     numpy.i
@@ -146,7 +147,8 @@ SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES}
   ${SiconosNumerics_LIBRARIES}
   ${SiconosIO_LIBRARIES}
   ${FORTRAN_LIBRARIES} 
-  ${Boost_LIBRARIES})
+  ${Boost_LIBRARIES}
+  ${BULLET_LIBRARIES})
 
 # get python dist-packages
 # warning python may not know cmake_install_prefix
