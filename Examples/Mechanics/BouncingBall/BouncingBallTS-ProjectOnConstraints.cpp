@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    unsigned int levelForProjection = 1; //(default =1)
+    unsigned int levelForProjection = 0; //(default =1)
     SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
 
     // =========================== End of model definition ===========================
@@ -132,19 +132,23 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector p1 = ball->p(1);
+    SP::SiconosVector lambda1 = inter->lambda(1);
+    SP::SiconosVector lambda0 = inter->lambda(0);
+    SP::SiconosVector p0 = ball->p(0);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 3) = (*p1)(0);
+    dataPlot(0, 4) = (*lambda1)(0);
+    dataPlot(0, 5) = (*p0)(0);
+    dataPlot(0, 6) = (*lambda0)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -157,13 +161,16 @@ int main(int argc, char* argv[])
     while (s->nextTime() < T)
     {
       s->computeOneStep();
-
+      //std ::cout << "time step k = " << k << std::endl;
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*p)(0);
-      dataPlot(k, 4) = (*lambda)(0);
+      dataPlot(k, 3) = (*p1)(0);
+      dataPlot(k, 4) = (*lambda1)(0);
+      dataPlot(k, 5) = (*p0)(0);
+      dataPlot(k, 6) = (*lambda0)(0);
+
       s->nextStep();
       ++show_progress;
       k++;
@@ -199,6 +206,8 @@ int main(int argc, char* argv[])
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
       (dataPlot - dataPlotRef).display();
+
+
       return 1;
     }
 
