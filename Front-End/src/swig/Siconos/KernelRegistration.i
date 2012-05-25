@@ -88,5 +88,17 @@
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                       \
   PY_REGISTER(InteractionsSet);                                    \
   PY_REGISTER(BoundaryCondition);                                  \
-  PY_REGISTER(ioMatrix);
+  PY_REGISTER(ioMatrix);                                           \
+  PY_REGISTER_BULLET_MAYBE();
 
+#ifdef WITH_BULLET
+#define PY_REGISTER_BULLET_MAYBE()                      \
+  PY_REGISTER(BulletR);                                 \
+  PY_REGISTER(BulletDS);                                \
+  PY_REGISTER(BulletTimeStepping);                      \
+  PY_REGISTER(BulletTimeSteppingProjectOnConstraints);  \
+  PY_REGISTER(BulletWeightedShape);                     \
+  PY_REGISTER(BulletFrom1DLocalFrameR);
+#else
+#define PY_REGISTER_BULLET_MAYBE()
+#endif

@@ -75,6 +75,20 @@
 #include <Siconos/IO/SiconosRestart.hpp>
 #endif
 %} 
+
+#ifdef WITH_BULLET
+%{
+#include "BulletSiconos.hpp"
+#include "BulletSpaceFilter.hpp"
+#include "BulletR.hpp"
+#include "BulletDS.hpp"
+#include "BulletFrom1DLocalFrameR.hpp"
+#include "BulletTimeStepping.hpp"
+#include "BulletTimeSteppingProjectOnConstraints.hpp"
+#include "BulletWeightedShape.hpp"
+%}
+#endif
+
 // common declarations with Numerics
 
 %include Common.i
@@ -373,6 +387,8 @@ KERNEL_REGISTRATION();
 
 %}
 
+
+
 %inline
 %{
 
@@ -397,7 +413,6 @@ KERNEL_REGISTRATION();
   {
     return v;
   };
-  
 
 %}
 
@@ -473,6 +488,19 @@ KERNEL_REGISTRATION();
 #ifdef HAVE_SICONOS_IO
 %include "Siconos/IO/SiconosRestart.hpp";
 #endif
+
+
+#ifdef WITH_BULLET
+
+#define SIMD_FORCE_INLINE inline
+%ignore serialize;
+%ignore deSerialize;
+%import "LinearMath/btScalar.h"
+%include "LinearMath/btVector3.h"
+%include "btBulletCollisionCommon.h"
+%include "BulletCollision/CollisionShapes/btBoxShape.h"
+#endif
+
 
 %fragment("StdSequenceTraits");
 
