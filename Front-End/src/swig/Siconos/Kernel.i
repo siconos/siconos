@@ -268,7 +268,6 @@ namespace boost
 %shared_ptr(TYPE); 
 %enddef
 
-
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
@@ -285,11 +284,29 @@ namespace boost
 %shared_ptr(TYPE); 
 %enddef
 
+%define PY_REGISTER_BULLET(X) 
+TYPEDEF_SPTR(X);
+PY_REGISTER_WITHOUT_DIRECTOR(X)
+%enddef
+
  // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
 
 // ignores
 
+// Bullet
+// (because not defined in <name>.h)
+%ignore btCapsuleShapeX;
+%ignore btCapsuleShapeZ;
+%ignore btConeShapeX;
+%ignore btConeShapeZ;
+%ignore btCylinderShapeX;
+%ignore btCylinderShapeZ;
+%ignore btConvexInternalAabbCachingShape;
+%ignore btPolyhedralConvexAabbCachingShape;
+%ignore btBU_Simplex1to4;
+
+// createSPtr*
 %ignore nullDeleter;
 
 // defined in SimpleVector.cpp
@@ -448,6 +465,11 @@ KERNEL_REGISTRATION();
 #undef PY_REGISTER_WITHOUT_DIRECTOR
 %define PY_REGISTER_WITHOUT_DIRECTOR(X)
 %include "X.hpp";
+%enddef
+
+#undef PY_REGISTER_BULLET
+%define PY_REGISTER_BULLET(X)
+%include "BulletCollision/CollisionShapes/X.h";
 %enddef
 
 %shared_ptr(_SolverOptions);

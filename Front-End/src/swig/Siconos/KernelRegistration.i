@@ -92,13 +92,52 @@
   PY_REGISTER_BULLET_MAYBE();
 
 #ifdef WITH_BULLET
-#define PY_REGISTER_BULLET_MAYBE()                      \
-  PY_REGISTER(BulletR);                                 \
-  PY_REGISTER(BulletDS);                                \
-  PY_REGISTER(BulletTimeStepping);                      \
-  PY_REGISTER(BulletTimeSteppingProjectOnConstraints);  \
-  PY_REGISTER(BulletWeightedShape);                     \
-  PY_REGISTER(BulletFrom1DLocalFrameR);
+#define PY_REGISTER_BULLET_MAYBE()                                      \
+  PY_REGISTER(BulletR);                                                 \
+  PY_REGISTER(BulletDS);                                                \
+  PY_REGISTER(BulletTimeStepping);                                      \
+  PY_REGISTER(BulletTimeSteppingProjectOnConstraints);                  \
+  PY_REGISTER(BulletWeightedShape);                                     \
+  PY_REGISTER(BulletFrom1DLocalFrameR);                                 \
+  PY_REGISTER_BULLET(btCollisionShape)                                  \
+  PY_REGISTER_BULLET(btCollisionMargin)                                 \
+  PY_REGISTER_BULLET(btConvexShape)                                     \
+  PY_REGISTER_BULLET(btConvexInternalShape)                             \
+  PY_REGISTER_BULLET(btConvex2dShape)                                   \
+  PY_REGISTER_BULLET(btConvexPointCloudShape)                           \
+  PY_REGISTER_BULLET(btConvexHullShape)                                 \
+  PY_REGISTER_BULLET(btConvexPolyhedron)                                \
+  PY_REGISTER_BULLET(btConvexTriangleMeshShape)                         \
+  PY_REGISTER_BULLET(btPolyhedralConvexShape)                           \
+  PY_REGISTER_BULLET(btConcaveShape)                                    \
+  PY_REGISTER_BULLET(btEmptyShape)                                      \
+  PY_REGISTER_BULLET(btCompoundShape)                                   \
+  PY_REGISTER_BULLET(btTriangleShape)                                   \
+  PY_REGISTER_BULLET(btTriangleMesh)                                    \
+  PY_REGISTER_BULLET(btTriangleMeshShape)                               \
+  PY_REGISTER_BULLET(btBox2dShape)                                      \
+  PY_REGISTER_BULLET(btBoxShape)                                        \
+  PY_REGISTER_BULLET(btCapsuleShape)                                    \
+  PY_REGISTER_BULLET(btConeShape)                                       \
+  PY_REGISTER_BULLET(btCylinderShape)                                   \
+  PY_REGISTER_BULLET(btHeightfieldTerrainShape)                         \
+  PY_REGISTER_BULLET(btMaterial)                                        \
+  PY_REGISTER_BULLET(btMinkowskiSumShape)                               \
+  PY_REGISTER_BULLET(btSphereShape)                                     \
+  PY_REGISTER_BULLET(btMultiSphereShape)                                \
+  PY_REGISTER_BULLET(btMultimaterialTriangleMeshShape)                  \
+  PY_REGISTER_BULLET(btOptimizedBvh)                                    \
+  PY_REGISTER_BULLET(btScaledBvhTriangleMeshShape)                      \
+  PY_REGISTER_BULLET(btShapeHull)                                       \
+  PY_REGISTER_BULLET(btStaticPlaneShape)                                \
+  PY_REGISTER_BULLET(btStridingMeshInterface)                           \
+  PY_REGISTER_BULLET(btTetrahedronShape)                                \
+  PY_REGISTER_BULLET(btTriangleBuffer)                                  \
+  PY_REGISTER_BULLET(btTriangleCallback)                                \
+  PY_REGISTER_BULLET(btTriangleIndexVertexArray)                        \
+  PY_REGISTER_BULLET(btTriangleIndexVertexMaterialArray)                \
+  PY_REGISTER_BULLET(btTriangleInfoMap)                                 \
+  PY_REGISTER_BULLET(btUniformScalingShape)
 #else
 #define PY_REGISTER_BULLET_MAYBE()
 #endif
