@@ -327,6 +327,15 @@ void Simulation::reset()
   //std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
+void Simulation::reset(unsigned int level)
+{
+  // r (or p) is set to zero in all DynamicalSystems.
+  OSIIterator itOSI;
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    (*itOSI)->resetNonSmoothPart(level);
+  //std::cout << "     Simulation::reset()"  <<std::endl;
+}
+
 
 void Simulation::saveInMemory()
 {
@@ -394,7 +403,7 @@ void Simulation::updateInput(unsigned int level)
   InteractionsIterator it;
 
   // Set dynamical systems non-smooth part to zero.
-  reset();
+  reset(level);
 
   // We compute input using lambda(level).
   for (it = topology->interactions()->begin();

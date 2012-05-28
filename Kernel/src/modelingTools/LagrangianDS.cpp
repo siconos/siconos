@@ -989,6 +989,12 @@ void LagrangianDS::resetNonSmoothPart()
     _p[2]->zero();
 }
 
+void LagrangianDS::resetNonSmoothPart(unsigned int level)
+{
+  if (_p[level])
+    _p[level]->zero();
+}
+
 void LagrangianDS::computePostImpactVelocity()
 {
   // When this function is call, q[1] is supposed to be pre-impact velocity.

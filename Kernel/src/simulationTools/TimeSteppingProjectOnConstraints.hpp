@@ -40,7 +40,6 @@ protected:
    */
   ACCEPT_SERIALIZATION(TimeSteppingProjectOnConstraints);
 
-  virtual void initOSNS();
 
   /** level of IndexSet on which we project (default =1 (activated contact))
    */
@@ -55,6 +54,16 @@ protected:
    *  constraints at the  position level.
    */
   double _constraintTolUnilateral;
+
+  /** maximum violation for the violation of the unilateral
+   *  constraints at the  position level.
+   */
+  double _maxViolationUnilateral;
+
+  /** maximum violation for the violation of the equality
+   *  constraints at the  position level.
+   */
+  double _maxViolationEquality;
 
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
@@ -79,6 +88,7 @@ public:
                                    SP::OneStepNSProblem osnspb_pos,
                                    unsigned int _level = 1);
 
+  virtual void initOSNS();
 
   /** default constructor
    */
@@ -102,6 +112,16 @@ public:
   inline void setConstraintTolUnilateral(double v)
   {
     _constraintTolUnilateral = v;
+  }
+
+  inline double maxViolationUnilateral()
+  {
+    return _maxViolationUnilateral;
+  }
+
+  inline double maxViolationEquality()
+  {
+    return _maxViolationEquality;
   }
 
   inline void setProjectionMaxIteration(unsigned int v)

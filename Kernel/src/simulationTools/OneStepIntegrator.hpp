@@ -283,6 +283,10 @@ public:
    */
   void resetNonSmoothPart();
 
+  /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
+    */
+  void resetNonSmoothPart(unsigned int level);
+
   /** update the state of the DynamicalSystem attached to this Integrator
    *  \param unsigned int: level of interest for the dynamics
    */

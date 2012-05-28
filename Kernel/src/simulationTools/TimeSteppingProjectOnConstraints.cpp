@@ -20,6 +20,7 @@
 #include "TimeStepping.hpp"
 
 #include "TimeSteppingProjectOnConstraints.hpp"
+#include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 using namespace std;
@@ -41,7 +42,8 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
   _projectionMaxIteration = 10;
   _doProj = 1;
   _doOnlyProj = 0;
-
+  _maxViolationUnilateral = 0.0;
+  _maxViolationEquality = 0.0;
 
 }
 
@@ -133,9 +135,37 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //   if (criteria < -_constraintTol)
   //     runningNewton=true;
   // }
-
   if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
+
+  updateInput(0);
+
+  //Store the q vector of each DS.
+
+  // for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+  //   {
+  //     SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+  //     Type::Siconos dsType = Type::value(*ds);
+  //     if(dsType == Type::NewtonEulerDS)
+  //     {
+  //       SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+
+  //     }
+  //     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+  //     {
+  //       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+  //       SP::SiconosVector q = d->q();
+
+
+
+  //       //std::cout << " q=" << std::endl;
+  //       //q->display();
+  //       //std::cout << " p(0)=" << std::endl;
+  //       //d->p(0)->display();
+
+  //     }
+  //     else
+  //       RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
   while (runningProjection && cmp < _projectionMaxIteration)
   {
@@ -143,6 +173,14 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 #ifdef TSPROJ_DEBUG
     printf("TimeSteppingProjectOnConstraints projection step = %d\n", cmp);
 #endif
+    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    InteractionsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet->bundle(*ui);
+      inter->lambda(0)->zero();
+    }
+
     info = 0;
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
@@ -154,6 +192,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       cout << " TimeSteppingProjectOnConstraints::advanceToEvent() project on constraints. solver failed." << endl ;
       return;
     }
+    updateInput(0);
 
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
@@ -162,11 +201,24 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+
+
+
         neds->normalizeq();
         neds->updateT();
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
+        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+        SP::SiconosVector q = d->q();
+        if (d->p(0))
+        {
+          *q +=  *d->p(0);
+        }
+        //std::cout << " q=" << std::endl;
+        //q->display();
+        //std::cout << " p(0)=" << std::endl;
+        //d->p(0)->display();
 
       }
       else
@@ -195,6 +247,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   if (cmp == _projectionMaxIteration)
   {
     cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
+    printf("              max criteria equality =  %e.\n", _maxViolationEquality);
+    printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
+    RuntimeException::selfThrow("youyou");
   }
 
 
@@ -328,7 +383,7 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   double maxViolationEquality = -1e24;
   double minViolationEquality = +1e24;
   double maxViolationUnilateral = -1e24;
-  double minViolationUnilateral = +1e24;
+  //double minViolationUnilateral = +1e24;
 
   *runningProjection = false;
 
@@ -342,14 +397,14 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
-      double criteria = interac->y(0)->getValue(0);
+      double criteria = std::max(0.0, - interac->y(0)->getValue(0));
 #ifdef TSPROJ_DEBUG
-      printf("unilatreal interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
+      printf("Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
 #endif
 
       if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
-      if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
-      if (criteria < - _constraintTolUnilateral)
+      //if (criteria < minViolationUnilateral) minViolationUnilateral=criteria;
+      if (maxViolationUnilateral > _constraintTolUnilateral)
       {
         *runningProjection = true;
 #ifdef TSPROJ_DEBUG
@@ -369,7 +424,8 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
 #endif
       }
     }
-
+    _maxViolationUnilateral = maxViolationUnilateral;
+    _maxViolationEquality = maxViolationEquality;
   }
 #ifdef TSPROJ_DEBUG
   printf("TSProj newton min/max criteria projection\n");
@@ -377,6 +433,6 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   printf("              min criteria equality =  %e.\n", minViolationEquality);
   printf("              max criteria equality =  %e.\n", maxViolationEquality);
   printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  printf("              min criteria unilateral =  %e.\n", minViolationUnilateral);
+  //printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);
 #endif
 }

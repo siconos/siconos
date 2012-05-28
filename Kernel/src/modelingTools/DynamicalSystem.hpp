@@ -831,6 +831,10 @@ public:
    */
   virtual void resetNonSmoothPart() = 0;
 
+  /** set R to zero for a given level
+   */
+  virtual void resetNonSmoothPart(unsigned int level) = 0;
+
   /**
    * overwrite these methods to do the specific work that must be done
    * at the beginning or the end of a computation step.  It could be

@@ -478,6 +478,10 @@ public:
   /** set R to zero
    */
   virtual void resetNonSmoothPart();
+
+  /** set R to zero fo a given level
+   */
+  virtual void resetNonSmoothPart(unsigned int level);
   /*
    * reset work vectors.
    */

@@ -21,6 +21,7 @@
 
 #include "TimeSteppingCombinedProjection.hpp"
 #include "NewtonEulerDS.hpp"
+#include "LagrangianDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "MLCPProjectOnConstraints.hpp"
@@ -31,6 +32,7 @@ class MLCPProjectOnConstraints;
 
 using namespace std;
 //#define TSPROJ_DEBUG
+//#define TSPROJ_WITHOUT_PROJECTION
 
 
 //#define DEBUG_MESSAGES
@@ -55,12 +57,12 @@ TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(SP::TimeDiscretis
     RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection level not equal to 2 is not yet implemented.  ");
 
   }
-  _constraintTol = 1e-04;
+  _constraintTol = 1e-08;
   _constraintTolUnilateral = 1e-08;
   _projectionMaxIteration = 50;
   _kIndexSetMax = 50;
   _doCombinedProj = true;
-  _doCombinedProjOnEquality = false;
+  _doCombinedProjOnEquality = true;
   _isIndexSetsStable = false;
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
@@ -141,6 +143,10 @@ void TimeSteppingCombinedProjection::initOSNS()
   osnspb_pos->setLevelMax(_indexSetLevelForProjection);
 
 
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMin(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setLevelMax(_levelMaxForInput);
+
+
   // better with visitor but I am not able to fix it.
   //_SimulationEffectOnOSNSP simulationEffectOnOSNSP(this);
   //osnspb_pos->accept(simulationEffectOnOSNSP);
@@ -158,41 +164,11 @@ void TimeSteppingCombinedProjection::initOSNS()
 
 void TimeSteppingCombinedProjection::advanceToEventOLD()
 {
-  //   computeInitialResidu();
-  //   /*advance To Event consists of one Newton iteration, here the jacobians are updated.*/
-  //   prepareNewtonIteration();
-  //   // solve ...
-  //   computeFreeState();
-  //   int info = 0;
-  //   if (!_allNSProblems->empty())
-  //     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-  //   // Check output from solver (convergence or not ...)
-  //   if (!checkSolverOutput)
-  //     DefaultCheckSolverOutput(info);
-  //   else
-  //     checkSolverOutput(info, this);
-  //   // Update
-  //   update(_levelMin);
-
-
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
-
-  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
-  {
-    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-    SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-    assert(indexSet1);
-    assert(indexSet2);
-
-    indexSet1->clear();
-    indexSet2->clear();
-  }
 
 
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
-
-
+  assert(0);
 }
 
 
@@ -236,7 +212,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   }
 
 #ifdef TSPROJ_DEBUG
-  int kindexset = 0 ;
+  unsigned int kindexset = 0 ;
 #endif
   while (!_isIndexSetsStable)
   {
@@ -268,7 +244,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       (*it)->computeOutput(0);
       (*it)->computeOutput(1);
-      (*it)->swapTimeStepInMemory();
+      //  (*it)->swapTimeStepInMemory();
 
       level = 0;
 
@@ -352,10 +328,22 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 #endif
 
-    //if(!_doCombinedProj)
-    //  return;
     int info = 0;
 
+    // Zeroing Lambda Muliplier of indexSet()
+
+    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    InteractionsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet->bundle(*ui);
+      inter->lambda(0)->zero();
+    }
+    updateInput(0);
+
+#ifdef TSPROJ_WITHOUT_PROJECTION
+
+#else
     /** Second step, Perform the projection on constraints.*/
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingCombinedProjection::newtonSolve begin projection:\n";
@@ -392,14 +380,39 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
 
+    if (!runningProjection)
+    {
+      // Zeroing Lambda Muliplier of indexSet()
 
-
+      SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+      InteractionsGraph::VIterator ui, uiend;
+      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter = indexSet->bundle(*ui);
+        inter->lambda(0)->zero();
+      }
+      updateInput(0);
+    }
     while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
     {
       cmp++;
 #ifdef TSPROJ_DEBUG
       printf("TimeSteppingCombinedProjection projection step = %d\n", cmp);
 #endif
+
+      // Zeroing Lambda Muliplier of indexSet()
+
+      SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+      InteractionsGraph::VIterator ui, uiend;
+      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter = indexSet->bundle(*ui);
+        inter->lambda(0)->zero();
+      }
+
+
+
+
       info = 0;
 #ifdef TSPROJ_DEBUG
       cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
@@ -412,6 +425,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         cout << " TimeSteppingCombinedProjection::advanceToEvent() project on constraints. solver failed." << endl ;
         return;
       }
+
+
+
+      updateInput(0);
+
+
+
       for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
       {
         SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
@@ -424,7 +444,20 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         }
         else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-
+          SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+          SP::SiconosVector q = d->q();
+          if (d->p(0))
+          {
+            *q +=  *d->p(0);
+          }
+#ifdef TSPROJ_DEBUG
+          std::cout << " q=" << std::endl;
+          q->display();
+          std::cout << " p(0)=" << std::endl;
+          d->p(0)->display();
+          std::cout << " p(1)=" << std::endl;
+          d->p(1)->display();
+#endif
         }
         else
           RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -435,11 +468,30 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       computeCriteria(&runningProjection);
 
+
+
       //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
       //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
       //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
 #ifdef TSPROJ_DEBUG
+
+      SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+      std ::cout << "lamda(1) in IndexSet1" << std::endl;
+      for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter = indexSet1->bundle(*ui);
+        inter->lambda(1)->display();
+      }
+      SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+      std ::cout << "lamda(0) in indexSet2" << std::endl;
+      for (boost::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter = indexSet2->bundle(*ui);
+        inter->lambda(0)->display();
+      }
+
+
       cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << cmp << "\n";
 #endif
 
@@ -449,6 +501,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //  (*it)->relation()->computeh(getTkp1());
       //}
     } // end while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
+
+
     if (cmp == _projectionMaxIteration)
     {
       cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
@@ -456,6 +510,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     }
 
+#endif // TSPROJ_WITHOUT_PROJECTION   
 
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingCombinedProjection::newtonSolve end projection:\n";
@@ -526,7 +581,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   double maxViolationEquality = -1e24;
   double minViolationEquality = +1e24;
   double maxViolationUnilateral = -1e24;
-  double minViolationUnilateral = +1e24;
+  //  double minViolationUnilateral = +1e24;
 
   *runningProjection = false;
 
@@ -541,17 +596,19 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
+
+
+
+#ifdef TSPROJ_DEBUG
+      printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
+#endif
       if (!_doCombinedProjOnEquality)
       {
-        double criteria = interac->y(0)->getValue(0);
-#ifdef TSPROJ_DEBUG
-        printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
-#endif
-        if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
-        if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
-
-        if (criteria < - _constraintTolUnilateral)
+        if (maxViolationUnilateral > _constraintTolUnilateral)
         {
+          double criteria = std::max(0.0, - interac->y(0)->getValue(0));
+          if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+
           *runningProjection = true;
 #ifdef TSPROJ_DEBUG
           printf("TSProj newton criteria unilateral true %e.\n", criteria);
@@ -561,11 +618,8 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
       else
       {
         double criteria = interac->y(0)->getValue(0);
-#ifdef TSPROJ_DEBUG
-        printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
-#endif
         if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
-        if (criteria < minViolationUnilateral) minViolationUnilateral = criteria;
+
         if (std::abs(criteria) >=  _constraintTolUnilateral)
         {
           *runningProjection = true;
@@ -573,7 +627,6 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
           printf("TSProj newton criteria unilateral true %e.\n", criteria);
 #endif
         }
-
       }
 
     }
@@ -602,7 +655,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   printf("              min criteria equality =  %e.\n", minViolationEquality);
   printf("              max criteria equality =  %e.\n", maxViolationEquality);
   printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  printf("              min criteria unilateral =  %e.\n", minViolationUnilateral);
+  //  printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);
 #endif
 }
 

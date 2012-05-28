@@ -537,6 +537,11 @@ public:
    */
   void reset();
 
+  /** Set OSI (DS) non-smooth part to zero for a given level.
+   * \param level the level to will be zeroed
+   */
+  void reset(unsigned int level);
+
   /** save DynamicalSystems and Interactions states in Memories
       (through OSI and OSNS).
    */

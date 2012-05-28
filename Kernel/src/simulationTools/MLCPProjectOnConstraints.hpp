@@ -48,7 +48,7 @@ protected:
   /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
   bool _doProjOnEquality;
 
-
+  bool  _useMassNormalization;
 
 public:
 

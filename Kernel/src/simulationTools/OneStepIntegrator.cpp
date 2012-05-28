@@ -138,6 +138,10 @@ void OneStepIntegrator::resetNonSmoothPart()
 {
   for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), boost::bind(&DynamicalSystem::resetNonSmoothPart, _1));
 }
+void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
+{
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), boost::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
+}
 
 void OneStepIntegrator::display()
 {

@@ -39,7 +39,7 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
   _m = 0;
   _curBlock = 0;
   _doProjOnEquality = false;
-
+  _useMassNormalization = false;
 }
 
 
@@ -611,12 +611,21 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       work->trans();
       //        cout<<"LinearOSNS::computeInteractionBlock leftInteractionBlock"<<endl;
       //        leftInteractionBlock->display();
-      centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
-      //*currentInteractionBlock +=  *leftInteractionBlock ** work;
 
 
-      prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
-      //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
+
+      if (_useMassNormalization)
+      {
+        centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
+        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+        //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
+      }
+      else
+      {
+        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+      }
+
+
       //*currentInteractionBlock *=h;
     }
     else if (Type::value(*ds) == Type::NewtonEulerDS)
@@ -853,19 +862,37 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
             }
           }
         }
-
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : leftInteractionBlock" << std::endl;
+        leftInteractionBlock->display();
+#endif
         // inter1 != inter2
         rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
         inter2->getLeftInteractionBlockForDS(ds, rightInteractionBlock);
-
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : rightInteractionBlock" << std::endl;
+        rightInteractionBlock->display();
+#endif
         // Warning: we use getLeft for Right interactionBlock
         // because right = transpose(left) and because of
         // size checking inside the getBlock function, a
         // getRight call will fail.
+#ifdef MLCPPROJ_DEBUG
+        std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : centralInteractionBlocks[ds->number()] " << std::endl;
+        centralInteractionBlocks[ds->number()]->display();
+#endif
         rightInteractionBlock->trans();
-        centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
-        //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-        prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+
+        if (_useMassNormalization)
+        {
+          centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
+          //*currentInteractionBlock +=  *leftInteractionBlock ** work;
+          prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+        }
+        else
+        {
+          prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+        }
 #ifdef MLCPPROJ_DEBUG
         std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : currentInteractionBlock" << std::endl;
         currentInteractionBlock->display();
@@ -971,7 +998,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         else if (relationType == Lagrangian)
         {
           postComputeLagrangianR(inter, pos);
-
         }
         else
         {
@@ -979,6 +1005,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         }
 
       }
+
+
+
+
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postCompute AFTER UPDATE:\n");
       for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -1015,14 +1045,12 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, unsigned int pos)
     {
-
       SP::LagrangianR  lr = boost::static_pointer_cast<LagrangianR>(inter->relation());
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postComputeLagrangian inter->y(0)\n");
       inter->y(0)->display();
       printf("MLCPProjectOnConstraints::postComputeLagrangian lr->jachq \n");
       lr->jachq()->display();
-
       printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
       for (DSIterator it = inter->dynamicalSystemsBegin();
            it != inter->dynamicalSystemsEnd();
@@ -1044,44 +1072,75 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
                            (_M)->computeSizeForProjection(inter);
       // Copy _w/_z values, starting from index pos into y/lambda.
 
-      //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+      //setBlock(*_w, y, sizeY, pos, 0);
       setBlock(*_z, lambda, sizeY, pos, 0);
 
-      SP::SimpleVector aBuff(new SimpleVector(sizeY));
-      setBlock(*_z, aBuff, sizeY, pos, 0);
-
 #ifdef MLCPPROJ_DEBUG
-      printf("MLCPP lambda of Interaction is pos =%i :", pos);
-      aBuff->display();
+      printf("MLCPP lambda of Interaction is pos =%i :\n", pos);
+      //  aBuff->display();
       lambda->display();
-#endif
-
-      DSIterator itDS = inter->dynamicalSystemsBegin();
-      while (itDS != inter->dynamicalSystemsEnd())
-      {
-        Type::Siconos dsType = Type::value(**itDS);
-        if ((dsType != Type::LagrangianDS) and
-            (dsType != Type::LagrangianLinearTIDS))
-        {
-          RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
-        }
-        itDS++;
-      }
-
-      // WARNING : Must not be done here. and should be called with the correc time.
-      // compute p(0)
-      inter->computeInput(0.0 , 0);
-
-      // \warning aBuff should normally be in lambda[0]
-      // The update of the position in DS should be made
-      //  in Moreau::upateState or ProjectedMoreau::updateState
+      unsigned int nslawsize = inter->nonSmoothLaw()->size();
+      SP::SimpleVector aBuff(new SimpleVector(nslawsize));
+      setBlock(*_z, aBuff, sizeY, pos, 0);
       SP::SiconosMatrix J = lr->jachq();
       SP::SimpleMatrix aux(new SimpleMatrix(*J));
       aux->trans();
-      prod(*aux, *lambda, *(lr->q()), false);
-      //prod(*aux,*aBuff,*(lr->q()),false);
+      SP::SiconosVector tmp(new SimpleVector(*(lr->q())));
+      prod(*aux, *aBuff, *(tmp), false);
+      //prod(*aux,*lambda,*(lr->q()),false);
+      std:: cout << " tmp =  tmp + J^T * lambda" << std::endl;
+      tmp->display();
+#endif
 
 
+
+      // // WARNING : Must not be done here. and should be called with the correct time.
+      // // compute p(0)
+      // inter->computeInput(0.0 ,0);
+
+      // // \warning aBuff should normally be in lambda[0]
+      // // The update of the position in DS should be made
+      // //  in Moreau::upateState or ProjectedMoreau::updateState
+      // SP::SiconosMatrix J=lr->jachq();
+      // SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      // aux->trans();
+
+      // SP::SiconosVector tmp (new SimpleVector(*(lr->q())));
+      // std:: cout << " tmp ="<<std::endl;
+      // tmp->display();
+      // std:: cout << " lr->q() ="<<std::endl;
+      // lr->q()->display();
+
+      // //prod(*aux,*lambda,*(lr->q()),false);
+      // prod(*aux,*aBuff,*(tmp),false);
+      // std:: cout << " tmp =  tmp + J * lambda"<<std::endl;
+      // tmp->display();
+
+
+      // // The following step should be done on Moreau::upateState or ProjectedMoreau::updateState
+      // DSIterator itDS = inter->dynamicalSystemsBegin();
+      // while(itDS!=inter->dynamicalSystemsEnd())
+      // {
+      //   Type::Siconos dsType = Type::value(**itDS);
+      //   if((dsType !=Type::LagrangianDS) and
+      //      (dsType !=Type::LagrangianLinearTIDS) )
+      //   {
+      //     RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
+      //   }
+
+      //   SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+      //   SP::SiconosVector q = d->q();
+
+      //   *q +=  *d->p(0);
+      //   std::cout << " q=" << std::endl;
+      //   q->display();
+      //   itDS++;
+      // }
+
+      // if ((*lr->q() - *tmp).normInf() > 1e-12)
+      // {
+      //   RuntimeException::selfThrow("youyou");
+      // }
 
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
