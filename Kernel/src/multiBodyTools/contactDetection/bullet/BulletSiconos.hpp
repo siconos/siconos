@@ -21,7 +21,8 @@
 #ifndef BulletSiconos_hpp
 #define BulletSiconos_hpp
 
-#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+#include <bullet/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+#include <bullet/BulletCollision/CollisionShapes/btTriangleIndexVertexMaterialArray.h>
 
 #include "SiconosPointers.hpp"
 
@@ -29,6 +30,10 @@ DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
 DEFINE_SPTR(btManifoldPoint);
+
+DEFINE_SPTR(btTriangleIndexVertexMaterialArray);
+
+static SP::btTriangleIndexVertexMaterialArray x;
 
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);

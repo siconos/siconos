@@ -134,6 +134,8 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 class SiconosMatrix;
 DEFINE_SPTR(SiconosMatrix);
 
+DEFINE_SPTR(SimpleMatrix);
+
 /** A collection of pointers to matrices ; blocksMat is a typedef of
     boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;

@@ -86,7 +86,7 @@ protected:
 public:
 
   /** destructor */
-  ~ControlDynamicalSystem() {};
+  virtual ~ControlDynamicalSystem() {};
 
   /** Modify the value of theta (for Moreau)
    * \param newTheta the new value of theta */
@@ -164,7 +164,7 @@ public:
   };
 
   /** Run the simulation */
-  void run();
+  virtual void run();
 };
 
 DEFINE_SPTR(ControlDynamicalSystem);

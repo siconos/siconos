@@ -385,4 +385,6 @@ public:
 
 };
 
+TYPEDEF_SPTR(Moreau);
+
 #endif // MOREAU_H

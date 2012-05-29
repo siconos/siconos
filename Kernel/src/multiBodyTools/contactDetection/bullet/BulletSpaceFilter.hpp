@@ -26,7 +26,7 @@
 #include "BulletFrom1DLocalFrameR.hpp"
 #include "BulletDS.hpp"
 
-#include <btBulletCollisionCommon.h>
+#include <bullet/btBulletCollisionCommon.h>
 
 //typedef btSimpleBroadphase BulletBroadPhase;
 typedef bt32BitAxisSweep3 BulletBroadPhase;

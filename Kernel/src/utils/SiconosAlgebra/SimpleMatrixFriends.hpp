@@ -26,8 +26,6 @@
 #include "SiconosMatrix.hpp"
 //#include "BlocksSimpleMat.hpp"
 
-DEFINE_SPTR(SimpleMatrix);
-
 /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
  * \param MIn a SPC::SiconosMatrix
  * \param[in,out] MOut a SP::SiconosMatrix
