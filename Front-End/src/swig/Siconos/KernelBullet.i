@@ -74,7 +74,6 @@
 %ignore serialize;
 %ignore deSerialize;
 %import "LinearMath/btScalar.h"
-%include "LinearMath/btVector3.h"
 %include "btBulletCollisionCommon.h"
 
 

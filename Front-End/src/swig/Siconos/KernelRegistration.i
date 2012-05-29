@@ -95,49 +95,51 @@
 #define PY_REGISTER_BULLET_MAYBE()                                      \
   PY_REGISTER(BulletR);                                                 \
   PY_REGISTER(BulletDS);                                                \
+  PY_REGISTER(BulletSpaceFilter);                                       \
   PY_REGISTER(BulletTimeStepping);                                      \
   PY_REGISTER(BulletTimeSteppingProjectOnConstraints);                  \
   PY_REGISTER(BulletWeightedShape);                                     \
   PY_REGISTER(BulletFrom1DLocalFrameR);                                 \
-  PY_REGISTER_BULLET(btCollisionShape)                                  \
-  PY_REGISTER_BULLET(btCollisionMargin)                                 \
-  PY_REGISTER_BULLET(btConvexShape)                                     \
-  PY_REGISTER_BULLET(btConvexInternalShape)                             \
-  PY_REGISTER_BULLET(btConvex2dShape)                                   \
-  PY_REGISTER_BULLET(btConvexPointCloudShape)                           \
-  PY_REGISTER_BULLET(btConvexHullShape)                                 \
-  PY_REGISTER_BULLET(btConvexPolyhedron)                                \
-  PY_REGISTER_BULLET(btConvexTriangleMeshShape)                         \
-  PY_REGISTER_BULLET(btPolyhedralConvexShape)                           \
-  PY_REGISTER_BULLET(btConcaveShape)                                    \
-  PY_REGISTER_BULLET(btEmptyShape)                                      \
-  PY_REGISTER_BULLET(btCompoundShape)                                   \
-  PY_REGISTER_BULLET(btTriangleShape)                                   \
-  PY_REGISTER_BULLET(btTriangleMesh)                                    \
-  PY_REGISTER_BULLET(btTriangleMeshShape)                               \
-  PY_REGISTER_BULLET(btBox2dShape)                                      \
-  PY_REGISTER_BULLET(btBoxShape)                                        \
-  PY_REGISTER_BULLET(btCapsuleShape)                                    \
-  PY_REGISTER_BULLET(btConeShape)                                       \
-  PY_REGISTER_BULLET(btCylinderShape)                                   \
-  PY_REGISTER_BULLET(btHeightfieldTerrainShape)                         \
-  PY_REGISTER_BULLET(btMaterial)                                        \
-  PY_REGISTER_BULLET(btMinkowskiSumShape)                               \
-  PY_REGISTER_BULLET(btSphereShape)                                     \
-  PY_REGISTER_BULLET(btMultiSphereShape)                                \
-  PY_REGISTER_BULLET(btMultimaterialTriangleMeshShape)                  \
-  PY_REGISTER_BULLET(btOptimizedBvh)                                    \
-  PY_REGISTER_BULLET(btScaledBvhTriangleMeshShape)                      \
-  PY_REGISTER_BULLET(btShapeHull)                                       \
-  PY_REGISTER_BULLET(btStaticPlaneShape)                                \
-  PY_REGISTER_BULLET(btStridingMeshInterface)                           \
-  PY_REGISTER_BULLET(btTetrahedronShape)                                \
-  PY_REGISTER_BULLET(btTriangleBuffer)                                  \
-  PY_REGISTER_BULLET(btTriangleCallback)                                \
-  PY_REGISTER_BULLET(btTriangleIndexVertexArray)                        \
-  PY_REGISTER_BULLET(btTriangleIndexVertexMaterialArray)                \
-  PY_REGISTER_BULLET(btTriangleInfoMap)                                 \
-  PY_REGISTER_BULLET(btUniformScalingShape)
+  PY_REGISTER_BULLET_LINEAR_MATH(btVector3)                             \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btCollisionShape)              \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btCollisionMargin)             \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexShape)                 \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexInternalShape)         \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvex2dShape)               \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexPointCloudShape)       \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexHullShape)             \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexPolyhedron)            \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexTriangleMeshShape)     \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btPolyhedralConvexShape)       \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConcaveShape)                \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btEmptyShape)                  \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btCompoundShape)               \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleShape)               \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleMesh)                \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleMeshShape)           \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btBox2dShape)                  \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btBoxShape)                    \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btCapsuleShape)                \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btConeShape)                   \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btCylinderShape)               \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btHeightfieldTerrainShape)     \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btMaterial)                    \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btMinkowskiSumShape)           \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btSphereShape)                 \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btMultiSphereShape)            \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btMultimaterialTriangleMeshShape) \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btOptimizedBvh)                \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btScaledBvhTriangleMeshShape)  \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btShapeHull)                   \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btStaticPlaneShape)            \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btStridingMeshInterface)       \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTetrahedronShape)            \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleBuffer)              \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleCallback)            \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexArray)    \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleIndexVertexMaterialArray) \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleInfoMap)             \
+  PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape)
 #else
 #define PY_REGISTER_BULLET_MAYBE()
 #endif

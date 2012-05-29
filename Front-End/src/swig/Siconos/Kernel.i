@@ -19,7 +19,7 @@
 //	
 
 // SWIG interface for Siconos Kernel
-%module(directors="1") Kernel
+%module(directors="1", allprotected="1") Kernel
 
 %feature("director:except") {
   if ($error != NULL) {
@@ -142,7 +142,6 @@
 %include "stl.i"
 
 // 1. Vector and Matrix <=> numpy array (dense only)
-
 
 %include "KernelTypes.i"
 
@@ -284,7 +283,12 @@ namespace boost
 %shared_ptr(TYPE); 
 %enddef
 
-%define PY_REGISTER_BULLET(X) 
+%define PY_REGISTER_BULLET_COLLISION_DETECTION(X) 
+TYPEDEF_SPTR(X);
+PY_REGISTER_WITHOUT_DIRECTOR(X)
+%enddef
+
+%define PY_REGISTER_BULLET_LINEAR_MATH(X)
 TYPEDEF_SPTR(X);
 PY_REGISTER_WITHOUT_DIRECTOR(X)
 %enddef
@@ -295,7 +299,7 @@ KERNEL_REGISTRATION();
 // ignores
 
 // Bullet
-// (because not defined in <name>.h)
+// (mostly because not defined in <name>.h)
 %ignore btCapsuleShapeX;
 %ignore btCapsuleShapeZ;
 %ignore btConeShapeX;
@@ -305,6 +309,11 @@ KERNEL_REGISTRATION();
 %ignore btConvexInternalAabbCachingShape;
 %ignore btPolyhedralConvexAabbCachingShape;
 %ignore btBU_Simplex1to4;
+%ignore m_vertices1;
+
+%ignore btVector4;
+
+
 
 // createSPtr*
 %ignore nullDeleter;
@@ -339,6 +348,9 @@ KERNEL_REGISTRATION();
 
 // we do not need visitor hook
 %ignore visit;
+
+// cannot compile wrapper
+%ignore statOut;
 
 %include "SiconosAlgebra.hpp"
 
@@ -467,9 +479,14 @@ KERNEL_REGISTRATION();
 %include "X.hpp";
 %enddef
 
-#undef PY_REGISTER_BULLET
-%define PY_REGISTER_BULLET(X)
+#undef PY_REGISTER_BULLET_COLLISION_DETECTION
+%define PY_REGISTER_BULLET_COLLISION_DETECTION(X)
 %include "BulletCollision/CollisionShapes/X.h";
+%enddef
+
+#undef PY_REGISTER_BULLET_LINEAR_MATH
+%define PY_REGISTER_BULLET_LINEAR_MATH(X)
+%include "LinearMath/X.h";
 %enddef
 
 %shared_ptr(_SolverOptions);
@@ -501,7 +518,6 @@ KERNEL_REGISTRATION();
 #ifdef HAVE_SICONOS_IO
 %include "Siconos/IO/SiconosRestart.hpp";
 #endif
-
 
 %fragment("StdSequenceTraits");
 

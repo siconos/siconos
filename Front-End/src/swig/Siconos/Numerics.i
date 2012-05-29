@@ -48,6 +48,7 @@
 #include "fclib_interface.h"
 
 #include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/cat.hpp>
 %}
 
 %inline %{
@@ -1053,12 +1054,12 @@
 
   SolverOptions(FRICTION_SOLVER id)
   {
-    return SolverOptions_makeSolverOptions(NULL, NULL, id);
+    return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, NULL, id);
   }
 
   SolverOptions(FrictionContactProblem* fcp, FRICTION_SOLVER id)
   {
-    return SolverOptions_makeSolverOptions(NULL, fcp, id);
+    return BOOST_PP_CAT(FE_SWIG_INTERNAL_MEMBER,SolverOptions_makeSolverOptions)(NULL, fcp, id);
   }
 
   ~SolverOptions() 

@@ -20,6 +20,13 @@
 
 // Common stuff
 
+#if (SWIG_VERSION >= 0x020004)
+#define FE_SWIG_INTERNAL_MEMBER _
+#enddef
+#else
+#define FE_SWIG_INTERNAL_MEMBER 
+#enddef
+#endif
 
 // std python sequence -> C array
 
