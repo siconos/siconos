@@ -30,6 +30,7 @@
   REGISTER(EventDriven)                           \
   REGISTER(OneStepIntegrator)                     \
   REGISTER(Moreau)                                \
+  REGISTER(MoreauProjectOnConstraintsOSI)         \
   REGISTER(MoreauCombinedProjectionOSI)           \
   REGISTER(Lsodar)                                \
   REGISTER(D1MinusLinear)                         \

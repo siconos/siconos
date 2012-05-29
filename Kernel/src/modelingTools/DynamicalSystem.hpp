@@ -147,8 +147,10 @@ class DynamicalSystem
 {
 
 public:
-  /** List of indices used to save tmp work vectors (last value is the size of the present list)*/
-  enum WorkNames {local_buffer, sizeWorkV};
+  /** List of indices used to save tmp work vectors
+   * The last value is the size of the present list, so you HAVE to leave it at the end position.
+   */
+  enum WorkNames {local_buffer, qtmp, sizeWorkV};
 
 private:
   /** serialization hooks

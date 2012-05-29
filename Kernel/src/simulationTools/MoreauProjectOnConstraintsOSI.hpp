@@ -20,8 +20,8 @@
   Moreau Time-Integrator for Dynamical Systems for Combined Projection Algorithm
 */
 
-#ifndef MOREAUCOMBINEDPROJECTIONOSI_H
-#define MOREAUCOMBINEDPROJECTIONOSI_H
+#ifndef MOREAUPROJECTONCONSTRAINTSOSI_H
+#define MOREAUPROJECTONCONSTRAINTSOSI_H
 
 #include "OneStepIntegrator.hpp"
 #include "Moreau.hpp"
@@ -30,7 +30,7 @@
 class Simulation;
 class SiconosMatrix;
 
-const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
+const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 
 /**  Moreau Time-Integrator for Dynamical Systems for Combined Projection Algorithm
  *
@@ -48,16 +48,16 @@ const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
  *
  *
  */
-class MoreauCombinedProjectionOSI : public Moreau
+class MoreauProjectOnConstraintsOSI : public Moreau
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(MoreauCombinedProjectionOSI);
+  ACCEPT_SERIALIZATION(MoreauProjectOnConstraintsOSI);
 
   /** Default constructor
    */
-  MoreauCombinedProjectionOSI() {};
+  MoreauProjectOnConstraintsOSI() {};
 
 
 
@@ -67,25 +67,44 @@ public:
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  explicit MoreauCombinedProjectionOSI(double theta) : Moreau(theta) {}  ;
+  explicit MoreauProjectOnConstraintsOSI(double theta) : Moreau(theta)
+  {
+    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  };
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauCombinedProjectionOSI(SP::DynamicalSystem ds, double theta) : Moreau(ds, theta) {}  ;
+  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta) : Moreau(ds, theta)
+  {
+    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  }  ;
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
    */
-  MoreauCombinedProjectionOSI(DynamicalSystemsSet& dsSet, double theta) :     Moreau(dsSet, theta) {}   ;
+  MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta) :     Moreau(dsSet, theta)
+  {
+    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
+  }   ;
 
   /** destructor
    */
-  virtual ~MoreauCombinedProjectionOSI() {};
+  virtual ~MoreauProjectOnConstraintsOSI() {};
 
   // --- OTHER FUNCTIONS ---
+
+  // /** Apply the rule to one Interaction to known if is it should be included
+  //  * in the IndexSet of level i
+  //  */
+  // virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  // /** Apply the rule to one Interaction to known if is it should be removed
+  //  * in the IndexSet of level i
+  //  */
+  // virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
   /** initialization of the integrator; for linear time
       invariant systems, we compute time invariant operator (example :
@@ -94,24 +113,11 @@ public:
   void initialize();
 
 
-
-
-
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   */
-  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
-   */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted
    * \return a pointer on the integrator if it is of the right type, 0 otherwise
    */
-  static MoreauCombinedProjectionOSI* convert(OneStepIntegrator* osi);
+  static MoreauProjectOnConstraintsOSI* convert(OneStepIntegrator* osi);
 
   /** visitors hook
   */
@@ -119,4 +125,4 @@ public:
 
 };
 
-#endif // MOREAUCOMBINEDPROJECTIONOSI_H
+#endif // MOREAUPROJECTONCONSTRAINTSOSI_H

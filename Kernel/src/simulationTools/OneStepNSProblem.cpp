@@ -605,7 +605,9 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     Osi = simulation()->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
     unsigned int itN = (*itDS)->number();
-    if (osiType == OSI::MOREAU || osiType == OSI::SCHATZMANPAOLI)
+    if (osiType == OSI::MOREAU
+        || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
+        || osiType == OSI::SCHATZMANPAOLI)
     {
       dsType = Type::value(**itDS);
       if (dsType != Type::NewtonEulerDS)

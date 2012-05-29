@@ -44,6 +44,7 @@ Note that not all files from the current location are listed below, since some o
 #include "QP.hpp"
 #include "Lsodar.hpp"
 #include "Moreau.hpp"
+#include "MoreauProjectOnConstraintsOSI.hpp"
 #include "MoreauCombinedProjectionOSI.hpp"
 #include "Moreau2.hpp"
 #include "D1MinusLinear.hpp"

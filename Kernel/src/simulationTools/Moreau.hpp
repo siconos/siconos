@@ -289,7 +289,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  void initialize();
+  virtual void initialize();
 
   /** init WMap[ds] Moreau matrix at time t
    *  \param the time (double)

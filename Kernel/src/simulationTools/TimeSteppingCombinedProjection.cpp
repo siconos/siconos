@@ -393,6 +393,31 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       }
       updateInput(0);
     }
+
+    //Store the q vector of each DS.
+
+    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    {
+      SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+      Type::Siconos dsType = Type::value(*ds);
+      if (dsType == Type::NewtonEulerDS)
+      {
+        SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+        neds->addWorkVector(neds->q(), DynamicalSystem::qtmp);
+      }
+      else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+      {
+        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+        d->addWorkVector(d->q(), DynamicalSystem::qtmp);
+      }
+      else
+        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+    }
+
+
+
+
+
     while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
     {
       cmp++;
@@ -446,9 +471,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
+          SP::SiconosVector qtmp = d->getWorkVector(DynamicalSystem::qtmp);
           if (d->p(0))
           {
-            *q +=  *d->p(0);
+            *q = * qtmp +  *d->p(0);
+            //*q +=  *d->p(0);
           }
 #ifdef TSPROJ_DEBUG
           std::cout << " q=" << std::endl;

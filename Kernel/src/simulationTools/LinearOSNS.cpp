@@ -557,6 +557,7 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
 
 
   if (osiType == OSI::MOREAU ||
+      osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI ||
       osiType == OSI::LSODAR ||
       osiType == OSI::D1MINUSLINEAR ||
       osiType == OSI::SCHATZMANPAOLI ||

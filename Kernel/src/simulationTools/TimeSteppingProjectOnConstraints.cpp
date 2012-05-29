@@ -23,7 +23,9 @@
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "OneStepIntegrator.hpp"
 using namespace std;
+
 //#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
@@ -33,6 +35,13 @@ TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscr
     unsigned int level)
   : TimeStepping(td, osi, osnspb_velo)
 {
+
+  //if (Type::value(osi) != Type::MoreauProjectOnConstraintsOSI)
+  OSI::TYPES typeOSI;
+  typeOSI = (osi)->getType();
+  if (typeOSI != OSI::MOREAUPROJECTONCONSTRAINTSOSI)
+    RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints.  wrong type of OneStepIntegrator");
+
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
 
@@ -99,6 +108,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     return;
   int info = 0;
 
+
+
+
   /** Second step, Perform the projection on constraints.*/
 #ifdef TSPROJ_DEBUG
   cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
@@ -142,30 +154,23 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
   //Store the q vector of each DS.
 
-  // for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
-  //   {
-  //     SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
-  //     Type::Siconos dsType = Type::value(*ds);
-  //     if(dsType == Type::NewtonEulerDS)
-  //     {
-  //       SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
-
-  //     }
-  //     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-  //     {
-  //       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-  //       SP::SiconosVector q = d->q();
-
-
-
-  //       //std::cout << " q=" << std::endl;
-  //       //q->display();
-  //       //std::cout << " p(0)=" << std::endl;
-  //       //d->p(0)->display();
-
-  //     }
-  //     else
-  //       RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+  for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+  {
+    SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+    Type::Siconos dsType = Type::value(*ds);
+    if (dsType == Type::NewtonEulerDS)
+    {
+      SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+      neds->addWorkVector(neds->q(), DynamicalSystem::qtmp);
+    }
+    else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    {
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+      d->addWorkVector(d->q(), DynamicalSystem::qtmp);
+    }
+    else
+      RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+  }
 
   while (runningProjection && cmp < _projectionMaxIteration)
   {
@@ -193,7 +198,25 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       return;
     }
     updateInput(0);
+#ifdef TSPROJ_DEBUG
 
+    std ::cout << "After update input" << std::endl;
+    SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    std ::cout << "lamda(1) in IndexSet1" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->lambda(1)->display();
+    }
+    SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    std ::cout << "lamda(0) in indexSet0" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->lambda(0)->display();
+    }
+
+#endif
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
@@ -211,15 +234,13 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       {
         SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
+        SP::SiconosVector qtmp = d->getWorkVector(DynamicalSystem::qtmp);
+
         if (d->p(0))
         {
-          *q +=  *d->p(0);
+          *q = * qtmp +  *d->p(0);
+          //*q += *d->p(0);
         }
-        //std::cout << " q=" << std::endl;
-        //q->display();
-        //std::cout << " p(0)=" << std::endl;
-        //d->p(0)->display();
-
       }
       else
         RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -236,6 +257,20 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << cmp << "\n";
+    std ::cout << "After update state in position" << std::endl;
+    std ::cout << "lamda(1) in IndexSet1" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->lambda(1)->display();
+    }
+    std ::cout << "lamda(0) in indexSet0" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->lambda(0)->display();
+    }
+
 #endif
 
     //cout<<"during projection before normalizing of q:\n";

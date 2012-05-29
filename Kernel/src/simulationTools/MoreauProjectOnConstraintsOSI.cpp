@@ -16,22 +16,19 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "MoreauCombinedProjectionOSI.hpp"
+#include "MoreauProjectOnConstraintsOSI.hpp"
 #include "Simulation.hpp"
-#include "LagrangianDS.hpp"
+#include "Model.hpp"
 #include "NewtonEulerDS.hpp"
+#include "LagrangianDS.hpp"
 
-//#define DEBUG_STDOUT
+
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-using namespace std;
-//using namespace RELATION;
 
-
-
-void MoreauCombinedProjectionOSI::initialize()
+void MoreauProjectOnConstraintsOSI::initialize()
 {
 
   Moreau::initialize();
@@ -52,43 +49,8 @@ void MoreauCombinedProjectionOSI::initialize()
     }
     else
     {
-      RuntimeException::selfThrow("MoreauCombinedProjectionOSI::initialize() - DS not of the right type");
+      RuntimeException::selfThrow("MoreauProjectOnConstraintsOSI::initialize() - DS not of the right type");
     }
   }
-}
-
-
-
-
-
-bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-{
-  assert(i == 1 || i == 2);
-  //double h = simulationLink->timeStep();
-  if (i == 1) // index set for resolution at the velocity
-  {
-    double y = (inter->y(0))->getValue(0); // y(0) is the position
-    DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
-    if (y <= 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-    return (y <= 0);
-  }
-  else if (i == 2)  //  special index for the projection
-  {
-    double lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for Moreau scheme
-    DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
-    if (lambda > 0)
-      DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-    //    return (lambda > 0);
-    return true;
-  }
-  return(0);
-}
-
-
-bool MoreauCombinedProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-{
-  assert(0);
-  return(0);
 }
 
