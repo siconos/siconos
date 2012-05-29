@@ -1,5 +1,5 @@
 set term X11
-!tail -n 100000 result.dat > result-gp.dat
+!tail -n 1000000 result.dat > result-gp.dat
 #plot "result-gp.dat" u 1:2 t "Crank revolutions" w l
 #plot "result-gp.dat" u 2:3 t "Rod angle" w l
 #plot "result-gp.dat" u 2:4 t "Slider angle" w l

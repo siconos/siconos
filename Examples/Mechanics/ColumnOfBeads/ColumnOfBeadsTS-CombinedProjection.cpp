@@ -174,7 +174,10 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    s->setProjectionMaxIteration(10);
+    s->setConstraintTolUnilateral(1e-08);
+
 
     // =========================== End of model definition ===========================
 

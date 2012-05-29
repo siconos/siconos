@@ -117,8 +117,10 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
-
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    s->setProjectionMaxIteration(4);
+    s->setConstraintTolUnilateral(1e-10);
+    s->setConstraintTol(1e-10);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -136,17 +138,20 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(1);
+
+    SP::SiconosVector p1 = ball->p(1);
     SP::SiconosVector lambda1 = inter->lambda(1);
-    SP::SiconosVector y0 = inter->y(0);
-    //SP::SiconosVector lambda2 = inter->lambda(2);
+    SP::SiconosVector lambda0 = inter->lambda(0);
+    SP::SiconosVector p0 = ball->p(0);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*p)(0);
+    dataPlot(0, 3) = (*p1)(0);
     dataPlot(0, 4) = (*lambda1)(0);
-    dataPlot(0, 5) = (*y0)(0);
+    dataPlot(0, 5) = (*p0)(0);
+    dataPlot(0, 6) = (*lambda0)(0);
+
     double maxviolation = std::max(0.0,  -(*y0)(0));
     //dataPlot(0, 6) = (*lambda2)(0);
     // --- Time loop ---
@@ -173,17 +178,19 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*p)(0);
+      dataPlot(k, 3) = (*p1)(0);
       dataPlot(k, 4) = (*lambda1)(0);
-      dataPlot(k, 5) = (*y0)(0);
-      maxviolation = std::max(maxviolation, - (*y0)(0));
+      dataPlot(k, 5) = (*p0)(0);
+      dataPlot(k, 6) = (*lambda0)(0);
+
+      maxviolation = s->maxViolationUnilateral();
 
       if (maxviolation >= 1e-08)
       {
-        std::cout << "(*y0)(0) "  << (*y0)(0) << std::endl;
+        std::cout << std::endl << "maxviolation = " << maxviolation << std::endl;
         std::cout << "(*lambda1)(0) "  << (*lambda1)(0) << std::endl;
-
-        RuntimeException::selfThrow("maxviolation > 0   ");
+        std::cout << "(*lambda0)(0) "  << (*lambda0)(0) << std::endl;
+        //RuntimeException::selfThrow("maxviolation > 0   ");
       }
 
       //dataPlot(k, 6) = (*lambda2)(0);

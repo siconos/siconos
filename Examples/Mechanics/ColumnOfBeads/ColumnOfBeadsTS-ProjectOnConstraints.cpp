@@ -31,10 +31,6 @@
 using namespace std;
 
 
-
-
-
-
 int withLevel(unsigned int mylevel)
 {
   try
@@ -164,7 +160,7 @@ int withLevel(unsigned int mylevel)
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(theta));
+    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(theta));
     for (unsigned int i = 0; i < nBeads; i++)
     {
       OSI->insertDynamicalSystem(beads[i]);
@@ -178,8 +174,10 @@ int withLevel(unsigned int mylevel)
 
     // -- (4) Simulation setup with (1) (2) (3)
     unsigned int levelForProjection = mylevel; //(default =1)
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
-
+    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
+    s->setProjectionMaxIteration(10);
+    s->setConstraintTolUnilateral(1e-08);
+    // s->setConstraintTol(1e-10);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -365,7 +363,7 @@ int withLevel(unsigned int mylevel)
     cout << "Exception caught in ColumnOfBeadsTS.cpp" << endl;
   }
 
-
+  return 0;
 
 }
 

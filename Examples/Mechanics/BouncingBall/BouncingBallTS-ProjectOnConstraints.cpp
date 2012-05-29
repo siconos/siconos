@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(ball, theta));
+    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(ball, theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -117,9 +117,11 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    unsigned int levelForProjection = 0; //(default =1)
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
-
+    unsigned int levelForProjection = 1; //(default =1)
+    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
+    s->setProjectionMaxIteration(20);
+    s->setConstraintTolUnilateral(1e-08);
+    s->setConstraintTol(1e-08);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

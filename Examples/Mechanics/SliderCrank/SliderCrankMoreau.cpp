@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 0.14;       // final computation time
-    double h = 1e-5;       // time step : do not decrease, because of strong penetrations
+    double T = 1.0;       // final computation time
+    double h = 1e-6;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;

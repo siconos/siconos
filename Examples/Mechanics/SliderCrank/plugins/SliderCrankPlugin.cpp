@@ -30,7 +30,7 @@ double l1 = 0.1530;
 double l2 = 0.3060;
 double a = 0.05;
 double b = 0.025;
-double c = 0.;//0.001;
+double c = 0.001;
 double d = 2. * (b + c);
 
 // inertial properties

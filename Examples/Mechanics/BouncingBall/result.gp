@@ -5,4 +5,8 @@ plot\
 "result-gp.dat" u 1:3 t "Ball Velocity" w l,\
 "result-gp.dat" u 1:4 t "Reaction force" w l
 
+#,\
+#"result-gp.dat" u 1:5 t "Multiplier" w l
+     
+
 
