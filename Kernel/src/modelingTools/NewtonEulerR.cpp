@@ -218,12 +218,19 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   // computeJachq(t);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
-
-  prod(*lambda, *_jachqT, *_contactForce, true);
 #ifdef NER_DEBUG
-  printf("NewtonEulerR::computeInput contact force :");
-  _contactForce->display();
+  printf("NewtonEulerR::computeInput :");
+  std::cout << "level = "  << level << std::endl;
+  lambda->display();
 #endif
+  if (level == 1) /* \warning : we assume that ContactForce is given by lambda[1] */
+  {
+    prod(*lambda, *_jachqT, *_contactForce, true);
+#ifdef NER_DEBUG
+    printf("NewtonEulerR::computeInput contact force :");
+    _contactForce->display();
+#endif
+  }
   /*data is a pointer of memory associated to a dynamical system*/
   /** false because it consists in doing a sum*/
   prod(*lambda, *_jachqT, *data[p0 + level], false);
