@@ -559,7 +559,7 @@ void FirstOrderNonLinearDS::resetNonSmoothPart()
 void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
 {
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
-  assert(0);
+  //assert(0);
   _r->zero();
 }
 

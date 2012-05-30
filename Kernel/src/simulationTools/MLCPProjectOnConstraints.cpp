@@ -951,37 +951,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 
       InteractionsGraph::VIterator ui, uiend;
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPProjectOnConstraints::postCompute BEFORE UPDATE:\n");
-      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
-      {
-        SP::Interaction inter = indexSet->bundle(*ui);
-        RELATION::TYPES relationType = inter->getRelationType();
-        if (relationType == NewtonEuler)
-        {
-          SP::Relation R = inter->relation();
-          SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(R));
-          ner->computeh(0);
-          ner->getq()->display();
-        }
-        else if (relationType == Lagrangian)
-        {
-          inter->relation()->computeOutput(0.0, 0);
-          for (DSIterator it = inter->dynamicalSystemsBegin();
-               it != inter->dynamicalSystemsEnd();
-               ++it)
-          {
-            SP::LagrangianDS lds =  boost::static_pointer_cast<LagrangianDS>(*it);
-            lds->q()->display();
-          }
-        }
-        else
-        {
-          RuntimeException::selfThrow("MLCPProjectOnConstraints::postCompute - relation type is not from Lagrangian type neither NewtonEuler.");
-        }
-      }
-#endif
-
 
       for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
@@ -1155,18 +1124,6 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     }
     void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos)
     {
-      // Get Y and Lambda for the current Interaction
-      //y = inter->y(levelMin());
-      //lambda = inter->lambda(levelMin());
-      // Copy _w/_z values, starting from index pos into y/lambda.
-
-      //      setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
-      // saved in y !!
-      //setBlock(*_z, lambda, lambda->size(), pos, 0);
-
-      unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
-                           (_M)->computeSizeForProjection(inter);
-
       SP::NewtonEulerR ner = (boost::static_pointer_cast<NewtonEulerR>(inter->relation()));
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postCompute ner->jachq \n");
@@ -1178,6 +1135,14 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       printf("MLCPProjectOnConstraints::postCompute q before update\n");
       (ner->getq())->display();
 #endif
+      SP::SiconosVector lambda = inter->lambda(0);
+      SP::SiconosVector y = inter->y(0);
+      unsigned int sizeY = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+                           (_M)->computeSizeForProjection(inter);
+      // Copy _w/_z values, starting from index pos into y/lambda.
+
+      //setBlock(*_w, y, sizeY, pos, 0);
+      setBlock(*_z, lambda, sizeY, pos, 0);
 
 
       SP::SimpleVector aBuff(new SimpleVector(sizeY));
@@ -1191,6 +1156,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       DSIterator itDS;
       Index coord(8);
+
 #ifdef MLCPPROJ_WITH_CT
       unsigned int k = 0;
       unsigned int NumDS = 0;
@@ -1261,11 +1227,12 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       printf("MLCPProjectOnConstraints deltaqG:\n");
       deltaqG->display();
 #else
-
+#ifdef MLCPPROJ_DEBUG
       SP::SiconosMatrix J = ner->jachq();
       SP::SimpleMatrix aux(new SimpleMatrix(*J));
       aux->trans();
       prod(*aux, *aBuff, *(ner->getq()), false);
+#endif
 #endif
 
 

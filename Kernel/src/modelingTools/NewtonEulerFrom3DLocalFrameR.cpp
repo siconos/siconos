@@ -29,7 +29,9 @@ using namespace std;
 void NewtonEulerFrom3DLocalFrameR::initComponents()
 {
   NewtonEulerFrom1DLocalFrameR::initComponents();
+
   /*keep only the distance.*/
+  _jachq.reset(new SimpleMatrix(3, _qsize));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;

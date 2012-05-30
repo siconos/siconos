@@ -37,6 +37,8 @@ void NewtonEulerR::initComponents()
 
   // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
+
+
   if (! _jachq)
     _jachq.reset(new SimpleMatrix(_ysize, _qsize));
   else
@@ -52,6 +54,11 @@ void NewtonEulerR::initComponents()
              ("NewtonEuler::initComponents inconsistent sizes between _jachq matrix and the interaction." && false));
     }
   }
+#ifdef NER_DEBUG
+  std::cout << "NewtonEulerR::initComponents() _jachq" << std::endl;
+  _jachq->display();
+#endif
+
   if (! _jachqT)
     _jachqT.reset(new SimpleMatrix(_ysize, _xsize));
 
@@ -230,10 +237,30 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
     printf("NewtonEulerR::computeInput contact force :");
     _contactForce->display();
 #endif
+
+    /*data is a pointer of memory associated to a dynamical system*/
+    /** false because it consists in doing a sum*/
+    prod(*lambda, *_jachqT, *data[p0 + level], false);
   }
-  /*data is a pointer of memory associated to a dynamical system*/
-  /** false because it consists in doing a sum*/
-  prod(*lambda, *_jachqT, *data[p0 + level], false);
+  else if (level == 0)
+  {
+#ifdef NER_DEBUG
+    printf("NewtonEulerR::computeInput :");
+    std::cout << "level = "  << level << std::endl;
+    std::cout << "lambda " << std::endl;
+    lambda->display();
+    std::cout << "_jachq" << std::endl;
+    _jachq->display();
+    std::cout << "*data[p0+level]" << std::endl;
+    data[p0 + level]->display();
+#endif
+
+
+
+    prod(*lambda, *_jachq, *data[p0 + level], false);
+  }
+  else
+    RuntimeException::selfThrow("NewtonEulerR::computeInput(double t, unsigned int level) - not yet implemented for level > 1");
 }
 /*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
 void NewtonEulerR::computeJachqT()

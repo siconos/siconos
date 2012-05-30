@@ -163,8 +163,17 @@ bool NewtonEulerDS::checkDynamicalSystem()
 
 void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
-  if (!_p[level])
-    _p[level].reset(new SimpleVector(_n));
+
+  if (level == 0)
+  {
+    if (!_p[0])
+      _p[0].reset(new SimpleVector(_qDim));
+  }
+  else
+  {
+    if (!_p[level])
+      _p[level].reset(new SimpleVector(_n));
+  }
 }
 
 void NewtonEulerDS::initForces()

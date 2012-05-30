@@ -217,6 +217,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     }
 
 #endif
+    // This part should be in MoreauProjectOnConstraintsOS::updateState(level =0)
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
@@ -224,9 +225,14 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+        SP::SiconosVector q = neds->q();
+        SP::SiconosVector qtmp = neds->getWorkVector(DynamicalSystem::qtmp);
 
-
-
+        if (neds->p(0))
+        {
+          *q = * qtmp +  *neds->p(0);
+          //*q += *d->p(0);
+        }
         neds->normalizeq();
         neds->updateT();
       }
