@@ -50,6 +50,8 @@ public:
   {
     SP::SiconosVector y = interaction()->y(0);
     double height = fabs(data[q0]->getValue(0)) - _sBallRadius;
+    // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
+    // _jachq->display();
     y->setValue(0, height);
     _Nc->setValue(0, 1);
     _Nc->setValue(1, 0);
@@ -188,7 +190,7 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- (1) OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(ball, theta));
+    SP::MoreauProjectOnConstraintsOSI OSI(new MoreauProjectOnConstraintsOSI(ball, theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -200,7 +202,10 @@ int main(int argc, char* argv[])
 #endif
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef WITH_PROJ
-    SP::TimeStepping s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos));
+    s->setProjectionMaxIteration(20);
+    s->setConstraintTolUnilateral(1e-08);
+    s->setConstraintTol(1e-08);
 #else
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 #endif
@@ -285,7 +290,7 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot);
+    io.write(dataPlot, "noDim");
 
     // Comparison with a reference file
     cout << "====> Comparison with a reference file ..." << endl;
@@ -302,7 +307,40 @@ int main(int argc, char* argv[])
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The results is rather different from the reference file. err = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-      (dataPlot - dataPlotRef).display();
+      //(dataPlot-dataPlotRef).display();
+
+      double maxerror = -1e+24;
+      unsigned int imax = -1;
+      unsigned int jmax = -1;
+      double error;
+      for (unsigned int ii = 0;  ii < dataPlot.size(0); ii++)
+      {
+        for (unsigned int jj = 0;  jj < dataPlot.size(1); jj++)
+        {
+          error = std::abs(dataPlot.getValue(ii, jj) - dataPlotRef.getValue(ii, jj)) ;
+          if (error > 1e-12)
+          {
+
+            std::cout << "error = " << error << std::endl;
+            std::cout << "ii  = " << ii << "  jj  = " << jmax << std::endl;
+            std::cout << "dataPlot.getValue(ii,jj) = " <<  dataPlot.getValue(ii, jj) << std::endl;
+            std::cout << "dataPlotRef.getValue(ii,jj) =" <<  dataPlotRef.getValue(ii, jj) << std::endl;
+          }
+
+          if (error > maxerror)
+          {
+            maxerror = error ;
+            imax = ii;
+            jmax = jj;
+          }
+        }
+      }
+      std::cout << "max error = " << maxerror << std::endl;
+      std::cout << "imax  = " << imax << "  jmax  = " << jmax << std::endl;
+      std::cout << "dataPlot.getValue(imax,jmax) = " <<  dataPlot.getValue(imax, jmax) << std::endl;
+      std::cout << "dataPlotRef.getValue(imax,jmax) =" <<  dataPlotRef.getValue(imax, jmax) << std::endl;
+
+
       return 1;
     }
   }

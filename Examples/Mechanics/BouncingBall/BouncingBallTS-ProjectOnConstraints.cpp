@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
     SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, osnspb, osnspb_pos, levelForProjection));
     s->setProjectionMaxIteration(20);
     s->setConstraintTolUnilateral(1e-08);
-    s->setConstraintTol(1e-08);
+    s->setConstraintTol(1e-04);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
