@@ -508,6 +508,11 @@ public:
    */
   void resetNonSmoothPart();
 
+  /** set p[...] to zero for a given level
+   * \param level
+   */
+  void resetNonSmoothPart(unsigned int level);
+
 
   virtual void updateT();
   virtual void normalizeq();

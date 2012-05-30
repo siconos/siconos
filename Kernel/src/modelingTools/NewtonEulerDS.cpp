@@ -470,6 +470,11 @@ void NewtonEulerDS::resetNonSmoothPart()
   else
     _p[1].reset(new SimpleVector(_n));
 }
+void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
+{
+  if (_p[level])
+    _p[level]->zero();
+}
 
 
 void NewtonEulerDS::updateT()
