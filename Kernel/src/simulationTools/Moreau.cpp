@@ -1771,7 +1771,7 @@ void Moreau::updateState(unsigned int level)
       cout << "Moreau::updatestate prev v" << endl;
       v->display();
 #endif
-      if (level != LEVELMAX)
+      if (level != LEVELMAX && d->p(level))
       {
         /*d->p has been fill by the Relation->computeInput, it contains
           B \lambda _{k+1}*/

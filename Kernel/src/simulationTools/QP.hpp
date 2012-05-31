@@ -166,6 +166,14 @@ public:
    */
   static QP* convert(OneStepNSProblem* osnsp);
 
+
+  /* pure virtual in OneStepNSProblem.hpp */
+  void computeInteractionBlock(const InteractionsGraph::EDescriptor&)
+  {
+    assert(false);
+  }
+
+
 };
 
 #endif // QP_H

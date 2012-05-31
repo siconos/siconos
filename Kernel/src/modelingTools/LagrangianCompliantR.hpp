@@ -129,7 +129,7 @@ public:
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(double, unsigned int);
+  void computeInput(double, unsigned int = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation* : the relation which must be converted

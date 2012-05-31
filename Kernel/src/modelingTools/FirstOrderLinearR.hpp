@@ -362,13 +362,13 @@ public:
   //    *  \param double: not used
   //    *  \param unsigned int: not used
   //    */
-  void computeOutput(double, unsigned int);
+  void computeOutput(double, unsigned int = 0);
 
   //   /** default function to compute r
   //    *  \param double : not used
   //    *  \param unsigned int: not used
   //    */
-  void computeInput(double, unsigned int);
+  void computeInput(double, unsigned int = 0);
 
   //   /** copy the data of the Relation to the XML tree
   //    */

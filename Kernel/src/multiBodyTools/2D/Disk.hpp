@@ -44,11 +44,11 @@ public:
   /** Constructor
       \param radius
       \param mass
-      \param postion vector
+      \param position vector
       \param velocity vector
   */
 
-  Disk(double, double, SP::SiconosVector, SP::SiconosVector);
+  Disk(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** destructor
    */
