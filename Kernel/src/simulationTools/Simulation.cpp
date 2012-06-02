@@ -180,7 +180,7 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
   if (_osiMap.find(ds) != _osiMap.end()) // ie if ds is already registered
     // in the map with another
     // integrator
-    ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
+    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
   _osiMap[ds] = osi;
 }
 
@@ -189,7 +189,7 @@ void Simulation::addInteractionInOSIMap(SP::Interaction inter, SP::OneStepIntegr
   if (_interactionOsiMap.find(inter) != _interactionOsiMap.end())
     // in the map with another
     // integrator
-    ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
+    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
   _interactionOsiMap[inter] = osi;
 }
 

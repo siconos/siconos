@@ -273,8 +273,10 @@ const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
 const TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) const
 {
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
+  if (tmp->getNum() != 2)
+  {
+    SiconosMatrixException::selfThrow("TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
+  }
   return (tmp->getTriang());
 }
 
@@ -283,8 +285,10 @@ const SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  if (tmp->getNum() != 3)
+  {
+    SiconosMatrixException::selfThrow("SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  }
   return (tmp->getSym());
 }
 
@@ -293,9 +297,10 @@ const SparseMat  BlockMatrix::getSparse(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
-
+  if (tmp->getNum() != 4)
+  {
+    SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
+  }
   return (tmp->getSparse());
 }
 
@@ -315,9 +320,10 @@ const ZeroMat  BlockMatrix::getZero(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5);
-  SiconosMatrixException::selfThrow("ZeroMat BlockMatrix::getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
-
+  if (tmp->getNum() != 5)
+  {
+    SiconosMatrixException::selfThrow("ZeroMat BlockMatrix::getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
+  }
   return (tmp->getZero());
 }
 
@@ -326,9 +332,10 @@ const IdentityMat  BlockMatrix::getIdentity(unsigned int row, unsigned int col) 
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5);
-  SiconosMatrixException::selfThrow("IdentityMat BlockMatrix::getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
-
+  if (tmp->getNum() != 5)
+  {
+    SiconosMatrixException::selfThrow("IdentityMat BlockMatrix::getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
+  }
   return (tmp->getIdentity());
 }
 
@@ -338,8 +345,10 @@ DenseMat*  BlockMatrix::dense(unsigned int row, unsigned int col) const
 
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 1);
-  SiconosMatrixException::selfThrow("DenseMat* BlockMatrix::dense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
+  if (tmp->getNum() != 1)
+  {
+    SiconosMatrixException::selfThrow("DenseMat* BlockMatrix::dense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
+  }
 
   return (tmp->dense());
 }
@@ -348,17 +357,20 @@ TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
-
+  if (tmp->getNum() != 2)
+  {
+    SiconosMatrixException::selfThrow("TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
+  }
   return (tmp->triang());
 }
 SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  if (tmp->getNum() != 3)
+  {
+    SiconosMatrixException::selfThrow("SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  }
   return (tmp->sym());
 }
 
@@ -366,9 +378,10 @@ SparseMat*  BlockMatrix::sparse(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
-
+  if (tmp->getNum() != 4)
+  {
+    SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
+  }
   return (tmp->sparse());
 }
 
@@ -376,9 +389,10 @@ BandedMat*  BlockMatrix::banded(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat* BlockMatrix::banded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
-
+  if (tmp->getNum() != 5)
+  {
+    SiconosMatrixException::selfThrow("BandedMat* BlockMatrix::banded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
+  }
   return (tmp->banded());
 }
 
@@ -386,9 +400,10 @@ ZeroMat*  BlockMatrix::zero(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 6);
-  SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::zero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
-
+  if (tmp->getNum() != 6)
+  {
+    SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::zero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
+  }
   return (tmp->zero(row, col));
 }
 
@@ -396,9 +411,10 @@ IdentityMat*  BlockMatrix::identity(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5);
-  SiconosMatrixException::selfThrow("IdentityMat* BlockMatrix::identity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
-
+  if (tmp->getNum() != 5)
+  {
+    SiconosMatrixException::selfThrow("IdentityMat* BlockMatrix::identity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
+  }
   return (tmp->identity());
 }
 
