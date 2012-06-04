@@ -144,6 +144,16 @@ extern "C" void jacobianFIntqDot(double time, unsigned int sizeOfq, const double
 extern "C" void g1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) - a * sin(q[2]) + b * cos(q[2])); // normal
+  // printf("a = %e\t", a);
+  // printf("b = %e\t",b);
+  // printf("c = %e\n", c);
+  // printf("l1 = %e\t",l1);
+  // printf("l2 = %e\n", l2);
+  // printf("q[0] = %e\t", q[0]);
+  // printf("q[1] = %e\t", q[1]);
+  // printf("q[2] = %e\n", q[2]);
+  // printf("g1[0] = %e\n", g[0]);
+
   if (sizeOfY > 1)
     g[1] = l1 * cos(q[0]) + l2 * cos(q[1]) - a * cos(q[2]) - b * sin(q[2]); // tangential
 }

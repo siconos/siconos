@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 1.0;       // final computation time
+    double T = 0.15;       // final computation time
     double h = 1e-6;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // ----------------
     // --- Simulation ---
     // ----------------
-    SP::Moreau OSI(new Moreau(slider, 0.5));
+    SP::Moreau OSI(new Moreau(slider, 0.5, 0.0));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new FrictionContact(2));
 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 13;
+    unsigned int outputSize = 25;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
@@ -160,6 +160,18 @@ int main(int argc, char* argv[])
     dataPlot(0, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
     dataPlot(0, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
     dataPlot(0, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized
+    dataPlot(0, 13) = (*inter1->y(0))(0) ; // g1
+    dataPlot(0, 14) = (*inter2->y(0))(0) ; // g2
+    dataPlot(0, 15) = (*inter3->y(0))(0) ; // g3
+    dataPlot(0, 16) = (*inter4->y(0))(0) ; // g4
+    dataPlot(0, 17) = (*inter1->y(1))(0) ; // dot g1
+    dataPlot(0, 18) = (*inter2->y(1))(0) ; // dot g2
+    dataPlot(0, 19) = (*inter3->y(1))(0) ; // dot g3
+    dataPlot(0, 20) = (*inter4->y(1))(0) ; // dot g4
+    dataPlot(0, 21) = (*inter1->lambda(1))(0) ; // lambda1
+    dataPlot(0, 22) = (*inter2->lambda(1))(0) ; // lambda1
+    dataPlot(0, 23) = (*inter3->lambda(1))(0) ; // lambda3
+    dataPlot(0, 24) = (*inter4->lambda(1))(0) ; // lambda4
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -173,6 +185,7 @@ int main(int argc, char* argv[])
 
     while (s->nextTime() < T)
     {
+      //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();
 
       // --- Get values to be plotted ---
@@ -189,6 +202,33 @@ int main(int argc, char* argv[])
       dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
       dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
       dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
+      dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
+      dataPlot(k, 14) = (*inter2->y(0))(0) ; // g2
+      dataPlot(k, 15) = (*inter3->y(0))(0) ; // g3
+      dataPlot(k, 16) = (*inter4->y(0))(0) ; // g4
+      dataPlot(k, 17) = (*inter1->y(1))(0) ; // dot g1
+      dataPlot(k, 18) = (*inter2->y(1))(0) ; // dot g2
+      dataPlot(k, 19) = (*inter3->y(1))(0) ; // dot g3
+      dataPlot(k, 20) = (*inter4->y(1))(0) ; // dot g4
+      dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // lambda1
+      dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
+      dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
+      dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
+
+      //      if (s->nextTime() > 0.035 and (*inter1->lambda(1))(0) >0.0)
+      if (0)
+      {
+        std::cout << "=============== Step k =" << k << std::endl;
+        std::cout << "Time " << s->nextTime() << std::endl;
+
+        impact->display();
+        std::cout << " (*inter1->lambda(1))(0) " << (*inter1->lambda(1))(0) << std:: endl;
+        std::cout << " (*inter2->lambda(1))(0) " << (*inter2->lambda(1))(0) << std:: endl;
+        std::cout << " (*inter3->lambda(1))(0) " << (*inter3->lambda(1))(0) << std:: endl;
+        std::cout << " (*inter4->lambda(1))(0) " << (*inter4->lambda(1))(0) << std:: endl;
+
+      }
+
 
       s->processEvents();
       ++show_progress;
