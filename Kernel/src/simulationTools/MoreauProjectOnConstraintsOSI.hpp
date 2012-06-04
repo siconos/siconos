@@ -59,36 +59,33 @@ protected:
    */
   MoreauProjectOnConstraintsOSI() {};
 
+  double _deactivateYPosThreshold;
+  double _deactivateYVelThreshold;
+  double _activateYPosThreshold;
+  double _activateYVelThreshold;
+
 
 
 
 public:
 
+
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  explicit MoreauProjectOnConstraintsOSI(double theta) : Moreau(theta)
-  {
-    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
-  };
+  explicit MoreauProjectOnConstraintsOSI(double theta);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param theta value of the parameter
    */
-  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta) : Moreau(ds, theta)
-  {
-    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
-  }  ;
+  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
    */
-  MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta) :     Moreau(dsSet, theta)
-  {
-    integratorType = OSI::MOREAUPROJECTONCONSTRAINTSOSI;
-  }   ;
+  MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta);
 
   /** destructor
    */
@@ -96,15 +93,48 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  // /** Apply the rule to one Interaction to known if is it should be included
-  //  * in the IndexSet of level i
-  //  */
-  // virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-  // /** Apply the rule to one Interaction to known if is it should be removed
-  //  * in the IndexSet of level i
-  //  */
-  // virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  // setters and getters
+
+  inline double deactivateYPosThreshold()
+  {
+    return  _deactivateYPosThreshold;
+  };
+
+  inline void setDeactivateYPosThreshold(double newValue)
+  {
+    _deactivateYPosThreshold = newValue;
+  };
+
+  inline double deactivateYVelThreshold()
+  {
+    return  _deactivateYVelThreshold;
+  };
+
+  inline void setDeactivateYVelThreshold(double newValue)
+  {
+    _deactivateYVelThreshold = newValue;
+  };
+
+  inline double activateYPosThreshold()
+  {
+    return  _activateYPosThreshold;
+  };
+
+  inline void setActivateYPosThreshold(double newValue)
+  {
+    _activateYPosThreshold = newValue;
+  };
+
+  inline double activateYVelThreshold()
+  {
+    return  _activateYVelThreshold;
+  };
+
+  inline void setActivateYVelThreshold(double newValue)
+  {
+    _activateYVelThreshold = newValue;
+  };
 
   /** initialization of the integrator; for linear time
       invariant systems, we compute time invariant operator (example :
@@ -112,6 +142,20 @@ public:
   */
   void initialize();
 
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   */
+  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   */
+  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  /** Perform the integration of the dynamical systems linked to this integrator
+   *  without taking into account the nonsmooth input (_r or _p)
+   */
+  void computeFreeState();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted

@@ -25,7 +25,7 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
 using namespace std;
-
+static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 //#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
 TimeSteppingProjectOnConstraints::TimeSteppingProjectOnConstraints(SP::TimeDiscretisation td,
@@ -149,7 +149,15 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   // }
   if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
+  // Zeroing Lambda Muliplier of indexSet()
 
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  InteractionsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet->bundle(*ui);
+    inter->lambda(0)->zero();
+  }
   updateInput(0);
 
   //Store the q vector of each DS.
@@ -476,4 +484,90 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
   //printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);
 #endif
+}
+
+
+
+void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned int maxStep)
+{
+  bool isNewtonConverge = false;
+  _newtonNbSteps = 0; // number of Newton iterations
+  int info = 0;
+  //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
+  bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
+
+  computeInitialResidu();
+
+  if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
+      || isLinear)
+  {
+    _newtonNbSteps++;
+    prepareNewtonIteration();
+    computeFreeState();
+    // updateOutput(0);
+    // updateIndexSets();
+    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+    // Check output from solver (convergence or not ...)
+    if (!checkSolverOutputProjectOnConstraints)
+      DefaultCheckSolverOutput(info);
+    else
+      checkSolverOutputProjectOnConstraints(info, this);
+
+    update(_levelMaxForInput);
+
+    //isNewtonConverge = newtonCheckConvergence(criterion);
+    if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+      saveYandLambdaInMemory();
+  }
+
+  else if (_newtonOptions == SICONOS_TS_NONLINEAR)
+  {
+    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep) && (!info))
+    {
+      _newtonNbSteps++;
+      prepareNewtonIteration();
+      computeFreeState();
+      // updateOutput(0);
+      // updateIndexSets();
+      if (info)
+        cout << "new loop because of info\n" << endl;
+
+      // if there is not any Interaction at
+      // the beginning of the simulation _allNSProblems may not be
+      // empty here (check with SpaceFilter and one disk not on
+      // the ground : MultiBodyTest::t2)
+
+      // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
+      // is also relevant here.
+      if (!_allNSProblems->empty() && !allInteractions->isEmpty())
+      {
+        info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+      }
+      if (info)
+        cout << "info!" << endl;
+      // Check output from solver (convergence or not ...)
+      if (!checkSolverOutputProjectOnConstraints)
+        DefaultCheckSolverOutput(info);
+      else
+        checkSolverOutputProjectOnConstraints(info, this);
+
+      update(_levelMaxForInput);
+      isNewtonConverge = newtonCheckConvergence(criterion);
+      if (!isNewtonConverge && !info)
+      {
+        if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
+          saveYandLambdaInMemory();
+      }
+    }
+    if (!isNewtonConverge)
+      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
+    else if (info)
+      cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
+    //    else
+    //      cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+  }
+  else
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
 }

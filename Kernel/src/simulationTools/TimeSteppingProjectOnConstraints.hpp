@@ -149,6 +149,8 @@ public:
    */
   void computeCriteria(bool * runningProjection);
 
+  void newtonSolve(double criterion, unsigned int maxStep);
+
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
