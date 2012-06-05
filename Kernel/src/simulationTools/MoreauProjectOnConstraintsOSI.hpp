@@ -87,6 +87,23 @@ public:
    */
   MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta);
 
+  /** constructor from theta value only
+    *  \param theta value for all these DS.
+    */
+  explicit MoreauProjectOnConstraintsOSI(double theta, double gamma);
+
+  /** constructor from a minimum set of data: one DS and its theta
+   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param theta value of the parameter
+   */
+  MoreauProjectOnConstraintsOSI(SP::DynamicalSystem ds, double theta, double gamma);
+
+  /** constructor from a minimum set of data
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param theta value for all these DS.
+   */
+  MoreauProjectOnConstraintsOSI(DynamicalSystemsSet& dsSet, double theta, double gamma);
+
   /** destructor
    */
   virtual ~MoreauProjectOnConstraintsOSI() {};

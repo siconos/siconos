@@ -1145,95 +1145,95 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       setBlock(*_z, lambda, sizeY, pos, 0);
 
 
-      SP::SimpleVector aBuff(new SimpleVector(sizeY));
-      setBlock(*_z, aBuff, sizeY, pos, 0);
-      /*Now, update the ds's dof throw the relation*/
-      //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
-#ifdef MLCPPROJ_DEBUG
-      printf("MLCPP lambda of Interaction is pos =%i :", pos);
-      aBuff->display();
-#endif
+      // SP::SimpleVector aBuff(new SimpleVector(sizeY));
+      //   setBlock(*_z,aBuff,sizeY,pos,0);
+      //   /*Now, update the ds's dof throw the relation*/
+      //   //proj_with_q SP::SiconosMatrix J=ner->jachqProj();
+      // #ifdef MLCPPROJ_DEBUG
+      //   printf("MLCPP lambda of Interaction is pos =%i :",pos);
+      //   aBuff->display();
+      // #endif
 
-      DSIterator itDS;
-      Index coord(8);
+      //   DSIterator itDS;
+      //   Index coord(8);
 
-#ifdef MLCPPROJ_WITH_CT
-      unsigned int k = 0;
-      unsigned int NumDS = 0;
-      SP::SiconosMatrix J = ner->jachqT();
-      //printf("J\n");
-      //J->display();
+      // #ifdef MLCPPROJ_WITH_CT
+      //   unsigned int k=0;
+      //   unsigned int NumDS=0;
+      //   SP::SiconosMatrix J=ner->jachqT();
+      //   //printf("J\n");
+      //   //J->display();
 
-      SP::SimpleMatrix aux(new SimpleMatrix(*J));
-      aux->trans();
+      //   SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      //   aux->trans();
 
-      itDS = inter->dynamicalSystemsBegin();
-      while (itDS != inter->dynamicalSystemsEnd())
-      {
-        SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
-        k += neds->getqDim();
-        itDS++;
-      }
-      SP::SimpleVector deltaqG(new SimpleVector(k));
-      // prod(*aux,*aBuff,*vel,true);
-      k = 0;
-      deltaqG->zero();
+      //   itDS = inter->dynamicalSystemsBegin();
+      //   while(itDS!=inter->dynamicalSystemsEnd())
+      //   {
+      //     SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
+      //     k+=neds->getqDim();
+      //     itDS++;
+      //   }
+      //   SP::SimpleVector deltaqG(new SimpleVector(k));
+      //   // prod(*aux,*aBuff,*vel,true);
+      //   k=0;
+      //   deltaqG->zero();
 
-      itDS = inter->dynamicalSystemsBegin();
-      while (itDS != inter->dynamicalSystemsEnd())
-      {
-        Type::Siconos dsType = Type::value(**itDS);
-        if (dsType != Type::NewtonEulerDS)
-          RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not from NewtonEulerDS.");
-        SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
+      //   itDS = inter->dynamicalSystemsBegin();
+      //   while(itDS!=inter->dynamicalSystemsEnd())
+      //   {
+      //     Type::Siconos dsType = Type::value(**itDS);
+      //     if(dsType !=Type::NewtonEulerDS)
+      //       RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not from NewtonEulerDS.");
+      //     SP::NewtonEulerDS neds = (boost::static_pointer_cast<NewtonEulerDS>(*itDS));
 
-        SP::SimpleVector vel(new SimpleVector(neds->getDim()));
-        SP::SimpleVector deltaQ(new SimpleVector(neds->getqDim()));
-        coord[0] = k;
-        coord[1] = k + neds->getDim();
-        coord[2] = 0;
-        coord[3] = aux->size(1);
-        coord[4] = 0;
-        coord[5] = aux->size(1);
-        coord[6] = 0;
-        coord[7] = neds->getDim();
-        subprod(*aux   , *aBuff, *vel, coord, true);
-        SP::SimpleMatrix T = neds->T();
-        SP::SimpleMatrix workT(new SimpleMatrix(*T));
-        workT->trans();
-        SP::SimpleMatrix workT2(new SimpleMatrix(6, 6));
-        prod(*workT, *T, *workT2, true);
+      //     SP::SimpleVector vel(new SimpleVector(neds->getDim()));
+      //     SP::SimpleVector deltaQ(new SimpleVector(neds->getqDim()));
+      //     coord[0]=k;
+      //     coord[1]=k+neds->getDim();
+      //     coord[2]=0;
+      //     coord[3]=aux->size(1);
+      //     coord[4]=0;
+      //     coord[5]=aux->size(1);
+      //     coord[6]=0;
+      //     coord[7]=neds->getDim();
+      //     subprod(*aux   ,*aBuff,*vel,coord,true);
+      //     SP::SimpleMatrix T=neds->T();
+      //     SP::SimpleMatrix workT(new SimpleMatrix(*T));
+      //     workT->trans();
+      //     SP::SimpleMatrix workT2(new SimpleMatrix(6,6));
+      //     prod(*workT,*T,*workT2,true);
 
-        workT2->PLUForwardBackwardInPlace(*vel);
-        prod(*T, *vel, *deltaQ);
+      //     workT2->PLUForwardBackwardInPlace(*vel);
+      //     prod(*T,*vel,*deltaQ);
 
-        for (unsigned int ii = 0; ii < neds->getqDim(); ii++)
-        {
-          ner->getq()->setValue(k + ii,
-                                deltaQ->getValue(ii) +
-                                ner->getq()->getValue(k + ii));
-          deltaqG->setValue(k + ii, deltaQ->getValue(ii) + deltaqG->getValue(k + ii));
-        }
+      //     for(unsigned int ii=0; ii<neds->getqDim(); ii++)
+      //     {
+      //       ner->getq()->setValue(k+ii,
+      //                             deltaQ->getValue(ii)+
+      //                             ner->getq()->getValue(k+ii));
+      //       deltaqG->setValue(k+ii,deltaQ->getValue(ii)+deltaqG->getValue(k+ii));
+      //     }
 
-        k += neds->getDim();
-        itDS++;
-#ifdef MLCPPROJ_DEBUG
-        printf("MLCPProjectOnConstraints::postCompute ds %d, q updated\n", NumDS);
-        (ner->getq())->display();
-#endif
-        NumDS++;
+      //     k+=neds->getDim();
+      //     itDS++;
+      // #ifdef MLCPPROJ_DEBUG
+      //     printf("MLCPProjectOnConstraints::postCompute ds %d, q updated\n",NumDS);
+      //     (ner->getq())->display();
+      // #endif
+      //     NumDS++;
 
-      }
-      printf("MLCPProjectOnConstraints deltaqG:\n");
-      deltaqG->display();
-#else
-#ifdef MLCPPROJ_DEBUG
-      SP::SiconosMatrix J = ner->jachq();
-      SP::SimpleMatrix aux(new SimpleMatrix(*J));
-      aux->trans();
-      prod(*aux, *aBuff, *(ner->getq()), false);
-#endif
-#endif
+      //   }
+      //   printf("MLCPProjectOnConstraints deltaqG:\n");
+      //   deltaqG->display();
+      // #else
+      // #ifdef MLCPPROJ_DEBUG
+      //   SP::SiconosMatrix J=ner->jachq();
+      //   SP::SimpleMatrix aux(new SimpleMatrix(*J));
+      //   aux->trans();
+      //   prod(*aux,*aBuff,*(ner->getq()),false);
+      // #endif
+      // #endif
 
 
 #ifdef MLCPPROJ_DEBUG
