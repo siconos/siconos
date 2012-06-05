@@ -1047,7 +1047,7 @@ void OSNSMultipleImpact::ComputeImpact()
   unsigned int number_step = 1;
   unsigned int point_save = 0;
   unsigned int _counterstepsave = 1;
-  unsigned int Old_prima_contact;
+  unsigned int Old_prima_contact = 1;
   bool IsPrimaConChange = true;
   // Show computation progress
   cout << "*********** Impact computation progress *************" << endl;

@@ -219,9 +219,10 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYVelThreshold);
 
   assert(!isnan(y));
-
+#ifdef DEBUG_MESSAGES
   if (y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauProjectOnConstraintsOSI::addInteractionInIndexSet ACTIVATE.\n");
+#endif
   return (y <= _activateYPosThreshold);
 }
 
@@ -239,8 +240,10 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
+#ifdef DEBUG_MESSAGES
   if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+#endif
   return (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold);
 }
 

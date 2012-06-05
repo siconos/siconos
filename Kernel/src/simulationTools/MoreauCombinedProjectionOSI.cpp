@@ -77,7 +77,8 @@ bool MoreauCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter
   }
   else if (i == 2)  //  special index for the projection
   {
-    double lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for Moreau scheme
+    double lambda = 0;
+    lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for Moreau scheme
     DEBUG_PRINTF("MoreauCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
 #ifdef DEBUG_MESSAGES
     if (lambda > 0)
