@@ -238,6 +238,8 @@ public:
 
 public:
   G& _g;
+
+  // serialization issue with key_type as simple pointer (void *)
   boost::shared_ptr< std::map<key_type, T> > _store;
   int _stamp;
 
@@ -401,7 +403,6 @@ public:
 #define I_CONS_MEMBERS(r,gt,p) \
   BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)>(*static_cast<BOOST_PP_CAT(_,gt)*>(this))),
 
-
 #define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                 \
   BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
   bool dummy;                                                           \
@@ -409,5 +410,4 @@ public:
   BOOST_PP_CAT(GraphType, Graph)() :                                    \
     BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(true) {}; \
  
-
 #endif

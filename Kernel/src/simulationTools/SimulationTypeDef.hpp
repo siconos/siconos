@@ -192,6 +192,13 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 
   /** serialization hooks */
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
+
+  // to be installed with INSTALL_GRAPH_PROPERTIES
+  void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
+  {
+    OSI._store->erase(vd);
+  }
+
 };
 
 struct InteractionsGraph : public _InteractionsGraph
@@ -201,6 +208,19 @@ struct InteractionsGraph : public _InteractionsGraph
                            ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
                            ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
                            ((Edge, SP::SimpleMatrix, lower_blockProj)));  // idem
+
+  // to be installed with INSTALL_GRAPH_PROPERTIES
+  void eraseProperties(_InteractionsGraph::VDescriptor vd)
+  {
+    blockProj._store->erase(vd);
+  }
+
+  // to be installed with INSTALL_GRAPH_PROPERTIES
+  void eraseProperties(_InteractionsGraph::EDescriptor ed)
+  {
+    upper_blockProj._store->erase(ed);
+    lower_blockProj._store->erase(ed);
+  }
 
   /** serialization hooks */
   ACCEPT_SERIALIZATION(InteractionsGraph);
