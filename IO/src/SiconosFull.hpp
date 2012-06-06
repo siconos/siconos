@@ -248,26 +248,43 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
                                        boost::serialization::base_object<SiconosMatrix>(m));
 }
 
+template<typename Archive, typename P>
+void siconos_property_io(Archive& ar, P& p)
+{
+
+  typename P::Access::iterator vi, viend;
+  for (boost::tie(vi, viend) = p.access.elements(p._g); vi != viend; ++vi)
+  {
+    ar & boost::serialization::make_nvp("property", (*p._store)[*vi]);
+  }
+
+}
+
+
 #define MAKE_SICONOS_IO_PROPERTIES(CLASS)                               \
   template<class Archive>                                               \
   void siconos_io(Archive& ar, Siconos::VertexProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
   {                                                                     \
-    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
   }                                                                     \
   template<class Archive>                                               \
   void siconos_io(Archive& ar, Siconos::VertexProperties<CLASS, _InteractionsGraph>& p, unsigned int version) \
   {                                                                     \
-    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
   }                                                                     \
   template<class Archive>                                               \
   void siconos_io(Archive& ar, Siconos::EdgeProperties<CLASS, _DynamicalSystemsGraph>& p, unsigned int version) \
   {                                                                     \
-    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
   }                                                                     \
   template<class Archive>                                               \
   void siconos_io(Archive& ar, Siconos::EdgeProperties<CLASS, _InteractionsGraph>& p, unsigned int version) \
   {                                                                     \
-    SERIALIZE(p, (_g)(_store)(_stamp), ar);                             \
+    SERIALIZE(p, (_g)(_stamp), ar);                                     \
+    siconos_property_io(ar, p);                                         \
   }                                                                     \
  
 namespace Siconos
