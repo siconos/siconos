@@ -89,12 +89,13 @@ struct VertexAccess
 {
   typedef VertexAccess type;
   typedef typename G::VDescriptor descriptor;
-  typedef typename G::OVIndexAccess OldIndexMap;
+  typedef typename G::VIterator iterator;
 
-  std::vector<descriptor>& indexModified(G& g)
+  std::pair<iterator, iterator> elements(G& g)
   {
-    return g.vertex_index_modified();
+    return g.vertices();
   }
+
 
   size_t size(G& g)
   {
@@ -114,12 +115,13 @@ struct EdgeAccess
 {
   typedef EdgeAccess type;
   typedef typename G::EDescriptor descriptor;
-  typedef typename G::OEIndexAccess OldIndexMap;
+  typedef typename G::EIterator iterator;
 
-  static std::vector<descriptor>& indexModified(G& g)
+  std::pair<iterator, iterator> elements(G& g)
   {
-    return g.edge_index_modified();
+    return g.edges();
   }
+
 
   static size_t size(const G& g)
   {
@@ -228,7 +230,6 @@ public:
 
   Access access;
 
-  typedef typename Access::OldIndexMap OldIndexMap;
   typedef typename boost::property_traits<IndexMap>::key_type  key_type;
   typedef T value_type;
   typedef typename std::iterator_traits <
