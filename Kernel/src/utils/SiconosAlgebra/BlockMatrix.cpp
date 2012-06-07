@@ -309,9 +309,10 @@ const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat BlockMatrix::getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
-
+  if (tmp->getNum() != 5)
+  {
+    SiconosMatrixException::selfThrow("BandedMat BlockMatrix::getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
+  }
   return (tmp->getBanded());
 }
 

@@ -193,7 +193,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
     }
-
+    updateInput(0);
     info = 0;
 #ifdef TSPROJ_DEBUG
     cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
@@ -235,12 +235,25 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
         SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
         SP::SiconosVector qtmp = neds->getWorkVector(DynamicalSystem::qtmp);
+#ifdef TSPROJ_DEBUG
+        std ::cout << "qtmp before  update " << std::endl;
+        qtmp->display();
+        std ::cout << "p(0) before  update " << std::endl;
+        neds->p(0)->display();
 
+#endif
         if (neds->p(0))
         {
-          *q = * qtmp +  *neds->p(0);
-          //*q += *d->p(0);
+          //*q = * qtmp +  *neds->p(0);
+          *q += *neds->p(0); // Why it works like that and not with the previous line ?
         }
+#ifdef TSPROJ_DEBUG
+        std ::cout << "q after  update " << std::endl;
+        q->display();
+#endif
+
+
+
         neds->normalizeq();
         neds->updateT();
       }
@@ -283,6 +296,18 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     {
       SP::Interaction inter = indexSet0->bundle(*ui);
       inter->lambda(0)->display();
+    }
+    std ::cout << "y(1) in IndexSet1" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->y(1)->display();
+    }
+    std ::cout << "y(0) in indexSet0" << std::endl;
+    for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->y(0)->display();
     }
 
 #endif
@@ -463,6 +488,9 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
     }
     else
     {
+#ifdef TSPROJ_DEBUG
+      printf("Equality interac->y(0)->normInf() %e.\n", interac->y(0)->normInf());
+#endif
       if (interac->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = interac->y(0)->normInf() ;
       if (interac->y(0)->normInf()  < minViolationEquality) minViolationEquality = interac->y(0)->normInf() ;
       if (interac->y(0)->normInf() > _constraintTol)
@@ -478,7 +506,7 @@ void TimeSteppingProjectOnConstraints::computeCriteria(bool * runningProjection)
   }
 #ifdef TSPROJ_DEBUG
   printf("TSProj newton min/max criteria projection\n");
-  std::cout << "                 runningProjection"  << *runningProjection << std::endl;
+  std::cout << "             runningProjection "  << std::boolalpha << *runningProjection << std::endl;
   printf("              min criteria equality =  %e.\n", minViolationEquality);
   printf("              max criteria equality =  %e.\n", maxViolationEquality);
   printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);

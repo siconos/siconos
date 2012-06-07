@@ -585,6 +585,8 @@ double SimpleMatrix::normInf() const
 
 void SimpleMatrix::display() const
 {
+  std::cout.setf(std::ios::scientific);
+  std::cout.precision(6);
   if (num == 1)
     std::cout << *mat.Dense << std::endl;
   else if (num == 2)

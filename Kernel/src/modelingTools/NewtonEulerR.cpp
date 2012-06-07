@@ -215,7 +215,7 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
 
 /** to compute p
  *  \param double : current time
- *  \param unsigned int: "derivative" order of lambda used to compute input
+ *  \Param unsigned int: "derivative" order of lambda used to compute input
  */
 void NewtonEulerR::computeInput(double t, unsigned int level)
 {
@@ -226,9 +226,12 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 #ifdef NER_DEBUG
-  printf("NewtonEulerR::computeInput :");
-  std::cout << "level = "  << level << std::endl;
+  printf("\n");
+  printf("NewtonEulerR::computeInput start for level %i:", level);
+  std::cout << "lambda( "  << level << ")" << std::endl;
   lambda->display();
+  std::cout << "data[p0+level] before " << std::endl;
+  data[p0 + level]->display();
 #endif
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[1] */
   {
@@ -244,20 +247,30 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
   }
   else if (level == 0)
   {
-#ifdef NER_DEBUG
-    printf("NewtonEulerR::computeInput :");
-    std::cout << "level = "  << level << std::endl;
-    std::cout << "lambda " << std::endl;
-    lambda->display();
-    std::cout << "_jachq" << std::endl;
-    _jachq->display();
-    std::cout << "*data[p0+level]" << std::endl;
-    data[p0 + level]->display();
-#endif
 
 
 
     prod(*lambda, *_jachq, *data[p0 + level], false);
+#ifdef NER_DEBUG
+    std::cout << "_jachq" << std::endl;
+    _jachq->display();
+    std::cout << "data[p0+level]" << data[p0 + level] <<  std::endl;
+    std::cout << "data[p0+level]->vector(0)" << data[p0 + level]->vector(0) <<  std::endl;
+    if (data[p0 + level]->getNumberOfBlocks() > 1)
+      std::cout << "data[p0+level]->vector(1)" << data[p0 + level]->vector(1) <<  std::endl;
+    data[p0 + level]->display();
+
+
+    SP::SimpleVector buffer(new SimpleVector(data[p0 + level]->size()));
+    prod(*lambda, *_jachq, *buffer, true);
+    std::cout << "added part to p" << buffer <<  std::endl;
+    buffer->display();
+
+
+    printf("NewtonEulerR::computeInput end for level %i:", level);
+    printf("\n");
+#endif
+
   }
   else
     RuntimeException::selfThrow("NewtonEulerR::computeInput(double t, unsigned int level) - not yet implemented for level > 1");

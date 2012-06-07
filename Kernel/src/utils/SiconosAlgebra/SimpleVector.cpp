@@ -27,6 +27,8 @@
 #include "ioVector.hpp"
 
 
+
+
 // =================================================
 //                CONSTRUCTORS
 // =================================================
@@ -307,6 +309,8 @@ double SimpleVector::sum() const
 
 void SimpleVector::display()const
 {
+  std::cout.setf(std::ios::scientific);
+  std::cout.precision(6);
   if (_dense)
     std::cout << *vect.Dense << std::endl;
   else if (vect.Sparse)
