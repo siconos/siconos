@@ -468,16 +468,92 @@
 }
 
 // boost graph vertices => copy of opaque pointers in a python sequence
-%typemap(out) (boost::shared_ptr<DynamicalSystemsGraph>)
+%typemap(out) (std::pair< DynamicalSystemsGraph::VIterator, 
+                          DynamicalSystemsGraph::VIterator >)
 {
-  DynamicalSystemsGraph::VIterator vi,viend;
-  for(boost::tie(vi,viend) = (*&$1)->vertices(); vi != viend; ++vi)
+  DynamicalSystemsGraph::VIterator vi = (*&$1).first;
+  DynamicalSystemsGraph::VIterator viend = (*&$1).second;
+  if (vi!=viend)
   {
-    void * swig_arp;
-    PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((*&$1)->bundle(*vi))), 
-                                        SWIGTYPE_p_boost__shared_ptrT_DynamicalSystem_t,  0);
-    assert(pyds);
-    $result = SWIG_Python_AppendOutput($result,pyds);
+    for(; vi != viend; ++vi)
+    {
+      PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*vi))), 
+                                          SWIGTYPE_p_boost__shared_ptrT_DynamicalSystem_t,  0);
+      assert(pyds);
+      $result = SWIG_Python_AppendOutput($result,pyds);
+    }
+  }
+  else
+  {
+    Py_INCREF(Py_None);
+    $result = Py_None;
+  }
+}
+
+%typemap(out) (std::pair< InteractionsGraph::VIterator, 
+                          InteractionsGraph::VIterator >)
+{
+  InteractionsGraph::VIterator vi = (*&$1).first;
+  InteractionsGraph::VIterator viend = (*&$1).second;
+  if (vi!=viend)
+  {
+    for(; vi != viend; ++vi)
+    {
+      PyObject* pyinter = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*vi))), 
+                                             SWIGTYPE_p_boost__shared_ptrT_Interaction_t,  0);
+      assert(pyinter);
+      $result = SWIG_Python_AppendOutput($result,pyinter);
+    }
+  }
+  else
+  {
+    Py_INCREF(Py_None);
+    $result = Py_None; 
+  }
+}
+
+// boost graph edges => copy of opaque pointers in a python sequence
+%typemap(out) (std::pair< DynamicalSystemsGraph::EIterator, 
+                          DynamicalSystemsGraph::EIterator >)
+{
+  DynamicalSystemsGraph::EIterator ei = (*&$1).first;
+  DynamicalSystemsGraph::EIterator eiend = (*&$1).second;
+  if (ei!=eiend)
+  {
+    for(; ei != eiend; ++ei)
+    {
+      PyObject* pyinter = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*ei))), 
+                                             SWIGTYPE_p_boost__shared_ptrT_Interaction_t,  0);
+      assert(pyinter);
+    $result = SWIG_Python_AppendOutput($result,pyinter);
+    }
+  }
+  else
+  {
+    Py_INCREF(Py_None);
+    $result = Py_None; 
+  }
+}
+
+%typemap(out) (std::pair< InteractionsGraph::EIterator, 
+                          InteractionsGraph::EIterator >)
+{
+  InteractionsGraph::EIterator ei = (*&$1).first;
+  InteractionsGraph::EIterator eiend = (*&$1).second;
+  if (ei!=eiend)
+  {
+    for(; ei != eiend; ++ei)
+    {
+      PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*ei))), 
+                                          SWIGTYPE_p_boost__shared_ptrT_DynamicalSystem_t,  0);
+      assert(pyds);
+      $result = SWIG_Python_AppendOutput($result,pyds);
+    }
+  }
+  else
+  {
+    Py_INCREF(Py_None);
+    $result = Py_None; 
   }
 }
 
