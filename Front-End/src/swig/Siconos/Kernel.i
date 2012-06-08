@@ -146,6 +146,8 @@
 %include "KernelTypes.i"
 
 
+
+
 // python int sequence => std::vector<unsigned int>
 %{
   static int sequenceToUnsignedIntVector(PyObject *input, boost::shared_ptr<std::vector<unsigned int> > ptr) 
@@ -198,6 +200,12 @@ namespace boost
   }
 };
 
+// a std::size_t definition (otherwise swig complains about it)
+namespace std 
+{
+  typedef size_t size_t;
+}
+
 // boost >= 1.40
 %import "boost/version.hpp"
 #if (BOOST_VERSION >= 104000)
@@ -222,6 +230,15 @@ namespace boost
 
 %rename("$ignore", regexmatch$name="^createSPtr.*") "";
 
+// swig see those classes as abstract => no wrappers for constructors
+// note: this means something is wrong in .hpp headers => use -Wall to
+// detect it
+//%feature("notabstract") NewtonEulerDS;
+// ... (corrected)
+
+
+
+// includes and imports
 %include "SiconosPointers.hpp"
 %include "SiconosVisitables.hpp"
 %import "SiconosVisitor.hpp"
@@ -229,13 +246,60 @@ namespace boost
 %import "ioObject.hpp"
 %include "ioMatrix.hpp"
 
-%import "SiconosGraph.hpp"
-
 %import "SiconosProperties.hpp"
 
  /* swig has difficulties with this macro in SiconosProperties */
 #undef INSTALL_GRAPH_PROPERTIES
 #define INSTALL_GRAPH_PROPERTIES(X,Y)
+
+
+%include "SiconosGraph.hpp"
+
+
+TYPEDEF_SPTR(_DynamicalSystemsGraph);
+%feature("director") _DynamicalSystemsGraph;
+%shared_ptr( SiconosGraph<boost::shared_ptr<DynamicalSystem>, 
+                          boost::shared_ptr<Interaction>, 
+                          SystemProperties, InteractionProperties, 
+                          GraphProperties >);
+
+TYPEDEF_SPTR(_InteractionsGraph);
+%feature("director") _InteractionsGraph;
+%shared_ptr( SiconosGraph<boost::shared_ptr<Interaction>, 
+                          boost::shared_ptr<DynamicalSystem>, 
+                          InteractionProperties, SystemProperties, 
+                          GraphProperties >);
+
+TYPEDEF_SPTR(DynamicalSystemsGraph);
+%feature("director") DynamicalSystemsGraph;
+%shared_ptr(DynamicalSystemsGraph);
+
+TYPEDEF_SPTR(InteractionsGraph);
+%feature("director") InteractionsGraph;
+%shared_ptr(InteractionsGraph);
+
+// must be specified after %shared_ptr, if ever needed
+%template(_DynamicalSystemsGraph)  SiconosGraph<boost::shared_ptr<DynamicalSystem>, 
+                                                boost::shared_ptr<Interaction>, 
+                                                SystemProperties, InteractionProperties, 
+                                                GraphProperties >;
+
+%template(SP_DynamicalSystemsGraph)  boost::shared_ptr<SiconosGraph<boost::shared_ptr<DynamicalSystem>, 
+                                                                    boost::shared_ptr<Interaction>, 
+                                                                    SystemProperties, InteractionProperties, 
+                                                                    GraphProperties > >;
+
+%template(_InteractionsGraph)  SiconosGraph<boost::shared_ptr<Interaction>, 
+                                            boost::shared_ptr<DynamicalSystem>, 
+                                            InteractionProperties, SystemProperties, 
+                                            GraphProperties >;
+
+%template(SP_InteractionsGraph)  boost::shared_ptr<SiconosGraph<boost::shared_ptr<Interaction>, 
+                                                                boost::shared_ptr<DynamicalSystem>, 
+                                                                InteractionProperties, SystemProperties, 
+                                                                GraphProperties > >;
+
+
 %include "SimulationTypeDef.hpp" 
 
 %include "InteractionsSet.hpp"
@@ -435,6 +499,8 @@ KERNEL_REGISTRATION();
   };
 
 %}
+
+
 
 
 // needed templates

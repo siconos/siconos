@@ -467,6 +467,20 @@
              // thanks to shared ptr ref counting
 }
 
+// boost graph vertices => copy of opaque pointers in a python sequence
+%typemap(out) (boost::shared_ptr<DynamicalSystemsGraph>)
+{
+  DynamicalSystemsGraph::VIterator vi,viend;
+  for(boost::tie(vi,viend) = (*&$1)->vertices(); vi != viend; ++vi)
+  {
+    void * swig_arp;
+    PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((*&$1)->bundle(*vi))), 
+                                        SWIGTYPE_p_boost__shared_ptrT_DynamicalSystem_t,  0);
+    assert(pyds);
+    $result = SWIG_Python_AppendOutput($result,pyds);
+  }
+}
+
 
 TYPECHECK(boost::shared_ptr<SiconosVector>, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t);
 TYPECHECK(boost::shared_ptr<SimpleVector>,  SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t);
