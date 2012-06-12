@@ -20,7 +20,7 @@
 
 // Common stuff
 
-#if (SWIG_VERSION >= 0x020004)
+#if (SWIG_VERSION >= 0x020005)
 #define FE_SWIG_INTERNAL_MEMBER _
 #enddef
 #else
