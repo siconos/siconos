@@ -6,14 +6,12 @@ env
 /opt/local/bin/port install cppunit
 /opt/local/bin/port install wget
 
+/opt/local/bin/port install gcc
+/opt/local/bin/port install gfortran
+
 #
 # install in /usr
 #
-/opt/local/bin/wget http://r.research.att.com/gfortran-42-5664.pkg
-/usr/sbin/installer -pkg gfortran-42-5664.pkg -target /
 
-#
-# hpc fortran is in /usr/local
-#
-rm -rf /usr/local/bin/gfortran 
-rm -rf /usr/local/lib/libgfortran.*
+
+

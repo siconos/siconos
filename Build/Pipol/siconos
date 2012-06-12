@@ -4,17 +4,11 @@
 
 #PIPOL fedora-core14 03:00
 
-#PIPOL fedora-core15 03:00
-
 #PIPOL fedora-core16 03:00
 
 #PIPOL ubuntu-lucid 03:00
 
-#PIPOL ubuntu-karmic 03:00
-
-#PIPOL ubuntu-maverick 03:00
-
-#PIPOL ubuntu-natty 03:00
+#PIPOL ubuntu-precise 03:00
 
 #PIPOL ia64-linux-debian-squeeze 05:00
 
@@ -336,7 +330,7 @@ cmake_setup() {
     esac
 }
         
-cmake_setup
+#cmake_setup
 
 #sudo rm -f /usr/local/bin/ctest
 
@@ -417,7 +411,7 @@ pack_trunk IO Release
 save_packed_1 IO Release
 ##
 ### front-end (not with IO yet)
-swig_setup
+#swig_setup
 configure_trunk Front-End Release
 nightly_build Front-End Release
 nightly_test Front-End Release
