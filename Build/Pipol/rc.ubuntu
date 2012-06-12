@@ -2,4 +2,11 @@
 
 apt-get update
 
-apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib swig2.0
+apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib
+
+# this may fail on lucid, but we don't care since it is available through a PPA
+# it is correctly installed in rc.ubuntu-lucid
+set +e
+apt-get -y install swig2.0
+set -e
+exit 0

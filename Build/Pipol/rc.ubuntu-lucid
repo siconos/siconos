@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# cmake version is on pipol repository
+echo "deb http://fr.archive.ubuntu.com/ubuntu/ lucid-backports main restricted universe multiverse" >> /etc/apt/sources.list
+echo "deb http://ppa.launchpad.net/johannr/test-ppa/ubuntu lucid main" >> /etc/apt/sources.list
+
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 442D603E
+
+apt-get update
+
+apt-get -y install cmake swig2.0

@@ -2,16 +2,20 @@
 set -x
 env
 
+# change the group owner, otw it fails to install
+# see https://trac.macports.org/ticket/19590
+chgrp -R wheel /opt/local
+rm /sw/bin/gfortran
+
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
 /opt/local/bin/port install wget
 
-/opt/local/bin/port install gcc
-/opt/local/bin/port install gfortran
+/opt/local/bin/port selfupdate
 
-#
-# install in /usr
-#
+/opt/local/bin/port install gcc47
 
+# switch to the correct gcc version
+port select --set gcc mp-gcc47
 
-
+#exit 0
