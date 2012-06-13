@@ -27,8 +27,8 @@
 
 extern "C" {
   /* see footnote [2] in libs/numeric/bindings/lapack/doc/index.html */
-  /* #include <atlas/atlas_enum.h> */
-#include <atlas/clapack.h>
+  /* #include <atlas_enum.h> */
+#include <clapack.h>
 }
 
 #endif

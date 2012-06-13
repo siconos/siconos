@@ -33,13 +33,14 @@ template <typename T>
 struct vector_traits<detail::array<T> >
 {
   typedef T value_type;
+  typedef std::ptrdiff_t size_type;
   typedef T* pointer;
 
   static pointer storage(detail::array<T>& a)
   {
     return a.storage();
   }
-  static int size(detail::array<T>& a)
+  static size_type size(detail::array<T>& a)
   {
     return a.size();
   }

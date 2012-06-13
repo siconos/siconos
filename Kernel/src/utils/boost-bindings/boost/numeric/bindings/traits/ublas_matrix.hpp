@@ -74,19 +74,19 @@ struct matrix_detail_traits< boost::numeric::ublas::matrix<T, F, ArrT>, M >
     typedef typename detail::generate_const<M, ArrT>::type array_type ;
     return vector_traits<array_type>::storage(m.data());
   }
-  static int size1(matrix_type& m)
+  static std::ptrdiff_t num_rows(matrix_type& m)
   {
     return m.size1();
   }
-  static int size2(matrix_type& m)
+  static std::ptrdiff_t num_columns(matrix_type& m)
   {
     return m.size2();
   }
-  static int storage_size(matrix_type& m)
+  static std::ptrdiff_t storage_size(matrix_type& m)
   {
-    return size1(m) * size2(m);
+    return m.size1() * m.size2();
   }
-  static int leading_dimension(matrix_type& m)
+  static std::ptrdiff_t leading_dimension(matrix_type& m)
   {
     // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike
     //   identifier_type::functor_type::size2()
@@ -95,13 +95,13 @@ struct matrix_detail_traits< boost::numeric::ublas::matrix<T, F, ArrT>, M >
   }
 
   // stride1 == distance (m (i, j), m (i+1, j))
-  static int stride1(matrix_type& m)
+  static std::ptrdiff_t stride1(matrix_type& m)
   {
     //return functor_t::one1 (m.size1(), m.size2());
     return detail::ublas_ordering<orientation_category>::stride1(m) ;
   }
   // stride2 == distance (m (i, j), m (i, j+1))
-  static int stride2(matrix_type& m)
+  static std::ptrdiff_t stride2(matrix_type& m)
   {
     //return functor_t::one2 (m.size1(), m.size2());
     return detail::ublas_ordering<orientation_category>::stride2(m) ;
@@ -134,33 +134,33 @@ public:
     return matrix_traits<m_type>::storage(mr.expression());
   }
 
-  static int size1(matrix_type& mr)
+  static std::ptrdiff_t num_rows(matrix_type& mr)
   {
     return mr.size1();
   }
-  static int size2(matrix_type& mr)
+  static std::ptrdiff_t num_columns(matrix_type& mr)
   {
     return mr.size2();
   }
-  static int leading_dimension(matrix_type& mr)
+  static std::ptrdiff_t leading_dimension(matrix_type& mr)
   {
     return matrix_traits<m_type>::leading_dimension(mr.expression());
   }
 
-  static int stride1(matrix_type& mr)
+  static std::ptrdiff_t stride1(matrix_type& mr)
   {
     return matrix_traits<m_type>::stride1(mr.expression());
   }
-  static int stride2(matrix_type& mr)
+  static std::ptrdiff_t stride2(matrix_type& mr)
   {
     return matrix_traits<m_type>::stride2(mr.expression());
   }
   // Only for banded matrices
-  static int upper_bandwidth(matrix_type& mr)
+  static std::ptrdiff_t upper_bandwidth(matrix_type& mr)
   {
     return matrix_traits<m_type>::upper_bandwidth(mr.expression());
   }
-  static int lower_bandwidth(matrix_type& mr)
+  static std::ptrdiff_t lower_bandwidth(matrix_type& mr)
   {
     return matrix_traits<m_type>::lower_bandwidth(mr.expression());
   }
@@ -197,33 +197,33 @@ public:
     return ptr;
   }
 
-  static int size1(matrix_type& mr)
+  static std::ptrdiff_t num_rows(matrix_type& mr)
   {
     return mr.size1();
   }
-  static int size2(matrix_type& mr)
+  static std::ptrdiff_t num_columns(matrix_type& mr)
   {
     return mr.size2();
   }
-  static int leading_dimension(matrix_type& mr)
+  static std::ptrdiff_t leading_dimension(matrix_type& mr)
   {
     return matrix_traits<m_type>::leading_dimension(mr.data());
   }
 
-  static int stride1(matrix_type& mr)
+  static std::ptrdiff_t stride1(matrix_type& mr)
   {
     return matrix_traits<m_type>::stride1(mr.data());
   }
-  static int stride2(matrix_type& mr)
+  static std::ptrdiff_t stride2(matrix_type& mr)
   {
     return matrix_traits<m_type>::stride2(mr.data());
   }
   // For band matrices only
-  static int upper_bandwidth(matrix_type& mr)
+  static std::ptrdiff_t upper_bandwidth(matrix_type& mr)
   {
     return matrix_traits<m_type>::upper_bandwidth(mr.data());
   }
-  static int lower_bandwidth(matrix_type& mr)
+  static std::ptrdiff_t lower_bandwidth(matrix_type& mr)
   {
     return matrix_traits<m_type>::lower_bandwidth(mr.data());
   }
@@ -259,37 +259,37 @@ public:
     return ptr;
   }
 
-  static int size1(matrix_type& ms)
+  static std::ptrdiff_t num_rows(matrix_type& ms)
   {
     return ms.size1();
   }
-  static int size2(matrix_type& ms)
+  static std::ptrdiff_t num_columns(matrix_type& ms)
   {
     return ms.size2();
   }
 
 private:
-  static int ld(int s1, int s2, boost::numeric::ublas::row_major_tag)
+  static std::ptrdiff_t ld(std::ptrdiff_t s1, std::ptrdiff_t s2, boost::numeric::ublas::row_major_tag)
   {
     return s1;
   }
-  static int ld(int s1, int s2, boost::numeric::ublas::column_major_tag)
+  static std::ptrdiff_t ld(std::ptrdiff_t s1, std::ptrdiff_t s2, boost::numeric::ublas::column_major_tag)
   {
     return s2;
   }
 public:
-  static int leading_dimension(matrix_type& ms)
+  static std::ptrdiff_t leading_dimension(matrix_type& ms)
   {
     typedef typename identifier_type::orientation_category oc_t;
     return ld(ms.stride1(), ms.stride2(), oc_t())
            * matrix_traits<m_type>::leading_dimension(ms.data());
   }
 
-  static int stride1(matrix_type& ms)
+  static std::ptrdiff_t stride1(matrix_type& ms)
   {
     return ms.stride1() * matrix_traits<m_type>::stride1(ms.data());
   }
-  static int stride2(matrix_type& ms)
+  static std::ptrdiff_t stride2(matrix_type& ms)
   {
     return ms.stride2() * matrix_traits<m_type>::stride2(ms.data());
   }
@@ -324,7 +324,7 @@ public:
     ptr += mr.index() * matrix_traits<m_type>::stride1(mt);
     return ptr;
   }
-  static int stride(vector_type& mr)
+  static std::ptrdiff_t stride(vector_type& mr)
   {
     return matrix_traits<m_type>::stride2(mr.data());
   }
@@ -356,7 +356,7 @@ public:
     ptr += mc.index() * matrix_traits<m_type>::stride2(mt);
     return ptr;
   }
-  static int stride(vector_type& mc)
+  static std::ptrdiff_t stride(vector_type& mc)
   {
     return matrix_traits<m_type>::stride1(mc.data());
   }
@@ -385,30 +385,30 @@ struct matrix_detail_traits< boost::numeric::ublas::c_matrix<T, M, N>, Matr >
   {
     return m.data();
   }
-  static int size1(matrix_type& m)
+  static std::ptrdiff_t num_rows(matrix_type& m)
   {
     return m.size1();
   }
-  static int size2(matrix_type& m)
+  static std::ptrdiff_t num_columns(matrix_type& m)
   {
     return m.size2();
   }
-  static int storage_size(matrix_type& m)
+  static std::ptrdiff_t storage_size(matrix_type& m)
   {
     return M * N;
   }
-  static int leading_dimension(matrix_type& m)
+  static std::ptrdiff_t leading_dimension(matrix_type& m)
   {
     return N;
   }
 
   // stride1 == distance (m (i, j), m (i+1, j))
-  static int stride1(matrix_type& m)
+  static std::ptrdiff_t stride1(matrix_type& m)
   {
     return N;
   }
   // stride2 == distance (m (i, j), m (i, j+1))
-  static int stride2(matrix_type& m)
+  static std::ptrdiff_t stride2(matrix_type& m)
   {
     return 1;
   }
@@ -417,7 +417,125 @@ struct matrix_detail_traits< boost::numeric::ublas::c_matrix<T, M, N>, Matr >
 #endif // BOOST_NUMERIC_BINDINGS_FORTRAN 
 
 
-// TO DO: matrix_vector_range<>, matrix_vector_slice<>
+// ublas::matrix_vector_range<>
+template <typename M, typename MR>
+struct vector_detail_traits< boost::numeric::ublas::matrix_vector_range<M>, MR >
+    : default_vector_traits< MR, typename M::value_type >
+{
+#ifndef BOOST_NUMERIC_BINDINGS_NO_SANITY_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same< boost::numeric::ublas::matrix_vector_range<M>, typename boost::remove_const<MR>::type >::value));
+#endif
+
+  typedef boost::numeric::ublas::matrix_vector_range<M>          identifier_type;
+  typedef MR                                                     vector_type;
+  typedef typename M::value_type                                 value_type;
+  typedef typename default_vector_traits<MR, value_type>::pointer pointer;
+
+  static pointer storage(vector_type& mr)
+  {
+    typedef typename detail::generate_const<MR, typename MR::matrix_closure_type>::type m_type;
+    return matrix_traits<m_type>::storage(mr.data()) + mr.start1() * matrix_traits<m_type>::stride1(mr.data()) + mr.start2() * matrix_traits<m_type>::stride2(mr.data());
+  }
+  static std::ptrdiff_t stride(vector_type& mr)
+  {
+    typedef typename detail::generate_const<MR, typename MR::matrix_closure_type>::type m_type;
+    return matrix_traits<m_type>::stride1(mr.data()) + matrix_traits<m_type>::stride2(mr.data());
+  }
+};
+
+
+// ublas::matrix_vector_slice<>
+template <typename M, typename MR>
+struct vector_detail_traits< boost::numeric::ublas::matrix_vector_slice<M>, MR >
+    : default_vector_traits< MR, typename M::value_type >
+{
+#ifndef BOOST_NUMERIC_BINDINGS_NO_SANITY_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same< boost::numeric::ublas::matrix_vector_slice<M>, typename boost::remove_const<MR>::type >::value));
+#endif
+
+  typedef boost::numeric::ublas::matrix_vector_slice<M>          identifier_type;
+  typedef MR                                                     vector_type;
+  typedef typename M::value_type                                 value_type;
+  typedef typename default_vector_traits<MR, value_type>::pointer pointer;
+
+  static pointer storage(vector_type& mr)
+  {
+    typedef typename detail::generate_const<MR, typename MR::matrix_closure_type>::type m_type;
+    return matrix_traits<m_type>::storage(mr.data()) + mr.start1() * matrix_traits<m_type>::stride1(mr.data()) + mr.start2() * matrix_traits<m_type>::stride2(mr.data());
+  }
+  static std::ptrdiff_t stride(vector_type& mr)
+  {
+    typedef typename detail::generate_const<MR, typename MR::matrix_closure_type>::type m_type;
+    return mr.stride1() * matrix_traits<m_type>::stride1(mr.data()) + mr.stride2() * matrix_traits<m_type>::stride2(mr.data());
+  }
+};
+
+
+// ublas::bounded_matrix<>
+template <typename T, std::size_t R, std::size_t C, typename F, typename M>
+struct matrix_detail_traits< boost::numeric::ublas::bounded_matrix<T, R, C, F>, M >
+{
+#ifndef BOOST_NUMERIC_BINDINGS_NO_SANITY_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same<boost::numeric::ublas::bounded_matrix<T, R, C, F>, typename boost::remove_const<M>::type>::value));
+#endif
+#ifdef BOOST_NUMERIC_BINDINGS_FORTRAN
+  BOOST_STATIC_ASSERT((boost::is_same <
+                       typename F::orientation_category,
+                       boost::numeric::ublas::column_major_tag
+                       >::value));
+#endif
+
+  typedef boost::numeric::ublas::bounded_matrix<T, R, C, F>   identifier_type ;
+  typedef M                                                   matrix_type;
+  typedef general_t                                           matrix_structure;
+  typedef typename detail::ublas_ordering <
+  typename F::orientation_category
+  >::type                                                     ordering_type;
+
+  typedef T                                                   value_type;
+  typedef typename detail::generate_const<M, T>::type* pointer;
+
+  typedef typename identifier_type::orientation_category                      orientation_category;
+  typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
+
+  static pointer storage(matrix_type& m)
+  {
+    typedef typename detail::generate_const<M, typename identifier_type::array_type>::type array_type ;
+    return vector_traits<array_type>::storage(m.data());
+  }
+  static std::ptrdiff_t num_rows(matrix_type& m)
+  {
+    return m.size1();
+  }
+  static std::ptrdiff_t num_columns(matrix_type& m)
+  {
+    return m.size2();
+  }
+  static std::ptrdiff_t storage_size(matrix_type& m)
+  {
+    return m.size1() * m.size2();
+  }
+  static std::ptrdiff_t leading_dimension(matrix_type& m)
+  {
+    // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike
+    //   identifier_type::functor_type::size2()
+    //return functor_t::size_m (m.size1(), m.size2());
+    return detail::ublas_ordering<orientation_category>::leading_dimension(m) ;
+  }
+
+  // stride1 == distance (m (i, j), m (i+1, j))
+  static std::ptrdiff_t stride1(matrix_type& m)
+  {
+    //return functor_t::one1 (m.size1(), m.size2());
+    return detail::ublas_ordering<orientation_category>::stride1(m) ;
+  }
+  // stride2 == distance (m (i, j), m (i, j+1))
+  static std::ptrdiff_t stride2(matrix_type& m)
+  {
+    //return functor_t::one2 (m.size1(), m.size2());
+    return detail::ublas_ordering<orientation_category>::stride2(m) ;
+  }
+};
 
 }
 }

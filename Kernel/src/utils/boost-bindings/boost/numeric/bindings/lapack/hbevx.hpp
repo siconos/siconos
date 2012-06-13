@@ -1,7 +1,7 @@
 /*
  *
  * Copyright Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
- * Copyright Thomas Klimpel 2010
+ * Copyright Thomas Klimpel 2008
  *
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
@@ -21,7 +21,6 @@
 #include <boost/numeric/bindings/lapack/lapack.h>
 #include <boost/numeric/bindings/lapack/workspace.hpp>
 #include <boost/numeric/bindings/traits/detail/array.hpp>
-#include <boost/numeric/bindings/traits/detail/utils.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
 #  include <boost/static_assert.hpp>

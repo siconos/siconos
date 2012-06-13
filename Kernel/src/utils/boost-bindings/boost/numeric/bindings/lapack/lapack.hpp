@@ -27,6 +27,12 @@
 #include <boost/numeric/bindings/lapack/hesv.hpp>
 #include <boost/numeric/bindings/lapack/hpsv.hpp>
 
+// linear systems
+
+#include <boost/numeric/bindings/lapack/gels.hpp>
+#include <boost/numeric/bindings/lapack/gelss.hpp>
+#include <boost/numeric/bindings/lapack/gelsd.hpp>
+
 // eigenproblems
 
 #include <boost/numeric/bindings/lapack/gees.hpp>

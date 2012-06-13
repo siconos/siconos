@@ -44,6 +44,7 @@
 #define LAPACK_CGETRI FORTRAN_ID( cgetri )
 #define LAPACK_ZGETRI FORTRAN_ID( zgetri )
 
+
 /* symmetric/Hermitian positive definite */
 
 #define LAPACK_SPOSV FORTRAN_ID( sposv )
@@ -66,6 +67,22 @@
 #define LAPACK_CPOTRI FORTRAN_ID( cpotri )
 #define LAPACK_ZPOTRI FORTRAN_ID( zpotri )
 
+/* symmetric/Hermitian positive definite tridiagonal */
+
+#define LAPACK_SPTSV FORTRAN_ID( sptsv )
+#define LAPACK_DPTSV FORTRAN_ID( dptsv )
+#define LAPACK_CPTSV FORTRAN_ID( cptsv )
+#define LAPACK_ZPTSV FORTRAN_ID( zptsv )
+
+#define LAPACK_SPTTRF FORTRAN_ID( spttrf )
+#define LAPACK_DPTTRF FORTRAN_ID( dpttrf )
+#define LAPACK_CPTTRF FORTRAN_ID( cpttrf )
+#define LAPACK_ZPTTRF FORTRAN_ID( zpttrf )
+
+#define LAPACK_SPTTRS FORTRAN_ID( spttrs )
+#define LAPACK_DPTTRS FORTRAN_ID( dpttrs )
+#define LAPACK_CPTTRS FORTRAN_ID( cpttrs )
+#define LAPACK_ZPTTRS FORTRAN_ID( zpttrs )
 
 /* symmetric/Hermitian positive definite in packed storage */
 
@@ -113,6 +130,12 @@
 #define LAPACK_CHETRS FORTRAN_ID( chetrs )
 #define LAPACK_ZHETRS FORTRAN_ID( zhetrs )
 
+#define LAPACK_SSYTRI FORTRAN_ID( ssytri )
+#define LAPACK_DSYTRI FORTRAN_ID( dsytri )
+#define LAPACK_CSYTRI FORTRAN_ID( csytri )
+#define LAPACK_ZSYTRI FORTRAN_ID( zsytri )
+
+
 
 /* symmetric/Hermitian indefinite and complex symmetric in packed storage */
 
@@ -136,6 +159,13 @@
 #define LAPACK_ZSPTRS FORTRAN_ID( zsptrs )
 #define LAPACK_CHPTRS FORTRAN_ID( chptrs )
 #define LAPACK_ZHPTRS FORTRAN_ID( zhptrs )
+
+#define LAPACK_SSPTRI FORTRAN_ID( ssptri )
+#define LAPACK_DSPTRI FORTRAN_ID( dsptri )
+#define LAPACK_CSPTRI FORTRAN_ID( csptri )
+#define LAPACK_ZSPTRI FORTRAN_ID( zsptri )
+#define LAPACK_CHPTRI FORTRAN_ID( chptri )
+#define LAPACK_ZHPTRI FORTRAN_ID( zhptri )
 
 /* banded solve */
 
@@ -161,10 +191,15 @@
 #define LAPACK_CHEEV FORTRAN_ID( cheev )
 #define LAPACK_ZHEEV FORTRAN_ID( zheev )
 
-#define LAPACK_SHSEQR FORTRAN_ID( shseqr )
-#define LAPACK_DHSEQR FORTRAN_ID( dhseqr )
-#define LAPACK_CHSEQR FORTRAN_ID( chseqr )
-#define LAPACK_ZHSEQR FORTRAN_ID( zhseqr )
+#define LAPACK_SSYEVD FORTRAN_ID( ssyevd )
+#define LAPACK_DSYEVD FORTRAN_ID( dsyevd )
+#define LAPACK_CHEEVD FORTRAN_ID( cheevd )
+#define LAPACK_ZHEEVD FORTRAN_ID( zheevd )
+
+#define LAPACK_SSYEVX FORTRAN_ID( ssyevx )
+#define LAPACK_DSYEVX FORTRAN_ID( dsyevx )
+#define LAPACK_CHEEVX FORTRAN_ID( cheevx )
+#define LAPACK_ZHEEVX FORTRAN_ID( zheevx )
 
 #define LAPACK_STREVC FORTRAN_ID( strevc )
 #define LAPACK_DTREVC FORTRAN_ID( dtrevc )
@@ -176,26 +211,13 @@
 #define LAPACK_CTREXC FORTRAN_ID( ctrexc )
 #define LAPACK_ZTREXC FORTRAN_ID( ztrexc )
 
-// generalized eigenvalue/eigenvector
-#define LAPACK_SSYGV FORTRAN_ID( ssygv )
-#define LAPACK_DSYGV FORTRAN_ID( dsygv )
+/********************************************/
+/* eigenproblems for Hessenberg matrices */
 
-#define LAPACK_SSYEVD FORTRAN_ID( ssyevd )
-#define LAPACK_DSYEVD FORTRAN_ID( dsyevd )
-#define LAPACK_CHEEVD FORTRAN_ID( cheevd )
-#define LAPACK_ZHEEVD FORTRAN_ID( zheevd )
-
-#define LAPACK_SSYEVX FORTRAN_ID( ssyevx )
-#define LAPACK_DSYEVX FORTRAN_ID( dsyevx )
-#define LAPACK_CHEEVX FORTRAN_ID( cheevx )
-#define LAPACK_ZHEEVX FORTRAN_ID( zheevx )
-
-#define LAPACK_SSBEVX FORTRAN_ID( ssbevx )
-#define LAPACK_DSBEVX FORTRAN_ID( dsbevx )
-#define LAPACK_CHBEVX FORTRAN_ID( chbevx )
-#define LAPACK_ZHBEVX FORTRAN_ID( zhbevx )
-
-
+#define LAPACK_SHSEQR FORTRAN_ID( shseqr )
+#define LAPACK_DHSEQR FORTRAN_ID( dhseqr )
+#define LAPACK_CHSEQR FORTRAN_ID( chseqr )
+#define LAPACK_ZHSEQR FORTRAN_ID( zhseqr )
 
 /********************************************/
 /* eigenproblems for banded matrices */
@@ -205,6 +227,10 @@
 #define LAPACK_CHBEV FORTRAN_ID( chbev )
 #define LAPACK_ZHBEV FORTRAN_ID( zhbev )
 
+#define LAPACK_SSBEVX FORTRAN_ID( ssbevx )
+#define LAPACK_DSBEVX FORTRAN_ID( dsbevx )
+#define LAPACK_CHBEVX FORTRAN_ID( chbevx )
+#define LAPACK_ZHBEVX FORTRAN_ID( zhbevx )
 
 /********************************************/
 /* eigenproblems for tridiagonal matrices */
@@ -212,6 +238,13 @@
 #define LAPACK_SSTEQR FORTRAN_ID( ssteqr )
 #define LAPACK_DSTEQR FORTRAN_ID( dsteqr )
 
+/********************************************/
+/* generalized eigenvalue/eigenvector */
+
+#define LAPACK_SSYGV FORTRAN_ID( ssygv )
+#define LAPACK_DSYGV FORTRAN_ID( dsygv )
+#define LAPACK_CHEGV FORTRAN_ID( chegv )
+#define LAPACK_ZHEGV FORTRAN_ID( zhegv )
 
 /********************************************/
 /* QR factorization */
@@ -228,17 +261,13 @@
 #define LAPACK_CUNMQR FORTRAN_ID( cunmqr )
 #define LAPACK_ZUNMQR FORTRAN_ID( zunmqr )
 
-#define LAPACK_SSYTRD FORTRAN_ID( ssytrd )
-#define LAPACK_DSYTRD FORTRAN_ID( dsytrd )
-
-// generates an M-by-N real matrix Q with orthonormal columns,
-// which is defined as the first N columns of a product of K elementary
-//  reflectors of order M
-//        Q  =  H(1) H(2) . . . H(k)
-
 #define LAPACK_SORGQR FORTRAN_ID( sorgqr )
 #define LAPACK_DORGQR FORTRAN_ID( dorgqr )
+#define LAPACK_CUNGQR FORTRAN_ID( cungqr )
+#define LAPACK_ZUNGQR FORTRAN_ID( zungqr )
 
+#define LAPACK_SSYTRD FORTRAN_ID( ssytrd )
+#define LAPACK_DSYTRD FORTRAN_ID( dsytrd )
 
 
 /********************************************/

@@ -1,5 +1,5 @@
 //
-// Copyright Karl Meerbergen 2007
+// Copyright Karl Meerbergen 2008
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -9,10 +9,10 @@
 #ifndef BOOST_NUMERIC_BINDINGS_MUMPS_MUMPS_DRIVER_4_6_4_HPP
 #define BOOST_NUMERIC_BINDINGS_MUMPS_MUMPS_DRIVER_4_6_4_HPP
 
-#include <boost/numeric/bindings/mumps/4.6.4/smumps_c.hpp>
-#include <boost/numeric/bindings/mumps/4.6.4/cmumps_c.hpp>
-#include <boost/numeric/bindings/mumps/4.6.4/dmumps_c.hpp>
-#include <boost/numeric/bindings/mumps/4.6.4/zmumps_c.hpp>
+#include <smumps_c.h>
+#include <cmumps_c.h>
+#include <dmumps_c.h>
+#include <zmumps_c.h>
 #include <boost/numeric/bindings/traits/sparse_traits.hpp>
 #include <boost/numeric/bindings/traits/matrix_traits.hpp>
 #include <boost/numeric/bindings/traits/type_traits.hpp>

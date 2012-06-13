@@ -18,6 +18,9 @@
 #include <boost/numeric/bindings/traits/traits.hpp>
 #include <boost/numeric/bindings/lapack/lapack.h>
 #include <boost/numeric/bindings/traits/detail/array.hpp>
+#include <boost/numeric/bindings/lapack/workspace.hpp>
+#include <boost/numeric/bindings/lapack/ilaenv.hpp>
+
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
 #  include <boost/static_assert.hpp>
@@ -94,7 +97,7 @@ void gesv(int const n, int const nrhs,
                traits::complex_ptr(b), &ldb, info);
 }
 
-}
+} //namespace detail
 
 template <typename MatrA, typename MatrB, typename IVec>
 inline
@@ -189,7 +192,7 @@ void getrf(int const n, int const m,
   LAPACK_ZGETRF(&n, &m, traits::complex_ptr(a), &lda, ipiv, info);
 }
 
-}
+} //namespace detail
 
 template <typename MatrA, typename IVec>
 inline
@@ -264,7 +267,7 @@ void getrs(char const trans, int const n, int const nrhs,
                 traits::complex_ptr(b), &ldb, info);
 }
 
-}
+} // namespace detail
 
 template <typename MatrA, typename MatrB, typename IVec>
 inline
@@ -315,12 +318,160 @@ int getrs(MatrA const& a, IVec const& ipiv, MatrB& b)
   return getrs(no_transpose, a, ipiv, b);
 }
 
-// TO DO: getri()
+/*
+ * getri() computes the inverse of a matrix using
+ * the LU factorization computed by getrf().
+ */
+
+namespace detail
+{
+
+inline
+void getri(int const n, float* a, int const lda, int const* ipiv,
+           float* work, int const lwork, int* info)
+{
+  LAPACK_SGETRI(&n, a, &lda, ipiv, work, &lwork, info);
+}
+
+inline
+void getri(int const n, double* a, int const lda, int const* ipiv,
+           double* work, int const lwork, int* info)
+{
+  LAPACK_DGETRI(&n, a, &lda, ipiv, work, &lwork, info);
+}
+
+inline
+void getri(int const n, traits::complex_f* a, int const lda,
+           int const* ipiv, traits::complex_f* work, int const lwork,
+           int* info)
+{
+  LAPACK_CGETRI(&n, traits::complex_ptr(a), &lda, ipiv,
+                traits::complex_ptr(work), &lwork, info);
+}
+
+inline
+void getri(int const n, traits::complex_d* a, int const lda,
+           int const* ipiv, traits::complex_d* work, int const lwork,
+           int* info)
+{
+  LAPACK_ZGETRI(&n, traits::complex_ptr(a), &lda, ipiv,
+                traits::complex_ptr(work), &lwork, info);
+}
+
+
+
+template <typename MatrA, typename IVec, typename Work>
+inline
+int getri(MatrA& a, IVec const& ipiv, Work& work)
+{
+#ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same <
+                       typename traits::matrix_traits<MatrA>::matrix_structure,
+                       traits::general_t
+                       >::value));
+#endif
+
+  int const n = traits::matrix_size1(a);
+  assert(n > 0);
+  assert(n <= traits::leading_dimension(a));
+  assert(n == traits::matrix_size2(a));
+  assert(n == traits::vector_size(ipiv));
+  assert(n <= traits::vector_size(work));   //Minimal workspace size
+
+  int info;
+  //double* dummy = traits::matrix_storage (a);
+  detail::getri(n, traits::matrix_storage(a),
+                traits::leading_dimension(a),
+#ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
+                traits::vector_storage(ipiv),
+#else
+                traits::vector_storage_const(ipiv),
+#endif
+                traits::vector_storage(work),
+                traits::vector_size(work),
+                &info);
+  return info;
+}
+
+
+inline
+int getri_block(float)
+{
+  return lapack::ilaenv(1, "sgetri", "");
+}
+
+inline
+int getri_block(double)
+{
+  return lapack::ilaenv(1, "dgetri", "");
+}
+
+inline
+int getri_block(traits::complex_f)
+{
+  return lapack::ilaenv(1, "cgetri", "");
+}
+
+inline
+int getri_block(traits::complex_d)
+{
+  return lapack::ilaenv(1, "zgetri", "");
+}
+
+} // namespace detail
+
+
+template <typename MatrA, typename IVec>
+inline
+int getri(MatrA& a, IVec& ipiv, minimal_workspace)
+{
+  typedef typename MatrA::value_type value_type;
+
+  int n = traits::matrix_size1(a);
+  traits::detail::array<value_type> work(std::max<int>(1, n));
+
+  return detail::getri(a, ipiv, work);
 
 }
 
+
+// optimal workspace allocation
+template <typename MatrA, typename IVec>
+inline
+int getri(MatrA& a, IVec& ipiv, optimal_workspace)
+{
+  typedef typename MatrA::value_type value_type;
+
+  int n = traits::matrix_size1(a);
+  int nb = detail::getri_block(value_type());
+  traits::detail::array<value_type> work(std::max<int>(1, n * nb));
+
+  return detail::getri(a, ipiv, work);
+}
+
+
+template <typename MatrA, typename IVec>
+inline
+int getri(MatrA& a, IVec& ipiv)
+{
+  return getri(a, ipiv, optimal_workspace());
+}
+
+
+template <typename MatrA, typename IVec, typename Work>
+inline
+int getri(MatrA& a, IVec& ipiv, Work& work)
+{
+  return detail::getri(a, ipiv, work);
+}
+
+} // namespace lapack
+
 }
 }
-}
+} // namespace boost::numeric::bindings
+
+
+
 
 #endif

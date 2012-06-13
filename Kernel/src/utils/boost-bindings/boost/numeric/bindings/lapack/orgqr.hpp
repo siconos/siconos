@@ -1,5 +1,5 @@
 //
-// Copyright Fabien Dekeyser, Quoc-Cuong Pham 2010
+// Copyright Fabien Dekeyser, Quoc-Cuong Pham 2008
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -77,6 +77,24 @@ void orgqr(int const m, int const n, int const k,
            double* tau, double* work, int const lwork, int& info)
 {
   LAPACK_DORGQR(&m, &n, &k, a, &lda, tau, work, &lwork, &info);
+}
+
+inline
+void orgqr(int const m, int const n, int const k,
+           traits::complex_f* a, int const lda,
+           traits::complex_f* tau, traits::complex_f* work, int const lwork, int& info)
+{
+  LAPACK_CUNGQR(&m, &n, &k, traits::complex_ptr(a), &lda, traits::complex_ptr(tau),
+                traits::complex_ptr(work), &lwork, &info);
+}
+
+inline
+void orgqr(int const m, int const n, int const k,
+           traits::complex_d* a, int const lda,
+           traits::complex_d* tau, traits::complex_d* work, int const lwork, int& info)
+{
+  LAPACK_ZUNGQR(&m, &n, &k, traits::complex_ptr(a), &lda, traits::complex_ptr(tau),
+                traits::complex_ptr(work), &lwork, &info);
 }
 
 } // fin namespace detail

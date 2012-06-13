@@ -68,7 +68,7 @@ int gbtrf(MatrA& a, IVec& ipiv)
   int const ku = traits::matrix_upper_bandwidth(a) - kl;
   int const ld = traits::leading_dimension(a);
 
-  assert(ku > 0);
+  assert(ku >= 0);
 
   int info;
   detail::gbtrf(n, m, kl, ku,
@@ -116,7 +116,7 @@ int gbtrs(char const trans, MatrA const& a, IVec const& ipiv, MatrB& b)
   int const ku = traits::matrix_upper_bandwidth(a) - kl;
   int const ld = traits::leading_dimension(a);
 
-  assert(ku > 0);
+  assert(ku >= 0);
 
   int info;
   detail::gbtrs(trans, n, kl, ku, traits::matrix_size2(b),

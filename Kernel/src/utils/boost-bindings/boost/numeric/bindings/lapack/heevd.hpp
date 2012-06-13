@@ -1,7 +1,7 @@
 /*
  *
  * Copyright Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
- * Copyright Thomas Klimpel 2010
+ * Copyright Thomas Klimpel 2008
  *
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
@@ -20,6 +20,7 @@
 #include <boost/numeric/bindings/lapack/lapack.h>
 #include <boost/numeric/bindings/lapack/workspace.hpp>
 #include <boost/numeric/bindings/traits/detail/array.hpp>
+#include <boost/numeric/bindings/traits/detail/utils.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
 #  include <boost/static_assert.hpp>
@@ -101,9 +102,9 @@ inline void heevd(
 {
   LAPACK_CHEEVD(
     &jobz, &uplo, &n,
-    reinterpret_cast<fcomplex_t*>(a), &lda,
-    reinterpret_cast<fcomplex_t*>(w),
-    reinterpret_cast<fcomplex_t*>(work), &lwork,
+    traits::complex_ptr(a), &lda,
+    w,
+    traits::complex_ptr(work), &lwork,
     rwork, &lrwork, iwork, &liwork, &info);
 }
 
@@ -115,9 +116,9 @@ inline void heevd(
 {
   LAPACK_ZHEEVD(
     &jobz, &uplo, &n,
-    reinterpret_cast<dcomplex_t*>(a), &lda,
-    reinterpret_cast<dcomplex_t*>(w),
-    reinterpret_cast<dcomplex_t*>(work), &lwork,
+    traits::complex_ptr(a), &lda,
+    w,
+    traits::complex_ptr(work), &lwork,
     rwork, &lrwork, iwork, &liwork, &info);
 }
 } // namespace detail
@@ -164,7 +165,7 @@ struct Heevd< 1 >
           traits::vector_storage(iwork), traits::vector_size(iwork),
           info);
 
-    traits::detail::array<T> work(static_cast<int>(workspace_query));
+    traits::detail::array<T> work(traits::detail::to_int(workspace_query));
 
     heevd(jobz, uplo, n, a, lda, w,
           traits::vector_storage(work), traits::vector_size(work),
@@ -179,8 +180,8 @@ struct Heevd< 1 >
     R* w, std::pair<detail::workspace1<W>, detail::workspace1<WI> > work, int& info)
   {
 
-    assert(jobz == 'N' ? 1 + 2 * n : 1 + 6 * n + 2 * n * n <= traits::vector_size(work.first.w_));
-    assert(jobz == 'N' ? 1 : 3 + 5 * n <= traits::vector_size(work.second.w_));
+    assert(traits::vector_size(work.first.w_) >= jobz == 'N' ? 1 + 2 * n : 1 + 6 * n + 2 * n * n);
+    assert(traits::vector_size(work.second.w_) >= jobz == 'N' ? 1 : 3 + 5 * n);
 
     heevd(jobz, uplo, n, a, lda, w,
           traits::vector_storage(work.first.w_), traits::vector_size(work.first.w_),
@@ -229,7 +230,7 @@ struct Heevd< 2 >
           traits::vector_storage(iwork), traits::vector_size(iwork),
           info);
 
-    traits::detail::array<T> work(static_cast<int>(traits::real(workspace_query)));
+    traits::detail::array<T> work(traits::detail::to_int(workspace_query));
 
     heevd(jobz, uplo, n, a, lda, w,
           traits::vector_storage(work), traits::vector_size(work),
@@ -245,9 +246,9 @@ struct Heevd< 2 >
     R* w, std::pair<detail::workspace2<WC, WR>, detail::workspace1<WI> > work, int& info)
   {
 
-    assert(jobz == 'N' ? 1 + n : 2 * n + n * n <= traits::vector_size(work.first.w_));
-    assert(jobz == 'N' ? n : 1 + 5 * n + 2 * n * n <= traits::vector_size(work.first.wr_));
-    assert(jobz == 'N' ? 1 : 3 + 5 * n <= traits::vector_size(work.second.w_));
+    assert(traits::vector_size(work.first.w_) >= jobz == 'N' ? 1 + n : 2 * n + n * n);
+    assert(traits::vector_size(work.first.wr_) >= jobz == 'N' ? n : 1 + 5 * n + 2 * n * n);
+    assert(traits::vector_size(work.second.w_) >= jobz == 'N' ? 1 : 3 + 5 * n);
 
     heevd(jobz, uplo, n, a, lda, w,
           traits::vector_storage(work.first.w_), traits::vector_size(work.first.w_),

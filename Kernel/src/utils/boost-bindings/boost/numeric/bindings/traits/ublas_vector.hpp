@@ -74,7 +74,7 @@ public:
   {
     return vector_traits<vct_t>::storage(v.expression());
   }
-  static int stride(vector_type& v)
+  static std::ptrdiff_t stride(vector_type& v)
   {
     return vector_traits<vct_t>::stride(v.expression());
   }
@@ -104,7 +104,7 @@ public:
     ptr += vr.start() * vector_traits<v_type>::stride(vr.data());
     return ptr;
   }
-  static int stride(vector_type& vr)
+  static std::ptrdiff_t stride(vector_type& vr)
   {
     return vector_traits<v_type>::stride(vr.data());
   }
@@ -135,7 +135,7 @@ public:
     ptr += vs.start() * vector_traits<v_type>::stride(vs.data());
     return ptr;
   }
-  static int stride(vector_type& vs)
+  static std::ptrdiff_t stride(vector_type& vs)
   {
     return vs.stride() * vector_traits<v_type>::stride(vs.data());
   }
@@ -164,6 +164,27 @@ struct vector_detail_traits< boost::numeric::ublas::c_vector<T, N>, V >
 };
 
 #endif // BOOST_NUMERIC_BINDINGS_FORTRAN 
+
+
+// ublas::bounded_vector<>
+template <typename T, std::size_t N, typename V>
+struct vector_detail_traits< boost::numeric::ublas::bounded_vector<T, N>, V >
+    : default_vector_traits< V, T >
+{
+#ifndef BOOST_NUMERIC_BINDINGS_NO_SANITY_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same< boost::numeric::ublas::bounded_vector<T, N>, typename boost::remove_const<V>::type >::value));
+#endif
+
+  typedef boost::numeric::ublas::bounded_vector<T, N>     identifier_type;
+  typedef V                                               vector_type;
+  typedef typename default_vector_traits< V, T >::pointer pointer;
+
+  static pointer storage(vector_type& v)
+  {
+    typedef typename detail::generate_const<V, typename identifier_type::array_type>::type array_type ;
+    return vector_traits<array_type>::storage(v.data());
+  }
+};
 
 
 }

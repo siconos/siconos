@@ -392,6 +392,7 @@ int report_matrix(int n_row, int n_col,
 
 // report triplet (coordinate)
 
+inline
 int report_triplet(int n_row, int n_col, int nz,
                    int const* Ti, int const* Tj, double const* Tx,
                    double const* Control)
@@ -399,6 +400,7 @@ int report_triplet(int n_row, int n_col, int nz,
   return umfpack_di_report_triplet(n_row, n_col, nz, Ti, Tj, Tx, Control);
 }
 
+inline
 int report_triplet(int n_row, int n_col, int nz,
                    int const* Ti, int const* Tj,
                    traits::complex_d const* Tx,
@@ -418,11 +420,13 @@ int report_triplet(int n_row, int n_col, int nz,
 
 // report vector
 
+inline
 int report_vector(int n, double const* X, double const* Control)
 {
   return umfpack_di_report_vector(n, X, Control);
 }
 
+inline
 int report_vector(int n, traits::complex_d const* X,
                   double const* Control)
 {

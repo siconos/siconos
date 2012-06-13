@@ -49,6 +49,18 @@ struct generate_const< V const, X const >
   typedef X const type;
 };
 
+template <typename T, int N, typename X>
+struct generate_const< const T[N], X >
+{
+  typedef X const type;
+};
+
+template <typename T, int N, typename X>
+struct generate_const< const T[N], X const >
+{
+  typedef X const type;
+};
+
 }
 }
 }

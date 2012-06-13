@@ -73,49 +73,42 @@ struct matrix_detail_traits< boost::numeric::ublas::banded_matrix<T, F, ArrT>, M
     typedef typename detail::generate_const<M, ArrT>::type array_type ;
     return vector_traits<array_type>::storage(m.data());
   }
-  static int size1(matrix_type& m)
+  static std::ptrdiff_t size1(matrix_type& m)
   {
     return m.size1();
   }
-  static int size2(matrix_type& m)
+  static std::ptrdiff_t size2(matrix_type& m)
   {
     return m.size2();
   }
-  static int lower_bandwidth(matrix_type& m)
+  static std::ptrdiff_t lower_bandwidth(matrix_type& m)
   {
     return m.lower() ;
   }
-  static int upper_bandwidth(matrix_type& m)
+  static std::ptrdiff_t upper_bandwidth(matrix_type& m)
   {
     return m.upper() ;
   }
-  static int storage_size(matrix_type& m)
+  static std::ptrdiff_t storage_size(matrix_type& m)
   {
     return size1(m) * size2(m);
   }
-  static int leading_dimension(matrix_type& m)
+  static std::ptrdiff_t leading_dimension(matrix_type& m)
   {
-    // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike
-    //   identifier_type::functor_type::size2()
-    //return lower_bandwidth(m) + upper_bandwidth(m) + 1 ;
     typedef typename identifier_type::orientation_category                      orientation_category;
     return detail::ublas_banded_ordering<orientation_category>::leading_dimension(m) ;
   }
 
   // stride1 == distance (m (i, j), m (i+1, j))
-  static int stride1(matrix_type& m)
+  static std::ptrdiff_t stride1(matrix_type& m)
   {
     typedef typename identifier_type::orientation_category                      orientation_category;
-    //typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
-    //return functor_t::one2 ( std::max(m.size1(), m.size2()), leading_dimension(m)-1 ) ;
     return detail::ublas_banded_ordering<orientation_category>::stride1(m) ;
   }
   // stride2 == distance (m (i, j), m (i, j+1))
-  static int stride2(matrix_type& m)
+  static std::ptrdiff_t stride2(matrix_type& m)
   {
     typedef typename identifier_type::orientation_category                      orientation_category;
-    //typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
-    //return functor_t::one1 ( std::max(m.size1(), m.size2()), leading_dimension(m)-1 ) ;
     return detail::ublas_banded_ordering<orientation_category>::stride2(m) ;
   }
 };

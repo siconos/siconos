@@ -90,7 +90,7 @@ template <typename MatrA, typename MatrB, typename VecS, typename Work>
 inline int gelsd(MatrA& A, MatrB& B, VecS& s, Work& work)
 {
   typedef typename MatrA::value_type val_t;
-  typedef traits::type_traits<val_t>::real_type real_t;
+  typedef typename traits::type_traits<val_t>::real_type real_t;
 
   const int m = traits::matrix_size1(A);
   const int n = traits::matrix_size2(A);
@@ -140,7 +140,7 @@ template < typename MatrA, typename MatrB, typename VecS,
 inline int gelsd(MatrA& A, MatrB& B, VecS& s, Work& work, RWork& rwork)
 {
   typedef typename MatrA::value_type val_t;
-  typedef traits::type_traits<val_t>::real_type real_t;
+  typedef typename traits::type_traits<val_t>::real_type real_t;
 
   const int m = traits::matrix_size1(A);
   const int n = traits::matrix_size2(A);
@@ -221,7 +221,7 @@ struct Gelsd<1>
   inline int operator()(MatrA& A, MatrB& B, VecS& s, optimal_workspace) const
   {
     typedef typename MatrA::value_type val_t;
-    typedef traits::type_traits<val_t>::real_type real_t;
+    typedef typename traits::type_traits<val_t>::real_type real_t;
 
     const int m = traits::matrix_size1(A);
     const int n = traits::matrix_size2(A);
@@ -286,7 +286,7 @@ struct Gelsd<2>
   inline int operator()(MatrA& A, MatrB& B, VecS& s, minimal_workspace) const
   {
     typedef typename MatrA::value_type val_t;
-    typedef traits::type_traits<val_t>::real_type real_t;
+    typedef typename traits::type_traits<val_t>::real_type real_t;
 
     const int m = traits::matrix_size1(A);
     const int n = traits::matrix_size2(A);
@@ -314,7 +314,7 @@ struct Gelsd<2>
   inline int operator()(MatrA& A, MatrB& B, VecS& s, optimal_workspace) const
   {
     typedef typename MatrA::value_type val_t;
-    typedef traits::type_traits<val_t>::real_type real_t;
+    typedef typename traits::type_traits<val_t>::real_type real_t;
 
     const int m = traits::matrix_size1(A);
     const int n = traits::matrix_size2(A);
@@ -409,7 +409,7 @@ template <typename MatrA, typename MatrB, typename Work>
 inline int gelsd(MatrA& A, MatrB& B, Work& workspace)
 {
   typedef typename MatrA::value_type val_t;
-  typedef traits::type_traits<val_t>::real_type real_t;
+  typedef typename traits::type_traits<val_t>::real_type real_t;
 
   const int m = traits::matrix_size1(A);
   const int n = traits::matrix_size2(A);

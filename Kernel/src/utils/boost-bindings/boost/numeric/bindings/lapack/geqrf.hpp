@@ -25,6 +25,7 @@
 #  include <boost/static_assert.hpp>
 #  include <boost/type_traits.hpp>
 #endif
+#include <cassert>
 
 
 namespace boost

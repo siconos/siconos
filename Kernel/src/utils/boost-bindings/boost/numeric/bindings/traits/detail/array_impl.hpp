@@ -56,8 +56,9 @@ template <typename T>
 class array : private noncopyable
 {
 public:
+  typedef std::ptrdiff_t size_type ;
 
-  array(int n)
+  array(size_type n)
   {
     stg = new(std::nothrow) T[n];
     sz = (stg != 0) ? n : 0;
@@ -67,7 +68,7 @@ public:
     delete[] stg;
   }
 
-  int size() const
+  size_type size() const
   {
     return sz;
   }
@@ -101,7 +102,7 @@ public:
   }
 
 private:
-  int sz;
+  size_type sz;
   T* stg;
 };
 

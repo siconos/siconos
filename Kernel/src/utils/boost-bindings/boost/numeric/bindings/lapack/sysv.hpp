@@ -17,8 +17,11 @@
 #include <boost/numeric/bindings/traits/type_traits.hpp>
 #include <boost/numeric/bindings/traits/traits.hpp>
 #include <boost/numeric/bindings/lapack/lapack.h>
-#include <boost/numeric/bindings/lapack/ilaenv.hpp>
 #include <boost/numeric/bindings/traits/detail/array.hpp>
+#include "boost/numeric/bindings/traits/ublas_symmetric.hpp"
+#include <boost/numeric/bindings/lapack/ilaenv.hpp>
+#include <boost/numeric/bindings/lapack/workspace.hpp>
+
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
 #  include <boost/static_assert.hpp>
@@ -76,7 +79,6 @@ int sytrf_block(traits::complex_d,
   ul2[0] = ul;
   return ilaenv(ispec, "ZSYTRF", ul2, n);
 }
-
 }
 
 
@@ -84,7 +86,6 @@ template <typename SymmA>
 inline
 int sytrf_block(char const q, char const ul, SymmA const& a)
 {
-
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
   BOOST_STATIC_ASSERT((boost::is_same <
                        typename traits::matrix_traits<SymmA>::matrix_structure,
@@ -110,7 +111,6 @@ template <typename SymmA>
 inline
 int sytrf_block(char const q, SymmA const& a)
 {
-
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
   BOOST_STATIC_ASSERT((boost::is_same <
                        typename traits::matrix_traits<SymmA>::matrix_structure,
@@ -136,7 +136,6 @@ template <typename SymmA>
 inline
 int sytrf_work(char const q, char const ul, SymmA const& a)
 {
-
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
   BOOST_STATIC_ASSERT((boost::is_same <
                        typename traits::matrix_traits<SymmA>::matrix_structure,
@@ -272,7 +271,6 @@ template <typename SymmA, typename MatrB, typename IVec, typename Work>
 inline
 int sysv(char const ul, SymmA& a, IVec& i, MatrB& b, Work& w)
 {
-
   int const n = traits::matrix_size1(a);
   assert(n == traits::matrix_size2(a));
   assert(n == traits::matrix_size1(b));
@@ -297,7 +295,6 @@ template <typename SymmA, typename MatrB, typename IVec, typename Work>
 inline
 int sysv(char const ul, SymmA& a, IVec& i, MatrB& b, Work& w)
 {
-
   assert(ul == 'U' || ul == 'L');
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
@@ -428,7 +425,6 @@ int sysv(SymmA& a, MatrB& b)
 
 namespace detail
 {
-
 inline
 void sytrf(char const uplo, int const n,
            float* a, int const lda, int* ipiv,
@@ -490,7 +486,6 @@ template <typename SymmA, typename IVec, typename Work>
 inline
 int sytrf(char const ul, SymmA& a, IVec& i, Work& w)
 {
-
   assert(ul == 'U' || ul == 'L');
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
@@ -508,7 +503,6 @@ template <typename SymmA, typename IVec, typename Work>
 inline
 int sytrf(SymmA& a, IVec& i, Work& w)
 {
-
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
   BOOST_STATIC_ASSERT((boost::is_same <
                        typename traits::matrix_traits<SymmA>::matrix_structure,
@@ -699,12 +693,121 @@ int sytrs(SymmA const& a, IVec const& i, MatrB& b)
 }
 
 
-// TO DO: sytri
+
+namespace detail
+{
+inline
+void sytri(char const uplo, int const n, float* a, int const lda,
+           int const* ipiv, float* work, int* info)
+{
+  LAPACK_SSYTRI(&uplo, &n, a, &lda, ipiv, work, info);
+}
+
+inline
+void sytri(char const uplo, int const n, double* a, int const lda,
+           int const* ipiv, double* work, int* info)
+{
+  LAPACK_DSYTRI(&uplo, &n, a, &lda, ipiv, work, info);
+}
+
+inline
+void sytri(char const uplo, int const n, traits::complex_f* a,
+           int const lda, int const* ipiv, traits::complex_f* work, int* info)
+{
+  LAPACK_CSYTRI(&uplo, &n, traits::complex_ptr(a), &lda, ipiv,
+                traits::complex_ptr(work), info);
+}
+
+inline
+void sytri(char const uplo, int const n, traits::complex_d* a,
+           int const lda, int const* ipiv, traits::complex_d* work, int* info)
+{
+  LAPACK_ZSYTRI(&uplo, &n, traits::complex_ptr(a), &lda, ipiv,
+                traits::complex_ptr(work), info);
+}
+
+template <typename SymmA, typename IVec, typename Work>
+inline
+int sytri(char const ul, SymmA& a, IVec const& ipiv, Work& work)
+{
+  assert(ul == 'U' || ul == 'L');
+
+  int const n = traits::matrix_size1(a);
+  assert(n == traits::matrix_size2(a));
+  assert(n == traits::vector_size(ipiv));
+  assert(n == traits::vector_size(work));
+
+  int info;
+  //const double* dummy = traits::matrix_storage (a);
+  detail::sytri(ul, n, traits::matrix_storage(a),
+                traits::leading_dimension(a),
+#ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
+                traits::vector_storage(ipiv),
+#else
+                traits::vector_storage_const(ipiv),
+#endif
+                traits::vector_storage(work),
+                &info);
+  return info;
+}
+
+} // namespace detail
+
+
+//Internal allocation of workspace, general matrix with up/low tag
+template <typename SymmA, typename IVec>
+inline
+int sytri(char const ul, SymmA& a, IVec const& ipiv)
+{
+  assert(ul == 'U' || ul == 'L');
+
+#ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same <
+                       typename traits::matrix_traits<SymmA>::matrix_structure,
+                       traits::general_t
+                       >::value));
+#endif
+
+  typedef typename SymmA::value_type value_type;
+  int n = traits::matrix_size1(a);
+  traits::detail::array<value_type> work(std::max<int>(1, n));
+
+  return detail::sytri(ul, a, ipiv, work);
+}
+
+//Internal allocation of workspace, symmetric matrix
+
+/*Warning: the function will work only if SymmA is a
+  symmetric_adaptor. With SymmA = symmetric_matrix a
+  boost::STATIC_ASSERTION_FAILURE will be thrown at compile
+  time, because symmetric_matrix has a symmetric_packed_t
+  structure instead of symmetric_t. Use sptri() for
+  symmetric packed matrices.
+  */
+template <typename SymmA, typename IVec>
+inline
+int sytri(SymmA& a, IVec const& ipiv)
+{
+
+#ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
+  BOOST_STATIC_ASSERT((boost::is_same <
+                       typename traits::matrix_traits<SymmA>::matrix_structure,
+                       traits::symmetric_t
+                       >::value));
+#endif
+
+  typedef typename SymmA::value_type value_type;
+  int n = traits::matrix_size1(a);
+  traits::detail::array<value_type> work(std::max<int>(1, n));
+
+  char uplo = traits::matrix_uplo_tag(a);
+  return detail::sytri(uplo, a, ipiv, work);
+}
+
+} // namespace lapack
 
 }
-
 }
-}
-}
+} // namespace boost::numeric::bindings
 
 #endif

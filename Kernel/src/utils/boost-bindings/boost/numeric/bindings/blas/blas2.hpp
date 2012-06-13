@@ -124,18 +124,18 @@ void ger(const value_type& alpha,
     detail::geru( m, n, alpha, x_ptr, stride_x, y_ptr, stride_y, a_ptr, lda );
   }
 */
-/*
+
 // y <- alpha * A * x + beta * y
 template < typename matrix_type, typename vector_type_x, typename vector_type_y >
 inline
 void gemv(const typename traits::matrix_traits<matrix_type>::value_type &alpha,
-    const matrix_type &a,
-    const vector_type_x &x,
-    const typename traits::vector_traits<vector_type_y>::value_type &beta,
-    vector_type_y &y
-    )
+          const matrix_type &a,
+          const vector_type_x &x,
+          const typename traits::vector_traits<vector_type_y>::value_type &beta,
+          vector_type_y &y
+         )
 {
-  gemv( traits::NO_TRANSPOSE, alpha, a, x, beta, y );
+  gemv(traits::NO_TRANSPOSE, alpha, a, x, beta, y);
 }
 
 
@@ -145,9 +145,9 @@ inline
 void gemv(const matrix_type &a, const vector_type_x &x, vector_type_y &y)
 {
   typedef typename traits::matrix_traits<matrix_type>::value_type val_t;
-  gemv( traits::NO_TRANSPOSE, (val_t) 1, a, x, (val_t) 0, y );
+  gemv(traits::NO_TRANSPOSE, (val_t) 1, a, x, (val_t) 0, y);
 }
-*/
+
 
 }
 }

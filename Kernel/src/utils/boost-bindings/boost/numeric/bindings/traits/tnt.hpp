@@ -120,17 +120,17 @@ struct matrix_detail_traits<TNT::Array2D<T>, M>
   {
     return m[0];
   }
-  static int size1(matrix_type& m)
+  static int num_rows(matrix_type& m)
   {
     return m.dim1();
   }
-  static int size2(matrix_type& m)
+  static int num_columns(matrix_type& m)
   {
     return m.dim2();
   }
   static int storage_size(matrix_type& m)
   {
-    return size1(m) * size2(m);
+    return m.dim1() * m.dim2();
   }
   static int leading_dimension(matrix_type& m)
   {
@@ -161,17 +161,17 @@ struct matrix_detail_traits<TNT::Fortran_Array2D<T>, M>
   {
     return &m(1, 1);
   }
-  static int size1(matrix_type& m)
+  static int num_rows(matrix_type& m)
   {
     return m.dim1();
   }
-  static int size2(matrix_type& m)
+  static int num_columns(matrix_type& m)
   {
     return m.dim2();
   }
   static int storage_size(matrix_type& m)
   {
-    return size1(m) * size2(m);
+    return m.dim1() * m.dim2();
   }
   static int leading_dimension(matrix_type& m)
   {

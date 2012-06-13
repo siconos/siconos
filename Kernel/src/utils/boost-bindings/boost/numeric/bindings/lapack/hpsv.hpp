@@ -18,7 +18,6 @@
 #include <boost/numeric/bindings/traits/traits.hpp>
 #include <boost/numeric/bindings/lapack/lapack.h>
 #include <boost/numeric/bindings/traits/detail/array.hpp>
-#include <boost/numeric/bindings/traits/detail/utils.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
 #  include <boost/static_assert.hpp>
@@ -162,13 +161,6 @@ void hptrf(char const uplo, int const n,
            traits::complex_d* ap, int* ipiv, int* info)
 {
   LAPACK_ZHPTRF(&uplo, &n, traits::complex_ptr(ap), ipiv, info);
-}
-
-template <typename HermA, typename IVec, typename Work>
-inline
-int hptrf(char const ul, HermA& a, IVec& i, Work& w, int const lw)
-{
-
 }
 
 }

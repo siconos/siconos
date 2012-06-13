@@ -38,6 +38,7 @@ template <typename T = double>
 struct symbolic_type : private noncopyable
 {
   void *ptr;
+  symbolic_type(): ptr(0) {}
   ~symbolic_type()
   {
     if (ptr)
@@ -61,6 +62,7 @@ template <typename T = double>
 struct numeric_type : private noncopyable
 {
   void *ptr;
+  numeric_type(): ptr(0) {}
   ~numeric_type()
   {
     if (ptr)

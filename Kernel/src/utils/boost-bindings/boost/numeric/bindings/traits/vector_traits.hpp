@@ -48,11 +48,11 @@ struct default_vector_traits
   {
     return &v[0];
   }
-  static int size(V& v)
+  static std::ptrdiff_t size(V& v)
   {
-    return static_cast<int>(v.size());
+    return static_cast<std::ptrdiff_t>(v.size());
   }
-  static int stride(V&)
+  static std::ptrdiff_t stride(V&)
   {
     return 1;
   }
@@ -91,14 +91,14 @@ typename vector_traits<V>::pointer vector_storage(V& v)
 
 template <typename V>
 inline
-int vector_size(V& v)
+std::ptrdiff_t vector_size(V& v)
 {
   return vector_traits<V>::size(v);
 }
 
 template <typename V>
 inline
-int vector_stride(V& v)
+std::ptrdiff_t vector_stride(V& v)
 {
   return vector_traits<V>::stride(v);
 }

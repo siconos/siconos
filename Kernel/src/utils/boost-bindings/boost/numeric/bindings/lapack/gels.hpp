@@ -155,7 +155,7 @@ template <typename MatrA, typename VecB>
 inline
 int gels_optimal_work(const char trans, MatrA& A, VecB& b)
 {
-  MatrA::value_type work;
+  typename MatrA::value_type work;
   int info;
   detail::gels(trans,
                traits::matrix_size1(A),
@@ -184,7 +184,7 @@ int gels(const char trans, MatrA& A, VecB& b, optimal_workspace)
 {
   // query optimal workspace size
   int work_size = detail::gels_optimal_work(trans, A, b);
-  traits::detail::array<MatrA::value_type> work(work_size);
+  traits::detail::array<typename MatrA::value_type> work(work_size);
 
   return detail::gels(trans, A, b, work);
 }
@@ -201,7 +201,7 @@ int gels(const char trans, MatrA& A, VecB& b, minimal_workspace)
   const int maxmn = std::max(m, n);   // m > n ? m : n;
   const int maxdim = std::max(maxmn, r);  // maxmn > r ? maxmn : r;
 
-  traits::detail::array<MatrA::value_type> work(minmn + std::max(1, maxdim));
+  traits::detail::array<typename MatrA::value_type> work(minmn + std::max(1, maxdim));
 
   return detail::gels(trans, A, b, work);
 }

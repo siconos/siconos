@@ -79,6 +79,7 @@ void ormqr(char const side, char const trans, int const m, int const n,
            int const ldc, float* work, int const lwork,
            int& info)
 {
+  assert(trans == 'N' || trans == 'T');
   LAPACK_SORMQR(&side, &trans, &m, &n, &k,
                 a, &lda,
                 tau,
@@ -94,6 +95,7 @@ void ormqr(char const side, char const trans, int const m, int const n,
            int const ldc, double* work, int const lwork,
            int& info)
 {
+  assert(trans == 'N' || trans == 'T');
   LAPACK_DORMQR(&side, &trans, &m, &n, &k,
                 a, &lda,
                 tau,
@@ -109,6 +111,7 @@ void ormqr(char const side, char const trans, int const m, int const n,
            int const ldc, traits::complex_f* work, int const lwork,
            int& info)
 {
+  assert(trans == 'N' || trans == 'C');
   LAPACK_CUNMQR(&side, &trans, &m, &n, &k,
                 traits::complex_ptr(a), &lda,
                 traits::complex_ptr(tau),
@@ -124,6 +127,7 @@ void ormqr(char const side, char const trans, int const m, int const n,
            int const ldc, traits::complex_d* work, int const lwork,
            int& info)
 {
+  assert(trans == 'N' || trans == 'C');
   LAPACK_ZUNMQR(&side, &trans, &m, &n, &k,
                 traits::complex_ptr(a), &lda,
                 traits::complex_ptr(tau),
