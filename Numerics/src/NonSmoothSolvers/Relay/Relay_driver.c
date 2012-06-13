@@ -91,11 +91,13 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   case SICONOS_RELAY_LEMKE:
   {
 
+#ifdef DEBUG_RELAY
     char filename[20] = "relay_simple.dat";
 
     FILE *FP = fopen(filename, "w");
     relay_printInFile(problem, FP);
     fclose(FP);
+#endif
     relay_lexicolemke(problem, z , w , &info , options, global_options);
     break;
   }
