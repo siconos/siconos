@@ -1108,7 +1108,7 @@ void SchatzmanPaoli::integrate(double& tinit, double& tend, double& tout, int&)
   RuntimeException::selfThrow("SchatzmanPaoli::integrate - not yet implemented :");
 }
 
-void SchatzmanPaoli::updateState(unsigned int level)
+void SchatzmanPaoli::updateState(const unsigned int level)
 {
 
   double h = simulationLink->timeStep();

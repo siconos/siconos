@@ -1594,7 +1594,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
   }
 }
 
-void Moreau::updateState(unsigned int level)
+void Moreau::updateState(const unsigned int level)
 {
 
 

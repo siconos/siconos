@@ -113,10 +113,10 @@ public:
   }
 
   /** updates the state of the Dynamical Systems
-   *  \param level of interest for the dynamics: not used at the time
+   *  \param level level of interest for the dynamics: not used at the time
    *  \post{ds->velocity contains new velocity}
    */
-  virtual void updateState(unsigned int);
+  virtual void updateState(const unsigned int level);
 
   /** displays the data of the D1MinusLinear's integrator */
   virtual void display()

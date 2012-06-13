@@ -266,7 +266,7 @@ void Moreau2::computeFreeState()
 
 
 
-void Moreau2::updateState(unsigned int level)
+void Moreau2::updateState(const unsigned int level)
 {
 
 }

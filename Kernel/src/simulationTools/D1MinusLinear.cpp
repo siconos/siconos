@@ -493,7 +493,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType);
 }
 
-void D1MinusLinear::updateState(unsigned int level)
+void D1MinusLinear::updateState(const unsigned int level)
 {
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {

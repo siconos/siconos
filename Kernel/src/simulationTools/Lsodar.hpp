@@ -231,9 +231,9 @@ public:
   void integrate(double&, double&, double&, int&);
 
   /** update the state of the DynamicalSystems attached to this Integrator
-   *  \param unsigned int: level of interest for the dynamics
+   *  \param level level of interest for the dynamics
    */
-  void updateState(unsigned int);
+  void updateState(const unsigned int level);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted

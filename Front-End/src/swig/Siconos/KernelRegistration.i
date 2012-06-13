@@ -61,6 +61,7 @@
   PY_REGISTER(MLCPProjectOnConstraints);                           \
   PY_REGISTER(FrictionContact);                                    \
   PY_REGISTER(Moreau);                                             \
+  PY_REGISTER(ZeroOrderHold);                                      \
   PY_REGISTER(Simulation);                                         \
   PY_REGISTER(TimeStepping);                                       \
   PY_REGISTER(EventDriven);                                        \

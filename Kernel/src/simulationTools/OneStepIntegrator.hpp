@@ -288,9 +288,10 @@ public:
   void resetNonSmoothPart(unsigned int level);
 
   /** update the state of the DynamicalSystem attached to this Integrator
-   *  \param unsigned int: level of interest for the dynamics
+   *  \param level level of interest for the dynamics
    */
-  virtual void updateState(unsigned int) = 0;
+  virtual void updateState(const unsigned int level) = 0;
+
 
   /** print the data to the screen
    */

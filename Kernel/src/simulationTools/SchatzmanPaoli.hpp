@@ -336,9 +336,9 @@ public:
   void integrate(double&, double&, double&, int&);
 
   /** updates the state of the Dynamical Systems
-   *  \param unsigned int: level of interest for the dynamics: not used at the time
+   *  \param level level of interest for the dynamics: not used at the time
    */
-  virtual void updateState(unsigned int);
+  virtual void updateState(const unsigned int level);
 
   /** Displays the data of the SchatzmanPaoli's integrator
    */

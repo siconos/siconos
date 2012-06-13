@@ -36,11 +36,23 @@
 
 using namespace std;
 using namespace RELATION;
+// --- constructor from a set of data ---
+//ZeroOrderHold::ZeroOrderHold():
+//  OneStepIntegrator(OSI::ZOH)
+//{
+//}
+
 // --- xml constructor ---
 ZeroOrderHold::ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
 {
   RuntimeException::selfThrow("ZeroOrderHold::xml constructor - not yet implemented.");
+}
+
+// --- constructor from a set of data ---
+ZeroOrderHold::ZeroOrderHold(DynamicalSystemsSet& allDS):
+  OneStepIntegrator(OSI::ZOH, allDS)
+{
 }
 
 // --- constructor from a minimum set of data ---
@@ -50,17 +62,6 @@ ZeroOrderHold::ZeroOrderHold(SP::DynamicalSystem ds):
   OSIDynamicalSystems->insert(ds);
 }
 
-// --- constructor from a set of data ---
-ZeroOrderHold::ZeroOrderHold(DynamicalSystemsSet& allDS):
-  OneStepIntegrator(OSI::ZOH, allDS)
-{
-}
-
-// --- constructor from a set of data ---
-ZeroOrderHold::ZeroOrderHold():
-  OneStepIntegrator(OSI::ZOH)
-{
-}
 
 // Note: OSIDynamicalSystems must disappear
 void ZeroOrderHold::insertDynamicalSystem(SP::DynamicalSystem ds)
@@ -929,4 +930,9 @@ void ZeroOrderHold::display()
     else cout << "-> NULL" << endl;
   }
   cout << "================================" << endl;
+}
+ZeroOrderHold* ZeroOrderHold::convert(OneStepIntegrator* osi)
+{
+  ZeroOrderHold* zeroOrderHold = dynamic_cast<ZeroOrderHold*>(osi);
+  return zeroOrderHold;
 }

@@ -68,6 +68,11 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
  */
 class ZeroOrderHold : public OneStepIntegrator
 {
+private:
+  /** default constructor
+   */
+  ZeroOrderHold() {};
+
 protected:
   /** serialization hooks
   */
@@ -121,23 +126,19 @@ public:
    */
   ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList);
 
-  /** constructor from a minimum set of data: one DS
-   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
-   */
-  ZeroOrderHold(SP::DynamicalSystem ds);
-
   /** constructor from a minimum set of data
    *  \param allDS the list of DynamicalSystems to be integrated
    */
   ZeroOrderHold(DynamicalSystemsSet& allDS);
 
-  /** default constructor
+  /** constructor from a minimum set of data: one DS
+   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
    */
-  ZeroOrderHold();
+  ZeroOrderHold(SP::DynamicalSystem ds);
 
   /** destructor
   */
-  ~ZeroOrderHold() {};
+  virtual ~ZeroOrderHold() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -279,7 +280,7 @@ public:
   /** Unused
    * \param time current time
    */
-  void prepareNewtonIteration(const double time);
+  void prepareNewtonIteration(double time);
 
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
@@ -303,6 +304,12 @@ public:
    *  \param ds a SP::DynamicalSystem to insert
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
+
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param OneStepIntegrator* : the integrator which must be converted
+  * \return a pointer on the integrator if it is of the right type, 0 otherwise
+  */
+  static ZeroOrderHold* convert(OneStepIntegrator* osi);
 
   /** visitors hook
   */

@@ -364,7 +364,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 }
 
 
-void Lsodar::updateState(unsigned int level)
+void Lsodar::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;

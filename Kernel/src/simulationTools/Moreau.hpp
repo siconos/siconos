@@ -355,9 +355,9 @@ public:
   void integrate(double&, double&, double&, int&);
 
   /** updates the state of the Dynamical Systems
-   *  \param unsigned int: level of interest for the dynamics: not used at the time
+   *  \param level the level of interest for the dynamics: not used at the time
    */
-  virtual void updateState(unsigned int);
+  virtual void updateState(const unsigned int level);
 
   /** copy the matrix W of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
