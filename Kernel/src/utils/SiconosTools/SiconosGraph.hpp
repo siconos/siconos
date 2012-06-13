@@ -565,26 +565,29 @@ public:
 
 
     VDescriptor vd = descriptor(vertex_bundle);
-
+    /*   debug */
+#ifndef NDEBUG
     assert(adjacent_vertices_ok());
-
+#endif
     boost::clear_vertex(vd, g);
-
+    /*   debug */
+#ifndef NDEBUG
     assert(adjacent_vertices_ok());
     assert(!adjacent_vertex_exists(vd));
-
+#endif
     boost::remove_vertex(vd, g);
 
     assert(vertex_descriptor.size() == (size() + 1));
 
     vertex_descriptor.erase(vertex_bundle);
 
+    /*  debug */
+#ifndef NDEBUG
     assert(adjacent_vertices_ok());
     assert(vertex_descriptor.size() == size());
     assert(!is_vertex(vertex_bundle));
-
     assert(state_assert());
-
+#endif
   }
 
   EDescriptor add_edge(const VDescriptor& vd1,
@@ -705,7 +708,10 @@ public:
     assert(adjacent_vertex_exists(source(ed)));
 
     boost::remove_edge(ed, g);
+    /* debug */
+#ifndef NDEBUG
     assert(state_assert());
+#endif
   }
 
   template<class AdjointG>
@@ -727,9 +733,10 @@ public:
     remove_edge(ed);
 
     assert(ag.size() == edges_number());
-
+    /* debug */
+#ifndef NDEBUG
     assert(state_assert());
-
+#endif
   }
 
   /** Remove all the out-edges of vertex u for which the predicate p
@@ -758,8 +765,10 @@ public:
           }
         }
     */
-
+    /*  debug */
+#ifndef NDEBUG
     assert(state_assert());
+#endif
   }
 
 
@@ -891,6 +900,7 @@ public:
   }
 
   /* debug */
+#ifndef SWIG
 #ifndef NDEBUG
   bool state_assert()
   {
@@ -938,6 +948,7 @@ public:
     }
     return true;
   }
+#endif
 #endif
 
 

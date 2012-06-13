@@ -169,7 +169,7 @@ public:
    * \param inter a pointer to the interaction to insert
    * \param isControlInteraction true if the interaction is used for controling a DS
    */
-  void insertInteraction(SP::Interaction inter, const bool& isControlInteraction = false);
+  void insertInteraction(SP::Interaction inter, const bool isControlInteraction = false);
 
 
   /** remove an interaction to the system
@@ -280,7 +280,7 @@ public:
    * \param vd the descriptor of the Interaction owning the Interaction
    * \param isControlInteraction true if the Interaction is used for control purposes
    **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool& isControlInteraction);
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool isControlInteraction);
 };
 
 #endif

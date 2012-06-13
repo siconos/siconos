@@ -260,12 +260,12 @@ void NonSmoothDynamicalSystem::clear()
   _topology->clear();
 };
 
-void NonSmoothDynamicalSystem::setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool& isControlInteraction)
+void NonSmoothDynamicalSystem::setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool isControlInteraction)
 {
   InteractionsGraph& IG0 = *_topology->indexSet0();
   IG0.properties(vd).forControl = isControlInteraction;
 }
-void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const bool& isControlInteraction)
+void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const bool isControlInteraction)
 {
   InteractionsGraph::VDescriptor vd;
   vd = _topology->insertInteraction(inter);
