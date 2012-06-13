@@ -19,9 +19,17 @@
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 #include <boost/numeric/bindings/atlas/cblas2.hpp>
 #include <boost/numeric/bindings/atlas/cblas3.hpp>
+namespace siconosBindings = boost::numeric::bindings::atlas;
+#else
+#include <boost/numeric/bindings/blas/blas1.hpp>
+#include <boost/numeric/bindings/blas/blas2.hpp>
+#include <boost/numeric/bindings/blas/blas3.hpp>
+namespace siconosBindings = boost::numeric::bindings::blas;
+#endif
 #include <boost/numeric/ublas/fwd.hpp>
 
 
@@ -3627,7 +3635,7 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
       if (numA == 1)
       {
         DenseMat p(A.size(0), B.size(1));
-        atlas::gemm(*A.dense(), *B.dense(), p);
+        siconosBindings::gemm(*A.dense(), *B.dense(), p);
         //      return (DenseMat)(prod(*A.dense(),*B.dense()));
         return p;
       }
@@ -3790,7 +3798,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
         case 1:
           if (numB == 1)
             //*C.dense() = prod(*A.dense(),*B.dense());
-            atlas::gemm(*A.dense(), *B.dense(), *C.dense());
+            siconosBindings::gemm(*A.dense(), *B.dense(), *C.dense());
           else if (numB == 2)
             *C.dense()  = prod(*A.dense(), *B.triang());
           else if (numB == 3)
@@ -6032,7 +6040,7 @@ void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const 
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  atlas::gemv(transA, a, *A.dense(), *x.dense(), b, *y.dense());
+  siconosBindings::gemv(transA, a, *A.dense(), *x.dense(), b, *y.dense());
 }
 
 void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
@@ -6045,7 +6053,7 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  atlas::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
+  siconosBindings::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
 }
 
 void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
@@ -6058,7 +6066,7 @@ void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  atlas::gemv(*A.dense(), *x.dense(), *y.dense());
+  siconosBindings::gemv(*A.dense(), *x.dense(), *y.dense());
 }
 
 void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
@@ -6071,7 +6079,7 @@ void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, 
   if (numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
-  atlas::gemm(transA, transB, a, *A.dense(), *B.dense(), b, *C.dense());
+  siconosBindings::gemm(transA, transB, a, *A.dense(), *B.dense(), b, *C.dense());
   C.resetLU();
 }
 
@@ -6085,7 +6093,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
 
   if (numA == 1 && numB == 1 && numC == 1)
-    atlas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
+    siconosBindings::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
   else if (numA == 1 && numB == 1 && numC != 1)
   {
     // To be improved ...
@@ -6109,7 +6117,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     else
       tmpC = C.dense();
 
-    atlas::gemm(a, *tmpA, *tmpB, b, *tmpC);
+    siconosBindings::gemm(a, *tmpA, *tmpB, b, *tmpC);
     if (numC != 1)
     {
       noalias(*C.dense()) = *tmpC;
@@ -6134,7 +6142,7 @@ void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
   if (numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
-  atlas::gemm(*A.dense(), *B.dense(), *C.dense());
+  siconosBindings::gemm(*A.dense(), *B.dense(), *C.dense());
   C.resetLU();
 }
 

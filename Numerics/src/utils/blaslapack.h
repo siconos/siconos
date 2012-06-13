@@ -38,7 +38,7 @@ extern "C"
 #define F77NAME(x) x##_
 #endif
 
-
+#ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS_H
 #ifndef BOOST_NUMERIC_BINDINGS_LAPACK_LAPACK_H
 
 #ifndef _BLAS1_H_
@@ -454,7 +454,7 @@ extern "C"
 #endif
 
 #endif // BOOST_NUMERIC_BINDINGS_LAPACK_LAPACK_H
-
+#endif /* BOOST_NUMERIC_BINDINGS_BLAS_BLAS_H */
 #ifdef __cplusplus
 }
 #endif

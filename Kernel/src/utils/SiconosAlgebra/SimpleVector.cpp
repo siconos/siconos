@@ -19,8 +19,14 @@
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
-#include <boost/numeric/bindings/atlas/cblas1.hpp>
 
+#if defined(HAVE_ATLAS)
+#include <boost/numeric/bindings/atlas/cblas1.hpp>
+namespace siconosBindings = boost::numeric::bindings::atlas;
+#else
+#include <boost/numeric/bindings/blas/blas1.hpp>
+namespace siconosBindings = boost::numeric::bindings::blas;
+#endif
 
 #include "SimpleVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -232,7 +238,7 @@ double* SimpleVector::getArray(unsigned int) const
 void SimpleVector::zero()
 {
   if (_dense)
-    atlas::set(0.0, *vect.Dense);
+    siconosBindings::scal(0.0, *vect.Dense);
 
   else
   {
@@ -258,7 +264,17 @@ void SimpleVector::fill(double value)
       (vect.Sparse)->push_back(i, value);
   }
   else
-    atlas::set(value, *vect.Dense);
+  {
+    // only atlas provides set functions
+    // they are called catlas_*set for a reason
+#if defined(HAVE_ATLAS)
+    siconosBindings::set(value, *vect.Dense);
+#else
+    for (unsigned int i = 0; i < (vect.Dense)->size(); ++i)
+      (*vect.Dense)(i) = value;
+#endif
+  }
+
 }
 
 //=======================
@@ -692,7 +708,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
       switch (vInNum)
       {
       case 1:
-        //atlas::copy(*vIn.dense(),*vect.Dense);
+        //siconosBindings::copy(*vIn.dense(),*vect.Dense);
         noalias(*vect.Dense) = *vIn.dense();
         break;
       case 4:
@@ -731,7 +747,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
     switch (vInNum)
     {
     case 1:
-      //atlas::copy(*vIn.dense(),*vect.Dense);
+      //siconosBindings::copy(*vIn.dense(),*vect.Dense);
       noalias(*vect.Dense) = *vIn.dense();
 
       break;
@@ -760,7 +776,7 @@ SimpleVector& SimpleVector::operator = (const DenseVect& d)
   if (d.size() != size())
     SiconosVectorException::selfThrow("SimpleVector::operator = DenseVect : inconsistent size.");
 
-  atlas::copy(d, *vect.Dense);
+  siconosBindings::copy(d, *vect.Dense);
   return *this;
 }
 
@@ -925,9 +941,9 @@ SimpleVector operator * (const  SiconosVector&m, double d)
   }
   else if (numM == 1)
   {
-    // Copy m into p and call atlas::scal(d,p), p = d*p.
+    // Copy m into p and call siconosBindings::scal(d,p), p = d*p.
     DenseVect p = *m.dense();
-    atlas::scal(d, p);
+    siconosBindings::scal(d, p);
     return p;
   }
   else// if(numM==4)
@@ -948,9 +964,9 @@ SimpleVector operator * (double d, const  SiconosVector&m)
   }
   else if (numM == 1)
   {
-    // Copy m into p and call atlas::scal(d,p), p = d*p.
+    // Copy m into p and call siconosBindings::scal(d,p), p = d*p.
     DenseVect p = *m.dense();
-    atlas::scal(d, p);
+    siconosBindings::scal(d, p);
     return p;
   }
   else// if(numM==4)
@@ -973,7 +989,7 @@ SimpleVector operator / (const SimpleVector &m, double d)
   else if (numM == 1)
   {
     DenseVect p = *m.dense();
-    atlas::scal((1.0 / d), p);
+    siconosBindings::scal((1.0 / d), p);
     return p;
   }
 
@@ -997,7 +1013,7 @@ SimpleVector operator + (const  SiconosVector& x, const  SiconosVector& y)
   {
     if (numX == 1)
     {
-      //    atlas::xpy(*x.dense(),p);
+      //    siconosBindings::xpy(*x.dense(),p);
       //    return p;
       return (DenseVect)(*x.dense() + *y.dense());
     }
@@ -1120,7 +1136,7 @@ SimpleVector operator - (const  SiconosVector& x, const  SiconosVector& y)
   {
     if (numX == 1)
     {
-      //    atlas::xpy(*x.dense(),p);
+      //    siconosBindings::xpy(*x.dense(),p);
       //    return p;
       return (DenseVect)(*x.dense() - *y.dense());
     }
@@ -1240,7 +1256,10 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
   if (numX == numY) // x and y of the same type
   {
     if (numX == 1) // all dense
-      atlas::axpby(a, *x.dense(), b, *y.dense());
+    {
+      siconosBindings::scal(b, *y.dense());
+      siconosBindings::axpy(a, *x.dense(), *y.dense());
+    }
 
     else if (numX == 0) // ie if x and y are block
     {
@@ -1284,7 +1303,7 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
     {
       SimpleVector tmp(x);
       if (numY == 1)
-        atlas::axpy(a, *tmp.dense(), *y.dense());
+        siconosBindings::axpy(a, *tmp.dense(), *y.dense());
       else
         SiconosVectorException::selfThrow("axpby failed: try to add block to sparse vector.");
     }
@@ -1311,7 +1330,7 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
   if (numX == numY) // x and y of the same type
   {
     if (numX == 1) // all dense
-      atlas::axpy(a, *x.dense(), *y.dense());
+      siconosBindings::axpy(a, *x.dense(), *y.dense());
 
     else if (numX == 0) // ie if x and y are block
     {
@@ -1352,7 +1371,7 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
     {
       SimpleVector tmp(x);
       if (numY == 1)
-        atlas::axpy(a, *tmp.dense(), *y.dense());
+        siconosBindings::axpy(a, *tmp.dense(), *y.dense());
       else
         SiconosVectorException::selfThrow("axpby failed: try to add block to sparse vector.");
     }
@@ -1380,7 +1399,7 @@ double inner_prod(const SiconosVector &x, const SiconosVector &m)
   if (numX == numM)
   {
     if (numM == 1)
-      return atlas::dot(*x.dense(), *m.dense());
+      return siconosBindings::dot(*x.dense(), *m.dense());
     else
       return inner_prod(*x.sparse(), *m.sparse());
   }
@@ -1466,7 +1485,7 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
       else if (numX == 1) // ie if both are Dense
       {
         if (init)
-          //atlas::axpby(a,*x.dense(),0.0,*y.dense());
+          //siconosBindings::axpby(a,*x.dense(),0.0,*y.dense());
           noalias(*y.dense()) = a * *x.dense();
         else
           noalias(*y.dense()) += a * *x.dense();

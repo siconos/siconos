@@ -34,7 +34,13 @@
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/banded.hpp>
+#if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas_enum.hpp>
+#else
+extern "C" {
+#include <cblas.h>
+}
+#endif
 
 #include "SiconosPointers.hpp"
 #include "SiconosConst.hpp"
@@ -44,8 +50,9 @@
 #include "SiconosVisitor.hpp"
 
 namespace ublas = boost::numeric::ublas;
+#if defined(HAVE_ATLAS)
 namespace atlas = boost::numeric::bindings::atlas;
-
+#endif
 //const int MAX_SIZE = 1000;
 
 /** type of object used to save indices */
