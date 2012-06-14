@@ -265,10 +265,10 @@ void NonSmoothDynamicalSystem::setControlProperty(const InteractionsGraph::VDesc
   InteractionsGraph& IG0 = *_topology->indexSet0();
   IG0.properties(vd).forControl = isControlInteraction;
 }
-void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const bool isControlInteraction)
+void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const int isControlInteraction)
 {
   InteractionsGraph::VDescriptor vd;
   vd = _topology->insertInteraction(inter);
-  if (isControlInteraction)
-    setControlProperty(vd, isControlInteraction);
+  if (isControlInteraction == 1)
+    setControlProperty(vd, true);
 };

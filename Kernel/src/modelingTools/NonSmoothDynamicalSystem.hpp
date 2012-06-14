@@ -169,7 +169,7 @@ public:
    * \param inter a pointer to the interaction to insert
    * \param isControlInteraction true if the interaction is used for controling a DS
    */
-  void insertInteraction(SP::Interaction inter, const bool isControlInteraction = false);
+  void insertInteraction(SP::Interaction inter, const int isControlInteraction = 0);
 
 
   /** remove an interaction to the system
