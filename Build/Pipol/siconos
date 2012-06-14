@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#WAASPREPIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
+#PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
 #PIPOL fedora-core14 03:00
 
