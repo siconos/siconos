@@ -994,6 +994,9 @@
 %include "NumericsOptions.h"
 %include "frictionContact_test_function.h"
 
+//Relay
+%include "relay_cst.h"
+
 %extend NumericsOptions
 {
   NumericsOptions()
