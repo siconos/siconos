@@ -20,6 +20,8 @@
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 
+#include "KernelConfig.h"
+
 #if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 namespace siconosBindings = boost::numeric::bindings::atlas;

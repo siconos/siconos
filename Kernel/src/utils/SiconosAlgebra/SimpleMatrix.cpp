@@ -19,6 +19,9 @@
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+
+#include "KernelConfig.h"
+
 #if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 #include <boost/numeric/bindings/atlas/cblas2.hpp>
@@ -33,7 +36,6 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include <boost/numeric/ublas/fwd.hpp>
 
 
-#include "KernelConfig.h"
 
 #ifndef FRAMEWORK_BLAS
 #define OUTSIDE_FRAMEWORK_BLAS

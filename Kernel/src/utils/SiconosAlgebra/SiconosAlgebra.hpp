@@ -29,6 +29,8 @@
 #ifndef SiconosAlgebra
 #define SiconosAlgebra
 
+#include "KernelConfig.h"
+
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
@@ -50,9 +52,6 @@ extern "C" {
 #include "SiconosVisitor.hpp"
 
 namespace ublas = boost::numeric::ublas;
-#if defined(HAVE_ATLAS)
-namespace atlas = boost::numeric::bindings::atlas;
-#endif
 //const int MAX_SIZE = 1000;
 
 /** type of object used to save indices */

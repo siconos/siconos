@@ -1,7 +1,11 @@
 #!/bin/sh
 
+echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> /etc/apt/sources.list
+
+
 apt-get update
 
-apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib python-py
+apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev libatlas-base-dev libxml2 libxml2-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-codespeak-lib python-py swig2.0 doxygen libboost-filesystem-dev
 
-
+#quirk
+ln -s /usr/bin/swig2.0 /usr/bin/swig
