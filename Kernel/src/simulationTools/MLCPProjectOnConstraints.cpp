@@ -131,10 +131,16 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
          vi != viend; ++vi)
     {
 
+
+
+
       SP::Interaction inter = indexSet->bundle(*vi);
       unsigned int nslawSize = boost::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                (_M)->computeSizeForProjection(inter);
-
+#ifdef MLCPPROJ_DEBUG
+      std::cout << " " << std::endl;
+      std::cout <<  "Start to work on Interaction " << inter->getId() << "of vertex" << *vi <<  std::endl;
+#endif
       if (! indexSet->blockProj[*vi])
       {
 #ifdef MLCPPROJ_DEBUG
@@ -520,9 +526,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 #ifdef MLCPPROJ_DEBUG
   cout << "\nMLCPProjectOnConstraints::computeDiagonalInteractionBlock" << endl;
   std::cout << "levelMin()" << levelMin() << std::endl;
-  std::cout << "indexSet :" << indexSet << std::endl;
-  std::cout << "vd :" << vd << std::endl;
-  indexSet->display();
+  //  std::cout << "indexSet :"<< indexSet << std::endl;
+  //  std::cout << "vd :"<< vd << std::endl;
+  //  indexSet->display();
   // std::cout << "DS1 :" << std::endl;
   // DS1->display();
   // std::cout << "DS2 :" << std::endl;
@@ -531,6 +537,17 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   assert(indexSet->blockProj[vd]);
   SP::SiconosMatrix currentInteractionBlock = indexSet->blockProj[vd];
 
+#ifdef MLCPPROJ_DEBUG
+  //    std::cout<<"MLCPProjectOnConstraints::computeDiagonalInteractionBlock  "<<std::endl;
+  //    currentInteractionBlock->display();
+  std::cout << "sizeY " << sizeY  << std::endl;
+  std::cout <<  "blockProj " <<  indexSet->blockProj[vd].get() << " of edge " << vd << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter->getId() <<  std::endl;
+  //std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+  //inter1->display();
+  //std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+  //inter2->display();
+
+#endif
 
   assert(currentInteractionBlock->size(0) == sizeY);
   assert(currentInteractionBlock->size(1) == sizeY);
@@ -682,20 +699,20 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
         leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
         inter->getLeftInteractionBlockForDSProjectOnConstraints(ds, leftInteractionBlock);
-#ifdef MLCPPROJ_DEBUG
-        std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case leftInteractionBlock : " << std::endl;
-        leftInteractionBlock->display();
-#endif
+        // #ifdef MLCPPROJ_DEBUG
+        //         std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case leftInteractionBlock : " << std::endl;
+        //         leftInteractionBlock->display();
+        // #endif
 
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
         //cout<<"LinearOSNS sizeY="<<sizeY<<": leftUBlock\n";
         //work->display();
         work->trans();
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
-#ifdef MLCPPROJ_DEBUG
-        std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case currentInteractionBlock : " << std::endl;
-        currentInteractionBlock->display();
-#endif
+        // #ifdef MLCPPROJ_DEBUG
+        //         std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case currentInteractionBlock : "<< std::endl;
+        //         currentInteractionBlock->display();
+        // #endif
 
 
       }

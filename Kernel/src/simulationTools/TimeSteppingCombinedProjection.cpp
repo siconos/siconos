@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+
 #include "TimeStepping.hpp"
 
 #include "TimeSteppingCombinedProjection.hpp"
@@ -197,17 +198,52 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       ++vnext;
       SP::Interaction inter1 = indexSet1->bundle(*ui);
       inter1->lambda(1)->zero();
+      indexSet1->eraseProperties(*ui);
+      InteractionsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet1->out_edges(*ui);
+           oei != oeiend; ++oei)
+      {
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+        if (ed2 != ed1)
+        {
+          indexSet1->eraseProperties(ed1);
+          indexSet1->eraseProperties(ed2);
+        }
+        else
+        {
+          indexSet1->eraseProperties(ed1);
+        }
+      }
     }
 
-    // // zeroing the lambda of indexSet2
-    // boost::tie(ui,uiend) = indexSet2->vertices();
-    // for(vnext = ui; ui != uiend; ui = vnext)
-    // {
-    //   ++vnext;
-    //   SP::Interaction inter2 = indexSet2->bundle(*ui);
-    //   inter2->lambda(0)->zero();
-    // }
     indexSet1->clear();
+
+    boost::tie(ui, uiend) = indexSet2->vertices();
+    for (vnext = ui; ui != uiend; ui = vnext)
+    {
+      ++vnext;
+      indexSet2->eraseProperties(*ui);
+      InteractionsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet2->out_edges(*ui);
+           oei != oeiend; ++oei)
+      {
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
+        if (ed2 != ed1)
+        {
+          indexSet2->eraseProperties(ed1);
+          indexSet2->eraseProperties(ed2);
+        }
+        else
+        {
+          indexSet2->eraseProperties(ed1);
+        }
+      }
+    }
+
+
+
     indexSet2->clear();
   }
 
@@ -464,6 +500,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         if (dsType == Type::NewtonEulerDS)
         {
           SP::NewtonEulerDS neds = boost::static_pointer_cast<NewtonEulerDS>(ds);
+          SP::SiconosVector q = neds->q();
+          SP::SiconosVector qtmp = neds->getWorkVector(DynamicalSystem::qtmp);
+          if (neds->p(0))
+          {
+            //*q = * qtmp +  *neds->p(0);
+            *q +=  *neds->p(0);
+          }
+
           neds->normalizeq();
           neds->updateT();
         }
@@ -722,11 +766,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update indexSets start : indexSet0 size : %i\n", (int)(indexSet0->size()));
 
   // Check indexSet1
-  InteractionsGraph::VIterator ui1, ui1end, v1next;
-  boost::tie(ui1, ui1end) = indexSet1->vertices();
 
   if (i == 1)
   {
+    InteractionsGraph::VIterator ui1, ui1end, v1next;
+
+    boost::tie(ui1, ui1end) = indexSet1->vertices();
     _isIndexSetsStable = true ;
 
     DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
@@ -810,10 +855,39 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
   if (i == 2)
   {
+    InteractionsGraph::VIterator ui1, ui1end, v1next;
+    boost::tie(ui1, ui1end) = indexSet2->vertices();
+
+    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+    {
+      ++v1next;
+      indexSet2->eraseProperties(*ui1);
+      InteractionsGraph::OEIterator oei, oeiend;
+      for (boost::tie(oei, oeiend) = indexSet2->out_edges(*ui1);
+           oei != oeiend; ++oei)
+      {
+        InteractionsGraph::EDescriptor ed1, ed2;
+        boost::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
+        if (ed2 != ed1)
+        {
+          indexSet2->eraseProperties(ed1);
+          indexSet2->eraseProperties(ed2);
+        }
+        else
+        {
+          indexSet2->eraseProperties(ed1);
+        }
+      }
+    }
+
+
+
+
     indexSet2->clear();
     DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
     // Scan indexSet1
+    boost::tie(ui1, ui1end) = indexSet1->vertices();
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;
