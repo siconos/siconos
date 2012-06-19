@@ -18,4 +18,7 @@ rm /sw/bin/gfortran
 # switch to the correct gcc version
 port select --set gcc mp-gcc47
 
+cd /usr/local/lib
+rm *gfortran*
+
 #exit 0
