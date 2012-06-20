@@ -258,6 +258,25 @@ unsigned int BlockVector::getNumVectorAtPos(unsigned int pos) const
 BlockVector& BlockVector::operator = (const BlockVector& vIn)
 {
   if (&vIn == this) return *this;
+  else
+  {
+    if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
+    {
+      VectorOfVectors::iterator it1;
+      VectorOfVectors::const_iterator it2 = vIn.begin();
+
+      for (it1 = vect.begin(); it1 != vect.end(); ++it1)
+      {
+        (**it1) = (**it2);
+        it2++;
+      }
+    }
+    else
+    {
+      for (unsigned int i = 0; i < _sizeV; ++i)
+        (*this)(i) = vIn(i);
+    }
+  }
 }
 
 BlockVector& BlockVector::operator -= (const BlockVector& vIn)
@@ -360,35 +379,35 @@ void BlockVector::setBlock(const SiconosVector& vIn, BlockVector& vOut, unsigned
   {
 
     // The current considered block ...
-    SiconosVector& currentBlock = *vOut.vector(blockOutStart);
+    SP::SiconosVector currentBlock = vOut.vector(blockOutStart);
 
     // Size of the subBlock of vOut to be set.
-    unsigned int subSizeB = currentBlock.size() - posOut;
+    unsigned int subSizeB = currentBlock->size() - posOut;
     unsigned int posIn = startIn;
 
     // Set first sub-block (currentBlock) values, between index posOut and posOut+subSizeB,
     // with vIn values from posIn to posIn+subSizeB.
-    vIn.toBlock(currentBlock, subSizeB, posIn, posOut);
+    vIn.toBlock(*currentBlock, subSizeB, posIn, posOut);
 
     // Other blocks, except number blockOutEnd.
     unsigned int currentBlockNum = blockOutStart + 1;
     while (currentBlockNum != blockOutEnd)
     {
       posIn += subSizeB;
-      currentBlock = *vOut.vector(currentBlockNum);
-      subSizeB = currentBlock.size();
-      vIn.toBlock(currentBlock, subSizeB, posIn, 0);
+      currentBlock = vOut.vector(currentBlockNum);
+      subSizeB = currentBlock->size();
+      vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
       currentBlockNum++;
     }
     // set last subBlock ...
-    currentBlock = *vOut.vector(blockOutEnd);
+    currentBlock = vOut.vector(blockOutEnd);
 
     posIn += subSizeB;
 
     // Size of the considered sub-block
     subSizeB = endOut - (*tabOut)[blockOutEnd - 1];
 
-    vIn.toBlock(currentBlock, subSizeB, posIn, 0);
+    vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
   }
 
 }

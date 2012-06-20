@@ -1398,12 +1398,12 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
       mainInteraction->setWorkFree();
-
-      subprod(*CT, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-      if (mainInteraction->dynamicalSystems()->size() == 2)
-      {
-        subprod(*CT, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
-      }
+      subprod(*CT, *Xfree, *Yp, coord, true);
+      //          subprod(*CT,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
+      //          if (mainInteraction->dynamicalSystems()->size() == 2)
+      //          {
+      //            subprod(*CT,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
+      //          }
     }
 
   }
@@ -1430,11 +1430,12 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       }
       else
       {
-        subprod(*C, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-        if (mainInteraction->dynamicalSystems()->size() == 2)
-        {
-          subprod(*C, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
-        }
+        subprod(*C, *Xfree, *Yp, coord, true);
+        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
+        //        if (mainInteraction->dynamicalSystems()->size()==2)
+        //        {
+        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
+        //        }
       }
     }
 
@@ -1492,7 +1493,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       if (F)
       {
         SP::SiconosVector workZ;
-        *workZ = *inter->workZ();
+        workZ = inter->workZ();
         coord[3] = F->size(1);
         coord[5] = F->size(1);
         subprod(*F, *workZ, *Yp, coord, false);

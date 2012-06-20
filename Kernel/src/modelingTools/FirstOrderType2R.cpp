@@ -70,8 +70,8 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  _workX.reset(new SiconosVector());
-  _workZ.reset(new SiconosVector());
+  _workX.reset(new SiconosVector(sizeDS));
+  _workZ.reset(new SiconosVector(sizeZ));
   _workY.reset(new SiconosVector(sizeY));
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector

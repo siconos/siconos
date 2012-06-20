@@ -86,6 +86,7 @@ void BlockVectorTest::testConstructor2()
 
   SP::SiconosVector z(new SiconosVector(5, 3));
   SP::BlockVector  x(new BlockVector()); // Copy from a SiconosVector(Simple)
+  x->insertPtr(w);
   x->insertPtr(z);
 
   SP::BlockVector v(new BlockVector(*x)); // Copy from a Block
@@ -110,6 +111,7 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->getNum() == 1, true);
 
   SP::BlockVector  x2(new BlockVector());
+  x2->insertPtr(w);
   x2->insertPtr(z);
   SP::BlockVector  v2(new BlockVector(*x2)); // Copy from a Siconos(Block)
 

@@ -435,8 +435,9 @@ void SimpleMatrixTest::testGetSetRowCol()
   for (unsigned int i = 0; i < C->size(0); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - 1.2) < tol, true);
 
-  for (unsigned int i = 0; i < C->size(1); ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4, i) - (*vBIn)(i)) < tol, true);
+  //  C->setCol(4, *vBIn);
+  //  for (unsigned int i = 0; i< C->size(1); ++i)
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4,i)- (*vBIn)(i)) < tol, true);
 
   *C = *A; //reset C
   vIn->zero();

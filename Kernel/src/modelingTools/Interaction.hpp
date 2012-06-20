@@ -35,7 +35,7 @@
 #include "Relation.hpp"
 #include "SiconosPointers.hpp"
 #include "LagrangianDS.hpp"
-#include "FirstOrderNonLinearDS.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 
 class DynamicalSystem;
 class BlockVector;
@@ -878,7 +878,8 @@ public:
          itDS != dynamicalSystemsEnd();
          ++itDS)
     {
-      assert(Type::value(**itDS) == Type::LagrangianDS);
+      assert(Type::value(**itDS) == Type::LagrangianDS ||
+             Type::value(**itDS) == Type::LagrangianLinearTIDS);
       _workX->setBlock(index, *boost::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
       index += (*itDS)->getDim();
     }
@@ -899,7 +900,9 @@ public:
          itDS != dynamicalSystemsEnd();
          ++itDS)
     {
-      assert(Type::value(**itDS) == Type::FirstOrderNonLinearDS);
+      assert(Type::value(**itDS) == Type::FirstOrderNonLinearDS ||
+             Type::value(**itDS) == Type::FirstOrderLinearDS ||
+             Type::value(**itDS) == Type::FirstOrderLinearTIDS);
       _workXq->setBlock(index, *boost::static_pointer_cast<FirstOrderNonLinearDS>(*itDS)->xq());
       index += (*itDS)->getDim();
     }
@@ -911,7 +914,7 @@ public:
 
     if (_workZ->size() == 0)
     {
-      _workZ->resize(_sizeOfDS);
+      _workZ->resize(_sizeZ);
     }
 
     ConstDSIterator itDS;
@@ -920,8 +923,9 @@ public:
          itDS != dynamicalSystemsEnd();
          ++itDS)
     {
-      _workZ->setBlock(index, *((*itDS)->z()));
-      index += (*itDS)->getDim();
+      SiconosVector& tmpz = *((*itDS)->z());
+      _workZ->setBlock(index, tmpz);
+      index += tmpz.size();
     }
   };
 

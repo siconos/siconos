@@ -63,9 +63,9 @@ void FirstOrderR::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  _workR.reset(new SiconosVector());
-  _workX.reset(new SiconosVector());
-  _workZ.reset(new SiconosVector());
+  _workR.reset(new SiconosVector(sizeX));
+  _workX.reset(new SiconosVector(sizeX));
+  _workZ.reset(new SiconosVector(sizeZ));
   _workY.reset(new SiconosVector(sizeY));
 }
 

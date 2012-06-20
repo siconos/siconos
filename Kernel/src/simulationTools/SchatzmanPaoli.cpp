@@ -1030,10 +1030,10 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoli scheme is used.
-  *Xq = *inter->workXq();
+  Xq = inter->workXq();
   Yp = inter->yp();
 
-  *Xfree = *inter->workFree();
+  Xfree = inter->workFree();
 
   assert(Xfree);
 
@@ -1069,11 +1069,12 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
       }
       else
       {
-        subprod(*C, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-        if (mainInteraction->dynamicalSystemsEnd() != mainInteraction->dynamicalSystemsBegin())
-        {
-          subprod(*C, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
-        }
+        subprod(*C, *Xfree, *Yp, coord, true);
+        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
+        //        if (mainInteraction->dynamicalSystems()->size() == 2)
+        //        {
+        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
+        //        }
       }
 
     }

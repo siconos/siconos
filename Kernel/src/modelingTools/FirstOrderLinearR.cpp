@@ -180,7 +180,7 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 
-  _workZ.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector(sizeZ));
 }
 
 // // setters

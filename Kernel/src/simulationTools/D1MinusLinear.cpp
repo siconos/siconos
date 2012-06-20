@@ -421,11 +421,11 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    *Xfree = *inter->workX();
+    Xfree = inter->workX();
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    *Xfree  = *inter->workFree();
+    Xfree  = inter->workFree();
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");

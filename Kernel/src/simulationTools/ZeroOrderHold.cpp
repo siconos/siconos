@@ -635,12 +635,12 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
 
   // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
-  SP::SiconosVector Xq(new SiconosVector(inter->workXq()->size()));
-  *Xq = *inter->workXq();
+  SP::SiconosVector Xq;
+  Xq = inter->workXq();
   SP::SiconosVector Yp = inter->yp();
 
-  SP::SiconosVector Xfree(new SiconosVector(inter->workFree()->size()));
-  *Xfree = *inter->workFree();
+  SP::SiconosVector Xfree;
+  Xfree = inter->workFree();
 
   assert(Xfree);
 
@@ -698,9 +698,9 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         inter->setWorkFree();
 
         subprod(*CT, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-        if (inter->dynamicalSystemsEnd() != inter->dynamicalSystemsBegin())
+        if (inter->dynamicalSystems()->size() == 2)
         {
-          subprod(*CT, *(*(inter->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+          subprod(*CT, *(*++(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, false);
         }
       }
 
@@ -729,9 +729,9 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         else
         {
           subprod(*C, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-          if (inter->dynamicalSystemsEnd() != inter->dynamicalSystemsBegin())
+          if (inter->dynamicalSystems()->size() == 2)
           {
-            subprod(*C, *(*(inter->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+            subprod(*C, *(*++(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, false);
           }
         }
       }
@@ -790,8 +790,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
         if (F)
         {
-          SP::SiconosVector workZ(new SiconosVector(inter->workZ()->size()));
-          *workZ = *inter->workZ();
+          SP::SiconosVector workZ = inter->workZ();
           coord[3] = F->size(1);
           coord[5] = F->size(1);
           subprod(*F, *workZ, *Yp, coord, false);

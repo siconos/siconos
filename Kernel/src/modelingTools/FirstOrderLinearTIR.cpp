@@ -125,7 +125,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   if (_e)
     assert(_e->size() == interaction()->getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
-  _workZ.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector(sizeZ));
 }
 
 void FirstOrderLinearTIR::computeh(double time)
