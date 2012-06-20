@@ -50,8 +50,6 @@
 
 SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
 
-SICONOS_IO_REGISTER(SiconosVector,)
-
 BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 
 BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
@@ -182,7 +180,7 @@ void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
 }
 
 template <class Archive>
-void siconos_io(Archive & ar, SimpleVector & v, unsigned int version)
+void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_dense", v._dense);
   if (v._dense)
@@ -193,8 +191,6 @@ void siconos_io(Archive & ar, SimpleVector & v, unsigned int version)
   {
     ar & boost::serialization::make_nvp("vect", v.vect.Sparse);
   }
-  ar &  boost::serialization::make_nvp("SiconosVector",
-                                       boost::serialization::base_object<SiconosVector>(v));
 }
 
 template <class Archive>
@@ -291,7 +287,7 @@ namespace Siconos
 {
 MAKE_SICONOS_IO_PROPERTIES(SP::OneStepIntegrator);
 MAKE_SICONOS_IO_PROPERTIES(SP::SimpleMatrix);
-MAKE_SICONOS_IO_PROPERTIES(SP::SimpleVector);
+MAKE_SICONOS_IO_PROPERTIES(SP::SiconosVector);
 MAKE_SICONOS_IO_PROPERTIES(double);
 MAKE_SICONOS_IO_PROPERTIES(int);
 MAKE_SICONOS_IO_PROPERTIES(bool);
@@ -383,7 +379,7 @@ void serialize(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
 
 
 template <class Archive>
-void serialize(Archive& ar, SimpleVector& v, unsigned int version)
+void serialize(Archive& ar, SiconosVector& v, unsigned int version)
 {
   siconos_io(ar, v, version);
 }
@@ -428,7 +424,7 @@ void siconos_io_register(Archive& ar)
 {
   siconos_io_register_generated(ar);
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
-  ar.register_type(static_cast<SimpleVector*>(NULL));
+  ar.register_type(static_cast<SiconosVector*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
   //  ar.register_type(static_cast<_SolverOptions*>(NULL));
   ar.register_type(static_cast<LinearComplementarityProblem*>(NULL));

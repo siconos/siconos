@@ -20,10 +20,10 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix, (SiconosMatrix),
                                (_mat)
                                (_tabRow)
                                (_tabCol))
-SICONOS_IO_REGISTER_WITH_BASES(BlockVector, (SiconosVector),
-                               (_sizeV)
-                               (vect)
-                               (_tabIndex))
+SICONOS_IO_REGISTER(BlockVector,
+                    (_sizeV)
+                    (vect)
+                    (_tabIndex))
 SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
                     (_BVP)
                     (_topology)
@@ -429,8 +429,11 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR),
                                (jacgx))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
                                (_indexSetLevelForProjection)
+                               (_nbProjectionIteration)
                                (_constraintTol)
                                (_constraintTolUnilateral)
+                               (_maxViolationUnilateral)
+                               (_maxViolationEquality)
                                (_projectionMaxIteration)
                                (_doProj)
                                (_doOnlyProj))
@@ -449,11 +452,16 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR),
                                (_pluginJachlambda))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection, (TimeStepping),
                                (_indexSetLevelForProjection)
+                               (_cumulatedNewtonNbSteps)
+                               (_nbProjectionIteration)
+                               (_nbCumulatedProjectionIteration)
+                               (_nbIndexSetsIteration)
                                (_constraintTol)
                                (_constraintTolUnilateral)
                                (_maxViolationUnilateral)
                                (_maxViolationEquality)
                                (_projectionMaxIteration)
+                               (_kIndexSetMax)
                                (_doCombinedProj)
                                (_doCombinedProjOnEquality)
                                (_isIndexSetsStable))
@@ -502,7 +510,8 @@ SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph, (_DynamicalSystemsGraph),
                                (dummy))
 SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints, (MLCP),
                                (_alpha)
-                               (_doProjOnEquality))
+                               (_doProjOnEquality)
+                               (_useMassNormalization))
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact, (LinearOSNS),
                                (Impulse_variable)
                                (Time_variable)
@@ -587,6 +596,11 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS, (DynamicalSystem),
                                (_pluginJacqDotFInt)
                                (_pluginJacqNNL)
                                (_pluginJacqDotNNL))
+SICONOS_IO_REGISTER_WITH_BASES(MoreauProjectOnConstraintsOSI, (Moreau),
+                               (_deactivateYPosThreshold)
+                               (_deactivateYVelThreshold)
+                               (_activateYPosThreshold)
+                               (_activateYVelThreshold))
 SICONOS_IO_REGISTER_WITH_BASES(Circle, (CircularDS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(CircularDS, (LagrangianDS),
@@ -793,6 +807,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<EventsManager*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
+  ar.register_type(static_cast<MoreauProjectOnConstraintsOSI*>(NULL));
   ar.register_type(static_cast<Circle*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));
   ar.register_type(static_cast<CircleCircleR*>(NULL));

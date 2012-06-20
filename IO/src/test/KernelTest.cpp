@@ -17,8 +17,8 @@ void KernelTest::tearDown() {};
 
 void KernelTest::t0()
 {
-  SP::SiconosVector q(new SimpleVector(3));
-  SP::SiconosVector q0(new SimpleVector(3));
+  SP::SiconosVector q(new SiconosVector(3));
+  SP::SiconosVector q0(new SiconosVector(3));
 
   (*q)(0) = 1.0;
   (*q)(1) = 2.0;
@@ -28,14 +28,14 @@ void KernelTest::t0()
   std::ofstream ofs("Kernelt0.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleVector*>(NULL));
+    oa.register_type(static_cast<SiconosVector*>(NULL));
     oa << NVP(q);
   }
 
   std::ifstream ifs("Kernelt0.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleVector*>(NULL));
+    ia.register_type(static_cast<SiconosVector*>(NULL));
     ia >> NVP(q0);
   }
 
@@ -76,8 +76,8 @@ void KernelTest::t1()
 void KernelTest::t2()
 {
   SP::SiconosMatrix m(new SimpleMatrix(3, 3));
-  SP::SiconosVector v(new SimpleVector(3));
-  SP::SiconosVector q(new SimpleVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
+  SP::SiconosVector q(new SiconosVector(3));
 
   m->eye();
 
@@ -89,7 +89,7 @@ void KernelTest::t2()
   {
     boost::archive::xml_oarchive oa(ofs);
     oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SimpleVector*>(NULL));
+    oa.register_type(static_cast<SiconosVector*>(NULL));
     oa.register_type(static_cast<LagrangianDS*>(NULL));
     oa << NVP(ds1);
   }
@@ -98,7 +98,7 @@ void KernelTest::t2()
   {
     boost::archive::xml_iarchive ia(ifs);
     ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SimpleVector*>(NULL));
+    ia.register_type(static_cast<SiconosVector*>(NULL));
     ia.register_type(static_cast<LagrangianDS*>(NULL));
     ia >> NVP(ds2);
   }
@@ -147,8 +147,8 @@ void KernelTest::t3()
 void KernelTest::t4()
 {
   SP::SiconosMatrix m(new SimpleMatrix(3, 3));
-  SP::SiconosVector v(new SimpleVector(3));
-  SP::SiconosVector q(new SimpleVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
+  SP::SiconosVector q(new SiconosVector(3));
 
   m->eye();
 
@@ -165,7 +165,7 @@ void KernelTest::t4()
   {
     boost::archive::xml_oarchive oa(ofs);
     oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SimpleVector*>(NULL));
+    oa.register_type(static_cast<SiconosVector*>(NULL));
     oa.register_type(static_cast<LagrangianDS*>(NULL));
     oa << NVP(dsset);
   }
@@ -176,7 +176,7 @@ void KernelTest::t4()
   {
     boost::archive::xml_iarchive ia(ifs);
     ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SimpleVector*>(NULL));
+    ia.register_type(static_cast<SiconosVector*>(NULL));
     ia.register_type(static_cast<LagrangianDS*>(NULL));
     ia >> NVP(dssetfromfile);
   }
@@ -215,8 +215,8 @@ void KernelTest::t5()
   (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  SP::SimpleVector q0(new SimpleVector(nDof));
-  SP::SimpleVector v0(new SimpleVector(nDof));
+  SP::SiconosVector q0(new SiconosVector(nDof));
+  SP::SiconosVector v0(new SiconosVector(nDof));
   (*q0)(0) = position_init;
   (*v0)(0) = velocity_init;
 
@@ -224,7 +224,7 @@ void KernelTest::t5()
   SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
 
   // -- Set external forces (weight) --
-  SP::SimpleVector weight(new SimpleVector(nDof));
+  SP::SiconosVector weight(new SiconosVector(nDof));
   (*weight)(0) = -m * g;
   ball->setFExtPtr(weight);
 
@@ -399,8 +399,8 @@ void KernelTest::t7()
 
   SP::DynamicalSystem ds1, ds2;
 
-  SP::SiconosVector q(new SimpleVector());
-  SP::SiconosVector v(new SimpleVector());
+  SP::SiconosVector q(new SiconosVector());
+  SP::SiconosVector v(new SiconosVector());
 
   ds1.reset(new Disk(1, 1, q, v));
 
