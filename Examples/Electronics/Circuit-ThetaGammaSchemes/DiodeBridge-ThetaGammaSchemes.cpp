@@ -235,7 +235,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 7) = inner_prod(*x, *tmp);
 
 
-      prod(1 / 2.0 * h, *LS_Q, *xlambda, *tmp6, true);
+      prod(*LS_Q, *xlambda, *tmp6, true);
+      *tmp6 *= 1 / 2.0 * h;
       *tmp6bis = *xlambda;
       dataPlot(k, 8) = inner_prod(*tmp6bis, *tmp6) +  dataPlot(k - 1, 8) ;
 

@@ -384,10 +384,7 @@ void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
   assert(newY->size() == _interactionSize &&
          "Interaction::setYPtr, interactionSize differs from newY vector size");
 
-  assert(!newY->isBlock() &&
-         "Interaction::setYPtr(newY), newY is a block vector!");
-
-  _y[index] = boost::static_pointer_cast<SiconosVector>(newY);
+  _y[index] = newY;
 }
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
@@ -436,11 +433,7 @@ void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOl
   assert(newYOld->size() == _interactionSize &&
          "Interaction::setYOldPtr, interactionSize differs from newYOld vector size");
 
-  assert((! newYOld->isBlock()) &&
-         "Interaction::setYOldPtr(newY), newY is a block vector!");
-
-  // set _yOld[index]
-  _yOld[index] = boost::static_pointer_cast<SiconosVector>(newYOld);
+  _yOld[index] = newYOld;
 }
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
@@ -486,11 +479,7 @@ void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newL
   assert(newLambda->size() == _interactionSize &&
          "Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
 
-  assert(!newLambda->isBlock() &&
-         "Interaction::setLambdaPtr(newLambda), newLambda is  a block vector! ");
-
-  // set lambda[index]
-  _lambda[index] = boost::static_pointer_cast<SiconosVector>(newLambda);
+  _lambda[index] = newLambda;
 }
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
@@ -538,11 +527,8 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector n
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
   if (newLambdaOld->size() != _interactionSize)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
-  if (!newLambdaOld->isBlock())
-    RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is  a block vector! ");
 
-  // set lambdaOld[index]
-  _lambdaOld[index] = boost::static_pointer_cast<SiconosVector>(newLambdaOld);
+  _lambdaOld[index] = newLambdaOld;
 }
 
 

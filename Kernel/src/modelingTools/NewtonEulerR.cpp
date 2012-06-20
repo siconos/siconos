@@ -63,9 +63,9 @@ void NewtonEulerR::initComponents()
     _jachqT.reset(new SimpleMatrix(_ysize, _xsize));
 
 
-  _workX.reset(new SiconosVector());
+  _workX.reset(new SiconosVector(_xsize));
   _workQ.reset(new SiconosVector(_qsize));
-  _workZ.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector(interaction()->getSizez()));
   _workY.reset(new SiconosVector(_ysize));
   //_yQ.reset(new SiconosVector(1));
   //proj_with_q  _jachqProj=_jachq;

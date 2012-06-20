@@ -296,20 +296,11 @@ public:
    */
   void display() const;
   /** return a block vector containing ths dynamical system's dof.*/
-  SP::BlockVector getq()
-  {
-    return data[q0];
-  }
+  //  SP::BlockVector getq(){return data[q0];}
 
-  SP::BlockVector q()
-  {
-    return data[q0];
-  }
+  //  SP::BlockVector q(){return data[q0];}
 
-  SP::BlockVector getDeltaq()
-  {
-    return data[deltaq];
-  }
+  //  SP::BlockVector getDeltaq(){return data[deltaq];}
 
   ACCEPT_STD_VISITORS();
 

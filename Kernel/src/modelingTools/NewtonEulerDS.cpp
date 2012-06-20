@@ -287,7 +287,7 @@ void NewtonEulerDS::computeForces(double time)
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(0, *_fExt);
+      _forces->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
@@ -296,7 +296,7 @@ void NewtonEulerDS::computeForces(double time)
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(3, *_mExt);
+      _forces->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
@@ -329,7 +329,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::Siconos
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(0, *_fExt);
+      _forces->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
@@ -338,7 +338,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::Siconos
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(3, *_mExt);
+      _forces->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)

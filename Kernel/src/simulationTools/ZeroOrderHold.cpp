@@ -696,12 +696,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.
         inter->setWorkFree();
-
-        subprod(*CT, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-        if (inter->dynamicalSystems()->size() == 2)
-        {
-          subprod(*CT, *(*++(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, false);
-        }
+        subprod(*CT, *Xfree, *Yp, coord, true);
       }
 
     }
@@ -728,11 +723,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         }
         else
         {
-          subprod(*C, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
-          if (inter->dynamicalSystems()->size() == 2)
-          {
-            subprod(*C, *(*++(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, false);
-          }
+          subprod(*C, *Xfree, *Yp, coord, true);
         }
       }
 

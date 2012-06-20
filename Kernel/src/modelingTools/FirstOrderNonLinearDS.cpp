@@ -18,7 +18,6 @@
  */
 #include "FirstOrderNonLinearDS.hpp"
 #include "FirstOrderNonLinearDSXML.hpp"
-#include "BlockVector.hpp"
 #include "Plugin.hpp"
 #include "PluginTypes.hpp"
 

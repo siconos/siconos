@@ -267,10 +267,7 @@ public:
   void display() const;
 
   /** return a block vector containing ths dynamical system's dof.*/
-  SP::BlockVector q()
-  {
-    return data[q0];
-  }
+  //  SP::BlockVector q(){return data[q0];}
 
 
 };

@@ -21,7 +21,6 @@ Include files related to utils directory
 */
 
 #include "BlockMatrix.hpp"
-#include "BlockVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "ioMatrix.hpp"
