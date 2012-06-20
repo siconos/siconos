@@ -1856,7 +1856,7 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   if (y <= 0)
     DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
 #endif
-  return (y <= 0);
+  return (y <= 0.0);
 }
 
 
@@ -1878,7 +1878,7 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   if (y > 0)
     DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
 #endif
-  return (y > 0);
+  return (y > 0.0);
 }
 
 

@@ -45,9 +45,26 @@ protected:
    */
   unsigned int _indexSetLevelForProjection;
 
-  /** tolerance for the violation of the equality
-  *  constraints at the  position level.
+  /** Cumulated Number of steps perfomed is the Newton Loop */
+  unsigned int _cumulatedNewtonNbSteps;
+
+  /** Number of iteration of projection
   */
+  unsigned int _nbProjectionIteration;
+
+  /** Number of cumulated iteration of projection
+  */
+  unsigned int _nbCumulatedProjectionIteration;
+
+  /** Number of iteration for stabilizating indexsets
+  */
+  unsigned int _nbIndexSetsIteration;
+
+
+
+  /** tolerance for the violation of the equality
+   *  constraints at the  position level.
+   */
   double _constraintTol;
 
   /** tolerance for the violation of the unilateral
@@ -135,6 +152,32 @@ public:
   virtual void updateWorldFromDS()
   {
     ;
+  }
+  /** get the Number of iteration of projection
+   */
+  inline unsigned int nbProjectionIteration()
+  {
+    return _nbProjectionIteration;
+  }
+  /** get the Number of cumulated iteration of projection
+   */
+  inline unsigned int nbCumulatedProjectionIteration()
+  {
+    return _nbCumulatedProjectionIteration;
+  }
+
+  /** get the  Cumulated Number of steps perfomed is the Newton Loop
+   */
+  inline unsigned int cumulatedNewtonNbSteps()
+  {
+    return _cumulatedNewtonNbSteps;
+  }
+
+  /** get the Number of iteration for stabilizating indexsets
+   */
+  inline unsigned int nbIndexSetsIteration()
+  {
+    return _nbIndexSetsIteration;
   }
 
   inline void setConstraintTol(double v)
