@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     (*Mass)(1, 1) = MassBlock;
     (*Mass)(2, 2) = InertiaBlock;
     //2. Set the initial position of the block in function of the initial position of the contact point A (left-hand contact)
-    SP::SimpleVector PosIniBlock(new SimpleVector(Nfreedom));
+    SP::SiconosVector PosIniBlock(new SiconosVector(Nfreedom));
     (*PosIniBlock)(0) = PosXiniPointA + 0.5 * LengthBlock * cos(AngleThetaIni) - 0.5 * HeightBlock * sin(AngleThetaIni);
     (*PosIniBlock)(1) = PosYiniPointA + 0.5 * LengthBlock * sin(AngleThetaIni) + 0.5 * HeightBlock * cos(AngleThetaIni);
     (*PosIniBlock)(2) = AngleThetaIni;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     (*PosIniBlock)(2) = 0.2;
 
     //3. Set the initial velocity of the block in function of the initial relative velocity of the contact point A
-    SP::SimpleVector VelIniBlock(new SimpleVector(Nfreedom));
+    SP::SiconosVector VelIniBlock(new SiconosVector(Nfreedom));
     (*VelIniBlock)(0) = VelXiniPointA - (0.5 * LengthBlock * sin(AngleThetaIni) + 0.5 * HeightBlock * cos(AngleThetaIni)) * RotVelBlockIni;
     (*VelIniBlock)(1) = VelYiniPointA + (0.5 * LengthBlock * cos(AngleThetaIni) - 0.5 * HeightBlock * sin(AngleThetaIni)) * RotVelBlockIni;
     (*VelIniBlock)(2) = RotVelBlockIni;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     //4. Instantiate the object of "LagrangianTIDS"
     SP::LagrangianLinearTIDS RockingBlock(new LagrangianLinearTIDS(PosIniBlock, VelIniBlock, Mass));
     //5. Set the external force
-    SP::SimpleVector ForceExtern(new SimpleVector(Nfreedom));
+    SP::SiconosVector ForceExtern(new SiconosVector(Nfreedom));
     (*ForceExtern)(1) = -MassBlock * GGearth;
     RockingBlock->setFExtPtr(ForceExtern);
     //
@@ -133,12 +133,12 @@ int main(int argc, char* argv[])
     DataPlot(0, 5) = (*VelBlock)(1); // Velocity Vy
     DataPlot(0, 6) = (*VelBlock)(2); // Angular velocity
 
-    SP::SiconosVector tmp(new SimpleVector(Nfreedom));
+    SP::SiconosVector tmp(new SiconosVector(Nfreedom));
     prod(*Mass, *VelBlock, *tmp, true);
     double kineticEnergy = 0.5 * inner_prod(*VelBlock, *tmp);
     DataPlot(0, 7) = kineticEnergy;
 
-    SP::SiconosVector PosRef(new SimpleVector(Nfreedom));
+    SP::SiconosVector PosRef(new SiconosVector(Nfreedom));
     (*PosRef)(0) = 0.0;
     (*PosRef)(1) = HeightBlock / 2.0;
     (*PosRef)(2) = 0.0;

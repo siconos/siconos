@@ -67,19 +67,19 @@ int main(int argc, char* argv[])
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    std::vector<SP::SimpleVector> q0(nBeads);
-    std::vector<SP::SimpleVector> v0(nBeads);
+    std::vector<SP::SiconosVector> q0(nBeads);
+    std::vector<SP::SiconosVector> v0(nBeads);
 
     for (unsigned int i = 0; i < nBeads; i++)
     {
-      (q0[i]).reset(new SimpleVector(nDof));
-      (v0[i]).reset(new SimpleVector(nDof));
+      (q0[i]).reset(new SiconosVector(nDof));
+      (v0[i]).reset(new SiconosVector(nDof));
       (q0[i])->setValue(0, position_init + i * initialGap);
       (v0[i])->setValue(0, velocity_init);
     }
 
     // -- The dynamical system --
-    SP::SimpleVector weight(new SimpleVector(nDof));
+    SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(0) = -m * g;
 
 
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     //
     SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
-    SP::SiconosVector b(new SimpleVector(1));
+    SP::SiconosVector b(new SiconosVector(1));
     (*b)(0) = -R;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     SP::SiconosMatrix HOfBeads(new SimpleMatrix(1, 2 * nDof));
     (*HOfBeads)(0, 0) = -1.0;
     (*HOfBeads)(0, 3) = 1.0;
-    SP::SiconosVector bOfBeads(new SimpleVector(1));
+    SP::SiconosVector bOfBeads(new SiconosVector(1));
     (*bOfBeads)(0) = -2 * R;
 
     // This doesn't work !!!

@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
     DynamicalSystemsSet allDS1; // the list of DS
 
     // -- Initial positions and velocities --
-    SP::SimpleVector q10(new SimpleVector(qDim));
-    SP::SimpleVector v10(new SimpleVector(nDim));
+    SP::SiconosVector q10(new SiconosVector(qDim));
+    SP::SiconosVector v10(new SiconosVector(nDim));
     SP::SimpleMatrix I1(new SimpleMatrix(3, 3));
     v10->zero();
     I1->eye();
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     q10->setValue(2, 1);
 
     double angle = M_PI / 5;
-    SimpleVector V1(3);
+    SiconosVector V1(3);
     V1.zero();
     V1.setValue(2, 1);
     V1.setValue(0, 3);
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
     allDS1.insert(beam1);
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(nDof));
+    SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
     beam1->setFExtPtr(weight);
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     SP::SimpleMatrix H1(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
     H1->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
-    SP::SimpleVector axe1(new SimpleVector(3));
+    SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
 

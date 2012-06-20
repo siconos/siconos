@@ -58,8 +58,8 @@ void DelayedSampledActuator::actuate()
   int nDof = model()->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->getDim();
   int ncont = 0;
   double t = model()->currentTime();
-  SimpleVector * myZ(new SimpleVector(nDof));
-  SimpleVector * state(new SimpleVector(2 * nDof));
+  SiconosVector * myZ(new SiconosVector(nDof));
+  SiconosVector * state(new SiconosVector(2 * nDof));
 
   // ici récupération de la valeur du Sensor
   itS = getSensors()->begin();

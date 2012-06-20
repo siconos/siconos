@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
   // Matrix declaration
   SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof, 0));
-  SP::SiconosVector x0(new SimpleVector(ndof));
+  SP::SiconosVector x0(new SiconosVector(ndof));
   (*x0)(0) = Xinit;
   (*x0)(1) = -Xinit;
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));

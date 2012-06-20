@@ -21,7 +21,7 @@ void elecRelation::initialize(SP::Interaction inter)
 
   double t0 = 0;
 
-  _workL.reset(new SimpleVector(interaction()->getSizeOfY()));
+  _workL.reset(new SiconosVector(interaction()->getSizeOfY()));
   Jachx->resize(sizeY, sizeDS);
   _jachlambda->resize(sizeY, sizeY);
 

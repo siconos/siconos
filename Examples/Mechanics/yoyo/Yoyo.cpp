@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
 
     DynamicalSystemsSet allDS;
     SP::SiconosMatrix M(new SimpleMatrix(nDof, nDof));
-    SP::SiconosVector q0(new SimpleVector(nDof));
-    SP::SiconosVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     InteractionsSet allInteractions;
 
     SP::NonSmoothLaw loi(new NewtonImpactNSL(e));

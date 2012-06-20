@@ -49,12 +49,12 @@ int main()
   int dimX = 4;
   SimpleMatrix * M = 0;
   SimpleMatrix * A = 0;
-  SimpleVector* x0 = 0;
-  SimpleVector* As = 0;
-  SimpleVector* mti = 0;
+  SiconosVector* x0 = 0;
+  SiconosVector* As = 0;
+  SiconosVector* mti = 0;
 
 
-  x0 = new SimpleVector(dimX);
+  x0 = new SiconosVector(dimX);
   //Point de départ hors arc singulier
   x0->setValue(0, 3.4999939172);
   x0->setValue(1, -2.2788416237);

@@ -68,14 +68,14 @@ int main(int argc, char* argv[])
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0.zero();
     v0.zero();
     q0(0) = 0.9;
     q0(1) = -1.5;
     q0(2) = 0.9;
     q0(3) = -1.5;
-    SP::SiconosVector z(new SimpleVector(nDof * 5));
+    SP::SiconosVector z(new SiconosVector(nDof * 5));
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     (*z)(19) = 0;
 
 
-    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSimpleVector(q0), createSPtrSimpleVector(v0)));
+    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
     arm->setComputeMassFunction("Two-linkFlexiblePlugin.so", "mass");
@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
 
 
 
-// SiconosVector * z = new SimpleVector(nDof*4);
+// SiconosVector * z = new SiconosVector(nDof*4);
 //     (*z)(0) = q0(0);
 //     (*z)(1) = q0(1);
 //     (*z)(2) = v0(0);
@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
 
 
 //    //  SimpleMatrix H1(2,4);
-// //     SimpleVector b1(2);
+// //     SiconosVector b1(2);
 // //     H1.zero();
 // //     H1(0,0) =-1;
 // //     H1(1,0) =1;
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 // //     Interaction * inter1 =  new Interaction("floor-arm2", allDS,1,2, nslaw2, relation1);
 
 // //     SimpleMatrix H2(2,4);
-// //     SimpleVector b2(2);
+// //     SiconosVector b2(2);
 // //     H2.zero();
 // //     H2(0,1) =-1;
 // //     H2(1,1) =1;

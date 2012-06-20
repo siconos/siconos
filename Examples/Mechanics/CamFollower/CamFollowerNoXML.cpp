@@ -54,12 +54,12 @@ int main(int argc, char* argv[])
     (*K)(0, 0) = 1430.8;
 
     // -- Initial positions and velocities --
-    vector<SP::SimpleVector> q0;
-    vector<SP::SimpleVector> velocity0;
+    vector<SP::SiconosVector> q0;
+    vector<SP::SiconosVector> velocity0;
     q0.resize(dsNumber);
     velocity0.resize(dsNumber);
-    q0[0].reset(new SimpleVector(nDof));
-    velocity0[0].reset(new SimpleVector(nDof));
+    q0[0].reset(new SiconosVector(nDof));
+    velocity0[0].reset(new SiconosVector(nDof));
     (*(q0[0]))(0) = position_init;
     (*(velocity0[0]))(0) = velocity_init;
     SP::LagrangianLinearTIDS lds(new LagrangianLinearTIDS(q0[0], velocity0[0], Mass, K, C));
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 
     // Example to set a list of parameters in FExt function.
     // 1 - Create a simple vector that contains the required parameters.
-    SP::SiconosVector param(new SimpleVector(1)); // Here we only set one parameter, the DS number.
+    SP::SiconosVector param(new SiconosVector(1)); // Here we only set one parameter, the DS number.
     //    (*param)(0) = vectorDS[0]->getNumber();
     (*param)(0) = rpm;
     // 2 - Assign this param to the function FExt

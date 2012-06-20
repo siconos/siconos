@@ -136,7 +136,7 @@ struct ForJachq : public Question<SP::SiconosMatrix>
   IFBULLET(ANSWER(BulletR, jachq()));
 };
 
-struct ForContactForce : public Question<SP::SimpleVector>
+struct ForContactForce : public Question<SP::SiconosVector>
 {
   IFBULLET(ANSWER(BulletR, contactForce()));
 };
@@ -246,13 +246,13 @@ public:
     case Type::NewtonEulerDS :
     {
       boost::static_pointer_cast<NewtonEulerDS>(DS())
-      ->setFExtPtr(boost::static_pointer_cast<SimpleVector>(savedFExt_));
+      ->setFExtPtr(boost::static_pointer_cast<SiconosVector>(savedFExt_));
       break;
     }
     case Type::LagrangianDS :
     {
       boost::static_pointer_cast<LagrangianDS>(DS())
-      ->setFExtPtr(boost::static_pointer_cast<SimpleVector>(savedFExt_));
+      ->setFExtPtr(boost::static_pointer_cast<SiconosVector>(savedFExt_));
       break;
     };
     default:

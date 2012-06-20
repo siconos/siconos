@@ -92,11 +92,11 @@ void Spheres::init()
       R = Spheres->getValue(i, 3);
       m = Spheres->getValue(i, 4);
 
-      SP::SimpleVector qTmp;
-      SP::SimpleVector vTmp;
+      SP::SiconosVector qTmp;
+      SP::SiconosVector vTmp;
 
-      qTmp.reset(new SimpleVector(NDOF));
-      vTmp.reset(new SimpleVector(NDOF));
+      qTmp.reset(new SiconosVector(NDOF));
+      vTmp.reset(new SiconosVector(NDOF));
       vTmp->zero();
       (*qTmp)(0) = (*Spheres)(i, 0);
       (*qTmp)(1) = (*Spheres)(i, 1);
@@ -117,11 +117,11 @@ void Spheres::init()
 
 
       SP::LagrangianDS body;
-      body.reset(new SphereLDS(R, m, boost::shared_ptr<SimpleVector>(qTmp), boost::shared_ptr<SimpleVector>(vTmp)));
+      body.reset(new SphereLDS(R, m, boost::shared_ptr<SiconosVector>(qTmp), boost::shared_ptr<SiconosVector>(vTmp)));
 
       // -- Set external forces (weight) --
-      SP::SimpleVector FExt;
-      FExt.reset(new SimpleVector(NDOF));
+      SP::SiconosVector FExt;
+      FExt.reset(new SiconosVector(NDOF));
       FExt->zero();
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);

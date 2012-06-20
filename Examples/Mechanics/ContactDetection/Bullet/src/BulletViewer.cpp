@@ -197,7 +197,7 @@ void BulletViewer::draw()
       SP::SiconosVector q1 = ask<ForPosition>(*d1);
 
       {
-        SimpleVector& cf = *ask<ForContactForce>(*relation);
+        SiconosVector& cf = *ask<ForContactForce>(*relation);
         double cfn = cf.norm2();
 
         w = fmax(.3, cfn / fmax(lbdmax, cfn));

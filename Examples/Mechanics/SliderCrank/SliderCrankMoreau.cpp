@@ -66,8 +66,8 @@ int main(int argc, char* argv[])
     double mu4 = 0.01;
 
     // initial conditions
-    SP::SimpleVector q0(new SimpleVector(nDof));
-    SP::SimpleVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     q0->zero();
     v0->zero();
     (*v0)(0) = 150.;

@@ -3,7 +3,7 @@
 #include <math.h>
 using namespace std;
 static unsigned int ndof = 4;
-static SP::SiconosVector xr(new SimpleVector(2));
+static SP::SiconosVector xr(new SiconosVector(2));
 /* 02/2010 --> 08/2010*/
 /*Author: Yamen ABDENNADHER */
 /*Exemple from : Rafael Ramos, Dominigo Biel, Enric Fossas and Franisco Guinjoan. Interleaving Quasi-Sliding-Mode Control of Parallel-Connected Buck-based Inverters. IEEE vol 55 N11 Novembre 2008. For more detail, please see Yamen's report.*/
@@ -19,10 +19,10 @@ void (eLDS)(double t, unsigned int N, double* e, unsigned int z, double*zz)
   (*Z)(1, 1) = -6e-5;
   (*Z)(2, 0) = -1;
   (*Z)(2, 1) = -6e-5;
-  //SP::SiconosVector xr(new SimpleVector(2));
+  //SP::SiconosVector xr(new SiconosVector(2));
   (*xr)(0) = 55 * sin(100 * M_PI * t);
 
-  SP::SiconosVector P(new SimpleVector(3));
+  SP::SiconosVector P(new SiconosVector(3));
   prod(*Z, *xr, *P);
 
   e[0] = (*P)(0);
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     A->display();
 
 
-    SP::SiconosVector x0(new SimpleVector(ndof));
+    SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = 50;
     (*x0)(1) = 7;
     (*x0)(2) = 4;
@@ -292,9 +292,9 @@ int main(int argc, char* argv[])
 
     int i = 0;
     int j = 0;
-    SP::SiconosVector err(new SimpleVector(2));
-    SP::SiconosVector il1(new SimpleVector(1));
-    SP::SiconosVector temps(new SimpleVector(N + 1));
+    SP::SiconosVector err(new SiconosVector(2));
+    SP::SiconosVector il1(new SiconosVector(1));
+    SP::SiconosVector temps(new SiconosVector(N + 1));
 
 
     while (k < N - 1)

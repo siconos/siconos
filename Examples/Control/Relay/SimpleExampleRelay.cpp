@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     (*A)(0, 1) = 0.0;
     (*A)(1, 0) = 0.0;
     (*A)(1, 1) = 0.0;
-    SP::SiconosVector x0(new SimpleVector(ndof));
+    SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = Vinit;
     (*x0)(1) = -Vinit;
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));

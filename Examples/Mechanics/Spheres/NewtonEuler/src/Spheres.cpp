@@ -95,11 +95,11 @@ void Spheres::init()
       R = Spheres->getValue(i, 3);
       m = Spheres->getValue(i, 4);
 
-      SP::SimpleVector qTmp;
-      SP::SimpleVector vTmp;
+      SP::SiconosVector qTmp;
+      SP::SiconosVector vTmp;
 
-      qTmp.reset(new SimpleVector(7));
-      vTmp.reset(new SimpleVector(6));
+      qTmp.reset(new SiconosVector(7));
+      vTmp.reset(new SiconosVector(6));
       qTmp->zero();
       vTmp->zero();
 
@@ -116,12 +116,12 @@ void Spheres::init()
       (*IMat)(0, 0) = (*IMat)(1, 1) = (*IMat)(2, 2) = m * R * R * 2. / 5.;
 
       SP::NewtonEulerDS body;
-      body.reset(new SphereNEDS(R, m, IMat, boost::shared_ptr<SimpleVector>(qTmp),
-                                boost::shared_ptr<SimpleVector>(vTmp)));
+      body.reset(new SphereNEDS(R, m, IMat, boost::shared_ptr<SiconosVector>(qTmp),
+                                boost::shared_ptr<SiconosVector>(vTmp)));
 
       // -- Set external forces (weight) --
-      SP::SimpleVector FExt;
-      FExt.reset(new SimpleVector(6)); //
+      SP::SiconosVector FExt;
+      FExt.reset(new SiconosVector(6)); //
       FExt->zero();
       //if (i)
       FExt->setValue(2, -m * g);

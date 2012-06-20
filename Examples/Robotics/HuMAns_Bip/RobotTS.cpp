@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     // The dof are angles between differents parts of the robot.
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0(1) = -0.1;
     q0(2) = 0.2;
     q0(3) = -0.1;
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 
     //The linear contraint corresponding to joints limits (hq+b>0)
     SimpleMatrix H(30, 21);
-    SimpleVector b(30);
+    SiconosVector b(30);
     H.zero();
     H(0, 0) = -1;
     H(1, 0) = 1;

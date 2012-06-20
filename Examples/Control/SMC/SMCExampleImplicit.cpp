@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   // Matrix declaration
   // For the DynamycalSystem
   SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof, 0));
-  SP::SiconosVector x0(new SimpleVector(ndof));
+  SP::SiconosVector x0(new SiconosVector(ndof));
   (*x0)(0) = Xinit;
   (*x0)(1) = -Xinit;
   // For the Sensor
@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
   SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::LinearSMC act = static_pointer_cast<LinearSMC>(control->addActuator(LINEAR_SMC, tActuator));
-  act->setCsurfacePtr(Csurface);
-  act->setBPtr(Brel);
-  act->setDPtr(Drel);
-  act->addSensorPtr(sens);
+  LinearSMC& act = *static_pointer_cast<LinearSMC>(control->addActuator(LINEAR_SMC, tActuator));
+  act.setCsurfacePtr(Csurface);
+  act.setBPtr(Brel);
+  act.setDPtr(Drel);
+  act.addSensorPtr(sens);
 
   // =========================== End of model definition ===========================
 
@@ -125,14 +125,14 @@ int main(int argc, char* argv[])
   unsigned int outputSize = 3; // number of required data
   unsigned int N = ceil((T - t0) / h) + 10; // Number of time steps
 
-  SP::SiconosVector xProc = processDS->x();
+  SiconosVector& xProc = *processDS->x();
   // Save data in a matrix dataPlot
   SimpleMatrix dataPlot(N, outputSize);
   dataPlot(0, 0) = process->t0(); // Initial time of the model
-  dataPlot(0, 1) = (*xProc)(0);
-  dataPlot(0, 2) = (*xProc)(1);
+  dataPlot(0, 1) = xProc(0);
+  dataPlot(0, 2) = xProc(1);
 
-  SP::EventsManager eventsManager = processSimulation->eventsManager();
+  EventsManager& eventsManager = *processSimulation->eventsManager();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
@@ -141,23 +141,22 @@ int main(int argc, char* argv[])
   boost::progress_display show_progress(N);
   boost::timer time;
   time.restart();
-  SP::Event nextEvent;
   while (processSimulation->nextTime() < T)
   {
     processSimulation->computeOneStep();
-    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
-    if (nextEvent->getType() == TD_EVENT)
+    Event& nextEvent = *eventsManager.followingEvent(eventsManager.currentEvent());
+    if (nextEvent.getType() == TD_EVENT)
     {
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();
-      dataPlot(k, 1) = (*xProc)(0);
-      dataPlot(k, 2) = (*xProc)(1);
+      dataPlot(k, 1) = xProc(0);
+      dataPlot(k, 2) = xProc(1);
       ++show_progress;
     }
     processSimulation->nextStep();
   }
   cout << endl << "Computation Time " << time.elapsed()  << endl;
-  eventsManager->display();
+  eventsManager.display();
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
@@ -177,5 +176,4 @@ int main(int argc, char* argv[])
     (dataPlot - dataPlotRef).display();
     return 1;
   }
-
 }

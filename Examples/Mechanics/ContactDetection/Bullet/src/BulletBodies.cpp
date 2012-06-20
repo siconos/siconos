@@ -109,8 +109,8 @@ void BulletBodies::init()
 
     srand(1.);
 
-    SP::SimpleVector FExt;
-    FExt.reset(new SimpleVector(3)); //
+    SP::SiconosVector FExt;
+    FExt.reset(new SiconosVector(3)); //
     FExt->zero();
     FExt->setValue(2, -9.81 * box1->mass());
 
@@ -121,8 +121,8 @@ void BulletBodies::init()
         for (unsigned int k = 0; k < 3; ++k)
         {
 
-          SP::SimpleVector position(new SimpleVector(7));
-          SP::SimpleVector velocity(new SimpleVector(6));
+          SP::SiconosVector position(new SiconosVector(7));
+          SP::SiconosVector velocity(new SiconosVector(6));
           velocity->zero();
           position->zero();
 
@@ -146,8 +146,8 @@ void BulletBodies::init()
           (*velocity)(5) = 0.;
 
           SP::BulletDS body(new BulletDS(shapes[(i + j + k) % 4],
-                                         boost::shared_ptr<SimpleVector>(position),
-                                         boost::shared_ptr<SimpleVector>(velocity)));
+                                         boost::shared_ptr<SiconosVector>(position),
+                                         boost::shared_ptr<SiconosVector>(velocity)));
           body->setFExtPtr(FExt);
 
           _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);

@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     TildeA(2, 1) = LG(0, 1);
     TildeA(3, 1) = LG(1, 1);
 
-    SP::SimpleVector x0(new SimpleVector(ndof));
+    SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = Vinit;
     SP::FirstOrderLinearDS processObserver(new FirstOrderLinearDS(x0, createSPtrSimpleMatrix(TildeA)));
     processObserver->setComputebFunction("SingleDSObserverLCSPlugin.so", "computeU");

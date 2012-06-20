@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   try
   {
     // --- Dynamical system specification ---
-    SP::SimpleVector init_state(new SimpleVector(2));
+    SP::SiconosVector init_state(new SiconosVector(2));
     init_state->setValue(0, 1.0);
     init_state->setValue(1, 1.0);
 

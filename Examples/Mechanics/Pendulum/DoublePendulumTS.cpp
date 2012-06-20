@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
     // --- DS: Double Pendulum ---
 
     // Initial position (angles in radian)
-    SP::SimpleVector q0(new SimpleVector(nDof));
-    SP::SimpleVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     q0->zero();
     v0->zero();
     (*q0)(0) = 1.5;

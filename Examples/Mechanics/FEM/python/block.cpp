@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
 
     SP::SiconosMatrix K(new SimpleMatrix(*Mass));
     // -- Initial positions and velocities --
-    SP::SimpleVector q0(new SimpleVector(ndof));
-    SP::SimpleVector v0(new SimpleVector(ndof));
+    SP::SiconosVector q0(new SiconosVector(ndof));
+    SP::SiconosVector v0(new SiconosVector(ndof));
     //(*q0)(0) = position_init;
     //(*v0)(0) = velocity_init;
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
 
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(ndof));
+    SP::SiconosVector weight(new SiconosVector(ndof));
     (*weight)(0) = -m * g;
     for (int i = 2; i < ndof; i = i + 3)
       (*weight)(i) = -m * g;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     (*H)(1, 5) = 1.0;
     (*H)(2, 8) = 1.0;
     (*H)(3, 11) = 1.0;
-    SP::SiconosVector b(new SimpleVector(4));
+    SP::SiconosVector b(new SiconosVector(4));
     (*b)(0) = 3.0;
     (*b)(1) = 3.0;
     (*b)(2) = 3.0;

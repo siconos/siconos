@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   try
   {
     // --- Dynamical system specification ---
-    SP::SimpleVector init_state(new SimpleVector(2));
+    SP::SiconosVector init_state(new SiconosVector(2));
     init_state->setValue(0, Vinit);
 
     SP::SimpleMatrix LS_A(new SimpleMatrix(2, 2));
@@ -177,14 +177,14 @@ int main(int argc, char* argv[])
     LS_Q->setValue(3, 2, coef);
     LS_Q->setValue(3, 3, coef);
 
-    SP::SiconosVector xlambda(new BlockVector(x, lambda));
+    SP::BlockVector xlambda(new BlockVector(x, lambda));
 
 
 
-    SP::SiconosVector tmp6(new SimpleVector(6));
-    SP::SiconosVector tmp6bis(new SimpleVector(6));
+    SP::SiconosVector tmp6(new SiconosVector(6));
+    SP::SiconosVector tmp6bis(new SiconosVector(6));
 
-    SP::SiconosVector tmp(new SimpleVector(2));
+    SP::SiconosVector tmp(new SiconosVector(2));
 
 
     prod(1 / 2.0, *LS_P, *x, *tmp, true);

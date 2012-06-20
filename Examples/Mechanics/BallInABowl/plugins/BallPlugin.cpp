@@ -47,7 +47,9 @@ extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsi
 extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   double R0 = 0.0;
-  y[0] = q[0] + sqrt(R * R - q[1] * q[1]) - R0;
+  if (R * R - q[1]*q[1] < 0)
+    printf("problem\n");
+  y[0] = q[0] + sqrt(fabs(R * R - q[1] * q[1])) - R0;
 }
 
 extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)

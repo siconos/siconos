@@ -105,8 +105,8 @@ int main(int argc, char* argv[])
     cout << "====> Model loading ..." << endl << endl;
 
     // -- Initial positions and velocities --
-    SP::SimpleVector q0(new SimpleVector(qDim));
-    SP::SimpleVector v0(new SimpleVector(nDim));
+    SP::SiconosVector q0(new SiconosVector(qDim));
+    SP::SiconosVector v0(new SiconosVector(nDim));
     SP::SimpleMatrix I(new SimpleMatrix(3, 3));
     v0->zero();
     q0->zero();
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     SP::NewtonEulerDS ball(new NewtonEulerDS(q0, v0, m, I));
 
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(nDof));
+    SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 

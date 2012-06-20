@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     (*A)(0, 1) = 1.0;
     (*A)(1, 0) = 3.0;
     (*A)(1, 1) = 1.0;
-    SP::SiconosVector x0(new SimpleVector(ndof));
+    SP::SiconosVector x0(new SiconosVector(ndof));
     (*x0)(0) = Vinit;
     SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
     process->setComputebFunction("ObserverLCSPlugin.so", "uProcess");
@@ -67,10 +67,10 @@ int main(int argc, char* argv[])
     (*hatA)(1, 0) = 1.0;
     (*hatA)(1, 1) = -1.0;
 
-    SP::SiconosVector obsX0(new SimpleVector(ndof));
+    SP::SiconosVector obsX0(new SiconosVector(ndof));
     SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(obsX0, hatA));
     observer->setComputebFunction("ObserverLCSPlugin.so", "uObserver");
-    //    SimpleVector z(new SimpleVector(1);
+    //    SiconosVector z(new SiconosVector(1);
     observer->setzPtr(process->x());
     // The set of all DynamicalSystems
     DynamicalSystemsSet allDS;

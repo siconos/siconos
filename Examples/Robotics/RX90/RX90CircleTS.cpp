@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     // --- DS: manipulator arm ---
 
     // Initial position (angles in radian)
-    SP::SimpleVector q0(new SimpleVector(nDof)), v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof)), v0(new SiconosVector(nDof));
     q0->zero();
     v0->zero();
     (*q0)(1) = PI / 3;
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
 
     SimpleMatrix H(12, 6);
-    SimpleVector b(12);
+    SiconosVector b(12);
     H.zero();
     for (unsigned int i = 0; i < nDof; i++)
     {

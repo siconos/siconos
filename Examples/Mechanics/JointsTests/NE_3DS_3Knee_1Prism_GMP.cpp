@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
     // -- Initial positions and velocities --
 
     //First DS
-    SP::SimpleVector q10(new SimpleVector(qDim));
-    SP::SimpleVector v10(new SimpleVector(nDim));
+    SP::SiconosVector q10(new SiconosVector(qDim));
+    SP::SiconosVector v10(new SiconosVector(nDim));
     SP::SimpleMatrix I1(new SimpleMatrix(3, 3));
     v10->zero();
     I1->eye();
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     (*q10)(1) = 0;
     (*q10)(2) = -0.5 * L1 / sqrt(2);
     double angle = M_PI / 4;
-    SimpleVector V1(3);
+    SiconosVector V1(3);
     V1.zero();
     V1.setValue(0, 0);
     V1.setValue(1, 1);
@@ -101,14 +101,14 @@ int main(int argc, char* argv[])
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
     allDS1.insert(beam1);
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(nDof));
+    SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(2) = -m * g;
     beam1->setFExtPtr(weight);
 
 
     //second DS
-    SP::SimpleVector q02(new SimpleVector(qDim));
-    SP::SimpleVector v02(new SimpleVector(nDim));
+    SP::SiconosVector q02(new SiconosVector(qDim));
+    SP::SiconosVector v02(new SiconosVector(nDim));
     SP::SimpleMatrix I2(new SimpleMatrix(3, 3));
     v02->zero();
     I2->eye();
@@ -131,13 +131,13 @@ int main(int argc, char* argv[])
     allDS2.insert(beam1);
     allDS2.insert(beam2);
     // -- Set external forces (weight) --
-    SP::SimpleVector weight2(new SimpleVector(nDof));
+    SP::SiconosVector weight2(new SiconosVector(nDof));
     (*weight2)(2) = -m * g;
     beam2->setFExtPtr(weight2);
 
 
-    SP::SimpleVector q03(new SimpleVector(qDim));
-    SP::SimpleVector v03(new SimpleVector(nDim));
+    SP::SiconosVector q03(new SiconosVector(qDim));
+    SP::SiconosVector v03(new SiconosVector(nDim));
     SP::SimpleMatrix I3(new SimpleMatrix(3, 3));
     v03->zero();
     I3->eye();
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
     allDS3.insert(beam2);
     allDS3.insert(beam3);
     // -- Set external forces (weight) --
-    SP::SimpleVector weight3(new SimpleVector(nDof));
+    SP::SiconosVector weight3(new SiconosVector(nDof));
     (*weight3)(2) = -m * g;
     beam3->setFExtPtr(weight3);
     allDS_With_Floor.insert(beam3);
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     // Interaction with the floor
     double e = 0.9;
     SP::SimpleMatrix H(new SimpleMatrix(1, qDim));
-    SP::SimpleVector eR(new SimpleVector(1));
+    SP::SiconosVector eR(new SiconosVector(1));
     eR->setValue(0, 2.3);
     H->zero();
     (*H)(0, 2) = 1.0;
@@ -202,12 +202,12 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
 
     //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::_sNbEqualities());
-    SP::SimpleVector P(new SimpleVector(3));
+    SP::SiconosVector P(new SiconosVector(3));
     P->zero();
 
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-    SP::SimpleVector G20(new SimpleVector(3));
+    SP::SiconosVector G20(new SiconosVector(3));
     P->zero();
     P->setValue(0, L1 / 2);
     SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
     SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
     H4->zero();
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
-    SP::SimpleVector axe1(new SimpleVector(3));
+    SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
     SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    SP::SimpleVector yAux(new SimpleVector(3));
+    SP::SiconosVector yAux(new SiconosVector(3));
     yAux->setValue(0, 1);
     SP::SimpleMatrix Jaux(new SimpleMatrix(3, 3));
     int NewtonIt = 0;

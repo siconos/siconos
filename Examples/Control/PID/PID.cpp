@@ -57,12 +57,12 @@ int main(int argc, char* argv[])
     A->zero();
     (*A)(0, 1) = 1;
 
-    SP::SiconosVector B(new SimpleVector(nDof));
+    SP::SiconosVector B(new SiconosVector(nDof));
     B->zero();
 
 
     // -- Initial positions and velocities --
-    SP::SimpleVector x0(new SimpleVector(nDof));
+    SP::SiconosVector x0(new SiconosVector(nDof));
     (*x0)(0) = position_init;
     (*x0)(1) = velocity_init;
 
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C, D));
     control->addSensorPtr(sens);
     // add the PID controller
-    SP::SimpleVector K(new SimpleVector(3, 0));
+    SP::SiconosVector K(new SiconosVector(3, 0));
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;

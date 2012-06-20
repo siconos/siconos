@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
   {
     // --- Dynamical system creation ---
     // --- Linear system  (load and filter) specification ---
-    SP::SimpleVector init_stateLS(new SimpleVector(1));
+    SP::SiconosVector init_stateLS(new SiconosVector(1));
     (*init_stateLS)(0) = VinitLS;
 
     SP::SimpleMatrix LS_A(new SimpleMatrix(1, 1));
@@ -82,18 +82,18 @@ int main(int argc, char* argv[])
     (*Int_D)(2, 1) = -1.0;
     (*Int_D)(3, 1) =  1.0;
 
-    SP::SimpleVector Offset_y(new SimpleVector(4));
+    SP::SiconosVector Offset_y(new SiconosVector(4));
     (*Offset_y)(0) = 1.0;
     (*Offset_y)(2) = 1.0;
     (*Offset_y)(3) = 1.0;
     *Offset_y = -DiodeThreshold * (*Offset_y);
 
-    SP::SimpleVector Offset_lambda(new SimpleVector(4));
+    SP::SiconosVector Offset_lambda(new SiconosVector(4));
     (*Offset_lambda)(1) = 1.0;
     *Offset_lambda = -DiodeThreshold * (*Offset_lambda);
 
-    SP::SimpleVector Int_z(new SimpleVector(5));
-    SP::SimpleVector tmp(new SimpleVector(4)) ;
+    SP::SiconosVector Int_z(new SiconosVector(5));
+    SP::SiconosVector tmp(new SiconosVector(4)) ;
     prod(*Int_D, *Offset_lambda, *tmp);
     *tmp -= *Offset_y;
     Int_z->setBlock(0, *tmp);

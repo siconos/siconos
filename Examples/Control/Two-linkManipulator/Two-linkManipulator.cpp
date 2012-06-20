@@ -70,12 +70,12 @@ int main(int argc, char* argv[])
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0.zero();
     v0.zero();
     q0(0) = 0.9;
     q0(1) = -1.6;
-    SP::SiconosVector z(new SimpleVector(nDof * 12));
+    SP::SiconosVector z(new SiconosVector(nDof * 12));
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     (*z)(22) = 0;
     (*z)(23) = 0;
 
-    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSimpleVector(q0), createSPtrSimpleVector(v0)));
+    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
     arm->setComputeMassFunction("Two-linkPlugin.so", "mass");
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
 
     SP::SimpleMatrix H1(new SimpleMatrix(2, 2));
-    SP::SimpleVector b1(new SimpleVector(2));
+    SP::SiconosVector b1(new SiconosVector(2));
     H1->zero();
     (*H1)(0, 0) = -1;
     (*H1)(1, 0) = 1;
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     SP::Interaction inter1(new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation1));
 
     SP::SimpleMatrix H2(new SimpleMatrix(2, 2));
-    SP::SimpleVector b2(new SimpleVector(2));
+    SP::SiconosVector b2(new SiconosVector(2));
     H2->zero();
     (*H2)(0, 1) = -1;
     (*H2)(1, 1) = 1;

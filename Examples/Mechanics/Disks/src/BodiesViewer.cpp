@@ -727,7 +727,7 @@ void BodiesViewer::mouseMoveEvent(QMouseEvent *e)
         shapes_[selectedName()]->setSelection(true);
         shapes_[selectedName()]->saveFExt();
 
-        SP::SimpleVector fext(new SimpleVector());
+        SP::SiconosVector fext(new SiconosVector());
         fext->resize(ask<ForFExt>(*shapes_[selectedName()]->DS())->size());
 
         switch (Type::value(*shapes_[selectedName()]->DS()))

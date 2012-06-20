@@ -69,14 +69,14 @@ int main(int argc, char* argv[])
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0.zero();
     v0.zero();
     q0(0) = 1.5;
     q0(1) = -0.9;
     q0(2) = 1.5;
     q0(3) = -0.9;
-    SP::SiconosVector z(new SimpleVector(nDof * 6 + 1));
+    SP::SiconosVector z(new SiconosVector(nDof * 6 + 1));
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     (*z)(24) = 0;
 
 
-    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSimpleVector(q0), createSPtrSimpleVector(v0)));
+    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSiconosVector(q0), createSPtrSiconosVector(v0)));
 
     // external plug-in
     arm->setComputeMassFunction("TwolinkMultiFlexPlugin.so", "mass");

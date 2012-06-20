@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     // --- Dynamical system specification ---
 
     cout << "====> Model loading ..." << endl << endl;
-    SP::SimpleVector init_state(new SimpleVector(4));
+    SP::SiconosVector init_state(new SiconosVector(4));
     (*init_state)(0) = 0.0;
     (*init_state)(1) = 0.0;
     (*init_state)(2) = 0.0;
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS LSPRC(new FirstOrderLinearDS(init_state, LS_A));
 
     // Lrvalue is required in the plug-in, thus we set z[0] = 100.0/ Lrvalue.
-    SP::SiconosVector z(new SimpleVector(1));
+    SP::SiconosVector z(new SiconosVector(1));
 
     // z[0] is used as a parameter in the plug-in.
     (*z)(0) = 1.0 / Lrvalue;

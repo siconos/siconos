@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
 
 
     // -- Initial positions and velocities --
-    SP::SimpleVector q0(new SimpleVector(nDof, position_init));
-    SP::SimpleVector v0(new SimpleVector(nDof, velocity_init));
+    SP::SiconosVector q0(new SiconosVector(nDof, position_init));
+    SP::SiconosVector v0(new SiconosVector(nDof, velocity_init));
 
     // -- The dynamical system --
     SP::LagrangianLinearTIDS beam(new LagrangianLinearTIDS(q0, v0, SparseMass));
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
 
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(nDof, -g * rho * S / l));
+    SP::SiconosVector weight(new SiconosVector(nDof, -g * rho * S / l));
 
 
     beam->setFExtPtr(weight);
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
 
-    SP::SiconosVector tmp(new SimpleVector(nDof));
+    SP::SiconosVector tmp(new SiconosVector(nDof));
 
     prod(*SparseStiffness, *q, *tmp, true);
     double potentialEnergy = inner_prod(*q,   *tmp);

@@ -59,8 +59,8 @@ int main(int argc, char* argv[])
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    SP::SimpleVector q0(new SimpleVector(nDof));
-    SP::SimpleVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
 
     // -- Set external forces (weight) --
-    SP::SimpleVector weight(new SimpleVector(nDof));
+    SP::SiconosVector weight(new SiconosVector(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 

@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   {
 
     // --- Linear system 1 (LC oscillator) specification ---
-    SP::SimpleVector init_stateLS1(new SimpleVector(2));
+    SP::SiconosVector init_stateLS1(new SiconosVector(2));
     (*init_stateLS1)(0) = VinitLS1;
 
     SP::SimpleMatrix LS1_A(new SimpleMatrix(2, 2));
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS LS1DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS1, LS1_A));
 
     // --- Linear system 2 (load and filter) specification ---
-    SP::SimpleVector init_stateLS2(new SimpleVector(1));
+    SP::SiconosVector init_stateLS2(new SiconosVector(1));
     (*init_stateLS2)(0) = VinitLS2;
 
     SP::SimpleMatrix LS2_A(new SimpleMatrix(1, 1));

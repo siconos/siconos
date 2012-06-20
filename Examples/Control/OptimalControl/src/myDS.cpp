@@ -25,7 +25,7 @@
 MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
 {
   _jacobianfx.reset(new SimpleMatrix(4, 4));
-  _f.reset(new SimpleVector(4));
+  _f.reset(new SiconosVector(4));
   _M.reset(new SimpleMatrix(4, 4));
   _M->eye();
 
@@ -45,22 +45,22 @@ void MyDS::computeF(double t)
 {
 
 
-  SP::SimpleVector QX(new SimpleVector(2));
-  SP::SimpleVector X(new SimpleVector(2));
+  SP::SiconosVector QX(new SiconosVector(2));
+  SP::SiconosVector X(new SiconosVector(2));
 
   X->setValue(0, (_x[0]->getValue(0) - 2.0));
   X->setValue(1, (_x[0]->getValue(1) + 1.0));
 
   prod(*Q, *X, *QX, true);
 
-  SP::SimpleVector K1P(new SimpleVector(2));
-  SP::SimpleVector P(new SimpleVector(2));
+  SP::SiconosVector K1P(new SiconosVector(2));
+  SP::SiconosVector P(new SiconosVector(2));
   P->setValue(0, _x[0]->getValue(2));
   P->setValue(1, _x[0]->getValue(3));
   prod(*K1, *P, *K1P, true);
 
 
-  SP::SimpleVector alphatmp(new SimpleVector(2));
+  SP::SiconosVector alphatmp(new SiconosVector(2));
 
   alpha(t, _x[0], alphatmp);
 

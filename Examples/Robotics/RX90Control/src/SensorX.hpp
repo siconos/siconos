@@ -27,7 +27,7 @@
 
 #include "Sensor.hpp"
 
-class SimpleVector;
+class SiconosVector;
 
 /** \class SensorX
  *  \brief Specific Sensor to get position

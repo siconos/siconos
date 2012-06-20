@@ -23,7 +23,7 @@
 MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
 {
   _jacobianfx.reset(new SimpleMatrix(1, 1));
-  _f.reset(new SimpleVector(1));
+  _f.reset(new SiconosVector(1));
   _M.reset(new SimpleMatrix(1, 1));
   _M->eye();
 }

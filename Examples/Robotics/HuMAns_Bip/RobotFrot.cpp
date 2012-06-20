@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     // The dof are angles between differents parts of the robot.
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0(1) = -0.1;
     q0(2) = 0.2;
     q0(3) = -0.1;
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     //The linear contraint corresponding to joints limits (hq+b>0)
     SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(en, et, 0, 3));
     SimpleMatrix H(90, 21);
-    SimpleVector b(90);
+    SiconosVector b(90);
     H.zero();
     b.zero();
     for (unsigned int i = 0; i < 15; ++i)

@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
+    SiconosVector q0(nDof), v0(nDof);
     q0(0) = 0.05;
     q0(1) = 0.05;
 
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     // => angular stops
 
     //     SimpleMatrix H(6,3);
-    //     SimpleVector b(6);
+    //     SiconosVector b(6);
     //     H.zero();
     //     H(0,0) =-1;
     //     H(1,0) =1;
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     double lim0 = 1.6;
     double lim1 = 3.1;  // -lim_i <= q[i] <= lim_i
     SimpleMatrix H(4, 3);
-    SimpleVector b(4);
+    SiconosVector b(4);
     H.zero();
 
     H(0, 0) = -1;

@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     (*Mass)(1, 1) = MassBlock;
     (*Mass)(2, 2) = InertiaBlock;
     //2. Set the initial position of the block in function of the initial position of the contact point A (left-hand contact)
-    SP::SimpleVector PosIniBlock(new SimpleVector(Nfreedom));
+    SP::SiconosVector PosIniBlock(new SiconosVector(Nfreedom));
     /*
     (*PosIniBlock)(0) = PosXiniPointA + 0.5*LengthBlock*cos(AngleThetaIni) - 0.5*HeightBlock*sin(AngleThetaIni);
     (*PosIniBlock)(1) = PosYiniPointA + 0.5*LengthBlock*sin(AngleThetaIni) + 0.5*HeightBlock*cos(AngleThetaIni);
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     (*PosIniBlock)(1) = 0.5;
     (*PosIniBlock)(2) = 0.0;
     //3. Set the initial velocity of the block in function of the initial relative velocity of the contact point A
-    SP::SimpleVector VelIniBlock(new SimpleVector(Nfreedom));
+    SP::SiconosVector VelIniBlock(new SiconosVector(Nfreedom));
     /*
     (*VelIniBlock)(0) = VelXiniPointA - (0.5*LengthBlock*sin(AngleThetaIni) + 0.5*HeightBlock*cos(AngleThetaIni))*RotVelBlockIni;
     (*VelIniBlock)(1) = VelYiniPointA + (0.5*LengthBlock*cos(AngleThetaIni) - 0.5*HeightBlock*sin(AngleThetaIni))*RotVelBlockIni;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     //4. Instantiate the object of "LagrangianTIDS"
     SP::LagrangianLinearTIDS RockingBlock(new LagrangianLinearTIDS(PosIniBlock, VelIniBlock, Mass));
     //5. Set the external force
-    SP::SimpleVector ForceExtern(new SimpleVector(Nfreedom));
+    SP::SiconosVector ForceExtern(new SiconosVector(Nfreedom));
     (*ForceExtern)(1) = -MassBlock * GGearth;
     RockingBlock->setFExtPtr(ForceExtern);
     //
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     /*
     SP::SiconosMatrix H(new SimpleMatrix(1,Nfreedom));
     (*H)(0,1) = 1.0;
-    SP::SiconosVector E(new SimpleVector(1));
+    SP::SiconosVector E(new SiconosVector(1));
     (*E)(0) = -0.5*HeightBlock;
     */
     // Impact law

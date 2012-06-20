@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
     // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
 
     // Initial position (angles in radian)
-    SP::SiconosVector q0(new SimpleVector(nDof));
-    SP::SiconosVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     q0->zero();
     v0->zero();
     (*q0)(1) = PI / 3;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntqDotFunction("RX90Plugin.so", "jacobFintQ");
 
     // creating Z parameter computed in Actuators and used in FInt
-    SP::SimpleVector torques(new SimpleVector(nDof));
+    SP::SiconosVector torques(new SiconosVector(nDof));
     torques->zero();
     arm->setzPtr(torques);
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     std::vector<SP::SiconosVector> bvector(12);
 
 
-    SP::SiconosVector b(new SimpleVector(12));
+    SP::SiconosVector b(new SiconosVector(12));
     for (unsigned int i = 0; i < nDof; i++)
     {
       Hvector[2 * i].reset(new SimpleMatrix(1, 6));
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     std::vector<SP::Interaction> interactionVector(12);
     for (unsigned int i = 0; i < 2 * nDof; i++)
     {
-      bvector[i].reset(new SimpleVector(1));
+      bvector[i].reset(new SiconosVector(1));
       // (*(bvector[i])) (1) = *b(i);
       (bvector[i])->setValue(0, (*b)(i));
       relationVector[i].reset(new LagrangianLinearTIR(Hvector[i], bvector[i]));

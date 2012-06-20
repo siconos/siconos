@@ -60,12 +60,12 @@ int main(int argc, char* argv[])
     C.reset(new SimpleMatrix(nDof, nDof));
 
     // -- Initial positions and velocities --
-    SP::SimpleVector q0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
     (*q0)(0) = y_0;
     (*q0)(1) = phi_M_0;
     (*q0)(2) = phi_S_0;
 
-    SP::SimpleVector velocity0(new SimpleVector(nDof));
+    SP::SiconosVector velocity0(new SiconosVector(nDof));
     (*velocity0)(0) = v_0;
     (*velocity0)(1) = omega_M_0;
     (*velocity0)(2) = omega_S_0;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     (*H1)(1, 0) = 1;
     (*H1)(1, 1) = l_M;
     (*H1)(1, 2) = l_G - l_S;
-    SP::SimpleVector b1(new SimpleVector(2));
+    SP::SiconosVector b1(new SiconosVector(2));
     (*b1)(0) = l_M + l_G - l_S - r_O;
     (*b1)(1) = 0;
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eps_N_1, eps_T_123, mu_123, 2));
@@ -108,10 +108,10 @@ int main(int argc, char* argv[])
     (*H3)(1, 0) = 1;
     (*H3)(1, 1) = r_M;
     (*H3)(1, 2) = 0;
-    SP::SimpleVector b2(new SimpleVector(2));
+    SP::SiconosVector b2(new SiconosVector(2));
     (*b2)(0) = r_M - r_O;
     (*b2)(1) = 0;
-    SP::SimpleVector b3(new SimpleVector(2));
+    SP::SiconosVector b3(new SiconosVector(2));
     (*b3)(0) = r_M - r_O;
     (*b3)(1) = 0;
 

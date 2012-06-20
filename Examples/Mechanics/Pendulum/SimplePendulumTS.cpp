@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
     // --- DS: Double Pendulum ---
 
     // Initial position (angles in radian)
-    SP::SimpleVector q0(new SimpleVector(nDof));
-    SP::SimpleVector v0(new SimpleVector(nDof));
+    SP::SiconosVector q0(new SiconosVector(nDof));
+    SP::SiconosVector v0(new SiconosVector(nDof));
     (*q0).zero();
     (*v0).zero();
     (*q0)(0) = 1;
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
 
     //     SimpleMatrix H(1,2);
-    //     SimpleVector b(1);
+    //     SiconosVector b(1);
     //     H.zero();
     //     H(0,0) =1.0;
     //     H(0,1) =0.0;

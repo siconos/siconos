@@ -25,7 +25,7 @@ void adjointInput::initialize(SP::Interaction inter)
 
   double t0 = 0;
 
-  _workL.reset(new SimpleVector(interaction()->getSizeOfY()));
+  _workL.reset(new SiconosVector(interaction()->getSizeOfY()));
   Jachx->resize(sizeY, sizeDS);
   _jachlambda->resize(sizeY, sizeY);
 
@@ -72,7 +72,7 @@ void adjointInput::computeh(double t)
   SP::SiconosVector Heval = interaction()->relation()->Halpha();
 
 
-  SP::SimpleVector betatmp(new SimpleVector(2));
+  SP::SiconosVector betatmp(new SiconosVector(2));
   beta(t, _workX, betatmp);
 
   double betap = 2.0 * ((betatmp->getValue(0)) * _workX->getValue(2) + (betatmp->getValue(1)) * _workX->getValue(3));
@@ -101,8 +101,8 @@ void adjointInput::computeg(double t)
   std::cout << "************      computeG at: " << t << std::endl;
 #endif
 
-  SP::SimpleVector K2P(new SimpleVector(2));
-  SP::SimpleVector P(new SimpleVector(2));
+  SP::SiconosVector K2P(new SiconosVector(2));
+  SP::SiconosVector P(new SiconosVector(2));
   P->setValue(0, _workX->getValue(2));
   P->setValue(1, _workX->getValue(3));
 
@@ -110,7 +110,7 @@ void adjointInput::computeg(double t)
 
   prod(*K2, *P, *K2P, true);
 
-  SP::SimpleVector betatmp(new SimpleVector(2));
+  SP::SiconosVector betatmp(new SiconosVector(2));
   beta(t, _workX, betatmp);
 
   (*data[g_alpha]).setValue(0, betatmp->getValue(0) * (_workL->getValue(0) - 1.0));       //R=g_barre(x,lambda_barre)
@@ -141,7 +141,7 @@ void adjointInput::computeJachx(double t)
   std::cout << "computeJachx " << " at " << " " << t << std::endl;
 #endif
 
-  SP::SimpleVector betatmp(new SimpleVector(2));
+  SP::SiconosVector betatmp(new SiconosVector(2));
   beta(t, _workX, betatmp);
 
   SP::SiconosMatrix jacbetaXtmp(new SimpleMatrix(2, 2));
@@ -242,14 +242,14 @@ void adjointInput::computeJacglambda(double t)
   std::cout << "computeJacglambda " << " at " << " " << t << std::endl;
 #endif
 
-  SP::SimpleVector K2P(new SimpleVector(2));
-  SP::SimpleVector P(new SimpleVector(2));
+  SP::SiconosVector K2P(new SiconosVector(2));
+  SP::SiconosVector P(new SiconosVector(2));
   P->setValue(0, _workX->getValue(2));
   P->setValue(1, _workX->getValue(3));
 
   prod(*K2, *P, *K2P, true);
 
-  SP::SimpleVector betatmp(new SimpleVector(2));
+  SP::SiconosVector betatmp(new SiconosVector(2));
   beta(t, _workX, betatmp);
 
   g[0] = betatmp->getValue(0)  ;
