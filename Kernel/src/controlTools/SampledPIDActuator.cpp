@@ -65,7 +65,7 @@ void SampledPIDActuator::initialize(SP::Model m)
       for (unsigned int i = 0; i < 3; i++)
         (*_err).push_front(0.0);
 
-      _u.reset(new SimpleVector(_nDim, 0));
+      _u.reset(new SiconosVector(_nDim, 0));
       // to have immediatly the right SP
       FOLDS->setb(_u);
     }
@@ -89,7 +89,7 @@ void SampledPIDActuator::actuate()
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
 }
 
-void SampledPIDActuator::setK(const SimpleVector& newValue)
+void SampledPIDActuator::setK(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != 3)
@@ -104,12 +104,12 @@ void SampledPIDActuator::setK(const SimpleVector& newValue)
     }
     else
     {
-      _K.reset(new SimpleVector(newValue));
+      _K.reset(new SiconosVector(newValue));
     }
   }
 }
 
-void SampledPIDActuator::setKPtr(SP::SimpleVector newPtr)
+void SampledPIDActuator::setKPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != 3)

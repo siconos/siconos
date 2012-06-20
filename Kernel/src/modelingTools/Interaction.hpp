@@ -34,6 +34,8 @@
 #include "RelationNamespace.hpp"
 #include "Relation.hpp"
 #include "SiconosPointers.hpp"
+#include "LagrangianDS.hpp"
+#include "FirstOrderNonLinearDS.hpp"
 
 class DynamicalSystem;
 class BlockVector;
@@ -463,7 +465,7 @@ public:
   /** get y[i], derivative number i of output
    *  \return BlockVector
    */
-  inline const SimpleVector getCopyOfy(const unsigned int i) const
+  inline const SiconosVector getCopyOfy(const unsigned int i) const
   {
     return *(_y[i]);
   }
@@ -471,7 +473,7 @@ public:
   /** get y[i], derivative number i of output
    *  \return BlockVector
    */
-  inline const SimpleVector getCopyOfyOld(const unsigned int i) const
+  inline const SiconosVector getCopyOfyOld(const unsigned int i) const
   {
     return *(_yOld[i]);
   }
@@ -487,7 +489,7 @@ public:
 
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector y(const unsigned int i) const
   {
@@ -529,7 +531,7 @@ public:
   /** get yOld[i], derivative number i of output
   *  \return BlockVector
   */
-  inline const SimpleVector getYOld(const unsigned int i) const
+  inline const SiconosVector getYOld(const unsigned int i) const
   {
     return *(_yOld[i]);
   }
@@ -599,16 +601,16 @@ public:
   }
 
   /** get lambda[i], derivative number i of input
-  *  \return SimpleVector
+  *  \return SiconosVector
   */
-  inline const SimpleVector getLambda(const unsigned int i) const
+  inline const SiconosVector getLambda(const unsigned int i) const
   {
     assert(_lambda[i]);
     return *(_lambda[i]);
   }
 
   /** get lambda[i], derivative number i of input
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector lambda(const unsigned int i) const
   {
@@ -647,9 +649,9 @@ public:
   }
 
   /** get lambdaOld[i], derivative number i of input
-  *  \return SimpleVector
+  *  \return SiconosVector
   */
-  inline const SimpleVector getLambdaOld(const unsigned int i) const
+  inline const SiconosVector getLambdaOld(const unsigned int i) const
   {
     return *(_lambdaOld[i]);
   }
@@ -819,21 +821,108 @@ public:
   void computeInput(double, unsigned int);
 
 
-  /** to set workX content.
-   * \param a SP::SiconosVector to be inserted into workX
-   */
-  inline void insertInWorkX(SP::SiconosVector newX)
-  {
-    assert(_workX) ;
-    _workX->insertPtr(newX);
-  };
   /** to set _workFree content.
-   * \param a SP::SiconosVector to be inserted into workFree
    */
-  inline void insertInWorkFree(SP::SiconosVector newX)
+  inline void setWorkFree()
   {
     assert(_workFree) ;
-    _workFree->insertPtr(newX);
+
+    if (_workFree->size() == 0)
+    {
+      _workFree->resize(_sizeOfDS);
+    }
+
+    ConstDSIterator itDS;
+    int index;
+    for (index = 0, itDS = dynamicalSystemsBegin();
+         itDS != dynamicalSystemsEnd();
+         ++itDS)
+    {
+      _workFree->setBlock(index, *((*itDS)->workFree()));
+      index += (*itDS)->getDim();
+    }
+  };
+
+  inline void setWorkX()
+  {
+    assert(_workX) ;
+
+    if (_workX->size() == 0)
+    {
+      _workX->resize(_sizeOfDS);
+    }
+
+    ConstDSIterator itDS;
+    int index;
+    for (index = 0, itDS = dynamicalSystemsBegin();
+         itDS != dynamicalSystemsEnd();
+         ++itDS)
+    {
+      _workX->setBlock(index, *((*itDS)->x()));
+      index += (*itDS)->getDim();
+    }
+  };
+
+  inline void setWorkXFromVelocity()
+  {
+    assert(_workX) ;
+
+    if (_workX->size() == 0)
+    {
+      _workX->resize(_sizeOfDS);
+    }
+
+    ConstDSIterator itDS;
+    int index;
+    for (index = 0, itDS = dynamicalSystemsBegin();
+         itDS != dynamicalSystemsEnd();
+         ++itDS)
+    {
+      assert(Type::value(**itDS) == Type::LagrangianDS);
+      _workX->setBlock(index, *boost::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+      index += (*itDS)->getDim();
+    }
+  };
+
+  inline void setWorkXq()
+  {
+    assert(_workXq) ;
+
+    if (_workXq->size() == 0)
+    {
+      _workXq->resize(_sizeOfDS);
+    }
+
+    ConstDSIterator itDS;
+    int index;
+    for (index = 0, itDS = dynamicalSystemsBegin();
+         itDS != dynamicalSystemsEnd();
+         ++itDS)
+    {
+      assert(Type::value(**itDS) == Type::FirstOrderNonLinearDS);
+      _workXq->setBlock(index, *boost::static_pointer_cast<FirstOrderNonLinearDS>(*itDS)->xq());
+      index += (*itDS)->getDim();
+    }
+  };
+
+  inline void setWorkZ()
+  {
+    assert(_workZ) ;
+
+    if (_workZ->size() == 0)
+    {
+      _workZ->resize(_sizeOfDS);
+    }
+
+    ConstDSIterator itDS;
+    int index;
+    for (index = 0, itDS = dynamicalSystemsBegin();
+         itDS != dynamicalSystemsEnd();
+         ++itDS)
+    {
+      _workZ->setBlock(index, *((*itDS)->z()));
+      index += (*itDS)->getDim();
+    }
   };
 
   /** Get a pointer to workX */

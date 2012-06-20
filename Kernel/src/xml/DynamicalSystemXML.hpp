@@ -25,11 +25,11 @@
 #define __DynamicalSystemXML__
 
 #include "SiconosDOMTreeTools.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "DynamicalSystemTypes.hpp"
 
 
-class SimpleVector;
+class SiconosVector;
 class SiconosVector;
 
 /** XML management for DynamicalSystem
@@ -82,9 +82,9 @@ public:
   Type::Siconos getType() const;
 
   /** Returns the z vector, discret state of the DynamicalSystem
-   *  \return SimpleVector
+   *  \return SiconosVector
    */
-  inline const SimpleVector getz() const
+  inline const SiconosVector getz() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(zNode);
   }

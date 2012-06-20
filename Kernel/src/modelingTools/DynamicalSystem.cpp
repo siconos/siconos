@@ -61,7 +61,7 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 
   // z - Optional parameter.
   if (_dsxml->hasz())
-    _z.reset(new SimpleVector(_dsxml->getz()));
+    _z.reset(new SiconosVector(_dsxml->getz()));
 
   if (_dsxml->hasStepsInMemory()) _stepsInMemory = _dsxml->getStepsInMemory();
   _workV.resize(sizeWorkV);
@@ -75,8 +75,8 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   _normRef = 1;
   _x.resize(2);
   _workV.resize(sizeWorkV);
-  _residuFree.reset(new SimpleVector(getDim()));
-  _r.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SiconosVector(getDim()));
+  _r.reset(new SiconosVector(getDim()));
 }
 
 // Copy constructor
@@ -86,12 +86,12 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   // The following data should always be initialize
   _n = ds.getN();
   _normRef = ds.normRef();
-  _x0.reset(new SimpleVector(*(ds.x0())));
-  _residuFree.reset(new SimpleVector(*(ds.residuFree())));
-  _r.reset(new SimpleVector(*(ds.r())));
+  _x0.reset(new SiconosVector(*(ds.x0())));
+  _residuFree.reset(new SiconosVector(*(ds.residuFree())));
+  _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
-  _x[0].reset(new SimpleVector(*(ds.x())));
-  _x[1].reset(new SimpleVector(*(ds.rhs())));
+  _x[0].reset(new SiconosVector(*(ds.x())));
+  _x[1].reset(new SiconosVector(*(ds.rhs())));
 
   // These  were not always initialised
   if (ds.jacobianRhsx())
@@ -101,9 +101,9 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   //  if (ds.jacobianXDotG())
   //    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
   if (ds.z())
-    _z.reset(new SimpleVector(*(ds.z())));
+    _z.reset(new SiconosVector(*(ds.z())));
   if (ds.g())
-    _g.reset(new SimpleVector(*(ds.g())));
+    _g.reset(new SiconosVector(*(ds.g())));
   if (ds.dynamicalSystemXML())
     _dsxml.reset(new DynamicalSystemXML(*(ds.dynamicalSystemXML())));
 
@@ -120,11 +120,11 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _workV.resize(sizeWorkV);
 
   if (ds.getWorkVector(local_buffer))
-    _workV[local_buffer].reset(new SimpleVector(*(ds.getWorkVector(local_buffer))));
-  //  _workV[sizeWorkV].reset(new SimpleVector(*(ds.getWorkVector(sizeWorkV))));
+    _workV[local_buffer].reset(new SiconosVector(*(ds.getWorkVector(local_buffer))));
+  //  _workV[sizeWorkV].reset(new SiconosVector(*(ds.getWorkVector(sizeWorkV))));
   // XXX See how to implement the copy of _workMatrix
 
-  _workFree.reset(new SimpleVector(*(ds.workFree())));
+  _workFree.reset(new SiconosVector(*(ds.workFree())));
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
@@ -162,10 +162,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isBlock())
-      _x0.reset(new BlockVector(newValue));
-    else
-      _x0.reset(new SimpleVector(newValue));
+    _x0.reset(new SiconosVector(newValue));
   }
   _normRef = _x0->norm2() + 1;
 }
@@ -189,7 +186,7 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
     RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
   if (! _x[0])
-    _x[0].reset(new SimpleVector(newValue));
+    _x[0].reset(new SiconosVector(newValue));
   else
     *(_x[0]) = newValue;
 }
@@ -214,7 +211,7 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
     RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
   if (! _x[1])
-    _x[1].reset(new SimpleVector(newValue));
+    _x[1].reset(new SiconosVector(newValue));
   else
     *(_x[1]) = newValue;
 }
@@ -239,7 +236,7 @@ void DynamicalSystem::setR(const SiconosVector& newValue)
     *_r = newValue;
 
   else
-    _r.reset(new SimpleVector(newValue));
+    _r.reset(new SiconosVector(newValue));
 }
 
 void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
@@ -284,11 +281,7 @@ void DynamicalSystem::setz(const SiconosVector& newValue)
   }
   else
   {
-
-    if (newValue.isBlock())
-      _z.reset(new BlockVector(newValue));
-    else
-      _z.reset(new SimpleVector(newValue));
+    _z.reset(new SiconosVector(newValue));
   }
 }
 

@@ -44,10 +44,10 @@ private:
   double _ref;
 
   /** control variable */
-  SP::SimpleVector _u;
+  SP::SiconosVector _u;
 
   /** vector of gains */
-  SP::SimpleVector _K;
+  SP::SiconosVector _K;
 
   /** the sensor that feed the controller */
   SP::ControlSensor _sensor;
@@ -93,14 +93,14 @@ public:
   void actuate();
 
   /** Set the value of _K to newValue
-   * * \param newValue SimpleVector \f$ [K_P, K_I, K_D] \f$
+   * * \param newValue SiconosVector \f$ [K_P, K_I, K_D] \f$
    */
-  void setK(const SimpleVector& newValue);
+  void setK(const SiconosVector& newValue);
 
   /** Set _K to pointer newPtr
-   * \param newPtr SP::SimpleVector f$ [K_P, K_I, K_D] \f$
+   * \param newPtr SP::SiconosVector f$ [K_P, K_I, K_D] \f$
    */
-  void setKPtr(SP::SimpleVector newPtr);
+  void setKPtr(SP::SiconosVector newPtr);
 
   /** Set the value of _ref to newValue
    * \param newValue

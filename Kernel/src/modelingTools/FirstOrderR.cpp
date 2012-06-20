@@ -63,10 +63,10 @@ void FirstOrderR::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  _workR.reset(new SimpleVector(sizeX));
-  _workX.reset(new SimpleVector(sizeX));
-  _workZ.reset(new SimpleVector(sizeZ));
-  _workY.reset(new SimpleVector(sizeY));
+  _workR.reset(new SiconosVector());
+  _workX.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector());
+  _workY.reset(new SiconosVector(sizeY));
 }
 
 void FirstOrderR::computeJachx(double)
@@ -92,7 +92,9 @@ void FirstOrderR::computeResiduR(double t)
 
 const SP::SiconosVector FirstOrderR::residuR()
 {
-  return data[residu_r];
+  SP::SiconosVector tmp(new SiconosVector());
+  *tmp = *data[residu_r];
+  return tmp;
 }
 
 void FirstOrderR::display() const

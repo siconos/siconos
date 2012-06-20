@@ -48,7 +48,7 @@ protected:
   /** Dimension of the output */
   unsigned int _YDim;
   /** A vector for the current value of the output */
-  SP::SimpleVector _storedY;
+  SP::SiconosVector _storedY;
 
   /** Default constructor
    */
@@ -70,9 +70,9 @@ public:
   };
 
   /** Get a pointer to the output
-   * \return SP::SimpleVector to the output
+   * \return SP::SiconosVector to the output
    */
-  inline SP::SimpleVector y() const
+  inline SP::SiconosVector y() const
   {
     return _storedY;
   };

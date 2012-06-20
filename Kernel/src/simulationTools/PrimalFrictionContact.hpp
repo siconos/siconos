@@ -23,7 +23,7 @@
 #define PrimalFrictionContact_H
 
 #include "LinearOSNS.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
 /** Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics */
@@ -155,16 +155,16 @@ public:
 
   // --- LocalVelocity ---
   /** get the value of localVelocity, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getLocalVelocity() const
+  inline const SiconosVector getLocalVelocity() const
   {
     return *_localVelocity;
   }
 
   /** get localVelocity
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector localVelocity() const
   {
@@ -172,7 +172,7 @@ public:
   }
 
   /** set the value of localVelocity to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
   void setLocalVelocity(const SiconosVector&);
 
@@ -186,16 +186,16 @@ public:
 
   // --- Reaction ---
   /** get the value of reaction, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getLocalReaction() const
+  inline const SiconosVector getLocalReaction() const
   {
     return *_localReaction;
   }
 
   /** get localReaction, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector localReaction() const
   {
@@ -203,7 +203,7 @@ public:
   }
 
   /** set the value of localReaction to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
   void setLocalReaction(const SiconosVector&);
 
@@ -218,16 +218,16 @@ public:
   // --- TildeLocalVelocity ---
 
   /** get the value of tildeLocalVelocity, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getTildeLocalVelocity() const
+  inline const SiconosVector getTildeLocalVelocity() const
   {
     return *_tildeLocalVelocity;
   }
 
   /** get tildeLocalVelocity
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector tildeLocalVelocity() const
   {
@@ -235,7 +235,7 @@ public:
   }
 
   /** set the value of tildeLocalVelocity to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
   void setTildeLocalVelocity(const SiconosVector&);
 
@@ -288,8 +288,8 @@ public:
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
   inline double getMu(unsigned int i) const
   {

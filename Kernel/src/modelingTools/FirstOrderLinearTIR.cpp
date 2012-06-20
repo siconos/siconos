@@ -42,7 +42,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
     _F.reset(new SimpleMatrix(folrXML->getF()));
 
   if (folrXML->hasE())
-    _e.reset(new SimpleVector(folrXML->getE()));
+    _e.reset(new SiconosVector(folrXML->getE()));
 
   if (folrXML->hasB())
     Jacglambda.reset(new SimpleMatrix(folrXML->getB()));
@@ -125,7 +125,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   if (_e)
     assert(_e->size() == interaction()->getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
-  _workZ.reset(new SimpleVector(sizeZ));
+  _workZ.reset(new SiconosVector());
 }
 
 void FirstOrderLinearTIR::computeh(double time)

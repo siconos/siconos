@@ -112,8 +112,8 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   _jachqT->display();
   SP::SimpleMatrix jaux(new SimpleMatrix(*jhqT));
   jaux->trans();
-  SP::SimpleVector v(new SimpleVector(3));
-  SP::SimpleVector vRes(new SimpleVector(6));
+  SP::SiconosVector v(new SiconosVector(3));
+  SP::SiconosVector vRes(new SiconosVector(6));
   v->zero();
   v->setValue(0, 1);
   prod(*jaux, *v, *vRes, true);

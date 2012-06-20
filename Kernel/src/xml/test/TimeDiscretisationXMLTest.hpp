@@ -43,7 +43,7 @@ private:
   xmlNode *root;
   TimeDiscretisationXML td;
   /*SiconosVector*/
-  SimpleVector vectorRef;
+  SiconosVector vectorRef;
 
   // on nomme la suite de tests
   CPPUNIT_TEST_SUITE(TimeDiscretisationXMLTest);

@@ -184,7 +184,7 @@ IF(WITH_TESTING)
   BEGIN_TEST(utils/SiconosAlgebra/test)
 
   NEW_TEST(testSiconosAlgebra
-    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp)
+    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp)
   END_TEST()
   
   # Siconos Memory

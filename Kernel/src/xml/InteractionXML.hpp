@@ -23,7 +23,7 @@
 #define __INTERACTIONXML__
 
 #include "SiconosDOMTreeTools.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 class DynamicalSystem;
 class Interaction;
@@ -181,9 +181,9 @@ public:
   }
 
   /** Return y vector of the InteractionXML
-  *  \return a SimpleVector
+  *  \return a SiconosVector
   */
-  inline SimpleVector getY() const
+  inline SiconosVector getY() const
   {
     if (!hasY())
       XMLException::selfThrow("InteractionXML::getY() : yNode == NULL");
@@ -204,9 +204,9 @@ public:
   };
 
   /** Return lambda[0] of the Interaction
-  *   \return a SimpleVector
+  *   \return a SiconosVector
   */
-  inline SimpleVector getLambda() const
+  inline SiconosVector getLambda() const
   {
     if (!hasLambda())
       XMLException::selfThrow("InteractionXML::getLambda() : lambdaNode == NULL");
@@ -250,9 +250,9 @@ public:
   void getDSNumbers(std::vector<int>&);
 
   /** set the DSs concerned by the InteractionXML
-  *   \param a SimpleVector which contains a list of DS number
+  *   \param a SiconosVector which contains a list of DS number
   */
-  //\todo inline SimpleVector setDSConcernedVector(){};
+  //\todo inline SiconosVector setDSConcernedVector(){};
 
   /** true if tag relation is present
   *  \return a bool

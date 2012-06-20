@@ -19,13 +19,13 @@
 #include "SiconosDOMTreeTools.hpp"
 #include "ioVector.hpp"
 #include "ioMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "RuntimeException.hpp"
 
 using namespace std;
 
-SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
+SiconosVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
 {
   if (!vectorNode)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue, node == NULL ");
@@ -35,7 +35,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorN
   //   - read in the xml file
   if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
-    SimpleVector v(getStringAttributeValue(vectorNode, SDTT_VECTORFILE), true);
+    SiconosVector v(getStringAttributeValue(vectorNode, SDTT_VECTORFILE), true);
     return v;
   }
   else
@@ -48,7 +48,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorN
     string vectorContent = (char *)tmp;
     vector<double> tmpV;
     string2Vector(vectorContent, tmpV);
-    SimpleVector v(tmpV);
+    SiconosVector v(tmpV);
     xmlFree(tmp);
 
     if (v.size() != size)
@@ -81,7 +81,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
     xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
     unsigned int i = 0;
     SimpleMatrix matrix(matrixRowSize, matrixColSize);
-    SP::SimpleVector v(new SimpleVector(matrixColSize));
+    SP::SiconosVector v(new SiconosVector(matrixColSize));
     while ((node) && (i < matrixRowSize))
     {
       if (getSiconosRowMatrixValue(node, matrixColSize).size() != matrixColSize)
@@ -147,7 +147,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
       XMLException::selfThrow("SiconosDOMTreeTools - setSiconosVectorNodeValue : the size of the " + vectorName +
                               " vector you want to save is different of the size defined the Kernel\ncheck the size of your DynamicalSystem");
 
-    SimpleVector sv(v);
+    SiconosVector sv(v);
     xmlNodeSetContent((xmlNodePtr)siconosVectorNode, (xmlChar *)(sv.toString().c_str()));
   }
 }
@@ -182,7 +182,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
     xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
 
     unsigned int i = 0;
-    SP::SimpleVector matRow(new SimpleVector(matrix.size(1)));
+    SP::SiconosVector matRow(new SiconosVector(matrix.size(1)));
     while ((node) && (i < matrixRowSize))
     {
       matrix.getRow(i, *matRow);
@@ -316,7 +316,7 @@ xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const stri
 
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXCOLSIZE.c_str()), (xmlChar*)col.c_str());
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXROWSIZE.c_str()), (xmlChar*)row.c_str());
-  SP::SimpleVector matRow(new SimpleVector(matrix.size(1)));
+  SP::SiconosVector matRow(new SiconosVector(matrix.size(1)));
   for (unsigned int i = 0; i < matrix.size(0); i++)
   {
     rowNode = new xmlNode();
@@ -526,11 +526,11 @@ xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node)
   return NULL;
 }
 
-SimpleVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNodePtr  siconosMatrixRowNode, const int& colSize)
+SiconosVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNodePtr  siconosMatrixRowNode, const int& colSize)
 {
   if (xmlHasProp((xmlNodePtr) siconosMatrixRowNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //row is defined in a extern ascii file
   {
-    SimpleVector v(getStringAttributeValue(siconosMatrixRowNode, SDTT_VECTORFILE), true);
+    SiconosVector v(getStringAttributeValue(siconosMatrixRowNode, SDTT_VECTORFILE), true);
     return v;
   }
   else
@@ -541,7 +541,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNodePtr  sic
     string vectorContent = (char *)tmp;
     vector<double> tmpV;
     string2Vector(vectorContent, tmpV);
-    SimpleVector v(tmpV);
+    SiconosVector v(tmpV);
     xmlFree(tmp);
     return v;
   }

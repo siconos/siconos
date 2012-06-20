@@ -44,7 +44,7 @@ void DynamicalSystemXMLTest::setUp()
     v.at(3) = 0.0;
     v.at(4) = 0.0;
     v.at(5) = 0.0;
-    vectorRef = /*SiconosVector*/SimpleVector(v);
+    vectorRef = /*SiconosVector*/SiconosVector(v);
 
     matrixRef = SiconosMatrix("matrix.dat", true);
     //vectorRef = SiconosVector("vector.dat", true);

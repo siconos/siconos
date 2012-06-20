@@ -35,8 +35,8 @@ void ZOHTest::setUp()
   _tol = 1e-12;
   // Download a Model from Template.xml file
   _A.reset(new SimpleMatrix(_n, _n, 0));
-  _b.reset(new SimpleVector(_n, 0));
-  _x0.reset(new SimpleVector(_n, 0));
+  _b.reset(new SiconosVector(_n, 0));
+  _x0.reset(new SiconosVector(_n, 0));
 }
 
 void ZOHTest::init()
@@ -245,7 +245,7 @@ void ZOHTest::testMatrixIntegration3()
   SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
-  SimpleVector sampledControl(_n);
+  SiconosVector sampledControl(_n);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -320,7 +320,7 @@ void ZOHTest::testMatrixIntegration4()
   SimpleMatrix dataPlot(ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
-  SimpleVector sampledControl(_n);
+  SiconosVector sampledControl(_n);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);

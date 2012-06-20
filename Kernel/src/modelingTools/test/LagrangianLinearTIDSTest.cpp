@@ -28,11 +28,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearTIDSTest);
 
 void LagrangianLinearTIDSTest::setUp()
 {
-  q0.reset(new SimpleVector(3));
+  q0.reset(new SiconosVector(3));
   (*q0)(0) = 1;
   (*q0)(1) = 2;
   (*q0)(2) = 3;
-  velocity0.reset(new SimpleVector(3));
+  velocity0.reset(new SiconosVector(3));
   (*velocity0)(0) = 4;
   (*velocity0)(1) = 5;
   (*velocity0)(2) = 6;
@@ -124,7 +124,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
 
-  SP::SimpleVector x01(new SimpleVector(3));
+  SP::SiconosVector x01(new SiconosVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
@@ -154,7 +154,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
 
-  SP::SimpleVector x01(new SimpleVector(3));
+  SP::SiconosVector x01(new SiconosVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;

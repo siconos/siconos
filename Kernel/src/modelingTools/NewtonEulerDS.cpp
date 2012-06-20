@@ -53,12 +53,12 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 
 
   // Current state
-  _q.reset(new SimpleVector(_qDim));
-  _deltaq.reset(new SimpleVector(_qDim));
-  _v.reset(new SimpleVector(_n));
+  _q.reset(new SiconosVector(_qDim));
+  _deltaq.reset(new SiconosVector(_qDim));
+  _v.reset(new SiconosVector(_n));
 
-  _dotq.reset(new SimpleVector(_qDim));
-  _residuFree.reset(new SimpleVector(_n));
+  _dotq.reset(new SiconosVector(_qDim));
+  _residuFree.reset(new SiconosVector(_n));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
@@ -83,12 +83,12 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _MObjToAbs.reset(new SimpleMatrix(3, 3));
 
   // Current state
-  _q.reset(new SimpleVector(_qDim));
-  _deltaq.reset(new SimpleVector(_qDim));
-  _v.reset(new SimpleVector(_n));
+  _q.reset(new SiconosVector(_qDim));
+  _deltaq.reset(new SiconosVector(_qDim));
+  _v.reset(new SiconosVector(_n));
   (*_q) = (*_q0);
-  _dotq.reset(new SimpleVector(_qDim));
-  _residuFree.reset(new SimpleVector(_n));
+  _dotq.reset(new SiconosVector(_qDim));
+  _residuFree.reset(new SiconosVector(_n));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _jacobianvFL.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
@@ -167,19 +167,19 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
   if (level == 0)
   {
     if (!_p[0])
-      _p[0].reset(new SimpleVector(_qDim));
+      _p[0].reset(new SiconosVector(_qDim));
   }
   else
   {
     if (!_p[level])
-      _p[level].reset(new SimpleVector(_n));
+      _p[level].reset(new SiconosVector(_n));
   }
 }
 
 void NewtonEulerDS::initForces()
 {
 
-  _forces.reset(new SimpleVector(_n));
+  _forces.reset(new SiconosVector(_n));
 
   _jacobianvFL.reset(new SimpleMatrix(_n, _qDim));
   _jacobianqDotForces.reset(new SimpleMatrix(_n, _qDim));
@@ -208,18 +208,18 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
-    _z.reset(new SimpleVector(1));
+    _z.reset(new SiconosVector(1));
 
   if (computeFExtPtr && !_fExt)
-    _fExt.reset(new SimpleVector(3));
+    _fExt.reset(new SiconosVector(3));
 
   if (computeMExtPtr && !_mExt)
   {
-    _mExt.reset(new SimpleVector(3));
+    _mExt.reset(new SiconosVector(3));
     _mExt->zero();
   }
   //   if ( computeFIntPtr && ! _fInt)
-  //     _fInt.reset(new SimpleVector(_n));
+  //     _fInt.reset(new SiconosVector(_n));
   //   if (computeJacobianFIntqPtr && !_jacobianFIntq)
   //     _jacobianFIntq.reset(new SimpleMatrix(_n,_n));
   //   if (computeJacobianFIntqDotPtr && !_jacobianFIntqDot)
@@ -228,7 +228,7 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
   //
   if (!_workFree)
-    _workFree.reset(new SimpleVector(getDim()));
+    _workFree.reset(new SiconosVector(getDim()));
   // Memory allocation for fL and its jacobians.
 
   // Set links to variables of top-class DynamicalSystem.
@@ -287,16 +287,16 @@ void NewtonEulerDS::computeForces(double time)
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(0, *_fExt);
+      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
       computeMExt(time);
-      SimpleVector aux(3);
+      SiconosVector aux(3);
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(3, *_mExt);
+      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
@@ -305,9 +305,9 @@ void NewtonEulerDS::computeForces(double time)
       // _I->display();
       // _v->display();
 
-      SimpleVector bufOmega(3);
-      SimpleVector bufIOmega(3);
-      SimpleVector buf(3);
+      SiconosVector bufOmega(3);
+      SiconosVector bufIOmega(3);
+      SiconosVector buf(3);
       bufOmega.setValue(0, _v->getValue(3));
       bufOmega.setValue(1, _v->getValue(4));
       bufOmega.setValue(2, _v->getValue(5));
@@ -329,23 +329,23 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::Siconos
     if (_fExt)
     {
       computeFExt(time);
-      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(0, *_fExt);
+      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
       computeMExt(time);
-      SimpleVector aux(3);
+      SiconosVector aux(3);
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
       *_mExt = aux;
-      (boost::static_pointer_cast <SimpleVector>(_forces))->setBlock(3, *_mExt);
+      (boost::static_pointer_cast <SiconosVector>(_forces))->setBlock(3, *_mExt);
     }
     /*computation of \Omega vectortiel I \Omega*/
     if (_I)
     {
-      SimpleVector bufOmega(3);
-      SimpleVector bufIOmega(3);
-      SimpleVector buf(3);
+      SiconosVector bufOmega(3);
+      SiconosVector bufIOmega(3);
+      SiconosVector buf(3);
       bufOmega.setValue(0, v2->getValue(3));
       bufOmega.setValue(1, v2->getValue(4));
       bufOmega.setValue(2, v2->getValue(5));
@@ -365,16 +365,16 @@ void NewtonEulerDS::computeJacobianvFL(double time)
   {
     //Omega /\ I \Omega:
     _jacobianvFL->zero();
-    SimpleVector omega(3);
+    SiconosVector omega(3);
     omega.setValue(0, _v->getValue(3));
     omega.setValue(1, _v->getValue(4));
     omega.setValue(2, _v->getValue(5));
-    SimpleVector Iomega(3);
+    SiconosVector Iomega(3);
     prod(*_I, omega, Iomega, true);
-    SimpleVector ei(3);
-    SimpleVector Iei(3);
-    SimpleVector ei_Iomega(3);
-    SimpleVector omega_Iei(3);
+    SiconosVector ei(3);
+    SiconosVector Iei(3);
+    SiconosVector ei_Iomega(3);
+    SiconosVector omega_Iei(3);
 
     /*See equation of DevNotes.pdf, equation with label eq:NE_nablaFL1*/
     for (int i = 0; i < 3; i++)
@@ -477,7 +477,7 @@ void NewtonEulerDS::resetNonSmoothPart()
   if (_p[1])
     _p[1]->zero();
   else
-    _p[1].reset(new SimpleVector(_n));
+    _p[1].reset(new SiconosVector(_n));
 }
 void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 {

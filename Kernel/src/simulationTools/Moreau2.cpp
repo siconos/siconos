@@ -59,7 +59,7 @@ void Moreau2::computeFreeState()
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
-  //  SimpleVector *rold = static_cast<SimpleVector*>(d->rMemory()->getSiconosVector(0));
+  //  SiconosVector *rold = static_cast<SiconosVector*>(d->rMemory()->getSiconosVector(0));
 
   // Iteration through the set of Dynamical Systems.
   //
@@ -194,7 +194,7 @@ void Moreau2::computeFreeState()
         scal(coef, *d->forces(), *ffree, false);
       }
 
-      SP::SiconosVector  ftmp(new SimpleVector(*ffree));
+      SP::SiconosVector  ftmp(new SiconosVector(*ffree));
       prod(*W, (*v), *ftmp);
       *ffree += *ftmp;
     }

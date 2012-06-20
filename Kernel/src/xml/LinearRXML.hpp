@@ -26,7 +26,7 @@
 
 #include "RelationXML.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 /** XML management for Linear Relations (FirstOrder or Lagrangian)
 
@@ -168,9 +168,9 @@ public:
   }
 
   /** Return vector e.
-   *  \return a SimpleVector
+   *  \return a SiconosVector
    */
-  inline SimpleVector getE()
+  inline SiconosVector getE()
   {
     if (isEPlugin())
       XMLException::selfThrow("LinearRXML - getE : no vector input, e is loaded from a plugin");

@@ -75,7 +75,7 @@ private:
 
   // Members
 
-  SP::SimpleVector x0;
+  SP::SiconosVector x0;
   SP::SiconosMatrix J0, M;
   xmlNodePtr node1, node2;
   SP::FirstOrderNonLinearDSXML tmpxml1, tmpxml2;

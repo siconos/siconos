@@ -18,7 +18,7 @@
  */
 #include "BlockMatrixTest.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -312,8 +312,8 @@ void BlockMatrixTest::testEye()
 void BlockMatrixTest::testGetSetRowCol()
 {
   cout << "--> Test: get, set Row and Col." << endl;
-  SP::SimpleVector tmp(new SimpleVector(6));
-  SP::SimpleVector tmp1(new SimpleVector(6));
+  SP::SiconosVector tmp(new SiconosVector(6));
+  SP::SiconosVector tmp1(new SiconosVector(6));
   (*tmp1)(0) = 1;
   (*tmp1)(2) = 2;
   SP::SiconosMatrix A(new SimpleMatrix(2, 2));
@@ -334,8 +334,8 @@ void BlockMatrixTest::testGetSetRowCol()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*A)(1, 0) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*H)(1, 0) == 2, true);
 
-  SP::SimpleVector tmp2(new SimpleVector(7));
-  SP::SimpleVector tmp3(new SimpleVector(7));
+  SP::SiconosVector tmp2(new SiconosVector(7));
+  SP::SiconosVector tmp3(new SiconosVector(7));
   (*tmp3)(0) = 1;
   (*tmp3)(2) = 2;
   test->setCol(1, *tmp3);

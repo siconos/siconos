@@ -24,7 +24,7 @@
 #ifndef RELATION_H
 #define RELATION_H
 
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
@@ -37,7 +37,7 @@
 #include "DynamicalSystemsSet.hpp"
 //#include "Interaction.hpp"
 
-class SimpleVector;
+class SiconosVector;
 class SimpleMatrix;
 class Interaction;
 
@@ -128,27 +128,27 @@ protected:
 
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
-  std::vector<SP::SiconosVector> data;
+  std::vector<SP::BlockVector> data;
 
   /** the object linked this Relation to read XML data */
   SP::RelationXML relationxml;
 
   /** work vector for R */
-  SP::SimpleVector _workR;
+  SP::SiconosVector _workR;
 
   /** work vector for x */
-  SP::SimpleVector _workX;
+  SP::SiconosVector _workX;
 
   /** work vector for x dot */
-  SP::SimpleVector _workXdot;
+  SP::SiconosVector _workXdot;
   /** work vector for z */
-  SP::SimpleVector _workZ;
+  SP::SiconosVector _workZ;
 
   /** work vector for y */
-  SP::SimpleVector _workY;
+  SP::SiconosVector _workY;
 
   /** work vector for lambda */
-  SP::SimpleVector _workL;
+  SP::SiconosVector _workL;
 
   /** The residu y of the newton iterations*/
   SP::SiconosVector _Residuy;

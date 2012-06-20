@@ -228,8 +228,8 @@ void Disks::init(std::string disks_input)
       SP::SiconosVector qTmp;
       SP::SiconosVector vTmp;
 
-      qTmp.reset(new SimpleVector(NDOF));
-      vTmp.reset(new SimpleVector(NDOF));
+      qTmp.reset(new SiconosVector(NDOF));
+      vTmp.reset(new SiconosVector(NDOF));
       vTmp->zero();
       (*qTmp)(0) = (*Disks)(i, 0);
       (*qTmp)(1) = (*Disks)(i, 1);
@@ -241,8 +241,8 @@ void Disks::init(std::string disks_input)
         body.reset(new Circle(-R, m, qTmp, vTmp));
 
       // -- Set external forces (weight) --
-      SP::SimpleVector FExt;
-      FExt.reset(new SimpleVector(NDOF));
+      SP::SiconosVector FExt;
+      FExt.reset(new SiconosVector(NDOF));
       FExt->zero();
       FExt->setValue(1, -m * g);
       body->setFExtPtr(FExt);

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosMemoryTest.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "BlockVector.hpp"
 
 using std::cout;
@@ -43,9 +43,9 @@ void SiconosMemoryTest::setUp()
   z[0] = 7;
   z[1] = 8;
   z[2] = 9;
-  q1.reset(new SimpleVector(v));
-  q2.reset(new SimpleVector(w));
-  q3.reset(new SimpleVector(z));
+  q1.reset(new SiconosVector(v));
+  q2.reset(new SiconosVector(w));
+  q3.reset(new SiconosVector(z));
   c1.reset(new BlockVector());
   c2.reset(new BlockVector());
 
@@ -59,8 +59,8 @@ void SiconosMemoryTest::setUp()
 
   V1->push_back(q1);
   V1->push_back(q2);
-  V2->push_back(c1);
-  V2->push_back(c2);
+  //  V2->push_back(c1);
+  //  V2->push_back(c2);
   V3->push_back(q2);
   V3->push_back(q1);
 

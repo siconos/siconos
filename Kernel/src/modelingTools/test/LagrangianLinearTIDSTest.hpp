@@ -57,7 +57,7 @@ private:
 
   // Members
 
-  SP::SimpleVector q0, velocity0;
+  SP::SiconosVector q0, velocity0;
   SP::SiconosMatrix mass, K, C;
   xmlNodePtr node1;
   SP::LagrangianLinearTIDSXML tmpxml1;

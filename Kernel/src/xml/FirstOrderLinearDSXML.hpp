@@ -111,9 +111,9 @@ public:
   }
 
   /** Return b vector of the FirstOrderLinearDSXML
-  *   \return a SimpleVector
+  *   \return a SiconosVector
   */
-  inline const SimpleVector getBVector() const
+  inline const SiconosVector getBVector() const
   {
     if (isBPlugin())
       XMLException::selfThrow("FirstOrderLinearDSXML - getBVector : b vector is not given ; b is calculated from a plugin");
@@ -122,7 +122,7 @@ public:
   }
 
   /** to save the b vector of the FirstOrderLinearDSXML
-  *   \param The b SimpleVector to save
+  *   \param The b SiconosVector to save
   */
   void setB(const SiconosVector& v);
 

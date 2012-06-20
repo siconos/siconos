@@ -235,7 +235,7 @@ void ZeroOrderHold::initMatrixPhi(const double t, SP::DynamicalSystem ds)
   if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     _PhiMap[dsN].reset(new SimpleMatrix(sizeN, sizeN));
-    _xNext[dsN].reset(new SimpleVector(sizeN));
+    _xNext[dsN].reset(new SiconosVector(sizeN));
   }
   else RuntimeException::selfThrow("ZeroOrderHold::initMatrixPhi - not yet implemented for Dynamical system type: " + dsType);
 
@@ -311,7 +311,7 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
 
   if (withInteraction)
   {
-    SP::SiconosVector tmpb(new SimpleVector(ds.getDim(), 0));
+    SP::SiconosVector tmpb(new SiconosVector(ds.getDim(), 0));
     static_pointer_cast<FirstOrderLinearDS>(_DSPsiMap[dsN])->setb(tmpb);
     _modelPsiMap[dsN].reset(new Model(t0, T));
     _modelPsiMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPsiMap[dsN]);
@@ -339,7 +339,7 @@ void ZeroOrderHold::computePhi(const DynamicalSystem& ds)
 {
   unsigned int dsN = ds.number();
   unsigned int n = ds.getN();
-  SimpleVector* canonicalVector = new SimpleVector(n, 0);
+  SiconosVector* canonicalVector = new SiconosVector(n, 0);
   EventDriven& sim = static_cast<EventDriven&>(*_simulPhiMap[dsN]);
   SimpleMatrix& phi = *_PhiMap[dsN];
   SiconosVector& x = *_DSPhiMap[dsN]->x();
@@ -635,10 +635,12 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
 
   // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
-  SP::SiconosVector Xq = inter->workXq();
+  SP::SiconosVector Xq(new SiconosVector(inter->workXq()->size()));
+  *Xq = *inter->workXq();
   SP::SiconosVector Yp = inter->yp();
 
-  SP::SiconosVector Xfree = inter->workFree();
+  SP::SiconosVector Xfree(new SiconosVector(inter->workFree()->size()));
+  *Xfree = *inter->workFree();
 
   assert(Xfree);
 
@@ -686,32 +688,20 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
       if (CT)
       {
-
-        assert(Xfree);
-        if (Xfree->size() == 0)
-        {
-          // creates a POINTER link between workX[ds] (xfree) and the
-          // corresponding unitaryBlock in each UR for each ds of the
-          // current UR.
-          ConstDSIterator itDS;
-          for (itDS = inter->dynamicalSystemsBegin();
-               itDS != inter->dynamicalSystemsEnd();
-               ++itDS)
-          {
-            //osi = osiMap[*itDS];
-            inter->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-          }
-        }
-        assert(Yp);
-
         coord[3] = CT->size(1);
         coord[5] = CT->size(1);
-        // printf("LinearOSNS: computing q: CT\n");
-        // CT->display();
-        // printf("LinearOSNS: computing q: Xfree and _q\n");
-        // Xfree->display();
-        subprod(*CT, *Xfree, *Yp, coord, true);
-        //        _q->display();
+        assert(Yp);
+        assert(Xfree);
+        // creates a POINTER link between workX[ds] (xfree) and the
+        // corresponding interactionBlock in each Interactionfor each ds of the
+        // current Interaction.
+        inter->setWorkFree();
+
+        subprod(*CT, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
+        if (inter->dynamicalSystemsEnd() != inter->dynamicalSystemsBegin())
+        {
+          subprod(*CT, *(*(inter->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+        }
       }
 
     }
@@ -723,32 +713,26 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
       {
 
         assert(Xfree);
-        if (Xfree->size() == 0)
-        {
-          // creates a POINTER link between workX[ds] (xfree) and the
-          // corresponding unitaryBlock in each UR for each ds of the
-          // current UR.
-          ConstDSIterator itDS;
-          for (itDS = inter->dynamicalSystemsBegin();
-               itDS != inter->dynamicalSystemsEnd();
-               ++itDS)
-          {
-            //osi = osiMap[*itDS];
-            inter->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-          }
-        }
-        assert(Yp);
         assert(Xq);
 
         coord[3] = C->size(1);
         coord[5] = C->size(1);
+        // creates a POINTER link between workX[ds] (xfree) and the
+        // corresponding interactionBlock in each Interactionfor each ds of the
+        // current Interaction.
+        inter->setWorkFree();
+
         if (_useGammaForRelation)
         {
           subprod(*C, *Xq, *Yp, coord, true);
         }
         else
         {
-          subprod(*C, *Xfree, *Yp, coord, true);
+          subprod(*C, *(*(inter->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
+          if (inter->dynamicalSystemsEnd() != inter->dynamicalSystemsBegin())
+          {
+            subprod(*C, *(*(inter->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+          }
         }
       }
 
@@ -806,10 +790,11 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
         if (F)
         {
-          SiconosVector& workZ = *inter->workZ();
+          SP::SiconosVector workZ(new SiconosVector(inter->workZ()->size()));
+          *workZ = *inter->workZ();
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, workZ, *Yp, coord, false);
+          subprod(*F, *workZ, *Yp, coord, false);
         }
       }
 

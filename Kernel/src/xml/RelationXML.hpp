@@ -26,7 +26,7 @@
 
 #include "SiconosDOMTreeTools.hpp"
 #include "RelationNamespace.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
 using RELATION::TYPES;
@@ -174,9 +174,9 @@ public:
   }
 
   /** Return hDot vector.
-   *   \return a SimpleVector.
+   *   \return a SiconosVector.
    */
-  inline const SimpleVector gethDotVector() const
+  inline const SiconosVector gethDotVector() const
   {
     if (isHDotPlugin())
       XMLException::selfThrow("RelationRXML - gethDotVector : hDot is plugged, not set with a vector.");

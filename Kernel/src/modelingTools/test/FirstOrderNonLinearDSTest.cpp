@@ -28,7 +28,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderNonLinearDSTest);
 
 void FirstOrderNonLinearDSTest::setUp()
 {
-  x0.reset(new SimpleVector(3));
+  x0.reset(new SiconosVector(3));
   (*x0)(0) = 1;
   (*x0)(1) = 2;
   (*x0)(2) = 3;

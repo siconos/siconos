@@ -22,7 +22,7 @@
 
 #include <vector>
 #include "SiconosPointers.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "PluggedObject.hpp"
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
 TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int);
@@ -50,13 +50,13 @@ public:
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
   /** \fn BoundaryCondition(std::vector<unsigned int> *
-   * newVelocityIndices, SP::SimpleVector newVelocityValues);
+   * newVelocityIndices, SP::SiconosVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
    *  \param the indices of the velocity subjected to prescribed velocities
    *  \param the values of the prescribed velocities
    */
   BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
-                    SP::SimpleVector newVelocityValues);
+                    SP::SiconosVector newVelocityValues);
 
   /** destructor */
   virtual ~BoundaryCondition();
@@ -74,7 +74,7 @@ public:
   /** to get the prescribedVelocity
    *  \return a pointer on _prescribedVelocity
    */
-  inline SP::SimpleVector prescribedVelocity()
+  inline SP::SiconosVector prescribedVelocity()
   {
     return _prescribedVelocity;
   };
@@ -82,7 +82,7 @@ public:
   /** to get the prescribedVelocityOld
    *  \return a pointer on _prescribedVelocityOld
    */
-  inline SP::SimpleVector prescribedVelocityOld()
+  inline SP::SiconosVector prescribedVelocityOld()
   {
     return _prescribedVelocityOld;
   };
@@ -94,7 +94,7 @@ public:
   void setComputePrescribedVelocityFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginPrescribedVelocity->setComputeFunction(pluginPath, functionName);
-    if (!_prescribedVelocity) _prescribedVelocity.reset(new SimpleVector(_velocityIndices->size()));
+    if (!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector(_velocityIndices->size()));
   }
 
   /** default function to compute the precribed velocities
@@ -114,10 +114,10 @@ protected:
   SP::UnsignedIntVector _velocityIndices;
 
   /* Values of the prescribed component of the velocity vector */
-  SP::SimpleVector _prescribedVelocity;
+  SP::SiconosVector _prescribedVelocity;
 
   /* Old values of the prescribed component of the velocity vector */
-  SP::SimpleVector _prescribedVelocityOld;
+  SP::SiconosVector _prescribedVelocityOld;
 
   /*plugin defining the function V(t)*/
   SP::PluggedObject _pluginPrescribedVelocity;

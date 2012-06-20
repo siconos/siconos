@@ -91,7 +91,7 @@ void LagrangianCompliantR::initComponents()
 {
   LagrangianR::initComponents();
   unsigned int sizeY = interaction()->getSizeOfY();
-  _workL.reset(new SimpleVector(sizeY));
+  _workL.reset(new SiconosVector());
 
   if (! _jachlambda)
     _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));

@@ -94,7 +94,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   initVectorsMemory();
 
   if (!_localVelocity)
-    _localVelocity.reset(new SimpleVector(_maxSize));
+    _localVelocity.reset(new SiconosVector(_maxSize));
   else
   {
     if (_localVelocity->size() != _maxSize)
@@ -102,7 +102,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   }
 
   if (!_localReaction)
-    _localReaction.reset(new SimpleVector(_maxSize));
+    _localReaction.reset(new SiconosVector(_maxSize));
   else
   {
     if (_localReaction->size() != _maxSize)
@@ -110,7 +110,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   }
 
   if (!_tildeLocalVelocity)
-    _tildeLocalVelocity.reset(new SimpleVector(_maxSize));
+    _tildeLocalVelocity.reset(new SiconosVector(_maxSize));
   else
   {
     if (_tildeLocalVelocity->size() != _maxSize)
@@ -429,8 +429,8 @@ int PrimalFrictionContact::compute(double time)
     //    double dparam2[5];
     //    dparam2[0] = 1e-6;
     //    dparam2[2] = 1e-6;
-    //    SimpleVector * z= new SimpleVector(_sizeOutput);
-    //    SimpleVector * w= new SimpleVector(_sizeOutput);
+    //    SiconosVector * z= new SiconosVector(_sizeOutput);
+    //    SiconosVector * w= new SiconosVector(_sizeOutput);
     //    M->display();
     //    q->display();
 

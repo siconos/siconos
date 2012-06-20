@@ -27,18 +27,18 @@ using namespace std;
 // }
 
 
-BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, SP::SimpleVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
+BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, SP::SiconosVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
 
   if (newVelocityIndices->size() != newVelocityValues->size())
     RuntimeException::selfThrow("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
-  _prescribedVelocityOld.reset(new SimpleVector(*newVelocityValues));
+  _prescribedVelocityOld.reset(new SiconosVector(*newVelocityValues));
   _pluginPrescribedVelocity.reset(new PluggedObject());
 }
 
 BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices): _velocityIndices(newVelocityIndices)
 {
-  _prescribedVelocityOld.reset(new SimpleVector(newVelocityIndices->size()));
+  _prescribedVelocityOld.reset(new SiconosVector(newVelocityIndices->size()));
   _pluginPrescribedVelocity.reset(new PluggedObject());
 }
 

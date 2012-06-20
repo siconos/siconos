@@ -106,7 +106,7 @@ void OSNSMultipleImpact::WriteSiconosVector(const SiconosVector& m)
   std::copy(p->begin(), p->end(), std::ostream_iterator<double>(OutputFile, " "));
 }
 //---------------------------------------------------------------------------------------------------
-void OSNSMultipleImpact::WriteVectorIntoMatrix(const SimpleVector m, const unsigned int pos_row, const unsigned int pos_col)
+void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector m, const unsigned int pos_row, const unsigned int pos_col)
 {
   for (unsigned int i = 0; i < m.size(); ++i)
   {
@@ -145,7 +145,7 @@ unsigned int OSNSMultipleImpact::EstimateNdataCols()
 void OSNSMultipleImpact::AllocateMemory()
 {
   if (!VelContact)
-    VelContact.reset(new SimpleVector(maxSize()));
+    VelContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (VelContact->size() != maxSize())
@@ -153,7 +153,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!OldVelContact)
-    OldVelContact.reset(new SimpleVector(maxSize()));
+    OldVelContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (OldVelContact->size() != maxSize())
@@ -161,7 +161,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (! EnerContact)
-    EnerContact.reset(new SimpleVector(maxSize()));
+    EnerContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (EnerContact->size() != maxSize())
@@ -169,7 +169,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!WcContact)
-    WcContact.reset(new SimpleVector(maxSize()));
+    WcContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (WcContact->size() != maxSize())
@@ -177,7 +177,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!DistriVector)
-    DistriVector.reset(new SimpleVector(maxSize()));
+    DistriVector.reset(new SiconosVector(maxSize()));
   else
   {
     if (DistriVector->size() != maxSize())
@@ -193,7 +193,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!Kcontact)
-    Kcontact.reset(new SimpleVector(maxSize()));
+    Kcontact.reset(new SiconosVector(maxSize()));
   else
   {
     if (Kcontact->size() != maxSize())
@@ -201,7 +201,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!ResContact)
-    ResContact.reset(new SimpleVector(maxSize()));
+    ResContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (ResContact->size() != maxSize())
@@ -209,14 +209,14 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!ElasCoefContact)
-    ElasCoefContact.reset(new SimpleVector(maxSize()));
+    ElasCoefContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (ElasCoefContact->size() != maxSize())
       ElasCoefContact->resize(maxSize());
   };
   if (!TolImpulseContact)
-    TolImpulseContact.reset(new SimpleVector(maxSize()));
+    TolImpulseContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (TolImpulseContact->size() != maxSize())
@@ -224,7 +224,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!DelImpulseContact)
-    DelImpulseContact.reset(new SimpleVector(maxSize()));
+    DelImpulseContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (DelImpulseContact->size() != maxSize())
@@ -232,7 +232,7 @@ void OSNSMultipleImpact::AllocateMemory()
   };
   //
   if (!ImpulseContact_update)
-    ImpulseContact_update.reset(new SimpleVector(maxSize()));
+    ImpulseContact_update.reset(new SiconosVector(maxSize()));
   else
   {
     if (ImpulseContact_update->size() != maxSize())
@@ -240,7 +240,7 @@ void OSNSMultipleImpact::AllocateMemory()
   }
   //
   if (!ForceContact)
-    ForceContact.reset(new SimpleVector(maxSize()));
+    ForceContact.reset(new SiconosVector(maxSize()));
   else
   {
     if (ForceContact->size() != maxSize())
@@ -324,9 +324,9 @@ void OSNSMultipleImpact::ComputeStepSize()
     SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
     SP::SiconosVector vel_ds = Lagds->velocity();  // Pre-impact velocity of DS
 
-    SP::SiconosVector abs_vel_ds(new SimpleVector(vel_ds->size()));
+    SP::SiconosVector abs_vel_ds(new SiconosVector(vel_ds->size()));
     abs_wise(*vel_ds, *abs_vel_ds); // get the absolute (velocity vector of ds)
-    SP::SimpleVector prod_mass_vel(new SimpleVector(mass_ds->size(0)));
+    SP::SiconosVector prod_mass_vel(new SiconosVector(mass_ds->size(0)));
     prod(*mass_ds, *abs_vel_ds, *prod_mass_vel);
     Pest = Pest + prod_mass_vel->sum();
 
@@ -370,9 +370,9 @@ void OSNSMultipleImpact::ComputeStepSize()
   //         SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
   //         SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
   //         SP::SiconosVector vel_ds = Lagds->velocityMemory()->getSiconosVector(1);  // Pre-impact velocity of DS
-  //         SP::SiconosVector abs_vel_ds(new SimpleVector(vel_ds->size()));
+  //         SP::SiconosVector abs_vel_ds(new SiconosVector(vel_ds->size()));
   //         abs_wise(*vel_ds,*abs_vel_ds);// get the absolute (velocity vector of ds)
-  //         SP::SimpleVector prod_mass_vel(new SimpleVector(mass_ds->size(0)));
+  //         SP::SiconosVector prod_mass_vel(new SiconosVector(mass_ds->size(0)));
   //         prod(*mass_ds,*abs_vel_ds,*prod_mass_vel);
   //         Pest = Pest + prod_mass_vel->sum();
   //       }
@@ -508,12 +508,12 @@ void OSNSMultipleImpact::InitializeInput()
     SP::SiconosVector Vc0 = inter->yOld(1); // Relative velocity at beginning of impact
     unsigned int pos_inter = _M->getPositionOfInteractionBlock(inter);
     setBlock(*Vc0, VelContact, Vc0->size(), 0, pos_inter);
-    SP::SiconosVector ener0(new SimpleVector(Vc0->size()));
+    SP::SiconosVector ener0(new SiconosVector(Vc0->size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*ener0, EnerContact, ener0->size(), 0, pos_inter);
     //SP::SiconosVector impulse0= (inter)->lambda(1))->vector(inter->number());
-    SP::SiconosVector impulse0(new SimpleVector(Vc0->size()));
+    SP::SiconosVector impulse0(new SiconosVector(Vc0->size()));
     impulse0->zero(); // We suppose that the impulse before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*impulse0, TolImpulseContact, impulse0->size(), 0, pos_inter);
@@ -958,9 +958,9 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
     SP::Interaction inter = indexSet0->bundle(*ui); // Interaction
     unsigned int id_contact = inter->number();
     SP::SiconosVector ydot = inter->y(1);
-    SP::SiconosVector P_inter(new SimpleVector(inter->nonSmoothLaw()->size()));
-    SP::SiconosVector F_inter(new SimpleVector(inter->nonSmoothLaw()->size()));
-    SP::SiconosVector E_inter(new SimpleVector(1));
+    SP::SiconosVector P_inter(new SiconosVector(inter->nonSmoothLaw()->size()));
+    SP::SiconosVector F_inter(new SiconosVector(inter->nonSmoothLaw()->size()));
+    SP::SiconosVector E_inter(new SiconosVector(1));
 
     if (indexSet1->is_vertex(inter)) // if Interactionbelongs to the IndexSet[1]
     {

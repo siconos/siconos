@@ -66,7 +66,7 @@ void LinearSMC::initialize(SP::Model m)
   }
   // We have to reset the _pluginb
   _DS_SMC->setComputebFunction(NULL);
-  SP::SiconosVector dummyb(new SimpleVector(_nDim, 0));
+  SP::SiconosVector dummyb(new SiconosVector(_nDim, 0));
   _DS_SMC->setb(dummyb);
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
@@ -110,13 +110,13 @@ void LinearSMC::initialize(SP::Model m)
 
     // Handy
     _eventsManager = _simulationSMC->eventsManager();
-    _lambda.reset(new SimpleVector(_sDim));
+    _lambda.reset(new SiconosVector(_sDim));
     _lambda = _interactionSMC->lambda(0);
     _xController = _DS_SMC->x();
-    _u.reset(new SimpleVector(_nDim, 0));
+    _u.reset(new SiconosVector(_nDim, 0));
 
     // XXX really stupid stuff
-    _sampledControl.reset(new SimpleVector(_nDim, 0));
+    _sampledControl.reset(new SiconosVector(_nDim, 0));
     _DS->setzPtr(_sampledControl);
   }
   _indx = 0;

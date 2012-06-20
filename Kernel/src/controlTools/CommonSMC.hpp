@@ -50,7 +50,7 @@ protected:
   unsigned int _indx;
 
   /** control variable */
-  SP::SimpleVector _u;
+  SP::SiconosVector _u;
 
   /** the vector defining the surface (\f$ s = Cx \f$) */
   SP::SiconosMatrix _Csurface;

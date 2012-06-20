@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "SimpleMatrixTest.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -46,9 +46,9 @@ void SimpleMatrixTest::setUp()
   v5[1] = 9;
   v5[2] = 10;
 
-  vect1.reset(new SimpleVector(v3));
-  vect2.reset(new SimpleVector(v4)); // vect2 != vect1, but vect2 == SimM second column
-  vect3.reset(new SimpleVector(v5)); // vect3 != vect1, but vect3 == SimM second row
+  vect1.reset(new SiconosVector(v3));
+  vect2.reset(new SiconosVector(v4)); // vect2 != vect1, but vect2 == SimM second column
+  vect3.reset(new SiconosVector(v5)); // vect3 != vect1, but vect3 == SimM second row
 
   // Dense
   D.reset(new DenseMat(2, 2));
@@ -416,58 +416,41 @@ void SimpleMatrixTest::testGetSetRowCol()
 {
   cout << "--> Test: get, set Row and Col." << endl;
 
-  SP::SiconosVector vIn(new SimpleVector(10, 1.2));
-  SP::SiconosVector vBIn(new BlockVector());
-  SP::SiconosVector v1(new SimpleVector(3, 2));
-  SP::SiconosVector v2(new SimpleVector(5, 3));
-  SP::SiconosVector v3(new SimpleVector(2, 4));
+  SP::SiconosVector vIn(new SiconosVector(10, 1.2));
+  SP::BlockVector vBIn(new BlockVector());
+  SP::SiconosVector v1(new SiconosVector(3, 2));
+  SP::SiconosVector v2(new SiconosVector(5, 3));
+  SP::SiconosVector v3(new SiconosVector(2, 4));
   vBIn->insertPtr(v1);
   vBIn->insertPtr(v2);
   vBIn->insertPtr(v3);
 
-  // Set row with a SimpleVector
+  // Set row with a SiconosVector
   C->setRow(4, *vIn);
   for (unsigned int i = 0; i < C->size(1); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4, i) - 1.2) < tol, true);
 
-  // Set col with a SimpleVector
+  // Set col with a SiconosVector
   C->setCol(4, *vIn);
   for (unsigned int i = 0; i < C->size(0); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - 1.2) < tol, true);
 
-  // Set row with a BlockVector
-  C->setRow(4, *vBIn);
-
   for (unsigned int i = 0; i < C->size(1); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4, i) - (*vBIn)(i)) < tol, true);
-
-  // Set col with a BlockVector
-  C->setCol(4, *vBIn);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - (*vBIn)(i)) < tol, true);
 
   *C = *A; //reset C
   vIn->zero();
   vBIn->zero();
-  // get row and copy it into a SimpleVector
+  // get row and copy it into a SiconosVector
   C->getRow(4, *vIn);
   for (unsigned int i = 0; i < C->size(1); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4, i) - (*vIn)(i)) < tol, true);
 
-  // get col and copy it into a SimpleVector
+  // get col and copy it into a SiconosVector
   C->getCol(4, *vIn);
   for (unsigned int i = 0; i < C->size(0); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - (*vIn)(i)) < tol, true);
 
-  // get row and copy it into a BlockVector
-  C->getRow(4, *vBIn);
-  for (unsigned int i = 0; i < C->size(1); ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(4, i) - (*vBIn)(i)) < tol, true);
-
-  // get col and copy it into a BlockVector
-  C->getCol(4, *vBIn);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - (*vBIn)(i)) < tol, true);
   cout << "--> get, set Row and Col tests ended with success." << endl;
 }
 
@@ -2118,12 +2101,12 @@ void SimpleMatrixTest::testOperators8_5()
 
   cout << "--> Test: operator8_5." << endl;
   Index coord(8);
-  SP::SiconosVector x1(new SimpleVector(2));
-  SP::SiconosVector x2(new SimpleVector(3));
-  SP::SiconosVector x3(new SimpleVector(5));
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new BlockVector());
-  SP::SiconosVector v(new SimpleVector(size));
+  SP::SiconosVector x1(new SiconosVector(2));
+  SP::SiconosVector x2(new SiconosVector(3));
+  SP::SiconosVector x3(new SiconosVector(5));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::BlockVector x(new BlockVector());
+  SP::SiconosVector v(new SiconosVector(size));
   x->insertPtr(x1);
   x->insertPtr(x2);
   x->insertPtr(x3);
@@ -2150,8 +2133,8 @@ void SimpleMatrixTest::testOperators8_5()
 
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
-  subprod(*A, *x, *y, coord, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense())) < tol, true);
+  //  subprod(*A,*x,*y, coord, true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense()- prod(*A->dense(),*v->dense()))<tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -2175,16 +2158,16 @@ void SimpleMatrixTest::testOperators8_5()
   }
   y->zero();
   // Simple = Simple * Block, all dense
-  subprod(*A, *x, *y, coord, true);
-  res = (*A)(0, 1) * (*x)(3) + (*A)(0, 2) * (*x)(4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  res = (*A)(1, 1) * (*x)(3) + (*A)(1, 2) * (*x)(4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    if (i != 2 && i != 3)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  }
+  //  subprod(*A,*x,*y, coord, true);
+  //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res-(*y)(2))<tol, true);
+  //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res-(*y)(3))<tol, true);
+  //  for (unsigned int i=0; i<size; ++i)
+  //  {
+  //    if (i!=2 && i!=3)
+  //      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i))<tol, true);
+  //  }
   //   // Others ...
   // Triang
 
@@ -2262,12 +2245,12 @@ void SimpleMatrixTest::testOperators8_6()
 
   cout << "--> Test: operator8_6." << endl;
   Index coord(8);
-  SP::SiconosVector x1(new SimpleVector(2));
-  SP::SiconosVector x2(new SimpleVector(3));
-  SP::SiconosVector x3(new SimpleVector(5));
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new BlockVector());
-  SP::SiconosVector v(new SimpleVector(size));
+  SP::SiconosVector x1(new SiconosVector(2));
+  SP::SiconosVector x2(new SiconosVector(3));
+  SP::SiconosVector x3(new SiconosVector(5));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::BlockVector x(new BlockVector());
+  SP::SiconosVector v(new SiconosVector(size));
   x->insertPtr(x1);
   x->insertPtr(x2);
   x->insertPtr(x3);
@@ -2297,8 +2280,8 @@ void SimpleMatrixTest::testOperators8_6()
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
   *y = *v;
-  subprod(*A, *x, *y, coord, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
+  //  subprod(*A,*x,*y, coord, false);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense()- prod(*A->dense(),*v->dense())- *v->dense())<tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -2323,16 +2306,16 @@ void SimpleMatrixTest::testOperators8_6()
   }
   *y = *v;
   // Simple = Simple * Block, all dense
-  subprod(*A, *x, *y, coord, false);
-  res = (*A)(0, 1) * (*x)(3) + (*A)(0, 2) * (*x)(4) + (*v)(2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  res = (*A)(1, 1) * (*x)(3) + (*A)(1, 2) * (*x)(4) + (*v)(3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    if (i != 2 && i != 3)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
-  }
+  //  subprod(*A,*x,*y, coord, false);
+  //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4) + (*v)(2);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res-(*y)(2))<tol, true);
+  //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4) + (*v)(3);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res-(*y)(3))<tol, true);
+  //  for (unsigned int i=0; i<size; ++i)
+  //  {
+  //    if (i!=2 && i!=3)
+  //      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i)-(*v)(i))<tol, true);
+  //  }
 
   //   // Others ...
   // Triang
@@ -2749,13 +2732,13 @@ void SimpleMatrixTest::testProd() // y = A*x
 {
   cout << "--> Test: prod. mat-vect" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -2771,14 +2754,14 @@ void SimpleMatrixTest::testProd() // y = A*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i) - sum) < tol, true);
   }
   // Simple = Simple * Block
-  *y = prod(*A , *xB);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i) - sum) < tol, true);
-  }
+  //  *y = prod(*A , *xB);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i) - sum)< tol, true);
+  //  }
 
 
   // Block = Simple * Simple
@@ -2792,14 +2775,14 @@ void SimpleMatrixTest::testProd() // y = A*x
   }
 
   // Block = Simple * Block
-  *yB = prod(*A , *xB);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i) - sum) < tol, true);
-  }
+  //  *yB = prod(*A ,*xB);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
 
   // Others or old stuff ...
 
@@ -2807,11 +2790,11 @@ void SimpleMatrixTest::testProd() // y = A*x
   SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
   SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
-  SP::SiconosVector v(new SimpleVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SP::SiconosVector vv(new SimpleVector(4));
+  SP::SiconosVector vv(new SiconosVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
@@ -2823,10 +2806,10 @@ void SimpleMatrixTest::testProd() // y = A*x
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SP::SiconosVector w(new SimpleVector(*sv));
-  SP::SiconosVector ww(new SimpleVector(*sv2));
-  SP::SiconosVector res(new SimpleVector(4));
-  SP::SiconosVector res2(new SimpleVector(3));
+  SP::SiconosVector w(new SiconosVector(*sv));
+  SP::SiconosVector ww(new SiconosVector(*sv2));
+  SP::SiconosVector res(new SiconosVector(4));
+  SP::SiconosVector res2(new SiconosVector(3));
 
   // Triang * ...
   *res2 = prod(*tmp2, *v);
@@ -2855,13 +2838,13 @@ void SimpleMatrixTest::testProdBis()
 {
   cout << "--> Test: prod. mat-vect (bis)" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -2897,26 +2880,26 @@ void SimpleMatrixTest::testProdBis()
   }
 
   // Block = Simple * Block
-  prod(*A , *xB, *yB);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum) < tol, true);
-  }
-
+  //  prod(*A ,*xB,*yB);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
+  //
   // Others or old stuff ...
 
   SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
   SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
   SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
-  SP::SiconosVector v(new SimpleVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SP::SiconosVector vv(new SimpleVector(4));
+  SP::SiconosVector vv(new SiconosVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
@@ -2928,10 +2911,10 @@ void SimpleMatrixTest::testProdBis()
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SP::SiconosVector w(new SimpleVector(*sv));
-  SP::SiconosVector ww(new SimpleVector(*sv2));
-  SP::SiconosVector res(new SimpleVector(4));
-  SP::SiconosVector res2(new SimpleVector(3));
+  SP::SiconosVector w(new SiconosVector(*sv));
+  SP::SiconosVector ww(new SiconosVector(*sv2));
+  SP::SiconosVector res(new SiconosVector(4));
+  SP::SiconosVector res2(new SiconosVector(3));
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
@@ -2960,13 +2943,13 @@ void SimpleMatrixTest::testProdTer()
 {
   cout << "--> Test: prod. mat-vect (ter)" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -2982,7 +2965,7 @@ void SimpleMatrixTest::testProdTer()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum) < tol, true);
   }
 
-  SP::SiconosVector backUp(new SimpleVector(*y));
+  SP::SiconosVector backUp(new SiconosVector(*y));
   // Simple += Simple * Simple
   axpy_prod(*A, *x, *y, false);
   for (unsigned int i = 0; i < size; ++i)
@@ -2994,78 +2977,78 @@ void SimpleMatrixTest::testProdTer()
   }
 
   // Simple = Simple * Block
-  axpy_prod(*A , *xB, *y, true);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum) < tol, true);
-  }
-
+  //  axpy_prod(*A ,*xB,*y, true);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum)< tol, true);
+  //  }
+  //
   *backUp = *y;
   // Simple += Simple * Block
-  axpy_prod(*A , *xB, *y, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum - (*backUp)(i)) < tol, true);
-  }
-
-  // Block = Simple * Simple
-  axpy_prod(*A , *x, *yB, true);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum) < tol, true);
-  }
-
-  // Block += Simple * Simple
-  *backUp = *yB;
-  axpy_prod(*A , *x, *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum - (*backUp)(i)) < tol, true);
-  }
-
-  // Block = Simple * Block
-  axpy_prod(*A , *xB, *yB, true);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum) < tol, true);
-  }
-
-  // Block += Simple * Block
-  *backUp = *yB;
-  axpy_prod(*A , *xB, *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum - (*backUp)(i)) < tol, true);
-  }
-  // Others or old stuff ...
+  //  axpy_prod(*A ,*xB,*y, false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum - (*backUp)(i))< tol, true);
+  //  }
+  //
+  //  // Block = Simple * Simple
+  //  axpy_prod(*A ,*x,*yB, true);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*x)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
+  //
+  //  // Block += Simple * Simple
+  //  *backUp = *yB;
+  //  axpy_prod(*A ,*x,*yB, false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*x)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum - (*backUp)(i))< tol, true);
+  //  }
+  //
+  //  // Block = Simple * Block
+  //  axpy_prod(*A ,*xB,*yB,true);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
+  //
+  //  // Block += Simple * Block
+  //  *backUp = *yB;
+  //  axpy_prod(*A ,*xB,*yB,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += (*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum - (*backUp)(i))< tol, true);
+  //  }
+  //  // Others or old stuff ...
 
   SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
   SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
   SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
-  SP::SiconosVector v(new SimpleVector(3));
+  SP::SiconosVector v(new SiconosVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SP::SiconosVector vv(new SimpleVector(4));
+  SP::SiconosVector vv(new SiconosVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
@@ -3077,10 +3060,10 @@ void SimpleMatrixTest::testProdTer()
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SP::SiconosVector w(new SimpleVector(*sv));
-  SP::SiconosVector ww(new SimpleVector(*sv2));
-  SP::SiconosVector res(new SimpleVector(4));
-  SP::SiconosVector res2(new SimpleVector(3));
+  SP::SiconosVector w(new SiconosVector(*sv));
+  SP::SiconosVector ww(new SiconosVector(*sv2));
+  SP::SiconosVector res(new SiconosVector(4));
+  SP::SiconosVector res2(new SiconosVector(3));
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
@@ -3109,13 +3092,13 @@ void SimpleMatrixTest::testProd4() // y += A*x
 {
   cout << "--> Test: prod. mat-vect (4)" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3158,15 +3141,15 @@ void SimpleMatrixTest::testProd4() // y += A*x
 
   // Block = Simple * Block
   yB->zero();
-  prod(*A , *xB, *yB, false);
-  prod(*A , *xB, *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += 2 * (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum) < tol, true);
-  }
+  //  prod(*A ,*xB,*yB,false);
+  //  prod(*A ,*xB,*yB,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += 2*(*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
   cout << "-->  test prod4 ended with success." << endl;
 }
 
@@ -3174,13 +3157,13 @@ void SimpleMatrixTest::testProd5() // y += a*A*x
 {
   cout << "--> Test: prod. mat-vect (5)" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3199,39 +3182,39 @@ void SimpleMatrixTest::testProd5() // y += a*A*x
   }
   // Simple = Simple * Block
   y->zero();
-  prod(a, *A , *xB, *y, false);
-  prod(a, *A , *xB, *y, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += a * 2 * (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i) - sum) < tol, true);
-  }
+  //  prod(a,*A ,*xB,*y,false);
+  //  prod(a,*A ,*xB,*y,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += a*2*(*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i) - sum)< tol, true);
+  //  }
 
   // Block = Simple * Simple
   yB->zero();
-  prod(a, *A , *x, *yB, false);
-  prod(a, *A , *x, *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += a * 2 * (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum) < tol, true);
-  }
-
+  //  prod(a,*A ,*x,*yB,false);
+  //  prod(a,*A ,*x,*yB,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += a*2*(*A)(i,j)*(*x)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
+  //
   // Block = Simple * Block
   yB->zero();
-  prod(a, *A , *xB, *yB, false);
-  prod(a, *A , *xB, *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += a * 2 * (*A)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum) < tol, true);
-  }
+  //  prod(a,*A ,*xB,*yB,false);
+  //  prod(a,*A ,*xB,*yB,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += a*2*(*A)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
   cout << "-->  test prod5 ended with success." << endl;
 }
 
@@ -3239,13 +3222,13 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
 {
   cout << "--> Test: prod. mat-vect (6)" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
-  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
-  SP::SiconosVector x2(new SimpleVector(2, 3.1));
+  SP::SiconosVector y(new SiconosVector(size));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
+  SP::SiconosVector x1(new SiconosVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SiconosVector(2, 3.1));
 
-  SP::SiconosVector xB(new BlockVector(x1, x2));
-  SP::SiconosVector yB(new BlockVector(*xB));
+  SP::BlockVector xB(new BlockVector(x1, x2));
+  SP::BlockVector yB(new BlockVector(*xB));
   yB->zero();
 
   SP::SiconosMatrix tmp(new SimpleMatrix(*A));
@@ -3266,16 +3249,16 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
   }
   // Simple = Simple * Block
   y->zero();
-  prod(*xB, *A, *y);
-  prod(*xB, *A, *y, false);
-
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < size; ++j)
-      sum += 2 * (*tmp)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i) - sum) < tol, true);
-  }
+  //  prod(*xB,*A,*y);
+  //  prod(*xB,*A,*y,false);
+  //
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< size; ++j)
+  //      sum += 2*(*tmp)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i) - sum)< tol, true);
+  //  }
 
   // Block = Simple * Simple
   yB->zero();
@@ -3291,15 +3274,15 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
 
   // Block = Simple * Block
   yB->zero();
-  prod(*xB, *A , *yB);
-  prod(*xB, *A , *yB, false);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += 2 * (*tmp)(i, j) * (*xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum) < tol, true);
-  }
+  //  prod(*xB,*A ,*yB);
+  //  prod(*xB,*A ,*yB,false);
+  //  for (unsigned int i = 0; i< size; ++i)
+  //  {
+  //    sum = 0;
+  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //      sum += 2*(*tmp)(i,j)*(*xB)(j);
+  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum)< tol, true);
+  //  }
   cout << "-->  test prod6 ended with success." << endl;
 }
 
@@ -3307,10 +3290,10 @@ void SimpleMatrixTest::testGemv()
 {
   cout << "--> Test: gemv" << endl;
 
-  SP::SiconosVector y(new SimpleVector(size, 1.0));
-  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector y(new SiconosVector(size, 1.0));
+  SP::SiconosVector x(new SiconosVector(size, 4.3));
 
-  SP::SiconosVector backUp(new SimpleVector(*y));
+  SP::SiconosVector backUp(new SiconosVector(*y));
 
   gemv(*A, *x, *y);
   double sum;

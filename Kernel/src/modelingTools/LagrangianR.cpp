@@ -53,10 +53,10 @@ void LagrangianR::initComponents()
     else if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
   }
-  _workX.reset(new SimpleVector(sizeDS));
-  _workXdot.reset(new SimpleVector(sizeDS));
-  _workZ.reset(new SimpleVector(interaction()->getSizez()));
-  _workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SiconosVector());
+  _workXdot.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector());
+  _workY.reset(new SiconosVector(sizeY));
 }
 
 void LagrangianR::initialize(SP::Interaction inter)

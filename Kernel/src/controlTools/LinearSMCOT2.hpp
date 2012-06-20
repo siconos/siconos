@@ -34,7 +34,7 @@ private:
   /** default constructor */
   LinearSMCOT2() {};
   /** Current value of the state (\f$ x_k\f$)*/
-  SP::SimpleVector _X;
+  SP::SiconosVector _X;
   /** Predicted current value of the state (\f$ \hat{x}_k = \Phi x_{k-1} + \Gamma u_{k-1}\f$)*/
   SP::SiconosVector _Xhat;
   /** Next value of the state only with the influence of the dynamic \f$ \XPhi = \Phi x_k\f$*/

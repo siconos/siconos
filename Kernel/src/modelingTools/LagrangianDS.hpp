@@ -577,7 +577,7 @@ public:
   /** set fExt to pointer newPtr
    *  \param a SP to a Simple vector
    */
-  inline void setFExtPtr(SP::SimpleVector newPtr)
+  inline void setFExtPtr(SP::SiconosVector newPtr)
   {
     _fExt = newPtr;
   }
@@ -673,9 +673,9 @@ public:
   // -- forces --
 
   /** get the value of forces
-   *  \return SimpleVector
+   *  \return SiconosVector
    */
-  inline const SimpleVector getForces() const
+  inline const SiconosVector getForces() const
   {
     return *_forces;
   }
@@ -736,7 +736,7 @@ public:
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
     _pluginFInt->setComputeFunction(pluginPath, functionName);
-    if (!_fInt) _fInt.reset(new SimpleVector(_ndof));
+    if (!_fInt) _fInt.reset(new SiconosVector(_ndof));
     //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
   }
 
@@ -756,7 +756,7 @@ public:
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginFExt->setComputeFunction(pluginPath, functionName);
-    if (!_fExt) _fExt.reset(new SimpleVector(_ndof));
+    if (!_fExt) _fExt.reset(new SiconosVector(_ndof));
     //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
   }
 

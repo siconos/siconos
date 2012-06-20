@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosMemoryXML.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 using namespace std;
 
@@ -59,7 +59,7 @@ SP::MemoryContainer SiconosMemoryXML::getVectorMemoryValue()
   int cpt = 0;
   while (node)
   {
-    v->push_back(SP::SimpleVector(new SimpleVector(SiconosDOMTreeTools::getSiconosVectorValue(node))));
+    v->push_back(SP::SiconosVector(new SiconosVector(SiconosDOMTreeTools::getSiconosVectorValue(node))));
     node = SiconosDOMTreeTools::findFollowNode(node, SM_MEMORY);
     cpt ++;
   }

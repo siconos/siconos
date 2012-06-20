@@ -102,22 +102,22 @@ public:
   LagrangianLinearTIDS(SP::DynamicalSystemXML);
 
   /** constructor from a set of data
-   *  \param SimpleVector: initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosVector: initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    *  \param SiconosMatrix : matrix K of this DynamicalSystem
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    */
-  //  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
-  LagrangianLinearTIDS(SP::SimpleVector, SP::SimpleVector, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
+  //  LagrangianLinearTIDS(const SiconosVector&, const SiconosVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(SP::SiconosVector, SP::SiconosVector, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
 
   /** constructor from a set of data
-   *  \param SimpleVector: initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosVector: initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    */
-  LagrangianLinearTIDS(SP::SimpleVector, SP::SimpleVector, SP::SiconosMatrix);
-  //  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  LagrangianLinearTIDS(SP::SiconosVector, SP::SiconosVector, SP::SiconosMatrix);
+  //  LagrangianLinearTIDS(const SiconosVector&, const SiconosVector&, const SiconosMatrix&);
 
   /** destructor */
   ~LagrangianLinearTIDS();

@@ -34,7 +34,7 @@ const std::string transpose = "transpose";
 typedef std::vector<int> VInt;
 TYPEDEF_SPTR(VInt);
 
-class SimpleVector;
+class SiconosVector;
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *
@@ -129,6 +129,12 @@ private:
        \param init, a bool
   */
   friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::SiconosVector, bool);
+  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::SiconosVector, bool);
+  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
+  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
+
+
+
 
   /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
@@ -150,6 +156,9 @@ private:
        \param init, a bool
   */
   friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
+  friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
+  friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+  friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
 
 public:
   /** Default constructor
@@ -446,25 +455,25 @@ public:
 
   /** get row index of current matrix and save it into vOut
    *  \param index row we want to get
-   *  \param[out] vOut SimpleVector that will contain the desired row
+   *  \param[out] vOut SiconosVector that will contain the desired row
    */
   void getRow(unsigned int index, SiconosVector& vOut) const;
 
   /** get column index of current matrix and save it into vOut
    *  \param index column we want to get
-   *  \param[out] vOut SimpleVector that will contain the desired column
+   *  \param[out] vOut SiconosVector that will contain the desired column
    */
   void getCol(unsigned int index, SiconosVector& vOut) const;
 
   /** set line row of the current matrix with vector v
    *  \param index row we want to set
-   *  \param vIn SimpleVector containing the new row
+   *  \param vIn SiconosVector containing the new row
    */
   void setRow(unsigned int index, const SiconosVector& vIn);
 
   /** set column col of the current matrix with vector v
    *  \param index column we want to set
-   *  \param vIn a SimpleVector containing the new column
+   *  \param vIn a SiconosVector containing the new column
    */
   void setCol(unsigned int index, const SiconosVector& vIn);
 
@@ -613,13 +622,19 @@ public:
 
   friend void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
 
-  friend const SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
+  friend const SiconosVector prod(const SiconosMatrix&, const SiconosVector&);
 
   friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
+
+  friend void prod(const SiconosMatrix&, const BlockVector&, SiconosVector&, bool);
+
+  friend void prod(const SiconosMatrix&, const SiconosVector&, BlockVector&, bool);
 
   friend void prod(double, const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
 
   friend void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool);
+
+  friend void prod(const SiconosVector&, const SiconosMatrix&, BlockVector&, bool);
 
   friend void subprod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, const Index&, bool);
 

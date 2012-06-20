@@ -54,14 +54,14 @@ void Relation::zeroPlugin()
 void Relation::initializeMemory()
 {
   unsigned int nslawSize = interaction()->nonSmoothLaw()->size();
-  _Residuy.reset(new SimpleVector(nslawSize));
+  _Residuy.reset(new SiconosVector(nslawSize));
   // unsigned int numberOfRelations = interaction()->numberOfRelations();
   // for(unsigned int j = 0; j<numberOfRelations ; ++j)
-  //   _Residuy->insertPtr(SP::SimpleVector (new SimpleVector(nslawSize)));
+  //   _Residuy->insertPtr(SP::SiconosVector (new SiconosVector(nslawSize)));
 
-  _h_alpha.reset(new SimpleVector(nslawSize));
+  _h_alpha.reset(new SiconosVector(nslawSize));
   // for(unsigned int j = 0; j< numberOfRelations; ++j)
-  //   _h_alpha->insertPtr( SP::SimpleVector(new SimpleVector(nslawSize)) );
+  //   _h_alpha->insertPtr( SP::SiconosVector(new SiconosVector(nslawSize)) );
 
 }
 
@@ -196,7 +196,9 @@ void Relation::setComputehFunction(const std::string& pluginPath, const std::str
 const  SP::SiconosVector Relation::residuR()
 {
   assert(0);
-  return data[0];
+  SP::SiconosVector tmp(new SiconosVector());
+  *tmp = *data[0];
+  return tmp;
 }
 void Relation::saveRelationToXML() const
 {

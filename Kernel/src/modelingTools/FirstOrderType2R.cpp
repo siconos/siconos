@@ -70,9 +70,9 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  _workX.reset(new SimpleVector(sizeDS));
-  _workZ.reset(new SimpleVector(sizeZ));
-  _workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector());
+  _workY.reset(new SiconosVector(sizeY));
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -125,7 +125,10 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
   prod(*B(), *_workL, *_workX, false);
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
-  *data[r] += *_workX;
+
+  SP::BlockVector tmp(new BlockVector(*data[r]));
+  *tmp = *_workX;
+  *data[r] += *tmp;
 
   /*compute the new g_alpha*/
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -192,10 +195,13 @@ void FirstOrderType2R::preparNewtonIteration()
   //      cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha: \n";
   //      data[g_alpha]->display();
 
-  *_workX += *data[g_alpha];
+  SP::SiconosVector tmp(new SiconosVector(*_workX));
+  *tmp = *data[g_alpha];
+  *_workX += *tmp;
 
-
-  *data[ds_xp] += *_workX;
+  SP::BlockVector ntmp(new BlockVector(*data[ds_xp]));
+  *ntmp = *_workX;
+  *data[ds_xp] += *ntmp;
   //     cout<<"FirstOrderType2R::preparNewtonIteration,xp= g_alpha -B*lambda : \n";
   //     _workX->display();
 }

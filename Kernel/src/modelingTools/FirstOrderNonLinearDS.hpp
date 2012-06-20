@@ -131,10 +131,10 @@ protected:
   SP::SiconosMemory _rMemory;
 
   /** Residu r*/
-  SP::SimpleVector _residur;
+  SP::SiconosVector _residur;
 
   /** g_alpha*/
-  SP::SimpleVector _g_alpha;
+  SP::SiconosVector _g_alpha;
   //  SP::SiconosVector mXfree;
 
   SP::SiconosVector _xp;

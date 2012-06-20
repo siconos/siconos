@@ -156,7 +156,7 @@ void Lsodar::fillXWork(integer* sizeOfX, doublereal* x)
 {
   unsigned int sizeX = (unsigned int)(*sizeOfX);
   for (unsigned int i = 0; i < sizeX ; ++i)
-    (*xWork)(i) = x[i];
+    (*_xWork)(i) = x[i];
 }
 
 void Lsodar::computeRhs(double t)
@@ -191,19 +191,20 @@ void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integ
 void Lsodar::initialize()
 {
   OneStepIntegrator::initialize();
-  xWork.reset(new BlockVector());
+  _xWork.reset(new BlockVector());
   DSIterator itDS;
   string type;
   // initialize xWork with x values of the dynamical systems present in the set.
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-    xWork->insertPtr((*itDS)->x());
+    _xWork->insertPtr((*itDS)->x());
   }
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 1 - Neq; x vector size.
-  intData[0] = xWork->size();
+  intData[0] = _xWork->size();
+  _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
   intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
@@ -304,7 +305,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   // === LSODAR CALL ===
 
-  SP::SimpleVector xtmp(new SimpleVector(*xWork)); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
+  *_xtmp = *_xWork;
   if (istate == 3)
   {
     istate = 1; // restart TEMPORARY
@@ -314,7 +315,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   // call LSODAR to integrate dynamical equation
   F77NAME(dlsodar)(pointerToF,
                    &(intData[0]),
-                   &(*xtmp)(0),
+                   &(*_xtmp)(0),
                    &tinit_DR, &tend_DR,
                    &(intData[2]),
                    rtol.get(),
@@ -348,7 +349,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
     RuntimeException::selfThrow("Lsodar, integration failed");
   }
 
-  *xWork = *xtmp;
+  *_xWork = *_xtmp;
   istate = intData[4];
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
@@ -447,7 +448,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
-  Xq = inter->workXq();
+  *Xq = *inter->workXq();
   Yp = inter->yp();
 
   /* V.A. 10/10/2010
@@ -459,13 +460,13 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
   {
-    Xfree  = inter->workFree();
+    *Xfree  = *inter->workFree();
     //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
-    Xfree = inter->workX();
+    *Xfree = *inter->workX();
     //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 

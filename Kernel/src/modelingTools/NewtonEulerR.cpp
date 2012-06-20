@@ -63,11 +63,11 @@ void NewtonEulerR::initComponents()
     _jachqT.reset(new SimpleMatrix(_ysize, _xsize));
 
 
-  _workX.reset(new SimpleVector(_xsize));
-  _workQ.reset(new SimpleVector(_qsize));
-  _workZ.reset(new SimpleVector(interaction()->getSizez()));
-  _workY.reset(new SimpleVector(_ysize));
-  //_yQ.reset(new SimpleVector(1));
+  _workX.reset(new SiconosVector());
+  _workQ.reset(new SiconosVector(_qsize));
+  _workZ.reset(new SiconosVector());
+  _workY.reset(new SiconosVector(_ysize));
+  //_yQ.reset(new SiconosVector(1));
   //proj_with_q  _jachqProj=_jachq;
   SP::SiconosVector vaux = interaction()->y(0);
   SP::SiconosVector vaux2 = (*vaux)[0];
@@ -118,7 +118,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
     data[z]->insertPtr(lds->z());
     sizeForAllxInDs += lds->p(1)->size();
   }
-  _contactForce.reset(new SimpleVector(sizeForAllxInDs));
+  _contactForce.reset(new SiconosVector(sizeForAllxInDs));
   _contactForce->zero();
 }
 
@@ -196,9 +196,9 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
         itDS=interaction()->dynamicalSystemsBegin();
         while(  itDS!=interaction()->dynamicalSystemsEnd() ){
           SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
-          SP::SimpleVector vPredictor = d->vPredictor();
+          SP::SiconosVector vPredictor = d->vPredictor();
           unsigned int d_dim=d->getDim();
-          SP::SimpleVector F(new SimpleVector(d_dim));
+          SP::SiconosVector F(new SiconosVector(d_dim));
           setBlock(_contactForce,F,d_dim,0,k);
           d->luM()->PLUForwardBackwardInPlace(*F);
           *(d->vPredictor())+=*F;
@@ -261,7 +261,7 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
     data[p0 + level]->display();
 
 
-    SP::SimpleVector buffer(new SimpleVector(data[p0 + level]->size()));
+    SP::SiconosVector buffer(new SiconosVector(data[p0 + level]->size()));
     prod(*lambda, *_jachq, *buffer, true);
     std::cout << "added part to p" << buffer <<  std::endl;
     buffer->display();

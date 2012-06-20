@@ -21,7 +21,7 @@
 
 #include "Model.hpp"
 #include "FirstOrderLinearDS.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
 #include <sys/time.h>
 #include <iostream>
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     // problem size
     unsigned int size = 3;
     // initial state
-    SP::SiconosVector x0(new SimpleVector(3));
+    SP::SiconosVector x0(new SiconosVector(3));
     (*x0)(0) = 1;
     (*x0)(1) = 2;
     (*x0)(2) = 3;
@@ -58,10 +58,10 @@ int main(int argc, char* argv[])
 
     // set b, u, E
     SP::SiconosMatrix E(new SiconosMatrix("matE.dat", true));
-    SP::SimpleVector u(new SimpleVector(2));
+    SP::SiconosVector u(new SiconosVector(2));
     (*u)(0) = 1.8;
     (*u)(1) = 1.4;
-    SP::SimpleVector b(new SimpleVector(size));
+    SP::SiconosVector b(new SiconosVector(size));
     (*b)(0) = 2.5;
     (*b)(1) = 4;
     (*b)(2) = 9;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
     lds1->display();
 
     // change set different size for u
-    SP::SimpleVector u2(new SimpleVector(1));
+    SP::SiconosVector u2(new SiconosVector(1));
     (*u2)(0) = 34;
     // lds1->setU(*u2); error -> should change uSize before
     lds1->setUSize(1);

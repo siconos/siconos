@@ -247,20 +247,17 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     indexSet2->clear();
   }
 
-
-
-  _nbIndexSetsIteration = 0 ;
-  _cumulatedNewtonNbSteps = 0 ;
-  _nbCumulatedProjectionIteration = 0;
-
+#ifdef TSPROJ_DEBUG
+  unsigned int kindexset = 0 ;
+#endif
   while (!_isIndexSetsStable)
   {
-    _nbIndexSetsIteration++ ;
 #ifdef TSPROJ_DEBUG
+    kindexset++ ;
     cout << "==================================================== :\n";
     cout << "TimeSteppingCombinedProjection::advanceToEvent begin :\n";
     cout << "==================================================== :\n";
-    cout << "_nbIndexSetsIteration =" << _nbIndexSetsIteration << "  :\n";
+    cout << "kindexset =" << kindexset << "  :\n";
     SP::InteractionsGraph indexSet0 = topo->indexSet(0);
     cout << "indexSet0->size() " << indexSet0->size()   << endl;
 
@@ -307,11 +304,16 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       (*it)->y_k(level)->display();
     }
 
-#endif
-    if (_nbIndexSetsIteration > _kIndexSetMax)
+
+
+
+
+    if (kindexset > _kIndexSetMax)
     {
-      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection _nbIndexSetsIteration >  _kIndexSetMax ");
+      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection kindexset >  _kIndexSetMax ");
     }
+
+#endif
 
 
 
@@ -321,7 +323,6 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     cout << "TimeStepping::newtonSolve begin :\n";
 #endif
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-    _cumulatedNewtonNbSteps += getNewtonNbSteps();
 #ifdef TSPROJ_DEBUG
     cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
     cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
@@ -387,7 +388,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
     bool runningProjection = false;
-    _nbProjectionIteration = 0;
+    unsigned int cmp = 0;
     SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
 
 
@@ -446,18 +447,18 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         d->addWorkVector(d->q(), DynamicalSystem::qtmp);
       }
       else
-        RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
     }
 
 
 
-    _nbProjectionIteration = 0;
 
-    while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
+
+    while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
     {
-      _nbProjectionIteration++;
+      cmp++;
 #ifdef TSPROJ_DEBUG
-      printf("TimeSteppingCombinedProjection projection step = %d\n", _nbProjectionIteration);
+      printf("TimeSteppingCombinedProjection projection step = %d\n", cmp);
 #endif
 
       // Zeroing Lambda Muliplier of indexSet()
@@ -475,7 +476,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       info = 0;
 #ifdef TSPROJ_DEBUG
-      cout << "TimeSteppingCombinedProjection compute OSNSP." << endl ;
+      cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
 #endif
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
@@ -517,8 +518,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
           SP::SiconosVector qtmp = d->getWorkVector(DynamicalSystem::qtmp);
           if (d->p(0))
           {
-            //*q = * qtmp +  *d->p(0);
-            *q +=  *d->p(0);
+            *q = * qtmp +  *d->p(0);
+            //*q +=  *d->p(0);
           }
 #ifdef TSPROJ_DEBUG
           std::cout << " q=" << std::endl;
@@ -562,7 +563,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       }
 
 
-      cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+      cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << cmp << "\n";
 #endif
 
       //cout<<"during projection before normalizing of q:\n";
@@ -570,12 +571,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //{
       //  (*it)->relation()->computeh(getTkp1());
       //}
-    } // end while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
+    } // end while ((runningProjection && cmp < _projectionMaxIteration) && _doCombinedProj)
 
-    _nbCumulatedProjectionIteration += _nbProjectionIteration ;
-    if (_nbProjectionIteration == _projectionMaxIteration)
+
+    if (cmp == _projectionMaxIteration)
     {
-      cout << "TimeSteppingCombinedProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  << endl ;
+      cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
       printf("              max criteria equality =  %e.\n", _maxViolationEquality);
       printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     }
@@ -634,9 +635,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #endif
 
   }// end  while (!_isIndexSetsStable)
-#ifdef TSPROJ_DEBUG
-  cout << "TimeSteppingCombinedProjection::indexset stable end : Number of iterations=" << _nbIndexSetsIteration << "\n";
-#endif
+
   return;
 }
 

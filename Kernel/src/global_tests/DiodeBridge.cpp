@@ -67,8 +67,8 @@ bool DiodeBridge()
   try
   {
     // --- Dynamical system specification ---
-    SP::SimpleVector init_state;
-    init_state.reset(new SimpleVector(2));
+    SP::SiconosVector init_state;
+    init_state.reset(new SiconosVector(2));
     init_state->setValue(0, Vinit);
 
     SP::SimpleMatrix LS_A;

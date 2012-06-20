@@ -359,7 +359,7 @@ double D1MinusLinear::computeResidu()
 
     if (d->p(2))
     {
-      SP::SiconosVector dummy(new SimpleVector(*(d->p(2)))); // value = contact force
+      SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
       M->PLUForwardBackwardInPlace(*dummy);
       *residuFree -= 0.5 * h**dummy;
 
@@ -421,11 +421,11 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    Xfree = inter->workX();
+    *Xfree = *inter->workX();
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    Xfree  = inter->workFree();
+    *Xfree  = *inter->workFree();
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
@@ -504,7 +504,7 @@ void D1MinusLinear::updateState(const unsigned int level)
 
     if (d->p(1))
     {
-      SP::SiconosVector dummy(new SimpleVector(*(d->p(1)))); // value = nonsmooth impulse
+      SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
       M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
       *v += *dummy; // add free velocity
       DEBUG_PRINT("\nRIGHT IMPULSE\n");

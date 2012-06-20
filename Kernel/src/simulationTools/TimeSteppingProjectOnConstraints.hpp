@@ -45,10 +45,6 @@ protected:
    */
   unsigned int _indexSetLevelForProjection;
 
-  /** Number of iteration of projection
-   */
-  unsigned int _nbProjectionIteration;
-
   /** tolerance for the violation of the equality
    *  constraints at the  position level.
    */
@@ -106,13 +102,6 @@ public:
   virtual void updateWorldFromDS()
   {
     ;
-  }
-
-  /** get the Number of iteration of projection
-   */
-  inline unsigned int nbProjectionIteration()
-  {
-    return _nbProjectionIteration;
   }
 
   inline void setConstraintTol(double v)

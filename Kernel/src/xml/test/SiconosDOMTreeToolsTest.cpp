@@ -147,7 +147,7 @@ void SiconosDOMTreeToolsTest::testGetSiconosVectorValue()
   child = root->children;
   child = child->next;
 
-  /*SP::SiconosVector/SimpleVector v;
+  /*SP::SiconosVector/SiconosVector v;
   v = SiconosDOMTreeTools::getSiconosVectorValue(child);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVectorValue : v", v(3) == 4, true);
@@ -335,14 +335,14 @@ void SiconosDOMTreeToolsTest::testGetSiconosVectorValue()
   child = child->next;
 
   /*SiconosVector*/
-  SimpleVector v1;
+  SiconosVector v1;
   v1 = SiconosDOMTreeTools::getSiconosVectorValue(child);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetSiconosVectorValue : v1", v1(3) == 4, true);
 
   v1(3) = 3.1415;
   SiconosDOMTreeTools::setSiconosVectorNodeValue(child, v1 /*, 5*/);
   /*SiconosVector*/
-  SimpleVector vv;
+  SiconosVector vv;
   vv = SiconosDOMTreeTools::getSiconosVectorValue(child);
 
 
@@ -454,12 +454,12 @@ void SiconosDOMTreeToolsTest::testCreateVectorNode()
   child = child->next;
 
   /*SiconosVector*/
-  SimpleVector vect("vector.dat", true);
+  SiconosVector vect("vector.dat", true);
 
   xmlNode* node = SiconosDOMTreeTools::createVectorNode(root, "TestVector", vect);
 
   /*SiconosVector*/
-  SimpleVector vectRes;
+  SiconosVector vectRes;
   vectRes = SiconosDOMTreeTools::getSiconosVectorValue(node);
   CPPUNIT_ASSERT_EQUAL(vect.size(), vectRes.size());
   CPPUNIT_ASSERT_EQUAL(vect == vectRes, true);
@@ -653,7 +653,7 @@ void SiconosDOMTreeToolsTest::testGetVectorValueBadSizeException()
   child = child->next;
 
   /*SiconosVector*/
-  SimpleVector v;
+  SiconosVector v;
   v = SiconosDOMTreeTools::getSiconosVectorValue(child);
 }
 

@@ -68,7 +68,7 @@ void LinearSMCOT2::initialize(SP::Model m)
   }
   else
   {
-    _u.reset(new SimpleVector(_nDim, 0));
+    _u.reset(new SiconosVector(_nDim, 0));
 
     // XXX really stupid stuff
     _DS->setzPtr(_u);
@@ -76,7 +76,7 @@ void LinearSMCOT2::initialize(SP::Model m)
   _indx = 0;
   //  _Phi.reset(new SimpleMatrix(_nDim, _nDim));
   //  _Phi->eye();
-  //  _Xold.reset(new SimpleVector(_nDim));
+  //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
   double _t0 = _model->t0();
   double _T = _model->finalT();
@@ -84,18 +84,18 @@ void LinearSMCOT2::initialize(SP::Model m)
   _timeDPhi.reset(new TimeDiscretisation(*_timeDiscretisation));
   _timeDPred.reset(new TimeDiscretisation(*_timeDiscretisation));
 
-  //  _XPhi.reset(new SimpleVector(_nDim));
+  //  _XPhi.reset(new SiconosVector(_nDim));
   //  (*_XPhi) = _DS->getX0();
   //  _DSPhi->setXPtr(_XPhi);
   _XPhi = _DSPhi->x();
 
-  //  _Xhat.reset(new SimpleVector(_nDim));
+  //  _Xhat.reset(new SiconosVector(_nDim));
   //  *_Xhat = _DS->getX0();
   // _DSPred->setXPtr(_Xhat);
   _Xhat = _DSPred->x();
   _DSPred->setb(_u);
 
-  //  _Xhat.reset(new SimpleVector(_nDim, 0));
+  //  _Xhat.reset(new SiconosVector(_nDim, 0));
   //  _DSPred->setXPtr(_Xhat);
 
   _modelPhi.reset(new Model(_t0, _T));
@@ -135,7 +135,7 @@ void LinearSMCOT2::actuate()
   _simulPhi->processEvents();
   _simulPhi->advanceToEvent();
   // XXX small hack here
-  SP::SimpleVector CS(new SimpleVector(_nDim));
+  SP::SiconosVector CS(new SiconosVector(_nDim));
   _Csurface->getRow(0, *CS);
   _coeff = -1 / (CS->sum() * hCurrent);
   double uEq = inner_prod(*CS, _coeff * (*_XPhi + *_X - *_Xhat));

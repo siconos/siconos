@@ -162,8 +162,8 @@ void  LagrangianScleronomousR::computeNonLinearH2dot(double time)
   // Compute the H Jacobian dot
   LagrangianScleronomousR::computeJachqDot(time);
   //
-  _NLh2dot.reset(new SimpleVector(_jachqDot->size(0)));
-  (*_NLh2dot) = prod(*_jachqDot, *_workXdot);
+  _NLh2dot.reset(new SiconosVector(_jachqDot->size(0)));
+  prod(*_jachqDot, *_workXdot, *_NLh2dot);
 }
 
 void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)

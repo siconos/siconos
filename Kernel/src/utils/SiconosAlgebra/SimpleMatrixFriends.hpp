@@ -160,9 +160,9 @@ void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool)
 /** prod(A, x) returns the product Ax
   \param A a SiconosMatrix
   \param x a SiconosVector
-  \return a SimpleVector
+  \return a SiconosVector
   */
-const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x);
+const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x);
 
 /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
   \param A a SiconosMatrix
@@ -171,6 +171,22 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x);
   \param init a bool (default = true)
   */
 void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
+
+/** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+  */
+void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init = true);
+
+/** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
+  \param A a SiconosMatrix
+  \param x a SiconosVector
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+  */
+void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init = true);
 
 /** prod(a, A, x, y, init) computes y = a*A*x or y += a*A*x if init = false
   \param a a double
@@ -188,6 +204,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   \param init a bool (default = true)
   */
 void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool init = true);
+void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init = true);
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
   \param A a SiconosMatrix

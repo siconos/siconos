@@ -46,7 +46,7 @@ private:
   LagrangianDSXML ds;
   SiconosMatrix matrixRef;
   /*SiconosVector*/
-  SimpleVector vectorRef;
+  SiconosVector vectorRef;
 
 
   // on nomme la suite de tests

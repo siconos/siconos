@@ -58,12 +58,12 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
   {
     if (foldsxml->isBPlugin())
     {
-      _b.reset(new SimpleVector(_n));
+      _b.reset(new SiconosVector(_n));
       plugin = foldsxml->getBPlugin();
       setComputebFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      _b.reset(new SimpleVector(foldsxml->getBVector()));
+      _b.reset(new SiconosVector(foldsxml->getBVector()));
   }
 
   checkDynamicalSystem();
@@ -79,9 +79,9 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& AP
   _pluginA->setComputeFunction(APlugin);
   _pluginb->setComputeFunction(bPlugin);
 
-  _f.reset(new SimpleVector(getDim()));
+  _f.reset(new SiconosVector(getDim()));
   _A.reset(new SimpleMatrix(getDim(), getDim()));
-  _b.reset(new SimpleVector(getDim()));
+  _b.reset(new SiconosVector(getDim()));
 
   checkDynamicalSystem();
 }
@@ -96,9 +96,9 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
   _pluginA->setComputeFunction(APlugin);
   _pluginb->setComputeFunction(bPlugin);
 
-  _f.reset(new SimpleVector(getDim()));
+  _f.reset(new SiconosVector(getDim()));
   _A.reset(new SimpleMatrix(getDim(), getDim()));
-  _b.reset(new SimpleVector(getDim()));
+  _b.reset(new SiconosVector(getDim()));
 
 
   checkDynamicalSystem();
@@ -110,7 +110,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderNonLinearDS(newX0)
 {
-  _f.reset(new SimpleVector(getDim()));
+  _f.reset(new SiconosVector(getDim()));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
@@ -134,7 +134,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 
   _A = newA;
   _b = newB;
-  _f.reset(new SimpleVector(getDim()));
+  _f.reset(new SiconosVector(getDim()));
 
   checkDynamicalSystem();
 }
@@ -145,7 +145,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
   _A.reset(new SimpleMatrix(*(FOLDS.A())));
 
   if (_b)
-    _b.reset(new SimpleVector(*(FOLDS.b())));
+    _b.reset(new SiconosVector(*(FOLDS.b())));
 
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
@@ -220,7 +220,7 @@ void FirstOrderLinearDS::setComputebFunction(const string& pluginPath, const str
   //  Plugin::setFunction(&_bPtr, pluginPath, functionName);
   _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
-    _b.reset(new SimpleVector(getDim()));
+    _b.reset(new SiconosVector(getDim()));
   //  SSL::buildPluginName(pluginNamebPtr,pluginPath,functionName);
 }
 

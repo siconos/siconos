@@ -69,8 +69,8 @@ protected:
       _q[0:2] : the coordinates of the center of mass.
       _q[3:6] : a quaternion representing the orientation of the solid.
   */
-  SP::SimpleVector _q;
-  SP::SimpleVector _deltaq;
+  SP::SiconosVector _q;
+  SP::SiconosVector _deltaq;
   SP::SiconosVector _q0;
   /** The time derivative of q*/
   SP::SiconosVector _dotq;
@@ -236,11 +236,11 @@ public:
   /** get q
    *  \return pointer on a SiconosVector
    */
-  inline SP::SimpleVector q() const
+  inline SP::SiconosVector q() const
   {
     return _q;
   }
-  inline SP::SimpleVector deltaq() const
+  inline SP::SiconosVector deltaq() const
   {
     return _deltaq;
   }
@@ -346,7 +346,7 @@ public:
   /** set fExt to pointer newPtr
    *  \param   newPtr a SP to a Simple vector
    */
-  inline void setFExtPtr(SP::SimpleVector newPtr)
+  inline void setFExtPtr(SP::SiconosVector newPtr)
   {
     _fExt = newPtr;
   }
@@ -354,7 +354,7 @@ public:
   /** set mExt to pointer newPtr
     *  \param newPtr a SP to a Simple vector
     */
-  inline void setMExtPtr(SP::SimpleVector newPtr)
+  inline void setMExtPtr(SP::SiconosVector newPtr)
   {
     _mExt = newPtr;
   }
@@ -364,9 +364,9 @@ public:
   // -- forces --
 
   /** get the value of fL
-   *  \return SimpleVector
+   *  \return SiconosVector
    */
-  inline const SimpleVector getForces() const
+  inline const SiconosVector getForces() const
   {
     return *_forces;
   }

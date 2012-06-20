@@ -88,14 +88,14 @@ void Relay::initialize(SP::Simulation sim)
 
   // initialize memory for _lb and _ub
   if (! _lb)
-    _lb.reset(new SimpleVector(maxSize()));
+    _lb.reset(new SiconosVector(maxSize()));
   else
   {
     if (_lb->size() != maxSize())
       _lb->resize(maxSize());
   }
   if (! _ub)
-    _ub.reset(new SimpleVector(maxSize()));
+    _ub.reset(new SiconosVector(maxSize()));
   else
   {
     if (_ub->size() != maxSize())

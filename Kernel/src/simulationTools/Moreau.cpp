@@ -274,7 +274,7 @@ void Moreau::initialize()
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
+    // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
 
     // W initialization
     initW(t0, *itDS);
@@ -469,7 +469,7 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
     SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[dsN];
 
-    SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+    SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
     int columnindex = 0;
 
@@ -775,7 +775,7 @@ double Moreau::computeResidu()
         //d->computeForces(t);
         // or  forces(ti+1, v_k,i+1, q(v_k,i+1))
         //or
-        SP::SiconosVector qbasedonv(new SimpleVector(*qold));
+        SP::SiconosVector qbasedonv(new SiconosVector(*qold));
         *qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
         d->computeForces(t, qbasedonv, v);
         coef = -h * _theta;
@@ -790,7 +790,7 @@ double Moreau::computeResidu()
 
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -875,10 +875,10 @@ double Moreau::computeResidu()
       //   ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v + K(q_i+h(1-theta)v_i+h theta v)))
       //                     +hFext_theta     (2)
       //       SP::SiconosMatrix M = d->mass();
-      //       SP::SiconosVector realresiduFree (new SimpleVector(*residuFree));
+      //       SP::SiconosVector realresiduFree (new SiconosVector(*residuFree));
       //       realresiduFree->zero();
       //       prod(*M, (*v-*vold), *realresiduFree); // residuFree = M(v - vold)
-      //       SP::SiconosVector qkplustheta (new SimpleVector(*qold));
+      //       SP::SiconosVector qkplustheta (new SiconosVector(*qold));
       //       qkplustheta->zero();
       //       *qkplustheta = *qold + h *((1-_theta)* *vold + _theta* *v);
       //       if (C){
@@ -913,7 +913,7 @@ double Moreau::computeResidu()
 
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -1017,7 +1017,7 @@ void Moreau::computeFreeState()
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
-  //  SimpleVector *rold = static_cast<SimpleVector*>(d->rMemory()->getSiconosVector(0));
+  //  SiconosVector *rold = static_cast<SiconosVector*>(d->rMemory()->getSiconosVector(0));
 
   // Iteration through the set of Dynamical Systems.
   //
@@ -1331,9 +1331,9 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::SiconosVector Xq;
+  SP::SiconosVector Xq(new SiconosVector());
   SP::SiconosVector Yp;
-  SP::SiconosVector Xfree;
+  SP::SiconosVector Xfree(new SiconosVector());
 
   SP::SiconosVector H_alpha;
 
@@ -1390,32 +1390,20 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
     if (CT)
     {
-
-      assert(Xfree);
-      if (Xfree->size() == 0)
-      {
-        // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding interactionBlock in each Interactionfor each ds of the
-        // current Interaction.
-        ConstDSIterator itDS;
-        for (itDS = mainInteraction->dynamicalSystemsBegin();
-             itDS != mainInteraction->dynamicalSystemsEnd();
-             ++itDS)
-        {
-          //osi = osiMap[*itDS];
-          mainInteraction->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-        }
-      }
-      assert(Yp);
-
       coord[3] = CT->size(1);
       coord[5] = CT->size(1);
-      // printf("LinearOSNS: computing q: CT\n");
-      // CT->display();
-      // printf("LinearOSNS: computing q: Xfree and _q\n");
-      // Xfree->display();
-      subprod(*CT, *Xfree, *Yp, coord, true);
-      //        _q->display();
+      assert(Yp);
+      assert(Xfree);
+      // creates a POINTER link between workX[ds] (xfree) and the
+      // corresponding interactionBlock in each Interactionfor each ds of the
+      // current Interaction.
+      mainInteraction->setWorkFree();
+
+      subprod(*CT, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
+      if (mainInteraction->dynamicalSystems()->size() == 2)
+      {
+        subprod(*CT, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+      }
     }
 
   }
@@ -1427,32 +1415,26 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     {
 
       assert(Xfree);
-      if (Xfree->size() == 0)
-      {
-        // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding interactionBlock in each Interactionfor each ds of the
-        // current Interaction.
-        ConstDSIterator itDS;
-        for (itDS = mainInteraction->dynamicalSystemsBegin();
-             itDS != mainInteraction->dynamicalSystemsEnd();
-             ++itDS)
-        {
-          //osi = osiMap[*itDS];
-          mainInteraction->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-        }
-      }
-      assert(Yp);
       assert(Xq);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
+      // creates a POINTER link between workX[ds] (xfree) and the
+      // corresponding interactionBlock in each Interactionfor each ds of the
+      // current Interaction.
+      mainInteraction->setWorkFree();
+
       if (_useGammaForRelation)
       {
         subprod(*C, *Xq, *Yp, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        subprod(*C, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
+        if (mainInteraction->dynamicalSystems()->size() == 2)
+        {
+          subprod(*C, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+        }
       }
     }
 
@@ -1509,7 +1491,8 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
       if (F)
       {
-        SP::SiconosVector  workZ = inter->workZ();
+        SP::SiconosVector workZ;
+        *workZ = *inter->workZ();
         coord[3] = F->size(1);
         coord[5] = F->size(1);
         subprod(*F, *workZ, *Yp, coord, false);
@@ -1707,7 +1690,7 @@ void Moreau::updateState(const unsigned int level)
 
 
       int bc = 0;
-      SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
+      SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
       if (d->boundaryConditions())
       {
@@ -1856,7 +1839,7 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   if (y <= 0)
     DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
 #endif
-  return (y <= 0.0);
+  return (y <= 0);
 }
 
 
@@ -1878,7 +1861,7 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   if (y > 0)
     DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
 #endif
-  return (y > 0.0);
+  return (y > 0);
 }
 
 

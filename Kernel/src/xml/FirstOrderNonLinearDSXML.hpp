@@ -25,7 +25,7 @@
 #define __FirstOrderNonLinearDSXML__
 
 #include "DynamicalSystemXML.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosMemory.hpp"
 
@@ -42,7 +42,7 @@ class SiconosMemory;
 class SiconosMemoryXML;
 class SimpleMatrix;
 class SiconosMatrix;
-class SimpleVector;
+class SiconosVector;
 class SiconosVector;
 
 /** XML management for FirstOrderNonLinearDS
@@ -85,9 +85,9 @@ public:
   virtual ~FirstOrderNonLinearDSXML();
 
   /** Returns initial state of the DynamicalSystem (x0)
-   *   \return a SimpleVector
+   *   \return a SiconosVector
    */
-  inline const SimpleVector getX0() const
+  inline const SiconosVector getX0() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(x0Node);
   }
@@ -103,9 +103,9 @@ public:
   }
 
   /** Returns the x state-vector of the DynamicalSystem
-   *   \return SimpleVector
+   *   \return SiconosVector
    */
-  inline const SimpleVector getx() const
+  inline const SiconosVector getx() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(xNode);
   }
@@ -170,9 +170,9 @@ public:
   }
 
   /** return f vector
-   *   \return SimpleVector
+   *   \return SiconosVector
    */
-  inline const SimpleVector getFVector() const
+  inline const SiconosVector getFVector() const
   {
     if (isFPlugin())
       XMLException::selfThrow("FirstOrderNonLinearDSXML - getFVector : f vector is not given since f is calculated using a plug-in");

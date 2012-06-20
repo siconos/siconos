@@ -101,9 +101,9 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  _workX.reset(new SimpleVector(sizeDS));
-  _workZ.reset(new SimpleVector(sizeZ));
-  _workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SiconosVector());
+  _workZ.reset(new SiconosVector());
+  _workY.reset(new SiconosVector(sizeY));
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not

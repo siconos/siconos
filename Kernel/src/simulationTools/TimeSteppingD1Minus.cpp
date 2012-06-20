@@ -65,17 +65,14 @@ void TimeSteppingD1Minus::initOSNS()
 
 void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
 {
-  for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
-    inter->workZ()->insertPtr((*it)->z());
+
+  inter->setWorkZ();
 
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
-    for (DSIterator it = inter->dynamicalSystemsBegin(); it != inter->dynamicalSystemsEnd(); ++it)
-    {
-      inter->workX()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
-      inter->workFree()->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
-    }
+    inter->setWorkXFromVelocity();
+    inter->setWorkFree();
   }
   else
     RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);

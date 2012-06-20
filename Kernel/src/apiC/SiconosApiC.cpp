@@ -428,8 +428,8 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
     // TODO: parameters verification
 
     // Vectors and Matrix creation
-    SimpleVector vQ0(nDof);
-    SimpleVector vVel0(nDof);
+    SiconosVector vQ0(nDof);
+    SiconosVector vVel0(nDof);
     SimpleMatrix  mMass(nDof, nDof);
 
 
@@ -477,8 +477,8 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
     nId = SetDSPtr->size();
 
     // Vectors and Matrix creation
-    SimpleVector vQ0(nDof);
-    SimpleVector vVel0(nDof);
+    SiconosVector vQ0(nDof);
+    SiconosVector vVel0(nDof);
 
     // Vectors initialisation with function parameters
     // Is there a solution less stupid ?
@@ -793,7 +793,7 @@ extern "C" int  sicSetFExt(int nIdDs, double *tFext)
 
     ndof = DS->getDim();
 
-    SP::SiconosVector  Vfext = new SimpleVector(ndof);
+    SP::SiconosVector  Vfext = new SiconosVector(ndof);
     for (int index = 0; index < ndof; index++)
       (*Vfext)(index) = tFext[index];
 
@@ -931,7 +931,7 @@ extern "C" int sicLagrangianLinearTIR(int nDof, int nRel, double *H, double *b)
       }
     }
 
-    SimpleVector vB(nRel);
+    SiconosVector vB(nRel);
 
     for (int i = 0; i < nRel; i++)
     {

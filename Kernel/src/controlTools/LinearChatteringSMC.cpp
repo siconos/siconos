@@ -56,14 +56,14 @@ void LinearChatteringSMC::initialize(SP::Model m)
   }
   else
   {
-    _u.reset(new SimpleVector(_nDim, 0));
+    _u.reset(new SiconosVector(_nDim, 0));
 
     // XXX really stupid stuff
     _DS->setzPtr(_u);
   }
   _indx = 0;
-  _s.reset(new SimpleVector(_sDim));
-  _lambda.reset(new SimpleVector(_sDim));
+  _s.reset(new SiconosVector(_sDim));
+  _lambda.reset(new SiconosVector(_sDim));
 }
 
 void LinearChatteringSMC::actuate()

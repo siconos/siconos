@@ -28,7 +28,7 @@
 class DynamicalSystem;
 class RelationXML;
 class SimpleMatrix;
-class SimpleVector;
+class SiconosVector;
 
 /** Lagrangian (Non Linear) Relation (generic interface)
  *
@@ -267,7 +267,7 @@ public:
   void display() const;
 
   /** return a block vector containing ths dynamical system's dof.*/
-  SP::SiconosVector q()
+  SP::BlockVector q()
   {
     return data[q0];
   }

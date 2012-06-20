@@ -176,7 +176,7 @@ SphereLDS::SphereLDS(double r, double m,
   _jacobianNNLq.reset(new SimpleMatrix(_ndof, _ndof));
   _jacobianNNLqDot.reset(new SimpleMatrix(_ndof, _ndof));
 
-  _NNL.reset(new SimpleVector(_ndof));
+  _NNL.reset(new SiconosVector(_ndof));
   _NNL->zero();
 
   computeNNL();

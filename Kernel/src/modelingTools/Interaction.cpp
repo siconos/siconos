@@ -266,11 +266,11 @@ void Interaction::initialize(double t0)
     }
 
 
-    _workX.reset(new BlockVector());
-    _workZ.reset(new BlockVector());
-    _workXq.reset(new BlockVector());
-    _workFree.reset(new BlockVector());
-    _workYp.reset(new SimpleVector(nslaw()->size()));
+    _workX.reset(new SiconosVector());
+    _workZ.reset(new SiconosVector());
+    _workXq.reset(new SiconosVector());
+    _workFree.reset(new SiconosVector());
+    _workYp.reset(new SiconosVector(nslaw()->size()));
 
     _initialized = true;
   }
@@ -316,9 +316,9 @@ void Interaction::initializeMemory()
        i < _upperLevelForOutput + 1 ;
        i++)
   {
-    _y[i].reset(new SimpleVector(nslawSize));
-    _yOld[i].reset(new SimpleVector(nslawSize));
-    _y_k[i].reset(new SimpleVector(nslawSize));
+    _y[i].reset(new SiconosVector(nslawSize));
+    _yOld[i].reset(new SiconosVector(nslawSize));
+    _y_k[i].reset(new SiconosVector(nslawSize));
     assert(_steps > 0);
     _yMemory[i].reset(new SiconosMemory(_steps));
     _y[i]->zero();
@@ -329,8 +329,8 @@ void Interaction::initializeMemory()
        i < _upperLevelForInput + 1 ;
        i++)
   {
-    _lambda[i].reset(new SimpleVector(nslawSize));
-    _lambdaOld[i].reset(new SimpleVector(nslawSize));
+    _lambda[i].reset(new SiconosVector(nslawSize));
+    _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();
   }
 
@@ -347,7 +347,7 @@ void Interaction::setY(const VectorOfVectors& newVector)
   _y.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _y[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
+    _y[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYPtr(const VectorOfVectors& newVector)
@@ -366,7 +366,7 @@ void Interaction::setY(const unsigned int  index, const SiconosVector& newY)
   // set y[index]
   if (! _y[index])
   {
-    _y[index].reset(new SimpleVector(newY));
+    _y[index].reset(new SiconosVector(newY));
   }
   else
   {
@@ -387,7 +387,7 @@ void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
   assert(!newY->isBlock() &&
          "Interaction::setYPtr(newY), newY is a block vector!");
 
-  _y[index] = boost::static_pointer_cast<SimpleVector>(newY);
+  _y[index] = boost::static_pointer_cast<SiconosVector>(newY);
 }
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
@@ -397,7 +397,7 @@ void Interaction::setYOld(const VectorOfVectors& newVector)
   _yOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _yOld[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
+    _yOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYOldPtr(const VectorOfVectors& newVector)
@@ -418,7 +418,7 @@ void Interaction::setYOld(const unsigned int  index, const SiconosVector& newYOl
   // set _yOld[index]
   if (! _yOld[index])
   {
-    _yOld[index].reset(new SimpleVector(newYOld));
+    _yOld[index].reset(new SiconosVector(newYOld));
   }
   else
   {
@@ -440,7 +440,7 @@ void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOl
          "Interaction::setYOldPtr(newY), newY is a block vector!");
 
   // set _yOld[index]
-  _yOld[index] = boost::static_pointer_cast<SimpleVector>(newYOld);
+  _yOld[index] = boost::static_pointer_cast<SiconosVector>(newYOld);
 }
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
@@ -450,7 +450,7 @@ void Interaction::setLambda(const VectorOfVectors& newVector)
   _lambda.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _lambda[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
+    _lambda[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
@@ -468,7 +468,7 @@ void Interaction::setLambda(const unsigned int  index, const SiconosVector& newL
   // set lambda[index]
   if (! _lambda[index])
   {
-    _lambda[index].reset(new SimpleVector(newLambda));
+    _lambda[index].reset(new SiconosVector(newLambda));
   }
   else
   {
@@ -490,7 +490,7 @@ void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newL
          "Interaction::setLambdaPtr(newLambda), newLambda is  a block vector! ");
 
   // set lambda[index]
-  _lambda[index] = boost::static_pointer_cast<SimpleVector>(newLambda);
+  _lambda[index] = boost::static_pointer_cast<SiconosVector>(newLambda);
 }
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
@@ -502,7 +502,7 @@ void Interaction::setLambdaOld(const VectorOfVectors& newVector)
   _lambdaOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    _lambdaOld[i].reset(new SimpleVector(*(newVector[i]))); // -> copy !
+    _lambdaOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
@@ -522,7 +522,7 @@ void Interaction::setLambdaOld(const unsigned int  index, const SiconosVector& n
   // set lambdaOld[index]
   if (! _lambdaOld[index])
   {
-    _lambdaOld[index].reset(new SimpleVector(newLambdaOld));
+    _lambdaOld[index].reset(new SiconosVector(newLambdaOld));
   }
   else
   {
@@ -542,7 +542,7 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector n
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is  a block vector! ");
 
   // set lambdaOld[index]
-  _lambdaOld[index] = boost::static_pointer_cast<SimpleVector>(newLambdaOld);
+  _lambdaOld[index] = boost::static_pointer_cast<SiconosVector>(newLambdaOld);
 }
 
 

@@ -35,12 +35,12 @@ void LagrangianDS::connectToDS()
   // One exception: zero and identity matrices, used to filled in M and jacobianfx.
 
   // Initial conditions
-  _x0.reset(new BlockVector(_q0, _velocity0));
+  _x0.reset(new SiconosVector(*_q0, *_velocity0));
 
   // Current State: \f$ x \f$ and rhs = \f$ \dot x \f$
 
-  _x[0].reset(new BlockVector(_q[0], _q[1]));
-  _x[1].reset(new BlockVector(_q[1], _q[2]));
+  _x[0].reset(new SiconosVector(*_q[0], *_q[1]));
+  _x[1].reset(new SiconosVector(*_q[1], *_q[2]));
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
 }
 void LagrangianDS::zeroPlugin()
@@ -67,14 +67,14 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
   // Current state
   _q.resize(3);
-  _q[0].reset(new SimpleVector(*_q0));
-  _q[1].reset(new SimpleVector(*_velocity0));
-  _q[2].reset(new SimpleVector(_ndof));
-  _residuFree.reset(new SimpleVector(getDim()));
-  //   _xp.reset(new SimpleVector(getDim()));
-  //   _xq.reset(new SimpleVector(getDim()));
-  //   mXfree.reset(new SimpleVector(getDim()));
-  //   r.reset(new SimpleVector(getDim()));
+  _q[0].reset(new SiconosVector(*_q0));
+  _q[1].reset(new SiconosVector(*_velocity0));
+  _q[2].reset(new SiconosVector(_ndof));
+  _residuFree.reset(new SiconosVector(getDim()));
+  //   _xp.reset(new SiconosVector(getDim()));
+  //   _xq.reset(new SiconosVector(getDim()));
+  //   mXfree.reset(new SiconosVector(getDim()));
+  //   r.reset(new SiconosVector(getDim()));
 
   // set allocation flags: true for required input, false for others
   _p.resize(3);
@@ -104,13 +104,13 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   if (! lgptr->hasQ0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, q0 is a required input");
 
-  _q0.reset(new SimpleVector(lgptr->getQ0())); // required node in xml file
+  _q0.reset(new SiconosVector(lgptr->getQ0())); // required node in xml file
   _ndof = _q0->size();
 
   if (! lgptr->hasVelocity0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, v0 is a required input");
 
-  _velocity0.reset(new SimpleVector(lgptr->getVelocity0())); // required node in xml file
+  _velocity0.reset(new SiconosVector(lgptr->getVelocity0())); // required node in xml file
 
   if (_velocity0->size() != _ndof)
     RuntimeException::selfThrow("LagrangianDS::xml constructor - size of input velocity0 differs from ndof");
@@ -120,16 +120,16 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   _q.resize(3);
 
   if (lgptr->hasQ())
-    _q[0].reset(new SimpleVector(lgptr->getQ())); // Means that first q is different from q0 ?? Strange case ...
+    _q[0].reset(new SiconosVector(lgptr->getQ())); // Means that first q is different from q0 ?? Strange case ...
   else
-    _q[0].reset(new SimpleVector(*_q0));           // initialize q with q0
+    _q[0].reset(new SiconosVector(*_q0));           // initialize q with q0
   if (lgptr->hasVelocity())
-    _q[1].reset(new SimpleVector(lgptr->getVelocity0())); // same remark as for q
+    _q[1].reset(new SiconosVector(lgptr->getVelocity0())); // same remark as for q
   else
-    _q[1].reset(new SimpleVector(*_velocity0));
+    _q[1].reset(new SiconosVector(*_velocity0));
 
-  _q[2].reset(new SimpleVector(_ndof));
-  _residuFree.reset(new SimpleVector(getDim()));
+  _q[2].reset(new SiconosVector(_ndof));
+  _residuFree.reset(new SiconosVector(getDim()));
   _p.resize(3);
   // Memories
   if (lgptr->hasQMemory())   // qMemory
@@ -159,7 +159,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
       setComputeFIntFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      _fInt.reset(new SimpleVector(lgptr->getFIntVector()));
+      _fInt.reset(new SiconosVector(lgptr->getFIntVector()));
   }
 
   // _fExt
@@ -171,7 +171,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
       setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      _fExt.reset(new SimpleVector(lgptr->getFExtVector()));
+      _fExt.reset(new SiconosVector(lgptr->getFExtVector()));
   }
 
   // NNL
@@ -183,7 +183,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
       setComputeNNLFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      _NNL.reset(new SimpleVector(lgptr->getNNLVector()));
+      _NNL.reset(new SiconosVector(lgptr->getNNLVector()));
   }
 
   // jacobian q of fInt
@@ -255,10 +255,10 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
   // Current state
   _q.resize(3);
-  _q[0].reset(new SimpleVector(*_q0));
-  _q[1].reset(new SimpleVector(*_velocity0));
-  _q[2].reset(new SimpleVector(_ndof));
-  _residuFree.reset(new SimpleVector(getDim()));
+  _q[0].reset(new SiconosVector(*_q0));
+  _q[1].reset(new SiconosVector(*_velocity0));
+  _q[2].reset(new SiconosVector(_ndof));
+  _residuFree.reset(new SiconosVector(getDim()));
 
 
   _p.resize(3);
@@ -276,10 +276,10 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
   // Current state
   _q.resize(3);
-  _q[0].reset(new SimpleVector(*_q0));
-  _q[1].reset(new SimpleVector(*_velocity0));
-  _q[2].reset(new SimpleVector(_ndof));
-  _residuFree.reset(new SimpleVector(getDim()));
+  _q[0].reset(new SiconosVector(*_q0));
+  _q[1].reset(new SiconosVector(*_velocity0));
+  _q[2].reset(new SiconosVector(_ndof));
+  _residuFree.reset(new SiconosVector(getDim()));
 
   // Mass
   setComputeMassFunction(SSL::getPluginName(massName), SSL::getPluginFunctionName(massName));
@@ -339,13 +339,13 @@ bool LagrangianDS::checkDynamicalSystem()
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
   if (!_p[level])
-    _p[level].reset(new SimpleVector(_ndof));
+    _p[level].reset(new SiconosVector(_ndof));
 }
 
 void LagrangianDS::initForces()
 {
 
-  _forces.reset(new SimpleVector(_ndof));
+  _forces.reset(new SiconosVector(_ndof));
 
   _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
   _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
@@ -411,19 +411,19 @@ void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
-    _z.reset(new SimpleVector(1));
+    _z.reset(new SiconosVector(1));
   if (_pluginNNL->fPtr && !_NNL)
-    _NNL.reset(new SimpleVector(_ndof));
+    _NNL.reset(new SiconosVector(_ndof));
   if (_pluginJacqDotNNL->fPtr && !_jacobianNNLqDot)
     _jacobianNNLqDot.reset(new SimpleMatrix(_ndof, _ndof));
   if (_pluginJacqNNL->fPtr && ! _jacobianNNLq)
     _jacobianNNLq.reset(new SimpleMatrix(_ndof, _ndof));
 
   if (_pluginFExt->fPtr && !_fExt)
-    _fExt.reset(new SimpleVector(_ndof));
+    _fExt.reset(new SiconosVector(_ndof));
 
   if (_pluginFInt->fPtr && ! _fInt)
-    _fInt.reset(new SimpleVector(_ndof));
+    _fInt.reset(new SiconosVector(_ndof));
   if (_pluginJacqFInt->fPtr && !_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
   if (_pluginJacqDotFInt->fPtr && !_jacobianFIntqDot)
@@ -435,14 +435,14 @@ void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
 
   //
   if (!_workFree)
-    _workFree.reset(new SimpleVector(getDim()));
+    _workFree.reset(new SiconosVector(getDim()));
   // Memory allocation for fL and its jacobians.
   initForces();
 
 
   if (_boundaryConditions)
   {
-    _reactionToBoundaryConditions.reset(new SimpleVector(_boundaryConditions->velocityIndices()->size()));
+    _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
   }
 
 
@@ -474,7 +474,7 @@ void LagrangianDS::setQ(const SiconosVector& newValue)
     RuntimeException::selfThrow("LagrangianDS - setQ: inconsistent input vector size ");
 
   if (! _q[0])
-    _q[0].reset(new SimpleVector(newValue));
+    _q[0].reset(new SiconosVector(newValue));
   else
     *_q[0] = newValue;
 }
@@ -493,7 +493,7 @@ void LagrangianDS::setQ0(const SiconosVector& newValue)
     RuntimeException::selfThrow("LagrangianDS - setQ0: inconsistent input vector size ");
 
   if (! _q0)
-    _q0.reset(new SimpleVector(newValue));
+    _q0.reset(new SiconosVector(newValue));
   else
     *_q0 = newValue;
 }
@@ -511,7 +511,7 @@ void LagrangianDS::setVelocity(const SiconosVector& newValue)
     RuntimeException::selfThrow("LagrangianDS - setVelocity: inconsistent input vector size ");
 
   if (! _q[1])
-    _q[1].reset(new SimpleVector(newValue));
+    _q[1].reset(new SiconosVector(newValue));
   else
     *_q[1] = newValue;
 }
@@ -542,7 +542,7 @@ void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)
     RuntimeException::selfThrow("LagrangianDS - setP: inconsistent input vector size ");
 
   if (! _p[level])
-    _p[level].reset(new SimpleVector(newValue));
+    _p[level].reset(new SiconosVector(newValue));
   else
     *(_p[level]) = newValue;
 }
@@ -999,7 +999,7 @@ void LagrangianDS::computePostImpactVelocity()
 {
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
-  SimpleVector tmp(*_p[1]);
+  SiconosVector tmp(*_p[1]);
   _workMatrix[invMass]->PLUForwardBackwardInPlace(tmp);
   *_q[1] += tmp;  // v+ = v- + p
 }

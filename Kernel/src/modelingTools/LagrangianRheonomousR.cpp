@@ -45,7 +45,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
     _pluginhDot->setComputeFunction(SSL::getPluginName(LRxml->gethDotPlugin()), SSL::getPluginFunctionName(LRxml->gethDotPlugin()));
   }
   else
-    _hDot.reset(new SimpleVector(LRxml->gethDotVector()));
+    _hDot.reset(new SiconosVector(LRxml->gethDotVector()));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
@@ -76,7 +76,7 @@ void LagrangianRheonomousR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   // hDot
   if (!_hDot)
-    _hDot.reset(new SimpleVector(sizeY));
+    _hDot.reset(new SiconosVector(sizeY));
   else
     _hDot->resize(sizeY);
   if (_pluginJachq->fPtr && !_jachq)

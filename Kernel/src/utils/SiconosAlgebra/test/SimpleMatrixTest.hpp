@@ -20,7 +20,7 @@
 #define __SimpleMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
@@ -160,7 +160,7 @@ private:
   SPC::SiconosMatrix A, B, Ab, Bb;
   SP::SimpleMatrix SimM;
   string fic1, fic2;
-  SP::SimpleVector vect1, vect2, vect3;
+  SP::SiconosVector vect1, vect2, vect3;
   SP::DenseMat  D;
   SP::TriangMat T, T2;
   SP::SymMat S, S2;

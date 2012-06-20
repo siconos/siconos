@@ -28,12 +28,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderLinearDSTest);
 
 void FirstOrderLinearDSTest::setUp()
 {
-  x0.reset(new SimpleVector(3));
+  x0.reset(new SiconosVector(3));
   (*x0)(0) = 1;
   (*x0)(1) = 2;
   (*x0)(2) = 3;
 
-  b0.reset(new SimpleVector(3));
+  b0.reset(new SiconosVector(3));
   (*b0)(0) = 4;
   (*b0)(1) = 5;
   (*b0)(2) = 6;
@@ -109,7 +109,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
   ds->initialize(time);
   ds->computeb(time);
   ds->computeA(time);
-  SP::SimpleVector x01(new SimpleVector(3));
+  SP::SiconosVector x01(new SiconosVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
@@ -118,7 +118,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2I : ", *(ds->b()) == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2J : ", *(ds->A()) == 2 * *A0, true);
 
-  SP::SimpleVector u0(new SimpleVector(2));
+  SP::SiconosVector u0(new SiconosVector(2));
   (*u0)(0) = 3;
   (*u0)(1) = 6;
   SP::SiconosMatrix T0(new SimpleMatrix("matT0.dat", true));
@@ -146,7 +146,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   ds->computeA(time);
   ds->computeb(time);
   ds->computeRhs(time);
-  SP::SimpleVector x01(new SimpleVector(3));
+  SP::SiconosVector x01(new SiconosVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;

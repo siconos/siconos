@@ -194,7 +194,7 @@ void MLCP2::computeq(double time)
     pos = M->getPositionOfInteractionBlock(*itCurrent);
     //update e(ti+1)
     SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
-    boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+    boost::static_pointer_cast<SiconosVector>(q)->addBlock(pos, *e);
   }
   SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
@@ -209,7 +209,7 @@ void MLCP2::computeq(double time)
       //update with ffree
       SP::DynamicalSystem  DSaux = *itDS;
       SP::SiconosVector  Vaux = Osi->getWorkX(DSaux);
-      boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *Vaux);
+      boost::static_pointer_cast<SiconosVector>(q)->addBlock(pos, *Vaux);
     }
 
   }

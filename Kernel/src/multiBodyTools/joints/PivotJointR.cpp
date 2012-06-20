@@ -25,7 +25,7 @@
 
 int PivotJointR::_sNbEqualities = 5;
 
-PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P, SP::SimpleVector A): KneeJointR(d1, d2, P)
+PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)
 {
   // SP::SiconosVector q1 = d1->q0();
   // ::boost::math::quaternion<double>    quat1(q1->getValue(3),-q1->getValue(4),-q1->getValue(5),-q1->getValue(6));
@@ -43,11 +43,11 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleV
 }
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SimpleVector P0, see KneeJointR documentation.
-   \param a SP::SimpleVector A, axis in the frame of the object.
+   \param a SP::SiconosVector P0, see KneeJointR documentation.
+   \param a SP::SiconosVector A, axis in the frame of the object.
    \param a bool, used only by the KneeJointR constructor see KneeJointR documentation.
 */
-PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
+PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::SiconosVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
 {
   _Ax = A->getValue(0);
   _Ay = A->getValue(1);
@@ -60,12 +60,12 @@ void PivotJointR::initComponents()
   KneeJointR::initComponents();
   //if (_d2){
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
-  //proj_with_q    _yProj.reset(new SimpleVector(7));
-  //_yProj.reset(new SimpleVector(5));
+  //proj_with_q    _yProj.reset(new SiconosVector(7));
+  //_yProj.reset(new SiconosVector(5));
   // }else{
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(6,7));
-  //proj_with_q    _yProj.reset(new SimpleVector(6));
-  //_yProj.reset(new SimpleVector(5));
+  //proj_with_q    _yProj.reset(new SiconosVector(6));
+  //_yProj.reset(new SiconosVector(5));
   // }
   //proj_with_q  _jachqProj->zero();
   //_yProj->zero();

@@ -24,7 +24,7 @@
 #define LinearOSNS_H
 
 #include "OneStepNSProblem.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "BlockCSRMatrix.hpp"
 #include <sys/time.h>
@@ -119,17 +119,17 @@ public:
 
   // --- W ---
   /** get the value of w, the initial state of the DynamicalSystem
-   *  \return a SimpleVector
+   *  \return a SiconosVector
    *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SimpleVector
+   *  lvalue => return SiconosVector
    */
-  inline const SimpleVector getW() const
+  inline const SiconosVector getW() const
   {
     return *_w;
   }
 
   /** get w, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector W() const
   {
@@ -151,11 +151,11 @@ public:
 
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an
-   *  lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an
+   *  lvalue => return SiconosVector
    */
-  inline const SimpleVector getz() const
+  inline const SiconosVector getz() const
   {
     return *_z;
   }
@@ -206,11 +206,11 @@ public:
 
   // --- Q ---
   /** get the value of q, the constant vector in the LinearOSNS
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an
-   *  lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an
+   *  lvalue => return SiconosVector
    */
-  inline const SimpleVector getQ() const
+  inline const SiconosVector getQ() const
   {
     return *_q;
   }

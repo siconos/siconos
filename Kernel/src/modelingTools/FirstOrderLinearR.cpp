@@ -169,7 +169,7 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
   if (!_e && _plugine->fPtr)
   {
     unsigned int sizeY = interaction()->getSizeOfY();
-    _e.reset(new SimpleVector(sizeY));
+    _e.reset(new SiconosVector(sizeY));
   }
 
   if (_e)
@@ -180,7 +180,7 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 
-  _workZ.reset(new SimpleVector(sizeZ));
+  _workZ.reset(new SiconosVector());
 }
 
 // // setters

@@ -32,10 +32,10 @@ public:
 
 
 public:
-  SP::SimpleVector _axe0;
+  SP::SiconosVector _axe0;
 
-  SP::SimpleVector _V1;
-  SP::SimpleVector _V2;
+  SP::SiconosVector _V1;
+  SP::SiconosVector _V2;
   double _G10G20d1x;
   double _G10G20d1y;
   double _G10G20d1z;
@@ -53,9 +53,9 @@ public:
   SP::NewtonEulerDS _d2;
 
   /*axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector axe);
+  PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axe);
   /*axe is the axis of the prismatic joint, in the absolute frame.*/
-  PrismaticJointR(SP::NewtonEulerDS d2, SP::SimpleVector axe);
+  PrismaticJointR(SP::NewtonEulerDS d2, SP::SiconosVector axe);
 
   void computeFromInitialPosition();
   void displayInitialPosition();

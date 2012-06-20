@@ -75,7 +75,7 @@ private:
   void End();
   // Members
 
-  SP::SiconosVector ref;
+  SP::BlockVector ref;
   std::vector<double> vq;
   SP::DenseVect dv;
   SP::SparseVect sv;

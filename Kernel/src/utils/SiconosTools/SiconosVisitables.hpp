@@ -43,7 +43,7 @@
   REGISTER(MLCPProjectOnConstraints)              \
   REGISTER(OSNSMultipleImpact)                    \
   REGISTER(FrictionContact)                       \
-  REGISTER(SimpleVector)                          \
+  REGISTER(SiconosVector)                          \
   REGISTER(SimpleMatrix)                          \
   REGISTER(BlockVector)                           \
   REGISTER(BlockMatrix)                           \

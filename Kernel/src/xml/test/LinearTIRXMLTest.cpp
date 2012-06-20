@@ -86,7 +86,7 @@ void LinearTIRXMLTest::testGetD()
 
 void LinearTIRXMLTest::testGeta()
 {
-  /*SiconosVector*/SimpleVector a;
+  /*SiconosVector*/SiconosVector a;
   a = LinearTIR.getA();
 
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : a.size()", a.size() == 8);

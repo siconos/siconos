@@ -56,7 +56,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include <boost/numeric/ublas/operation_sparse.hpp>
 
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "cholesky.hpp"
 #include "ioMatrix.hpp"
 #include "BlockVector.hpp"
@@ -1182,16 +1182,7 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
   {
     unsigned int numV = vOut.getNum();
     unsigned int pos = 0;
-    if (numV == 0) // vOut is Block
-    {
-      VectorOfVectors::iterator it;
-      for (it = vOut.begin(); it != vOut.end(); ++it)
-      {
-        getSubRow(r, pos, *it);
-        pos += (*it)->size();
-      }
-    }
-    else if (numV == 1)
+    if (numV == 1)
     {
 
       if (num == 1)
@@ -1238,18 +1229,6 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
   if (num == 6 || num == 7)
     SiconosMatrixException::selfThrow("setRow(row,v): current matrix is read-only (zero or identity).");
 
-  if (numV == 0) // vIn Block
-  {
-    VectorOfVectors::const_iterator it;
-    unsigned int pos = 0;
-
-    for (it = vIn.begin(); it != vIn.end(); ++it)
-    {
-      setSubRow(r, pos, *it);
-      pos += (*it)->size();
-    }
-  }
-  else
   {
     if (num == 1)
     {
@@ -1291,17 +1270,7 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
   {
     unsigned int numV = vOut.getNum();
 
-    if (numV == 0) // vOut is Block
-    {
-      VectorOfVectors::iterator it;
-      unsigned int pos = 0;
-      for (it = vOut.begin(); it != vOut.end(); ++it)
-      {
-        getSubCol(r, pos, *it);
-        pos += (*it)->size();
-      }
-    }
-    else if (numV == 1)
+    if (numV == 1)
     {
 
       if (num == 1)
@@ -1348,17 +1317,6 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
   if (num == 6 || num == 7)
     SiconosMatrixException::selfThrow("setCol(col,v): current matrix is read-only (zero or identity).");
 
-  if (numV == 0) // vIn Block
-  {
-    VectorOfVectors::const_iterator it;
-    unsigned int pos = 0;
-    for (it = vIn.begin(); it != vIn.end(); ++it)
-    {
-      setSubCol(r, pos, *it);
-      pos += (*it)->size();
-    }
-  }
-  else
   {
     if (num == 1)
     {
@@ -1402,16 +1360,8 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
     unsigned int numV = vOut->getNum();
     unsigned int subPos = pos;
     unsigned int nbEl = vOut->size();
-    if (numV == 0) // vOut is Block
-    {
-      VectorOfVectors::iterator it;
-      for (it = vOut->begin(); it != vOut->end(); ++it)
-      {
-        getSubRow(r, subPos, *it);
-        subPos += (*it)->size();
-      }
-    }
-    else if (numV == 1)
+
+    if (numV == 1)
     {
       if (num == 1)
       {
@@ -1467,17 +1417,6 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
   if (num == 6 || num == 7)
     SiconosMatrixException::selfThrow("setSubRow(row,v): current matrix is read-only (zero or identity).");
 
-  if (numV == 0) // vIn Block
-  {
-    VectorOfVectors::const_iterator it;
-    unsigned int subPos = pos;
-    for (it = vIn->begin(); it != vIn->end(); ++it)
-    {
-      setSubRow(r, subPos, *it);
-      subPos += (*it)->size();
-    }
-  }
-  else
   {
     unsigned int nbEl = vIn->size();
     if (num == 1)
@@ -1526,17 +1465,8 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
     unsigned int numV = vOut->getNum();
     unsigned int subPos = pos;
     unsigned int nbEl = vOut->size();
-    if (numV == 0) // vOut is Block
-    {
-      VectorOfVectors::iterator it;
-      for (it = vOut->begin(); it != vOut->end(); ++it)
-      {
-        getSubRow(r, subPos, *it);
-        subPos += (*it)->size();
-      }
-    }
 
-    else if (numV == 1)
+    if (numV == 1)
     {
       if (num == 1)
       {
@@ -1592,17 +1522,6 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
   if (num == 6 || num == 7)
     SiconosMatrixException::selfThrow("setSubCol(col,v): current matrix is read-only (zero or identity).");
 
-  if (numV == 0) // vIn Block
-  {
-    VectorOfVectors::const_iterator it;
-    unsigned int subPos = pos;
-    for (it = vIn->begin(); it != vIn->end(); ++it)
-    {
-      setSubCol(r, subPos, *it);
-      subPos += (*it)->size();
-    }
-  }
-  else
   {
     unsigned int nbEl = vIn->size();
     if (num == 1)
@@ -4423,157 +4342,194 @@ void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int s
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
-  if (!x->isBlock()) // if input vector is not block
+
+  // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+  // Then computation of y = subA*x + y.
+  unsigned int numA = A->getNum();
+  unsigned int numY = y->getNum();
+  unsigned int numX = x->getNum();
+  unsigned int sizeX = x->size();
+  unsigned int sizeY = y->size();
+
+  if (numX != numY)
+    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+
+  if (numY == 1 && numX == 1)
   {
-    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
-    // Then computation of y = subA*x + y.
-    unsigned int numA = A->getNum();
-    unsigned int numY = y->getNum();
-    unsigned int numX = x->getNum();
-    unsigned int sizeX = x->size();
-    unsigned int sizeY = y->size();
 
-    if (numX != numY)
-      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+    assert(y->dense() != x->dense());
 
-    if (numY == 1 && numX == 1)
-    {
-
-      assert(y->dense() != x->dense());
-
-      if (numA == 1)
-        noalias(*y->dense()) += prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 2)
-        noalias(*y->dense()) += prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 3)
-        noalias(*y->dense()) += prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 4)
-        noalias(*y->dense()) += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else //if(numA==5)
-        noalias(*y->dense()) += prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    }
-    else // x and y sparse
-    {
-      if (numA == 4)
-        *y->sparse() += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
-      else
-        SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
-    }
-
+    if (numA == 1)
+      noalias(*y->dense()) += prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 2)
+      noalias(*y->dense()) += prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 3)
+      noalias(*y->dense()) += prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 4)
+      noalias(*y->dense()) += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else //if(numA==5)
+      noalias(*y->dense()) += prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
   }
-  else // if block
+  else // x and y sparse
   {
-    VectorOfVectors::const_iterator it;
-    unsigned int startColBis = startCol;
-    for (it = x->begin(); it != x->end(); ++it)
-    {
-      private_addprod(A, startRow, startColBis, (*it), y);
-      startColBis += (*it)->size();
-    }
+    if (numA == 4)
+      *y->sparse() += prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
+    else
+      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
   }
 }
 
+void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::BlockVector x, SP::SiconosVector y)
+{
+  if (A->isBlock())
+    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+
+  VectorOfVectors::const_iterator it;
+  unsigned int startColBis = startCol;
+  for (it = x->begin(); it != x->end(); ++it)
+  {
+    private_addprod(A, startRow, startColBis, (*it), y);
+    startColBis += (*it)->size();
+  }
+
+}
+
+// x block, y siconos
+void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::BlockVector x, SP::SiconosVector y, bool init)
+{
+
+  // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
+
+  if (init) // y = subA * x , else y += subA * x
+    y->zero();
+  private_addprod(A, startRow, 0, x, y);
+}
+
 // x and y blocks
+void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::BlockVector x, SP::BlockVector y, bool init)
+{
+  unsigned int row = startRow;
+  VectorOfVectors::const_iterator it;
+  for (it = y->begin(); it != y->end(); ++it)
+  {
+    private_prod(A, row, x, *it, init);
+    row += (*it)->size();
+  }
+}
+
+// x block, y siconos
 void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector y, bool init)
 {
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
-  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
-  {
-    if (init) // y = subA * x , else y += subA * x
-      y->zero();
-    private_addprod(A, startRow, 0, x, y);
-  }
-  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
-  {
-    unsigned int row = startRow;
-    VectorOfVectors::const_iterator it;
-    for (it = y->begin(); it != y->end(); ++it)
-    {
-      private_prod(A, row, x, *it, init);
-      row += (*it)->size();
-    }
-  }
+  if (init) // y = subA * x , else y += subA * x
+    y->zero();
+  private_addprod(A, startRow, 0, x, y);
 }
 
-
+// x and y blocks
+void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::SiconosVector x, SP::BlockVector y, bool init)
+{
+  unsigned int row = startRow;
+  VectorOfVectors::const_iterator it;
+  for (it = y->begin(); it != y->end(); ++it)
+  {
+    private_prod(A, row, x, *it, init);
+    row += (*it)->size();
+  }
+}
 // With trans(A) ...
 void private_addprod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y)
 {
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for block matrix.");
 
-  if (!x->isBlock()) // if input vector is not block
+  // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+  // Then computation of y = subA*x + y.
+  unsigned int numA = A->getNum();
+  unsigned int numY = y->getNum();
+  unsigned int numX = x->getNum();
+  unsigned int sizeX = x->size();
+  unsigned int sizeY = y->size();
+
+  if (numX != numY)
+    SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x and y of different types.");
+
+  if (numY == 1 && numX == 1)
   {
-    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
-    // Then computation of y = subA*x + y.
-    unsigned int numA = A->getNum();
-    unsigned int numY = y->getNum();
-    unsigned int numX = x->getNum();
-    unsigned int sizeX = x->size();
-    unsigned int sizeY = y->size();
 
-    if (numX != numY)
-      SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x and y of different types.");
+    assert(y->dense() != x->dense());
 
-    if (numY == 1 && numX == 1)
-    {
-
-      assert(y->dense() != x->dense());
-
-      if (numA == 1)
-        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->dense()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 2)
-        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->triang()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 3)
-        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sym()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 4)
-        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else //if(numA==5)
-        noalias(*y->dense()) += prod(ublas::subrange(trans(*A->banded()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    }
-    else // x and y sparse
-    {
-      if (numA == 4)
-        *y->sparse() += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
-      else
-        SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x, y  sparse and A not sparse.");
-    }
-
+    if (numA == 1)
+      noalias(*y->dense()) += prod(ublas::subrange(trans(*A->dense()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 2)
+      noalias(*y->dense()) += prod(ublas::subrange(trans(*A->triang()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 3)
+      noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sym()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 4)
+      noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else //if(numA==5)
+      noalias(*y->dense()) += prod(ublas::subrange(trans(*A->banded()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
   }
-  else // if block
+  else // x and y sparse
   {
-    VectorOfVectors::const_iterator it;
-    unsigned int startColBis = startCol;
-    for (it = x->begin(); it != x->end(); ++it)
-    {
-      private_addprod((*it), A, startRow, startColBis, y);
-      startColBis += (*it)->size();
-    }
+    if (numA == 4)
+      *y->sparse() += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
+    else
+      SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x, y  sparse and A not sparse.");
   }
+}
+
+void private_addprod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y)
+{
+  VectorOfVectors::const_iterator it;
+  unsigned int startColBis = startCol;
+  for (it = x->begin(); it != x->end(); ++it)
+  {
+    private_addprod((*it), A, startRow, startColBis, y);
+    startColBis += (*it)->size();
+  }
+
 }
 
 void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::SiconosVector  y, bool init)
 {
-
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
+  if (init) // y = subA * x , else y += subA * x
+    y->zero();
+  private_addprod(x, A, startCol, 0 , y);
 
-  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
+}
+
+void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
+{
+  unsigned int col = startCol;
+  VectorOfVectors::const_iterator it;
+  for (it = y->begin(); it != y->end(); ++it)
   {
-    if (init) // y = subA * x , else y += subA * x
-      y->zero();
-    private_addprod(x, A, startCol, 0 , y);
+    private_prod(x, A, col, *it, init);
+    col += (*it)->size();
   }
-  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
+}
+
+void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::SiconosVector  y, bool init)
+{
+  // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
+  if (init) // y = subA * x , else y += subA * x
+    y->zero();
+  private_addprod(x, A, startCol, 0 , y);
+
+}
+
+void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
+{
+  unsigned int col = startCol;
+  VectorOfVectors::const_iterator it;
+  for (it = y->begin(); it != y->end(); ++it)
   {
-    unsigned int col = startCol;
-    VectorOfVectors::const_iterator it;
-    for (it = y->begin(); it != y->end(); ++it)
-    {
-      private_prod(x, A, col, *it, init);
-      col += (*it)->size();
-    }
+    private_prod(x, A, col, *it, init);
+    col += (*it)->size();
   }
 }
 
@@ -4582,54 +4538,41 @@ void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsi
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 
-  if (!x->isBlock()) // if input vector is not block
+  // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+  // Then computation of y = subA*x + y.
+  unsigned int numA = A->getNum();
+  unsigned int numY = y->getNum();
+  unsigned int numX = x->getNum();
+  unsigned int sizeX = x->size();
+  unsigned int sizeY = y->size();
+
+  if (numX != numY)
+    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+
+  if (numY == 1 && numX == 1)
   {
-    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
-    // Then computation of y = subA*x + y.
-    unsigned int numA = A->getNum();
-    unsigned int numY = y->getNum();
-    unsigned int numX = x->getNum();
-    unsigned int sizeX = x->size();
-    unsigned int sizeY = y->size();
 
-    if (numX != numY)
-      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+    assert(y->dense() != x->dense());
 
-    if (numY == 1 && numX == 1)
-    {
-
-      assert(y->dense() != x->dense());
-
-      if (numA == 1)
-        noalias(*y->dense()) += a * prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 2)
-        noalias(*y->dense()) += a * prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 3)
-        noalias(*y->dense()) += a * prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else if (numA == 4)
-        noalias(*y->dense()) += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-      else //if(numA==5)
-        noalias(*y->dense()) += a * prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    }
-    else // x and y sparse
-    {
-      if (numA == 4)
-        *y->sparse() += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
-      else
-        SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
-    }
-
+    if (numA == 1)
+      noalias(*y->dense()) += a * prod(ublas::subrange(*A->dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 2)
+      noalias(*y->dense()) += a * prod(ublas::subrange(*A->triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 3)
+      noalias(*y->dense()) += a * prod(ublas::subrange(*A->sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else if (numA == 4)
+      noalias(*y->dense()) += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
+    else //if(numA==5)
+      noalias(*y->dense()) += a * prod(ublas::subrange(*A->banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
   }
-  else // if block
+  else // x and y sparse
   {
-    VectorOfVectors::const_iterator it;
-    unsigned int startColBis = startCol;
-    for (it = x->begin(); it != x->end(); ++it)
-    {
-      private_addprod(a, A, startRow, startColBis, (*it), y);
-      startColBis += (*it)->size();
-    }
+    if (numA == 4)
+      *y->sparse() += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
+    else
+      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
   }
+
 }
 
 void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector  y, bool init)
@@ -4637,25 +4580,13 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
-  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
-  {
-    if (init) // y = subA * x , else y += subA * x
-      y->zero();
-    private_addprod(a, A, startRow, 0, x, y);
-  }
-  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
-  {
-    unsigned int row = startRow;
-    VectorOfVectors::const_iterator it;
-    for (it = y->begin(); it != y->end(); ++it)
-    {
-      private_prod(a, A, row, x, *it, init);
-      row += (*it)->size();
-    }
-  }
+  if (init) // y = subA * x , else y += subA * x
+    y->zero();
+  private_addprod(a, A, startRow, 0, x, y);
+
 }
 
-const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
+const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 {
   // To compute y = A * x
 
@@ -4705,19 +4636,6 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
           return (DenseVect)(prod(*A.banded(), *x.sparse()));
       }
     }
-    else // if (x.isBlock())
-    {
-      VectorOfVectors::const_iterator it;
-      SimpleVector res(A.size(0));
-      unsigned int start = 0;
-
-      for (it = x.begin(); it != x.end(); ++it)
-      {
-        private_addprod(createSPtrConstSiconosMatrix(A), 0, start, *it, createSPtrSiconosVector(res));
-        start += (*it)->size();
-      }
-      return res;
-    }
   }
 }
 
@@ -4761,188 +4679,185 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   {
 
     // === First case: y is not a block vector ===
-    if (numY != 0)
+    if (init)
     {
-      // if x is block: call of a specific function to treat each block
-      if (numX == 0)
+      if (&x != &y) // if no common memory between x and y.
       {
-        if (init)
-          y.zero();
-        unsigned int startRow = 0;
-        unsigned int startCol = 0;
-        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
-        // starting from position startRow in rows and startCol in columns.
-        // private_prod takes also into account the fact that each block of x can also be a block.
-        VectorOfVectors::const_iterator it;
-        for (it = x.begin(); it != x.end(); ++it)
+        if (numX == 1)
         {
-          private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
-          startCol += (*it)->size();
+          if (numY != 1)
+            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+          assert(y.dense() != x.dense());
+
+          if (numA == 1)
+            noalias(*y.dense()) = ublas::prod(*A.dense(), *x.dense());
+          else if (numA == 2)
+            noalias(*y.dense()) = ublas::prod(*A.triang(), *x.dense());
+          else if (numA == 3)
+            noalias(*y.dense()) = ublas::prod(*A.sym(), *x.dense());
+          else if (numA == 4)
+            noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.dense());
+          else //if(numA==5)
+            noalias(*y.dense()) = ublas::prod(*A.banded(), *x.dense());
+        }
+        else //if(numX == 4)
+        {
+          if (numY != 1 && numA != 4)
+            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+          if (numA == 1)
+            noalias(*y.dense()) = ublas::prod(*A.dense(), *x.sparse());
+          else if (numA == 2)
+            noalias(*y.dense()) = ublas::prod(*A.triang(), *x.sparse());
+          else if (numA == 3)
+            noalias(*y.dense()) = ublas::prod(*A.sym(), *x.sparse());
+          else if (numA == 4)
+          {
+            if (numY == 1)
+              noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.sparse());
+            else
+              noalias(*y.sparse()) = ublas::prod(*A.sparse(), *x.sparse());
+          }
+          else //if(numA==5)
+            noalias(*y.dense()) = ublas::prod(*A.banded(), *x.sparse());
         }
       }
-      else // If neither x nor y are block: direct call to ublas::prod.
+      else // if x and y are the same object => alias
       {
-        if (init)
+        if (numX == 1)
         {
-          if (&x != &y) // if no common memory between x and y.
-          {
-            if (numX == 1)
-            {
-              if (numY != 1)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-              assert(y.dense() != x.dense());
-
-              if (numA == 1)
-                noalias(*y.dense()) = ublas::prod(*A.dense(), *x.dense());
-              else if (numA == 2)
-                noalias(*y.dense()) = ublas::prod(*A.triang(), *x.dense());
-              else if (numA == 3)
-                noalias(*y.dense()) = ublas::prod(*A.sym(), *x.dense());
-              else if (numA == 4)
-                noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==5)
-                noalias(*y.dense()) = ublas::prod(*A.banded(), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numY != 1 && numA != 4)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) = ublas::prod(*A.dense(), *x.sparse());
-              else if (numA == 2)
-                noalias(*y.dense()) = ublas::prod(*A.triang(), *x.sparse());
-              else if (numA == 3)
-                noalias(*y.dense()) = ublas::prod(*A.sym(), *x.sparse());
-              else if (numA == 4)
-              {
-                if (numY == 1)
-                  noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.sparse());
-                else
-                  noalias(*y.sparse()) = ublas::prod(*A.sparse(), *x.sparse());
-              }
-              else //if(numA==5)
-                noalias(*y.dense()) = ublas::prod(*A.banded(), *x.sparse());
-            }
-          }
-          else // if x and y are the same object => alias
-          {
-            if (numX == 1)
-            {
-              if (numA == 1)
-                *y.dense() = ublas::prod(*A.dense(), *x.dense());
-              else if (numA == 2)
-                *y.dense() = ublas::prod(*A.triang(), *x.dense());
-              else if (numA == 3)
-                *y.dense() = ublas::prod(*A.sym(), *x.dense());
-              else if (numA == 4)
-                *y.dense() = ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==5)
-                *y.dense() = ublas::prod(*A.banded(), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numA == 1)
-                *y.sparse() = ublas::prod(*A.dense(), *x.sparse());
-              else if (numA == 2)
-                *y.sparse() = ublas::prod(*A.triang(), *x.sparse());
-              else if (numA == 3)
-                *y.sparse() = ublas::prod(*A.sym(), *x.sparse());
-              else if (numA == 4)
-                *y.sparse() = ublas::prod(*A.sparse(), *x.sparse());
-              else //if(numA==5)
-                *y.sparse() = ublas::prod(*A.banded(), *x.sparse());
-            }
-          }
+          if (numA == 1)
+            *y.dense() = ublas::prod(*A.dense(), *x.dense());
+          else if (numA == 2)
+            *y.dense() = ublas::prod(*A.triang(), *x.dense());
+          else if (numA == 3)
+            *y.dense() = ublas::prod(*A.sym(), *x.dense());
+          else if (numA == 4)
+            *y.dense() = ublas::prod(*A.sparse(), *x.dense());
+          else //if(numA==5)
+            *y.dense() = ublas::prod(*A.banded(), *x.dense());
         }
-        else // += case
+        else //if(numX == 4)
         {
-          if (&x != &y) // if no common memory between x and y.
-          {
-            if (numX == 1)
-            {
-              if (numY != 1)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) += ublas::prod(*A.dense(), *x.dense());
-              else if (numA == 2)
-                noalias(*y.dense()) += ublas::prod(*A.triang(), *x.dense());
-              else if (numA == 3)
-                noalias(*y.dense()) += ublas::prod(*A.sym(), *x.dense());
-              else if (numA == 4)
-                noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==5)
-                noalias(*y.dense()) += ublas::prod(*A.banded(), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numY != 1 && numA != 4)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) += ublas::prod(*A.dense(), *x.sparse());
-              else if (numA == 2)
-                noalias(*y.dense()) += ublas::prod(*A.triang(), *x.sparse());
-              else if (numA == 3)
-                noalias(*y.dense()) += ublas::prod(*A.sym(), *x.sparse());
-              else if (numA == 4)
-              {
-                if (numY == 1)
-                  noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.sparse());
-                else
-                  noalias(*y.sparse()) += ublas::prod(*A.sparse(), *x.sparse());
-              }
-              else //if(numA==5)
-                noalias(*y.dense()) += ublas::prod(*A.banded(), *x.sparse());
-            }
-          }
-          else // if x and y are the same object => alias
-          {
-            if (numX == 1)
-            {
-              if (numA == 1)
-                *y.dense() += ublas::prod(*A.dense(), *x.dense());
-              else if (numA == 2)
-                *y.dense() += ublas::prod(*A.triang(), *x.dense());
-              else if (numA == 3)
-                *y.dense() += ublas::prod(*A.sym(), *x.dense());
-              else if (numA == 4)
-                *y.dense() += ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==5)
-                *y.dense() += ublas::prod(*A.banded(), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numA == 1)
-                *y.sparse() += ublas::prod(*A.dense(), *x.sparse());
-              else if (numA == 2)
-                *y.sparse() += ublas::prod(*A.triang(), *x.sparse());
-              else if (numA == 3)
-                *y.sparse() += ublas::prod(*A.sym(), *x.sparse());
-              else if (numA == 4)
-                *y.sparse() += ublas::prod(*A.sparse(), *x.sparse());
-              else //if(numA==5)
-                *y.sparse() += ublas::prod(*A.banded(), *x.sparse());
-            }
-          }
+          if (numA == 1)
+            *y.sparse() = ublas::prod(*A.dense(), *x.sparse());
+          else if (numA == 2)
+            *y.sparse() = ublas::prod(*A.triang(), *x.sparse());
+          else if (numA == 3)
+            *y.sparse() = ublas::prod(*A.sym(), *x.sparse());
+          else if (numA == 4)
+            *y.sparse() = ublas::prod(*A.sparse(), *x.sparse());
+          else //if(numA==5)
+            *y.sparse() = ublas::prod(*A.banded(), *x.sparse());
         }
       }
     }
-    else // === Second case: y is a block vector ===
+    else // += case
     {
-      unsigned int startRow = 0;
-      VectorOfVectors::const_iterator it;
-      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
-      // private_prod takes into account the fact that x and y[i] may be block vectors.
-      for (it = y.begin(); it != y.end(); ++it)
+      if (&x != &y) // if no common memory between x and y.
       {
-        private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
-        startRow += (*it)->size();
+        if (numX == 1)
+        {
+          if (numY != 1)
+            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+          if (numA == 1)
+            noalias(*y.dense()) += ublas::prod(*A.dense(), *x.dense());
+          else if (numA == 2)
+            noalias(*y.dense()) += ublas::prod(*A.triang(), *x.dense());
+          else if (numA == 3)
+            noalias(*y.dense()) += ublas::prod(*A.sym(), *x.dense());
+          else if (numA == 4)
+            noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.dense());
+          else //if(numA==5)
+            noalias(*y.dense()) += ublas::prod(*A.banded(), *x.dense());
+        }
+        else //if(numX == 4)
+        {
+          if (numY != 1 && numA != 4)
+            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+          if (numA == 1)
+            noalias(*y.dense()) += ublas::prod(*A.dense(), *x.sparse());
+          else if (numA == 2)
+            noalias(*y.dense()) += ublas::prod(*A.triang(), *x.sparse());
+          else if (numA == 3)
+            noalias(*y.dense()) += ublas::prod(*A.sym(), *x.sparse());
+          else if (numA == 4)
+          {
+            if (numY == 1)
+              noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.sparse());
+            else
+              noalias(*y.sparse()) += ublas::prod(*A.sparse(), *x.sparse());
+          }
+          else //if(numA==5)
+            noalias(*y.dense()) += ublas::prod(*A.banded(), *x.sparse());
+        }
+      }
+      else // if x and y are the same object => alias
+      {
+        if (numX == 1)
+        {
+          if (numA == 1)
+            *y.dense() += ublas::prod(*A.dense(), *x.dense());
+          else if (numA == 2)
+            *y.dense() += ublas::prod(*A.triang(), *x.dense());
+          else if (numA == 3)
+            *y.dense() += ublas::prod(*A.sym(), *x.dense());
+          else if (numA == 4)
+            *y.dense() += ublas::prod(*A.sparse(), *x.dense());
+          else //if(numA==5)
+            *y.dense() += ublas::prod(*A.banded(), *x.dense());
+        }
+        else //if(numX == 4)
+        {
+          if (numA == 1)
+            *y.sparse() += ublas::prod(*A.dense(), *x.sparse());
+          else if (numA == 2)
+            *y.sparse() += ublas::prod(*A.triang(), *x.sparse());
+          else if (numA == 3)
+            *y.sparse() += ublas::prod(*A.sym(), *x.sparse());
+          else if (numA == 4)
+            *y.sparse() += ublas::prod(*A.sparse(), *x.sparse());
+          else //if(numA==5)
+            *y.sparse() += ublas::prod(*A.banded(), *x.sparse());
+        }
       }
     }
   }
+}
+
+
+void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
+{
+  if (init)
+    y.zero();
+  unsigned int startRow = 0;
+  unsigned int startCol = 0;
+  // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
+  // starting from position startRow in rows and startCol in columns.
+  // private_prod takes also into account the fact that each block of x can also be a block.
+  VectorOfVectors::const_iterator it;
+  for (it = x.begin(); it != x.end(); ++it)
+  {
+    private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
+    startCol += (*it)->size();
+  }
+}
+
+void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init)
+{
+  unsigned int startRow = 0;
+  VectorOfVectors::const_iterator it;
+  // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
+  //       // private_prod takes into account the fact that x and y[i] may be block vectors.
+  for (it = y.begin(); it != y.end(); ++it)
+  {
+    private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
+    startRow += (*it)->size();
+  }
+
 }
 
 void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init)
@@ -4983,59 +4898,6 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
 
   if (numA == 0)  // If A,x or y is Block
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for A block matrices.");
-  if (numY == 0)
-  {
-    BlockVector * pBY = (BlockVector*) &y;
-    unsigned int curPosInY = 0;
-    for (unsigned int numBlock = 0; numBlock < pBY->getNumberOfBlocks(); numBlock++)
-    {
-      SP::SiconosVector blockOfY = pBY->vector(numBlock);
-      unsigned int beginPosBlock = curPosInY;
-      unsigned int endPosBlock = curPosInY + blockOfY->size();
-      Index aCoord(8);
-      for (int ii = 0; ii < 8; ii++) aCoord[ii] = coord[ii];
-
-      /*if intersection of [r0y,r1y] with [beginPosBlock,endPosBlock] is null, continue*/
-      if (r0y >= endPosBlock || r1y <= beginPosBlock)
-      {
-        curPosInY += blockOfY->size();
-        continue;
-      }
-
-      /*first coordinate of pBY:*/
-      if (r0y <= beginPosBlock)
-        aCoord[6] = 0;
-      else
-        aCoord[6] = r0y - beginPosBlock;
-
-      /*first line of A:*/
-      if (beginPosBlock <= r0y)
-        aCoord[0] = r0A;
-      else
-        aCoord[0] = r0A + beginPosBlock - r0y;
-
-      /*last coordinate of pBY:*/
-      if (r1y >= endPosBlock)
-        aCoord[7] = blockOfY->size();
-      else
-        aCoord[7] = blockOfY->size() - (endPosBlock - r1y);
-
-      /*last line of A:*/
-      if (r1y <= endPosBlock)
-        aCoord[1] = r1A;
-      else
-        aCoord[1] = r1A - (r1y - endPosBlock);
-      aCoord[2] = c0A;
-      aCoord[3] = c1A;
-      aCoord[4] = r0x;
-      aCoord[5] = r1x;
-
-      subprod(A, x, *blockOfY, aCoord, init);
-
-      curPosInY += blockOfY->size();
-    }
-    return;
-  }
 
   if (numA == 6) // A = 0
   {
@@ -5048,7 +4910,6 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
     }
     //else nothing
   }
-
   else if (numA == 7) // A = identity
   {
     if (!init)
@@ -5065,61 +4926,6 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
 
   else // A is not 0 or identity
   {
-    if (numX == 0) // ie if x is a block vector
-    {
-      VectorOfVectors::const_iterator it;
-      // Number of the subvector of x that handles element at position coord[4]
-      std::size_t firstBlockNum = x.getNumVectorAtPos(coord[4]);
-      // Number of the subvector of x that handles element at position coord[5]
-      unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
-      Index subCoord = coord;
-      SPC::SiconosVector  tmp = x[firstBlockNum];
-      std::size_t subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-      const SP::Index xTab = x.tabIndex();
-      if (firstBlockNum != 0)
-      {
-        subCoord[4] -= (*xTab)[firstBlockNum - 1];
-        subCoord[5] =  std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
-      }
-      else
-        subCoord[5] =  std::min(coord[5], subSize);
-
-      if (firstBlockNum == lastBlockNum)
-      {
-        subprod(A, *tmp, y, subCoord, init);
-      }
-      else
-      {
-        unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
-        bool firstLoop = true;
-        subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
-        for (it = x.begin(); it != x.end(); ++it)
-        {
-          if ((*it)->getNum() == 0)
-            SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for x block of blocks ...");
-          if (xPos >= firstBlockNum && xPos <= lastBlockNum)
-          {
-            tmp = x[xPos];
-            if (firstLoop)
-            {
-              subprod(A, *tmp, y, subCoord, init);
-              firstLoop = false;
-            }
-            else
-            {
-              subCoord[2] += subCoord[5] - subCoord[4]; // !! old values for 4 and 5
-              subSize = tmp->size();
-              subCoord[4] = 0;
-              subCoord[5] = std::min(coord[5] - (*xTab)[xPos - 1], subSize);
-              subCoord[3] = subCoord[2] + subCoord[5] - subCoord[4];
-              subprod(A, *tmp, y, subCoord, false);
-            }
-          }
-          xPos++;
-        }
-      }
-    }
-    else
     {
       if (init)
       {
@@ -5484,26 +5290,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   {
 
     // === First case: y is not a block vector ===
-    if (numY != 0)
     {
-      // if x is block: call of a specific function to treat each block
-      if (numX == 0)
-      {
-        if (init)
-          y.zero();
-        unsigned int startRow = 0;
-        unsigned int startCol = 0;
-        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
-        // starting from position startRow in rows and startCol in columns.
-        // private_prod takes also into account the fact that each block of x can also be a block.
-        VectorOfVectors::const_iterator it;
-        for (it = x.begin(); it != x.end(); ++it)
-        {
-          private_addprod(a, createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
-          startCol += (*it)->size();
-        }
-      }
-      else // If neither x nor y are block: direct call to ublas::prod.
       {
         if (init)
         {
@@ -5651,18 +5438,6 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         }
       }
     }
-    else // === Second case: y is a block vector ===
-    {
-      unsigned int startRow = 0;
-      VectorOfVectors::const_iterator it;
-      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
-      // private_prod takes into account the fact that x and y[i] may be block vectors.
-      for (it = y.begin(); it != y.end(); ++it)
-      {
-        private_prod(a, createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
-        startRow += (*it)->size();
-      }
-    }
   }
 }
 
@@ -5704,188 +5479,167 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 
   else // A is not 0 or identity
   {
-    // === First case: y is not a block vector ===
-    if (numY != 0)
     {
-      // if x is block: call of a specific function to treat each block
-      if (numX == 0)
+      if (init)
       {
-        if (init)
-          y.zero();
-        unsigned int startRow = 0;
-        unsigned int startCol = 0;
-        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
-        // starting from position startRow in rows and startCol in columns.
-        // private_prod takes also into account the fact that each block of x can also be a block.
-        VectorOfVectors::const_iterator it;
-        for (it = x.begin(); it != x.end(); ++it)
+
+        if (&x != &y) // if no common memory between x and y.
         {
-          private_addprod(*it, createSPtrConstSiconosMatrix(A), startRow, startCol, createSPtrSiconosVector(y));
-          startCol += (*it)->size();
+          if (numX == 1)
+          {
+            if (numY != 1)
+              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+            if (numA == 1)
+              noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.dense());
+            else if (numA == 2)
+              noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.dense());
+            else if (numA == 3)
+              noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.dense());
+            else if (numA == 4)
+              noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.dense());
+            else //if(numA==5)
+              noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.dense());
+          }
+          else //if(numX == 4)
+          {
+            if (numY != 1 && numA != 4)
+              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+            if (numA == 1)
+              noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.sparse());
+            else if (numA == 2)
+              noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.sparse());
+            else if (numA == 3)
+              noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.sparse());
+            else if (numA == 4)
+            {
+              if (numY == 1)
+                noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.sparse());
+              else
+                noalias(*y.sparse()) = ublas::prod(trans(*A.sparse()), *x.sparse());
+            }
+            else //if(numA==5)
+              noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.sparse());
+          }
+        }
+        else // if x and y are the same object => alias
+        {
+          if (numX == 1)
+          {
+            if (numA == 1)
+              *y.dense() = ublas::prod(trans(*A.dense()), *x.dense());
+            else if (numA == 2)
+              *y.dense() = ublas::prod(trans(*A.triang()), *x.dense());
+            else if (numA == 3)
+              *y.dense() = ublas::prod(trans(*A.sym()), *x.dense());
+            else if (numA == 4)
+              *y.dense() = ublas::prod(trans(*A.sparse()), *x.dense());
+            else //if(numA==5)
+              *y.dense() = ublas::prod(trans(*A.banded()), *x.dense());
+          }
+          else //if(numX == 4)
+          {
+            if (numA == 1)
+              *y.sparse() = ublas::prod(trans(*A.dense()), *x.sparse());
+            else if (numA == 2)
+              *y.sparse() = ublas::prod(trans(*A.triang()), *x.sparse());
+            else if (numA == 3)
+              *y.sparse() = ublas::prod(trans(*A.sym()), *x.sparse());
+            else if (numA == 4)
+              *y.sparse() = ublas::prod(trans(*A.sparse()), *x.sparse());
+            else //if(numA==5)
+              *y.sparse() = ublas::prod(trans(*A.banded()), *x.sparse());
+          }
         }
       }
-      else // If neither x nor y are block: direct call to ublas::prod.
+      else // += case
       {
-        if (init)
+
+        if (&x != &y) // if no common memory between x and y.
         {
-
-          if (&x != &y) // if no common memory between x and y.
+          if (numX == 1)
           {
-            if (numX == 1)
-            {
-              if (numY != 1)
-                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+            if (numY != 1)
+              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
 
-              if (numA == 1)
-                noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.dense());
-              else if (numA == 2)
-                noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.dense());
-              else if (numA == 3)
-                noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.dense());
-              else if (numA == 4)
-                noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.dense());
-              else //if(numA==5)
-                noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numY != 1 && numA != 4)
-                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.sparse());
-              else if (numA == 2)
-                noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.sparse());
-              else if (numA == 3)
-                noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.sparse());
-              else if (numA == 4)
-              {
-                if (numY == 1)
-                  noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.sparse());
-                else
-                  noalias(*y.sparse()) = ublas::prod(trans(*A.sparse()), *x.sparse());
-              }
-              else //if(numA==5)
-                noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.sparse());
-            }
+            if (numA == 1)
+              noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.dense());
+            else if (numA == 2)
+              noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.dense());
+            else if (numA == 3)
+              noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.dense());
+            else if (numA == 4)
+              noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.dense());
+            else //if(numA==5)
+              noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else // if x and y are the same object => alias
+          else //if(numX == 4)
           {
-            if (numX == 1)
+            if (numY != 1 && numA != 4)
+              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+            if (numA == 1)
+              noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.sparse());
+            else if (numA == 2)
+              noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.sparse());
+            else if (numA == 3)
+              noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.sparse());
+            else if (numA == 4)
             {
-              if (numA == 1)
-                *y.dense() = ublas::prod(trans(*A.dense()), *x.dense());
-              else if (numA == 2)
-                *y.dense() = ublas::prod(trans(*A.triang()), *x.dense());
-              else if (numA == 3)
-                *y.dense() = ublas::prod(trans(*A.sym()), *x.dense());
-              else if (numA == 4)
-                *y.dense() = ublas::prod(trans(*A.sparse()), *x.dense());
-              else //if(numA==5)
-                *y.dense() = ublas::prod(trans(*A.banded()), *x.dense());
+              if (numY == 1)
+                noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.sparse());
+              else
+                noalias(*y.sparse()) += ublas::prod(trans(*A.sparse()), *x.sparse());
             }
-            else //if(numX == 4)
-            {
-              if (numA == 1)
-                *y.sparse() = ublas::prod(trans(*A.dense()), *x.sparse());
-              else if (numA == 2)
-                *y.sparse() = ublas::prod(trans(*A.triang()), *x.sparse());
-              else if (numA == 3)
-                *y.sparse() = ublas::prod(trans(*A.sym()), *x.sparse());
-              else if (numA == 4)
-                *y.sparse() = ublas::prod(trans(*A.sparse()), *x.sparse());
-              else //if(numA==5)
-                *y.sparse() = ublas::prod(trans(*A.banded()), *x.sparse());
-            }
+            else //if(numA==5)
+              noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
-        else // += case
+        else // if x and y are the same object => alias
         {
-
-          if (&x != &y) // if no common memory between x and y.
+          if (numX == 1)
           {
-            if (numX == 1)
-            {
-              if (numY != 1)
-                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.dense());
-              else if (numA == 2)
-                noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.dense());
-              else if (numA == 3)
-                noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.dense());
-              else if (numA == 4)
-                noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.dense());
-              else //if(numA==5)
-                noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numY != 1 && numA != 4)
-                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
-
-              if (numA == 1)
-                noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.sparse());
-              else if (numA == 2)
-                noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.sparse());
-              else if (numA == 3)
-                noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.sparse());
-              else if (numA == 4)
-              {
-                if (numY == 1)
-                  noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.sparse());
-                else
-                  noalias(*y.sparse()) += ublas::prod(trans(*A.sparse()), *x.sparse());
-              }
-              else //if(numA==5)
-                noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.sparse());
-            }
+            if (numA == 1)
+              *y.dense() += ublas::prod(trans(*A.dense()), *x.dense());
+            else if (numA == 2)
+              *y.dense() += ublas::prod(trans(*A.triang()), *x.dense());
+            else if (numA == 3)
+              *y.dense() += ublas::prod(trans(*A.sym()), *x.dense());
+            else if (numA == 4)
+              *y.dense() += ublas::prod(trans(*A.sparse()), *x.dense());
+            else //if(numA==5)
+              *y.dense() += ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else // if x and y are the same object => alias
+          else //if(numX == 4)
           {
-            if (numX == 1)
-            {
-              if (numA == 1)
-                *y.dense() += ublas::prod(trans(*A.dense()), *x.dense());
-              else if (numA == 2)
-                *y.dense() += ublas::prod(trans(*A.triang()), *x.dense());
-              else if (numA == 3)
-                *y.dense() += ublas::prod(trans(*A.sym()), *x.dense());
-              else if (numA == 4)
-                *y.dense() += ublas::prod(trans(*A.sparse()), *x.dense());
-              else //if(numA==5)
-                *y.dense() += ublas::prod(trans(*A.banded()), *x.dense());
-            }
-            else //if(numX == 4)
-            {
-              if (numA == 1)
-                *y.sparse() += ublas::prod(trans(*A.dense()), *x.sparse());
-              else if (numA == 2)
-                *y.sparse() += ublas::prod(trans(*A.triang()), *x.sparse());
-              else if (numA == 3)
-                *y.sparse() += ublas::prod(trans(*A.sym()), *x.sparse());
-              else if (numA == 4)
-                *y.sparse() += ublas::prod(trans(*A.sparse()), *x.sparse());
-              else //if(numA==5)
-                *y.sparse() += ublas::prod(trans(*A.banded()), *x.sparse());
-            }
+            if (numA == 1)
+              *y.sparse() += ublas::prod(trans(*A.dense()), *x.sparse());
+            else if (numA == 2)
+              *y.sparse() += ublas::prod(trans(*A.triang()), *x.sparse());
+            else if (numA == 3)
+              *y.sparse() += ublas::prod(trans(*A.sym()), *x.sparse());
+            else if (numA == 4)
+              *y.sparse() += ublas::prod(trans(*A.sparse()), *x.sparse());
+            else //if(numA==5)
+              *y.sparse() += ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
       }
     }
-    else // === Second case: y is a block vector ===
-    {
-      unsigned int startRow = 0;
-      VectorOfVectors::const_iterator it;
-      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
-      // private_prod takes into account the fact that x and y[i] may be block vectors.
-      for (it = y.begin(); it != y.end(); ++it)
-      {
-        private_prod(createSPtrConstSiconosVector(x), createSPtrConstSiconosMatrix(A), startRow, *it, init);
-        startRow += (*it)->size();
-      }
-    }
+  }
+}
+
+void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init)
+{
+  unsigned int startRow = 0;
+  VectorOfVectors::const_iterator it;
+  // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
+  // private_prod takes into account the fact that x and y[i] may be block vectors.
+  for (it = y.begin(); it != y.end(); ++it)
+  {
+    private_prod(createSPtrConstSiconosVector(x), createSPtrConstSiconosMatrix(A), startRow, *it, init);
+    startRow += (*it)->size();
   }
 }
 
@@ -5924,26 +5678,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
 
   else // A is not 0 or identity
   {
-    // === First case: y is not a block vector ===
-    if (numY != 0)
     {
-      // if x is block: call of a specific function to treat each block
-      if (numX == 0)
-      {
-        if (init) y.zero();
-        unsigned int startRow = 0;
-        unsigned int startCol = 0;
-        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
-        // starting from position startRow in rows and startCol in columns.
-        // private_prod takes also into account the fact that each block of x can also be a block.
-        VectorOfVectors::const_iterator it;
-        for (it = x.begin(); it != x.end(); ++it)
-        {
-          private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
-          startCol += (*it)->size();
-        }
-      }
-      else // If neither x nor y are block: direct call to ublas::prod.
       {
         if (&x != &y) // if no common memory between x and y.
         {
@@ -6016,24 +5751,12 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
         }
       }
     }
-    else // === Second case: y is a block vector ===
-    {
-      unsigned int startRow = 0;
-      VectorOfVectors::const_iterator it;
-      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
-      // private_prod takes into account the fact that x and y[i] may be block vectors.
-      for (it = y.begin(); it != y.end(); ++it)
-      {
-        private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
-        startRow += (*it)->size();
-      }
-    }
   }
 }
 
 void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
 {
-  if (x.isBlock() || y.isBlock() || A.isBlock())
+  if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
 
   unsigned int numA = A.getNum();
@@ -6047,7 +5770,7 @@ void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const 
 
 void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
 {
-  if (x.isBlock() || y.isBlock() || A.isBlock())
+  if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();
@@ -6060,7 +5783,7 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
 
 void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
 {
-  if (x.isBlock() || y.isBlock() || A.isBlock())
+  if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();

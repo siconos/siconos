@@ -38,20 +38,20 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
   // x[0] initialized with x0.
 
-  _x[0].reset(new SimpleVector(*_x0));
-  _x[1].reset(new SimpleVector(_n));
+  _x[0].reset(new SiconosVector(*_x0));
+  _x[1].reset(new SiconosVector(_n));
 
   //mG
-  _g_alpha.reset(new SimpleVector(_n));
-  _residur.reset(new SimpleVector(_n));
-  _xp.reset(new SimpleVector(getDim()));
-  _xq.reset(new SimpleVector(getDim()));
-  _workFree.reset(new SimpleVector(getDim()));
-  _fold.reset(new SimpleVector(getDim()));
+  _g_alpha.reset(new SiconosVector(_n));
+  _residur.reset(new SiconosVector(_n));
+  _xp.reset(new SiconosVector(getDim()));
+  _xq.reset(new SiconosVector(getDim()));
+  _workFree.reset(new SiconosVector(getDim()));
+  _fold.reset(new SiconosVector(getDim()));
 
   // == r ==
 
-  _r.reset(new SimpleVector(_n));
+  _r.reset(new SiconosVector(_n));
 
   checkDynamicalSystem();
 }
@@ -66,20 +66,20 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
   // x[0] initialized with x0.
 
-  _x[0].reset(new SimpleVector(*_x0));
-  _x[1].reset(new SimpleVector(_n));
+  _x[0].reset(new SiconosVector(*_x0));
+  _x[1].reset(new SiconosVector(_n));
 
   //mG
-  _g_alpha.reset(new SimpleVector(_n));
-  _residur.reset(new SimpleVector(_n));
-  _xp.reset(new SimpleVector(getDim()));
-  _xq.reset(new SimpleVector(getDim()));
-  _workFree.reset(new SimpleVector(getDim()));
-  _fold.reset(new SimpleVector(getDim()));
+  _g_alpha.reset(new SiconosVector(_n));
+  _residur.reset(new SiconosVector(_n));
+  _xp.reset(new SiconosVector(getDim()));
+  _xq.reset(new SiconosVector(getDim()));
+  _workFree.reset(new SiconosVector(getDim()));
+  _fold.reset(new SiconosVector(getDim()));
 
   // == r ==
 
-  _r.reset(new SimpleVector(_n));
+  _r.reset(new SiconosVector(_n));
 
   checkDynamicalSystem();
 
@@ -98,7 +98,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   if (! fonlds->hasX0())
     RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, x0 is a required input");
 
-  _x0.reset(new SimpleVector(fonlds->getX0()));
+  _x0.reset(new SiconosVector(fonlds->getX0()));
 
   _n = _x0->size();
 
@@ -106,14 +106,14 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   // x is composed of two blocks of size n, (*x)[0] = \f$ x \f$ and (*x)[1]=\f$ \dot x \f$.
 
   if (fonlds->hasx())
-    _x[0].reset(new SimpleVector(fonlds->getx()));
+    _x[0].reset(new SiconosVector(fonlds->getx()));
   else // (*x)[0] initialize with x0.
-    _x[0].reset(new SimpleVector(*_x0));
+    _x[0].reset(new SiconosVector(*_x0));
   // build and initialize right-hand side
-  _x[1].reset(new SimpleVector(_n));
+  _x[1].reset(new SiconosVector(_n));
   // r
 
-  _r.reset(new SimpleVector(_n));
+  _r.reset(new SiconosVector(_n));
 
   string plugin;
 
@@ -146,7 +146,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
       if (fonlds->getFVector().size() != _n)
         RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
 
-      _f.reset(new SimpleVector(fonlds->getFVector()));
+      _f.reset(new SiconosVector(fonlds->getFVector()));
     }
   }
 
@@ -178,28 +178,28 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
 {
   zeroPlugin();
   // == Initial conditions ==
-  _x0.reset(new SimpleVector(newX0));
+  _x0.reset(new SiconosVector(newX0));
 
   // == Current state ==
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
   // x[0] initialized with x0.
 
-  _x[0].reset(new SimpleVector(*_x0));
-  _x[1].reset(new SimpleVector(_n));
-  _f.reset(new SimpleVector(_n));
+  _x[0].reset(new SiconosVector(*_x0));
+  _x[1].reset(new SiconosVector(_n));
+  _f.reset(new SiconosVector(_n));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
   //mG
-  _g_alpha.reset(new SimpleVector(_n));
-  _residur.reset(new SimpleVector(_n));
-  _xp.reset(new SimpleVector(getDim()));
-  _xq.reset(new SimpleVector(getDim()));
-  _workFree.reset(new SimpleVector(getDim()));
-  _r.reset(new SimpleVector(getDim()));
-  _fold.reset(new SimpleVector(getDim()));
+  _g_alpha.reset(new SiconosVector(_n));
+  _residur.reset(new SiconosVector(_n));
+  _xp.reset(new SiconosVector(getDim()));
+  _xq.reset(new SiconosVector(getDim()));
+  _workFree.reset(new SiconosVector(getDim()));
+  _r.reset(new SiconosVector(getDim()));
+  _fold.reset(new SiconosVector(getDim()));
 
   // == r ==
 
-  _r.reset(new SimpleVector(_n));
+  _r.reset(new SiconosVector(_n));
 
   // == f and its jacobian ==
   // Allocation and link with the plug-in
@@ -216,7 +216,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS): DynamicalSystem(FONLDS)
 {
   // Always initialized
-  _fold.reset(new SimpleVector(*(FONLDS.fold())));
+  _fold.reset(new SiconosVector(*(FONLDS.fold())));
   _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
 
   // Not always initialized
@@ -225,25 +225,25 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
   if (_pluginJacxf)
     _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
   if (FONLDS.gAlpha())
-    _g_alpha.reset(new SimpleVector(*(FONLDS.gAlpha())));
+    _g_alpha.reset(new SiconosVector(*(FONLDS.gAlpha())));
   if (FONLDS.jacobianfx())
     _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
 
   if (FONLDS.M())
     _M.reset(new SimpleMatrix(*(FONLDS.M())));
   if (FONLDS.f())
-    _f.reset(new SimpleVector(*(FONLDS.f())));
+    _f.reset(new SiconosVector(*(FONLDS.f())));
 
   if (_pluginM)
     _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
 
   // data - not always initialized
   if (FONLDS.residur())
-    _residur.reset(new SimpleVector(*(FONLDS.residur())));
+    _residur.reset(new SiconosVector(*(FONLDS.residur())));
   if (FONLDS.xp())
-    _xp.reset(new SimpleVector(*(FONLDS.xp())));
+    _xp.reset(new SiconosVector(*(FONLDS.xp())));
   if (FONLDS.xq())
-    _xq.reset(new SimpleVector(*(FONLDS.xq())));
+    _xq.reset(new SiconosVector(*(FONLDS.xq())));
   if (FONLDS.invM())
     _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
 }
@@ -348,7 +348,7 @@ void FirstOrderNonLinearDS::initialize(double time, unsigned int sizeOfMemory)
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
-    _z.reset(new SimpleVector(1));
+    _z.reset(new SiconosVector(1));
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -569,7 +569,7 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
 {
     double dsCvgIndic;
   // Velocity is used to calculate the indicator.
-  SP::SiconosVector diff(new SimpleVector(x[0]->size()));
+  SP::SiconosVector diff(new SiconosVector(x[0]->size()));
   // Compute difference between present and previous Newton steps
   SP::SiconosVector valRef = workV[NewtonSave];
   *diff =  *(x[0]) - *valRef;

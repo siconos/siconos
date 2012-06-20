@@ -21,7 +21,7 @@
 
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosMatrixException.hpp"
 
 

@@ -245,7 +245,7 @@ public:
   /** get the value of e
    *  \return plugged vector
 
-  inline const SimpleVector getE() const { return *e; }
+  inline const SiconosVector getE() const { return *e; }
   */
   /** get e
    *  \return pointer on a plugged vector
@@ -260,7 +260,7 @@ public:
 
   void setE(const SiconosVector& newValue)
     {
-      setObject<SimpleVector, SP::SiconosVector,SiconosVector>(e,newValue);
+      setObject<SiconosVector, SP::SiconosVector,SiconosVector>(e,newValue);
     }
      */
 

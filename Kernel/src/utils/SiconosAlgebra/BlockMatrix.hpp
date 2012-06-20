@@ -339,23 +339,23 @@ public:
 
   /** get row index of current matrix and save it unsigned into vOut
    *  \param unsigned int: index of required line
-   *  \param ref to SimpleVector: in-out parameter
+   *  \param ref to SiconosVector: in-out parameter
    */
   void  getRow(unsigned int, SiconosVector&) const;
 
   /** set line row of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
+   *  \param an unsigned int and a SiconosVector
    */
   void  setRow(unsigned int, const SiconosVector&);
 
   /** get column index of current matrix and save it into vOut
    *  \param unsigned int: index of required column
-   *  \param ref to SimpleVector: in-out parameter
+   *  \param ref to SiconosVector: in-out parameter
    */
   void  getCol(unsigned int, SiconosVector&) const;
 
   /** set column col of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
+   *  \param an unsigned int and a SiconosVector
    */
   void  setCol(unsigned int, const SiconosVector&);
 

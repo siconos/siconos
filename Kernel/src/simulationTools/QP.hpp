@@ -23,10 +23,10 @@
 
 #include "OneStepNSProblem.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 class SimpleMatrix;
-class SimpleVector;
+class SiconosVector;
 
 /** Quadratic Problem
  *
@@ -49,7 +49,7 @@ private:
   SP::SiconosMatrix Q;
 
   /** contains the p vector of a QP problem */
-  SP::SimpleVector _p;
+  SP::SiconosVector _p;
 
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
@@ -101,34 +101,34 @@ public:
 
   // --- P ---
   /** get the value of p, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getP() const
+  inline const SiconosVector getP() const
   {
     return *_p;
   }
 
   /** get p, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SP::SimpleVector p() const
+  inline SP::SiconosVector p() const
   {
     return _p;
   }
 
   /** set the value of p to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  inline void setP(const SimpleVector& newValue)
+  inline void setP(const SiconosVector& newValue)
   {
     *_p = newValue;
   }
 
   /** set p to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  inline void setp(SP::SimpleVector newPtr)
+  inline void setp(SP::SiconosVector newPtr)
   {
     _p = newPtr;
   }

@@ -176,9 +176,9 @@ public:
   // -- hDot --
 
   /** get vector hDot
-   *  \return a SimpleVector
+   *  \return a SiconosVector
 
-  inline const SimpleVector gethDot() const { return *hDot; }
+  inline const SiconosVector gethDot() const { return *hDot; }
    */
 
   /** get a pointer on vector hDot

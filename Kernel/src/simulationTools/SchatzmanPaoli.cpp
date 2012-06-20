@@ -243,7 +243,7 @@ void SchatzmanPaoli::initialize()
 
     }
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
+    // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
 
     // W initialization
     initW(t0, *itDS);
@@ -395,7 +395,7 @@ void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
   //   SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
 
-  //   SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+  //   SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
   //   int columnindex =0;
 
@@ -571,7 +571,7 @@ double SchatzmanPaoli::computeResidu()
       //         //d->computeForces(t);
       //         // or  forces(ti+1, v_k,i+1, q(v_k,i+1))
       //         //or
-      //         SP::SiconosVector qbasedonv(new SimpleVector(*qold));
+      //         SP::SiconosVector qbasedonv(new SiconosVector(*qold));
       //         *qbasedonv +=  h*( (1-_theta)* *vold + _theta * *v );
       //         d->computeForces(t,qbasedonv,v);
       //         coef = -h*_theta;
@@ -586,7 +586,7 @@ double SchatzmanPaoli::computeResidu()
 
       //         unsigned int columnindex=0;
       //         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
-      //         SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+      //         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
       //         for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
       //              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -683,7 +683,7 @@ double SchatzmanPaoli::computeResidu()
 
       //   unsigned int columnindex=0;
       //   SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds];
-      //   SP::SiconosVector columntmp(new SimpleVector(ds->getDim()));
+      //   SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
       //   for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
       //        itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -788,7 +788,7 @@ void SchatzmanPaoli::computeFreeState()
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
-  //  SimpleVector *rold = static_cast<SimpleVector*>(d->rMemory()->getSiconosVector(0));
+  //  SiconosVector *rold = static_cast<SiconosVector*>(d->rMemory()->getSiconosVector(0));
 
   // Iteration through the set of Dynamical Systems.
   //
@@ -1030,10 +1030,10 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoli scheme is used.
-  Xq = inter->workXq();
+  *Xq = *inter->workXq();
   Yp = inter->yp();
 
-  Xfree = inter->workFree();
+  *Xfree = *inter->workFree();
 
   assert(Xfree);
 
@@ -1054,33 +1054,28 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
     {
 
       assert(Xfree);
-      if (Xfree->size() == 0)
-      {
-        // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding interactionBlock in each Interactionfor each ds of the
-        // current Interaction.
-        ConstDSIterator itDS;
-        for (itDS = mainInteraction->dynamicalSystemsBegin();
-             itDS != mainInteraction->dynamicalSystemsEnd();
-             ++itDS)
-        {
-          //osi = osiMap[*itDS];
-          mainInteraction->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
-        }
-      }
-      assert(Yp);
       assert(Xq);
 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
+      // creates a POINTER link between workX[ds] (xfree) and the
+      // corresponding interactionBlock in each Interactionfor each ds of the
+      // current Interaction.
+      mainInteraction->setWorkFree();
+
       if (_useGammaForRelation)
       {
         subprod(*C, *Xq, *Yp, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        subprod(*C, *(*(mainInteraction->dynamicalSystemsBegin()))->workFree(), *Yp, coord, true);
+        if (mainInteraction->dynamicalSystemsEnd() != mainInteraction->dynamicalSystemsBegin())
+        {
+          subprod(*C, *(*(mainInteraction->dynamicalSystemsEnd()))->workFree(), *Yp, coord, false);
+        }
       }
+
     }
     SP::LagrangianLinearTIR ltir = boost::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
     e = ltir->e();
@@ -1175,7 +1170,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       // v->display();
 
       // int bc=0;
-      // SP::SimpleVector columntmp(new SimpleVector(ds->getDim()));
+      // SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
       // if (d->boundaryConditions())
       // {

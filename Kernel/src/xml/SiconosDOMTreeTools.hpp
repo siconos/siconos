@@ -55,7 +55,7 @@ const unsigned int MATRIX_MAX_SIZE = 10;
 const unsigned int VECTOR_MAX_SIZE = 10;
 
 class SimpleMatrix;
-class SimpleVector;
+class SiconosVector;
 class SiconosVector;
 class SiconosMatrix;
 
@@ -72,11 +72,11 @@ class SiconosDOMTreeTools
 {
 public:
 
-  /** Return a SimpleVector read from a vector-type node
+  /** Return a SiconosVector read from a vector-type node
   *   \param xmlNodePtr : the vector node to be read
   *   \return A simpleVector
   */
-  static SimpleVector getSiconosVectorValue(const xmlNodePtr);
+  static SiconosVector getSiconosVectorValue(const xmlNodePtr);
 
   /** read a vector-type node and save value of type T into a vector<T>
   *   \param xmlNodePtr: the vector node to be read
@@ -450,7 +450,7 @@ private :
   *   \param int rowSize : the size of the row
   *   \return A SiconosVector
   */
-  static SimpleVector getSiconosRowMatrixValue(const xmlNodePtr  matrixRowNode, const int& rowSize);
+  static SiconosVector getSiconosRowMatrixValue(const xmlNodePtr  matrixRowNode, const int& rowSize);
 
   /** Set the row describes by matrixRowNode  of a matrix of col size colSize to v vector
   *   \param const xmlNodePtr  matrixRowNode : the matrix row node you want to set

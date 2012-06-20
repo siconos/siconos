@@ -93,9 +93,9 @@ public:
 
   // === q ===
   /** Return  q vector of the LagrangianDSXML
-   *   \return SimpleVector : q vector of the LagrangianDSXML
+   *   \return SiconosVector : q vector of the LagrangianDSXML
    */
-  inline const SimpleVector getQ() const
+  inline const SiconosVector getQ() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(qNode);
   }
@@ -112,9 +112,9 @@ public:
 
   // === q0 ===
   /** Return q0 vector of the LagrangianDSXML
-   *   \return SimpleVector : q0 vector of the LagrangianDSXML
+   *   \return SiconosVector : q0 vector of the LagrangianDSXML
    */
-  inline const SimpleVector getQ0() const
+  inline const SiconosVector getQ0() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(q0Node);
   }
@@ -145,11 +145,11 @@ public:
   void setQMemory(const SiconosMemory& smem);
 
   /** Return the velocity of the LagrangianDSXML
-   *   \return SimpleVector :  velocity vector of the LagrangianDSXML
+   *   \return SiconosVector :  velocity vector of the LagrangianDSXML
    */
 
   // === Velocity ===
-  inline  const SimpleVector getVelocity() const
+  inline  const SiconosVector getVelocity() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(velocityNode);
   }
@@ -166,9 +166,9 @@ public:
 
   // === Velocity0 ===
   /** Return the initial velocity of the LagrangianDSXML
-   *   \return SimpleVector : The velocity0 SiconosVector of the LagrangianDSXML
+   *   \return SiconosVector : The velocity0 SiconosVector of the LagrangianDSXML
    */
-  inline const SimpleVector getVelocity0() const
+  inline const SiconosVector getVelocity0() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(velocity0Node);
   }
@@ -213,10 +213,10 @@ public:
   }
 
   /** Return the NNL vector of the LagrangianDSXML
-   *   \return SimpleVector : NNL vector of the LagrangianDSXML
+   *   \return SiconosVector : NNL vector of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline const SimpleVector getNNLVector() const
+  inline const SiconosVector getNNLVector() const
   {
     if (isNNLPlugin())
       XMLException::selfThrow("LagrangianDSXML - getNNLVector : NNL vector is not given ; NNL is calculated from a plugin");
@@ -262,10 +262,10 @@ public:
   }
 
   /** Return the internal forces vector of the LagrangianDSXML
-   *   \return SimpleVector : FInt SiconosVector of the LagrangianDSXML
+   *   \return SiconosVector : FInt SiconosVector of the LagrangianDSXML
    *   \exception XMLException
    */
-  inline const SimpleVector getFIntVector() const
+  inline const SiconosVector getFIntVector() const
   {
     if (isFIntPlugin())
       XMLException::selfThrow("LagrangianDSXML - getFIntVector : FInt vector is not given ; FInt is calculated from a plugin");
@@ -310,10 +310,10 @@ public:
   }
 
   /** Return the external forces vector of the LagrangianDSXML
-   *   \return SimpleVector : FExt vector of the LagrangianDSXML
+   *   \return SiconosVector : FExt vector of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline const SimpleVector getFExtVector() const
+  inline const SiconosVector getFExtVector() const
   {
     if (isFExtPlugin())
       XMLException::selfThrow("LagrangianDSXML - getFExtVector : FExt matrix is not given ; FExt is calculated from a plugin");

@@ -44,7 +44,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
     _F.reset(new SimpleMatrix(folrXML->getF()));
 
   if (folrXML->hasE())
-    _e.reset(new SimpleVector(folrXML->getE()));
+    _e.reset(new SiconosVector(folrXML->getE()));
 }
 
 // Minimum data (C as pointer) constructor
@@ -87,7 +87,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   _jachq.reset(new SimpleMatrix(newC));
   _jachlambda.reset(new SimpleMatrix(newD));
   _F.reset(new SimpleMatrix(newF));
-  _e.reset(new SimpleVector(newE));
+  _e.reset(new SiconosVector(newE));
 }
 
 // Constructor from C and e as matrix/vector
@@ -96,7 +96,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
   _jachq.reset(new SimpleMatrix(newC));
-  _e.reset(new SimpleVector(newE));
+  _e.reset(new SiconosVector(newE));
 }
 
 void LagrangianLinearTIR::initComponents()
@@ -117,7 +117,7 @@ void LagrangianLinearTIR::initComponents()
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
-  _workL.reset(new SimpleVector(sizeY));
+  _workL.reset(new SiconosVector(sizeY));
 
 }
 

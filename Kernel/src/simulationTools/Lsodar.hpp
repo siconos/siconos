@@ -71,9 +71,10 @@ private:
   /** integer array used for output of root information */
   SA::integer jroot;
   /** temporary vector to save x values */
-  SP::BlockVector xWork;
+  SP::BlockVector _xWork;
   Lsodar() {};
 
+  SP::SiconosVector _xtmp;
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;

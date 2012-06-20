@@ -16,32 +16,32 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#ifndef __SimpleVectorTest__
-#define __SimpleVectorTest__
+#ifndef __SiconosVectorTest__
+#define __SiconosVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "BlockVector.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include <math.h>
 #include <vector>
 
-class SimpleVectorTest : public CppUnit::TestFixture
+class SiconosVectorTest : public CppUnit::TestFixture
 {
 
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(SimpleVectorTest);
+  ACCEPT_SERIALIZATION(SiconosVectorTest);
 
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(SimpleVectorTest);
+  CPPUNIT_TEST_SUITE(SiconosVectorTest);
 
   // tests to be done ...
 
-  //  CPPUNIT_TEST(testBuildSimpleVector);
+  //  CPPUNIT_TEST(testBuildSiconosVector);
   CPPUNIT_TEST(testConstructor0);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
@@ -113,8 +113,10 @@ private:
   void End();
   // Members
 
-  SP::SiconosVector ref, z, zB, tmp1, tmp2, tmp3, tmp4;
-  SPC::SiconosVector x, y, xB, yB;
+  SP::SiconosVector ref, z, tmp1, tmp2, tmp3, tmp4;
+  SP::BlockVector zB;
+  SPC::SiconosVector x, y;
+  SPC::BlockVector xB, yB;
   unsigned int size, size1, size2;
   std::vector<double> vq;
   SP::DenseVect  dv;

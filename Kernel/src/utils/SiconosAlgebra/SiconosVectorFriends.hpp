@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file SimpleVectorFriends.hpp
-  List of friend functions for SimpleVectors.
+/*! \file SiconosVectorFriends.hpp
+  List of friend functions for SiconosVectors.
 */
 
-#ifndef __SimpleVectorFriends__
-#define __SimpleVectorFriends__
+#ifndef __SiconosVectorFriends__
+#define __SiconosVectorFriends__
 
 struct VectorNum;
 
@@ -47,31 +47,31 @@ bool operator ==(const SiconosVector&, const SiconosVector&);
 /** multiplication of a vector by a scalar
  *  \param a double
  *  \param a SiconosVector
- *  \return a SimpleVector
+ *  \return a SiconosVector
  */
-SimpleVector operator * (double, const SiconosVector&);
+SiconosVector operator * (double, const SiconosVector&);
 
 /** multiplication of a vector by a double
  *  \param a SiconosVector
  *  \param a double
- *  \return a SimpleVector
+ *  \return a SiconosVector
  */
-SimpleVector operator * (const SiconosVector&, double);
+SiconosVector operator * (const SiconosVector&, double);
 
 /** division of the vector by a double
  *  \param a SiconosVector
  *  \param a double
- *  \return a SimpleVector
+ *  \return a SiconosVector
  *  \exception SiconosVectorException, if the double d = 0
  */
-SimpleVector operator / (const SimpleVector&, double);
+SiconosVector operator / (const SiconosVector&, double);
 
 /** Addition of two vectors
  * \param a SiconosVector
  * \param a SiconosVector
- * \return a SimpleVector
+ * \return a SiconosVector
  */
-SimpleVector operator + (const SiconosVector&, const SiconosVector&);
+SiconosVector operator + (const SiconosVector&, const SiconosVector&);
 
 /** computes z = x + y
     \param x, a  SiconosVector, IN.
@@ -83,9 +83,9 @@ void add(const SiconosVector&, const SiconosVector&, SiconosVector&);
 /** Subtraction of two vectors
     \param a SiconosVector (x), IN.
     \param a SiconosVector (y), IN.
-    \return a SimpleVector
+    \return a SiconosVector
 */
-SimpleVector operator - (const SiconosVector&, const SiconosVector&);
+SiconosVector operator - (const SiconosVector&, const SiconosVector&);
 
 /** computes z = x - y
     \param a SiconosVector (x), IN.
@@ -141,21 +141,21 @@ void scal(double, const SiconosVector&, SiconosVector&, bool = true);
 void subscal(double, const SiconosVector&, SiconosVector&, const Index&, bool = true);
 
 /** cross product
- *  \param V1, a SimpleVector of dimention 3.
- *  \param V2, aSimpleVector of dimention 3.
- *  \param VOUT, aSimpleVector of dimention 3, the resulting cross product between V1 and V2.
+ *  \param V1, a SiconosVector of dimention 3.
+ *  \param V2, aSiconosVector of dimention 3.
+ *  \param VOUT, aSiconosVector of dimention 3, the resulting cross product between V1 and V2.
  */
 void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
 /** get an absolute vector
- *  \param 1, a SimpleVector (Input).
- *  \param 2, a SimpleVector (Output).
+ *  \param 1, a SiconosVector (Input).
+ *  \param 2, a SiconosVector (Output).
  */
 
 void abs_wise(const SiconosVector&, SiconosVector&);
 
 /** get maximal element of a vector
- *  \param 1, a SimpleVector (Input).
+ *  \param 1, a SiconosVector (Input).
  *  \param 2, a double variable giving the maximum element (Output).
  *  \param 3, an unsigned int variable giving the position of the maximum element (Output)
  */
@@ -163,7 +163,7 @@ void abs_wise(const SiconosVector&, SiconosVector&);
 void getMax(const SiconosVector&, double &, unsigned int &);
 
 /** get minimum element of a vector
- *  \param 1, a SimpleVector (Input).
+ *  \param 1, a SiconosVector (Input).
  *  \param 2, a double variable giving the minimum element (Output).
  *  \param 3, an unsigned int variable giving the position of the minimum element (Output)
  */

@@ -28,7 +28,7 @@ int PrismaticJointR::_sNbEqualities = 5;
 
 
 /*axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector axe): NewtonEulerR()
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axe): NewtonEulerR()
 {
   _axe0 = axe;
   _d1 = d1;
@@ -36,7 +36,7 @@ PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP:
   computeFromInitialPosition();
 }
 /*axe is the axis of the prismatic joint, in the absolute frame.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d2, SP::SimpleVector axe): NewtonEulerR()
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d2, SP::SiconosVector axe): NewtonEulerR()
 {
   //    _d1=NULL;
   _axe0 = axe;
@@ -66,7 +66,7 @@ void PrismaticJointR::computeFromInitialPosition()
   }
   else
   {
-    q1.reset(new SimpleVector(7));
+    q1.reset(new SiconosVector(7));
     q1->zero();
     q1->setValue(3, 1);
   }
@@ -88,8 +88,8 @@ void PrismaticJointR::computeFromInitialPosition()
 
 void PrismaticJointR::computeV1V2FromAxe()
 {
-  _V1.reset(new SimpleVector(3));
-  _V2.reset(new SimpleVector(3));
+  _V1.reset(new SiconosVector(3));
+  _V2.reset(new SiconosVector(3));
   _V1->zero();
   _V2->zero();
   //build _V1

@@ -615,7 +615,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
              ++itindex)
         {
           // (sizeY,sizeDS));
-          SP::SiconosVector coltmp(new SimpleVector(sizeY));
+          SP::SiconosVector coltmp(new SiconosVector(sizeY));
           coltmp->zero();
           leftInteractionBlock->setCol(*itindex, *coltmp);
         }
@@ -884,7 +884,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
                  ++itindex)
             {
               // (sizeY1,sizeDS));
-              SP::SiconosVector coltmp(new SimpleVector(sizeY1));
+              SP::SiconosVector coltmp(new SiconosVector(sizeY1));
               coltmp->zero();
               leftInteractionBlock->setCol(*itindex, *coltmp);
             }
@@ -1044,12 +1044,12 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //  aBuff->display();
       lambda->display();
       unsigned int nslawsize = inter->nonSmoothLaw()->size();
-      SP::SimpleVector aBuff(new SimpleVector(nslawsize));
+      SP::SiconosVector aBuff(new SiconosVector(nslawsize));
       setBlock(*_z, aBuff, sizeY, pos, 0);
       SP::SiconosMatrix J = lr->jachq();
       SP::SimpleMatrix aux(new SimpleMatrix(*J));
       aux->trans();
-      SP::SiconosVector tmp(new SimpleVector(*(lr->q())));
+      SP::SiconosVector tmp(new SiconosVector(*(lr->q())));
       prod(*aux, *aBuff, *(tmp), false);
       //prod(*aux,*lambda,*(lr->q()),false);
       std:: cout << " tmp =  tmp + J^T * lambda" << std::endl;
@@ -1069,7 +1069,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       // SP::SimpleMatrix aux(new SimpleMatrix(*J));
       // aux->trans();
 
-      // SP::SiconosVector tmp (new SimpleVector(*(lr->q())));
+      // SP::SiconosVector tmp (new SiconosVector(*(lr->q())));
       // std:: cout << " tmp ="<<std::endl;
       // tmp->display();
       // std:: cout << " lr->q() ="<<std::endl;

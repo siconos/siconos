@@ -50,11 +50,11 @@ protected:
   ACCEPT_SERIALIZATION(NewtonEulerFrom1DLocalFrameR);
 
   /*Point of contact*/
-  SP::SimpleVector _Pc1;
-  SP::SimpleVector _Pc2;
+  SP::SiconosVector _Pc1;
+  SP::SiconosVector _Pc2;
 
   /*Inward Normal at the contact */
-  SP::SimpleVector _Nc;
+  SP::SiconosVector _Nc;
 
   // /*because set is not sorted!*/
   // SP::NewtonEulerDS _ds1;
@@ -83,8 +83,8 @@ public:
   /** constructorx
    */
   NewtonEulerFrom1DLocalFrameR():
-    NewtonEulerR(), _Pc1(new SimpleVector(3)), _Pc2(new SimpleVector(3)),
-    _Nc(new SimpleVector(3))
+    NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
+    _Nc(new SiconosVector(3))
   {
     /*_ds1=NULL;_ds2=NULL;*/
   }
@@ -101,39 +101,39 @@ public:
   virtual void computeJachq(double t);
   virtual void computeJachqT();
 
-  inline SP::SimpleVector pc1()
+  inline SP::SiconosVector pc1()
   {
     return _Pc1;
   }
-  inline SP::SimpleVector pc2()
+  inline SP::SiconosVector pc2()
   {
     return _Pc2;
   }
-  inline SP::SimpleVector nc()
+  inline SP::SiconosVector nc()
   {
     return _Nc;
   }
 
   /** set the coordinates of first contact point
-   * \param SP::SimpleVector new coordinates
+   * \param SP::SiconosVector new coordinates
    */
-  void setpc1(SP::SimpleVector npc)
+  void setpc1(SP::SiconosVector npc)
   {
     _Pc1 = npc;
   };
 
   /** set the coordinates of second contact point
-   * \param SP::SimpleVector new coordinates
+   * \param SP::SiconosVector new coordinates
    */
-  void setpc2(SP::SimpleVector npc)
+  void setpc2(SP::SiconosVector npc)
   {
     _Pc2 = npc;
   };
 
   /** set the coordinates of inside normal vector at the contact point
-   * \param SP::SimpleVector new coordinates
+   * \param SP::SiconosVector new coordinates
    */
-  void setnc(SP::SimpleVector nnc)
+  void setnc(SP::SiconosVector nnc)
   {
     _Nc = nnc;
   };

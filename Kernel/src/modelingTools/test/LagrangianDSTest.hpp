@@ -61,7 +61,7 @@ private:
 
   // Members
 
-  SP::SimpleVector q0, velocity0, u0;
+  SP::SiconosVector q0, velocity0, u0;
   SP::SiconosMatrix mass;
   xmlNodePtr node1 , *node2, *node3;
   SP::LagrangianDSXML tmpxml1, tmpxml2, tmpxml3;

@@ -25,7 +25,7 @@
 
 #include "OneStepNSProblemXML.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 class OneStepNSProblem;
 

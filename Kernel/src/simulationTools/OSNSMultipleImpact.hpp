@@ -3,7 +3,7 @@
 #ifndef _OSNSMULTIPLEIMPACT_
 #define _OSNSMULTIPLEIMPACT_
 //-----------------------------------------------------------------------------------------
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosPointers.hpp"
 #include "LinearOSNS.hpp"
@@ -219,7 +219,7 @@ public:
   void WriteSiconosVector(const SiconosVector&);
   // To write a SiconosVector into a matrix
   // row and columns positions starting to write
-  void WriteVectorIntoMatrix(const SimpleVector, const unsigned int, const unsigned int);
+  void WriteVectorIntoMatrix(const SiconosVector, const unsigned int, const unsigned int);
   // Save data for each step
   // parameter: ith pointer to be save
   void SaveDataOneStep(unsigned int);

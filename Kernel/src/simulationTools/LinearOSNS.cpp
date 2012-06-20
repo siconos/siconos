@@ -65,14 +65,14 @@ void LinearOSNS::setW(const SiconosVector& newValue)
 {
   assert(_sizeOutput == newValue.size() &&
          "LinearOSNS: setW, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
-  setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_w, newValue);
+  setObject<SiconosVector, SP::SiconosVector, SiconosVector>(_w, newValue);
 }
 
 void LinearOSNS::setz(const SiconosVector& newValue)
 {
   assert(_sizeOutput == newValue.size() &&
          "LinearOSNS: setz, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
-  setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_z, newValue);
+  setObject<SiconosVector, SP::SiconosVector, SiconosVector>(_z, newValue);
 }
 
 void LinearOSNS::setM(const OSNSMatrix& newValue)
@@ -87,7 +87,7 @@ void LinearOSNS::initVectorsMemory()
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
   if (! _w)
-    _w.reset(new SimpleVector(maxSize()));
+    _w.reset(new SiconosVector(maxSize()));
   else
   {
     if (_w->size() != maxSize())
@@ -95,7 +95,7 @@ void LinearOSNS::initVectorsMemory()
   }
 
   if (! _z)
-    _z.reset(new SimpleVector(maxSize()));
+    _z.reset(new SiconosVector(maxSize()));
   else
   {
     if (_z->size() != maxSize())
@@ -103,7 +103,7 @@ void LinearOSNS::initVectorsMemory()
   }
 
   if (! _q)
-    _q.reset(new SimpleVector(maxSize()));
+    _q.reset(new SiconosVector(maxSize()));
   else
   {
     if (_q->size() != maxSize())
@@ -327,7 +327,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
                ++itindex)
           {
             // (nslawSize,sizeDS));
-            SP::SiconosVector coltmp(new SimpleVector(nslawSize));
+            SP::SiconosVector coltmp(new SiconosVector(nslawSize));
             coltmp->zero();
             leftInteractionBlock->setCol(*itindex, *coltmp);
           }
@@ -503,7 +503,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
              ++itindex)
         {
           // (nslawSize1,sizeDS));
-          SP::SiconosVector coltmp(new SimpleVector(nslawSize1));
+          SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
           coltmp->zero();
           leftInteractionBlock->setCol(*itindex, *coltmp);
         }

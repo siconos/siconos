@@ -118,11 +118,11 @@ public:
   ~Relay();
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an
-   *  lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an
+   *  lvalue => return SiconosVector
    */
-  inline const SimpleVector getLb() const
+  inline const SiconosVector getLb() const
   {
     return *_lb;
   }
@@ -146,11 +146,11 @@ public:
 
   // --- ub ---
   /** get the value of ub, the  upper bounds of the Relay system
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an
-   *  lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an
+   *  lvalue => return SiconosVector
    */
-  inline const SimpleVector getUb() const
+  inline const SiconosVector getUb() const
   {
     return *_ub;
   }

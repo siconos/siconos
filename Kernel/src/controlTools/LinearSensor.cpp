@@ -68,7 +68,7 @@ void LinearSensor::initialize(SP::Model m)
   // -> saved in a matrix data
   _k = 0;
   // -> event
-  _storedY.reset(new SimpleVector(rowC));
+  _storedY.reset(new SiconosVector(rowC));
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
   _YDim = rowC;

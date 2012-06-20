@@ -28,7 +28,7 @@
 class DynamicalSystem;
 class RelationXML;
 class SimpleMatrix;
-class SimpleVector;
+class SiconosVector;
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
@@ -73,7 +73,7 @@ protected:
   unsigned int _xsize;
   unsigned int _qsize;
 
-  SP::SimpleVector _workQ;
+  SP::SiconosVector _workQ;
 
   /** Jacobian matrices of H */
   SP::SimpleMatrix _jachq;
@@ -86,7 +86,7 @@ protected:
   /*Used for the projection formulation*/
 
   /**vector of contact forces, ie: _contactForce = B \lambda. Useful for the end user.*/
-  SP::SimpleVector _contactForce;
+  SP::SiconosVector _contactForce;
 
   /**updated in computeJachqT:
    In the case of the bilateral constrains, it is _jachq._T.
@@ -287,7 +287,7 @@ public:
   /** A buffer containing the forces due to this.
       It is an output unused for the computation.
    */
-  SP::SimpleVector contactForce() const
+  SP::SiconosVector contactForce() const
   {
     return _contactForce;
   };
@@ -296,17 +296,17 @@ public:
    */
   void display() const;
   /** return a block vector containing ths dynamical system's dof.*/
-  SP::SiconosVector getq()
+  SP::BlockVector getq()
   {
     return data[q0];
   }
 
-  SP::SiconosVector q()
+  SP::BlockVector q()
   {
     return data[q0];
   }
 
-  SP::SiconosVector getDeltaq()
+  SP::BlockVector getDeltaq()
   {
     return data[deltaq];
   }

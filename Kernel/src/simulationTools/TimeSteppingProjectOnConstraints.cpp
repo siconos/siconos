@@ -131,7 +131,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 #endif
 
   bool runningProjection = false;
-  _nbProjectionIteration = 0;
+  unsigned int cmp = 0;
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++){
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
@@ -180,11 +180,11 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       RuntimeException::selfThrow("TimeSteppingProjectOnConstraints::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
   }
 
-  while (runningProjection && _nbProjectionIteration < _projectionMaxIteration)
+  while (runningProjection && cmp < _projectionMaxIteration)
   {
-    _nbProjectionIteration++;
+    cmp++;
 #ifdef TSPROJ_DEBUG
-    printf("TimeSteppingProjectOnConstraints projection step = %d\n", _nbProjectionIteration);
+    printf("TimeSteppingProjectOnConstraints projection step = %d\n", cmp);
 #endif
     SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
@@ -265,8 +265,8 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
         if (d->p(0))
         {
-          //*q = * qtmp +  *d->p(0);
-          *q += *d->p(0);
+          *q = * qtmp +  *d->p(0);
+          //*q += *d->p(0);
         }
       }
       else
@@ -283,7 +283,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //(boost::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
 #ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+    cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << cmp << "\n";
     std ::cout << "After update state in position" << std::endl;
     std ::cout << "lamda(1) in IndexSet1" << std::endl;
     for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
@@ -317,10 +317,10 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //{
     //  (*it)->relation()->computeh(getTkp1());
     //}
-  }// end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
-  if (_nbProjectionIteration == _projectionMaxIteration)
+  }// end while(runningProjection && cmp < _projectionMaxIteration)
+  if (cmp == _projectionMaxIteration)
   {
-    cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  << endl ;
+    cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << cmp << ")"  << endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
     printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     RuntimeException::selfThrow("youyou");
@@ -368,7 +368,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       //if (n2q < 1e-14)
   //       // continue;
 
-  //       SP::SimpleVector FextNorm(new SimpleVector(3));
+  //       SP::SiconosVector FextNorm(new SiconosVector(3));
   //       FextNorm->setValue(0,neds->fExt()->getValue(0));
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));

@@ -18,7 +18,7 @@
 */
 #include "SiconosMemory.hpp"
 #include "BlockVector.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosMemoryXML.hpp"
 
 using namespace std;
@@ -62,10 +62,7 @@ SiconosMemory::SiconosMemory(const MemoryContainer& V):
   _vectorMemory->reserve(_maxSize);
   for (unsigned int i = 0; i < _maxSize; i++)
   {
-    if (V[i]->isBlock())
-      _vectorMemory->push_back(SP::BlockVector(new BlockVector(*V[i])));
-    else
-      _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*V[i])));
+    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
   }
 }
 
@@ -81,10 +78,7 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryConta
   {
     for (unsigned int i = 0; i < V.size(); i++)
     {
-      if (V[i]->isBlock())
-        _vectorMemory->push_back(SP::BlockVector(new BlockVector(*V[i])));
-      else
-        _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*V[i])));
+      _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
     }
   }
 }
@@ -100,10 +94,7 @@ SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
   const MemoryContainer VtoCopy = *(Mem.vectorMemory());
   for (unsigned int i = 0; i < VtoCopy.size(); i++)
   {
-    if (VtoCopy[i]->isBlock())
-      _vectorMemory->push_back(SP::BlockVector(new BlockVector(*VtoCopy[i])));
-    else
-      _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*VtoCopy[i])));
+    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*VtoCopy[i])));
   }
   // this was not always initialised
   if (Mem.getSiconosMemoryXML())
@@ -127,10 +118,7 @@ void SiconosMemory::setVectorMemory(const MemoryContainer& V)
   _vectorMemory->clear();
   for (unsigned int i = 0; i < V.size(); i++)
   {
-    if (V[i]->isBlock())
-      _vectorMemory->push_back(SP::BlockVector(new BlockVector(*V[i])));
-    else
-      _vectorMemory->push_back(SP::SimpleVector(new SimpleVector(*V[i])));
+    _vectorMemory->push_back(SP::SiconosVector(new SiconosVector(*V[i])));
   }
 }
 
@@ -147,10 +135,7 @@ void SiconosMemory::swap(SP::SiconosVector v)
   // If vectorMemory size is _maxSize, we remove its last element.
   if (_vectorMemory->size() == _maxSize)
     _vectorMemory->resize(_maxSize - 1);
-  if (v->isBlock())
-    _vectorMemory->insert(_vectorMemory->begin(), SP::BlockVector(new BlockVector(*v)));
-  else // v = SimpleVector
-    _vectorMemory->insert(_vectorMemory->begin(), SP::SimpleVector(new SimpleVector(*v)));
+  _vectorMemory->insert(_vectorMemory->begin(), SP::SiconosVector(new SiconosVector(*v)));
   _nbVectorsInMemory = _vectorMemory->size();
 }
 

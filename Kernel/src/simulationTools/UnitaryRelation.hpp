@@ -178,7 +178,7 @@ public:
   };
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector y(unsigned int i) const
   {
@@ -187,7 +187,7 @@ public:
   };
 
   /** get yOld[i], derivative number i of output
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector yOld(unsigned int i) const
   {
@@ -196,7 +196,7 @@ public:
   };
 
   /* get y_k[i]
-   *    \return pointer on a SimpleVector
+   *    \return pointer on a SiconosVector
    */
   inline SP::SiconosVector y_k(unsigned int i) const
   {
@@ -205,7 +205,7 @@ public:
   };
 
   // /* get yMemory[i][j]
-  //  *    \return pointer on a SimpleVector
+  //  *    \return pointer on a SiconosVector
   //  * i is the derivative number.
   //  * j is the depth in time
   //  */
@@ -228,12 +228,12 @@ public:
   {
     // A new object of type VectorOfVectors is created but it handles
     // pointers to BlockVectors, thus there is no copy of the "basic"
-    // SimpleVectors.
+    // SiconosVectors.
     return  interaction()->getLambda();
   };
 
   /** get lambda[i], derivative number i of input
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector lambda(unsigned int i) const
   {

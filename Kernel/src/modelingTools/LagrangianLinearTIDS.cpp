@@ -46,12 +46,12 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
   {
     string plugin = lltidsxml->getFExtPlugin();
     setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    _fExt.reset(new SimpleVector(_ndof));
+    _fExt.reset(new SiconosVector(_ndof));
   }
 }
 
 // --- Constructor from a set of data - _Mass, K and C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVector newVelocity0,
+LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
     SP::SiconosMatrix newMass,  SP::SiconosMatrix newK, SP::SiconosMatrix newC):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
@@ -67,13 +67,13 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVec
 }
 
 // --- Constructor from a set of data - Mass, no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVector newVelocity0,
+LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
     SP::SiconosMatrix newMass):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
 }
-//LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0, const SiconosMatrix& newMass):
-//  LagrangianDS(createSPtrSiconosVector((SimpleVector&)newQ0), createSPtrSiconosVector((SimpleVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass)){
+//LagrangianLinearTIDS::LagrangianLinearTIDS(const SiconosVector& newQ0, const SiconosVector& newVelocity0, const SiconosMatrix& newMass):
+//  LagrangianDS(createSPtrSiconosVector((SiconosVector&)newQ0), createSPtrSiconosVector((SiconosVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass)){
 //}
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {}
@@ -149,16 +149,16 @@ void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
 
   if (_boundaryConditions)
   {
-    _reactionToBoundaryConditions.reset(new SimpleVector(_boundaryConditions->velocityIndices()->size()));
+    _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
   }
 
   if (!_workFree)
-    _workFree.reset(new SimpleVector(getDim()));
+    _workFree.reset(new SiconosVector(getDim()));
 
   // If z has not been set, we initialize it with a null vector of
   // size 1, since z is required in plug-in functions call.
   if (! _z)
-    _z.reset(new SimpleVector(1));
+    _z.reset(new SiconosVector(1));
 
   // Set variables of top-class DynamicalSystem
   connectToDS(); // note that connection can not be done during

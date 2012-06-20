@@ -28,7 +28,7 @@
 #include "SiconosSharedLibrary.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "DynamicalSystemTypes.hpp"
@@ -42,7 +42,7 @@ class DynamicalSystemXML;
 class SiconosVector;
 class SiconosMatrix;
 class SimpleMatrix;
-class SimpleVector;
+class SiconosVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
@@ -343,10 +343,10 @@ public:
   // --- X0 ---
 
   /** get the value of x0, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getX0() const
+  inline const SiconosVector getX0() const
   {
     return *_x0;
   }
@@ -370,10 +370,10 @@ public:
   // --- R ---
 
   /** get the value of r
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    *  \return a vector
    */
-  inline const SimpleVector getR() const
+  inline const SiconosVector getR() const
   {
     return *_r;
   }
@@ -419,11 +419,11 @@ public:
   // --- X ---
 
   /** get the value of \f$ x \f$, the state of the DynamicalSystem
-   *  \return SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
 
-  inline const SimpleVector getx() const
+  inline const SiconosVector getx() const
   {
     return *(_x[0]);
   }
@@ -449,10 +449,10 @@ public:
   // ---  Rhs ---
 
   /** get the value of the right-hand side, \f$ \dot x \f$, derivative of the state of the DynamicalSystem.
-   *  \return SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return SiconosVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getRhs() const
+  inline const SiconosVector getRhs() const
   {
     return *(_x[1]);
   }
@@ -506,10 +506,10 @@ public:
   // -- z --
 
   /** get the value of \f$ z \f$, the vector of algebraic parameters.
-   * \return a SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   * \return a SiconosVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-  inline const SimpleVector getz() const
+  inline const SiconosVector getz() const
   {
     return *_z;
   }
@@ -680,12 +680,12 @@ public:
   }
 
   /** to allocate memory for a new vector in tmp map
-   *  \param the id of the SimpleVector
+   *  \param the id of the SiconosVector
    *  \param an int to set the size
    */
   inline void allocateWorkVector(const WorkNames& id, int size)
   {
-    _workV[id].reset(new SimpleVector(size));
+    _workV[id].reset(new SiconosVector(size));
   }
 
   /** to get the free vector.

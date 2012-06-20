@@ -21,7 +21,7 @@
 
 #include "Model.hpp"
 #include "LagrangianDS.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
 #include <sys/time.h>
 #include <iostream>
@@ -37,11 +37,11 @@ int main(int argc, char* argv[])
     // problem size
     unsigned int size = 3;
     // initial state
-    SP::SimpleVector q0(new SimpleVector(3));
+    SP::SiconosVector q0(new SiconosVector(3));
     (*q0)(0) = 1;
     (*q0)(1) = 2;
     (*q0)(2) = 3;
-    SP::SimpleVector v0(new SimpleVector(3));
+    SP::SiconosVector v0(new SiconosVector(3));
     (*v0)(0) = 4;
     (*v0)(1) = 5;
     (*v0)(2) = 6;
@@ -158,16 +158,16 @@ int main(int argc, char* argv[])
     lds1->jacobianQNLInertiaVelocity()->display();
 
     // set f, u, B
-    SP::SimpleVector u(new SimpleVector(2));
+    SP::SiconosVector u(new SiconosVector(2));
     (*u)(0) = 1.8;
     (*u)(1) = 1.4;
-    SP::SimpleVector f(new SimpleVector(size));
+    SP::SiconosVector f(new SiconosVector(size));
     (*f)(0) = 2.5;
     (*f)(1) = 4;
     (*f)(2) = 9;
 
 
-    SP::SimpleVector u2(new SimpleVector(1));
+    SP::SiconosVector u2(new SiconosVector(1));
     (*u2)(0) = 34;
 
     cout << "======== Test 6 ============= " << endl;

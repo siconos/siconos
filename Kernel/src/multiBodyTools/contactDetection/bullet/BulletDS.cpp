@@ -52,7 +52,7 @@ void BulletDS::updateCollisionObject() const
 
   DEBUG_PRINT("updateCollisionObject()");
 
-  SimpleVector& q = *_q;
+  SiconosVector& q = *_q;
 
   DEBUG_EXPR(q.display());
 

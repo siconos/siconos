@@ -33,7 +33,7 @@ void LinearsystemDSXMLTest::setUp()
   root = xmlDocGetRootElement(doc);
   child = NULL;
   matrixRef = SiconosMatrix("matrix.dat", true);
-  vectorRef = /*SiconosVector*/SimpleVector("vector.dat", true);
+  vectorRef = /*SiconosVector*/SiconosVector("vector.dat", true);
 }
 
 void LinearsystemDSXMLTest::tearDown()
@@ -66,7 +66,7 @@ void LinearsystemDSXMLTest::testGetUF()
 {
   LinearDSXML lsdsxml(root, false);
   /*SiconosVector*/
-  SimpleVector U, b;
+  SiconosVector U, b;
   U = lsdsxml.getUVector();
   b = lsdsxml.getBVector();
   CPPUNIT_ASSERT_MESSAGE("testGetUF : U == vectorRef", U == vectorRef);

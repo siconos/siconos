@@ -25,9 +25,8 @@
 #define BLOCKVECTOR_H
 
 #include "SiconosVector.hpp"
-#include "SimpleVector.hpp"
 
-class SimpleVector;
+class SiconosVector;
 
 /** Object to handle block-vectors (ie list of SP::SiconosVector)
  *
@@ -39,7 +38,7 @@ class SimpleVector;
  * Insertion of NULL SP::SiconosVector is not allowed.
  *
  */
-class BlockVector : public SiconosVector
+class BlockVector
 {
 private:
   /** serialization hooks
@@ -56,27 +55,18 @@ private:
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   SP::Index _tabIndex;
 
+  void setBlock(const SiconosVector&, BlockVector&, unsigned int, unsigned int, unsigned int);
+
 public:
 
   /** default contructor
    */
   BlockVector();
 
-  /** contructor from data by function read call
-   *  \param a string
-   *  \param a bool
-   */
-  BlockVector(const std::string&, const bool);
-
   /** copy contructor
    *  \param BlockVector& v
    */
   BlockVector(const BlockVector&);
-
-  /** contructor with a SiconosVector (copy)
-   *  \param SiconosVector& v
-   */
-  BlockVector(const SiconosVector&);
 
   /** contructor with a 2 SiconosVectors
    *  \param SP::SiconosVector v1
@@ -84,15 +74,11 @@ public:
    */
   BlockVector(SP::SiconosVector, SP::SiconosVector);
 
-  /** constructor with the number of Blocks and their dimension (ie all Blocks have the same dim AND are SimpleVectors)
-   *  \param unsigned int : number of Blocks
-   *  \param unsigned int : dim of each Block
-   */
-  BlockVector(unsigned int, unsigned int);
+  BlockVector(unsigned int numberOfBlocks, unsigned int dim);
 
   /** destructor
    */
-  ~BlockVector();
+  virtual ~BlockVector();
 
   /** get the vector size, ie the total number of (double) elements in
      *  the vector
@@ -103,22 +89,6 @@ public:
     return _sizeV;
   };
 
-  /** true if the vector is block else false.
-    * \return a bool.
-    */
-  virtual bool isBlock() const
-  {
-    return true;
-  };
-
-
-  /** Get the type number of the current vector.
-   * \return an unsigned int
-   */
-  unsigned int getNum() const
-  {
-    return 0;
-  };
 
   /** iterator equal to vect.begin
       \return a VectorOfVectors::iterator
@@ -160,30 +130,6 @@ public:
     return vect;
   }
 
-  /** get the attribute if it's type is DenseVect
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
-   *  \return a DenseVect
-   */
-  const DenseVect getDense(unsigned int = 0) const;
-
-  /** get the attribute if it's type is SparseVect
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
-   *  \return a SparseVect
-   */
-  const SparseVect getSparse(unsigned int = 0) const;
-
-  /** get a pointer on DenseVect
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
-   *  \return a DenseVect*
-   */
-  DenseVect* dense(unsigned int = 0) const;
-
-  /** get a pointer on SparseVect
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
-   *  \return a SparseVect*
-   */
-  SparseVect* sparse(unsigned int = 0) const;
-
   /** get the number of Blocks
    *  \return unsigned int
    */
@@ -192,15 +138,10 @@ public:
     return _tabIndex->size();
   };
 
-  /** return the array of double values of the vector
-   *  \exception SiconosVectorException
-   *  \param unsigned int: vector position (only for block vector)
-   *  \return double* : the pointer on the array
-   */
-  double* getArray(unsigned int = 0) const;
+
 
   /** sets all the values of the vector to 0.0
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+   *  \param unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    */
   void zero();
 
@@ -209,28 +150,9 @@ public:
    */
   void fill(double);
 
-  /** resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
-   *  \exception SiconosVectorException
-   */
-  void resize(unsigned int, bool = true);
-
-  /** compute the infinite norm of the vector
-   *  \return a double
-   */
-  double normInf() const;
-
-  /** return the Euclidian norm of the vector
-   *  \return a double
-   */
-  double norm2() const ;
-
   /** display data on standard output
    */
   void display(void) const;
-
-  /** put data of the vector into a string
-   */
-  const std::string toString() const;
 
   /** return the element vector[i]
    *  \param an unsigned int i
@@ -255,12 +177,6 @@ public:
    *  \return a double
    */
   double operator()(unsigned int) const;
-
-  /** return i-eme SiconosVector of vect
-   * \param unsigned int: block number
-   * \return a SimpleVector
-   */
-  SimpleVector getVector(unsigned int) const;
 
   /** return i-eme SiconosVector of vect
    * \param unsigned int: block number
@@ -358,50 +274,24 @@ public:
   */
   unsigned int getNumVectorAtPos(unsigned int) const;
 
-  /** add a part of the input vector (starting from pos. i) to the current vector
-   *  \param an unsigned int i (in-out)
-   *  \param a SiconosVector (in-out)
-   */
-  void addSimple(unsigned int&, const SiconosVector&);
-
-  /** subtract a part of the input vector (starting from pos. i) to the current vector
-   *  \param an unsigned int i (in-out)
-   *  \param a SiconosVector (in-out)
-   */
-  void subSimple(unsigned int&, const SiconosVector&);
-
   /** operator =
-   *  \param SiconosVector : the vector to be copied
-   */
-  BlockVector& operator =(const SiconosVector&);
-
-  /** operator =
-   *  \param SiconosVector : the vector to be copied
-   */
+  *  \param SiconosVector : the vector to be copied
+  */
   BlockVector& operator =(const BlockVector&);
 
-  /** operator =
-   *  \param a DenseVect : the vector to be copied
+  BlockVector& operator -=(const BlockVector&);
+  BlockVector& operator +=(const BlockVector&);
+
+  /* * operator =
+   * \param SiconosVector : the vector to be copied
    */
-  BlockVector& operator = (const DenseVect&);
+  BlockVector& operator =(const SiconosVector& vIn)
+  {
+    setBlock(vIn, *this, _sizeV, 0, 0);
+    return *this;
+  }
 
-  /** operator =
-   *  \param a DenseVect : the vector to be copied
-   */
-  BlockVector& operator = (const SparseVect&);
-
-  /** operator +=
-   *  \param SiconosVector : a vector to add
-   */
-  BlockVector& operator +=(const SiconosVector&);
-
-  /** operator -=
-   *  \param SiconosVector : a vector to subtract
-   */
-  BlockVector& operator -=(const SiconosVector&);
-
-
-  SiconosVector& operator *= (double s)
+  BlockVector& operator *= (double s)
   {
     VectorOfVectors::iterator it;
     for (it = begin(); it != end(); ++it)
@@ -409,7 +299,7 @@ public:
     return *this;
   }
 
-  SiconosVector& operator /= (double s)
+  BlockVector& operator /= (double s)
   {
     VectorOfVectors::iterator it;
     for (it = begin(); it != end(); ++it)
@@ -426,6 +316,8 @@ public:
    *  \param a pointer to SP::SiconosVector
    */
   void insertPtr(SP::SiconosVector) ;
+
+  bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 
   ACCEPT_STD_VISITORS();
 

@@ -34,7 +34,7 @@ protected:
   ACCEPT_SERIALIZATION(KneeJointR);
 
   /*coodinate of the Knee point in the frame of d1*/
-  SP::SimpleVector _P0;
+  SP::SiconosVector _P0;
 
   SP::NewtonEulerDS _d1;
   SP::NewtonEulerDS _d2;
@@ -51,15 +51,15 @@ public:
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
      \param a SP::NewtonEulerDS d2, a dynamical system containing the intial position
-     \param a SP::SimpleVector P, P contains the coordinates of the Knee point, in the frame of d1 where the origine is G1.
+     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the frame of d1 where the origine is G1.
                                   ie P contains the coordinates of the Knee point, in the object frame G1.
   */
-  KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P);
+  KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P);
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SimpleVector P, P contains the coordinates of the Knee point, in the absolute frame.
+     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the absolute frame.
   */
-  KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRef = true);
+  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
   /** destructor
    */
   void checkInitPos();

@@ -118,7 +118,7 @@ public:
    *  \param  SiconosMatrix : C
    *  \param  SiconosMatrix : D
    *  \param  SiconosMatrix : F
-   *  \param  SimpleVector  : e
+   *  \param  SiconosVector  : e
    *  \param  SiconosMatrix : B
 
   FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix& , const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);

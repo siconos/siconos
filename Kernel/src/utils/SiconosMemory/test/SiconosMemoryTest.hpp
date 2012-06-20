@@ -53,7 +53,8 @@ private:
   void End();
 
   SP::MemoryContainer V1, V2, V3;
-  SP::SiconosVector q1, q2, q3, c1, c2;
+  SP::SiconosVector q1, q2, q3;
+  SP::BlockVector c1, c2;
   unsigned int _sizeMem;
 public:
   void setUp();

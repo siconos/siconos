@@ -79,7 +79,7 @@ void TimeDiscretisationXMLTest::testGetTk()
   vector<double> v(2);
   v.at(0) = 5;
   v.at(1) = -5;
-  vectorRef = /*SiconosVector*/SimpleVector(v);
+  vectorRef = /*SiconosVector*/SiconosVector(v);
 
   //cout<<"td.getTk() : "<< *(td.getTk()) <<endl<<" - vectorRef : "<< vectorRef <<endl;
 

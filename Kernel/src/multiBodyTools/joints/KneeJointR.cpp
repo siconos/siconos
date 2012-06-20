@@ -64,9 +64,9 @@ void KneeJointR::checkInitPos()
 
 
 }
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerR()
 {
-  _P0.reset(new SimpleVector(3));
+  _P0.reset(new SiconosVector(3));
   *_P0 = *P;
   _d1 = d1;
   SP::SiconosVector q1 = d1->q0();
@@ -75,7 +75,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   _G1P0z = _P0->getValue(2);
   _d2 = d2;
   SP::SiconosVector q2 = d2->q0();
-  SimpleVector G2_abs(3);
+  SiconosVector G2_abs(3);
   G2_abs.setValue(0, q2->getValue(0));
   G2_abs.setValue(1, q2->getValue(1));
   G2_abs.setValue(2, q2->getValue(2));
@@ -84,13 +84,13 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
   ::boost::math::quaternion<double>    quatG1P0(0, _G1P0x, _G1P0y, _G1P0z);
   ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
   quatBuff = quat1 * quatG1P0 / quat1;
-  SimpleVector P0_abs(3);
+  SiconosVector P0_abs(3);
   P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
   P0_abs.setValue(1, quatBuff.R_component_3() + q1->getValue(1));
   P0_abs.setValue(2, quatBuff.R_component_4() + q1->getValue(2));
   std::cout << "KneeJoint: P0_abs in the initial position.\n";
   P0_abs.display();
-  SimpleVector G2P0_abs(3);
+  SiconosVector G2P0_abs(3);
   G2P0_abs = P0_abs - G2_abs;
   ::boost::math::quaternion<double>    quatG2P0_abs(0, G2P0_abs.getValue(0), G2P0_abs.getValue(1), G2P0_abs.getValue(2));
   quatBuff = quat2_inv * quatG2P0_abs / quat2_inv;
@@ -106,13 +106,13 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVec
 }
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SimpleVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
+   \param a SP::SiconosVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
    else P0 contains the coordinates of the Knee point, in the frame of d1,
    ie P0 in the frame of the object, ie G1P0 in the obsolut frame with d1->q=(x,y,z,1,0,0,0).
 */
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, bool absolutRef): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerR()
 {
-  _P0.reset(new SimpleVector(3));
+  _P0.reset(new SiconosVector(3));
   *_P0 = *P0;
   _d1 = d1;
   SP::SiconosVector q1 = d1->q0();

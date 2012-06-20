@@ -47,17 +47,17 @@ public:
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
      \param a SP::NewtonEulerDS d2, a dynamical system containing the intial position
-     \param a SP::SimpleVector P, see KneeJointR documentation.
-     \param a SP::SimpleVector A, Axis of the pivot in the frame of d1.
+     \param a SP::SiconosVector P, see KneeJointR documentation.
+     \param a SP::SiconosVector A, Axis of the pivot in the frame of d1.
   */
-  PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SimpleVector P, SP::SimpleVector A);
+  PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A);
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SimpleVector P0, see KneeJointR documentation.
-     \param a SP::SimpleVector A, axis in the frame of the object.
+     \param a SP::SiconosVector P0, see KneeJointR documentation.
+     \param a SP::SiconosVector A, axis in the frame of the object.
      \param a bool, used only by the KneeJointR constructor see KneeJointR documentation.
   */
-  PivotJointR(SP::NewtonEulerDS d1, SP::SimpleVector P0, SP::SimpleVector A, bool absolutRef = true);
+  PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::SiconosVector A, bool absolutRef = true);
   /** destructor
    */
   virtual ~PivotJointR() {};

@@ -26,7 +26,7 @@
 
 #include "OneStepNSProblemXML.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimpleVector.hpp"
+#include "SiconosVector.hpp"
 
 class OneStepNSProblem;
 
@@ -61,9 +61,9 @@ public:
   }
 
   /** Return p
-   *   \return SimpleVector :  vector p of the QP
+   *   \return SiconosVector :  vector p of the QP
    */
-  inline /*SiconosVector*/SimpleVector getP()
+  inline /*SiconosVector*/SiconosVector getP()
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(this->pNode);
   }
@@ -81,7 +81,7 @@ public:
   }
 
   /** allows to save p
-   *   \param SimpleVector* : vector p to save
+   *   \param SiconosVector* : vector p to save
    */
   inline void setP(const SiconosVector&v)
   {
