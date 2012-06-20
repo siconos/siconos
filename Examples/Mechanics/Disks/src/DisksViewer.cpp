@@ -64,7 +64,7 @@ void DisksViewer::draw()
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
-  SP::UnitaryRelationsGraph I1;
+  SP::InteractionsGraph I1;
   SP::Interaction interaction;
   SP::Relation relation;
 
@@ -73,15 +73,15 @@ void DisksViewer::draw()
     I1 = Siconos_->model()->simulation()->indexSet(1);
 
     // calibration
-    UnitaryRelationsGraph::VIterator ui, uiend;
+    InteractionsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
     {
-      lbdmax = fmax(I1->bundle(*ui)->interaction()->lambdaOld(1)->getValue(0), lbdmax);
+      lbdmax = fmax(I1->bundle(*ui)->lambdaOld(1)->getValue(0), lbdmax);
     }
 
     for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
     {
-      interaction = I1->bundle(*ui)->interaction();
+      interaction = I1->bundle(*ui);
       relation = interaction->relation();
 
       lbd = interaction->lambdaOld(1)->getValue(0);
