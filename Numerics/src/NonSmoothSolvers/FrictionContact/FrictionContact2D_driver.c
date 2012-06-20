@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,9 +28,17 @@ char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
 char *  SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 char *  SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
 char *  SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
+char *  SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
+char *  SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
+//#define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
+#define DUMP_PROBLEM_IF_INFO
+#ifdef DUMP_PROBLEM_IF_INFO
+static int fccounter = 0;
+#endif
+
 
 int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {
@@ -38,6 +46,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
 #ifdef DUMP_PROBLEM
   char fname[256];
   sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
+  printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
 
   FILE * foutput  =  fopen(fname, "w");
   frictionContact_printInFile(problem, foutput);
@@ -111,15 +120,33 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
     /****** CPG algorithm ******/
     case SICONOS_FRICTION_2D_CPG:
     {
-      printf(" ========================== Call CPG solver for Friction-Contact 2D problem ==========================\n");
+      if (verbose)
+        printf(" ========================== Call CPG solver for Friction-Contact 2D problem ==========================\n");
       FrictionContact2D_cpg(problem, reaction, velocity, &info, options);
       break;
     }
     /****** Latin algorithm ******/
     case SICONOS_FRICTION_2D_LATIN:
     {
-      printf(" ========================== Call Latin solver for Friction-Contact 2D problem ==========================\n");
+      if (verbose)
+        printf(" ========================== Call Latin solver for Friction-Contact 2D problem ==========================\n");
       FrictionContact2D_latin(problem, reaction, velocity, &info, options);
+      break;
+    }
+    /****** Lexicolemke algorithm ******/
+    case SICONOS_FRICTION_2D_LEMKE:
+    {
+      if (verbose)
+        printf(" ========================== Call Lemke solver for Friction-Contact 2D problem ==========================\n");
+      frictionContact2D_lexicolemke(problem, reaction, velocity, &info, options, global_options);
+      break;
+    }
+    /****** Enum algorithm ******/
+    case SICONOS_FRICTION_2D_ENUM:
+    {
+      if (verbose)
+        printf(" ========================== Call Enumerative solver for Friction-Contact 2D problem ==========================\n");
+      frictionContact2D_enum(problem, reaction, velocity, &info, options, global_options);
       break;
     }
     /*error */
@@ -129,6 +156,18 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
       exit(EXIT_FAILURE);
     }
     }
+#ifdef DUMP_PROBLEM_IF_INFO
+    if (info)
+    {
+      char fname[256];
+      sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
+      printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
+
+      FILE * foutput  =  fopen(fname, "w");
+      frictionContact_printInFile(problem, foutput);
+      fclose(foutput);
+    }
+#endif
   }
   else
   {

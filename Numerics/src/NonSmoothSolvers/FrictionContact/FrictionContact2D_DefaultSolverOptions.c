@@ -52,6 +52,16 @@ int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, int solver
     info =    frictionContact2D_latin_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_2D_LEMKE:
+  {
+    info =    frictionContact2D_lexicolemke_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_2D_ENUM:
+  {
+    info =    frictionContact2D_enum_setDefaultSolverOptions(options);
+    break;
+  }
 
   default:
   {

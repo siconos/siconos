@@ -431,6 +431,15 @@ IF(WITH_TESTING)
   NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
   NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
 
+  ## test 2D dense with Lemke NSGS failed on it
+  NEW_TEST(FrictionContact2D_Problemtest30 FrictionContact2D_test30.c)
+  NEW_TEST(FrictionContact2D_Problemtest31 FrictionContact2D_test31.c)
+  #SET(FrictionContact2D_Problemtest32 WILL_FAIL TRUE)
+  #NEW_TEST(FrictionContact2D_Problemtest32 FrictionContact2D_test32.c)
+
+  ## test 2D dense with Enum Lemke failed on 41 !!
+  NEW_TEST(FrictionContact2D_Problemtest40 FrictionContact2D_test40.c)
+  NEW_TEST(FrictionContact2D_Problemtest41 FrictionContact2D_test41.c)
 
 
   NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)

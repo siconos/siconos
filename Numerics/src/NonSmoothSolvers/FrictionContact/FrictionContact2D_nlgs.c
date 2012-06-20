@@ -24,6 +24,29 @@
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
+void shuffle(int size, int * randnum) //size is the given range
+{
+  int i;
+  int swap, randindex;
+  /* for(i=0;i<size;i++) */
+  /* { */
+  /*  printf("Array before shuffling is : %d\n",randnum[i]); */
+  /* } */
+  for (i = 0; i < size; ++i)
+  {
+    swap = randnum[i];
+    randindex = rand() % size;
+    randnum[i] = randnum[randindex];
+    randnum[randindex] = swap;
+  }
+  /* printf("\n\n\n"); */
+  /* for(i=0;i<size;i++) */
+  /* { */
+  /*  printf("Array after shuffling is : %d\n",randnum[i]); */
+  /* } */
+}
+
+
 void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
@@ -31,7 +54,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
   double *q = problem->q;
   double * mu = problem->mu;
 
-  int i, j, k, iter;
+  int i, j, k, kk, iter;
   int n = 2 * nc;
   int it_end = 0;
   int  incx, incy;
@@ -40,6 +63,8 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
   double *y, res = INFINITY;
   double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
+
+  int * randomContactList;
 
   int maxit = options->iparam[0];
   double errmax = options->dparam[0];
@@ -50,6 +75,17 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
   eps          = 1.e-08;
 
   y       = (double*) malloc(n  * sizeof(double));
+
+
+
+
+  randomContactList = (int*) malloc(nc  * sizeof(int));
+
+  for (i = 0; i < nc; i++)
+  {
+    randomContactList[i] = i;
+  }
+
 
   for (i = 0; i < n; i++)
   {
@@ -64,13 +100,23 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
   {
     iter = iter + 1 ;
 
+    if (options->iparam[2] > 0)
+    {
+      shuffle(nc, randomContactList);
+    }
+
+
 
     /*         Loop over contacts                */
 
 
 
-    for (i = 0; i < nc; i++)
+    for (kk = 0; kk < nc; kk++)
     {
+
+
+      i = randomContactList[kk];
+
       avn = 0.;
       avt = 0.;
       apn = 0.;
@@ -127,7 +173,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
             printf(" Warning denominator nul\n");
 
           free(y);
-
+          free(randomContactList);
           *info = 2;
           return;
 
@@ -163,6 +209,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
               printf(" Warning denominator nul\n");
 
             free(y);
+            free(randomContactList);
 
             *info = 2;
             return;
@@ -199,6 +246,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
                 printf(" Warning denominator nul\n");
 
               free(y);
+              free(randomContactList);
 
               *info = 2;
               return;
@@ -278,6 +326,7 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
 
 
   free(y);
+  free(randomContactList);
 
 
 
@@ -311,3 +360,4 @@ int frictionContact2D_nsgs_setDefaultSolverOptions(SolverOptions *options)
   options ->internalSolvers = NULL;
   return 0;
 }
+

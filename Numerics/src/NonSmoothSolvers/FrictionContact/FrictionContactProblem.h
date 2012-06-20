@@ -116,11 +116,13 @@
  * <ul>
  * <li> FrictionContact2D_nsgs(), Non Linear Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =400,
  * </li>
- * <li> FrictionContact2D_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_NSGS =401,
+ * <li> FrictionContact2D_cpg(), conjugate projected gradient SolverId SICONOS_FRICTION_2D_CPG =401,
  * </li>
- * <li> FrictionContact2D_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_NSGS =402,
+ * <li> FrictionContact2D_pgs(), projected Gauss Seidel solver. SolverId SICONOS_FRICTION_2D_PGS =402,
  * </li>
- * <li> FrictionContact2D_latin(), latin solver. SolverId SICONOS_FRICTION_2D_NSGS =403, </li>
+ * <li> FrictionContact2D_latin(), latin solver. SolverId SICONOS_FRICTION_2D_LATIN =403, </li>
+ * </li>
+ * <li> FrictionContact2D_lexicolemke(), lemke solver. SolverId SICONOS_FRICTION_2D_LMEKE =404, </li>
  * </ul>
  *
  */
@@ -170,6 +172,11 @@ typedef struct
 extern "C"
 {
 #endif
+  /** display a FrictionContactProblem
+   * \param problem the problem to display
+   */
+  void frictionContact_display(FrictionContactProblem*  problem);
+
   /** print a FrictionContactProblem in a file (numerics .dat format)
    * \param problem the problem to print out
    * \param file the dest file

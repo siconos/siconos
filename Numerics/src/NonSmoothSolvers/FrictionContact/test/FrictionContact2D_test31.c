@@ -16,33 +16,32 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "frictionContact_test_function.h"
 
-#ifndef FrictionContact2D_compute_error_H
-#define FrictionContact2D_compute_error_H
-
-/*!\file FrictionContact2D_compute_error.h
-  \brief functions related to error computation for friction-contact problems
-
-  \author Vincent Acary, 26/05/2008
-
-*/
-
-#ifdef __cplusplus
-extern "C"
+int main(void)
 {
-#endif
+  int info = 0 ;
 
-  /** Error computation for friction-contact 3D problem
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param tolerance value for error computation
-      \param[in,out] error value
-   */
-  int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
+  char filename[50] = "./data/FrictionContactProblem00374.dat";
 
-#ifdef __cplusplus
+  printf("Test on %s\n", filename);
+
+  FILE * finput  =  fopen(filename, "r");
+
+
+  SolverOptions * options = malloc(sizeof(SolverOptions));
+  info = frictionContact2D_setDefaultSolverOptions(options, SICONOS_FRICTION_2D_LEMKE);
+
+  info = frictionContact_test_function(finput, options);
+
+  deleteSolverOptions(options);
+  free(options);
+  fclose(finput);
+  printf("End of test on %s\n", filename);
+
+
+  return info;
 }
-#endif
-
-#endif

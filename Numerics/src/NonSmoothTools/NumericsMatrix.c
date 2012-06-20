@@ -204,14 +204,15 @@ void display(const NumericsMatrix* const m)
   {
     printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
     printf("[");
-    for (int i = 0; i < m->size1 * m->size0; i++)
+    for (int i = 0; i < m->size0; i++)
     {
-      printf("%lf ", m->matrix0[i]);
-      if ((i + 1) % m->size1 == 0)
-        printf("\n");
+      printf("[");
+      for (int j = 0; j < m->size1; j++)
+      {
+        printf("%lf ", m->matrix0[i + j * m->size0]);
+      }
+      printf("]\n");
     }
-    printf("]");
-    printf("\n (warning: column-major) \n");
   }
   else if (storageType == 1)
     printSBM(m->matrix1);

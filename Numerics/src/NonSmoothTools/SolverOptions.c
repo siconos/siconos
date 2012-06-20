@@ -361,6 +361,10 @@ char * idToName(int Id)
     return SICONOS_FRICTION_2D_CPG_STR;
   case SICONOS_FRICTION_2D_LATIN:
     return SICONOS_FRICTION_2D_LATIN_STR;
+  case SICONOS_FRICTION_2D_LEMKE:
+    return SICONOS_FRICTION_2D_LEMKE_STR;
+  case SICONOS_FRICTION_2D_ENUM:
+    return SICONOS_FRICTION_2D_ENUM_STR;
     /*FRICTION_3D*/
   case SICONOS_FRICTION_3D_NSGS:
     return SICONOS_FRICTION_3D_NSGS_STR;
@@ -510,6 +514,8 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_2D_LATIN;
   else if (strcmp(SICONOS_RELAY_LATIN_STR, pName) == 0)
     return SICONOS_RELAY_LATIN;
+  else if (strcmp(SICONOS_RELAY_LEMKE_STR, pName) == 0)
+    return SICONOS_RELAY_LEMKE;
   /*FRICTION_3D*/
   else if (strcmp(SICONOS_FRICTION_3D_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_3D_NSGS;

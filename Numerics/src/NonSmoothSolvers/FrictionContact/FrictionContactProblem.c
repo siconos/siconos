@@ -17,8 +17,49 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include <stdlib.h>
+#include <assert.h>
 #include "FrictionContactProblem.h"
 #include "misc.h"
+
+
+void frictionContact_display(FrictionContactProblem* problem)
+{
+
+  assert(problem);
+  int i, n = problem->dimension * problem->numberOfContacts;
+  printf("FrictionContact Display :\n-------------\n");
+  printf("dimension :%d \n", problem->dimension);
+  printf("numberOfContacts:%d \n", problem->numberOfContacts);
+
+  if (problem->M)
+  {
+    printf("M matrix:\n");
+    display(problem->M);
+  }
+  else
+    printf("No M matrix:\n");
+
+  if (problem->q)
+  {
+    printf("q vector:\n");
+    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+  }
+  else
+    printf("No q vector:\n");
+
+  if (problem->mu)
+  {
+    printf("mu vector:\n");
+    for (i = 0; i < problem->numberOfContacts; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
+  }
+  else
+    printf("No mu vector:\n");
+
+}
+
+
+
+
 
 int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
 {
