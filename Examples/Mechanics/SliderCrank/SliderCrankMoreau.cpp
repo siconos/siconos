@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 0.15;       // final computation time
-    double h = 1e-6;       // time step : do not decrease, because of strong penetrations
+    double T = 0.2;       // final computation time
+    double h = 1e-4;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -124,12 +124,17 @@ int main(int argc, char* argv[])
     // ----------------
     SP::Moreau OSI(new Moreau(slider, 0.5, 0.0));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::OneStepNSProblem impact(new FrictionContact(2));
-
+    SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
+    impact->numericsSolverOptions()->dparam[0] = 1e-08;
+    impact->numericsSolverOptions()->iparam[0] = 100;
+    impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::TimeStepping s(new TimeStepping(t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
+    s->setNewtonTolerance(1e-10);
+    s->setNewtonMaxIteration(200);
 
+    SP::Topology topo = sliderWithClearance->nonSmoothDynamicalSystem()->topology();
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -141,7 +146,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 25;
+    unsigned int outputSize = 27;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
@@ -172,6 +177,8 @@ int main(int argc, char* argv[])
     dataPlot(0, 22) = (*inter2->lambda(1))(0) ; // lambda1
     dataPlot(0, 23) = (*inter3->lambda(1))(0) ; // lambda3
     dataPlot(0, 24) = (*inter4->lambda(1))(0) ; // lambda4
+    dataPlot(0, 25) = 0;
+    dataPlot(0, 26) = 0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -182,12 +189,13 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
+    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
     while (s->nextTime() < T)
     {
       //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();
-
+      impact->setNumericsVerboseMode(0);
       // --- Get values to be plotted ---
       dataPlot(k, 0) = s->nextTime();
       dataPlot(k, 1) = (*q)(0) / (2.*M_PI); // crank revolution
@@ -198,8 +206,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*v)(2);
       dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
       dataPlot(k, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
-      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
-      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 3 (normalized)
+      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 4 (normalized)
       dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
       dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
       dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
@@ -214,7 +222,13 @@ int main(int argc, char* argv[])
       dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
       dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
       dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
+      dataPlot(k, 25) = s->getNewtonNbSteps();
+      dataPlot(k, 26) = indexSet1->size();
 
+      if (indexSet1->size() > 5)
+      {
+        impact->display();
+      }
       //      if (s->nextTime() > 0.035 and (*inter1->lambda(1))(0) >0.0)
       if (0)
       {

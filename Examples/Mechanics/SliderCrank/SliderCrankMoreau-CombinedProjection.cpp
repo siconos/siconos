@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
     double T = 0.2;       // final computation time
-    double h = 2e-5;       // time step : do not decrease, because of strong penetrations
+    double h = 1e-6;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -124,11 +124,14 @@ int main(int argc, char* argv[])
     // ----------------
     SP::MoreauCombinedProjectionOSI OSI(new MoreauCombinedProjectionOSI(slider, 0.5));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::OneStepNSProblem impact(new FrictionContact(2));
+    SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
+    impact->numericsSolverOptions()->dparam[0] = 1e-08;
+    impact->numericsSolverOptions()->iparam[0] = 100;
+    impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::OneStepNSProblem position(new MLCPProjectOnConstraints());
 
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, impact, position, 2));
-    s->setProjectionMaxIteration(5);
+    s->setProjectionMaxIteration(500);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
     // =========================== End of model definition ===========================
@@ -142,7 +145,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 29;
+    unsigned int outputSize = 35;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
@@ -177,6 +180,12 @@ int main(int argc, char* argv[])
     dataPlot(0, 26) = (*inter2->lambda(0))(0) ; // lambda2
     dataPlot(0, 27) = (*inter3->lambda(0))(0) ; // lambda3
     dataPlot(0, 28) = (*inter4->lambda(0))(0) ; // lambda4
+    dataPlot(0, 29) = 1;
+    dataPlot(0, 30) = 0;
+    dataPlot(0, 31) = 0;
+    dataPlot(0, 32) = 0;
+    dataPlot(0, 33) = 0;
+    dataPlot(0, 34) = 0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 
@@ -221,7 +230,12 @@ int main(int argc, char* argv[])
       dataPlot(k, 26) = (*inter2->lambda(0))(0) ; // lambda2
       dataPlot(k, 27) = (*inter3->lambda(0))(0) ; // lambda3
       dataPlot(k, 28) = (*inter4->lambda(0))(0) ; // lambda4
-
+      dataPlot(k, 29) = s->getNewtonNbSteps();
+      dataPlot(k, 30) = s->nbProjectionIteration();
+      dataPlot(k, 31) = s->maxViolationUnilateral();
+      dataPlot(k, 32) = s->nbIndexSetsIteration();
+      dataPlot(k, 33) = s->cumulatedNewtonNbSteps();
+      dataPlot(k, 34) = s->nbCumulatedProjectionIteration();
       s->processEvents();
       ++show_progress;
       k++;

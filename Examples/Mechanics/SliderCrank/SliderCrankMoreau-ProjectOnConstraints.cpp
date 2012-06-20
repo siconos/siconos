@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
-    double T = 0.15;       // final computation time
-    double h = 1e-6;       // time step : do not decrease, because of strong penetrations
+    double T = 0.2;       // final computation time
+    double h = 1e-4;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -129,11 +129,14 @@ int main(int argc, char* argv[])
     OSI->setActivateYVelThreshold(100.0);
 
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-    SP::OneStepNSProblem impact(new FrictionContact(2));
+    SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
+    impact->numericsSolverOptions()->dparam[0] = 1e-08;
+    impact->numericsSolverOptions()->iparam[0] = 100;
+    impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::MLCPProjectOnConstraints position(new MLCPProjectOnConstraints());
 
-    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, impact, position, 1));
-    s->setProjectionMaxIteration(5);
+    SP::TimeSteppingProjectOnConstraints s(new TimeSteppingProjectOnConstraints(t, OSI, impact, position, 0));
+    s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
     // =========================== End of model definition ===========================
@@ -147,7 +150,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 29;
+    unsigned int outputSize = 32;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
@@ -162,8 +165,8 @@ int main(int argc, char* argv[])
     dataPlot(0, 6) = (*v)(2);
     dataPlot(0, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
     dataPlot(0, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
-    dataPlot(0, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
-    dataPlot(0, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+    dataPlot(0, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 3 (normalized)
+    dataPlot(0, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 4 (normalized)
     dataPlot(0, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
     dataPlot(0, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized
     dataPlot(0, 13) = (*inter1->y(0))(0) ; // g1
@@ -182,7 +185,9 @@ int main(int argc, char* argv[])
     dataPlot(0, 26) = (*inter2->lambda(0))(0) ; // lambda2
     dataPlot(0, 27) = (*inter3->lambda(0))(0) ; // lambda3
     dataPlot(0, 28) = (*inter4->lambda(0))(0) ; // lambda4
-
+    dataPlot(0, 29) = 0;
+    dataPlot(0, 30) = 0;
+    dataPlot(0, 31) = 0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 
@@ -210,8 +215,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*v)(2);
       dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
       dataPlot(k, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
-      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
-      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 3 (normalized)
+      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 4 (normalized)
       dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
       dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
       dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
@@ -231,6 +236,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 26) = (*inter2->lambda(0))(0) ; // lambda2
       dataPlot(k, 27) = (*inter3->lambda(0))(0) ; // lambda3
       dataPlot(k, 28) = (*inter4->lambda(0))(0) ; // lambda4
+      dataPlot(k, 29) = s->getNewtonNbSteps();
+      dataPlot(k, 30) = s->nbProjectionIteration();
+      dataPlot(k, 31) = s->maxViolationUnilateral();
       //if (s->nextTime() > 0.035 and (*inter1->lambda(1))(0) >0.0)
       if (0)
       {
