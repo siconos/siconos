@@ -85,7 +85,6 @@
   PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                     \
   PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                      \
   PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                     \
-  PY_REGISTER_WITHOUT_DIRECTOR(SimpleVector);                      \
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                       \
   PY_REGISTER(InteractionsSet);                                    \
   PY_REGISTER(BoundaryCondition);                                  \

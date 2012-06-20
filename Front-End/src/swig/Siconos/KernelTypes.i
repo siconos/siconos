@@ -83,9 +83,9 @@
       if (!require_dimensions(array,1) ||
           !require_native(array) || !require_fortran(array)) SWIG_fail;
       
-      SP::SimpleVector tmp;
-      tmp.reset(new SimpleVector(array_size(array,0)));
-      // copy : with SimpleVector based on resizable std::vector there is
+      SP::SiconosVector tmp;
+      tmp.reset(new SiconosVector(array_size(array,0)));
+      // copy : with SiconosVector based on resizable std::vector there is
       // no other way
       memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
       $1 = tmp;
@@ -228,7 +228,7 @@
   // %typemap(directorin, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
   if ($1_name)
   {
-    if (($1_name).getNum() == 1)
+    if (($1_name)->getNum() == 1)
     {
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0]=$1->size(0);
@@ -316,9 +316,9 @@
     if (!require_dimensions(array,1) ||
         !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
     
-    SP::SimpleVector tmp;
-    tmp.reset(new SimpleVector(array_size(array,0)));
-    // copy : with SimpleVector based on resizable std::vector there is
+    SP::SiconosVector tmp;
+    tmp.reset(new SiconosVector(array_size(array,0)));
+    // copy : with SiconosVector based on resizable std::vector there is
     // no other way
     memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
     return tmp;
@@ -336,7 +336,7 @@
   }
 }
 
-// director output : PyObject -> SP::SimpleVector 
+// director output : PyObject -> SP::SiconosVector 
 %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
 {
   // %typemap(directorout, fragment="NumPy_Fragments") boost::shared_ptr<SiconosMatrix> ()
@@ -401,7 +401,7 @@
 
 %typemap(out) boost::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
 {
-  // %typemap(out) boost::shared_ptr<SimpleVector>
+  // %typemap(out) boost::shared_ptr<SiconosVector>
 
   // compile time test to reproduce swig director test. swig does not
   // seem to provides facilities to customize this
@@ -424,7 +424,7 @@
     // result from C++ method, return the pointer
     $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_boost__shared_ptrT_std__vectorT_unsigned_int_std__allocatorT_unsigned_int_t_t_const_t,  0 );
   }
-  // call from python : return numpy from SimpleVector
+  // call from python : return numpy from SiconosVector
   else
   {
     if ($1)
@@ -559,17 +559,14 @@
 
 
 TYPECHECK(boost::shared_ptr<SiconosVector>, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t);
-TYPECHECK(boost::shared_ptr<SimpleVector>,  SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t);
 TYPECHECK(boost::shared_ptr<SiconosMatrix>, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t);
 TYPECHECK(boost::shared_ptr<SimpleMatrix>, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t);
 TYPEMAP_VECTOR(boost::shared_ptr<SiconosVector>, SWIGTYPE_p_boost__shared_ptrT_SiconosVector_t);
-TYPEMAP_VECTOR(boost::shared_ptr<SimpleVector>, SWIGTYPE_p_boost__shared_ptrT_SimpleVector_t);
 TYPEMAP_MATRIX(boost::shared_ptr<SiconosMatrix>, SWIGTYPE_p_boost__shared_ptrT_SiconosMatrix_t);
 TYPEMAP_MATRIX(boost::shared_ptr<SimpleMatrix>, SWIGTYPE_p_boost__shared_ptrT_SimpleMatrix_t);  
 // needed?
 // from C++ to python 
 %template() boost::shared_ptr<SiconosVector>;
-%template() boost::shared_ptr<SimpleVector>;
 %template() boost::shared_ptr<BlockVector>;
 %template() boost::shared_ptr<SiconosMatrix>;
 %template() boost::shared_ptr<SimpleMatrix>;
@@ -578,7 +575,6 @@ TYPEMAP_MATRIX(boost::shared_ptr<SimpleMatrix>, SWIGTYPE_p_boost__shared_ptrT_Si
 
 
 %apply (boost::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
-%apply (boost::shared_ptr<SimpleVector>) { (SP::SimpleVector) };
 
 %apply (boost::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
 %apply (boost::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };

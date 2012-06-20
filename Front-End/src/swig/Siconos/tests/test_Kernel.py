@@ -2,12 +2,12 @@
 
 
 def test_getVector():
-    from Siconos.Kernel import getVector, SimpleVector
+    from Siconos.Kernel import getVector, SiconosVector
     from numpy import array
 
     assert (getVector([1,2,3]) == array([1,2,3])).all()
 
-    v = SimpleVector(3)
+    v = SiconosVector(3)
     v.setValue(0,1)
     v.setValue(1,2)
     v.setValue(2,4)

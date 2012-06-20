@@ -47,6 +47,7 @@
 #undef c_abs
 #endif
 #include <SiconosKernel.hpp>
+#include <SiconosVisitor.hpp>
 #include "Disk.hpp"
 #include "Circle.hpp"
 #include "DiskDiskR.hpp"
@@ -241,6 +242,7 @@ namespace std
 // includes and imports
 %include "SiconosPointers.hpp"
 %include "SiconosVisitables.hpp"
+
 %import "SiconosVisitor.hpp"
 %import "SiconosSerialization.hpp"
 %import "ioObject.hpp"
@@ -382,7 +384,7 @@ KERNEL_REGISTRATION();
 // createSPtr*
 %ignore nullDeleter;
 
-// defined in SimpleVector.cpp
+// defined in SiconosVector.cpp
 %ignore setBlock;
 %ignore add;
 %ignore sub;
@@ -410,8 +412,8 @@ KERNEL_REGISTRATION();
 %ignore getInvMSimple;
 %ignore getInvMBlock;
 
-// we do not need visitor hook
-%ignore visit;
+// issue with visitor hook and typechek map in VectorNum
+%ignore VectorNum;
 
 // cannot compile wrapper
 %ignore statOut;
@@ -475,13 +477,12 @@ KERNEL_REGISTRATION();
 
 %inline
 %{
-
   
   /* Note: without the PyCObject stuff the python
    * wrapper fail on this, the numpy vector points on a deleted
    * memory!*/
   
-  const SP::SiconosVector getVector(SP::SimpleVector v)
+  const SP::SiconosVector getVector(SP::SiconosVector v)
   {
     return v;
   };
@@ -491,12 +492,12 @@ KERNEL_REGISTRATION();
     return v;
   };
   
-  
   /* to make swig define SWIGTYPE_p_PyArrayObject */
   const PyArrayObject* getVector(PyArrayObject* v)
   {
     return v;
   };
+
 
 %}
 
@@ -529,7 +530,6 @@ KERNEL_REGISTRATION();
 // suppress warning
 %ignore  boost::enable_shared_from_this< Hashed >;
 %template (sharedHashed) boost::enable_shared_from_this< Hashed >;
-
 
 
 // include registered headers
@@ -575,6 +575,9 @@ TYPEDEF_SPTR(_SolverOptions);
       deleteSolverOptions(self);
     }
 };
+
+
+
 
 
 KERNEL_REGISTRATION();
