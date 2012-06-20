@@ -628,13 +628,14 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep) && (!info))
+    //  while((!isNewtonConverge)&&(_newtonNbSteps < maxStep)&&(!info))
+    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep))
     {
       _newtonNbSteps++;
       prepareNewtonIteration();
       computeFreeState();
       if (info)
-        cout << "new loop because of info\n" << endl;
+        cout << "New Newton loop because of nonsmooth solver failed\n" << endl;
 
       // if there is not any Interaction at
       // the beginning of the simulation _allNSProblems may not be
@@ -647,8 +648,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
-      if (info)
-        cout << "info!" << endl;
+      //if(info)
+      //  cout<<"info!"<<endl;
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutput)
         DefaultCheckSolverOutput(info);
@@ -664,11 +665,15 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       }
     }
     if (!isNewtonConverge)
+    {
       cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
-    else if (info)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
-    //    else
-    //      cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+      if (info)
+        cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." << endl ;
+    }
+    else
+    {
+      //      cout << "TimeStepping::newtonSolve succeed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+    }
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
@@ -762,7 +767,8 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   // else: depend on solver
   if (info != 0)
   {
-    cout << "TimeStepping::check non smooth solver output warning: output message from solver is equal to " << info << endl;
+    std::cout << "TimeStepping::DefaultCheckSolverOutput:" << std::endl;
+    std::cout << "Non smooth solver warning/error: output message from solver is equal to " << info << std::endl;
     //       cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
