@@ -11,14 +11,28 @@ rm /sw/bin/gfortran
 /opt/local/bin/port install cppunit
 /opt/local/bin/port install wget
 
+
+
 /opt/local/bin/port selfupdate
+
+sudo port uninstall perl5.8 perl5 @5.8.9_0
+sudo port install perl5
 
 /opt/local/bin/port install gcc47
 
 # switch to the correct gcc version
 port select --set gcc mp-gcc47
+/opt/local/bin/port install gmp
+/opt/local/bin/port install doxygen
+/opt/local/bin/port install swig
+/opt/local/bin/port install py27-numpy
+/opt/local/bin/port install py27-py
+# big quirk
 
 cd /usr/local/lib
 rm *gfortran*
+
+# get rid of old gmp
+[ -f /opt/local/include/gmp.h ] && [ -f /usr/local/include/gmp.h ] && rm -f /usr/local/include/gmp.h /usr/local/lib/libgmp.a /usr/local/lib/libgmp.la
 
 #exit 0
