@@ -197,7 +197,15 @@ void Lsodar::initialize()
   // initialize xWork with x values of the dynamical systems present in the set.
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
-    _xWork->insertPtr((*itDS)->x());
+    if (Type::value(**itDS) == Type::LagrangianDS ||
+        Type::value(**itDS) == Type::LagrangianLinearTIDS)
+    {
+      LagrangianDS& LDS = *boost::static_pointer_cast<LagrangianDS>(*itDS);
+      _xWork->insertPtr(LDS.q());
+      _xWork->insertPtr(LDS.velocity());
+    }
+    else
+      _xWork->insertPtr((*itDS)->x());
   }
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments

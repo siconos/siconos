@@ -1331,9 +1331,9 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::SiconosVector Xq(new SiconosVector());
+  SP::SiconosVector Xq;
   SP::SiconosVector Yp;
-  SP::SiconosVector Xfree(new SiconosVector());
+  SP::SiconosVector Xfree;
 
   SP::SiconosVector H_alpha;
 
