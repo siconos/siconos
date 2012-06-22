@@ -5,7 +5,7 @@ env
 # change the group owner, otw it fails to install
 # see https://trac.macports.org/ticket/19590
 chgrp -R wheel /opt/local
-rm /sw/bin/gfortran
+rm -f /sw/bin/gfortran
 
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
@@ -24,13 +24,15 @@ sudo port install perl5
 port select --set gcc mp-gcc47
 /opt/local/bin/port install gmp
 /opt/local/bin/port install doxygen
-/opt/local/bin/port install swig
+/opt/local/bin/port install swig-python
 /opt/local/bin/port install py27-numpy
 /opt/local/bin/port install py27-py
 # big quirk
 
+rm -f /sw/bin/gfortran-fsf-4.5
+rm -f /usr/local/bin/gfortran
 cd /usr/local/lib
-rm *gfortran*
+rm -f *gfortran*
 
 # get rid of old gmp
 [ -f /opt/local/include/gmp.h ] && [ -f /usr/local/include/gmp.h ] && rm -f /usr/local/include/gmp.h /usr/local/lib/libgmp.a /usr/local/lib/libgmp.la

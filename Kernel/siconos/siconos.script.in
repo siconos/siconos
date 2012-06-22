@@ -132,7 +132,7 @@ if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     fi
     eval set -- "$args"
 else
-    echo "Warning getopt failed and argument parsing is limited. Please consider installing GNU getopt." >&2
+    echo "Warning getopt test is not conclusive and argument parsing is limited. Please consider installing GNU getopt." >&2
     no_parsing=true
     true
 fi
@@ -287,6 +287,8 @@ if test ! "$make_args" = "clean"; then
 
     if [ $comp = true ]; then
         
+        # for macos : the linker doesn't allow undefined symbol by default -- xhub
+        test `uname` = "Darwin" && linker_options="$linker_options;-undefined;dynamic_lookup"
         if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
             -DCALL_PWD=$call_pwd \
             -DMAIN_SOURCE=$main_source \
