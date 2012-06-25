@@ -1,1 +1,7 @@
-rc.debian-lenny
+#!/bin/sh
+
+#update cmake for a new enough version (>= 2.8.7)
+apt-get -y --force-yes -t squeeze-backports install cmake
+
+
+
