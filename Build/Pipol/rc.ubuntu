@@ -9,4 +9,6 @@ apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesy
 set +e
 apt-get -y install swig2.0
 set -e
+
+apt-get -y clean
 exit 0

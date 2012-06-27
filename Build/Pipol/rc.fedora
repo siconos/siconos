@@ -1,3 +1,6 @@
 #!/bin/sh
 
 yum install -y cmake gcc gcc-gfortran boost-devel atlas atlas-devel gmp gmp-devel libxml2 libxml2-devel cppunit cppunit-devel pcre-devel python-matplotlib scipy python-numeric python-devel swig
+
+# try to free some space
+find /var/cache/yum/ -name '*.rpm'
