@@ -40,17 +40,15 @@ echo HEAD : $head_revision
 echo LOCAL : $local_revision
 
 case $PIPOL_IMAGE in 
-    *windows*) cp -r $HOME/.ssh /home/root/.ssh;;
-    *mac*) export PATH=$PATH:/usr/local/bin
+    *windows*) nbcores=2; cp -r $HOME/.ssh /home/root/.ssh;;
+    *mac*) nbcores=2; export PATH=$PATH:/usr/local/bin
         echo "which gfortran:"
         which gfortran
         ls -l /usr/bin/gfortran;;
+    *) nbcores=`cat /proc/cpuinfo  | grep processor | wc -l`;;
 esac
 
 env
-
-
-
 
 # a local copy because make Nightly will update this sources.
 setup_trunk() {
@@ -122,7 +120,7 @@ make_2() {
     shift; shift
     args="$@"
     cd $PIPOL_WDIR/build/$mod/$btype ;{
-        make -j 2 $args
+        make -j $nbcores $args
     }; cd -
 }
 
