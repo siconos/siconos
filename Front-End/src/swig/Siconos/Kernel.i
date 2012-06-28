@@ -73,7 +73,7 @@
 
 #include "FrontEndConfig.h"
 #ifdef HAVE_SICONOS_IO
-#include <Siconos/IO/SiconosRestart.hpp>
+#include <SiconosRestart.hpp>
 #endif
 %} 
 
@@ -585,7 +585,7 @@ KERNEL_REGISTRATION();
 %include "FrontEndConfig.h";
 
 #ifdef HAVE_SICONOS_IO
-%include "Siconos/IO/SiconosRestart.hpp";
+%include "SiconosRestart.hpp";
 #endif
 
 %fragment("StdSequenceTraits");
