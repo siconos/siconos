@@ -33,6 +33,8 @@
 #include "LagrangianDS.hpp"
 #include "EventFactory.hpp"
 
+//#define DEBUG_MESSAGES 1
+
 #include <debug.h>
 
 using namespace std;
@@ -118,9 +120,9 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
   boost::tie(uibegin, uipend) = indexSet0->vertices();
@@ -196,9 +198,13 @@ void EventDriven::updateIndexSet(unsigned int i)
     }
     else
     {
-      RuntimeException::selfThrow("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't existe");
+      RuntimeException::selfThrow("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't exist");
     }
   }
+
+  DEBUG_PRINTF("update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()

@@ -18,6 +18,9 @@
  */
 #include "LCP.hpp"
 
+#include "debug.h"
+//#define DEBUG_MESSAGES 1
+
 using namespace std;
 using namespace RELATION;
 
@@ -61,6 +64,8 @@ int LCP::compute(double time)
 
   if (_sizeOutput != 0)
   {
+    DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
+
     // The LCP in Numerics format
     _numerics_problem->M = &*_M->getNumericsMatrix();
     _numerics_problem->q = _q->getArray();
@@ -83,8 +88,13 @@ int LCP::compute(double time)
 
     }
 
+
+
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
+
+
+    DEBUG_EXPR(display());
 
   }
 
