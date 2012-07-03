@@ -181,6 +181,26 @@ extern "C"
 
   int FrictionContact2D_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem);
 
+  /** set the default solver parameters and perform memory allocation for enum solver
+      \param options the pointer to options to set
+  */
+  int frictionContact2D_enum_setDefaultSolverOptions(SolverOptions* options);
+
+  /** frictionContact2D_enum solver for  frictionContact2D problems.\n
+     * \param[in] problem structure that represents the frictionContact2D (M, q...)
+     * \param[in,out] reaction a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+     * \param[in,out] velocity a n-vector of doubles which returns the solution of the problem.
+     * \param options
+     * \param global_options
+     * \param[out] info an integer which returns the termination value:\n
+     0 = convergence,\n
+     1 = no convergence,\n
+     2 = Null diagonal term\n
+     \author V. Acary
+    */
+  void frictionContact2D_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options,  NumericsOptions* global_options);
+
+
 
 #ifdef __cplusplus
 }

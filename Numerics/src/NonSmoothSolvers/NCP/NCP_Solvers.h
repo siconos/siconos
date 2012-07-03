@@ -51,7 +51,7 @@ extern "C"
 
   /**
    * This function checks the validity of the vector z as a solution \n
-   * of the LCP : \n
+   * of the NCP : \n
    * \f$
    *    0 \le z \perp Mz + q \ge 0
    * \f$

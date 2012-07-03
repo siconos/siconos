@@ -151,11 +151,15 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
   SICONOS_NUMERICS_PROBLEM_MLCP = 1,
   SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
   SICONOS_NUMERICS_PROBLEM_FC2D = 3,
-  SICONOS_NUMERICS_PROBLEM_FC3D = 4
+  SICONOS_NUMERICS_PROBLEM_FC3D = 4,
+  SICONOS_NUMERICS_PROBLEM_NCP = 5,
+  SICONOS_NUMERICS_PROBLEM_MCP = 6
 };
 
 extern char * SICONOS_NUMERICS_PROBLEM_LCP_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_MLCP_STR;
+extern char * SICONOS_NUMERICS_PROBLEM_NCP_STR;
+extern char * SICONOS_NUMERICS_PROBLEM_MCP_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC2D_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC3D_STR;
@@ -166,14 +170,12 @@ extern "C"
 #endif
 
   /** Read default parameters values for a solver and save them in a SolverOptions structure
-      \param[in] driverType type of the considered problem \n
+      \param[in] int, type of the considered problem.
+      Only the following solvers ids are allowed :\n
       0: LCP\n
       1: MLCP\n
       2: FrictionContact2D\n
       3: FrictionContact3D\n
-      4: Relay\n
-      5: QP\n
-      6: NCP
       \param[out] options structure used to save the parameters
    */
   void readSolverOptions(int driverType, SolverOptions* options);

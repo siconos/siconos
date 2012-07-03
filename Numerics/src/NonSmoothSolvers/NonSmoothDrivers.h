@@ -30,6 +30,8 @@
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "NCP_Solvers.h"
+#include "MCP_Solvers.h"
 #include "LinearSystemProblem.h"
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
@@ -38,15 +40,10 @@
 
 #include "NonSmoothNewton.h"
 
-/** Union of specific methods (one for each type of problem)
-    Deprecated. 98
-*/
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
 
   /** General interface to solver for MLCP problems
       \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
@@ -63,15 +60,15 @@ extern "C"
   int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
 
   /** General interface to solver for linear system
-        \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
-        \param[in,out] z a n-vector of doubles solution of the problem.
-        \param[out] w a n-vector of doubles which contains zeros.
-        \param[in,out] options structure used to define the solver(s) and their parameters
-        \return info termination value
-        - 0 : successful\n
-        - >0 : otherwise see each solver for more information about the log info
-        \author Vincent Acary
-    */
+      \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles solution of the problem.
+      \param[out] w a n-vector of doubles which contains zeros.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
+      \author Vincent Acary
+  */
   int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 
   /** General interface to solvers for friction-contact 2D problem
@@ -84,9 +81,16 @@ extern "C"
    */
   int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
-
-
-
+  /** General interface to solver for MCP problems
+      \param[in] problem the MixedComplementarityProblem structure which handles the problem (M,q)
+      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] global_options  general options for Numerics (verbose mode ...)
+      \return info termination value
+      - 0 : successful\n
+  */
+  //int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
 
 
 #ifdef __cplusplus
