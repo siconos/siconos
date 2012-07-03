@@ -45,23 +45,23 @@ This case is implemented in Siconos with the relation FirstOrderType2R.
 
 
 
-\paragraph{Linear case }Let us introduce anew notation, 
+\paragraph{Linear case }Let us introduce a new notation, 
 \begin{equation}
 \begin{array}{l}
 M \dot{x}(t) = Ax(t) + r(t)  +b(t)\\[2mm]
 y(t) = h(x(t),\lambda (t),z) = Cx + Fz + D \lambda  \\[2mm]
 r(t) = g(t,\lambda (t) ) = B \lambda \\[2mm]
 \end{array}
-\label{fisrt-DS3}
+\label{first-DS3}
 \end{equation}
 
 
-\section{Time--discretizations} 
+\section{Time--discretizations}
 
 
 
 \subsection{Standard $\theta-\gamma$ scheme.}
-Let us now proceed with the time discretization of (\ref{first-DS}) by a fully implicit scheme : 
+Let us now proceed with the time discretization of (\ref{first-DS3}) by a fully implicit scheme : 
 \begin{equation}
   \begin{array}{l}
     \label{eq:toto1}
@@ -123,7 +123,7 @@ which yields
 
 \begin{equation}
   \mathcal R (x^{\alpha}_{k+1},r^{\alpha}_{k+1}) = \fbox{$\mathcal R^{\alpha}_{k+1} \stackrel{\Delta}{=}  \mathcal R
-_{free}(x^{\alpha}_{k+1},r^{\alpha}_{k+1} )  - h\gamma r^{\alpha}_{k+1} - h(1-\gamma)r_k$}\label{eq:rfree-1}
+_{free}(x^{\alpha}_{k+1})  - h\gamma r^{\alpha}_{k+1} - h(1-\gamma)r_k$}\label{eq:rfree-1}
 \end{equation}
 
 \[  \mathcal R
