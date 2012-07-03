@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
@@ -30,6 +30,7 @@ using namespace RELATION;
 // xml constructor
 LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): LagrangianR(LRxml, ScleronomousR)
 {
+  zeroPlugin();
   // h plug-in
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
@@ -39,10 +40,9 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
   //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
-  _pluginjqh.reset(new PluggedObject());
   if (LRxml->isJacobianHPlugin(0))
   {
-    _pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
+    _pluginJachq->setComputeFunction(LRxml->getJacobianHPlugin(0));
   }
   else
     _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
@@ -53,12 +53,12 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const std::string& strcomputeJachq):
   LagrangianR(ScleronomousR)
 {
+  zeroPlugin();
   setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
-  _pluginjqh.reset(new PluggedObject());
-  _pluginjqh->setComputeFunction(strcomputeJachq);
+  _pluginJachq->setComputeFunction(strcomputeJachq);
 
-  //  unsigned int sizeY = interaction()->getSizeOfY();
+  //  unsigned int sizeY = inter.getSizeOfY();
   //  unsigned int sizeQ = workX->size();
   //  _jachq.reset(new SimpleMatrix(sizeY,sizeQ));
 
@@ -70,15 +70,21 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
 LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq, const std::string& computeJachqdot):
   LagrangianR(ScleronomousR)
 {
+  zeroPlugin();
   setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
-  _pluginjqh.reset(new PluggedObject());
-  _pluginjqh->setComputeFunction(strcomputeJachq);
+  _pluginJachq->setComputeFunction(strcomputeJachq);
 
-  _pluginjqhdot.reset(new PluggedObject());
   _pluginjqhdot->setComputeFunction(computeJachqdot);
 }
-void LagrangianScleronomousR::computeh(double)
+
+void LagrangianScleronomousR::zeroPlugin()
+{
+  LagrangianR::zeroPlugin();
+  _pluginJachq.reset(new PluggedObject());
+}
+
+void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
 {
   if (_pluginh)
   {
@@ -86,116 +92,95 @@ void LagrangianScleronomousR::computeh(double)
     if (_pluginh->fPtr)
     {
       // get vector y of the current interaction
-      SP::SiconosVector y = interaction()->y(0);
+      SiconosVector& y = *inter.y(0);
 
       // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-      *_workX = *data[q0];
-      *_workZ = *data[z];
-      *_workY = *y;
+      SiconosVector workQ = *inter.data(q0);
+      SiconosVector workZ = *inter.data(z);
 
-      unsigned int sizeQ = _workX->size();
-      unsigned int sizeY = y->size();
-      unsigned int sizeZ = _workZ->size();
-
-      ((FPtr3)(_pluginh->fPtr))(sizeQ, &(*_workX)(0) , sizeY, &(*_workY)(0), sizeZ, &(*_workZ)(0));
+      ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
 
       // Copy data that might have been changed in the plug-in call.
-      *data[z] = *_workZ;
-      *y = *_workY;
+      *inter.data(z) = workZ;
     }
   }
   // else nothing
 }
 
-void LagrangianScleronomousR::computeJachq(double)
+void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter)
 {
-  // First arg: time. Useless.
-  // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
-
-  //
-  if (_pluginjqh)
+  if (_pluginJachq)
   {
-    if (_pluginjqh->fPtr)
+    if (_pluginJachq->fPtr)
     {
       // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-      *_workX = *data[q0];
-      *_workZ = *data[z];
+      SiconosVector workQ = *inter.data(q0);
+      SiconosVector workZ = *inter.data(z);
 
-      unsigned int sizeY = _jachq->size(0);
-      unsigned int sizeQ = _workX->size();
-      unsigned int sizeZ = _workZ->size();
-
-      ((FPtr3)(_pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
-
+      // get vector lambda of the current interaction
+      ((FPtr3)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), _jachq->size(0), &(*_jachq)(0, 0), workZ.size(), &(workZ)(0));
       // Copy data that might have been changed in the plug-in call.
-      *data[z] = *_workZ;
-    }
-  }
-  //  else nothing!
-}
-
-void LagrangianScleronomousR::computeJachqDot(double time)
-{
-  if (_pluginjqhdot)
-  {
-    if (_pluginjqhdot->fPtr)
-    {
-      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-      *_workX = *data[q0];
-      *_workXdot = *data[q1];
-      *_workZ = *data[z];
-
-      unsigned int sizeS = _jachqDot->size(0);
-      unsigned int sizeQ = _workX->size();
-      unsigned int sizeQdot = _workXdot->size();
-      unsigned int sizeZ = _workZ->size();
-
-      ((FPtr5bis)(_pluginjqhdot->fPtr))(sizeQ, &(*_workX)(0), sizeQdot, &(*_workXdot)(0) , sizeS, &(*_jachqDot)(0, 0), sizeZ, &(*_workZ)(0));
-
-      // Copy data that might have been changed in the plug-in call.
-      *data[z] = *_workZ;
+      *inter.data(z) = workZ;
     }
   }
 }
-void  LagrangianScleronomousR::computeNonLinearH2dot(double time)
+
+void LagrangianScleronomousR::computeJachqDot(const double time, Interaction& inter)
+{
+
+  if (_pluginjqhdot->fPtr)
+  {
+    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    SiconosVector workQ = *inter.data(q0);
+    SiconosVector workZ = *inter.data(z);
+    SiconosVector workQdot = *inter.data(q1);
+
+    // get vector lambda of the current interaction
+    ((FPtr2)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
+    // Copy data that might have been changed in the plug-in call.
+    *inter.data(z) = workZ;
+  }
+}
+
+void  LagrangianScleronomousR::computeNonLinearH2dot(const double time, Interaction& inter)
 {
   // Compute the H Jacobian dot
-  LagrangianScleronomousR::computeJachqDot(time);
-  //
+  LagrangianScleronomousR::computeJachqDot(time, inter);
   _NLh2dot.reset(new SiconosVector(_jachqDot->size(0)));
-  prod(*_jachqDot, *_workXdot, *_NLh2dot);
+  SiconosVector workQdot = *inter.data(q1);
+  prod(*_jachqDot, workQdot, *_NLh2dot);
 }
 
-void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)
+void LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
-    computeh(time);
+    computeh(time, inter);
   else
   {
-    computeJachq(time);
-    SP::SiconosVector y = interaction()->y(derivativeNumber) ;
+    computeJachq(time, inter);
+    SiconosVector& y = *inter.y(derivativeNumber);
     if (derivativeNumber == 1)
-      prod(*_jachq, *data[q1], *y);
+      prod(*_jachq, *inter.data(q1), y);
     else if (derivativeNumber == 2)
-      prod(*_jachq, *data[q2], *y);
+      prod(*_jachq, *inter.data(q2), y);
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
 }
 
-void LagrangianScleronomousR::computeInput(double time, unsigned int level)
+void LagrangianScleronomousR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
-  computeJachq(time);
+  computeJachq(time, inter);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = interaction()->lambda(level);
+  SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *_jachq, *data[p0 + level], false);
+  prod(lambda, *_jachq, *inter.data(p0 + level), false);
 
 }
 const std::string LagrangianScleronomousR::getJachqName() const
 {
-  if (_pluginjqh->fPtr)
-    return _pluginjqh->getPluginName();
+  if (_pluginJachq->fPtr)
+    return _pluginJachq->getPluginName();
   return "unamed";
 
 }

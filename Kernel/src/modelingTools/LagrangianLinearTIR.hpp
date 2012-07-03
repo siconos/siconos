@@ -18,7 +18,7 @@
  */
 /*! \file LagrangianLinearTIR.hpp
 
-*/
+ */
 #ifndef LAGRANGIANLINEARRELATION_H
 #define LAGRANGIANLINEARRELATION_H
 
@@ -27,27 +27,27 @@
 
 /**  Lagrangian Linear Relation.
 
-  \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 27, 2004
+\author SICONOS Development Team - copyright INRIA
+\version 3.0.0.
+\date (Creation) Apr 27, 2004
 
-  Lagrangian Relation with:
+Lagrangian Relation with:
 
-  \f[
-  y= Cq + e + D\lambda + Fz
-  \f]
+\f[
+y= Cq + e + D\lambda + Fz
+\f]
 
-  \f[
-  p = C^t \lambda
-  \f]
+\f[
+p = C^t \lambda
+\f]
 
-   C is the only required input to built a LagrangianLinearTIR.
-   D is optional and may represent a stiffness in the relation
-
-
+C is the only required input to built a LagrangianLinearTIR.
+D is optional and may represent a stiffness in the relation
 
 
-*/
+
+
+ */
 class LagrangianLinearTIR : public LagrangianR
 {
 
@@ -71,109 +71,106 @@ protected:
   SP::SiconosVector _e;
 
   /** Default constructor
-   */
+  */
   LagrangianLinearTIR(): LagrangianR(RELATION::LinearTIR) {};
 
 public:
 
   /** constructor with XML object of the parent class Relation
-   *  \param RelationXML* : the XML object corresponding
-   */
+  *  \param RelationXML* : the XML object corresponding
+  */
   LagrangianLinearTIR(SP::RelationXML);
 
   /** create the Relation from a set of data
-   *  \param SP::SiconosMatrix : the matrix C
-   */
+  *  \param SP::SiconosMatrix : the matrix C
+  */
   LagrangianLinearTIR(SP::SiconosMatrix);
 
   /** create the Relation from a set of data
-   *  \param SP::SiconosMatrix : C
-   *  \param SP::SiconosMatrix : D
-   *  \param SP::SiconosMatrix : F
-   *  \param SP::SiconosVector : e
-   */
+  *  \param SP::SiconosMatrix : C
+  *  \param SP::SiconosMatrix : D
+  *  \param SP::SiconosMatrix : F
+  *  \param SP::SiconosVector : e
+  */
   LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosVector);
 
   /** create the Relation from a set of data
-   *  \param SP::SiconosMatrix : C
-   *  \param SP::SiconosVector : e
-   */
+  *  \param SP::SiconosMatrix : C
+  *  \param SP::SiconosVector : e
+  */
   LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosVector);
 
   /** create the Relation from a set of data
-   *  \param SiconosMatrix : the matrix C
-   */
+  *  \param SiconosMatrix : the matrix C
+  */
   LagrangianLinearTIR(const SiconosMatrix&);
 
   /** create the Relation from a set of data
-   *  \param SiconosMatrix : C
-   *  \param SiconosMatrix : D
-   *  \param SiconosMatrix : F
-   *  \param SiconosVector : e
-   */
+  *  \param SiconosMatrix : C
+  *  \param SiconosMatrix : D
+  *  \param SiconosMatrix : F
+  *  \param SiconosVector : e
+  */
   LagrangianLinearTIR(const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&);
 
   /** create the Relation from a set of data
-   *  \param SiconosMatrix : C
-   *  \param SiconosVector : e
-   */
+  *  \param SiconosMatrix : C
+  *  \param SiconosVector : e
+  */
   LagrangianLinearTIR(const SiconosMatrix&, const SiconosVector&);
 
   /** destructor
-   */
+  */
   virtual ~LagrangianLinearTIR() {};
 
   /** initialize LagrangianLinearTIR specific operators.
-   */
-  void initComponents();
-
-  // /** default function to compute h
-  //  *  \param double : current time
-  //  */
-  // void computeh(double);
-  // void computeg(double time);
+  * \param inter an Interaction using this relation
+  */
+  void initComponents(Interaction& inter);
 
 
   /** default function to compute y
-   *  \param double: not used
-   *  \param unsigned int: not used
-   */
-  void computeOutput(double, unsigned int = 0);
+  *  \param time not used
+  *  \param inter the Interaction we want to update
+  *  \param derivativeNumber the derivative of y we want to compute
+  */
+  void computeOutput(const double time, Interaction& inter, const unsigned int derivativeNumber = 0);
 
   /** default function to compute r
-   *  \param double : not used
-   *  \param unsigned int: not used
-   */
-  void computeInput(double, unsigned int = 0);
+  *  \param time not used
+  *  \param inter the Interaction we want to update
+  *  \param level the derivative of lambda we want to compute
+  */
+  void computeInput(const double time, Interaction& inter, const unsigned int level = 0);
 
   // GETTERS/SETTERS
 
   // -- C --
   /** get the value of C
-   *  \return plugged matrix
+  *  \return plugged matrix
 
   inline const SimpleMatrix getC() const { return *C; }
   */
   /** get C
-   *  \return pointer on a plugged matrix
-   */
+  *  \return pointer on a plugged matrix
+  */
   inline SP::SiconosMatrix C() const
   {
     return _jachq;
   }
 
   /** set the value of C to newValue
-   *  \param a plugged matrix
+  *  \param a plugged matrix
 
   void setC(const SiconosMatrix& newValue)
-    {
-      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(C,newValue);
-    }
+  {
+  setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(C,newValue);
+  }
   */
 
   /** set C to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
+  *  \param a SP to plugged matrix
+  */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
     _jachq = newPtr;
@@ -182,31 +179,31 @@ public:
   // -- D --
 
   /** get the value of D
-   *  \return plugged matrix
+  *  \return plugged matrix
 
   inline const SimpleMatrix getD() const { return *D; }
   */
 
   /** get D
-   *  \return pointer on a plugged matrix
-   */
+  *  \return pointer on a plugged matrix
+  */
   inline SP::SiconosMatrix D() const
   {
     return _jachlambda;
   }
 
   /** set the value of D to newValue
-   *  \param a plugged matrix
+  *  \param a plugged matrix
 
   void setD(const SiconosMatrix& newValue)
-    {
-      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(D,newValue);
-    }
+  {
+  setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(D,newValue);
+  }
   */
 
   /** set D to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
+  *  \param a SP to plugged matrix
+  */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
     _jachlambda = newPtr;
@@ -215,31 +212,31 @@ public:
   // -- F --
 
   /** get the value of F
-   *  \return plugged matrix
+  *  \return plugged matrix
 
   inline const SimpleMatrix getF() const { return *_F; }
   */
 
   /** get F
-   *  \return pointer on a plugged matrix
-   */
+  *  \return pointer on a plugged matrix
+  */
   inline SP::SiconosMatrix F() const
   {
     return _F;
   }
 
   /** set the value of F to newValue
-   *  \param a plugged matrix
+  *  \param a plugged matrix
 
   void setF(const SiconosMatrix& newValue)
-    {
-      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(F,newValue);
-    }
+  {
+  setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(F,newValue);
+  }
   */
 
   /** set F to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
+  *  \param a SP to plugged matrix
+  */
   inline void setFPtr(SP::SiconosMatrix newPtr)
   {
     _F = newPtr;
@@ -247,63 +244,63 @@ public:
 
   // -- e --
   /** get the value of e
-   *  \return plugged vector
+  *  \return plugged vector
 
   inline const SiconosVector getE() const { return *e; }
   */
 
   /** get e
-   *  \return pointer on a plugged vector
-   */
+  *  \return pointer on a plugged vector
+  */
   inline SP::SiconosVector e() const
   {
     return _e;
   }
 
   /** set the value of e to newValue
-   *  \param a plugged vector
+  *  \param a plugged vector
 
   void setE(const SiconosVector& newValue)
-    {
-      setObject<SiconosVector, SP::SiconosVector,SiconosVector>(e,newValue);
-    }
+  {
+  setObject<SiconosVector, SP::SiconosVector,SiconosVector>(e,newValue);
+  }
   */
 
   /** set e to pointer newPtr
-   *  \param a SP to plugged vector
-   */
+  *  \param a SP to plugged vector
+  */
   inline void setEPtr(SP::SiconosVector newPtr)
   {
     _e = newPtr;
   }
 
   /** get matrix Jach[index]
-   *  \return a SimpleMatrix
+  *  \return a SimpleMatrix
   const SimpleMatrix getJachx() const;
   const SimpleMatrix getJachlambda() const;
-   */
+  */
 
   /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
-   */
+  *  \return a pointer on a SiconosMatrix
+  */
 
   /** copy the data of the Relation to the XML tree
-   */
+  */
   void saveRelationToXML() const;
 
   /** print the data to the screen
-   */
+  */
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  *  \param Relation * : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static LagrangianLinearTIR* convert(Relation *r);
 
   /**
-   * return true if the relation is linear.
-   */
+  * return true if the relation is linear.
+  */
 
   virtual bool isLinear()
   {

@@ -33,7 +33,6 @@
 #include "PluginTypes.hpp"
 #include "RelationNamespace.hpp"
 #include "PluggedObject.hpp"
-#include <boost/weak_ptr.hpp>
 #include "DynamicalSystemsSet.hpp"
 //#include "Interaction.hpp"
 
@@ -107,57 +106,18 @@ protected:
   SP::PluggedObject _plugine;
   /** To initialize all the plugin functions with NULL.
    */
-  void zeroPlugin();
+  virtual void zeroPlugin();
 
-protected:
+  SP::SiconosMatrix _jachlambda;
 
   /** type of the Relation: FirstOrder or Lagrangian */
-  RELATION::TYPES relationType;
+  RELATION::TYPES _relationType;
 
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
-  RELATION::SUBTYPES subType;
-
-  /** The Interaction linked to this Relation */
-  boost::weak_ptr<Interaction> _interaction;
-
-  /** Name of the plugin function used to compute h*/
-  //  std::string hName;
-
-  /** Name of the plugin function used to compute g*/
-  //  std::string gName;
-
-  /** A map of vectors, used to save links (pointers) to DS objects of
-      the interaction */
-  std::vector<SP::BlockVector> data;
+  RELATION::SUBTYPES _subType;
 
   /** the object linked this Relation to read XML data */
-  SP::RelationXML relationxml;
-
-  /** work vector for R */
-  SP::SiconosVector _workR;
-
-  /** work vector for x */
-  SP::SiconosVector _workX;
-
-  /** work vector for x dot */
-  SP::SiconosVector _workXdot;
-  /** work vector for z */
-  SP::SiconosVector _workZ;
-
-  /** work vector for y */
-  SP::SiconosVector _workY;
-
-  /** work vector for lambda */
-  SP::SiconosVector _workL;
-
-  /** The residu y of the newton iterations*/
-  SP::SiconosVector _Residuy;
-
-  /*value of h at the current newton iteration*/
-  SP::SiconosVector _h_alpha;
-
-  /** \f$ \nabla_{\lambda} h(..)\f$ */
-  SP::SiconosMatrix _jachlambda;
+  SP::RelationXML _relationxml;
 
   /** basic constructor
    *  \param a string that gives the type of the relation
@@ -171,6 +131,7 @@ protected:
    *  \param a string that gives the subtype of the relation
    */
   Relation(SP::RelationXML, RELATION::TYPES, RELATION::SUBTYPES);
+
 
 private:
 
@@ -193,31 +154,12 @@ public:
    */
   virtual ~Relation();
 
-  /** To get the pointer to the Interaction linked to the present
-   *  Relation
-   *  \return a pointer to Interaction.
-   */
-  inline SP::Interaction interaction()
-  {
-    assert(!_interaction.expired());
-    return _interaction.lock();
-  }
-
-  /** To set the pointer to the Interaction linked to the present
-   *  Relation
-   *  \param a pointer to Interaction.
-   */
-  inline void setInteractionPtr(SP::Interaction newInter)
-  {
-    _interaction = boost::weak_ptr<Interaction>(newInter);
-  }
-
   /** To get the RelationXML* of the Relation
    *  \return a pointer on the RelationXML of the Relation
    */
   inline SP::RelationXML getRelationXML()
   {
-    return relationxml;
+    return _relationxml;
   }
 
   /** To set the RelationXML* of the Relation
@@ -225,7 +167,7 @@ public:
    */
   inline void setRelationXML(SP::RelationXML rxml)
   {
-    relationxml = rxml;
+    _relationxml = rxml;
   }
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
@@ -233,7 +175,7 @@ public:
    */
   inline RELATION::TYPES  getType() const
   {
-    return relationType;
+    return _relationType;
   }
 
   /** To get the subType of the Relation
@@ -241,7 +183,7 @@ public:
    */
   inline RELATION::SUBTYPES  getSubType() const
   {
-    return subType;
+    return _subType;
   }
 
   /** To get the name of h plugin
@@ -264,164 +206,90 @@ public:
    */
   virtual const std::string getJacgName(unsigned int) const;
 
-  /** true if h is plugged
-   *  \return a bool
-
-  inline const bool isHPlugged() const {return output;}
-  */
-  /** true if g is plugged
-   *  \return a bool
-
-  inline const bool isGPlugged() const {return input;}
-  */
-  /** true if Jach[i] is plugged
-   *  \return a bool
-  virtual const bool isJachPlugged(unsigned int) const {return false;}
-   */
-
-  /** true if Jacg[i] is plugged
-   *  \return a bool
-  virtual const bool isJacgPlugged(unsigned int) const {return false;}
-   */
-
-
-  /**
-  * return a SP on the C matrix.
-  * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  *
-  */
-  virtual SP::SiconosMatrix C() const = 0;
-  /**
-   * return a SP on the D matrix.
-   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-   */
-  virtual SP::SiconosMatrix D() const = 0;
-  /**
-   * return a SP on the B matrix.
-   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-   */
-  virtual SP::SiconosMatrix B() const = 0;
-
-
-
-  /** get matrix Jach[index]
-   *  \return a SimpleMatrix
-  virtual const SimpleMatrix getJach(unsigned int  index = 0) const = 0;
-   */
-
-  /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
-  virtual SP::SiconosMatrix jachX() const = 0;
-  virtual SP::SiconosMatrix jachlambda() const = 0;
-   */
-
-  /** get matrix Jacg[index]
-   *  \return a SimpleMatrix
-  virtual const SimpleMatrix getJacg(unsigned int  index = 0) const
-  {
-    RuntimeException::selfThrow("Relation::getJacg() - not implemented for this type of relation (probably Lagrangian): "+getType());
-    return SimpleMatrix(0,0);
-  }
-   */
-
-  /** get a pointer on matrix Jacg[index]
-   *  \return a pointer on a SiconosMatrix
-   */
-  virtual SP::SiconosMatrix jacglambda() const
-  {
-    RuntimeException::selfThrow("Relation::jacg() - not implemented for this type of relation (probably Lagrangian): " + getType());
-    return SP::SiconosMatrix();
-  }
-
-
   /** To set a plug-in function to compute output function h
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute  \f$ \nabla_x h(..)\f$
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName);
   /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f$
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute input function g
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputegFunction(const std::string& pluginPath, const std::string& functionName);
   /** To set a plug-in function to compute input function F
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
   virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute the jacobian according to x of the input
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
+      \param inter the interaction using this relation
   */
-  virtual void initialize(SP::Interaction) = 0;
-  virtual void initializeMemory() ;
+  virtual void initialize(Interaction& inter) = 0;
 
   /** default function to compute h
-   *  \param double : current time
+   *  \param time the current time
+   *  \param inter the interaction using this relation
    */
-  virtual void computeh(double) = 0;
+  virtual void computeh(const double time, Interaction& inter) = 0;
 
   /** default function to compute g
-   *  \param double : current time
+   *  \param time the current time
+   *  \param inter the interaction using this relation
    */
-  virtual void computeg(double t);
+  virtual void computeg(const double time, Interaction& inter);
 
-  /** default function to compute jacobianH
-   *  \param double : current time
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-
-  virtual void computeJachx(double) = 0;
-  virtual void computeJachlambda(double) = 0;
-  */
   /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible
-   *  jacobian => i = 0 is the default value x.
+   *  \param time the current time
+   *  \param inter the interaction using this relation
    */
-  virtual void computeJacglambda(double)
-  {
-    ;//RuntimeException::selfThrow("Relation::computeJacg() - not implemented for this type of relation (probably Lagrangian): "+getType());
-  }
+  virtual void computeJacglambda(const double time, Interaction& inter) = 0;
 
-  /* compute all the H Jacobian */
-  virtual void computeJach(double) = 0;
-  /* compute all the G Jacobian */
-  virtual void computeJacg(double) = 0;
+  /** compute all the H Jacobian
+   *  \param time the current time
+   *  \param inter the interaction using this relation
+   */
+  virtual void computeJach(const double time, Interaction& inter) = 0;
+
+  /* compute all the G Jacobian
+   *  \param time the current time
+   *  \param inter the interaction using this relation
+   */
+  virtual void computeJacg(const double time, Interaction& inter) = 0;
 
 
   /** default function to compute y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute,
-   *  optional, default = 0.
+   *  \param time the current time
+   *  \param inter the interaction using this relation
+   *  \param deriativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double, unsigned int = 0) = 0;
+  virtual void computeOutput(double time, Interaction& inter, unsigned int deriativeNumber = 0) = 0;
 
   /** default function to compute r
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to
-   *  compute input
+   *  \param time the current time
+   *  \param inter the interaction using this relation
+   *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double, unsigned int = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) = 0;
 
   virtual inline SP::SiconosMatrix jachlambda() const
   {
@@ -429,46 +297,8 @@ public:
   }
 
 
+  virtual inline SP::SiconosMatrix C() const = 0;
 
-  // --- Residu y functions
-
-  inline const SP::SiconosVector residuY()
-  {
-    return _Residuy;
-  }
-  virtual const SP::SiconosVector residuR();
-  /*
-   * Compute the residuY.
-   *
-   *
-   */
-  virtual void computeResiduY(double t);
-  /*
-   * Compute the residuR.
-   * default management is empty, else must be overloaded.
-   *
-   */
-  virtual void computeResiduR(double t)
-  {
-    ;
-  }
-  /*
-   * Return H_alpha
-   *
-   */
-  virtual const SP::SiconosVector Halpha()
-  {
-    return _h_alpha;
-  };
-
-  /*
-   * Do the computation needed by for a Iteration.
-   *
-   */
-  virtual void preparNewtonIteration()
-  {
-    ;
-  };
 
   /**
    * return true if the relation is linear.
@@ -486,16 +316,6 @@ public:
   /** copy the data of the Relation to the XML tree
    */
   virtual void saveRelationToXML() const;
-
-
-  /** Link the data of the Relation with the DS
-   */
-  virtual void LinkData() {};
-
-  /** Link the data of the Relation with the DS Memory
-   * \param unsigned int Memory level
-   */
-  virtual void LinkDataFromMemory(unsigned int) {};
 
   /** Check if _pluginh is correctly set */
   inline bool ishPlugged() const

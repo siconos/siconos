@@ -41,16 +41,16 @@ double SphereNEDSPlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SphereNEDSPlanR::computeh(double)
+void SphereNEDSPlanR::computeh(const double time, Interaction& inter)
 {
 
-  double q_0 = (*data[q0])(0);
-  double q_1 = (*data[q0])(1);
-  double q_2 = (*data[q0])(2);
+  double q_0 = (*inter.data(q0))(0);
+  double q_1 = (*inter.data(q0))(1);
+  double q_2 = (*inter.data(q0))(2);
 
-  SP::SiconosVector y = interaction()->y(0);
+  SiconosVector& y = *inter.y(0);
 
-  y->setValue(0, distance(q_0, q_1, q_2, r));
+  y.setValue(0, distance(q_0, q_1, q_2, r));
   _Pc1->setValue(0, q_0 - r * n1);
   _Pc1->setValue(1, q_1 - r * n2);
   _Pc1->setValue(2, q_2 - r * n3);

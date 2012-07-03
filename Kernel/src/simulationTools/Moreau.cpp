@@ -31,7 +31,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-
+#include "FirstOrderType2R.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -1331,18 +1331,18 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::SiconosVector Xq;
+  SP::BlockVector Xq;
   SP::SiconosVector Yp;
-  SP::SiconosVector Xfree;
+  SP::BlockVector Xfree;
 
   SP::SiconosVector H_alpha;
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
-  Xq = inter->workXq();
+  Xq = inter->dataXq();
   Yp = inter->yp();
 
-  Xfree = inter->workFree();
+  Xfree = inter->dataFree();
 
   assert(Xfree);
 
@@ -1355,8 +1355,9 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   {
     SP::SiconosVector lambda;
     lambda = inter->lambda(0);
-    C = mainInteraction->relation()->C();
-    D = mainInteraction->relation()->D();
+    FirstOrderType2R& rel = *boost::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
+    C = rel.C();
+    D = rel.D();
     assert(lambda);
 
     if (D)
@@ -1379,7 +1380,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     {
       RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
-    H_alpha = inter->relation()->Halpha();
+    H_alpha = inter->Halpha();
     assert(H_alpha);
     *Yp += *H_alpha;
   }
@@ -1397,8 +1398,16 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
-      mainInteraction->setWorkFree();
-      subprod(*CT, *Xfree, *Yp, coord, true);
+      // XXX Big quirks !!! -- xhub
+      if (Xfree->getNumberOfBlocks() == 2 && CT->size(1) == Xfree->size())
+      {
+        SiconosVector xTmp = *Xfree;
+        subprod(*CT, xTmp, *Yp, coord, true);
+      }
+      else
+      {
+        subprod(*CT, *Xfree, *Yp, coord, true);
+      }
       //          subprod(*CT,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
       //          if (mainInteraction->dynamicalSystems()->size() == 2)
       //          {
@@ -1422,15 +1431,22 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
-      mainInteraction->setWorkFree();
-
       if (_useGammaForRelation)
       {
         subprod(*C, *Xq, *Yp, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, *Yp, coord, true);
+        // XXX Big quirks !!! -- xhub
+        if (Xfree->getNumberOfBlocks() == 2 && C->size(1) == Xfree->size())
+        {
+          SiconosVector xTmp = *Xfree;
+          subprod(*C, xTmp, *Yp, coord, true);
+        }
+        else
+        {
+          subprod(*C, *Xfree, *Yp, coord, true);
+        }
         //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
         //        if (mainInteraction->dynamicalSystems()->size()==2)
         //        {
@@ -1459,7 +1475,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       {
         if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+          boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
           subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
         }
         else
@@ -1492,11 +1508,9 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
       if (F)
       {
-        SP::SiconosVector workZ;
-        workZ = inter->workZ();
         coord[3] = F->size(1);
         coord[5] = F->size(1);
-        subprod(*F, *workZ, *Yp, coord, false);
+        subprod(*F, *inter->dataZ(), *Yp, coord, false);
       }
     }
 

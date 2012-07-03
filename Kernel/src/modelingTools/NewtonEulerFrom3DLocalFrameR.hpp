@@ -18,7 +18,7 @@
  */
 /*! \file NewtonEulerR.hpp
 
-*/
+ */
 #ifndef NEWTONEULERRELATIONFC3D_H
 #define NEWTONEULERRELATIONFC3D_H
 
@@ -51,14 +51,14 @@ public:
   NewtonEulerFrom3DLocalFrameR(): NewtonEulerFrom1DLocalFrameR() {}
 
   /** destructor
-   */
+  */
   virtual ~NewtonEulerFrom3DLocalFrameR() {};
   /** initialize components specific to derived classes.
-    */
-  virtual void initComponents();
+  */
+  virtual void initComponents(Interaction& inter);
 
   /*default implementation consists in multiplying jachq and T*/
-  virtual void computeJachqT();
+  virtual void computeJachqT(Interaction& inter);
 
   ACCEPT_STD_VISITORS();
 };

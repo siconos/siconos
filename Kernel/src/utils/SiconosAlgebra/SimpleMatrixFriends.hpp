@@ -208,6 +208,17 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
   \param A a SiconosMatrix
+  \param x a BlockVector
+  \param[in,out] y a SiconosVector
+  \param coord an Index = [r0A r1A c0A c1A r0x r1x r0y r1y];
+  subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A and c1A-1;
+  The same for x and y with rix and riy.
+  \param init a bool (default = true)
+  */
+void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init = true);
+
+/** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
+  \param A a SiconosMatrix
   \param x a SiconosVector
   \param[in,out] y a SiconosVector
   \param coord an Index = [r0A r1A c0A c1A r0x r1x r0y r1y];

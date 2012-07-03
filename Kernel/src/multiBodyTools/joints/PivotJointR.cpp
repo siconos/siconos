@@ -55,9 +55,9 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::Siconos
   buildA1A2();
 }
 
-void PivotJointR::initComponents()
+void PivotJointR::initComponents(Interaction& inter)
 {
-  KneeJointR::initComponents();
+  KneeJointR::initComponents(inter);
   //if (_d2){
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
   //proj_with_q    _yProj.reset(new SiconosVector(7));
@@ -200,12 +200,13 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
   double aZ = quatBuff.R_component_4();
   return _A2x * aX + _A2y * aY + _A2z * aZ;
 }
-void PivotJointR::computeh(double t)
+
+void PivotJointR::computeh(const double time, Interaction& inter)
 {
   /*check order of ds:*/
   DSIterator it;
   SP::NewtonEulerDS lds;
-  it = interaction()->dynamicalSystemsBegin();
+  it = inter.dynamicalSystemsBegin();
   lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
   if (lds != _d1)
   {
@@ -213,13 +214,8 @@ void PivotJointR::computeh(double t)
     exit(1);
   }
 
-
-
-
-  KneeJointR::computeh(t);
+  KneeJointR::computeh(time, inter);
   SP::SiconosVector x1 = _d1->q();
-  //std::cout<<"PivotJoint computeH d1->q:\n";
-  //x1->display();
   double q10 = x1->getValue(3);
   double q11 = x1->getValue(4);
   double q12 = x1->getValue(5);
@@ -248,17 +244,8 @@ void PivotJointR::computeh(double t)
     q23 = x2->getValue(6);
   }
 
-  SP::SiconosVector y = interaction()->y(0);
-  y->setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
-  y->setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
+  SiconosVector& y = *inter.y(0);
+  y.setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23));
+  y.setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23));
 
-  // std::cout<<"PivotJoint computeH:\n";
-  // y->display();
-  /*proj_with_q*/
-  //for (unsigned int ii=0; ii<y->size();ii++)
-  //  _yProj->setValue(ii,y->getValue(ii));
-  //    _yProj->setValue(5,q10*q10+q11*q11+q12*q12+q13*q13 -1.0);
-  //   if (_d2){
-  //  _yProj->setValue(6,q20*q20+q21*q21+q22*q22+q23*q23 -1.0);
-  //}
 }

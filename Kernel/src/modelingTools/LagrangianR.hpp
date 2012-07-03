@@ -18,7 +18,7 @@
  */
 /*! \file LagrangianR.hpp
 
-*/
+ */
 #ifndef LAGRANGIANRELATION_H
 #define LAGRANGIANRELATION_H
 
@@ -64,7 +64,7 @@ class LagrangianR : public Relation
 {
 public:
 
-  enum DataNames {z, q0, q1, q2, p0, p1, p2, sizeDataNames};
+  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, sizeDataNames};
 
 protected:
   /** serialization hooks
@@ -74,42 +74,42 @@ protected:
   /** Jacobian matrices of H */
   SP::SiconosMatrix _jachq;
   SP::SiconosMatrix _jachqDot;
-  //SP::SiconosMatrix _jachlambda;
+  SP::PluggedObject _pluginJachq;
 
   /** basic constructor
-      \param the sub-type of the relation
-   */
+  \param the sub-type of the relation
+  */
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
   /** constructor from xml file
-   *  \param relationXML
-   *  \param string: relation subType
-   */
+  *  \param relationXML
+  *  \param string: relation subType
+  */
   LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::Lagrangian, newSubType) {}
 
   /** initialize components specific to derived classes.
-   */
-  virtual void initComponents();
+  */
+  virtual void initComponents(Interaction& inter);
+  virtual void zeroPlugin();
 
 public:
 
   /** destructor
-   */
+  */
   virtual ~LagrangianR() {};
 
   // -- Jach --
 
   /** get matrix Jach[index]
-   *  \return a SimpleMatrix
+  *  \return a SimpleMatrix
   inline const SimpleMatrix getJach(unsigned int  index = 0) const { return *(Jach.at(index)); }
-   */
+  */
 
   /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
-   */
+  *  \return a pointer on a SiconosMatrix
+  */
   inline SP::SiconosMatrix jachq() const
   {
-    //  std::cout << "_jachq.get()     " <<  _jachq.get()  <<std::endl;
     return _jachq;
   }
   inline SP::SiconosMatrix jacQDotH() const
@@ -122,153 +122,120 @@ public:
   }
 
   /** set the value of Jach[index] to newValue (copy)
-   *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in Jach vector
+  *  \param SiconosMatrix newValue
+  *  \param unsigned int: index position in Jach vector
 
   template <class U> void setJach(const U& newValue, unsigned int index = 0)
-    {
-      assert(index>=Jach.size()&&"LagrangianR:: setJach(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+  {
+  assert(index>=Jach.size()&&"LagrangianR:: setJach(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
 
-      if(Jach[index]) Jach[index]->resize(newValue.size(0), newValue.size(1));
-      setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jach[index],newValue);
-    }
+  if(Jach[index]) Jach[index]->resize(newValue.size(0), newValue.size(1));
+  setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jach[index],newValue);
+  }
   */
   /** set Jach[index] to pointer newPtr (pointer link)
-   *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in Jach vector
-   */
+  *  \param SP::SiconosMatrix  newPtr
+  *  \param unsigned int: index position in Jach vector
+  */
   inline void setJachqPtr(SP::SiconosMatrix newPtr)
   {
     _jachq = newPtr ;
   }
 
   /** To get the name of Jach[i] plugin
-   *  \return a string
+  *  \return a string
   const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
-   */
+  */
 
   /** true if Jach[i] is plugged
-   *  \return a bool
+  *  \return a bool
   const bool isJachPlugged(unsigned int i) const {return Jach[i]->isPlugged();}
-   */
+  */
 
   /** Gets the number of computed jacobians for h
-      \return an unsigned int.
+  \return an unsigned int.
   inline unsigned int numberOfJacobiansForH() const { return Jach.size();}
   */
 
+  inline SP::SiconosMatrix C() const
+  {
+    return _jachq;
+  }
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
+  \param SP to Interaction: the interaction that owns this relation
   */
-  void initialize(SP::Interaction);
+  void initialize(Interaction& inter);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
-   * \param: double, current time
-   */
-  virtual void computeh(double);
+  * \param: double, current time
+  */
+  virtual void computeh(const double time, Interaction& inter);
 
   /** default function to compute jacobianH
-   *  \param double : current time
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+  *  \param double : current time
+  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJachx(double);*/
-  void computeJachlambda(double)
+  void computeJachlambda(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJachq(double)
+  void computeJachq(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJachqDot(double)
+  void computeJachqDot(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJacglambda(double)
+  void computeJacglambda(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgq(double)
+  void computeJacgq(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJacgqDot(double)
+  void computeJacgqDot(const double time, Interaction& inter)
   {
     ;
   }
   /* compute all the H Jacobian */
-  virtual void computeJach(double t)
+  virtual void computeJach(const double time, Interaction& inter)
   {
-    computeJachq(t);
-    computeJachqDot(t);
-    computeJachlambda(t);
+    computeJachq(time, inter);
+    computeJachqDot(time, inter);
+    computeJachlambda(time, inter);
   }
   /* compute all the G Jacobian */
-  virtual void computeJacg(double t)
+  virtual void computeJacg(const double time, Interaction& inter)
   {
-    computeJacgq(t);
-    computeJacgqDot(t);
-    computeJacglambda(t);
+    computeJacgq(time, inter);
+    computeJacgqDot(time, inter);
+    computeJacglambda(time, inter);
   }
 
 
   /** to compute output
-    *  \param double : current time
-    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-    */
-  virtual void computeOutput(double, unsigned int = 0) = 0;
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
+  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0) = 0;
 
   /** to compute p
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
-   */
-  virtual void computeInput(double, unsigned int = 0) = 0;
+  *  \param double : current time
+  *  \param unsigned int: "derivative" order of lambda used to compute input
+  */
+  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0) = 0;
 
   /** copy the data of the Relation to the XML tree
-   */
+  */
   void saveRelationToXML() const;
 
-  /** Link the data of the Relation with the DS
-   */
-  void LinkData();
-
-  /** Link the data of the Relation with the DS Memory
-   * \param unsigned int Memory level
-   */
-  void LinkDataFromMemory(unsigned int);
-
-  /**
-  * return a SP on the C matrix.
-  * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  *
-  */
-  virtual SP::SiconosMatrix C() const;
-
-  /**
-   * return a SP on the D matrix.
-   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-   */
-  virtual SP::SiconosMatrix D() const
-  {
-    return jachlambda();
-  }
-  /**
-   * return a SP on the B matrix.
-   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-   */
-  virtual SP::SiconosMatrix B() const
-  {
-    return jacglambda();
-  }
-
   /** main relation members display
-   */
+  */
   void display() const;
-
-  /** return a block vector containing ths dynamical system's dof.*/
-  //  SP::BlockVector q(){return data[q0];}
-
 
 };
 TYPEDEF_SPTR(LagrangianR);

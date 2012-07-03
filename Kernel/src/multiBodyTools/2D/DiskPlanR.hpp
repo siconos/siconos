@@ -114,9 +114,9 @@ public:
     return width;
   };
 
-  void computeh(double);
+  void computeh(const double time, Interaction& inter);
 
-  void computeJachq(double);
+  void computeJachq(const double time, Interaction& inter);
 
   bool equal(double, double, double, double) const;
 

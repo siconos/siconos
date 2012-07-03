@@ -34,7 +34,7 @@ BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactMani
 {
 };
 
-void BulletR::computeh(double)
+void BulletR::computeh(const double time, Interaction& inter)
 {
   DEBUG_PRINT("start of computeh\n");
 
@@ -59,7 +59,7 @@ void BulletR::computeh(double)
 
   if (fabs(fabs(_contactPoints->getDistance()) - d) <= 1e-5)
   {
-    interaction()->y(0)->setValue(0, _contactPoints->getDistance());
+    inter.y(0)->setValue(0, _contactPoints->getDistance());
 
     (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
     (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
@@ -69,14 +69,14 @@ void BulletR::computeh(double)
   {
     if (_contactPoints->getDistance() < 0.) d = -d;
     //    printf("WARNING! distance = %g != %g\n",  _contactPoints->getDistance(), d);
-    interaction()->y(0)->setValue(0, d);
+    inter.y(0)->setValue(0, d);
     btVector3 n = (posb - posa).normalize();
     (*nc())(0) = n[0];
     (*nc())(1) = n[1];
     (*nc())(2) = n[2];
   }
 
-  DEBUG_PRINTF("distance : %g\n",  interaction()->y(0)->getValue(0));
+  DEBUG_PRINTF("distance : %g\n",  inter.y(0)->getValue(0));
 
 
   DEBUG_PRINTF("position on A : %g,%g,%g\n", posa[0], posa[1], posa[2]);

@@ -319,6 +319,8 @@ public:
 
   bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 
+  double norm2() const;
+
   ACCEPT_STD_VISITORS();
 
 };

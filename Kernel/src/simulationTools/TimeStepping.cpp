@@ -322,14 +322,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
 void TimeStepping::initializeInteraction(SP::Interaction inter)
 {
 
-  inter->setWorkZ();
 
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == FirstOrder)
   {
-    inter->setWorkX();
-    inter->setWorkFree();
-    inter->setWorkXq();
   }
 }
 
@@ -484,7 +480,7 @@ void TimeStepping::computeInitialResidu()
   if (_computeResiduY)
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeResiduY(tkp1);
+      (*it)->computeResiduY(tkp1);
     }
 
   //  cout<<"END computeInitialResidu"<<endl;
@@ -557,8 +553,8 @@ void   TimeStepping::prepareNewtonIteration()
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->relation()->computeJach(getTkp1());
-    (*it)->relation()->computeJacg(getTkp1());
+    (*it)->relation()->computeJach(getTkp1(), **it);
+    (*it)->relation()->computeJacg(getTkp1(), **it);
   }
 
 
@@ -574,10 +570,6 @@ void   TimeStepping::prepareNewtonIteration()
     //     (*itds)->R()->zero();
   }
   /**/
-  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
-  {
-    (*it)->relation()->preparNewtonIteration();
-  }
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
   if (topoHasChanged)
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
@@ -719,8 +711,8 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeResiduY(getTkp1());
-      residu = (*it)->relation()->residuY()->norm2();
+      (*it)->computeResiduY(getTkp1());
+      residu = (*it)->residuY()->norm2();
       if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
       if (residu > criterion)
       {
@@ -738,8 +730,8 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeResiduR(getTkp1());
-      residu = (*it)->relation()->residuR()->norm2();
+      (*it)->computeResiduR(getTkp1());
+      residu = (*it)->residuR()->norm2();
       cout << "residuR =" << residu << ">" << criterion << endl;
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)

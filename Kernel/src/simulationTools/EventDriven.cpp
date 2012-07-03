@@ -21,7 +21,6 @@
 #include "SimulationXML.hpp"
 #include "OneStepNSProblemXML.hpp"
 #include "SimulationXML.hpp"
-//#include "Interaction.hpp"
 #include "Lsodar.hpp"
 #include "LCP.hpp"
 #include "Model.hpp"
@@ -33,7 +32,7 @@
 #include "LagrangianDS.hpp"
 #include "EventFactory.hpp"
 
-//#define DEBUG_MESSAGES 1
+#define DEBUG_MESSAGES 1
 
 #include <debug.h>
 
@@ -243,13 +242,10 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 void EventDriven::initializeInteraction(SP::Interaction inter)
 {
 
-  inter->setWorkZ();
-
-  RELATION::TYPES pbType = inter->relation()->getType();
+  RELATION::TYPES pbType = inter->getRelationType();
   if (pbType == Lagrangian)
   {
-    inter->setWorkXFromVelocity();
-    inter->setWorkFree();
+    //    inter->setDataXFromVelocity();
   }
   else
     RuntimeException::selfThrow("EventDriven::initializeInteractions(SP::interaction inter) - not implemented for Relation of type " + pbType);
@@ -403,9 +399,23 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   unsigned int i = 0;
   for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
   {
-    SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
-      xdot[i++] = xtmp2(j);
+    if (Type::value(**it) == Type::LagrangianDS ||
+        Type::value(**it) == Type::LagrangianLinearTIDS)
+    {
+      LagrangianDS& LDS = *boost::static_pointer_cast<LagrangianDS>(*it);
+      SiconosVector& qDotTmp = *LDS.velocity();
+      SiconosVector& qDotDotTmp = *LDS.acceleration();
+      for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+        xdot[i++] = qDotTmp(j);
+      for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+        xdot[i++] = qDotDotTmp(j);
+    }
+    else
+    {
+      SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
+      for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
+        xdot[i++] = xtmp2(j);
+    }
   }
 
   //std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;

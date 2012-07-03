@@ -448,15 +448,11 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::SiconosMatrix  C;
   //   SP::SiconosMatrix  D;
   //   SP::SiconosMatrix  F;
-  SP::SiconosVector Xq;
   SP::SiconosVector Yp;
-  SP::SiconosVector Xfree;
-  //  SP::SiconosVector lambda;
-  SP::SiconosVector H_alpha;
+  SP::BlockVector Xfree;
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
-  *Xq = *inter->workXq();
   Yp = inter->yp();
 
   /* V.A. 10/10/2010
@@ -468,26 +464,19 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
   {
-    *Xfree  = *inter->workFree();
+    Xfree  = inter->dataFree();
     //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
-    *Xfree = *inter->workX();
+    Xfree = inter->dataQ1();
     //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
   }
   else
     RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
-
-
-
-
-
-  //  lambda = inter->lambda(0);
-  H_alpha = inter->relation()->Halpha();
 
   if (relationType == Lagrangian)
   {
@@ -524,7 +513,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
       }
       else
@@ -535,7 +524,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
       }
     }

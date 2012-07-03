@@ -35,7 +35,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(CircularR);
 
-  double r1, r2;
+  double _r1, _r2;
 
   CircularR() : LagrangianScleronomousR() {};
 
@@ -46,16 +46,16 @@ public:
   \param disk1 radius
   \param disk2 radius
   */
-  CircularR(double, double) {};
+  CircularR(double r1, double r2): _r1(r1), _r2(r2) {};
 
   double getRadius1()
   {
-    return r1;
+    return _r1;
   };
 
   double getRadius2()
   {
-    return r2;
+    return _r2;
   };
 
   virtual double distance(double, double, double, double, double, double)

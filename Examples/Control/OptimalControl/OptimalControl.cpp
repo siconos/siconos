@@ -1,6 +1,6 @@
 
 #include "SiconosKernel.hpp"
-#include "adjointInput.h"
+#include "adjointInput.hpp"
 #include "myDS.h"
 #include <stdio.h>
 #include <stdlib.h>

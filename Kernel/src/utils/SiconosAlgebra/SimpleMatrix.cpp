@@ -23,11 +23,13 @@
 #include "KernelConfig.h"
 
 #if defined(HAVE_ATLAS)
+#define SB_IS_ATLAS
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 #include <boost/numeric/bindings/atlas/cblas2.hpp>
 #include <boost/numeric/bindings/atlas/cblas3.hpp>
 namespace siconosBindings = boost::numeric::bindings::atlas;
 #else
+#define SB_IS_BLAS
 #include <boost/numeric/bindings/blas/blas1.hpp>
 #include <boost/numeric/bindings/blas/blas2.hpp>
 #include <boost/numeric/bindings/blas/blas3.hpp>
@@ -4857,6 +4859,17 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool i
     private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
     startRow += (*it)->size();
   }
+
+}
+void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init)
+{
+  VectorOfVectors::const_iterator it;
+  if (init) y.zero();
+  for (it = x.begin(); it != x.end(); ++it)
+  {
+    subprod(A, **it, y, coord, false);
+  }
+
 
 }
 

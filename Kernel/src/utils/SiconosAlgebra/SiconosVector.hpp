@@ -98,6 +98,7 @@ public:
    */
   SiconosVector(const SiconosVector&);
 
+  SiconosVector(const BlockVector & vIn);
   /** constructor with a DenseVect vector (see SiconosAlgebra.hpp for details)
    *  \param a DenseVect
    */

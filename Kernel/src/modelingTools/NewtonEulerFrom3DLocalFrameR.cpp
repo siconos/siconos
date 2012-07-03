@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 
 
 #include "NewtonEulerFrom3DLocalFrameR.hpp"
@@ -24,14 +24,14 @@
 using namespace std;
 //#define NEFC3D_DEBUG
 /*
-  See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
- */
-void NewtonEulerFrom3DLocalFrameR::initComponents()
+See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
+*/
+void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter)
 {
-  NewtonEulerFrom1DLocalFrameR::initComponents();
-
+  NewtonEulerFrom1DLocalFrameR::initComponents(inter);
+  unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  _jachq.reset(new SimpleMatrix(3, _qsize));
+  _jachq.reset(new SimpleMatrix(3, qSize));
   _Mabs_C.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
@@ -86,7 +86,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   (*_NPG1)(2, 2) = 0;
 
   d1->updateMObjToAbs();
-  SP::SimpleMatrix Mobj1_abs = d1->MObjToAbs();
+  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
 
 
@@ -95,8 +95,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   Mobj1_abs->display();
 #endif
 
-
-  prod(*_NPG1, *Mobj1_abs, *_AUX1, true);
+  prod(*_NPG1, Mobj1_abs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
 
@@ -184,10 +183,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
 
 
   d1->updateMObjToAbs();
-  SP::SimpleMatrix Mobj1_abs = d1->MObjToAbs();
+  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
 
-  prod(*_NPG1, *Mobj1_abs, *_AUX1, true);
+  prod(*_NPG1, Mobj1_abs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
 
@@ -200,10 +199,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
   d2->updateMObjToAbs();
-  SP::SimpleMatrix Mobj2_abs = d2->MObjToAbs();
+  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
 
-
-  prod(*_NPG2, *Mobj2_abs, *_AUX1, true);
+  prod(*_NPG2, Mobj2_abs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
   for (unsigned int ii = 0; ii < 3; ii++)
@@ -215,12 +213,13 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
 
 }
-void NewtonEulerFrom3DLocalFrameR::computeJachqT()
+
+void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter)
 {
-  DSIterator itDS = interaction()->dynamicalSystemsBegin();
+  DSIterator itDS = inter.dynamicalSystemsBegin();
   SP::NewtonEulerDS d1 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
   itDS++;
-  if (itDS != interaction()->dynamicalSystemsEnd())
+  if (itDS != inter.dynamicalSystemsEnd())
   {
     SP::NewtonEulerDS d2 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
     FC3DcomputeJachqTFromContacts(d1, d2);

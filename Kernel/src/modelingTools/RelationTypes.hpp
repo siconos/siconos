@@ -38,4 +38,3 @@ Include files related to the different types of relations
 #include "LagrangianCompliantR.hpp"
 
 #endif
-

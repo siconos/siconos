@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 #include "FirstOrderType2R.hpp"
 #include "RelationXML.hpp"
 #include "Interaction.hpp"
@@ -55,88 +55,76 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
   setComputeJacglambdaFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
 }
 
-void FirstOrderType2R::initialize(SP::Interaction inter)
+void FirstOrderType2R::initialize(Interaction& inter)
 {
   FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = interaction()->getSizeOfY();
-  unsigned int sizeDS = interaction()->getSizeOfDS();
-  unsigned int sizeZ = interaction()->getSizez();
-  if (!interaction())
-    RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
-
-  // Update data member (links to DS variables)
-  initDSLinks();
-  // Initialize work vectors
-
-  _workX.reset(new SiconosVector(sizeDS));
-  _workZ.reset(new SiconosVector(sizeZ));
-  _workY.reset(new SiconosVector(sizeY));
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeDS = inter.getSizeOfDS();
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
-  if (!Jachx)
-    Jachx.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (!_jachx)
+    _jachx.reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_jachlambda)
     _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
-  if (!jacgx)
-    jacgx.reset(new SimpleMatrix(sizeDS, sizeDS));
-  if (!Jacglambda)
-    Jacglambda.reset(new SimpleMatrix(sizeDS, sizeY));
+  if (!_jacgx)
+    _jacgx.reset(new SimpleMatrix(sizeDS, sizeDS));
+  if (!_jacglambda)
+    _jacglambda.reset(new SimpleMatrix(sizeDS, sizeY));
 
 
-  assert((Jachx->size(1) == sizeDS && Jachx->size(0) == sizeY) &&
-         "FirstOrderType2R::initialize inconsistent sizes between Jach[0] matrix and the interaction.");
+  assert((_jachx->size(1) == sizeDS && _jachx->size(0) == sizeY) &&
+         "FirstOrderType2R::initialize inconsistent sizes between _jach[0] matrix and the interaction.");
 
-  assert((Jacglambda->size(0) == sizeDS && Jacglambda->size(1) == sizeY) &&
-         "FirstOrderType2R::initialize inconsistent sizes between Jacg[0] matrix and the interaction.");
+  assert((_jacglambda->size(0) == sizeDS && _jacglambda->size(1) == sizeY) &&
+         "FirstOrderType2R::initialize inconsistent sizes between _jacg[0] matrix and the interaction.");
 }
 
-void FirstOrderType2R::computeh(double t)
+void FirstOrderType2R::computeh(const double time, Interaction& inter)
 {
-  computeOutput(t, 0);
+  computeOutput(time, inter, 0);
 }
 
-void FirstOrderType2R::computeg(double t)
+void FirstOrderType2R::computeg(const double time, Interaction& inter)
 {
-  computeInput(t, 0);
+  /* this function calls computeInput, which in return calls this function.
+  * Broken logic, put a selfthrow so people may fix it */
+  RuntimeException::selfThrow("The logic in this function is broken. Please fix it before using it");
+  computeInput(time, inter, 0);
 }
 
-void FirstOrderType2R::computeOutput(double t, unsigned int)
+void FirstOrderType2R::computeOutput(const double time, Interaction& inter, unsigned int)
 {
-  computeh(t);
+  computeh(time, inter);
 }
 
-void FirstOrderType2R::computeInput(double t, unsigned int level)
+void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsigned int level)
 {
 
   /**compute the newr */
-  SP::SiconosVector lambda = interaction()->lambda(level);
-  *_workX = *data[g_alpha];
-  *_workL = *lambda;
-  *_workL -= *(interaction()->lambdaOld(level));
+
+  SiconosVector workL = *inter.lambda(level);
+  workL -= *(inter.lambdaOld(level));
+
   //  cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
-  //  interaction()->lambdaOld(level)->display();
+  //  inter.lambdaOld(level)->display();
   //  lambda->display();
   //  _workL->display();
   //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
   //  _workX->display();
-  prod(*B(), *_workL, *_workX, false);
+  prod(*B(), workL, *inter.data(g_alpha), false);
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
 
-  SP::BlockVector tmp(new BlockVector(*data[r]));
-  *tmp = *_workX;
-  *data[r] += *tmp;
+  *inter.data(r) += *inter.data(g_alpha);
 
-  /*compute the new g_alpha*/
+  //compute the new g_alpha
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *_workX = *data[x];
-  *_workZ = *data[z];
+  computeg(time, inter);
 
 
-  computeg(t);
   //  cout<<"next g_alpha"<<endl;
   //  data[g_alpha]->display();
   /*  unsigned int sizeL = lambda->size();
@@ -152,60 +140,28 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
 
 }
 
-void FirstOrderType2R::computeJachlambda(double)
+void FirstOrderType2R::computeJachlambda(const double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(double)
+void FirstOrderType2R::computeJachx(const double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJacglambda(double)
+void FirstOrderType2R::computeJacglambda(const double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
-void FirstOrderType2R::computeJacgx(double)
+void FirstOrderType2R::computeJacgx(const double time, Interaction& inter)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computejacgx must be overload.");
 }
-void FirstOrderType2R::computeJacg(double t)
+void FirstOrderType2R::computeJacg(const double time, Interaction& inter)
 {
-  computeJacglambda(t);
-  computeJacgx(t);
+  computeJacglambda(time, inter);
+  computeJacgx(time, inter);
 }
-
-void FirstOrderType2R::preparNewtonIteration()
-{
-
-  /** compute the comtribution in xp, for the next iteration*/
-  /** */
-  SP::SiconosVector lambda = interaction()->lambda(0);
-  *_workL = *lambda;
-
-  //     cout<<"FirstOrderType2R::preparNewtonIteration, lambda: \n";
-  //     _workL->display();
-
-  scal(-1.0, *_workL, *_workL);
-  prod(*(B()), *_workL, *_workX, true);
-
-  //      cout<<"FirstOrderType2R::preparNewtonIteration, -B*lambda: \n";
-  //      _workX->display();
-
-  //      cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha: \n";
-  //      data[g_alpha]->display();
-
-  SP::SiconosVector tmp(new SiconosVector(*_workX));
-  *tmp = *data[g_alpha];
-  *_workX += *tmp;
-
-  SP::BlockVector ntmp(new BlockVector(*data[ds_xp]));
-  *ntmp = *_workX;
-  *data[ds_xp] += *ntmp;
-  //     cout<<"FirstOrderType2R::preparNewtonIteration,xp= g_alpha -B*lambda : \n";
-  //     _workX->display();
-}
-
 
 
 FirstOrderType2R* FirstOrderType2R::convert(Relation *r)

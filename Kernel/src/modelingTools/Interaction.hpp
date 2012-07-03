@@ -86,7 +86,9 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-
+  enum DataNamesFirstOrder {free, z, x, xq, r, g_alpha, residu_r, ds_xp, sizeDataNames};
+  //  enum DataNamesLagrangian {z,q0,q1,q2,p0,p1,p2,sizeDataNames};
+  enum DataNamesNewtonEuler {free2, z2, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames2};
 
   /**initialization flag */
   bool _initialized;
@@ -124,7 +126,7 @@ private:
    */
   unsigned int _upperLevelForInput;
 
-  /** size of the interaction, ie size of y[i] and lambda[i] */
+  /** size of the interaction, ie size of y[i] and _lambda[i] */
   unsigned int _interactionSize;
 
   // /** number of relations in the interaction ( equal to
@@ -166,7 +168,7 @@ private:
   /** result of the computeInput function */
   VectorOfVectors _lambda;
 
-  /** previous step values for lambda */
+  /** previous step values for _lambda */
   VectorOfVectors _lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
@@ -181,22 +183,25 @@ private:
   /** the XML object linked to the Interaction to read XML data */
   SP::InteractionXML _interactionxml;
 
+  /** A map of vectors, used to save links (pointers) to DS objects of
+      the interaction */
+  typedef boost::array<SP::BlockVector, 10> dataR;
+  dataR _data;
+
   /** Work vectors to save pointers to state-related data of the
       dynamical systems involved in the Interaction.*/
-  SP::SiconosVector _workX;
-  SP::SiconosVector _workXq;
-  SP::SiconosVector _workFree;
 
+
+  /** The residu y of the newton iterations*/
+  SP::SiconosVector _Residuy;
+
+  /*value of h at the current newton iteration*/
+  SP::SiconosVector _h_alpha;
+
+  /* work vector to compute qblock, XXX maybe it shouldn't exist */
   SP::SiconosVector _workYp;
 
-  /** Work vector to save pointers to z data of the dynamical systems
-      involved in the Interaction.*/
-  SP::SiconosVector _workZ;
-
-
   // === PRIVATE FUNCTIONS ===
-
-
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
@@ -263,13 +268,13 @@ public:
    */
   ~Interaction();
 
-  /** allocate memory for y[i] and lambda[i] and set them to zero.
+  /** allocate memory for y[i] and _lambda[i] and set them to zero.
    * \param time for initialization.
-   * \param the number of required derivatives for y.
    */
-  void initialize(double);
+  void initialize(double time);
 
   /** check if Interaction is initialized
+   * \return true if it is initialized
    */
   bool isInitialized() const
   {
@@ -403,7 +408,7 @@ public:
   };
 
 
-  /** get the dimension of the interaction (y and lambda size)
+  /** get the dimension of the interaction (y and _lambda size)
   *  \return an unsigned int
   */
   inline unsigned int getSizeOfY() const
@@ -590,7 +595,7 @@ public:
     return _yMemory[level];
   }
 
-  // -- lambda --
+  // -- _lambda --
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
@@ -600,7 +605,7 @@ public:
     return _lambda;
   }
 
-  /** get lambda[i], derivative number i of input
+  /** get _lambda[i], derivative number i of input
   *  \return SiconosVector
   */
   inline const SiconosVector getLambda(const unsigned int i) const
@@ -609,7 +614,7 @@ public:
     return *(_lambda[i]);
   }
 
-  /** get lambda[i], derivative number i of input
+  /** get _lambda[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector lambda(const unsigned int i) const
@@ -618,27 +623,27 @@ public:
     return _lambda[i];
   }
 
-  /** set the input vector lambda to newVector
+  /** set the input vector _lambda to newVector
   *  \param VectorOfVectors
   */
   void setLambda(const VectorOfVectors&);
 
-  /** set vector lambda to newVector with direct pointer equality for the lambda[i]
+  /** set vector _lambda to newVector with direct pointer equality for the _lambda[i]
   *  \param VectorOfVectors
   */
   void setLambdaPtr(const VectorOfVectors&);
 
-  /** set lambda[i] to newValue
+  /** set _lambda[i] to newValue
   *  \param a SiconosVector and an unsigned int
   */
   void setLambda(const unsigned int , const SiconosVector&);
 
-  /** set lambda[i] to pointer newPtr
+  /** set _lambda[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
   */
   void setLambdaPtr(const unsigned int , SP::SiconosVector newPtr);
 
-  // -- lambdaOld --
+  // -- _lambdaOld --
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
@@ -648,7 +653,7 @@ public:
     return _lambdaOld;
   }
 
-  /** get lambdaOld[i], derivative number i of input
+  /** get _lambdaOld[i], derivative number i of input
   *  \return SiconosVector
   */
   inline const SiconosVector getLambdaOld(const unsigned int i) const
@@ -656,7 +661,7 @@ public:
     return *(_lambdaOld[i]);
   }
 
-  /** get lambdaOld[i], derivative number i of input
+  /** get _lambdaOld[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
   inline SP::SiconosVector lambdaOld(const unsigned int i) const
@@ -664,22 +669,22 @@ public:
     return _lambdaOld[i];
   }
 
-  /** set the input vector lambdaOld to newVector
+  /** set the input vector _lambdaOld to newVector
   *  \param VectorOfVectors
   */
   void setLambdaOld(const VectorOfVectors&);
 
-  /** set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
+  /** set vector _lambdaOld to newVector with direct pointer equality for the _lambdaOld[i]
   *  \param VectorOfVectors
   */
   void setLambdaOldPtr(const VectorOfVectors&);
 
-  /** set lambdaOld[i] to newValue
+  /** set _lambdaOld[i] to newValue
   *  \param a SiconosVector and an unsigned int
   */
   void setLambdaOld(const unsigned int , const SiconosVector&);
 
-  /** set lambdaOld[i] to pointer newPtr
+  /** set _lambdaOld[i] to pointer newPtr
   *  \param a SP::SiconosVector  and an unsigned int
   */
   void setLambdaOldPtr(const unsigned int , SP::SiconosVector newPtr);
@@ -795,7 +800,7 @@ public:
   */
   void computeSizeOfDS();
 
-  /**   put values of y into yOld, the same for lambda
+  /**   put values of y into yOld, the same for _lambda
   */
   void swapInMemory();
 
@@ -816,146 +821,63 @@ public:
   /** Compute input r of all Dynamical Systems involved in the present
    *   Interaction.
    *  \param double : current time
-   *  \param unsigned int: order of lambda used to compute input.
+   *  \param unsigned int: order of _lambda used to compute input.
    */
   void computeInput(double, unsigned int);
 
-
-  /** to set _workFree content.
-   */
-  inline void setWorkFree()
+  /** Get the _workYp vector */
+  inline SP::SiconosVector yp() const
   {
-    assert(_workFree) ;
+    return _workYp;
+  }
 
-    if (_workFree->size() == 0)
-    {
-      _workFree->resize(_sizeOfDS);
-    }
+  inline void setDataXFromVelocity()
+  {
+    assert(_data[x]);
+    // this method is strange
+    _data[x].reset(new BlockVector());
 
     ConstDSIterator itDS;
-    int index;
-    for (index = 0, itDS = dynamicalSystemsBegin();
-         itDS != dynamicalSystemsEnd();
-         ++itDS)
-    {
-      _workFree->setBlock(index, *((*itDS)->workFree()));
-      index += (*itDS)->getDim();
-    }
-  };
-
-  inline void setWorkX()
-  {
-    assert(_workX) ;
-
-    if (_workX->size() == 0)
-    {
-      _workX->resize(_sizeOfDS);
-    }
-
-    ConstDSIterator itDS;
-    int index;
-    for (index = 0, itDS = dynamicalSystemsBegin();
-         itDS != dynamicalSystemsEnd();
-         ++itDS)
-    {
-      _workX->setBlock(index, *((*itDS)->x()));
-      index += (*itDS)->getDim();
-    }
-  };
-
-  inline void setWorkXFromVelocity()
-  {
-    assert(_workX) ;
-
-    if (_workX->size() == 0)
-    {
-      _workX->resize(_sizeOfDS);
-    }
-
-    ConstDSIterator itDS;
-    int index;
-    for (index = 0, itDS = dynamicalSystemsBegin();
+    for (itDS = dynamicalSystemsBegin();
          itDS != dynamicalSystemsEnd();
          ++itDS)
     {
       assert(Type::value(**itDS) == Type::LagrangianDS ||
              Type::value(**itDS) == Type::LagrangianLinearTIDS);
-      _workX->setBlock(index, *boost::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
-      index += (*itDS)->getDim();
+      _data[x]->insertPtr(boost::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
     }
   };
 
-  inline void setWorkXq()
+
+  inline SP::BlockVector dataFree() const
   {
-    assert(_workXq) ;
-
-    if (_workXq->size() == 0)
-    {
-      _workXq->resize(_sizeOfDS);
-    }
-
-    ConstDSIterator itDS;
-    int index;
-    for (index = 0, itDS = dynamicalSystemsBegin();
-         itDS != dynamicalSystemsEnd();
-         ++itDS)
-    {
-      assert(Type::value(**itDS) == Type::FirstOrderNonLinearDS ||
-             Type::value(**itDS) == Type::FirstOrderLinearDS ||
-             Type::value(**itDS) == Type::FirstOrderLinearTIDS);
-      _workXq->setBlock(index, *boost::static_pointer_cast<FirstOrderNonLinearDS>(*itDS)->xq());
-      index += (*itDS)->getDim();
-    }
-  };
-
-  inline void setWorkZ()
+    return _data[free];
+  }
+  inline SP::BlockVector dataX() const
   {
-    assert(_workZ) ;
-
-    if (_workZ->size() == 0)
-    {
-      _workZ->resize(_sizeZ);
-    }
-
-    ConstDSIterator itDS;
-    int index;
-    for (index = 0, itDS = dynamicalSystemsBegin();
-         itDS != dynamicalSystemsEnd();
-         ++itDS)
-    {
-      SiconosVector& tmpz = *((*itDS)->z());
-      _workZ->setBlock(index, tmpz);
-      index += tmpz.size();
-    }
-  };
-
-  /** Get a pointer to workX */
-  inline SP::SiconosVector workX()
+    return _data[x];
+  }
+  inline SP::BlockVector dataXq() const
   {
-    return _workX;
-  };
-
-  inline SP::SiconosVector workXq()
+    return _data[xq];
+  }
+  inline SP::BlockVector dataZ() const
   {
-    return _workXq;
-  };
-
-  inline SP::SiconosVector workFree()
+    return _data[z];
+  }
+  inline SP::BlockVector dataQ1() const
   {
-    return _workFree;
-  };
-
-  inline SP::SiconosVector yp()
+    return _data[q1];
+  }
+  /** Access to an element of data
+   * \warning this function returns a BlockVector, which should be used with parsimoniousness!
+   * \param indx the index
+   * \return a SP::BlockVector
+   */
+  inline SP::BlockVector data(unsigned int indx) const
   {
-    return _workYp;
-  };
-
-
-  /** Get a pointer to workZ */
-  inline SP::SiconosVector workZ()
-  {
-    return _workZ;
-  };
+    return _data[indx];
+  }
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
@@ -991,13 +913,13 @@ public:
     // the present relation, the first scalar value is used.  For
     // example, for friction, normal part is in first position, followed
     // by the tangential parts.
-    return (*y(i))(0);
+    return (*_y[i])(0);
   }
 
   inline double getLambdaRef(unsigned int i) const
   {
     // get the single value used to build indexSets
-    return (*lambda(i))(0);
+    return (*_lambda[i])(0);
   }
 
   // --- XML RELATED FUNCTIONS ---
@@ -1028,15 +950,67 @@ public:
   inline RELATION::TYPES getRelationType() const
   {
     return _relation->getType();
-  };
+  }
 
   /** returns the subtype of the embedded relation.
    */
   inline RELATION::SUBTYPES getRelationSubType() const
   {
     return _relation->getSubType();
-  } ;
+  }
 
+  /*
+   * Return H_alpha
+   *
+   */
+  SP::SiconosVector Halpha() const
+  {
+    return _h_alpha;
+  };
+
+
+  // --- Residu functions
+
+  inline SP::SiconosVector residuY() const
+  {
+    return _Residuy;
+  }
+  inline SP::BlockVector residuR() const
+  {
+    return _data[r];
+  }
+  /*
+   * Compute the residuY.
+   *
+   *
+   */
+  void computeResiduY(double time);
+
+  /*
+   * Compute the residuR.
+   * default management is empty, else must be overloaded.
+   *
+   */
+  void computeResiduR(const double time) const
+  {
+    RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
+  }
+
+  void initData();
+  void initDataFirstOrder();
+  void initDataLagrangian();
+  void initDataNewtonEuler();
+  void LinkDataFromMemory(unsigned int memoryLevel);
+  void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
+
+  inline void computeJach(const double time)
+  {
+    _relation->computeJach(time, *this);
+  }
+  inline void computeJacg(const double time)
+  {
+    _relation->computeJacg(time, *this);
+  }
 };
 
 #endif // INTERACTION_H

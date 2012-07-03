@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
@@ -26,10 +26,10 @@
 
 using namespace std;
 
-void LagrangianR::initComponents()
+void LagrangianR::initComponents(Interaction& inter)
 {
-  unsigned int sizeY = interaction()->getSizeOfY();
-  unsigned int sizeDS = interaction()->getSizeOfDS();
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeDS = inter.getSizeOfDS();
 
   // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
@@ -50,125 +50,23 @@ void LagrangianR::initComponents()
   {
     if (_jachqDot->size(0) == 0) // if the matrix dimension are null
       _jachqDot->resize(sizeY, sizeDS);
-    else if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
-      RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
-  }
-  _workX.reset(new SiconosVector(sizeDS));
-  _workXdot.reset(new SiconosVector(sizeDS));
-  _workZ.reset(new SiconosVector(interaction()->getSizez()));
-  _workY.reset(new SiconosVector(sizeY));
-}
-
-void LagrangianR::initialize(SP::Interaction inter)
-{
-  assert(inter && "Lagrangian::initialize failed. No Interaction linked to the present relation.");
-  _interaction = inter;
-
-  // Memory allocation for G[i], if required (depends on the chosen constructor).
-  initComponents();
-  data.resize(sizeDataNames);
-
-  LinkData();
-}
-
-void LagrangianR::LinkData()
-{
-
-
-  data[q0].reset(new BlockVector()); // displacement
-  data[q1].reset(new BlockVector()); // velocity
-  data[q2].reset(new BlockVector()); // acceleration
-  data[z].reset(new BlockVector()); // z vector
-  data[p0].reset(new BlockVector());
-  data[p1].reset(new BlockVector());
-  data[p2].reset(new BlockVector());
-
-  SP::LagrangianDS lds;
-  DSIterator it;
-  for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
-  {
-    // check dynamical system type
-    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-            Type::value(**it) == Type::LagrangianDS));
-
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = boost::static_pointer_cast<LagrangianDS> (*it);
-
-    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    data[q0]->insertPtr(lds->q());
-    data[q1]->insertPtr(lds->velocity());
-    data[q2]->insertPtr(lds->acceleration());
-    data[z]->insertPtr(lds->z());
-
-    // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
-    for (unsigned int k = interaction()->lowerLevelForInput() ;
-         k < interaction()->upperLevelForInput() + 1;
-         k++)
+    else
     {
-      assert(lds->p(k));
-      assert(data[p0 + k]);
-      data[p0 + k]->insertPtr(lds->p(k));
+      if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
+        RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
     }
-
-
   }
 }
 
-
-
-void LagrangianR::LinkDataFromMemory(unsigned int memoryLevel)
+void LagrangianR::initialize(Interaction& inter)
 {
-
-
-  //  assert(memoryLevel>=0);
-
-  DSIterator it;
-  data[q0].reset(new BlockVector()); // displacement
-  data[q1].reset(new BlockVector()); // velocity
-  data[q2].reset(new BlockVector()); // acceleration
-  data[z].reset(new BlockVector()); // z vector
-  data[p0].reset(new BlockVector());
-  data[p1].reset(new BlockVector());
-  data[p2].reset(new BlockVector());
-
-  SP::LagrangianDS lds;
-  for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
-  {
-    // check dynamical system type
-    assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
-            Type::value(**it) == Type::LagrangianDS));
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = boost::static_pointer_cast<LagrangianDS> (*it);
-
-    // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    data[q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
-    data[q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
-
-
-    // Do nothing for the remaining of data since there are no Memory
-    // An access to the content ofdata[q2] based on a link on Memory
-    //must throw an exeption
-
-
-    // data[q2]->insertPtr( lds->acceleration());
-    // data[z]->insertPtr( lds->z());
-
-    // // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
-    // for (unsigned int k = interaction()->lowerLevelForInput() ;
-    //      k < interaction()->upperLevelForInput()+1;
-    //      k++)
-    // {
-    //   assert(lds->p(k));
-    //   assert(data[p0+k]);
-    //   data[p0+k]->insertPtr( lds->p(k) );
-    // }
-
-  }
+  // Memory allocation for G[i], if required (depends on the chosen constructor).
+  initComponents(inter);
 }
 
-void LagrangianR::computeh(double)
+void LagrangianR::computeh(const double time, Interaction& inter)
 {
-  RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + subType);
+  RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
 }
 
 void LagrangianR::saveRelationToXML() const
@@ -176,16 +74,11 @@ void LagrangianR::saveRelationToXML() const
   RuntimeException::selfThrow("LagrangianR::saveRelationToXML - not yet implemented.");
 }
 
-SP::SiconosMatrix LagrangianR::C() const
+void LagrangianR::zeroPlugin()
 {
-  //std::cout << " SP::SiconosMatrix LagrangianR::C()      " << std::endl;
-  // jachq()->display();
-  //  std::cout << "jachq().get()     " <<  jachq().get()  <<std::endl;
-  //return jachq();
-  return _jachq;
+  Relation::zeroPlugin();
+  _pluginJachq.reset(new PluggedObject());
 }
-
-
 void LagrangianR::display() const
 {
   Relation::display();

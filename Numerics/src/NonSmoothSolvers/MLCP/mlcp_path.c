@@ -24,9 +24,9 @@
 #include <string.h>
 #include <math.h>
 
-
+#ifdef HAVE_PATHFERRIS
 #include "InterfaceToPathFerris/SimpleLCP.h"
-
+#endif
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarityProblem is supposed to fit with this form.

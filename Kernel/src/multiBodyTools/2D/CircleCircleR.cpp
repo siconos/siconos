@@ -21,11 +21,8 @@
 #include <math.h>
 #include "CircleCircleR.hpp"
 
-CircleCircleR::CircleCircleR(double r, double rr) : CircularR()
+CircleCircleR::CircleCircleR(double r, double rr): CircularR(r, rr)
 {
-  r1 = r;
-  r2 = rr;
-  ar1mr2 = fabs(r1 - r2);
 }
 
 double CircleCircleR::distance(double x1, double y1, double r1, double x2, double y2, double r2)
@@ -35,28 +32,28 @@ double CircleCircleR::distance(double x1, double y1, double r1, double x2, doubl
 
 }
 
-void CircleCircleR::computeh(double)
+void CircleCircleR::computeh(const double time, Interaction& inter)
 {
 
-  double q_0 = (*data[q0])(0);
-  double q_1 = (*data[q0])(1);
-  double q_3 = (*data[q0])(3);
-  double q_4 = (*data[q0])(4);
+  double q_0 = (*inter.data(q0))(0);
+  double q_1 = (*inter.data(q0))(1);
+  double q_3 = (*inter.data(q0))(3);
+  double q_4 = (*inter.data(0))(4);
 
-  SiconosVector *y = interaction()->y(0).get();
-  (*y)(0) = distance(q_0, q_1, r1, q_3, q_4, r2);
+  SiconosVector& y = *inter.y(0);
+  y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 
-};
+}
 
-void CircleCircleR::computeJachq(double)
+void CircleCircleR::computeJachq(const double time, Interaction& inter)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();
 
-  double x1 = (*data[q0])(0);
-  double y1 = (*data[q0])(1);
-  double x2 = (*data[q0])(3);
-  double y2 = (*data[q0])(4);
+  double x1 = (*inter.data(q0))(0);
+  double y1 = (*inter.data(q0))(1);
+  double x2 = (*inter.data(q0))(3);
+  double y2 = (*inter.data(q0))(4);
 
   double dx = x2 - x1;
   double dy = y2 - y1;
@@ -71,13 +68,11 @@ void CircleCircleR::computeJachq(double)
   (*g)(0, 1) = dysd;
   (*g)(1, 1) = dxsd;
   (*g)(0, 2) = 0.;
-  (*g)(1, 2) = -r1;
+  (*g)(1, 2) = -_r1;
   (*g)(0, 3) = -dxsd;
   (*g)(1, 3) = dysd;
   (*g)(0, 4) = -dysd;
   (*g)(1, 4) = -dxsd;
   (*g)(0, 5) = 0.;
-  (*g)(1, 5) = -r2;
-
+  (*g)(1, 5) = -_r2;
 }
-

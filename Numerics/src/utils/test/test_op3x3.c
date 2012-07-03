@@ -14,6 +14,11 @@
 #include "op3x3.h"
 
 
+#ifdef _WIN32
+#define random rand
+#define srandom srand
+#endif
+
 
 int main()
 {

@@ -75,7 +75,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 	  # Note Franck : I try to set DYLD ... useless for the moment
       set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=@LD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
       if(APPLE)
-		set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=@DYLD_LIBRARY_PATH@:@SiconosNumerics_FOUND@)
+	GET_FILENAME_COMPONENT(LibSiconosNumerics_PATH SiconosNumerics_FOUND PATH)
+	set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT DYLD_LIBRARY_PATH=@DYLD_LIBRARY_PATH@:@LibSiconosNumerics_PATH@)
 	  endif()
 	  
       IF(${_EXE}_PROPERTIES)

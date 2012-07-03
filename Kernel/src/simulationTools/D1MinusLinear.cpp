@@ -149,8 +149,8 @@ double D1MinusLinear::computeResidu()
   {
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeJach(told);
-      (*it)->relation()->computeJacg(told);
+      (*it)->computeJach(told);
+      (*it)->computeJacg(told);
     }
 
     if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -320,8 +320,8 @@ double D1MinusLinear::computeResidu()
 
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->relation()->computeJach(t);
-      (*it)->relation()->computeJacg(t);
+      (*it)->computeJach(t);
+      (*it)->computeJacg(t);
     }
 
     if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -415,17 +415,17 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   coord[6] = 0;
   coord[7] = sizeY;
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
-  SP::SiconosVector Xfree; // free degree of freedom
+  SP::BlockVector Xfree; // free degree of freedom
   SP::SiconosVector Yp = inter->yp(); // POINTER CONSTRUCTOR : contains output
 
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    Xfree = inter->workX();
+    Xfree = inter->dataX();
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    Xfree  = inter->workFree();
+    Xfree  = inter->dataFree();
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
@@ -439,7 +439,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   if (relationType == Lagrangian)
   {
     // in Yp the linear part of velocity or acceleration relation will be saved
-    C = mainInteraction->relation()->C();
+    C = boost::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
     if (C)
     {
@@ -469,7 +469,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1());
+        boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(boost::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
       }
       else
@@ -479,7 +479,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
-        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1());
+        boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(boost::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
       }
     }

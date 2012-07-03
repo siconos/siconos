@@ -60,11 +60,11 @@ public:
 
   void init(double);
 
-  void computeh(double);
+  void computeh(const double time, Interaction& inter);
 
-  void computeJachq(double);
+  void computeJachq(const double time, Interaction& inter);
 
-  void computehDot(double);
+  void computehDot(const double time, Interaction& inter);
 
   double distance(double, double, double);
 

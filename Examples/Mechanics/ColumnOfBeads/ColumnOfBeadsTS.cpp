@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
 
 
-            relationOfBeads[i]->interaction();
+            //            relationOfBeads[i]->interaction();
 
 
             //std::cout << "Contact declared= " << ncontact << std::endl;

@@ -54,15 +54,15 @@ typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*
  * g <=> input
  *
  * Operators (and their corresponding plug-in):
-     - h: saved in Interaction as y (plug-in: output[0])
-     - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-     - \f$ \nabla_\lambda h \f$: jacobianH[1] ( output[2] )
-     - g: saved in DS as r ( input[0])
-     - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+- h: saved in Interaction as y (plug-in: output[0])
+- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+- \f$ \nabla_\lambda h \f$: jacobianH[1] ( output[2] )
+- g: saved in DS as r ( input[0])
+- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
 
 
-     Note: we use a vector for jacobianG while there is only one jacobian. Just for future changes and to allow easy new implementations if some other
-     variables are required in g.
+Note: we use a vector for jacobianG while there is only one jacobian. Just for future changes and to allow easy new implementations if some other
+variables are required in g.
 
  *
  */
@@ -70,187 +70,135 @@ class FirstOrderR : public Relation
 {
 public:
 
-  enum DataNames {z, x, r, g_alpha, residu_r, ds_xp, sizeDataNames};
+  enum DataNames {free, z, x, xq, r, g_alpha, residu_r, ds_xp, sizeDataNames};
 
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(FirstOrderR);
 
-
-
-
-  SP::SiconosMatrix Jachx;
-
-  SP::SiconosMatrix Jacglambda;
-
   /** basic constructor
-   *  \param the type of the relation
-   */
+  *  \param the type of the relation
+  */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
   /** xml constructor
-   *  \param SP::RelationXML : the XML object.
-   *  \param the type of the relation
-   */
+  *  \param SP::RelationXML : the XML object.
+  *  \param the type of the relation
+  */
   FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType): Relation(relxml, RELATION::FirstOrder, newType) {}
 
-  /** To initialize data member: links to DS variables.
-   */
-  void initDSLinks();
+  SP::SiconosMatrix _jachx;
+  SP::SiconosMatrix _jacglambda;
 
 public:
 
   /** destructor
-   */
+  */
   virtual ~FirstOrderR() {};
 
   // -- Jach --
 
-  /** get matrix Jach[index]
-   *  \return a SimpleMatrix
-
-  virtual inline const SimpleMatrix getJachx() const { return *(Jach.at(index)); }
-  */
-  /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
-   */
-  virtual  SP::SiconosMatrix jachx() const
-  {
-    return Jachx;
-  }
-
   /** set the value of Jach[index] to newValue (copy)
-   *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in Jach vector
+  *  \param SiconosMatrix newValue
+  *  \param unsigned int: index position in Jach vector
 
   void setJacobianH(const SiconosMatrix&, unsigned int = 0);
   */
 
-  /** set Jach[index] to pointer newPtr (pointer link)
-   *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in Jach vector
-   */
-  inline void setJachxPtr(SP::SiconosMatrix newPtr)
-  {
-    Jachx = newPtr ;
-  }
-  inline void setJachlambdaPtr(SP::SiconosMatrix newPtr)
-  {
-    _jachlambda = newPtr ;
-  }
-
   // -- Jacg --
 
-  /** get matrix Jacg[index]
-   *  \return a SimpleMatrix
-
-  inline const SimpleMatrix getJacg(unsigned int  index = 0) const { return *(Jacg.at(index)); }
-  */
   /** get a pointer on matrix Jacg[index]
-   *  \return a pointer on a SiconosMatrix
-   */
+  *  \return a pointer on a SiconosMatrix
+  */
   virtual SP::SiconosMatrix jacglambda() const
   {
-    return Jacglambda;
+    return _jacglambda;
   }
 
   /** set the value of Jacg[index] to newValue (copy)
-   *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in Jacg vector
+  *  \param SiconosMatrix newValue
+  *  \param unsigned int: index position in Jacg vector
 
   void setJacg(const U& newValue, unsigned int index )
-    {
-      assert(index<Jacg.size()&&"FirstOrderR:: setJacg(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
-      if(Jacg[index]) Jacg[index]->resize(newValue.size(0), newValue.size(1));
-      setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jacg[index],newValue);
-    };
+  {
+  assert(index<Jacg.size()&&"FirstOrderR:: setJacg(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+  if(Jacg[index]) Jacg[index]->resize(newValue.size(0), newValue.size(1));
+  setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jacg[index],newValue);
+  };
   */
 
   /** set Jacg[index] to pointer newPtr (pointer link)
-   *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in Jacg vector
-   */
+  *  \param SP::SiconosMatrix  newPtr
+  *  \param unsigned int: index position in Jacg vector
+  */
   inline void setJacglambdaPtr(SP::SiconosMatrix newPtr)
   {
-    Jacglambda = newPtr ;
+    _jacglambda = newPtr ;
   }
 
   /** To get the name of Jach[i] plugin
-   *  \return a string
+  *  \return a string
   const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
-   */
+  */
 
   /** To get the name of Jacg[i] plugin
-   *  \return a string
+  *  \return a string
   const std::string getJacgName(unsigned int i) const {return Jacg[i]->getPluginName();}
-   */
+  */
 
   /** true if Jach[i] is plugged
-   *  \return a bool
-   */
+  *  \return a bool
+  */
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
-   */
-  virtual void initialize(SP::Interaction);
+  \param SP to Interaction: the interaction that owns this relation
+  */
+  virtual void initialize(Interaction& inter);
 
   /** default function to compute h
-   *  \param double : current time
-   */
-  virtual void computeh(double) = 0;
+  *  \param double : current time
+  */
+  virtual void computeh(const double time, Interaction& inter) = 0;
 
   /** default function to compute g
-   *  \param double : current time
-   */
-  virtual void computeg(double) = 0;
+  *  \param double : current time
+  */
+  virtual void computeg(const double time, Interaction& inter) = 0;
 
   /** default function to compute jacobianH
-   *  \param double : current time
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-   */
-  virtual void computeJachx(double);
-  virtual void computeJachlambda(double);
-  virtual void computeJach(double t)
+  *  \param double : current time
+  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+  */
+  virtual void computeJachx(const double time, Interaction& inter);
+  virtual void computeJachlambda(const double time, Interaction& inter);
+  virtual void computeJach(const double time, Interaction& inter)
   {
-    computeJachx(t);
-    computeJachlambda(t);
+    computeJachx(time, inter);
+    computeJachlambda(time, inter);
   }
 
 
   /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  virtual void computeJacglambda(double);
+  *  \param double : current time
+  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  */
+  virtual void computeJacglambda(const double time, Interaction& inter);
 
-  virtual void computeJacg(double t)
+  virtual void computeJacg(const double time, Interaction& inter)
   {
-    computeJacglambda(t);
+    computeJacglambda(time, inter);
   }
   /*
-   * Compute the residuR from r and g_alpha.
-   *
-   */
-  virtual void computeResiduR(double t);
+  * Compute the residuR from r and g_alpha.
+  *
+  */
+  virtual void computeResiduR(const double time, Interaction& inter);
 
-  /** Link the data of the Relation with the DS
-   */
-  void LinkData()
+  SP::SiconosMatrix jachx() const
   {
-    RuntimeException::selfThrow("FirstOrderR::LinkData: not yet implemented");
-  };
-
-  /** Link the data of the Relation with the DS Memory
-   * \param unsigned int Memory level
-   */
-  void LinkDataFromMemory(unsigned int)
-  {
-    RuntimeException::selfThrow("FirstOrderR::LinkData: not yet implemented");
-  };
-
-  /** main relation members display
-   */
+    return _jachx;
+  }
 
   /**
   * return a SP on the C matrix.
@@ -262,27 +210,22 @@ public:
     return jachx();
   }
   /**
-   * return a SP on the D matrix.
-   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-   */
+  * return a SP on the D matrix.
+  * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
+  */
   SP::SiconosMatrix D() const
   {
     return jachlambda();
   }
   /**
-   * return a SP on the B matrix.
-   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-   */
+  * return a SP on the B matrix.
+  * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
+  */
   SP::SiconosMatrix B() const
   {
     return jacglambda();
   }
 
-  // --- Residu r functions
-  virtual const SP::SiconosVector residuR();
-
-
-  void display() const;
 };
 TYPEDEF_SPTR(FirstOrderR);
 

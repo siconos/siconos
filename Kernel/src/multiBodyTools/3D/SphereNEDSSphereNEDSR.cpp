@@ -41,20 +41,20 @@ double SphereNEDSSphereNEDSR::distance(double x1, double y1, double z1, double r
 }
 
 
-void SphereNEDSSphereNEDSR::computeh(double)
+void SphereNEDSSphereNEDSR::computeh(const double time, Interaction& inter)
 {
 
 
-  double q_0 = (*data[q0])(0);
-  double q_1 = (*data[q0])(1);
-  double q_2 = (*data[q0])(2);
-  double q_7 = (*data[q0])(7);
-  double q_8 = (*data[q0])(8);
-  double q_9 = (*data[q0])(9);
+  double q_0 = (*inter.data(q0))(0);
+  double q_1 = (*inter.data(q0))(1);
+  double q_2 = (*inter.data(q0))(2);
+  double q_7 = (*inter.data(q0))(7);
+  double q_8 = (*inter.data(q0))(8);
+  double q_9 = (*inter.data(q0))(9);
 
-  SP::SiconosVector y = interaction()->y(0);
+  SiconosVector& y = *inter.y(0);
 
-  y->setValue(0, distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2));
+  y.setValue(0, distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2));
   //Approximation _Pc1=_Pc2
   _Pc1->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
   _Pc1->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
@@ -62,14 +62,12 @@ void SphereNEDSSphereNEDSR::computeh(double)
   _Pc2->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
   _Pc2->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
   _Pc2->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
-  _Nc->setValue(0, (q_0 - q_7) / (y->getValue(0) + r1pr2));
-  _Nc->setValue(1, (q_1 - q_8) / (y->getValue(0) + r1pr2));
-  _Nc->setValue(2, (q_2 - q_9) / (y->getValue(0) + r1pr2));
+  _Nc->setValue(0, (q_0 - q_7) / (y.getValue(0) + r1pr2));
+  _Nc->setValue(1, (q_1 - q_8) / (y.getValue(0) + r1pr2));
+  _Nc->setValue(2, (q_2 - q_9) / (y.getValue(0) + r1pr2));
   //std::cout<<" SphereNEDSSphereNEDSR::computeh dist:"<<y->getValue(0)<<"\n";
   //std::cout<<"_Pc:\n";
   //_Pc->display();
   //std::cout<<"_Nc:\n";
   //_Nc->display();
 };
-
-

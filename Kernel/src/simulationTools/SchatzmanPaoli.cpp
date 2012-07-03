@@ -1021,19 +1021,19 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
   SP::SiconosMatrix  C;
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::SiconosVector Xq;
+  SP::BlockVector Xq;
   SP::SiconosVector Yp;
   SP::SiconosVector e;
-  SP::SiconosVector Xfree;
+  SP::BlockVector Xfree;
 
   SP::SiconosVector H_alpha;
 
 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a SchatzmanPaoli scheme is used.
-  Xq = inter->workXq();
+  Xq = inter->dataXq();
   Yp = inter->yp();
 
-  Xfree = inter->workFree();
+  Xfree = inter->dataFree();
 
   assert(Xfree);
 
@@ -1061,7 +1061,6 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
-      mainInteraction->setWorkFree();
 
       if (_useGammaForRelation)
       {

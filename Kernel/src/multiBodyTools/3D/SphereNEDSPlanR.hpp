@@ -58,7 +58,7 @@ public:
 
   double distance(double, double, double, double);
 
-  void computeh(double);
+  void computeh(const double time, Interaction& inter);
 
   //void computeJachq(double);
 

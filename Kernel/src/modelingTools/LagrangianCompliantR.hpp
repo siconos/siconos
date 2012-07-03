@@ -18,7 +18,7 @@
  */
 /*! \file LagrangianCompliantR.hpp
 
-*/
+ */
 #ifndef LagrangianCompliantR_H
 #define LagrangianCompliantR_H
 
@@ -63,78 +63,76 @@ protected:
 
 
   /** LagrangianR plug-in to compute h(q,lambda,z)
-    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-    * @param q : pointer to the first element of q
-    * @param sizeY : size of vector y (ie of lambda and of the interaction)
-    * @param lambda : pointer to lambda of the interaction
-    * @param[in,out] y : pointer to the first element of y
-    * @param sizeZ : size of vector z.
-    * @param[in,out] z : a vector of user-defined parameters
-    */
+  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+  * @param q : pointer to the first element of q
+  * @param sizeY : size of vector y (ie of lambda and of the interaction)
+  * @param lambda : pointer to lambda of the interaction
+  * @param[in,out] y : pointer to the first element of y
+  * @param sizeZ : size of vector z.
+  * @param[in,out] z : a vector of user-defined parameters
+  */
 
-
-  SP::PluggedObject _pluginJachq;
   SP::PluggedObject _pluginJachlambda;
 
   /** default constructor
-   */
+  */
   LagrangianCompliantR() : LagrangianR(RELATION::CompliantR) {  };
 
   /** initialize G matrices or components specific to derived classes.
-   */
-  void initComponents();
+  */
+  void initComponents(Interaction& inter);
   void zeroPlugin();
 
 public:
 
   /** constructor from xml file
-   *  \param relationXML
-   */
+  *  \param relationXML
+  */
   LagrangianCompliantR(SP::RelationXML);
 
   /** constructor from a set of data
-   *  \param string : the name of the plugin to computeh
-   *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
-   */
+  *  \param string : the name of the plugin to computeh
+  *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
+  */
   LagrangianCompliantR(const std::string&, const std::vector<std::string>&);
 
   /** destructor
-   */
+  */
   virtual ~LagrangianCompliantR() {};
 
   /** to compute y = h(q,v,t) using plug-in mechanism
-   * \param: double, current time
-   */
-  void computeh(double);
+  * \param: double, current time
+  */
+  void computeh(const double time, Interaction& inter);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-   * \param: double, current time
-   * \param: unsigned int
-   */
-  void computeJachq(double);
-  void computeJachlambda(double);
+  * \param: double, current time
+  * \param: unsigned int
+  */
+  void computeJachq(const double time, Interaction& inter);
+  void computeJachlambda(const double time, Interaction& inter);
   const std::string getJachlambdaName() const;
   const std::string getJachqName() const;
 
 
   /** to compute output
-   *  \param Interaction : the interaction that owns y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  void computeOutput(double, unsigned int = 0);
+  *  \param time the current time
+  *  \param inter the Interaction owning y
+  *  \param level number of the derivative to compute, optional, default = 0.
+  */
+  void computeOutput(const double time, Interaction& inter, unsigned int level = 0);
 
-  /** to compute p
-   *  \param Interaction : the interaction that owns lambda
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
-   */
-  void computeInput(double, unsigned int = 0);
+  /** to compute the input
+  *  \param time the current time
+  *  \param inter the Interaction owning lambda
+  *  \param level "derivative" order of lambda used to compute input
+  */
+  void computeInput(const double time, Interaction& inter, unsigned int level = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation* : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  *  \param Relation* : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static LagrangianCompliantR* convert(Relation *r);
 
 

@@ -661,8 +661,8 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
-    interac->relation()->computeOutput(getTkp1(), 0);
-    interac->relation()->computeJach(getTkp1());
+    interac->computeOutput(getTkp1(), 0);
+    interac->computeJach(getTkp1());
 
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||

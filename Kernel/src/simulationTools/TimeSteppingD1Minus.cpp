@@ -66,13 +66,11 @@ void TimeSteppingD1Minus::initOSNS()
 void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
 {
 
-  inter->setWorkZ();
 
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
-    inter->setWorkXFromVelocity();
-    inter->setWorkFree();
+    inter->setDataXFromVelocity();
   }
   else
     RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);

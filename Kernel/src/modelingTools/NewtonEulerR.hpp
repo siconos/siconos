@@ -18,7 +18,7 @@
  */
 /*! \file NewtonEulerR.hpp
 
-*/
+ */
 #ifndef NEWTONEULERRELATION_H
 #define NEWTONEULERRELATION_H
 
@@ -62,24 +62,18 @@ class NewtonEulerR : public Relation
 {
 public:
 
-  enum DataNames {z, deltaq, q0, q1, q2, p0, p1, p2, velo, sizeDataNames};
+  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames};
 
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
-  unsigned int _ysize;
-  unsigned int _xsize;
-  unsigned int _qsize;
-
-  SP::SiconosVector _workQ;
-
   /** Jacobian matrices of H */
   SP::SimpleMatrix _jachq;
   //proj_with_q SP::SimpleMatrix _jachqProj;
   SP::SiconosMatrix _jachqDot;
-  SP::SiconosMatrix _jachlambda;
+  SP::SiconosMatrix _jacglambda;
 
   /**vector e*/
   SP::SiconosVector _e;
@@ -89,42 +83,37 @@ protected:
   SP::SiconosVector _contactForce;
 
   /**updated in computeJachqT:
-   In the case of the bilateral constrains, it is _jachq._T.
-   In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
+  In the case of the bilateral constrains, it is _jachq._T.
+  In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
   SP::SiconosMatrix _jachqT;
 
   /** basic constructor
-      \param the sub-type of the relation
-   */
+  \param the sub-type of the relation
+  */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
   /** constructor from xml file
-   *  \param relationXML
-   *  \param string: relation subType
-   */
+  *  \param relationXML
+  *  \param string: relation subType
+  */
   NewtonEulerR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::NewtonEuler, newSubType) {}
 
   /** initialize components specific to derived classes.
-   */
-  virtual void initComponents();
+  */
+  virtual void initComponents(Interaction& inter);
 
 public:
   NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
 
   /** destructor
-   */
+  */
   virtual ~NewtonEulerR() {};
 
   // -- Jach --
 
-  /** get matrix Jach[index]
-   *  \return a SimpleMatrix
-  inline const SimpleMatrix getJach(unsigned int  index = 0) const { return *(Jach.at(index)); }
-   */
-
   /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SiconosMatrix
-   */
+  *  \return a pointer on a SiconosMatrix
+  */
   inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
@@ -142,6 +131,10 @@ public:
   {
     return _jachlambda;
   }
+  inline SP::SiconosMatrix jacglambda() const
+  {
+    return _jacglambda;
+  }
   inline void setE(SP::SiconosVector newE)
   {
     _e = newE;
@@ -156,108 +149,88 @@ public:
     _jachqT = newJachqT;
   }
 
-
   /** set Jach[index] to pointer newPtr (pointer link)
-   *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in Jach vector
-   */
+  *  \param SP::SiconosMatrix  newPtr
+  *  \param unsigned int: index position in Jach vector
+  */
   inline void setJachqPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr ;
   }
 
-
-
-
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
+  \param SP to Interaction: the interaction that owns this relation
   */
-  void initialize(SP::Interaction);
+  void initialize(Interaction& inter);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
-   * \param: double, current time
-   */
-  virtual void computeh(double);
+  * \param: double, current time
+  */
+  virtual void computeh(const double time, Interaction& inter);
 
   /** default function to compute jacobianH
-   *  \param double : current time
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+  *  \param double : current time
+  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJachx(double);*/
-  virtual void computeJachlambda(double)
+  virtual void computeJachlambda(const double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachq(double)
+  virtual void computeJachq(const double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJachqDot(double)
+  virtual void computeJachqDot(const double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJacglambda(double)
+  virtual void computeJacglambda(const double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJacgq(double)
+  virtual void computeJacgq(const double time, Interaction& inter)
   {
     ;
   }
-  virtual void computeJacgqDot(double)
+  virtual void computeJacgqDot(const double time, Interaction& inter)
   {
     ;
   }
   /*default implementation consists in multiplying jachq and T*/
-  virtual void computeJachqT();
+  virtual void computeJachqT(Interaction& inter);
   /* compute all the H Jacobian */
-  virtual void computeJach(double t)
+  virtual void computeJach(const double time, Interaction& inter)
   {
-    computeJachq(t);
-    computeJachqDot(t);
-    computeJachlambda(t);
-    computeJachqT();
+    computeJachq(time, inter);
+    computeJachqDot(time, inter);
+    computeJachlambda(time, inter);
+    computeJachqT(inter);
   }
   /* compute all the G Jacobian */
-  virtual void computeJacg(double t)
+  virtual void computeJacg(const double time, Interaction& inter)
   {
-    computeJacgq(t);
-    computeJacgqDot(t);
-    computeJacglambda(t);
+    computeJacgq(time, inter);
+    computeJacgqDot(time, inter);
+    computeJacglambda(time, inter);
   }
 
 
   /** to compute output
-    *  \param double : current time
-    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-    */
-  virtual void computeOutput(double, unsigned int = 0) ;
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
+  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0) ;
 
   /** to compute p
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
-   */
-  virtual void computeInput(double, unsigned int = 0) ;
+  *  \param double : current time
+  *  \param unsigned int: "derivative" order of lambda used to compute input
+  */
+  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0) ;
 
   /** copy the data of the Relation to the XML tree
-   */
+  */
   void saveRelationToXML() const;
-
-  /** Link the data of the Relation with the DS
-   */
-  void LinkData()
-  {
-    RuntimeException::selfThrow("NewtonEulerR::LinkData: not yet implemented");
-  };
-
-  /** Link the data of the Relation with the DS Memory
-   * \param unsigned int Memory level
-   */
-  void LinkDataFromMemory(unsigned int)
-  {
-    RuntimeException::selfThrow("NewtonEulerR::LinkData: not yet implemented");
-  };
-
 
   /**
   * return a SP on the C matrix.
@@ -269,32 +242,29 @@ public:
     return jachq();
   }
   /**
-   * return a SP on the D matrix.
-   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-   */
+  * return a SP on the D matrix.
+  * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
+  */
   virtual SP::SiconosMatrix D() const
   {
     return jachlambda();
   }
   /**
-   * return a SP on the B matrix.
-   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-   */
+  * return a SP on the B matrix.
+  * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
+  */
   virtual SP::SiconosMatrix B() const
   {
     return jacglambda();
   }
   /** A buffer containing the forces due to this.
-      It is an output unused for the computation.
-   */
+  It is an output unused for the computation.
+  */
   SP::SiconosVector contactForce() const
   {
     return _contactForce;
   };
 
-  /** main relation members display
-   */
-  void display() const;
   /** return a block vector containing ths dynamical system's dof.*/
   //  SP::BlockVector getq(){return data[q0];}
 

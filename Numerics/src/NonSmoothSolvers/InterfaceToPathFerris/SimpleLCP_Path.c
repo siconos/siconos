@@ -19,13 +19,13 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "SimpleLCP.h"
 #include "NumericsConfig.h"
 
 #define PATHFERRIS_LOG_IN_FILE
 
 #ifdef HAVE_PATHFERRIS
 
+#include "SimpleLCP.h"
 #include "include/MCP_Interface.h"
 
 #include "include/Path.h"
@@ -491,6 +491,9 @@ void SimpleLCP(int variables,
   return;
 }
 #else
+
+#include "include/Types.h"
+
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
                double *lb, double *ub,

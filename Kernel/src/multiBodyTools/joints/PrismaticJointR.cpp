@@ -128,7 +128,7 @@ void PrismaticJointR::computeV1V2FromAxe()
 
 
 
-void PrismaticJointR::computeJachq(double t)
+void PrismaticJointR::computeJachq(const double time, Interaction& inter)
 {
   _jachq->zero();
   SP::SiconosVector x2 = _d2->q();
@@ -168,7 +168,7 @@ void PrismaticJointR::computeJachq(double t)
 
 
 
-void PrismaticJointR::computeh(double t)
+void PrismaticJointR::computeh(const double time, Interaction& inter)
 {
 
   SP::SiconosVector x2 = _d2->q();
@@ -197,15 +197,15 @@ void PrismaticJointR::computeh(double t)
     q12 = x1->getValue(5);
     q13 = x1->getValue(6);
   }
-  SP::SiconosVector y = interaction()->y(0);
-  y->setValue(0, H1(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(1, H2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(2, H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(3, H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(4, H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  SiconosVector& y = *inter.y(0);
+  y.setValue(0, H1(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(1, H2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(2, H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(3, H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(4, H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   double norm = 0;
   for (int ii = 0; ii < 5; ii++)
-    norm += y->getValue(ii) * y->getValue(ii);
+    norm += y.getValue(ii) * y.getValue(ii);
   //std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 
 

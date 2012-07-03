@@ -34,23 +34,23 @@ typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
 /** First Order Linear Relation
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date Apr 15, 2007
+\author SICONOS Development Team - copyright INRIA
+\version 3.0.0.
+\date Apr 15, 2007
 
-    Linear Relation for First Order Dynamical Systems:
+Linear Relation for First Order Dynamical Systems:
 
-    \f{eqnarray}
-    y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+\f{eqnarray}
+y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
 
-    R &=& B(t,z) \lambda
-    \f}
+R &=& B(t,z) \lambda
+\f}
 
-    All coefficients can be plugged or not. Use isPlugged[name] to check if name ( = "C", "F" etc) is plugged.
+All coefficients can be plugged or not. Use isPlugged[name] to check if name ( = "C", "F" etc) is plugged.
 
-    Note: the connections (pointers equalities) between C, D, B and jacobianH and jacobianG of FirstOrderR class are done during initialize.
+Note: the connections (pointers equalities) between C, D, B and jacobianH and jacobianG of FirstOrderR class are done during initialize.
 
-*/
+ */
 class FirstOrderLinearR : public FirstOrderR
 {
 
@@ -59,104 +59,99 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
-
-  /** F*/
   SP::SiconosMatrix _F;
-  /** e*/
   SP::SiconosVector _e;
-
-
 
 public:
 
   /** default constructor, protected
-   */
+  */
   FirstOrderLinearR();
 
   /** xml constructor
-      \param SP::RelationXML : the XML object corresponding
+  \param SP::RelationXML : the XML object corresponding
   */
   FirstOrderLinearR(SP::RelationXML);
 
   /** Constructor with C and B plug-in names
-      \param C plug-in name
-      \param B plug-in name
+  \param C plug-in name
+  \param B plug-in name
   **/
   FirstOrderLinearR(const std::string&, const std::string&);
 
   /** Constructor all plug-in names
-      \param C plug-in name
-      \param D plug-in name
-      \param F plug-in name
-      \param e plug-in name
-      \param B plug-in name
+  \param C plug-in name
+  \param D plug-in name
+  \param F plug-in name
+  \param e plug-in name
+  \param B plug-in name
   **/
   FirstOrderLinearR(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&);
 
   /** create the Relation from a set of data
-   *  \param Plugged Matrix : the matrix C
-   *  \param Plugged Matrix : the matrix B
-   */
+  *  \param Plugged Matrix : the matrix C
+  *  \param Plugged Matrix : the matrix B
+  */
   FirstOrderLinearR(SP::SiconosMatrix, SP::SiconosMatrix);
 
   /** create the Relation from a set of data
-   *  \param Plugged Matrix : C
-   *  \param Plugged Matrix : D
-   *  \param Plugged Matrix : F
-   *  \param Plugged Vector : e
-   *  \param Plugged Matrix : B
-   */
+  *  \param Plugged Matrix : C
+  *  \param Plugged Matrix : D
+  *  \param Plugged Matrix : F
+  *  \param Plugged Vector : e
+  *  \param Plugged Matrix : B
+  */
   FirstOrderLinearR(SP::SiconosMatrix , SP::SiconosMatrix, SP::SiconosMatrix , SP::SiconosVector, SP::SiconosMatrix);
 
   /** create the Relation from a set of data
-   *  \param  SiconosMatrix : the matrix C
-   *  \param  SiconosMatrix : the matrix B
+  *  \param  SiconosMatrix : the matrix C
+  *  \param  SiconosMatrix : the matrix B
 
   FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix&);
   */
   /** create the Relation from a set of data
-   *  \param  SiconosMatrix : C
-   *  \param  SiconosMatrix : D
-   *  \param  SiconosMatrix : F
-   *  \param  SiconosVector  : e
-   *  \param  SiconosMatrix : B
+  *  \param  SiconosMatrix : C
+  *  \param  SiconosMatrix : D
+  *  \param  SiconosMatrix : F
+  *  \param  SiconosVector  : e
+  *  \param  SiconosMatrix : B
 
   FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix& , const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);
   */
   /** destructor
-   */
+  */
   ~FirstOrderLinearR() {};
 
   // GETTERS/SETTERS
 
   // -- C --
   /** get the value of C
-   *  \return plugged matrix
+  *  \return plugged matrix
 
   inline const PluggedMatrix getC() const { return *(Jach.at(0)); }
   */
   /** get C
-   *  \return pointer on a plugged matrix
-   */
+  *  \return pointer on a plugged matrix
+  */
   //inline SP::SiconosMatrix C() const { return Jach.at(0); }
 
   /** set the value of C to newValue
-   *  \param a plugged matrix
+  *  \param a plugged matrix
 
   template <class U> void setC(const U& newValue)
-    {
-      setJach(newValue,0);
-    }
+  {
+  setJach(newValue,0);
+  }
   */
   /** set C to pointer newPtr
-   *  \param a SP to plugged matrix
+  *  \param a SP to plugged matrix
 
   inline void setCPtr(SP_PluggedMatrix newPtr) {Jach[0] = newPtr;}
   */
   /** set a specified function to compute the matrix C
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   */
+  *  \param string : the complete path to the plugin
+  *  \param string : the function name to use in this plugin
+  */
 
 
   void setComputeCFunction(const std::string& pluginPath, const std::string& functionName)
@@ -168,137 +163,70 @@ public:
   // -- D --
 
   /** get the value of D
-   *  \return plugged matrix
-   */
+  *  \return plugged matrix
+  */
   //inline const PluggedMatrix getD() const { return *(Jach.at(1)); }
 
   /** get D
-   *  \return pointer on a plugged matrix
-   */
+  *  \return pointer on a plugged matrix
+  */
   //inline SP::SiconosMatrix D() const { return Jach.at(1); }
 
   /** set the value of D to newValue
-   *  \param a plugged matrix
+  *  \param a plugged matrix
 
   void setD(const U& newValue)
-    {
-      if(Jach.size()<2) Jach.resize(2);
-      setJach(newValue,1);
-    }
-    */
-
-  /** set D to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
-  void setDPtr(SP::SiconosMatrix newPtr)
   {
-    _jachlambda = newPtr;
+  if(Jach.size()<2) Jach.resize(2);
+  setJach(newValue,1);
   }
+  */
 
   /** set a specified function to compute the matrix D
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   */
+  *  \param string : the complete path to the plugin
+  *  \param string : the function name to use in this plugin
+  */
   void setComputeDFunction(const std::string& pluginPath, const std::string& functionName)
   {
     setComputeJachlambdaFunction(pluginPath,  functionName);
   }
 
-
-  // -- F --
-
-  /** get the value of F
-   *  \return plugged matrix
-
-  inline const PluggedMatrix getF() const { return *F; }
+  /** set D to pointer newPtr
+  *  \param a SP to plugged matrix
   */
-  /** get F
-   *  \return pointer on a plugged matrix
-   */
-  inline SP::SiconosMatrix F() const
+  inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    return _F;
+    _jachlambda = newPtr;
   }
 
-  /** set the value of F to newValue
-   *  \param a plugged matrix
 
-  void setF(const SiconosMatrix& newValue){
-    if(F) F->resize(newValue.size(0), newValue.size(1));
-  }
-  */
   /** set F to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
+  *  \param a SP to plugged matrix
+  */
   inline void setFPtr(SP::SiconosMatrix newPtr)
   {
     _F = newPtr;
   }
 
   /** set a specified function to compute the matrix F
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-    void setComputeFFunction(const std::string& , const std::string& );
-   */
+  *  \param string : the complete path to the plugin
+  *  \param string : the function name to use in this plugin
+  void setComputeFFunction(const std::string& , const std::string& );
+  */
 
   // -- e --
   /** get the value of e
-   *  \return plugged vector
+  *  \return plugged vector
 
   inline const Plugged_Vector_FTime getE() const { return *e; }
   */
   /** get e
-   *  \return pointer on a plugged vector
-   */
+  *  \return pointer on a plugged vector
+  */
   inline SP::SiconosVector e() const
   {
     return _e;
   }
-
-  /** set the value of e to newValue
-   *  \param a plugged vector
-  void setE(const SiconosVector& newValue)
-    {
-      if(e) e->resize(newValue.size());
-    }
-   */
-
-  /** set e to pointer newPtr
-   *  \param a SP to plugged vector
-   */
-  //  inline void setEPtr(SP::SiconosVector newPtr) {e = newPtr;}
-
-  /** set a specified function to compute the vector e
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   */
-  //  void setComputeEFunction(const std::string& , const std::string& );
-  /** set a specified function to compute the vector e
-   *  \param VectorFunctionOfTime : a pointer function
-   */
-
-  // -- B --
-  /** get the value of B
-   *  \return plugged matrix
-   */
-  //inline const PluggedMatrix getB() const { return *(Jacg.at(0)); }
-
-  /** get B
-   *  \return pointer on a plugged matrix
-   */
-  //inline SP_PluggedMatrix B() const { return Jacg.at(0); }
-
-  /** set the value of B to newValue
-   *  \param a plugged matrix
-
-  void setB(const & newValue){
-    setJacg(newValue,0);
-  }
-  */
-  /** set B to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
-  //   inline void setBPtr(SP::SiconosMatrix newPtr) {Jacglambda = newPtr;}
 
   //   /** set a specified function to compute the matrix B
   //    *  \param string : the complete path to the plugin
@@ -310,85 +238,76 @@ public:
   }
 
 
-  //   /** Function to compute matrix C
-  //    */
-  void computeC(double);
+  /** Function to compute matrix C
+  */
+  void computeC(const double time, Interaction& inter);
 
-  //   /** Function to compute matrix F
-  //    */
-  void computeF(double);
+  /** Function to compute matrix F
+  */
+  void computeF(const double time, Interaction& inter);
 
-  //   /** Function to compute matrix D
-  //    */
-  void computeD(double);
+  /** Function to compute matrix D
+  */
+  void computeD(const double time, Interaction& inter);
 
-  //   /** Function to compute vector e
-  //    */
-  void computeE(double);
+  /** Function to compute vector e
+  */
+  void computeE(const double time, Interaction& inter);
 
-  //   /** Function to compute matrix B
-  //    */
-  void computeb(double);
+  /** Function to compute matrix B
+  */
+  void computeb(const double time, Interaction& inter);
 
-  //   /** initialize the relation (check sizes, memory allocation ...)
-  //       \param SP to Interaction: the interaction that owns this relation
-  //   */
-  void initialize(SP::Interaction);
+  /** initialize the relation (check sizes, memory allocation ...)
+  \param inter Interaction: the interaction that owns this relation
+  */
+  void initialize(Interaction & inter);
 
-  //   /** default function to compute h
-  //    *  \param double : current time
-  //    */
-  void computeh(double);
+  /** default function to compute h
+  *  \param double : current time
+  */
+  void computeh(const double time, Interaction& inter);
 
-  //   /** default function to compute g
-  //    *  \param double : current time
-  //    */
-  void computeg(double);
+  /** default function to compute g
+  *  \param double : current time
+  */
+  void computeg(const double time, Interaction& inter);
 
-  //   /** default function to compute jacobianH
-  //    *  \param double : not used
-  //    *  \param not used
-  //    */
-  //   void computeJachx(double);
-  //   void computeJachlambda(double);
+  /** default function to compute y
+  *  \param double: not used
+  *  \param unsigned int: not used
+  */
+  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
 
-  //   /** default function to compute jacobianG according to lambda
-  //    *  \param double : current time
-  //    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-  //    */
-  //   void computeJacglambda(double);
+  /** default function to compute r
+  *  \param double : not used
+  *  \param unsigned int: not used
+  */
+  void computeInput(const double time, Interaction& inter, unsigned int = 0);
 
-  //   /** default function to compute y
-  //    *  \param double: not used
-  //    *  \param unsigned int: not used
-  //    */
-  void computeOutput(double, unsigned int = 0);
-
-  //   /** default function to compute r
-  //    *  \param double : not used
-  //    *  \param unsigned int: not used
-  //    */
-  void computeInput(double, unsigned int = 0);
-
-  //   /** copy the data of the Relation to the XML tree
-  //    */
+  /** copy the data of the Relation to the XML tree
+  */
   void saveRelationToXML() const;
 
-  //   /** print the data to the screen
-  //    */
+  /** print the data to the screen
+  */
   void display() const;
   virtual void setComputeEFunction(FOVecPtr ptrFunct);
   virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
+  inline SP::SiconosMatrix F() const
+  {
+    return _F;
+  }
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  *  \param Relation * : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static FirstOrderLinearR* convert(Relation *r);
 
   /**
-   * return true if the relation is linear.
-   */
+  * return true if the relation is linear.
+  */
 
   virtual bool isLinear()
   {

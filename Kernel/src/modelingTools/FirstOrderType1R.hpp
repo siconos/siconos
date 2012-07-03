@@ -44,10 +44,10 @@ typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, uns
  * \f}
  *
  * Operators (and their corresponding plug-in):
-     - h: saved in Interaction as y (plug-in: output[0])
-     - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-     - g: saved in DS as r ( input[0])
-     - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+- h: saved in Interaction as y (plug-in: output[0])
+- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+- g: saved in DS as r ( input[0])
+- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
 class FirstOrderType1R : public FirstOrderR
@@ -56,74 +56,71 @@ class FirstOrderType1R : public FirstOrderR
 public:
 
   /** xml constructor
-   *  \param RelationXML smart pointer : the XML object.
-   */
+  *  \param RelationXML smart pointer : the XML object.
+  */
   FirstOrderType1R(SP::RelationXML);
 
   /** data constructor
-   *  \param a string with computeOutput function name.
-   *  \param a string with computeInput function name.
-   */
+  *  \param a string with computeOutput function name.
+  *  \param a string with computeInput function name.
+  */
   FirstOrderType1R(const std::string&, const std::string&);
 
   /** data constructor
-   *  \param a string with computeOutput function name.
-   *  \param a string with computeInput function name.
-   *  \param a string: name of the function to compute the jacobian of h according to x
-   *  \param a string: name of the function to compute the jacobian of g according to lambda
-   */
+  *  \param a string with computeOutput function name.
+  *  \param a string with computeInput function name.
+  *  \param a string: name of the function to compute the jacobian of h according to x
+  *  \param a string: name of the function to compute the jacobian of g according to lambda
+  */
   FirstOrderType1R(const std::string&, const std::string&, const std::string&, const std::string&);
 
   /** destructor
-   */
+  */
   ~FirstOrderType1R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
-   */
-  virtual void initialize(SP::Interaction);
+  \param SP to Interaction: the interaction that owns this relation
+  */
+  virtual void initialize(Interaction& inter);
 
   /** default function to compute h
-   *  \param double : current time
-   */
-  void computeh(double);
+  *  \param double : current time
+  */
+  void computeh(const double time, Interaction& inter);
 
   /** default function to compute g
-   *  \param double : current time
-   */
-  void computeg(double);
+  *  \param double : current time
+  */
+  void computeg(const double time, Interaction& inter);
 
   /** default function to compute jacobianH
-   *  \param double : not used
-   *  \param not used
-   */
-  void computeJachx(double);
+  *  \param double : not used
+  *  \param not used
+  */
+  void computeJachx(const double time, Interaction& inter);
 
   /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  void computeJacglambda(double);
+  *  \param double : current time
+  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  */
+  void computeJacglambda(const double time, Interaction& inter);
 
   /** default function to compute y
-   *  \param double: not used
-   *  \param unsigned int: not used
-   */
-  void computeOutput(double, unsigned int = 0);
+  *  \param double: not used
+  *  \param unsigned int: not used
+  */
+  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
-   *  \param double : not used
-   *  \param unsigned int: not used
-   */
-  void computeInput(double, unsigned int = 0);
+  *  \param double : not used
+  *  \param unsigned int: not used
+  */
+  void computeInput(const double time, Interaction& inter, unsigned int = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
-
-
-
+  *  \param Relation * : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static FirstOrderType1R* convert(Relation *r);
 
   ACCEPT_STD_VISITORS();

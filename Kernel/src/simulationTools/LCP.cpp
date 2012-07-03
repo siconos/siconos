@@ -19,7 +19,7 @@
 #include "LCP.hpp"
 
 #include "debug.h"
-//#define DEBUG_MESSAGES 1
+#define DEBUG_MESSAGES 1
 
 using namespace std;
 using namespace RELATION;

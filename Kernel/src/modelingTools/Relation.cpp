@@ -24,7 +24,7 @@ using namespace std;
 // Default constructor
 Relation::Relation(RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub)
+  _relationType(newType), _subType(newSub)
 {
   zeroPlugin();
 }
@@ -33,11 +33,11 @@ Relation::Relation(RELATION::TYPES newType,
 Relation::Relation(SP::RelationXML relxml,
                    RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub),
-  relationxml(relxml)
+  _relationType(newType), _subType(newSub),
+  _relationxml(relxml)
 {
   zeroPlugin();
-  if (! relationxml)
+  if (! _relationxml)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 void Relation::zeroPlugin()
@@ -50,23 +50,6 @@ void Relation::zeroPlugin()
   _pluginf.reset(new PluggedObject());
   _plugine.reset(new PluggedObject());
 }
-
-void Relation::initializeMemory()
-{
-  unsigned int nslawSize = interaction()->nonSmoothLaw()->size();
-  _Residuy.reset(new SiconosVector(nslawSize));
-  // unsigned int numberOfRelations = interaction()->numberOfRelations();
-  // for(unsigned int j = 0; j<numberOfRelations ; ++j)
-  //   _Residuy->insertPtr(SP::SiconosVector (new SiconosVector(nslawSize)));
-
-  _h_alpha.reset(new SiconosVector(nslawSize));
-  // for(unsigned int j = 0; j< numberOfRelations; ++j)
-  //   _h_alpha->insertPtr( SP::SiconosVector(new SiconosVector(nslawSize)) );
-
-}
-
-
-
 
 Relation::~Relation()
 {
@@ -104,102 +87,51 @@ const std::string Relation::getJacgName(unsigned int) const
 void Relation::display() const
 {
   cout << "=====> Relation of type "
-       << relationType
+       << _relationType
        << " and subtype "
-       << subType << endl;
-  if (_interaction.lock())
-    cout
-        << "- Interaction id"
-        << _interaction.lock()->getId()
-        << endl;
-  else cout << "- Linked interaction -> NULL" << endl;
+       << _subType << endl;
 }
 
-// --- ResiduY functions
-void Relation::computeResiduY(double t)
+void Relation::computeg(const double time, Interaction& inter)
 {
-  //Residu_y = y_alpha_k+1 - H_alpha;
-  *_Residuy = *_h_alpha;
-  scal(-1, *_Residuy, *_Residuy);
-
-  //      cout<<"Relation::computeResiduY _h_alpha"<<endl;
-  //      _h_alpha->display();
-  //      cout<<"Relation::computeResiduY Y"<<endl;
-  //      interaction()->y(0)->display();
-
-  (*_Residuy) += *(interaction()->y(0));
-
-  //      cout<<" Relation::computeResiduY residuY"<<endl;
-  //      _Residuy->display();
-
-}
-void Relation::computeg(double t)
-{
-  unsigned int i = interaction()->getRelativeDegree();
+  unsigned int i = inter.getRelativeDegree();
   if (i)
     i--;
-  computeInput(t, i);
+  computeInput(time, inter, i);
 }
 
 void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJachlambda->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&_pluginJachlambda, pluginPath, functionName);
-  //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 void Relation::setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJachx->setComputeFunction(pluginPath, functionName);
-  //    Plugin::setFunction(&_pluginJachx, pluginPath, functionName);
 }
 
-/** To set a plug-in function to compute input function g
- *  \param string : the complete path to the plugin
- *  \param string : the function name to use in this plugin
- */
 void Relation::setComputegFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluging->setComputeFunction(pluginPath, functionName);
-  //    SSL::buildPluginName(pluginNameInput,pluginPath,functionName);
 }
 void Relation::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  //  Plugin::setFunction(&pluginf, pluginPath, functionName,gName);
   _pluginf->setComputeFunction(pluginPath, functionName);
-  //    SSL::buildPluginName(pluginNamefplugin,pluginPath,functionName);
 }
 void Relation::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _plugine->setComputeFunction(pluginPath, functionName);
-  //Plugin::setFunction(&_plugine, pluginPath, functionName,gName);
-  //    SSL::buildPluginName(pluginNameeplugin,pluginPath,functionName);
 }
 
-/** To set a plug-in function to compute the jacobian according to x of the input
- *  \param string : the complete path to the plugin
- *  \param string : the function name to use in this plugin
- *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
- */
 void Relation::setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJacLg->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&_pluginJacLg, pluginPath, functionName);
-  //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 
 void Relation::setComputehFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginh->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&_pluginh, pluginPath, functionName,hName);
-  //    SSL::buildPluginName(pluginNameOutput,pluginPath,functionName);
 }
-const  SP::SiconosVector Relation::residuR()
-{
-  assert(0);
-  SP::SiconosVector tmp(new SiconosVector());
-  *tmp = *data[0];
-  return tmp;
-}
+
 void Relation::saveRelationToXML() const
 {
   RuntimeException::selfThrow("Relation - saveRelationToXML: not yet implemented for relation of type " + getType());

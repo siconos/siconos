@@ -41,10 +41,10 @@
  * \f}
  *
  * Operators (and their corresponding plug-in):
-     - h: saved in Interaction as y (plug-in: output[0])
-     - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-     - g: saved in DS as r ( input[0])
-     - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+- h: saved in Interaction as y (plug-in: output[0])
+- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+- g: saved in DS as r ( input[0])
+- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
 class FirstOrderType2R : public FirstOrderR
@@ -54,87 +54,83 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderType2R);
 
-  SP::SimpleMatrix jacgx;
-
+  SP::SimpleMatrix _jacgx;
 
 public:
   /** xml constructor
-   *  \param RelationXML smart pointer : the XML object.
-   */
+  *  \param RelationXML smart pointer : the XML object.
+  */
   FirstOrderType2R(SP::RelationXML);
 
   FirstOrderType2R();
   /** data constructor
-   *  \param a string with computeOutput function name.
-   *  \param a string with computeInput function name.
-   */
+  *  \param a string with computeOutput function name.
+  *  \param a string with computeInput function name.
+  */
   FirstOrderType2R(const std::string&, const std::string&);
 
   /** data constructor
-   *  \param a string with computeOutput function name.
-   *  \param a string with computeInput function name.
-   *  \param a string: name of the function to compute the jacobian of h according to x
-   *  \param a string: name of the function to compute the jacobian of g according to lambda
-   */
+  *  \param a string with computeOutput function name.
+  *  \param a string with computeInput function name.
+  *  \param a string: name of the function to compute the jacobian of h according to x
+  *  \param a string: name of the function to compute the jacobian of g according to lambda
+  */
   FirstOrderType2R(const std::string&, const std::string&, const std::string&, const std::string&);
 
   /** destructor
-   */
+  */
   ~FirstOrderType2R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
-   */
-  virtual void initialize(SP::Interaction);
+  \param SP to Interaction: the interaction that owns this relation
+  */
+  virtual void initialize(Interaction& inter);
 
   /** default function to compute h
-   *  \param double : current time
-   */
-  virtual void computeh(double);
+  *  \param double : current time
+  */
+  virtual void computeh(const double time, Interaction& inter);
 
   /** default function to compute g
-   *  \param double : current time
-   */
-  virtual void computeg(double);
+  *  \param double : current time
+  */
+  virtual void computeg(const double time, Interaction& inter);
 
   /** default function to compute jacobianH
-   *  \param double : not used
-   *  \param not used
-   */
-  virtual void computeJachx(double);
-  virtual void computeJachlambda(double);
+  *  \param double : not used
+  *  \param not used
+  */
+  virtual void computeJachx(const double time, Interaction& inter);
+  virtual void computeJachlambda(const double time, Interaction& inter);
 
   /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  virtual void computeJacglambda(double);
-  virtual void computeJacgx(double);
+  *  \param double : current time
+  *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  */
+  virtual void computeJacglambda(const double time, Interaction& inter);
+  virtual void computeJacgx(const double time, Interaction& inter);
 
-  virtual void computeJacg(double t);
+  virtual void computeJacg(const double time, Interaction& inter);
 
   /** default function to compute y
-   *  \param double: not used
-   *  \param unsigned int: not used
-   */
-  virtual void computeOutput(double, unsigned int = 0);
+  *  \param double: not used
+  *  \param unsigned int: not used
+  */
+  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
-   *  \param double : not used
-   *  \param unsigned int: not used
-   */
-  virtual void computeInput(double, unsigned int = 0);
+  *  \param double : not used
+  *  \param unsigned int: not used
+  */
+  virtual void computeInput(const double time, Interaction& inter, unsigned int = 0);
   /*
-    inline SP_PluggedMatrix getB(){return Jacg.at(1);};
+  inline SP_PluggedMatrix getB(){return Jacg.at(1);};
   */
 
-  virtual void preparNewtonIteration();
-
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  *  \param Relation * : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static FirstOrderType2R* convert(Relation *r);
 
   ACCEPT_STD_VISITORS();

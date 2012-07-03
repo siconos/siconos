@@ -46,10 +46,10 @@ public:
 
   my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
 
-  virtual void computeh(double t)
+  virtual void computeh(double t, Interaction& inter)
   {
-    SP::SiconosVector y = interaction()->y(0);
-    double height = fabs(data[q0]->getValue(0)) - _sBallRadius;
+    SP::SiconosVector y = inter.y(0);
+    double height = fabs(inter.data(q0)->getValue(0)) - _sBallRadius;
     // std::cout <<"my_NewtonEulerR:: computeh _jachq" << std:: endl;
     // _jachq->display();
     y->setValue(0, height);
@@ -57,8 +57,8 @@ public:
     _Nc->setValue(1, 0);
     _Nc->setValue(2, 0);
     _Pc1->setValue(0, height);
-    _Pc1->setValue(1, data[q0]->getValue(1));
-    _Pc1->setValue(2, data[q0]->getValue(2));
+    _Pc1->setValue(1, inter.data(q0)->getValue(1));
+    _Pc1->setValue(2, inter.data(q0)->getValue(2));
 
     //_Pc2->setValue(0,hpc);
     //_Pc2->setValue(1,data[q0]->getValue(1));

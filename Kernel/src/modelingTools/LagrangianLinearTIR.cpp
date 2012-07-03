@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 #include "LagrangianLinearTIR.hpp"
 #include "LinearRXML.hpp"
 #include "Interaction.hpp"
@@ -99,11 +99,11 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   _e.reset(new SiconosVector(newE));
 }
 
-void LagrangianLinearTIR::initComponents()
+void LagrangianLinearTIR::initComponents(Interaction& inter)
 {
-  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeY = inter.getSizeOfY();
 
-  if (!(_jachq) || _jachq->size(1) !=  interaction()->getSizeOfDS() ||  _jachq->size(0) != sizeY)
+  if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
   if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
@@ -113,79 +113,53 @@ void LagrangianLinearTIR::initComponents()
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
   if ((_F) && (
-        _F->size(0) != interaction()->getSizez() || _F->size(1) != interaction()->getSizez()))
+        _F->size(0) != inter.getSizez() || _F->size(1) != inter.getSizez()))
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
-  _workL.reset(new SiconosVector(sizeY));
-
 }
 
-// void LagrangianLinearTIR::computeh(double time)
-// {
-//   computeOutput(time, 0);
-// }
-// void LagrangianLinearTIR::computeg(double time)
-// {
-//   computeInput(time, 0);
-// }
-
-void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumber)
+void LagrangianLinearTIR::computeOutput(const double time, Interaction& inter, const unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
-  SP::SiconosVector y = interaction()->y(derivativeNumber);
+  SiconosVector& y = *inter.y(derivativeNumber);
 
-  //string name = "q"+toString<unsigned int>(derivativeNumber);
-  prod(*_jachq, *data[q0 + derivativeNumber], *y);
+  prod(*_jachq, *inter.data(q0 + derivativeNumber), y);
 
   if (derivativeNumber == 0)
   {
     if (_e)
-      *y += *_e;
+      y += *_e;
     if (_F)
-      prod(*_F, *data[z], *y, false);
+      prod(*_F, *inter.data(z), y, false);
   }
 
   if (_jachlambda)
   {
-    SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
-    prod(*_jachlambda, *lambda, *y, false) ;
+    SiconosVector& lambda = *inter.lambda(derivativeNumber);
+    prod(*_jachlambda, lambda, y, false);
   }
 
 
 }
 
-void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
+void LagrangianLinearTIR::computeInput(const double time, Interaction& inter, const unsigned int level)
 {
   // get lambda of the concerned interaction
-  //  string name = "p"+toString<unsigned int>(level);
-
-  *_workL = *interaction()->lambda(level);
+  SiconosVector& lambda = *inter.lambda(level);
   // computation of p = Ht lambda
-  prod(*_workL, *_jachq, *data[p0 + level], false);
-  //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
+  prod(lambda, *_jachq, *inter.data(p0 + level), false);
 }
-/*
-const SimpleMatrix LagrangianLinearTIR::getJachx(unsigned int  index ) const
-{
-  assert(index<2&&"LagrangianLinearTIR::getJach(index) error, index is out of range.");
-  if(index == 0)
-    return *C;
-  else
-    return *D;
-}
-*/
-
 
 void LagrangianLinearTIR::saveRelationToXML() const
 {
-  assert(relationxml &&
+  assert(_relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*_jachq) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*_e) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*_jachlambda) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*_F) ;
+  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
+  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
+  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
+  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
 }
 
 LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)

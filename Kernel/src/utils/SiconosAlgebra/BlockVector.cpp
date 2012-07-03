@@ -424,3 +424,14 @@ bool BlockVector::isComparableTo(const BlockVector& v1, const BlockVector& v2)
   return (I1 == I2);
 
 }
+double BlockVector::norm2() const
+{
+  double d = 0;
+  VectorOfVectors::const_iterator it;
+  for (it = vect.begin(); it != vect.end(); ++it)
+  {
+    assert(*it);
+    d += pow((*it)->norm2(), 2);
+  }
+  return sqrt(d);
+}

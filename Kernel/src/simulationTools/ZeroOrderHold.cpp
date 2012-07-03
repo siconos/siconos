@@ -29,6 +29,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "SubPluggedObject.hpp"
+#include "FirstOrderType2R.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -635,12 +636,12 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
 
   // All of these values should be stored in the node corrseponding to the UR when a Moreau scheme is used.
-  SP::SiconosVector Xq;
-  Xq = inter->workXq();
+  SP::BlockVector Xq;
+  Xq = inter->dataXq();
   SP::SiconosVector Yp = inter->yp();
 
-  SP::SiconosVector Xfree;
-  Xfree = inter->workFree();
+  SP::BlockVector Xfree;
+  Xfree = inter->dataFree();
 
   assert(Xfree);
 
@@ -654,7 +655,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
     {
       SP::SiconosVector lambda = inter->lambda(0);
       SP::SiconosMatrix C = rel->C();
-      SP::SiconosMatrix D = rel->D();
+      SP::SiconosMatrix D = boost::static_pointer_cast<FirstOrderType2R>(rel)->D();
       assert(lambda);
 
       if (D)
@@ -677,7 +678,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
       {
         RuntimeException::selfThrow("ZeroOrderHold::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
-      SP::SiconosVector H_alpha = rel->Halpha();
+      SP::SiconosVector H_alpha = inter->Halpha();
       assert(H_alpha);
       *Yp += *H_alpha;
     }
@@ -695,7 +696,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         // creates a POINTER link between workX[ds] (xfree) and the
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.
-        inter->setWorkFree();
         subprod(*CT, *Xfree, *Yp, coord, true);
       }
 
@@ -715,7 +715,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         // creates a POINTER link between workX[ds] (xfree) and the
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.
-        inter->setWorkFree();
 
         if (_useGammaForRelation)
         {
@@ -747,7 +746,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         {
           if (((allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
           {
-            static_pointer_cast<LagrangianRheonomousR>(rel)->computehDot(simulation()->getTkp1());
+            static_pointer_cast<LagrangianRheonomousR>(rel)->computehDot(simulation()->getTkp1(), *inter);
             subprod(*ID, *(static_pointer_cast<LagrangianRheonomousR>(rel)->hDot()), *Yp, xcoord, false); // y += hDot
           }
           else
@@ -781,10 +780,9 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
         if (F)
         {
-          SP::SiconosVector workZ = inter->workZ();
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, *workZ, *Yp, coord, false);
+          subprod(*F, *inter->dataZ(), *Yp, coord, false);
         }
       }
 

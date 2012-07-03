@@ -34,8 +34,6 @@ private:
   */
   ACCEPT_SERIALIZATION(CircleCircleR);
 
-  double ar1mr2;
-
   CircleCircleR() {};
 
 public:
@@ -49,9 +47,9 @@ public:
 
   double distance(double, double, double, double, double, double);
 
-  void computeh(double);
+  void computeh(const double time, Interaction& inter);
 
-  void computeJachq(double);
+  void computeJachq(const double time, Interaction& inter);
 
   /** visitors hook
    */

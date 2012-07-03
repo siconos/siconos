@@ -24,9 +24,11 @@
 
 #if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
+#define SB_IS_ATLAS
 namespace siconosBindings = boost::numeric::bindings::atlas;
 #else
 #include <boost/numeric/bindings/blas/blas1.hpp>
+#define SB_IS_BLAS
 namespace siconosBindings = boost::numeric::bindings::blas;
 #endif
 
@@ -122,6 +124,29 @@ SiconosVector::SiconosVector(const SiconosVector &svect) : boost::enable_shared_
   // large or small vectors.
 }
 
+// Copy from BlockVector
+SiconosVector::SiconosVector(const BlockVector & vIn) : boost::enable_shared_from_this<SiconosVector>()
+{
+  if (ask<IsDense>(**(vIn.begin()))) // dense
+  {
+    _dense = true;
+    vect.Dense = new DenseVect(vIn.size());
+  }
+  else
+  {
+    _dense = false;
+    vect.Sparse = new SparseVect(vIn.size());
+  }
+
+  VectorOfVectors::const_iterator it;
+  unsigned int pos = 0;
+  for (it = vIn.begin(); it != vIn.end(); ++it)
+  {
+    setBlock(pos, **it);
+    pos += (*it)->size();
+  }
+
+}
 
 SiconosVector::SiconosVector(const DenseVect& m)
 {
@@ -255,7 +280,7 @@ void SiconosVector::fill(double value)
   {
     // only atlas provides set functions
     // they are called catlas_*set for a reason
-#if defined(HAVE_ATLAS)
+#if defined(SB_IS_ATLAS)
     siconosBindings::set(value, *vect.Dense);
 #else
     for (unsigned int i = 0; i < (vect.Dense)->size(); ++i)

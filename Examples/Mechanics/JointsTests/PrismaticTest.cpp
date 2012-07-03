@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q1 = beam1->q();
     std::cout << "computeh1\n";
-    relation1->computeh(0.);
+    relation1->computeh(0., *inter1);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====

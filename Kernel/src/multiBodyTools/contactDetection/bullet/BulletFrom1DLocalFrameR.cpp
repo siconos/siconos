@@ -26,9 +26,9 @@ BulletFrom1DLocalFrameR::BulletFrom1DLocalFrameR(SP::btManifoldPoint point) : Ne
 {
 };
 
-void BulletFrom1DLocalFrameR::computeh(double)
+void BulletFrom1DLocalFrameR::computeh(const double time, Interaction& inter)
 {
-  interaction()->y(0)->setValue(0, _contactPoints->getDistance());
+  inter.y(0)->setValue(0, _contactPoints->getDistance());
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
   (*pc1())(0) = posa[0];

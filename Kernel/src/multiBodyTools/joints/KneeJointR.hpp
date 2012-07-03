@@ -65,8 +65,8 @@ public:
   void checkInitPos();
   virtual ~KneeJointR() {};
 
-  virtual void computeJachq(double t);
-  virtual void computeh(double t);
+  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeh(const double time, Interaction& inter);
 protected:
 
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);

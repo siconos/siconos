@@ -55,9 +55,9 @@ public:
 
   double distance(double, double, double, double);
 
-  void computeh(double);
+  void computeh(const double time, Interaction& inter);
 
-  void computeJachq(double);
+  void computeJachq(const double time, Interaction& inter);
 
   bool equal(double _A, double _B, double _C, double _D, double _r) const
   {

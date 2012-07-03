@@ -412,7 +412,7 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
 
 
 
-void KneeJointR::computeJachq(double t)
+void KneeJointR::computeJachq(const double time, Interaction& inter)
 {
   _jachq->zero();
   SP::SiconosVector x1 = _d1->q();
@@ -535,7 +535,7 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
   }
 }
 
-void KneeJointR::computeh(double t)
+void KneeJointR::computeh(const double time, Interaction& inter)
 {
 
   SP::SiconosVector x1 = _d1->q();
@@ -564,15 +564,8 @@ void KneeJointR::computeh(double t)
     q22 = x2->getValue(5);
     q23 = x2->getValue(6);
   }
-  SP::SiconosVector y = interaction()->y(0);
-  y->setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y->setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  //std::cout<<"KneeJoint computeH:\n";
-  //y->display();
-
-
-
+  SiconosVector& y = *inter.y(0);
+  y.setValue(0, Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(1, Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y.setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
 }
-
-

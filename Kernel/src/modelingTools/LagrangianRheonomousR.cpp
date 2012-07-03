@@ -1,21 +1,21 @@
 /* Siconos-Kernel, Copyright INRIA 2005-2011.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
@@ -69,11 +69,11 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
 
 }
 
-void LagrangianRheonomousR::initComponents()
+void LagrangianRheonomousR::initComponents(Interaction& inter)
 {
-  LagrangianR::initComponents();
+  LagrangianR::initComponents(inter);
 
-  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeY = inter.getSizeOfY();
   // hDot
   if (!_hDot)
     _hDot.reset(new SiconosVector(sizeY));
@@ -81,8 +81,8 @@ void LagrangianRheonomousR::initComponents()
     _hDot->resize(sizeY);
   if (_pluginJachq->fPtr && !_jachq)
   {
-    unsigned int sizeY = interaction()->getSizeOfY();
-    unsigned int sizeQ = _workX->size();
+    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeQ = inter.data(q0)->size();
     _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
   }
 }
@@ -96,8 +96,8 @@ void LagrangianRheonomousR::setComputehDotFunction(const string& pluginPath, con
 }
 void LagrangianRheonomousR::zeroPlugin()
 {
+  LagrangianR::zeroPlugin();
   _pluginhDot.reset(new PluggedObject());
-  _pluginJachq.reset(new PluggedObject());
 }
 const std::string LagrangianRheonomousR::getJachqName() const
 {
@@ -112,92 +112,79 @@ const std::string LagrangianRheonomousR::gethDotName() const
     return _pluginhDot->getPluginName();
   return "unamed";
 }
-void LagrangianRheonomousR::computeh(double time)
+void LagrangianRheonomousR::computeh(const double time, Interaction& inter)
 {
   if (_pluginh->fPtr)
   {
     // get vector y of the current interaction
-    SP::SiconosVector y = interaction()->y(0);
+    SiconosVector& y = *inter.y(0);
 
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workZ = *data[z];
-    *_workY = *y;
+    SiconosVector workQ = *inter.data(q0);
+    SiconosVector workZ = *inter.data(z);
 
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeY = y->size();
-    unsigned int sizeZ = _workZ->size();
-
-    ((FPtr4)(_pluginh->fPtr))(sizeQ, &(*_workX)(0), time, sizeY,  &(*_workY)(0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginh->fPtr))(workQ.size(), &(workQ)(0), time, y.size(),  &(y)(0), workZ.size(), &(workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
-    *y = *_workY;
+    *inter.data(z) = workZ;
   }
   // else nothing
 }
 
-void LagrangianRheonomousR::computehDot(double time)
+void LagrangianRheonomousR::computehDot(const double time, Interaction& inter)
 {
   if (_pluginhDot->fPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workZ = *data[z];
+    SiconosVector workQ = *inter.data(q0);
+    SiconosVector workZ = *inter.data(z);
 
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeY = _hDot->size();
-    unsigned int sizeZ = _workZ->size();
-
-    ((FPtr4)(_pluginhDot->fPtr))(sizeQ, &(*_workX)(0), time, sizeY,  &(*_hDot)(0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginhDot->fPtr))(workQ.size(), &(workQ)(0), time, _hDot->size(),  &(*_hDot)(0), workZ.size(), &(workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
+    *inter.data(z) = workZ;
   }
   // else nothing
 }
 
-void LagrangianRheonomousR::computeJachq(double time)
+void LagrangianRheonomousR::computeJachq(const double time, Interaction& inter)
 {
   // Note that second input arg is useless.
   if (_pluginJachq->fPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
-    *_workX = *data[q0];
-    *_workZ = *data[z];
+    SiconosVector workQ = *inter.data(q0);
+    SiconosVector workZ = *inter.data(z);
 
-    unsigned int sizeY = _jachq->size(0);
-    unsigned int sizeQ = _workX->size();
-    unsigned int sizeZ = _workZ->size();
-    ((FPtr4)(_pluginJachq->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), time, _jachq->size(0), &(*_jachq)(0, 0), workZ.size(), &(workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *_workZ;
+    *inter.data(z) = workZ;
   }
   // else nothing.
 }
 
-void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNumber)
+void LagrangianRheonomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
-    computeh(time);
+    computeh(time, inter);
   else
   {
-    SP::SiconosVector y = interaction()->y(derivativeNumber);
-    computeJachq(time);
+    SiconosVector& y = *inter.y(derivativeNumber);
+    computeJachq(time, inter);
     if (derivativeNumber == 1)
     {
       // Computation of the partial derivative w.r.t time of h(q,t)
-      computehDot(time);
+      computehDot(time, inter);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      prod(*_jachq, *data[q1], *y);
+      prod(*_jachq, *inter.data(q1), y);
       // Sum of the terms
-      *y += *_hDot;
+      y += *_hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*_jachq, *data[q2], *y); // Approx:,  ...
+      prod(*_jachq, *inter.data(q2), y); // Approx:,  ...
     // \warning : the computation of y[2] (in event-driven
     // simulation for instance) is approximated by y[2] =
     // Jach[0]q[2]. For the moment, other terms are neglected
@@ -207,18 +194,13 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
   }
 }
 
-void LagrangianRheonomousR::computeInput(double time, unsigned int level)
+void LagrangianRheonomousR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
-  computeJachq(time);
+  computeJachq(time, inter);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = interaction()->lambda(level);
+  SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *_jachq, *data[p0 + level], false);
-
-  //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
-  //   GT->trans();
-  //   *data[name] += prod(*GT, *lambda);
-  //  gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]);
+  prod(lambda, *_jachq, *inter.data(p0 + level), false);
 }
 
 LagrangianRheonomousR* LagrangianRheonomousR::convert(Relation *r)

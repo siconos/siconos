@@ -18,7 +18,7 @@
  */
 /*! \file NewtonEulerR.hpp
 
-*/
+ */
 #ifndef NEWTONEULERIMPACT_H
 #define NEWTONEULERIMPACT_H
 
@@ -38,7 +38,7 @@
  * the method computeh, by setting the menber pc1, pc2, nc and y.  The
  * matrix jachq is used both for the building of the OSNSP (with T)
  * and for the predictor of activation of deactivation of the Interaction.
-*
+ *
  */
 
 
@@ -59,7 +59,7 @@ protected:
   // /*because set is not sorted!*/
   // SP::NewtonEulerDS _ds1;
   // SP::NewtonEulerDS _ds2;
-  virtual void initComponents();
+  virtual void initComponents(Interaction& inter);
 
   /*Matrix converting  the absolute coordinate to the contact coordinate.*/
   SP::SimpleMatrix _Mabs_C;
@@ -75,13 +75,13 @@ private:
 public:
 
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
-   *  seems parametrize the projection algorithm
-   *  the projection is done on the surface $y=0$ or on $y \geq 0$
-   */
+  *  seems parametrize the projection algorithm
+  *  the projection is done on the surface $y=0$ or on $y \geq 0$
+  */
   bool _isOnContact;
 
   /** constructorx
-   */
+  */
   NewtonEulerFrom1DLocalFrameR():
     NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
     _Nc(new SiconosVector(3))
@@ -95,11 +95,11 @@ public:
   // inline SP::NewtonEulerDS ds2(){return _ds2;}
 
   /** destructor
-   */
+  */
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
-  virtual void computeJachq(double t);
-  virtual void computeJachqT();
+  virtual void computeJachq(const double time, Interaction& inter);
+  virtual void computeJachqT(const double time, Interaction& inter);
 
   inline SP::SiconosVector pc1()
   {
@@ -115,24 +115,24 @@ public:
   }
 
   /** set the coordinates of first contact point
-   * \param SP::SiconosVector new coordinates
-   */
+  * \param SP::SiconosVector new coordinates
+  */
   void setpc1(SP::SiconosVector npc)
   {
     _Pc1 = npc;
   };
 
   /** set the coordinates of second contact point
-   * \param SP::SiconosVector new coordinates
-   */
+  * \param SP::SiconosVector new coordinates
+  */
   void setpc2(SP::SiconosVector npc)
   {
     _Pc2 = npc;
   };
 
   /** set the coordinates of inside normal vector at the contact point
-   * \param SP::SiconosVector new coordinates
-   */
+  * \param SP::SiconosVector new coordinates
+  */
   void setnc(SP::SiconosVector nnc)
   {
     _Nc = nnc;

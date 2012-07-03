@@ -68,10 +68,10 @@ public:
 
 
 
-  virtual void computeJachq(double t);
+  virtual void computeJachq(const double time, Interaction& inter);
 
 
-  virtual void computeh(double t);
+  virtual void computeh(const double time, Interaction& inter);
 
 
   /* The options were    : operatorarrow */
