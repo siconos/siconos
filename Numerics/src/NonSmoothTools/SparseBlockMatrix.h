@@ -56,12 +56,12 @@
     *blocksize1 : the list of sums of the number of columns of the
     first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
     ni being the number of columns of the block at column i
-    \param filled1 : number of non empty lines + 1
+    \param filled1 : index of the last non empty line + 1
     \param filled2 : number of non null blocks
-    \param index1_data : index1_data is of size filled1 = number of
-    non empty lines + 1. A block with number blockNumber inside a row
+    \param index1_data : index1_data is of size equal to number of non
+    empty lines + 1. A block with number blockNumber inside a row
     numbered rowNumber verify : index1_data[rowNumber]<= blockNumber
-    <index1_data[rowNumber+1]
+    <index1_data[rowNumber+1]`
 
     \param index2_data : index2_data is of size filled2
     index2_data[blockNumber] -> columnNumber.
@@ -119,6 +119,31 @@ typedef struct
   size_t *index2_data;
 
 } SparseBlockStructuredMatrix;
+
+typedef struct
+{
+  /** number of blocks */
+  unsigned int nbblocks;
+
+  /** number of rows */
+  unsigned int m;
+
+  /** number of columns */
+  unsigned int n;
+
+  /** block pointers */
+  double **block;
+
+  //* block sizes
+  unsigned int *blocksize0;
+  unsigned int *blocksize1;
+
+  /** row indices */
+  unsigned int *row;
+
+  /** column indices */
+  unsigned int *column;
+} SparseBlockCoordinateMatrix;
 
 typedef struct
 {
@@ -283,7 +308,28 @@ extern "C"
   */
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 
+  /** allocate a SparseBlockCoordinateMatrix from a list of 3x3
+   * blocks
+   * \param[in] m the number of rows
+   * \param[in] n the number of colums
+   * \param[in] nbblocks the number of blocks
+   * \param[in] row a pointer to row of each block
+   * \param[in] colums a pointer to column of each block
+   * \param[in] block a pointer to each block
+   */
+  SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3(unsigned int m, unsigned int n,
+      unsigned int nbblocks,
+      unsigned int *row, unsigned int *column, double *block);
 
+
+  /** free allocated memory in newSparseBlockCoordinateMatrix functions
+   * \param[in] MC matrix pointer */
+  void freeSparseBlockCoordinateMatrix3x3(SparseBlockCoordinateMatrix *MC);
+
+  /** copy a SparseBlockCoordinateMatrix to a SparseBlockStructuredMatrix
+   * \param[in] MC the SparseBlockCoordinateMatrix matrix
+   */
+  SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC);
 
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
       \param[in] blocksize the blocksize

@@ -1648,6 +1648,104 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
   return 0;
 }
 
+SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3fortran(unsigned int m, unsigned int n,
+    unsigned int nbblocks,
+    unsigned int *row,
+    unsigned int *column,
+    double *block)
+{
+  SparseBlockCoordinateMatrix* MC = (SparseBlockCoordinateMatrix*) malloc(sizeof(SparseBlockCoordinateMatrix));
+  MC->m = m;
+  MC->n = n;
+  MC->nbblocks = nbblocks;
+  MC->row = (unsigned int *)  malloc(sizeof(unsigned int) * m);
+  MC->column = (unsigned int *)  malloc(sizeof(unsigned int) * n);
+  for (unsigned int i = 0; i < m; ++i)
+  {
+    MC->row[i] = row[i] - 1;
+  }
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    MC->column[i] = column[i] - 1;
+  }
+  MC->column = column;
+  MC->block = (double **) malloc(sizeof(double*)*nbblocks);
+  MC->blocksize0 = (unsigned int *) malloc(sizeof(unsigned int) * nbblocks);
+  MC->blocksize1 = (unsigned int *) malloc(sizeof(unsigned int) * nbblocks);
+  for (unsigned int i = 0; i < nbblocks; ++i)
+  {
+    MC->blocksize0[i] = 3 * i;
+    MC->blocksize1[i] = 3 * i;
+    MC->block[i] = &block[i * 9];
+  }
+
+  return MC;
+}
+
+void freeSparseBlockCoordinateMatrix3x3fortran(SparseBlockCoordinateMatrix *MC)
+{
+  free(MC->block);
+  free(MC->blocksize0);
+  free(MC->blocksize1);
+  free(MC->row);
+  free(MC->column);
+}
+
+/* quite obvious alg but in case of incomprehension see Nathan Bell coo_tocsr */
+/* i.e coo.h file under scipy sparsetools */
+SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
+{
+  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *) malloc(sizeof(SparseBlockStructuredMatrix));
+
+  M->nbblocks = MC->nbblocks;
+  M->filled2 = MC->nbblocks;
+  M->blocknumber0 = MC->m;
+  M->blocknumber1 = MC->n;
+  M->blocksize0 = MC->blocksize0;
+  M->blocksize1 = MC->blocksize1;
+
+  M->index1_data = (size_t *) malloc(sizeof(size_t) * (MC->m + 1));
+  M->index2_data = (size_t *) malloc(sizeof(size_t) * MC->n);
+  for (unsigned int i = 0; i < MC->m; ++i)
+  {
+    M->index1_data[i] = 0;
+  }
+  M->filled1 = 2;
+  for (unsigned int i = 0; i < MC->nbblocks; ++i)
+  {
+    M->index1_data[MC->row[i] + 1]++;
+    M->filled1 = ((MC->row[i] + 2) > M->filled1) ? MC->row[i] + 2 : M->filled1;
+  }
+
+  for (unsigned int i = 1; i < MC->m + 1; ++i)
+  {
+    M->index1_data[i] += M->index1_data[i - 1];
+  }
+
+  M->block = (double **) malloc(sizeof(double*)*M->nbblocks);
+
+  for (unsigned int i = 0; i < MC->nbblocks; ++i)
+  {
+    unsigned int row  = MC->row[i];
+    unsigned int dest  = M->index1_data[row];
+
+    M->index2_data[dest] = MC->column[i];
+    M->block[dest] = MC->block[i];
+
+    M->index1_data[row]++;
+  }
+
+  for (unsigned int i = 0, last = 0; i <= MC->m; i++)
+  {
+    unsigned int temp = M->index1_data[i];
+    M->index1_data[i]  = last;
+    last = temp;
+  }
+
+  return M;
+}
+
+
 int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
 {
   assert(sparseMat);
