@@ -4889,7 +4889,7 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
     unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
     bool firstLoop = true;
     subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
-    for (it = x.begin(); it != x.end(); ++it)
+    for (VectorOfVectors::const_iterator it = x.begin(); it != x.end(); ++it)
     {
       if ((*it)->getNum() == 0)
         SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for x block of blocks ...");
