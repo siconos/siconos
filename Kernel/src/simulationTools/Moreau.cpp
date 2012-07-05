@@ -1399,20 +1399,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      if (Xfree->getNumberOfBlocks() == 2 && CT->size(1) == Xfree->size())
-      {
-        SiconosVector xTmp = *Xfree;
-        subprod(*CT, xTmp, *Yp, coord, true);
-      }
-      else
-      {
-        subprod(*CT, *Xfree, *Yp, coord, true);
-      }
-      //          subprod(*CT,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
-      //          if (mainInteraction->dynamicalSystems()->size() == 2)
-      //          {
-      //            subprod(*CT,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
-      //          }
+      subprod(*CT, *Xfree, *Yp, coord, true);
     }
 
   }
@@ -1437,21 +1424,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       }
       else
       {
-        // XXX Big quirks !!! -- xhub
-        if (Xfree->getNumberOfBlocks() == 2 && C->size(1) == Xfree->size())
-        {
-          SiconosVector xTmp = *Xfree;
-          subprod(*C, xTmp, *Yp, coord, true);
-        }
-        else
-        {
-          subprod(*C, *Xfree, *Yp, coord, true);
-        }
-        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
-        //        if (mainInteraction->dynamicalSystems()->size()==2)
-        //        {
-        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
-        //        }
+        subprod(*C, *Xfree, *Yp, coord, true);
       }
     }
 

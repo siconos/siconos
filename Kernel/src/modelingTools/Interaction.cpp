@@ -357,11 +357,12 @@ void Interaction::initDataFirstOrder()
     FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
     _data[free]->insertPtr(ds.workFree());
     _data[x]->insertPtr(ds.x());
+    _data[xq]->insertPtr(ds.xq());
     _data[z]->insertPtr(ds.z());
     _data[r]->insertPtr(ds.r());
     _data[residu_r]->insertPtr(ds.residur());
-    _data[g_alpha]->insertPtr(ds.gAlpha());
     _data[ds_xp]->insertPtr(ds.xp());
+    _data[g_alpha]->insertPtr(ds.gAlpha());
 
   }
 }

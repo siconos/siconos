@@ -660,6 +660,16 @@ SiconosVector& SiconosVector::operator += (const SiconosVector& vIn)
   }
   return *this;
 }
+SiconosVector& SiconosVector::operator += (const BlockVector& vIn)
+{
+  VectorOfVectors::const_iterator it;
+  unsigned int pos = 0;
+  for (it = vIn.begin(); it != vIn.end(); ++it)
+  {
+    addBlock(pos, **it);
+    pos += (*it)->size();
+  }
+}
 
 SiconosVector& SiconosVector::operator -= (const SiconosVector& vIn)
 {
@@ -699,6 +709,18 @@ SiconosVector& SiconosVector::operator -= (const SiconosVector& vIn)
   }
   return *this;
 }
+
+SiconosVector& SiconosVector::operator -= (const BlockVector& vIn)
+{
+  VectorOfVectors::const_iterator it;
+  unsigned int pos = 0;
+  for (it = vIn.begin(); it != vIn.end(); ++it)
+  {
+    subBlock(pos, **it);
+    pos += (*it)->size();
+  }
+}
+
 
 //===============
 // Comparison

@@ -123,7 +123,7 @@ public:
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  unsigned int size() const
+  inline unsigned int size() const
   {
     if (!_dense)
     {
@@ -350,11 +350,13 @@ public:
    *  \param SiconosVector : a vector to add
    */
   SiconosVector& operator +=(const SiconosVector&);
+  SiconosVector& operator +=(const BlockVector&);
 
   /** operator -=
    *  \param SiconosVector : a vector to subtract
    */
   SiconosVector& operator -=(const SiconosVector&);
+  SiconosVector& operator -=(const BlockVector&);
 
 
   SiconosVector& operator *= (double s)
@@ -415,6 +417,7 @@ public:
   friend void getMax(const SiconosVector&, double &, unsigned int &);
 
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
+
   /*
   friend SiconosVector abs_wise(const SiconosVector&);
 

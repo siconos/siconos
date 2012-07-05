@@ -139,6 +139,19 @@ void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsig
   */
 
 }
+void FirstOrderType2R::preparNewtonIteration(Interaction& inter)
+{
+
+  /* compute the comtribution in xp, for the next iteration */
+  SiconosVector& lambda = *inter.lambda(0);
+  SiconosVector tmpV = SiconosVector(inter.data(ds_xp)->size());
+
+  prod(*(B()), lambda, tmpV, true);
+
+  *inter.data(ds_xp) -= tmpV;
+
+  *inter.data(ds_xp) += *inter.data(g_alpha);
+}
 
 void FirstOrderType2R::computeJachlambda(const double time, Interaction& inter)
 {

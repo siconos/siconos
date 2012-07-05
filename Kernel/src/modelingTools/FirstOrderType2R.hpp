@@ -132,7 +132,7 @@ public:
   * \return a pointer on the relation if it is of the right type, NULL otherwise
   */
   static FirstOrderType2R* convert(Relation *r);
-
+  virtual void preparNewtonIteration(Interaction& inter);
   ACCEPT_STD_VISITORS();
 
 };

@@ -24,8 +24,8 @@
 #ifndef BLOCKVECTOR_H
 #define BLOCKVECTOR_H
 
-#include "SiconosVector.hpp"
-
+//#include "SiconosVector.hpp"
+#include "SiconosAlgebra.hpp"
 class SiconosVector;
 
 /** Object to handle block-vectors (ie list of SP::SiconosVector)
@@ -285,27 +285,11 @@ public:
   /* * operator =
    * \param SiconosVector : the vector to be copied
    */
-  BlockVector& operator =(const SiconosVector& vIn)
-  {
-    setBlock(vIn, *this, _sizeV, 0, 0);
-    return *this;
-  }
+  BlockVector& operator =(const SiconosVector& vIn);
 
-  BlockVector& operator *= (double s)
-  {
-    VectorOfVectors::iterator it;
-    for (it = begin(); it != end(); ++it)
-      (**it) *= s;
-    return *this;
-  }
+  BlockVector& operator *= (double s);
 
-  BlockVector& operator /= (double s)
-  {
-    VectorOfVectors::iterator it;
-    for (it = begin(); it != end(); ++it)
-      (**it) /= s;
-    return *this;
-  }
+  BlockVector& operator /= (double s);
 
   /** Insert a subvector in this vector: allocation and copy
   *  \param SiconosVector& v : the vector to be inserted
@@ -320,7 +304,8 @@ public:
   bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 
   double norm2() const;
-
+  BlockVector& operator += (const SiconosVector& vIn);
+  BlockVector& operator -= (const SiconosVector& vIn);
   ACCEPT_STD_VISITORS();
 
 };

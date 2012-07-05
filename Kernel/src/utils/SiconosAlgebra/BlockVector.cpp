@@ -20,8 +20,9 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <vector>
 
-#include "BlockVector.hpp"
+
 #include "SiconosVector.hpp"
+#include "BlockVector.hpp"
 
 
 // =================================================
@@ -297,6 +298,34 @@ BlockVector& BlockVector::operator -= (const BlockVector& vIn)
   return *this;
 }
 
+BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
+{
+  // Add a part of vIn (starting from index) to the current vector.
+  // vIn must be a SimpleVector.
+
+  // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
+
+  unsigned int dim = vIn.size(); // size of the block to be added.
+  if (dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+
+  VectorOfVectors::const_iterator it;
+  unsigned int numVIn = vIn.getNum();
+  unsigned int currentSize, currentNum;
+  unsigned int index = 0;
+  for (it = vect.begin(); it != vect.end(); ++it)
+  {
+    currentSize = (*it)->size();
+    currentNum = (*it)->getNum();
+    if (numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
+    if (numVIn == 1)
+      noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
+    else
+      noalias(*(*it)->sparse()) -=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
+    index += currentSize;
+  }
+  return *this;
+}
+
 BlockVector& BlockVector::operator += (const BlockVector& vIn)
 {
   if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
@@ -311,6 +340,35 @@ BlockVector& BlockVector::operator += (const BlockVector& vIn)
   {
     for (unsigned int i = 0; i < _sizeV; ++i)
       (*this)(i) += vIn(i);
+  }
+  return *this;
+}
+
+BlockVector& BlockVector::operator += (const SiconosVector& vIn)
+{
+  // Add a part of vIn (starting from index) to the current vector.
+  // vIn must be a SimpleVector.
+
+  // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
+
+  unsigned int dim = vIn.size(); // size of the block to be added.
+  if (dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+
+  VectorOfVectors::const_iterator it;
+  unsigned int numVIn = vIn.getNum();
+  unsigned int currentSize, currentNum;
+  unsigned int index = 0;
+
+  for (it = vect.begin(); it != vect.end(); ++it)
+  {
+    currentSize = (*it)->size();
+    currentNum = (*it)->getNum();
+    if (numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
+    if (numVIn == 1)
+      noalias(*(*it)->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize) ;
+    else
+      noalias(*(*it)->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
+    index += currentSize;
   }
   return *this;
 }
@@ -424,6 +482,7 @@ bool BlockVector::isComparableTo(const BlockVector& v1, const BlockVector& v2)
   return (I1 == I2);
 
 }
+
 double BlockVector::norm2() const
 {
   double d = 0;
@@ -434,4 +493,26 @@ double BlockVector::norm2() const
     d += pow((*it)->norm2(), 2);
   }
   return sqrt(d);
+}
+
+BlockVector& BlockVector::operator =(const SiconosVector& vIn)
+{
+  setBlock(vIn, *this, _sizeV, 0, 0);
+  return *this;
+}
+
+BlockVector& BlockVector::operator *= (double s)
+{
+  VectorOfVectors::iterator it;
+  for (it = begin(); it != end(); ++it)
+    (**it) *= s;
+  return *this;
+}
+
+BlockVector& BlockVector::operator /= (double s)
+{
+  VectorOfVectors::iterator it;
+  for (it = begin(); it != end(); ++it)
+    (**it) /= s;
+  return *this;
 }

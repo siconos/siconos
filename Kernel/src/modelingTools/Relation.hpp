@@ -402,6 +402,10 @@ public:
   };
   /** visitors hook
    */
+  virtual void preparNewtonIteration(Interaction& inter)
+  {
+    ;
+  };
   VIRTUAL_ACCEPT_VISITORS(Relation);
 
 };

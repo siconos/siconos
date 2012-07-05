@@ -570,13 +570,18 @@ void   TimeStepping::prepareNewtonIteration()
     //     (*itds)->R()->zero();
   }
   /**/
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->preparNewtonIteration();
+  }
   bool topoHasChanged = model()->nonSmoothDynamicalSystem()->topology()->hasChanged();
   if (topoHasChanged)
+  {
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
       (*itOsns)->setHasBeenUpdated(false);
     }
-
+  }
 }
 void TimeStepping::saveYandLambdaInMemory()
 {

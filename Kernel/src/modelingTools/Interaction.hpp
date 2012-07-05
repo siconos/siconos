@@ -1003,6 +1003,10 @@ public:
   void LinkDataFromMemory(unsigned int memoryLevel);
   void LinkDataFromMemoryLagrangian(unsigned int memoryLevel);
 
+  inline void preparNewtonIteration()
+  {
+    _relation->preparNewtonIteration(*this);
+  }
   inline void computeJach(const double time)
   {
     _relation->computeJach(time, *this);
