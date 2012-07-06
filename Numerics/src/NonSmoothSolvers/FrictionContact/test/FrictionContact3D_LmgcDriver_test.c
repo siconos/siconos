@@ -60,5 +60,9 @@ int main(void)
                                       500,
                                       tolerance,
                                       itermax);
+
+  free(reaction);
+  free(velocity);
+
   return info;
 }

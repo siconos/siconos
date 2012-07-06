@@ -22,6 +22,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                  double tolerance,
                                  int itermax)
 {
+
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
 
   SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
@@ -35,9 +36,10 @@ int frictionContact3D_LmgcDriver(double *reaction,
   NumericsOptions numerics_options;
   numerics_options.verboseMode = 2; // turn verbose mode to off by default
 
-  FILE * ff =  fopen("Example1_Fc3D_SBM.dat", "w");
-  frictionContact_printInFile(FC, ff);
-  fclose(ff);
+  //  uncomment to save FrictionContactProblem
+  //  FILE * ff =  fopen("LMGC.dat", "w");
+  //  frictionContact_printInFile(FC, ff);
+  //  fclose(ff);
 
   SolverOptions numerics_solver_options;
 
@@ -51,8 +53,16 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                       &numerics_solver_options, &numerics_options);
 
 
-  /* freeSparseBlockCoordinateMatrix3x3fortran(MC); */
-  /* freeNumericsMatrix(NM); */
-  /* freeFrictionContactProblem(FC); */
+  freeSparseBlockCoordinateMatrix3x3fortran(MC);
+
+  free(M->index1_data);
+  free(M->index2_data);
+  free(M->block);
+  free(M);
+  free(FC);
+  deleteSolverOptions(&numerics_solver_options);
+  free(NM);
+  free(MC);
+
   return info;
 }
