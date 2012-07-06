@@ -60,7 +60,7 @@ int main(void)
                                       solver_id,
                                       tolerance,
                                       itermax,
-                                      0);
+                                      0, 0);
 
   free(reaction);
   free(velocity);

@@ -96,7 +96,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem->W->n = problem->M->size1;
   fclib_problem->W->nz = -2;
 
-  SparseMatrix * spmat ;
+  SparseMatrix * spmat = NULL;
   if (problem ->M->storageType == 0) /* Dense Matrix */
   {
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;

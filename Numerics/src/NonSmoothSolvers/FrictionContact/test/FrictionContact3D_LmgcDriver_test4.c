@@ -91,7 +91,7 @@ int main(void)
                                       solver_id,
                                       tolerance,
                                       itermax,
-                                      0);
+                                      0, 0);
   printf("reaction:");
   printm(1, 3 * nc, reaction);
 

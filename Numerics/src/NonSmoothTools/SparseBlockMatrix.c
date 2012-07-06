@@ -1516,7 +1516,7 @@ sparse_matrix_iterator sparseMatrixBegin(const SparseMatrix* const sparseMat)
   }
 
   assert(0);
-  sparse_matrix_iterator z;
+  sparse_matrix_iterator z = { 0, 0, 0, 0, NAN, sparseMat };
   return z;
 }
 

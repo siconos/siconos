@@ -116,6 +116,7 @@ extern "C"
    *  \param[in] solver_id id an int to be mapped to actual solver in Numerics
    *  \param[in] tolerance
    *  \param[in] itermax the maximum number of iteration
+   *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
    *  \param[in] outputFile outputFile option 0 : nothing 1 : dat file 2: FCLIB HDF5 file if FCLIB is found
    *  \return result (0 if successful otherwise 1).
    *
@@ -132,6 +133,7 @@ extern "C"
                                    int solver_id,
                                    double tolerance,
                                    int itermax,
+                                   int verbose,
                                    int outputFile);
 
 #ifdef __cplusplus

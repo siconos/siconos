@@ -327,7 +327,7 @@ extern "C"
 
   /** free allocated memory in newSparseBlockCoordinateMatrix functions
    * \param[in] MC matrix pointer */
-  void freeSparseBlockCoordinateMatrix3x3(SparseBlockCoordinateMatrix *MC);
+  void freeSparseBlockCoordinateMatrix3x3fortran(SparseBlockCoordinateMatrix *MC);
 
   /** copy a SparseBlockCoordinateMatrix to a SparseBlockStructuredMatrix
    * \param[in] MC the SparseBlockCoordinateMatrix matrix

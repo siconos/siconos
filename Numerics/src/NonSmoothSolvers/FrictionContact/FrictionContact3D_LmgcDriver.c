@@ -23,6 +23,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
                                  int solver_id,
                                  double tolerance,
                                  int itermax,
+                                 int verbose,
                                  int outputFile)
 {
 
@@ -37,7 +38,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
   /* frictionContact_display(FC); */
 
   NumericsOptions numerics_options;
-  numerics_options.verboseMode = 2; // turn verbose mode to off by default
+  numerics_options.verboseMode = verbose; // turn verbose mode to off by default
 
   //  uncomment to save FrictionContactProblem
   if (outputFile == 1)
