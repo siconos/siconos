@@ -73,8 +73,10 @@ int main(void)
     velocity[i] = 0.0;
   }
 
-  int solver_id = SICONOS_FRICTION_3D_NSGS; // 500
-  double tolerance = 1e-5;
+
+
+  int solver_id = SICONOS_FRICTION_3D_GLOBALAC; // 500
+  double tolerance = 1e-10;
   int itermax = 500;
 
   info = frictionContact3D_LmgcDriver(reaction,
@@ -97,6 +99,8 @@ int main(void)
 
   free(reaction);
   free(velocity);
+
+  printf("info: %d\n", info);
 
   return info;
 }

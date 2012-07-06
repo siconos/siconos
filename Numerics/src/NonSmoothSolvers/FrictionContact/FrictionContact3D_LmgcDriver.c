@@ -34,7 +34,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
   frictionContact_display(FC);
 
   NumericsOptions numerics_options;
-  numerics_options.verboseMode = 2; // turn verbose mode to off by default
+  numerics_options.verboseMode = 0; // turn verbose mode to off by default
 
   //  uncomment to save FrictionContactProblem
   //  FILE * ff =  fopen("LMGC.dat", "w");
