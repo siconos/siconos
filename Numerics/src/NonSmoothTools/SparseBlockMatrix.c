@@ -1658,13 +1658,13 @@ SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3fortran(unsigned i
   MC->blocknumber0 = m; /* block row */
   MC->blocknumber1 = n; /* block column */
   MC->nbblocks = nbblocks;
-  MC->row = (unsigned int *)  malloc(sizeof(unsigned int) * m);
-  MC->column = (unsigned int *)  malloc(sizeof(unsigned int) * n);
-  for (unsigned int i = 0; i < m; ++i)
+  MC->row = (unsigned int *)  malloc(sizeof(unsigned int) * nbblocks);
+  MC->column = (unsigned int *)  malloc(sizeof(unsigned int) * nbblocks);
+  for (unsigned int i = 0; i < nbblocks; ++i)
   {
     MC->row[i] = row[i] - 1;
   }
-  for (unsigned int i = 0; i < n; ++i)
+  for (unsigned int i = 0; i < nbblocks; ++i)
   {
     MC->column[i] = column[i] - 1;
   }
