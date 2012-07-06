@@ -376,7 +376,9 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
 
   NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
-  NEW_TEST(FC3DLmgcDriver FrictionContact3D_LmgcDriver_test.c)
+  NEW_TEST(FC3DLmgcDriver1 FrictionContact3D_LmgcDriver_test1.c)
+  NEW_TEST(FC3DLmgcDriver2 FrictionContact3D_LmgcDriver_test2.c)
+  NEW_TEST(FC3DLmgcDriver3 FrictionContact3D_LmgcDriver_test3.c)
 
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
   NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)

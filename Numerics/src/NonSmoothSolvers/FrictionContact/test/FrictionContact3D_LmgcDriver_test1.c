@@ -25,15 +25,15 @@
 int main(void)
 {
   int info = 0 ;
-  int nc = 3;//Number of contacts
-  int nb = 3;//Number of contacts
+  int nc = 4;//Number of contacts
+  int nb = 4;//Number of blocks
 
-  double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
-  double mu[3] = {0.1, 0.1, 0.1};
+  double q[12] = { -1, 1, 3, -1, 1, 3, -1, 1, 3, -1, 1, 3};
+  double mu[4] = {0.1, 0.1, 0.1, 0.1};
 
-  unsigned int row[3] = {1, 2, 3};
-  unsigned int column[3] = {1, 2, 3};
-  double W[27] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+  unsigned int row[4] = {1, 2, 3, 4};
+  unsigned int column[4] = {1, 2, 3, 4};
+  double W[36] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 
   double *reaction = (double*)malloc(3 * nc * sizeof(double));
@@ -57,7 +57,7 @@ int main(void)
                                       column,
                                       nc,
                                       nb,
-                                      500,
+                                      solver_id,
                                       tolerance,
                                       itermax);
 
