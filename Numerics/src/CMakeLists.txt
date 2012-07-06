@@ -375,6 +375,8 @@ IF(WITH_TESTING)
   NEW_TEST(FC3Dtest71 FrictionContact3D_test71.c)	
   NEW_TEST(FC3Dtest72 FrictionContact3D_test72.c)	
 
+  NEW_TEST(FC3DNewFromFortranData FrictionContact3D_newFromFortranData.c)
+
   NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
   NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
   SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)

@@ -15,54 +15,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
-
-/*
-  Tests functions for NumericsMatrix structure
-
  */
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "NumericsMatrix.h"
-#include "LA.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "SparseMatrix.h"
+#include "NonSmoothDrivers.h"
+#include "frictionContact_test_function.h"
 
-#define nnz 10
 
 int main(void)
 {
-  unsigned int Ai[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
-  unsigned int Aj[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
-  double Ax[nnz] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  int info = 0 ;
+  int NC = 3;//Number of contacts
 
-  SparseBlockCoordinateMatrix mc;
+  double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
+  double mu[3] = {0.1, 0.1, 0.1};
 
-  unsigned int blocksize0[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  unsigned int blocksize1[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  unsigned int row[3] = {1, 2, 3};
+  unsigned int column[3] = {1, 2, 3};
+  int m = 3;
+  int n = 3;
+  double W[27] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
-  double* block[nnz] = {&Ax[0], &Ax[1], &Ax[2], &Ax[3], &Ax[4], &Ax[5], &Ax[6], &Ax[7], &Ax[8], &Ax[9] };
 
-  mc.nbblocks = nnz;
-  mc.blocknumber0 = 10;
-  mc.blocknumber1 = 10;
-  mc.blocksize0 = blocksize0;
-  mc.blocksize1 = blocksize1;
+  SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(m, n, 3, row, column, W);
 
-  mc.row = Ai;
-  mc.column = Aj;
+  SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
 
-  mc.block = block;
+  NumericsMatrix* NM = newSparseNumericsMatrix(m * 3, n * 3, M);
 
-  SparseBlockStructuredMatrix* m = SBCMToSBM(&mc);
+  FrictionContactProblem* FC = frictionContactProblem_new(3, 3, NM, q, mu);
 
-  printSBM(m);
+  frictionContact_display(FC);
 
-  assert(getValueSBM(m, 0, 0) == 2.);
-  assert(getValueSBM(m, 8, 8) == 9.);
 
+  return info;
 }
-

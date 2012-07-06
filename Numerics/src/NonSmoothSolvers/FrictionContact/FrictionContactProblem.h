@@ -194,6 +194,17 @@ extern "C"
    */
   void freeFrictionContactProblem(FrictionContactProblem* problem);
 
+
+  /** new FrictionContactProblem from minimal set of data
+   * \param[in] dim the problem dimension
+   * \param[in] nc the number of contact
+   * \param[in] M the NumericsMatrix
+   * \param[in] q the q vector
+   * \param[in] mu the mu vector
+   */
+  FrictionContactProblem* frictionContactProblem_new(int dim, int nc,
+      NumericsMatrix* M, double* q, double* mu);
+
 #ifdef __cplusplus
 }
 #endif

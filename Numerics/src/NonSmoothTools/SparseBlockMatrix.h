@@ -126,16 +126,19 @@ typedef struct
   unsigned int nbblocks;
 
   /** number of rows */
-  unsigned int m;
+  unsigned int blocknumber0;
 
   /** number of columns */
-  unsigned int n;
+  unsigned int blocknumber1;
 
   /** block pointers */
   double **block;
 
-  //* block sizes
+  /** cumulative number of rows in blocks */
   unsigned int *blocksize0;
+
+  /** cumulative number of columns in blocks */
+
   unsigned int *blocksize1;
 
   /** row indices */
@@ -317,7 +320,7 @@ extern "C"
    * \param[in] colums a pointer to column of each block
    * \param[in] block a pointer to each block
    */
-  SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3(unsigned int m, unsigned int n,
+  SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3fortran(unsigned int m, unsigned int n,
       unsigned int nbblocks,
       unsigned int *row, unsigned int *column, double *block);
 

@@ -243,6 +243,14 @@ extern "C"
                         int size,
                         double **Bout);
 
+
+  /** new NumericsMatrix with sparse storage from minimal set of data
+   * \param[in] size0 number of rows
+   * \param[in] size1 number of columns
+   * \param[in] m1 the SparseBlockStructuredMatrix
+   */
+  NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
+
 #ifdef __cplusplus
 }
 #endif

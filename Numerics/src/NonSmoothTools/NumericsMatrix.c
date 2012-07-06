@@ -413,3 +413,17 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
 
   }
 }
+
+NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
+{
+  NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
+
+  M->storageType = 1;
+
+  M->size0 = size0;
+  M->size1 = size1;
+  M->matrix0 = NULL;
+  M->matrix1 = m1;
+
+  return M;
+}
