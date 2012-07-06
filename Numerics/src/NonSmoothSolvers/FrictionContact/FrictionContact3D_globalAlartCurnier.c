@@ -801,6 +801,22 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
 
+  if (!mumps_id)
+  {
+    /* we suppose no mpi init has been done */
+    /* if this not the case you *must* call
+       frictionContact3D_sparseGlobalAlartCurnierInit yourself */
+    int ierr, myid;
+    int argc = 0;
+    char **argv;
+    ierr = MPI_Init(argc, argv);
+    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    frictionContact3D_sparseGlobalAlartCurnierInit(options);
+    mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+  }
+
+  assert(mumps_id);
+
   assert(itermax > 0);
   assert(nzmax > 0);
 
@@ -834,6 +850,8 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
   // compute rho here
   for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
+
+
 
   mumps_id->n = problemSize;
   mumps_id->nz = nz[0];
