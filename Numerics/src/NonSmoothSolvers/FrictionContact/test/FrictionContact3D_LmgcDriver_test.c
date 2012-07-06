@@ -25,31 +25,40 @@
 int main(void)
 {
   int info = 0 ;
-  int NC = 3;//Number of contacts
+  int nc = 3;//Number of contacts
+  int nb = 3;//Number of contacts
 
   double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[3] = {0.1, 0.1, 0.1};
 
   unsigned int row[3] = {1, 2, 3};
   unsigned int column[3] = {1, 2, 3};
-  int m = 3;
-  int n = 3;
   double W[27] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 
-  SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(m, n, 3, row, column, W);
+  double *reaction = (double*)malloc(3 * nc * sizeof(double));
+  double *velocity = (double*)malloc(3 * nc * sizeof(double));
+  for (int i = 0; i < 3 * nc; i++)
+  {
+    reaction[i] = 0.0;
+    velocity[i] = 0.0;
+  }
 
-  SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
+  int solver_id = SICONOS_FRICTION_3D_NSGS; // 500
+  double tolerance = 1e-16;
+  int itermax = 100;
 
-  NumericsMatrix* NM = newSparseNumericsMatrix(m * 3, n * 3, M);
-
-  FrictionContactProblem* FC = frictionContactProblem_new(3, 3, NM, q, mu);
-
-  frictionContact_display(FC);
-
-  assert(FC->M->matrix1->blocksize0[2] == 9);
-  assert(FC->M->matrix1->blocksize0[1] == 6);
-  assert(FC->M->matrix1->block[0][0] == 1.);
-
+  info = frictionContact3D_LmgcDriver(reaction,
+                                      velocity,
+                                      q,
+                                      mu,
+                                      W,
+                                      row,
+                                      column,
+                                      nc,
+                                      nb,
+                                      500,
+                                      tolerance,
+                                      itermax);
   return info;
 }

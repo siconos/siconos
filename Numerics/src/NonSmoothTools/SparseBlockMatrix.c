@@ -1668,7 +1668,6 @@ SparseBlockCoordinateMatrix* newSparseBlockCoordinateMatrix3x3fortran(unsigned i
   {
     MC->column[i] = column[i] - 1;
   }
-  MC->column = column;
   MC->block = (double **) malloc(sizeof(double*)*nbblocks);
   MC->blocksize0 = (unsigned int *) malloc(sizeof(unsigned int) * nbblocks);
   MC->blocksize1 = (unsigned int *) malloc(sizeof(unsigned int) * nbblocks);

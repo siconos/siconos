@@ -205,6 +205,8 @@ extern "C"
   FrictionContactProblem* frictionContactProblem_new(int dim, int nc,
       NumericsMatrix* M, double* q, double* mu);
 
+
+
 #ifdef __cplusplus
 }
 #endif

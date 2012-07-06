@@ -64,9 +64,6 @@ int ls_test_function(FILE * f, int solverId)
 
   info = LinearSystem_newFromFile(problem, f);
 
-
-  NumericsOptions global_options;
-  global_options.verboseMode = 1;
   SolverOptions * options ;
   options = malloc(sizeof(*options));
 

@@ -81,6 +81,17 @@ extern "C"
    */
   int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
+
+  /** General interface to solvers for friction-contact 3D problem
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \param[in] global_options for Numerics (verbose mode ...)
+   *  \return result (0 if successful otherwise 1).
+   */
+  int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+
   /** General interface to solver for MCP problems
       \param[in] problem the MixedComplementarityProblem structure which handles the problem (M,q)
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
@@ -92,6 +103,33 @@ extern "C"
   */
   //int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
 
+  /** LMGC interface to solvers for friction-contact 3D problem
+   *  \param[in,out] reaction global vector (nc*3)
+   *  \param[in,out] velocity global vector (nc*3)
+   *  \param[in] q global vector (nc*3)
+   *  \param[in] mu global vector (nc)
+   *  \param[in] W the block matrix in coordinate format
+   *  \param[in] row block row indices
+   *  \param[in] column block column indices
+   *  \param[in] nc number of contacts
+   *  \param[in] nb number of blocks
+   *  \param[in] solver_id id an int to be mapped to actual solver in Numerics
+   *  \param[in] tolerance
+   *  \param[in] itermax the maximum number of iteration
+   *  \return result (0 if successful otherwise 1).
+   */
+  int frictionContact3D_LmgcDriver(double *reaction,
+                                   double *velocity,
+                                   double *q,
+                                   double *mu,
+                                   double* W,
+                                   unsigned int *row,
+                                   unsigned int *column,
+                                   unsigned int nc,
+                                   unsigned int nb,
+                                   int solver_id,
+                                   double tolerance,
+                                   int itermax);
 
 #ifdef __cplusplus
 }
