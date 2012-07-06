@@ -1703,38 +1703,42 @@ SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
   M->blocksize0 = MC->blocksize0;
   M->blocksize1 = MC->blocksize1;
 
-  M->index1_data = (size_t *) malloc(sizeof(size_t) * (MC->blocknumber0 + 1));
-  M->index2_data = (size_t *) malloc(sizeof(size_t) * MC->blocknumber1);
-  for (unsigned int i = 0; i < MC->blocknumber0; ++i)
+  M->index1_data = (size_t *) malloc(sizeof(size_t) * (M->blocknumber0 + 1));
+  M->index2_data = (size_t *) malloc(sizeof(size_t) * M->nbblocks);
+  for (unsigned int i = 0; i < M->blocknumber0; ++i)
   {
     M->index1_data[i] = 0;
   }
   M->filled1 = 2;
-  for (unsigned int i = 0; i < MC->nbblocks; ++i)
+  for (unsigned int i = 0; i < M->nbblocks; ++i)
   {
     M->index1_data[MC->row[i] + 1]++;
     M->filled1 = ((MC->row[i] + 2) > M->filled1) ? MC->row[i] + 2 : M->filled1;
   }
 
-  for (unsigned int i = 1; i < MC->blocknumber0 + 1; ++i)
+  for (unsigned int i = 1; i < M->blocknumber0 + 1; ++i)
   {
     M->index1_data[i] += M->index1_data[i - 1];
   }
 
   M->block = (double **) malloc(sizeof(double*)*M->nbblocks);
 
-  for (unsigned int i = 0; i < MC->nbblocks; ++i)
+  for (unsigned int i = 0; i < M->nbblocks; ++i)
   {
     unsigned int row  = MC->row[i];
     unsigned int dest  = M->index1_data[row];
 
+    assert(dest < M->nbblocks);
     M->index2_data[dest] = MC->column[i];
+
+    assert(dest < M->nbblocks);
     M->block[dest] = MC->block[i];
 
+    assert(row < (M->blocknumber0 + 1));
     M->index1_data[row]++;
   }
 
-  for (unsigned int i = 0, last = 0; i <= MC->blocknumber0; i++)
+  for (unsigned int i = 0, last = 0; i <= M->blocknumber0; i++)
   {
     unsigned int temp = M->index1_data[i];
     M->index1_data[i]  = last;
