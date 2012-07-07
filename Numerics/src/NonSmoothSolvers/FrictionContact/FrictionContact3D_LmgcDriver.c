@@ -38,10 +38,60 @@ int frictionContact3D_LmgcDriver(double *reaction,
   /* frictionContact_display(FC); */
 
   NumericsOptions numerics_options;
+
   numerics_options.verboseMode = verbose; // turn verbose mode to off by default
 
   //  uncomment to save FrictionContactProblem
+
   if (outputFile == 1)
+  {
+    FILE * file = fopen("tutu.c", "w");
+
+    fprintf(file, "int nc = %i ;\n ", nc);
+    fprintf(file, "int nb = %i ;\n ", nb);
+    fprintf(file, "double mu[%i] ={\n", nc);
+    for (int i = 0; i < nc - 1 ; i++)
+    {
+      fprintf(file, "%32.24e, \t", mu[i]);
+    }
+    fprintf(file, "%32.24e };\n", mu[nc - 1]);
+    fprintf(file, "int row[%i] ={\n", nb);
+    for (int i = 0; i < nb - 1 ; i++)
+    {
+      fprintf(file, "%i,\t", row[i]);
+    }
+
+    fprintf(file, " %i};\n", row[nb - 1]);
+    fprintf(file, "int column[%i] ={\n", nb);
+    for (int i = 0; i < nb - 1 ; i++)
+    {
+      fprintf(file, "%i,\t", column[i]);
+    }
+    fprintf(file, " %i};\n", column[nb - 1]);
+    fprintf(file, "double q[%i] ={\n", 3 * nc);
+    for (int i = 0; i < 3 * nc - 1 ; i++)
+    {
+      fprintf(file, "%32.24e,\t", q[i]);
+    }
+    fprintf(file, " %32.24e};\n", q[3 * nc - 1]);
+
+    fprintf(file, "double W[%i] ={\n", 3 * 3 * nb);
+    for (int i = 0; i < nb - 1 ; i++)
+    {
+      for (int j = 0; j < 3 * 3 ; j++)
+      {
+        fprintf(file, "%32.24e, \t", W[i * 9 + j]);
+      }
+      fprintf(file, "\n");
+    }
+    for (int j = 0; j < 3 * 3 - 1 ; j++)
+    {
+      fprintf(file, "%32.24e, \t", W[(nb - 1) * 9 + j]);
+    }
+    fprintf(file, "%32.24e};\n", W[(nb - 1) * 9 + 8]);
+    fclose(file);
+  }
+  else if (outputFile == 2)
   {
     char fname[256];
     sprintf(fname, "LMGC_FrictionContactProblem%.5d.dat", fccounter++);
@@ -51,7 +101,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
     frictionContact_printInFile(FC, foutput);
     fclose(foutput);
   }
-  else if (outputFile == 2)
+  else if (outputFile == 3)
   {
 #ifdef WITH_FCLIB
     char fname[256];
@@ -110,3 +160,4 @@ int frictionContact3D_LmgcDriver(double *reaction,
 
   return info;
 }
+
