@@ -238,7 +238,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("mlcp_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
+    numericsError("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   if (verbose)

@@ -47,13 +47,15 @@
   non linear function that must be user-defined.
 
   \section mcpSolversList Available solvers :
-
+  - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
 
 */
 
-/** */
-typedef void (*ptrFunctionMCP)(int, double*, double*);
-
+/** type for user defined function used to compute Fmcp and its jacobian.
+    TODO : set properly the list of arguments for this function, when
+    things will be clearer ...
+ */
+typedef void (*ptrFunctionMCP)(double*);
 
 //ptrFunctionMCP Fmcp = NULL;
 
@@ -65,9 +67,13 @@ typedef struct
   // $z_i,w_i$ size
   int sizeInequalities;
   // A pointer to the function to compute F(z)
-  ptrFunctionMCP Fmcp ;
+  ptrFunctionMCP computeFmcp ;
   // A pointer to the function to compute the jacobian of F(z)
-  ptrFunctionMCP nabla_Fmcp ;
+  ptrFunctionMCP computeNablaFmcp ;
+  // F(z)
+  double * Fmcp ;
+  // jacobian of F(z)
+  double * nablaFmcp ;
 
 } MixedComplementarityProblem;
 

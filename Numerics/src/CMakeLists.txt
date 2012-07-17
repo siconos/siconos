@@ -289,6 +289,11 @@ IF(WITH_TESTING)
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
   NEW_TEST(MLCPtest main_mlcp.cpp)
   END_TEST()
+
+  BEGIN_TEST(NonSmoothSolvers/MCP/test)
+  NEW_TEST(MCPtest MCP_test.cpp)
+  END_TEST()
+
   BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)
   
   #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)

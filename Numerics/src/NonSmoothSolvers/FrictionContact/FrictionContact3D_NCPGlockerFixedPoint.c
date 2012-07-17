@@ -19,7 +19,6 @@
 
 #include "NCP_Path.h"
 #include "NCP_FixedP.h"
-#include "NCP_FischerBurmeister.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D2NCP_Glocker.h"

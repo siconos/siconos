@@ -17,32 +17,20 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#ifndef MCPFB_H
-#define MCPFB_H
-
-#include "FischerBurmeister.h"
-
-/*!\file MCP_FischerBurmeister.h
-
-  routines required for the MCP solver based on Fischer-Burmeister functions and Semi-Smooth Newton solver.
-
+#ifndef MCP_CST_H
+#define MCP_CST_H
+/*!\file mcp_cst.h
+  \brief Constants to define the list of available MCP solvers. See the solver list \ref mcpSolversList
 */
-
-#ifdef __cplusplus
-extern "C"
+/**\enum MCP_SOLVER
+   \brief Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP. See the solver list \ref mcpSolversList
+ */
+enum MCP_SOLVER
 {
-#endif
+  SICONOS_MCP_FB = 700
+};
 
 
-  /** Initialisation of the MCP Fischer solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-      \param[in] : the description of the MCP
-      \param[in] : options for the solver
-  */
-  void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options);
-
-
-#ifdef __cplusplus
-}
-#endif
+extern char * SICONOS_MCP_FB_STR;
 
 #endif

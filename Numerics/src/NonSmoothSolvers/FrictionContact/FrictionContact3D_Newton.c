@@ -22,6 +22,8 @@
 #include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "FischerBurmeister.h"
+
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 

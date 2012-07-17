@@ -191,6 +191,11 @@ extern "C"
   */
   void deleteSolverOptions(SolverOptions * options);
 
+  /* Free the working memory (options->iWork and options->dWork)
+     \param[in] options structure used to define the solver(s) and their parameters
+  */
+  void free_working_memory(SolverOptions* options);
+
   int nameToId(char * pName);
   char * idToName(int Id);
   char * idProblemToChar(int id);

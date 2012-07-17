@@ -37,7 +37,7 @@ void phi_FB(int size, double* z, double* F, double* phiVector)
   }
 }
 
-/* Compute Jacobian of function G */
+/* Compute the jacobian of the Fischer function */
 void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
 {
   if (z == NULL || F == NULL || jacobianF == NULL || jacobianPhiMatrix == NULL)
@@ -71,4 +71,65 @@ void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* j
     jacobianPhiMatrix[i * size + i] += ai;
   }
 }
+
+/* Computation of the mixed Fischer-Burmeister function */
+void phi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* phiVector)
+{
+  if (z == NULL || F == NULL || phiVector == NULL)
+  {
+    fprintf(stderr, "FisherBurmeister::phi_MCP_FB failed, null input vector(s).\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int i;
+  int totalSize = sizeEq + sizeIneq;
+
+  for (i = 0 ; i < sizeEq ; ++i)
+  {
+    phiVector[i] = F[i];
+  }
+  for (i = sizeEq ; i < totalSize ; ++i)
+  {
+    phiVector[i] =  sqrt(z[i] * z[i] + F[i] * F[i]) - z[i] - F[i];
+  }
+}
+
+/* Compute the jacobian of the mixed Fischer function */
+void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
+{
+  if (z == NULL || F == NULL || jacobianF == NULL || jacobianPhiMatrix == NULL)
+  {
+    fprintf(stderr, "FisherBurmeister::jacobianPhi_MCP_FB failed, null input vector(s) or matrices.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* jacobianPhiMatrix is initialized with jacobianF */
+  DCOPY((sizeEq + sizeIneq) * (sizeEq + sizeIneq), jacobianF, 1, jacobianPhiMatrix, 1);
+
+  double ri, ai, bi;
+  int i;
+  for (i = sizeEq; i < sizeEq + sizeIneq; i++)
+  {
+    ri = sqrt(z[i] * z[i] +  F[i] * F[i]);
+    if (ri > 0.0)
+    {
+      ai = z[i] / ri - 1.0;
+      bi = F[i] / ri - 1.0;
+    }
+    else
+    {
+      ai = -1.0;
+      bi = -1.0;
+    }
+    /* jacobianPhiMatrix_ij = delta_ij*ai + bi * jacobianF_ij
+       delta_ij being the Kronecker symbol
+    */
+    /*        DSCAL(size, bi, &jacobianPhiMatrix[i], size);*/
+
+    DSCAL(sizeEq + sizeIneq, bi, &jacobianPhiMatrix[i], sizeEq + sizeIneq);
+    jacobianPhiMatrix[i * (sizeEq + sizeIneq) + i] += ai;
+  }
+}
+
+
 

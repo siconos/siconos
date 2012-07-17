@@ -21,61 +21,78 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "MixedComplementarityProblem.h"
+#include "SolverOptions.h"
+#include "NonSmoothNewton.h"
+#include "FischerBurmeister.h"
 
-/* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z) */
-void phi_MCP_FB(int sizen, int sizem, double* z, double* F, double* phiVector)
+
+/* Static object which contains the MCP problem description.
+Ugly but required to deal with function pointer connection
+in  FischerFunc_MCP and its jacobian.
+*/
+static MixedComplementarityProblem * localProblem = 0;
+
+
+void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options)
 {
-  if (z == NULL || F == NULL || phiVector == NULL)
-  {
-    fprintf(stderr, "FisherBurmeister::phi_MCP_FB failed, null input vector(s).\n");
-    exit(EXIT_FAILURE);
-  }
-
-  int i;
-  for (i = 0 ; i < sizen ; ++i)
-  {
-    phiVector[i] = F[i];
-  }
-  for (i = sizen ; i < sizen + sizem ; ++i)
-  {
-    phiVector[i] =  sqrt(z[i] * z[i] + F[i] * F[i]) - z[i] - F[i];
-  }
+  localProblem = malloc(sizeof(MixedComplementarityProblem));
+  /* Connect local static problem with the "real" MCP */
+  localProblem->sizeEqualities = problem->sizeEqualities ;
+  localProblem->sizeInequalities = problem->sizeInequalities ;
+  localProblem->computeFmcp = problem->computeFmcp ;
+  localProblem->computeNablaFmcp = problem->computeNablaFmcp ;
+  localProblem->Fmcp = options->dWork ;
+  int fullSize = localProblem->sizeEqualities + localProblem->sizeInequalities ;
+  // Memory allocation for working vectors
+  int lwork = 3 * (problem->sizeEqualities + problem->sizeInequalities) ;
+  options->dWork = (double *) malloc(lwork * sizeof(double));
+  localProblem->nablaFmcp = &(options->dWork[fullSize]) ;
 }
 
-/* Compute Jacobian of function G */
-void jacobianPhi_MCP_FB(int sizen, int sizem, double* z, double* F, double* jacobianF, double* jacobianPhiMatrix)
+
+// Must corresponds to a NewtonFunctionPtr
+void FischerFunc_MCP(int size, double* z, double* phi, int dummy)
 {
-  if (z == NULL || F == NULL || jacobianF == NULL || jacobianPhiMatrix == NULL)
-  {
-    fprintf(stderr, "FisherBurmeister::jacobianPhi_MCP_FB failed, null input vector(s) or matrices.\n");
-    exit(EXIT_FAILURE);
-  }
+  // This function uses a user-defined function, set in the problem, to compute
+  // the Fisher function
 
-  /* jacobianPhiMatrix is initialized with jacobianF */
-  DCOPY((sizen + sizem) * (sizen + sizem), jacobianF, 1, jacobianPhiMatrix, 1);
-
-  double ri, ai, bi;
-  int i;
-  for (i = sizen; i < sizen + sizem; i++)
-  {
-    ri = sqrt(z[i] * z[i] +  F[i] * F[i]);
-    if (ri > 0.0)
-    {
-      ai = z[i] / ri - 1.0;
-      bi = F[i] / ri - 1.0;
-    }
-    else
-    {
-      ai = -1.0;
-      bi = -1.0;
-    }
-    /* jacobianPhiMatrix_ij = delta_ij*ai + bi * jacobianF_ij
-       delta_ij being the Kronecker symbol
-    */
-    /*        DSCAL(size, bi, &jacobianPhiMatrix[i], size);*/
-
-    DSCAL(sizen + sizem, bi, &jacobianPhiMatrix[i], sizen + sizem);
-    jacobianPhiMatrix[i * (sizen + sizem) + i] += ai;
-  }
+  int sizeEq = localProblem->sizeEqualities;
+  int sizeIneq = localProblem->sizeInequalities;
+  /* First call user-defined function to compute Fmcp function, */
+  localProblem->computeFmcp(localProblem->Fmcp) ;
+  /* and compute the corresponding Fischer function */
+  phi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, phi) ;
 }
 
+// Must corresponds to a NewtonFunctionPtr
+void nablaFischerFunc_MCP(int size, double* z, double* nablaPhi, int dummy)
+{
+  int sizeEq = localProblem->sizeEqualities;
+  int sizeIneq = localProblem->sizeInequalities;
+  /* First call user-defined function to compute Fmcp function, */
+  localProblem->computeNablaFmcp(localProblem->nablaFmcp) ;
+  /* and compute the corresponding jacobian of the Fischer function */
+  jacobianPhi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, localProblem->nablaFmcp, nablaPhi) ;
+}
+
+void mcp_FB(MixedComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
+{
+  *info = 1;
+  int fullSize = problem->sizeEqualities + problem->sizeInequalities ;
+
+  // Set links to Fisher functions and its jacobian
+  NewtonFunctionPtr phi = &FischerFunc_MCP ;
+  NewtonFunctionPtr nablaPhi = &nablaFischerFunc_MCP ;
+
+  // Call semi-smooth Newton solver
+  *info = nonSmoothNewton(fullSize, z, &phi, &nablaPhi, options->iparam, options->dparam);
+
+  // todo : compute error function
+
+  // Check output
+  if (*info > 0)
+    fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
+
+  return;
+}

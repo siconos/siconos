@@ -17,15 +17,54 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+//#include "SolverOptions.h"
+//#include "MixedComplementarityProblem.h"
+#include "MCP_Solvers.h"
+#include "mcp_cst.h"
+#include "MCP_FischerBurmeister.h"
 
-#include "NumericsOptions.h"
-#include "SolverOptions.h"
-#include "MixedComplementarityProblem.h"
+char *  SICONOS_MCP_FB_STR = "NewtonFB";
 
 int mcp_driver(MixedComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {
+  if (options == NULL)
+    numericsError("mcp_driver ", "null input for solver options.\n");
 
-  // test
-  //problem->Fmcp(z,w);
-  return 0;
+  /* Set global options */
+  if (global_options)
+    setNumericsOptions(global_options);
+
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("mcp_driver", "null input for MixedComplementarityProblem and/or unknowns (z,w)");
+  /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
+  int info = -1;
+
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_FB: // Fischer-Burmeister/Newton
+    mcp_FB(problem, z, w, &info, options);
+    break;
+
+  default:
+    fprintf(stderr, "mcp_driver error: unknown solver id: %d\n", options->solverId);
+    exit(EXIT_FAILURE);
+
+  }
+
+  return info;
+}
+
+void mcp_driver_init(MixedComplementarityProblem* problem, SolverOptions* options)
+{
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_FB :
+    mcp_FB_init(problem, options) ;
+    break ;
+  default :
+    fprintf(stderr, "mcp_driver_init error: unknown solver id: %d\n", options->solverId);
+    exit(EXIT_FAILURE);
+  }
+
 }

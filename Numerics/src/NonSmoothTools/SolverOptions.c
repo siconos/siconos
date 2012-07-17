@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include "mlcp_cst.h"
+#include "MCP_cst.h"
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
@@ -439,6 +440,9 @@ char * idToName(int Id)
     return SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR_STR;
   case SICONOS_FRICTION_3D_PRIMAL_NSGS:
     return SICONOS_FRICTION_3D_PRIMAL_NSGS_STR;
+    // MCP
+  case SICONOS_MCP_FB:
+    return SICONOS_MCP_FB_STR;
     /*DEFAULT*/
   default:
     return SICONOS_NONAME_STR;
@@ -586,6 +590,20 @@ int nameToId(char * pName)
     return SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR;
   else if (strcmp(SICONOS_FRICTION_3D_PRIMAL_NSGS_STR, pName) == 0)
     return SICONOS_FRICTION_3D_PRIMAL_NSGS;
+  else if (strcmp(SICONOS_MCP_FB_STR, pName) == 0)
+    return SICONOS_MCP_FB;
+
   return 0;
 
+}
+
+/* Free working vectors memory */
+void free_working_memory(SolverOptions* options)
+{
+  if (options->iWork)
+    free(options->iWork);
+  if (options->dWork)
+    free(options->dWork);
+  options->iWork = NULL;
+  options->dWork = NULL;
 }

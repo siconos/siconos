@@ -40,7 +40,6 @@
 */
 
 #include "SparseBlockMatrix.h"
-#include "NCP_FischerBurmeister.h"
 #include "NCP_Path.h"
 #include "NCP_FixedP.h"
 

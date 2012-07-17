@@ -16,7 +16,7 @@ IF(SiconosNumerics_LIBRARY_DIRECTORY)
     MESSAGE(STATUS "Found : ${SiconosNumerics_FOUND}")
   ENDIF(SiconosNumerics_FOUND)
 ELSE(SiconosNumerics_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics)
+  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosNumerics_LIBRARY_DIRECTORY)
 
 IF(SiconosNumerics_FOUND)

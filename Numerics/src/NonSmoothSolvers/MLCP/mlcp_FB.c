@@ -24,9 +24,9 @@
 #include <string.h>
 #include <math.h>
 
-#include "NonSmoothNewtonNeighbour.h"
 
-#include "MCP/MCP_FischerBurmeister.h"
+#include "NonSmoothNewtonNeighbour.h"
+#include "FischerBurmeister.h"
 
 static int sN = 0;
 static int sM = 0;
@@ -62,11 +62,12 @@ void computeFz(double* z)
   DCOPY(size , sProblem->q , incx , sFz , incy);
   prodNumericsMatrix(size, size, 1.0, sProblem->M, z, 1.0, sFz);
 }
+
 void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a)
 {
 
   computeFz(z);
-  phi_MCP_FB(sN, sM, z, sFz, FBz);
+  phi_Mixed_FB(sN, sM, z, sFz, FBz);
 }
 
 /** writes \f$ \nabla_z F(z) \f$  using MLCP formulation and the Fischer-Burmeister function.
@@ -75,7 +76,7 @@ void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix
 {
 
   computeFz(z);
-  jacobianPhi_MCP_FB(sN, sM, z, sFz, sProblem->M->matrix0, jacobianFMatrix);
+  jacobianPhi_Mixed_FB(sN, sM, z, sFz, sProblem->M->matrix0, jacobianFMatrix);
 }
 
 

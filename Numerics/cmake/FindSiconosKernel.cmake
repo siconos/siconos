@@ -12,7 +12,7 @@
 IF(SiconosKernel_LIBRARY_DIRECTORY)
   FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel PATHS "${SiconosKernel_LIBRARY_DIRECTORY}")
 ELSE(SiconosKernel_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel)
+  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel  ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosKernel_LIBRARY_DIRECTORY)
 
 IF(SiconosKernel_FOUND)
