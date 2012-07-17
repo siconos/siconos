@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     double rho = 7800 ; // specific mass
     //rho=1.0;
     double g = 9.81; // Gravity
-    g = 0.0;
+    //g=0.0;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     SparseStiffness->setValue(0, 0, 1.0);
     SparseStiffness->setValue(0, 1, -1.0);
 
-    for (int i = 1; i < nDof - 1; i++)
+    for (unsigned int i = 1; i < nDof - 1; i++)
     {
       SparseMass->setValue(i, i, 2.0 / 3.0);
       SparseMass->setValue(i, i - 1, 1.0 / 6.0);
@@ -109,11 +109,8 @@ int main(int argc, char* argv[])
     // -- Set stiffness matrix (weight) --
     beam->setKPtr(SparseStiffness);
 
-
-
     // -- Set external forces (weight) --
     SP::SiconosVector weight(new SiconosVector(nDof, -g * rho * S / l));
-
 
     beam->setFExtPtr(weight);
 

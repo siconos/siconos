@@ -41,13 +41,13 @@ set multiplot
 
 set size winratio,winheight
 
-set ylabel "m" offset 1
+set ylabel "m"
 set origin 0.01,winheight*2.0+heightoff
 plot\
 "result.dat" u 1:2 t "Beam end position" w l
 
 
-set ylabel "m/s" offset 1
+set ylabel "m/s"
 set origin 0.01,winheight+heightoff
 plot\
 "result.dat" u 1:3 t "Beam end Velocity" w l
@@ -57,7 +57,7 @@ set format
 set xtics axis
 set xlabel "time in s"
 
-set ylabel "Ns" offset 1
+set ylabel "Ns"
 set origin 0.01,0.0+heightoff
 
 plot\
