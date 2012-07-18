@@ -123,6 +123,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     fclib_problem->W->x = spmat->x;
     fclib_problem->W->p = spmat->p;
     fclib_problem->W->i = spmat->i;
+    fclib_problem->W->info = NULL;
   }
   else
   {
