@@ -291,7 +291,7 @@ IF(WITH_TESTING)
   END_TEST()
 
   BEGIN_TEST(NonSmoothSolvers/MCP/test)
-  NEW_TEST(MCPtest MCP_test.cpp)
+#  NEW_TEST(MCPtest MCP_test.cpp)
   END_TEST()
 
   BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)

@@ -20,7 +20,7 @@
 //#include "SolverOptions.h"
 //#include "MixedComplementarityProblem.h"
 #include "MCP_Solvers.h"
-#include "mcp_cst.h"
+#include "MCP_cst.h"
 #include "MCP_FischerBurmeister.h"
 
 char *  SICONOS_MCP_FB_STR = "NewtonFB";
