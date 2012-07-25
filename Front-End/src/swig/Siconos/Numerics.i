@@ -87,6 +87,7 @@
 
 %ignore lcp_compute_error_only;
 
+
 // numpy macros
 %include numpy.i 	
 
@@ -1161,6 +1162,9 @@
 %ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
                           //instead of *iparam, *dparam).
 %ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
+
+%ignore frictionContactProblem_new; // signature issue with mu param
+
 
 %include "FrictionContactProblem.h"
 %include "FrictionContact3D_Solvers.h"
