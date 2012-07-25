@@ -280,16 +280,16 @@ public:
   /** default function to compute y
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param deriativeNumber number of the derivative to compute (optional, default = 0)
+   *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int deriativeNumber = 0) = 0;
+  virtual void computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber = 0) = 0;
 
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) = 0;
+  virtual void computeInput(const double time, Interaction& inter, unsigned int level = 0) = 0;
 
   virtual inline SP::SiconosMatrix jachlambda() const
   {
