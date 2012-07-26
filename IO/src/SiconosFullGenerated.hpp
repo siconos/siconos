@@ -36,19 +36,9 @@ SICONOS_IO_REGISTER(Relation,
                     (_pluginJacLg)
                     (_pluginf)
                     (_plugine)
-                    (relationType)
-                    (subType)
-                    (_interaction)
-                    (data)
-                    (_workR)
-                    (_workX)
-                    (_workXdot)
-                    (_workZ)
-                    (_workY)
-                    (_workL)
-                    (_Residuy)
-                    (_h_alpha)
-                    (_jachlambda))
+                    (_jachlambda)
+                    (_relationType)
+                    (_subType))
 SICONOS_IO_REGISTER(ControlManager,
                     (_allSensors)
                     (_allActuators)
@@ -146,7 +136,8 @@ SICONOS_IO_REGISTER(GraphProperties,
                     (symmetric))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianR, (Relation),
                                (_jachq)
-                               (_jachqDot))
+                               (_jachqDot)
+                               (_pluginJachq))
 SICONOS_IO_REGISTER_WITH_BASES(SchatzmanPaoli, (OneStepIntegrator),
                                (WMap)
                                (_WBoundaryConditionsMap)
@@ -190,13 +181,9 @@ SICONOS_IO_REGISTER_WITH_BASES(SampledPIDActuator, (Actuator),
 SICONOS_IO_REGISTER_WITH_BASES(LCP, (LinearOSNS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR, (Relation),
-                               (_ysize)
-                               (_xsize)
-                               (_qsize)
-                               (_workQ)
                                (_jachq)
                                (_jachqDot)
-                               (_jachlambda)
+                               (_jacglambda)
                                (_e)
                                (_contactForce)
                                (_jachqT))
@@ -265,11 +252,10 @@ SICONOS_IO_REGISTER(Interaction,
                     (_involvedDS)
                     (_nslaw)
                     (_relation)
-                    (_workX)
-                    (_workXq)
-                    (_workFree)
-                    (_workYp)
-                    (_workZ))
+                    (_data)
+                    (_Residuy)
+                    (_h_alpha)
+                    (_workYp))
 SICONOS_IO_REGISTER(DynamicalSystem,
                     (_number)
                     (_n)
@@ -363,7 +349,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS, (LagrangianDS),
 SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical, (LinearOSNS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR, (LagrangianR),
-                               (_pluginjqh)
                                (_pluginjqhdot)
                                (_NLh2dot))
 SICONOS_IO_REGISTER(Model,
@@ -426,7 +411,7 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS, (OneStepNSProblem),
                                (_MStorageType)
                                (_keepLambdaAndYState))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR),
-                               (jacgx))
+                               (_jacgx))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
                                (_indexSetLevelForProjection)
                                (_nbProjectionIteration)
@@ -439,8 +424,7 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingProjectOnConstraints, (TimeStepping),
                                (_doOnlyProj))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR, (LagrangianR),
                                (_hDot)
-                               (_pluginhDot)
-                               (_pluginJachq))
+                               (_pluginhDot))
 SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent, (Event),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw),
@@ -448,7 +432,6 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw),
                                (_Stiff)
                                (_ElasCof))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR),
-                               (_pluginJachq)
                                (_pluginJachlambda))
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection, (TimeStepping),
                                (_indexSetLevelForProjection)
@@ -489,8 +472,8 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR),
 SICONOS_IO_REGISTER_WITH_BASES(Equality, (LinearOSNS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR, (Relation),
-                               (Jachx)
-                               (Jacglambda))
+                               (_jachx)
+                               (_jacglambda))
 SICONOS_IO_REGISTER_WITH_BASES(Moreau, (OneStepIntegrator),
                                (WMap)
                                (_WBoundaryConditionsMap)
@@ -607,10 +590,10 @@ SICONOS_IO_REGISTER_WITH_BASES(CircularDS, (LagrangianDS),
                                (radius)
                                (massValue))
 SICONOS_IO_REGISTER_WITH_BASES(CircleCircleR, (CircularR),
-                               (ar1mr2))
+                              )
 SICONOS_IO_REGISTER_WITH_BASES(CircularR, (LagrangianScleronomousR),
-                               (r1)
-                               (r2))
+                               (_r1)
+                               (_r2))
 SICONOS_IO_REGISTER_WITH_BASES(Disk, (CircularDS),
                               )
 SICONOS_IO_REGISTER_WITH_BASES(DiskDiskR, (CircularR),
