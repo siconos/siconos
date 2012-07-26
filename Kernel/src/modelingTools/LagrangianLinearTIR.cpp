@@ -119,7 +119,7 @@ void LagrangianLinearTIR::initComponents(Interaction& inter)
 
 }
 
-void LagrangianLinearTIR::computeOutput(const double time, Interaction& inter, const unsigned int derivativeNumber)
+void LagrangianLinearTIR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
@@ -143,7 +143,7 @@ void LagrangianLinearTIR::computeOutput(const double time, Interaction& inter, c
 
 }
 
-void LagrangianLinearTIR::computeInput(const double time, Interaction& inter, const unsigned int level)
+void LagrangianLinearTIR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);

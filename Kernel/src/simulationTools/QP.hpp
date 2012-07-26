@@ -173,6 +173,20 @@ public:
     assert(false);
   }
 
+  void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&)
+  {
+    assert(false);
+  }
+
+  void preCompute(double)
+  {
+    assert(false);
+  }
+
+  void postCompute(double)
+  {
+    assert(false);
+  }
 
 };
 
