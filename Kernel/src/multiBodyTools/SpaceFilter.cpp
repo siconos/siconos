@@ -1100,11 +1100,6 @@ void SpaceFilter::insertInteraction(SP::Interaction inter)
   model()->nonSmoothDynamicalSystem()->topology()->insertInteraction(inter);
   model()->simulation()->computeLevelsForInputAndOutput(inter);
   inter->initialize(model()->simulation()->nextTime());
-  if (!_osnsinit)
-  {
-    model()->simulation()->initOSNS();
-    _osnsinit = true;
-  }
 }
 
 
@@ -1140,6 +1135,8 @@ void SpaceFilter::buildInteractions(double time)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
+
+  model()->simulation()->initOSNS();
 
 }
 
