@@ -34,14 +34,7 @@
 int main()
 {
 
-  SP::Model model;
-  SP::TimeDiscretisation timedisc;
-  SP::TimeStepping simulation;
-  SP::FrictionContact osnspb;
   // User-defined main parameters
-
-  SP::BulletSpaceFilter space_filter;
-
   double t0 = 0;                   // initial computation time
   double T = 20.0;                 // end of computation time
   double h = 0.005;                // time step
@@ -70,7 +63,7 @@ int main()
     osi.reset(new Moreau(theta));
 
     // -- Model --
-    model.reset(new Model(t0, T));
+    SP::Model model(new Model(t0, T));
 
     std::vector<SP::BulletWeightedShape> shapes;
 
@@ -132,10 +125,10 @@ int main()
     // ------------------
 
     // -- Time discretisation --
-    timedisc.reset(new TimeDiscretisation(t0, h));
+    SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
 
     // -- OneStepNsProblem --
-    osnspb.reset(new FrictionContact(3));
+    SP::FrictionContact osnspb(new FrictionContact(3));
 
     // -- Some configuration
 
@@ -167,7 +160,7 @@ int main()
     // -- The space filter performs broadphase collsion detection
     SP::btVector3 aabbmax(new btVector3(100, 100, 100));
     SP::btVector3 aabbmin(new btVector3(-100, -100, -100));
-    space_filter.reset(new BulletSpaceFilter(model, nslaw, aabbmin, aabbmax));
+    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model, nslaw, aabbmin, aabbmax));
 
     // -- The ground is a static object
     space_filter->collisionWorld()->addCollisionObject(&*ground);
@@ -175,8 +168,8 @@ int main()
     space_filter->staticShapes()->push_back(groundShape);
 
     // -- Moreau Time Stepping with Bullet Dynamical Systems
-    simulation.reset(new BulletTimeStepping(timedisc,
-                                            space_filter));
+    SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc,
+                                      space_filter));
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
