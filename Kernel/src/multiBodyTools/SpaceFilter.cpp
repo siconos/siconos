@@ -31,15 +31,15 @@ std::size_t hash_value(SP::Hashed const& h)
 class SpaceFilter::_BodyHash : public SiconosVisitor
 {
 public:
-  SP::SpaceFilter parent;
-  _BodyHash(SP::SpaceFilter p) : parent(p) {};
+  SpaceFilter& parent;
+  _BodyHash(SpaceFilter& p) : parent(p) {};
 
   void visit(SP::Disk pds)
   {
     int i, j, imin, imax, jmin, jmax;
 
-    unsigned int _bboxfactor = parent->bboxfactor();
-    unsigned int _cellsize = parent->cellsize();
+    unsigned int _bboxfactor = parent.bboxfactor();
+    unsigned int _cellsize = parent.cellsize();
 
     imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
     imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
@@ -51,7 +51,7 @@ public:
     {
       for (j = jmin; j <= jmax; ++j)
       {
-        parent->insert(pds, i, j, 0);
+        parent.insert(pds, i, j, 0);
       }
     }
   };
@@ -60,8 +60,8 @@ public:
   {
     int i, j, imin, imax, jmin, jmax;
 
-    unsigned int _bboxfactor = parent->bboxfactor();
-    unsigned int _cellsize = parent->cellsize();
+    unsigned int _bboxfactor = parent.bboxfactor();
+    unsigned int _cellsize = parent.cellsize();
 
     imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
     imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
@@ -73,7 +73,7 @@ public:
     {
       for (j = jmin; j <= jmax; ++j)
       {
-        parent->insert(pds, i, j, 0);
+        parent.insert(pds, i, j, 0);
       }
     }
   }
@@ -82,8 +82,8 @@ public:
   {
     int i, j, k, imin, imax, jmin, jmax, kmin, kmax;
 
-    unsigned int _bboxfactor = parent->bboxfactor();
-    unsigned int _cellsize = parent->cellsize();
+    unsigned int _bboxfactor = parent.bboxfactor();
+    unsigned int _cellsize = parent.cellsize();
 
     imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
     imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
@@ -100,7 +100,7 @@ public:
       {
         for (k = kmin; k <= kmax; ++k)
         {
-          parent->insert(pds, i, j, k);
+          parent.insert(pds, i, j, k);
         }
       }
     }
@@ -111,8 +111,8 @@ public:
   {
     int i, j, k, imin, imax, jmin, jmax, kmin, kmax;
 
-    unsigned int _bboxfactor = parent->bboxfactor();
-    unsigned int _cellsize = parent->cellsize();
+    unsigned int _bboxfactor = parent.bboxfactor();
+    unsigned int _cellsize = parent.cellsize();
 
     imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
     imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
@@ -129,7 +129,7 @@ public:
       {
         for (k = kmin; k <= kmax; ++k)
         {
-          parent->insert(pds, i, j, k);
+          parent.insert(pds, i, j, k);
         }
       }
     }
@@ -401,6 +401,8 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
         SP::Interaction inter(new Interaction(3,
                                               parent->_nslaw,
                                               rel, parent->_interID++));
+
+        // use link with ds number...
         inter->insert(ds1);
         inter->insert(ds2);
         parent->insertInteraction(inter);
@@ -1113,7 +1115,7 @@ void SpaceFilter::buildInteractions(double time)
   DSG0 = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   boost::shared_ptr<_BodyHash>
-  hasher(new _BodyHash(shared_from_this()));
+  hasher(new _BodyHash(*this));
   boost::shared_ptr<_FindInteractions>
   findInteractions(new _FindInteractions(shared_from_this(), time));
 

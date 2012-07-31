@@ -34,11 +34,11 @@ class ExternalBody :
 {
 public:
 
-  virtual void selfHash(SP::SpaceFilter) = 0;
+  virtual void selfHash(SpaceFilter&) = 0;
 
   virtual void selfFindInteractions(SP::SpaceFilter) = 0;
 
-  ACCEPT_VISITORS();
+  ACCEPT_STD_VISITORS();
 };
 
 TYPEDEF_SPTR(ExternalBody);
