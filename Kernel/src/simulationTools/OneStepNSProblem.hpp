@@ -28,6 +28,7 @@
 #include "NumericsOptions.h"
 #include "NumericsMatrix.h"
 #include "OSNSMatrix.hpp"
+#include <ctime>
 
 class Simulation;
 class DynamicalSystem;

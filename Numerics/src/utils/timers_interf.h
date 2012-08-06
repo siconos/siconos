@@ -57,6 +57,11 @@
 #ifdef HAVE_TIME_H
 #define __need_timespec
 #include <time.h>
+/* This is a little bit hackisch, but mingw32
+ * does not provide a timespec struct in time.h -- xhub */
+#if defined(__MINGW32__)
+#include <pthread.h>
+#endif
 #endif
 
 #ifdef HAVE_SYSTIMES_H

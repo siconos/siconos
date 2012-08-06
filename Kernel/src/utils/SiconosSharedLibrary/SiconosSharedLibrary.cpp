@@ -48,7 +48,7 @@ std::vector<PluginHandle> SiconosSharedLibrary::isPlugged;
 PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
-#ifdef _SYS_WNT
+#ifdef _WIN32
   HandleRes = LoadLibrary(pluginPath.c_str());
 #endif
 #ifdef _SYS_UNX
@@ -67,10 +67,10 @@ PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 //
 // getProcAddress
 //
-void* SiconosSharedLibrary::getProcAddress(PluginHandle plugin, const string& procedure)
+void * SiconosSharedLibrary::getProcAddress(PluginHandle plugin, const string& procedure)
 {
-#ifdef _SYS_WNT
-  return GetProcAddress(plugin, procedure.c_str());
+#ifdef _WIN32
+  return (void*) GetProcAddress(plugin, procedure.c_str());
 #endif
 #ifdef _SYS_UNX
   void* ptr = dlsym(plugin, procedure.c_str());
@@ -106,7 +106,7 @@ void SiconosSharedLibrary::closeAllPlugins()
 //
 const string SiconosSharedLibrary::getSharedLibraryExtension()
 {
-#ifdef _SYS_WNT
+#ifdef _WIN32
   return ".dll";
 #endif
 #ifdef _SYS_UNX

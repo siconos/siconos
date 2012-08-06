@@ -44,7 +44,7 @@ protected:
 public:
 
   /** plug-in */
-  PluginHandle fPtr;
+  void * fPtr;
 
   /** Default Constructor
    */

@@ -9,6 +9,10 @@
 # One may want to use a specific Numerics Library by setting
 # SiconosNumerics_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosNumerics)
 
+IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
+ENDIF()
+
 IF(SiconosNumerics_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for Numerics library in ${SiconosNumerics_LIBRARY_DIRECTORY}")
   FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics PATHS "${SiconosNumerics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)

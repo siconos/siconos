@@ -1,0 +1,52 @@
+This file is a brain dump for cross compiling from Linux to windows
+
+= Toolchain
+
+It is recommended to use the mxe environment : http://mxe.cc/ https://github.com/mxe/mxe
+
+Then you have to install the dependencies :
+make gcc boost gmp cppunit lapack libxml2# to complete
+
+No python :(
+
+= Python
+
+/!\ This is really hackisch
+* get the python installer (python-*.msi)
+* create a dir and cd into it
+* uncompress it using cabextract : cabextract python-*.msi
+
+To get numpy
+* download the exe
+* create a dir
+* unzip it with unzip : unzip numpy*.exe
+
+You need swig on the host machine (and also numpy)
+
+= Sampled command to build Siconos:
+
+* Numerics
+CFLAGS='-U__STRICT_ANSI__' cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install ~/siconos/Numerics/
+* Kernel
+cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install -DSiconosNumerics_INCLUDE_DIRS=/scratch/Olivier/siconos-windows/install/include/Siconos/Numerics/ -DSiconosNumerics_FOUND=/scratch/Olivier/siconos-windows/install/lib/libSiconosNumerics.dll ~/siconos/Kernel/
+* Front-End
+cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install -DSiconosNumerics_INCLUDE_DIRS=/scratch/Olivier/siconos-windows/install/include/Siconos/Numerics/ -DSiconosNumerics_FOUND=/scratch/Olivier/siconos-windows/install/lib/libSiconosNumerics.dll -DSWIG_DIR=/usr/share/swig/2.0.7/ ~/siconos/Front-End/ -DPYTHON_LIBRARIES=/scratch/Olivier/mingw32/python/lib/python27.dll -DPYTHON_INCLUDE_DIR=/scratch/Olivier/mingw32/python/include/ -DSiconosKernel_FOUND=/scratch/Olivier/siconos-windows/install/lib/libSiconosKernel.dll -DPYTHON_NUMPY_INCLUDE_DIR=/scratch/Olivier/mingw32/numpy/PLATLIB/numpy/core/include
+
+= BUGS
+* When using a prefix to install Siconos, it fails to find the already installed required Siconos parts
+* you need to manually copy the dll in the same directory as the executable. This is a problem when generating the
+cmake files in the Kernel. Hacky workaround : find . -name CTestTestfile.cmake | grep test | xargs dirname | xargs -n 1 cp src/libSiconosNumerics.dll
+You have to do the same for the Kernel library
+Good Fix : set the Path environnment variable to something like : Z:\\scratch\\Olivier\\siconos-windows\\build-numerics\\src:$TRansformed_install_prefix/lib
+Sed Command to transform an unix path to a windows one (simple path only) and to feed it to an env. var. : sed -e 's,^,Z:,' -e 's,/,\\\\,g' 
+
+= TODO
+* Polish the Front-End cross-compilation
+* Fix bugs !
+* Try to run Python tests : you need to install python through wine (requires graphical interface), install py.test, ...
+* create an installer (nsis is available from mxe)
+* Make examples work !
+* Adapt siconos script !
+
+= TIPS
+* Use Dependency Walker to see the dll used by a dll

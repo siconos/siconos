@@ -35,7 +35,7 @@ private:
   */
   ACCEPT_SERIALIZATION(SubPluggedObject);
   /** function pointer to the parent PluggedObject*/
-  PluginHandle _parentfPtr;
+  void * _parentfPtr;
   /** Matrix to temporary storage of the output */
   SP::SiconosMatrix _tmpMat;
   /** Column index */
@@ -127,7 +127,7 @@ public:
   /** Get the user defined plugin
    * \return the user defined plugin
    */
-  inline PluginHandle getParentfPtr() const
+  inline void * getParentfPtr() const
   {
     return _parentfPtr;
   };

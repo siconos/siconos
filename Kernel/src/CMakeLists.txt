@@ -113,6 +113,16 @@ IF(NOT Boost_GRAPH_FOUND)
 ENDIF(NOT Boost_GRAPH_FOUND)
 
 COMPILE_WITH(LibXml2 REQUIRED)
+# This is needed to overcome some shortcomings in the FindXml2 Module
+# When we are crosscompiling to windows, we want to link external lib statically
+# But libxml2 archive needs zlib, iconv and an obscure W32api lib. pkg-config
+# gives this information, but it is not taken into account in the cmake Module
+IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+  FOREACH(_EXTRA_LIB ${PC_LIBXML_LIBRARIES})
+    LIST(APPEND ${PROJECT_NAME}_LINK_LIBRARIES ${_EXTRA_LIB})
+  ENDFOREACH()
+ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+
 COMPILE_WITH(LAPACK REQUIRED)
 COMPILE_WITH(BLAS REQUIRED)
 IF(NOT WITHOUT_ATLAS)
@@ -167,7 +177,13 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 LIBRARY_PROJECT_SETUP()
 
 # wrappers for tests are needed
-SET(TEST_WRAP TRUE)
+# XXX maybe it's time to get rid of this -- xhub
+IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+  SET(TEST_WRAP FALSE)
+ELSE()
+  SET(TEST_WRAP TRUE)
+ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+
 
 #
 # tests with cppunit

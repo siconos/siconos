@@ -62,16 +62,32 @@ MACRO(SICONOS_PROJECT
     CHECK_C_COMPILER_FLAG("-Wall" C_HAVE_WALL)
     CHECK_C_COMPILER_FLAG("-lm" C_HAVE_LINKER_M)
     CHECK_C_COMPILER_FLAG("-Wextra -Wno-unused-parameter" C_HAVE_WEXTRA)
+    CHECK_C_COMPILER_FLAG("-static -static-libgcc" C_HAVE_STATIC_LINK)
   ENDIF(CMAKE_C_COMPILER)
 
   IF(CMAKE_CXX_COMPILER)
     INCLUDE(TestCXXAcceptsFlag)
+    CHECK_CXX_ACCEPTS_FLAG("-static -static-libgcc -static-libstdc++" CXX_HAVE_STATIC_LINK)
   ENDIF(CMAKE_CXX_COMPILER)
 
   # check some headers
   CHECK_INCLUDE_FILE(time.h HAVE_TIME_H)
   CHECK_INCLUDE_FILE(sys/times.h HAVE_SYSTIMES_H)
-     
+
+  # Link external lib statically. This icomes handy when we want to distribute
+  # Siconos on Mac or Windows
+  # TODO complete this for other lib (libxml2, gmp, boost, ...)
+  IF(LINK_STATICALLY)
+    SET(BLA_STATIC TRUE) # For blas/lapack
+    IF(NOT (C_HAVE_STATIC_LINK AND CXX_HAVE_STATIC_LINK))
+      message(FATAL_ERROR "Your compiler has to support static linking flags (-static -static-libgcc -static-libstdc++ -static-libgfortran)")
+    ELSE()
+      APPEND_C_FLAGS("-static -static-libgcc")
+      APPEND_CXX_FLAGS("-static -static-libgcc -static-libstdc++")
+      APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
+    ENDIF()
+  ENDIF(LINK_STATICALLY)
+
   # Some http://pipol.inria.fr configurations
 
   # system configuration directory

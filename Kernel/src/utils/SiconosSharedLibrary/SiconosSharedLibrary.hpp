@@ -24,13 +24,17 @@
 #define SICONOSSHAREDLIBRARY_H
 
 #include <iostream>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include <vector>
 #include "SiconosSerialization.hpp"
 
+#ifndef _WIN32
 #define _SYS_UNX
+#endif
 
-#ifdef _SYS_WNT
+#ifdef _WIN32
 #include <windows.h>
 #define DLEXPORT __declspec(dllexport)
 typedef HMODULE PluginHandle;
@@ -83,7 +87,7 @@ public:
    *  \exception SiconosSharedLibraryException if procedure not found
    *  \return pointer on procedure
    */
-  static void* getProcAddress(PluginHandle plugin, const std::string& procedure);
+  static void * getProcAddress(PluginHandle plugin, const std::string& procedure);
 
   /**  Closes plugin
    *  \param PluginHandle plugin : plugin handle
