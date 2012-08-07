@@ -49,7 +49,7 @@ private:
   ACCEPT_SERIALIZATION(BlockMatrix);
 
 
-  /** A container of pointers to SiconosMatrix*
+  /** A container of pointers to SiconosMatrix
    */
   SP::BlocksMat _mat;
 
@@ -425,6 +425,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-DEFINE_SPTR(BlockMatrix);
+//DEFINE_SPTR(BlockMatrix);
 
 #endif

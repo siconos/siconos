@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
     (*PosIniBlock)(0) = 0.5;
     (*PosIniBlock)(1) = 0.5;
     (*PosIniBlock)(2) = 0.0;
+
     //3. Set the initial velocity of the block in function of the initial relative velocity of the contact point A
     SP::SiconosVector VelIniBlock(new SiconosVector(Nfreedom));
     /*
@@ -66,6 +67,7 @@ int main(int argc, char* argv[])
     (*VelIniBlock)(0) = 0.0;
     (*VelIniBlock)(1) = 0.0;
     (*VelIniBlock)(2) = 0.0;
+
     //4. Instantiate the object of "LagrangianTIDS"
     SP::LagrangianLinearTIDS RockingBlock(new LagrangianLinearTIDS(PosIniBlock, VelIniBlock, Mass));
     //5. Set the external force
@@ -98,11 +100,11 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     // Interaction at contact point 1
     //SP::Relation relation1(new LagrangianLinearTIR(H, E));
-    SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1"));
+    SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1", "RockingBlockPlugin:G1dot"));
     SP::Interaction inter1(new Interaction("contact1", allDS, 1, 1, nslaw, relation1));
     // Interaction at contact point 2
     //SP::Relation relation2(new LagrangianLinearTIR(H, E));
-    SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2"));
+    SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2", "RockingBlockPlugin:G2dot"));
     SP::Interaction inter2(new Interaction("contact2", allDS, 2, 1, nslaw, relation2));
     // Interactions for the whole dynamical system
     allInteractions.insert(inter1);

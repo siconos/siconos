@@ -38,7 +38,8 @@
 #include "FirstOrderLinearTIDS.hpp"
 
 class DynamicalSystem;
-class BlockVector;
+
+
 
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 

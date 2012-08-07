@@ -82,6 +82,7 @@ void LagrangianScleronomousR::zeroPlugin()
 {
   LagrangianR::zeroPlugin();
   _pluginJachq.reset(new PluggedObject());
+  _pluginjqhdot.reset(new PluggedObject());
 }
 
 void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
@@ -127,18 +128,20 @@ void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter
 
 void LagrangianScleronomousR::computeJachqDot(const double time, Interaction& inter)
 {
-
-  if (_pluginjqhdot->fPtr)
+  if (_pluginjqhdot)
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SiconosVector workQ = *inter.data(q0);
-    SiconosVector workZ = *inter.data(z);
-    SiconosVector workQdot = *inter.data(q1);
+    if (_pluginjqhdot->fPtr)
+    {
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      SiconosVector workQ = *inter.data(q0);
+      SiconosVector workZ = *inter.data(z);
+      SiconosVector workQdot = *inter.data(q1);
 
-    // get vector lambda of the current interaction
-    ((FPtr2)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *inter.data(z) = workZ;
+      // get vector lambda of the current interaction
+      ((FPtr2)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *inter.data(z) = workZ;
+    }
   }
 }
 

@@ -96,6 +96,12 @@
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
  
+#define ACCEPT_NONVIRTUAL_VISITORS()                                           \
+  template<typename Archive> friend class SiconosSerializer;            \
+  void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
+  inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
+ 
 #define ACCEPT_SP_VISITORS()                                            \
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 

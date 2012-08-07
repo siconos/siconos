@@ -31,6 +31,7 @@
 #include "DynamicalSystem.hpp"
 #include "LagrangianDS.hpp"
 #include "EventFactory.hpp"
+#include "BlockMatrix.hpp"
 
 #define DEBUG_MESSAGES 1
 
@@ -119,9 +120,9 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %d\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
   boost::tie(uibegin, uipend) = indexSet0->vertices();
@@ -201,9 +202,9 @@ void EventDriven::updateIndexSet(unsigned int i)
     }
   }
 
-  DEBUG_PRINTF("update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
-  DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets end : indexSet0 size : %d\n", indexSet0->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %d\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet2 size : %d\n", indexSet2->size());
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()
@@ -455,11 +456,25 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    SP::SiconosMatrix jacotmp = (*it)->jacobianRhsx(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
+    if (Type::value(**it) == Type::LagrangianDS ||
+        Type::value(**it) == Type::LagrangianLinearTIDS)
     {
-      for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
-        jacob[i++] = (*jacotmp)(k, j);
+      LagrangianDS& lds = *boost::static_pointer_cast<LagrangianDS>(*it);
+      BlockMatrix& jacotmp = *lds.jacobianRhsx();
+      for (unsigned int j = 0; j < (*it)->getN(); ++j)
+      {
+        for (unsigned int k = 0; k < (*it)->getDim(); ++k)
+          jacob[i++] = jacotmp(k, j);
+      }
+    }
+    else
+    {
+      SiconosMatrix& jacotmp = *(*it)->jacobianRhsx(); // Pointer link !
+      for (unsigned int j = 0; j < (*it)->getN(); ++j)
+      {
+        for (unsigned int k = 0; k < (*it)->getDim(); ++k)
+          jacob[i++] = jacotmp(k, j);
+      }
     }
   }
 }

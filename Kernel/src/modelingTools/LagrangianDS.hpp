@@ -27,7 +27,10 @@
 #include "DynamicalSystem.hpp"
 #include "Plugin.hpp"
 #include "BoundaryCondition.hpp"
+
 class DynamicalSystem;
+class BlockMatrix;
+
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
 typedef void (*FPtrMass)(unsigned int, const double*, double*, unsigned int, double*);
@@ -161,14 +164,15 @@ protected:
   /** memory of previous velocities of the system */
   SP::SiconosMemory _velocityMemory;
 
+  SP::BlockMatrix _jacxRhs;
   /** "Reaction" due to the non smooth law - The index corresponds to the kinematic
-   * level of the corresponding constraints. It mainly depends on what the simulation
-   * part want to store, but some rules have to be followed. For instance :
-   *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
-   *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
-   *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
-   * in position
-   */
+     * level of the corresponding constraints. It mainly depends on what the simulation
+     * part want to store, but some rules have to be followed. For instance :
+     *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
+     *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
+     *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
+     * in position
+     */
   std::vector<SP::SiconosVector> _p;
 
   /** mass of the system */
@@ -820,6 +824,22 @@ public:
    *  \param a pointer on the plugin function
    */
   void setComputeJacobianNNLqDotFunction(FPtr5 fct);
+
+  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
+   *  \return SimpleMatrix
+   */
+  inline const BlockMatrix& getJacobianRhsx() const
+  {
+    return *_jacxRhs;
+  }
+
+  /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SP::BlockMatrix jacobianRhsx() const
+  {
+    return _jacxRhs;
+  }
 
   /** default function to compute the mass
    */

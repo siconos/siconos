@@ -434,7 +434,8 @@ public:
 
   friend struct IsBlock;
 
-  ACCEPT_STD_VISITORS();
+  //  temporary workaround, the visitor has to be removed or rework -- xhub
+  ACCEPT_NONVIRTUAL_VISITORS();
 
 };
 

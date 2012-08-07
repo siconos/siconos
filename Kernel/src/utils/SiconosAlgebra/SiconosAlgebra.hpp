@@ -141,6 +141,7 @@ class SiconosMatrix;
 DEFINE_SPTR(SiconosMatrix);
 
 DEFINE_SPTR(SimpleMatrix);
+DEFINE_SPTR(BlockMatrix);
 
 /** A collection of pointers to matrices ; blocksMat is a typedef of
     boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */

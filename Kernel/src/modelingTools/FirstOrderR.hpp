@@ -205,25 +205,25 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  SP::SiconosMatrix C() const
+  inline SP::SiconosMatrix C() const
   {
-    return jachx();
+    return _jachx;
   }
   /**
   * return a SP on the D matrix.
   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
   */
-  SP::SiconosMatrix D() const
+  inline SP::SiconosMatrix D() const
   {
-    return jachlambda();
+    return _jachlambda;
   }
   /**
   * return a SP on the B matrix.
   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
   */
-  SP::SiconosMatrix B() const
+  inline SP::SiconosMatrix B() const
   {
-    return jacglambda();
+    return _jacglambda;
   }
 
 };

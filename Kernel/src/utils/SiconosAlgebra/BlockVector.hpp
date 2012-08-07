@@ -78,7 +78,7 @@ public:
 
   /** destructor
    */
-  virtual ~BlockVector();
+  ~BlockVector();
 
   /** get the vector size, ie the total number of (double) elements in
      *  the vector
@@ -306,7 +306,8 @@ public:
   double norm2() const;
   BlockVector& operator += (const SiconosVector& vIn);
   BlockVector& operator -= (const SiconosVector& vIn);
-  ACCEPT_STD_VISITORS();
+
+  ACCEPT_NONVIRTUAL_VISITORS();
 
 };
 

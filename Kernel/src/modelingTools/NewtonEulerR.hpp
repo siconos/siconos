@@ -237,30 +237,30 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual SP::SiconosMatrix C() const
+  virtual inline SP::SiconosMatrix C() const
   {
-    return jachq();
+    return _jachq;
   }
   /**
   * return a SP on the D matrix.
   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
   */
-  virtual SP::SiconosMatrix D() const
+  virtual inline SP::SiconosMatrix D() const
   {
-    return jachlambda();
+    return _jachlambda;
   }
   /**
   * return a SP on the B matrix.
   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
   */
-  virtual SP::SiconosMatrix B() const
+  virtual inline SP::SiconosMatrix B() const
   {
-    return jacglambda();
+    return _jacglambda;
   }
   /** A buffer containing the forces due to this.
   It is an output unused for the computation.
   */
-  SP::SiconosVector contactForce() const
+  inline SP::SiconosVector contactForce() const
   {
     return _contactForce;
   };

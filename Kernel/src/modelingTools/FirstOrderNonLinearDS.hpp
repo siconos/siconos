@@ -25,10 +25,8 @@
 #define FIRSTORDERNONLINEARDS_H
 
 #include "DynamicalSystem.hpp"
-#include "BlockMatrix.hpp"
 
 class DynamicalSystem;
-class BlockMatrix;
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
@@ -251,10 +249,7 @@ public:
   /** get the value of invM
    *  \return BlockMatrix
    */
-  inline const BlockMatrix getInvMBlock() const
-  {
-    return *_invM;
-  }
+  //  inline const BlockMatrix getInvMBlock() const { return *_invM; }
 
   /** get invM
    *  \return pointer on a SiconosMatrix
