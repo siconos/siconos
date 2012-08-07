@@ -5,7 +5,9 @@ This file is a brain dump for cross compiling from Linux to windows
 It is recommended to use the mxe environment : http://mxe.cc/ https://github.com/mxe/mxe
 
 Then you have to install the dependencies :
-make gcc boost gmp cppunit lapack libxml2# to complete
+make gcc boost gmp cppunit blas lapack libxml2 pthreads # to complete
+
+There is a bug in mxe, you have to run i686-pc-mingw32-ranlib on liblapack.a
 
 No python :(
 
@@ -23,6 +25,21 @@ To get numpy
 
 You need swig on the host machine (and also numpy)
 
+To run the Python tests, you need to install 
+* Python: wine msiexec /i python-*.msi
+* Numpy: wine numpy*.exe
+* pytest:
+  * first get setuptools*.exe, install it ( wine setuptools*.exe )
+  * Add to the windows Path the following directories: C:\Python27 C:\Python27\Scripts
+    wine cmd 
+    REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /d "%PATH%;C:\Python27;C:\Python27\Scripts" /f
+  * Pip: http://www.pip-installer.org/en/latest/installing.html#using-the-installer
+    curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py > get-pip.py
+    wine python.exe get-pip.py
+  * Pytest : wine pip.exe install -U pytest
+
+You should be all set
+
 = Sampled command to build Siconos:
 
 * Numerics
@@ -34,17 +51,11 @@ cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe
 
 = BUGS
 * When using a prefix to install Siconos, it fails to find the already installed required Siconos parts
-* you need to manually copy the dll in the same directory as the executable. This is a problem when generating the
-cmake files in the Kernel. Hacky workaround : find . -name CTestTestfile.cmake | grep test | xargs dirname | xargs -n 1 cp src/libSiconosNumerics.dll
-You have to do the same for the Kernel library
-Good Fix : set the Path environnment variable to something like : Z:\\scratch\\Olivier\\siconos-windows\\build-numerics\\src:$TRansformed_install_prefix/lib
-Sed Command to transform an unix path to a windows one (simple path only) and to feed it to an env. var. : sed -e 's,^,Z:,' -e 's,/,\\\\,g' 
 
 = TODO
 * Polish the Front-End cross-compilation
 * Fix bugs !
-* Try to run Python tests : you need to install python through wine (requires graphical interface), install py.test, ...
-* create an installer (nsis is available from mxe)
+* create an installer (nsis is available from mxe and works fine with cpack)
 * Make examples work !
 * Adapt siconos script !
 
