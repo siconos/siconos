@@ -77,8 +77,12 @@ MACRO(SICONOS_PROJECT
   # Link external lib statically. This icomes handy when we want to distribute
   # Siconos on Mac or Windows
   # TODO complete this for other lib (libxml2, gmp, boost, ...)
+  IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    OPTION(LINK_STATICALLY "Link external libraries statically (on if crosscompiling from linux to windows)" ON)
+  ENDIF()
   IF(LINK_STATICALLY)
     SET(BLA_STATIC TRUE) # For blas/lapack
+    # For the compiler
     IF(NOT (C_HAVE_STATIC_LINK AND CXX_HAVE_STATIC_LINK))
       message(FATAL_ERROR "Your compiler has to support static linking flags (-static -static-libgcc -static-libstdc++ -static-libgfortran)")
     ELSE()
@@ -87,6 +91,12 @@ MACRO(SICONOS_PROJECT
       APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
     ENDIF()
   ENDIF(LINK_STATICALLY)
+
+  IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+    SET(EXE_EXT ".exe")
+  ELSE()
+    SET(EXE_EXT)
+  ENDIF()
 
   # Some http://pipol.inria.fr configurations
 
@@ -256,9 +266,9 @@ MACRO(SICONOS_PROJECT
   SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
   SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
   SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake_${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Siconos-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
   
-  SET(CPACK_PACKAGE_CONTACT "Siconos development team")
+  SET(CPACK_PACKAGE_CONTACT "Siconos development team <siconos-team@lists.gforge.inria.fr>")
 
   SET(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEBIAN_PACKAGE_DEPENDS})
   

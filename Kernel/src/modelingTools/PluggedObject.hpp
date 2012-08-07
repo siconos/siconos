@@ -86,7 +86,7 @@ public:
   void setComputeFunction(const std::string& pluginPath, const std::string& functionName)
   {
     SSL::setFunction(&fPtr, pluginPath, functionName);
-    _pluginName = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
+    _pluginName = pluginPath.substr(0, pluginPath.find_last_of(".")) + ":" + functionName;
   };
 
   /* Connect a function to fPtr

@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
 import sys
+import os
 from subprocess import call
 
 
-retcode = call("py.test " + sys.argv[1], shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig", "PYTHONDONTWRITEBYTECODE" : "1"})
+retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True, env={
+"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig",
+"PYTHONDONTWRITEBYTECODE": "1",
+"HOME": os.environ['HOME'],
+"Path": "${SICONOS_NUMERICS_PATH}"
+})
 exit(retcode)
