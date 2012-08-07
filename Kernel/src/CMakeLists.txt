@@ -330,3 +330,5 @@ MESSAGE(STATUS " The Numerics library used is : ${SiconosNumerics_FOUND}")
 MESSAGE(STATUS " To get more information about dependencies, config or else, ")
 MESSAGE(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
 MESSAGE(STATUS "=================================================================================================\n")
+
+WRITE_NOTES()

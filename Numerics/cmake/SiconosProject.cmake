@@ -70,6 +70,27 @@ MACRO(SICONOS_PROJECT
     CHECK_CXX_ACCEPTS_FLAG("-static -static-libgcc -static-libstdc++" CXX_HAVE_STATIC_LINK)
   ENDIF(CMAKE_CXX_COMPILER)
 
+  # Get c compiler version (cf FindBoost.cmake version 2.8.7)
+  IF(CMAKE_C_COMPILER)
+    EXEC_PROGRAM(${CMAKE_C_COMPILER}
+      ARGS -dumpversion
+      OUTPUT_VARIABLE C_COMPILER_VERSION)
+  ENDIF(CMAKE_C_COMPILER)
+
+  # Get fortran compiler version (cf FindBoost.cmake version 2.8.7)
+  IF(CMAKE_Fortran_COMPILER)
+    EXEC_PROGRAM(${CMAKE_Fortran_COMPILER}
+      ARGS -dumpversion
+      OUTPUT_VARIABLE Fortran_COMPILER_VERSION)
+  ENDIF(CMAKE_Fortran_COMPILER)
+
+  # Get cxx compiler version (cf FindBoost.cmake version 2.8.7)
+  IF(CMAKE_CXX_COMPILER)
+    EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+      ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+      OUTPUT_VARIABLE CXX_COMPILER_VERSION)
+  ENDIF(CMAKE_CXX_COMPILER)
+
   # check some headers
   CHECK_INCLUDE_FILE(time.h HAVE_TIME_H)
   CHECK_INCLUDE_FILE(sys/times.h HAVE_SYSTIMES_H)
@@ -111,18 +132,6 @@ MACRO(SICONOS_PROJECT
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
     
-    IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
-      # a note file for the dashboard
-      FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
-      FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "svn revision : ${SVN_REVISION}\n")
-      # the default buildname
-      FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
-    ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
-
     IF(BUILDNAME_OPTIONS)
       SET(BUILDNAME "${_PROJECT_NAME}-${BUILDNAME_OPTIONS}")
     ELSE(BUILDNAME_OPTIONS)
@@ -275,3 +284,24 @@ MACRO(SICONOS_PROJECT
   INCLUDE(CPack)
 
 ENDMACRO(SICONOS_PROJECT)
+
+MACRO(WRITE_NOTES)
+  IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+    # a note file for the dashboard
+    FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
+    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "svn revision : ${SVN_REVISION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
+    # the default buildname
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${C_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CXX_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${Fortran_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "all libraries : ${${PROJECT_NAME}_LINK_LIBRARIES}\n")
+  ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+ENDMACRO(WRITE_NOTES)
