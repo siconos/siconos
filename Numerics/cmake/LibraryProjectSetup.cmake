@@ -192,16 +192,19 @@ MACRO(LIBRARY_PROJECT_SETUP)
     IF(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
       INSTALL(TARGETS 
         ${PROJECT_NAME}_static ${PROJECT_NAME}_shared 
+        RUNTIME DESTINATION ${_install_lib}
         ARCHIVE DESTINATION ${_install_lib}
         LIBRARY DESTINATION ${_install_lib})
     ELSEIF(BUILD_SHARED_LIBS) 
       INSTALL(TARGETS 
         ${PROJECT_NAME}_shared
+        RUNTIME DESTINATION ${_install_lib}
         ARCHIVE DESTINATION ${_install_lib}
         LIBRARY DESTINATION ${_install_lib})
     ELSEIF(BUILD_STATIC_LIBS)
       INSTALL(TARGETS 
         ${PROJECT_NAME}_static
+        RUNTIME DESTINATION ${_install_lib}
         ARCHIVE DESTINATION ${_install_lib}
         LIBRARY DESTINATION ${_install_lib})
     ELSE(BUILD_STATIC_LIBS)
