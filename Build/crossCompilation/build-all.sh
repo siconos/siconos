@@ -19,7 +19,7 @@ build_component() {
 
 make_component() {
 	make ExperimentalStart
-	make ExperimentalConfigure
+#	make ExperimentalConfigure # not working right now -- xhub
 	make -j5 ARGS=-j5 ExperimentalBuild ARGS=-j5
 	timeout 10s make test
 	make -j5 ARGS=-j5 ExperimentalTest ARGS=-j5

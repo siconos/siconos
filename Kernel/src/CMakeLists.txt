@@ -197,8 +197,8 @@ IF(WITH_TESTING)
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
   # the number of backslases matters ! This mess is just to have a correct
   # Path vairable, with an escaped ';' in the generated cmake file -- xhub
-  SET(PATH_FOR_CC
-   ".\\\\\\\\\\\\\\\\\;${CMAKE_CURRENT_BINARY_DIR}/plugin\\\\\\\\\\\\\\\\\;${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
+  SET(PATH_FOR_PLUGIN
+   ".\;${CMAKE_CURRENT_BINARY_DIR}/plugin\;${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
   #  GET_FILENAME_COMPONENT(SICONOS_LIB_PATH SiconosNumerics_FOUND PATH)
   SET(SICONOS_LIB_PATH "${CMAKE_INSTALL_PREFIX}/lib")
 

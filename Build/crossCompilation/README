@@ -5,7 +5,7 @@ This file is a brain dump for cross compiling from Linux to windows
 It is recommended to use the mxe environment : http://mxe.cc/ https://github.com/mxe/mxe
 
 Then you have to install the dependencies :
-make gcc boost gmp cppunit blas lapack libxml2 pthreads # to complete
+make gcc boost gmp cppunit blas cblas lapack libxml2 pthreads # to complete
 
 There is a bug in mxe, you have to run i686-pc-mingw32-ranlib on liblapack.a
 
