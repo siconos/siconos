@@ -69,7 +69,7 @@ void CdashDumpTest(CppUnit::Test *test, char* myname)
 
   std::cout << "MESSAGE( STATUS Adding unit test : " << test->getName() << " ) "
             << std::endl;
-  std::cout << "ADD_TEST(" << test->getName() << " "
+  std::cout << "ADD_CPPUNIT_TEST(" << test->getName() << " "
             << EMULATOR << " " << myname << WRAPPER << " " << test->getName()
             << ")" << std::endl;
 };
@@ -120,6 +120,9 @@ int main(int argc, char** argv)
     std::string arg = argv[1];
     if (strcmp(argv[1], "--cdash-prepare") == 0)
     {
+      std::cout << "# this is a ctest input file" << std::endl;
+      std::cout << "include(SiconosTestConfig.cmake)" << std::endl;
+
       CdashDump(testSuite, argv[2]);
     }
   }
