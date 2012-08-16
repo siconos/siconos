@@ -674,7 +674,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     dk is saved in phiVector.
     */
     DSCAL(n , -1.0 , sphi_z, incx);
-    DGESV(n, 1, sjacobianPhi_z, n, sipiv, sphi_z, n, infoDGESV);
+    DGESV(n, 1, sjacobianPhi_z, n, sipiv, sphi_z, n, &infoDGESV);
     if (infoDGESV)
     {
       printf("DGEV error %d.\n", infoDGESV);

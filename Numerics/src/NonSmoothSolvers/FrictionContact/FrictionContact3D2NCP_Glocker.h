@@ -50,7 +50,7 @@
 */
 #include "NumericsMatrix.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -104,7 +104,7 @@ extern "C"
   /** free memory for friction contact to NCP-Glocker */
   void NCPGlocker_free();
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

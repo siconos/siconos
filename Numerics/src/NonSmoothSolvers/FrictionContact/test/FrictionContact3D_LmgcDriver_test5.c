@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "misc.h"
 
 int main(void)
 {
@@ -32,11 +32,11 @@ int main(void)
   {
     7.500000000000000000000000e-01,     7.500000000000000000000000e-01,     7.500000000000000000000000e-01,     7.500000000000000000000000e-01
   };
-  int row[16] =
+  unsigned int row[16] =
   {
     1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,   4
   };
-  int column[16] =
+  unsigned int column[16] =
   {
     1,  2,  3,  4,  1,  2,  3,  4,  1,  2,  3,  4,  1,  2,  3,   4
   };

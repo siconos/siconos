@@ -41,7 +41,8 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   int itermax = options->iparam[0];
   double errmax = options->dparam[0];
 
-  int i, j, iter1, nrhs, info2;
+  int i, j, iter1, nrhs;
+  int info2 = 0;
   int incx = 1, incy = 1;
 
   double alpha, beta, mina, aa;
@@ -144,7 +145,7 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
 
 
 
-  DPOTRF(LA_UP, n, DPO , n, info2);
+  DPOTRF(LA_UP, n, DPO , n, &info2);
 
   if (info2 != 0)
   {
@@ -203,10 +204,10 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
     DAXPY(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
-    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
 
 
-    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
 
     DCOPY(n, znum1, incx, z, incy);
 

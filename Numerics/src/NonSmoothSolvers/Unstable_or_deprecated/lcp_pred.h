@@ -33,7 +33,7 @@ typedef struct
 } method_lcp;
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -159,7 +159,7 @@ extern "C"
                                 double *z, double *w,
                                 int *it_end, int *itt_end , double *res);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

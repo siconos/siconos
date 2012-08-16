@@ -7,6 +7,8 @@
 #include "ioMatrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/progress.hpp>
+
+#include "SiconosAlgebra.hpp"
 using namespace std;
 //Default constructor
 OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
@@ -1158,8 +1160,7 @@ void OSNSMultipleImpact::ComputeImpact()
   {
     if (YesSaveByMatrix)
     {
-      ioMatrix io(NameFile.c_str(), "ascii");
-      io.write(*_DataMatrix, "noDim");
+      ioMatrix::write(NameFile.c_str(), "ascii", *_DataMatrix, "noDim");
     }
     else
       OutputFile.close();

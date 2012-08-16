@@ -121,7 +121,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   InteractionsGraph::VIterator uipend, uip;
 
-  for (tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
+  for (boost::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
 

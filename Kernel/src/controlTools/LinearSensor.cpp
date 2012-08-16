@@ -18,7 +18,6 @@
 */
 #include "LinearSensor.hpp"
 #include "SensorFactory.hpp"
-#include "ioMatrix.hpp"
 #include "DynamicalSystem.hpp"
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
@@ -51,9 +50,7 @@ void LinearSensor::initialize(SP::Model m)
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
   if (colC != _nDim)
   {
-    char err[200];
-    snprintf(err, 200, "The number of column of the C matrix must be equal to the length of x\nHere col(C) = %i and length(x) = %i", colC, _nDim);
-    RuntimeException::selfThrow(err);
+    RuntimeException::selfThrow(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
   }
   if (_matD)
   {

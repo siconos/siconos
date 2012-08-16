@@ -164,13 +164,13 @@ int main()
   assert(equal3(iv, v));
 
   int ipiv[3];
-  int info;
+  int info = 0;
 
   START_TIMER(t6);
   for (i = 0; i < 1; ++i)
   {
     cpy3(v, x);
-    DGESV(3, 1, a, 3, ipiv, x, 3, info);
+    DGESV(3, 1, a, 3, ipiv, x, 3, &info);
     v[0] += 0.0001;
   }
   STOP_TIMER(t6);
@@ -263,7 +263,7 @@ int main()
 
     cpy3x3(A + 9 * i, a);
 
-    DGESV(3, 1, a, 3, ipiv, x, 3, info);
+    DGESV(3, 1, a, 3, ipiv, x, 3, &info);
 
     if (! info)
     {

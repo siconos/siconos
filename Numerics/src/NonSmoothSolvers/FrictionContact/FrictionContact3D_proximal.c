@@ -64,7 +64,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   double rho = dparam[3];
   double minusrho = -1.0 * rho;
 
-  double * reactionold = malloc(n * sizeof(double));
+  double * reactionold = (double *)malloc(n * sizeof(double));
   DCOPY(n , reaction , 1 , reactionold , 1);
 
 

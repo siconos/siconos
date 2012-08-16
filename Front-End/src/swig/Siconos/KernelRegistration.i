@@ -88,7 +88,6 @@
   PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                       \
   PY_REGISTER(InteractionsSet);                                    \
   PY_REGISTER(BoundaryCondition);                                  \
-  PY_REGISTER(ioMatrix);                                           \
   PY_REGISTER_BULLET_MAYBE();
 
 #ifdef WITH_BULLET

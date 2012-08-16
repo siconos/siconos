@@ -30,7 +30,7 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // input g
   if (FORxml->hasG())
   {
-    setComputegFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
+    setComputegFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
     // Gradients
     if (!FORxml->hasJacobianG())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
@@ -38,7 +38,7 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
     if (FORxml->isJacobianGPlugin(0))
     {
       //Jacg[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      setComputeJacglambdaFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
+      setComputeJacglambdaFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
     }
     else
     {
@@ -49,13 +49,13 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // output h
   if (FORxml->hasH())
   {
-    setComputehFunction(SSL::getPluginName(FORxml->gethPlugin()), SSL::getPluginFunctionName(FORxml->gethPlugin()));
+    setComputehFunction(SSLH::getPluginName(FORxml->gethPlugin()), SSLH::getPluginFunctionName(FORxml->gethPlugin()));
     // Gradients
     if (!FORxml->hasJacobianH())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
     if (FORxml->isJacobianHPlugin(0))
     {
-      setComputeJachxFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
+      setComputeJachxFunction(SSLH::getPluginName(FORxml->getgPlugin()), SSLH::getPluginFunctionName(FORxml->getgPlugin()));
       //Jach[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
     }
     else
@@ -70,8 +70,8 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
+  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
@@ -80,10 +80,10 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
-  setComputeJachxFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
-  setComputeJacglambdaFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
+  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
+  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
+  setComputeJachxFunction(SSLH::getPluginName(computeJX), SSLH::getPluginFunctionName(computeJX));
+  setComputeJacglambdaFunction(SSLH::getPluginName(computeJL), SSLH::getPluginFunctionName(computeJL));
 }
 
 void FirstOrderType1R::initialize(Interaction& inter)

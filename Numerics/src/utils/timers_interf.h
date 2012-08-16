@@ -65,7 +65,11 @@
 #endif
 
 #ifdef HAVE_SYSTIMES_H
+#if defined(__MINGW32__)
+#include <sys/time.h>
+#else
 #include <sys/times.h>
+#endif
 #endif
 
 

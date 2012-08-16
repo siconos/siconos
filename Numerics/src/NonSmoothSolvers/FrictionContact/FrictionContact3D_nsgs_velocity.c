@@ -38,8 +38,8 @@ void initializeLocalSolver_nsgs_velocity(SolverPtr* solve, FreeSolverPtr* freeSo
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_ProjectionOnCone_velocity)
   {
     *solve = &frictionContact3D_projectionOnCone_velocity_solve;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error_velocity;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error_velocity;
     frictionContact3D_projection_initialize(problem, localproblem);
   }
   else

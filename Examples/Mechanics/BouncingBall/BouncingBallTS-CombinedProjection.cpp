@@ -207,15 +207,13 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("result-CombinedProjection.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("result-CombinedProjection.ref", "ascii", dataPlotRef);
     std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)

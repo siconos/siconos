@@ -26,6 +26,13 @@ Do not hesitate to use the emacs mode Change Log for editing this file
   v3.5.0
 --------------------------------------------------------------------------------
 Main Changes:
+	* Remove unneeded Plugin class
+	* Include C++ header instead of C ones (math.h -> cmath, ...)
+	* Misc. changes to enable crosscompilation to windows with mingw and
+	Visual Studio
+	* Transform some classes into namespace (ioMatrix, iovector, SSL).
+	Split SSL in 2 : SSL and SSLH (SSL Helper). The latter is the one used
+	in the code, the former contains the Plateform specific part.
 	* Remove UnitaryRelation
 
 --------------------------------------------------------------------------------

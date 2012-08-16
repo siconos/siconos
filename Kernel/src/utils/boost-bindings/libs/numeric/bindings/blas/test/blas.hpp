@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iomanip>
 
 #include <boost/numeric/ublas/vector.hpp>

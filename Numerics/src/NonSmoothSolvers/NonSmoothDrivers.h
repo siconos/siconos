@@ -25,6 +25,9 @@
 */
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
+
+#include "NumericsConfig.h"
+
 #include "mlcp_cst.h"
 #include "lcp_cst.h"
 #include "Relay_Solvers.h"
@@ -41,7 +44,7 @@
 
 #include "NonSmoothNewton.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -136,7 +139,7 @@ extern "C"
                                    int verbose,
                                    int outputFile);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

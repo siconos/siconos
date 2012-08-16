@@ -60,7 +60,7 @@ extern int (*f__dorevert)();
 extern int rd_ed(), rd_ned();
 extern int w_ed(), w_ned();
 #else
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   extern int (*f__doed)(struct f__syl*, char*, ftnlen), (*f__doned)(struct f__syl*);
@@ -72,7 +72,7 @@ extern "C" {
   extern int wrt_E(ufloat*, int, int, int, ftnlen);
   extern int wrt_F(ufloat*, int, int, ftnlen);
   extern int wrt_L(Uint*, int, ftnlen);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

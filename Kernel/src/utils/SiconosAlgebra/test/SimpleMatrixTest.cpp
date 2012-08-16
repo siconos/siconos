@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "SimpleMatrixTest.hpp"
-#include "SiconosVector.hpp"
+#include "SiconosAlgebra.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -1876,7 +1876,7 @@ void SimpleMatrixTest::testOperators8()
   SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
   SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
 
-  SP::SiconosMatrix res(new SimpleMatrix(4, 4));
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4, 0));
 
   // Dense * ...
   // triang

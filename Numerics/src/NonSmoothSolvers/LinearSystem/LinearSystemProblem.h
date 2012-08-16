@@ -61,7 +61,7 @@ typedef struct
 
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -73,7 +73,7 @@ extern "C"
   int LinearSystem_newFromFile(LinearSystemProblem* problem, FILE* file);
   void LinearSystem_display(LinearSystemProblem* p);
   int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

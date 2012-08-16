@@ -16,7 +16,9 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
 #include "SiconosMatrix.hpp"
+#include "SiconosAlgebra.hpp"
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int newNum): dimRow(0), dimCol(0), num(newNum)
@@ -87,5 +89,63 @@ bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
   const SP::Index I2C = m2.tabCol();
 
   return ((*I1R == *I2R) && (*I1C == *I2C));
+}
+
+SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
+{
+  if (m.num == 0)// BlockMatrix
+  {
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      for (it2 = it.begin(); it2 != it.end(); ++it2)
+        (**it2) *= s;
+    }
+  }
+  else if (m.num == 1)
+    *m.dense() *= s;
+  else if (m.num == 2)
+    *m.triang() *= s;
+  else if (m.num == 3)
+    *m.sym() *= s;
+  else if (m.num == 4)
+    *m.sparse() *= s;
+  else if (m.num == 5)
+    *m.banded() *= s;
+  else if (m.num == 6) {} // nothing!
+  else //if(num == 7)
+    SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
+
+  return m;
+}
+
+SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
+{
+  if (m.num == 0)// BlockMatrix
+  {
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      for (it2 = it.begin(); it2 != it.end(); ++it2)
+        (**it2) /= s;
+    }
+  }
+  else if (m.num == 1)
+    *m.dense() /= s;
+  else if (m.num == 2)
+    *m.triang() /= s;
+  else if (m.num == 3)
+    *m.sym() /= s;
+  else if (m.num == 4)
+    *m.sparse() /= s;
+  else if (m.num == 5)
+    *m.banded() /= s;
+  else if (m.num == 6) {} // nothing!
+  else //if(num == 7)
+    SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
+
+  return m;
 }
 

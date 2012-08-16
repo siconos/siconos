@@ -20,9 +20,9 @@
 #ifndef PluggedObject_H
 #define PluggedObject_H
 
-#include "SiconosPointers.hpp"
-#include "SiconosSharedLibrary.hpp"
 #include <string>
+#include "SiconosSerialization.hpp"
+#include "SiconosPointers.hpp"
 
 /*! \file PluggedObject.hpp
   \brief utilities for plugin definition to compute matrices or vectors from user-defined functions.
@@ -48,19 +48,12 @@ public:
 
   /** Default Constructor
    */
-  PluggedObject(): _pluginName("unplugged")
-  {
-    fPtr = 0;
-  };
+  PluggedObject();
 
   /** Constructor with the plugin name
    * \param name a string of the form "fileName:functionName", without an extension for pluginFile
    */
-  PluggedObject(const std::string& name): _pluginName(name)
-  {
-    fPtr = 0;
-    setComputeFunction();
-  };
+  PluggedObject(const std::string& name);
 
   /** Copy constructor
    * \param PO a PluggedObject we are going to copy
@@ -83,29 +76,17 @@ public:
    \param pluginPath name of the file where the function is defined (WITH extension)
    \param functionName name of the function to be connected
   */
-  void setComputeFunction(const std::string& pluginPath, const std::string& functionName)
-  {
-    SSL::setFunction(&fPtr, pluginPath, functionName);
-    _pluginName = pluginPath.substr(0, pluginPath.find_last_of(".")) + ":" + functionName;
-  };
+  void setComputeFunction(const std::string& pluginPath, const std::string& functionName);
 
   /* Connect a function to fPtr
    * \param plugin a string of the form "fileName:functionName,  without an extension for pluginFile"
    */
-  void setComputeFunction(const std::string& plugin)
-  {
-    SSL::setFunction(&fPtr, SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    _pluginName = plugin;
-  };
+  void setComputeFunction(const std::string& plugin);
 
   /** Connect _pluginName to fPtr
    * \warning _pluginName must have been set before !
    */
-  void setComputeFunction()
-  {
-    assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
-    SSL::setFunction(&fPtr, SSL::getPluginName(_pluginName), SSL::getPluginFunctionName(_pluginName));
-  };
+  void setComputeFunction(void);
 
   /** Connect input function to fPtr
       \param functionPtr a pointer to a C function
@@ -119,7 +100,7 @@ public:
   /** Return the name of the plugin used to compute fPtr
    * \return _pluginName (a std::string)
    */
-  inline std::string getPluginName() const
+  inline std::string getPluginName(void) const
   {
     return _pluginName;
   };
@@ -131,7 +112,8 @@ public:
   {
     _pluginName = name;
   };
-
 };
+
 TYPEDEF_SPTR(PluggedObject);
+
 #endif

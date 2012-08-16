@@ -201,13 +201,11 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("prismatic.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("prismatic.ref", "ascii", dataPlotRef);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;

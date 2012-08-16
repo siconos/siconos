@@ -1,7 +1,7 @@
 /* If you are using a C++ compiler, append the following to f2c.h
    for compiling libF77 and libI77. */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 extern int abort_(void);
 extern double c_abs(complex *);

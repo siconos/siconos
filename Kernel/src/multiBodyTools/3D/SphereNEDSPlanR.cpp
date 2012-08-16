@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "SphereNEDSPlanR.hpp"
 
 SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)

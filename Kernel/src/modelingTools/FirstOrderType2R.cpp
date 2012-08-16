@@ -38,8 +38,8 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
+  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
@@ -48,11 +48,11 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSLH::getPluginName(computeOut), SSLH::getPluginFunctionName(computeOut));
+  setComputegFunction(SSLH::getPluginName(computeIn), SSLH::getPluginFunctionName(computeIn));
 
-  setComputeJachxFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
-  setComputeJacglambdaFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
+  setComputeJachxFunction(SSLH::getPluginName(computeJX), SSLH::getPluginFunctionName(computeJX));
+  setComputeJacglambdaFunction(SSLH::getPluginName(computeJL), SSLH::getPluginFunctionName(computeJL));
 }
 
 void FirstOrderType2R::initialize(Interaction& inter)

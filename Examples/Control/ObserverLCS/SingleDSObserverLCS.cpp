@@ -185,15 +185,13 @@ int main(int argc, char* argv[])
     }
 
     // Write the results into the file "ObserverLCS.dat"
-    ioMatrix io("SingleDSObserverLCS.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("SingleDSObserverLCS.dat", "ascii", dataPlot, "noDim");
 
     // --- Time loop ---
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("SingleDSObserverLCS.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("SingleDSObserverLCS.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-09)
     {

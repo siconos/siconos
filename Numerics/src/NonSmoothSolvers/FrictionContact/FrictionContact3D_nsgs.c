@@ -75,8 +75,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *update = &frictionContact3D_projectionWithDiagonalization_update;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
   }
@@ -84,8 +84,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *update = &frictionContact3D_projection_update;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
   }
@@ -93,8 +93,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *update = &frictionContact3D_projection_update;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
   }
@@ -102,8 +102,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *update = &frictionContact3D_projection_update_with_regularization;
-    *freeSolver = &frictionContact3D_projection_with_regularization_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_with_regularization_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize_with_regularization(problem, localproblem);
     break;
   }
@@ -113,7 +113,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     *solve = &frictionContact3D_Newton_solve;
     *update = &frictionContact3D_AC_update;
     *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
   }
@@ -122,7 +122,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     *solve = &frictionContact3D_Newton_solve;
     *update = &frictionContact3D_AC_update;
     *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
   }
@@ -132,7 +132,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     *solve = &frictionContact3D_Newton_solve;
     *update = &NCPGlocker_update;
     *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
     frictionContact3D_Newton_initialize(problem, localproblem, localsolver_options);
     break;
@@ -143,7 +143,7 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;
     *update = &NCPGlocker_update;
-    *computeError = &FrictionContact3D_compute_error;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     // *computeError = &fake_compute_error;
     frictionContact3D_Path_initialize(problem, localproblem, localsolver_options);
     break;
@@ -164,8 +164,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_projectionOnCylinder_solve;
     *update = &frictionContact3D_projectionOnCylinder_update;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_Tresca_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_projection_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_Tresca_compute_error;
     frictionContact3D_projection_initialize(problem, localproblem);
     break;
   }
@@ -173,8 +173,8 @@ void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverP
   {
     *solve = &frictionContact3D_unitary_enumerative_solve;
     *update = &frictionContact3D_nsgs_update;
-    *freeSolver = &frictionContact3D_unitary_enumerative_free;
-    *computeError = &FrictionContact3D_compute_error;
+    *freeSolver = (FreeSolverPtr)&frictionContact3D_unitary_enumerative_free;
+    *computeError = (ComputeErrorPtr)&FrictionContact3D_compute_error;
     frictionContact3D_unitary_enumerative_initialize(localproblem);
     break;
   }
@@ -299,7 +299,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
   SolverPtr local_solver = NULL;
   UpdatePtr update_localproblem = NULL;
-  FreeSolverPtr freeSolver = NULL;
+  FreeSolverNSGSPtr freeSolver = NULL;
   ComputeErrorPtr computeError = NULL;
 
   /* Connect local solver and local problem*/
@@ -325,7 +325,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
     localproblem->M->matrix1 = NULL;
   }
 
-  initializeLocalSolver_nsgs(&local_solver, &update_localproblem, &freeSolver, &computeError, problem , localproblem, localsolver_options);
+  initializeLocalSolver_nsgs(&local_solver, &update_localproblem, (FreeSolverPtr *)&freeSolver, &computeError, problem , localproblem, localsolver_options);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */

@@ -89,7 +89,7 @@
 #include <cstdlib>
 #include <string> 
 #include <algorithm> 
-#include <math.h>
+#include <cmath>
 #ifdef __ICC
 #  include <mathimf.h> 
 #endif  

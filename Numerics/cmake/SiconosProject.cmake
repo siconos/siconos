@@ -54,6 +54,7 @@ MACRO(SICONOS_PROJECT
   INCLUDE(CheckFunctionExists)
   INCLUDE(CheckIncludeFileCXX)
   INCLUDE(CheckIncludeFile)
+  INCLUDE(CheckStructHasMember)
 
   # Compilers environment
   IF(CMAKE_C_COMPILER)
@@ -92,25 +93,35 @@ MACRO(SICONOS_PROJECT
   ENDIF(CMAKE_CXX_COMPILER)
 
   # check some headers
-  CHECK_INCLUDE_FILE(time.h HAVE_TIME_H)
-  CHECK_INCLUDE_FILE(sys/times.h HAVE_SYSTIMES_H)
+  IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+    CHECK_STRUCT_HAS_MEMBER("struct timespec" tv_sec pthread.h HAVE_TIME_H)
+  ELSE(CMAKE_SYSTEM_NAME MATCHES Windows)
+    CHECK_STRUCT_HAS_MEMBER("struct timespec" tv_sec time.h HAVE_TIME_H)
+  ENDIF(CMAKE_SYSTEM_NAME MATCHES Windows)
+  CHECK_FUNCTION_EXISTS(gettimeofday HAVE_SYSTIMES_H)
+  IF(MSVC)
+    SET(BUILD_AS_CPP TRUE)
+  ENDIF(MSVC)
 
-  # Link external lib statically. This icomes handy when we want to distribute
+  # Link external lib statically. This comes handy when we want to distribute
   # Siconos on Mac or Windows
   # TODO complete this for other lib (libxml2, gmp, boost, ...)
   IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
     OPTION(LINK_STATICALLY "Link external libraries statically (on if crosscompiling from linux to windows)" ON)
-  ENDIF()
+  ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   IF(LINK_STATICALLY)
     SET(BLA_STATIC TRUE) # For blas/lapack
+    SET(Boost_USE_STATIC_LIBS TRUE)
     # For the compiler
-    IF(NOT (C_HAVE_STATIC_LINK AND CXX_HAVE_STATIC_LINK))
-      message(FATAL_ERROR "Your compiler has to support static linking flags (-static -static-libgcc -static-libstdc++ -static-libgfortran)")
-    ELSE()
-      APPEND_C_FLAGS("-static -static-libgcc")
-      APPEND_CXX_FLAGS("-static -static-libgcc -static-libstdc++")
-      APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
-    ENDIF()
+    IF(NOT MSVC)
+      IF(NOT (C_HAVE_STATIC_LINK AND CXX_HAVE_STATIC_LINK))
+        message(FATAL_ERROR "Your compiler has to support static linking flags (-static -static-libgcc -static-libstdc++ -static-libgfortran)")
+      ELSE()
+        APPEND_C_FLAGS("-static -static-libgcc")
+        APPEND_CXX_FLAGS("-static -static-libgcc -static-libstdc++")
+      ENDIF()
+    ENDIF(NOT MSVC)
+    APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran") # XXX No test :( -- xhub
   ENDIF(LINK_STATICALLY)
 
   IF(CMAKE_SYSTEM_NAME MATCHES Windows)

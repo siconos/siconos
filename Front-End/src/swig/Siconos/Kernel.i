@@ -48,6 +48,7 @@
 #endif
 #include <SiconosKernel.hpp>
 #include <SiconosVisitor.hpp>
+#include "SiconosPointers.hpp"
 #include "Disk.hpp"
 #include "Circle.hpp"
 #include "DiskDiskR.hpp"
@@ -245,8 +246,6 @@ namespace std
 
 %import "SiconosVisitor.hpp"
 %import "SiconosSerialization.hpp"
-%import "ioObject.hpp"
-%include "ioMatrix.hpp"
 
 %import "SiconosProperties.hpp"
 
@@ -418,6 +417,7 @@ KERNEL_REGISTRATION();
 // cannot compile wrapper
 %ignore statOut;
 
+%include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
 
 %import "RelationNamespace.hpp";
@@ -515,8 +515,6 @@ KERNEL_REGISTRATION();
 %template (dspv) std::vector<std::pair<boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<DynamicalSystem> > >;
 
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
-
-%template (ioMatrix) ioObject<SiconosMatrix>; 
 
 %template(unsignedintv) boost::shared_ptr<std::vector<unsigned int> >;
 

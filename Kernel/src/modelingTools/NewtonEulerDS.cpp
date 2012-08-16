@@ -125,8 +125,8 @@ void NewtonEulerDS::zeroPlugin()
 {
   computeJacobianFIntqPtr = NULL;
   computeJacobianFIntqDotPtr = NULL;
-  computeFExtPtr = NULL;
-  computeMExtPtr = NULL;
+  //  computeFExtPtr=NULL;
+  //  computeMExtPtr=NULL;
   //  computeFIntPtr=NULL;
 }
 

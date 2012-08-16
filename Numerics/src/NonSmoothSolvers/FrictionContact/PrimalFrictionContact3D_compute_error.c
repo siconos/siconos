@@ -67,7 +67,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
 #ifdef USE_MKL
     DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, infoDGETRS);
 #else
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, &infoDGETRS);
 #endif
     assert(!infoDGETRS);
   }

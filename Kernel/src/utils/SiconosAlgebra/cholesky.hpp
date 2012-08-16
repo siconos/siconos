@@ -23,6 +23,7 @@
 #ifndef _H_CHOLESKY_HPP_
 #define _H_CHOLESKY_HPP_
 
+#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 
 #include <cassert>
 

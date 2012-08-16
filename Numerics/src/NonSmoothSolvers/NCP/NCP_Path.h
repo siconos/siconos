@@ -34,7 +34,7 @@
   \author Franck Perignon, 21/05/2008
 */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -49,7 +49,7 @@ extern "C"
   */
   int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam, double* dparam);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

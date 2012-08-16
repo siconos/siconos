@@ -18,7 +18,6 @@
 */
 #include "SensorX.hpp"
 #include "SensorFactory.hpp"
-#include "ioMatrix.hpp"
 #include "DynamicalSystem.hpp"
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"

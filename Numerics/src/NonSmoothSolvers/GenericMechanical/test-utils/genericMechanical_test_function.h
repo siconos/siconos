@@ -19,7 +19,7 @@
 #ifndef GENERICMECHANICAL_TEST_FUNCTION_H
 #define GENERICMECHANICAL_TEST_FUNCTION_H
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -27,7 +27,7 @@ extern "C"
   int genericMechanical_test_function(FILE * f, SolverOptions * options);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

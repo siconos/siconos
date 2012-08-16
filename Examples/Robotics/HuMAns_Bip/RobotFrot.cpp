@@ -224,8 +224,7 @@ int main(int argc, char* argv[])
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---
-    ioMatrix out("result.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
   }
 

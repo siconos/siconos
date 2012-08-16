@@ -18,38 +18,25 @@
  */
 #include "SiconosSharedLibrary.hpp"
 #include "SiconosSharedLibraryException.hpp"
+
 using namespace std;
 
-std::vector<PluginHandle> SiconosSharedLibrary::isPlugged;
-//*************************************************************************
-//
-// Public methods
-//
-//*************************************************************************
+namespace SiconosSharedLibrary
+{
 
-// SiconosSharedLibrary::SiconosSharedLibrary(unsigned int n)
-// {
-//   if(n>0)
-//     isPlugged.reserve(n);
-// }
+std::vector<PluginHandle> isPlugged;
 
-// SiconosSharedLibrary::~SiconosSharedLibrary()
-// {
-//   vector<PluginHandle>::iterator iter;
-//   for(iter=isPlugged.begin();iter!=isPlugged.end();++iter)
-//     dlclose(*iter);
-//   isPlugged.clear();
-// }
-
-///////////////////////////////////////////////////////////////////////////
-//
-// loadPlugin
-//
-PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
+PluginHandle loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
 #ifdef _WIN32
   HandleRes = LoadLibrary(pluginPath.c_str());
+  if (!HandleRes)
+  {
+    DWORD err = GetLastError();
+    cout << "Error returned : " << err << endl;
+    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
+  }
 #endif
 #ifdef _SYS_UNX
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
@@ -63,11 +50,7 @@ PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
   return HandleRes;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// getProcAddress
-//
-void * SiconosSharedLibrary::getProcAddress(PluginHandle plugin, const string& procedure)
+void * getProcAddress(PluginHandle plugin, const string& procedure)
 {
 #ifdef _WIN32
   return (void*) GetProcAddress(plugin, procedure.c_str());
@@ -80,101 +63,29 @@ void * SiconosSharedLibrary::getProcAddress(PluginHandle plugin, const string& p
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// closePlugin
-//
-void  SiconosSharedLibrary::closePlugin(PluginHandle plugin)
+void closePlugin(PluginHandle plugin)
 {
+#ifdef _WIN32
+  FreeLibrary(plugin);
+#endif
 #ifdef _SYS_UNX
   dlclose(plugin);
 #endif
 }
 
-void SiconosSharedLibrary::closeAllPlugins()
+void closeAllPlugins()
 {
-#ifdef _SYS_UNX
   vector<PluginHandle>::iterator iter;
   for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
-    dlclose(*iter);
-#endif
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// getSharedLibraryExtension
-//
-const string SiconosSharedLibrary::getSharedLibraryExtension()
-{
+  {
 #ifdef _WIN32
-  return ".dll";
+    FreeLibrary(*iter);
 #endif
 #ifdef _SYS_UNX
-  return ".so";
+    dlclose(*iter);
 #endif
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// link a function
-//
-void SiconosSharedLibrary::setFunction(void* fPtr, const string& pluginPath, const string& fName)
-{
-  // load the library
-  PluginHandle handle = loadPlugin(pluginPath.c_str());
-  // get the function pointer
-  *(void **)(fPtr) = getProcAddress(handle, fName.c_str());
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// new functions for the plugins
-//
-const string SiconosSharedLibrary::getPluginName(const string& s)
-{
-  string res;
-
-  if ((s.find("\n", 0) != string::npos) || (s.find("\t", 0) != string::npos) || (s.find(" ", 0) != string::npos))
-  {
-    //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginName - The 'string' which contains the plugin name contains '\\n' or '\\t' or ' '");
-  }
-  else if ((s.find(":", 0) == string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
-  {
-    //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
-  }
-  else
-  {
-    // return the plugin name
-    int pos = s.find(":", 0);
-    res = s.substr(0, pos);
-    res = res + getSharedLibraryExtension();
-    return res;
   }
 }
 
-const string SiconosSharedLibrary::getPluginFunctionName(const string& s)
-{
-  string res;
 
-  if ((s.find("\n", 0) != string::npos) || (s.find("\t", 0) != string::npos) || (s.find(" ", 0) != string::npos))
-  {
-    //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginFunctionName - The 'string' which contains the plugin function name contains '\\n' or '\\t' or ' '");
-  }
-  else if ((s.find(":", 0) == string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
-  {
-    //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginFunctionName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
-  }
-  else
-  {
-    // return the plugin function name
-    int pos = s.find(":", 0);
-    res = s.substr(pos + 1, s.length());
-    return res;
-  }
 }
-
-/* eof --------------------------------------------------------------------*/

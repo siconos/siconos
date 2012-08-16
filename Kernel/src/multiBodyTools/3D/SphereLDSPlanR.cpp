@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "SphereLDSPlanR.hpp"
 
 SphereLDSPlanR::SphereLDSPlanR(double r, double A, double B, double C, double D)

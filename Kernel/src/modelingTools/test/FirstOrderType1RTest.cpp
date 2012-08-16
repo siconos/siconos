@@ -21,10 +21,13 @@
 
 #include "Interaction.hpp"
 #include "FirstOrderType1RTest.hpp"
+#include "SSLH.hpp"
+
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderType1RTest);
@@ -52,8 +55,9 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ", R1->getSubType() == RELATION::Type1R, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ", R1->gethName()=="TestPlugin:hT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getgName()=="TestPlugin:gT1", true);
-  R1->setComputeJachxFunction("TestPlugin.so", "Jh0T1");
-  R1->setComputeJacglambdaFunction("TestPlugin.so", "Jg0T1");
+  std::string plugin = "TestPlugin" + SSLH::getSharedLibraryExtension();
+  R1->setComputeJachxFunction(plugin, "Jh0T1");
+  R1->setComputeJacglambdaFunction(plugin, "Jg0T1");
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
   cout << "--> Constructor1 test ended with success." << endl;

@@ -45,7 +45,7 @@ typedef struct   /* matrix in compressed row/column or triplet form */
            -2 for compressed rows */
 } SparseMatrix;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -59,7 +59,7 @@ extern "C"
    */
   void freeSparse(const SparseMatrix* const M);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

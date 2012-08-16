@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianLinearTIDSXML.hpp"
+#include "SiconosVector.hpp"
+
 using namespace std;
 
 LagrangianLinearTIDSXML::LagrangianLinearTIDSXML():

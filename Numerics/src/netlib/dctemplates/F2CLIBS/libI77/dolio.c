@@ -1,6 +1,6 @@
 #include "f2c.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 #ifdef KR_headers
@@ -17,6 +17,6 @@ extern "C" {
   {
     return((*f__lioproc)(number, ptr, len, *type));
   }
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

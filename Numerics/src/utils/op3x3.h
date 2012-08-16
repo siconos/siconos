@@ -22,6 +22,7 @@
 
 #include <math.h>
 #include <float.h>
+#include "SiconosCompat.h"
 
 #ifdef __GNUC__
 #define MAYBE_UNUSED __attribute__((unused))

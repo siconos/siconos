@@ -170,7 +170,7 @@ typedef struct Namelist Namelist;
 /* procedure parameter types for -A and -C++ */
 
 #define F2C_proc_par_types 1
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 typedef int /* Unknown procedure type */ (*U_fp)(...);
 typedef shortint(*J_fp)(...);
 typedef integer(*I_fp)(...);

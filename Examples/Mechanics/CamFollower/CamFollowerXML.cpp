@@ -127,8 +127,7 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("result.dat", "ascii");
-    io.write(DataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
 
     // Xml output
     //  bouncingBall.saveToXMLFile("./CamFollower_TIDS.xml.output");

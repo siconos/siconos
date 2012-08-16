@@ -27,10 +27,10 @@
 
 #include "DynamicalSystemXML.hpp"
 #include "SiconosMemory.hpp"
-#include "SimpleMatrix.hpp"
 #include <vector>
 
-class DynamicalSystemXML ;
+class DynamicalSystemXML;
+class SimpleMatrix;
 
 const std::string LNLDS_Q = "q";
 const std::string LNLDS_Q0 = "q0";

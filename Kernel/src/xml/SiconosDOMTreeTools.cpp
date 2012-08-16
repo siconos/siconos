@@ -133,8 +133,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
   if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
-    ioVector io(file, FILE_STORAGE);
-    io.write(v);
+    ioVector::write(file, FILE_STORAGE, v);
   }
   else
   {
@@ -160,8 +159,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
-    ioMatrix io(file, FILE_STORAGE);
-    io.write(matrix);
+    ioMatrix::write(file, FILE_STORAGE, matrix);
   }
   else
   {

@@ -36,7 +36,7 @@ sum_{k=0:n} p[k] x^(n-k) =0
 Assume p[0]<>0 (overflows otherwise)
 **/
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -49,7 +49,7 @@ extern "C"
   int BIQUADROOTS(double p[5], double r[3][5]);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

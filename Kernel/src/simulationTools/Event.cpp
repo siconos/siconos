@@ -18,7 +18,7 @@
 */
 #include "Event.hpp"
 #include "RuntimeException.hpp"
-#include <math.h>
+#include <cmath>
 using namespace std;
 
 double Event::tick = DEFAULT_TICK;

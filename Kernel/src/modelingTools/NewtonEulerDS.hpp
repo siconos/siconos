@@ -26,7 +26,6 @@
 #define NEWTONEULERNLDS_H
 
 #include "DynamicalSystem.hpp"
-#include "Plugin.hpp"
 
 class DynamicalSystem;
 /** Pointer to function for plug-in. */
@@ -406,30 +405,26 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
-  {
-    Plugin::setFunction(&computeFExtPtr, pluginPath, functionName);
-  }
+  //  void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName){
+  //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
+  //  }
   /** allow to set a specified function to compute Mext
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName)
-  {
-    Plugin::setFunction(&computeMExtPtr, pluginPath, functionName);
-  }
+  //  void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName){
+  //    Plugin::setFunction(&computeMExtPtr, pluginPath,functionName);
+  //  }
 
   /** set a specified function to compute fExt
    *  \param a pointer on the plugin function
    */
-  void setComputeFExtFunction(Fext fct)
-  {
-    computeFExtPtr = fct ;
-  }
-  void setComputeMExtFunction(Fext fct)
-  {
-    computeMExtPtr = fct ;
-  }
+  //  void setComputeFExtFunction(Fext fct ){
+  //   computeFExtPtr = fct ;
+  //  }
+  //  void setComputeMExtFunction(Fext fct ){
+  //    computeMExtPtr = fct ;
+  //  }
 
 
 

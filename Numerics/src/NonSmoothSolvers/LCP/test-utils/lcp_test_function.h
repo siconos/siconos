@@ -21,7 +21,7 @@
 
 #include "lcp_enum.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -29,7 +29,7 @@ extern "C"
   int lcp_test_function(FILE * f, int solverid);
   int lcp_test_function_SBM(FILE * f, int solverid);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

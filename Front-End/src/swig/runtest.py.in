@@ -5,10 +5,17 @@ import os
 from subprocess import call
 
 
+def returnWinePrefix():
+    if 'WINEPREFIX' in os.environ:
+        return  os.environ['WINEPREFIX']
+    else:
+        return os.environ['HOME'] + ".wine"
+
 retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True, env={
 "PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig",
 "PYTHONDONTWRITEBYTECODE": "1",
 "HOME": os.environ['HOME'],
+"WINEPREFIX": returnWinePrefix(),
 "Path": "${SICONOS_NUMERICS_PATH}"
 })
 exit(retcode)

@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     // Xml output
     //  oscillator->saveToXMLFile("./BouncingOscillo_TIDS.xml.output");

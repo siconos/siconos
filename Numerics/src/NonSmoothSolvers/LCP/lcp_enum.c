@@ -139,7 +139,7 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
     LWORK = -1;
     int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
+    DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;
     LWORK = (int) dgelsSize;
   }
@@ -230,7 +230,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*   } */
 
       DGELS(sSize, sSize, NRHS, sM, sSize, sQ, sSize, DgelsWork, LWORK,
-            LAinfo);
+            &LAinfo);
       if (verbose)
       {
         printf("Solution of dgels (info=%i)\n", LAinfo);
@@ -239,7 +239,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     }
     else
     {
-      DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, LAinfo);
+      DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, &LAinfo);
     }
     if (!LAinfo)
     {

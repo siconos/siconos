@@ -106,14 +106,12 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("BouncingBallEDXml.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("BouncingBallEDXml.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-11)
     {

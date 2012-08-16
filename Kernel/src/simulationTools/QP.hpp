@@ -183,7 +183,7 @@ public:
     assert(false);
   }
 
-  void postCompute(double)
+  void postCompute()
   {
     assert(false);
   }

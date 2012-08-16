@@ -17,10 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 
 #include "KernelConfig.h"
+
+#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 
 #if defined(HAVE_ATLAS)
 #define SB_IS_ATLAS
@@ -35,7 +38,6 @@ namespace siconosBindings = boost::numeric::bindings::atlas;
 #include <boost/numeric/bindings/blas/blas3.hpp>
 namespace siconosBindings = boost::numeric::bindings::blas;
 #endif
-#include <boost/numeric/ublas/fwd.hpp>
 
 
 
@@ -57,11 +59,14 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
 
-#include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "cholesky.hpp"
 #include "ioMatrix.hpp"
 #include "BlockVector.hpp"
+#include "SimpleMatrix.hpp"
+
+#include "SiconosAlgebra.hpp"
+
 using namespace Siconos;
 
 
@@ -305,13 +310,11 @@ SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1
   mat.Dense = new DenseMat();
   if (ascii)
   {
-    ioMatrix io(file, "ascii");
-    io.read(*this);
+    ioMatrix::read(file, "ascii", *this);
   }
   else
   {
-    ioMatrix io(file, "binary");
-    io.read(*this);
+    ioMatrix::read(file, "binary", *this);
   }
   dimRow = (mat.Dense)->size1();
   dimCol = (mat.Dense)->size2();

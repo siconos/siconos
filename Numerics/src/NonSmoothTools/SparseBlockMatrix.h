@@ -23,6 +23,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "SiconosCompat.h"
+
 #include <SparseMatrix.h>
 
 /*!\file SparseBlockMatrix.h
@@ -167,7 +169,7 @@ typedef struct
 extern unsigned int NUMERICS_SBM_FREE_BLOCK;
 extern unsigned int NUMERICS_SBM_FREE_SBM;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -395,7 +397,7 @@ extern "C"
   */
   void ColPermutationSBM(unsigned int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

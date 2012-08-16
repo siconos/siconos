@@ -17,10 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 
 #include "KernelConfig.h"
+
+#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 
 #if defined(HAVE_ATLAS)
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
@@ -32,12 +35,11 @@ namespace siconosBindings = boost::numeric::bindings::atlas;
 namespace siconosBindings = boost::numeric::bindings::blas;
 #endif
 
-#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "ioVector.hpp"
-
-
+#include "SiconosVector.hpp"
+#include "SiconosAlgebra.hpp"
 
 
 // =================================================
@@ -169,13 +171,11 @@ SiconosVector::SiconosVector(const std::string &file, bool ascii)
   vect.Dense = new DenseVect();
   if (ascii)
   {
-    ioVector io(file, "ascii");
-    io.read(*this);
+    ioVector::read(file, "ascii", *this);
   }
   else
   {
-    ioVector io(file, "binary");
-    io.read(*this);
+    ioVector::read(file, "binary", *this);
   }
 }
 
@@ -669,6 +669,7 @@ SiconosVector& SiconosVector::operator += (const BlockVector& vIn)
     addBlock(pos, **it);
     pos += (*it)->size();
   }
+  return *this;
 }
 
 SiconosVector& SiconosVector::operator -= (const SiconosVector& vIn)
@@ -719,6 +720,7 @@ SiconosVector& SiconosVector::operator -= (const BlockVector& vIn)
     subBlock(pos, **it);
     pos += (*it)->size();
   }
+  return *this;
 }
 
 
@@ -894,7 +896,6 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
     else
       return (SparseVect)(*x.sparse() - *y.sparse());
   }
-
   else if (numX != 0 && numY != 0  && numX != numY) // x, y SiconosVector with y and x of different types
   {
     if (numX == 1)
@@ -902,6 +903,8 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
     else
       return (DenseVect)(*x.sparse() - *y.dense());
   }
+  else
+    SiconosVectorException::selfThrow("SiconosVector, x - y: Unknow error");
 
 }
 
@@ -1379,3 +1382,35 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
       noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) = ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
   }
 }
+
+unsigned int SiconosVector::size(void) const
+{
+  if (!_dense)
+  {
+    return (vect.Sparse->size());
+  }
+  else
+  {
+    return (vect.Dense->size());
+  }
+}
+
+SiconosVector& operator *= (SiconosVector& v, const double& s)
+{
+  if (v._dense)
+    *v.dense() *= s;
+  else
+    *v.sparse() *= s;
+  return v;
+}
+
+
+SiconosVector& operator /= (SiconosVector& v, const double& s)
+{
+  if (v._dense)
+    *v.dense() /= s;
+  else
+    *v.sparse() /= s;
+  return v;
+}
+

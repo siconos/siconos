@@ -19,6 +19,9 @@
 #include "FirstOrderNonLinearDSXML.hpp"
 #include "SiconosMemoryXML.hpp"
 
+#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
+
 using namespace std;
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML():

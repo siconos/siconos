@@ -299,7 +299,7 @@
     }
     else if (array_numdims(array) == 1)
     {
-      *p_problem_size1 = sqrt(array_size(array,0));
+      *p_problem_size1 = isqrt(array_size(array,0));
     }
     else
       SWIG_fail;
@@ -973,6 +973,25 @@
   void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM)
   {
     outSBM=M;
+  }
+%}
+
+%inline
+%{
+ unsigned int isqrt(unsigned int n)
+  {
+    unsigned int c = 0x8000;
+    unsigned int g = 0x8000;
+
+    for(;;)
+    {
+      if(g*g > n)
+      g ^= c;
+      c >>= 1;
+      if(c == 0)
+        return g;
+      g |= c;
+    }
   }
 %}
 

@@ -10,7 +10,7 @@
 #ifndef KR_headers
 #include "stdlib.h"
 #endif
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
@@ -120,6 +120,6 @@ extern "C" {
     return 0; /* For compilers that complain of missing return values; */
     /* others will complain that this is unreachable code. */
   }
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -21,7 +21,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <iostream>
 
-#include <string.h>
+#include <cstring>
 using namespace std;
 
 /* get a test pointer in the test suite */

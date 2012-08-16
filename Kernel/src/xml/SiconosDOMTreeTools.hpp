@@ -56,8 +56,9 @@ const unsigned int VECTOR_MAX_SIZE = 10;
 
 class SimpleMatrix;
 class SiconosVector;
-class SiconosVector;
 class SiconosMatrix;
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
 /** Toolbox for XML data handling in Siconos
  *

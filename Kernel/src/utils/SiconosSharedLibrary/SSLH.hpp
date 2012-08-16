@@ -17,41 +17,30 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file Plugin.hpp
-  \brief Class to deal with functions given as C functions
-*/
+#ifndef SSLH_H
+#define SSLH_H
 
-#ifndef PLUGIN_HPP
-#define PLUGIN_HPP
+#include <string>
 
-#include "SiconosSharedLibrary.hpp"
-
-class Plugin
+namespace SSLH
 {
+///////////////////////////////////////////////////////////////////////////
+//
+// new functions for the plugins
+//
 
-public:
+///////////////////////////////////////////////////////////////////////////
+//
+// getSharedLibraryExtension
+//
+const std::string getSharedLibraryExtension(void);
 
-  static bool setFunction(void* f,  const std::string& pluginPath, const std::string& functionName, std::string& name)
-  {
-    SSL::setFunction(f, pluginPath, functionName);
-    name = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
-    return true;
-  }
+const std::string getPluginName(const std::string& s);
 
-  static bool setFunction(void* f,  const std::string& pluginPath, const std::string& functionName)
-  {
-    SSL::setFunction(f, pluginPath, functionName);
-    return true;
-  }
-  static bool setFunction(void* f,  const std::string& Name)
-  {
-    SSL::setFunction(f, SSL::getPluginName(Name), SSL::getPluginFunctionName(Name));
-    return true;
-  }
+const std::string getPluginFunctionName(const std::string& s);
 
+void setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName);
 
-};
+}
 
 #endif
-
-

@@ -50,7 +50,7 @@ void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimal
   {
     /*       *solve = &frictionContact3D_projectionOnCone_solve; */
     *freeSolver = &PrimalfrictionContact3D_projection_free;
-    *computeError = &PrimalFrictionContact3D_compute_error;
+    *computeError = (ComputeErrorPrimalPtr)&PrimalFrictionContact3D_compute_error;
     /*       frictionContact3D_projection_initialize(n,M,q,mu); */
   }
   else
@@ -120,7 +120,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
     int infoDGETRF = -1;
     Primal_ipiv = (int *)malloc(n * sizeof(int));
     assert(!Primal_MisLU);
-    DGETRF(n, n, M->matrix0, n, Primal_ipiv, infoDGETRF);
+    DGETRF(n, n, M->matrix0, n, Primal_ipiv, &infoDGETRF);
     Primal_MisLU = 1;
     assert(!infoDGETRF);
   }
@@ -159,7 +159,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
 #ifdef USE_MKL
       DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
 #else
-      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, &infoDGETRS);
 #endif
       assert(!infoDGETRS);
     }

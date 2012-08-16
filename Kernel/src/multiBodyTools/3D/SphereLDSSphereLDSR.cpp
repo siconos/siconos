@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "SphereLDSSphereLDSR.hpp"
 
 SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r, double rr) : LagrangianScleronomousR()

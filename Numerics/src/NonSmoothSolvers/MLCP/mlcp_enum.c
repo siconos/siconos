@@ -156,7 +156,7 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
     LWORK = -1;
     int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
+    DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     LWORK = (int) dgelsSize;
   }
   return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
@@ -236,7 +236,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     if (useDGELS)
     {
       DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-            LAinfo);
+            &LAinfo);
       if (verbose)
       {
         printf("Solution of dgels\n");
@@ -245,7 +245,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     }
     else
     {
-      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
     }
     if (!LAinfo)
     {
@@ -346,7 +346,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   int * ipiv;
   int * indexInBlock;
   int check;
-  int LAinfo;
+  int LAinfo = 0;
   int useDGELS = options->iparam[4];
   *info = 0;
   assert(problem->M);
@@ -407,7 +407,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     if (useDGELS)
     {
       DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-            LAinfo);
+            &LAinfo);
       if (verbose)
       {
         printf("Solution of dgels\n");
@@ -416,7 +416,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     }
     else
     {
-      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
     }
     if (!LAinfo)
     {

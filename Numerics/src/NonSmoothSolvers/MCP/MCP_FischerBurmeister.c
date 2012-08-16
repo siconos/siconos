@@ -36,7 +36,7 @@ static MixedComplementarityProblem * localProblem = 0;
 
 void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options)
 {
-  localProblem = malloc(sizeof(MixedComplementarityProblem));
+  localProblem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
   /* Connect local static problem with the "real" MCP */
   localProblem->sizeEqualities = problem->sizeEqualities ;
   localProblem->sizeInequalities = problem->sizeInequalities ;

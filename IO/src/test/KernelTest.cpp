@@ -362,14 +362,12 @@ void KernelTest::t6()
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("result.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

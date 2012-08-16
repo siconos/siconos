@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "SphereNEDSSphereNEDSR.hpp"
 
 SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR(double r,

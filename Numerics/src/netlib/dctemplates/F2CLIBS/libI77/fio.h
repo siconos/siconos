@@ -55,7 +55,7 @@ extern int (*f__donewrec)(), t_putc(), x_wSL();
 extern int c_sfe(), err_fl(), xrd_SL();
 #else
 #define Void void
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   extern int (*f__getn)(void), (*f__putn)(int); /*for formatted io*/
@@ -73,7 +73,7 @@ extern "C" {
   extern int isatty(int);
   extern int err__fl(int, int, char*);
   extern int xrd_SL(void);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

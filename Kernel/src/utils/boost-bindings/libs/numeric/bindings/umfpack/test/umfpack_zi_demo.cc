@@ -75,7 +75,7 @@
 #include <cstdlib>
 #include <algorithm> 
 #include <complex> 
-#include <math.h>
+#include <cmath>
 #include <boost/numeric/bindings/traits/c_array.hpp>
 #include <boost/numeric/bindings/traits/std_vector.hpp>
 #include <boost/numeric/bindings/traits/ublas_sparse.hpp>

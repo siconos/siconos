@@ -32,7 +32,7 @@
 #include "SparseBlockMatrix.h"
 #include "SolverOptions.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -45,7 +45,7 @@ extern "C"
   int frictionContact3D_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
   int frictionContact3D_unitary_enumerative_setDefaultSolverOptions(SolverOptions* options);
   int frictionContact3D_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

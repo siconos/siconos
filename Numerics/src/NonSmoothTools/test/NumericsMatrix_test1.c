@@ -35,12 +35,12 @@ int main(void)
   printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
 
   int i, nmm = 4 ;
-  NumericsMatrix ** NMM = malloc(nmm * sizeof(NumericsMatrix *)) ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
 
 
   for (i = 0 ; i < nmm; i++)
   {
-    NMM[i] = malloc(sizeof(NumericsMatrix));
+    NMM[i] = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
   }
 
 

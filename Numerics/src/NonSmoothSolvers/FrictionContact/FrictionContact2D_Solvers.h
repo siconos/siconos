@@ -51,8 +51,9 @@ function: pfc_2D_cpg()
 #include "SolverOptions.h"
 #include "Friction_cst.h"
 #include "LinearComplementarityProblem.h"
+#include "SiconosCompat.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -127,20 +128,20 @@ extern "C"
    * \param[out] status  the new status.
    *
    */
-  void FrictionContact2D_projc(double* xi, int* n, int* statusi, double* p, double* fric, double *reaction, int *status);
+  void FrictionContact2D_projc(double xi[], int *n, int statusi[], double p[], double fric[], double *reaction, int *status);
 
   /** FrictionContact2D_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
    *              for primal contact problem with friction.\n
    *
    *
-   * \param[in] statusi  parameter which represents the status vector.
+   * \param[in] etat  parameter which represents the status vector.
    * \param[in] n      parameter which represents the dimension of the system.
    * \param[in] y    parameter which contains the components of the residue or descent direction vector.
    * \param[in] fric   parameter which contains the friction coefficient.
    * \param[out] projf1 parameter which contains the projected residue or descent direction.
    *
    */
-  void FrictionContact2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
+  void FrictionContact2D_projf(int etat[], int *n, double y[], double fric[], double projf1[]);
 
   /** */
   void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options) ;
@@ -202,7 +203,7 @@ extern "C"
 
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

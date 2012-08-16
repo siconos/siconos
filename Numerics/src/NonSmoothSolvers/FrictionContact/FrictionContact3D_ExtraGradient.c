@@ -53,8 +53,8 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double * velocitytmp = malloc(n * sizeof(double));
-  double * reactiontmp = malloc(n * sizeof(double));
+  double * velocitytmp = (double *)malloc(n * sizeof(double));
+  double * reactiontmp = (double *)malloc(n * sizeof(double));
 
   double rho = 0.0;
 

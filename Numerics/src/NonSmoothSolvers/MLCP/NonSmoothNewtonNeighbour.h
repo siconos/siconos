@@ -35,7 +35,7 @@
 
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -51,7 +51,7 @@ extern "C"
   void NSNN_thisIsTheSolution(int n, double * z);
   void  NSNN_reset();
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

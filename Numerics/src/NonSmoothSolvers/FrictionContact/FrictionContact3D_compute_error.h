@@ -27,7 +27,7 @@
 
 */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -40,7 +40,7 @@ extern "C"
       \param options
       \param[in,out] error value
    */
-  void FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
   /** Error computation for one friction-contact 3D problem
       \param z vector
@@ -57,7 +57,7 @@ extern "C"
       \param tolerance value for error computation
       \param[in,out] error value
    */
-  void FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
 
 
@@ -69,9 +69,9 @@ extern "C"
       \param options
       \param[in,out] error value
    */
-  void FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

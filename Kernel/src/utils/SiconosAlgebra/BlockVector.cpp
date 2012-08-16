@@ -17,13 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "BlockVector.hpp"
+
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <vector>
 
-
 #include "SiconosVector.hpp"
-#include "BlockVector.hpp"
 
+#include "SiconosAlgebra.hpp"
 
 // =================================================
 //                CONSTRUCTORS

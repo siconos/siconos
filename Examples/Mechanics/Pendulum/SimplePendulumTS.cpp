@@ -205,8 +205,7 @@ int main(int argc, char* argv[])
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---
-    ioMatrix out("SimplePendulumResult.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("SimplePendulumResult.dat", "ascii", dataPlot, "noDim");
 
   }
 

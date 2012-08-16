@@ -19,7 +19,7 @@
 
 #ifndef ProjectionOnCylinder_H
 #define ProjectionOnCylinder_H
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -28,7 +28,7 @@ extern "C"
   \param[in] R the radius of the cone
   */
   void projectionOnCylinder(double* r, double  R);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

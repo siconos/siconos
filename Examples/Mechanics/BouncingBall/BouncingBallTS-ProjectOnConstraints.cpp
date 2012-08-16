@@ -182,22 +182,19 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     cout << "====> Comparison with a reference file ..." << endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     if (levelForProjection == 1)
     {
-      ioMatrix ref("result-ProjectOnConstraints.ref", "ascii");
-      ref.read(dataPlotRef);
+      ioMatrix::read("result-ProjectOnConstraints.ref", "ascii", dataPlotRef);
     }
     else
     {
-      ioMatrix ref("result-ProjectOnConstraints-level0.ref", "ascii");
-      ref.read(dataPlotRef);
+      ioMatrix::read("result-ProjectOnConstraints-level0.ref", "ascii", dataPlotRef);
     }
 
 

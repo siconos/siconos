@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "CircleCircleR.hpp"
 
 CircleCircleR::CircleCircleR(double r, double rr): CircularR(r, rr)

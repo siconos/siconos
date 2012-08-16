@@ -206,8 +206,7 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
-    ioMatrix out("DoublePendulumResult.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("DoublePendulumResult.dat", "ascii", dataPlot, "noDim");
   }
 
   catch (SiconosException e)

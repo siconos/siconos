@@ -20,7 +20,7 @@
 #ifndef Pinv_H
 #define Pinv_H
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -33,7 +33,7 @@ extern "C"
   double pinv(double * A, int n, int m, double tolerance);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

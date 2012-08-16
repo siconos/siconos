@@ -26,14 +26,14 @@
   \author Houari Khenous, 31/05/2008
 */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
   int Fixe(int n, double* z, int* iparam, double* dparam);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

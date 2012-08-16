@@ -201,14 +201,12 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("Filippov.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("Filippov.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("Filippov.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("Filippov.ref", "ascii", dataPlotRef);
     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

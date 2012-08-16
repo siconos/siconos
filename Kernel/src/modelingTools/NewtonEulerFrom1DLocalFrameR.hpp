@@ -99,7 +99,7 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(const double time, Interaction& inter);
-  virtual void computeJachqT(const double time, Interaction& inter);
+  virtual void computeJachqT(Interaction& inter);
 
   inline SP::SiconosVector pc1()
   {

@@ -9,7 +9,7 @@ extern FILE *fdopen();
 #define read _read
 #define write _write
 #endif
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 #ifndef MSDOS
@@ -32,7 +32,7 @@ extern "C" {
 
   extern char *mktemp(char*);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

@@ -34,7 +34,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
   // h plug-in
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for h.");
-  setComputehFunction(SSL::getPluginName(LRxml->gethPlugin()), SSL::getPluginFunctionName(LRxml->gethPlugin()));
+  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
 
   // Read hDot
   if (!LRxml->hasHDot())
@@ -42,7 +42,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
   if (LRxml->isHDotPlugin())
   {
     //    hDot.reset(new PVT2(LRxml->gethDotPlugin()));
-    _pluginhDot->setComputeFunction(SSL::getPluginName(LRxml->gethDotPlugin()), SSL::getPluginFunctionName(LRxml->gethDotPlugin()));
+    _pluginhDot->setComputeFunction(SSLH::getPluginName(LRxml->gethDotPlugin()), SSLH::getPluginFunctionName(LRxml->gethDotPlugin()));
   }
   else
     _hDot.reset(new SiconosVector(LRxml->gethDotVector()));
@@ -61,10 +61,10 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
 {
   zeroPlugin();
   // h
-  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
 
   // hDot
-  setComputehDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
+  setComputehDotFunction(SSLH::getPluginName(computehDot), SSLH::getPluginFunctionName(computehDot));
   _pluginJachq->setComputeFunction(strcomputeJachq);
 
 }

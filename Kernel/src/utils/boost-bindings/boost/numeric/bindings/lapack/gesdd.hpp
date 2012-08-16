@@ -206,14 +206,20 @@ int gesdd_min_work(traits::complex_f, char jobz, int m, int n)
   int m2 = 2 * minmn;
   int minw = m2 + maxmn;
   if (jobz == 'N')
+  {
     // LWORK >= 2*min(M,N)+max(M,N)
     ;
+  }
   if (jobz == 'O')
+  {
     // LWORK >= 2*min(M,N)*min(M,N) + 2*min(M,N) + max(M,N)
     minw += m2 * minmn;
+  }
   if (jobz == 'S' || jobz == 'A')
+  {
     // LWORK >= min(M,N)*min(M,N) + 2*min(M,N) + max(M,N)
     minw += minmn * minmn;
+  }
   return minw;
 }
 inline
@@ -224,14 +230,20 @@ int gesdd_min_work(traits::complex_d, char jobz, int m, int n)
   int m2 = 2 * minmn;
   int minw = m2 + maxmn;
   if (jobz == 'N')
+  {
     // LWORK >= 2*min(M,N)+max(M,N)
     ;
+  }
   if (jobz == 'O')
+  {
     // LWORK >= 2*min(M,N)*min(M,N) + 2*min(M,N) + max(M,N)
     minw += m2 * minmn;
+  }
   if (jobz == 'S' || jobz == 'A')
+  {
     // LWORK >= min(M,N)*min(M,N) + 2*min(M,N) + max(M,N)
     minw += minmn * minmn;
+  }
   return minw;
 }
 

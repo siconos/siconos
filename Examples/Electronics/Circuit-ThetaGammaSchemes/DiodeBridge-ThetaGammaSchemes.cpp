@@ -254,15 +254,13 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("DiodeBridge.dat", "ascii");
     dataPlot.resize(k, 10);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 
-    ioMatrix ref("DiodeBridge.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("DiodeBridge.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {

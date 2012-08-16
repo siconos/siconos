@@ -65,7 +65,7 @@ LArge Time INcrements solver
 #include "SolverOptions.h"
 #include "relay_cst.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -257,7 +257,7 @@ extern "C"
 
   void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

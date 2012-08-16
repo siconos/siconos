@@ -8,7 +8,7 @@ ftnlen n;
 #else
 #undef abs
 #include "stdlib.h"
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   void f_exit(void);
@@ -27,7 +27,7 @@ extern "C" {
   }
   f_exit();
   exit(0);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0; /* NOT REACHED */
 }
 #endif

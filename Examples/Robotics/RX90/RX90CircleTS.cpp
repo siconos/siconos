@@ -212,8 +212,7 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
-    ioMatrix out("result.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
   }
 

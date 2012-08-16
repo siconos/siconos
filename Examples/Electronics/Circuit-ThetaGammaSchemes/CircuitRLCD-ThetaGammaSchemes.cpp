@@ -222,14 +222,12 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << t.elapsed()  << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("CircuitRLCD.dat", "ascii");
     dataPlot.resize(k, 9);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("CircuitRLCD.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("CircuitRLCD.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("CircuitRLCD.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {

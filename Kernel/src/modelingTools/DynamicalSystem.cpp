@@ -18,7 +18,6 @@
  */
 #include "DynamicalSystem.hpp"
 #include "DynamicalSystemXML.hpp"
-#include "Plugin.hpp"
 
 using namespace std;
 

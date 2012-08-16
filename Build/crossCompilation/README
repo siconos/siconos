@@ -1,6 +1,6 @@
 This file is a brain dump for cross compiling from Linux to windows
 
-= Toolchain
+## Toolchain
 
 It is recommended to use the mxe environment : http://mxe.cc/ https://github.com/mxe/mxe
 
@@ -29,18 +29,20 @@ To run the Python tests, you need to install
 * Python: wine msiexec /i python-*.msi
 * Numpy: wine numpy*.exe
 * pytest:
-  * first get setuptools*.exe, install it ( wine setuptools*.exe )
-  * Add to the windows Path the following directories: C:\Python27 C:\Python27\Scripts
+    * first get setuptools*.exe, install it ( wine setuptools*.exe )
+    * Add to the windows Path the following directories: C:\Python27 C:\Python27\Scripts
     wine cmd 
     REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /d "%PATH%;C:\Python27;C:\Python27\Scripts" /f
-  * Pip: http://www.pip-installer.org/en/latest/installing.html#using-the-installer
+    * Pip: http://www.pip-installer.org/en/latest/installing.html#using-the-installer
     curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py > get-pip.py
     wine python.exe get-pip.py
-  * Pytest : wine pip.exe install -U pytest
+    * Pytest : wine pip.exe install -U pytest
 
 You should be all set
 
-= Sampled command to build Siconos:
+## Sampled command to build Siconos:
+
+You can also have a look at build-mingw.sh.
 
 * Numerics
 CFLAGS='-U__STRICT_ANSI__' cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install ~/siconos/Numerics/
@@ -49,15 +51,16 @@ cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe
 * Front-End
 cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install -DSiconosNumerics_INCLUDE_DIRS=/scratch/Olivier/siconos-windows/install/include/Siconos/Numerics/ -DSiconosNumerics_FOUND=/scratch/Olivier/siconos-windows/install/lib/libSiconosNumerics.dll -DSWIG_DIR=/usr/share/swig/2.0.7/ ~/siconos/Front-End/ -DPYTHON_LIBRARIES=/scratch/Olivier/mingw32/python/lib/python27.dll -DPYTHON_INCLUDE_DIR=/scratch/Olivier/mingw32/python/include/ -DSiconosKernel_FOUND=/scratch/Olivier/siconos-windows/install/lib/libSiconosKernel.dll -DPYTHON_NUMPY_INCLUDE_DIR=/scratch/Olivier/mingw32/numpy/PLATLIB/numpy/core/include
 
-= BUGS
+## BUGS
 * When using a prefix to install Siconos, it fails to find the already installed required Siconos parts
 
-= TODO
+## TODO
 * Polish the Front-End cross-compilation
 * Fix bugs !
 * create an installer (nsis is available from mxe and works fine with cpack)
 * Make examples work !
 * Adapt siconos script !
+* Try to compile it natively on windows ( using mingw or Codeblocks or cygwin or ...)
 
-= TIPS
+## TIPS
 * Use Dependency Walker to see the dll used by a dll

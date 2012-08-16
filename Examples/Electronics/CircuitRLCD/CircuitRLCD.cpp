@@ -188,8 +188,7 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << t.elapsed()  << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("CircuitRLCD.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("CircuitRLCD.dat", "ascii", dataPlot, "noDim");
   }
 
   // --- Exceptions handling ---

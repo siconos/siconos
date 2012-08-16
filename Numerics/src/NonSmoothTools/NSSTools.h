@@ -25,7 +25,7 @@
 
 */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -84,7 +84,7 @@ extern "C"
   /** */
   void sortsn_(int*ddl_i, int *sort, int *n);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

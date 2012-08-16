@@ -32,7 +32,7 @@ y_getc(Void)
     return(-1);
   }
   err(f__elist->cierr, errno, "readingd");
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }
@@ -62,7 +62,7 @@ y_rev(Void)
 y_err(Void)
 {
   err(f__elist->cierr, 110, "dfe");
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }

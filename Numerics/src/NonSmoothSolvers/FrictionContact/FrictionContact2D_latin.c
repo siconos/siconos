@@ -34,12 +34,14 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
 
 
-  int    i, j, kk, iter1, ino, ddl, info2, info77, nrhs;
-  int    n = 2 * nc, idim, jdim, nbno, it_end;
-  int    incx = 1, incy = 1;
-  int    taille, taillet, taillen, itt;
-  int    *ddln;
-  int    *ddlt, *vectnt;
+  int info77 = 0;
+  int i, j, kk, iter1, ino, ddl, nrhs;
+  int info2 = 0;
+  int n = 2 * nc, idim, jdim, nbno, it_end;
+  int incx = 1, incy = 1;
+  int taille, taillet, taillen, itt;
+  int *ddln;
+  int *ddlt, *vectnt;
 
   double  errmax, alpha, beta, maxa, k_latin, res;
   double  aa, nt, wn, tc, zc0;
@@ -262,7 +264,7 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
 
 
-  DPOTRF(LA_UP, n, DPO , n, info2);
+  DPOTRF(LA_UP, n, DPO , n, &info2);
 
   if (info2 != 0)
   {
@@ -324,9 +326,9 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
     DAXPY(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
-    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info77);
+    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info77);
 
-    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info77);
+    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info77);
 
     DCOPY(n, znum1, incx, reaction, incy);
 

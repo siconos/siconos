@@ -23,6 +23,8 @@ Include files related to Siconos Kernel
 #ifndef SiconosKernel_hpp
 #define SiconosKernel_hpp
 
+#include "SiconosAlgebra.hpp"
+
 #include "Model.hpp"
 #include "Utils.hpp"
 #include "ModelingTools.hpp"
@@ -30,7 +32,7 @@ Include files related to Siconos Kernel
 #include "ControlTools.hpp"
 #include "XmlTools.hpp"
 #include "PluginTypes.hpp"
-#include <sys/time.h>
+#include <time.h>
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 

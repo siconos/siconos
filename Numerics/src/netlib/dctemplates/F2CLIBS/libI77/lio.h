@@ -56,7 +56,7 @@ extern int f__scale;
 extern int (*f__lioproc)(), (*l_getc)(), (*l_ungetc)();
 extern int l_read(), l_write();
 #else
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   extern int (*f__lioproc)(ftnint*, char*, ftnlen, ftnint);
@@ -66,7 +66,7 @@ extern "C" {
   extern int l_read(ftnint*, char*, ftnlen, ftnint);
   extern integer e_rsle(void), e_wsle(void), s_wsne(cilist*);
   extern int z_rnew(void);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

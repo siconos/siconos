@@ -21,7 +21,7 @@
 #include "TimeDiscretisation.hpp"
 #include "Model.hpp"
 #include "Simulation.hpp"
-#include <math.h>
+#include <cmath>
 #include <limits> // for ULONG_MAX
 using namespace std;
 

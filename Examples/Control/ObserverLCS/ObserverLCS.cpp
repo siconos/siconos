@@ -222,13 +222,11 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("ObserverLCS.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("ObserverLCS.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("ObserverLCS.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("ObserverLCS.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {

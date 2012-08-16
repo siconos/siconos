@@ -10,7 +10,7 @@ void sig_die(s, kill) register char *s;
 int kill;
 #else
 #include "stdlib.h"
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   extern void f_exit(void);
@@ -33,6 +33,6 @@ extern "C" {
   else
     exit(1);
 }
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

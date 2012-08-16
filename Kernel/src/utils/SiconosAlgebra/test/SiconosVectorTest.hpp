@@ -23,7 +23,7 @@
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 class SiconosVectorTest : public CppUnit::TestFixture

@@ -164,7 +164,7 @@ extern char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC2D_STR;
 extern char * SICONOS_NUMERICS_PROBLEM_FC3D_STR;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -199,7 +199,7 @@ extern "C"
   int nameToId(char * pName);
   char * idToName(int Id);
   char * idProblemToChar(int id);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

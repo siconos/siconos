@@ -24,7 +24,6 @@
 #ifndef __SimpleMatrixFriends__
 #define __SimpleMatrixFriends__
 #include "SiconosMatrix.hpp"
-//#include "BlocksSimpleMat.hpp"
 
 /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
  * \param MIn a SPC::SiconosMatrix

@@ -19,14 +19,14 @@
 #ifndef LS_TEST_FUNCTION_H
 #define LS_TEST_FUNCTION_H
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
   int ls_test_function(FILE * f, int solverid);
   int ls_test_function_SBM(FILE * f, int solverid);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

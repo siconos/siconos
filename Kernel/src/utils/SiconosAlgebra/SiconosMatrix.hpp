@@ -25,7 +25,7 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "SiconosAlgebra.hpp"
+#include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosMatrixException.hpp"
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
@@ -418,66 +418,12 @@ public:
   /** multiply the current matrix with a scalar
    *  \param template, double, int ...
    */
-  template <class T> SiconosMatrix& operator *=(const T& s)
-  {
-    if (num == 0)// BlockMatrix
-    {
-      BlocksMat::iterator1 it;
-      BlocksMat::iterator2 it2;
-      for (it = begin(); it != end(); ++it)
-      {
-        for (it2 = it.begin(); it2 != it.end(); ++it2)
-          (**it2) *= s;
-      }
-    }
-    else if (num == 1)
-      *dense() *= s;
-    else if (num == 2)
-      *triang() *= s;
-    else if (num == 3)
-      *sym() *= s;
-    else if (num == 4)
-      *sparse() *= s;
-    else if (num == 5)
-      *banded() *= s;
-    else if (num == 6) {} // nothing!
-    else //if(num == 7)
-      SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
-
-    return *this;
-  }
+  friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
 
   /** divide the current matrix with a scalar
    *  \param template, double, int ...
    */
-  template <class T> SiconosMatrix& operator /=(const T& s)
-  {
-    if (num == 0)// BlockMatrix
-    {
-      BlocksMat::iterator1 it;
-      BlocksMat::iterator2 it2;
-      for (it = begin(); it != end(); ++it)
-      {
-        for (it2 = it.begin(); it2 != it.end(); ++it2)
-          (**it2) /= s;
-      }
-    }
-    else if (num == 1)
-      *dense() /= s;
-    else if (num == 2)
-      *triang() /= s;
-    else if (num == 3)
-      *sym() /= s;
-    else if (num == 4)
-      *sparse() /= s;
-    else if (num == 5)
-      *banded() /= s;
-    else if (num == 6) {} // nothing!
-    else //if(num == 7)
-      SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
-
-    return *this;
-  }
+  friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 
   /** computes a LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.

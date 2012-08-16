@@ -15,7 +15,7 @@ integer f_clos(a) cllist *a;
 #ifdef MSDOS
 #include "io.h"
 #else
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" int unlink(const char*);
 #else
 extern int unlink(const char*);
@@ -98,7 +98,7 @@ flush_(void)
   for (i = 0; i < MXUNIT; i++)
     if (f__units[i].ufd != NULL && f__units[i].uwrt)
       fflush(f__units[i].ufd);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }

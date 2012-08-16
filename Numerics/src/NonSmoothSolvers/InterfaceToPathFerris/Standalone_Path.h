@@ -37,7 +37,7 @@ typedef int (*FuncEvalPtr)(int, double*, double*);
 /** pointer to function used to call jacEval */
 typedef int (*JacEvalPtr)(int, int, double*, int*, int*, int*, double*);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -76,7 +76,7 @@ extern "C"
   void setJacEval(JacEvalPtr myJac);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

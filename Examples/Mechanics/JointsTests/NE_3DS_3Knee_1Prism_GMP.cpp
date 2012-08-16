@@ -383,13 +383,11 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("NE_3DS_3Knee_1Prism_GMP.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("NE_3DS_3Knee_1Prism_GMP.ref", "ascii", dataPlotRef);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
       (dataPlot - dataPlotRef).display();

@@ -34,7 +34,7 @@ unsigned int NUMERICS_GMP_FREE_GMP = 1 << 3;
 
 GenericMechanicalProblem * buildEmptyGenericMechanicalProblem()
 {
-  GenericMechanicalProblem * paux = malloc(sizeof(GenericMechanicalProblem));
+  GenericMechanicalProblem * paux = (GenericMechanicalProblem *)malloc(sizeof(GenericMechanicalProblem));
   paux->firstListElem = 0;
   paux->lastListElem = 0;
   paux->size = 0;

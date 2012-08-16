@@ -53,6 +53,9 @@ For each solver, the input argument are:
 #include "FrictionContact3D_globalAlartCurnier.h"
 #include "FrictionContact3D_unitary_enumerative.h"
 #include "Friction_cst.h"
+#include "SiconosCompat.h"
+
+
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
 
@@ -68,10 +71,13 @@ typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, doubl
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();
 
+/** pointer to function used to free memory for objects used in nsgs solvers */
+typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*);
+
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int *, SolverOptions *);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -250,7 +256,7 @@ extern "C"
   */
   int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

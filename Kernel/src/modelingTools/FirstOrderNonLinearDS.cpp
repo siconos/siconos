@@ -18,7 +18,7 @@
  */
 #include "FirstOrderNonLinearDS.hpp"
 #include "FirstOrderNonLinearDSXML.hpp"
-#include "Plugin.hpp"
+//#include "Plugin.hpp"
 #include "PluginTypes.hpp"
 
 using namespace std;
@@ -123,7 +123,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
     if (fonlds->isMPlugin())
     {
       plugin = fonlds->getMPlugin();
-      setComputeMFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeMFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else // This means that M is constant
     {
@@ -138,7 +138,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
     if (fonlds->isFPlugin())
     {
       plugin = fonlds->getFPlugin();
-      setComputeFFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeFFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
     {
@@ -154,7 +154,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
     if (fonlds->isJacobianfxPlugin())
     {
       plugin = fonlds->getJacobianfxPlugin();
-      setComputeJacobianfxFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeJacobianfxFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else // This means that jacobianfx is constant
     {
@@ -204,7 +204,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   // Allocation and link with the plug-in
   _pluginf->setComputeFunction(fPlugin);
   _pluginJacxf->setComputeFunction(jacobianfxPlugin);
-  //  Plugin::setFunction(&computeJacobianfxPtr, SSL::getPluginName( jacobianfxPlugin ),SSL::getPluginFunctionName( jacobianfxPlugin ));
+  //  Plugin::setFunction(&computeJacobianfxPtr, SSLH::getPluginName( jacobianfxPlugin ),SSLH::getPluginFunctionName( jacobianfxPlugin ));
   //  _pluginNameComputeFPtr = fPlugin;
   //  pluginNameComputeJacobianfxPtr = jacobianfxPlugin;
 

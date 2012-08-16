@@ -8,7 +8,7 @@
 
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -23,7 +23,7 @@ extern "C"
   */
   void convertToPathSparse(int size0, int size1, double* matIn,
                            int* col_start, int* col_len, int* row, double* data);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

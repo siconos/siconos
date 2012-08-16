@@ -34,7 +34,7 @@
 #include"FunctionTest.hpp"
 #include <fstream>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <set>
 #include<string>

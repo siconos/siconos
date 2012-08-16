@@ -20,7 +20,7 @@
 #ifndef BLASLAPACK_H
 #define BLASLAPACK_H
 
-#if __GNUC__ >= 4
+#if __GNUC__ >= 4 || defined(_MSC_VER)
 #include "f2c.h"
 #else
 #include <g2c.h>

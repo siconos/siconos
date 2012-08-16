@@ -17,8 +17,9 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
+
 #include "LinearSMC.hpp"
-using namespace std;
+
 using namespace ActuatorFactory;
 
 LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC, t, ds), _thetaSMC(0.5)

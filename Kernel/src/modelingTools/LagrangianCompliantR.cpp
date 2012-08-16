@@ -23,7 +23,6 @@
 #include "RelationXML.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
-#include "Plugin.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -35,24 +34,24 @@ LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(L
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for h.");
 
-  setComputehFunction(SSL::getPluginName(LRxml->gethPlugin()), SSL::getPluginFunctionName(LRxml->gethPlugin()));
+  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for Jach0.");
   //   Jach.resize(2);
   if (LRxml->isJacobianHPlugin(0))
-    _pluginJachq->setComputeFunction(SSL::getPluginName(LRxml->getJacobianHPlugin(0)), SSL::getPluginFunctionName(LRxml->getJacobianHPlugin(0)));
+    _pluginJachq->setComputeFunction(SSLH::getPluginName(LRxml->getJacobianHPlugin(0)), SSLH::getPluginFunctionName(LRxml->getJacobianHPlugin(0)));
   if (LRxml->isJacobianHPlugin(1))
-    _pluginJachlambda->setComputeFunction(SSL::getPluginName(LRxml->getJacobianHPlugin(1)), SSL::getPluginFunctionName(LRxml->getJacobianHPlugin(1)));
+    _pluginJachlambda->setComputeFunction(SSLH::getPluginName(LRxml->getJacobianHPlugin(1)), SSLH::getPluginFunctionName(LRxml->getJacobianHPlugin(1)));
 }
 
 // constructor from a set of data
 LagrangianCompliantR::LagrangianCompliantR(const string& computeh, const std::vector<string> & computeg): LagrangianR(CompliantR)
 {
   zeroPlugin();
-  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
-  _pluginJachq->setComputeFunction(SSL::getPluginName(computeg[0]), SSL::getPluginFunctionName(computeg[0]));
-  _pluginJachlambda->setComputeFunction(SSL::getPluginName(computeg[1]), SSL::getPluginFunctionName(computeg[1]));
+  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
+  _pluginJachq->setComputeFunction(SSLH::getPluginName(computeg[0]), SSLH::getPluginFunctionName(computeg[0]));
+  _pluginJachlambda->setComputeFunction(SSLH::getPluginName(computeg[1]), SSLH::getPluginFunctionName(computeg[1]));
 }
 
 void LagrangianCompliantR::zeroPlugin()

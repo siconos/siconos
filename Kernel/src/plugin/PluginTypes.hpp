@@ -30,8 +30,6 @@ typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*
 /** Pointer to function used for plug-in for vector-type operators that depends only on time */
 typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
 
-#include "SimpleMatrix.hpp"
-
 /** */
 typedef void (*FPtr1)(double, unsigned int, const double*, double*, unsigned int, double*);
 

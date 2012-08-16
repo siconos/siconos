@@ -156,15 +156,13 @@ int main(int argc, char* argv[])
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("SMCExampleExplicit.dat", "ascii");
   dataPlot.resize(k, outputSize);
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("SMCExampleExplicit.dat", "ascii", dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("SMCExampleExplicit.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("SMCExampleExplicit.ref", "ascii", dataPlotRef);
   std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 
   if ((dataPlot - dataPlotRef).normInf() > 1e-12)

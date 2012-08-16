@@ -25,10 +25,7 @@
 #define __FirstOrderNonLinearDSXML__
 
 #include "DynamicalSystemXML.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "SiconosMemory.hpp"
-
 //Tags
 const std::string DS_X0 = "x0";
 const std::string DS_X = "x";
@@ -40,10 +37,6 @@ const std::string DS_JACOBIANXF = "jacobianfx";
 
 class SiconosMemory;
 class SiconosMemoryXML;
-class SimpleMatrix;
-class SiconosMatrix;
-class SiconosVector;
-class SiconosVector;
 
 /** XML management for FirstOrderNonLinearDS
  *

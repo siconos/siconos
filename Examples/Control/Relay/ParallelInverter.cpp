@@ -350,8 +350,7 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("SimpleExampleRelay.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("SimpleExampleRelay.dat", "ascii", dataPlot, "noDim");
   }
 
   catch (SiconosException e)

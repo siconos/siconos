@@ -344,11 +344,11 @@ void frictionContact3D_globalAlartCurnier(
   // iparam[2] != 0 => use of DGELS
   if (options->iparam[2])
   {
-    int dgelsinfo;
+    int dgelsinfo = 0;
 
     DGELS(problemSize, problemSize,
           1, AWpB, problemSize,
-          F, problemSize, &w, -1, dgelsinfo);
+          F, problemSize, &w, -1, &dgelsinfo);
 
     LWORK = (int) w;
 
@@ -379,7 +379,7 @@ void frictionContact3D_globalAlartCurnier(
     // AW + B
     computeAWpB(problemSize, A, problem->M->matrix0, B, AWpB);
 
-    int fail;
+    int info2 = 0;
 
     DCOPY(problemSize, F, 1, tmp1, 1);
     DSCAL(problemSize, -1., tmp1, 1);
@@ -388,7 +388,7 @@ void frictionContact3D_globalAlartCurnier(
     {
       assert(WORK);
       DGELS(problemSize, problemSize, 1, AWpB, problemSize,
-            tmp1, problemSize, WORK, LWORK, fail);
+            tmp1, problemSize, WORK, LWORK, &info2);
     }
     else
     {
@@ -399,7 +399,7 @@ void frictionContact3D_globalAlartCurnier(
 
       // tmp1 <- sol (AWpB * tmp1 = -F)
       DGESV(problemSize, 1, AWpB, problemSize, ipiv,
-            tmp1, problemSize, fail);
+            tmp1, problemSize, &info2);
 
 #ifndef NDEBUG
       DCOPY(problemSize, F, 1, tmp2, 1);
@@ -410,11 +410,11 @@ void frictionContact3D_globalAlartCurnier(
 
     }
 
-    assert(fail >= 0);
+    assert(info2 >= 0);
 
-    if (fail > 0)
+    if (info2 > 0)
       /*if (verbose>0)*/
-      printf("GLOBALAC: warning DGESV fail with U(%d,%d) == 0.\n", fail, fail);
+      printf("GLOBALAC: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
 
     // line search
     double alpha = 1;

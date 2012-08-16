@@ -35,7 +35,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
 
-  setComputehFunction(SSL::getPluginName(LRxml->gethPlugin()), SSL::getPluginFunctionName(LRxml->gethPlugin()));
+  setComputehFunction(SSLH::getPluginName(LRxml->gethPlugin()), SSLH::getPluginFunctionName(LRxml->gethPlugin()));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
@@ -54,7 +54,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
-  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
 
   _pluginJachq->setComputeFunction(strcomputeJachq);
 
@@ -71,7 +71,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, co
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
-  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));
 
   _pluginJachq->setComputeFunction(strcomputeJachq);
 

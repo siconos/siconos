@@ -19,14 +19,14 @@
 #ifndef RELAY_TEST_FUNCTION_H
 #define RELAY_TEST_FUNCTION_H
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
   void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
   int relay_test_function(FILE * f, int solverId);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

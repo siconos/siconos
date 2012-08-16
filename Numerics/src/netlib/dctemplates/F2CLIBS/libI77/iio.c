@@ -14,7 +14,7 @@ z_getc(Void)
     return(*f__icptr++);
   }
   err(f__svic->icierr, 110, "recend");
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }
@@ -73,7 +73,7 @@ c_si(icilist *a)
 y_ierr(Void)
 {
   err(f__elist->cierr, 110, "iio");
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }

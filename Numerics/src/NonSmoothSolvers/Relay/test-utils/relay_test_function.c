@@ -39,7 +39,7 @@ int relay_test_function(FILE * f, int  solverId)
 
 
 
-  SolverOptions * options = malloc(sizeof(SolverOptions));
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   relay_setDefaultSolverOptions(problem, options, solverId);
 
@@ -49,8 +49,8 @@ int relay_test_function(FILE * f, int  solverId)
   options->dparam[0] = tolerance;
 
 
-  double * z = malloc(problem->size * sizeof(double));
-  double * w = malloc(problem->size * sizeof(double));
+  double * z = (double *)malloc(problem->size * sizeof(double));
+  double * w = (double *)malloc(problem->size * sizeof(double));
 
   for (i = 0; i <  problem->size ; i++)
   {

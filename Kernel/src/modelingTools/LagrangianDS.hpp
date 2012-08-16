@@ -25,7 +25,6 @@
 #define LAGRANGIANNLDS_H
 
 #include "DynamicalSystem.hpp"
-#include "Plugin.hpp"
 #include "BoundaryCondition.hpp"
 
 class DynamicalSystem;

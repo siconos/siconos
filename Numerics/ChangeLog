@@ -24,6 +24,21 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v3.5.0
+--------------------------------------------------------------------------------
+
+Changes:
+	* LA.h: transform macros used to wrap LAPACK/BLAS functions into
+	static inline functions. This should not induced any loss of
+	performance
+	* Enable Numerics to be build with a C++ Compiler (needed by Visual
+	Studio). In this case it sets BUILD_AS_CPP.
+	* Misc changes for crosscompiling to Windows using mingw and Visual
+	Studio. The files SiconosCompat.h and SiconosCompat.c contains some
+	functions not defined by VS (most of them are C99)
+
+
+--------------------------------------------------------------------------------
   v3.4.0
 --------------------------------------------------------------------------------
 

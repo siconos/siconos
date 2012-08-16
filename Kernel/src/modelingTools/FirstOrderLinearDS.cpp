@@ -18,7 +18,7 @@
 */
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearDSXML.hpp"
-#include "Plugin.hpp"
+//#include "Plugin.hpp"
 
 using namespace std;
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
@@ -47,7 +47,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
     {
       plugin = foldsxml->getAPlugin();
       _A.reset(new SimpleMatrix(_n, _n));
-      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeAFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _A.reset(new SimpleMatrix(foldsxml->getA()));
@@ -60,7 +60,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
     {
       _b.reset(new SiconosVector(_n));
       plugin = foldsxml->getBPlugin();
-      setComputebFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputebFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _b.reset(new SiconosVector(foldsxml->getBVector()));
@@ -207,7 +207,7 @@ void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const str
 {
   _pluginA->setComputeFunction(pluginPath, functionName);
   //   Plugin::setFunction(&_APtr, pluginPath, functionName);
-  //   SSL::buildPluginName(pluginNameAPtr,pluginPath,functionName);
+  //   SSLH::buildPluginName(pluginNameAPtr,pluginPath,functionName);
 }
 
 void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
@@ -221,7 +221,7 @@ void FirstOrderLinearDS::setComputebFunction(const string& pluginPath, const str
   _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
     _b.reset(new SiconosVector(getDim()));
-  //  SSL::buildPluginName(pluginNamebPtr,pluginPath,functionName);
+  //  SSLH::buildPluginName(pluginNamebPtr,pluginPath,functionName);
 }
 
 void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)

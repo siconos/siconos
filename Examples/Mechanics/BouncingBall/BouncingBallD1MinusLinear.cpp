@@ -177,13 +177,11 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result_tdg.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result_tdg.dat", "ascii", dataPlot, "noDim");
     //SimpleMatrix dataPlotRef(dataPlot);
     //dataPlotRef.zero();
-    //ioMatrix ref("result.ref", "ascii");
-    //ref.read(dataPlotRef);
+    //ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
     //if((dataPlot-dataPlotRef).normInf() > 1e-8)
     //{

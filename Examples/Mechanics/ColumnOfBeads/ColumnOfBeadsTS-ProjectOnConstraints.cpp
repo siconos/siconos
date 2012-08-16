@@ -328,21 +328,18 @@ int withLevel(unsigned int mylevel)
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     if (levelForProjection == 1)
     {
-      ioMatrix ref("result-WITHPROJ.ref", "ascii");
-      ref.read(dataPlotRef);
+      ioMatrix::read("result-WITHPROJ.ref", "ascii", dataPlotRef);
     }
     else if (levelForProjection == 0)
     {
-      ioMatrix ref("result-WITHPROJ-level0.ref", "ascii");
-      ref.read(dataPlotRef);
+      ioMatrix::read("result-WITHPROJ-level0.ref", "ascii", dataPlotRef);
     }
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;

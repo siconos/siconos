@@ -18,6 +18,7 @@
  */
 
 #include "SiconosVectorTest.hpp"
+#include "SiconosAlgebra.hpp"
 
 using namespace std;
 using namespace boost::numeric::ublas;

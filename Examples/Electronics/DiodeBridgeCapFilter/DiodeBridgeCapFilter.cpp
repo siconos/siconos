@@ -235,8 +235,7 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("DiodeBridgeCapFilter.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("DiodeBridgeCapFilter.dat", "ascii", dataPlot, "noDim");
   }
 
   // --- Exceptions handling ---

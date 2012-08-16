@@ -94,7 +94,7 @@ typedef struct
   double* mu;
 } PrimalFrictionContactProblem;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -104,7 +104,7 @@ extern "C"
 
   void freePrimalFrictionContact_problem(PrimalFrictionContactProblem* problem);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 #endif

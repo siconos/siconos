@@ -19,7 +19,6 @@
 #include "FirstOrderLinearR.hpp"
 #include "LinearRXML.hpp"
 #include "Interaction.hpp"
-#include "Plugin.hpp"
 
 using namespace std;
 using namespace RELATION;

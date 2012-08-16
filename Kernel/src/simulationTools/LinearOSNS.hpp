@@ -27,7 +27,7 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "BlockCSRMatrix.hpp"
-#include <sys/time.h>
+#include <time.h>
 
 #include "SiconosPointers.hpp"
 

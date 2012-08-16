@@ -21,7 +21,7 @@ integer s_rnge(char *varn, ftnint offset, char *procn, ftnint line)
   while ((i = *varn) && i != ' ')
     putc(*varn++, stderr);
   sig_die(".", 1);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }

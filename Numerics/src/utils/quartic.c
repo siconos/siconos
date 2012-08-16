@@ -16,8 +16,7 @@ Assume p[0]<>0 (overflows otherwise)
 */
 #include <stdio.h>
 #include <math.h>
-int QUADROOTS(p, r)
-double p[5], r[3][5];
+int QUADROOTS(double p[5], double r[3][5])
 {
   /*
   Array r[3][5]  p[5]
@@ -43,8 +42,7 @@ double p[5], r[3][5];
   }
   return(0);
 }
-int CUBICROOTS(p, r)
-double p[5], r[3][5];
+int CUBICROOTS(double p[5], double r[3][5])
 {
   /*
   Array r[3][5]  p[5]
@@ -126,7 +124,7 @@ double p[5], r[3][5];
   }
   return(0);
 }
-int BIQUADROOTS(p, r)
+int BIQUADROOTS(double p[5], double r[3][5])
 /* add _ if calling from fortran */
 /*
 Array r[3][5]  p[5]
@@ -134,7 +132,6 @@ Roots of poly p[0] x^4 + p[1] x^3...+p[4]=0
 x=r[1][k] + i r[2][k]  k=1,...,4
 */
 
-double p[5], r[3][5];
 {
   double a, b, c, d, e;
   int k, j;
@@ -198,6 +195,7 @@ double p[5], r[3][5];
       goto END;
     }
   }
+
 QUAD:
   p[2] = c / b;
   QUADROOTS(p, r);

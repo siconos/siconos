@@ -255,10 +255,8 @@ int main(int argc, char* argv[])
     // écrire les valeur de la matrice dataPlot dans un fichier result.dat
 
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io1("result.dat", "ascii");
-    io1.write(dataPlot, "noDim");
-    ioMatrix io2("fichier.dat", "ascii");
-    io2.write(Controle, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("fichier.dat", "ascii", Controle, "noDim");
 
     // --- Libérer de la mémoire
   }

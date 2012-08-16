@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "DiskPlanR.hpp"
 #include "Disk.hpp"
 

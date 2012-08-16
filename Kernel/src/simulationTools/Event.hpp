@@ -23,7 +23,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <math.h>
+#include <cmath>
 #include <iostream> // Warning (FP): iostream must be included before gmp
 #include <gmp.h>
 #include "SiconosConst.hpp"

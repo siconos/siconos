@@ -22,7 +22,7 @@
 #ifndef NUMERICSMATRIX_TEST_FUNCTION_H
 #define NUMERICSMATRIX_TEST_FUNCTION_H
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -36,7 +36,7 @@ extern "C"
   int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
   int test_RowPermutationSBM(SparseBlockStructuredMatrix *M);
   int test_ColPermutationSBM(SparseBlockStructuredMatrix *M);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

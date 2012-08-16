@@ -20,6 +20,8 @@
 #include "LA.h"
 #include "NumericsOptions.h" // for global options
 #include "FrictionContactProblem.h"
+#include "SolverOptions.h"
+#include "FrictionContact3D_compute_error.h"
 #include "FrictionContact3D_projection.h"
 #include "projectionOnCone.h"
 #include "projectionOnCylinder.h"

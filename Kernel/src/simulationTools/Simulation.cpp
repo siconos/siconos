@@ -831,7 +831,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   {
     SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
     unsigned int indxSize = topo->indexSetsSize();
-    if (indxSize == LEVELMAX or indxSize < _levelMaxForOutput + 1)
+    if ((indxSize == LEVELMAX) || (indxSize < _levelMaxForOutput + 1))
     {
       topo->indexSetsResize(_levelMaxForOutput + 1);
       // Init if the size has changed
@@ -860,7 +860,7 @@ void Simulation::computeLevelsForInputAndOutput()
   }
 
   unsigned int indxSize = topo->indexSetsSize();
-  if (indxSize == LEVELMAX or indxSize < _levelMaxForOutput + 1)
+  if ((indxSize == LEVELMAX) || (indxSize < _levelMaxForOutput + 1))
   {
     topo->indexSetsResize(_levelMaxForOutput + 1);
     // Init if the size has changed

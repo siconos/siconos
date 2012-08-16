@@ -33,7 +33,7 @@
 #include "SparseBlockMatrix.h"
 #include "SolverOptions.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -62,7 +62,7 @@ extern "C"
    */
   void frictionContact3D_Path_computeError(int dimension, double* velocity, double* reaction, double * output_error);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

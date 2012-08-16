@@ -39,7 +39,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
   int  incx, incy;
   double err, a1, b1;
   double alpha;
-  int infoDGESV;
+  int infoDGESV = 0;
 
   int *ipiv;
 
@@ -144,7 +144,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
     DCOPY(mm , JacH , incx , A , incy);
     k = 1;
-    DGESV(m , k , A , m , ipiv , H , m , infoDGESV);
+    DGESV(m , k , A , m , ipiv , H , m , &infoDGESV);
 
     if (infoDGESV)
     {

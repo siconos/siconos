@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "DiskDiskR.hpp"
 
 DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)

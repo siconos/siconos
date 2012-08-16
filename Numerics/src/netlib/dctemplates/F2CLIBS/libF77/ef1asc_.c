@@ -16,7 +16,7 @@ int ef1asc_(ftnint *a, ftnlen *la, ftnint *b, ftnlen *lb)
 #endif
 {
   s_copy((char *)a, (char *)b, EVEN(*la), *lb);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0;
 #endif
 }

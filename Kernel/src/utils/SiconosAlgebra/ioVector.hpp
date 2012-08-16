@@ -25,21 +25,21 @@
 #ifndef __ioVector__
 #define __ioVector__
 
-#include "ioObject.hpp"
-#include "SiconosVector.hpp"
-//class SiconosVector;
+#include <string>
+
+class SiconosVector;
 
 
-/** io object specialization */
-typedef ioObject<SiconosVector> ioVector;
+namespace ioVector
+{
+/** Read a SiconosMatrix from a file
+ * \param fileName the file containing the matrix
+ * \param[in,out] m the SiconosVector containing the matrix
+ * \return bool true if read ok, else false ...
+ */
+bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m);
 
-/** Specialization to read a SiconosMatrix
-    \param[in] SiconosMatrix the matrix to be read
-    \return bool true if read ok, else false ...
-*/
-template<> bool ioObject<SiconosVector>::read(SiconosVector&) const;
-
-/** Specialization to write a SiconosVector
+/** Write a SiconosVector to a file
     \param[in] SiconosVector the vector to be read
     \param[in] string type of output:
     Type of Output for write function:
@@ -53,6 +53,6 @@ template<> bool ioObject<SiconosVector>::read(SiconosVector&) const;
     Reading input format is the one corresponding to "python".
     \return bool true if read ok, else false ...
 */
-template<> bool ioObject<SiconosVector>::write(const SiconosVector&, const std::string&) const;
-
+bool write(const std::string& fileName, const std::string& Mode, const SiconosVector& m, const std::string& outputType = "python");
+}
 #endif

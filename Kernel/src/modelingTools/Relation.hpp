@@ -28,7 +28,6 @@
 #include "SimpleMatrix.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
-#include "Plugin.hpp"
 #include "SiconosPointers.hpp"
 #include "PluginTypes.hpp"
 #include "RelationNamespace.hpp"

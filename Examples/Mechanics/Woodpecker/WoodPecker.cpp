@@ -210,13 +210,11 @@ int main(int argc, char* argv[])
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("Woodpecker.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("Woodpecker.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

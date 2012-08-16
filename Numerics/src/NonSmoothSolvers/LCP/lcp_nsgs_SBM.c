@@ -96,8 +96,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
   /* Local problem initialization */
 
-  LinearComplementarityProblem * local_problem = malloc(sizeof(*local_problem));
-  local_problem->M = malloc(sizeof(*local_problem->M));
+  LinearComplementarityProblem * local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
+  local_problem->M = (NumericsMatrix *)malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0; // dense storage
   local_problem->M->matrix0 = NULL;
   local_problem->M->matrix1 = NULL;

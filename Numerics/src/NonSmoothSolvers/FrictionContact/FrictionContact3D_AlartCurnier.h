@@ -50,7 +50,7 @@
  */
 #include "SparseBlockMatrix.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -126,7 +126,7 @@ extern "C"
   int DampedLocalNonsmoothNewtonSolver(FrictionContactProblem* localproblem,
                                        double * R, int *iparam, double *dparam);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

@@ -127,16 +127,14 @@ void ZOHTest::testMatrixIntegration1()
   }
   dataPlot.display();
   cout << endl << endl;
-  ioMatrix io("testMatrixIntegration1.dat", "ascii");
   dataPlot.resize(k, 3);
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("testMatrixIntegration1.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   //magic line to compute the following:
   // python -c "import numpy as np; t = np.linspace(0, 9.9, 100); np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" && sed -i "1i100 3" testMatrixIntegration1.ref
-  ioMatrix ref("testMatrixIntegration1.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("testMatrixIntegration1.ref", "ascii", dataPlotRef);
   cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
@@ -195,14 +193,12 @@ void ZOHTest::testMatrixIntegration2()
   }
   dataPlot.display();
   cout << endl << endl;
-  ioMatrix io("testMatrixIntegration2.dat", "ascii");
   dataPlot.resize(k, 5);
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("testMatrixIntegration2.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("testMatrixIntegration2.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("testMatrixIntegration2.ref", "ascii", dataPlotRef);
   cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
@@ -270,14 +266,12 @@ void ZOHTest::testMatrixIntegration3()
   }
   dataPlot.display();
   cout << endl << endl;
-  ioMatrix io("testMatrixIntegration3.dat", "ascii");
   dataPlot.resize(k, 7);
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("testMatrixIntegration3.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("testMatrixIntegration3.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("testMatrixIntegration3.ref", "ascii", dataPlotRef);
   cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
@@ -345,14 +339,12 @@ void ZOHTest::testMatrixIntegration4()
   }
   dataPlot.display();
   cout << endl << endl;
-  ioMatrix io("testMatrixIntegration4.dat", "ascii");
   dataPlot.resize(k, 7);
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("testMatrixIntegration4.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("testMatrixIntegration4.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("testMatrixIntegration4.ref", "ascii", dataPlotRef);
   cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }

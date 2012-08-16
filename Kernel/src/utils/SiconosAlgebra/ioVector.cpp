@@ -17,26 +17,27 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "ioVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosVectorException.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include<fstream>
 
-// Default private
-template<> bool ioVector::read(SiconosVector& m) const
+#include "SiconosAlgebra.hpp"
+
+namespace ioVector
+{
+bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m)
 {
   std::ifstream infile;
   if (Mode == "ascii")
-    infile.open(FileName.c_str(), std::ifstream::in);
+    infile.open(fileName.c_str(), std::ifstream::in);
   else if (Mode == "binary")
-    infile.open(FileName.c_str(), std::ifstream::binary);
+    infile.open(fileName.c_str(), std::ifstream::binary);
   else
-    SiconosVectorException::selfThrow(" ioVector::read : Fail to open file \"" + FileName + "\"");
+    SiconosVectorException::selfThrow(" ioVector::read : Fail to open file \"" + fileName + "\"");
 
   if (!infile.good())
-    SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + FileName + "\"");
-
-  if (m.isBlock())
-    SiconosVectorException::selfThrow(" ioVector::read : read BlockVector is not implemented");
+    SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
 
   infile.precision(15);
 
@@ -56,21 +57,18 @@ template<> bool ioVector::read(SiconosVector& m) const
   return true;
 }
 
-template<> bool ioVector::write(const SiconosVector& m, const std::string& outputType) const
+bool write(const std::string& fileName, const std::string& Mode, const SiconosVector& m, const std::string& outputType)
 {
   std::ofstream outfile;
   if (Mode == "ascii")
-    outfile.open(FileName.c_str(), std::ofstream::out);
+    outfile.open(fileName.c_str(), std::ofstream::out);
   else if (Mode == "binary")
-    outfile.open(FileName.c_str(), std::ofstream::binary);
+    outfile.open(fileName.c_str(), std::ofstream::binary);
   else
     SiconosVectorException::selfThrow("ioVector::write - Incorrect mode for writing");
 
   if (!outfile.good())
-    SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + FileName + "\"");
-
-  if (m.isBlock())
-    SiconosVectorException::selfThrow(" ioVector::write : write BlockVector is not implemented");
+    SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
 
   outfile.precision(15);
 
@@ -92,3 +90,4 @@ template<> bool ioVector::write(const SiconosVector& m, const std::string& outpu
   return true;
 }
 
+}

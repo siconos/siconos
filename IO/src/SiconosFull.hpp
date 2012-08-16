@@ -318,12 +318,6 @@ void serialize(Archive& ar, InteractionsSet& v, unsigned int version)
 }
 
 template <class Archive>
-void serialize(Archive& ar, PluginHandle& v, unsigned int version)
-{
-
-}
-
-template <class Archive>
 void serialize(Archive& ar, _InteractionsGraph& v, unsigned int version)
 {
   siconos_io(ar, v, version);

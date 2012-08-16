@@ -65,7 +65,7 @@ int ls_test_function(FILE * f, int solverId)
   info = LinearSystem_newFromFile(problem, f);
 
   SolverOptions * options ;
-  options = malloc(sizeof(*options));
+  options = (SolverOptions *)malloc(sizeof(*options));
 
   options->solverId = solverId;
   printf("solverName ==> %s\n", idToName(solverId));
@@ -73,8 +73,8 @@ int ls_test_function(FILE * f, int solverId)
   _LSfillParamWithRespectToSolver(options, solverId, problem);
 
   options->filterOn = 1;
-  double * z = malloc(problem->size * sizeof(double));
-  double * w = malloc(problem->size * sizeof(double));
+  double * z = (double *)malloc(problem->size * sizeof(double));
+  double * w = (double *)malloc(problem->size * sizeof(double));
   for (i = 0; i < problem->size; i++)
   {
     z[i] = 0.0;

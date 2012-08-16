@@ -25,18 +25,19 @@
 #ifndef __ioMatrix__
 #define __ioMatrix__
 
-#include "SiconosMatrix.hpp"
-#include "SiconosMatrixException.hpp"
-#include "ioObject.hpp"
+#include <string>
+
+class SiconosMatrix;
 
 /** io object specialization */
-typedef ioObject<SiconosMatrix> ioMatrix;
 
+namespace ioMatrix
+{
 /** Specialization to read a SiconosMatrix
     \param[in] SiconosMatrix the matrix to be read
     \return bool true if read ok, else false ...
 */
-template<> bool ioObject<SiconosMatrix>::read(SiconosMatrix& m) const;
+bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m);
 
 /** Specialization to write a SiconosMatrix
     \param[in] SiconosMatrix the matrix to be read
@@ -53,6 +54,8 @@ template<> bool ioObject<SiconosMatrix>::read(SiconosMatrix& m) const;
     Reading input format is the one corresponding to "python".
     \return bool true if read ok, else false ...
 */
-template<> bool ioObject<SiconosMatrix>::write(const SiconosMatrix& m, const std::string& outputType) const;
+bool write(const std::string& fileName, const std::string& Mode, const SiconosMatrix& m, const std::string& outputType = "python");
+
+}
 
 #endif

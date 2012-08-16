@@ -28,7 +28,7 @@
 
 */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -41,7 +41,7 @@ extern "C"
   void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

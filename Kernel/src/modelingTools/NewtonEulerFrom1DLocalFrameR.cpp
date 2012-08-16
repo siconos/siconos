@@ -251,7 +251,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(const double time, Interaction& 
 #endif
 
 }
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(const double time, Interaction& inter)
+void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter)
 {
   DSIterator itDS = inter.dynamicalSystemsBegin();
   SP::NewtonEulerDS d1 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);

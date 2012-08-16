@@ -19,7 +19,6 @@
 #include "DelayedSampledActuator.hpp"
 #include "DynamicalSystem.hpp"
 #include "ActuatorFactory.hpp"
-#include "ioMatrix.hpp"
 
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

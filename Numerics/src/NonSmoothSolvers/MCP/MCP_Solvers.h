@@ -42,7 +42,7 @@
 #include "MixedComplementarityProblem.h"
 #include "SolverOptions.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -65,7 +65,7 @@ extern "C"
   void mcp_driver_init(MixedComplementarityProblem * problem, SolverOptions* options);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

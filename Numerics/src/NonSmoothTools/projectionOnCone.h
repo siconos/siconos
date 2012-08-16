@@ -19,7 +19,7 @@
 
 #ifndef ProjectionOnCone_H
 #define ProjectionOnCone_H
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -28,7 +28,7 @@ extern "C"
   \param[in] mu the angle of the cone
   */
   void projectionOnCone(double* r, double  mu);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

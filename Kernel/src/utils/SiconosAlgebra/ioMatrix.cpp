@@ -18,32 +18,37 @@
  */
 
 #include <iterator>
-#include<iostream>
-#include<fstream>
-#include<limits>
+#include <iostream>
+#include <fstream>
+#include <limits>
 #include "ioMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixException.hpp"
 #include <boost/numeric/ublas/io.hpp>
 
-template<> bool ioMatrix::read(SiconosMatrix& m) const
+#include "SiconosAlgebra.hpp"
+
+namespace ioMatrix
+{
+bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m)
 {
   std::ifstream infile;
   if (Mode == "ascii")
-    infile.open(FileName.c_str(), std::ifstream::in);
+    infile.open(fileName.c_str(), std::ifstream::in);
   else if (Mode == "binary")
-    infile.open(FileName.c_str(), std::ifstream::binary);
+    infile.open(fileName.c_str(), std::ifstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::read Incorrect mode for reading");
 
   if (!infile.good())
-    SiconosMatrixException::selfThrow("ioMatrix::read error : Fail to open \"" + FileName + "\"");
+    SiconosMatrixException::selfThrow("ioMatrix::read error : Fail to open \"" + fileName + "\"");
 
   if (m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 
   infile.precision(15);
   infile.setf(std::ios::scientific);
-  DenseMat * p = m.dense();
+  DenseMat& p = *m.dense();
 
   // Dim of the matrix are given in the first line.
   // Just use to check that sizes are consistents.
@@ -52,8 +57,8 @@ template<> bool ioMatrix::read(SiconosMatrix& m) const
   infile >> s1;
   infile >> s2;
 
-  if (s1 != p->size1() || s2 != p->size2())
-    p->resize(s1, s2);
+  if (s1 != p.size1() || s2 != p.size2())
+    p.resize(s1, s2);
 
   // Note: using istream stl iterator seems to be 2-times faster than << with a loop over matrix data.
   //  copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p->data()).begin());
@@ -64,27 +69,13 @@ template<> bool ioMatrix::read(SiconosMatrix& m) const
   //   std::cout.precision(15);
   //   std::cout.setf(std::ios::scientific);
 
-  for (it = p->begin1(); it != p->end1(); ++it)
+  for (unsigned int i = 0; i < s1; i++)
   {
-
-
-    //std::string sz;
-    //double  tmp;
-    //getline(infile,sz);
-    //std::cout << sz;
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for (unsigned int j = 0; j < s2; j++)
     {
-      //infile >> tmp;
-      //std ::cout << tmp << " ";
-      //(*it2)=tmp;
-      //std ::cout << *it2 << " ";
-      infile >> *it2;
-      //        assert(!infile.eof());
-      //        assert(!infile.fail());
-      //        assert(!infile.bad());
+      infile >> p(i, j);
       assert(infile.good());
     }
-    // std::cout  << std:: endl;
   }
 
   // Old version: result in Boost format for ouptut
@@ -95,19 +86,19 @@ template<> bool ioMatrix::read(SiconosMatrix& m) const
   return true;
 }
 
-template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType) const
+bool write(const std::string& fileName, const std::string& Mode, const SiconosMatrix& m, const std::string& outputType)
 {
   // Open file and various checks
   std::ofstream outfile;
   if (Mode == "ascii")
-    outfile.open(FileName.c_str(), std::ofstream::out);
+    outfile.open(fileName.c_str(), std::ofstream::out);
   else if (Mode == "binary")
-    outfile.open(FileName.c_str(), std::ofstream::binary);
+    outfile.open(fileName.c_str(), std::ofstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for writing");
 
   if (!outfile.good())
-    SiconosMatrixException::selfThrow("ioMatrix:: write error : Fail to open \"" + FileName + "\"");
+    SiconosMatrixException::selfThrow("ioMatrix:: write error : Fail to open \"" + fileName + "\"");
 
   if (m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix:: write error : not yet implemented for BlockMatrix");
@@ -125,12 +116,11 @@ template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outpu
     DenseMat::iterator1 row;
     DenseMat::iterator2 col;
     double tmp;
-    for (row = p->begin1(); row != p->end1() ; ++row)
+    for (unsigned int i = 0; i < m.size(0); i++)
     {
-      //std::copy(row.begin(),row.end(),std::ostream_iterator<double>(outfile," "));
-      for (col = row.begin(); col != row.end() ; ++col)
+      for (unsigned int j = 0; j < m.size(1); j++)
       {
-        tmp = *col;
+        tmp = m(i, j);
         if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
         outfile << tmp << " " ;
         assert(outfile.good());
@@ -184,7 +174,7 @@ template<> bool ioMatrix::write(const SiconosMatrix& m, const std::string& outpu
   return true;
 }
 
-
+}
 // To be used later ... ?
 //   template <class T, class iterator1> friend void write( const T& obj, iterator1 row, std::ofstream outfile)
 //   {

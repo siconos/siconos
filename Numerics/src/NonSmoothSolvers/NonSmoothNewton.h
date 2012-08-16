@@ -35,7 +35,7 @@
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -84,7 +84,7 @@ extern "C"
                             int* iparam, double* dparam);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

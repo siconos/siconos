@@ -179,8 +179,7 @@ int main(int argc, char* argv[])
 
     // dataPlot (ascii) output
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("PRC.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("PRC.dat", "ascii", dataPlot, "noDim");
   }
 
   // --- Exceptions handling ---

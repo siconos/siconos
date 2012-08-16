@@ -266,8 +266,8 @@ void NCPGlocker_update(int contact, FrictionContactProblem* problem, FrictionCon
   // === initialize reactionGlocker with reaction[currentContact] ===
   // reactionGlocker = function(reaction, mu_i)
   reactionGlocker[0] = reaction[in]; /* Pn */
-  reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
-  reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
+  reactionGlocker[1] = mu_i * reaction[in] - sqrt(3.) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
+  reactionGlocker[2] = mu_i * reaction[in] + sqrt(3.) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
   reactionGlocker[3] = 0.; /* k3 */
   reactionGlocker[4] = 0.; /* kD */
 

@@ -89,7 +89,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
     jacobianF = &jacobianF_AC;
     /*     updateSolver = &frictionContact3D_AC_update; */
     postSolver = &frictionContact3D_AC_post;
-    freeSolver = &frictionContact3D_AC_free;
+    freeSolver = (FreeSolverPtr)&frictionContact3D_AC_free;
 
   }
   else if (localsolver_options->solverId == SICONOS_FRICTION_3D_DampedAlartCurnierNewton)
@@ -100,7 +100,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
     jacobianF = &jacobianF_AC;
     /*     updateSolver = &frictionContact3D_AC_update; */
     postSolver = &frictionContact3D_AC_post;
-    freeSolver = &frictionContact3D_AC_free;
+    freeSolver = (FreeSolverPtr)&frictionContact3D_AC_free;
 
   }
 
@@ -116,7 +116,7 @@ void frictionContact3D_Newton_initialize(FrictionContactProblem* problem, Fricti
     jacobianF = &jacobianF_GlockerFischerBurmeister;
     /*     updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
-    freeSolver = &NCPGlocker_free;
+    freeSolver = (FreeSolverPtr)&NCPGlocker_free;
   }
   else
   {

@@ -25,12 +25,9 @@
 #define __DynamicalSystemXML__
 
 #include "SiconosDOMTreeTools.hpp"
-#include "SiconosVector.hpp"
 #include "DynamicalSystemTypes.hpp"
 
-
-class SiconosVector;
-class SiconosVector;
+#include "SiconosVisitor.hpp"
 
 /** XML management for DynamicalSystem
  *

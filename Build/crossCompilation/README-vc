@@ -1,0 +1,48 @@
+This is a brain dump on how to compile Siconos from Linux with Visual Studio
+
+## Toolchain
+
+The wrapmsvc project has some nice info on how to use Visual Studio from Linux
+http://code.google.com/p/wrapmsvc/
+Get a release tarball of checkout the svn. Follow the README to install the win7 SDK
+and the wrapper.
+
+For the Fortran compiler and some external dependencies, you will need the mxe toolchain
+See README-mingw on how to install it. You can also install Python, numpy, ...
+
+There is an ABI compatibility between GCC and Visual Studio for C (VS can also link to fortran
+libraries compiled with GCC). But with C++, they are incompatible
+
+So you have to compile cppunit with VS. First get a compatible version here:
+http://blogs.powersoft.ca/erict/archive/2012/02/21/cppunit-in-vs2010ndashwith-a-sample.aspx
+go in src/cppunit/
+Build it with
+wine /path/to/wine/dir/drive_c/windows/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe cppunit.vcxproj /p:PlatformToolset=Windows7.1SDK
+It will create a static lib in the Debug directory
+
+If you want to build Siconos in Release mode, you also have to build cppunit in Release. You can
+then use the switch "/p:Configuration=Release;PlatformToolset=Windows7.1SDK"
+
+Another big issue is that you cannot put the include dir from the mxe toochain in the include path.
+In this case it will mix the header from the mingw std lib and those from VS, resulting in a mess.
+So you have to copy those in a separate dir and give it to cmake (see the build-vc.sh script).
+
+## Bugs
+
+* There is an issue with some operator test (especially the prod test). A debug c++ assert fails !
+This might be a bug in ublas or in the std VS C++ library
+* VS does not C99 ... but the C++ compiler support ISO C++, which contains a subset of C99. Fortunately,
+we only use this subset, so we have to use the C++ compiler for Numerics. As a site effect, the C calling convention
+is not respected. In most header if __cplusplus is defined, we declare function as extern C, which is not correct
+in this case. We then have to prevent this if Numerics is build using a C++ compiler. Hence we create a new macro
+BUILD_AS_CPP. But it does not always work as expected ... When building Numerics, we have to force its definition,
+despite been defined in NumericsConfig.h
+* Many failures in Release mode
+
+## TODO
+
+* Mark imported function as __declspec(dllimport) (especially LA.h, exported function in Numerics, Kernel)
+* See if we still comply to the GPL (http://www.gnu.org/licenses/gpl-faq.html#WindowsRuntimeAndGPL)
+* Adapt the siconos script to make use of the VS compiler (among others ...)
+* Fix bugs
+* Try to build it natively on Windows

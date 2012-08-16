@@ -178,7 +178,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
     DCOPY(n , JacPhi , incx , JacPhi_copy , incy);
     k = 1;
-    DGESV(m, k, JacPhi_copy, m, ipiv, beta, m, infoDGESV);
+    DGESV(m, k, JacPhi_copy, m, ipiv, beta, m, &infoDGESV);
 
     if (infoDGESV)
     {

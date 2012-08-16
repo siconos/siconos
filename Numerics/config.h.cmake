@@ -24,3 +24,4 @@
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM
 #cmakedefine WITH_FCLIB
+#cmakedefine BUILD_AS_CPP

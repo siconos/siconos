@@ -86,15 +86,13 @@ int main(int argc, char* argv[])
     cout << "End of computation - Number of iterations done: " << k - 1 << endl << endl;
 
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix io("result.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("resultTSXML.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("resultTSXML.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

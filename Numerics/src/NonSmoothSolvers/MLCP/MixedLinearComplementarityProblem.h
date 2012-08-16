@@ -136,13 +136,13 @@ typedef struct
 
 void displayMat(double * M, int Nblin, int Nbcol, int incLin);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
   void displayMLCP(MixedLinearComplementarityProblem* p);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

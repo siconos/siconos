@@ -21,7 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "SiconosVector.hpp"
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 class BlockVectorTest : public CppUnit::TestFixture

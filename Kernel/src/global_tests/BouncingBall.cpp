@@ -79,8 +79,7 @@ bool BouncingBall()
     SP::SiconosMatrix dataRef(new SimpleMatrix("refBouncingBall.dat", true));
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     if (norm < tol)
     {

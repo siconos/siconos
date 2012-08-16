@@ -107,7 +107,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   DCOPY(n, rr, incx, ww, incy);
   DCOPY(n, rr, incx, pp, incy);
 
-  iter = 0.0;
+  iter = 0;
   err  = 1.0 ;
 
   while ((iter < itermax) && (err > tol))

@@ -96,7 +96,7 @@ typedef struct
   double * ub;
 } RelayProblem;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -114,7 +114,7 @@ extern "C"
 
   void freeRelay_problem(RelayProblem* problem);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

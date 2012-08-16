@@ -224,8 +224,7 @@ int main(int argc, char* argv[])
 
     cout << endl << "Output writing ..." << endl;
     // --- Output files ---
-    ioMatrix out("result.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
   }
 
   catch (SiconosException e)

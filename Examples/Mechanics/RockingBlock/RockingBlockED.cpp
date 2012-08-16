@@ -200,8 +200,7 @@ int main(int argc, char* argv[])
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix io("result.dat", "ascii");
-    io.write(DataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
   }
   //============================== Catch exceptions ===================================================================
   catch (SiconosException e)

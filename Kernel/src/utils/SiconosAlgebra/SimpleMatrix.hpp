@@ -23,8 +23,6 @@
 #ifndef __SimpleMatrix__
 #define __SimpleMatrix__
 
-//#include "SiconosMatrix.hpp"
-
 #include "SimpleMatrixFriends.hpp"
 
 /**Input parameter for copy and transpose constructor.*/
@@ -33,8 +31,6 @@ const std::string transpose = "transpose";
 /** A STL vector of int */
 typedef std::vector<int> VInt;
 TYPEDEF_SPTR(VInt);
-
-class SiconosVector;
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *

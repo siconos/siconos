@@ -144,7 +144,7 @@ void mlcp_direct_reset()
 }
 int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
-  int INFO;
+  int INFO = 0;
   mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
   if (verbose)
   {
@@ -153,7 +153,7 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
   }
   if (!(spFirstCC->Usable))
     return 0;
-  DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
+  DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, &INFO);
   if (INFO)
   {
     spFirstCC->Usable = 0;
@@ -161,7 +161,7 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
     return 0;
   }
 #ifdef DIRECT_SOLVER_USE_DGETRI
-  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
+  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, &INFO);
   if (INFO)
   {
     spFirstCC->Usable = 1;

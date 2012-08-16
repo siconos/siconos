@@ -35,7 +35,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
   int n2 = n * n;
 
 
-  int i, j,  iter1, info2, nrhs;
+  int i, j,  iter1, nrhs;
+  int info2 = 0;
   int itt, it_end;
   int incx, incy;
   int itermax = options->iparam[0];
@@ -190,7 +191,7 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
   /*            Cholesky              */
 
 
-  DPOTRF(LA_UP, n, DPO , n, info2);
+  DPOTRF(LA_UP, n, DPO , n, &info2);
 
 
   if (info2 != 0)
@@ -259,8 +260,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
     DTRTRS(LA_UP, CLA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
     DTRTRS(LA_UP, CLA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
 #else
-    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
+    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
+    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
 #endif
     DCOPY(n, znum1, incx, z, incy);
 

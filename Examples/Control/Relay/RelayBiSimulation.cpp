@@ -249,19 +249,15 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix io("RelayBiSimulation.dat", "ascii");
-    ioMatrix ioController("RelayBiSimulation-Controller.dat", "ascii");
     dataPlot.resize(k, outputSize);
     dataPlotController.resize(kcontroller, outputSize);
-    io.write(dataPlot, "noDim");
-    ioController.write(dataPlotController, "noDim");
+    ioMatrix::write("RelayBiSimulation-Controller.dat", "ascii", dataPlotController, "noDim");
 
 
     // Comparison with a reference file
     //    SimpleMatrix dataPlotRef(dataPlot);
     //     dataPlotRef.zero();
-    // ioMatrix ref("RelayBiSimulation.ref", "ascii");
-    //     ref.read(dataPlotRef);
+    //     ioMatrix::read("RelayBiSimulation.ref", "ascii", dataPlotRef);
     //     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
 
     //     if ((dataPlot-dataPlotRef).normInf() > 1e-12)

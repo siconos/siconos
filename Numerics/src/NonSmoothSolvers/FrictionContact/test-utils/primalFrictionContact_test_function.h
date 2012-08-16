@@ -19,7 +19,7 @@
 #ifndef PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
 #define PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
 #include "SolverOptions.h"
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -27,7 +27,7 @@ extern "C"
   int primalFrictionContact_test_function(FILE * f, SolverOptions *);
 
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

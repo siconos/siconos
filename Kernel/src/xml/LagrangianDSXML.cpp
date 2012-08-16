@@ -18,6 +18,8 @@
 */
 #include "LagrangianDSXML.hpp"
 #include "SiconosMemoryXML.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
 
 using namespace std;
 

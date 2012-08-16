@@ -93,9 +93,8 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("result.dat", "ascii");
-    //io.write(dataPlot,"noDim");
-    io.write(dataPlot);
+    //ioMatrix::write(dataPlot,"noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot);
   }
 
   // --- Exceptions handling ---

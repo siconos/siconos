@@ -39,7 +39,7 @@
 #include "NumericsMatrix.h"
 #include "SolverOptions.h"
 #include "FrictionContact3D_Solvers.h"
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -133,11 +133,11 @@ extern "C"
    */
   int frictionContact3D_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
   /** free memory for friction contact 3D projection solver */
-  void frictionContact3D_projection_free();
+  void frictionContact3D_projection_free(FrictionContactProblem* localproblem);
   /** free memory for friction contact 3D projection solver */
-  void frictionContact3D_projection_with_regularization_free();
+  void frictionContact3D_projection_with_regularization_free(FrictionContactProblem* localproblem);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

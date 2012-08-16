@@ -19,7 +19,7 @@
 #include "TimeDiscretisation.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
-#include <math.h>
+#include <cmath>
 using namespace std;
 
 // IO Constructors -> XML

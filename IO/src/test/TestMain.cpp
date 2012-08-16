@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2010.
+/* Siconos-Kernel, Copyright INRIA 2005-2011.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <iostream>
 
-#include <string.h>
+#include <cstring>
 using namespace std;
 
 /* get a test pointer in the test suite */
@@ -69,10 +69,9 @@ void CdashDumpTest(CppUnit::Test *test, char* myname)
 
   std::cout << "MESSAGE( STATUS Adding unit test : " << test->getName() << " ) "
             << std::endl;
-
-  std::cout << "ADD_TEST(" << test->getName() << " "
-            << myname << ".ldwrap " << test->getName() << ")"
-            << std::endl;
+  std::cout << "ADD_CPPUNIT_TEST(" << test->getName() << " "
+            << EMULATOR << " " << myname << WRAPPER << " " << test->getName()
+            << ")" << std::endl;
 };
 
 /* Dump the test suite */
@@ -116,39 +115,45 @@ int main(int argc, char** argv)
   CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
   CppUnit::TestSuite *testSuite = static_cast<CppUnit::TestSuite*>(registry.makeTest());
 
-  if (argc == 2)
+  if (argc == 3)
   {
     std::string arg = argv[1];
     if (strcmp(argv[1], "--cdash-prepare") == 0)
     {
-      CdashDump(testSuite, argv[0]);
+      std::cout << "# this is a ctest input file" << std::endl;
+      std::cout << "include(SiconosTestConfig.cmake)" << std::endl;
+
+      CdashDump(testSuite, argv[2]);
+    }
+  }
+  else if (argc == 2)
+  {
+    // The object to run tests
+    CppUnit::TextUi::TestRunner runner;
+
+    // get the test
+    CppUnit::Test * test = GetTest(testSuite, argv[1]);
+
+    if (test != NULL)
+    {
+      runner.addTest(test);
+
+      bool wasSucessful = false;
+
+      wasSucessful = runner.run("", false, true, false);
+      return wasSucessful ? 0 : 1;
     }
     else
     {
-
-      // The object to run tests
-      CppUnit::TextUi::TestRunner runner;
-
-      // get the test
-      CppUnit::Test * test = GetTest(testSuite, argv[1]);
-
-      if (test != NULL)
-      {
-        runner.addTest(test);
-
-        bool wasSucessful = false;
-
-        wasSucessful = runner.run("", false, true, false);
-
-        return wasSucessful ? 0 : 1;
-      }
-      else
-      {
-        std::cerr << "Cannot find test : " << argv[1] << std::endl;
-        return 1;
-      }
-
+      std::cerr << "Cannot find test : " << argv[1] << std::endl;
+      return 1;
     }
 
+  }
+
+  else
+  {
+    std::cerr << "Error, no test given" << std::endl;
+    return 1;
   }
 }

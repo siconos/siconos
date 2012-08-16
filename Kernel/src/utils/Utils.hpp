@@ -20,6 +20,7 @@
 Include files related to utils directory
 */
 
+
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -30,11 +31,10 @@ Include files related to utils directory
 #include "SiconosMatrixException.hpp"
 #include "XMLException.hpp"
 #include "SiconosVectorException.hpp"
-#include "SiconosSharedLibraryException.hpp"
 
 #include "SiconosMemory.hpp"
 
-#include "SiconosSharedLibrary.hpp"
+#include "SSLH.hpp"
 
 #include "Tools.hpp"
 #include "Cmp.hpp"

@@ -120,14 +120,12 @@ int main(int argc, char* argv[])
 
   // ==== Output files ====
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("SMCExampleImplicitSimplified.dat", "ascii");
-  io.write(*dataPlot, "noDim");
+  ioMatrix::write("SMCExampleImplicitSimplified.dat", "ascii", *dataPlot, "noDim");
 
   // Comparison with a reference file
   SimpleMatrix dataPlotRef(*dataPlot);
   dataPlotRef.zero();
-  ioMatrix ref("SMCExampleImplicit.ref", "ascii");
-  ref.read(dataPlotRef);
+  ioMatrix::read("SMCExampleImplicit.ref", "ascii", dataPlotRef);
   std::cout << (*dataPlot - dataPlotRef).normInf() << std::endl;
 
   if ((*dataPlot - dataPlotRef).normInf() > 1e-12)

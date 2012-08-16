@@ -337,8 +337,7 @@ int main(int argc, char* argv[])
     cout << endl << "End of computation - Number of iterations done: " << k << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
-    ioMatrix out("result.dat", "ascii");
-    out.write(dataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
   }
 

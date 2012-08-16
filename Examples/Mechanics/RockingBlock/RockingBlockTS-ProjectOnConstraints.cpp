@@ -175,8 +175,7 @@ int main(int argc, char* argv[])
     //----------------------- At the end of the simulation --------------------------
     cout << "End of the simulation" << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix io("result.dat", "ascii");
-    io.write(DataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
   }
   //============================== Catch exceptions ===================================================================
   catch (SiconosException e)

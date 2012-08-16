@@ -190,8 +190,7 @@ int main(int argc, char* argv[])
       S->nextStep();
     }
     // --- Output files ---
-    ioMatrix io("result.dat", "ascii");
-    io.write(DataPlot, "noDim");
+    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
     cout << "time = " << tt.elapsed() << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
   }

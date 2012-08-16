@@ -207,8 +207,7 @@ int main(int argc, char* argv[])
     cout << "Number of iterations done: " << k << endl;
 
     // dataPlot (ascii) output
-    ioMatrix io("DiodeBridge.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
   }
 
   // --- Exceptions handling ---

@@ -23,11 +23,9 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
-#include "SiconosAlgebra.hpp"
+#include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
-
-class BlockVector;
 
 /** Union of DenseVect and SparseVect pointers -
     Siconos::DENSE, num = 1,
@@ -123,17 +121,7 @@ public:
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  inline unsigned int size() const
-  {
-    if (!_dense)
-    {
-      return (vect.Sparse->size());
-    }
-    else
-    {
-      return (vect.Dense->size());
-    }
-  }
+  unsigned int size() const;
 
   /** true if the vector is block else false.
    * \return a bool.
@@ -359,26 +347,9 @@ public:
   SiconosVector& operator -=(const BlockVector&);
 
 
-  SiconosVector& operator *= (double s)
-  {
-    if (_dense)
-      //atlas::scal((double)m,*vect.Dense);
-      *dense() *= s;
-    else
-      *sparse() *= s;
-    return *this;
-  }
+  friend SiconosVector& operator *= (SiconosVector& v, const double& s);
 
-
-  SiconosVector& operator /= (double s)
-  {
-    if (_dense)
-      //atlas::scal((double)m,*vect.Dense);
-      *dense() /= s;
-    else
-      *sparse() /= s;
-    return *this;
-  }
+  friend SiconosVector& operator /= (SiconosVector& v, const double& s);
 
   friend void setBlock(const SiconosVector&, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
 

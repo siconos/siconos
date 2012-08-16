@@ -286,20 +286,21 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     assert(C->blocknumber0 == A->blocknumber0);
     assert(C->blocknumber1 == B->blocknumber1);
 
-    assert( {int compat = 1;
-             for (unsigned int i = 0; i < C->blocknumber0; i++)
-  {
-    if (C->blocksize0[i] != A->blocksize0[i]) compat = 0;
-    }
-    compat == 1;
-            });
-    assert( {int compat = 1;
-             for (unsigned int j = 0; j < C->blocknumber1; j++)
-  {
-    if (C->blocksize1[j] != B->blocksize1[j]) compat = 0;
-    }
-    compat == 1;
-            });
+    /* My eyes are bleeding; if this is important, move it into a function --xhub */
+    /*    assert( {int compat =1;
+                 for(unsigned int i =0; i<C->blocknumber0; i++)
+      {
+        if(C->blocksize0[i] != A->blocksize0[i]) compat =0;
+        }
+        compat==1;
+                });
+        assert( {int compat =1;
+                 for(unsigned int j =0; j<C->blocknumber1; j++)
+      {
+        if(C->blocksize1[j] != B->blocksize1[j]) compat =0;
+        }
+        compat==1;
+                });*/
   }
 
   unsigned int currentRowNumberofA, currentRowNumberofB;
@@ -479,13 +480,15 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
   /* Get dim (rows) of the current block */
   nbRows = sizeY;
 
-  assert(
-  {
-    nbRows = A->blocksize0[currentRowNumber];
-    if (currentRowNumber != 0)
-      nbRows -= A->blocksize0[currentRowNumber - 1];
-    nbRows == sizeY;
-  });
+  /* if this is important, move it into a function --xhub */
+  /*
+    assert(
+    {
+      nbRows = A->blocksize0[currentRowNumber];
+      if(currentRowNumber!=0)
+        nbRows -= A->blocksize0[currentRowNumber-1];
+      nbRows ==sizeY;
+    }); */
 
   /* Set y to 0, if required */
   if (init == 1)
@@ -556,13 +559,14 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
   /* Get dim (rows) of the current block */
   nbRows = sizeY;
 
-  assert(
-  {
-    nbRows = A->blocksize0[currentRowNumber];
-    if (currentRowNumber != 0)
-      nbRows -= A->blocksize0[currentRowNumber - 1];
-    nbRows == sizeY ;
-  });
+  /*  if this is important, move it into a function --xhub */
+  /*   assert(
+    {
+      nbRows = A->blocksize0[currentRowNumber];
+      if(currentRowNumber!=0)
+        nbRows -= A->blocksize0[currentRowNumber-1];
+      nbRows == sizeY ;
+    });*/
 
   /* Set y to 0, if required */
   if (init == 1)
@@ -1377,7 +1381,8 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
   unsigned int currentRowNumber ;
   unsigned int colNumber;
   unsigned int nbRows, nbColumns;
-  int infoDGETRF, infoDGETRI ;
+  int infoDGETRF = 0;
+  int infoDGETRI = 0;
   int info = 0;
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
   {
@@ -1399,10 +1404,10 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 
       int* ipiv = (int *)malloc(nbRows * sizeof(int));
 
-      DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, infoDGETRF);
+      DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, &infoDGETRF);
       assert(!infoDGETRF);
 
-      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, infoDGETRI);
+      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, &infoDGETRI);
       assert(!infoDGETRI);
       free(ipiv);
 
@@ -1865,7 +1870,7 @@ int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockS
   assert(A->block == NULL);
 
   A->block = (double **) malloc(A->nbblocks * sizeof(double *));
-  for (int i = 0; i < A->nbblocks; i++)
+  for (unsigned int i = 0; i < A->nbblocks; i++)
   {
     A->block[i] = (double *) malloc(blocksize * blocksize * sizeof(double));
 
@@ -2111,7 +2116,11 @@ void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level)
   free(A->index1_data);
   free(A->index2_data);
   if (level & NUMERICS_SBM_FREE_SBM)
+  {
+    printf("val1 : %d", NUMERICS_SBM_FREE_SBM);
+    printf("val2 : %d", level);
     free(A);
+  }
 }
 
 //#define SBM_DEBUG_SBMRowToDense

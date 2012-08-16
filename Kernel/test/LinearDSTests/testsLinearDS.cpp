@@ -25,7 +25,7 @@
 #include "SiconosMatrix.hpp"
 #include <sys/time.h>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 

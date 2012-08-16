@@ -54,7 +54,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M1->storageType = 0;
   M1->size0 = n;
   M1->size1 = n;
-  M1->matrix0 = malloc(n * n * sizeof(double));
+  M1->matrix0 = (double *)malloc(n * n * sizeof(double));
   /* Note: M1->matrix0 = &m0[0] results in strange behavior ... */
   int i;
   for (i = 0; i < n * n; i++)
@@ -74,7 +74,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M3->storageType = 0;
   M3->size0 = n;
   M3->size1 = nn;
-  M3->matrix0 = malloc(nn * n * sizeof(double));
+  M3->matrix0 = (double *)malloc(nn * n * sizeof(double));
   for (i = 0; i < nn * n; i++)
     M3->matrix0[i] = m00[i];
   M3->matrix1 = NULL;
@@ -117,19 +117,19 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   SBM->index2_data[4] =  0;
   SBM->index2_data[5] =  2;
 
-  SBM->block = malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+  SBM->block = (double **)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
   double block0[16] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
   double block1[8] = {3, 4, 0, 0, -1, 1, 0, 6};
   double block2[4] = {1, 0, 0, 2};
   double block3[4] = {0, 0, 5, 2};
   double block4[8] = {0, 0, 0, 0, 2, 2, 1, 2};
   double block5[4] = {2, -1, 2, 2};
-  SBM->block[0] = malloc(16 * sizeof(double));
-  SBM->block[1] = malloc(8 * sizeof(double));
-  SBM->block[2] = malloc(4 * sizeof(double));
-  SBM->block[3] = malloc(4 * sizeof(double));
-  SBM->block[4] = malloc(8 * sizeof(double));
-  SBM->block[5] = malloc(4 * sizeof(double));
+  SBM->block[0] = (double *)malloc(16 * sizeof(double));
+  SBM->block[1] = (double *)malloc(8 * sizeof(double));
+  SBM->block[2] = (double *)malloc(4 * sizeof(double));
+  SBM->block[3] = (double *)malloc(4 * sizeof(double));
+  SBM->block[4] = (double *)malloc(8 * sizeof(double));
+  SBM->block[5] = (double *)malloc(4 * sizeof(double));
   for (i = 0; i < 16; i++)
     SBM->block[0][i] = block0[i];
   for (i = 0; i < 8; i++)
@@ -199,11 +199,11 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   SBM2->index2_data[0] =  0;
   SBM2->index2_data[1] =  0;
 
-  SBM2->block = malloc(SBM2->nbblocks * sizeof(*(SBM2->block)));
+  SBM2->block = (double **)malloc(SBM2->nbblocks * sizeof(*(SBM2->block)));
   double block00[16] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
   double block40[8] = {0, 0, 0, 0, 2, 2, 1, 2};
-  SBM2->block[0] = malloc(16 * sizeof(double));
-  SBM2->block[1] = malloc(8 * sizeof(double));
+  SBM2->block[0] = (double *)malloc(16 * sizeof(double));
+  SBM2->block[1] = (double *)malloc(8 * sizeof(double));
   for (i = 0; i < 16; i++)
     SBM2->block[0][i] = block00[i];
   for (i = 0; i < 8; i++)
@@ -245,13 +245,13 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
   printf("== Numerics tests: prodNumericsMatrix(NumericsMatrix,vector) == \n");
   int i , n = M1->size1, m = 4;
 
-  double * x = malloc(n * sizeof(double));
-  double * x2 = malloc(m * sizeof(double));
+  double * x = (double *)malloc(n * sizeof(double));
+  double * x2 = (double *)malloc(m * sizeof(double));
   double alpha = 2.3, beta = 1.9;
-  double * yref = malloc(n * sizeof(double));
-  double * yref2 = malloc(n * sizeof(double));;
-  double * y = malloc(n * sizeof(double));
-  double * y2 = malloc(n * sizeof(double));
+  double * yref = (double *)malloc(n * sizeof(double));
+  double * yref2 = (double *)malloc(n * sizeof(double));;
+  double * y = (double *)malloc(n * sizeof(double));
+  double * y2 = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++)
   {
     x[i] = i + 1.0;
@@ -570,7 +570,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
 
   printf("== Numerics tests: subRowProd(NumericsMatrix,vector) == \n");
   int i , n = M1->size1;
-  double * x = malloc(n * sizeof(double));
+  double * x = (double *)malloc(n * sizeof(double));
 
   for (i = 0; i < n; i++)
   {
@@ -581,8 +581,8 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   int max = 6;
   int sizeY = max - min;
   /* Computes yRef = subA*x, subA = A limited to row min to max*/
-  double * y = malloc(sizeY * sizeof(double));
-  double yref[sizeY];
+  double * y = (double *)malloc(sizeY * sizeof(double));
+  double yref[4];
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++)
     yref[i] = DDOT(n, &(M1->matrix0[min + i]), incx, x, incy);
@@ -623,7 +623,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   free(y);
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
-  y = malloc(sizeY * sizeof(double));
+  y = (double *)malloc(sizeY * sizeof(double));
 
   for (i = 0; i < sizeY; i++)
   {
@@ -676,7 +676,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   printf("== Numerics tests: subRowProdNonSquare(NumericsMatrix,vector) == \n");
   int i , n = M3->size0, m = M3->size1;
-  double * x = malloc(m * sizeof(double));
+  double * x = (double *)malloc(m * sizeof(double));
 
   for (i = 0; i < m; i++)
   {
@@ -688,8 +688,8 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   int sizeY = max - min;
   int sizeX = m;
   /* Computes yRef = subA*x, subA = A limited to row min to max*/
-  double * y = malloc(sizeY * sizeof(double));
-  double yref[sizeY];
+  double * y = (double *)malloc(sizeY * sizeof(double));
+  double yref[2];
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++)
     yref[i] = DDOT(m, &(M3->matrix0[min + i]), incx, x, incy);
@@ -729,7 +729,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
-  y = malloc(sizeY * sizeof(double));
+  y = (double *)malloc(sizeY * sizeof(double));
 
   for (i = 0; i < sizeY; i++)
   {
@@ -783,7 +783,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
 
   printf("== Numerics tests: rowProdNoDiag(NumericsMatrix,vector) == \n");
   int i , n = M1->size1;
-  double * x = malloc(n * sizeof(double));
+  double * x = (double *)malloc(n * sizeof(double));
 
   for (i = 0; i < n; i++)
   {
@@ -794,8 +794,8 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   int max = 6;
   int sizeY = max - min;
   /* Computes yRef = subA*x, subA = A limited to row min to max*/
-  double * y = malloc(sizeY * sizeof(double));
-  double yref[sizeY];
+  double * y = (double *)malloc(sizeY * sizeof(double));
+  double yref[4];
   //  int incx = n, incy =1;
   double tol = 1e-12;
   int info = 0;
@@ -831,7 +831,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   free(y);
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
-  y = malloc(sizeY * sizeof(double));
+  y = (double *)malloc(sizeY * sizeof(double));
   for (i = 0; i < sizeY; i++) y[i] = 0.0;
 
 
@@ -882,7 +882,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   printf("== Numerics tests: rowProdNoDiagNonSquare(NumericsMatrix,vector) == \n");
   int i ,  m = M3->size1;
-  double * x = malloc(m * sizeof(double));
+  double * x = (double *)malloc(m * sizeof(double));
 
   for (i = 0; i < m; i++)
   {
@@ -894,8 +894,8 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   int sizeY = max - min;
   int sizeX = m;
   /* Computes yRef = subA*x, subA = A limited to row min to max*/
-  double * y = malloc(sizeY * sizeof(double));
-  double yref[sizeY];
+  double * y = (double *)malloc(sizeY * sizeof(double));
+  double yref[4];
   //  int incx = n, incy =1;
   double tol = 1e-12;
   int info = 0;
@@ -928,7 +928,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   free(y);
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
-  y = malloc(sizeY * sizeof(double));
+  y = (double *)malloc(sizeY * sizeof(double));
   yref[0] = 0;
   yref[1] = 0;
 

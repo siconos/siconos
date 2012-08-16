@@ -186,9 +186,10 @@ function: lcp_nsgs_SBM() \n
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "lcp_cst.h"
+#include "SiconosCompat.h"
 /* internal at the moment */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -612,7 +613,7 @@ extern "C"
   */
   int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

@@ -188,8 +188,7 @@ int main()
 
   // --- Output files ---
   cout << "====> Output file writing ..." << endl;
-  ioMatrix io("OptimalControl.dat", "ascii");
-  io.write(dataPlot, "noDim");
+  ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
   delete fout;
   cout << "===== End of simulation. ==== " << endl;

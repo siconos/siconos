@@ -184,7 +184,10 @@ ELSE()
   SET(TEST_WRAP FALSE)
 ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 
-
+IF(MSVC)
+  SET(CMAKE_CXX_CREATE_SHARED_MODULE
+"<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
+ENDIF(MSVC)
 #
 # tests with cppunit
 #
@@ -195,8 +198,7 @@ IF(WITH_TESTING)
 
   # used in ldwrap.c.in
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
-  # the number of backslases matters ! This mess is just to have a correct
-  # Path vairable, with an escaped ';' in the generated cmake file -- xhub
+  # For Windows
   SET(PATH_FOR_PLUGIN
    ".\;${CMAKE_CURRENT_BINARY_DIR}/plugin\;${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
   #  GET_FILENAME_COMPONENT(SICONOS_LIB_PATH SiconosNumerics_FOUND PATH)

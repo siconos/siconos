@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "DiskMovingPlanR.hpp"
 
 DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,

@@ -18,7 +18,7 @@
  *
  */
 
-#include <math.h>
+#include <cmath>
 #include "SphereNEDS.hpp"
 
 SphereNEDS::SphereNEDS(double r, double m, SP::SiconosMatrix I,

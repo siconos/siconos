@@ -143,7 +143,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   if (lgptr->isMassPlugin()) // if mass is plugged
   {
     plugin = lgptr->getMassPlugin();
-    setComputeMassFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    setComputeMassFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
   }
   else
     _mass.reset(new SimpleMatrix(lgptr->getMassMatrix()));
@@ -156,7 +156,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isFIntPlugin()) // if fInt is plugged
     {
       plugin = lgptr->getFIntPlugin();
-      setComputeFIntFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeFIntFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _fInt.reset(new SiconosVector(lgptr->getFIntVector()));
@@ -168,7 +168,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isFExtPlugin())// if _fExt is plugged
     {
       plugin = lgptr->getFExtPlugin();
-      setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeFExtFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _fExt.reset(new SiconosVector(lgptr->getFExtVector()));
@@ -180,7 +180,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isNNLPlugin())// if NNL is plugged
     {
       plugin = lgptr->getNNLPlugin();
-      setComputeNNLFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeNNLFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _NNL.reset(new SiconosVector(lgptr->getNNLVector()));
@@ -192,7 +192,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isJacobianFIntPlugin(0))// if is plugged
     {
       plugin = lgptr->getJacobianFIntPlugin(0);
-      setComputeJacobianFIntqFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeJacobianFIntqFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _jacobianFIntq.reset(new SimpleMatrix(lgptr->getJacobianFIntMatrix(0)));
@@ -204,7 +204,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isJacobianFIntPlugin(1))// if is plugged
     {
       plugin = lgptr->getJacobianFIntPlugin(1);
-      setComputeJacobianFIntqDotFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeJacobianFIntqDotFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _jacobianFIntqDot.reset(new SimpleMatrix(lgptr->getJacobianFIntMatrix(1)));
@@ -217,7 +217,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isJacobianNNLPlugin(0))// if is plugged
     {
       plugin = lgptr->getJacobianNNLPlugin(0);
-      setComputeJacobianNNLqFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeJacobianNNLqFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _jacobianNNLq.reset(new SimpleMatrix(lgptr->getJacobianNNLMatrix(0)));
@@ -228,7 +228,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     if (lgptr->isJacobianNNLPlugin(1))// if is plugged
     {
       plugin = lgptr->getJacobianNNLPlugin(1);
-      setComputeJacobianNNLqDotFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+      setComputeJacobianNNLqDotFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     }
     else
       _jacobianNNLqDot.reset(new SimpleMatrix(lgptr->getJacobianNNLMatrix(1)));
@@ -282,7 +282,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _residuFree.reset(new SiconosVector(getDim()));
 
   // Mass
-  setComputeMassFunction(SSL::getPluginName(massName), SSL::getPluginFunctionName(massName));
+  setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 
   _p.resize(3);
 }

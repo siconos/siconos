@@ -234,15 +234,13 @@ int main(int argc, char* argv[])
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
     cout << "Number of nonsmooth events" << ll << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix io("resultTwoConED.dat", "ascii");
     dataPlot.resize(k, outputSize);
-    io.write(dataPlot, "noDim");
+    ioMatrix::write("resultTwoConED.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix ref("BouncingBallTwoConED.ref", "ascii");
-    ref.read(dataPlotRef);
+    ioMatrix::read("BouncingBallTwoConED.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

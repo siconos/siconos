@@ -25,7 +25,7 @@
 #define DYNAMICALSYSTEM_H
 
 #include "SiconosPointers.hpp"
-#include "SiconosSharedLibrary.hpp"
+#include "SSLH.hpp"
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
 #include "SiconosVector.hpp"

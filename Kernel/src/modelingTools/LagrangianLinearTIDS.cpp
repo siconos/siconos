@@ -45,7 +45,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
   if (lltidsxml->hasFExt())
   {
     string plugin = lltidsxml->getFExtPlugin();
-    setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    setComputeFExtFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     _fExt.reset(new SiconosVector(_ndof));
   }
 }

@@ -146,7 +146,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     dk is saved in phiVector.
     */
     DSCAL(n , -1.0 , phiVector, incx);
-    DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, infoDGESV);
+    DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, &infoDGESV);
 
     /* descentCondition = jacobian_psi.dk */
     descentCondition = DDOT(n, jacobian_psi,  1,  phiVector, 1);
@@ -217,7 +217,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
 
   int incx = 1;
   int n2 = n * n;
-  int infoDGESV;
+  int infoDGESV = 0;
 
   /* Memory allocation for phi and its jacobian */
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
@@ -272,7 +272,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     dk is saved in phiVector.
     */
     DSCAL(n , -1.0 , phiVector, incx);
-    DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, infoDGESV);
+    DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, &infoDGESV);
 
     double tk = -1;
 

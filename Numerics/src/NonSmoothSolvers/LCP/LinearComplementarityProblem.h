@@ -91,7 +91,7 @@ typedef struct
   double * q;/**< vector of the LCP (see the mathematical description)*/
 } LinearComplementarityProblem;
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -121,7 +121,7 @@ extern "C"
    *  \param problem  pointer to a LinearComplementarityProblem to delete
    */
   void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

@@ -30,8 +30,6 @@
 const std::string LDS_A = "A";
 const std::string LDS_B = "b";
 
-class SimpleMatrix;
-
 /** XML management for FirstOrderLinearDS
  *
  *  \author SICONOS Development Team - copyright INRIA

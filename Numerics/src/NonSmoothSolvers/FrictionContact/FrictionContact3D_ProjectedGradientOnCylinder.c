@@ -53,7 +53,7 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double * velocitytmp = malloc(n * sizeof(double));
+  double * velocitytmp = (double *)malloc(n * sizeof(double));
 
   double rho = 0.0;
   int isVariable = 0;
@@ -75,8 +75,8 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
   double * direction;
   if (isVariable)
   {
-    reactionold = malloc(n * sizeof(double));
-    direction = malloc(n * sizeof(double));
+    reactionold = (double *)malloc(n * sizeof(double));
+    direction = (double *)malloc(n * sizeof(double));
   }
   double alpha = 1.0;
   double beta = 1.0;

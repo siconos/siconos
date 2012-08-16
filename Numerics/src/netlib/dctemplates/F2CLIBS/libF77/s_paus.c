@@ -11,7 +11,7 @@
 #undef abs
 #include "stdlib.h"
 #include "signal.h"
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
   extern int getpid(void), isatty(int), pause(void);
@@ -58,7 +58,7 @@ int s_paus(char *s, ftnlen n)
     pause();
   }
   fprintf(stderr, "Execution resumes after PAUSE.\n");
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
   return 0; /* NOT REACHED */
 }
 #endif

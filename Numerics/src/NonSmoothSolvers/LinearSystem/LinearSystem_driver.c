@@ -71,7 +71,7 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
     ipiv = options->iWork;
   else
     ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
-  int LAinfo;
+  int LAinfo = 0;
   /* Checks inputs */
   if (problem == NULL || z == NULL)
     numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
@@ -90,7 +90,7 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 
   double * dgelsWork = Maux + n2;
 
-  DGELS(n, n, 1, Maux, n, z, n, dgelsWork, LWORK, LAinfo);
+  DGELS(n, n, 1, Maux, n, z, n, dgelsWork, LWORK, &LAinfo);
   if (LAinfo)
   {
     printf("LinearSystem_driver: DGELS  failed:\n");
@@ -127,7 +127,7 @@ int LinearSystem_getNbDwork(LinearSystemProblem* problem, SolverOptions* options
     LWORK = -1;
     int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, info);
+    DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;
     LWORK = (int) dgelsSize;
   }
@@ -155,7 +155,7 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
     ipiv = options->iWork;
   else
     ipiv = (int *) malloc(LinearSystem_getNbIwork(problem, options) * sizeof(int));
-  int LAinfo;
+  int LAinfo = 0;
   /* Checks inputs */
   if (problem == NULL || z == NULL)
     numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
@@ -169,7 +169,7 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
   for (int ii = 0; ii < n; ii++)
     z[ii] = -problem->q[ii];
 
-  DGESV(n, 1, Maux, n, ipiv, z, n, LAinfo);
+  DGESV(n, 1, Maux, n, ipiv, z, n, &LAinfo);
   if (!LAinfo)
   {
     info = 0;

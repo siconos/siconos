@@ -46,7 +46,7 @@
  */
 #include "NumericsConfig.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
@@ -88,7 +88,7 @@ extern "C"
     int *info,
     SolverOptions *options);
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

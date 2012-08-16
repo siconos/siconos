@@ -194,7 +194,7 @@ int lcp_test_function(FILE * f, int solverId)
   NumericsOptions global_options;
   global_options.verboseMode = 1;
   SolverOptions * options ;
-  options = malloc(sizeof(*options));
+  options = (SolverOptions *) malloc(sizeof(*options));
   options->dWork = NULL;
   options->iWork = NULL;
   options->numberOfInternalSolvers = 0;
@@ -213,8 +213,8 @@ int lcp_test_function(FILE * f, int solverId)
 
   options->isSet = 1;
   options->filterOn = 1;
-  double * z = malloc(problem->size * sizeof(double));
-  double * w = malloc(problem->size * sizeof(double));
+  double * z = (double *)malloc(problem->size * sizeof(double));
+  double * w = (double *)malloc(problem->size * sizeof(double));
   for (i = 0; i < problem->size; i++)
   {
     z[i] = 0.0;
@@ -286,8 +286,8 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
 
 
-  double * z = malloc(problem->size * sizeof(double));
-  double * w = malloc(problem->size * sizeof(double));
+  double * z = (double *)malloc(problem->size * sizeof(double));
+  double * w = (double *)malloc(problem->size * sizeof(double));
 
   for (i = 0; i < problem->size; i++)
   {
