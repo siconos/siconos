@@ -413,6 +413,8 @@ public:
 struct VectorNum : public Question<unsigned int>
 {
 
+  using SiconosVisitor::visit;
+
   void visit(const SiconosVector& v)
   {
     if (v._dense) answer = 1;
@@ -434,6 +436,8 @@ struct VectorNum : public Question<unsigned int>
 
 struct IsDense : public Question<bool>
 {
+  using SiconosVisitor::visit;
+
   void visit(const SiconosVector& v)
   {
     answer = v._dense;
@@ -447,6 +451,9 @@ struct IsDense : public Question<bool>
 
 struct IsSparse : public Question<bool>
 {
+
+  using SiconosVisitor::visit;
+
   void visit(const SiconosVector& v)
   {
     answer = !v._dense;
@@ -460,6 +467,8 @@ struct IsSparse : public Question<bool>
 
 struct IsBlock : public Question<bool>
 {
+  using SiconosVisitor::visit;
+
   void visit(const SiconosVector& v)
   {
     answer = false;

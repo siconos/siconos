@@ -35,6 +35,8 @@ public:
   SpaceFilter& parent;
   _BodyHash(SpaceFilter& p) : parent(p) {};
 
+  using SiconosVisitor::visit;
+
   void visit(SP::Disk pds)
   {
     int i, j, imin, imax, jmin, jmax;
@@ -151,6 +153,8 @@ public:
 /* proximity detection for circular object */
 struct SpaceFilter::_CircularFilter : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   SP::CircularDS ds1;
 
@@ -264,6 +268,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 /* proximity detection for sphere objects */
 struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   SP::SphereLDS ds1;
 
@@ -350,6 +356,8 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 
 struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   SP::SphereNEDS ds1;
 
@@ -439,6 +447,9 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 /* disk plan relation comparison */
 struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   double A, B, C, r, xCenter, yCenter, width;
   bool flag;
@@ -476,6 +487,9 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 
 struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   FTime AF, BF, CF;
   double r;
@@ -514,6 +528,9 @@ struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 /* sphere plan relation comparison */
 struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   SP::SpaceFilter parent;
   double A, B, C, D, r;
   bool flag;
@@ -891,6 +908,8 @@ bool operator ==(interPair const& a, interPair const& b)
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
 {
 
+  using SiconosVisitor::visit;
+
   typedef boost::unordered_multiset < interPair,
           boost::hash<interPair> > interPairs;
 
@@ -1158,6 +1177,9 @@ bool SpaceFilter::haveNeighbours(SP::Hashed h)
 
 struct SpaceFilter::_DiskDistance : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   double x;
   double y;
   double r;

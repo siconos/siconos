@@ -69,6 +69,9 @@ MACRO(SICONOS_PROJECT
   IF(CMAKE_CXX_COMPILER)
     INCLUDE(TestCXXAcceptsFlag)
     CHECK_CXX_ACCEPTS_FLAG("-static -static-libgcc -static-libstdc++" CXX_HAVE_STATIC_LINK)
+    CHECK_CXX_ACCEPTS_FLAG("-Woverloaded-virtual" CXX_HAVE_WOVERLOADED_VIRTUAL)
+    CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" CXX_HAVE_DIAG_DISABLE_654)
+    CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" CXX_HAVE_D__ALIGNED__IGNORED)
   ENDIF(CMAKE_CXX_COMPILER)
 
   # Get c compiler version (cf FindBoost.cmake version 2.8.7)

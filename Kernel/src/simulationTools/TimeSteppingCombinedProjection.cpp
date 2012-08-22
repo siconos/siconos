@@ -107,6 +107,9 @@ void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput()
 
 struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   TimeSteppingCombinedProjection * _parent;
 
   _SimulationEffectOnOSNSP(TimeSteppingCombinedProjection * p) :

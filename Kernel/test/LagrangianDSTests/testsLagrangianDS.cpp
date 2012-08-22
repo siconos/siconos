@@ -23,7 +23,6 @@
 #include "LagrangianDS.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
-#include <sys/time.h>
 #include <iostream>
 #include <cmath>
 

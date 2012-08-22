@@ -1264,6 +1264,8 @@ void Moreau::prepareNewtonIteration(double time)
 
 struct Moreau::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
 

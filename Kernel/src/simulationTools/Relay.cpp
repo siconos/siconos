@@ -43,6 +43,9 @@ Relay::Relay(const int newNumericsSolverId , const std::string& newId):
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
 {
+
+  using SiconosVisitor::visit;
+
   Relay* _parent;
   SP::Interaction _inter;
   unsigned int _pos;

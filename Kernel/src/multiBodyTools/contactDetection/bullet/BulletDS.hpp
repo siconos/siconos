@@ -87,6 +87,8 @@ struct ForWeightedShape : public Question<SP::BulletWeightedShape>
 
 struct UpdateCollisionObject : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   void visit(const BulletDS& bds)
   {
     bds.updateCollisionObject();

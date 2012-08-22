@@ -69,22 +69,20 @@ ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
 
-if(CMAKE_CXX_COMPILER)
- include(TestCXXAcceptsFlag)
- CHECK_CXX_ACCEPTS_FLAG("-diag-disable 654" disable_warning)
- CHECK_CXX_ACCEPTS_FLAG("-D__aligned__=ignored" DALIGNEDERROR)
- if(NOT CMAKE_COMPILER_IS_GNUCXX)
-  if(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+IF(CMAKE_CXX_COMPILER)
+
+ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
+  IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
    # Disable warnings with intel compiler due (mainly) to visitors visit function overloading
-   if(disable_warning)
-    append_cxx_flags("-diag-disable 654")
-   endif(disable_warning)
+   IF(CXX_HAVE_DIAG_DISABLE_654)
+    APPEND_CXX_FLAGS("-diag-disable 654")
+   ENDIF(CXX_HAVE_DIAG_DISABLE_654)
    # Error on intel compiler, see: http://software.intel.com/en-us/forums/showthread.php?t=65041
    # This issue have been solved with ICC >= 12.1
    if(NOT ICCOK)
-    if(DALIGNEDERROR)
-     append_cxx_flags("-D__aligned__=ignored")
-    endif(DALIGNEDERROR)
+    if(CXX_HAVE_D__ALIGNED__IGNORED)
+     APPEND_CXX_FLAGS("-D__aligned__=ignored")
+    endif(CXX_HAVE_D__ALIGNED__IGNORED)
    endif(NOT ICCOK)
   endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
  endif(NOT CMAKE_COMPILER_IS_GNUCXX)
@@ -99,7 +97,11 @@ if(CMAKE_CXX_COMPILER)
   APPEND_FLAGS(CMAKE_CXX_FLAGS "-Wno-string-plus-int")
  ENDIF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
 
-endif(CMAKE_CXX_COMPILER)
+ IF(CXX_HAVE_WOVERLOADED_VIRTUAL)
+   APPEND_FLAGS(CMAKE_CXX_FLAGS "-Woverloaded-virtual")
+ ENDIF(CXX_HAVE_WOVERLOADED_VIRTUAL)
+
+ENDIF(CMAKE_CXX_COMPILER)
 
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)

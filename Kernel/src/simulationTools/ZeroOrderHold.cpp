@@ -571,6 +571,8 @@ void ZeroOrderHold::prepareNewtonIteration(double time)
 
 struct ZeroOrderHold::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
 

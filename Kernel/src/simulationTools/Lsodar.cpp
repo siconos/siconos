@@ -397,6 +397,8 @@ void Lsodar::updateState(const unsigned int level)
 
 struct Lsodar::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
 

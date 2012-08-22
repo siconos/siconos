@@ -470,6 +470,8 @@ void Simulation::processEvents()
 
 struct Simulation::SetupLevels : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   SP::Simulation _parent;
   SP::Interaction _interaction;
   SP::NonSmoothLaw _nonSmoothLaw;

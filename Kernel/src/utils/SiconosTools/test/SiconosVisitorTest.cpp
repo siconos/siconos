@@ -59,6 +59,7 @@ void SiconosVisitorTest::t2()
 
   struct MyVisitor : SiconosVisitor
   {
+    using SiconosVisitor::visit;
 
     void visit(const LagrangianDS&)
     {

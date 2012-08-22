@@ -945,6 +945,8 @@ void SchatzmanPaoli::prepareNewtonIteration(double time)
 
 struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
 {
+  using SiconosVisitor::visit;
+
   OneStepNSProblem* _osnsp;
   SP::Interaction _inter;
 
