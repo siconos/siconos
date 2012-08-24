@@ -70,7 +70,7 @@ void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_probl
     lcp_problem->q[i + problem->size] = problem->ub[i] - problem->lb[i];
     for (j = 0; j < problem->size; j++)
     {
-      lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)] * problem->ub[i];
+      lcp_problem->q[i] += problem->M->matrix0[i + j * (problem->size)] * problem->lb[j];
     }
   }
 
