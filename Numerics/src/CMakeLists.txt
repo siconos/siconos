@@ -283,9 +283,17 @@ IF(WITH_TESTING)
   NEW_TEST(Relaytest10 relay_test10.c)
   NEW_TEST(Relaytest11 relay_test11.c)
   NEW_TEST(Relaytest12 relay_test12.c)
+  NEW_TEST(Relaytest13 relay_test13.c)
   NEW_TEST(Relaytest20 relay_test20.c)
+  NEW_TEST(Steptest1 step_test1.c)
+  NEW_TEST(Steptest2 step_test2.c)
+  NEW_TEST(Steptest3 step_test3.c)
+  NEW_TEST(Steptest4 step_test4.c)
+ 
+
   END_TEST()
   
+
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
   NEW_TEST(MLCPtest main_mlcp.cpp)
   END_TEST()
