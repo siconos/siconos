@@ -169,6 +169,8 @@ public:
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   virtual void nextStep();
 
+  using Simulation::update;
+
   /** update input, state of each dynamical system and output
    *  \param lambda order used to compute input
    */

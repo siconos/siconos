@@ -169,6 +169,8 @@ public:
   */
   void updateImpactState();
 
+  using Simulation::update;
+
   /** update input, output and indexSets.
    *  \param lambda order used to compute input
    */

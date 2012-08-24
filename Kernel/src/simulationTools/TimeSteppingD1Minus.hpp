@@ -82,6 +82,8 @@ public:
    */
   virtual void updateIndexSet(unsigned int);
 
+  using Simulation::update;
+
   /** update input, state and output of DynamicalSystems
    *  \param level to be updated for input
    */
