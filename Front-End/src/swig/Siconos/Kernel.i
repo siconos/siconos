@@ -411,8 +411,9 @@ KERNEL_REGISTRATION();
 %ignore getInvMSimple;
 %ignore getInvMBlock;
 
-// issue with visitor hook and typechek map in VectorNum
-%ignore VectorNum;
+// do not wrap visitor visit : this lead to a huge amount of wrapper
+// code generation and this fail at compile time on shared_ptr freearg
+%ignore SiconosVisitor::visit;
 
 // cannot compile wrapper
 %ignore statOut;
