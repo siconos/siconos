@@ -33,7 +33,12 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   // conversion into LCP
   LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
+
+  /* Relay_display(problem); */
+
   relay_tolcp(problem, lcp_problem);
+
+  /* LinearComplementarity_display(lcp_problem);  */
 
   double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
   double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
@@ -62,21 +67,21 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   // Conversion of result
   for (i = 0; i < problem->size; i++)
   {
-    z[i] = 1.0 / 2.0 * (zlcp[i] - wlcp[i + problem->size]);
-    //   printf("z[ %i]=%12.10e\n", i, z[i]);
+    /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
+    z[i] = zlcp[i] +  problem->lb[i];
 
     w[i] = wlcp[i] - zlcp[i + problem->size];
     //printf("w[ %i]=%12.10e\n", i, w[i]);
   }
 
-  /*        for (i=0; i< lcp_problem->size; i++){  */
-  /*     printf("zlcp[ %i]=%12.10e,\t wlcp[ %i]=%12.10e \n", i, zlcp[i],i, wlcp[i]); */
-  /*        } */
-  /*        printf("\n"); */
+  /* for (i=0; i< lcp_problem->size; i++){ */
+  /*   printf("zlcp[ %i]=%12.10e,\t wlcp[ %i]=%12.10e \n", i, zlcp[i],i, wlcp[i]); */
+  /* } */
+  /* printf("\n"); */
 
-  /*        for (i=0; i< problem->size; i++){  */
-  /*     printf("z[ %i]=%12.10e,\t w[ %i]=%12.10e\n", i, z[i],i, w[i]); */
-  /*        } */
+  /* for (i=0; i< problem->size; i++){ */
+  /*   printf("z[ %i]=%12.10e,\t w[ %i]=%12.10e\n", i, z[i],i, w[i]); */
+  /* } */
 
 
   /*        printf("\n"); */
