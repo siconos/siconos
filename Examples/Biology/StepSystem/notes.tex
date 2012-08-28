@@ -1,0 +1,130 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Numerical simulation of PWL models of gene regulatory networks}
+\author{V. Acary}
+\begin{document}
+\maketitle
+\subsection*{Standard form}
+
+\begin{equation}
+  \label{eq:std}
+  \left\{\begin{array}{l}
+      M \dot x  = f(x,t) +  r(t) \\
+      r(t) = g(x,t,\lambda) \text{ (input) }  \\
+      y(t) = h(x,t,\lambda) \text{ (output) } \\
+   \end{array}\right.
+\end{equation}
+
+with one of the following nonsmooth law
+\begin{enumerate}
+\item Sign function
+  \begin{equation}
+    \label{eq:sign}
+    \lambda \in \mbox{Sign} (-y) \Longleftrightarrow  - y  \in N_{[-1,1]}(\lambda)
+  \end{equation}
+\item Step function
+  \begin{equation}
+    \label{eq:step}
+    \lambda \in \mbox{Step} (-y) \Longleftrightarrow  - y  \in N_{[0,1]}(\lambda)
+  \end{equation}
+\end{enumerate}
+
+We have 
+\begin{equation}
+  \label{eq:signstep}
+  \begin{array}{l}
+  s^+(x,\theta) = \mbox{Step}(x-\theta) = \frac 1 2 (1+ \mbox{Sign}(x-\theta))\\ \\
+  s^-(x,\theta) = 1 - \mbox{Step}(x-\theta) = \frac 1 2 (1- \mbox{Sign}(x-\theta))
+\end{array}
+\end{equation}
+\subsection*{First 2D example}
+\begin{equation*}
+\left\{\begin{array}{l} \dot{x}_{a} = - \gamma_{a}\, x_{a}+ \kappa_{a} \, s^{+}(x_{b},\theta_{b}^1)\, s^{-}(x_{a},\theta_{a}^2) \\
+\dot{x}_{b} = - \gamma_{b}\, x_{b} + \kappa_{b} \,  s^{+}(x_{a},\theta_{a}^1)\,s^{-}(x_{b},\theta_{b}^2) \end{array}\right. .
+\end{equation*}
+
+
+The parameters are: $\theta_a^1=\theta_b^1=4, \theta_a^2=\theta_b^2=8, k_a=k_b=40, \gamma_a=4.5$ and $\gamma_b=1.5$.
+
+The vector fields $f$ and $h$ can be identified as
+
+
+\begin{equation}
+  \label{eq:f1}
+  f(x,t) = \left[
+    \begin{array}{l}
+      - \gamma_a x_a \\
+      - \gamma_b x_b \\
+    \end{array}
+  \right]=\left[
+    \begin{array}{l}
+      - 4.5 x_a \\
+      - 1.5 x_b \\
+    \end{array}
+  \right]
+\end{equation}
+
+\begin{equation}
+  \label{eq:h1}
+  h(x,t,\lambda) = -  \left[
+    \begin{array}{l}
+       x_a - \theta_a^1 \\      
+       x_b - \theta_b^1 \\
+       x_a - \theta_a^2 \\      
+       x_b - \theta_b^2 \\
+    \end{array}
+  \right]=\left[
+    \begin{array}{l}
+      4- x_a \\      
+      4- x_b \\
+      8- x_a \\      
+      8- x_b \\
+    \end{array}
+  \right]
+\end{equation}
+
+
+\subsubsection*{With the sign function}
+\begin{equation}
+  \label{eq:g1sign}
+  \begin{array}{lcl}
+  g(x,t,\lambda) &=&\displaystyle\frac 1 4  \left[
+    \begin{array}{l}
+      \kappa_a      (1- \mbox{sign}( x_a - \theta_a^2))((1+ \mbox{sign}( x_b - \theta_b^1)))\\
+      \kappa_b      (1+ \mbox{sign}( x_a - \theta_a^1))((1- \mbox{sign}( x_b - \theta_b^2)))
+    \end{array}
+  \right]\\ \\
+  &=& 10   \left[
+    \begin{array}{l}
+          (1-\lambda_3)(1+\lambda_2)\\
+          (1+\lambda_1)(1-\lambda_4)
+    \end{array}
+  \right] 
+\end{array}
+\end{equation}
+
+\subsubsection*{With the Step function}
+\begin{equation}
+  \label{eq:g1step}
+  \begin{array}{lcl}
+  g(x,t,\lambda) &=&  \left[
+    \begin{array}{l}
+      \kappa_a      (1- \mbox{step}( x_a - \theta_a^2))( \mbox{step}( x_b - \theta_b^1)))\\
+      \kappa_b      (\mbox{step}( x_a - \theta_a^1))((1- \mbox{step}( x_b - \theta_b^2)))
+    \end{array}
+  \right]\\ \\
+  &=& 40   \left[
+    \begin{array}{l}
+          \lambda_2 (1-\lambda_3)\\
+          \lambda_1 (1-\lambda_4)
+    \end{array}
+  \right] 
+\end{array}
+\end{equation}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
