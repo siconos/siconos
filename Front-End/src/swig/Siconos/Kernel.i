@@ -558,29 +558,11 @@ KERNEL_REGISTRATION();
 %enddef
 
 %shared_ptr(_SolverOptions);
-
 TYPEDEF_SPTR(_SolverOptions);
 
+// note : deleteSolverOptions is call by ~LCP(), ~FrictionContact(), etc.
+
 %include "SolverOptions.h"
-
-%extend _SolverOptions
-{
-   _SolverOptions* _SolverOptions()
-    {
-      _SolverOptions *SO;
-      SO = (_SolverOptions *) malloc(sizeof(_SolverOptions));
-      return SO;
-    }
-
-  ~_SolverOptions() 
-    { 
-      deleteSolverOptions(self);
-    }
-};
-
-
-
-
 
 KERNEL_REGISTRATION();
 
