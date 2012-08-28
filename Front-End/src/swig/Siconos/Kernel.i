@@ -233,10 +233,13 @@ namespace std
 %rename("$ignore", regexmatch$name="^createSPtr.*") "";
 
 // swig see those classes as abstract => no wrappers for constructors
-// note: this means something is wrong in .hpp headers => use -Wall to
+// note: this means something may be wrong in .hpp headers => use -Wall to
 // detect it
-//%feature("notabstract") NewtonEulerDS;
-// ... (corrected)
+
+// swig does not see the using Simulation::update ?
+%feature("notabstract") TimeStepping;
+%feature("notabstract") EventDriven;
+
 
 
 
