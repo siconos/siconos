@@ -978,7 +978,7 @@ public:
   }
   inline SP::BlockVector residuR() const
   {
-    return _data[r];
+    return _data[residu_r];
   }
   /*
    * Compute the residuY.
@@ -992,10 +992,7 @@ public:
    * default management is empty, else must be overloaded.
    *
    */
-  void computeResiduR(const double time) const
-  {
-    RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
-  }
+  void computeResiduR(const double time) ;
 
   void initData();
   void initDataFirstOrder();

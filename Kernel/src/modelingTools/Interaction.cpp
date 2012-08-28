@@ -1073,3 +1073,19 @@ void Interaction::computeResiduY(const double time)
 
 }
 
+void Interaction::computeResiduR(const double time)
+{
+  //Residu_r = r_alpha_k+1 - g_alpha;
+  *_data[residu_r] = *_data[r];
+  *_data[residu_r] -= *_data[g_alpha];
+
+  // std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
+  // std::cout<< "_data[r] = " << std::endl ;
+  // _data[r]->display();
+  // std::cout<< "_data[g_alpha] = " << std::endl ;
+  // _data[g_alpha]->display();
+  // std::cout<< "_data[residu_r] = " << std::endl ;
+  // _data[residu_r]->display();
+
+  //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
+}

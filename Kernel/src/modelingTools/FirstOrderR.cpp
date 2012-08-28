@@ -43,8 +43,3 @@ void FirstOrderR::computeJacglambda(const double time, Interaction& inter)
   //RuntimeException::selfThrow("FirstOrderR::computeJacglambda, not (yet) implemented or forbidden for relations of type "+subType);
 }
 
-void FirstOrderR::computeResiduR(const double time, Interaction& inter)
-{
-  *inter.data(residu_r) = *inter.data(r);
-  *inter.data(residu_r) -= *inter.data(g_alpha);
-}

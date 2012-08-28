@@ -655,6 +655,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       update(_levelMaxForInput);
       isNewtonConverge = newtonCheckConvergence(criterion);
+
       if (!isNewtonConverge && !info)
       {
         if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
@@ -737,14 +738,16 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     {
       (*it)->computeResiduR(getTkp1());
       residu = (*it)->residuR()->norm2();
-      cout << "residuR =" << residu << ">" << criterion << endl;
+
       if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
       if (residu > criterion)
       {
-        cout << "residuR > criteron" << residu << ">" << criterion << endl;
+        //cout<<"residuR > criteron"<<residu<<">"<<criterion<<endl;
         checkConvergence = false;
         //break;
       }
+      //else
+      //  cout<<"residuR ="<<residu<<"<"<<criterion<<endl;
     }
 
   }

@@ -189,11 +189,6 @@ public:
   {
     computeJacglambda(time, inter);
   }
-  /*
-  * Compute the residuR from r and g_alpha.
-  *
-  */
-  virtual void computeResiduR(const double time, Interaction& inter);
 
   SP::SiconosMatrix jachx() const
   {
