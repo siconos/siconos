@@ -52,6 +52,10 @@ protected:
   // /** compute LevelMax */
   // void initLevelMax();
 
+  /** boolean variable to known whether Newton iterations converges or not
+   */
+  bool _isNewtonConverge;
+
   /** boolean variable to known whether the ResiduY has to be computed or not
    *  if true, the ResiduY is computed and the convergence is checked
    */
@@ -238,6 +242,11 @@ public:
   /** Set CheckSolverOutput function */
   void setCheckSolverFunction(CheckSolverFPtr);
 
+  /**  */
+  bool isNewtonConverge()
+  {
+    return _isNewtonConverge;
+  };
   /** To specify if the output interaction residu must be computed.
    *  \param: a bool
    */
@@ -247,7 +256,7 @@ public:
   };
 
   /** To known if the output interaction residu must be computed. */
-  bool computeResiduY(bool v)
+  bool computeResiduY()
   {
     return _computeResiduY;
   };
@@ -262,7 +271,7 @@ public:
   };
 
   /** To known if the input interaction residu must be computed. */
-  bool computeResiduR(bool v)
+  bool computeResiduR()
   {
     return _computeResiduR;
   };

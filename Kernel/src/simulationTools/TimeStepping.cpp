@@ -593,7 +593,7 @@ void TimeStepping::saveYandLambdaInMemory()
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
-  bool isNewtonConverge = false;
+  _isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
@@ -618,15 +618,15 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update(_levelMaxForInput);
 
-    //isNewtonConverge = newtonCheckConvergence(criterion);
+    //_isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
       saveYandLambdaInMemory();
   }
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    //  while((!isNewtonConverge)&&(_newtonNbSteps < maxStep)&&(!info))
-    while ((!isNewtonConverge) && (_newtonNbSteps < maxStep))
+    //  while((!_isNewtonConverge)&&(_newtonNbSteps < maxStep)&&(!info))
+    while ((!_isNewtonConverge) && (_newtonNbSteps < maxStep))
     {
       _newtonNbSteps++;
       prepareNewtonIteration();
@@ -654,15 +654,15 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         checkSolverOutput(info, this);
 
       update(_levelMaxForInput);
-      isNewtonConverge = newtonCheckConvergence(criterion);
+      _isNewtonConverge = newtonCheckConvergence(criterion);
 
-      if (!isNewtonConverge && !info)
+      if (!_isNewtonConverge && !info)
       {
         if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
           saveYandLambdaInMemory();
       }
     }
-    if (!isNewtonConverge)
+    if (!_isNewtonConverge)
     {
       cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
       if (info)

@@ -345,6 +345,7 @@ void Interaction::initDataFirstOrder()
   _data[free].reset(new BlockVector());
   _data[x].reset(new BlockVector()); // displacements
   _data[xq].reset(new BlockVector());
+  _data[deltax].reset(new BlockVector()); // displacements
   _data[z].reset(new BlockVector());
   _data[r].reset(new BlockVector());
   _data[residu_r].reset(new BlockVector());
@@ -358,6 +359,7 @@ void Interaction::initDataFirstOrder()
     _data[free]->insertPtr(ds.workFree());
     _data[x]->insertPtr(ds.x());
     _data[xq]->insertPtr(ds.xq());
+    _data[deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
     _data[z]->insertPtr(ds.z());
     _data[r]->insertPtr(ds.r());
     _data[residu_r]->insertPtr(ds.residur());

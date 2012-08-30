@@ -87,7 +87,8 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-  enum DataNamesFirstOrder {free, z, x, xq, r, g_alpha, residu_r, ds_xp, sizeDataNames};
+  enum DataNamesFirstOrder {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
+  // Why not using FirstOrderR::free
   //  enum DataNamesLagrangian {z,q0,q1,q2,p0,p1,p2,sizeDataNames};
   enum DataNamesNewtonEuler {free2, z2, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames2};
 

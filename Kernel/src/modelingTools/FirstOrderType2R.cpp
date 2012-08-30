@@ -22,6 +22,11 @@
 #include "FirstOrderNonLinearDS.hpp"
 
 using namespace std;
+#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES 1
+
+#include <debug.h>
+
 
 FirstOrderType2R::FirstOrderType2R():
   FirstOrderR(RELATION::Type2R)
@@ -84,6 +89,9 @@ void FirstOrderType2R::initialize(Interaction& inter)
 
 void FirstOrderType2R::computeh(const double time, Interaction& inter)
 {
+  /* this function calls computeOutput, which in return calls this function.
+   * Broken logic, put a selfthrow so people may fix it */
+  RuntimeException::selfThrow("FirstOrderType2R::computeh. The logic in this function is broken. Please fix it before using it");
   computeOutput(time, inter, 0);
 }
 
@@ -91,30 +99,94 @@ void FirstOrderType2R::computeg(const double time, Interaction& inter)
 {
   /* this function calls computeInput, which in return calls this function.
   * Broken logic, put a selfthrow so people may fix it */
-  RuntimeException::selfThrow("The logic in this function is broken. Please fix it before using it");
+  RuntimeException::selfThrow("FirstOrderType2R::computeg . The logic in this function is broken. Please fix it before using it");
   computeInput(time, inter, 0);
 }
 
-void FirstOrderType2R::computeOutput(const double time, Interaction& inter, unsigned int)
+void FirstOrderType2R::computeOutput(const double time, Interaction& inter, unsigned int level)
 {
+  DEBUG_PRINT("FirstOrderType2R::computeOutput \n");
+  // compute the new y  obtained by linearisation (see DevNotes)
+  // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
+  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+  // or equivalently
+  // y_{alpha+1}_{k+1} = y_{alpha}_{k+1} - ResiduY_{k+1}^{alpha}
+  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+
+
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) before \n");
+#ifdef DEBUG_MESSAGES
+  inter.y(level)->display();
+#endif
+  //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : yOld(level) \n");
+#ifdef DEBUG_MESSAGES
+  inter.yOld(level)->display();
+#endif
+  *inter.y(level) = *inter.yOld(level);
+
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
+#ifdef DEBUG_MESSAGES
+  inter.residuY()->display();
+#endif
+  *inter.y(level) -= *inter.residuY();
+
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
+#ifdef DEBUG_MESSAGES
+  inter.y(level)->display();
+#endif
+  SiconosVector Deltax = *inter.data(deltax);
+  //  deltax -= *(inter.data(xold));
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
+#ifdef DEBUG_MESSAGES
+  Deltax.display();
+#endif
+
+  prod(*C(), Deltax, *inter.y(level), false);
+
+
+  SiconosVector deltalambda = *inter.lambda(level);
+  deltalambda -= *(inter.lambdaOld(level));
+
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : deltalambda \n");
+#ifdef DEBUG_MESSAGES
+  deltalambda.display();
+#endif
+  prod(*D(), deltalambda, *inter.y(level), false);
+
+  DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
+#ifdef DEBUG_MESSAGES
+  inter.y(level)->display();
+#endif
+
   computeh(time, inter);
+
+
+
+
+
 }
 
 void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsigned int level)
 {
+  DEBUG_PRINT("FirstOrderType2R::computeInput \n");
+  // compute the new r  obtained by linearisation
+  // r_{alpha+1}_{k+1} = g(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
+  //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
 
-  /**compute the newr */
 
-  SiconosVector workL = *inter.lambda(level);
-  workL -= *(inter.lambdaOld(level));
+  SiconosVector lambda = *inter.lambda(level);
+  lambda -= *(inter.lambdaOld(level));
 
   //  cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
   //  inter.lambdaOld(level)->display();
   //  lambda->display();
-  //  _workL->display();
+  //  _lambda->display();
   //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
   //  _workX->display();
-  prod(*B(), workL, *inter.data(g_alpha), false);
+  prod(*B(), lambda, *inter.data(g_alpha), false);
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
 
@@ -127,16 +199,7 @@ void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsig
 
   //  cout<<"next g_alpha"<<endl;
   //  data[g_alpha]->display();
-  /*  unsigned int sizeL = lambda->size();
-  unsigned int sizeZ = data[z]->size();
-  unsigned int sizeR = _workX->size();
 
-  input(sizeL, &(*_workL)(0), sizeR, &(*_workX)(0),sizeR, &(*__workR)(0), sizeZ, &(*_workZ)(0));
-
-
-  *data[g_alpha] = *_workR;
-  *data[z] = *_workZ;
-  */
 
 }
 void FirstOrderType2R::preparNewtonIteration(Interaction& inter)

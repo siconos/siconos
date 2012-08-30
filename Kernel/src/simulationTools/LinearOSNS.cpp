@@ -722,7 +722,7 @@ void LinearOSNS::postCompute()
     lambda = inter->lambda(levelMin());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
-    setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+    //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
   }

@@ -70,7 +70,7 @@ class FirstOrderR : public Relation
 {
 public:
 
-  enum DataNames {free, z, x, xq, r, g_alpha, residu_r, ds_xp, sizeDataNames};
+  enum DataNames {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
 
 protected:
   /** serialization hooks
