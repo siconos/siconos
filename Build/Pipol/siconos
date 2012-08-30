@@ -31,6 +31,7 @@ export LC_ALL=C
 
 id -u
 date
+cmake --version
 df -k
 
 head_revision=`cat $PIPOL_HOMEDIR/src/siconos/head_revision`
@@ -113,6 +114,14 @@ make_1() {
         make $args
     }; cd -
 }
+
+clean_1() { 
+    mod=$1
+    btype=$2
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        make clean
+    }; cd -
+
 
 make_2() {
     mod=$1
@@ -241,6 +250,7 @@ gforge_upload_3_2() {
 save_packed_1() {
     cd $PIPOL_WDIR/build/$1/$2; {
         cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/packages
+        rm *.$PIPOL_PACK_EXT
     }; cd -
 }
 
@@ -383,6 +393,7 @@ nightly_test Numerics Release
 nightly_memcheck Numerics Release
 nightly_submit Numerics Release
 install_1 Numerics Release
+clean_1 Numerics Release
 #
 configure_trunk Kernel Release
 nightly_build Kernel Release
@@ -390,6 +401,7 @@ nightly_test Kernel Release
 nightly_memcheck Kernel Release
 nightly_submit Kernel Release
 install_1 Kernel Release
+clean_1 Kernel Release
 #
 configure_trunk IO Release
 nightly_build IO Release
@@ -397,7 +409,7 @@ nightly_test IO Release
 nightly_memcheck IO Release
 nightly_submit IO Release
 install_1 IO Release
-
+clean_1 IO Release
 ### Snapshot packages
 pack_trunk Numerics Release
 save_packed_1 Numerics Release
@@ -414,6 +426,8 @@ configure_trunk Front-End Release
 nightly_build Front-End Release
 nightly_test Front-End Release
 nightly_submit Front-End Release
+install_1 Front-End Release
+clean_1 Front-End Release
 pack_trunk Front-End Release
 save_packed_1 Front-End Release
 ##
@@ -424,6 +438,7 @@ nightly_build Numerics Debug
 nightly_coverage Numerics Debug
 nightly_submit Numerics Debug
 install_1 Numerics Debug
+clean_1 Numerics Debug
 ##
 #setup_trunk
 configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
@@ -431,6 +446,7 @@ nightly_build Kernel Debug
 nightly_coverage Kernel Debug
 nightly_submit Kernel Debug
 install_1 Kernel Debug
+clean_1 Kernel Debug
 ##
 ### Examples
 rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
