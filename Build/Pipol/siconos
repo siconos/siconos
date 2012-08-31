@@ -121,7 +121,7 @@ clean_1() {
     cd $PIPOL_WDIR/build/$mod/$btype ;{
         make clean
     }; cd -
-
+}
 
 make_2() {
     mod=$1
