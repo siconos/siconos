@@ -87,22 +87,30 @@ DEFINE_SPTR(BulletSpaceFilter);
 
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletSpaceFilter, collisionWorld());
 };
 
 struct ForStaticObjects : public Question< boost::shared_ptr<std::vector<SP::btCollisionObject> > >
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletSpaceFilter, staticObjects());
 };
 
 struct ForStaticShapes : public Question< boost::shared_ptr<std::vector<SP::btCollisionShape> > >
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletSpaceFilter, staticShapes());
 };
 
 
 struct ForContactPoint : public Question<SP::btManifoldPoint>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletR, contactPoint());
   ANSWER(BulletFrom1DLocalFrameR, contactPoint());
 };

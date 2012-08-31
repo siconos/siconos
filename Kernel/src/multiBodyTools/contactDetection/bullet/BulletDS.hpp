@@ -77,11 +77,15 @@ public:
 
 struct ForCollisionObject : public Question<SP::btCollisionObject>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletDS, collisionObject());
 };
 
 struct ForWeightedShape : public Question<SP::BulletWeightedShape>
 {
+  using SiconosVisitor::visit;
+
   ANSWER(BulletDS, weightedShape());
 };
 
