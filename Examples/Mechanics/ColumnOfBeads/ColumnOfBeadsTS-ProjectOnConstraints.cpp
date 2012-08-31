@@ -187,7 +187,7 @@ int withLevel(unsigned int mylevel)
     cout << "====> Initialisation ..." << endl << endl;
     columnOfBeads->initialize(s);
 
-    int N = (int)((T - t0) / h); // Number of time steps
+    int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
