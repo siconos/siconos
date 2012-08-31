@@ -3,7 +3,7 @@
 
 #include "NonlinearrelationWithSignInversed.h"
 
-#include "const.h"
+//#include "const.h"
 #define SICONOS_DEBUG
 
 NonlinearRelationWithSignInversed::NonlinearRelationWithSignInversed():
@@ -60,7 +60,7 @@ void NonlinearRelationWithSignInversed::computeh(double t, Interaction& inter)
 {
 
   SiconosVector workX = *inter.data(x);
-  SiconosVector& lambda = *inter.lambda(0);
+  //SiconosVector& lambda = *inter.lambda(0);
 
 #ifdef SICONOS_DEBUG
   std::cout << "******** NonlinearRelationWithSignInversed::computeh computeh at " << t << std::endl;

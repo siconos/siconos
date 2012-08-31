@@ -90,6 +90,8 @@ public:
    */
   virtual ~MyDS() {};
 
+  using FirstOrderNonLinearDS::computef;
+
 
   /** Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
@@ -101,6 +103,9 @@ public:
    * \param SP::SiconosVector
    */
   //virtual void computef(double, SP::SiconosVector);
+
+  using FirstOrderNonLinearDS::computeJacobianfx;
+
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time

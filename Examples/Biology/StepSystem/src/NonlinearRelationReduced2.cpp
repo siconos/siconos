@@ -3,7 +3,7 @@
 
 #include "NonlinearRelationReduced2.h"
 
-#include "const.h"
+//#include "const.h"
 #define SICONOS_DEBUG
 
 NonlinearRelationReduced2::NonlinearRelationReduced2():
@@ -16,8 +16,8 @@ void NonlinearRelationReduced2::initialize(Interaction& inter)
   FirstOrderType2R::initialize(inter);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
+  //SiconosVector& y = *inter.y(0);
+  //SiconosVector& lambda = *inter.lambda(0);
 
   double t0 = 0;
 
@@ -60,7 +60,7 @@ void NonlinearRelationReduced2::computeh(double t, Interaction& inter)
 {
 
   SiconosVector workX = *inter.data(x);
-  SiconosVector& lambda = *inter.lambda(0);
+  //SiconosVector& lambda = *inter.lambda(0);
 
   /*
   #ifdef SICONOS_DEBUG
@@ -143,7 +143,7 @@ void NonlinearRelationReduced2::computeJacgx(double t, Interaction& inter)
 void NonlinearRelationReduced2::computeJacglambda(double t, Interaction& inter)
 {
 
-  SiconosVector& lambda = *inter.lambda(0);
+  //SiconosVector& lambda = *inter.lambda(0);
 
   //  double *g = &(*Jacglambda)(0,0);
   _jacglambda->setValue(0, 0, -40.0);

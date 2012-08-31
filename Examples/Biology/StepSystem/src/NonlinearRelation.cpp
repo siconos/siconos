@@ -3,7 +3,7 @@
 
 #include "NonlinearRelation.h"
 
-#include "const.h"
+//#include "const.h"
 #define SICONOS_DEBUG
 
 NonlinearRelation::NonlinearRelation():
@@ -16,7 +16,7 @@ void NonlinearRelation::initialize(Interaction& inter)
   FirstOrderType2R::initialize(inter);
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  SiconosVector& y = *inter.y(0);
+  //SiconosVector& y = *inter.y(0);
   SiconosVector& lambda = *inter.lambda(0);
 
   double t0 = 0;
@@ -60,7 +60,7 @@ void NonlinearRelation::computeh(double t, Interaction& inter)
 {
 
   SiconosVector workX = *inter.data(x);
-  SiconosVector& lambda = *inter.lambda(0);
+  // SiconosVector& lambda = *inter.lambda(0);
 
   /*
   #ifdef SICONOS_DEBUG
