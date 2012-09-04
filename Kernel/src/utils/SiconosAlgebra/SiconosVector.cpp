@@ -420,7 +420,6 @@ double SiconosVector::operator()(unsigned int row) const
 void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
 {
   // Set current vector elements, starting from position "index", to the values of vector vIn
-  // vIn may be a BlockVector.
 
   // Exceptions ...
   if (&vIn == this)
@@ -432,7 +431,6 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int end = vIn.size() + index;
   if (end > size())
     SiconosVectorException::selfThrow("SiconosVector::setBlock : invalid ranges");
-
 
   unsigned int numVin = vIn.getNum();
   if (numVin != getNum()) SiconosVectorException::selfThrow("SiconosVector::setBlock: inconsistent types.");
@@ -451,18 +449,18 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
   unsigned int sizeOut = vOut.size();
 
   if (startIn >= sizeIn)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): start position in input vector is out of range.");
+    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): start position in input vector is out of range.");
 
   if (startOut >= sizeOut)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): start position in output vector is out of range.");
+    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): start position in output vector is out of range.");
 
   unsigned int endIn = startIn + sizeB;
   unsigned int endOut = startOut + sizeB;
 
   if (endIn > sizeIn)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): end position in input vector is out of range.");
+    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): end position in input vector is out of range.");
   if (endOut > sizeOut)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): end position in output vector is out of range.");
+    SiconosVectorException::selfThrow("vector toBlock(v1,v2,...): end position in output vector is out of range.");
 
   unsigned int numIn = getNum();
   unsigned int numOut = vOut.getNum();
@@ -798,7 +796,7 @@ SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
 
-  if (numX == numY && numX != 0) // x, y SiconosVector of the same type
+  if (numX == numY)  // x, y SiconosVector of the same type
   {
     if (numX == 1)
     {
@@ -810,7 +808,7 @@ SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
       return (SparseVect)(*x.sparse() + *y.sparse());
   }
 
-  else if (numX != 0 && numY != 0  && numX != numY) // x, y SiconosVector with y and x of different types
+  else  // x, y SiconosVector with y and x of different types
   {
     if (numX == 1)
       return (DenseVect)(*x.dense() + *y.sparse());
@@ -885,7 +883,7 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
 
-  if (numX == numY && numX != 0) // x, y SiconosVector of the same type
+  if (numX == numY) // x, y SiconosVector of the same type
   {
     if (numX == 1)
     {
@@ -896,16 +894,13 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
     else
       return (SparseVect)(*x.sparse() - *y.sparse());
   }
-  else if (numX != 0 && numY != 0  && numX != numY) // x, y SiconosVector with y and x of different types
+  else  // x, y SiconosVector with y and x of different types
   {
     if (numX == 1)
       return (DenseVect)(*x.dense() - *y.sparse());
     else
       return (DenseVect)(*x.sparse() - *y.dense());
   }
-  else
-    SiconosVectorException::selfThrow("SiconosVector, x - y: Unknow error");
-
 }
 
 void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
@@ -1363,7 +1358,6 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
 */
 void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
 {
-  unsigned int endIn = startIn + sizeB;
   unsigned int endOut = startOut + sizeB;
   unsigned int numIn = vIn.getNum();
   unsigned int numOut = vOut->getNum();

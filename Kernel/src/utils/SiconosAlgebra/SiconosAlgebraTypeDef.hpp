@@ -94,10 +94,6 @@ DEFINE_SPTR(BlockVector);
     derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;
 
-typedef std::vector<SP::BlockVector> VectorOfBlockVectors;
-
-typedef std::vector<SP::SiconosVector> VectorOfSiconosVectors;
-
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SiconosMatrix> VectorOfMatrices;

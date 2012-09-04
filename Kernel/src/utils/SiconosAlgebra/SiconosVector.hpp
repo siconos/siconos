@@ -351,6 +351,13 @@ public:
 
   friend SiconosVector& operator /= (SiconosVector& v, const double& s);
 
+  /** Copy a part of a vector into a sublock of another vector
+      \param SiconosVector input vector (read only)
+      \param SiconosVector vector to be overwritten
+      \param int size of the block to be copied
+      \param int starting index of the block to be copied (in input vector)
+      \param int starting index of the block to be overwritten (in output vector)
+  **/
   friend void setBlock(const SiconosVector&, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
 
   friend bool operator ==(const SiconosVector&, const SiconosVector&);

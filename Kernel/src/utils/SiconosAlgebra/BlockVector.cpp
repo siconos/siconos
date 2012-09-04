@@ -279,6 +279,7 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
         (*this)(i) = vIn(i);
     }
   }
+  return *this;
 }
 
 BlockVector& BlockVector::operator -= (const BlockVector& vIn)
@@ -393,52 +394,41 @@ void BlockVector::insertPtr(SP::SiconosVector v)
   _tabIndex->push_back(_sizeV);
 }
 
-void BlockVector::setBlock(const SiconosVector& vIn, BlockVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
+void BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
 {
   // Check dim ...
-  unsigned int sizeIn = vIn.size();
-  unsigned int sizeOut = vOut.size();
-
-  if (startIn >= sizeIn)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): start position in input vector is out of range.");
-
-  if (startOut >= sizeOut)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): start position in output vector is out of range.");
-
-  unsigned int endIn = startIn + sizeB;
   unsigned int endOut = startOut + sizeB;
 
-  if (endIn > sizeIn)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): end position in input vector is out of range.");
-  if (endOut > sizeOut)
-    SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): end position in output vector is out of range.");
+  assert(startIn < vIn.size());
+  assert(startOut < size());
+  assert((startIn + sizeB) <= vIn.size());
+  assert(endOut <= size());
 
   // We look for the block of vOut that include index startOut
   unsigned int blockOutStart = 0;
-  const SP::Index tabOut = vOut.tabIndex();
-  while (startOut >= (*tabOut)[blockOutStart] && blockOutStart < tabOut->size())
+  while (startOut >= (*_tabIndex)[blockOutStart] && blockOutStart < _tabIndex->size())
     blockOutStart++;
   // Relative position in the block blockOutStart.
   unsigned int posOut = startOut;
   if (blockOutStart != 0)
-    posOut -= (*tabOut)[blockOutStart - 1];
+    posOut -= (*_tabIndex)[blockOutStart - 1];
 
   // We look for the block of vOut that include index endOut
   unsigned int blockOutEnd = blockOutStart;
-  while (endOut > (*tabOut)[blockOutEnd] && blockOutEnd < tabOut->size())
+  while (endOut > (*_tabIndex)[blockOutEnd] && blockOutEnd < _tabIndex->size())
     blockOutEnd ++;
 
   // => the block to be set runs from block number blockOutStart to block number blockOutEnd.
 
   if (blockOutEnd == blockOutStart) //
   {
-    vIn.toBlock(*vOut.vector(blockOutStart), sizeB, startIn, posOut);
+    vIn.toBlock(*vect[blockOutStart], sizeB, startIn, posOut);
   }
   else // More that one block of vOut are concerned
   {
 
     // The current considered block ...
-    SP::SiconosVector currentBlock = vOut.vector(blockOutStart);
+    SP::SiconosVector currentBlock = vect[blockOutStart];
 
     // Size of the subBlock of vOut to be set.
     unsigned int subSizeB = currentBlock->size() - posOut;
@@ -453,18 +443,18 @@ void BlockVector::setBlock(const SiconosVector& vIn, BlockVector& vOut, unsigned
     while (currentBlockNum != blockOutEnd)
     {
       posIn += subSizeB;
-      currentBlock = vOut.vector(currentBlockNum);
+      currentBlock = vect[currentBlockNum];
       subSizeB = currentBlock->size();
       vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
       currentBlockNum++;
     }
     // set last subBlock ...
-    currentBlock = vOut.vector(blockOutEnd);
+    currentBlock = vect[blockOutEnd];
 
     posIn += subSizeB;
 
     // Size of the considered sub-block
-    subSizeB = endOut - (*tabOut)[blockOutEnd - 1];
+    subSizeB = endOut - (*_tabIndex)[blockOutEnd - 1];
 
     vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
   }
@@ -498,7 +488,7 @@ double BlockVector::norm2() const
 
 BlockVector& BlockVector::operator =(const SiconosVector& vIn)
 {
-  setBlock(vIn, *this, _sizeV, 0, 0);
+  setBlock(vIn, _sizeV, 0, 0);
   return *this;
 }
 

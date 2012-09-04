@@ -53,9 +53,9 @@ private:
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   SP::Index _tabIndex;
 
-  void setBlock(const SiconosVector&, BlockVector&, unsigned int, unsigned int, unsigned int);
-
 public:
+
+  void setBlock(const SiconosVector&, unsigned int, unsigned int, unsigned int);
 
   /** default contructor
    */

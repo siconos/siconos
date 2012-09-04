@@ -296,7 +296,7 @@ public:
   }
 
 
-  virtual inline SP::SiconosMatrix C() const = 0;
+  virtual SP::SiconosMatrix C() const = 0;
 
 
   /**

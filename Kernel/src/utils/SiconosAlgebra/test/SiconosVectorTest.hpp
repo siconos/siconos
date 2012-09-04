@@ -56,7 +56,7 @@ private:
   CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testResize);
   CPPUNIT_TEST(testSetBlock);
-  CPPUNIT_TEST(testSetBlock2);
+  //  CPPUNIT_TEST(testSetBlock2);
   CPPUNIT_TEST(testSetBlock3);
   CPPUNIT_TEST(testSetBlock4);
   CPPUNIT_TEST(testAssignment);

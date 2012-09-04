@@ -1186,10 +1186,8 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
   else
   {
     unsigned int numV = vOut.getNum();
-    unsigned int pos = 0;
     if (numV == 1)
     {
-
       if (num == 1)
       {
         noalias(*(vOut.dense())) = ublas::row(*mat.Dense, r);
@@ -1363,7 +1361,6 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
   else
   {
     unsigned int numV = vOut->getNum();
-    unsigned int subPos = pos;
     unsigned int nbEl = vOut->size();
 
     if (numV == 1)
@@ -1468,7 +1465,6 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
   else
   {
     unsigned int numV = vOut->getNum();
-    unsigned int subPos = pos;
     unsigned int nbEl = vOut->size();
 
     if (numV == 1)
@@ -4612,34 +4608,31 @@ const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 
   else
   {
-    if (numX != 0) // if x is not a block vector.
+    if (numX == 1)
     {
-      if (numX == 1)
-      {
-        if (numA == 1)
-          return (DenseVect)(prod(*A.dense(), *x.dense()));
-        else if (numA == 2)
-          return (DenseVect)(prod(*A.triang(), *x.dense()));
-        else if (numA == 3)
-          return (DenseVect)(prod(*A.sym(), *x.dense()));
-        else if (numA == 4)
-          return (DenseVect)(prod(*A.sparse(), *x.dense()));
-        else // if(numA==5)
-          return (DenseVect)(prod(*A.banded(), *x.dense()));
-      }
-      else //if(numX == 4)
-      {
-        if (numA == 1)
-          return (DenseVect)(prod(*A.dense(), *x.sparse()));
-        else if (numA == 2)
-          return (DenseVect)(prod(*A.triang(), *x.sparse()));
-        else if (numA == 3)
-          return (DenseVect)(prod(*A.sym(), *x.sparse()));
-        else if (numA == 4)
-          return (DenseVect)(prod(*A.sparse(), *x.sparse()));
-        else // if(numA==5)
-          return (DenseVect)(prod(*A.banded(), *x.sparse()));
-      }
+      if (numA == 1)
+        return (DenseVect)(prod(*A.dense(), *x.dense()));
+      else if (numA == 2)
+        return (DenseVect)(prod(*A.triang(), *x.dense()));
+      else if (numA == 3)
+        return (DenseVect)(prod(*A.sym(), *x.dense()));
+      else if (numA == 4)
+        return (DenseVect)(prod(*A.sparse(), *x.dense()));
+      else // if(numA==5)
+        return (DenseVect)(prod(*A.banded(), *x.dense()));
+    }
+    else //if(numX == 4)
+    {
+      if (numA == 1)
+        return (DenseVect)(prod(*A.dense(), *x.sparse()));
+      else if (numA == 2)
+        return (DenseVect)(prod(*A.triang(), *x.sparse()));
+      else if (numA == 3)
+        return (DenseVect)(prod(*A.sym(), *x.sparse()));
+      else if (numA == 4)
+        return (DenseVect)(prod(*A.sparse(), *x.sparse()));
+      else // if(numA==5)
+        return (DenseVect)(prod(*A.banded(), *x.sparse()));
     }
   }
 }
@@ -4934,14 +4927,6 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   unsigned int colA = coord[3] - coord[2];
   unsigned int dimX = coord[5] - coord[4];
   unsigned int dimY = coord[7] - coord[6];
-  unsigned int r0A = coord[0];
-  unsigned int r1A = coord[1];
-  unsigned int c0A = coord[2];
-  unsigned int c1A = coord[3];
-  unsigned int r0x = coord[4];
-  unsigned int r1x = coord[5];
-  unsigned int r0y = coord[6];
-  unsigned int r1y = coord[7];
   if (colA != dimX)
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: inconsistent sizes between A and x.");
 

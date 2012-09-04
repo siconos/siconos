@@ -289,30 +289,31 @@ void SiconosVectorTest::testSetBlock()
   cout << "--> setBlock test ended with success." << endl;
 }
 
-void SiconosVectorTest::testSetBlock2()
-{
-  cout << "--> Test: setBlock2." << endl;
+// void SiconosVectorTest::testSetBlock2()
+// {
+//   cout << "--> Test: setBlock2." << endl;
 
-  // Block copy from a Block into a Simple.
-  SP::BlockVector BSV(new BlockVector());
-  BSV->insertPtr(ref);
-  SP::SiconosVector ref2(new SiconosVector(3));
-  for (unsigned int i = 0; i < 3; ++i)
-    (*ref2)(i) = i;
-  BSV->insertPtr(ref2);
+// Note FP :  Block copy from a Block into a Simple is no more implemented.
+//   // Block copy from a Block into a Simple.
+//   SP::BlockVector BSV(new BlockVector());
+//   BSV->insertPtr(ref);
+//   SP::SiconosVector ref2(new SiconosVector(3));
+//   for (unsigned int i = 0; i<3; ++i)
+//     (*ref2)(i)=i;
+//   BSV->insertPtr(ref2);
 
-  SP::SiconosVector vOut(new SiconosVector(14));
+//   SP::SiconosVector vOut(new SiconosVector(14));
 
-  unsigned int sizeB = 6;
-  unsigned int posIn = 1;
-  unsigned int posOut = 3;
+//   unsigned int sizeB = 6;
+//   unsigned int posIn = 1;
+//   unsigned int posOut = 3;
 
-  //  setBlock(*BSV, vOut, sizeB, posIn, posOut);
-  //  for (unsigned int i = 0; i < sizeB; ++i)
-  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*vOut)(i+posOut) == (*BSV)(i+posIn), true);
+// //  setBlock(*BSV, vOut, sizeB, posIn, posOut);
+// //  for (unsigned int i = 0; i < sizeB; ++i)
+// //    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*vOut)(i+posOut) == (*BSV)(i+posIn), true);
 
-  cout << "--> setBlock2 test ended with success." << endl;
-}
+//   cout << "--> setBlock2 test ended with success." << endl;
+// }
 
 void SiconosVectorTest::testSetBlock3()
 {
@@ -335,9 +336,9 @@ void SiconosVectorTest::testSetBlock3()
   unsigned int posIn = 1;
   unsigned int posOut = 2;
 
-  //  setBlock(*vIn, BSV, sizeB, posIn, posOut);
-  //  for (unsigned int i = 0; i < sizeB; ++i)
-  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i+posOut) == (*vIn)(i+posIn), true);
+  BSV->setBlock(*vIn, sizeB, posIn, posOut);
+  for (unsigned int i = 0; i < sizeB; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn), true);
 
   cout << "--> setBlock3 test ended with success." << endl;
 }

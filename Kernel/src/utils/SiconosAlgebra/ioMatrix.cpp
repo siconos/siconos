@@ -112,7 +112,7 @@ bool write(const std::string& fileName, const std::string& Mode, const SiconosMa
 
   if (m.getNum() == 1)
   {
-    DenseMat * p = m.dense();
+    // DenseMat * p = m.dense();
     DenseMat::iterator1 row;
     DenseMat::iterator2 col;
     double tmp;

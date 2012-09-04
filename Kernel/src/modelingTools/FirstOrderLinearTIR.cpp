@@ -103,7 +103,6 @@ void FirstOrderLinearTIR::initialize(Interaction & inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeZ = inter.getSizez();
 
   assert((_jachx->size(0) == inter.getSizeOfY() && _jachx->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
@@ -116,7 +115,7 @@ void FirstOrderLinearTIR::initialize(Interaction & inter)
 
 
   if (_F)
-    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != inter.getSizez())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 }
