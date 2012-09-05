@@ -866,7 +866,9 @@ bool ZeroOrderHold::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y <= 0)
+  {
     DEBUG_PRINT("ZeroOrderHold::addInteractionInIndexSet ACTIVATE.\n");
+  }
   return (y <= 0);
 }
 
@@ -882,7 +884,9 @@ bool ZeroOrderHold::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
   y += gamma * h * yDot;
   assert(!isnan(y));
   if (y > 0)
+  {
     DEBUG_PRINT("ZeroOrderHold::removeInteractionInIndexSet DEACTIVATE.\n");
+  }
   return (y > 0);
 }
 

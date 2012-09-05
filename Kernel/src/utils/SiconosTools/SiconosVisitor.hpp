@@ -215,9 +215,7 @@ inline Siconos value(const C& c)
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
-namespace
-{
-boost::shared_ptr<std::string> str(const Siconos& X)
+inline boost::shared_ptr<std::string> str(const Siconos& X)
 {
   boost::shared_ptr<std::string> r;
 
@@ -229,7 +227,6 @@ boost::shared_ptr<std::string> str(const Siconos& X)
   }
 
   return(r);
-}
 }
 
 

@@ -796,7 +796,7 @@ SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
 
-  if (numX == numY)  // x, y SiconosVector of the same type
+  if (numX == numY) // x, y SiconosVector of the same type
   {
     if (numX == 1)
     {
@@ -808,7 +808,7 @@ SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
       return (SparseVect)(*x.sparse() + *y.sparse());
   }
 
-  else  // x, y SiconosVector with y and x of different types
+  else // x, y SiconosVector with y and x of different types
   {
     if (numX == 1)
       return (DenseVect)(*x.dense() + *y.sparse());
@@ -894,7 +894,7 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
     else
       return (SparseVect)(*x.sparse() - *y.sparse());
   }
-  else  // x, y SiconosVector with y and x of different types
+  else // x, y SiconosVector with y and x of different types
   {
     if (numX == 1)
       return (DenseVect)(*x.dense() - *y.sparse());

@@ -278,6 +278,7 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
       for (unsigned int i = 0; i < _sizeV; ++i)
         (*this)(i) = vIn(i);
     }
+    return *this;
   }
   return *this;
 }

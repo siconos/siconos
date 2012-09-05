@@ -29,7 +29,7 @@ std::size_t hash_value(SP::Hashed const& h)
 
 
 /* the hashing is done with a visitor */
-class SpaceFilter::_BodyHash : public SiconosVisitor
+struct SpaceFilter::_BodyHash : public SiconosVisitor
 {
 public:
   SpaceFilter& parent;

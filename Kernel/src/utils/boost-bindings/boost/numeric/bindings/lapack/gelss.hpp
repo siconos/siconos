@@ -197,14 +197,6 @@ struct Gelss<1>
     typedef typename MatrA::value_type val_t;
     typedef typename traits::type_traits<val_t>::real_type real_t;
 
-    const int m = traits::matrix_size1(A);
-    const int n = traits::matrix_size2(A);
-    const int rhs = traits::matrix_size2(B);
-
-    const int minmn = std::min(m, n);     // minmn = m < n ? m : n
-    const int maxmn = std::max(m, n);     // maxmn = m > n ? m : n
-    const int maxmnr = std::max(maxmn, rhs);  // maxmnr = maxmn > rhs ? maxmn : rhs
-
     val_t temp_work;
 
     const real_t rcond = -1;
@@ -274,11 +266,8 @@ struct Gelss<2>
 
     const int m = traits::matrix_size1(A);
     const int n = traits::matrix_size2(A);
-    const int rhs = traits::matrix_size2(B);
 
     const int minmn = std::min(m, n);   // minmn = m < n ? m : n
-    const int maxmn = std::max(m, n);   // maxmn = m > n ? m : n
-    const int maxmnr = std::max(maxmn, rhs);  // maxmnr = maxmn > rhs ? maxmn : rhs
 
     val_t temp_work;
     real_t temp_rwork;
