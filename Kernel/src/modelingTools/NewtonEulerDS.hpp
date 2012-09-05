@@ -455,13 +455,13 @@ public:
    *  \param time current time
    *  \param isDSup flag to avoid recomputation of operators
    */
-  virtual void computeRhs(const double time, bool isDSup = false);
+  virtual void computeRhs(double time, bool isDSup = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    */
-  virtual void computeJacobianRhsx(double, bool  = false);
+  virtual void computeJacobianRhsx(double time, bool isDup = false);
 
   /** Default function to compute fL
    *  \param double, the current time

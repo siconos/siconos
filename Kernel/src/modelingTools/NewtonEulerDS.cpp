@@ -257,7 +257,7 @@ void NewtonEulerDS::computeMExt(const double time)
     ((Fext)_pluginMExt->fPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));
 }
 
-void NewtonEulerDS::computeRhs(const double time, const bool isDSup)
+void NewtonEulerDS::computeRhs(double time, bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
 
