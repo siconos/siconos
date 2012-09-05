@@ -23,6 +23,7 @@
 
 #include "BulletSpaceFilter.hpp"
 
+#include <stdio.h>
 using namespace qglviewer;
 
 void BulletViewer::init()
@@ -172,6 +173,32 @@ void BulletViewer::draw()
   SP::Relation relation;
 
 
+  /*  static int file_counter=0;
+    char filename[32];
+    sprintf(filename,"data%d.txt",file_counter++);
+    FILE* posf = fopen(filename,"w");
+
+
+    fprintf(posf, "%g\n", Siconos_->model()->currentTime());
+
+    for (unsigned int i=0;i<GETNDS(Siconos_);i++)
+    {
+
+      SP::DynamicalSystem d1 = shapes_[i]->DS();
+      SP::SiconosVector q1 = ask<ForPosition>(*d1);
+
+      qglviewer::Quaternion q = qglviewer::Quaternion(GETA2(d1),GETA3(d1),GETA4(d1),GETA1(d1));
+      qglviewer::Vec axis;
+      float angle;
+      q.getAxisAngle(axis,angle);
+
+      fprintf(posf,
+              "%g %g %g %f %f %f %f file:///tmp/pyramid.vtu 0. 0.\n",
+              (*q1)(0), (*q1)(1), (*q1)(2),
+              angle, axis[0], axis[1], axis[2]);
+              }*/
+
+
   // calibration
   if (Siconos_->model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() >= 2)
   {
@@ -221,14 +248,27 @@ void BulletViewer::draw()
         QGLViewer::drawArrow(qglviewer::Vec(posa[0], posa[1], posa[2]), qglviewer::Vec(endf[0], endf[1], endf[2]), .05, 10.);
         glPopMatrix();
 
+        /*        fprintf(posf,
+                        "%g %g %g %g %g %g %g Arrow %g %g\n",
+                        posa[0], posa[1], posa[2],
+                        0., cf(0), cf(1), cf(2), .05, w);*/
+
         glPushMatrix();
         glColor3f(0, .80, 0);
         glLineWidth(1.);
         QGLViewer::drawArrow(qglviewer::Vec(posb[0], posb[1], posb[2]), qglviewer::Vec(cnB[0], cnB[1], cnB[2]), .03, 10.);
         glPopMatrix();
 
+        qglviewer::Vec cpo = qglviewer::Vec(posb[0], posb[1], posb[2]) - qglviewer::Vec(cnB[0], cnB[1], cnB[2]);
+
+        /*        fprintf(posf,
+                        "%g %g %g %g %g %g %g Arrow %g %g\n",
+                        posa[0], posa[1], posa[2],
+                        0., cpo[0], cpo[1], cpo[2], .05, .3);*/
+
       }
     }
+    //    fclose(posf);
   }
 
 
@@ -240,8 +280,12 @@ void BulletViewer::draw()
     //    }
     //    else
     //    {
+
+
     drawQGLShape(*shapes_[i]);
-    //   }
+
+
+
   }
 
   // draw static objects

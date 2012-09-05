@@ -1,2 +1,2 @@
 #!/bin/sh
-siconos -j 2 -DWITH_BULLET -DWITH_GLOBALAC -DWITH_MUMPS -P"mpirun -np 2" -DNDEBUG -ldmumps -lmumps_common -lmpi_cxx -lmpi `pkg-config bullet --cflags` `pkg-config bullet --lib`  -lglut QGLBullet.cpp
+siconos -j 2 -DWITH_BULLET -DWITH_SOLVER=SICONOS_FRICTION_3D_GLOBALAC -DNDEBUG -ldmumps -lmumps_common -lmpi_cxx -lmpi `pkg-config bullet --cflags` `pkg-config bullet --lib`  -lglut QGLBullet.cpp

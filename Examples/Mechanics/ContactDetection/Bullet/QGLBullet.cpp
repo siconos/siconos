@@ -22,17 +22,24 @@
 
 int main(int argc, char* argv[])
 {
-  QApplication application(argc, argv);
 
-#ifdef QT_INTERFACE
-  ViewerInterface viewer;
-#else
-  BulletViewer viewer;
-#endif /*QT_INTERFACE */
+  try
+  {
+    QApplication application(argc, argv);
+    BulletViewer viewer;
 
-  //* only with qt4
-  viewer.setWindowTitle("Bullet model / Siconos simulation");
+    viewer.setWindowTitle("Bullet model / Siconos simulation");
+    viewer.show();
 
-  viewer.show();
-  return application.exec();
+    return application.exec();
+  }
+
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in QGLBullet.cpp" << endl;
+  }
 }

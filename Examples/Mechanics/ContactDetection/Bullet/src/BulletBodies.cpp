@@ -4,10 +4,6 @@
 #include <BulletDS.hpp>
 #include <BulletWeightedShape.hpp>
 
-#ifdef WITH_GLOBALAC
-#include <mpi.h>
-#endif
-
 #include <stdlib.h>
 
 #define NDOF 3
@@ -220,8 +216,8 @@ void BulletBodies::init()
 
     simulation.reset(new BulletTimeStepping(timedisc, boost::static_pointer_cast<BulletSpaceFilter>(_playground)));
 
-#ifdef WITH_GLOBALAC
-    osnspb.reset(new FrictionContact(3, SICONOS_FRICTION_3D_GLOBALAC));
+#ifdef WITH_SOLVER
+    osnspb.reset(new FrictionContact(3, WITH_SOLVER));
 #else
     osnspb.reset(new FrictionContact(3));
 #endif
@@ -229,35 +225,14 @@ void BulletBodies::init()
     osnspb->numericsSolverOptions()->iparam[0] = 1000; // Max number of
     // iterations
 
-#ifdef WITH_GLOBALAC
-    osnspb->numericsSolverOptions()->iparam[1] = 1; // compute error with GLOBALAC
-#else
-    osnspb->numericsSolverOptions()->iparam[1] = 10; // with NSGS
-#endif
-
-
-    // iterations
     osnspb->numericsSolverOptions()->dparam[0] = 1e-5; // Tolerance
 
     osnspb->setMaxSize(16384);
-    osnspb->setMStorageType(1);
+    osnspb->setMStorageType(1);                       // Sparse
     osnspb->setNumericsVerboseMode(0);
     osnspb->setKeepLambdaAndYState(true);
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
-
-#ifdef WITH_GLOBALAC
-    int myid, ierr;
-    int argc = 0;
-    char **argv = 0;
-    ierr = MPI_Init(&argc, &argv);
-    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    osnspb->numericsSolverOptions()->iparam[4] = myid;
-    osnspb->numericsSolverOptions()->iparam[5] = 1;
-
-    frictionContact3D_sparseGlobalAlartCurnierInit(osnspb->numericsSolverOptions().get());
-#endif
-    //simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
