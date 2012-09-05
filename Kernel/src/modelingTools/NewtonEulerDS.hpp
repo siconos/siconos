@@ -98,6 +98,12 @@ protected:
   /** external moment of the forces */
   SP::SiconosVector _mExt;
 
+  /** Plugin to compute strength of external forces */
+  SP::PluggedObject _pluginFExt;
+
+  /** Plugin to compute moments of external forces */
+  SP::PluggedObject _pluginMExt;
+
   /*The following code is commented because the jacobian of m/fext are not yet integrated in the numerical scheme.*/
   /** jacobian_q */
   //  SP::SiconosMatrix _jacobianqmExt;
@@ -143,8 +149,8 @@ protected:
    * @param[in,out] fExt : pointer to the first element of fExt
    * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(double, double *, double*, double*);
-  void (*computeMExtPtr)(double, double *, double*, double*);
+  //  void (*computeFExtPtr)(double, double *, double*, double* );
+  //  void (*computeMExtPtr)(double, double *, double*, double* );
 
 
   /** NewtonEulerDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFIntq"
@@ -401,46 +407,55 @@ public:
 
 
 
-  /** allow to set a specified function to compute Fext
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+  /** allow to set a specified function to compute _fExt
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the name of the function to use in this plugin
    */
-  //  void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName){
-  //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
-  //  }
-  /** allow to set a specified function to compute Mext
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+  void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    _pluginFExt->setComputeFunction(pluginPath, functionName);
+  }
+  /** allow to set a specified function to compute _mExt
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the name of the function to use in this plugin
    */
-  //  void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName){
-  //    Plugin::setFunction(&computeMExtPtr, pluginPath,functionName);
-  //  }
+  void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    _pluginMExt->setComputeFunction(pluginPath, functionName);
+  }
 
-  /** set a specified function to compute fExt
-   *  \param a pointer on the plugin function
+  /** set a specified function to compute _fExt
+   *  \param fct a pointer on the plugin function
    */
-  //  void setComputeFExtFunction(Fext fct ){
-  //   computeFExtPtr = fct ;
-  //  }
-  //  void setComputeMExtFunction(Fext fct ){
-  //    computeMExtPtr = fct ;
-  //  }
+  void setComputeFExtFunction(Fext fct)
+  {
+    _pluginFExt->setComputeFunction((void*)fct);
+  }
 
-
+  /** set a specified function to compute _mExt
+   *  \param fct a pointer on the plugin function
+   */
+  void setComputeMExtFunction(Fext fct)
+  {
+    _pluginMExt->setComputeFunction((void*)fct);
+  }
 
   /** default function to compute the external strengths
-   *  \param double time : the current time
+   *  \param time the current time
    */
-  virtual void computeFExt(double);
-  virtual void computeMExt(double);
+  virtual void computeFExt(const double time);
 
+  /** default function to compute the external moments
+   * \param time the current time
+   */
+  virtual void computeMExt(const double time);
 
 
   /** Default function to compute the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time current time
+   *  \param isDSup flag to avoid recomputation of operators
    */
-  virtual void computeRhs(double, bool  = false);
+  virtual void computeRhs(const double time, bool isDSup = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
    *  \param double time : current time

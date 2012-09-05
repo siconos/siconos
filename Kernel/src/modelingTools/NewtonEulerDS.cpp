@@ -125,8 +125,8 @@ void NewtonEulerDS::zeroPlugin()
 {
   computeJacobianFIntqPtr = NULL;
   computeJacobianFIntqDotPtr = NULL;
-  //  computeFExtPtr=NULL;
-  //  computeMExtPtr=NULL;
+  _pluginFExt.reset(new PluggedObject());
+  _pluginMExt.reset(new PluggedObject());
   //  computeFIntPtr=NULL;
 }
 
@@ -210,14 +210,14 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   if (! _z)
     _z.reset(new SiconosVector(1));
 
-  if (computeFExtPtr && !_fExt)
-    _fExt.reset(new SiconosVector(3));
+  if (_pluginFExt->fPtr && !_fExt)
+    _fExt.reset(new SiconosVector(3, 0));
 
-  if (computeMExtPtr && !_mExt)
+  if (_pluginMExt->fPtr && !_mExt)
   {
-    _mExt.reset(new SiconosVector(3));
-    _mExt->zero();
+    _mExt.reset(new SiconosVector(3, 0));
   }
+
   //   if ( computeFIntPtr && ! _fInt)
   //     _fInt.reset(new SiconosVector(_n));
   //   if (computeJacobianFIntqPtr && !_jacobianFIntq)
@@ -245,18 +245,19 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 
 
-void NewtonEulerDS::computeFExt(double time)
+void NewtonEulerDS::computeFExt(const double time)
 {
-  if (computeFExtPtr)
-    (computeFExtPtr)(time, &(*_q)(0), &(*_fExt)(0),  &(*_q0)(0));
-}
-void NewtonEulerDS::computeMExt(double time)
-{
-  if (computeMExtPtr)
-    (computeMExtPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));
+  if (_pluginFExt->fPtr)
+    ((Fext)_pluginFExt->fPtr)(time, &(*_q)(0), &(*_fExt)(0),  &(*_q0)(0));
 }
 
-void NewtonEulerDS::computeRhs(double time, bool isDSup)
+void NewtonEulerDS::computeMExt(const double time)
+{
+  if (_pluginMExt->fPtr)
+    ((Fext)_pluginMExt->fPtr)(time, &(*_q)(0), &(*_mExt)(0),  &(*_q0)(0));
+}
+
+void NewtonEulerDS::computeRhs(const double time, const bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
 
@@ -328,12 +329,12 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q2, SP::Siconos
     // 1 - Computes the required functions
     if (_fExt)
     {
-      computeFExt(time);
+      //      computeFExt(time);
       _forces->setBlock(0, *_fExt);
     }
     if (_mExt)
     {
-      computeMExt(time);
+      //      computeMExt(time);
       SiconosVector aux(3);
       updateMObjToAbs();
       prod(*_mExt, *_MObjToAbs, aux);
