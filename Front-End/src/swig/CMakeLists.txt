@@ -79,6 +79,9 @@ ADD_CUSTOM_TARGET(distutils-install
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/FrontEndConfig.h DESTINATION include/Siconos/FrontEnd)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/Common.i DESTINATION include/Siconos/FrontEnd)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
 
 
 # To have a full print of variables, use -DPRINT_ENV=ON
