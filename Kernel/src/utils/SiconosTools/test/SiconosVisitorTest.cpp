@@ -34,6 +34,7 @@ class DynamicalSystem
 {
 public:
   VIRTUAL_ACCEPT_VISITORS();
+  virtual ~DynamicalSystem() {}
 };
 
 class LagrangianDS : public DynamicalSystem

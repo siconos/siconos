@@ -809,7 +809,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     int ierr, myid;
     int argc = 0;
     char **argv;
-    ierr = MPI_Init(argc, argv);
+    ierr = MPI_Init(&argc, &argv);
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
     frictionContact3D_sparseGlobalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];

@@ -23,6 +23,7 @@
 #include "KneeJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
+
 int KneeJointR::_sNbEqualities = 3;
 void KneeJointR::checkInitPos()
 {
@@ -159,6 +160,10 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutR
   std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
   checkInitPos();
 }
+
+// The rest of the code is generated
+// we can disable some warning
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {

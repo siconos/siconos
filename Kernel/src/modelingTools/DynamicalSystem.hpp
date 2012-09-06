@@ -284,7 +284,7 @@ public:
 
   /** destructor
    */
-  virtual ~DynamicalSystem() {};
+  virtual ~DynamicalSystem() {}
 
   //@}
 

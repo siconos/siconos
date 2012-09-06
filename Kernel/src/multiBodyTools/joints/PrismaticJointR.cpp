@@ -212,6 +212,9 @@ void PrismaticJointR::computeh(const double time, Interaction& inter)
 
 }
 
+// The rest of the code is generated.
+// we can disable some warning
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 
 /* The options were    : operatorarrow */
