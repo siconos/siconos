@@ -24,9 +24,9 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/relay_deudeu.dat\n");
+  printf("Test on ./data/relay_2x2.dat\n");
 
-  FILE * finput  =  fopen("./data/relay_deudeu.dat", "r");
+  FILE * finput  =  fopen("./data/relay_2x2.dat", "r");
 
   char solvername[20] = "RELAY_LEMKE";
   info = relay_test_function(finput, nameToId(solvername));
