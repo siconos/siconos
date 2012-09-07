@@ -37,5 +37,5 @@ typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::const_ite
 typedef std::pair<UnitaryRelationsIterator, bool> CheckInsertUnitaryRelation;
 
 
-TYPEDEF_SPTR(UnitaryRelationsSet);
+TYPEDEF_SPTR(UnitaryRelationsSet)
 #endif

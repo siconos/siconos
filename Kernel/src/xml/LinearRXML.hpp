@@ -289,6 +289,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LinearRXML);
+TYPEDEF_SPTR(LinearRXML)
 
 #endif

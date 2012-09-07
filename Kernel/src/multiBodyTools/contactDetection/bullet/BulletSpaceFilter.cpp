@@ -43,7 +43,7 @@ bool contactProcess(btManifoldPoint& cp, void *body0, void *body1)
   if (true)
   {
     DEBUG_PRINTF("gContactProcessedCallback : process contactPoint : %p, distance %g\n", &cp, cp.getDistance());
-  };
+  }
   return true;
 }
 
@@ -90,14 +90,14 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
   for (; dsi != dsiend; ++dsi)
   {
     _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
-  };
+  }
 
   //gContactBreakingThreshold = 10.;
 
   gContactProcessedCallback = &contactProcess;
   gContactDestroyedCallback = &contactClear;
 
-};
+}
 
 
 void BulletSpaceFilter::buildInteractions(double time)
@@ -122,7 +122,7 @@ void BulletSpaceFilter::buildInteractions(double time)
     Interaction& inter0 = *(indexSet0->bundle(*ui0));
     ++v0next;  // trick to iterate on a dynamic bgl graph
     contactPoints[&*ask<ForContactPoint>(*(inter0.relation()))] = false;
-  };
+  }
 
   unsigned int numManifolds =
     _collisionWorld->getDispatcher()->getNumManifolds();

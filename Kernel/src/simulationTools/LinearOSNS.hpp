@@ -33,7 +33,7 @@
 
 /** stl vector of double */
 typedef std::vector<double> MuStorage;
-TYPEDEF_SPTR(MuStorage);
+TYPEDEF_SPTR(MuStorage)
 
 /** Base (abstract) class for linear non-smooth problems
 
@@ -319,6 +319,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LinearOSNS);
+TYPEDEF_SPTR(LinearOSNS)
 
 #endif // LinearOSNS_H

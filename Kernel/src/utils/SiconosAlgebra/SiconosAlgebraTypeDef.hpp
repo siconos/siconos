@@ -84,11 +84,11 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 
 /** Objects used to define block matrices and vectors:*/
 
-DEFINE_SPTR(SiconosMatrix);
-DEFINE_SPTR(SimpleMatrix);
-DEFINE_SPTR(BlockMatrix);
-DEFINE_SPTR(SiconosVector);
-DEFINE_SPTR(BlockVector);
+DEFINE_SPTR(SiconosMatrix)
+DEFINE_SPTR(SimpleMatrix)
+DEFINE_SPTR(BlockMatrix)
+DEFINE_SPTR(SiconosVector)
+DEFINE_SPTR(BlockVector)
 
 /** Some containers for vectors - Used for example to handle x and its
     derivatives in DynamicalSystem. */
@@ -106,7 +106,7 @@ typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
 
 /** type of object used to save indices */
 typedef std::vector<std::size_t> Index;
-TYPEDEF_SPTR(Index);
+TYPEDEF_SPTR(Index)
 
 namespace ublas = boost::numeric::ublas;
 
@@ -115,55 +115,55 @@ namespace ublas = boost::numeric::ublas;
 /** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >
  */
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
-TYPEDEF_SPTR(DenseMat);
+TYPEDEF_SPTR(DenseMat)
 
 //typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 10000> > DenseMat;
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
-TYPEDEF_SPTR(TriangMat);
+TYPEDEF_SPTR(TriangMat)
 
 /** SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::symmetric_matrix<double, ublas::upper, ublas::column_major> SymMat;
-TYPEDEF_SPTR(SymMat);
+TYPEDEF_SPTR(SymMat)
 
 /** BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, column_major, std::vector<double> >
  */
 typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
-TYPEDEF_SPTR(BandedMat);
+TYPEDEF_SPTR(BandedMat)
 
 /** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
-TYPEDEF_SPTR(SparseMat);
+TYPEDEF_SPTR(SparseMat)
 
 /** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
  */
 typedef ublas::zero_matrix<double> ZeroMat;
-TYPEDEF_SPTR(ZeroMat);
+TYPEDEF_SPTR(ZeroMat)
 
 /** IdentityMat is a typedef of boost::ublas::identity_matrix ie identity matrix.
  */
 typedef ublas::identity_matrix<double> IdentityMat;
-TYPEDEF_SPTR(IdentityMat);
+TYPEDEF_SPTR(IdentityMat)
 
 /** A collection of pointers to matrices ; blocksMat is a typedef of
     boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
-TYPEDEF_SPTR(BlocksMat);
+TYPEDEF_SPTR(BlocksMat)
 
 /** Various vector types available in Siconos **/
 
 /** DenseVect is a typedef of boost::ublas::numeric::vector<double, std::vector<double> >
  */
 typedef ublas::vector<double, std::vector<double> > DenseVect;
-TYPEDEF_SPTR(DenseVect);
+TYPEDEF_SPTR(DenseVect)
 
 /** SparseVect is a typedef of boost::ublas::numeric::mapped<double>
  */
 typedef ublas::compressed_vector<double> SparseVect;
-TYPEDEF_SPTR(SparseVect);
+TYPEDEF_SPTR(SparseVect)
 
 /**  iterator for BlocksMat*/
 typedef BlocksMat::iterator1 BlockIterator1;

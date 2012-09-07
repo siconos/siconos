@@ -71,5 +71,5 @@ protected:
   double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
 
 };
-TYPEDEF_SPTR(PivotJointR);
+TYPEDEF_SPTR(PivotJointR)
 #endif // BEAMRELATION_H

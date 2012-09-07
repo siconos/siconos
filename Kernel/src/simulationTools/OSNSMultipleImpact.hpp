@@ -228,5 +228,5 @@ public:
   //==================== Friend methods ================================
   ACCEPT_STD_VISITORS();
 };
-DEFINE_SPTR(OSNSMultipleImpact);
+DEFINE_SPTR(OSNSMultipleImpact)
 #endif

@@ -47,6 +47,6 @@ public:
 
 
 
-TYPEDEF_SPTR(BulletFrom1DLocalFrameR);
+TYPEDEF_SPTR(BulletFrom1DLocalFrameR)
 
 #endif

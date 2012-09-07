@@ -385,6 +385,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Moreau);
+TYPEDEF_SPTR(Moreau)
 
 #endif // MOREAU_H

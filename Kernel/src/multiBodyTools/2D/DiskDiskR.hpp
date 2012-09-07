@@ -61,6 +61,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(DiskDiskR);
+TYPEDEF_SPTR(DiskDiskR)
 
 #endif /* DiskDiskR_h */

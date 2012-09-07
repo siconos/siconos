@@ -142,5 +142,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-TYPEDEF_SPTR(NewtonEulerFrom1DLocalFrameR);
+TYPEDEF_SPTR(NewtonEulerFrom1DLocalFrameR)
 #endif // NEWTONEULERRIMPACT_H

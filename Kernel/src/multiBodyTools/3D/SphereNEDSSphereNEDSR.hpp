@@ -60,6 +60,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereNEDSSphereNEDSR);
+TYPEDEF_SPTR(SphereNEDSSphereNEDSR)
 
 #endif /* SphereNEDSSphereNEDSR_h */

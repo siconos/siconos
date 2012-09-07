@@ -121,4 +121,4 @@ void SampledPIDActuator::setKPtr(SP::SiconosVector newPtr)
     _K = newPtr;
   }
 }
-AUTO_REGISTER_ACTUATOR(SAMPLED_PID_ACTUATOR, SampledPIDActuator);
+AUTO_REGISTER_ACTUATOR(SAMPLED_PID_ACTUATOR, SampledPIDActuator)

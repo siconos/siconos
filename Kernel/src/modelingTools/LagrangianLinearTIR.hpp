@@ -310,6 +310,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianLinearTIR);
+TYPEDEF_SPTR(LagrangianLinearTIR)
 
 #endif

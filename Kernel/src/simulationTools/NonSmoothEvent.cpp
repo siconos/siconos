@@ -143,4 +143,4 @@ void NonSmoothEvent::process(SP::Simulation simulation)
   }
 }
 
-AUTO_REGISTER_EVENT(NS_EVENT, NonSmoothEvent);
+AUTO_REGISTER_EVENT(NS_EVENT, NonSmoothEvent)

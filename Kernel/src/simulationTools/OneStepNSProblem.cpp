@@ -661,6 +661,6 @@ void OneStepNSProblem::clear()
 OneStepNSProblem::~OneStepNSProblem()
 {
   clear();
-};
+}
 
 

@@ -34,8 +34,8 @@ class Simulation;
 class DynamicalSystem;
 class Interaction;
 class SiconosMatrix;
-TYPEDEF_SPTR(NumericsOptions);
-TYPEDEF_SPTR(SolverOptions);
+TYPEDEF_SPTR(NumericsOptions)
+TYPEDEF_SPTR(SolverOptions)
 
 /** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";

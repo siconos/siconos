@@ -53,5 +53,5 @@ private:
 
 };
 
-DEFINE_SPTR(LsodarXML);
+DEFINE_SPTR(LsodarXML)
 #endif

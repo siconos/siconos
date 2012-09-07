@@ -121,5 +121,5 @@ public:
     return (CNode);
   }
 };
-DEFINE_SPTR(LagrangianLinearTIDSXML);
+DEFINE_SPTR(LagrangianLinearTIDSXML)
 #endif

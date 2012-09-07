@@ -73,6 +73,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereNEDSPlanR);
+TYPEDEF_SPTR(SphereNEDSPlanR)
 
 #endif /* SphereNEDSPlanR_h */

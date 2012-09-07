@@ -248,6 +248,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianLinearTIDS);
+TYPEDEF_SPTR(LagrangianLinearTIDS)
 
 #endif // LAGRANGIANTIDS_H

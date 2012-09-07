@@ -546,7 +546,7 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderNonLinearDS);
+TYPEDEF_SPTR(FirstOrderNonLinearDS)
 
 #endif
 

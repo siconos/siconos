@@ -33,7 +33,7 @@ typedef bt32BitAxisSweep3 BulletBroadPhase;
 //typedef btDbvtBroadphase BulletBroadPhase;
 
 
-TYPEDEF_SPTR(BulletBroadPhase);
+TYPEDEF_SPTR(BulletBroadPhase)
 
 class BulletSpaceFilter : public SpaceFilter
 {
@@ -82,7 +82,7 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-DEFINE_SPTR(BulletSpaceFilter);
+DEFINE_SPTR(BulletSpaceFilter)
 
 
 struct ForCollisionWorld : public Question<SP::btCollisionWorld>

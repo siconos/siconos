@@ -84,6 +84,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(ComplementarityConditionNSL);
+TYPEDEF_SPTR(ComplementarityConditionNSL)
 
 #endif // COMPLEMENTARITYCONDITIONNSLAW_H

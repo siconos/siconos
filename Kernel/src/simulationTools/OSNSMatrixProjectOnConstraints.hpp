@@ -128,6 +128,6 @@ public:
   virtual unsigned int getPositionOfInteractionBlock(SP::Interaction) const;
 };
 
-DEFINE_SPTR(OSNSMatrixProjectOnConstraints);
+DEFINE_SPTR(OSNSMatrixProjectOnConstraints)
 
 #endif

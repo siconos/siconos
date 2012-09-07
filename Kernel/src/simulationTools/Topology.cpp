@@ -227,7 +227,7 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
   // note: only one or two ds => only one vertex in IG
   return ig_new_ve;
 
-};
+}
 
 /* an edge is removed from _DSG graph if the corresponding vertex is
    removed from the adjoint graph (_IG)
@@ -280,14 +280,14 @@ void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
     _DSG[0]->remove_out_edge_if
     (_DSG[0]->descriptor(*ids),
      VertexIsRemoved(inter, _DSG[0], _IG[0]));
-  };
-};
+  }
+}
 
 
 void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   _DSG[0]->add_vertex(ds);
-};
+}
 
 InteractionsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter)
 {
@@ -301,7 +301,7 @@ InteractionsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter
 
   return ig_new_ve;
 
-};
+}
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
@@ -312,12 +312,12 @@ void Topology::removeInteraction(SP::Interaction inter)
   removeInteractionFromIndexSet(inter);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-};
+}
 
 void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 {
   RuntimeException::selfThrow("remove dynamical system not implemented");
-};
+}
 
 
 void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
@@ -334,7 +334,7 @@ void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
   inter->insert(ds);
   insertInteraction(inter);
 
-};
+}
 
 
 

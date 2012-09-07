@@ -84,6 +84,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(EqualityConditionNSL);
+TYPEDEF_SPTR(EqualityConditionNSL)
 
 #endif // EQUALITYCONDITIONNSLAW_H

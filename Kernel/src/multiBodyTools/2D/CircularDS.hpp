@@ -68,6 +68,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(CircularDS);
+TYPEDEF_SPTR(CircularDS)
 
 #endif /* CircularDS_h */

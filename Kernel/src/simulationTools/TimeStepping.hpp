@@ -363,7 +363,7 @@ public:
 
 };
 
-DEFINE_SPTR(TimeStepping);
+DEFINE_SPTR(TimeStepping)
 
 #endif // TIMESTEPPING_H
 

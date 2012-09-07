@@ -80,4 +80,4 @@ void LinearSensor::capture()
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
 }
-AUTO_REGISTER_SENSOR(LINEAR_SENSOR, LinearSensor);
+AUTO_REGISTER_SENSOR(LINEAR_SENSOR, LinearSensor)

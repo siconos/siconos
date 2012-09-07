@@ -386,7 +386,7 @@ void readInFileForScilab(NumericsMatrix* const M, FILE *file)
 {
   fprintf(stderr, "Numerics, NumericsMatrix,readInFileForScilab");
   exit(EXIT_FAILURE);
-};
+}
 
 void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, double ** Bout)
 {

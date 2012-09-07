@@ -76,5 +76,5 @@ public:
   double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 };
-TYPEDEF_SPTR(KneeJointR);
+TYPEDEF_SPTR(KneeJointR)
 #endif // BEAMRELATION_H

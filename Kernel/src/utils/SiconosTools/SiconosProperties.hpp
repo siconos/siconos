@@ -327,7 +327,7 @@ template<typename T, typename G>
 VertexProperties<T, G> vertexProperties(G& g)
 {
   return VertexProperties<T, G>(g);
-};
+}
 
 /** function to build a EdgeProperties from one template parameter
   \param g the graph
@@ -336,7 +336,7 @@ template<typename T, typename G>
 EdgeProperties<T, G> edgeProperties(G& g)
 {
   return EdgeProperties<T, G>(g);
-};
+}
 
 
 /** global properties : they may be attached to main graph and may be
@@ -405,10 +405,10 @@ public:
   BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)>(*static_cast<BOOST_PP_CAT(_,gt)*>(this))),
 
 #define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                 \
-  BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES); \
+  BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) \
   bool dummy;                                                           \
                                                                         \
   BOOST_PP_CAT(GraphType, Graph)() :                                    \
-    BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(true) {}; \
+    BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) dummy(true) {} \
  
 #endif

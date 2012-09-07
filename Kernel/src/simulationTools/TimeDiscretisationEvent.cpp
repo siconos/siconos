@@ -40,4 +40,4 @@ void TimeDiscretisationEvent::process(SP::Simulation simulation)
   simulation->saveInMemory();
 }
 
-AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEvent);
+AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEvent)

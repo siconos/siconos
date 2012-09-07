@@ -24,7 +24,7 @@
 #define RELAY_H
 
 #include "LinearOSNS.hpp"
-TYPEDEF_SPTR(RelayProblem);
+TYPEDEF_SPTR(RelayProblem)
 class LinearOSNS;
 class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
@@ -191,6 +191,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Relay);
+TYPEDEF_SPTR(Relay)
 
 #endif // RELAY_H

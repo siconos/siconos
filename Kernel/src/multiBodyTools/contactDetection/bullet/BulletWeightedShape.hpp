@@ -53,6 +53,6 @@ public:
   };
 };
 
-TYPEDEF_SPTR(BulletWeightedShape);
+TYPEDEF_SPTR(BulletWeightedShape)
 
 #endif

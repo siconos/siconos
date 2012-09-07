@@ -65,5 +65,5 @@ public:
   };
 };
 
-DEFINE_SPTR(ControlFirstOrderLinearDS);
+DEFINE_SPTR(ControlFirstOrderLinearDS)
 #endif // CONTROLFIRSTORDERLINEARDS_H

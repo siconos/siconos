@@ -14,7 +14,7 @@ bool operator ==(SP::Hashed const& a, SP::Hashed const& b)
   return (a->i == b->i &&
           a->j == b->j &&
           a->k == b->k);
-};
+}
 
 
 
@@ -25,7 +25,7 @@ std::size_t hash_value(SP::Hashed const& h)
   boost::hash_combine(seed, h->j);
   boost::hash_combine(seed, h->k);
   return seed;
-};
+}
 
 
 /* the hashing is done with a visitor */
@@ -635,7 +635,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
       }
     }
   }
-};
+}
 
 
 
@@ -713,7 +713,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
       }
     }
   }
-};
+}
 
 /* proximity detection between circular object and plans */
 void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, SP::SphereLDS ds)
@@ -784,7 +784,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
       }
     }
   }
-};
+}
 
 
 // note : all PlanObject should be merged
@@ -856,7 +856,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
       }
     }
   }
-};
+}
 
 
 /* insertion */
@@ -865,33 +865,33 @@ void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 
   SP::Hashed hashed(new Hashed(ds, i, j));
   _hash_table.insert(hashed);
-};
+}
 
 void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j));
   _hash_table.insert(hashed);
-};
+}
 
 void SpaceFilter::insert(SP::SphereLDS ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j, k));
   _hash_table.insert(hashed);
-};
+}
 
 void SpaceFilter::insert(SP::SphereNEDS ds, int i, int j, int k)
 {
 
   SP::Hashed hashed(new Hashed(ds, i, j, k));
   _hash_table.insert(hashed);
-};
+}
 
 void SpaceFilter::insert(SP::Hashed hashed)
 {
   _hash_table.insert(hashed);
-};
+}
 
 /* insert other objects */
 
@@ -903,7 +903,7 @@ typedef std::pair<int, int> interPair;
 bool operator ==(interPair const& a, interPair const& b)
 {
   return ((a.first == b.first) && (a.second == b.second));
-};
+}
 
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
 {
@@ -1165,14 +1165,14 @@ void SpaceFilter::buildInteractions(double time)
 std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)
 {
   return _hash_table.equal_range(h);
-};
+}
 
 bool SpaceFilter::haveNeighbours(SP::Hashed h)
 {
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
     = _hash_table.equal_range(h);
   return (neighbours.first != neighbours.second);
-};
+}
 
 
 struct SpaceFilter::_DiskDistance : public SiconosVisitor

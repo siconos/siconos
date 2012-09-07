@@ -56,7 +56,7 @@ public:
   //Visitors hook
   ACCEPT_STD_VISITORS();
 };
-DEFINE_SPTR(MultipleImpactNSL);
+DEFINE_SPTR(MultipleImpactNSL)
 #endif
 
 

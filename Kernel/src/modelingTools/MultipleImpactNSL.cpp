@@ -24,14 +24,14 @@ void MultipleImpactNSL::setResCof(double newResCof)
   _ResCof = newResCof;
   if ((_ResCof < 0.0) || (_ResCof > 1.0))
     RuntimeException::selfThrow("MultipleImpactNSL::setResCof, the restitution coefficient must be between 0.0 and 1.0!");
-};
+}
 //
 void MultipleImpactNSL::setStiff(double newStiff)
 {
   _Stiff = newStiff;
   if (_Stiff < 0.0)
     RuntimeException::selfThrow("MultipleImpactNSL::setStiff, the stiffness must be positive!");
-};
+}
 //
 void MultipleImpactNSL::setElasCoeff(double _newElasCoef)
 {

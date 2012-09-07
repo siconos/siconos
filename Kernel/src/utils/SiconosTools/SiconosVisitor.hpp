@@ -273,7 +273,7 @@ typename GeneralQuestion::type ask(const Visitable& v)
 
   return t.answer;
 
-};
+}
 
 /** get some value from a visitable object with the help of a
     parameterized GeneralQuestion
@@ -289,7 +289,7 @@ typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg)
 
   return t.answer;
 
-};
+}
 
 /** apply a SiconosVisitor to a visitable object
  * \param v a visitable object
@@ -301,7 +301,7 @@ void apply(const Visitable& v)
 
   v.accept(t);
 
-};
+}
 
 /** apply a parameterized SiconosVisitor to a visitable object
  * \param v a visitable object
@@ -314,7 +314,7 @@ void apply(const Visitable& v, const Argument& arg)
 
   v.accept(t);
 
-};
+}
 
 /** apply a parameterized SiconosVisitor to a visitable object
  * \param v a visitable object
@@ -328,7 +328,7 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
 
   v.accept(t);
 
-};
+}
 
 /* use boost array for the initialization of non const reference */
 #include <boost/type_traits.hpp>
@@ -368,7 +368,7 @@ struct Question : public SiconosVisitor
 
 
 
-TYPEDEF_SPTR(SiconosVisitor);
+TYPEDEF_SPTR(SiconosVisitor)
 
 #undef REGISTER
 #undef REGISTER_STRUCT

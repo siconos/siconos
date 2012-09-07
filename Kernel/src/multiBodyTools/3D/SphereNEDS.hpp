@@ -75,6 +75,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereNEDS);
+TYPEDEF_SPTR(SphereNEDS)
 
 #endif /* SphereNEDS_h */

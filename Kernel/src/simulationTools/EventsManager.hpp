@@ -307,6 +307,6 @@ public:
   void SortEvent(SP::Event);
 };
 
-DEFINE_SPTR(EventsManager);
+DEFINE_SPTR(EventsManager)
 
 #endif // EventsManager_H

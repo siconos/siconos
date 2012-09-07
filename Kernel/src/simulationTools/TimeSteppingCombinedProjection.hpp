@@ -233,7 +233,7 @@ public:
 
 };
 
-DEFINE_SPTR(TimeSteppingCombinedProjection);
+DEFINE_SPTR(TimeSteppingCombinedProjection)
 
 #endif // TIMESTEPPINGCOMBINEDPROJECTION_H
 

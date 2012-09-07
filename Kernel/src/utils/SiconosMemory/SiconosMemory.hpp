@@ -31,12 +31,12 @@
 #include "SiconosVector.hpp"
 #include <vector>
 
-DEFINE_SPTR(SiconosMemoryXML);
+DEFINE_SPTR(SiconosMemoryXML)
 
 
 /** Container used to save vectors in SiconosMemory */
 typedef std::vector<SP::SiconosVector> MemoryContainer;
-TYPEDEF_SPTR(MemoryContainer);
+TYPEDEF_SPTR(MemoryContainer)
 
 /** This class is a backup for vectors of previous time step
     \author SICONOS Development Team - copyright INRIA
@@ -175,7 +175,7 @@ public:
 
 };
 
-DEFINE_SPTR(SiconosMemory);
+DEFINE_SPTR(SiconosMemory)
 
 #endif
 

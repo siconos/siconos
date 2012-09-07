@@ -42,7 +42,7 @@ public:
   void updateWorldFromDS();
 };
 
-TYPEDEF_SPTR(BulletTimeSteppingProjectOnConstraints);
+TYPEDEF_SPTR(BulletTimeSteppingProjectOnConstraints)
 #endif
 
 

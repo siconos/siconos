@@ -119,5 +119,5 @@ public:
 
 };
 
-DEFINE_SPTR(MoreauXML);
+DEFINE_SPTR(MoreauXML)
 #endif

@@ -145,6 +145,6 @@ public:
 
 };
 
-DEFINE_SPTR(NonSmoothLaw);
+DEFINE_SPTR(NonSmoothLaw)
 
 #endif

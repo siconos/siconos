@@ -54,10 +54,10 @@ enum TYPES
 // please note: TYPEDEF_SPTR(X) Better at the end of X.hhp
 // (compilation issues with swig -> TYPEDEF_SPTR(Moreau) moved in
 // Moreau.hpp)
-DEFINE_SPTR(MoreauProjectOnConstraintsOSI);
-DEFINE_SPTR(MoreauCombinedProjectionOSI);
-DEFINE_SPTR(Lsodar);
-DEFINE_SPTR(D1MinusLinear);
-DEFINE_SPTR(SchatzmanPaoli);
-DEFINE_SPTR(ZeroOrderHold);
+DEFINE_SPTR(MoreauProjectOnConstraintsOSI)
+DEFINE_SPTR(MoreauCombinedProjectionOSI)
+DEFINE_SPTR(Lsodar)
+DEFINE_SPTR(D1MinusLinear)
+DEFINE_SPTR(SchatzmanPaoli)
+DEFINE_SPTR(ZeroOrderHold)
 #endif

@@ -222,6 +222,6 @@ public:
   }
 
 };
-TYPEDEF_SPTR(FirstOrderR);
+TYPEDEF_SPTR(FirstOrderR)
 
 #endif

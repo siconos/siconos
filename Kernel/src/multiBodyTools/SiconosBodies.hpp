@@ -77,6 +77,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SiconosBodies);
+TYPEDEF_SPTR(SiconosBodies)
 
 #endif // SiconosBodies_hpp

@@ -35,6 +35,6 @@ typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::const_iterator Co
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<InteractionsIterator, bool> CheckInsertInteraction;
 
-TYPEDEF_SPTR(InteractionsSet);
+TYPEDEF_SPTR(InteractionsSet)
 
 #endif

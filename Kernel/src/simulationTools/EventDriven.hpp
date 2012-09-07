@@ -194,5 +194,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-DEFINE_SPTR(EventDriven);
+DEFINE_SPTR(EventDriven)
 #endif // EVENTDRIVEN_H

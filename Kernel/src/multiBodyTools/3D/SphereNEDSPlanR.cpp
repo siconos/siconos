@@ -60,4 +60,4 @@ void SphereNEDSPlanR::computeh(const double time, Interaction& inter)
   _Nc->setValue(0, n1);
   _Nc->setValue(1, n2);
   _Nc->setValue(2, n3);
-};
+}

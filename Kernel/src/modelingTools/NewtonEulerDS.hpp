@@ -563,6 +563,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(NewtonEulerDS);
+TYPEDEF_SPTR(NewtonEulerDS)
 
 #endif // NEWTONEULERNLDS_H

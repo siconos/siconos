@@ -152,4 +152,4 @@ void LinearSMCOT2::actuate()
   _simulPred->advanceToEvent();
 }
 
-AUTO_REGISTER_ACTUATOR(LINEAR_SMC_OT2, LinearSMCOT2);
+AUTO_REGISTER_ACTUATOR(LINEAR_SMC_OT2, LinearSMCOT2)

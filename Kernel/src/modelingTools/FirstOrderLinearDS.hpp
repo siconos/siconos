@@ -363,6 +363,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderLinearDS);
+TYPEDEF_SPTR(FirstOrderLinearDS)
 
 #endif // FOLINEARDS_H

@@ -66,9 +66,9 @@ More documentation on smart pointers and reference counting:
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-namespace SharedPointer {};
-namespace SharedPointerConst {};
-namespace SharedArray {};
+namespace SharedPointer {}
+namespace SharedPointerConst {}
+namespace SharedArray {}
 
 /** \namespace SP Namespace for Siconos smart pointers : memory
     pointed by a Siconos smart pointers is automaticaly
@@ -101,7 +101,7 @@ struct nullDeleter
   namespace SharedPointer \
   { \
     typedef SPtr##X X; \
-  }; \
+  } \
   namespace SharedPointerConst \
   { \
     typedef SPtrConst##X X;\
@@ -123,12 +123,12 @@ struct nullDeleter
   { \
     boost::shared_ptr<X> px(&x, nullDeleter()); \
     return px; \
-  }; \
+  } \
   inline SPtrConst##X create##SPtrConst##X(const X &x) \
   { \
     boost::shared_ptr<const X> px(&x, nullDeleter()); \
     return px; \
-  } ;\
+  } \
   NAME_SPACE_SPTR(X)
 
 #define TYPEDEF_SAPTR(X) \
@@ -151,7 +151,7 @@ struct nullDeleter
   namespace SharedPointer                        \
   {                                              \
     typedef SPtr##N N;                           \
-  };                                             \
+  }                                              \
   namespace SharedPointerConst                   \
   {                                              \
     typedef SPtrConst##N N;                      \
@@ -164,60 +164,56 @@ struct nullDeleter
   {                                                        \
     boost::shared_ptr<X<Y> > px(&x, nullDeleter());        \
     return px;                                             \
-  };                                                       \
+  }                                                        \
   inline SPtrConst##N create##SPtrConst##N(const X<Y> &x)  \
   {                                                        \
     boost::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
     return px;                                             \
-  } ;                                                      \
+  }                                                        \
   NAME_SPACE_TPL1_SPTR(N,X,Y)
 
 
 /* *SPtr types definitions, outside class headers because of some race
    conditions */
 
-DEFINE_SPTR(BlockCSRMatrix);
+DEFINE_SPTR(BlockCSRMatrix)
 
-DEFINE_SPTR(DynamicalSystemXML);
+DEFINE_SPTR(DynamicalSystemXML)
 
-DEFINE_SPTR(Interaction);
-DEFINE_SPTR(InteractionXML);
+DEFINE_SPTR(Interaction)
+DEFINE_SPTR(InteractionXML)
 
-DEFINE_SPTR(Model);
-
-
-DEFINE_SPTR(NonSmoothDynamicalSystemXML);
-DEFINE_SPTR(NonSmoothDynamicalSystem);
-
-DEFINE_SPTR(NonSmoothLawXML);
-
-DEFINE_SPTR(OneStepNSProblem);
-DEFINE_SPTR(OneStepNSProblemXML);
-
-DEFINE_SPTR(OneStepIntegrator);
-DEFINE_SPTR(OneStepIntegratorXML);
-
-DEFINE_SPTR(Relation);
-DEFINE_SPTR(RelationXML);
-
-DEFINE_SPTR(Simulation);
-DEFINE_SPTR(SimulationXML);
-
-DEFINE_SPTR(LCP);
+DEFINE_SPTR(Model)
 
 
+DEFINE_SPTR(NonSmoothDynamicalSystemXML)
+DEFINE_SPTR(NonSmoothDynamicalSystem)
 
+DEFINE_SPTR(NonSmoothLawXML)
 
+DEFINE_SPTR(OneStepNSProblem)
+DEFINE_SPTR(OneStepNSProblemXML)
 
-DEFINE_SPTR(MixedComplementarityConditionNSL);
-TYPEDEF_SPTR(MixedLinearComplementarityProblem);
+DEFINE_SPTR(OneStepIntegrator)
+DEFINE_SPTR(OneStepIntegratorXML)
 
-DEFINE_SPTR(TimeDiscretisationXML);
-DEFINE_SPTR(TimeDiscretisation);
+DEFINE_SPTR(Relation)
+DEFINE_SPTR(RelationXML)
 
-TYPEDEF_SAPTR(integer);
-TYPEDEF_SPTR(integer);
-TYPEDEF_SAPTR(doublereal);
-TYPEDEF_SPTR(doublereal);
+DEFINE_SPTR(Simulation)
+DEFINE_SPTR(SimulationXML)
+
+DEFINE_SPTR(LCP)
+
+DEFINE_SPTR(MixedComplementarityConditionNSL)
+TYPEDEF_SPTR(MixedLinearComplementarityProblem)
+
+DEFINE_SPTR(TimeDiscretisationXML)
+DEFINE_SPTR(TimeDiscretisation)
+
+TYPEDEF_SAPTR(integer)
+TYPEDEF_SPTR(integer)
+TYPEDEF_SAPTR(doublereal)
+TYPEDEF_SPTR(doublereal)
 
 #endif /* SiconosPointers_hpp */

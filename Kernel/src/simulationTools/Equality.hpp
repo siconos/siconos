@@ -114,6 +114,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Equality);
+TYPEDEF_SPTR(Equality)
 
 #endif // Equality_H

@@ -96,7 +96,7 @@ public:
 
 };
 
-DEFINE_SPTR(Hashed);
+DEFINE_SPTR(Hashed)
 
 typedef boost::unordered_multiset < SP::Hashed,
         boost::hash<SP::Hashed> > space_hash;
@@ -104,7 +104,7 @@ typedef boost::unordered_multiset < SP::Hashed,
 typedef ublas::matrix < FTime, ublas::column_major,
         std::vector<FTime> > FMatrix;
 
-TYPEDEF_SPTR(FMatrix);
+TYPEDEF_SPTR(FMatrix)
 
 class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
 {

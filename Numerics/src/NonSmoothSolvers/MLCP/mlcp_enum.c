@@ -177,7 +177,10 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 {
   int nbSol = 0;
   if (problem->blocksLine)
-    return mlcp_enum_Block(problem, z, w, info, options);
+  {
+    mlcp_enum_Block(problem, z, w, info, options);
+    return;
+  }
   double tol ;
   double * workingFloat = options->dWork;
   int * workingInt = options->iWork;

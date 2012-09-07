@@ -100,5 +100,5 @@ public:
 };
 
 
-TYPEDEF_SPTR(PrismaticJointR);
+TYPEDEF_SPTR(PrismaticJointR)
 #endif

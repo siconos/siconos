@@ -39,4 +39,4 @@ public:
 
 #endif
 
-TYPEDEF_SPTR(BulletTimeStepping);
+TYPEDEF_SPTR(BulletTimeStepping)

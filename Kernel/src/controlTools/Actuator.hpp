@@ -45,7 +45,7 @@ typedef Sensors::iterator SensorsIterator;
 /** Return-type for Actuators insertion. */
 typedef std::pair<SensorsIterator, bool> SensorsCheckInsert;
 
-TYPEDEF_SPTR(Sensors);
+TYPEDEF_SPTR(Sensors)
 
 /** Actuators Base Class
 

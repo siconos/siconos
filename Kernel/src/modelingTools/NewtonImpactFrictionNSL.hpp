@@ -152,5 +152,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-DEFINE_SPTR(NewtonImpactFrictionNSL);
+DEFINE_SPTR(NewtonImpactFrictionNSL)
 #endif // NewtonImpactFrictionNSL_H

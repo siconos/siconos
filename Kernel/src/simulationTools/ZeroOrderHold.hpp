@@ -317,5 +317,5 @@ public:
 
 };
 
-//TYPEDEF_SPTR(ZeroOrderHold);
+//TYPEDEF_SPTR(ZeroOrderHold)
 #endif // ZEROORDERHOLD_H

@@ -62,7 +62,7 @@ public:
 
 };
 
-TYPEDEF_SPTR(Disk);
+TYPEDEF_SPTR(Disk)
 
 #endif /* Disk_H */
 

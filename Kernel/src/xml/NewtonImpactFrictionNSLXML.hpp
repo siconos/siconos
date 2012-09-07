@@ -137,6 +137,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(NewtonImpactFrictionNSLXML);
+TYPEDEF_SPTR(NewtonImpactFrictionNSLXML)
 
 #endif

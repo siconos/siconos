@@ -298,5 +298,5 @@ public:
     return xmlHasProp(jacobianfxNode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
 };
-DEFINE_SPTR(FirstOrderNonLinearDSXML);
+DEFINE_SPTR(FirstOrderNonLinearDSXML)
 #endif

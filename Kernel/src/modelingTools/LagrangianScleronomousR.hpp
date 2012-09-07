@@ -203,6 +203,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianScleronomousR);
+TYPEDEF_SPTR(LagrangianScleronomousR)
 
 #endif // LAGRANGIANRELATION_H

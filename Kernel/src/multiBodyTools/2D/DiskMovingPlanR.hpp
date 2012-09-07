@@ -132,7 +132,7 @@ public:
 
 };
 
-TYPEDEF_SPTR(DiskMovingPlanR);
+TYPEDEF_SPTR(DiskMovingPlanR)
 
 #undef COMPUTE
 

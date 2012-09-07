@@ -257,6 +257,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianRheonomousR);
+TYPEDEF_SPTR(LagrangianRheonomousR)
 
 #endif

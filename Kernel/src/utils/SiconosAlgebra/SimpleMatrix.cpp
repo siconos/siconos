@@ -82,7 +82,7 @@ using std::endl;
 SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
-};
+}
 
 SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
 {

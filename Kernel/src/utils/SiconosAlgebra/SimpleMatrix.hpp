@@ -30,7 +30,7 @@ const std::string transpose = "transpose";
 
 /** A STL vector of int */
 typedef std::vector<int> VInt;
-TYPEDEF_SPTR(VInt);
+TYPEDEF_SPTR(VInt)
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *

@@ -32,7 +32,7 @@ BulletR::BulletR(SP::btManifoldPoint point, SP::btPersistentManifold contactMani
   _contactPoints(point),
   _contactManifold(contactManifold)
 {
-};
+}
 
 void BulletR::computeh(const double time, Interaction& inter)
 {
@@ -86,4 +86,4 @@ void BulletR::computeh(const double time, Interaction& inter)
   DEBUG_PRINT("end of computeh\n");
 
 
-};
+}

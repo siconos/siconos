@@ -70,6 +70,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereLDSPlanR);
+TYPEDEF_SPTR(SphereLDSPlanR)
 
 #endif /* SphereLDSPlanR_h */

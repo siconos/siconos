@@ -36,7 +36,7 @@ LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
   _numerics_problem.reset(new LinearComplementarityProblem);
 
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
-};
+}
 
 LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
   LinearOSNS(newNewNumericsSolverId, "LCP", newId)
@@ -46,7 +46,7 @@ LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
 
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 
-};
+}
 
 
 int LCP::compute(double time)

@@ -28,7 +28,7 @@
 
 #define SICONOS_LCP_DEFAULT_SOLVER "Lemke"
 
-TYPEDEF_SPTR(LinearComplementarityProblem);
+TYPEDEF_SPTR(LinearComplementarityProblem)
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
  *  \author SICONOS Development Team - copyright INRIA

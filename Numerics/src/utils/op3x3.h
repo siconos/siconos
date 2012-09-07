@@ -243,7 +243,7 @@ static inline void cpytr3x3(double* a, double* b)
   *b02 = *a20;
   *b12 = *a21;
   *b22 = *a22;
-};
+}
 
 /** matrix vector multiplication
  * \param[in] a a[9]
@@ -503,7 +503,7 @@ static inline double dot3(double* a, double* b)
   r += *a++ * * b++;
   r += *a * *b;
   return r;
-};
+}
 
 /** cross product : c <- a x b
  * \param[in] a double a[3]

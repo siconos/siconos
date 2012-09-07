@@ -275,5 +275,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-TYPEDEF_SPTR(NewtonEulerR);
+TYPEDEF_SPTR(NewtonEulerR)
 #endif // NEWTONEULERRELATION_H

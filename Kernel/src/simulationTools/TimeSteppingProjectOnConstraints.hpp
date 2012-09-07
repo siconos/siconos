@@ -168,7 +168,7 @@ public:
 
 };
 
-DEFINE_SPTR(TimeSteppingProjectOnConstraints);
+DEFINE_SPTR(TimeSteppingProjectOnConstraints)
 
 #endif // TIMESTEPPINGPROJECTONCONSTRAINTS_H
 

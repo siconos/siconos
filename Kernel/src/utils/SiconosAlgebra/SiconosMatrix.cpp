@@ -33,28 +33,28 @@ BlockIterator1 SiconosMatrix::begin()
   SiconosMatrixException::selfThrow("SiconosMatrix::begin(): reserved to BlockMatrix");
   BlockIterator1 it;
   return it;
-};
+}
 
 BlockIterator1 SiconosMatrix::end()
 {
   SiconosMatrixException::selfThrow("SiconosMatrix::end(): reserved to BlockMatrix");
   BlockIterator1 it;
   return it;
-};
+}
 
 ConstBlockIterator1 SiconosMatrix::begin() const
 {
   SiconosMatrixException::selfThrow("SiconosMatrix::begin(): reserved to BlockMatrix");
   ConstBlockIterator1 it;
   return it;
-};
+}
 
 ConstBlockIterator1 SiconosMatrix::end() const
 {
   SiconosMatrixException::selfThrow("SiconosMatrix::end(): reserved to BlockMatrix");
   ConstBlockIterator1 it;
   return it;
-};
+}
 
 const SP::Index SiconosMatrix::tabRow() const
 {

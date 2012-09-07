@@ -85,12 +85,12 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1)
 {
   (*_allNSProblems).resize(SICONOS_OSNSP_ED_NUMBER);
-};
+}
 
 EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1)
 {
   (*_allNSProblems).resize(nb);
-};
+}
 
 double EventDriven::TOL_ED = DEFAULT_TOL_ED;
 

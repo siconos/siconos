@@ -30,7 +30,7 @@
 #include "Topology.hpp"
 #include "BlockCSRMatrix.hpp"
 
-TYPEDEF_SPTR(NumericsMatrix);
+TYPEDEF_SPTR(NumericsMatrix)
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -315,6 +315,6 @@ public:
   void display() const;
 };
 
-DEFINE_SPTR(OSNSMatrix);
+DEFINE_SPTR(OSNSMatrix)
 
 #endif

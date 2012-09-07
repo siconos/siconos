@@ -114,6 +114,6 @@ public:
   };
 };
 
-TYPEDEF_SPTR(PluggedObject);
+TYPEDEF_SPTR(PluggedObject)
 
 #endif

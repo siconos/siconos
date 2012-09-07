@@ -167,5 +167,5 @@ public:
   virtual void run();
 };
 
-DEFINE_SPTR(ControlDynamicalSystem);
+DEFINE_SPTR(ControlDynamicalSystem)
 #endif // CONTROLDYNAMICALSYSTEM_H

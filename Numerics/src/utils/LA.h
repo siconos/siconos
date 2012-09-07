@@ -172,7 +172,7 @@ static inline double DNRM2(int N, double* X, int INCX)
   assert(C_INCX > 0);
   assert(X != NULL);
   return BLAS_NAME(dnrm2)(INTEGER(C_N), X, INTEGER(C_INCX));
-};
+}
 
 
 /* DCOPY - a vector, x, to a vector, y
@@ -319,7 +319,7 @@ static inline void DGELS(int M, int N, int NRHS, double* A, int LDA, double* B, 
 {
   *INFO = 1;
   fprintf(stderr, "DGELS not found. Please check you LAPACK/ATLAS installation.\n");
-  fprintf(stderr, "%p", WORK);
+  fprintf(stderr, "%p", (void *)WORK);
   exit(EXIT_FAILURE);
 }
 #endif

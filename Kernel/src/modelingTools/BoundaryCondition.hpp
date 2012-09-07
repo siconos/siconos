@@ -25,7 +25,7 @@
 #include "SiconosVector.hpp"
 #include "PluggedObject.hpp"
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
-TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int);
+TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int)
 
 /** \class BoundaryCondition
  *  \brief This class models simple boundary conditions for
@@ -126,5 +126,5 @@ protected:
   //   SP::DynamicalSystem _DS;
 };
 
-TYPEDEF_SPTR(BoundaryCondition);
+TYPEDEF_SPTR(BoundaryCondition)
 #endif // BOUNDARYCONDITION_HPP

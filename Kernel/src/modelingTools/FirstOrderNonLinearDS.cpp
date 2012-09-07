@@ -259,7 +259,7 @@ void FirstOrderNonLinearDS::preparStep()
 {
   _xp->zero();
   _r->zero();
-};
+}
 bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
   DynamicalSystem::checkDynamicalSystem();

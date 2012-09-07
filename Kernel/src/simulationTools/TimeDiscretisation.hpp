@@ -231,6 +231,6 @@ public:
   void saveTimeDiscretisationToXML();
 };
 
-//DEFINE_SPTR(TimeDiscretisation);
+//DEFINE_SPTR(TimeDiscretisation)
 
 #endif // TIMEDISCRETISATION_H

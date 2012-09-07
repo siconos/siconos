@@ -148,5 +148,5 @@ public:
 
 };
 
-TYPEDEF_SPTR(MLCPProjectOnConstraints);
+TYPEDEF_SPTR(MLCPProjectOnConstraints)
 #endif // MLCPProjectOnConstraints_H

@@ -28,7 +28,7 @@
 
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */
 typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
-TYPEDEF_SPTR(FrictionContactProblem);
+TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
@@ -177,6 +177,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FrictionContact);
+TYPEDEF_SPTR(FrictionContact)
 
 #endif // FrictionContact_H

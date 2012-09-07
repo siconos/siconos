@@ -225,5 +225,5 @@ public:
   void display() const;
 
 };
-DEFINE_SPTR(Sensor);
+DEFINE_SPTR(Sensor)
 #endif

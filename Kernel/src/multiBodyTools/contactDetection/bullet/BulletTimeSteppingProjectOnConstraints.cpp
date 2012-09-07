@@ -42,6 +42,6 @@ void BulletTimeSteppingProjectOnConstraints::updateWorldFromDS()
     dsg.bundle(*dsi)->accept(up);
   }
 
-};
+}
 
 

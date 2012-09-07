@@ -73,7 +73,7 @@ public:
   void init(std::string);
 };
 
-TYPEDEF_SPTR(Disks);
+TYPEDEF_SPTR(Disks)
 
 #endif //Disks_h
 

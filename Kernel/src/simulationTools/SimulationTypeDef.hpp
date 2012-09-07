@@ -69,7 +69,7 @@ typedef std::map<SP::DynamicalSystem, double> MapOfDouble;
 
 /** Map of double; key = the related DS */
 typedef std::map<SP::DynamicalSystem, unsigned  int> DS_int;
-TYPEDEF_SPTR(DS_int);
+TYPEDEF_SPTR(DS_int)
 
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
@@ -132,11 +132,11 @@ typedef std::vector< SP::InteractionsSet > VectorOfSetOfInteractions;
 
 /** Map to link SP::Interaction with an int - Used for example in interactionBlocksPositions for OSNSMatrix */
 typedef std::map< SP::Interaction , unsigned int > Interaction_int;
-TYPEDEF_SPTR(Interaction_int);
+TYPEDEF_SPTR(Interaction_int)
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
-TYPEDEF_SPTR(IndexInt);
+TYPEDEF_SPTR(IndexInt)
 
 
 /** properties that are always needed */
@@ -165,7 +165,7 @@ struct GraphProperties
   ACCEPT_SERIALIZATION(GraphProperties);
 };
 
-TYPEDEF_SPTR(GraphProperties);
+TYPEDEF_SPTR(GraphProperties)
 
 
 /** the graph structure :
@@ -187,7 +187,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(DynamicalSystems,
-                           ((Vertex, SP::OneStepIntegrator, OSI))); // note : OSI not used at the moment
+                           ((Vertex, SP::OneStepIntegrator, OSI))) // note : OSI not used at the moment
   // always needed -> SystemProperties
 
   /** serialization hooks */
@@ -207,7 +207,7 @@ struct InteractionsGraph : public _InteractionsGraph
   INSTALL_GRAPH_PROPERTIES(Interactions,
                            ((Vertex, SP::SimpleMatrix, blockProj))        // ProjectOnConstraint
                            ((Edge, SP::SimpleMatrix, upper_blockProj))    // idem
-                           ((Edge, SP::SimpleMatrix, lower_blockProj)));  // idem
+                           ((Edge, SP::SimpleMatrix, lower_blockProj)))  // idem
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
   void eraseProperties(_InteractionsGraph::VDescriptor vd)
@@ -226,8 +226,8 @@ struct InteractionsGraph : public _InteractionsGraph
   ACCEPT_SERIALIZATION(InteractionsGraph);
 };
 
-TYPEDEF_SPTR(DynamicalSystemsGraph);
-TYPEDEF_SPTR(InteractionsGraph);
+TYPEDEF_SPTR(DynamicalSystemsGraph)
+TYPEDEF_SPTR(InteractionsGraph)
 
 
 
@@ -308,7 +308,7 @@ const int SICONOS_NB_OSNSP_TSP = 2;
 #define TD_EVENT 1
 #define NS_EVENT 2
 
-TYPEDEF_SPTR(OSISet);
-TYPEDEF_SPTR(OneStepNSProblems);
+TYPEDEF_SPTR(OSISet)
+TYPEDEF_SPTR(OneStepNSProblems)
 
 #endif

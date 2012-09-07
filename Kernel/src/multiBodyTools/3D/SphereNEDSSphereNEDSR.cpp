@@ -70,4 +70,4 @@ void SphereNEDSSphereNEDSR::computeh(const double time, Interaction& inter)
   //_Pc->display();
   //std::cout<<"_Nc:\n";
   //_Nc->display();
-};
+}

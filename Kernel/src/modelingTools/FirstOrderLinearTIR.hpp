@@ -349,6 +349,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderLinearTIR);
+TYPEDEF_SPTR(FirstOrderLinearTIR)
 
 #endif

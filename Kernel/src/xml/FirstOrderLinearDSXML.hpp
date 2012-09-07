@@ -160,5 +160,5 @@ public:
   }
 
 };
-DEFINE_SPTR(FirstOrderLinearDSXML);
+DEFINE_SPTR(FirstOrderLinearDSXML)
 #endif

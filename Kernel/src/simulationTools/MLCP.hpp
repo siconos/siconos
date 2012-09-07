@@ -180,5 +180,5 @@ public:
 
 };
 
-TYPEDEF_SPTR(MLCP);
+TYPEDEF_SPTR(MLCP)
 #endif // MLCP_H

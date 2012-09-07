@@ -61,7 +61,7 @@ CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)
     }
   }
   return NULL;
-};
+}
 
 /* Dump a unit test as a cmake test */
 void CdashDumpTest(CppUnit::Test *test, char* myname)
@@ -72,7 +72,7 @@ void CdashDumpTest(CppUnit::Test *test, char* myname)
   std::cout << "ADD_CPPUNIT_TEST(" << test->getName() << " "
             << EMULATOR << " " << myname << WRAPPER << " " << test->getName()
             << ")" << std::endl;
-};
+}
 
 /* Dump the test suite */
 int CdashDump(CppUnit::Test *tests, char* myname)
@@ -102,7 +102,7 @@ int CdashDump(CppUnit::Test *tests, char* myname)
 
   return count; // A verifier
 
-};
+}
 
 
 /* <test executable> --cdash-prepare */

@@ -335,6 +335,6 @@ public:
 
 };
 
-DEFINE_SPTR(Topology);
+DEFINE_SPTR(Topology)
 
 #endif // TOPOLOGY_H

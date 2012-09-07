@@ -136,6 +136,6 @@ typedef DynamicalSystemsSet::const_iterator ConstDSIterator;
     failed. */
 typedef std::pair<DSIterator, bool> CheckInsertDS;
 
-TYPEDEF_SPTR(DynamicalSystemsSet);
+TYPEDEF_SPTR(DynamicalSystemsSet)
 
 #endif

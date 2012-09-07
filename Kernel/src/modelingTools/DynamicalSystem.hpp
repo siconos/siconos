@@ -877,6 +877,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(DynamicalSystem);
+TYPEDEF_SPTR(DynamicalSystem)
 
 #endif // DYNAMICALSYSTEM_H

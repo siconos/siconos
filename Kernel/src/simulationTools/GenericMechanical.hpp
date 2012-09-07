@@ -28,7 +28,7 @@
 #include "SiconosNumerics.h"
 /** Pointer to function of the type used for drivers for GenericMechanical problems in Numerics */
 
-TYPEDEF_SPTR(GenericMechanicalProblem);
+TYPEDEF_SPTR(GenericMechanicalProblem)
 
 /** Formalization and Resolution of a generic mechanical problem: It mixes bilateral equality, complementarity, impact and friction problems.
  *
@@ -113,6 +113,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(GenericMechanical);
+TYPEDEF_SPTR(GenericMechanical)
 
 #endif // GenericMechanical_H

@@ -140,6 +140,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianCompliantR);
+TYPEDEF_SPTR(LagrangianCompliantR)
 
 #endif

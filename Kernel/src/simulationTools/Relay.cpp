@@ -38,7 +38,7 @@ Relay::Relay(const int newNumericsSolverId , const std::string& newId):
   relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, newNumericsSolverId);
 
 
-};
+}
 /* nslaw dispatch on bounds */
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor

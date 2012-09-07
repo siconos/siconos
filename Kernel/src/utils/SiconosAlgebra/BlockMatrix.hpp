@@ -425,6 +425,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-//DEFINE_SPTR(BlockMatrix);
+//DEFINE_SPTR(BlockMatrix)
 
 #endif

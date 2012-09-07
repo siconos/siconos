@@ -68,5 +68,5 @@ public:
 
 };
 
-TYPEDEF_SPTR(CircularR);
+TYPEDEF_SPTR(CircularR)
 #endif /* CircularR_h */

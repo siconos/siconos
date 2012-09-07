@@ -184,7 +184,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
   clear();
-};
+}
 
 // === DynamicalSystems management ===
 
@@ -258,7 +258,7 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 void NonSmoothDynamicalSystem::clear()
 {
   _topology->clear();
-};
+}
 
 void NonSmoothDynamicalSystem::setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool isControlInteraction)
 {
@@ -271,4 +271,4 @@ void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const in
   vd = _topology->insertInteraction(inter);
   if (isControlInteraction == 1)
     setControlProperty(vd, true);
-};
+}

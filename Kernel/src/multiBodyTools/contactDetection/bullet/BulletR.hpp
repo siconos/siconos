@@ -46,6 +46,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(BulletR);
+TYPEDEF_SPTR(BulletR)
 
 #endif

@@ -182,5 +182,5 @@ public:
   virtual void update();
 
 };
-DEFINE_SPTR(Event);
+DEFINE_SPTR(Event)
 #endif // Event_H

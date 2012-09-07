@@ -41,8 +41,8 @@ typedef std::set<SP::OneStepNSProblemXML> SetOfOSNSPBXML;
 /** iterator through  set of OneStepNSProblemXML*/
 typedef SetOfOSNSPBXML::iterator SetOfOSNSPBXMLIt;
 
-TYPEDEF_SPTR(SetOfOSIXML);
-TYPEDEF_SPTR(SetOfOSNSPBXML);
+TYPEDEF_SPTR(SetOfOSIXML)
+TYPEDEF_SPTR(SetOfOSNSPBXML)
 
 /** XML management for Simulation
  *

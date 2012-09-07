@@ -92,6 +92,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereLDS);
+TYPEDEF_SPTR(SphereLDS)
 
 #endif /* SphereLDS_h */

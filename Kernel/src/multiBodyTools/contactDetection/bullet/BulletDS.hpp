@@ -100,7 +100,7 @@ struct UpdateCollisionObject : public SiconosVisitor
 };
 
 
-TYPEDEF_SPTR(BulletDS);
+TYPEDEF_SPTR(BulletDS)
 
 #endif
 

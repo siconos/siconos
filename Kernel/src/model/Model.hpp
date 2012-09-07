@@ -32,7 +32,7 @@
 #include "SiconosSerialization.hpp"
 
 class Simulation;
-DEFINE_SPTR(SiconosModelXML);
+DEFINE_SPTR(SiconosModelXML)
 
 /** Model: object that links the NonSmoothDynamicalSystem with a
  * Simulation.

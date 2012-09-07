@@ -391,5 +391,5 @@ public:
 
 };
 
-TYPEDEF_SPTR(UnitaryRelation);
+TYPEDEF_SPTR(UnitaryRelation)
 #endif // UNITARYRELATION_H

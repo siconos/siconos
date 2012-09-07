@@ -1030,6 +1030,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianDS);
+TYPEDEF_SPTR(LagrangianDS)
 
 #endif // LAGRANGIANNLDS_H

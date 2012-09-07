@@ -317,6 +317,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderLinearR);
+TYPEDEF_SPTR(FirstOrderLinearR)
 
 #endif

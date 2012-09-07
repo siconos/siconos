@@ -42,6 +42,6 @@ void BulletTimeStepping::updateWorldFromDS()
     dsg.bundle(*dsi)->accept(up);
   }
 
-};
+}
 
 

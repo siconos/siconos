@@ -238,5 +238,5 @@ public:
   void display() const;
 
 };
-TYPEDEF_SPTR(LagrangianR);
+TYPEDEF_SPTR(LagrangianR)
 #endif // LAGRANGIANRELATION_H

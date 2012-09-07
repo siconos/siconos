@@ -24,7 +24,7 @@
 
 BulletFrom1DLocalFrameR::BulletFrom1DLocalFrameR(SP::btManifoldPoint point) : NewtonEulerFrom1DLocalFrameR(), _contactPoints(point)
 {
-};
+}
 
 void BulletFrom1DLocalFrameR::computeh(const double time, Interaction& inter)
 {
@@ -42,4 +42,4 @@ void BulletFrom1DLocalFrameR::computeh(const double time, Interaction& inter)
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
   (*nc())(2) = _contactPoints->m_normalWorldOnB[2];;
 
-};
+}

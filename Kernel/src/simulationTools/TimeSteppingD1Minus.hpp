@@ -117,6 +117,6 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-DEFINE_SPTR(TimeSteppingD1Minus);
+DEFINE_SPTR(TimeSteppingD1Minus)
 
 #endif // TIMESTEPPINGD1MINUS_H

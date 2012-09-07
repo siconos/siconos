@@ -112,7 +112,7 @@ public:
   ACCEPT_STD_VISITORS();
 };
 
-DEFINE_SPTR(NewtonImpactNSL);
+DEFINE_SPTR(NewtonImpactNSL)
 
 
 #endif // NewtonImpactNSL_H

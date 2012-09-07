@@ -137,6 +137,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderType2R);
+TYPEDEF_SPTR(FirstOrderType2R)
 
 #endif

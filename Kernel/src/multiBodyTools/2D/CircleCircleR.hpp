@@ -59,6 +59,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(CircleCircleR);
+TYPEDEF_SPTR(CircleCircleR)
 
 #endif /* CircleCircleR_h */

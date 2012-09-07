@@ -59,6 +59,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereLDSSphereLDSR);
+TYPEDEF_SPTR(SphereLDSSphereLDSR)
 
 #endif /* SphereLDSSphereLDSR_h */

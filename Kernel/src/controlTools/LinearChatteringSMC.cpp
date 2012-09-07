@@ -102,4 +102,4 @@ void LinearChatteringSMC::actuate()
   _indx++;
 }
 
-AUTO_REGISTER_ACTUATOR(LINEAR_CHATTERING_SMC, LinearChatteringSMC);
+AUTO_REGISTER_ACTUATOR(LINEAR_CHATTERING_SMC, LinearChatteringSMC)
