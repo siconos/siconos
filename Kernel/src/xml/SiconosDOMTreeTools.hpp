@@ -116,7 +116,7 @@ public:
       xmlFree(tmp);
       string2Vector(vOut, outputVector);
     }
-  };
+  }
 
   /** Return a SimpleMatrix computed from a siconos matrix node
   *   \param siconosMatrixNode : the matrix node you want to get in SimpleMatrix type
@@ -175,7 +175,7 @@ public:
     T value;
     iss >> value;
     return value;
-  };
+  }
 
   /** Return the string content of the node node
   *   \param node : the node you want the string content
@@ -199,7 +199,7 @@ public:
     T value;
     iss >> value;
     return value;
-  };
+  }
 
   /** Change values of a siconosVectorNode from a SiconosVector
   * if the vector is greater than VectorMaxSize, it will be saved in an external file
@@ -444,7 +444,7 @@ private :
       pos2 = strOut.find_first_of(' ', pos1);
       pos1 = strOut.find_first_not_of(' ', pos2);
     }
-  };
+  }
 
   /** Return a SiconosVector computed from a row of a matrix
   *   \param const xmlNodePtr  matrixRowNode : the matrix row node you want to get in SiconosVector type

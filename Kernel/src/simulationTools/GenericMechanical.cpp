@@ -93,7 +93,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
       SP::NewtonImpactFrictionNSL nsLaw =
-        boost::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();

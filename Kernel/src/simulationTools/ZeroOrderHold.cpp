@@ -143,11 +143,11 @@ void ZeroOrderHold::initialize()
     dsType = Type::value(**itDS);
     indxIter = 0;
     DynamicalSystemsGraph::AVIterator avi, aviend;
-    for (boost::tie(avi, aviend) = DSG0.adjacent_vertices(DSG0.descriptor(*itDS));
+    for (cpp11ns::tie(avi, aviend) = DSG0.adjacent_vertices(DSG0.descriptor(*itDS));
          avi != aviend; ++avi)
     {
       DynamicalSystemsGraph::EDescriptor ed1, ed2;
-      boost::tie(ed1, ed2) = DSG0.edges(DSG0.descriptor(*itDS), *avi);
+      cpp11ns::tie(ed1, ed2) = DSG0.edges(DSG0.descriptor(*itDS), *avi);
 
       if (IG0.properties(IG0.descriptor(DSG0.bundle(ed1))).forControl) // the integration is for control
       {
@@ -163,7 +163,7 @@ void ZeroOrderHold::initialize()
           initIntegrators(**itDS, true);
           if (dsType == Type::FirstOrderLinearTIDS)
           {
-            FirstOrderLinearTIDS& d = *boost::static_pointer_cast<FirstOrderLinearTIDS>(*itDS);
+            FirstOrderLinearTIDS& d = *cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(*itDS);
             if (_constH)
             {
               computePhi(d);
@@ -172,7 +172,7 @@ void ZeroOrderHold::initialize()
           }
           else if (dsType == Type::FirstOrderLinearDS)
           {
-            FirstOrderLinearDS& d = *boost::static_pointer_cast<FirstOrderLinearDS>(*itDS);
+            FirstOrderLinearDS& d = *cpp11ns::static_pointer_cast<FirstOrderLinearDS>(*itDS);
             if (_constH)
             {
               computePhi(d);
@@ -197,7 +197,7 @@ void ZeroOrderHold::initialize()
       initIntegrators(**itDS, false);
       if (dsType == Type::FirstOrderLinearTIDS)
       {
-        FirstOrderLinearTIDS& d = *boost::static_pointer_cast<FirstOrderLinearTIDS>(*itDS);
+        FirstOrderLinearTIDS& d = *cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(*itDS);
         if (_constH)
         {
           computePhi(d);
@@ -657,7 +657,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
     {
       SP::SiconosVector lambda = inter->lambda(0);
       SP::SiconosMatrix C = rel->C();
-      SP::SiconosMatrix D = boost::static_pointer_cast<FirstOrderType2R>(rel)->D();
+      SP::SiconosMatrix D = cpp11ns::static_pointer_cast<FirstOrderType2R>(rel)->D();
       assert(lambda);
 
       if (D)
@@ -834,7 +834,7 @@ void ZeroOrderHold::updateState(const unsigned int level)
             // we have to find the control interaction
             DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
             DynamicalSystemsGraph::OEIterator oei, oeiend;
-            for (boost::tie(oei, oeiend) = DSG0.out_edges(DSG0.descriptor(*it)); oei != oeiend; ++oei)
+            for (cpp11ns::tie(oei, oeiend) = DSG0.out_edges(DSG0.descriptor(*it)); oei != oeiend; ++oei)
             {
               if (DSG0.properties(*oei).forControl)
               {

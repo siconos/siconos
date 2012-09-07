@@ -54,7 +54,7 @@ union MATRIX_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SiconosMatrix : public boost::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix : public cpp11ns::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
@@ -93,7 +93,7 @@ public:
   /** constructor from a shared ptr (for python)
    *  \param a SiconosMatrix shared ptr
    */
-  SiconosMatrix(boost::shared_ptr<SiconosMatrix> m)
+  SiconosMatrix(cpp11ns::shared_ptr<SiconosMatrix> m)
   {
     shared_from_this() = m;
   }

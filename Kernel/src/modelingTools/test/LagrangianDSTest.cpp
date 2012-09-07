@@ -228,8 +228,8 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5B : ", ds->number() == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", boost::static_pointer_cast<LagrangianDS>(ds)->getNdof() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", boost::static_pointer_cast<LagrangianDS>(ds)->getMass() == (*mass), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", cpp11ns::static_pointer_cast<LagrangianDS>(ds)->getNdof() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", cpp11ns::static_pointer_cast<LagrangianDS>(ds)->getMass() == (*mass), true);
 
   map<string, bool> isPl = ds->getIsPlugin();
 
@@ -248,7 +248,7 @@ void LagrangianDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
   DynamicalSystem * ds(new LagrangianDS(tmpxml2));
-  SP::LagrangianDS copy =  boost::static_pointer_cast<LagrangianDS>(ds);
+  SP::LagrangianDS copy =  cpp11ns::static_pointer_cast<LagrangianDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
   ds->computeRhs(time);

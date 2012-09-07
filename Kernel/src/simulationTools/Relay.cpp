@@ -130,7 +130,7 @@ int Relay::compute(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
 

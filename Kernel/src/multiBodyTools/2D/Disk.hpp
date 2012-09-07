@@ -26,7 +26,7 @@
 
 #include "CircularDS.hpp"
 
-class Disk : public CircularDS, public boost::enable_shared_from_this<Disk>
+class Disk : public CircularDS, public cpp11ns::enable_shared_from_this<Disk>
 {
 private:
   /** serialization hooks

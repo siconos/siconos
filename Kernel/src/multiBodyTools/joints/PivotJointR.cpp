@@ -207,7 +207,7 @@ void PivotJointR::computeh(const double time, Interaction& inter)
   DSIterator it;
   SP::NewtonEulerDS lds;
   it = inter.dynamicalSystemsBegin();
-  lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
+  lds = cpp11ns::static_pointer_cast<NewtonEulerDS> (*it);
   if (lds != _d1)
   {
     printf("PivotJointR::computeh order of DS1 wrong.");
@@ -228,7 +228,7 @@ void PivotJointR::computeh(const double time, Interaction& inter)
   {
     /*check order of ds:*/
     it++;
-    lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
+    lds = cpp11ns::static_pointer_cast<NewtonEulerDS> (*it);
     if (lds != _d2)
     {
       printf("PivotJointR::computeh order of DS2 wrong.");

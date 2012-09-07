@@ -36,7 +36,7 @@
 
 class DynamicalSystem;
 
-class ControlDynamicalSystem : public boost::enable_shared_from_this<ControlDynamicalSystem>
+class ControlDynamicalSystem : public cpp11ns::enable_shared_from_this<ControlDynamicalSystem>
 {
 private:
   /** serialization hooks */

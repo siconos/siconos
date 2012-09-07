@@ -103,12 +103,12 @@ void MoreauProjectOnConstraintsOSI::initialize()
     Type::Siconos dsType = Type::value(**itDS);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS>(*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else
@@ -139,7 +139,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //         dsType == Type::LagrangianDS)
   //     {
 
-  //       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+  //       SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
   //       SP::SiconosVector vfree = d->workFree();
   //       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
   //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -161,7 +161,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //     }
   //     else if (dsType == Type::NewtonEulerDS)
   //     {
-  //       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+  //       SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
   //       SP::SiconosVector vfree = d->workFree();
   //       SP::SiconosMatrix T = d->T();
   //       SP::SiconosVector dotq = d->dotq();

@@ -983,7 +983,7 @@ public:
 
   /** set p[...] to zero
    */
-  void resetNonSmoothPart();
+  void resetAllNonSmoothPart();
 
   /** set p[...] to zero for a given level
    */

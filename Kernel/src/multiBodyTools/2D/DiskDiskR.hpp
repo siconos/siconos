@@ -27,7 +27,7 @@
 
 #include "CircularR.hpp"
 
-class DiskDiskR : public CircularR, public boost::enable_shared_from_this<DiskDiskR>
+class DiskDiskR : public CircularR, public cpp11ns::enable_shared_from_this<DiskDiskR>
 {
 private:
   /** serialization hooks

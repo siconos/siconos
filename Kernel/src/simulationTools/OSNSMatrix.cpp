@@ -40,7 +40,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   // Interactionin indexSet
   dim = 0;
   InteractionsGraph::VIterator vd, vdend;
-  for (boost::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (cpp11ns::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
@@ -96,7 +96,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
     dim += (*it)->getDim();
   }
   InteractionsGraph::VIterator vd, vdend;
-  for (boost::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (cpp11ns::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     indexSet->bundle(*vd)->setAbsolutePosition(dim);
     dim += indexSet->bundle(*vd)->getNonSmoothLawSize();
@@ -279,13 +279,13 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for (boost::tie(vi, viend) = indexSet->vertices();
+    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePosition();
 
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
@@ -295,7 +295,7 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for (boost::tie(ei, eiend) = indexSet->edges();
+    for (cpp11ns::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
       InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
@@ -322,11 +322,11 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
       assert(indexSet->properties(*ei).lower_block);
       assert(indexSet->properties(*ei).upper_block);
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet->properties(*ei).upper_block);
 
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet->properties(*ei).lower_block);
     }
@@ -386,11 +386,11 @@ void OSNSMatrix::fillDiagonal(SP::InteractionsGraph IG, bool update)
     // indexSets[level]) ===
 
     InteractionsGraph::VIterator ui,uiend;
-    for (boost::tie(ui,uiend)=URSet->vertices(); ui!=uiend; ++ui)
+    for (cpp11ns::tie(ui,uiend)=URSet->vertices(); ui!=uiend; ++ui)
     {
       SP::Interaction inter = URSet->bundle(*ui);
       pos = (*interactionBlocksPositions)[inter];
-      boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,pos,*(interactionBlocks[inter][inter]));
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,pos,*(interactionBlocks[inter][inter]));
     }
   }
   else // if storageType == 1
@@ -443,7 +443,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, 
 
       // Case 1: basic storage
       pos = (*DSBlocksPositions)[*itDS];
-      boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, pos, *(DSBlocks[(*itDS)->number()]));
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, pos, *(DSBlocks[(*itDS)->number()]));
     }
   }
   else // if storageType == 1
@@ -508,7 +508,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, SP::InteractionsGraph IG, M
         // Case 1: basic storage
         pos = (*DSBlocksPositions)[*itCol];
         col = ((*itRow).first)->absolutePosition();
-        boost::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, col, *(DSInteractionBlocks[*itCol][(*itRow).first]));
+        cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, col, *(DSInteractionBlocks[*itCol][(*itRow).first]));
       }
     }
 

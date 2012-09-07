@@ -43,7 +43,7 @@ DEFINE_SPTR(SiconosModelXML)
  *
  *
  */
-class Model : public boost::enable_shared_from_this<Model>
+class Model : public cpp11ns::enable_shared_from_this<Model>
 {
 private:
   /** current time of the simulation */

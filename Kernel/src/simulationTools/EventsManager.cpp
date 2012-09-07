@@ -144,7 +144,7 @@ bool EventsManager::hasEvent(SP::Event event) const
 
 bool EventsManager::hasNextEvent() const
 {
-  return (_nextEvent);
+  return (bool(_nextEvent));
 }
 
 double EventsManager::getTimeOfEvent(SP::Event event) const

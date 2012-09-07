@@ -29,7 +29,7 @@ using namespace RELATION;
 LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
   LagrangianR(relxml, LinearTIR)
 {
-  SP::LinearRXML folrXML = boost::static_pointer_cast<LinearRXML>(relxml);
+  SP::LinearRXML folrXML = cpp11ns::static_pointer_cast<LinearRXML>(relxml);
   // get matrices values. All are optional.
 
   if (folrXML->hasC())
@@ -156,10 +156,10 @@ void LagrangianLinearTIR::saveRelationToXML() const
   assert(_relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
-  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
-  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
-  (boost::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
+  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
+  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
+  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
+  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
 }
 
 LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)

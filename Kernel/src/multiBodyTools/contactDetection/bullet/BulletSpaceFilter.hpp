@@ -43,8 +43,8 @@ protected:
   */
   ACCEPT_SERIALIZATION(BulletSpaceFilter);
 
-  boost::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
-  boost::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
+  cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
+  cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
 
   SP::btCollisionWorld _collisionWorld;
   SP::btDefaultCollisionConfiguration _collisionConfiguration;
@@ -67,12 +67,12 @@ public:
     return _collisionWorld;
   };
 
-  boost::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
+  cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
   {
     return _staticObjects;
   };
 
-  boost::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
+  cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
   {
     return _staticShapes;
   };
@@ -92,14 +92,14 @@ struct ForCollisionWorld : public Question<SP::btCollisionWorld>
   ANSWER(BulletSpaceFilter, collisionWorld());
 };
 
-struct ForStaticObjects : public Question< boost::shared_ptr<std::vector<SP::btCollisionObject> > >
+struct ForStaticObjects : public Question< cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> > >
 {
   using SiconosVisitor::visit;
 
   ANSWER(BulletSpaceFilter, staticObjects());
 };
 
-struct ForStaticShapes : public Question< boost::shared_ptr<std::vector<SP::btCollisionShape> > >
+struct ForStaticShapes : public Question< cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > >
 {
   using SiconosVisitor::visit;
 

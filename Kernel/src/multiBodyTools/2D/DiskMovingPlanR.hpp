@@ -34,7 +34,7 @@ typedef double(*FTime)(const double);
   { if (_##X##Function->fPtr) _##X=((FTime)(_##X##Function->fPtr))(t); else _##X=0.; }
 
 class DiskMovingPlanR : public LagrangianRheonomousR,
-  public boost::enable_shared_from_this<DiskMovingPlanR>
+  public cpp11ns::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
   /** serialization hooks

@@ -194,7 +194,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   if (indexSet->properties().symmetric)
   {
     InteractionsGraph::VIterator vi, viend;
-    for (boost::tie(vi, viend) = indexSet->vertices();
+    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
@@ -216,7 +216,7 @@ void OneStepNSProblem::updateInteractionBlocks()
     std::fill(initialized.begin(), initialized.end(), false);
 
     InteractionsGraph::EIterator ei, eiend;
-    for (boost::tie(ei, eiend) = indexSet->edges();
+    for (cpp11ns::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
       SP::Interaction inter1 = indexSet->bundle(indexSet->source(*ei));
@@ -224,7 +224,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       /* on adjoint graph there is at most 2 edges between source and target */
       InteractionsGraph::EDescriptor ed1, ed2;
-      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
+      cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
 
       assert(*ei == ed1 || *ei == ed2);
 
@@ -304,7 +304,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   {
 
     InteractionsGraph::VIterator vi, viend;
-    for (boost::tie(vi, viend) = indexSet->vertices();
+    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
@@ -323,12 +323,12 @@ void OneStepNSProblem::updateInteractionBlocks()
       InteractionsGraph::OEIterator oei, oeiend;
       /* interactionBlock must be zeroed at init */
       std::map<SP::SiconosMatrix, bool> initialized;
-      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
         if (indexSet->properties(ed1).upper_block)
         {
           initialized[indexSet->properties(ed1).upper_block] = false;
@@ -353,13 +353,13 @@ void OneStepNSProblem::updateInteractionBlocks()
 
 
 
-      for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
 
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
         assert(*oei == ed1 || *oei == ed2);
 
@@ -431,7 +431,7 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
 
   std::cout <<  "OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet) " << std::endl;
   InteractionsGraph::VIterator vi, viend;
-  for (boost::tie(vi, viend) = indexSet->vertices();
+  for (cpp11ns::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
@@ -441,11 +441,11 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for (boost::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
          oei != oeiend; ++oei)
     {
       InteractionsGraph::EDescriptor ed1, ed2;
-      boost::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
       if (indexSet->properties(ed1).upper_block)
       {
@@ -574,14 +574,14 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 void OneStepNSProblem::saveInMemory()
 {
   assert(_OSNSInteractions);
-  std::for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
-                boost::bind(&Interaction::swapInMemory, _1));
+  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
+           cpp11ns::bind(&Interaction::swapInMemory, _1));
 }
 void OneStepNSProblem::saveTimeStepInMemory()
 {
   assert(_OSNSInteractions);
-  std::for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
-                boost::bind(&Interaction::swapTimeStepInMemory, _1));
+  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
+           cpp11ns::bind(&Interaction::swapTimeStepInMemory, _1));
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
@@ -611,9 +611,9 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     {
       dsType = Type::value(**itDS);
       if (dsType != Type::NewtonEulerDS)
-        centralInteractionBlocks[itN] = (boost::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
+        centralInteractionBlocks[itN] = (cpp11ns::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
       else
-        centralInteractionBlocks[itN] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
+        centralInteractionBlocks[itN] = (cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {
@@ -623,7 +623,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
 
       // get lu-factorized mass
       centralInteractionBlocks[itN] =
-        (boost::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
+        (cpp11ns::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
 
     }
     else if (osiType == OSI::D1MINUSLINEAR)
@@ -632,11 +632,11 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
       if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
 
-      centralInteractionBlocks[itN].reset(new SimpleMatrix(*((boost::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
+      centralInteractionBlocks[itN].reset(new SimpleMatrix(*((cpp11ns::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
     }
     else if (osiType == OSI::ZOH)
     {
-      centralInteractionBlocks[itN] = (boost::static_pointer_cast<ZeroOrderHold>(Osi))->Phi(**itDS);
+      centralInteractionBlocks[itN] = (cpp11ns::static_pointer_cast<ZeroOrderHold>(Osi))->Phi(**itDS);
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);

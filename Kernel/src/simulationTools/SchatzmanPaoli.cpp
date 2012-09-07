@@ -205,7 +205,7 @@ void SchatzmanPaoli::initialize()
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // Computation of the first step for starting
-      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (*itDS);
+      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (*itDS);
 
       SP::SiconosVector q0  = d->q0();
       SP::SiconosVector q  = d->q();
@@ -281,7 +281,7 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
   // 1 - Lagrangian non linear systems
   if (dsType == Type::LagrangianDS)
   {
-    // SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+    // SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
     // SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     // SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
     // WMap[ds].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
@@ -303,7 +303,7 @@ void SchatzmanPaoli::initW(double t, SP::DynamicalSystem ds)
   // 4 - Lagrangian linear systems
   else if (dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
     WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
@@ -362,7 +362,7 @@ void SchatzmanPaoli::initWBoundaryConditions(SP::DynamicalSystem ds)
   //   // Memory allocation for WBoundaryConditions
   //   unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
 
-  //   SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+  //   SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
   //   unsigned int numberBoundaryConditions = d->boundaryConditions()->velocityIndices()->size();
   //   _WBoundaryConditionsMap[ds].reset(new SimpleMatrix(sizeWBoundaryConditions,numberBoundaryConditions));
@@ -401,7 +401,7 @@ void SchatzmanPaoli::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
   //   vector<unsigned int>::iterator itindex;
 
-  //   SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+  //   SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
   //   for (itindex = d->boundaryConditions()->velocityIndices()->begin() ;
   //        itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -449,7 +449,7 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
   // 1 - Lagrangian non linear systems
   if (dsType == Type::LagrangianDS)
   {
-    // SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+    // SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
     // SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     // SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
@@ -479,7 +479,7 @@ void SchatzmanPaoli::computeW(double t, SP::DynamicalSystem ds)
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    // SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+    // SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
     // d->computeJacobianvFL(t);
     // double thetaFL=_theta;
     // *(d->luW())=*(d->jacobianvFL());
@@ -539,7 +539,7 @@ double SchatzmanPaoli::computeResidu()
       // // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
 
       //       // -- Convert the DS into a Lagrangian one.
-      //       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+      //       SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
       //       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //       SP::SiconosVector qold =d->qMemory()->getSiconosVector(0);
@@ -628,7 +628,7 @@ double SchatzmanPaoli::computeResidu()
       // in the sequel, only the equation (1) is implemented
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
@@ -733,7 +733,7 @@ double SchatzmanPaoli::computeResidu()
       // // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
       //     // -- Convert the DS into a Lagrangian one.
-      //     SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+      //     SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
 
       //     // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //     SP::SiconosVector qold =d->qMemory()->getSiconosVector(0);
@@ -819,7 +819,7 @@ void SchatzmanPaoli::computeFreeState()
       //       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       //       // -- Convert the DS into a Lagrangian one.
-      //       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+      //       SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
       //       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //       SP::SiconosVector qold =d->qMemory()->getSiconosVector(0);
@@ -860,7 +860,7 @@ void SchatzmanPaoli::computeFreeState()
       // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // q_k
@@ -896,7 +896,7 @@ void SchatzmanPaoli::computeFreeState()
       // // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // // -- Convert the DS into a Lagrangian one.
-      // SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+      // SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
       // computeW(t,d);
       // // Get state i (previous time step) from Memories -> var. indexed with "Old"
       // SP::SiconosVector qold =d->qMemory()->getSiconosVector(0);
@@ -1079,7 +1079,7 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
       }
 
     }
-    SP::LagrangianLinearTIR ltir = boost::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
+    SP::LagrangianLinearTIR ltir = cpp11ns::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
     e = ltir->e();
     if (e)
     {
@@ -1129,7 +1129,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // get dynamical system
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector q = d->q();
@@ -1204,7 +1204,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
     else if (dsType == Type::NewtonEulerDS)
     {
       //  // get dynamical system
-      //       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+      //       SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
       //       SP::SiconosVector v = d->velocity();
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       cout<<"SchatzmanPaoli::updatestate prev v"<<endl;

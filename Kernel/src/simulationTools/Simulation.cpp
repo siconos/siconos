@@ -230,7 +230,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m || !"Simulation::initialize(model) - model = NULL.");
-  _model = boost::weak_ptr<Model>(m);
+  _model = cpp11ns::weak_ptr<Model>(m);
 
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
@@ -277,8 +277,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   {
     computeLevelsForInputAndOutput();
 
-    std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, _tinit));
+    for_each(allInteractions->begin(), allInteractions->end(),
+             cpp11ns::bind(&Interaction::initialize, _1, _tinit));
 
     // Initialize OneStepNSProblem: in derived classes specific functions.
     initOSNS();
@@ -382,9 +382,9 @@ void Simulation::saveSimulationToXML()
     {
       typeOSI = (*it)->getType();
       if (typeOSI == OSI::MOREAU)
-        (boost::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
+        (cpp11ns::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
       else if (typeOSI == OSI::LSODAR)
-        (boost::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
+        (cpp11ns::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
     }
 
@@ -825,7 +825,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   SP::OneStepIntegrator Osi =  integratorOfDS(ds);
   addInteractionInOSIMap(inter, Osi);
 
-  boost::shared_ptr<SetupLevels> setupLevels;
+  cpp11ns::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   Osi->accept(*(setupLevels.get()));
 

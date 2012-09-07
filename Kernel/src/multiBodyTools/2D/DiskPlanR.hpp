@@ -29,7 +29,7 @@
 #include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
 
-class DiskPlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<DiskPlanR>
+class DiskPlanR : public LagrangianScleronomousR, public cpp11ns::enable_shared_from_this<DiskPlanR>
 {
 private:
   /** serialization hooks

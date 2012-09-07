@@ -58,12 +58,13 @@ void SiconosVisitorTest::t1()
 void SiconosVisitorTest::t2()
 {
 
-  struct MyVisitor : SiconosVisitor
+  struct MyVisitor : public SiconosVisitor
   {
     using SiconosVisitor::visit;
 
-    void visit(const LagrangianDS&)
+    void visit(const LagrangianDS& ds)
     {
+      ;
     }
 
   };

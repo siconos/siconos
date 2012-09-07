@@ -64,7 +64,7 @@ class Interaction;
  * the system.
  *
  */
-class Topology : public boost::enable_shared_from_this<Topology>
+class Topology : public cpp11ns::enable_shared_from_this<Topology>
 {
 
 private:

@@ -62,6 +62,12 @@ using std::size_t;
 #pragma clang diagnostic pop
 #endif
 
+#if __cplusplus >= 201103L
+namespace cpp11ns = std;
+#else
+namespace cpp11ns = boost;
+#endif
+
 #include "SiconosSerialization.hpp"
 
 using namespace boost;
@@ -226,12 +232,12 @@ public:
   {
     bool ret = false;
     EDescriptor tmped;
-    boost::tie(tmped, ret) = edge(vd1, vd2);
+    cpp11ns::tie(tmped, ret) = edge(vd1, vd2);
 
 #ifndef NDEBUG
     bool check_ret = false;
     AVIterator avi, aviend;
-    for (boost::tie(avi, aviend) = adjacent_vertices(vd1);
+    for (cpp11ns::tie(avi, aviend) = adjacent_vertices(vd1);
          avi != aviend; ++avi)
     {
       if (*avi == vd2)
@@ -263,7 +269,7 @@ public:
     bool ifirst = false;
     bool isecond = false;
     EDescriptor first, second;
-    for (boost::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
+    for (cpp11ns::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
     {
       if (target(*oei) == v)
       {
@@ -308,7 +314,7 @@ public:
   {
     bool found = false;
     OEIterator oei, oeiend;
-    for (boost::tie(oei, oeiend) = out_edges(vd1);
+    for (cpp11ns::tie(oei, oeiend) = out_edges(vd1);
          oei != oeiend; ++oei)
     {
       if (target(*oei) == vd2 && bundle(*oei) == e_bundle)
@@ -324,7 +330,7 @@ public:
   {
     bool ret = false;
     VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
@@ -436,14 +442,14 @@ public:
   inline VIterator begin()
   {
     VIterator vi, viend;
-    boost::tie(vi, viend) = vertices();
+    cpp11ns::tie(vi, viend) = vertices();
     return vi;
   }
 
   inline VIterator end()
   {
     VIterator vi, viend;
-    boost::tie(vi, viend) = vertices();
+    cpp11ns::tie(vi, viend) = vertices();
     return viend;
   }
 
@@ -531,7 +537,7 @@ public:
 
     // edges copy as in boost::subgraph
     typename G::OEIterator ogoei, ogoeiend;
-    for (boost::tie(ogoei, ogoeiend) =
+    for (cpp11ns::tie(ogoei, ogoeiend) =
            og.out_edges(og.descriptor(vertex_bundle));
          ogoei != ogoeiend; ++ogoei)
     {
@@ -606,7 +612,7 @@ public:
 
     assert(!is_edge(vd1, vd2, e_bundle));
 
-    boost::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
+    cpp11ns::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
     assert(inserted);
 
     index(new_edge) = std::numeric_limits<size_t>::max();
@@ -665,7 +671,7 @@ public:
       std::map<E, EDescriptor> Edone;
 
       OEIterator ied, iedend;
-      for (boost::tie(ied, iedend) = out_edges(vdx);
+      for (cpp11ns::tie(ied, iedend) = out_edges(vdx);
            ied != iedend; ++ied)
       {
         if (Edone.find(bundle(*ied)) == Edone.end())
@@ -757,7 +763,7 @@ public:
        multiset allows for member removal without invalidating iterators
 
         OEIterator oei,oeiend;
-        for(boost::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
+        for(cpp11ns::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
         {
           if (pred(*oei))
           {
@@ -792,7 +798,7 @@ public:
     VIterator vi, viend;
     size_t i;
     _vertex_index_modified.clear();
-    for (boost::tie(vi, viend) = boost::vertices(g), i = 0;
+    for (cpp11ns::tie(vi, viend) = boost::vertices(g), i = 0;
          vi != viend; ++vi, ++i)
     {
       if (index(*vi) != i && index(*vi) != std::numeric_limits<size_t>::max())
@@ -816,7 +822,7 @@ public:
     EIterator ei, eiend;
     size_t i;
     _edge_index_modified.clear();
-    for (boost::tie(ei, eiend) = boost::edges(g), i = 0;
+    for (cpp11ns::tie(ei, eiend) = boost::edges(g), i = 0;
          ei != eiend; ++ei, ++i)
     {
       if (index(*ei) != i && index(*ei) != std::numeric_limits<size_t>::max())
@@ -870,7 +876,7 @@ public:
   {
 
     VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices();
+    for (cpp11ns::tie(vi, viend) = vertices();
          vi != viend; ++vi)
     {
       std::cout << "vertex :"
@@ -882,7 +888,7 @@ public:
                 << ", color : "
                 << color(*vi);
       OEIterator oei, oeiend, next;
-      for (boost::tie(oei, oeiend) = out_edges(*vi);
+      for (cpp11ns::tie(oei, oeiend) = out_edges(*vi);
            oei != oeiend; ++oei)
       {
         std::cout << "---"
@@ -905,20 +911,20 @@ public:
   bool state_assert()
   {
     VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       OEIterator ei, eiend;
-      for (boost::tie(ei, eiend) = out_edges(*vi);
+      for (cpp11ns::tie(ei, eiend) = out_edges(*vi);
            ei != eiend; ++ei)
       {
         assert(is_vertex(bundle(target(*ei))));
         assert(source(*ei) == *vi);
       }
       AVIterator avi, aviend;
-      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (cpp11ns::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));
@@ -933,13 +939,13 @@ public:
   {
 
     VIterator vi, viend;
-    for (boost::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       AVIterator avi, aviend;
-      for (boost::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (cpp11ns::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));

@@ -27,7 +27,7 @@
 
 #include "CircularR.hpp"
 
-class CircleCircleR : public CircularR, public boost::enable_shared_from_this<CircleCircleR>
+class CircleCircleR : public CircularR, public cpp11ns::enable_shared_from_this<CircleCircleR>
 {
 private:
   /** serialization hooks

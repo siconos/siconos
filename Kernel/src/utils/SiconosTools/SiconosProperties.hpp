@@ -42,7 +42,14 @@
 #include <boost/property_map.hpp>
 #endif
 
+#if __cplusplus >= 201103L
+#include <memory>
+namespace cpp11ns = std;
+#else
 #include <boost/shared_ptr.hpp>
+namespace cpp11ns = boost;
+#endif
+
 #include <boost/mpl/eval_if.hpp>
 #include <boost/static_assert.hpp>
 #include <vector>
@@ -59,7 +66,7 @@ template <typename T>
 struct IsSharedPtr : boost::mpl::false_ {};
 
 template <typename T>
-struct IsSharedPtr<boost::shared_ptr<T> > : boost::mpl::true_ {};
+struct IsSharedPtr<cpp11ns::shared_ptr<T> > : boost::mpl::true_ {};
 
 template <typename T>
 struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {};
@@ -72,7 +79,7 @@ struct RemovePointer
 };
 
 template <typename T>
-struct RemovePointer<boost::shared_ptr<T> >
+struct RemovePointer<cpp11ns::shared_ptr<T> >
 {
   typedef T type;
 };
@@ -241,7 +248,7 @@ public:
   G& _g;
 
   // serialization issue with key_type as simple pointer (void *)
-  boost::shared_ptr< std::map<key_type, T> > _store;
+  cpp11ns::shared_ptr< std::map<key_type, T> > _store;
   int _stamp;
 
 

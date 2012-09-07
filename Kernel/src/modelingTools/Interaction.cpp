@@ -388,7 +388,7 @@ void Interaction::initDataLagrangian()
             Type::value(**it) == Type::LagrangianDS));
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = boost::static_pointer_cast<LagrangianDS> (*it);
+    lds = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     _data[free]->insertPtr(lds->workFree());
@@ -429,7 +429,7 @@ void Interaction::initDataNewtonEuler()
     assert((Type::value(**it) == Type::NewtonEulerDS) && "NewtonEulerR::initialize failed, not implemented for dynamical system of that type.\n");
 
     // convert vDS systems into NewtonEulerDS and put them in vLDS
-    lds = boost::static_pointer_cast<NewtonEulerDS> (*it);
+    lds = cpp11ns::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     _data[free]->insertPtr(lds->workFree());
     _data[q0]->insertPtr(lds->q());
@@ -475,7 +475,7 @@ void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
     assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
             Type::value(**it) == Type::LagrangianDS));
     // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = boost::static_pointer_cast<LagrangianDS> (*it);
+    lds = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     _data[q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
@@ -851,16 +851,16 @@ void Interaction::saveInteractionToXML()
     if (subType == NonLinearR)
       relation()->saveRelationToXML();
     else if (subType == LinearR)
-      (boost::static_pointer_cast<FirstOrderLinearR>(relation()))->saveRelationToXML();
+      (cpp11ns::static_pointer_cast<FirstOrderLinearR>(relation()))->saveRelationToXML();
     else if (subType == LinearTIR)
-      (boost::static_pointer_cast<FirstOrderLinearTIR>(relation()))->saveRelationToXML();
+      (cpp11ns::static_pointer_cast<FirstOrderLinearTIR>(relation()))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
   }
   else if (type == Lagrangian)
   {
     if (subType == LinearTIR)
-      (boost::static_pointer_cast<LagrangianLinearTIR>(relation()))->saveRelationToXML();
+      (cpp11ns::static_pointer_cast<LagrangianLinearTIR>(relation()))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
   }
@@ -904,17 +904,17 @@ void Interaction::getLeftInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 
   if (relationType == FirstOrder)
   {
-    SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (relation());
+    SP::FirstOrderR r = cpp11ns::static_pointer_cast<FirstOrderR> (relation());
     originalMatrix = r->jachx();
   }
   else if (relationType == Lagrangian)
   {
-    SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (relation());
+    SP::LagrangianR r = cpp11ns::static_pointer_cast<LagrangianR> (relation());
     originalMatrix = r->jachq();
   }
   else if (relationType == NewtonEuler)
   {
-    SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (relation());
+    SP::NewtonEulerR r = cpp11ns::static_pointer_cast<NewtonEulerR> (relation());
     originalMatrix = r->jachqT();
   }
   else
@@ -953,20 +953,20 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(SP::Dynamical
   // look for ds and its position in G
   while (*itDS != ds && itDS != dynamicalSystemsEnd())
   {
-    k += (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+    k += (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
     itDS++;
     NumDS++;
   }
 
   // check dimension (1)
-  unsigned int sizeDS = (boost::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+  unsigned int sizeDS = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
   if (sizeDS != InteractionBlock->size(1))
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject(DS, InteractionBlock, ...): inconsistent sizes between InteractionBlock and DS");
 
 
   SP::SiconosMatrix originalMatrix;
 
-  SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (relation());
+  SP::NewtonEulerR r = cpp11ns::static_pointer_cast<NewtonEulerR> (relation());
   //proj_with_q originalMatrix = r->jachqProj();
   originalMatrix = r->jachq();
 
@@ -1007,7 +1007,7 @@ void Interaction::getRightInteractionBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = boost::static_pointer_cast<FirstOrderR>(relation())->jacglambda();
+    originalMatrix = cpp11ns::static_pointer_cast<FirstOrderR>(relation())->jacglambda();
   }
   else if (relationType == Lagrangian || relationType == NewtonEuler)
   {

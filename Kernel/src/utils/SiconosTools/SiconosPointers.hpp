@@ -63,8 +63,14 @@ More documentation on smart pointers and reference counting:
 #include <SiconosNumerics.h>
 
 #include <boost/shared_array.hpp>
+
+#if __cplusplus >= 201103L
+namespace cpp11ns = std;
+#else
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+namespace cpp11ns = boost;
+#endif
 
 namespace SharedPointer {}
 namespace SharedPointerConst {}
@@ -117,16 +123,16 @@ struct nullDeleter
 /* template typedef : no */
 
 #define TYPEDEF_SPTR(X) \
-  typedef boost::shared_ptr<X> SPtr##X; \
-  typedef boost::shared_ptr<const X> SPtrConst##X; \
+  typedef cpp11ns::shared_ptr<X> SPtr##X; \
+  typedef cpp11ns::shared_ptr<const X> SPtrConst##X; \
   inline SPtr##X create##SPtr##X(X &x) \
   { \
-    boost::shared_ptr<X> px(&x, nullDeleter()); \
+    cpp11ns::shared_ptr<X> px(&x, nullDeleter()); \
     return px; \
   } \
   inline SPtrConst##X create##SPtrConst##X(const X &x) \
   { \
-    boost::shared_ptr<const X> px(&x, nullDeleter()); \
+    cpp11ns::shared_ptr<const X> px(&x, nullDeleter()); \
     return px; \
   } \
   NAME_SPACE_SPTR(X)
@@ -158,16 +164,16 @@ struct nullDeleter
   }
 
 #define TYPEDEF_TPL1_SPTR(N,X,Y)                           \
-  typedef boost::shared_ptr<X<Y> > SPtr##N;                \
-  typedef boost::shared_ptr<const X<Y> > SPtrConst##N;     \
+  typedef cpp11ns::shared_ptr<X<Y> > SPtr##N;                \
+  typedef cpp11ns::shared_ptr<const X<Y> > SPtrConst##N;     \
   inline SPtr##N create##SPtr##N(X<Y> &x)                  \
   {                                                        \
-    boost::shared_ptr<X<Y> > px(&x, nullDeleter());        \
+    cpp11ns::shared_ptr<X<Y> > px(&x, nullDeleter());        \
     return px;                                             \
   }                                                        \
   inline SPtrConst##N create##SPtrConst##N(const X<Y> &x)  \
   {                                                        \
-    boost::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
+    cpp11ns::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
     return px;                                             \
   }                                                        \
   NAME_SPACE_TPL1_SPTR(N,X,Y)

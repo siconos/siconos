@@ -33,11 +33,18 @@
 #include "InteractionsSet.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include <fstream>
-#include <boost/bind.hpp>
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Topology.hpp"
+
+
+#if __cplusplus >= 201103L
+#include <functional>
+using namespace std::placeholders;
+#else
+#include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
+#endif
 
 class DynamicalSystem;
 class EventsManager;
@@ -64,7 +71,7 @@ class SimulationXML;
   Rules:
   - A Model must be given to the constructor, else => exception.
 */
-class Simulation : public boost::enable_shared_from_this<Simulation>
+class Simulation : public cpp11ns::enable_shared_from_this<Simulation>
 {
 protected:
   /** serialization hooks
@@ -114,7 +121,7 @@ protected:
   SP::SimulationXML _simulationxml;
 
   /** A link to the Model which contains the Simulation */
-  boost::weak_ptr<Model> _model;
+  cpp11ns::weak_ptr<Model> _model;
 
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
@@ -480,7 +487,7 @@ public:
    */
   inline void setModelPtr(SP::Model m)
   {
-    _model = boost::weak_ptr<Model>(m);
+    _model = cpp11ns::weak_ptr<Model>(m);
   }
 
   /** get tolerance

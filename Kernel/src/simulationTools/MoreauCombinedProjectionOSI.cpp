@@ -42,12 +42,12 @@ void MoreauCombinedProjectionOSI::initialize()
     Type::Siconos dsType = Type::value(**itDS);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS>(*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else

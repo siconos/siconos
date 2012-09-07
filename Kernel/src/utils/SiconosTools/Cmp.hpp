@@ -24,7 +24,13 @@ Classes related to object ordering in SiconosSet.
 #ifndef CMP_H
 #define CMP_H
 
+#if __cplusplus >= 201103L
+#include <memory>
+namespace cpp11ns = std;
+#else
 #include <boost/shared_ptr.hpp>
+namespace cpp11ns = boost;
+#endif
 
 /**  Virtual functors class
  *
@@ -62,7 +68,7 @@ private:
   /** pointer to member function */
   U(TClass::*fpt)() const;
   /** pointer to object */
-  boost::shared_ptr<TClass> pt2Object;
+  cpp11ns::shared_ptr<TClass> pt2Object;
 
 public:
 
@@ -72,7 +78,7 @@ public:
    * \param pointer to TClass
    * \param pointer to function of type const int(TClass::*_fpt)() const
    */
-  myTSpecificFunctor(boost::shared_ptr<TClass> _pt2Object, U(TClass::*_fpt)() const)
+  myTSpecificFunctor(cpp11ns::shared_ptr<TClass> _pt2Object, U(TClass::*_fpt)() const)
   {
     pt2Object = _pt2Object;
     fpt = _fpt;
@@ -139,7 +145,7 @@ public:
   /** comparison of elements
   * \param two pointers to T
   */
-  bool operator()(boost::shared_ptr<T> t1, boost::shared_ptr<T> t2) const
+  bool operator()(cpp11ns::shared_ptr<T> t1, cpp11ns::shared_ptr<T> t2) const
   {
     // set functors and call pointers to function to get values to be compared
     myTSpecificFunctor<T, U> specFuncA(t1, fpt);

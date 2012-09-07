@@ -86,7 +86,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   DynamicalSystemsGraph& dsg = *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg.vertices();
+  cpp11ns::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi)
   {
     _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
@@ -115,7 +115,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator ui0, ui0end, v0next;
-  boost::tie(ui0, ui0end) = indexSet0->vertices();
+  cpp11ns::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {
@@ -313,7 +313,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   gOrphanedInteractions.clear();
 
   // 4. remove old contact points
-  boost::tie(ui0, ui0end) = indexSet0->vertices();
+  cpp11ns::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {

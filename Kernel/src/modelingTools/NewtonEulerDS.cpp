@@ -473,7 +473,7 @@ NewtonEulerDS* NewtonEulerDS::convert(DynamicalSystem* ds)
   return lnlds;
 }
 
-void NewtonEulerDS::resetNonSmoothPart()
+void NewtonEulerDS::resetAllNonSmoothPart()
 {
   if (_p[1])
     _p[1]->zero();

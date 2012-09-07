@@ -91,7 +91,7 @@ TYPEDEF_SPTR(Sensors)
    cm->addAndRecordActuator(myType,t)
    \endcode
 */
-class Actuator : public boost::enable_shared_from_this<Actuator>
+class Actuator : public cpp11ns::enable_shared_from_this<Actuator>
 {
 protected:
   /** serialization hooks

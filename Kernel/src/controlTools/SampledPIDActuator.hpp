@@ -38,7 +38,7 @@ private:
   ACCEPT_SERIALIZATION(SampledPIDActuator);
 
   /** error vector */
-  boost::shared_ptr<boost::circular_buffer<double> > _err;
+  cpp11ns::shared_ptr<boost::circular_buffer<double> > _err;
 
   /** reference we are tracking */
   double _ref;

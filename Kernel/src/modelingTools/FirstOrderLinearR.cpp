@@ -325,7 +325,7 @@ void FirstOrderLinearR::saveRelationToXML() const
   if (!_relationxml)
     RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no yet implemented.");
 
-  SP::LinearRXML folrXML = (boost::static_pointer_cast<LinearRXML>(_relationxml));
+  SP::LinearRXML folrXML = (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml));
   folrXML->setC(*_jachx);
   folrXML->setD(*_jachlambda);
   folrXML->setF(*_F);

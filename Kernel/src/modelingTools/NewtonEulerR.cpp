@@ -189,7 +189,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
     dimIndex[0] = ySize;
     dimIndex[1] = 7;
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
-    NewtonEulerDS& d = *boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+    NewtonEulerDS& d = *cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS);
     SiconosMatrix& T = *d.T();
 
     prod(*auxBloc, T, *auxBloc2);

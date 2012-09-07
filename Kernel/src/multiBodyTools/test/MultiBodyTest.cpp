@@ -63,7 +63,7 @@
 
 #include "SiconosBodies.hpp"
 
-class Disks : public SiconosBodies, public boost::enable_shared_from_this<Disks>
+class Disks : public SiconosBodies, public cpp11ns::enable_shared_from_this<Disks>
 {
 public:
   void init()
@@ -85,7 +85,7 @@ using namespace std;
 
 /* do nothing if solver does not converge */
 void localCheckSolverOuput(int, Simulation*)
-{};
+{}
 
 double A(double t)
 {
@@ -285,7 +285,7 @@ void Disks::init(std::string disks_input)
     // -- Simulation --
     simulation_.reset(new TimeStepping(timedisc_));
 
-    boost::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
+    cpp11ns::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
 
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);

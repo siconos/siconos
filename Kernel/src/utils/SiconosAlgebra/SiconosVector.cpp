@@ -104,7 +104,7 @@ SiconosVector::SiconosVector(const std::vector<double>& v, Siconos::UBLAS_TYPE t
 }
 
 // Copy
-SiconosVector::SiconosVector(const SiconosVector &svect) : boost::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const SiconosVector &svect) : cpp11ns::enable_shared_from_this<SiconosVector>()
 {
   if (ask<IsDense>(svect)) // dense
   {
@@ -127,7 +127,7 @@ SiconosVector::SiconosVector(const SiconosVector &svect) : boost::enable_shared_
 }
 
 // Copy from BlockVector
-SiconosVector::SiconosVector(const BlockVector & vIn) : boost::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const BlockVector & vIn) : cpp11ns::enable_shared_from_this<SiconosVector>()
 {
   if (ask<IsDense>(**(vIn.begin()))) // dense
   {

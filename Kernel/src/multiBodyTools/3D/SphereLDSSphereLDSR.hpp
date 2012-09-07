@@ -27,7 +27,7 @@
 
 #include "LagrangianScleronomousR.hpp"
 
-class SphereLDSSphereLDSR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereLDSSphereLDSR>
+class SphereLDSSphereLDSR : public LagrangianScleronomousR, public cpp11ns::enable_shared_from_this<SphereLDSSphereLDSR>
 {
 private:
   /** serialization hooks

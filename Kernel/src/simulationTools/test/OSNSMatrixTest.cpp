@@ -32,7 +32,7 @@ void OSNSMatrixTest::setUp()
   tol = 1e-12;
   // Download a Model from Template.xml file
   temp.reset(new Model("Template.xml"));
-  SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(temp->simulation());
+  SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(temp->simulation());
   s->initialize();
   // Get a set of Interactions
   indexSet = s->indexSet(0);

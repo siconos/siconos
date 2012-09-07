@@ -176,7 +176,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
-  boost::tie(ui1, ui1end) = indexSet1->vertices();
+  cpp11ns::tie(ui1, ui1end) = indexSet1->vertices();
 
   //Remove interactions from the indexSet1
   for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
@@ -204,11 +204,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
           indexSet1->eraseProperties(*ui1);
 
           InteractionsGraph::OEIterator oei, oeiend;
-          for (boost::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+          for (cpp11ns::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
                oei != oeiend; ++oei)
           {
             InteractionsGraph::EDescriptor ed1, ed2;
-            boost::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+            cpp11ns::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
             if (ed2 != ed1)
             {
               indexSet1->eraseProperties(ed1);
@@ -234,11 +234,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
       // ui1 becomes invalid
       indexSet1->eraseProperties(*ui1);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (boost::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+      for (cpp11ns::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
            oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
-        boost::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+        cpp11ns::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
         if (ed2 != ed1)
         {
           indexSet1->eraseProperties(ed1);
@@ -258,7 +258,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // indexSet0\indexSet1 scan
   InteractionsGraph::VIterator ui0, ui0end;
   //Add interaction in indexSet1
-  for (boost::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+  for (cpp11ns::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
   {
     if (indexSet0->color(*ui0) == boost::black_color)
     {
@@ -345,7 +345,7 @@ void TimeStepping::initOSNS()
   InteractionsGraph::VIterator ui, uiend;
 
   // For each Interaction in I0 ...
-  for (boost::tie(ui, uiend) = indexSet0->vertices();
+  for (cpp11ns::tie(ui, uiend) = indexSet0->vertices();
        ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
@@ -437,7 +437,7 @@ void TimeStepping::update(unsigned int levelInput)
 
 void TimeStepping::computeFreeState()
 {
-  std::for_each(_allOSI->begin(), _allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
+  for_each(_allOSI->begin(), _allOSI->end(), cpp11ns::bind(&OneStepIntegrator::computeFreeState, _1));
 }
 
 // compute simulation between current and next event.  Initial

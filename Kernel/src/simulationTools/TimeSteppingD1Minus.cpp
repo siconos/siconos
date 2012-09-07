@@ -37,7 +37,7 @@ void TimeSteppingD1Minus::initOSNS()
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     initializeInteraction(indexSet0->bundle(*ui));
   }
@@ -121,7 +121,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   InteractionsGraph::VIterator uipend, uip;
 
-  for (boost::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
+  for (cpp11ns::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
 
@@ -298,7 +298,7 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
         RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
       else
       {
-        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (*itDS);
+        SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*itDS);
         if (d->p(level)) d->p(level)->zero();
       }
     }
@@ -321,7 +321,7 @@ void TimeSteppingD1Minus::computeResidu()
 
 void TimeSteppingD1Minus::computeFreeState()
 {
-  std::for_each(_allOSI->begin(), _allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
+  for_each(_allOSI->begin(), _allOSI->end(), cpp11ns::bind(&OneStepIntegrator::computeFreeState, _1));
 }
 
 TimeSteppingD1Minus* TimeSteppingD1Minus::convert(Simulation *str)

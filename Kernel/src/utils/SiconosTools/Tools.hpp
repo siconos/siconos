@@ -117,9 +117,9 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
 #include "SiconosPointers.hpp"
 /** Graph -> Set conversion */
 template <class S, class G>
-boost::shared_ptr<S> setOfGraph(boost::shared_ptr<G> g)
+cpp11ns::shared_ptr<S> setOfGraph(cpp11ns::shared_ptr<G> g)
 {
-  boost::shared_ptr<S> r;
+  cpp11ns::shared_ptr<S> r;
   r.reset(new S());
   for (typename G::VIterator vi = g->begin(); vi != g->end(); ++vi)
   {

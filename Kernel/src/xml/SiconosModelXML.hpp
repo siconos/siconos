@@ -353,7 +353,7 @@ public:
   */
   inline bool hasSimulation() const
   {
-    return simulationXML ;
+    return bool(simulationXML);
   }
 
   /** Saves the Siconos Model creating a Siconos XML data file

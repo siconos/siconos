@@ -167,7 +167,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
   SP::DynamicalSystem ds(new LagrangianLinearTIDS(tmpxml1));
-  SP::LagrangianLinearTIDS copy = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
+  SP::LagrangianLinearTIDS copy = cpp11ns::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
   SP::SiconosMatrix jx = ds->jacobianRhsx();

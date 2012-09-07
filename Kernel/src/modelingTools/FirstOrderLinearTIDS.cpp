@@ -30,7 +30,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 
   // pointer to xml
 
-  SP::FirstOrderLinearDSXML ldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
+  SP::FirstOrderLinearDSXML ldsxml = (cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
 
   // reject case where A or b is a plug-in
   if (ldsxml->isAPlugin())

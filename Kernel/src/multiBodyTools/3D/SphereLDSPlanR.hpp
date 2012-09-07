@@ -27,7 +27,7 @@
 
 #include "CircularR.hpp"
 
-class SphereLDSPlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereLDSPlanR>
+class SphereLDSPlanR : public LagrangianScleronomousR, public cpp11ns::enable_shared_from_this<SphereLDSPlanR>
 {
 private:
   /** serialization hooks

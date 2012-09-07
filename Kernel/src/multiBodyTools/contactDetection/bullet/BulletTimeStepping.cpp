@@ -33,7 +33,7 @@ void BulletTimeStepping::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  boost::tie(dsi, dsiend) = dsg.vertices();
+  cpp11ns::tie(dsi, dsiend) = dsg.vertices();
 
   static UpdateCollisionObject up;
 

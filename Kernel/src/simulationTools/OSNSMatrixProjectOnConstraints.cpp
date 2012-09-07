@@ -64,7 +64,7 @@ void OSNSMatrixProjectOnConstraints::updateSizeAndPositions(unsigned int& dim,
   std::cout << "indexSet :" << indexSet << std::endl;
   indexSet->display();
 #endif
-  for (boost::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (cpp11ns::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
@@ -128,13 +128,13 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
     std::cout << "indexSet :" << indexSet << std::endl;
     indexSet->display();
 #endif
-    for (boost::tie(vi, viend) = indexSet->vertices();
+    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePositionProj();
       assert(indexSet->blockProj[*vi]);
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *(indexSet->blockProj[*vi]));
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
@@ -144,7 +144,7 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for (boost::tie(ei, eiend) = indexSet->edges();
+    for (cpp11ns::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
       InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
@@ -169,11 +169,11 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
       printf("OSNSMatrix lower: %i %i\n", (indexSet->lower_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
 #endif
 
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *(indexSet->upper_blockProj[*ei]));
 
-      boost::static_pointer_cast<SimpleMatrix>(M1)
+      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *(indexSet->lower_blockProj[*ei]));
     }
@@ -214,7 +214,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
   {
     if (relationType == NewtonEuler)
     {
-      // SP::NewtonEulerFrom1DLocalFrameR ri = boost::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
+      // SP::NewtonEulerFrom1DLocalFrameR ri = cpp11ns::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;

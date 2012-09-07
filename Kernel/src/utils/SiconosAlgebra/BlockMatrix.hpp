@@ -334,7 +334,7 @@ public:
    */
   inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {
-    return boost::shared_ptr<SiconosMatrix>((*_mat)(row, col));
+    return cpp11ns::shared_ptr<SiconosMatrix>((*_mat)(row, col));
   };
 
   /** get row index of current matrix and save it unsigned into vOut

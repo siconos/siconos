@@ -34,7 +34,7 @@ MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()
 
 SP::MixedComplementarityConditionNSL MixedComplementarityConditionNSL::convert(SP::NonSmoothLaw nsl)
 {
-  return boost::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
+  return cpp11ns::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
 }
 
 

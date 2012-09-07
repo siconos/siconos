@@ -329,7 +329,7 @@ void SiconosGraphTest::t7()
   AG::AVIterator ui, uiend;
   std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
-  for (boost::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
+  for (cpp11ns::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
   {
     tot += k * ag.bundle(*ui);
   }

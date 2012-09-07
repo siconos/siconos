@@ -217,11 +217,11 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
 void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter)
 {
   DSIterator itDS = inter.dynamicalSystemsBegin();
-  SP::NewtonEulerDS d1 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+  SP::NewtonEulerDS d1 =  cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS);
   itDS++;
   if (itDS != inter.dynamicalSystemsEnd())
   {
-    SP::NewtonEulerDS d2 =  boost::static_pointer_cast<NewtonEulerDS> (*itDS);
+    SP::NewtonEulerDS d2 =  cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS);
     FC3DcomputeJachqTFromContacts(d1, d2);
   }
   else

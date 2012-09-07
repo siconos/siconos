@@ -104,7 +104,7 @@ typedef VectorMap::const_iterator VectorMapConstIterator;
    See \ref SicControl for details on how to define its own Sensor.
 
  */
-class Sensor : public boost::enable_shared_from_this<Sensor>
+class Sensor : public cpp11ns::enable_shared_from_this<Sensor>
 {
 protected:
   /** serialization hooks

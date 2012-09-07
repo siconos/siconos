@@ -50,7 +50,7 @@ union VECTOR_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SiconosVector : public boost::enable_shared_from_this<SiconosVector>
+class SiconosVector : public cpp11ns::enable_shared_from_this<SiconosVector>
 {
 protected:
   /** serialization hooks
@@ -428,7 +428,7 @@ struct VectorNum : public Question<unsigned int>
     else answer = 4;
   }
 
-  void visit(boost::shared_ptr<SiconosVector> v)
+  void visit(cpp11ns::shared_ptr<SiconosVector> v)
   {
     if (v->_dense) answer = 1;
     else answer = 4;

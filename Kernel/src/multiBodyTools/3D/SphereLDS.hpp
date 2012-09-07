@@ -28,7 +28,7 @@
 
 #include "LagrangianDS.hpp"
 
-class SphereLDS : public LagrangianDS, public boost::enable_shared_from_this<SphereLDS>
+class SphereLDS : public LagrangianDS, public cpp11ns::enable_shared_from_this<SphereLDS>
 {
 protected:
   /** serialization hooks

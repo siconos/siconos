@@ -174,7 +174,7 @@ struct FindType
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
-  virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
+  virtual void visit(cpp11ns::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
@@ -215,9 +215,9 @@ inline Siconos value(const C& c)
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
-inline boost::shared_ptr<std::string> str(const Siconos& X)
+inline cpp11ns::shared_ptr<std::string> str(const Siconos& X)
 {
-  boost::shared_ptr<std::string> r;
+  cpp11ns::shared_ptr<std::string> r;
 
   switch (X)
   {
@@ -331,8 +331,14 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
 }
 
 /* use boost array for the initialization of non const reference */
-#include <boost/type_traits.hpp>
+//#include <boost/type_traits.hpp>
+#if __cplusplus >= 201103L
+#include <type_traits>
+#include <array>
+#else
+#include <boost/type_traits/remove_reference.hpp>
 #include <boost/array.hpp>
+#endif
 
 /** a generic return value visitor */
 template <class AnswerType>
@@ -341,7 +347,7 @@ struct Question : public SiconosVisitor
   typedef AnswerType type;
   type answer;
 
-  Question() : answer(boost::array<typename boost::remove_reference<AnswerType>::type, 1>()[0])
+  Question() : answer(cpp11ns::array<typename cpp11ns::remove_reference<AnswerType>::type, 1>()[0])
   {};
   Question(AnswerType ref) : answer(ref) {};
 

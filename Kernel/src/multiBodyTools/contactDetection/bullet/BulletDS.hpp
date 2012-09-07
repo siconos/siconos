@@ -26,7 +26,7 @@
 
 #include "NewtonEulerDS.hpp"
 
-class BulletDS : public NewtonEulerDS, public boost::enable_shared_from_this<BulletDS>
+class BulletDS : public NewtonEulerDS, public cpp11ns::enable_shared_from_this<BulletDS>
 {
 
 private:
@@ -61,7 +61,7 @@ public:
 
   /** get a shared_ptr from this
    */
-  boost::shared_ptr<BulletDS> shared_ptr()
+  cpp11ns::shared_ptr<BulletDS> shared_ptr()
   {
     return shared_from_this();
   };

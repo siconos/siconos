@@ -29,7 +29,7 @@
 #include "NewtonEulerDS.hpp"
 
 
-class SphereNEDS : public NewtonEulerDS, public boost::enable_shared_from_this<SphereNEDS>
+class SphereNEDS : public NewtonEulerDS, public cpp11ns::enable_shared_from_this<SphereNEDS>
 {
 protected:
   /** serialization hooks

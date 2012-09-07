@@ -199,13 +199,13 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     {
       SP::DynamicalSystem ds = dynamicalSystems()->bundle(*vi);
       if (Type::value(*ds) == Type::LagrangianDS)
-        (boost::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
+        (cpp11ns::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::LagrangianLinearTIDS)
-        (boost::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
+        (cpp11ns::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderLinearDS)
-        (boost::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
+        (cpp11ns::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderLinearTIDS)
-        (boost::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
+        (cpp11ns::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderNonLinearDS)
         ds->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");

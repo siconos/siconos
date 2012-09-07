@@ -45,7 +45,7 @@ typedef MapFactory::iterator MapFactoryIt;
 /** Template function to return a new object of type SubType*/
 template<class SubType> SP::Sensor factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
-  return boost::shared_ptr<SubType>(new SubType(t, ds));
+  return cpp11ns::shared_ptr<SubType>(new SubType(t, ds));
 }
 
 /** Registry Class for sensors.

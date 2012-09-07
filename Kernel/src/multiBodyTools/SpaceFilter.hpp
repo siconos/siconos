@@ -72,7 +72,7 @@
 
 /** hash container
  */
-class Hashed : public boost::enable_shared_from_this<Hashed>
+class Hashed : public cpp11ns::enable_shared_from_this<Hashed>
 {
 protected:
   /** serialization hooks
@@ -106,7 +106,7 @@ typedef ublas::matrix < FTime, ublas::column_major,
 
 TYPEDEF_SPTR(FMatrix)
 
-class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
+class SpaceFilter : public cpp11ns::enable_shared_from_this<SpaceFilter>
 {
 
 protected:

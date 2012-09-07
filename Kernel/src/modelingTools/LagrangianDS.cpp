@@ -97,7 +97,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
 {
   zeroPlugin();
   // -- Lagrangian  xml object --
-  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
+  SP::LagrangianDSXML lgptr = cpp11ns::static_pointer_cast <LagrangianDSXML>(dsxml);
 
   // === Initial conditions ===
   // Warning: ndof is given by q0.size() !!
@@ -826,7 +826,7 @@ void LagrangianDS::saveSpecificDataToXML()
   if (!_dsxml)
     RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(_dsxml);
+  SP::LagrangianDSXML lgptr = cpp11ns::static_pointer_cast <LagrangianDSXML>(_dsxml);
   lgptr->setMassPlugin(_pluginMass->getPluginName());
   lgptr->setQ(*_q[0]);
   lgptr->setQ0(*_q0);
@@ -979,7 +979,7 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 //   _workMatrix[invMass]->PLUForwardBackwardInPlace(*qFreeOut);
 // }
 
-void LagrangianDS::resetNonSmoothPart()
+void LagrangianDS::resetAllNonSmoothPart()
 {
   if (_p[0])
     _p[0]->zero();

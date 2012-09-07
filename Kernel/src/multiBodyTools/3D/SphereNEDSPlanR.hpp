@@ -29,7 +29,7 @@
 
 #include "NewtonEulerFrom3DLocalFrameR.hpp"
 
-class SphereNEDSPlanR : public NewtonEulerFrom3DLocalFrameR, public boost::enable_shared_from_this<SphereNEDSPlanR>
+class SphereNEDSPlanR : public NewtonEulerFrom3DLocalFrameR, public cpp11ns::enable_shared_from_this<SphereNEDSPlanR>
 {
 private:
   /** serialization hooks

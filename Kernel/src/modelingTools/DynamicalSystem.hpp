@@ -831,7 +831,7 @@ public:
 
   /** set R to zero
    */
-  virtual void resetNonSmoothPart() = 0;
+  virtual void resetAllNonSmoothPart() = 0;
 
   /** set R to zero for a given level
    */

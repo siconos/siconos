@@ -26,7 +26,7 @@
 
 #include "CircularDS.hpp"
 
-class Circle : public CircularDS, public boost::enable_shared_from_this<Circle>
+class Circle : public CircularDS, public cpp11ns::enable_shared_from_this<Circle>
 {
 private:
   /** serialization hooks

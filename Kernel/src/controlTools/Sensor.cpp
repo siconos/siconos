@@ -44,7 +44,7 @@ void Sensor::initialize(SP::Model m)
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), SENSOR_EVENT);
-  boost::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
+  cpp11ns::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
 }
 
 // Add the present sensor into the Simulation process

@@ -27,7 +27,7 @@ NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml), _e(0.0)
 {
   if (nslawxml)
-    _e = (boost::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
+    _e = (cpp11ns::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
   else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
 }
 
@@ -55,7 +55,7 @@ void NewtonImpactNSL::display() const
 
 void NewtonImpactNSL::saveNonSmoothLawToXML()
 {
-  boost::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
+  cpp11ns::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
 }
 
 NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)

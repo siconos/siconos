@@ -199,7 +199,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for (boost::tie(oei, oeiend) = indexSet->out_edges(vd);
+    for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(vd);
          oei != oeiend; ++oei)
     {
       // note : at most 4 edges
@@ -280,9 +280,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (osiType == OSI::MOREAU)
       {
-        if ((boost::static_pointer_cast<Moreau> (Osi))->useGamma() || (boost::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+        if ((cpp11ns::static_pointer_cast<Moreau> (Osi))->useGamma() || (cpp11ns::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
         {
-          *rightInteractionBlock *= (boost::static_pointer_cast<Moreau> (Osi))->gamma();
+          *rightInteractionBlock *= (cpp11ns::static_pointer_cast<Moreau> (Osi))->gamma();
         }
       }
 
@@ -317,7 +317,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
       {
-        SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
         if (d->boundaryConditions())
         {
@@ -493,7 +493,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
 
       if (d->boundaryConditions())
       {
@@ -598,7 +598,7 @@ void LinearOSNS::computeq(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
 
@@ -665,7 +665,7 @@ void LinearOSNS::preCompute(double time)
     if (_keepLambdaAndYState)
     {
       InteractionsGraph::VIterator ui, uiend;
-      for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         // Get the relative position of inter-interactionBlock in the vector w
@@ -710,7 +710,7 @@ void LinearOSNS::postCompute()
   unsigned int pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector w
@@ -750,8 +750,8 @@ void LinearOSNS::saveNSProblemToXML()
 {
   //   if(onestepnspbxml != NULL)
   //     {
-  // //       (boost::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
-  //       (boost::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
+  // //       (cpp11ns::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
+  //       (cpp11ns::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
   //     }
   //   else RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - Not yet implemented.");

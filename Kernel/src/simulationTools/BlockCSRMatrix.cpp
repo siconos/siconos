@@ -133,7 +133,7 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   int sizeV = 0;
 
   InteractionsGraph::VIterator vi, viend;
-  for (boost::tie(vi, viend) = indexSet->vertices();
+  for (cpp11ns::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
@@ -149,7 +149,7 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   }
 
   InteractionsGraph::EIterator ei, eiend;
-  for (boost::tie(ei, eiend) = indexSet->edges();
+  for (cpp11ns::tie(ei, eiend) = indexSet->edges();
        ei != eiend; ++ei)
   {
     InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);

@@ -130,14 +130,14 @@ unsigned int OSNSMultipleImpact::EstimateNdataCols()
   // Number of columns for data at contacts
   SP::InteractionsGraph indexSet = simulation()->indexSet(0); // get indexSet[0]
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _numberCols = _numberCols + 3 * (indexSet->bundle(*ui)->nonSmoothLaw()->size()) + 1;
   }
   // Number of columns for data at particles
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  for (boost::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
+  for (cpp11ns::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
     _numberCols = _numberCols + (DSG->bundle(*dsi)->getDim());
   }
@@ -267,11 +267,11 @@ void OSNSMultipleImpact::BuildParaContact()
   SP::InteractionsGraph indexSet = simulation()->indexSet(1); // get indexSet[1]
   //Loop over the Interactionof the indexSet(1)
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     SP::NonSmoothLaw nslaw = inter->nslaw();
-    SP::MultipleImpactNSL Mulnslaw = boost::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
+    SP::MultipleImpactNSL Mulnslaw = cpp11ns::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of inter-interactionBlock in the vector VelContact
     unsigned int pos = _M->getPositionOfInteractionBlock(inter);
@@ -301,7 +301,7 @@ void OSNSMultipleImpact::ComputeStepSize()
   SP::DynamicalSystem DS1;
   SP::DynamicalSystem DS2;
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet1->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
@@ -322,7 +322,7 @@ void OSNSMultipleImpact::ComputeStepSize()
   double Pest = 0.0;
   for (it = setOfDS.begin(); it != setOfDS.end(); it++)
   {
-    SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(*it);
+    SP::LagrangianDS Lagds = cpp11ns::dynamic_pointer_cast<LagrangianDS>(*it);
     SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
     SP::SiconosVector vel_ds = Lagds->velocity();  // Pre-impact velocity of DS
 
@@ -351,12 +351,12 @@ void OSNSMultipleImpact::ComputeStepSize()
   // DynamicalSystemsGraph::VIterator ui, uiend;
   // DynamicalSystemsGraph::OEIterator edi, ediend;
   // double Pest = 0.0;
-  // for (boost::tie(ui,uiend) = DSG->vertices(); ui != uiend; ++ui)
+  // for (cpp11ns::tie(ui,uiend) = DSG->vertices(); ui != uiend; ++ui)
   //   {
   //     // Check if this DS is involved in the impact or not
   //     bool found = false;
   //     // Loop over all edges comming from this DS
-  //     for(boost::tie(edi,ediend) = DSG->out_edges(*ui); edi != ediend; ++edi)
+  //     for(cpp11ns::tie(edi,ediend) = DSG->out_edges(*ui); edi != ediend; ++edi)
   //       {
   //         SP::Interaction interp = DSG->bundle(*edi);
   //         if (indexSet1->is_vertex(inter)) // there exist at least one edge of this DS in the indexSet[1]
@@ -369,7 +369,7 @@ void OSNSMultipleImpact::ComputeStepSize()
   //     if (found) // if this DS involved in the impact
   //       {
   //         SP::DynamicalSystem ds = DSG->bundle(*ui); // DS
-  //         SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+  //         SP::LagrangianDS Lagds = cpp11ns::dynamic_pointer_cast<LagrangianDS>(ds);
   //         SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
   //         SP::SiconosVector vel_ds = Lagds->velocityMemory()->getSiconosVector(1);  // Pre-impact velocity of DS
   //         SP::SiconosVector abs_vel_ds(new SiconosVector(vel_ds->size()));
@@ -503,7 +503,7 @@ void OSNSMultipleImpact::InitializeInput()
   //Loop over alls Interactioninvolved in the indexSet[1]
   SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin()); // get indexSet[1]
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
@@ -913,7 +913,7 @@ void OSNSMultipleImpact::UpdateDuringImpact()
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact
@@ -955,7 +955,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   int Status_inter;
   InteractionsGraph::VIterator ui, uiend;
   unsigned int col_pos = 2;
-  for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui); // Interaction
     unsigned int id_contact = inter->number();
@@ -1008,11 +1008,11 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   // Save the data related to DS
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  for (boost::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
+  for (cpp11ns::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
     SP::DynamicalSystem ds = DSG->bundle(*dsi); // DS
     unsigned int id_ds = ds->number();
-    SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+    SP::LagrangianDS Lagds = cpp11ns::dynamic_pointer_cast<LagrangianDS>(ds);
     SP::SiconosVector qdot = Lagds->velocity();
     // Write
     if (YesSaveByMatrix)
@@ -1177,7 +1177,7 @@ void OSNSMultipleImpact::PostComputeImpact()
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
   InteractionsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector VelContact/TolImpulseContact

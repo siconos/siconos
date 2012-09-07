@@ -25,7 +25,7 @@ using namespace std;
 // --- Constructor from an xml file---
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): LagrangianDS(dsxml)
 {
-  SP::LagrangianLinearTIDSXML lltidsxml = boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml);
+  SP::LagrangianLinearTIDSXML lltidsxml = cpp11ns::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml);
 
   // If FInt or NNL is given: ignored.
   if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
@@ -275,7 +275,7 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   assert(_dsxml &&
          "LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(_dsxml);
+  SP::LagrangianDSXML lgptr = cpp11ns::static_pointer_cast <LagrangianDSXML>(_dsxml);
   lgptr->setMassMatrix(*_mass);
   lgptr->setQ(*_q[0]);
   lgptr->setQ0(*_q0);
@@ -296,8 +296,8 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   {
     lgptr->setFExtPlugin(_pluginFExt->getPluginName());
   }
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setK(*_K);
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setC(*_C);
+  (cpp11ns::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setK(*_K);
+  (cpp11ns::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setC(*_C);
 }
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)

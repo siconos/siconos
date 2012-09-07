@@ -31,7 +31,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
 {
 
   // pointer to xml
-  SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
+  SP::FirstOrderLinearDSXML foldsxml = (cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
 
@@ -302,13 +302,13 @@ void FirstOrderLinearDS::saveSpecificDataToXML()
 {
   if (!_dsxml)
     RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-  boost::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setA(*_A);
+  cpp11ns::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setA(*_A);
 
   // b
   if (_b)
   {
-    if (!(boost::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml))->isBPlugin())
-      boost::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setB(*_b);
+    if (!(cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml))->isBPlugin())
+      cpp11ns::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setB(*_b);
   }
 
   else RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");

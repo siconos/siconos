@@ -90,7 +90,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 {
   zeroPlugin();
   // -- Type::FirstOrderNonLinearDS xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
+  SP::FirstOrderNonLinearDSXML fonlds = cpp11ns::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
 
   // === Initial conditions ===
   // Warning: n is set thanks to x0 size
@@ -521,7 +521,7 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool)
 void FirstOrderNonLinearDS::saveSpecificDataToXML()
 {
   // -- FirstOrderNonLinearDS  xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(_dsxml);
+  SP::FirstOrderNonLinearDSXML fonlds = cpp11ns::static_pointer_cast <FirstOrderNonLinearDSXML>(_dsxml);
   // --- other data ---
   if (!fonlds)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
@@ -550,7 +550,7 @@ void FirstOrderNonLinearDS::display() const
   cout << " ============================================" << endl;
 }
 
-void FirstOrderNonLinearDS::resetNonSmoothPart()
+void FirstOrderNonLinearDS::resetAllNonSmoothPart()
 {
   _r->zero();
 }

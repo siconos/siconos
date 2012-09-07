@@ -174,12 +174,12 @@ TYPEDEF_SPTR(GraphProperties)
  *
  * where L is the line graph
  * transformation */
-typedef SiconosGraph < boost::shared_ptr<DynamicalSystem>, boost::shared_ptr<Interaction>,
+typedef SiconosGraph < cpp11ns::shared_ptr<DynamicalSystem>, cpp11ns::shared_ptr<Interaction>,
         SystemProperties, InteractionProperties,
         GraphProperties > _DynamicalSystemsGraph;
 
 
-typedef SiconosGraph < boost::shared_ptr<Interaction>, boost::shared_ptr<DynamicalSystem>,
+typedef SiconosGraph < cpp11ns::shared_ptr<Interaction>, cpp11ns::shared_ptr<DynamicalSystem>,
         InteractionProperties, SystemProperties,
         GraphProperties > _InteractionsGraph;
 

@@ -55,7 +55,7 @@ template <class T, class U> class SiconosSet
 public:
 
   /** set of T */
-  typedef std::set<boost::shared_ptr<T>, Cmp<T, U> > TSet;
+  typedef std::set<cpp11ns::shared_ptr<T>, Cmp<T, U> > TSet;
 
   /** iterator through a set of T */
   typedef typename TSet::iterator TIterator;
@@ -79,7 +79,7 @@ protected:
   U(T::*fpt)() const;
 
   /** a set of T, sorted thanks to their address */
-  boost::shared_ptr<TSet> setOfT;
+  cpp11ns::shared_ptr<TSet> setOfT;
 
 private:
 
@@ -154,7 +154,7 @@ public:
   /** return setOfT
    *  \return an InterSet
    */
-  const boost::shared_ptr<TSet> getSet() const
+  const cpp11ns::shared_ptr<TSet> getSet() const
   {
     return setOfT;
   }
@@ -162,7 +162,7 @@ public:
   /** get T number num, if it is present in the set (else, exception)
    *  \return a pointer to T
    */
-  boost::shared_ptr<T> getPtr(int num) const
+  cpp11ns::shared_ptr<T> getPtr(int num) const
   {
     ConstTIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
@@ -179,7 +179,7 @@ public:
    *  \param a pointer to T
    *  \return a bool
    */
-  bool isIn(boost::shared_ptr<T> t) const
+  bool isIn(cpp11ns::shared_ptr<T> t) const
   {
     TIterator it = setOfT->find(t);
     bool out = false;
@@ -211,7 +211,7 @@ public:
    *  \param a pointer to T
    *  \param a TIterator
    */
-  TIterator find(boost::shared_ptr<T> t)
+  TIterator find(cpp11ns::shared_ptr<T> t)
   {
     return setOfT->find(t);
   };
@@ -235,7 +235,7 @@ public:
    *  \param a pointer to T
    *  \return a CheckInsertT (boolean type information)
    */
-  CheckInsertT insert(boost::shared_ptr<T> t)
+  CheckInsertT insert(cpp11ns::shared_ptr<T> t)
   {
     return setOfT->insert(t);
   };
@@ -253,7 +253,7 @@ public:
   /** remove a T* from the set
    *  \param a pointer to T
    */
-  void erase(boost::shared_ptr<T> t)
+  void erase(cpp11ns::shared_ptr<T> t)
   {
     TIterator it = setOfT->find(t);
     if (it == setOfT->end())

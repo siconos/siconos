@@ -48,7 +48,7 @@ class BlockVector;
  *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
  *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
-class Lsodar : public OneStepIntegrator, public boost::enable_shared_from_this<Lsodar>
+class Lsodar : public OneStepIntegrator, public cpp11ns::enable_shared_from_this<Lsodar>
 {
 private:
   /** serialization hooks

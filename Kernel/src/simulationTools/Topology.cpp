@@ -20,10 +20,15 @@
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
-//#include "Interaction.hpp"
 #include "EqualityConditionNSL.hpp"
 
+#if __cplusplus >= 201103L
+#include <functional>
+#else
 #include <boost/bind.hpp>
+#endif
+
+
 #include <algorithm>
 #include <limits>
 
@@ -178,7 +183,7 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
           assert(!_IG[0]->is_vertex(inter));
 
           DynamicalSystemsGraph::EDescriptor new_ed;
-          boost::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
+          cpp11ns::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
 
           // add self branches in vertex properties
           // note : boost graph SEGFAULT on self branch removal
@@ -208,7 +213,7 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
             assert(!_IG[0]->is_vertex(inter));
 
             DynamicalSystemsGraph::EDescriptor new_ed;
-            boost::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
+            cpp11ns::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
 
             // add self branches in vertex properties
             // note : boost graph SEGFAULT on self branch removal

@@ -207,9 +207,9 @@ void Model::savePlatformToXML()
     _strat->timeDiscretisation()->saveTimeDiscretisationToXML();
 
     if (Type::value(*_strat) == Type::TimeStepping)
-      (boost::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();
+      (cpp11ns::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();
     else if (Type::value(*_strat) == Type::EventDriven)
-      (boost::static_pointer_cast<EventDriven>(_strat))->saveSimulationToXML();
+      (cpp11ns::static_pointer_cast<EventDriven>(_strat))->saveSimulationToXML();
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Simulation");
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object SimulationXML does not exist");

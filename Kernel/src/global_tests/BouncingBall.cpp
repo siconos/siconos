@@ -40,8 +40,8 @@ bool BouncingBall()
     // --- Model loading from xml file ---
     SP::Model bouncingBall(new Model("./Ball.xml"));
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::LagrangianDS ball = cpp11ns::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     bouncingBall->initialize();
 
     // --- Get the time discretisation scheme ---
