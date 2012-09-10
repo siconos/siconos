@@ -68,9 +68,9 @@ build_Kernel_VS() {
 		-DLIBXML2_INCLUDE_DIR=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/include-VC/libxml2 \
 		-DGMP_FOUND=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DGMP_INCLUDE_DIRS=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC \
-		-DCPPUNIT_FOUND=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/Debug/cppunit.lib \
+		-DCPPUNIT_FOUND=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/${REL_TYPE}/cppunit.lib \
 		-DCPPUNIT_INCLUDE_DIR=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC/cppunit \
-		-DCPPUNIT_LIBRARIES=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/Debug/cppunit.lib \
+		-DCPPUNIT_LIBRARIES=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/${REL_TYPE}/cppunit.lib \
 		-DBoost_INCLUDE_DIR=/scratch/Olivier/mingw32/boost_1_50_0 \
 		-DCMAKE_BUILD_TYPE=${REL_TYPE} \
 		${SICONOS_SOURCES}/Kernel/
