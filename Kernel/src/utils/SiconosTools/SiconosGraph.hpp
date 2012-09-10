@@ -62,7 +62,7 @@ using std::size_t;
 #pragma clang diagnostic pop
 #endif
 
-#if __cplusplus >= 201103L
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 namespace cpp11ns = std;
 #else
 namespace cpp11ns = boost;

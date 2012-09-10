@@ -26,7 +26,12 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 
+#if __cplusplus >= 201103L
+#include <boost/serialization/ser_shared_ptr.hpp>
+#else
 #include <boost/serialization/shared_ptr.hpp>
+#endif
+
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>

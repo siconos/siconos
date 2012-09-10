@@ -42,7 +42,7 @@
 #include <boost/property_map.hpp>
 #endif
 
-#if __cplusplus >= 201103L
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <memory>
 namespace cpp11ns = std;
 #else

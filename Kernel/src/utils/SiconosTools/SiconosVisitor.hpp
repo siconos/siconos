@@ -332,7 +332,7 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
 
 /* use boost array for the initialization of non const reference */
 //#include <boost/type_traits.hpp>
-#if __cplusplus >= 201103L
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
 #else

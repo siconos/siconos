@@ -103,12 +103,12 @@ void KernelTest::t2()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(*(boost::static_pointer_cast<LagrangianDS>(ds1)->mass())
-                 == *(boost::static_pointer_cast<LagrangianDS>(ds2)->mass()));
-  CPPUNIT_ASSERT(*(boost::static_pointer_cast<LagrangianDS>(ds1)->q())
-                 == *(boost::static_pointer_cast<LagrangianDS>(ds2)->q()));
-  CPPUNIT_ASSERT(*(boost::static_pointer_cast<LagrangianDS>(ds1)->velocity())
-                 == *(boost::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
+  CPPUNIT_ASSERT(*(cpp11ns::static_pointer_cast<LagrangianDS>(ds1)->mass())
+                 == *(cpp11ns::static_pointer_cast<LagrangianDS>(ds2)->mass()));
+  CPPUNIT_ASSERT(*(cpp11ns::static_pointer_cast<LagrangianDS>(ds1)->q())
+                 == *(cpp11ns::static_pointer_cast<LagrangianDS>(ds2)->q()));
+  CPPUNIT_ASSERT(*(cpp11ns::static_pointer_cast<LagrangianDS>(ds1)->velocity())
+                 == *(cpp11ns::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
 
 }
 
@@ -310,11 +310,11 @@ void KernelTest::t6()
 
 
 
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
+    SP::LagrangianDS ball = cpp11ns::static_pointer_cast<LagrangianDS>
                             (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
 
     SP::Interaction inter = *(bouncingBall->nonSmoothDynamicalSystem()->interactions()->begin());
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
 
 
     // --- Get the values to be plotted ---
@@ -418,7 +418,7 @@ void KernelTest::t7()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(boost::static_pointer_cast<Disk>(ds1)->getRadius() ==
-                 boost::static_pointer_cast<Disk>(ds2)->getRadius());
+  CPPUNIT_ASSERT(cpp11ns::static_pointer_cast<Disk>(ds1)->getRadius() ==
+                 cpp11ns::static_pointer_cast<Disk>(ds2)->getRadius());
 }
 

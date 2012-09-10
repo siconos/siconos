@@ -64,7 +64,7 @@ More documentation on smart pointers and reference counting:
 
 #include <boost/shared_array.hpp>
 
-#if __cplusplus >= 201103L
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 namespace cpp11ns = std;
 #else
 #include <boost/shared_ptr.hpp>

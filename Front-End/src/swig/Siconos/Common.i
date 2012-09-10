@@ -226,7 +226,7 @@ static int convert_darray(PyObject *input, double *ptr) {
                                                  TYPE,                  \
                                                  NAME->getArray());     \
   SharedPointerKeeper* savedSharedPointer = new                         \
-    SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
+    SharedPointerKeeper(cpp11ns::static_pointer_cast<void>(NAME));        \
   reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
     PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
                           &sharedPointerKeeperDelete);                  \
@@ -238,7 +238,7 @@ static int convert_darray(PyObject *input, double *ptr) {
                                                  TYPE,                  \
                                                  &(*NAME)[0]);          \
   SharedPointerKeeper* savedSharedPointer = new                         \
-    SharedPointerKeeper(boost::static_pointer_cast<void>(NAME));        \
+    SharedPointerKeeper(cpp11ns::static_pointer_cast<void>(NAME));        \
   reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
     PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
                           &sharedPointerKeeperDelete);                  \
