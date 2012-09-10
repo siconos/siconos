@@ -436,7 +436,7 @@ int frictionContact3D_unitary_enumerative_solve_sliding(FrictionContactProblem* 
   Poly4[4] = AA + EE;
   int nbRealRacines;
   double Racines[4];
-  double PossiblesTheta[6];
+  double PossiblesTheta[8];
 
   compute_racines(Poly4, &nbRealRacines, Racines);
   for (int numR = 0; numR < nbRealRacines; numR++)

@@ -8,8 +8,6 @@
 //#define DEBUG_MESSAGES 1
 #include "debug.h"
 
-unsigned int NUMERICS_SBM_FREE_BLOCK = 1 << 2;
-unsigned int NUMERICS_SBM_FREE_SBM = 1 << 3;
 //#define VERBOSE_DEBUG
 
 void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)

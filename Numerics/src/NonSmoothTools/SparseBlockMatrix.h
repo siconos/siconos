@@ -166,8 +166,8 @@ typedef struct
   double **workspace;
 } SparseBlockStructuredMatrixPred;
 
-extern unsigned int NUMERICS_SBM_FREE_BLOCK;
-extern unsigned int NUMERICS_SBM_FREE_SBM;
+#define NUMERICS_SBM_FREE_BLOCK 4
+#define NUMERICS_SBM_FREE_SBM 8
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

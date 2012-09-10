@@ -78,6 +78,7 @@ int main(void)
   printf("\n (warning: column-major) \n");
 
   free(denseMat);
+  printf("NUMERICS_SBM_FREE_BLOCK value %d", NUMERICS_SBM_FREE_BLOCK);
   SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
