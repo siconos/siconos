@@ -75,15 +75,15 @@ int main()
     // This is ok if we build one with btConveHullShape
     SP::btCollisionShape box(new btConvexHullShape());
     {
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, -1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, 1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, 1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, 1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, -1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, -1.0));
-      boost::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, 1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, -1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, 1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, 1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, 1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, -1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, -1.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, 1.0));
     }
     SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
     shapes.push_back(box1);

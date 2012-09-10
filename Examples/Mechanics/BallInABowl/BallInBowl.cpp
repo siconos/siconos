@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     bouncingBall->initialize();
 
     // --- Get the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
     // --- Get the time discretisation scheme ---
     SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     // time
     dataPlot(k, 0) =  bouncingBall->t0();
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::LagrangianDS ball = cpp11ns::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);

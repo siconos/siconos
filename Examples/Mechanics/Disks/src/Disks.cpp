@@ -236,7 +236,7 @@ void Disks::init()
     // -- Simulation --
     simulation_.reset(new TimeStepping(timedisc_));
 
-    boost::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
+    cpp11ns::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
 
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);

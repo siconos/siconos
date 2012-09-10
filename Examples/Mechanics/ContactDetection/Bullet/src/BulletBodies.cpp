@@ -75,11 +75,11 @@ void BulletBodies::init()
     {
       double height = 1;
       double r = 1;
-      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(0.0,  0.75 * height, 0.0));
-      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,    r));
-      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,    r));
-      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,   -r));
-      boost::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,   -r));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(0.0,  0.75 * height, 0.0));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,    r));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,    r));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(r, -0.25 * height,   -r));
+      cpp11ns::static_pointer_cast<btConvexHullShape>(mshape)->addPoint(btVector3(-r, -0.25 * height,   -r));
     }
     SP::BulletWeightedShape mshape1(new BulletWeightedShape(mshape, 1.0));
 
@@ -214,7 +214,7 @@ void BulletBodies::init()
     // -- Time discretisation --
     timedisc.reset(new TimeDiscretisation(t0, h));
 
-    simulation.reset(new BulletTimeStepping(timedisc, boost::static_pointer_cast<BulletSpaceFilter>(_playground)));
+    simulation.reset(new BulletTimeStepping(timedisc, cpp11ns::static_pointer_cast<BulletSpaceFilter>(_playground)));
 
 #ifdef WITH_SOLVER
     osnspb.reset(new FrictionContact(3, WITH_SOLVER));
