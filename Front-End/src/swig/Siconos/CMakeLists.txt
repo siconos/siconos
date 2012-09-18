@@ -204,6 +204,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/Rover1039.dat Rover1039.dat COP
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/SBM1.dat SBM1.dat COPYONLY)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/smc_2.ref smc_2.ref COPYONLY)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/result.ref result.ref COPYONLY)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tests/diode_bridge.ref diode_bridge.ref COPYONLY)
 
 IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   SET(DRIVE_LETTER "Z:")
@@ -216,6 +217,7 @@ ADD_TEST(sparse ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_C
 ADD_TEST(Kernel ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_Kernel.py)
 ADD_TEST(friction_contact ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_friction_contact.py)
 ADD_TEST(bouncing_ball ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_bouncing_ball.py)
+ADD_TEST(diode_bridge ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diode_bridge.py)
 ADD_TEST(smc ${CMAKE_BINARY_DIR}/src/swig/runtest.py ${DRIVE_LETTER}${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
 
 SET_TESTS_PROPERTIES(lcp PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;Assertion")
