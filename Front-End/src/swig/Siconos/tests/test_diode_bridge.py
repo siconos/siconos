@@ -11,10 +11,6 @@ def test_diodebridge1():
     Vinit = 10.0    # initial voltage
     Modeltitle = "DiodeBridge"
 
-    withPlot=True
-    if (withPlot) :
-        from matplotlib.pyplot import subplot, title, plot, grid, show
-
     from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                                ComplementarityConditionNSL, Interaction,\
                                Model, Moreau, TimeDiscretisation, LCP,  \
@@ -142,10 +138,6 @@ def test_diodebridge2():
     Rvalue = 1e3    # resistance 
     Vinit = 10.0    # initial voltage
     Modeltitle = "DiodeBridge"
-
-    withPlot=True
-    if (withPlot) :
-        from matplotlib.pyplot import subplot, title, plot, grid, show
 
     from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearR, \
                                ComplementarityConditionNSL, Interaction,\
