@@ -1,5 +1,4 @@
 
-
 # need a ref file.
 def test_diodebridge1():
     t0 = 0.0
@@ -128,6 +127,18 @@ def test_diodebridge1():
         k += 1
         aTS.nextStep()
 
+    #
+    # comparison with the reference file
+    #
+    from Siconos.Kernel import SimpleMatrix, getMatrix
+    from numpy.linalg import norm
+
+    ref = getMatrix(SimpleMatrix("diode_bridge.ref"))
+
+    assert (norm(dataPlot - ref) < 1e-12)
+    return ref,dataPlot
+
+
 
 def test_diodebridge2():
     t0 = 0.0
@@ -142,7 +153,7 @@ def test_diodebridge2():
     from Siconos.Kernel import FirstOrderLinearDS, FirstOrderLinearR, \
                                ComplementarityConditionNSL, Interaction,\
                                Model, Moreau, TimeDiscretisation, LCP,  \
-                               TimeStepping
+                               TimeStepping, SiconosVector
 
     #
     # dynamical system
@@ -174,13 +185,19 @@ def test_diodebridge2():
 
     class VoltageSource(FirstOrderLinearR):
 
+        omega = 1e4
+        Voffset = 0.0
+        
         def __init__(self, *args):
             super(VoltageSource, self).__init__(*args)
+            
+        def initialize(self, inter):
+            super(VoltageSource, self).initialize(inter)
+            self._e = SiconosVector(inter.getSizeOfY())
 
         def computeE(self, time, inter):
-            print time
-            print inter.data(Interaction.z)
-
+            workZ = inter.data(1)
+            # then compute self._e 
 
     LTIRDiodeBridge=VoltageSource(C,B)
     LTIRDiodeBridge.setDPtr(D)
@@ -268,7 +285,7 @@ def test_diodebridge2():
         aTS.nextStep()
 
 
-     #
+    #
     # comparison with the reference file
     #
     from Siconos.Kernel import SimpleMatrix, getMatrix

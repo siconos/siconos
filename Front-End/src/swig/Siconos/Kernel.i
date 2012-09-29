@@ -304,6 +304,9 @@ TYPEDEF_SPTR(InteractionsGraph);
                                                                 InteractionProperties, SystemProperties, 
                                                                 GraphProperties > >;
 
+%rename (ioMatrix_read) ioMatrix::read; 
+%rename (ioMatrix_write) ioMatrix::write; 
+%include "ioMatrix.hpp"
 
 %include "SimulationTypeDef.hpp" 
 
@@ -333,8 +336,43 @@ TYPEDEF_SPTR(InteractionsGraph);
 %feature("director") TYPE;
 %ignore cpp11ns::enable_shared_from_this<TYPE>;
 %template (shared ## TYPE) cpp11ns::enable_shared_from_this<TYPE>;
+
 %shared_ptr(TYPE); 
 %enddef
+
+
+ /*
+%typemap (in) (Interaction&) (int res)
+{
+  int newmem = 0;
+  void * argp_;
+
+  res = SWIG_ConvertPtrAndOwn($input, &argp_, SWIGTYPE_p_Interaction,  0 , &newmem);
+
+  if (!SWIG_IsOK(res)) {
+    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "" "', argument " """ of type '" "Interaction &""'"); 
+    }
+  if (!argp_) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "', argument " "2"" of type '" "Interaction &""'"); 
+  }
+  if (newmem & SWIG_CAST_NEW_MEMORY) {
+    assert(0);
+  }
+  else
+  {
+    $1 = reinterpret_cast< Interaction * >(argp_);
+  }
+}
+*/
+ //%apply (Interaction& inter) { (Interaction&) };
+%typemap(directorin) (Interaction& inter) ()
+{
+  //  %typemap(directorin) (Interaction&) ()
+  void * swig_argp;
+  SP::Interaction pinter(createSPtrInteraction($1));
+  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&pinter), SWIGTYPE_p_cpp11ns__shared_ptrT_Interaction_t, 0);
+}
+
 
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
 %rename  (__getitem__) TYPE ## ::operator[];
