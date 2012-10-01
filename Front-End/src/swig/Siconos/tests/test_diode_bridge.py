@@ -98,7 +98,7 @@ def test_diodebridge1():
     # ->saved in a matrix dataPlot
 
     from numpy import empty
-    dataPlot = empty([N+1,8])
+    dataPlot = empty([N,8])
 
     x = LSDiodeBridge.x()
     print "Initial state : ",x
@@ -106,6 +106,31 @@ def test_diodebridge1():
     print "First y : ",y
     lambda_ = InterDiodeBridge.lambda_(0)
 
+    # For the initial time step:
+    # time
+
+    #  inductor voltage
+    dataPlot[k, 1] = x[0]
+
+    # inductor current
+    dataPlot[k, 2] = x[1]
+
+    # diode R1 current
+    dataPlot[k, 3] = y[0]
+
+    # diode R1 voltage
+    dataPlot[k, 4] = - lambda_[0]
+
+    # diode F2 voltage 
+    dataPlot[k, 5] = - lambda_[1]
+
+    # diode F1 current
+    dataPlot[k, 6] = lambda_[2]
+
+    # resistor current
+    dataPlot[k, 7] = y[0] + lambda_[2]
+
+    k += 1
     while (k < N):    
         aTS.computeOneStep()
         #aLCP.display()
@@ -255,7 +280,7 @@ def test_diodebridge2():
     # ->saved in a matrix dataPlot
 
     from numpy import empty
-    dataPlot = empty([N+1,8])
+    dataPlot = empty([N,8])
 
     x = LSDiodeBridge.x()
     print "Initial state : ",x
@@ -263,6 +288,31 @@ def test_diodebridge2():
     print "First y : ",y
     lambda_ = InterDiodeBridge.lambda_(0)
 
+    # For the initial time step:
+    # time
+
+    #  inductor voltage
+    dataPlot[k, 1] = x[0]
+
+    # inductor current
+    dataPlot[k, 2] = x[1]
+
+    # diode R1 current
+    dataPlot[k, 3] = y[0]
+
+    # diode R1 voltage
+    dataPlot[k, 4] = - lambda_[0]
+
+    # diode F2 voltage 
+    dataPlot[k, 5] = - lambda_[1]
+
+    # diode F1 current
+    dataPlot[k, 6] = lambda_[2]
+
+    # resistor current
+    dataPlot[k, 7] = y[0] + lambda_[2]
+
+    k += 1
     while (k < N):    
         aTS.computeOneStep()
         #aLCP.display()
@@ -283,7 +333,6 @@ def test_diodebridge2():
         dataPlot[k, 7] = y[0] + lambda_[2]
         k += 1
         aTS.nextStep()
-
 
     #
     # comparison with the reference file
