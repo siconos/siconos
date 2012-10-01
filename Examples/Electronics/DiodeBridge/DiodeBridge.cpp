@@ -1,4 +1,3 @@
-
 /* Siconos-sample , Copyright INRIA 2005-2011.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -21,11 +20,13 @@
 //
 //  DiodeBridge  : sample of an electrical circuit involving :
 //  - a linear dynamical system consisting of an LC oscillator (1 µF , 10 mH)
-//  - a non smooth system (a 1000 Ohm resistor supplied through a 4 diodes bridge) in parallel
-//    with the oscillator
+//  - a non smooth system (a 1000 Ohm resistor supplied through a 4
+//    diodes bridge) in parallel with the oscillator
 //
 //  Expected behavior :
-//  The initial state (Vc = 10 V , IL = 0) of the oscillator provides an initial energy.
+
+//  The initial state (Vc = 10 V , IL = 0) of the oscillator provides
+//  an initial energy.
 //  The period is 2 Pi sqrt(LC) ~ 0,628 ms.
 //      The non smooth system is a full wave rectifier :
 //  each phase (positive and negative) of the oscillation allows current to flow
@@ -37,9 +38,10 @@
 //  - the current through the inductor
 //
 //  Since there is only one dynamical system, the interaction is defined by :
-//  - complementarity laws between diodes current and voltage. Depending on
-//        the diode position in the bridge, y stands for the reverse voltage across the diode
-//    or for the diode current (see figure in the template file)
+//  - complementarity laws between diodes current and
+//    voltage. Depending on the diode position in the bridge, y stands
+//    for the reverse voltage across the diode or for the diode
+//    current (see figure in the template file)
 //  - a linear time invariant relation between the state variables and
 //    y and lambda (derived from Kirchhoff laws)
 //
@@ -71,7 +73,8 @@ int main(int argc, char* argv[])
     LS_A->setValue(0, 1, -1.0 / Cvalue);
     LS_A->setValue(1, 0, 1.0 / Lvalue);
 
-    SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
+    SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state,
+                                         LS_A));
 
     // --- Interaction between linear system and non smooth system ---
     SP::SiconosMatrix Int_C(new SimpleMatrix(4, 2));
@@ -92,20 +95,24 @@ int main(int argc, char* argv[])
     (*Int_B)(0, 2) = -1.0 / Cvalue ;
     (*Int_B)(0, 3) = 1.0 / Cvalue;
 
-    SP::FirstOrderLinearTIR LTIRDiodeBridge(new FirstOrderLinearTIR(*Int_C, *Int_B));
+    SP::FirstOrderLinearTIR LTIRDiodeBridge(new FirstOrderLinearTIR(*Int_C,
+                                            *Int_B));
     LTIRDiodeBridge->setDPtr(Int_D);
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridge(new Interaction(4, nslaw, LTIRDiodeBridge, 1));
+    SP::Interaction InterDiodeBridge(new Interaction(4, nslaw,
+                                     LTIRDiodeBridge, 1));
     InterDiodeBridge->insert(LSDiodeBridge);
 
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
     // add the dynamical system in the non smooth dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->
+    insertDynamicalSystem(LSDiodeBridge);
     // link the interaction and the dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->
+    link(InterDiodeBridge, LSDiodeBridge);
 
     // ------------------
     // --- Simulation ---
@@ -136,7 +143,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N, 7);
+    SimpleMatrix dataPlot(N, 8);
 
     SP::SiconosVector x = LSDiodeBridge->x();
     SP::SiconosVector y = InterDiodeBridge->y(0);
@@ -164,6 +171,9 @@ int main(int argc, char* argv[])
     // diode F1 current
     dataPlot(k, 6) = (*lambda)(2);
 
+    // resistor current
+    dataPlot(k, 7) = (*y)(0) + (*lambda)(2);
+
     boost::timer t;
     t.restart();
 
@@ -172,7 +182,7 @@ int main(int argc, char* argv[])
     {
       // solve ...
       aTS->computeOneStep();
-      aLCP->display();
+      //  aLCP->display();
       // --- Get values to be plotted ---
       // time
       dataPlot(k, 0) = aTS->nextTime();
@@ -195,6 +205,9 @@ int main(int argc, char* argv[])
       // diode F1 current
       dataPlot(k, 6) = (*lambda)(2);
 
+      // resistor current
+      dataPlot(k, 7) = (*y)(0) + (*lambda)(2);
+
       aTS->nextStep();
 
     }
@@ -208,8 +221,21 @@ int main(int argc, char* argv[])
 
     // dataPlot (ascii) output
     ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
-  }
 
+
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("result.ref", "ascii", dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout <<
+                "Warning. The result is rather different from the reference file."
+                << std::endl;
+      return 1;
+    }
+
+  }
   // --- Exceptions handling ---
   catch (SiconosException e)
   {

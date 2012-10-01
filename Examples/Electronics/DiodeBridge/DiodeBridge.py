@@ -1,51 +1,53 @@
 #!/usr/bin/env python
-
-# /* Siconos-sample , Copyright INRIA 2005-2011.
-#  * Siconos is a program dedicated to modeling, simulation and control
-#  * of non smooth dynamical systems.	
-#  * Siconos is a free software; you can redistribute it and/or modify
-#  * it under the terms of the GNU General Public License as published by
-#  * the Free Software Foundation; either version 2 of the License, or
-#  * (at your option) any later version.
-#  * Siconos is distributed in the hope that it will be useful,
-#  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  * GNU General Public License for more details.
-#  *
-#  * You should have received a copy of the GNU General Public License
-#  * along with Siconos; if not, write to the Free Software
-#  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#  *
-#  * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
-# */
-# //-----------------------------------------------------------------------
-# //
-# //  DiodeBridge  : sample of an electrical circuit involving :
-# //	- a linear dynamical system consisting of an LC oscillator
-# //	- a non smooth system (a 1000 Ohm resistor supplied through a 4 diodes bridge) in parallel
-# //	  with the oscillator
-# //
-# //  Expected behavior : 
-# //	The initial state (Vc = 10 V , IL = 0) of the oscillator provides an initial energy.
-# //	The period is 2 Pi sqrt(LC) ~ 0,628 ms.
-# //      The non smooth system is a full wave rectifier :
-# //	each phase (positive and negative) of the oscillation allows current to flow
-# //	through the resistor in a constant direction, resulting in an energy loss :
-# //	the oscillation damps.
-# //
-# //  State variables : 
-# //	- the voltage across the capacitor (or inductor)
-# //	- the current through the inductor
-# //
-# //  Since there is only one dynamical system, the interaction is defined by :
-# //	- complementarity laws between diodes current and voltage. Depending on
-# //        the diode position in the bridge, y stands for the reverse voltage across the diode 
-# //	  or for the diode current (see figure in the template file) 
-# //	- a linear time invariant relation between the state variables and
-# //	  y and lambda (derived from Kirchhoff laws)
-# //
-# //-----------------------------------------------------------------------
-
+# -*- coding: utf-8 -*-
+# Siconos-sample , Copyright INRIA 2005-2011.
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.	
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# 
+# Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+#
+# -----------------------------------------------------------------------
+# 
+#   DiodeBridge  : sample of an electrical circuit involving :
+#     - a linear dynamical system consisting of an LC oscillator (1 µF , 10 mH)
+#     - a non smooth system (a 1000 Ohm resistor supplied through a 4
+# 	diodes bridge) in parallel with the oscillator
+# 
+#   Expected behavior :
+#
+#   The initial state (Vc = 10 V , IL = 0) of the oscillator provides
+#   an initial energy.
+#   The period is 2 Pi sqrt(LC) ~ 0,628 ms.
+#   The non smooth system is a full wave rectifier :
+#   each phase (positive and negative) of the oscillation allows current to flow
+#   through the resistor in a constant direction, resulting in an energy loss :
+#   the oscillation damps.
+# 
+#   State variables :
+#     - the voltage across the capacitor (or inductor)
+#     - the current through the inductor
+# 
+#   Since there is only one dynamical system, the interaction is defined by :
+#     - complementarity laws between diodes current and
+#   voltage. Depending on the diode position in the bridge, y stands
+#   for the reverse voltage across the diode or for the diode
+#   current (see figure in the template file)
+#     - a linear time invariant relation between the state variables and
+# 	y and lambda (derived from Kirchhoff laws)
+# 
+# -----------------------------------------------------------------------
 
 t0 = 0.0
 T = 5.0e-3       # Total simulation time
@@ -147,8 +149,8 @@ print "Number of steps : ",N
 # Get the values to be plotted 
 # ->saved in a matrix dataPlot
 
-from numpy import empty
-dataPlot = empty([N+1,8])
+from numpy import zeros
+dataPlot = zeros([N,8])
 
 x = LSDiodeBridge.x()
 print "Initial state : ",x
@@ -156,6 +158,31 @@ y = InterDiodeBridge.y(0)
 print "First y : ",y
 lambda_ = InterDiodeBridge.lambda_(0)
 
+# For the initial time step:
+# time
+
+#  inductor voltage
+dataPlot[k, 1] = x[0]
+
+# inductor current
+dataPlot[k, 2] = x[1]
+
+# diode R1 current
+dataPlot[k, 3] = y[0]
+
+# diode R1 voltage
+dataPlot[k, 4] = - lambda_[0]
+
+# diode F2 voltage 
+dataPlot[k, 5] = - lambda_[1]
+
+# diode F1 current
+dataPlot[k, 6] = lambda_[2]
+
+# resistor current
+dataPlot[k, 7] = y[0] + lambda_[2]
+
+k += 1
 while (k < N):    
     aTS.computeOneStep()
     #aLCP.display()
@@ -176,6 +203,14 @@ while (k < N):
     dataPlot[k, 7] = y[0] + lambda_[2]
     k += 1
     aTS.nextStep()
+
+# comparison with reference file
+from Siconos.Kernel import SimpleMatrix, getMatrix
+from numpy.linalg import norm
+
+ref = getMatrix(SimpleMatrix("result.ref"))
+
+assert (norm(dataPlot - ref) < 1e-12)
 
 if (withPlot) :
     #
@@ -199,4 +234,8 @@ if (withPlot) :
     plot(dataPlot[0:k-1,0], dataPlot[0:k-1,7])
     grid()
     show()
+
+
+
+
 
