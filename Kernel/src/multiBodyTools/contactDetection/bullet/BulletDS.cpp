@@ -33,14 +33,25 @@
 BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,
                    SP::SiconosVector velocity) :
-  NewtonEulerDS(position, velocity, weightedShape->mass(), weightedShape->inertiaMatrix()),
+  NewtonEulerDS(position, velocity, weightedShape->mass(),
+                weightedShape->inertiaMatrix()),
   _weightedShape(weightedShape)
 {
+  SiconosVector& q = *_q;
+
+  if (fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
+                pow(q(5), 2) +  pow(q(6), 2)) - 1.) >= 1e-10)
+  {
+    RuntimeException::selfThrow(
+      " Input quaternion is not a unit quaternion "
+    );
+  }
 
   _collisionObject.reset(new btCollisionObject());
 
   _collisionObject->setUserPointer(this);
-  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+  _collisionObject->setCollisionFlags(_collisionObject->getCollisionFlags() |
+                                      btCollisionObject::CF_KINEMATIC_OBJECT);
 
   _collisionObject->setCollisionShape(&*(weightedShape->collisionShape()));
 
@@ -56,7 +67,8 @@ void BulletDS::updateCollisionObject() const
 
   DEBUG_EXPR(q.display());
 
-  assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +  pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
+  assert(fabs(sqrt(pow(q(3), 2) + pow(q(4), 2) +
+                   pow(q(5), 2) +  pow(q(6), 2)) - 1.) < 1e-10);
 
   _collisionObject->getWorldTransform().setOrigin(btVector3(q(0), q(1), q(2)));
   _collisionObject->getWorldTransform().getBasis().setRotation(btQuaternion(q(4), q(5),

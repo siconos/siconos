@@ -49,7 +49,7 @@ void LinearChatteringSMC::initialize(SP::Model m)
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
 
-  _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+  _sensor = cpp11ns::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
     RuntimeException::selfThrow("LinearChatteringSMC::initialize - the given sensor is not a ControlSensor");

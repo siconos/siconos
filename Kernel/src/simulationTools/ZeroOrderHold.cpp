@@ -313,7 +313,7 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
   if (withInteraction)
   {
     SP::SiconosVector tmpb(new SiconosVector(ds.getDim(), 0));
-    static_pointer_cast<FirstOrderLinearDS>(_DSPsiMap[dsN])->setb(tmpb);
+    cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_DSPsiMap[dsN])->setb(tmpb);
     _modelPsiMap[dsN].reset(new Model(t0, T));
     _modelPsiMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPsiMap[dsN]);
     _PsiOSIMap[dsN].reset(new Lsodar(_DSPsiMap[dsN]));
@@ -687,7 +687,7 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
 
     else if (relationType == NewtonEuler)
     {
-      SP::SiconosMatrix CT =  static_pointer_cast<NewtonEulerR>(rel)->jachqT();
+      SP::SiconosMatrix CT =  cpp11ns::static_pointer_cast<NewtonEulerR>(rel)->jachqT();
 
       if (CT)
       {
@@ -748,8 +748,8 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         {
           if (((allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
           {
-            static_pointer_cast<LagrangianRheonomousR>(rel)->computehDot(simulation()->getTkp1(), *inter);
-            subprod(*ID, *(static_pointer_cast<LagrangianRheonomousR>(rel)->hDot()), *Yp, xcoord, false); // y += hDot
+            cpp11ns::static_pointer_cast<LagrangianRheonomousR>(rel)->computehDot(simulation()->getTkp1(), *inter);
+            subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianRheonomousR>(rel)->hDot()), *Yp, xcoord, false); // y += hDot
           }
           else
             RuntimeException::selfThrow("ZeroOrderHold::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
@@ -768,13 +768,13 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         SP::SiconosMatrix F;
         if (relationSubType == LinearTIR)
         {
-          e = static_pointer_cast<FirstOrderLinearTIR>(rel)->e();
-          F = static_pointer_cast<FirstOrderLinearTIR>(rel)->F();
+          e = cpp11ns::static_pointer_cast<FirstOrderLinearTIR>(rel)->e();
+          F = cpp11ns::static_pointer_cast<FirstOrderLinearTIR>(rel)->F();
         }
         else
         {
-          e = static_pointer_cast<FirstOrderLinearR>(rel)->e();
-          F = static_pointer_cast<FirstOrderLinearR>(rel)->F();
+          e = cpp11ns::static_pointer_cast<FirstOrderLinearR>(rel)->e();
+          F = cpp11ns::static_pointer_cast<FirstOrderLinearR>(rel)->F();
         }
 
         if (e)

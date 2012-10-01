@@ -232,6 +232,11 @@ public:
    *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
+
+  /** To set a plug-in function to compute input function E
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
+   */
   virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute the jacobian according to x of the input

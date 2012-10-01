@@ -43,13 +43,13 @@ void LinearSMCOT2::initialize(SP::Model m)
   dsType = Type::value(*_DS);
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DSPhi.reset(new FirstOrderLinearDS(*(static_pointer_cast<FirstOrderLinearDS>(_DS))));
-    _DSPred.reset(new FirstOrderLinearDS(*(static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DSPhi.reset(new FirstOrderLinearDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DSPred.reset(new FirstOrderLinearDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_DS))));
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
-    _DSPhi.reset(new FirstOrderLinearTIDS(*(static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
-    _DSPred.reset(new FirstOrderLinearTIDS(*(static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DSPhi.reset(new FirstOrderLinearTIDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DSPred.reset(new FirstOrderLinearTIDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
   }
   else
   {
@@ -61,7 +61,7 @@ void LinearSMCOT2::initialize(SP::Model m)
   _DSPred->setComputebFunction(NULL);
   // XXX What if there is more than one sensor ...
 
-  _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+  _sensor = cpp11ns::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
     RuntimeException::selfThrow("LinearSMCOT2::initialize - the given sensor is not a ControlSensor");

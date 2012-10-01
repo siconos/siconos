@@ -61,7 +61,7 @@ public:
   /** Return the _processDS */
   SP::FirstOrderLinearDS processDS() const
   {
-    return static_pointer_cast<FirstOrderLinearDS>(_processDS);
+    return cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_processDS);
   };
 };
 

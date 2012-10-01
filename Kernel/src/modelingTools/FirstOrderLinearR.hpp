@@ -240,23 +240,23 @@ public:
 
   /** Function to compute matrix C
   */
-  void computeC(const double time, Interaction& inter);
+  virtual void computeC(const double time, Interaction& inter);
 
   /** Function to compute matrix F
   */
-  void computeF(const double time, Interaction& inter);
+  virtual void computeF(const double time, Interaction& inter);
 
   /** Function to compute matrix D
   */
-  void computeD(const double time, Interaction& inter);
+  virtual void computeD(const double time, Interaction& inter);
 
   /** Function to compute vector e
   */
-  void computeE(const double time, Interaction& inter);
+  virtual void computeE(const double time, Interaction& inter);
 
   /** Function to compute matrix B
   */
-  void computeb(const double time, Interaction& inter);
+  virtual void computeb(const double time, Interaction& inter);
 
   /** initialize the relation (check sizes, memory allocation ...)
   \param inter Interaction: the interaction that owns this relation
@@ -266,18 +266,18 @@ public:
   /** default function to compute h
   *  \param double : current time
   */
-  void computeh(const double time, Interaction& inter);
+  virtual void computeh(const double time, Interaction& inter);
 
   /** default function to compute g
   *  \param double : current time
   */
-  void computeg(const double time, Interaction& inter);
+  virtual void computeg(const double time, Interaction& inter);
 
   /** default function to compute y
   *  \param double: not used
   *  \param unsigned int: not used
   */
-  void computeOutput(const double time, Interaction& inter, unsigned int = 0);
+  virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
 
   /** default function to compute r
   *  \param double : not used

@@ -47,13 +47,13 @@ void SampledPIDActuator::initialize(SP::Model m)
   }
   else
   {
-    SP::FirstOrderLinearDS FOLDS = static_pointer_cast<FirstOrderLinearDS>(_DS);
+    SP::FirstOrderLinearDS FOLDS = cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_DS);
 
 
     // Get the dimension of the output
     // XXX What if there is more than one sensor ...
 
-    _sensor = dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+    _sensor = cpp11ns::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
     if (_sensor == NULL)
     {
       RuntimeException::selfThrow("SampledPIDActuator::initialize - the given sensor is not a ControlSensor");

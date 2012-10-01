@@ -70,8 +70,6 @@ namespace cpp11ns = boost;
 
 #include "SiconosSerialization.hpp"
 
-using namespace boost;
-
 enum vertex_old_index_t { vertex_old_index };
 enum edge_old_index_t { edge_old_index };
 
@@ -104,43 +102,43 @@ public:
 
   /* note : OutEdgeList as multisetS => cannot compile remove_out_edge_if :
      /usr/include/boost/graph/detail/adjacency_list.hpp:440: error: passing 'const ... */
-  typedef adjacency_list<listS, listS, undirectedS> proxy_graph_t;
+  typedef boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS> proxy_graph_t;
 
   typedef typename
-  graph_traits<proxy_graph_t>::edge_descriptor EDescriptor;
+  boost::graph_traits<proxy_graph_t>::edge_descriptor EDescriptor;
 
   typedef typename
-  graph_traits<proxy_graph_t>::vertex_descriptor VDescriptor;
+  boost::graph_traits<proxy_graph_t>::vertex_descriptor VDescriptor;
 
 
-  typedef adjacency_list <
-  listS, listS, undirectedS,
-         property < vertex_bundle_t, V,
-         property < vertex_color_t ,
-         default_color_type ,
-         property < vertex_index_t, size_t,
-         property < vertex_old_index_t, size_t,
-         //                                             property< vertex_descriptor0_t, VDescriptor,
-         property< vertex_properties_t , VProperties > > > > > ,
-         property < edge_bundle_t, E,
-         property < edge_color_t ,
-         default_color_type ,
-         property < edge_index_t, size_t,
-         property < edge_old_index_t, size_t,
-         //                                             property< edge_descriptor0_t, EDescriptor,
-         property< edge_properties_t , EProperties > > > > > ,
-         property < graph_properties_t, GProperties > >
-         graph_t;
+  typedef boost::adjacency_list <
+  boost::listS, boost::listS, boost::undirectedS,
+        boost::property < boost::vertex_bundle_t, V,
+        boost::property < boost::vertex_color_t ,
+        boost::default_color_type ,
+        boost::property < boost::vertex_index_t, size_t,
+        boost::property < vertex_old_index_t, size_t,
+        //                                             property< vertex_descriptor0_t, VDescriptor,
+        boost::property< vertex_properties_t , VProperties > > > > > ,
+        boost::property < boost::edge_bundle_t, E,
+        boost::property < boost::edge_color_t ,
+        boost::default_color_type ,
+        boost::property < boost::edge_index_t, size_t,
+        boost::property < edge_old_index_t, size_t,
+        //                                             property< edge_descriptor0_t, EDescriptor,
+        boost::property< edge_properties_t , EProperties > > > > > ,
+        boost::property < graph_properties_t, GProperties > >
+        graph_t;
 
   typedef V vertex_t;
 
   typedef E edge_t;
 
   typedef typename
-  graph_traits<graph_t>::edge_iterator EIterator;
+  boost::graph_traits<graph_t>::edge_iterator EIterator;
 
   typedef typename
-  graph_traits<graph_t>::vertex_iterator VIterator;
+  boost::graph_traits<graph_t>::vertex_iterator VIterator;
 
   //  typedef typename
   //  graph_traits<graph_t>::edge_descriptor EDescriptor;
@@ -149,43 +147,43 @@ public:
   //  graph_traits<graph_t>::vertex_descriptor VDescriptor;
 
   typedef typename
-  graph_traits<graph_t>::out_edge_iterator OEIterator;
+  boost::graph_traits<graph_t>::out_edge_iterator OEIterator;
 
   typedef typename
-  graph_traits<graph_t>::adjacency_iterator AVIterator;
+  boost::graph_traits<graph_t>::adjacency_iterator AVIterator;
 
   typedef typename
-  property_map<graph_t, edge_bundle_t >::type EBundleAccess;
+  boost::property_map<graph_t, boost::edge_bundle_t >::type EBundleAccess;
 
   typedef typename
-  property_map<graph_t, vertex_bundle_t >::type VBundleAccess;
+  boost::property_map<graph_t, boost::vertex_bundle_t >::type VBundleAccess;
 
   typedef typename
-  property_map<graph_t, edge_color_t >::type EColorAccess;
+  boost::property_map<graph_t, boost::edge_color_t >::type EColorAccess;
 
   typedef typename
-  property_map<graph_t, vertex_color_t >::type VColorAccess;
+  boost::property_map<graph_t, boost::vertex_color_t >::type VColorAccess;
 
   typedef typename
-  property_map<graph_t, edge_old_index_t >::type OEIndexAccess;
+  boost::property_map<graph_t, edge_old_index_t >::type OEIndexAccess;
 
   typedef typename
-  property_map<graph_t, vertex_old_index_t >::type OVIndexAccess;
+  boost::property_map<graph_t, vertex_old_index_t >::type OVIndexAccess;
 
   typedef typename
-  property_map<graph_t, edge_index_t >::type EIndexAccess;
+  boost::property_map<graph_t, boost::edge_index_t >::type EIndexAccess;
 
   typedef typename
-  property_map<graph_t, vertex_index_t >::type VIndexAccess;
+  boost::property_map<graph_t, boost::vertex_index_t >::type VIndexAccess;
 
   typedef typename
-  property_map<graph_t, edge_properties_t >::type EPropertiesAccess;
+  boost::property_map<graph_t, edge_properties_t >::type EPropertiesAccess;
 
   typedef typename
-  property_map<graph_t, vertex_properties_t >::type VPropertiesAccess;
+  boost::property_map<graph_t, vertex_properties_t >::type VPropertiesAccess;
 
   typedef typename
-  property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
+  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
   typedef typename std::map<V, VDescriptor> VMap;
 
@@ -344,72 +342,72 @@ public:
 
   size_t size() const
   {
-    return num_vertices(g);
+    return boost::num_vertices(g);
   };
 
   size_t vertices_number() const
   {
-    return num_vertices(g);
+    return boost::num_vertices(g);
   };
 
   size_t edges_number() const
   {
-    return num_edges(g);
+    return boost::num_edges(g);
   };
 
   inline V& bundle(const VDescriptor& vd)
   {
-    return get(vertex_bundle, g)[vd];
+    return boost::get(boost::vertex_bundle, g)[vd];
   };
 
   inline E& bundle(const EDescriptor& ed)
   {
-    return get(edge_bundle, g)[ed];
+    return boost::get(boost::edge_bundle, g)[ed];
   };
 
-  inline default_color_type& color(const VDescriptor& vd)
+  inline boost::default_color_type& color(const VDescriptor& vd)
   {
-    return get(vertex_color, g)[vd];
+    return boost::get(boost::vertex_color, g)[vd];
   };
 
-  inline default_color_type& color(const EDescriptor& ed)
+  inline boost::default_color_type& color(const EDescriptor& ed)
   {
-    return get(edge_color, g)[ed];
+    return boost::get(boost::edge_color, g)[ed];
   };
 
   inline GProperties& properties()
   {
-    return get_property(g, graph_properties);
+    return boost::get_property(g, graph_properties);
   };
 
   inline size_t& index(const VDescriptor& vd)
   {
-    return get(vertex_index, g)[vd];
+    return boost::get(boost::vertex_index, g)[vd];
   };
 
   inline size_t& old_index(const VDescriptor& vd)
   {
-    return get(vertex_old_index, g)[vd];
+    return boost::get(vertex_old_index, g)[vd];
   };
 
   inline size_t& index(const EDescriptor& ed)
   {
-    return get(edge_index, g)[ed];
+    return boost::get(boost::edge_index, g)[ed];
   };
 
   inline size_t& old_index(const EDescriptor& ed)
   {
-    return get(edge_old_index, g)[ed];
+    return boost::get(edge_old_index, g)[ed];
   };
 
   inline VProperties& properties(const VDescriptor& vd)
   {
-    return get(vertex_properties, g)[vd];
+    return boost::get(vertex_properties, g)[vd];
   };
 
   inline EProperties& properties(const EDescriptor& ed)
   {
-    return get(edge_properties, g)[ed];
+    return boost::get(edge_properties, g)[ed];
   };
 
   //  inline VDescriptor& descriptor0(const VDescriptor& vd)
@@ -755,8 +753,8 @@ public:
   //                      Predicate pred)
   {
 
-    BOOST_CONCEPT_ASSERT((IncidenceGraphConcept<graph_t>));
-    BOOST_CONCEPT_ASSERT((MutableGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_out_edge_if(vd, pred, g);
     /* workaround on multisetS (tested on Disks : ok)
@@ -843,22 +841,22 @@ public:
 
   EIndexAccess edges_indices()
   {
-    return get(edge_index, g);
+    return boost::get(boost::edge_index, g);
   }
 
   VIndexAccess vertices_indices()
   {
-    return get(vertex_index, g);
+    return boost::get(boost::vertex_index, g);
   }
 
   OEIndexAccess old_edges_indices()
   {
-    return get(edge_old_index, g);
+    return boost::get(edge_old_index, g);
   }
 
   OVIndexAccess old_vertices_indices()
   {
-    return get(vertex_old_index, g);
+    return boost::get(vertex_old_index, g);
   }
 
   void clear()
