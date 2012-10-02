@@ -92,7 +92,8 @@ int main(int argc, char* argv[])
   SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
   control->addSensorPtr(sens);
   // add the sliding mode controller
-  SP::LinearSMC act = static_pointer_cast<LinearSMC>(control->addActuator(LINEAR_SMC, tActuator));
+  SP::LinearSMC act = cpp11ns::static_pointer_cast<LinearSMC>
+                      (control->addActuator(LINEAR_SMC, tActuator));
   act->setCsurfacePtr(Csurface);
   act->setBPtr(Brel);
   act->setDPtr(Drel);
