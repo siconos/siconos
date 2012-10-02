@@ -23,18 +23,17 @@ from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
 from matplotlib.pyplot import subplot, title, plot, grid, show
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
-from numpy.linalg import norm
 
 # variable declaration
-ndof = 2   # Number of degrees of freedom of your system
-t0 = 0.0   # start time
-T = 1    # end time
+ndof = 2  # Number of degrees of freedom of your system
+t0 = 0.0  # start time
+T = 1  # end time
 h = 1.0e-4  # time step for simulation
-hControl = 1.0e-2 # time step for control
-Xinit = 1.0 # initial position
+hControl = 1.0e-2  # time step for control
+Xinit = 1.0  # initial position
 theta = 0.5
-N = ceil((T-t0)/h + 10) # number of time steps
-outputSize = 3 # number of variable to store at each time step
+N = ceil((T-t0)/h + 10)  # number of time steps
+outputSize = 3  # number of variable to store at each time step
 
 # Matrix declaration
 A = zeros((ndof, ndof))
@@ -51,7 +50,7 @@ if h > hControl:
 
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
-processDS.setComputebFunction("RelayPlugin.so","computeB")
+processDS.setComputebFunction("RelayPlugin.so", "computeB")
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
@@ -76,7 +75,7 @@ act.setDPtr(Drel)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
-# Initialization 
+# Initialization
 process.initialize(processSimulation)
 control.initialize()
 # This is not working right now
