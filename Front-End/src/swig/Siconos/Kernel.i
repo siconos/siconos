@@ -153,7 +153,9 @@
 
 // python int sequence => std::vector<unsigned int>
 %{
-  static int sequenceToUnsignedIntVector(PyObject *input, std11::shared_ptr<std::vector<unsigned int> > ptr) 
+  static int sequenceToUnsignedIntVector(
+    PyObject *input, 
+    std11::shared_ptr<std::vector<unsigned int> > ptr) 
   {
     int i;
     if (!PySequence_Check(input)) {
@@ -289,25 +291,29 @@ TYPEDEF_SPTR(InteractionsGraph);
 %shared_ptr(InteractionsGraph);
 
 // must be specified after %shared_ptr, if ever needed
-%template(_DynamicalSystemsGraph)  SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
-                                                std11::shared_ptr<Interaction>, 
-                                                SystemProperties, InteractionProperties, 
-                                                GraphProperties >;
+%template(_DynamicalSystemsGraph) SiconosGraph<
+  std11::shared_ptr<DynamicalSystem>, 
+  std11::shared_ptr<Interaction>, 
+  SystemProperties, InteractionProperties, 
+  GraphProperties >;
 
-%template(SP_DynamicalSystemsGraph)  std11::shared_ptr<SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
-                                                                    std11::shared_ptr<Interaction>, 
-                                                                    SystemProperties, InteractionProperties, 
-                                                                    GraphProperties > >;
+%template(SP_DynamicalSystemsGraph) std11::shared_ptr<
+  SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
+               std11::shared_ptr<Interaction>, 
+               SystemProperties, InteractionProperties, 
+               GraphProperties > >;
 
-%template(_InteractionsGraph)  SiconosGraph<std11::shared_ptr<Interaction>, 
-                                            std11::shared_ptr<DynamicalSystem>, 
-                                            InteractionProperties, SystemProperties, 
-                                            GraphProperties >;
+%template(_InteractionsGraph) SiconosGraph<
+  std11::shared_ptr<Interaction>, 
+  std11::shared_ptr<DynamicalSystem>, 
+  InteractionProperties, SystemProperties, 
+  GraphProperties >;
 
-%template(SP_InteractionsGraph)  std11::shared_ptr<SiconosGraph<std11::shared_ptr<Interaction>, 
-                                                                std11::shared_ptr<DynamicalSystem>, 
-                                                                InteractionProperties, SystemProperties, 
-                                                                GraphProperties > >;
+%template(SP_InteractionsGraph) std11::shared_ptr<
+  SiconosGraph<std11::shared_ptr<Interaction>, 
+               std11::shared_ptr<DynamicalSystem>, 
+               InteractionProperties, SystemProperties, 
+               GraphProperties > >;
 
 %rename (ioMatrix_read) ioMatrix::read; 
 %rename (ioMatrix_write) ioMatrix::write; 
@@ -342,42 +348,16 @@ TYPEDEF_SPTR(InteractionsGraph);
 %feature("director") TYPE;
 %ignore STD11::enable_shared_from_this<TYPE>;
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
-
+%typemap(directorin) TYPE& ()
+{
+  // %typemap(directorin) (TYPE&) ()
+  // swig issue shared pointer check in wrappers even if arg is a ref
+  SP::TYPE myptemp(createSPtr##TYPE($1));
+  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp), 
+                              SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
+}
 %shared_ptr(TYPE); 
 %enddef
-
-
- /*
-%typemap (in) (Interaction&) (int res)
-{
-  int newmem = 0;
-  void * argp_;
-
-  res = SWIG_ConvertPtrAndOwn($input, &argp_, SWIGTYPE_p_Interaction,  0 , &newmem);
-
-  if (!SWIG_IsOK(res)) {
-    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "" "', argument " """ of type '" "Interaction &""'"); 
-    }
-  if (!argp_) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "', argument " "2"" of type '" "Interaction &""'"); 
-  }
-  if (newmem & SWIG_CAST_NEW_MEMORY) {
-    assert(0);
-  }
-  else
-  {
-    $1 = reinterpret_cast< Interaction * >(argp_);
-  }
-}
-*/
- //%apply (Interaction& inter) { (Interaction&) };
-%typemap(directorin) (Interaction& inter) ()
-{
-  //  %typemap(directorin) (Interaction&) ()
-  void * swig_argp;
-  SP::Interaction pinter(createSPtrInteraction($1));
-  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&pinter), SWIGTYPE_p_std11__shared_ptrT_Interaction_t, 0);
-}
 
 
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
@@ -508,7 +488,7 @@ KERNEL_REGISTRATION();
      example: 
      SharedPointerKeeper* savedSharePtr = 
        new SharedPointerKeeper(std11::static_pointer_cast<void>(mysharedptr));
-     PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);      
+     PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);
   */
 
   /* note PyCObject is deprecated for Python >= 2.7 ... */
@@ -559,9 +539,11 @@ KERNEL_REGISTRATION();
 
 %template (dsi) std::pair<unsigned int, unsigned int >;
 
-%template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<DynamicalSystem> >;
+%template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, 
+                          std11::shared_ptr<DynamicalSystem> >;
 
-%template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<DynamicalSystem> > >;
+%template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, 
+                                       std11::shared_ptr<DynamicalSystem> > >;
 
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
