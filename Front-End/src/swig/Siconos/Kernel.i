@@ -209,6 +209,10 @@ namespace std
   typedef size_t size_t;
 }
 
+#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
+#define CPP11NS std
+#else
+#define CPP11NS boost
 // boost >= 1.40
 %import "boost/version.hpp"
 #if (BOOST_VERSION >= 104000)
@@ -216,6 +220,7 @@ namespace std
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
 #else
 %import "boost/enable_shared_from_this.hpp"
+#endif
 #endif
 
 // SimpleMatrix operators 
@@ -322,6 +327,7 @@ TYPEDEF_SPTR(InteractionsGraph);
 
 %include "KernelRegistration.i"
 
+
 %define PY_REGISTER(TYPE)
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
@@ -334,8 +340,8 @@ TYPEDEF_SPTR(InteractionsGraph);
 %rename  (__ne__) TYPE ## ::operator!=;
 %rename  (__copy__) TYPE ## ::operator=;
 %feature("director") TYPE;
-%ignore cpp11ns::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) cpp11ns::enable_shared_from_this<TYPE>;
+%ignore CPP11NS::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) CPP11NS::enable_shared_from_this<TYPE>;
 
 %shared_ptr(TYPE); 
 %enddef
@@ -385,8 +391,8 @@ TYPEDEF_SPTR(InteractionsGraph);
 %rename  (__eq__) TYPE ## ::operator==;
 %rename  (__ne__) TYPE ## ::operator!=;
 %rename  (__copy__) TYPE ## ::operator=;
-%ignore cpp11ns::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) cpp11ns::enable_shared_from_this<TYPE>;
+%ignore CPP11NS::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) CPP11NS::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE); 
 %enddef
 
@@ -569,8 +575,8 @@ KERNEL_REGISTRATION();
 %template (quint) Question<unsigned int>;
 
 // suppress warning
-%ignore  cpp11ns::enable_shared_from_this< Hashed >;
-%template (sharedHashed) cpp11ns::enable_shared_from_this< Hashed >;
+%ignore  CPP11NS::enable_shared_from_this< Hashed >;
+%template (sharedHashed) CPP11NS::enable_shared_from_this< Hashed >;
 
 
 // include registered headers
