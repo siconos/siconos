@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ using namespace RELATION;
 LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
   LagrangianR(relxml, LinearTIR)
 {
-  SP::LinearRXML folrXML = cpp11ns::static_pointer_cast<LinearRXML>(relxml);
+  SP::LinearRXML folrXML = std11::static_pointer_cast<LinearRXML>(relxml);
   // get matrices values. All are optional.
 
   if (folrXML->hasC())
@@ -156,10 +156,10 @@ void LagrangianLinearTIR::saveRelationToXML() const
   assert(_relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
-  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
-  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
-  (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
+  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setC(*_jachq) ;
+  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setE(*_e) ;
+  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setD(*_jachlambda) ;
+  (std11::static_pointer_cast<LinearRXML>(_relationxml))->setF(*_F) ;
 }
 
 LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)

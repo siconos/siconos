@@ -19,5 +19,5 @@ Siconos/Front-End provides Python bindings.")
 SET(DEBIAN_PACKAGE_DEPENDS 
   "g++, python, libboost-dev")
 
-SICONOS_PROJECT(FrontEnd 3 4 0)
+SICONOS_PROJECT(FrontEnd 3 5 0)
 

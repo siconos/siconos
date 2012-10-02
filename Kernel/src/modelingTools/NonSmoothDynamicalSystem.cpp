@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -199,13 +199,13 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     {
       SP::DynamicalSystem ds = dynamicalSystems()->bundle(*vi);
       if (Type::value(*ds) == Type::LagrangianDS)
-        (cpp11ns::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
+        (std11::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::LagrangianLinearTIDS)
-        (cpp11ns::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
+        (std11::static_pointer_cast<LagrangianLinearTIDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderLinearDS)
-        (cpp11ns::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
+        (std11::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderLinearTIDS)
-        (cpp11ns::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
+        (std11::static_pointer_cast<FirstOrderLinearDS>(ds))->saveDSToXML();
       else if (Type::value(*ds) == Type::FirstOrderNonLinearDS)
         ds->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");

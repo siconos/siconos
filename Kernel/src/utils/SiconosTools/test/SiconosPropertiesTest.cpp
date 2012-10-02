@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ void SiconosPropertiesTest::t1()
   typedef SiconosGraph < std::string, std::string,
           boost::no_property, boost::no_property, boost::no_property > G;
 
-  cpp11ns::shared_ptr<G> g(new G());
+  std11::shared_ptr<G> g(new G());
 
 
   Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
@@ -73,7 +73,7 @@ void SiconosPropertiesTest::t2()
   typedef SiconosGraph < std::string, std::string,
           boost::no_property, boost::no_property, boost::no_property > G;
 
-  cpp11ns::shared_ptr<G> g(new G());
+  std11::shared_ptr<G> g(new G());
 
 
   Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
@@ -111,7 +111,7 @@ void SiconosPropertiesTest::t3()
   typedef SiconosGraph < std::string, std::string,
           boost::no_property, boost::no_property, boost::no_property > G;
 
-  cpp11ns::shared_ptr<G> g(new G());
+  std11::shared_ptr<G> g(new G());
 
 
   Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);

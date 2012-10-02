@@ -30,7 +30,7 @@ DEFINE_SPTR(SpaceFilter)
 
 class ExternalBody :
   public LagrangianDS,
-  public cpp11ns::enable_shared_from_this<ExternalBody>
+  public std11::enable_shared_from_this<ExternalBody>
 {
 public:
 

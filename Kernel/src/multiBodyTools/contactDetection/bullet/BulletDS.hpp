@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 
 #include "NewtonEulerDS.hpp"
 
-class BulletDS : public NewtonEulerDS, public cpp11ns::enable_shared_from_this<BulletDS>
+class BulletDS : public NewtonEulerDS, public std11::enable_shared_from_this<BulletDS>
 {
 
 private:
@@ -61,7 +61,7 @@ public:
 
   /** get a shared_ptr from this
    */
-  cpp11ns::shared_ptr<BulletDS> shared_ptr()
+  std11::shared_ptr<BulletDS> shared_ptr()
   {
     return shared_from_this();
   };

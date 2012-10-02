@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 
   // pointer to xml
 
-  SP::FirstOrderLinearDSXML ldsxml = (cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
+  SP::FirstOrderLinearDSXML ldsxml = (std11::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
 
   // reject case where A or b is a plug-in
   if (ldsxml->isAPlugin())

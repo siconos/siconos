@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ void OSNSMatrixTest::setUp()
   tol = 1e-12;
   // Download a Model from Template.xml file
   temp.reset(new Model("Template.xml"));
-  SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(temp->simulation());
+  SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(temp->simulation());
   s->initialize();
   // Get a set of Interactions
   indexSet = s->indexSet(0);

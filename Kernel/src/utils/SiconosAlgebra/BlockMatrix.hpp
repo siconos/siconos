@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -334,7 +334,7 @@ public:
    */
   inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {
-    return cpp11ns::shared_ptr<SiconosMatrix>((*_mat)(row, col));
+    return std11::shared_ptr<SiconosMatrix>((*_mat)(row, col));
   };
 
   /** get row index of current matrix and save it unsigned into vOut

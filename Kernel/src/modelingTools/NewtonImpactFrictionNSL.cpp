@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -38,10 +38,10 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
   assert((size() == 2 || size() == 3) &&
          "NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size());
 
-  _en = (cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
-  if ((cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->hasEt())
-    _et = (cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
-  _mu = (cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
+  _en = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
+  if ((std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->hasEt())
+    _et = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
+  _mu = (std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
 }
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
@@ -70,9 +70,9 @@ void NewtonImpactFrictionNSL::display() const
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 {
-  cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEn(_en);
-  cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEt(_et);
-  cpp11ns::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setMu(_mu);
+  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEn(_en);
+  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEt(_et);
+  std11::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setMu(_mu);
 }
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)

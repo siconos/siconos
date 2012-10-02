@@ -14,4 +14,4 @@ SET(PACKAGE_DESCRIPTION
 Non Smooth Dynamical Systems (NSDS). The present package,
 Siconos/IO provides some services for data input/output")
 
-SICONOS_PROJECT(IO 3 4 0)
+SICONOS_PROJECT(IO 3 5 0)

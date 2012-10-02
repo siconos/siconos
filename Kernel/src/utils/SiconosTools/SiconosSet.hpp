@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@ template <class T, class U> class SiconosSet
 public:
 
   /** set of T */
-  typedef std::set<cpp11ns::shared_ptr<T>, Cmp<T, U> > TSet;
+  typedef std::set<std11::shared_ptr<T>, Cmp<T, U> > TSet;
 
   /** iterator through a set of T */
   typedef typename TSet::iterator TIterator;
@@ -79,7 +79,7 @@ protected:
   U(T::*fpt)() const;
 
   /** a set of T, sorted thanks to their address */
-  cpp11ns::shared_ptr<TSet> setOfT;
+  std11::shared_ptr<TSet> setOfT;
 
 private:
 
@@ -154,7 +154,7 @@ public:
   /** return setOfT
    *  \return an InterSet
    */
-  const cpp11ns::shared_ptr<TSet> getSet() const
+  const std11::shared_ptr<TSet> getSet() const
   {
     return setOfT;
   }
@@ -162,7 +162,7 @@ public:
   /** get T number num, if it is present in the set (else, exception)
    *  \return a pointer to T
    */
-  cpp11ns::shared_ptr<T> getPtr(int num) const
+  std11::shared_ptr<T> getPtr(int num) const
   {
     ConstTIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
@@ -179,7 +179,7 @@ public:
    *  \param a pointer to T
    *  \return a bool
    */
-  bool isIn(cpp11ns::shared_ptr<T> t) const
+  bool isIn(std11::shared_ptr<T> t) const
   {
     TIterator it = setOfT->find(t);
     bool out = false;
@@ -211,7 +211,7 @@ public:
    *  \param a pointer to T
    *  \param a TIterator
    */
-  TIterator find(cpp11ns::shared_ptr<T> t)
+  TIterator find(std11::shared_ptr<T> t)
   {
     return setOfT->find(t);
   };
@@ -235,7 +235,7 @@ public:
    *  \param a pointer to T
    *  \return a CheckInsertT (boolean type information)
    */
-  CheckInsertT insert(cpp11ns::shared_ptr<T> t)
+  CheckInsertT insert(std11::shared_ptr<T> t)
   {
     return setOfT->insert(t);
   };
@@ -253,7 +253,7 @@ public:
   /** remove a T* from the set
    *  \param a pointer to T
    */
-  void erase(cpp11ns::shared_ptr<T> t)
+  void erase(std11::shared_ptr<T> t)
   {
     TIterator it = setOfT->find(t);
     if (it == setOfT->end())

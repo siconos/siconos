@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -175,17 +175,17 @@ void Lsodar::computeJacobianRhs(double t)
 
 void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  cpp11ns::static_pointer_cast<EventDriven>(simulationLink)->computef(shared_from_this(), sizeOfX, time, x, xdot);
+  std11::static_pointer_cast<EventDriven>(simulationLink)->computef(shared_from_this(), sizeOfX, time, x, xdot);
 }
 
 void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  cpp11ns::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+  std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  cpp11ns::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
+  std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
 void Lsodar::initialize()
@@ -200,7 +200,7 @@ void Lsodar::initialize()
     if (Type::value(**itDS) == Type::LagrangianDS ||
         Type::value(**itDS) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *cpp11ns::static_pointer_cast<LagrangianDS>(*itDS);
+      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*itDS);
       _xWork->insertPtr(LDS.q());
       _xWork->insertPtr(LDS.velocity());
     }
@@ -299,7 +299,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  global_object = cpp11ns::static_pointer_cast<Lsodar>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
+  global_object = std11::static_pointer_cast<Lsodar>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
   // function to compute the righ-hand side of xdot = f(x,t) + Tu
   fpointer pointerToF = Lsodar_f_wrapper;
@@ -382,7 +382,7 @@ void Lsodar::updateState(const unsigned int level)
   {
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
-      SP::LagrangianDS lds = cpp11ns::static_pointer_cast<LagrangianDS>(*it);
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(*it);
       lds->computePostImpactVelocity();
     }
   }
@@ -515,8 +515,8 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       }
       else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
       }
       else
         RuntimeException::selfThrow("Lsodar::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -526,8 +526,8 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     {
       if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
       {
-        cpp11ns::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart
       }
     }
   }

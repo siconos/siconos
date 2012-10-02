@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ void BulletTimeSteppingProjectOnConstraints::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  cpp11ns::tie(dsi, dsiend) = dsg.vertices();
+  std11::tie(dsi, dsiend) = dsg.vertices();
 
   static UpdateCollisionObject up;
 

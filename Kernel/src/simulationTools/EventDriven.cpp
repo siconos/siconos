@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -125,7 +125,7 @@ void EventDriven::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %d\n", (int)indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
-  cpp11ns::tie(uibegin, uipend) = indexSet0->vertices();
+  std11::tie(uibegin, uipend) = indexSet0->vertices();
   // loop over all vextice of the indexSet[i-1]
   for (uip = uibegin; uip != uipend; ++uip)
   {
@@ -222,7 +222,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   InteractionsGraph::VIterator ui, uiend, vnext;
-  cpp11ns::tie(ui, uiend) = indexSet2->vertices();
+  std11::tie(ui, uiend) = indexSet2->vertices();
 
   for (vnext = ui; ui != uiend; ui = vnext)
   {
@@ -283,7 +283,7 @@ void EventDriven::initOSNS()
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
   // For each Interaction in I0 ...
-  for (cpp11ns::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     // indexSet0->bundle(*ui)->initialize("EventDriven");
     initializeInteraction(indexSet0->bundle(*ui));
@@ -403,7 +403,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     if (Type::value(**it) == Type::LagrangianDS ||
         Type::value(**it) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *cpp11ns::static_pointer_cast<LagrangianDS>(*it);
+      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*it);
       SiconosVector& qDotTmp = *LDS.velocity();
       SiconosVector& qDotDotTmp = *LDS.acceleration();
       for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
@@ -432,7 +432,7 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
   if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  SP::Lsodar lsodar = cpp11ns::static_pointer_cast<Lsodar>(osi);
+  SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(osi);
 
   // Remark A: according to DLSODAR doc, each call to jacobian is
   // preceded by a call to f with the same arguments NEQ, T, and Y.
@@ -459,7 +459,7 @@ void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
     if (Type::value(**it) == Type::LagrangianDS ||
         Type::value(**it) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& lds = *cpp11ns::static_pointer_cast<LagrangianDS>(*it);
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(*it);
       BlockMatrix& jacotmp = *lds.jacobianRhsx();
       for (unsigned int j = 0; j < (*it)->getN(); ++j)
       {
@@ -494,7 +494,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, lambda;
-  SP::Lsodar lsodar = cpp11ns::static_pointer_cast<Lsodar>(osi);
+  SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(osi);
 
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
@@ -518,7 +518,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   updateOutput(0);
   updateOutput(1);
   //
-  for (cpp11ns::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
     nsLawSize = inter->getNonSmoothLawSize();
@@ -629,7 +629,7 @@ void EventDriven::advanceToEvent()
     }
     if (_printStat)
     {
-      SP::Lsodar lsodar = cpp11ns::static_pointer_cast<Lsodar>(*it);
+      SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
       statOut << "Results at time " << _tout << ":" << endl;
       SA::integer iwork = lsodar->getIwork();
       SA::doublereal Rwork = lsodar->getRwork();

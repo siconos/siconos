@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ void Sensor::initialize(SP::Model m)
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), SENSOR_EVENT);
-  cpp11ns::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
+  std11::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
 }
 
 // Add the present sensor into the Simulation process

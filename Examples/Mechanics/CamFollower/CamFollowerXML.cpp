@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     CamFollower->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::TimeStepping S = cpp11ns::static_pointer_cast<TimeStepping>(CamFollower->simulation());
+    SP::TimeStepping S = std11::static_pointer_cast<TimeStepping>(CamFollower->simulation());
     // --- Get the time discretisation scheme ---
     SP::TimeDiscretisation t = S->timeDiscretisation();
     int k = 0;
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     DataPlot(k, 0) = t0;
 
     // state q for the Follower
-    SP::LagrangianDS Follower = cpp11ns::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::LagrangianDS Follower = std11::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     // Position of the Follower
     DataPlot(k, 1) = ((*Follower->q()))(0);
     // Velocity for the Follower

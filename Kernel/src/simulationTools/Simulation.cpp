@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -230,7 +230,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m || !"Simulation::initialize(model) - model = NULL.");
-  _model = cpp11ns::weak_ptr<Model>(m);
+  _model = std11::weak_ptr<Model>(m);
 
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
@@ -278,7 +278,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     computeLevelsForInputAndOutput();
 
     for_each(allInteractions->begin(), allInteractions->end(),
-             cpp11ns::bind(&Interaction::initialize, _1, _tinit));
+             std11::bind(&Interaction::initialize, _1, _tinit));
 
     // Initialize OneStepNSProblem: in derived classes specific functions.
     initOSNS();
@@ -382,9 +382,9 @@ void Simulation::saveSimulationToXML()
     {
       typeOSI = (*it)->getType();
       if (typeOSI == OSI::MOREAU)
-        (cpp11ns::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
+        (std11::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
       else if (typeOSI == OSI::LSODAR)
-        (cpp11ns::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
+        (std11::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
     }
 
@@ -825,7 +825,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   SP::OneStepIntegrator Osi =  integratorOfDS(ds);
   addInteractionInOSIMap(inter, Osi);
 
-  cpp11ns::shared_ptr<SetupLevels> setupLevels;
+  std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
   Osi->accept(*(setupLevels.get()));
 

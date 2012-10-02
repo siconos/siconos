@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -195,7 +195,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     InteractionsGraph::VIterator ui, uiend, vnext;
 
     // zeroing the lambda of indexSet1
-    cpp11ns::tie(ui, uiend) = indexSet1->vertices();
+    std11::tie(ui, uiend) = indexSet1->vertices();
     for (vnext = ui; ui != uiend; ui = vnext)
     {
       ++vnext;
@@ -203,11 +203,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       inter1->lambda(1)->zero();
       indexSet1->eraseProperties(*ui);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = indexSet1->out_edges(*ui);
+      for (std11::tie(oei, oeiend) = indexSet1->out_edges(*ui);
            oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
-        cpp11ns::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+        std11::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
         if (ed2 != ed1)
         {
           indexSet1->eraseProperties(ed1);
@@ -222,17 +222,17 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     indexSet1->clear();
 
-    cpp11ns::tie(ui, uiend) = indexSet2->vertices();
+    std11::tie(ui, uiend) = indexSet2->vertices();
     for (vnext = ui; ui != uiend; ui = vnext)
     {
       ++vnext;
       indexSet2->eraseProperties(*ui);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = indexSet2->out_edges(*ui);
+      for (std11::tie(oei, oeiend) = indexSet2->out_edges(*ui);
            oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
-        cpp11ns::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
+        std11::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
         if (ed2 != ed1)
         {
           indexSet2->eraseProperties(ed1);
@@ -372,7 +372,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
-    for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
@@ -424,7 +424,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
-      for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
@@ -440,12 +440,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       Type::Siconos dsType = Type::value(*ds);
       if (dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS neds = cpp11ns::static_pointer_cast<NewtonEulerDS>(ds);
+        SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         neds->addWorkVector(neds->q(), DynamicalSystem::qtmp);
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
-        SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         d->addWorkVector(d->q(), DynamicalSystem::qtmp);
       }
       else
@@ -467,7 +467,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
-      for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
@@ -501,7 +501,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         Type::Siconos dsType = Type::value(*ds);
         if (dsType == Type::NewtonEulerDS)
         {
-          SP::NewtonEulerDS neds = cpp11ns::static_pointer_cast<NewtonEulerDS>(ds);
+          SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           SP::SiconosVector q = neds->q();
           SP::SiconosVector qtmp = neds->getWorkVector(DynamicalSystem::qtmp);
           if (neds->p(0))
@@ -515,7 +515,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         }
         else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
           SP::SiconosVector qtmp = d->getWorkVector(DynamicalSystem::qtmp);
           if (d->p(0))
@@ -545,20 +545,20 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
       //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
-      //(cpp11ns::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
+      //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
 #ifdef TSPROJ_DEBUG
 
       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
       std ::cout << "lamda(1) in IndexSet1" << std::endl;
-      for (cpp11ns::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet1->bundle(*ui);
         inter->lambda(1)->display();
       }
       SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
       std ::cout << "lamda(0) in indexSet2" << std::endl;
-      for (cpp11ns::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet2->bundle(*ui);
         inter->lambda(0)->display();
@@ -660,7 +660,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
   *runningProjection = false;
 
-  for (cpp11ns::tie(aVi, viend) = indexSet->vertices();
+  for (std11::tie(aVi, viend) = indexSet->vertices();
        aVi != viend; ++aVi)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
@@ -775,7 +775,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   {
     InteractionsGraph::VIterator ui1, ui1end, v1next;
 
-    cpp11ns::tie(ui1, ui1end) = indexSet1->vertices();
+    std11::tie(ui1, ui1end) = indexSet1->vertices();
     _isIndexSetsStable = true ;
 
     DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
@@ -804,7 +804,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
     // indexSet0\indexSet1 scan
     InteractionsGraph::VIterator ui0, ui0end;
     //Add interaction in indexSet1
-    for (cpp11ns::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+    for (std11::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
     {
       if (indexSet0->color(*ui0) == boost::black_color)
       {
@@ -859,18 +859,18 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   if (i == 2)
   {
     InteractionsGraph::VIterator ui1, ui1end, v1next;
-    cpp11ns::tie(ui1, ui1end) = indexSet2->vertices();
+    std11::tie(ui1, ui1end) = indexSet2->vertices();
 
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;
       indexSet2->eraseProperties(*ui1);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = indexSet2->out_edges(*ui1);
+      for (std11::tie(oei, oeiend) = indexSet2->out_edges(*ui1);
            oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
-        cpp11ns::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
+        std11::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
         if (ed2 != ed1)
         {
           indexSet2->eraseProperties(ed1);
@@ -890,7 +890,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
     DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
 
     // Scan indexSet1
-    cpp11ns::tie(ui1, ui1end) = indexSet1->vertices();
+    std11::tie(ui1, ui1end) = indexSet1->vertices();
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
   const OSI::TYPES  osiType = Osi->getType();
   if (osiType == OSI::MOREAU2)
   {
-    DSBlocks[DS] = (cpp11ns::static_pointer_cast<Moreau2> (Osi))->W(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (std11::static_pointer_cast<Moreau2> (Osi))->W(DS); // get its W matrix ( pointer link!)
     (*DSBlocks[DS]) *= -1.0;
     DSBlocks[DS]->display();
   }
@@ -193,7 +193,7 @@ void MLCP2::computeq(double time)
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfInteractionBlock(*itCurrent);
     //update e(ti+1)
-    SP::SiconosVector  e = cpp11ns::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
+    SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
     q->addBlock(pos, *e);
   }
   SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();

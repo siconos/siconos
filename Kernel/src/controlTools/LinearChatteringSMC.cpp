@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ void LinearChatteringSMC::initialize(SP::Model m)
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
 
-  _sensor = cpp11ns::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+  _sensor = std11::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
     RuntimeException::selfThrow("LinearChatteringSMC::initialize - the given sensor is not a ControlSensor");

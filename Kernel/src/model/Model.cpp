@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -207,9 +207,9 @@ void Model::savePlatformToXML()
     _strat->timeDiscretisation()->saveTimeDiscretisationToXML();
 
     if (Type::value(*_strat) == Type::TimeStepping)
-      (cpp11ns::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();
+      (std11::static_pointer_cast<TimeStepping>(_strat))->saveSimulationToXML();
     else if (Type::value(*_strat) == Type::EventDriven)
-      (cpp11ns::static_pointer_cast<EventDriven>(_strat))->saveSimulationToXML();
+      (std11::static_pointer_cast<EventDriven>(_strat))->saveSimulationToXML();
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Simulation");
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object SimulationXML does not exist");

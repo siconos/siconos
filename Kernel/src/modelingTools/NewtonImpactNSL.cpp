@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml), _e(0.0)
 {
   if (nslawxml)
-    _e = (cpp11ns::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
+    _e = (std11::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
   else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
 }
 
@@ -55,7 +55,7 @@ void NewtonImpactNSL::display() const
 
 void NewtonImpactNSL::saveNonSmoothLawToXML()
 {
-  cpp11ns::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
+  std11::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
 }
 
 NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)

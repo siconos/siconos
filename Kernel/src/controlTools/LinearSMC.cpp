@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -55,11 +55,11 @@ void LinearSMC::initialize(SP::Model m)
   // method
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearDS>(_DS))));
+    _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(_DS))));
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearTIDS(*(cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
+    _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(_DS))));
   }
   else
   {
@@ -71,7 +71,7 @@ void LinearSMC::initialize(SP::Model m)
   _DS_SMC->setb(dummyb);
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-  _sensor = cpp11ns::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
+  _sensor = std11::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
   if (_sensor == NULL)
   {
     RuntimeException::selfThrow("LinearSMC::initialize - the given sensor is not a ControlSensor");

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -104,7 +104,7 @@ SiconosVector::SiconosVector(const std::vector<double>& v, Siconos::UBLAS_TYPE t
 }
 
 // Copy
-SiconosVector::SiconosVector(const SiconosVector &svect) : cpp11ns::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const SiconosVector &svect) : std11::enable_shared_from_this<SiconosVector>()
 {
   if (ask<IsDense>(svect)) // dense
   {
@@ -127,7 +127,7 @@ SiconosVector::SiconosVector(const SiconosVector &svect) : cpp11ns::enable_share
 }
 
 // Copy from BlockVector
-SiconosVector::SiconosVector(const BlockVector & vIn) : cpp11ns::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const BlockVector & vIn) : std11::enable_shared_from_this<SiconosVector>()
 {
   if (ask<IsDense>(**(vIn.begin()))) // dense
   {

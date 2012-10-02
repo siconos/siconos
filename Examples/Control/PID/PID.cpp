@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     (*K)(0) = .25;
     (*K)(1) = .125;
     (*K)(2) = 2;
-    SP::SampledPIDActuator act = cpp11ns::static_pointer_cast<SampledPIDActuator>
+    SP::SampledPIDActuator act = std11::static_pointer_cast<SampledPIDActuator>
                                  (control->addActuator(100, tActuator));
     act->addSensorPtr(sens);
 

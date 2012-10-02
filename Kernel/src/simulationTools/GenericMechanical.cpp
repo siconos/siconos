@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -93,7 +93,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
       SP::NewtonImpactFrictionNSL nsLaw =
-        cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        std11::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();

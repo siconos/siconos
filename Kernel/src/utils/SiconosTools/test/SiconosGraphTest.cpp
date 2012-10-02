@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -329,7 +329,7 @@ void SiconosGraphTest::t7()
   AG::AVIterator ui, uiend;
   std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
-  for (cpp11ns::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
+  for (std11::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
   {
     tot += k * ag.bundle(*ui);
   }

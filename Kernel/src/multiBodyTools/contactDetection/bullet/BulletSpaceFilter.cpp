@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   DynamicalSystemsGraph& dsg = *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  cpp11ns::tie(dsi, dsiend) = dsg.vertices();
+  std11::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi)
   {
     _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
@@ -115,7 +115,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator ui0, ui0end, v0next;
-  cpp11ns::tie(ui0, ui0end) = indexSet0->vertices();
+  std11::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {
@@ -313,7 +313,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   gOrphanedInteractions.clear();
 
   // 4. remove old contact points
-  cpp11ns::tie(ui0, ui0end) = indexSet0->vertices();
+  std11::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
        ui0 != ui0end; ui0 = v0next)
   {

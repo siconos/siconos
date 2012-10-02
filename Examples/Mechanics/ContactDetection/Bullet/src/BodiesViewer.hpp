@@ -258,14 +258,14 @@ public:
     {
     case Type::NewtonEulerDS :
     {
-      cpp11ns::static_pointer_cast<NewtonEulerDS>(DS())
-      ->setFExtPtr(cpp11ns::static_pointer_cast<SiconosVector>(savedFExt_));
+      std11::static_pointer_cast<NewtonEulerDS>(DS())
+      ->setFExtPtr(std11::static_pointer_cast<SiconosVector>(savedFExt_));
       break;
     }
     case Type::LagrangianDS :
     {
-      cpp11ns::static_pointer_cast<LagrangianDS>(DS())
-      ->setFExtPtr(cpp11ns::static_pointer_cast<SiconosVector>(savedFExt_));
+      std11::static_pointer_cast<LagrangianDS>(DS())
+      ->setFExtPtr(std11::static_pointer_cast<SiconosVector>(savedFExt_));
       break;
     };
     default:

@@ -90,7 +90,7 @@
 %rename (lambda_) lambda;
 
 // shared ptr management
-#define SWIG_SHARED_PTR_NAMESPACE cpp11ns
+#define SWIG_SHARED_PTR_NAMESPACE std11
 %include "boost_shared_ptr.i"
 
 // numpy macros
@@ -153,7 +153,7 @@
 
 // python int sequence => std::vector<unsigned int>
 %{
-  static int sequenceToUnsignedIntVector(PyObject *input, cpp11ns::shared_ptr<std::vector<unsigned int> > ptr) 
+  static int sequenceToUnsignedIntVector(PyObject *input, std11::shared_ptr<std::vector<unsigned int> > ptr) 
   {
     int i;
     if (!PySequence_Check(input)) {
@@ -210,13 +210,13 @@ namespace std
 }
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
-#define CPP11NS std
+#define STD11 std
 #else
-#define CPP11NS boost
+#define STD11 boost
 // boost >= 1.40
 %import "boost/version.hpp"
 #if (BOOST_VERSION >= 104000)
-%ignore cpp11ns::enable_shared_from_this::operator=;
+%ignore std11::enable_shared_from_this::operator=;
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
 #else
 %import "boost/enable_shared_from_this.hpp"
@@ -268,15 +268,15 @@ namespace std
 
 TYPEDEF_SPTR(_DynamicalSystemsGraph);
 %feature("director") _DynamicalSystemsGraph;
-%shared_ptr( SiconosGraph<cpp11ns::shared_ptr<DynamicalSystem>, 
-                          cpp11ns::shared_ptr<Interaction>, 
+%shared_ptr( SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
+                          std11::shared_ptr<Interaction>, 
                           SystemProperties, InteractionProperties, 
                           GraphProperties >);
 
 TYPEDEF_SPTR(_InteractionsGraph);
 %feature("director") _InteractionsGraph;
-%shared_ptr( SiconosGraph<cpp11ns::shared_ptr<Interaction>, 
-                          cpp11ns::shared_ptr<DynamicalSystem>, 
+%shared_ptr( SiconosGraph<std11::shared_ptr<Interaction>, 
+                          std11::shared_ptr<DynamicalSystem>, 
                           InteractionProperties, SystemProperties, 
                           GraphProperties >);
 
@@ -289,23 +289,23 @@ TYPEDEF_SPTR(InteractionsGraph);
 %shared_ptr(InteractionsGraph);
 
 // must be specified after %shared_ptr, if ever needed
-%template(_DynamicalSystemsGraph)  SiconosGraph<cpp11ns::shared_ptr<DynamicalSystem>, 
-                                                cpp11ns::shared_ptr<Interaction>, 
+%template(_DynamicalSystemsGraph)  SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
+                                                std11::shared_ptr<Interaction>, 
                                                 SystemProperties, InteractionProperties, 
                                                 GraphProperties >;
 
-%template(SP_DynamicalSystemsGraph)  cpp11ns::shared_ptr<SiconosGraph<cpp11ns::shared_ptr<DynamicalSystem>, 
-                                                                    cpp11ns::shared_ptr<Interaction>, 
+%template(SP_DynamicalSystemsGraph)  std11::shared_ptr<SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
+                                                                    std11::shared_ptr<Interaction>, 
                                                                     SystemProperties, InteractionProperties, 
                                                                     GraphProperties > >;
 
-%template(_InteractionsGraph)  SiconosGraph<cpp11ns::shared_ptr<Interaction>, 
-                                            cpp11ns::shared_ptr<DynamicalSystem>, 
+%template(_InteractionsGraph)  SiconosGraph<std11::shared_ptr<Interaction>, 
+                                            std11::shared_ptr<DynamicalSystem>, 
                                             InteractionProperties, SystemProperties, 
                                             GraphProperties >;
 
-%template(SP_InteractionsGraph)  cpp11ns::shared_ptr<SiconosGraph<cpp11ns::shared_ptr<Interaction>, 
-                                                                cpp11ns::shared_ptr<DynamicalSystem>, 
+%template(SP_InteractionsGraph)  std11::shared_ptr<SiconosGraph<std11::shared_ptr<Interaction>, 
+                                                                std11::shared_ptr<DynamicalSystem>, 
                                                                 InteractionProperties, SystemProperties, 
                                                                 GraphProperties > >;
 
@@ -340,8 +340,8 @@ TYPEDEF_SPTR(InteractionsGraph);
 %rename  (__ne__) TYPE ## ::operator!=;
 %rename  (__copy__) TYPE ## ::operator=;
 %feature("director") TYPE;
-%ignore CPP11NS::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) CPP11NS::enable_shared_from_this<TYPE>;
+%ignore STD11::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 
 %shared_ptr(TYPE); 
 %enddef
@@ -376,7 +376,7 @@ TYPEDEF_SPTR(InteractionsGraph);
   //  %typemap(directorin) (Interaction&) ()
   void * swig_argp;
   SP::Interaction pinter(createSPtrInteraction($1));
-  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&pinter), SWIGTYPE_p_cpp11ns__shared_ptrT_Interaction_t, 0);
+  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&pinter), SWIGTYPE_p_std11__shared_ptrT_Interaction_t, 0);
 }
 
 
@@ -391,8 +391,8 @@ TYPEDEF_SPTR(InteractionsGraph);
 %rename  (__eq__) TYPE ## ::operator==;
 %rename  (__ne__) TYPE ## ::operator!=;
 %rename  (__copy__) TYPE ## ::operator=;
-%ignore CPP11NS::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) CPP11NS::enable_shared_from_this<TYPE>;
+%ignore STD11::enable_shared_from_this<TYPE>;
+%template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE); 
 %enddef
 
@@ -489,9 +489,9 @@ KERNEL_REGISTRATION();
   struct SharedPointerKeeper
   {
     // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
-    cpp11ns::shared_ptr<void> ref;
+    std11::shared_ptr<void> ref;
 
-    SharedPointerKeeper(cpp11ns::shared_ptr<void> v) : ref(v) 
+    SharedPointerKeeper(std11::shared_ptr<void> v) : ref(v) 
     {
       DEBUG_PRINTF("SharedPointerKeeper : use_count %ld\n",v.use_count());
     };
@@ -507,7 +507,7 @@ KERNEL_REGISTRATION();
   /* the PyCObject deleter 
      example: 
      SharedPointerKeeper* savedSharePtr = 
-       new SharedPointerKeeper(cpp11ns::static_pointer_cast<void>(mysharedptr));
+       new SharedPointerKeeper(std11::static_pointer_cast<void>(mysharedptr));
      PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);      
   */
 
@@ -559,13 +559,13 @@ KERNEL_REGISTRATION();
 
 %template (dsi) std::pair<unsigned int, unsigned int >;
 
-%template (dsp) std::pair<cpp11ns::shared_ptr<DynamicalSystem>, cpp11ns::shared_ptr<DynamicalSystem> >;
+%template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<DynamicalSystem> >;
 
-%template (dspv) std::vector<std::pair<cpp11ns::shared_ptr<DynamicalSystem>, cpp11ns::shared_ptr<DynamicalSystem> > >;
+%template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<DynamicalSystem> > >;
 
 %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
-%template(unsignedintv) cpp11ns::shared_ptr<std::vector<unsigned int> >;
+%template(unsignedintv) std11::shared_ptr<std::vector<unsigned int> >;
 
 // not sufficient
 %ignore Question<bool>;
@@ -575,8 +575,8 @@ KERNEL_REGISTRATION();
 %template (quint) Question<unsigned int>;
 
 // suppress warning
-%ignore  CPP11NS::enable_shared_from_this< Hashed >;
-%template (sharedHashed) CPP11NS::enable_shared_from_this< Hashed >;
+%ignore  STD11::enable_shared_from_this< Hashed >;
+%template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
 
 
 // include registered headers

@@ -1,5 +1,5 @@
 
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -97,7 +97,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
 {
   zeroPlugin();
   // -- Lagrangian  xml object --
-  SP::LagrangianDSXML lgptr = cpp11ns::static_pointer_cast <LagrangianDSXML>(dsxml);
+  SP::LagrangianDSXML lgptr = std11::static_pointer_cast <LagrangianDSXML>(dsxml);
 
   // === Initial conditions ===
   // Warning: ndof is given by q0.size() !!
@@ -826,7 +826,7 @@ void LagrangianDS::saveSpecificDataToXML()
   if (!_dsxml)
     RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  SP::LagrangianDSXML lgptr = cpp11ns::static_pointer_cast <LagrangianDSXML>(_dsxml);
+  SP::LagrangianDSXML lgptr = std11::static_pointer_cast <LagrangianDSXML>(_dsxml);
   lgptr->setMassPlugin(_pluginMass->getPluginName());
   lgptr->setQ(*_q[0]);
   lgptr->setQ0(*_q0);

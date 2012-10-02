@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -44,10 +44,10 @@
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
 #include <memory>
-namespace cpp11ns = std;
+namespace std11 = std;
 #else
 #include <boost/shared_ptr.hpp>
-namespace cpp11ns = boost;
+namespace std11 = boost;
 #endif
 
 #include <boost/mpl/eval_if.hpp>
@@ -66,7 +66,7 @@ template <typename T>
 struct IsSharedPtr : boost::mpl::false_ {};
 
 template <typename T>
-struct IsSharedPtr<cpp11ns::shared_ptr<T> > : boost::mpl::true_ {};
+struct IsSharedPtr<std11::shared_ptr<T> > : boost::mpl::true_ {};
 
 template <typename T>
 struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {};
@@ -79,7 +79,7 @@ struct RemovePointer
 };
 
 template <typename T>
-struct RemovePointer<cpp11ns::shared_ptr<T> >
+struct RemovePointer<std11::shared_ptr<T> >
 {
   typedef T type;
 };
@@ -248,7 +248,7 @@ public:
   G& _g;
 
   // serialization issue with key_type as simple pointer (void *)
-  cpp11ns::shared_ptr< std::map<key_type, T> > _store;
+  std11::shared_ptr< std::map<key_type, T> > _store;
   int _stamp;
 
 

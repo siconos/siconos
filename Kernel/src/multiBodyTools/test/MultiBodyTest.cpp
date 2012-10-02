@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -63,7 +63,7 @@
 
 #include "SiconosBodies.hpp"
 
-class Disks : public SiconosBodies, public cpp11ns::enable_shared_from_this<Disks>
+class Disks : public SiconosBodies, public std11::enable_shared_from_this<Disks>
 {
 public:
   void init()
@@ -285,7 +285,7 @@ void Disks::init(std::string disks_input)
     // -- Simulation --
     simulation_.reset(new TimeStepping(timedisc_));
 
-    cpp11ns::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
+    std11::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
 
     simulation_->insertIntegrator(osi);
     simulation_->insertNonSmoothProblem(osnspb_);

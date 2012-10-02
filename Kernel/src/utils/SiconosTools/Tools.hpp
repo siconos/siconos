@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -117,9 +117,9 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
 #include "SiconosPointers.hpp"
 /** Graph -> Set conversion */
 template <class S, class G>
-cpp11ns::shared_ptr<S> setOfGraph(cpp11ns::shared_ptr<G> g)
+std11::shared_ptr<S> setOfGraph(std11::shared_ptr<G> g)
 {
-  cpp11ns::shared_ptr<S> r;
+  std11::shared_ptr<S> r;
   r.reset(new S());
   for (typename G::VIterator vi = g->begin(); vi != g->end(); ++vi)
   {

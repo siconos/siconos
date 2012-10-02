@@ -45,9 +45,9 @@ int main(int argc, char* argv[])
     bouncingBall->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::EventDriven s = cpp11ns::static_pointer_cast<EventDriven>
+    SP::EventDriven s = std11::static_pointer_cast<EventDriven>
                         (bouncingBall->simulation());
-    SP::LagrangianDS ball = cpp11ns::static_pointer_cast<LagrangianDS>
+    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
                             (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
 
     // --- Get the values to be plotted ---

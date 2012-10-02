@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
   // Interactionin indexSet
   dim = 0;
   InteractionsGraph::VIterator vd, vdend;
-  for (cpp11ns::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
 
@@ -96,7 +96,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
     dim += (*it)->getDim();
   }
   InteractionsGraph::VIterator vd, vdend;
-  for (cpp11ns::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
   {
     indexSet->bundle(*vd)->setAbsolutePosition(dim);
     dim += indexSet->bundle(*vd)->getNonSmoothLawSize();
@@ -279,13 +279,13 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
+    for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
       pos = inter->absolutePosition();
 
-      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix M1: %i %i\n", M1->size(0), M1->size(1));
@@ -295,7 +295,7 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for (cpp11ns::tie(ei, eiend) = indexSet->edges();
+    for (std11::tie(ei, eiend) = indexSet->edges();
          ei != eiend; ++ei)
     {
       InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
@@ -322,11 +322,11 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
       assert(indexSet->properties(*ei).lower_block);
       assert(indexSet->properties(*ei).upper_block);
-      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet->properties(*ei).upper_block);
 
-      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)
+      std11::static_pointer_cast<SimpleMatrix>(M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet->properties(*ei).lower_block);
     }
@@ -386,11 +386,11 @@ void OSNSMatrix::fillDiagonal(SP::InteractionsGraph IG, bool update)
     // indexSets[level]) ===
 
     InteractionsGraph::VIterator ui,uiend;
-    for (cpp11ns::tie(ui,uiend)=URSet->vertices(); ui!=uiend; ++ui)
+    for (std11::tie(ui,uiend)=URSet->vertices(); ui!=uiend; ++ui)
     {
       SP::Interaction inter = URSet->bundle(*ui);
       pos = (*interactionBlocksPositions)[inter];
-      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,pos,*(interactionBlocks[inter][inter]));
+      std11::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos,pos,*(interactionBlocks[inter][inter]));
     }
   }
   else // if storageType == 1
@@ -443,7 +443,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, 
 
       // Case 1: basic storage
       pos = (*DSBlocksPositions)[*itDS];
-      cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, pos, *(DSBlocks[(*itDS)->number()]));
+      std11::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, pos, *(DSBlocks[(*itDS)->number()]));
     }
   }
   else // if storageType == 1
@@ -508,7 +508,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, SP::InteractionsGraph IG, M
         // Case 1: basic storage
         pos = (*DSBlocksPositions)[*itCol];
         col = ((*itRow).first)->absolutePosition();
-        cpp11ns::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, col, *(DSInteractionBlocks[*itCol][(*itRow).first]));
+        std11::static_pointer_cast<SimpleMatrix>(M1)->setBlock(pos, col, *(DSInteractionBlocks[*itCol][(*itRow).first]));
       }
     }
 

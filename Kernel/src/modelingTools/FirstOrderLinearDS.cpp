@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
 {
 
   // pointer to xml
-  SP::FirstOrderLinearDSXML foldsxml = (cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
+  SP::FirstOrderLinearDSXML foldsxml = (std11::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
 
@@ -302,13 +302,13 @@ void FirstOrderLinearDS::saveSpecificDataToXML()
 {
   if (!_dsxml)
     RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-  cpp11ns::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setA(*_A);
+  std11::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setA(*_A);
 
   // b
   if (_b)
   {
-    if (!(cpp11ns::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml))->isBPlugin())
-      cpp11ns::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setB(*_b);
+    if (!(std11::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml))->isBPlugin())
+      std11::static_pointer_cast<FirstOrderLinearDSXML>(_dsxml)->setB(*_b);
   }
 
   else RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");

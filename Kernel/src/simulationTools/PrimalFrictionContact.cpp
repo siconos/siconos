@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ using namespace std;
 PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
   LinearOSNS(osNsPbXml, "PrimalFrictionContact"), _contactProblemDim(3)
 {
-  SP::FrictionContactXML xmlFC = cpp11ns::static_pointer_cast<FrictionContactXML>(osNsPbXml);
+  SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
   // Read dimension of the problem (required parameter)
   if (!xmlFC->hasProblemDim())
@@ -171,7 +171,7 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   osiType = Osi->getType();
   if (osiType == MOREAU || osiType == MOREAU2)
   {
-    DSBlocks[DS] = (cpp11ns::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (std11::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
     //       cout << "PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
     //       DSBlocks[DS]->display();
   }
@@ -274,7 +274,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
     if (nslawType == NEWTONIMPACTNSLAW)
     {
 
-      e = (cpp11ns::static_pointer_cast<NewtonImpactNSL>(mainInteraction->nonSmoothLaw()))->getE();
+      e = (std11::static_pointer_cast<NewtonImpactNSL>(mainInteraction->nonSmoothLaw()))->getE();
 
       Index subCoord(4);
       if (simulationType == "TimeStepping")
@@ -299,7 +299,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-      e = (cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->nonSmoothLaw()))->getEn();
+      e = (std11::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->nonSmoothLaw()))->getEn();
 
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
@@ -392,7 +392,7 @@ void PrimalFrictionContact::preCompute(const double time)
     // Update mu
     _mu->clear();
     for (ConstInteractionsIterator itI = indexSet->begin(); itI != indexSet->end(); ++itI)
-      _mu->push_back(cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL>((*itI)->nonSmoothLaw())->getMu());
+      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>((*itI)->nonSmoothLaw())->getMu());
   }
 
   // Computes q

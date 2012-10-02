@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -43,8 +43,8 @@ protected:
   */
   ACCEPT_SERIALIZATION(BulletSpaceFilter);
 
-  cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
-  cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
+  std11::shared_ptr<std::vector<SP::btCollisionObject> > _staticObjects;
+  std11::shared_ptr<std::vector<SP::btCollisionShape> > _staticShapes;
 
   SP::btCollisionWorld _collisionWorld;
   SP::btDefaultCollisionConfiguration _collisionConfiguration;
@@ -67,12 +67,12 @@ public:
     return _collisionWorld;
   };
 
-  cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
+  std11::shared_ptr<std::vector<SP::btCollisionObject> >staticObjects() const
   {
     return _staticObjects;
   };
 
-  cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
+  std11::shared_ptr<std::vector<SP::btCollisionShape> > staticShapes() const
   {
     return _staticShapes;
   };
@@ -92,14 +92,14 @@ struct ForCollisionWorld : public Question<SP::btCollisionWorld>
   ANSWER(BulletSpaceFilter, collisionWorld());
 };
 
-struct ForStaticObjects : public Question< cpp11ns::shared_ptr<std::vector<SP::btCollisionObject> > >
+struct ForStaticObjects : public Question< std11::shared_ptr<std::vector<SP::btCollisionObject> > >
 {
   using SiconosVisitor::visit;
 
   ANSWER(BulletSpaceFilter, staticObjects());
 };
 
-struct ForStaticShapes : public Question< cpp11ns::shared_ptr<std::vector<SP::btCollisionShape> > >
+struct ForStaticShapes : public Question< std11::shared_ptr<std::vector<SP::btCollisionShape> > >
 {
   using SiconosVisitor::visit;
 

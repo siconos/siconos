@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -103,12 +103,12 @@ void MoreauProjectOnConstraintsOSI::initialize()
     Type::Siconos dsType = Type::value(**itDS);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(*itDS);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else
@@ -139,7 +139,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //         dsType == Type::LagrangianDS)
   //     {
 
-  //       SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+  //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
   //       SP::SiconosVector vfree = d->workFree();
   //       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
   //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -161,7 +161,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //     }
   //     else if (dsType == Type::NewtonEulerDS)
   //     {
-  //       SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
+  //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
   //       SP::SiconosVector vfree = d->workFree();
   //       SP::SiconosMatrix T = d->T();
   //       SP::SiconosVector dotq = d->dotq();

@@ -1,4 +1,4 @@
-/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2011.
+/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -40,8 +40,8 @@ bool BouncingBall()
     // --- Model loading from xml file ---
     SP::Model bouncingBall(new Model("./Ball.xml"));
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
-    SP::LagrangianDS ball = cpp11ns::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     bouncingBall->initialize();
 
     // --- Get the time discretisation scheme ---

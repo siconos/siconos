@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     oscillator->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = cpp11ns::static_pointer_cast<TimeStepping>(oscillator->simulation());
+    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(oscillator->simulation());
 
     // --- Get the time discretisation scheme ---
     SP::TimeDiscretisation t = s->timeDiscretisation();
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
-    SP::LagrangianDS oscillo = cpp11ns::static_pointer_cast<LagrangianDS>
+    SP::LagrangianDS oscillo = std11::static_pointer_cast<LagrangianDS>
                                (oscillator->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     SP::SiconosVector q = oscillo->q();
     SP::SiconosVector v = oscillo->velocity();

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -45,7 +45,7 @@ typedef MapFactory::iterator MapFactoryIt;
 /** Template function to return a new object of type SubType*/
 template<class SubType> SP::Sensor factory(SP::TimeDiscretisation t, SP::DynamicalSystem ds)
 {
-  return cpp11ns::shared_ptr<SubType>(new SubType(t, ds));
+  return std11::shared_ptr<SubType>(new SubType(t, ds));
 }
 
 /** Registry Class for sensors.

@@ -734,12 +734,12 @@ void BodiesViewer::mouseMoveEvent(QMouseEvent *e)
         {
         case Type::NewtonEulerDS :
         {
-          cpp11ns::static_pointer_cast<NewtonEulerDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          std11::static_pointer_cast<NewtonEulerDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
           break;
         };
         case Type::LagrangianDS :
         {
-          cpp11ns::static_pointer_cast<LagrangianDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
+          std11::static_pointer_cast<LagrangianDS>(shapes_[selectedName()]->DS())->setFExtPtr(fext);
           break;
         };
         default :

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -54,7 +54,7 @@ union MATRIX_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SiconosMatrix : public cpp11ns::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix : public std11::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
@@ -93,7 +93,7 @@ public:
   /** constructor from a shared ptr (for python)
    *  \param a SiconosMatrix shared ptr
    */
-  SiconosMatrix(cpp11ns::shared_ptr<SiconosMatrix> m)
+  SiconosMatrix(std11::shared_ptr<SiconosMatrix> m)
   {
     shared_from_this() = m;
   }

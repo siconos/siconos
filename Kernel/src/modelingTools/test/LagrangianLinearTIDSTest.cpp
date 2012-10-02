@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -167,7 +167,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
   SP::DynamicalSystem ds(new LagrangianLinearTIDS(tmpxml1));
-  SP::LagrangianLinearTIDS copy = cpp11ns::static_pointer_cast<LagrangianLinearTIDS>(ds);
+  SP::LagrangianLinearTIDS copy = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
   SP::SiconosMatrix jx = ds->jacobianRhsx();

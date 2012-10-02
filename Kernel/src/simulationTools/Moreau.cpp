@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
     RuntimeException::selfThrow("Moreau::xml constructor - OneStepIntegratorXML object == NULL.");
 
   integratorXml = osiXML;
-  SP::MoreauXML moreauXml = cpp11ns::static_pointer_cast<MoreauXML>(osiXML);
+  SP::MoreauXML moreauXml = std11::static_pointer_cast<MoreauXML>(osiXML);
 
   // Required inputs: a list of DS and one _theta per DS.
   // No xml entries at the time for _sizeMem and W.
@@ -95,7 +95,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
     // get corresponding ds and insert them into the set.
     vector<int>::iterator it;
     SP::DynamicalSystem ds;
-    for_each(dsList->begin(), dsList->end(), cpp11ns::bind(&DynamicalSystem::number, _1));
+    for_each(dsList->begin(), dsList->end(), std11::bind(&DynamicalSystem::number, _1));
     for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
     {
       ds = dsList->getPtr(*it);
@@ -315,7 +315,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     //     SP::SiconosMatrix W = WMap[ds];
 
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
 
@@ -345,7 +345,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 2 - First order linear systems
   //   else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   //     {
-  //       SP::FirstOrderLinearDS d = cpp11ns::static_pointer_cast<FirstOrderLinearDS> (ds);
+  //       SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS> (ds);
   //       if( d->M() )
   //  *W = *d->M();
   //       else
@@ -356,7 +356,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 3 - Lagrangian non linear systems
   else if (dsType == Type::LagrangianDS)
   {
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
     WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
@@ -377,7 +377,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 4 - Lagrangian linear systems
   else if (dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
     WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
@@ -437,7 +437,7 @@ void Moreau::initWBoundaryConditions(SP::DynamicalSystem ds)
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
 
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
     unsigned int numberBoundaryConditions = d->boundaryConditions()->velocityIndices()->size();
     _WBoundaryConditionsMap[dsN].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
@@ -475,7 +475,7 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
     vector<unsigned int>::iterator itindex;
 
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
     for (itindex = d->boundaryConditions()->velocityIndices()->begin() ;
          itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -524,7 +524,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   if (dsType == Type::FirstOrderNonLinearDS)
   {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
     if (d->M())
@@ -539,7 +539,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // 2 - First order linear systems
   else if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
-    SP::FirstOrderLinearDS d = cpp11ns::static_pointer_cast<FirstOrderLinearDS> (ds);
+    SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS> (ds);
     if (dsType == Type::FirstOrderLinearDS)
       d->computeA(t);
 
@@ -552,7 +552,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // 3 - Lagrangian non linear systems
   else if (dsType == Type::LagrangianDS)
   {
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
@@ -580,7 +580,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
+    SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     d->computeJacobianvFL(t);
     double thetaFL = _theta;
     *(d->luW()) = *(d->jacobianvFL());
@@ -645,7 +645,7 @@ double Moreau::computeResidu()
       // value, ie the one saved in the DynamicalSystem.
       // "i" values are saved in memory vectors.
 
-      SP::FirstOrderNonLinearDS d = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
@@ -710,7 +710,7 @@ double Moreau::computeResidu()
     // 2 - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == Type::FirstOrderLinearTIDS)
     {
-      SP::FirstOrderLinearTIDS d = cpp11ns::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      SP::FirstOrderLinearTIDS d = std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       //Don't use W because it is LU factorized
       //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
       // because x_k+1=x_k:
@@ -743,7 +743,7 @@ double Moreau::computeResidu()
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -832,7 +832,7 @@ double Moreau::computeResidu()
       // in the sequel, only the equation (1) is implemented
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
@@ -963,7 +963,7 @@ double Moreau::computeResidu()
       // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
-      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -1046,7 +1046,7 @@ void Moreau::computeFreeState()
       // IN to be updated at current time: W, f
       // IN at told: f
       // IN, not time dependant: M
-      SP::FirstOrderNonLinearDS d = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
@@ -1139,7 +1139,7 @@ void Moreau::computeFreeState()
       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -1180,7 +1180,7 @@ void Moreau::computeFreeState()
       // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
@@ -1215,7 +1215,7 @@ void Moreau::computeFreeState()
       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
-      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       computeW(t, d);
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -1357,7 +1357,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   {
     SP::SiconosVector lambda;
     lambda = inter->lambda(0);
-    FirstOrderType2R& rel = *cpp11ns::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
+    FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());
     C = rel.C();
     D = rel.D();
     assert(lambda);
@@ -1389,7 +1389,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
   else if (relationType == NewtonEuler)
   {
-    SP::SiconosMatrix CT =  cpp11ns::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
+    SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
 
     if (CT)
     {
@@ -1450,8 +1450,8 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       {
         if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-          subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
+          std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
+          subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false); // y += hDot
         }
         else
           RuntimeException::selfThrow("Moreau::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
@@ -1469,13 +1469,13 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       SP::SiconosVector e;
       if (relationSubType == LinearTIR)
       {
-        e = cpp11ns::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
-        F = cpp11ns::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
+        e = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
+        F = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
       }
       else
       {
-        e = cpp11ns::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-        F = cpp11ns::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
+        e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
+        F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
       }
 
       if (e)
@@ -1517,7 +1517,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // get the ds
-      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
       // get velocity pointers for current time step
       SP::SiconosVector v = d->velocity();
       // get q and velocity pointers for previous time step
@@ -1592,7 +1592,7 @@ void Moreau::updateState(const unsigned int level)
     // 1 - First Order Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
-      SP::FirstOrderNonLinearDS fonlds = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       SP::SiconosVector x = ds->x();
       bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
       if (level != LEVELMAX)
@@ -1639,7 +1639,7 @@ void Moreau::updateState(const unsigned int level)
 
 
       //  }else if (dsType == Type::FirstOrderLinearTIDS){
-      //    SP::FirstOrderNonLinearDS fonlds = cpp11ns::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      //    SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       //    SP::SiconosVector x = ds->x();
       //    // Solve W(x-xfree) = hr
       //    *x=*fonlds->r();
@@ -1653,7 +1653,7 @@ void Moreau::updateState(const unsigned int level)
     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // get dynamical system
-      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector v = d->velocity();
@@ -1738,7 +1738,7 @@ void Moreau::updateState(const unsigned int level)
     else if (dsType == Type::NewtonEulerDS)
     {
       // get dynamical system
-      SP::NewtonEulerDS d = cpp11ns::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
 #ifdef MOREAU_NE_DEBUG
       cout << "Moreau::updatestate prev v" << endl;

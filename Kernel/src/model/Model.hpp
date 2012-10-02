@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ DEFINE_SPTR(SiconosModelXML)
  *
  *
  */
-class Model : public cpp11ns::enable_shared_from_this<Model>
+class Model : public std11::enable_shared_from_this<Model>
 {
 private:
   /** current time of the simulation */

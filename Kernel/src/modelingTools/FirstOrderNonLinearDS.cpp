@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -90,7 +90,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 {
   zeroPlugin();
   // -- Type::FirstOrderNonLinearDS xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = cpp11ns::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
+  SP::FirstOrderNonLinearDSXML fonlds = std11::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
 
   // === Initial conditions ===
   // Warning: n is set thanks to x0 size
@@ -521,7 +521,7 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool)
 void FirstOrderNonLinearDS::saveSpecificDataToXML()
 {
   // -- FirstOrderNonLinearDS  xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = cpp11ns::static_pointer_cast <FirstOrderNonLinearDSXML>(_dsxml);
+  SP::FirstOrderNonLinearDSXML fonlds = std11::static_pointer_cast <FirstOrderNonLinearDSXML>(_dsxml);
   // --- other data ---
   if (!fonlds)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");

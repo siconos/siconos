@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@ void D1MinusLinear::initialize()
     Type::Siconos dsType = Type::value(**it);
     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
       RuntimeException::selfThrow("D1MinusLinear::initialize - not implemented for Dynamical system type: " + dsType);
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     d->computeMass();
   }
 }
@@ -91,7 +91,7 @@ double D1MinusLinear::computeResidu()
   {
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector workFree = d->workFree(); // POINTER CONSTRUCTOR : contains acceleration without contact force
     workFree->zero();
 
@@ -117,7 +117,7 @@ double D1MinusLinear::computeResidu()
     // Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (*it);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (*it);
 
       SP::SiconosMatrix C = d->C(); // constant dissipation
       SP::SiconosMatrix K = d->K(); // constant stiffness
@@ -176,7 +176,7 @@ double D1MinusLinear::computeResidu()
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // type of the current DS
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector workFree = d->workFree(); // contains acceleration without contact force
 
     // get left state from memory
@@ -237,7 +237,7 @@ double D1MinusLinear::computeResidu()
   {
     // type of the current DS
     Type::Siconos dsType = Type::value(**it);
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector workFree = d->workFree(); // POINTER CONSTRUCTOR : contains acceleration without contact force
     workFree->zero();
 
@@ -265,7 +265,7 @@ double D1MinusLinear::computeResidu()
     // Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianLinearTIDS d = cpp11ns::static_pointer_cast<LagrangianLinearTIDS> (*it);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (*it);
 
       SP::SiconosMatrix C = d->C(); // constant dissipation
       SP::SiconosMatrix K = d->K(); // constant stiffness
@@ -347,7 +347,7 @@ double D1MinusLinear::computeResidu()
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // type of the current DS
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosVector workFree = d->workFree(); // contains acceleration without contact force
 
     // get right state from memory
@@ -382,7 +382,7 @@ void D1MinusLinear::computeFreeState()
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // Lagrangian Systems
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // get left state from memory
     SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
@@ -442,7 +442,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   if (relationType == Lagrangian)
   {
     // in Yp the linear part of velocity or acceleration relation will be saved
-    C = cpp11ns::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
+    C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
     if (C)
     {
@@ -472,8 +472,8 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *inter);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), *Yp, xcoord, false);
       }
       else
         RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
@@ -482,8 +482,8 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
-        cpp11ns::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(cpp11ns::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
       }
     }
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
@@ -501,7 +501,7 @@ void D1MinusLinear::updateState(const unsigned int level)
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // Lagrangian Systems
-    SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*it);
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     SP::SiconosMatrix M = d->mass();
     SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
 

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -117,7 +117,7 @@ void OneStepIntegrator::initialize()
 
 void OneStepIntegrator::saveInMemory()
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), cpp11ns::bind(&DynamicalSystem::swapInMemory, _1));
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::swapInMemory, _1));
 }
 
 double OneStepIntegrator::computeResidu()
@@ -136,11 +136,11 @@ void OneStepIntegrator::computeFreeOutput(SP::Interaction inter, OneStepNSProble
 }
 void OneStepIntegrator::resetNonSmoothPart()
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), cpp11ns::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
 }
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
-  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), cpp11ns::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
 }
 
 void OneStepIntegrator::display()

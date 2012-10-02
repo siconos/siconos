@@ -200,7 +200,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
     {
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -226,7 +226,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -307,7 +307,7 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -333,7 +333,7 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -395,7 +395,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -422,7 +422,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
            oei != oeiend; ++oei)
       {
         if (DSG0->bundle(DSG0->target(*oei)) == ds2)
@@ -588,7 +588,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -617,7 +617,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -671,7 +671,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -698,7 +698,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -742,7 +742,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -769,7 +769,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -814,7 +814,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -841,7 +841,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
@@ -958,7 +958,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     unsigned int j;
     interPairs declaredInteractions;
-    cpp11ns::shared_ptr<_CircularFilter>
+    std11::shared_ptr<_CircularFilter>
     circularFilter(new _CircularFilter(parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
@@ -1025,7 +1025,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    cpp11ns::shared_ptr<_SphereLDSFilter> sphereFilter(new _SphereLDSFilter(parent, ds1));
+    std11::shared_ptr<_SphereLDSFilter> sphereFilter(new _SphereLDSFilter(parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -1080,7 +1080,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    cpp11ns::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent, ds1));
+    std11::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -1134,9 +1134,9 @@ void SpaceFilter::buildInteractions(double time)
   SP::DynamicalSystemsGraph
   DSG0 = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  cpp11ns::shared_ptr<_BodyHash>
+  std11::shared_ptr<_BodyHash>
   hasher(new _BodyHash(*this));
-  cpp11ns::shared_ptr<_FindInteractions>
+  std11::shared_ptr<_FindInteractions>
   findInteractions(new _FindInteractions(shared_from_this(), time));
 
 
@@ -1144,7 +1144,7 @@ void SpaceFilter::buildInteractions(double time)
 
   // 1: rehash DS
   DynamicalSystemsGraph::VIterator vi, viend;
-  for (cpp11ns::tie(vi, viend) = DSG0->vertices();
+  for (std11::tie(vi, viend) = DSG0->vertices();
        vi != viend; ++vi)
   {
     // to avoid cast see dual dispatch, visitor pattern
@@ -1152,7 +1152,7 @@ void SpaceFilter::buildInteractions(double time)
   }
 
   // 2: prox detection
-  for (cpp11ns::tie(vi, viend) = DSG0->vertices();
+  for (std11::tie(vi, viend) = DSG0->vertices();
        vi != viend; ++vi)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
@@ -1207,14 +1207,14 @@ double SpaceFilter::minDistance(SP::Hashed h)
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
     = _hash_table.equal_range(h);
 
-  SP::SiconosVector q = cpp11ns::static_pointer_cast<LagrangianDS>(h->body)->q();
+  SP::SiconosVector q = std11::static_pointer_cast<LagrangianDS>(h->body)->q();
 
   double dmin = INFINITY;
 
   {
-    SP::Disk disk = cpp11ns::static_pointer_cast<Disk>(h->body);
+    SP::Disk disk = std11::static_pointer_cast<Disk>(h->body);
 
-    cpp11ns::shared_ptr<_DiskDistance> distance(new _DiskDistance((*q)(0), (*q)(1), disk->getRadius()));
+    std11::shared_ptr<_DiskDistance> distance(new _DiskDistance((*q)(0), (*q)(1), disk->getRadius()));
 
     for (; neighbours.first != neighbours.second; ++neighbours.first)
     {

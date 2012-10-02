@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -65,11 +65,11 @@ More documentation on smart pointers and reference counting:
 #include <boost/shared_array.hpp>
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
-namespace cpp11ns = std;
+namespace std11 = std;
 #else
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-namespace cpp11ns = boost;
+namespace std11 = boost;
 #endif
 
 namespace SharedPointer {}
@@ -123,16 +123,16 @@ struct nullDeleter
 /* template typedef : no */
 
 #define TYPEDEF_SPTR(X) \
-  typedef cpp11ns::shared_ptr<X> SPtr##X; \
-  typedef cpp11ns::shared_ptr<const X> SPtrConst##X; \
+  typedef std11::shared_ptr<X> SPtr##X; \
+  typedef std11::shared_ptr<const X> SPtrConst##X; \
   inline SPtr##X create##SPtr##X(X &x) \
   { \
-    cpp11ns::shared_ptr<X> px(&x, nullDeleter()); \
+    std11::shared_ptr<X> px(&x, nullDeleter()); \
     return px; \
   } \
   inline SPtrConst##X create##SPtrConst##X(const X &x) \
   { \
-    cpp11ns::shared_ptr<const X> px(&x, nullDeleter()); \
+    std11::shared_ptr<const X> px(&x, nullDeleter()); \
     return px; \
   } \
   NAME_SPACE_SPTR(X)
@@ -164,16 +164,16 @@ struct nullDeleter
   }
 
 #define TYPEDEF_TPL1_SPTR(N,X,Y)                           \
-  typedef cpp11ns::shared_ptr<X<Y> > SPtr##N;                \
-  typedef cpp11ns::shared_ptr<const X<Y> > SPtrConst##N;     \
+  typedef std11::shared_ptr<X<Y> > SPtr##N;                \
+  typedef std11::shared_ptr<const X<Y> > SPtrConst##N;     \
   inline SPtr##N create##SPtr##N(X<Y> &x)                  \
   {                                                        \
-    cpp11ns::shared_ptr<X<Y> > px(&x, nullDeleter());        \
+    std11::shared_ptr<X<Y> > px(&x, nullDeleter());        \
     return px;                                             \
   }                                                        \
   inline SPtrConst##N create##SPtrConst##N(const X<Y> &x)  \
   {                                                        \
-    cpp11ns::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
+    std11::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
     return px;                                             \
   }                                                        \
   NAME_SPACE_TPL1_SPTR(N,X,Y)

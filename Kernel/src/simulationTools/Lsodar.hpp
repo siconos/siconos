@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ class BlockVector;
  *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
  *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
-class Lsodar : public OneStepIntegrator, public cpp11ns::enable_shared_from_this<Lsodar>
+class Lsodar : public OneStepIntegrator, public std11::enable_shared_from_this<Lsodar>
 {
 private:
   /** serialization hooks

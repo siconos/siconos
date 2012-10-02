@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -199,7 +199,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(vd);
+    for (std11::tie(oei, oeiend) = indexSet->out_edges(vd);
          oei != oeiend; ++oei)
     {
       // note : at most 4 edges
@@ -280,9 +280,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (osiType == OSI::MOREAU)
       {
-        if ((cpp11ns::static_pointer_cast<Moreau> (Osi))->useGamma() || (cpp11ns::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
+        if ((std11::static_pointer_cast<Moreau> (Osi))->useGamma() || (std11::static_pointer_cast<Moreau> (Osi))->useGammaForRelation())
         {
-          *rightInteractionBlock *= (cpp11ns::static_pointer_cast<Moreau> (Osi))->gamma();
+          *rightInteractionBlock *= (std11::static_pointer_cast<Moreau> (Osi))->gamma();
         }
       }
 
@@ -290,7 +290,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       // for ZOH, we have a different formula ...
       if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
       {
-        *rightInteractionBlock = *cpp11ns::static_pointer_cast<ZeroOrderHold>(Osi)->Psi(*ds);
+        *rightInteractionBlock = *std11::static_pointer_cast<ZeroOrderHold>(Osi)->Psi(*ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
       }
       else
@@ -317,7 +317,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
       {
-        SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
         if (d->boundaryConditions())
         {
@@ -493,7 +493,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       if (d->boundaryConditions())
       {
@@ -598,7 +598,7 @@ void LinearOSNS::computeq(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
 
@@ -665,7 +665,7 @@ void LinearOSNS::preCompute(double time)
     if (_keepLambdaAndYState)
     {
       InteractionsGraph::VIterator ui, uiend;
-      for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         // Get the relative position of inter-interactionBlock in the vector w
@@ -710,7 +710,7 @@ void LinearOSNS::postCompute()
   unsigned int pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector w
@@ -750,8 +750,8 @@ void LinearOSNS::saveNSProblemToXML()
 {
   //   if(onestepnspbxml != NULL)
   //     {
-  // //       (cpp11ns::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
-  //       (cpp11ns::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
+  // //       (std11::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
+  //       (std11::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
   //     }
   //   else RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - Not yet implemented.");

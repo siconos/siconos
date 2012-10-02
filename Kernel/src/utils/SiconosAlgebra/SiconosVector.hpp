@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@ union VECTOR_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SiconosVector : public cpp11ns::enable_shared_from_this<SiconosVector>
+class SiconosVector : public std11::enable_shared_from_this<SiconosVector>
 {
 protected:
   /** serialization hooks
@@ -428,7 +428,7 @@ struct VectorNum : public Question<unsigned int>
     else answer = 4;
   }
 
-  void visit(cpp11ns::shared_ptr<SiconosVector> v)
+  void visit(std11::shared_ptr<SiconosVector> v)
   {
     if (v->_dense) answer = 1;
     else answer = 4;

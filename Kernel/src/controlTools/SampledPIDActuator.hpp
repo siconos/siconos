@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ private:
   ACCEPT_SERIALIZATION(SampledPIDActuator);
 
   /** error vector */
-  cpp11ns::shared_ptr<boost::circular_buffer<double> > _err;
+  std11::shared_ptr<boost::circular_buffer<double> > _err;
 
   /** reference we are tracking */
   double _ref;

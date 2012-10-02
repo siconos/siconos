@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ FrictionContact::FrictionContact(int dimPb, const int newNumericsSolverId,
 FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
   LinearOSNS(osNsPbXml, "FrictionContact"), _contactProblemDim(3)
 {
-  SP::FrictionContactXML xmlFC = cpp11ns::static_pointer_cast<FrictionContactXML>(osNsPbXml);
+  SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
 
   if (osNsPbXml->hasNumericsSolverName())
@@ -115,9 +115,9 @@ void FrictionContact::initialize(SP::Simulation sim)
     SP::InteractionsGraph indexSet =
       simulation()->indexSet(levelMin());
     InteractionsGraph::VIterator ui, uiend;
-    for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
-      _mu->push_back(cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL>
+      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
     }
   }
@@ -145,9 +145,9 @@ int FrictionContact::compute(double time)
 
   SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
   InteractionsGraph::VIterator ui, uiend;
-  for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    _mu->push_back(cpp11ns::static_pointer_cast<NewtonImpactFrictionNSL>
+    _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
   // --- Call Numerics driver ---

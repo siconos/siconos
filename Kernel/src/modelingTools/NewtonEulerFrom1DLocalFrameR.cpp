@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -254,12 +254,12 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(const double time, Interaction& 
 void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter)
 {
   DSIterator itDS = inter.dynamicalSystemsBegin();
-  SP::NewtonEulerDS d1 =  cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS);
+  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (*itDS);
   SP::SiconosVector Q1 = d1->q();
   itDS++;
   if (itDS != inter.dynamicalSystemsEnd())
   {
-    SP::NewtonEulerDS d2 =  cpp11ns::static_pointer_cast<NewtonEulerDS> (*itDS);
+    SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (*itDS);
     SP::SiconosVector Q2 = d2->q();
     NIcomputeJachqTFromContacts(d1, d2);
   }

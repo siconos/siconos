@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -174,12 +174,12 @@ TYPEDEF_SPTR(GraphProperties)
  *
  * where L is the line graph
  * transformation */
-typedef SiconosGraph < cpp11ns::shared_ptr<DynamicalSystem>, cpp11ns::shared_ptr<Interaction>,
+typedef SiconosGraph < std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<Interaction>,
         SystemProperties, InteractionProperties,
         GraphProperties > _DynamicalSystemsGraph;
 
 
-typedef SiconosGraph < cpp11ns::shared_ptr<Interaction>, cpp11ns::shared_ptr<DynamicalSystem>,
+typedef SiconosGraph < std11::shared_ptr<Interaction>, std11::shared_ptr<DynamicalSystem>,
         InteractionProperties, SystemProperties,
         GraphProperties > _InteractionsGraph;
 

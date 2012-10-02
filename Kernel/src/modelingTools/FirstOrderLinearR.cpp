@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -325,7 +325,7 @@ void FirstOrderLinearR::saveRelationToXML() const
   if (!_relationxml)
     RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no yet implemented.");
 
-  SP::LinearRXML folrXML = (cpp11ns::static_pointer_cast<LinearRXML>(_relationxml));
+  SP::LinearRXML folrXML = (std11::static_pointer_cast<LinearRXML>(_relationxml));
   folrXML->setC(*_jachx);
   folrXML->setD(*_jachlambda);
   folrXML->setF(*_F);

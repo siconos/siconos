@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
 * Siconos is a program dedicated to modeling, simulation and control
 * of non smooth dynamical systems.
 * Siconos is a free software; you can redistribute it and/or modify
@@ -174,7 +174,7 @@ struct FindType
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
-  virtual void visit(cpp11ns::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
+  virtual void visit(std11::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 
@@ -215,9 +215,9 @@ inline Siconos value(const C& c)
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
-inline cpp11ns::shared_ptr<std::string> str(const Siconos& X)
+inline std11::shared_ptr<std::string> str(const Siconos& X)
 {
-  cpp11ns::shared_ptr<std::string> r;
+  std11::shared_ptr<std::string> r;
 
   switch (X)
   {
@@ -347,7 +347,7 @@ struct Question : public SiconosVisitor
   typedef AnswerType type;
   type answer;
 
-  Question() : answer(cpp11ns::array<typename cpp11ns::remove_reference<AnswerType>::type, 1>()[0])
+  Question() : answer(std11::array<typename std11::remove_reference<AnswerType>::type, 1>()[0])
   {};
   Question(AnswerType ref) : answer(ref) {};
 

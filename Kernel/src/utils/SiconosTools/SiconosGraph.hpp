@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -63,9 +63,9 @@ using std::size_t;
 #endif
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
-namespace cpp11ns = std;
+namespace std11 = std;
 #else
-namespace cpp11ns = boost;
+namespace std11 = boost;
 #endif
 
 #include "SiconosSerialization.hpp"
@@ -230,12 +230,12 @@ public:
   {
     bool ret = false;
     EDescriptor tmped;
-    cpp11ns::tie(tmped, ret) = edge(vd1, vd2);
+    std11::tie(tmped, ret) = edge(vd1, vd2);
 
 #ifndef NDEBUG
     bool check_ret = false;
     AVIterator avi, aviend;
-    for (cpp11ns::tie(avi, aviend) = adjacent_vertices(vd1);
+    for (std11::tie(avi, aviend) = adjacent_vertices(vd1);
          avi != aviend; ++avi)
     {
       if (*avi == vd2)
@@ -267,7 +267,7 @@ public:
     bool ifirst = false;
     bool isecond = false;
     EDescriptor first, second;
-    for (cpp11ns::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
+    for (std11::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
     {
       if (target(*oei) == v)
       {
@@ -312,7 +312,7 @@ public:
   {
     bool found = false;
     OEIterator oei, oeiend;
-    for (cpp11ns::tie(oei, oeiend) = out_edges(vd1);
+    for (std11::tie(oei, oeiend) = out_edges(vd1);
          oei != oeiend; ++oei)
     {
       if (target(*oei) == vd2 && bundle(*oei) == e_bundle)
@@ -328,7 +328,7 @@ public:
   {
     bool ret = false;
     VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
@@ -440,14 +440,14 @@ public:
   inline VIterator begin()
   {
     VIterator vi, viend;
-    cpp11ns::tie(vi, viend) = vertices();
+    std11::tie(vi, viend) = vertices();
     return vi;
   }
 
   inline VIterator end()
   {
     VIterator vi, viend;
-    cpp11ns::tie(vi, viend) = vertices();
+    std11::tie(vi, viend) = vertices();
     return viend;
   }
 
@@ -535,7 +535,7 @@ public:
 
     // edges copy as in boost::subgraph
     typename G::OEIterator ogoei, ogoeiend;
-    for (cpp11ns::tie(ogoei, ogoeiend) =
+    for (std11::tie(ogoei, ogoeiend) =
            og.out_edges(og.descriptor(vertex_bundle));
          ogoei != ogoeiend; ++ogoei)
     {
@@ -610,7 +610,7 @@ public:
 
     assert(!is_edge(vd1, vd2, e_bundle));
 
-    cpp11ns::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
+    std11::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
     assert(inserted);
 
     index(new_edge) = std::numeric_limits<size_t>::max();
@@ -669,7 +669,7 @@ public:
       std::map<E, EDescriptor> Edone;
 
       OEIterator ied, iedend;
-      for (cpp11ns::tie(ied, iedend) = out_edges(vdx);
+      for (std11::tie(ied, iedend) = out_edges(vdx);
            ied != iedend; ++ied)
       {
         if (Edone.find(bundle(*ied)) == Edone.end())
@@ -761,7 +761,7 @@ public:
        multiset allows for member removal without invalidating iterators
 
         OEIterator oei,oeiend;
-        for(cpp11ns::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
+        for(std11::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
         {
           if (pred(*oei))
           {
@@ -796,7 +796,7 @@ public:
     VIterator vi, viend;
     size_t i;
     _vertex_index_modified.clear();
-    for (cpp11ns::tie(vi, viend) = boost::vertices(g), i = 0;
+    for (std11::tie(vi, viend) = boost::vertices(g), i = 0;
          vi != viend; ++vi, ++i)
     {
       if (index(*vi) != i && index(*vi) != std::numeric_limits<size_t>::max())
@@ -820,7 +820,7 @@ public:
     EIterator ei, eiend;
     size_t i;
     _edge_index_modified.clear();
-    for (cpp11ns::tie(ei, eiend) = boost::edges(g), i = 0;
+    for (std11::tie(ei, eiend) = boost::edges(g), i = 0;
          ei != eiend; ++ei, ++i)
     {
       if (index(*ei) != i && index(*ei) != std::numeric_limits<size_t>::max())
@@ -874,7 +874,7 @@ public:
   {
 
     VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = vertices();
+    for (std11::tie(vi, viend) = vertices();
          vi != viend; ++vi)
     {
       std::cout << "vertex :"
@@ -886,7 +886,7 @@ public:
                 << ", color : "
                 << color(*vi);
       OEIterator oei, oeiend, next;
-      for (cpp11ns::tie(oei, oeiend) = out_edges(*vi);
+      for (std11::tie(oei, oeiend) = out_edges(*vi);
            oei != oeiend; ++oei)
       {
         std::cout << "---"
@@ -909,20 +909,20 @@ public:
   bool state_assert()
   {
     VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       OEIterator ei, eiend;
-      for (cpp11ns::tie(ei, eiend) = out_edges(*vi);
+      for (std11::tie(ei, eiend) = out_edges(*vi);
            ei != eiend; ++ei)
       {
         assert(is_vertex(bundle(target(*ei))));
         assert(source(*ei) == *vi);
       }
       AVIterator avi, aviend;
-      for (cpp11ns::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (std11::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));
@@ -937,13 +937,13 @@ public:
   {
 
     VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       AVIterator avi, aviend;
-      for (cpp11ns::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (std11::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
 
   if (!(simulation->oneStepNSProblems()->empty()))
   {
-    SP::EventDriven eventDriven = cpp11ns::static_pointer_cast<EventDriven>(simulation);
+    SP::EventDriven eventDriven = std11::static_pointer_cast<EventDriven>(simulation);
 
     // Compute y[0], y[1] and update index sets. => already done
     // during advance to event ...
@@ -61,7 +61,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     SP::InteractionsGraph indexSet2 = simulation->indexSet(2);
     bool found = true;
     InteractionsGraph::VIterator ui, uiend;
-    for (cpp11ns::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
     {
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
       if (!found) break;
@@ -69,16 +69,16 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     /*
     // Display the variable before processing NSEvent
     cout<< "-------Before processing NS events---------" << endl;
-    for (cpp11ns::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
+    for (std11::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet0->bundle(*ui);
         cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
       }
 
-    for (cpp11ns::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
+    for (std11::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
       {
         SP::DynamicalSystem ds = dsG->bundle(*vi);
-        SP::LagrangianDS  Lag_ds = cpp11ns::static_pointer_cast<LagrangianDS>(ds);
+        SP::LagrangianDS  Lag_ds = std11::static_pointer_cast<LagrangianDS>(ds);
         cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
       }
     */
@@ -103,16 +103,16 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     /*
     // Display the variable after processing NSEvent
     cout<< "-------After processing NS events---------" << endl;
-    for (cpp11ns::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
+    for (std11::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet0->bundle(*ui);
         cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
       }
 
-    for (cpp11ns::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
+    for (std11::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
       {
         SP::DynamicalSystem ds = dsG->bundle(*vi);
-        SP::LagrangianDS Lag_ds = cpp11ns::static_pointer_cast<LagrangianDS>(ds);
+        SP::LagrangianDS Lag_ds = std11::static_pointer_cast<LagrangianDS>(ds);
         cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
       }
     //

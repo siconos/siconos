@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -127,7 +127,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       _curBlock = 0;
     }
     InteractionsGraph::VIterator vi, viend;
-    for (cpp11ns::tie(vi, viend) = indexSet->vertices();
+    for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {
 
@@ -135,7 +135,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
 
       SP::Interaction inter = indexSet->bundle(*vi);
-      unsigned int nslawSize = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+      unsigned int nslawSize = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                (_M)->computeSizeForProjection(inter);
 #ifdef MLCPPROJ_DEBUG
       std::cout << " " << std::endl;
@@ -163,12 +163,12 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       InteractionsGraph::OEIterator oei, oeiend;
       /* interactionBlock must be zeroed at init */
       std::map<SP::SiconosMatrix, bool> initialized;
-      for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
         if (indexSet->upper_blockProj[ed1])
         {
           initialized[indexSet->upper_blockProj[ed1]] = false;
@@ -189,13 +189,13 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       }
 
 
-      for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
            oei != oeiend; ++oei)
       {
 
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
         assert(*oei == ed1 || *oei == ed2);
 
@@ -206,9 +206,9 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
         SP::Interaction inter2 = indexSet->bundle(indexSet->target(*oei));
 
         // Memory allocation if needed
-        unsigned int nslawSize1 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+        unsigned int nslawSize1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                   (_M)->computeSizeForProjection(inter1);
-        unsigned int nslawSize2 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+        unsigned int nslawSize2 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                                   (_M)->computeSizeForProjection(inter2);
         unsigned int isrc = indexSet->index(indexSet->source(*oei));
         unsigned int itar = indexSet->index(indexSet->target(*oei));
@@ -310,7 +310,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
 
 
   InteractionsGraph::VIterator vi, viend;
-  for (cpp11ns::tie(vi, viend) = indexSet->vertices();
+  for (std11::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
@@ -327,7 +327,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
 
 
 
-    for (cpp11ns::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
          oei != oeiend; ++oei)
     {
       unsigned int isrc = indexSet->index(indexSet->source(*oei));
@@ -338,7 +338,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
 
       InteractionsGraph::EDescriptor ed1, ed2;
       std::cout << "                          outedges :" << *oei << std::endl;
-      cpp11ns::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
       std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2  << std::endl;
       std::cout << "                          (ed1)->upper_blockProj : ";
       if (indexSet->upper_blockProj[ed1])
@@ -405,12 +405,12 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
         _curBlock = 0;
       }
       InteractionsGraph::VIterator vi, viend;
-      for (cpp11ns::tie(vi, viend) = indexSet->vertices();
+      for (std11::tie(vi, viend) = indexSet->vertices();
            vi != viend; ++vi)
       {
         SP::Interaction inter = indexSet->bundle(*vi);
         unsigned int sizeY = 0;
-        sizeY = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+        sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                 (_M)->computeSizeForProjection(inter);
 
         // #ifdef MLCPPROJ_DEBUG
@@ -437,16 +437,16 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 
 
       InteractionsGraph::EIterator ei, eiend;
-      for (cpp11ns::tie(ei, eiend) = indexSet->edges();
+      for (std11::tie(ei, eiend) = indexSet->edges();
            ei != eiend; ++ei)
       {
         SP::Interaction inter1 = indexSet->bundle(indexSet->source(*ei));
         SP::Interaction inter2 = indexSet->bundle(indexSet->target(*ei));
         unsigned int sizeY1 = 0;
         unsigned int sizeY2 = 0;
-        sizeY1 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+        sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                  (_M)->computeSizeForProjection(inter1);
-        sizeY2 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+        sizeY2 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                  (_M)->computeSizeForProjection(inter2);
 
         // Memory allocation if needed
@@ -519,7 +519,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   SP::Interaction inter = indexSet->bundle(vd);
 
   unsigned int sizeY = 0;
-  sizeY = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+  sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
           (_M)->computeSizeForProjection(inter);
 
 
@@ -602,7 +602,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
 
 
-      SP::LagrangianDS lds = (cpp11ns::static_pointer_cast<LagrangianDS>(ds));
+      SP::LagrangianDS lds = (std11::static_pointer_cast<LagrangianDS>(ds));
       unsigned int sizeDS = lds->getDim();
       leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
       inter->getLeftInteractionBlockForDS(ds, leftInteractionBlock);
@@ -652,7 +652,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       {
         RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not from NewtonEulerR.");
       }
-      SP::NewtonEulerDS neds = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds));
+      SP::NewtonEulerDS neds = (std11::static_pointer_cast<NewtonEulerDS>(ds));
 #ifdef MLCPPROJ_WITH_CT
       unsigned int sizeDS = neds->getDim();
       SP::SimpleMatrix T = neds->T();
@@ -671,7 +671,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       workT2->PLUForwardBackwardInPlace(*work);
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
 #else
-      if (0) //(cpp11ns::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
+      if (0) //(std11::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
       {
         unsigned int sizeDS = neds->getDim();
         SP::SimpleMatrix T = neds->T();
@@ -696,7 +696,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
       else
       {
-        unsigned int sizeDS = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+        unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
         leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
         inter->getLeftInteractionBlockForDSProjectOnConstraints(ds, leftInteractionBlock);
         // #ifdef MLCPPROJ_DEBUG
@@ -757,10 +757,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     unsigned int index2 = indexSet->index(indexSet->target(ed));
 
     unsigned int sizeY1 = 0;
-    sizeY1 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+    sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
              (_M)->computeSizeForProjection(inter1);
     unsigned int sizeY2 = 0;
-    sizeY2 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+    sizeY2 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
              (_M)->computeSizeForProjection(inter2);
 
 
@@ -837,10 +837,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       assert(inter1 != inter2);
       currentInteractionBlock->zero();
 #ifdef MLCPPROJ_WITH_CT
-      unsigned int sizeDS = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds))->getDim();
+      unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->getDim();
       leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
       inter1->getLeftInteractionBlockForDS(ds, leftInteractionBlock);
-      SP::NewtonEulerDS neds = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds));
+      SP::NewtonEulerDS neds = (std11::static_pointer_cast<NewtonEulerDS>(ds));
       SP::SimpleMatrix T = neds->T();
       SP::SimpleMatrix workT(new SimpleMatrix(*T));
       workT->trans();
@@ -854,10 +854,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 #else
 
-      unsigned int sizeDS = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
+      unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->getqDim();
       leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
       inter1->getLeftInteractionBlockForDSProjectOnConstraints(ds, leftInteractionBlock);
-      SP::NewtonEulerDS neds = (cpp11ns::static_pointer_cast<NewtonEulerDS>(ds));
+      SP::NewtonEulerDS neds = (std11::static_pointer_cast<NewtonEulerDS>(ds));
       rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
       inter2->getLeftInteractionBlockForDSProjectOnConstraints(ds, rightInteractionBlock);
       rightInteractionBlock->trans();
@@ -874,7 +874,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         Type::Siconos dsType = Type::value(*ds);
         if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
         {
-          SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (ds);
+          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
           if (d->boundaryConditions()) // V.A. Should we do that ?
           {
@@ -938,7 +938,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     {
 
       assert(inter);
-      unsigned int sizeY = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+      unsigned int sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                            (_M)->computeSizeForProjection(inter);
       for (unsigned int i = 0; i < sizeY; i++)
         _q->setValue(pos + i, inter->y(0)->getValue(0 + i));
@@ -980,7 +980,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       InteractionsGraph::VIterator ui, uiend;
 
-      for (cpp11ns::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
 
         SP::Interaction inter = indexSet->bundle(*ui);
@@ -1009,7 +1009,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, unsigned int pos)
     {
-      SP::LagrangianR  lr = cpp11ns::static_pointer_cast<LagrangianR>(inter->relation());
+      SP::LagrangianR  lr = std11::static_pointer_cast<LagrangianR>(inter->relation());
 #ifdef MLCPPROJ_DEBUG
       printf("MLCPProjectOnConstraints::postComputeLagrangian inter->y(0)\n");
       inter->y(0)->display();
@@ -1020,7 +1020,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
            it != inter->dynamicalSystemsEnd();
            ++it)
       {
-        SP::LagrangianDS lds =  cpp11ns::static_pointer_cast<LagrangianDS>(*it);
+        SP::LagrangianDS lds =  std11::static_pointer_cast<LagrangianDS>(*it);
         lds->q()->display();
       }
 #endif
@@ -1032,7 +1032,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       // y and lambda vectors
       SP::SiconosVector lambda = inter->lambda(0);
       SP::SiconosVector y = inter->y(0);
-      unsigned int sizeY = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+      unsigned int sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                            (_M)->computeSizeForProjection(inter);
       // Copy _w/_z values, starting from index pos into y/lambda.
 
@@ -1092,7 +1092,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //     RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
       //   }
 
-      //   SP::LagrangianDS d = cpp11ns::static_pointer_cast<LagrangianDS> (*itDS);
+      //   SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
       //   SP::SiconosVector q = d->q();
 
       //   *q +=  *d->p(0);
@@ -1120,10 +1120,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos)
     {
-      SP::NewtonEulerR ner = (cpp11ns::static_pointer_cast<NewtonEulerR>(inter->relation()));
+      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
       SP::SiconosVector lambda = inter->lambda(0);
       SP::SiconosVector y = inter->y(0);
-      unsigned int sizeY = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+      unsigned int sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                            (_M)->computeSizeForProjection(inter);
       // Copy _w/_z values, starting from index pos into y/lambda.
 
@@ -1140,7 +1140,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       relationType1 = inter1->getRelationType();
       // Retrieve size of Y (projected variable)
       unsigned int sizeY1;
-      sizeY1 = cpp11ns::static_pointer_cast<OSNSMatrixProjectOnConstraints>
+      sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
                (_M)->computeSizeForProjection(inter1);
 
       // Compute the number of equalities

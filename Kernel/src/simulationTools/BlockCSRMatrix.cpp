@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -133,7 +133,7 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   int sizeV = 0;
 
   InteractionsGraph::VIterator vi, viend;
-  for (cpp11ns::tie(vi, viend) = indexSet->vertices();
+  for (std11::tie(vi, viend) = indexSet->vertices();
        vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
@@ -149,7 +149,7 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   }
 
   InteractionsGraph::EIterator ei, eiend;
-  for (cpp11ns::tie(ei, eiend) = indexSet->edges();
+  for (std11::tie(ei, eiend) = indexSet->edges();
        ei != eiend; ++ei)
   {
     InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);

@@ -1,5 +1,5 @@
 
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -81,7 +81,7 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *
  *
  */
-class Interaction : public cpp11ns::enable_shared_from_this<Interaction >
+class Interaction : public std11::enable_shared_from_this<Interaction >
 {
 private:
   /** serialization hooks
@@ -187,7 +187,7 @@ private:
 
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
-  typedef cpp11ns::array<SP::BlockVector, 10> dataR;
+  typedef std11::array<SP::BlockVector, 10> dataR;
   dataR _data;
 
   /** Work vectors to save pointers to state-related data of the
@@ -846,7 +846,7 @@ public:
     {
       assert(Type::value(**itDS) == Type::LagrangianDS ||
              Type::value(**itDS) == Type::LagrangianLinearTIDS);
-      _data[x]->insertPtr(cpp11ns::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+      _data[x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
     }
   };
 

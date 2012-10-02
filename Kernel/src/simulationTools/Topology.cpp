@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -183,7 +183,7 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
           assert(!_IG[0]->is_vertex(inter));
 
           DynamicalSystemsGraph::EDescriptor new_ed;
-          cpp11ns::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
+          std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv, dsgv, inter, *_IG[0]);
 
           // add self branches in vertex properties
           // note : boost graph SEGFAULT on self branch removal
@@ -213,7 +213,7 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
             assert(!_IG[0]->is_vertex(inter));
 
             DynamicalSystemsGraph::EDescriptor new_ed;
-            cpp11ns::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
+            std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
 
             // add self branches in vertex properties
             // note : boost graph SEGFAULT on self branch removal

@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -91,7 +91,7 @@ TYPEDEF_SPTR(Sensors)
    cm->addAndRecordActuator(myType,t)
    \endcode
 */
-class Actuator : public cpp11ns::enable_shared_from_this<Actuator>
+class Actuator : public std11::enable_shared_from_this<Actuator>
 {
 protected:
   /** serialization hooks

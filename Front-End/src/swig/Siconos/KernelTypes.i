@@ -31,7 +31,7 @@
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
 (TYPE)
 {
-  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (cpp11ns::shared_ptr<SiconosVector>)
+  // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (std11::shared_ptr<SiconosVector>)
   int res = SWIG_ConvertPtr($input, 0, SWIGTYPE, 0);
   int state = SWIG_CheckState(res);
   $1 = is_array($input) || PySequence_Check($input) || state;
@@ -225,7 +225,7 @@
 // director input : TYPE -> numpy
 %typemap(directorin, fragment="NumPy_Fragments") TYPE ()
 {
-  // %typemap(directorin, fragment="NumPy_Fragments") cpp11ns::shared_ptr<SiconosMatrix> ()
+  // %typemap(directorin, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
   if ($1_name)
   {
     if (($1_name)->getNum() == 1)
@@ -299,13 +299,13 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // director output : PyObject -> SP::SiconosVector 
-%typemap(directorout, fragment="NumPy_Fragments") cpp11ns::shared_ptr<SiconosVector> ()
+%typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosVector> ()
 {
-  // %typemap(directorout, fragment="NumPy_Fragments") cpp11ns::shared_ptr<SiconosVector> ()
+  // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosVector> ()
   void * swig_argp;
 
   // try a conversion from SP::SiconosVector
-  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosVector_t,  0  | 0);
+  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_std11__shared_ptrT_SiconosVector_t,  0  | 0);
 
   if (!SWIG_IsOK(swig_res))
   {
@@ -337,11 +337,11 @@
 }
 
 // director output : PyObject -> SP::SiconosVector 
-%typemap(directorout, fragment="NumPy_Fragments") cpp11ns::shared_ptr<SiconosMatrix> ()
+%typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
 {
-  // %typemap(directorout, fragment="NumPy_Fragments") cpp11ns::shared_ptr<SiconosMatrix> ()
+  // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
   void * swig_argp;
-  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosMatrix_t,  0  | 0);
+  int swig_res = SWIG_ConvertPtr(result,&swig_argp,SWIGTYPE_p_std11__shared_ptrT_SiconosMatrix_t,  0  | 0);
 
   if (!SWIG_IsOK(swig_res))
   {
@@ -399,9 +399,9 @@
 %}  
 
 
-%typemap(out) cpp11ns::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
+%typemap(out) std11::shared_ptr<std::vector<unsigned int> > (bool upcall=false)
 {
-  // %typemap(out) cpp11ns::shared_ptr<SiconosVector>
+  // %typemap(out) std11::shared_ptr<SiconosVector>
 
   // compile time test to reproduce swig director test. swig does not
   // seem to provides facilities to customize this
@@ -422,7 +422,7 @@
   if (l_upcall)
   {
     // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_cpp11ns__shared_ptrT_std__vectorT_unsigned_int_std__allocatorT_unsigned_int_t_t_const_t,  0 );
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_std11__shared_ptrT_std__vectorT_unsigned_int_std__allocatorT_unsigned_int_t_t_const_t,  0 );
   }
   // call from python : return numpy from SiconosVector
   else
@@ -448,15 +448,15 @@
 
 // check on input : a python sequence
 %typecheck(SWIG_TYPECHECK_INTEGER)
-(cpp11ns::shared_ptr<std::vector<unsigned int> >) 
+(std11::shared_ptr<std::vector<unsigned int> >) 
 {
-  // %typecheck(cpp11ns::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
+  // %typecheck(std11::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
   PySequence_Check($input);
 }
 
 
 // int sequence => std::vector<unsigned int>
-%typemap(in,fragment="NumPy_Fragments") cpp11ns::shared_ptr<std::vector<unsigned int> > (cpp11ns::shared_ptr<std::vector<unsigned int> > temp) 
+%typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp) 
 {
   temp.reset(new std::vector<unsigned int>());
   if (!sequenceToUnsignedIntVector($input, temp))
@@ -478,7 +478,7 @@
     for(; vi != viend; ++vi)
     {
       PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*vi))), 
-                                          SWIGTYPE_p_cpp11ns__shared_ptrT_DynamicalSystem_t,  0);
+                                          SWIGTYPE_p_std11__shared_ptrT_DynamicalSystem_t,  0);
       assert(pyds);
       $result = SWIG_Python_AppendOutput($result,pyds);
     }
@@ -500,7 +500,7 @@
     for(; vi != viend; ++vi)
     {
       PyObject* pyinter = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*vi))), 
-                                             SWIGTYPE_p_cpp11ns__shared_ptrT_Interaction_t,  0);
+                                             SWIGTYPE_p_std11__shared_ptrT_Interaction_t,  0);
       assert(pyinter);
       $result = SWIG_Python_AppendOutput($result,pyinter);
     }
@@ -523,7 +523,7 @@
     for(; ei != eiend; ++ei)
     {
       PyObject* pyinter = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*ei))), 
-                                             SWIGTYPE_p_cpp11ns__shared_ptrT_Interaction_t,  0);
+                                             SWIGTYPE_p_std11__shared_ptrT_Interaction_t,  0);
       assert(pyinter);
     $result = SWIG_Python_AppendOutput($result,pyinter);
     }
@@ -545,7 +545,7 @@
     for(; ei != eiend; ++ei)
     {
       PyObject* pyds = SWIG_NewPointerObj(SWIG_as_voidptr(&*((arg1)->bundle(*ei))), 
-                                          SWIGTYPE_p_cpp11ns__shared_ptrT_DynamicalSystem_t,  0);
+                                          SWIGTYPE_p_std11__shared_ptrT_DynamicalSystem_t,  0);
       assert(pyds);
       $result = SWIG_Python_AppendOutput($result,pyds);
     }
@@ -558,26 +558,26 @@
 }
 
 
-TYPECHECK(cpp11ns::shared_ptr<SiconosVector>, SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosVector_t);
-TYPECHECK(cpp11ns::shared_ptr<SiconosMatrix>, SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosMatrix_t);
-TYPECHECK(cpp11ns::shared_ptr<SimpleMatrix>, SWIGTYPE_p_cpp11ns__shared_ptrT_SimpleMatrix_t);
-TYPEMAP_VECTOR(cpp11ns::shared_ptr<SiconosVector>, SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosVector_t);
-TYPEMAP_MATRIX(cpp11ns::shared_ptr<SiconosMatrix>, SWIGTYPE_p_cpp11ns__shared_ptrT_SiconosMatrix_t);
-TYPEMAP_MATRIX(cpp11ns::shared_ptr<SimpleMatrix>, SWIGTYPE_p_cpp11ns__shared_ptrT_SimpleMatrix_t);  
+TYPECHECK(std11::shared_ptr<SiconosVector>, SWIGTYPE_p_std11__shared_ptrT_SiconosVector_t);
+TYPECHECK(std11::shared_ptr<SiconosMatrix>, SWIGTYPE_p_std11__shared_ptrT_SiconosMatrix_t);
+TYPECHECK(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_SimpleMatrix_t);
+TYPEMAP_VECTOR(std11::shared_ptr<SiconosVector>, SWIGTYPE_p_std11__shared_ptrT_SiconosVector_t);
+TYPEMAP_MATRIX(std11::shared_ptr<SiconosMatrix>, SWIGTYPE_p_std11__shared_ptrT_SiconosMatrix_t);
+TYPEMAP_MATRIX(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_SimpleMatrix_t);  
 // needed?
 // from C++ to python 
-%template() cpp11ns::shared_ptr<SiconosVector>;
-%template() cpp11ns::shared_ptr<BlockVector>;
-%template() cpp11ns::shared_ptr<SiconosMatrix>;
-%template() cpp11ns::shared_ptr<SimpleMatrix>;
-%template() cpp11ns::shared_ptr<std::vector<unsigned int> >;
+%template() std11::shared_ptr<SiconosVector>;
+%template() std11::shared_ptr<BlockVector>;
+%template() std11::shared_ptr<SiconosMatrix>;
+%template() std11::shared_ptr<SimpleMatrix>;
+%template() std11::shared_ptr<std::vector<unsigned int> >;
 
 
 
-%apply (cpp11ns::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
+%apply (std11::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
 
-%apply (cpp11ns::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
-%apply (cpp11ns::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
+%apply (std11::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
+%apply (std11::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
 
-%apply (cpp11ns::shared_ptr<std::vector<unsigned int> >) { (SP::UnsignedIntVector) };
+%apply (std11::shared_ptr<std::vector<unsigned int> >) { (SP::UnsignedIntVector) };
 

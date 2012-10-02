@@ -1,4 +1,4 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -71,7 +71,7 @@ class SimulationXML;
   Rules:
   - A Model must be given to the constructor, else => exception.
 */
-class Simulation : public cpp11ns::enable_shared_from_this<Simulation>
+class Simulation : public std11::enable_shared_from_this<Simulation>
 {
 protected:
   /** serialization hooks
@@ -121,7 +121,7 @@ protected:
   SP::SimulationXML _simulationxml;
 
   /** A link to the Model which contains the Simulation */
-  cpp11ns::weak_ptr<Model> _model;
+  std11::weak_ptr<Model> _model;
 
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
@@ -487,7 +487,7 @@ public:
    */
   inline void setModelPtr(SP::Model m)
   {
-    _model = cpp11ns::weak_ptr<Model>(m);
+    _model = std11::weak_ptr<Model>(m);
   }
 
   /** get tolerance

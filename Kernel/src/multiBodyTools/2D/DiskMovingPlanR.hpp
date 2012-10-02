@@ -1,4 +1,4 @@
-/* Siconos-Example version 3.0.0, Copyright INRIA 2005-2011.
+/* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ typedef double(*FTime)(const double);
   { if (_##X##Function->fPtr) _##X=((FTime)(_##X##Function->fPtr))(t); else _##X=0.; }
 
 class DiskMovingPlanR : public LagrangianRheonomousR,
-  public cpp11ns::enable_shared_from_this<DiskMovingPlanR>
+  public std11::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
   /** serialization hooks
