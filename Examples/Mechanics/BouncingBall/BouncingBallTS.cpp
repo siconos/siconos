@@ -155,10 +155,6 @@ int main(int argc, char* argv[])
     while (s->nextTime() < T)
     {
       s->computeOneStep();
-      SP::InteractionsGraph indexSet0 = s->indexSet(0);
-      std::cout << "indexSet0->size()" << indexSet0->size() << std::endl;
-      SP::InteractionsGraph indexSet1 = s->indexSet(1);
-      std::cout << "indexSet1->size()" << indexSet1->size() << std::endl;
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
