@@ -185,16 +185,46 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
     if (d < rmax)
     {
-      // one inside the other
+      // one inside the other : CircleCircle relation
       if (rmax - (d + rmin) < tol)
-        rel.reset(new CircleCircleR(r1, r2));
+      {
+        CircleCircleRDeclaredPool::iterator rcandid =
+          parent->circlecircle_relations.find(CircleCircleRDeclared(r1, r2));
+        if (rcandid == parent->circlecircle_relations.end())
+        {
+          // a new relation
+          rel.reset(new CircleCircleR(r1, r2));
+          parent->circlecircle_relations[CircleCircleRDeclared(r1, r2)] = rel;
+        }
+        else
+        {
+          // get relation from pool
+          rel = (*rcandid).second;
+        }
+      }
     }
     else
     {
+      // a DiskDisk relation
       if (d - (r1 + r2) < tol)
-        rel.reset(new DiskDiskR(r1, r2));
-    }
+      {
+        DiskDiskRDeclaredPool::iterator rcandid =
+          parent->diskdisk_relations.find(DiskDiskRDeclared(r1, r2));
+        if (rcandid == parent->diskdisk_relations.end())
+        {
+          // a new relation
+          rel.reset(new DiskDiskR(r1, r2));
 
+          // FIX : this does not work!!
+          // parent->diskdisk_relations[DiskDiskRDeclared(r1,r2)] = rel;
+        }
+        else
+        {
+          // get relation from pool
+          rel = (*rcandid).second;
+        }
+      }
+    }
 
     if (rel)
     {
@@ -903,6 +933,24 @@ typedef std::pair<int, int> interPair;
 bool operator ==(interPair const& a, interPair const& b)
 {
   return ((a.first == b.first) && (a.second == b.second));
+}
+
+
+bool operator ==(std::pair<double, double> const& a,
+                 std::pair<double, double> const& b)
+{
+  return ((a.first == b.first) && (a.second == b.second));
+}
+
+bool operator ==(DiskPlanRDeclared const& a, DiskPlanRDeclared const& b)
+{
+  return ((std11::get<0>(a) == std11::get<0>(b) &&
+           std11::get<1>(a) == std11::get<1>(b) &&
+           std11::get<2>(a) == std11::get<2>(b) &&
+           std11::get<3>(a) == std11::get<3>(b) &&
+           std11::get<4>(a) == std11::get<4>(b) &&
+           std11::get<5>(a) == std11::get<5>(b) &&
+           std11::get<6>(a) == std11::get<6>(b)));
 }
 
 struct SpaceFilter::_FindInteractions : public SiconosVisitor

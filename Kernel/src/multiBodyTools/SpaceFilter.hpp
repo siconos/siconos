@@ -106,6 +106,24 @@ typedef ublas::matrix < FTime, ublas::column_major,
 
 TYPEDEF_SPTR(FMatrix)
 
+
+/* relations pool */
+typedef std::pair<double, double> CircleCircleRDeclared;
+typedef std::pair<double, double> DiskDiskRDeclared;
+typedef std11::tuple<double, double, double, double, double, double, double>
+DiskPlanRDeclared;
+
+
+typedef std::map<CircleCircleRDeclared, SP::CircularR>
+CircleCircleRDeclaredPool;
+
+typedef std::map<DiskDiskRDeclared, SP::CircularR>
+DiskDiskRDeclaredPool;
+
+typedef std::map<DiskPlanRDeclared, SP::DiskPlanR>
+DiskPlanRDeclaredPool;
+
+
 class SpaceFilter : public std11::enable_shared_from_this<SpaceFilter>
 {
 
@@ -142,6 +160,11 @@ protected:
 
   /* kee track of one step ns integrator initialization */
   bool _osnsinit;
+
+  /* relations pool */
+  DiskDiskRDeclaredPool diskdisk_relations;
+  DiskPlanRDeclaredPool diskplan_relations;
+  CircleCircleRDeclaredPool circlecircle_relations;
 
   void _PlanCircularFilter(double A, double B, double C,
                            double xCenter, double yCenter, double width,
