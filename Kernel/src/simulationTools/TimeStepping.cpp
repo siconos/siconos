@@ -698,7 +698,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   {
     residu = (*it)->computeResidu();
 
-    std::cout << "residu:" << residu << std::endl;
+    DEBUG_PRINTF("residu:%g\n", residu);
 
     if (residu > _newtonResiduDSMax) _newtonResiduDSMax = residu;
     if (residu > criterion)
