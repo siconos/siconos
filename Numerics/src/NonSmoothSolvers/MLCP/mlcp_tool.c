@@ -144,18 +144,18 @@ void mlcp_buildIndexInBlock(MixedLinearComplementarityProblem* problem, int *ind
   int curCompl = 0;
   int curComplLine = 0;
   int lin;
-  while (problem->blocksLine[numBlock] < n + m)
+  while (problem->blocksRows[numBlock] < n + m)
   {
     if (!problem->blocksIsComp[numBlock])
     {
-      for (lin = problem->blocksLine[numBlock]; lin < problem->blocksLine[numBlock + 1]; lin++)
+      for (lin = problem->blocksRows[numBlock]; lin < problem->blocksRows[numBlock + 1]; lin++)
       {
         curComplLine++;
       }
     }
     else
     {
-      for (lin = problem->blocksLine[numBlock]; lin < problem->blocksLine[numBlock + 1]; lin++)
+      for (lin = problem->blocksRows[numBlock]; lin < problem->blocksRows[numBlock + 1]; lin++)
       {
         indexInBlock[curCompl] = curComplLine;
         curCompl++;

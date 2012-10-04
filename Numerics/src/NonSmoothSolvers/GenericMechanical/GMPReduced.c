@@ -732,9 +732,11 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
   SolverOptions aMlcpOptions;
   aMLCP.n = Me_size;
   aMLCP.m = Mi_size;
-  aMLCP.blocksLine = 0;
+  aMLCP.blocksRows = 0;
   aMLCP.blocksIsComp = 0;
-  aMLCP.problemType = 0;
+  aMLCP.isStorageType1 = 1;
+  aMLCP.isStorageType2 = 0;
+
   aMLCP.A = 0;
   aMLCP.B = 0;
   aMLCP.C = 0;

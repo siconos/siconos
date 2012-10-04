@@ -636,8 +636,8 @@ void test_matrix(void)
   MixedLinearComplementarityProblem problem;
   problem.n = 0;
   problem.m = 0;
-  problem.blocksLine = (int*)malloc(3 * sizeof(int));
-  problem.blocksIsComp = (int*)malloc(2 * sizeof(int));
+  // problem.blocksRows = (int*)malloc(3*sizeof(int));
+  // problem.blocksIsComp = (int*)malloc(2*sizeof(int));
 
   problem.q = 0;
   problem.A = 0;
@@ -646,10 +646,10 @@ void test_matrix(void)
   problem.D = 0;
   problem.a = 0;
   problem.b = 0;
-  problem.problemType = 0;
-  problem.blocksLine[0] = 0;
-  problem.blocksIsComp[0] = 0;
-  problem.blocksIsComp[1] = 1;
+  //problem.problemType=0;
+  // problem.blocksRows[0]=0;
+  // problem.blocksIsComp[0]=0;
+  // problem.blocksIsComp[1]=1;
 
 #ifdef BAVARD
   printf("* *** ******************** *** * \n");
@@ -883,8 +883,8 @@ void test_matrix(void)
     // problem.D = vecD;
     // problem.a = a;
     // problem.b = b;
-    // problem.blocksLine[1]=n;
-    // problem.blocksLine[2]=n+m;
+    // problem.blocksRows[1]=n;
+    // problem.blocksRows[2]=n+m;
     // problem.n=n;
     // problem.m=m;
 

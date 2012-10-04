@@ -44,6 +44,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   isol = 1;
 
   vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
+
   vecQ = (double*)malloc((NbLines) * sizeof(double));
   vecA = (double*)malloc(n * (NbLines - m) * sizeof(double));
   vecB = (double*)malloc(m2 * sizeof(double));
@@ -52,6 +53,17 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   a    = (double*)malloc((NbLines - m) * sizeof(double));
   b    = (double*)malloc(m * sizeof(double));
   sol  = (double*)malloc((n + m + m) * sizeof(double));
+
+  problem->blocksRows = (int*)malloc(3 * sizeof(int));
+  problem->blocksIsComp = (int*)malloc(2 * sizeof(int));
+  problem->blocksRows[0] = 0;
+  problem->blocksRows[1] = n;
+  problem->blocksRows[2] = n + m;
+  problem->blocksIsComp[0] = 0;
+  problem->blocksIsComp[1] = 1;
+
+
+
 
 
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
@@ -62,7 +74,8 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   M->storageType = 0;
   M->matrix0 = vecM;
 
-  problem->problemType = 0; // Both problems seems to be stored
+  problem->isStorageType1 = 1; // Both problems seems to be stored
+  problem->isStorageType2 = 1; // Both problems seems to be stored
 
   problem->q = vecQ;
   problem->A = vecA;
@@ -71,8 +84,8 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   problem->D = vecD;
   problem->a = a;
   problem->b = b;
-  problem->blocksLine[1] = n;
-  problem->blocksLine[2] = n + m;
+  problem->blocksRows[1] = n;
+  problem->blocksRows[2] = n + m;
   problem->n = n;
   problem->m = m;
 
@@ -154,14 +167,24 @@ void displayMLCP(MixedLinearComplementarityProblem* p)
   int m = p->m;
   printf("MLCP DISPLAY:\n-------------\n");
   printf("n :%d m: %d\n", p->n, p->m);
-  printf(p->problemType ? "using (ABCD)\n" : "using (M)\n");
-  if (p->blocksLine)
+
+
+  printf(p->isStorageType1 ? "using (M)\n" : "not using (M)\n");
+  printf(p->isStorageType2 ? "using (ABCD)\n" : "not using (ABCD)\n");
+  if (p->blocksRows)
   {
     printf("blocks are:\n");
     int NumBlock = 0;
-    while (p->blocksLine[NumBlock] < n + m)
+    while (p->blocksRows[NumBlock] < n + m)
     {
-      printf("->block of complementarity type %d, from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksLine[NumBlock], p->blocksLine[NumBlock + 1]);
+      if (p->blocksIsComp[NumBlock])
+      {
+        printf("->block of complementarity condition (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
+      }
+      else
+      {
+        printf("->block of equality type (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
+      }
       NumBlock++;
     }
   }
@@ -261,13 +284,13 @@ void displayMLCP(MixedLinearComplementarityProblem* p)
 
 void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
 {
-  if (problem->problemType == 0)
+  if (problem->isStorageType1)
   {
     freeNumericsMatrix(problem->M);
     free(problem->M);
     free(problem->q);
   }
-  else if (problem->problemType == 0)
+  else if (problem->isStorageType2)
   {
     free(problem->A);
     free(problem->B);

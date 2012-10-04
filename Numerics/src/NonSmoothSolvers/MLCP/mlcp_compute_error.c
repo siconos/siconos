@@ -1,3 +1,4 @@
+
 /* Siconos-Numerics, Copyright INRIA 2005-2011.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -43,7 +44,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   /* Computation of w: depends on the way the problem is written */
 
   /* Problem in the form (M,q) */
-  if (problem->problemType == 0)
+  if (problem->isStorageType1)
   {
     if (problem->M == NULL)
       numericsError("mlcp_compute_error", "null input for M");
@@ -54,13 +55,15 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
 
   }
   /* Problem in the form ABCD */
-  else // if(problem->problemType == 1)
+  else //if (problem->isStorageType2)
   {
+
+
 
     /* Checks inputs */
     if (problem->A == NULL || problem->B == NULL || problem->C == NULL  || problem->D == NULL)
     {
-      numericsError("mlcp_compute_error", "null input for A, B,C or D");
+      numericsError("mlcp_compute_error: ", "null input for A, B, C or D");
     }
 
     /* Links to problem data */
@@ -96,19 +99,19 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   double *q = problem->q;
   double norm_e = 1;
   double norm_i = 1;
-  if (problem->blocksLine)
+  if (problem->blocksRows)
   {
     int numBlock = 0;
-    while (problem->blocksLine[numBlock] < n + m)
+    while (problem->blocksRows[numBlock] < n + m)
     {
       if (!problem->blocksIsComp[numBlock])
       {
-        error_e += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], w + problem->blocksLine[numBlock] , incx);
-        norm_e += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], q + problem->blocksLine[numBlock] , incx);
+        error_e += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
+        norm_e += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], q + problem->blocksRows[numBlock] , incx);
       }
       else
       {
-        for (int numLine = problem->blocksLine[numBlock]; numLine < problem->blocksLine[numBlock + 1] ; numLine++)
+        for (int numLine = problem->blocksRows[numBlock]; numLine < problem->blocksRows[numBlock + 1] ; numLine++)
         {
           zi = z[numLine];
           wi = w[numLine];
@@ -120,7 +123,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
           if (wi < 0.0) error_i += -wi;
           if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
         }
-        norm_i += DNRM2(problem->blocksLine[numBlock + 1] - problem->blocksLine[numBlock], w + problem->blocksLine[numBlock] , incx);
+        norm_i += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
       }
       numBlock++;
     }

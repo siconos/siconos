@@ -176,7 +176,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
 void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int nbSol = 0;
-  if (problem->blocksLine)
+  if (problem->blocksRows)
   {
     mlcp_enum_Block(problem, z, w, info, options);
     return;

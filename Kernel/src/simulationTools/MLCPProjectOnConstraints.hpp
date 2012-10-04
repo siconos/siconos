@@ -54,7 +54,7 @@ public:
 
   /** compute the number of inequality and equality for a given tuple of Interactions
    * update the global number of equality(_n) and inequality (_m)
-   * set up _numerics_problem parameters (blocksLine and blocksIsComp )
+   * set up _numerics_problem parameters (blocksRows and blocksIsComp )
    */
   virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
 

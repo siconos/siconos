@@ -34,7 +34,6 @@ MLCP2::MLCP2(const string& newNumericsSolverName, const string& newId):
   mFirstCall = true;
   m = 0;
   n = 0;
-
 }
 
 void MLCP2::initialize(SP::Simulation simulation)
@@ -77,7 +76,9 @@ void MLCP2::updateM()
     numerics_problem.D = 0;
     numerics_problem.a = 0;
     numerics_problem.b = 0;
-    numerics_problem.problemType = 0;
+    numerics_problem.isStorageType1 = 1;
+    numerics_problem.isStorageType2 = 0;
+
     numerics_problem.n = n; //size of the dynamical systems
     numerics_problem.m = m; //size of the NSlaw
   }

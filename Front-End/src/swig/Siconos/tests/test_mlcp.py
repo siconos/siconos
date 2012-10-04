@@ -35,8 +35,6 @@ def test_mlcp_enum():
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
 
-#N.mixedLinearComplementarity_newFromFilename(mlcp,"diodeBridge_mlcp.dat")
-
 z = array([0., 0., 0., 0., 0., 0.,0.])
 zsol =array([  9.85185185e-01,   9.85185185e-01,  -0.00000000e+00,
          9.85185185e-04,   0.00000000e+00,   0.00000000e+00,
@@ -86,5 +84,17 @@ def test_mlcp_enum_large():
     print "w = ", w
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
+mlcp =0
+mlcp=N.MLCP()
+N.mixedLinearComplementarity_newFromFilename(mlcp,"./data/diodeBridge_mlcp.dat")
+#N.displayMLCP(mlcp)
 
-
+def test_mlcp_enum_large_fromfile():
+    SO=N.SolverOptions(mlcp,N.SICONOS_MLCP_ENUM)
+    N.mlcp_driver_init(mlcp, SO)
+    info = N.mlcp_enum(mlcp, z, w, SO)
+    N.mlcp_driver_reset(mlcp, SO)
+    print "z = ", z
+    print "w = ", w
+    assert (linalg.norm(z-zsol) <= ztol)
+    assert not info

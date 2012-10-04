@@ -40,9 +40,9 @@ MLCP::MLCP(const int newNumericsSolverId):
   mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
   _n = 0;
   _m = 0;
-  _numerics_problem.blocksLine = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem.blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem.blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
-  _numerics_problem.blocksLine[0] = 0;
+  _numerics_problem.blocksRows[0] = 0;
   _curBlock = 0;
 
 }
@@ -50,9 +50,9 @@ MLCP::MLCP(const int newNumericsSolverId):
 
 void  MLCP::reset()
 {
-  if (_numerics_problem.blocksLine)
-    free(_numerics_problem.blocksLine);
-  _numerics_problem.blocksLine = 0;
+  if (_numerics_problem.blocksRows)
+    free(_numerics_problem.blocksRows);
+  _numerics_problem.blocksRows = 0;
   if (_numerics_problem.blocksIsComp)
     free(_numerics_problem.blocksIsComp);
   _numerics_problem.blocksIsComp = 0;
@@ -94,14 +94,14 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
     /*add an equality block.*/
     if (equalitySize1 > 0)
     {
-      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + equalitySize1;
+      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + equalitySize1;
       _numerics_problem.blocksIsComp[_curBlock] = 0;
       _curBlock++;
     }
     /*add a complementarity block.*/
     if (nslawSize1 - equalitySize1 > 0)
     {
-      _numerics_problem.blocksLine[_curBlock + 1] = _numerics_problem.blocksLine[_curBlock] + nslawSize1 - equalitySize1;
+      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + nslawSize1 - equalitySize1;
       _numerics_problem.blocksIsComp[_curBlock] = 1;
       _curBlock++;
     }
@@ -254,7 +254,8 @@ void MLCP::initialize(SP::Simulation sim)
   _numerics_problem.D = 0;
   _numerics_problem.a = 0;
   _numerics_problem.b = 0;
-  _numerics_problem.problemType = 0;
+  _numerics_problem.isStorageType1 = 1;
+  _numerics_problem.isStorageType2 = 0;
 }
 void  MLCP::updateInteractionBlocks()
 {

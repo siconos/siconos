@@ -75,8 +75,39 @@
       fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
       return 0;
     }
+    fclose(finput);
   }
+  
+  MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
+    (const char * filename)
+  {
+    FILE * finput = fopen(filename, "r");
+    if (finput) 
+    {
+      MixedLinearComplementarityProblem* problem = 
+        (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
+      if (mixedLinearComplementarity_newFromFile(problem,finput))
+      {
+      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot load %s\n",filename);
+      free(problem);
+      return 0;
+      }
+      else
+        return problem;
+    }
+    else
+    {
+      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot open %s\n",filename);
+      return 0;
+    }
+    fclose(finput);
+  }
+  
+
+
+
 %}
+
   
 // needed macros
 %include "NumericsConfig.h"
@@ -1031,7 +1062,7 @@
 %include "relay_cst.h"
 
 
- // redefine typemap on q for MLCP
+// redefine typemap on q for MLCP
 %typemap(out) (double* q) {
   npy_intp dims[2];
 
@@ -1200,6 +1231,13 @@
 
 %extend MixedLinearComplementarityProblem
 {
+  MixedLinearComplementarityProblem()
+   {
+     MixedLinearComplementarityProblem* MLCP;
+     MLCP =  (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
+     return MLCP;
+   }
+
   MixedLinearComplementarityProblem(PyObject *dim, PyObject *o1, PyObject *o2)
     {
 
@@ -1230,19 +1268,19 @@
 
       MLCP->n = (int) PyInt_AsLong(dim);
       MLCP->m = M->size0 - MLCP->n;
-      MLCP->blocksLine = (int *) malloc(3*sizeof(int));
+      MLCP->blocksRows = (int *) malloc(3*sizeof(int));
       MLCP->blocksIsComp = (int *) malloc(2*sizeof(int));
        
       
-      MLCP->blocksLine[0]=0;
-      MLCP->blocksLine[1]=MLCP->n;
-      MLCP->blocksLine[2]=MLCP->n+MLCP->m;
+      MLCP->blocksRows[0]=0;
+      MLCP->blocksRows[1]=MLCP->n;
+      MLCP->blocksRows[2]=MLCP->n+MLCP->m;
       MLCP->blocksIsComp[0]=0;
       MLCP->blocksIsComp[1]=1;
       
-      
-
-      MLCP->problemType = 0;
+ 
+      MLCP->isStorageType1 = 1;     
+      MLCP->isStorageType2 = 0;
       MLCP->M = M;
       MLCP->A = NULL;
       MLCP->B = NULL;
