@@ -345,8 +345,11 @@ cmake_setup() {
             };;
     esac
 }
-        
-#cmake_setup
+
+case $PIPOL_IMAGE in 
+    x86_64_mac-mac-osx-server-snow-leopard*)
+        cmake_setup;; # cmake 2.8.3 on this image
+esac
 
 #sudo rm -f /usr/local/bin/ctest
 
