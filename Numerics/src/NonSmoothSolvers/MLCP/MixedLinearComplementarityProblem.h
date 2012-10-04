@@ -139,8 +139,24 @@ typedef struct
 extern "C"
 {
 #endif
+
   void displayMLCP(MixedLinearComplementarityProblem* p);
 
+  /** \fn  int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* file)
+   *  \brief function to read and create a MixedLinearComplementarityProblem
+   *   from a file
+   *  \param problem pointer to a MixedLinearComplementarityProblem to create
+   *  \param file pointer to a FILE
+   */
+  int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* MLCPfile);
+
+  /** \fn  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
+   *  \brief function to read and create a MixedLinearComplementarityProblem
+   *   from a file
+   *  \param problem pointer to a MixedLinearComplementarityProblem to create
+   *  \param filename that contains the mlcp
+   */
+  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
 
   /** \fn  void freeMixedLinearComplementarityProblem(LinearComplementarityProblem* problem)
    *  \brief function to delete a LinearComplementarityProblem

@@ -94,6 +94,16 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   }
   return 1;
 }
+int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "r");
+
+  info = linearComplementarity_newFromFile(problem, file);
+
+  fclose(file);
+  return info;
+}
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {

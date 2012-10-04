@@ -25,6 +25,128 @@
 #include <stdlib.h>
 #include "MixedLinearComplementarityProblem.h"
 
+int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
+{
+  int n = 0, m = 0, NbLines = 0;
+  int i, j,  n2, m2, isol;
+  char val[128];
+
+  double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
+  double *a, *b, *sol;
+  int nread;
+
+  nread = fscanf(MLCPfile , "%d" , &n);
+  nread = fscanf(MLCPfile , "%d" , &m);
+  nread = fscanf(MLCPfile , "%d" , &NbLines);
+
+  n2 = n * n;
+  m2 = m * m;
+  isol = 1;
+
+  vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
+  vecQ = (double*)malloc((NbLines) * sizeof(double));
+  vecA = (double*)malloc(n * (NbLines - m) * sizeof(double));
+  vecB = (double*)malloc(m2 * sizeof(double));
+  vecC = (double*)malloc((NbLines - m) * m * sizeof(double));
+  vecD = (double*)malloc(m * n * sizeof(double));
+  a    = (double*)malloc((NbLines - m) * sizeof(double));
+  b    = (double*)malloc(m * sizeof(double));
+  sol  = (double*)malloc((n + m + m) * sizeof(double));
+
+
+  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+
+
+  NumericsMatrix * M = problem->M;
+
+  M->storageType = 0;
+  M->matrix0 = vecM;
+
+  problem->problemType = 0; // Both problems seems to be stored
+
+  problem->q = vecQ;
+  problem->A = vecA;
+  problem->B = vecB;
+  problem->C = vecC;
+  problem->D = vecD;
+  problem->a = a;
+  problem->b = b;
+  problem->blocksLine[1] = n;
+  problem->blocksLine[2] = n + m;
+  problem->n = n;
+  problem->m = m;
+
+  M->size0 = NbLines;
+  M->size1 = n + m;
+
+
+
+  for (i = 0 ; i < NbLines - m ; ++i)
+  {
+    for (j = 0 ; j < n ; ++j)
+    {
+      nread = fscanf(MLCPfile, "%s", val);
+      vecA[(NbLines - m)*j + i ] = atof(val);
+      vecM[(NbLines)*j + i ] = atof(val);
+    }
+  }
+  for (i = 0 ; i < m ; ++i)
+  {
+    for (j = 0 ; j < m ; ++j)
+    {
+      nread = fscanf(MLCPfile, "%s", val);
+      vecB[ m * j + i ] = atof(val);
+      /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
+      vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
+
+    }
+  }
+  for (i = 0 ; i < NbLines - m ; ++i)
+  {
+    for (j = 0 ; j < m ; ++j)
+    {
+      nread = fscanf(MLCPfile, "%s", val);
+      vecC[(NbLines - m)*j + i ] = atof(val);
+      vecM[(NbLines) * (n + j) + i ] = atof(val);
+    }
+  }
+  for (i = 0 ; i < m ; ++i)
+  {
+    for (j = 0 ; j < n ; ++j)
+    {
+      nread = fscanf(MLCPfile, "%s", val);
+      vecD[ m * j + i ] = atof(val);
+      vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
+    }
+  }
+
+  for (i = 0 ; i < NbLines - m ; ++i)
+  {
+    nread = fscanf(MLCPfile , "%s" , val);
+    a[i] = atof(val);
+    vecQ[i] = atof(val);
+  }
+  for (i = 0 ; i < m ; ++i)
+  {
+    nread = fscanf(MLCPfile , "%s" , val);
+    b[i] = atof(val);
+    vecQ[i + NbLines - m] = atof(val);
+  }
+
+  return 1;
+}
+
+int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "r");
+
+  info = mixedLinearComplementarity_newFromFile(problem, file);
+
+  fclose(file);
+  return info;
+}
+
 
 void displayMLCP(MixedLinearComplementarityProblem* p)
 {

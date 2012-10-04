@@ -116,6 +116,14 @@ extern "C"
    */
   int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
+  /** \fn  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, FILE* file)
+   *  \brief function to read and create a LinearComplementarityProblem
+   *   from a file
+   *  \param problem pointer to a LinearComplementarityProblem to create
+   *  \param filename that contains the lcp
+   */
+  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename);
+
   /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
    *  \brief function to delete a LinearComplementarityProblem
    *  \param problem  pointer to a LinearComplementarityProblem to delete
