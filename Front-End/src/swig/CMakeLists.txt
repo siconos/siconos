@@ -1,3 +1,20 @@
+# cf http://stackoverflow.com/questions/435708/any-way-in-cmake-to-require-gcc-version-4
+# with cmake version >= 2.8.8 we can use CMAKE_C_COMPILER_VERSION and
+# CMAKE_CXX_COMPILER_VERSION
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  EXEC_PROGRAM(
+    ${CMAKE_CXX_COMPILER}
+    ARGS                    --version
+    OUTPUT_VARIABLE _compiler_output)
+  STRING(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1"
+    gcc_compiler_version ${_compiler_output})
+  MESSAGE(STATUS "C++ compiler version: ${gcc_compiler_version} [${CMAKE_CXX_COMPILER}]")
+  
+  IF(gcc_compiler_version VERSION_LESS "4.5")
+    MESSAGE(FATAL_ERROR "gcc greater than 4.5 needed")
+  ENDIF()
+ENDIF()
+
 FIND_PACKAGE(SWIG 2.0.7 REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
 
