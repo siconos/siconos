@@ -615,14 +615,19 @@ void test_matrix(void)
 
   int i, j;
   int isol;
-  int n , n2;
-  int m, m2;
-  int NbLines;
+  // int n , n2;
+  // int m, m2;
+  // int NbLines;
+
+  int n, m ;
   int withSol = 0;
 
-  double *a, *b, *sol, *z, *w;
-  double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
-  NumericsMatrix M;
+  // double *a, *b,*sol,*z,*w;
+  // double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
+  // NumericsMatrix M;
+
+  double *sol, *z, *w;
+
 
   char val[128];
 
@@ -840,99 +845,107 @@ void test_matrix(void)
     default :
       exit(1);
     }
+    mixedLinearComplementarity_newFromFile(&problem, MLCPfile);
+    printf("test filename = %s\n", summary[itest].file);
+    displayMLCP(&problem);
+    // fscanf(MLCPfile , "%d" , &n);
+    // fscanf(MLCPfile , "%d" , &m);
+    // fscanf(MLCPfile , "%d" , &NbLines);
 
-    fscanf(MLCPfile , "%d" , &n);
-    fscanf(MLCPfile , "%d" , &m);
-    fscanf(MLCPfile , "%d" , &NbLines);
+    // n2 = n*n;
+    // m2 = m*m;
+    // isol = 1;
 
-    n2 = n * n;
-    m2 = m * m;
-    isol = 1;
+    n = problem.n;
+    m = problem.m;
 
-    vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
-    vecQ = (double*)malloc((NbLines) * sizeof(double));
+
+    // vecM = (double*)malloc((n+m)*(NbLines)*sizeof(double));
+    // vecQ = (double*)malloc((NbLines)*sizeof(double));
     z = (double*)calloc((n + m), sizeof(double));
-    w = (double*)calloc((NbLines), sizeof(double));
-    vecA = (double*)malloc(n * (NbLines - m) * sizeof(double));
-    vecB = (double*)malloc(m2 * sizeof(double));
-    vecC = (double*)malloc((NbLines - m) * m * sizeof(double));
-    vecD = (double*)malloc(m * n * sizeof(double));
-    a    = (double*)malloc((NbLines - m) * sizeof(double));
-    b    = (double*)malloc(m * sizeof(double));
+    w = (double*)calloc((n + m), sizeof(double));
+    // vecA = (double*)malloc(n*(NbLines-m)*sizeof(double));
+    // vecB = (double*)malloc(m2*sizeof(double));
+    // vecC = (double*)malloc((NbLines-m)*m*sizeof(double));
+    // vecD = (double*)malloc(m*n*sizeof(double));
+    // a    = (double*)malloc((NbLines-m)*sizeof(double));
+    // b    = (double*)malloc(m*sizeof(double));
     sol  = (double*)malloc((n + m + m) * sizeof(double));
 
-    M.storageType = 0;
-    M.matrix0 = vecM;
-    problem.M = &M;
-    problem.problemType = 0;
-    problem.q = vecQ;
-    problem.A = vecA;
-    problem.B = vecB;
-    problem.C = vecC;
-    problem.D = vecD;
-    problem.a = a;
-    problem.b = b;
-    problem.blocksLine[1] = n;
-    problem.blocksLine[2] = n + m;
-    problem.n = n;
-    problem.m = m;
+    // M.storageType = 0;
+    // M.matrix0=vecM;
+    // problem.M = &M;
+    // problem.problemType = 0;
+    // problem.q = vecQ;
+    // problem.A = vecA;
+    // problem.B = vecB;
+    // problem.C = vecC;
+    // problem.D = vecD;
+    // problem.a = a;
+    // problem.b = b;
+    // problem.blocksLine[1]=n;
+    // problem.blocksLine[2]=n+m;
+    // problem.n=n;
+    // problem.m=m;
 
-    M.size0 = NbLines;
-    M.size1 = n + m;
+    // M.size0=NbLines;
+    // M.size1=n+m;
 
 
 
-    for (i = 0 ; i < NbLines - m ; ++i)
-    {
-      for (j = 0 ; j < n ; ++j)
-      {
-        fscanf(MLCPfile, "%s", val);
-        vecA[(NbLines - m)*j + i ] = atof(val);
-        vecM[(NbLines)*j + i ] = atof(val);
-      }
-    }
-    for (i = 0 ; i < m ; ++i)
-    {
-      for (j = 0 ; j < m ; ++j)
-      {
-        fscanf(MLCPfile, "%s", val);
-        vecB[ m * j + i ] = atof(val);
-        /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
-        vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
+    // for(i = 0 ; i < NbLines-m ; ++i)
+    // {
+    //   for(j = 0 ; j < n ; ++j)
+    //   {
+    //     fscanf(MLCPfile,"%s",val);
+    //     vecA[(NbLines-m)*j+i ] = atof(val);
+    //     vecM[(NbLines)*j+i ] = atof(val);
+    //   }
+    // }
+    // for(i = 0 ; i < m ; ++i)
+    // {
+    //   for(j = 0 ; j < m ; ++j)
+    //   {
+    //     fscanf(MLCPfile,"%s",val);
+    //     vecB[ m*j+i ] = atof(val);
+    //     /* vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
+    //     vecM[ n*(NbLines)+(NbLines)*j+(NbLines-m)+i ] = atof(val);
 
-      }
-    }
-    for (i = 0 ; i < NbLines - m ; ++i)
-    {
-      for (j = 0 ; j < m ; ++j)
-      {
-        fscanf(MLCPfile, "%s", val);
-        vecC[(NbLines - m)*j + i ] = atof(val);
-        vecM[(NbLines) * (n + j) + i ] = atof(val);
-      }
-    }
-    for (i = 0 ; i < m ; ++i)
-    {
-      for (j = 0 ; j < n ; ++j)
-      {
-        fscanf(MLCPfile, "%s", val);
-        vecD[ m * j + i ] = atof(val);
-        vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
-      }
-    }
+    //   }
+    // }
+    // for(i = 0 ; i < NbLines-m ; ++i)
+    // {
+    //   for(j = 0 ; j < m ; ++j)
+    //   {
+    //     fscanf(MLCPfile,"%s",val);
+    //     vecC[(NbLines-m)*j+i ] = atof(val);
+    //     vecM[(NbLines)*(n+j)+i ] = atof(val);
+    //   }
+    // }
+    // for(i = 0 ; i < m ; ++i)
+    // {
+    //   for(j = 0 ; j < n ; ++j)
+    //   {
+    //     fscanf(MLCPfile,"%s",val);
+    //     vecD[ m*j+i ] = atof(val);
+    //     vecM[(NbLines)*j+i+(NbLines-m) ] = atof(val);
+    //   }
+    // }
 
-    for (i = 0 ; i < NbLines - m ; ++i)
-    {
-      fscanf(MLCPfile , "%s" , val);
-      a[i] = atof(val);
-      vecQ[i] = atof(val);
-    }
-    for (i = 0 ; i < m ; ++i)
-    {
-      fscanf(MLCPfile , "%s" , val);
-      b[i] = atof(val);
-      vecQ[i + NbLines - m] = atof(val);
-    }
+    // for(i = 0 ; i < NbLines-m ; ++i)
+    // {
+    //   fscanf(MLCPfile , "%s" , val);
+    //   a[i] = atof(val);
+    //   vecQ[i] = atof(val);
+    // }
+    // for(i = 0 ; i < m ; ++i)
+    // {
+    //   fscanf(MLCPfile , "%s" , val);
+    //   b[i] = atof(val);
+    //   vecQ[i+NbLines-m] = atof(val);
+    // }
+
+
 
     fscanf(MLCPfile , "%s" , val);
     withSol = 0;
@@ -990,14 +1003,14 @@ void test_matrix(void)
     test_mlcp_series(&problem, z, w, sol);
 
     free(sol);
-    free(vecQ);
-    free(vecM);
-    free(vecA);
-    free(vecB);
-    free(vecC);
-    free(vecD);
-    free(a);
-    free(b);
+    // free(vecQ);
+    // free(vecM);
+    // free(vecA);
+    // free(vecB);
+    // free(vecC);
+    // free(vecD);
+    // free(a);
+    // free(b);
     free(z);
     free(w);
   }
