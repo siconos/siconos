@@ -127,7 +127,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   }
   else
   {
-    printf("WARNING, DEPRECETED MLCP API\n");
+    printf("WARNING, DEPRECATED MLCP API\n");
     /* Error on equalities part */
     error_e = DNRM2(NbLines - m , w , incx);;
 

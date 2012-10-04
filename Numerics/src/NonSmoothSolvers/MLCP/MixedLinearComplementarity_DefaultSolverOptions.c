@@ -40,7 +40,7 @@ void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComp
   pOptions->iWork = 0;
   pOptions->iparam = (int*)malloc(10 * sizeof(int));
   pOptions->dparam = (double*)malloc(10 * sizeof(double));
-  pOptions->numberOfInternalSolvers = 1;
+  pOptions->numberOfInternalSolvers = 0;
 
 
   pOptions->dparam[0] = 10 - 7;

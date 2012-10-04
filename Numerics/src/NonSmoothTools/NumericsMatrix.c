@@ -192,6 +192,37 @@ void freeNumericsMatrix(NumericsMatrix* m)
 }
 
 
+void displayMat(double * m, int nRow, int nCol, int lDim)
+{
+  int lin, col;
+  if (lDim == 0)
+    lDim = nRow;
+  printf("Matrix of size\t%d\t%d =\n[", nRow, nCol);
+  if (nRow == 0)
+  {
+    printf("]\n");
+  }
+  if (nCol == 0)
+  {
+    printf("]\n");
+  }
+
+  for (lin = 0; lin < nRow; lin++)
+  {
+    for (col = 0; col < nCol; col++)
+    {
+      printf(" %.15e", m[lin + col * lDim]);
+      if (col != nCol - 1)
+        printf(",");
+    }
+    if (lin != nRow - 1)
+      printf(";\n");
+    else
+      printf("]\n");
+  }
+
+}
+
 void display(const NumericsMatrix* const m)
 {
   if (! m)
@@ -202,17 +233,18 @@ void display(const NumericsMatrix* const m)
   int storageType = m->storageType;
   if (storageType == 0)
   {
-    printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
-    printf("[");
-    for (int i = 0; i < m->size0; i++)
-    {
-      printf("[");
-      for (int j = 0; j < m->size1; j++)
-      {
-        printf("%lf ", m->matrix0[i + j * m->size0]);
-      }
-      printf("]\n");
-    }
+    printf("\n ========== Numerics Matrix\n");
+    displayMat(m->matrix0, m->size0, m->size1, m->size0);
+    /* printf("["); */
+    /* for (int i = 0; i<m->size0; i++) */
+    /* {     */
+    /*   printf("["); */
+    /*   for (int j = 0; j<m->size1; j++) */
+    /*   { */
+    /*     printf("%lf ",m->matrix0[i+j*m->size0]); */
+    /*   } */
+    /*   printf("]\n"); */
+    /* }   */
   }
   else if (storageType == 1)
     printSBM(m->matrix1);

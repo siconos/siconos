@@ -134,13 +134,21 @@ typedef struct
   int problemType;
 } MixedLinearComplementarityProblem;
 
-void displayMat(double * M, int Nblin, int Nbcol, int incLin);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
   void displayMLCP(MixedLinearComplementarityProblem* p);
+
+
+  /** \fn  void freeMixedLinearComplementarityProblem(LinearComplementarityProblem* problem)
+   *  \brief function to delete a LinearComplementarityProblem
+   *  \param problem  pointer to a LinearComplementarityProblem to delete
+   */
+  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem);
+
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

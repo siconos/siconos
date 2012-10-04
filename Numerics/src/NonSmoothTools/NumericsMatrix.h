@@ -176,6 +176,15 @@ extern "C"
    */
   void freeNumericsMatrix(NumericsMatrix* m);
 
+  /** Screen display of the matrix content stored as a double * array in Fortran style
+      \param M the matrix to be displayed
+      \param nRow the number of rows
+      \param nCol the number of columns
+      \param lDim the leading dimesion of M
+   */
+  void displayMat(double * m, int nRow, int nCol, int lDim);
+
+
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */

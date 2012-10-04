@@ -25,27 +25,6 @@
 #include <stdlib.h>
 #include "MixedLinearComplementarityProblem.h"
 
-void displayMat(double * M, int Nblin, int Nbcol, int incCol)
-{
-  int lin, col;
-  if (incCol == 0)
-    incCol = Nblin;
-  printf("M%d %d =[", Nblin, Nbcol);
-  for (lin = 0; lin < Nblin; lin++)
-  {
-    for (col = 0; col < Nbcol; col++)
-    {
-      printf(" %.15e", M[lin + col * incCol]);
-      if (col != Nbcol - 1)
-        printf(",");
-    }
-    if (lin != Nblin - 1)
-      printf(";\n");
-    else
-      printf("]\n");
-  }
-
-}
 
 void displayMLCP(MixedLinearComplementarityProblem* p)
 {
@@ -79,7 +58,7 @@ void displayMLCP(MixedLinearComplementarityProblem* p)
     displayMat(p->q, n + m, 1, 0);
   }
   else
-    printf("No b matrix:\n");
+    printf("No q matrix:\n");
 
   if (p->A)
   {
@@ -157,3 +136,24 @@ void displayMLCP(MixedLinearComplementarityProblem* p)
 }
 #endif
 
+
+void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
+{
+  if (problem->problemType == 0)
+  {
+    freeNumericsMatrix(problem->M);
+    free(problem->M);
+    free(problem->q);
+  }
+  else if (problem->problemType == 0)
+  {
+    free(problem->A);
+    free(problem->B);
+    free(problem->C);
+    free(problem->D);
+    free(problem->a);
+    free(problem->b);
+  }
+  free(problem);
+  problem = NULL;
+}
