@@ -57,7 +57,7 @@
 
 #define NAX_NBTESTS 20
 
-#define BAVARD
+//#define BAVARD
 //#define NBTEST 19
 #define NBTEST 10
 
@@ -834,10 +834,8 @@ void test_matrix(void)
 
     MixedLinearComplementarityProblem * problem = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
 
-    // Mixedlinearcomplementarity_newFromFile(&problem, MLCPfile);
-
-
-    mixedLinearComplementarity_newFromFileOld(problem, MLCPfile);
+    mixedLinearComplementarity_newFromFile(problem, MLCPfile);
+    //mixedLinearComplementarity_newFromFileOld(problem, MLCPfile);
     printf("\n");
     printf("====================== \n")     ;
     printf("test on  = %s\n", summary[itest].file);
