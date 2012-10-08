@@ -301,6 +301,7 @@ IF(WITH_TESTING)
 
   BEGIN_TEST(NonSmoothSolvers/MLCP/test)
   NEW_TEST(MLCPtest main_mlcp.cpp)
+  NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()
 
   BEGIN_TEST(NonSmoothSolvers/MCP/test)

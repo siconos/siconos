@@ -57,7 +57,7 @@
 
 #define NAX_NBTESTS 20
 
-//#define BAVARD
+#define BAVARD
 //#define NBTEST 19
 #define NBTEST 10
 
@@ -633,23 +633,8 @@ void test_matrix(void)
 
   int iter;
   double criteria;
-  MixedLinearComplementarityProblem problem;
-  problem.n = 0;
-  problem.m = 0;
-  // problem.blocksRows = (int*)malloc(3*sizeof(int));
-  // problem.blocksIsComp = (int*)malloc(2*sizeof(int));
 
-  problem.q = 0;
-  problem.A = 0;
-  problem.B = 0;
-  problem.C = 0;
-  problem.D = 0;
-  problem.a = 0;
-  problem.b = 0;
-  //problem.problemType=0;
-  // problem.blocksRows[0]=0;
-  // problem.blocksIsComp[0]=0;
-  // problem.blocksIsComp[1]=1;
+
 
 #ifdef BAVARD
   printf("* *** ******************** *** * \n");
@@ -672,7 +657,7 @@ void test_matrix(void)
 
     switch (itest)
     {
-    case 0:
+    case 5:
       strcpy(summary[itest].file, "2x2 MLCP");
       if ((MLCPfile = fopen("data/deudeu_mlcp.dat", "r")) == NULL)
       {
@@ -761,22 +746,6 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 16:
-      strcpy(summary[itest].file, "Rectangular_1_n0_m4_mlcp MLCP");
-      if ((MLCPfile = fopen("data/Rectangular_1_n0_m4_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: Rectangular_1_n0_m4_mlcp.dat");
-        exit(1);
-      }
-      break;
-    case 17:
-      strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
-      if ((MLCPfile = fopen("data/Rectangular_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: Rectangular_mlcp.dat");
-        exit(1);
-      }
-      break;
     case 6:
       strcpy(summary[itest].file, "diodeBridge MLCP");
       if ((MLCPfile = fopen("data/diodeBridge_mlcp.dat", "r")) == NULL)
@@ -793,19 +762,11 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 5:
+    case 0:
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
-      if ((MLCPfile = fopen("data/diodeBridge20_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/deudeu_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: diodeBridge20_mlcp.dat");
-        exit(1);
-      }
-      break;
-    case 18:
-      strcpy(summary[itest].file, "diodeBridge 40 MLCP");
-      if ((MLCPfile = fopen("data/diodeBridge40_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: diodeBridge40_mlcp.dat");
         exit(1);
       }
       break;
@@ -817,7 +778,33 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 19:
+    case 15:
+      strcpy(summary[itest].file, "Rectangular_1_n0_m4_mlcp MLCP");
+      if ((MLCPfile = fopen("data/Rectangular_1_n0_m4_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: Rectangular_1_n0_m4_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 16:
+      strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
+      if ((MLCPfile = fopen("data/Rectangular_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: Rectangular_mlcp.dat");
+        exit(1);
+      }
+      break;
+
+    case 17:
+      strcpy(summary[itest].file, "diodeBridge 40 MLCP");
+      if ((MLCPfile = fopen("data/diodeBridge40_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: diodeBridge40_mlcp.dat");
+        exit(1);
+      }
+      break;
+
+    case 18:
       strcpy(summary[itest].file, "Buck2");
       if ((MLCPfile = fopen("data/Buck2_mlcp.dat", "r")) == NULL)
       {
@@ -825,7 +812,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 20:
+    case 19:
       strcpy(summary[itest].file, "BuckFirstStep");
       if ((MLCPfile = fopen("data/BuckFirstStep_mlcp.dat", "r")) == NULL)
       {
@@ -833,63 +820,41 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 15:
-      strcpy(summary[itest].file, "relay_mlcp");
-      if ((MLCPfile = fopen("data/relay_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: relay_mlcp.dat");
-        exit(1);
-      }
-      break;
-
+      // case 20:
+      //   strcpy(summary[itest].file,"relay_mlcp");
+      //   if((MLCPfile = fopen("data/relay_mlcp.dat","r")) == NULL)
+      //   {
+      //     perror("fopen MLCPfile: relay_mlcp.dat");
+      //     exit(1);
+      //   }
+      //   break;
     default :
       exit(1);
     }
-    mixedLinearComplementarity_newFromFile(&problem, MLCPfile);
-    printf("test filename = %s\n", summary[itest].file);
-    displayMLCP(&problem);
-    // fscanf(MLCPfile , "%d" , &n);
-    // fscanf(MLCPfile , "%d" , &m);
-    // fscanf(MLCPfile , "%d" , &NbLines);
+
+    MixedLinearComplementarityProblem * problem = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
+
+    // Mixedlinearcomplementarity_newFromFile(&problem, MLCPfile);
+
+
+    mixedLinearComplementarity_newFromFileOld(problem, MLCPfile);
+    printf("\n");
+    printf("====================== \n")     ;
+    printf("test on  = %s\n", summary[itest].file);
 
     // n2 = n*n;
     // m2 = m*m;
     // isol = 1;
 
-    n = problem.n;
-    m = problem.m;
+    n = problem->n;
+    m = problem->m;
 
 
-    // vecM = (double*)malloc((n+m)*(NbLines)*sizeof(double));
-    // vecQ = (double*)malloc((NbLines)*sizeof(double));
     z = (double*)calloc((n + m), sizeof(double));
     w = (double*)calloc((n + m), sizeof(double));
-    // vecA = (double*)malloc(n*(NbLines-m)*sizeof(double));
-    // vecB = (double*)malloc(m2*sizeof(double));
-    // vecC = (double*)malloc((NbLines-m)*m*sizeof(double));
-    // vecD = (double*)malloc(m*n*sizeof(double));
-    // a    = (double*)malloc((NbLines-m)*sizeof(double));
-    // b    = (double*)malloc(m*sizeof(double));
+
     sol  = (double*)malloc((n + m + m) * sizeof(double));
 
-    // M.storageType = 0;
-    // M.matrix0=vecM;
-    // problem.M = &M;
-    // problem.problemType = 0;
-    // problem.q = vecQ;
-    // problem.A = vecA;
-    // problem.B = vecB;
-    // problem.C = vecC;
-    // problem.D = vecD;
-    // problem.a = a;
-    // problem.b = b;
-    // problem.blocksRows[1]=n;
-    // problem.blocksRows[2]=n+m;
-    // problem.n=n;
-    // problem.m=m;
-
-    // M.size0=NbLines;
-    // M.size1=n+m;
 
 
 
@@ -968,10 +933,10 @@ void test_matrix(void)
     }
 #ifdef BAVARD
     printf("\n");
-    for (i = 0; i < NbLines; i++)
+    for (i = 0; i < n + m; i++)
     {
       for (j = 0; j < n + m; j++)
-        printf("%f ", vecM[NbLines * j + i]);
+        printf("%f ", problem->M->matrix0[(n + m)*j + i]);
       printf("\n");
     }
 #endif
@@ -988,7 +953,7 @@ void test_matrix(void)
     /*ONLY FOR DEBUG    NSNN_thisIsTheSolution(n+m,sol);*/
     if (withSol)
     {
-      test_mlcp_series(&problem, z, w, sol);
+      test_mlcp_series(problem, z, w, sol);
 #ifdef BAVARD
       printf("\n Without exact solution : ");
       printf("\n ---------------------- : \n");
@@ -1000,19 +965,12 @@ void test_matrix(void)
       sol[i] = 0;
     sIdWithSol = 0;
 
-    test_mlcp_series(&problem, z, w, sol);
+    test_mlcp_series(problem, z, w, sol);
 
     free(sol);
-    // free(vecQ);
-    // free(vecM);
-    // free(vecA);
-    // free(vecB);
-    // free(vecC);
-    // free(vecD);
-    // free(a);
-    // free(b);
     free(z);
     free(w);
+    freeMixedLinearComplementarityProblem(problem);
   }
 #ifdef BAVARD
   for (j = 0; j < 2; j++)

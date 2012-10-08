@@ -36,7 +36,7 @@ void frictionContact2D_enum(FrictionContactProblem* problem, double *reaction, d
 
   FrictionContact2D_tolcp(problem, lcp_problem);
   /* frictionContact_display(problem); */
-  /* LinearComplementarity_display(lcp_problem); */
+  /* linearComplementarity_display(lcp_problem); */
 
 
 

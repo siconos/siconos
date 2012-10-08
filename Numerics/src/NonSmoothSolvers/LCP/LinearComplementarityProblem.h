@@ -95,11 +95,11 @@ typedef struct
 extern "C"
 {
 #endif
-  /** \fn void LinearComplementarity_display(LinearComplementarityProblem* problem)
+  /** \fn void linearComplementarity_display(LinearComplementarityProblem* problem)
    *  \brief function to display a LinearComplementarityProblem
    *  \param  problem pointer to a LinearComplementarityProblem to display
    */
-  void LinearComplementarity_display(LinearComplementarityProblem* problem);
+  void linearComplementarity_display(LinearComplementarityProblem* problem);
 
   /** \fn int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file)
    *  \brief function to write in a file a LinearComplementarityProblem

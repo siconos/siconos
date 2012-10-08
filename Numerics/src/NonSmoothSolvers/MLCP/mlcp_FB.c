@@ -127,7 +127,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   {
     fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
     /*ONLY FOR DEBUG
-      displayMLCP(problem);
+      mixedLinearComplementarity_display(problem);
     printf("with z init;\n");
     for (i=0;i<sN+sM;i++)
     printf("%.32e \n",zz[i]);

@@ -119,7 +119,7 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
   //  options->iWork = siWorkDirect;
   if (options->iparam[8] == 761727)
   {
-    displayMLCP(problem);
+    mixedLinearComplementarity_display(problem);
   }
   mlcp_path(problem, z, w, info, options);
   if (*info)

@@ -102,40 +102,35 @@
 
 #include "NumericsMatrix.h"
 
-/**  \struct MixedLinearComplementarityProblem MixedLinearComplementarityProblem.h
- *  \brief Structure that contains and defines  \ref MLCProblem
- *
- Find \f$(z,w)\f$ such that:\n
-
-  \f$
-  \left\{
-  \begin{array}{l}
-  M \ z + q = w \\
-  w_1=0 \\
-  0 \le w_{2} \perp v \ge 0
-  \end{array}
-  \right.
-  \text{ with }
-  z=
-  \left[
-  \begin{array}{c}
-  u\\
-  v\\
-  \end{array}
-  \right]
-  \text{ and }
-  w=
-  \left[
-  \begin{array}{c}
-  w_{1}\\
-  w_{2}\\
-  \end{array}
-  \right]
-  \f$
-
-  \f$ u, w_{1}\f$ are vectors of size n.\n
-  \f$ v, w_{2}\f$ are vectors of size m.
-
+/** \struct MixedLinearComplementarityProblem MixedLinearComplementarityProblem.h
+ *  The Structure that contains and defines  \ref MLCProblem. Find \f$(z,w)\f$ such that:\n
+ * \f$
+ * \left\{
+ * \begin{array}{l}
+ *  M \ z + q = w \\
+ * w_1=0 \\
+ * 0 \le w_{2} \perp v \ge 0
+ * \end{array}
+ * \right.
+ * \text{ with }
+ * z=
+ * \left[
+ * \begin{array}{c}
+ * u\\
+ * v\\
+ * \end{array}
+ * \right]
+ * \text{ and }
+ * w=
+ * \left[
+ * \begin{array}{c}
+ * w_{1}\\
+ * w_{2}\\
+ * \end{array}
+ * \right]
+ * \f$
+ * \f$ u, w_{1}\f$ are vectors of size n.\n
+ * \f$ v, w_{2}\f$ are vectors of size m.
  * See \ref MLCProblem for more details.
  */
 typedef struct
@@ -150,7 +145,7 @@ typedef struct
                        else the block is a complementarity block.
                        The number of total blocks is given by NbBlocks such that blocksRows[NbBlocks] = n+m*/
   NumericsMatrix* M; /**< M matrix of the MLCP */
-  NumericsMatrix* Bblock; /**< Bblock  ?*/
+  /** NumericsMatrix* Bblock;*/ /**< Bblock  ?*/
   double *q; /**< q vector of the MLCP */
   double *A; /**< A matrix of the MLCP */
   double *B; /**< B matrix of the MLCP */
@@ -166,7 +161,15 @@ extern "C"
 {
 #endif
 
-  void displayMLCP(MixedLinearComplementarityProblem* p);
+  void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p);
+
+  /** \fn int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem*  problem, FILE* file)
+   *  \brief function to write in a file a MixedLinearComplementarityProblem
+   *  \param problem pointer to a MixedLinearComplementarityProblem to print
+   *  \param file pointer to a FILE
+   */
+  int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem*  problem, FILE* file);
+
 
   /** \fn  int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* file)
    *  \brief function to read and create a MixedLinearComplementarityProblem
@@ -175,6 +178,14 @@ extern "C"
    *  \param file pointer to a FILE
    */
   int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem, FILE* MLCPfile);
+
+  /** \fn  int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* file)
+   *  \brief function to read and create a MixedLinearComplementarityProblem
+   *   from a file
+   *  \param problem pointer to a MixedLinearComplementarityProblem to create
+   *  \param file pointer to a FILE
+   */
+  int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* MLCPfile);
 
   /** \fn  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
    *  \brief function to read and create a MixedLinearComplementarityProblem

@@ -29,7 +29,7 @@
  *</ul>
  * the (reduced or dual) frictional contact problem  is to find two vectors \f$u\in{{\mathrm{I\!R}}}^n\f$,
  * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^n\f$,
- * the contact forces denoted by \f$\mathrm{FC}(W,q,\mu)\f$  such that
+ * the contact forces denoted by \f$\mathrm{FC}(M,q,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
  *   u = M r + q \\
@@ -134,9 +134,9 @@
 
 #include "NumericsMatrix.h"
 
-/** \struct FrictionContactProblem
+/** \struct FrictionContactProblem FrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem
- *  \f$\mathrm{FC}(W,q,\mu)\f$  such that
+ *  \f$\mathrm{FC}(M,q,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
  *   u = M r + q \\
@@ -160,10 +160,17 @@
 */
 typedef struct
 {
+  /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
   int dimension;
+  /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
+  /** M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+     a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
+  /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
+  /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
+      (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
 } FrictionContactProblem;
 

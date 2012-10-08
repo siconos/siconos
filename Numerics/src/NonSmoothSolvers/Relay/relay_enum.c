@@ -38,7 +38,7 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
 
   relay_tolcp(problem, lcp_problem);
 
-  /* LinearComplementarity_display(lcp_problem);  */
+  /* linearComplementarity_display(lcp_problem);  */
 
   double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
   double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));

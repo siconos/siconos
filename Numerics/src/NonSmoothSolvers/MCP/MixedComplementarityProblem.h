@@ -23,11 +23,9 @@
 */
 
 /*! \page MCProblem Mixed (Non Linear) Complementarity problems (MCP)
-  \section mcpIntro The problem
-  A Mixed Complementarity problems (MCP) is a NCP "augmented" with equality constraints.
-  It is defined as
-
-  Find \f$(z,w)\f$ such that:\n
+  \section mcpIntro  Problem Statement
+  Given a sufficiently smooth function \f${F} \in {{\mathrm{I\!R}}}^{n+m}  \rightarrow \in {{\mathrm{I\!R}}}^{n+m} \f$
+  The Mixed Complementarity problems (MCP) is to find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
   \f{equation*}{
   \begin{array}{ccc}
   w = \left[\begin{array}{c}
@@ -37,7 +35,6 @@
   \end{array}
   \f}
   where "i"(resp. "e") stands for inequalities (resp. equalities).
-
   \f{equation*}{
   z = \left[\begin{array}{c}
         \ \\ z_e\\ \ \\ z_i\end{array}\right]
@@ -45,6 +42,8 @@
 
   $z_i,w_i$ are vectors of size $sizeEqualities$, $z_e,w_e$ vectors of size $sizeInequalities$ and $F$ is a
   non linear function that must be user-defined.
+
+  A Mixed Complementarity problems (MCP) is a NCP "augmented" with equality constraints.
 
   \section mcpSolversList Available solvers :
   - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
@@ -59,20 +58,38 @@ typedef void (*ptrFunctionMCP)(double*);
 
 //ptrFunctionMCP Fmcp = NULL;
 
-// Definition of a MCP problem.
+/** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
+ * The structure that defines a Mixed Complementarity problems (MCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
+  \f{equation*}{
+  \begin{array}{ccc}
+  w = \left[\begin{array}{c}
+        \ \\ w_e\\ \ \\ w_i\end{array}\right] &=& F(z) \\
+  w_e &=&0 \\
+  0 \le w_i &\perp& z_i \ge 0
+  \end{array}
+  \f}
+  where "i"(resp. "e") stands for inequalities (resp. equalities).
+  \f{equation*}{
+  z = \left[\begin{array}{c}
+        \ \\ z_e\\ \ \\ z_i\end{array}\right]
+        \f}
+
+  $z_i,w_i$ are vectors of size $sizeEqualities$, $z_e,w_e$ vectors of size $sizeInequalities$ and $F$ is a
+  non linear function that must be user-defined.
+ */
 typedef struct
 {
-  // $z_e,w_e$ size
+  /** size of equalities $z_e,w_e$ size */
   int sizeEqualities;
-  // $z_i,w_i$ size
+  /** size of inequalities $z_i,w_i$ size */
   int sizeInequalities;
-  // A pointer to the function to compute F(z)
+  /** A pointer to the function to compute F(z) */
   ptrFunctionMCP computeFmcp ;
-  // A pointer to the function to compute the jacobian of F(z)
+  /** A pointer to the function to compute the jacobian of F(z) */
   ptrFunctionMCP computeNablaFmcp ;
-  // F(z)
+  /** The value F(z) */
   double * Fmcp ;
-  // jacobian of F(z)
+  /** jacobian of F(z) */
   double * nablaFmcp ;
 
 } MixedComplementarityProblem;

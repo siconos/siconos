@@ -36,7 +36,7 @@ void frictionContact2D_lexicolemke(FrictionContactProblem* problem, double *reac
 
   FrictionContact2D_tolcp(problem, lcp_problem);
   /* frictionContact_display(problem); */
-  /* LinearComplementarity_display(lcp_problem); */
+  /* linearComplementarity_display(lcp_problem); */
 
 
 
