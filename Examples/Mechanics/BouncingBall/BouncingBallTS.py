@@ -20,31 +20,32 @@
 #
 
 from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-     LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
+     LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation,\
+     LCP, TimeStepping
 
 from numpy import eye, empty
 
-t0 = 0      # start time
-T = 10      # end time
-h = 0.005   # time step
-r = 0.1     # ball radius
-g = 9.81    # gravity
-m = 1       # ball mass
-e = 0.9     # restitution coeficient
-theta = 0.5 # theta scheme
+t0 = 0       # start time
+T = 10       # end time
+h = 0.005    # time step
+r = 0.1      # ball radius
+g = 9.81     # gravity
+m = 1        # ball mass
+e = 0.9      # restitution coeficient
+theta = 0.5  # theta scheme
 
 #
 # dynamical system
 #
-x = [1,0,0] # initial position
-v = [0,0,0] # initial velocity
-mass = eye(3)      # mass matrix
-mass[2,2]=3./5 * r * r
+x = [1, 0, 0]    # initial position
+v = [0, 0, 0]    # initial velocity
+mass = eye(3)  # mass matrix
+mass[2, 2] = 3. / 5 * r * r
 
 # the dynamical system
 ball = LagrangianLinearTIDS(x, v, mass)
 
-# set external forces 
+# set external forces
 weight = [-m * g, 0, 0]
 ball.setFExtPtr(weight)
 
@@ -53,7 +54,7 @@ ball.setFExtPtr(weight)
 #
 
 # ball-floor
-H = [[1,0,0]]
+H = [[1, 0, 0]]
 
 nslaw = NewtonImpactNSL(e)
 relation = LagrangianLinearTIR(H)
@@ -62,13 +63,13 @@ inter = Interaction(1, nslaw, relation)
 #
 # Model
 #
-bouncingBall = Model(t0,T)
+bouncingBall = Model(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
 bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
 
 # link the interaction and the dynamical system
-bouncingBall.nonSmoothDynamicalSystem().link(inter,ball);
+bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 
 
 #
@@ -80,7 +81,7 @@ OSI = Moreau(theta)
 OSI.insertDynamicalSystem(ball)
 
 # (2) Time discretisation --
-t = TimeDiscretisation(t0,h)
+t = TimeDiscretisation(t0, h)
 
 # (3) one step non smooth problem
 osnspb = LCP()
@@ -101,13 +102,12 @@ bouncingBall.initialize(s)
 
 
 # the number of time steps
-N = (T-t0)/h
+N = (T - t0) / h
 
-# Get the values to be plotted 
+# Get the values to be plotted
 # ->saved in a matrix dataPlot
 
-dataPlot = empty((N,5))
-
+dataPlot = empty((N, 5))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -162,21 +162,18 @@ from matplotlib.pyplot import subplot, title, plot, grid, show
 
 subplot(411)
 title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
 subplot(412)
 title('velocity')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 subplot(413)
-plot(dataPlot[:,0], dataPlot[:,3])
+plot(dataPlot[:, 0], dataPlot[:, 3])
 title('reaction')
 grid()
 subplot(414)
-plot(dataPlot[:,0], dataPlot[:,4])
+plot(dataPlot[:, 0], dataPlot[:, 4])
 title('lambda')
 grid()
 show()
-
-
-    
