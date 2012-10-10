@@ -1,3 +1,4 @@
+# Copyright (C) 2005, 2012 by INRIA
 #!/usr/bin/env python
 
 from numpy import *
@@ -87,7 +88,7 @@ def test_mlcp_enum_large():
 mlcp =0
 mlcp=N.MLCP()
 N.mixedLinearComplementarity_newFromFilename(mlcp,"./data/diodeBridge_mlcp.dat")
-#N.displayMLCP(mlcp)
+N.mixedLinearComplementarity_display(mlcp)
 
 def test_mlcp_enum_large_fromfile():
     SO=N.SolverOptions(mlcp,N.SICONOS_MLCP_ENUM)

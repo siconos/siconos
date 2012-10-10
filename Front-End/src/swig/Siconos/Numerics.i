@@ -21,6 +21,8 @@
 // Siconos.i - SWIG interface for Siconos
 %module Numerics
 
+
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include <sstream>
@@ -51,79 +53,6 @@
 #include <boost/preprocessor/cat.hpp>
 %}
 
-%inline %{
-#include <stdio.h>
-  FrictionContactProblem* frictionContactProblemFromFile
-    (const char * filename)
-  {
-    FILE * finput = fopen(filename, "r");
-    if (finput) 
-    {
-      FrictionContactProblem* problem = 
-        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-      if (frictionContact_newFromFile(problem,finput))
-      {
-      fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
-      free(problem);
-      return 0;
-      }
-      else
-        return problem;
-    }
-    else
-    {
-      fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
-      return 0;
-    }
-    fclose(finput);
-  }
-  
-  MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
-    (const char * filename)
-  {
-    FILE * finput = fopen(filename, "r");
-    if (finput) 
-    {
-      MixedLinearComplementarityProblem* problem = 
-        (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
-      if (mixedLinearComplementarity_newFromFile(problem,finput))
-      {
-      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot load %s\n",filename);
-      free(problem);
-      return 0;
-      }
-      else
-        return problem;
-    }
-    else
-    {
-      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot open %s\n",filename);
-      return 0;
-    }
-    fclose(finput);
-  }
-  
-
-
-
-%}
-
-  
-// needed macros
-%include "NumericsConfig.h"
-
-
-// more convenient
-%rename (LCP) LinearComplementarityProblem;
-
-%ignore lcp_compute_error_only;
-
-// more convenient
-%rename (MLCP) MixedLinearComplementarityProblem;
-
-//%ignore lcp_compute_error_only;
-
-
 // numpy macros
 %include numpy.i 	
 
@@ -131,99 +60,121 @@
   import_array();
 %}
 
-%apply (int DIM1 , int DIM2 , double* IN_FARRAY2)
-{(int nrows, int ncols, double* data          )};
-
-%apply (int DIM1 , double* INPLACE_ARRAY1)
-{(int sizex, double *x          )};
-
-%apply (int DIM1 , double* INPLACE_ARRAY1)
-{(int sizey, double *y          )};
-
-%apply (int DIM1 , double* INPLACE_ARRAY1)
-{(int sizeq, double *q         )};
-
-%apply (int DIM1 , double* INPLACE_ARRAY1)
-{(int sizez, double *z        )};
-
-%apply (int DIM1 , double* INPLACE_ARRAY1)
-{(int sizew, double *w        )};
-
-%apply (double IN_ARRAY1[ANY])
-{(double reaction[3])}
-
-%apply (double IN_ARRAY1[ANY])
-{(double velocity[3])}
-
-%apply (double IN_ARRAY1[ANY])
-{(double rho[3])}
-
-%apply (double ARGOUT_ARRAY1[ANY])
-{(double ACresult[3])}
-
-%apply (double ARGOUT_ARRAY1[ANY])
-{(double result[3])}
-
-%apply (double ARGOUT_ARRAY1[ANY])
-{(double A[9])}
-
-%apply (double ARGOUT_ARRAY1[ANY])
-{(double B[9])}
-
-
-// Handle standard exceptions
-%include "exception.i"
-%exception
-{
-  try
-  {
-    $action
-  }
-  catch (const std::invalid_argument& e)
-  {
-    SWIG_exception(SWIG_ValueError, e.what());
-  }
-  catch (const std::out_of_range& e)
-  {
-    SWIG_exception(SWIG_IndexError, e.what());
-  }
-}
-
-%include "Common.i"
 
 
 
-%typemap(in) (LinearComplementarityProblem*) (npy_intp problem_size) {
-  void *lcp;
-  int res = SWIG_ConvertPtr($input, &lcp,SWIGTYPE_p_LinearComplementarityProblem, 0 |  0 );
-  if (!SWIG_IsOK(res)) SWIG_fail;
 
-  problem_size=((LinearComplementarityProblem *) lcp)->size;
 
-  $1 = (LinearComplementarityProblem *) lcp;
-}
+ // needed macros
+ %include "NumericsConfig.h"
 
-%typemap(in) (MixedLinearComplementarityProblem*) (npy_intp mlcproblem_size) {
-  void *mlcp;
-  int res = SWIG_ConvertPtr($input, &mlcp,SWIGTYPE_p_MixedLinearComplementarityProblem, 0 |  0 );
-  if (!SWIG_IsOK(res)) SWIG_fail;
 
-  mlcproblem_size=((MixedLinearComplementarityProblem *) mlcp)->n +((MixedLinearComplementarityProblem *) mlcp)->m;
+ // more convenient
+ %rename (LCP) LinearComplementarityProblem;
 
-  $1 = (MixedLinearComplementarityProblem *) mlcp;
-}
+ %ignore lcp_compute_error_only;
 
-// problemSize given as first arg => set by first numpy array length
-// in remaining args
-%typemap(in, numinputs=0) 
-  (unsigned int problemSize) 
-  (unsigned int *p_problem_size, npy_intp number_of_contacts)
-{
-  // the first array length sets problemSize
-  p_problem_size = &$1;
-  *p_problem_size = 0;
-  number_of_contacts = 0;  
-}
+ // more convenient
+ %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP) MixedComplementarityProblem;
+
+
+
+
+
+ %apply (int DIM1 , int DIM2 , double* IN_FARRAY2)
+ {(int nrows, int ncols, double* data          )};
+
+ %apply (int DIM1 , double* INPLACE_ARRAY1)
+ {(int sizex, double *x          )};
+
+ %apply (int DIM1 , double* INPLACE_ARRAY1)
+ {(int sizey, double *y          )};
+
+ %apply (int DIM1 , double* INPLACE_ARRAY1)
+ {(int sizeq, double *q         )};
+
+ %apply (int DIM1 , double* INPLACE_ARRAY1)
+ {(int sizez, double *z        )};
+
+ %apply (int DIM1 , double* INPLACE_ARRAY1)
+ {(int sizew, double *w        )};
+
+ %apply (double IN_ARRAY1[ANY])
+ {(double reaction[3])}
+
+ %apply (double IN_ARRAY1[ANY])
+ {(double velocity[3])}
+
+ %apply (double IN_ARRAY1[ANY])
+ {(double rho[3])}
+
+ %apply (double ARGOUT_ARRAY1[ANY])
+ {(double ACresult[3])}
+
+ %apply (double ARGOUT_ARRAY1[ANY])
+ {(double result[3])}
+
+ %apply (double ARGOUT_ARRAY1[ANY])
+ {(double A[9])}
+
+ %apply (double ARGOUT_ARRAY1[ANY])
+ {(double B[9])}
+
+
+ // Handle standard exceptions
+ %include "exception.i"
+ %exception
+ {
+   try
+   {
+     $action
+   }
+   catch (const std::invalid_argument& e)
+   {
+     SWIG_exception(SWIG_ValueError, e.what());
+   }
+   catch (const std::out_of_range& e)
+   {
+     SWIG_exception(SWIG_IndexError, e.what());
+   }
+ }
+
+ %include "Common.i"
+
+
+
+ %typemap(in) (LinearComplementarityProblem*) (npy_intp problem_size) {
+   void *lcp;
+   int res = SWIG_ConvertPtr($input, &lcp,SWIGTYPE_p_LinearComplementarityProblem, 0 |  0 );
+   if (!SWIG_IsOK(res)) SWIG_fail;
+
+   problem_size=((LinearComplementarityProblem *) lcp)->size;
+
+   $1 = (LinearComplementarityProblem *) lcp;
+ }
+
+ %typemap(in) (MixedLinearComplementarityProblem*) (npy_intp mlcproblem_size) {
+   void *mlcp;
+   int res = SWIG_ConvertPtr($input, &mlcp,SWIGTYPE_p_MixedLinearComplementarityProblem, 0 |  0 );
+   if (!SWIG_IsOK(res)) SWIG_fail;
+
+   mlcproblem_size=((MixedLinearComplementarityProblem *) mlcp)->n +((MixedLinearComplementarityProblem *) mlcp)->m;
+
+   $1 = (MixedLinearComplementarityProblem *) mlcp;
+ }
+
+ // problemSize given as first arg => set by first numpy array length
+ // in remaining args
+ %typemap(in, numinputs=0) 
+   (unsigned int problemSize) 
+   (unsigned int *p_problem_size, npy_intp number_of_contacts)
+ {
+   // the first array length sets problemSize
+   p_problem_size = &$1;
+   *p_problem_size = 0;
+   number_of_contacts = 0;  
+ }
 
 %typemap(in) 
   (FrictionContactProblem*) 
@@ -1086,12 +1037,152 @@
 %include "MLCP_Solvers.h"
 %include "mlcp_cst.h"
 
-// %typemap(argout) (MixedLinearComplementarityProblem * problem)
-// {
-//   $result = SWIG_Python_AppendOutput($result,problem);
-// }
+%inline %{
 
- //int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
+
+#include <stdio.h>
+  FrictionContactProblem* frictionContactProblemFromFile
+    (const char * filename)
+  {
+    FILE * finput = fopen(filename, "r");
+    if (finput) 
+    {
+      FrictionContactProblem* problem = 
+        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+      if (frictionContact_newFromFile(problem,finput))
+      {
+      fprintf(stderr, "frictionContactProblemFromFile: cannot load %s\n",filename);
+      free(problem);
+      return 0;
+      }
+      else
+        return problem;
+    }
+    else
+    {
+      fprintf(stderr, "frictionContactProblemFromFile: cannot open %s\n",filename);
+      return 0;
+    }
+    fclose(finput);
+  }
+  
+  MixedLinearComplementarityProblem* mixedLinearComplementarityProblemFromFile
+    (const char * filename)
+  {
+    FILE * finput = fopen(filename, "r");
+    if (finput) 
+    {
+      MixedLinearComplementarityProblem* problem = 
+        (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
+      if (mixedLinearComplementarity_newFromFile(problem,finput))
+      {
+      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot load %s\n",filename);
+      free(problem);
+      return 0;
+      }
+      else
+        return problem;
+    }
+    else
+    {
+      fprintf(stderr, "mixedLinearComplementarityProblemFromFile: cannot open %s\n",filename);
+      return 0;
+    }
+    fclose(finput);
+  }
+
+
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
+
+
+static PyObject *my_callback_Fmcp = NULL;
+
+static PyObject * set_my_callback_Fmcp(PyObject *o1)
+{
+  PyObject *result = NULL;
+  PyObject *temp;
+  if (!PyCallable_Check(o1)) {
+    PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+    return NULL;
+  }
+  Py_XINCREF(o1);         /* Add a reference to new callback */
+  Py_XDECREF(my_callback_Fmcp);  /* Dispose of previous callback */
+  my_callback_Fmcp = o1;       /* Remember new callback */
+  
+  /* Boilerplate to return "None" */
+  Py_INCREF(Py_None);
+  result = Py_None;
+
+  return result;
+}
+
+static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
+{
+  npy_intp this_matrix_dim[1];
+  this_matrix_dim[0]=size;
+  
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+  PyObject* tuple = PyTuple_New(1);
+  PyTuple_SetItem(tuple, 0, pyarray);  
+  PyObject* result; 
+
+  if (PyCallable_Check(my_callback_Fmcp))
+  {
+    result = PyObject_CallObject(my_callback_Fmcp, tuple);
+  }
+  else
+  {
+    PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+  }
+  
+  Py_DECREF(pyarray);
+  Py_DECREF(tuple);
+  
+  if (is_array(result))
+  {
+    if (array_size(result,0) != size)
+    {
+      char message[240];
+      sprintf(message, "Wrong size for  the return value of callback function. Expected size is %i", size);
+      PyErr_SetString(PyExc_RuntimeError,message);
+    }
+    else if (array_numdims(result) != 1)
+    {
+      char message[240];
+      sprintf(message, "Wrong dimension for  the return value of callback function. Expected dimension is 1");
+      PyErr_SetString(PyExc_RuntimeError,message);
+    }
+    else
+    { 
+      if (array_is_contiguous(result))
+      {
+        memcpy(F, (double *)array_data(result), size * sizeof(double));
+      }
+      else PyErr_SetString(PyExc_RuntimeError, "Return value of callback function is not contiguous");
+    }
+  }
+  else
+  {
+    PyErr_SetString(PyExc_TypeError, "Return value of callback function is not of numpy array type");
+  }
+  
+  Py_DECREF(result);
+  return;
+
+}
+
+
+
+ %}
+
+
+
+// MCP 
+%include "MixedComplementarityProblem.h"
+
 
 %extend NumericsOptions
 {
@@ -1356,6 +1447,96 @@
   // }
 
 };
+
+// %callback("%s_cb");
+// void tutu(double z);
+// %nocallback;
+
+
+
+
+%extend MixedComplementarityProblem
+{
+
+ 
+
+  MixedComplementarityProblem()
+   {
+     MixedComplementarityProblem* MCP;
+     MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
+     MCP->Fmcp=NULL;
+     MCP->nablaFmcp=NULL;
+     MCP->computeFmcp=NULL;
+     MCP->computeNablaFmcp=NULL;
+     return MCP;
+   }
+
+  int set_computeFmcp(PyObject *o1)
+  {
+    set_my_callback_Fmcp(o1);
+    $self->computeFmcp = (my_call_to_callback_Fmcp);
+  }
+  
+  int test_call_to_callback()
+  {
+    printf("I am in test_call_to_callback()\n");
+    
+    int size =   $self->sizeEqualities +  $self->sizeInequalities;
+
+    double * z = (double *)malloc(size*sizeof(double));
+    double * F = (double *)malloc(size*sizeof(double));
+    
+    for (int i=0; i < size; i++) z[i]=i;
+
+    for (int i=0; i < size; i++) printf("Input z[%i] = %lf\t", i, z[i]);
+    printf("\n");
+    $self->computeFmcp(size,z,F);
+
+    for (int i=0; i < size; i++) printf("Output F[%i] =  %lf\t", i, F[i]);
+    printf("\n");
+    
+
+
+    free(z);
+    free(F);
+     
+
+    printf("I leave test_call_to_callback()\n");
+  }
+ 
+
+
+  MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
+   {
+     MixedComplementarityProblem* MCP;
+     MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
+
+     MCP->sizeEqualities = (int) PyInt_AsLong(sizeEq);
+     MCP->sizeInequalities = (int) PyInt_AsLong(sizeIneq);
+     int size =  MCP->sizeEqualities +  MCP->sizeInequalities;
+
+     MCP->Fmcp = (double *) malloc(size*sizeof(double));
+     MCP->nablaFmcp = (double *) malloc(size*size*sizeof(double));
+     
+     if (!PyCallable_Check(o1)) {
+       PyErr_SetString(PyExc_TypeError, "parameter 3 must be callable");
+       // return NULL;
+     }
+     
+     set_my_callback_Fmcp(o1);
+     MCP->computeFmcp = (my_call_to_callback_Fmcp);
+
+     MCP->computeNablaFmcp=NULL;
+     
+     return MCP;
+   }
+
+  ~MixedComplementarityProblem()
+  {
+    freeMixedComplementarityProblem($self);
+  }
+};
+
 
 %typemap(out) (double* q) {
   npy_intp dims[2];
@@ -1670,3 +1851,4 @@
     freeSparse($self);
   }
 }
+
