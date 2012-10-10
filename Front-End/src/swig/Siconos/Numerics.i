@@ -1098,6 +1098,96 @@
 
 
 
+static PyObject *my_callback_NablaFmcp = NULL;
+
+static PyObject * set_my_callback_NablaFmcp(PyObject *o)
+{
+  PyObject *result = NULL;
+  PyObject *temp;
+  if (!PyCallable_Check(o)) {
+    PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+    return NULL;
+  }
+  Py_XINCREF(o);         /* Add a reference to new callback */
+  Py_XDECREF(my_callback_NablaFmcp);  /* Dispose of previous callback */
+  my_callback_NablaFmcp = o;       /* Remember new callback */
+  
+  /* Boilerplate to return "None" */
+  Py_INCREF(Py_None);
+  result = Py_None;
+
+  return result;
+}
+
+static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
+{  
+//  printf("I am in my_call_to_callback_NablaFmcp (int size, double *z, double *NablaF)\n");
+
+  npy_intp this_matrix_dim[1];
+  this_matrix_dim[0]=size;
+  
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+  PyObject* tuple = PyTuple_New(1);
+  PyTuple_SetItem(tuple, 0, pyarray);  
+  PyObject* result; 
+
+  if (PyCallable_Check(my_callback_NablaFmcp))
+  {
+    result = PyObject_CallObject(my_callback_NablaFmcp, tuple);
+  }
+  else
+  {
+    PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+  }
+  
+   Py_DECREF(pyarray);
+   Py_DECREF(tuple);
+  
+//Comment :  it will be safier to use  obj_to_array_fortran_allow_conversion
+
+  if (is_array(result))
+  {
+    if (array_size(result,0) != size || array_size(result,1) != size )
+    {
+      char message[240];
+      sprintf(message, "Wrong size for  the return value of callback function. Expected size is %i x %i", size,size);
+      PyErr_SetString(PyExc_RuntimeError,message);
+    }
+    else if (array_numdims(result) != 2)
+    {
+      char message[240];
+      sprintf(message, "Wrong dimension for  the return value of callback function. Expected dimension is 2");
+      PyErr_SetString(PyExc_RuntimeError,message);
+    }
+    else
+    { 
+
+      int is_new_object0=0;      
+      make_fortran((PyArrayObject *)result, &is_new_object0,0,0);
+      // if (is_new_object0)
+      // {
+      //   Py_DECREF(result);
+      //   printf ("the object is new !!\n");
+      // }
+      memcpy(nablaF, (double *)array_data(result), size*size * sizeof(double));
+      
+    }
+  }
+  else
+  {      
+    const char * desired_type = typecode_string(NPY_DOUBLE);
+    const char * actual_type  = pytype_string(result);
+    PyErr_Format(PyExc_TypeError,
+                 "Array of type '%s' required as return value fo callback function. A '%s' was returned",
+                   desired_type, actual_type);
+    
+  }
+  
+  Py_DECREF(result);
+  return;
+
+}
+
 static PyObject *my_callback_Fmcp = NULL;
 
 static PyObject * set_my_callback_Fmcp(PyObject *o1)
@@ -1121,6 +1211,9 @@ static PyObject * set_my_callback_Fmcp(PyObject *o1)
 
 static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 {
+
+//  printf("I am in my_call_to_callback_Fmcp (int size, double *z, double *F)\n");
+
   npy_intp this_matrix_dim[1];
   this_matrix_dim[0]=size;
   
@@ -1166,7 +1259,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   }
   else
   {
-    PyErr_SetString(PyExc_TypeError, "Return value of callback function is not of numpy array type");
+    const char * desired_type = typecode_string(NPY_DOUBLE);
+    const char * actual_type  = pytype_string(result);
+    PyErr_Format(PyExc_TypeError,
+                 "Array of type '%s' required as return value fo callback function. A '%s' was returned",
+                   desired_type, actual_type);
   }
   
   Py_DECREF(result);
@@ -1471,10 +1568,17 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
      return MCP;
    }
 
-  int set_computeFmcp(PyObject *o1)
+  int set_computeFmcp(PyObject *o)
   {
-    set_my_callback_Fmcp(o1);
+    set_my_callback_Fmcp(o);
     $self->computeFmcp = (my_call_to_callback_Fmcp);
+  }
+  
+  int set_computeNablaFmcp(PyObject *o)
+  {
+
+    set_my_callback_NablaFmcp(o);
+    $self->computeNablaFmcp = (my_call_to_callback_NablaFmcp);
   }
   
   int test_call_to_callback()
@@ -1485,21 +1589,28 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
     double * z = (double *)malloc(size*sizeof(double));
     double * F = (double *)malloc(size*sizeof(double));
+    double * nablaF = (double *)malloc(size*size*sizeof(double));
     
     for (int i=0; i < size; i++) z[i]=i;
-
-    for (int i=0; i < size; i++) printf("Input z[%i] = %lf\t", i, z[i]);
+    printf("Input \n");
+    for (int i=0; i < size; i++) printf("z[%i] = %lf\t", i, z[i]);
     printf("\n");
     $self->computeFmcp(size,z,F);
-
-    for (int i=0; i < size; i++) printf("Output F[%i] =  %lf\t", i, F[i]);
+    if  (!PyErr_Occurred())
+    {
+      $self->computeNablaFmcp(size,z,nablaF);
+    }
+    printf("Output \n");
+    for (int i=0; i < size; i++) printf("F[%i] =  %lf\t", i, F[i]); 
     printf("\n");
+    for (int i=0; i < size*size; i++) printf("nablaF[%i] =  %lf\t", i, nablaF[i]);
     
-
-
+    printf("\n");
     free(z);
     free(F);
-     
+    free(nablaF);
+    
+    
 
     printf("I leave test_call_to_callback()\n");
   }
@@ -1507,27 +1618,53 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 
   MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
-   {
+  {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
 
      MCP->sizeEqualities = (int) PyInt_AsLong(sizeEq);
      MCP->sizeInequalities = (int) PyInt_AsLong(sizeIneq);
      int size =  MCP->sizeEqualities +  MCP->sizeInequalities;
-
-     MCP->Fmcp = (double *) malloc(size*sizeof(double));
-     MCP->nablaFmcp = (double *) malloc(size*size*sizeof(double));
      
-     if (!PyCallable_Check(o1)) {
-       PyErr_SetString(PyExc_TypeError, "parameter 3 must be callable");
-       // return NULL;
+     if (size<1)
+     {
+       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       MCP->Fmcp = NULL;
+       MCP->nablaFmcp = NULL;
+       freeMixedComplementarityProblem(MCP);
+       return NULL;
+     }
+     else
+     {
+       MCP->Fmcp = (double *) malloc(size*sizeof(double));
+       MCP->nablaFmcp = (double *) malloc(size*size*sizeof(double));
      }
      
-     set_my_callback_Fmcp(o1);
-     MCP->computeFmcp = (my_call_to_callback_Fmcp);
+     if (PyCallable_Check(o1)) 
+     {
+       set_my_callback_Fmcp(o1);
+       MCP->computeFmcp = (my_call_to_callback_Fmcp);
+     }
+     else
+     {
+       PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
+       freeMixedComplementarityProblem(MCP);
+       return NULL;
+     }
 
-     MCP->computeNablaFmcp=NULL;
      
+     if (PyCallable_Check(o2))
+     {
+       set_my_callback_NablaFmcp(o2);
+       MCP->computeNablaFmcp = (my_call_to_callback_NablaFmcp);
+     }
+     else
+     {
+       PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
+       freeMixedComplementarityProblem(MCP);
+       return NULL;
+     }
+
      return MCP;
    }
 
