@@ -23,7 +23,7 @@
 #include "MCP_cst.h"
 #include "MCP_FischerBurmeister.h"
 
-char *  SICONOS_MCP_FB_STR = "NewtonFB";
+char   SICONOS_MCP_FB_STR[] = "NewtonFB";
 
 int mcp_driver(MixedComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {

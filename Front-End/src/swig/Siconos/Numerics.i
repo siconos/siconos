@@ -1273,13 +1273,15 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 
 
+
  %}
 
 
 
 // MCP 
 %include "MixedComplementarityProblem.h"
-
+%include "MCP_Solvers.h"
+%include "mcp_cst.h"
 
 %extend NumericsOptions
 {
@@ -1345,6 +1347,14 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     SO->solverId=id;
     mixedLinearComplementarity_setDefaultSolverOptions(mlcp, SO);
+    return SO;
+  }
+  SolverOptions(MixedComplementarityProblem* mlcp, MCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    mixedComplementarity_setDefaultSolverOptions(mlcp, SO);
     return SO;
   }
  

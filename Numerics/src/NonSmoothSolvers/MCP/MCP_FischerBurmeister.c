@@ -54,8 +54,6 @@ void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOpt
 
 void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options)
 {
-
-  free(localProblem->Fmcp);
   localProblem->Fmcp = NULL;
   localProblem->nablaFmcp = NULL;
   freeMixedComplementarityProblem(localProblem);

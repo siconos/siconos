@@ -14,7 +14,6 @@ def mcp_function (z) :
     return dot(M,z) + q
 
 def mcp_Nablafunction (z) : 
-    print "in mcp_function"
     M = array([[2., 1.],
                [1., 2.]])
     return M
@@ -35,12 +34,16 @@ def test_new():
 
 
 def test_mcp_FB():
-    pass
-    # SO=N.SolverOptions(mlcp,N.SICONOS_MLCP_ENUM)
-    # N.mlcp_driver_init(mlcp, SO)
-    # info = N.mlcp_enum(mlcp, z, w, SO)
-    # N.mlcp_driver_reset(mlcp, SO)
-    # print "z = ", z
-    # print "w = ", w
-    # assert (linalg.norm(z-zsol) <= ztol)
-    # assert not info
+    mcp=N.MCP(1,1,mcp_function,mcp_Nablafunction)
+    z = array([0., 0.])
+    w = array([0., 0.])
+    
+    SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
+    N.mcp_driver_init(mcp, SO)
+    info = N.mcp_FischerBurmeister(mcp, z, w, SO)
+    N.mcp_driver_reset(mcp, SO)
+    print "z = ", z
+    print "w = ", w
+    assert (linalg.norm(z-zsol) <= ztol)
+    assert not info
+

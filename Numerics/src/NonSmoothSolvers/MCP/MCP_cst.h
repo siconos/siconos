@@ -31,6 +31,6 @@ enum MCP_SOLVER
 };
 
 
-extern char * SICONOS_MCP_FB_STR;
+extern char SICONOS_MCP_FB_STR[];
 
 #endif
