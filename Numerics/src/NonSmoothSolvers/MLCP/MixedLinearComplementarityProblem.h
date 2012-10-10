@@ -195,9 +195,9 @@ extern "C"
    */
   int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
 
-  /** \fn  void freeMixedLinearComplementarityProblem(LinearComplementarityProblem* problem)
-   *  \brief function to delete a LinearComplementarityProblem
-   *  \param problem  pointer to a LinearComplementarityProblem to delete
+  /** \fn  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
+   *  \brief function to delete a MixedLinearComplementarityProblem
+   *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
    */
   void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem);
 

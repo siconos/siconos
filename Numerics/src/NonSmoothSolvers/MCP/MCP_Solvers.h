@@ -27,10 +27,10 @@
 
 /*! \page MCPSolvers MixedComplementarity Problems Solvers
 
-  \section mcp_FB  semi-smooth Newton/Fisher-Burmeister solver.
+  \section mcp_FischerBurmeister  semi-smooth Newton/Fisher-Burmeister solver.
   a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
 
-  function: mcp_FB() \n
+  function: mcp_FischerBurmeister() \n
   parameters:
   - iparam[0] (in): maximum number of iterations allowed
   - iparam[1] (out): number of iterations processed
@@ -46,6 +46,29 @@
 extern "C"
 {
 #endif
+  /** Initialisation of the MCP solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
+      \param[in] : the description of the MCP
+      \param[in] : options for the solver
+  */
+  void mcp_driver_init(MixedComplementarityProblem * problem, SolverOptions* options);
+
+  /** Reset of the MCP solver
+     \param[in] : the description of the MCP
+     \param[in] : options for the solver
+  */
+  void mcp_driver_reset(MixedComplementarityProblem * problem, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
+      \param problem  the pointer to the array of options to set.
+      \param pOptions the pointer to the SolverOptions stucture.
+  */
+  int mixedComplementarity_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions);
+
+  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
+      \param problem  the pointer to the array of options to set.
+      \param pOptions the pointer to the SolverOptions stucture.
+  */
+  void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions);
 
   /** Fischer Burmeister solver
       \param[in] problem a structure which represents the MCP
@@ -55,14 +78,16 @@ extern "C"
       \param[in,out] options structure used to define the solver and its parameters.
       \author Franck Pérignon
   */
-  void mcp_FB(MixedComplementarityProblem* problem, double* z, double* w, int* info, SolverOptions* options);
+  void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double* z, double* w, int* info, SolverOptions* options);
 
-
-  /** Initialisation of the MCP solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-      \param[in] : the description of the MCP
-      \param[in] : options for the solver
+  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
+      \param problem  the pointer to the array of options to set.
+      \param pOptions the pointer to the SolverOptions stucture.
   */
-  void mcp_driver_init(MixedComplementarityProblem * problem, SolverOptions* options);
+  int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver);
+
+
+
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

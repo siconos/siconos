@@ -38,7 +38,13 @@ extern "C"
       \param[in] : the description of the MCP
       \param[in] : options for the solver
   */
-  void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options);
+  void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options);
+
+  /** Reset of the MCP Fischer solver (free local variable)
+      \param[in] : the description of the MCP
+      \param[in] : options for the solver
+  */
+  void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

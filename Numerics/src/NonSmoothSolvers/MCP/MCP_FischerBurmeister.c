@@ -25,6 +25,7 @@
 #include "SolverOptions.h"
 #include "NonSmoothNewton.h"
 #include "FischerBurmeister.h"
+#include "MCP_solvers.h"
 
 
 /* Static object which contains the MCP problem description.
@@ -34,7 +35,7 @@ in  FischerFunc_MCP and its jacobian.
 static MixedComplementarityProblem * localProblem = 0;
 
 
-void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options)
+void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options)
 {
   localProblem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
   /* Connect local static problem with the "real" MCP */
@@ -42,14 +43,23 @@ void mcp_FB_init(MixedComplementarityProblem * problem, SolverOptions* options)
   localProblem->sizeInequalities = problem->sizeInequalities ;
   localProblem->computeFmcp = problem->computeFmcp ;
   localProblem->computeNablaFmcp = problem->computeNablaFmcp ;
-  localProblem->Fmcp = options->dWork ;
+
   int fullSize = localProblem->sizeEqualities + localProblem->sizeInequalities ;
   // Memory allocation for working vectors
   int lwork = 3 * (problem->sizeEqualities + problem->sizeInequalities) ;
   options->dWork = (double *) malloc(lwork * sizeof(double));
   localProblem->nablaFmcp = &(options->dWork[fullSize]) ;
+  localProblem->Fmcp = options->dWork ;
 }
 
+void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options)
+{
+
+  free(localProblem->Fmcp);
+  localProblem->Fmcp = NULL;
+  localProblem->nablaFmcp = NULL;
+  freeMixedComplementarityProblem(localProblem);
+}
 
 // Must corresponds to a NewtonFunctionPtr
 void FischerFunc_MCP(int size, double* z, double* phi, int dummy)
@@ -76,7 +86,7 @@ void nablaFischerFunc_MCP(int size, double* z, double* nablaPhi, int dummy)
   jacobianPhi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, localProblem->nablaFmcp, nablaPhi) ;
 }
 
-void mcp_FB(MixedComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
   int fullSize = problem->sizeEqualities + problem->sizeInequalities ;
@@ -96,3 +106,11 @@ void mcp_FB(MixedComplementarityProblem* problem, double *z, double *w, int *inf
 
   return;
 }
+
+int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver)
+{
+  mixedComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
+
+
