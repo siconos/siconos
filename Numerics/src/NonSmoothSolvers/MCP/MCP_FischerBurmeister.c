@@ -60,7 +60,7 @@ void FischerFunc_MCP(int size, double* z, double* phi, int dummy)
   int sizeEq = localProblem->sizeEqualities;
   int sizeIneq = localProblem->sizeInequalities;
   /* First call user-defined function to compute Fmcp function, */
-  localProblem->computeFmcp(localProblem->Fmcp) ;
+  localProblem->computeFmcp(sizeEq + sizeIneq, z, localProblem->Fmcp) ;
   /* and compute the corresponding Fischer function */
   phi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, phi) ;
 }
@@ -71,7 +71,7 @@ void nablaFischerFunc_MCP(int size, double* z, double* nablaPhi, int dummy)
   int sizeEq = localProblem->sizeEqualities;
   int sizeIneq = localProblem->sizeInequalities;
   /* First call user-defined function to compute Fmcp function, */
-  localProblem->computeNablaFmcp(localProblem->nablaFmcp) ;
+  localProblem->computeNablaFmcp(sizeEq + sizeIneq, z, localProblem->nablaFmcp) ;
   /* and compute the corresponding jacobian of the Fischer function */
   jacobianPhi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, localProblem->nablaFmcp, nablaPhi) ;
 }

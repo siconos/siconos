@@ -54,7 +54,7 @@
     TODO : set properly the list of arguments for this function, when
     things will be clearer ...
  */
-typedef void (*ptrFunctionMCP)(double*);
+typedef void (*ptrFunctionMCP)(int size , double* z, double * F);
 
 //ptrFunctionMCP Fmcp = NULL;
 
@@ -93,5 +93,23 @@ typedef struct
   double * nablaFmcp ;
 
 } MixedComplementarityProblem;
+
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
+
+  /** \fn  void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
+   *  \brief function to delete a MixedComplementarityProblem
+   *  \param problem  pointer to a MixedComplementarityProblem to delete
+   */
+  void freeMixedComplementarityProblem(MixedComplementarityProblem* problem);
+
+
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
 
 #endif
