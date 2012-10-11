@@ -29,7 +29,7 @@
 #include "NumericsConfig.h"
 
 #include "mlcp_cst.h"
-#include "mcp_cst.h"
+#include "MCP_cst.h"
 #include "lcp_cst.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
