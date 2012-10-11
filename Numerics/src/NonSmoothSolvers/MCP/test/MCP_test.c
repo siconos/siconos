@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "mcp_cst.h"
+#include "MCP_cst.h"
 
 
 
