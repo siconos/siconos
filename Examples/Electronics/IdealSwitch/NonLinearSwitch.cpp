@@ -34,9 +34,9 @@ int main()
   string solverSimplex = "SIMPLEX" ;
   string solverPath = "PATH" ;
   string * solverName = 0;
-  bool diodeIsOn;
-  bool switchIsOn;
-  bool stateChanged;
+  bool diodeIsOn = true;
+  bool switchIsOn = true;
+  bool stateChanged = true;
   // One Step non smooth problem
 
   double* floatWorkingMem = 0;
@@ -89,13 +89,13 @@ int main()
   SP::NonSmoothLaw aNSL;
   aNSL.reset(new MixedComplementarityConditionNSL(sN, sM));
   /*
-  if (ACE_FORMULATION==ACE_FORMULATION_SEMI_EXPLICT){
+    if (ACE_FORMULATION==ACE_FORMULATION_SEMI_EXPLICT){
     NSLawSize=m+s;
     aNSL.reset(new MixedComplementarityConditionNSL(m,s));
-  }else{
+    }else{
     NSLawSize=m;
     aNSL.reset(new ComplementarityConditionNSL(m));
-  }
+    }
   */
 
   //****BUILD THE INTERACTION
@@ -193,8 +193,8 @@ int main()
     lambda = aI->lambda(0);
 #ifdef CLSC_CIRCUIT
 
-    //    std::cout<<"x="<<x->getValue(0)<<" Is="<<lambda->getValue(0)<<" Id="<<lambda->getValue(1)<<" V3="<<lambda->getValue(2);
-    //   std::cout<<" V4="<<lambda->getValue(3)<<" V5="<<lambda->getValue(4)<<" l6="<<lambda->getValue(5)<<" l7="<<lambda->getValue(6);
+    //std::cout<<"x="<<x->getValue(0)<<" Is="<<lambda->getValue(0)<<" Id="<<lambda->getValue(1)<<" V3="<<lambda->getValue(2);
+    //std::cout<<" V4="<<lambda->getValue(3)<<" V5="<<lambda->getValue(4)<<" l6="<<lambda->getValue(5)<<" l7="<<lambda->getValue(6);
     //std::cout<<" l8="<<lambda->getValue(7)<<" l9="<<lambda->getValue(8)<<std::endl;
     stateChanged = false;
     if (lambda->getValue(6) > 1)
