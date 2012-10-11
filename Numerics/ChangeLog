@@ -28,6 +28,12 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 --------------------------------------------------------------------------------
 
 Changes:
+	* MixedComplementarity.* add structure and first test with FB algorithm
+	* MixedLinearComplementarity.* change the data structure to take into
+	account two storage types (M,q) and (A,B,C,D,a,b)
+	* Relay Fix huge bug in Relay with lb!=-1 and ub!=1
+	* FrictionContact Add LMGC driver.  Add FrictionContact2D 
+	solvers based on LCP reformulation and LEMKE and ENUM solvers
 	* LA.h: transform macros used to wrap LAPACK/BLAS functions into
 	static inline functions. This should not induced any loss of
 	performance
@@ -35,7 +41,7 @@ Changes:
 	Studio). In this case it sets BUILD_AS_CPP.
 	* Misc changes for crosscompiling to Windows using mingw and Visual
 	Studio. The files SiconosCompat.h and SiconosCompat.c contains some
-	functions not defined by VS (most of them are C99)
+	functions not defined by VS (most of them are C99) 
 
 
 --------------------------------------------------------------------------------
@@ -47,7 +53,7 @@ Changes:
       	mode is on (icntl(4)=0, icntl(10)=1, icntl(11)=1)
 	* some signatures updates for swig interface
 	* *.h update Doxygen documentation.
-	* FrictionContact renumbering FrictionContact Solver
+	* FrictionContact renumbering FrictionContact Solver.
 
 --------------------------------------------------------------------------------
   v3.3.0

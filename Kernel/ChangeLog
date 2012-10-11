@@ -23,7 +23,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v3.5.0
+  v3.5.0 October 2012
 --------------------------------------------------------------------------------
 Main Changes:
 	* Remove unneeded Plugin class
@@ -34,9 +34,16 @@ Main Changes:
 	Split SSL in 2 : SSL and SSLH (SSL Helper). The latter is the one used
 	in the code, the former contains the Plateform specific part.
 	* Remove UnitaryRelation
+	* SiconosAlgebra. SimpleVector is removed and now is SiconosVector.
+	* TimeSteppingProjectOnConstraints, TimeSteppingCombinedProjection
+	Rewrite entirely the code the use lambda[0] mand p[0].
+	Add MoreauProjectOnConstraintsOSI to use a temporary vector for
+	storing q before projection.
+	* FirstOrderType2Radd computation of computeInput
+	* TimeStepping add _isNewtonConverge 
 
 --------------------------------------------------------------------------------
-  v3.4.0
+  v3.4.0 March 2012
 --------------------------------------------------------------------------------
 Main Changes:
 	* serialization hooks & some minor modifications to be boost serializable
