@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "mcp_cst.h"
+#include "MCP_cst.h"
 
 static double M[4] = {2.0, 1.0, 1.0, 2.0};
 static double q[4] = { -5.0, -6.0};
