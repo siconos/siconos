@@ -25,7 +25,7 @@
 #include "SolverOptions.h"
 #include "NonSmoothNewton.h"
 #include "FischerBurmeister.h"
-#include "MCP_solvers.h"
+#include "MCP_Solvers.h"
 
 
 /* Static object which contains the MCP problem description.
