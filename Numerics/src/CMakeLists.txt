@@ -118,6 +118,15 @@ IF(UNIX)
 ENDIF(UNIX)
 APPEND_FLAGS(CMAKE_CXX_FLAGS "-D_NUMERICS_INTERNAL_CXX_")
 
+#set correct lib install path on linux
+IF(CMAKE_SYSTEM_NAME MATCHES Linux)
+  IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    SET(LIB_SUFFIX "")
+  ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    SET(LIB_SUFFIX "64")
+  ENDIF()
+ENDIF()
+
 IF(LLVM_ANALYSE)
   SET(CMAKE_C_OUTPUT_EXTENSION ".bc")
   SET(CMAKE_C_FLAGS "-emit-llvm")
@@ -137,7 +146,7 @@ SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
 # the RPATH to be used when installing
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 
 # don't add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH

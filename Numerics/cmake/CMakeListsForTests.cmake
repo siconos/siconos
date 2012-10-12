@@ -27,7 +27,7 @@ ENDIF()
 
 # For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
 #GET_FILENAME_COMPONENT(SiconosNumerics_PATH "${SiconosNumerics_FOUND}" PATH)
-SET(SiconosNumerics_PATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(SiconosNumerics_PATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   MESSAGE(STATUS "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE}")

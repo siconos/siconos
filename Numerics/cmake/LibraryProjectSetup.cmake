@@ -193,7 +193,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
     IF(${PROJECT_NAME}_INSTALL_LIB_DIR)
       SET(_install_lib ${${PROJECT_NAME}_INSTALL_LIB_DIR})
     ELSE(${PROJECT_NAME}_INSTALL_LIB_DIR)
-      SET(_install_lib lib)
+      SET(_install_lib lib${LIB_SUFFIX})
       SET(${PROJECT_NAME}_INSTALL_LIB_DIR ${_install_lib})
     ENDIF(${PROJECT_NAME}_INSTALL_LIB_DIR)
     
