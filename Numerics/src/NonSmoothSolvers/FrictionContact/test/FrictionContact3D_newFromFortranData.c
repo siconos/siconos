@@ -26,7 +26,6 @@ int main(void)
 {
   int info = 0 ;
 
-
   double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[3] = {0.1, 0.1, 0.1};
 
