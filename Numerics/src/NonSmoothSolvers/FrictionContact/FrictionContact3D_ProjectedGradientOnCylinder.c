@@ -268,7 +268,11 @@ int frictionContact3D_ProjectedGradientOnCylinder_setDefaultSolverOptions(Solver
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
+  if (options->iparam != NULL)
+    free(options->iparam);
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  if (options->dparam != NULL)
+    free(options->dparam);
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
@@ -280,6 +284,12 @@ int frictionContact3D_ProjectedGradientOnCylinder_setDefaultSolverOptions(Solver
   options->iparam[0] = 20000;
   options->dparam[0] = 1e-6;
   options->dparam[3] = 1e-3;
+
+  if (options->internalSolvers != NULL)
+  {
+    deleteSolverOptions(options->internalSolvers);
+    free(options->internalSolvers);
+  }
 
   options->internalSolvers = NULL;
 

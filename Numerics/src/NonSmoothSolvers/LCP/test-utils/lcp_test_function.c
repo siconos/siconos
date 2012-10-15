@@ -159,6 +159,11 @@ void fillParamWithRespectToSolver_SBM(SolverOptions *options, int solverId, Line
     /*       options->dWork=(double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
     /*       options->iWork=(int*) malloc(2*problem->size*sizeof(int)); */
 
+    if (options->iparam != NULL)
+      free(options->iparam);
+    if (options->dparam != NULL)
+      free(options->dparam);
+
     linearComplementarity_enum_setDefaultSolverOptions(problem,  options);
 
     break;
@@ -245,8 +250,8 @@ int lcp_test_function(FILE * f, int solverId)
   free(options->dparam);
 
 
-  if (!options->dWork) free(options->dWork);
-  if (!options->iWork) free(options->iWork);
+  if (options->dWork != NULL) free(options->dWork);
+  if (options->iWork != NULL) free(options->iWork);
 
   free(options);
 

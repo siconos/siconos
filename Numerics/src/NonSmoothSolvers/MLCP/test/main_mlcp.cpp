@@ -1081,6 +1081,5 @@ int main(void)
   printf("Test succed\n");
 #endif
   return 0;
-
 }
 

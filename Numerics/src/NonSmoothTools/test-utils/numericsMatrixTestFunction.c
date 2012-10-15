@@ -260,7 +260,10 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
     y[i] = yref[i];
     y2[i] = yref2[i];
   }
-
+  x2[0] = 0;
+  x2[1] = 0;
+  x2[2] = 0;
+  x2[3] = 0;
   int incx = 1, incy = 1;
   DGEMV(LA_NOTRANS, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
 
@@ -929,6 +932,8 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
   y = (double *)malloc(sizeY * sizeof(double));
+  y[0] = 0;
+  y[1] = 0;
   yref[0] = 0;
   yref[1] = 0;
 

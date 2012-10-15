@@ -84,6 +84,9 @@ int main()
   printf("T5/T0 = %g\n", ELAPSED(T5) / ELAPSED(T0));
 #endif
 
+  free(a);
+  free(b);
+  free(c);
   exit(0);
 }
 

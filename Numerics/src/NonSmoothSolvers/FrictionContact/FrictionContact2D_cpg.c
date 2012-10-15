@@ -47,7 +47,6 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
 
 
   r       = (double*) malloc(n * sizeof(double));
-  fric    = (double*) malloc(n * sizeof(double));
   p       = (double*) malloc(n * sizeof(double));
   v       = (double*) malloc(n * sizeof(double));
   w       = (double*) malloc(n * sizeof(double));
@@ -56,7 +55,7 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
   z       = (double*) malloc(n * sizeof(double));
   fric1   = (double*) malloc(n * sizeof(double));
 
-
+  fric    = (double*) malloc(nc * sizeof(double));
   stat    = (int*)    malloc(nc * sizeof(int));
   statusi = (int*)    malloc(nc * sizeof(int));
 
@@ -75,10 +74,10 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
     Ap[i]    = 0.0;
     z[i]     = 0.0;
     fric1[i] = 1.0;
-    fric[i]  = mu[i] * fric1[i];
 
     if (i < nc)
     {
+      fric[i]  = mu[i] * fric1[i];
       stat[i]    = 0;
       statusi[i] = 0;
 

@@ -336,6 +336,9 @@ extern "C"
    */
   SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC);
 
+  /** free a SparseBlockStructuredMatrix created with SBCMToSBM
+   * \param[in,out] M a SparseBlockStructuredMatrix to free*/
+  void freeSBMFromSBCM(SparseBlockStructuredMatrix* M);
   /** Copy a Sparse Matrix into a SBM, with fixed blocksize
       \param[in] blocksize the blocksize
       \param[in] sparseMat pointer on the Sparse Matrix

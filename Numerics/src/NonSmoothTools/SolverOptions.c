@@ -268,19 +268,19 @@ void deleteSolverOptions(SolverOptions* op)
     recursive_deleteSolverOptions(&(op->internalSolvers[i]));
   if (op->numberOfInternalSolvers && op->internalSolvers)
     free(op->internalSolvers);
-  op->internalSolvers = 0;
-  if (op->iparam)
+  op->internalSolvers = NULL;
+  if (op->iparam != NULL)
     free(op->iparam);
-  op->iparam = 0;
-  if (op->dparam)
+  op->iparam = NULL;
+  if (op->dparam != NULL)
     free(op->dparam);
-  op->dparam = 0;
-  if (op->iWork)
+  op->dparam = NULL;
+  if (op->iWork != NULL)
     free(op->iWork);
-  op->iWork = 0;
-  if (op->dWork)
+  op->iWork = NULL;
+  if (op->dWork != NULL)
     free(op->dWork);
-  op->dWork = 0;
+  op->dWork = NULL;
 
 
 

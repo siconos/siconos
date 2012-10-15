@@ -50,5 +50,14 @@ int main(void)
   assert(FC->M->matrix1->blocksize0[1] == 6);
   assert(FC->M->matrix1->block[0][0] == 1.);
 
+  free(NM);
+  NM = NULL;
+  free(M->block);
+  M->block = NULL;
+  free(M->index1_data);
+  free(M->index2_data);
+  free(M);
+  freeSparseBlockCoordinateMatrix3x3fortran(MC);
+
   return info;
 }

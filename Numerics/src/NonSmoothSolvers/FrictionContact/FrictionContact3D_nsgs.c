@@ -418,6 +418,10 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
 
   /***** Free memory *****/
   (*freeSolver)(localproblem);
+  if (problem->M->storageType == 0 && localproblem->M->matrix0 != NULL)
+  {
+    free(localproblem->M->matrix0);
+  }
   localproblem->M->matrix0 = NULL;
   freeFrictionContactProblem(localproblem);
 

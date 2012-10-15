@@ -67,6 +67,8 @@ int main(void)
   /// TODO : write a real test ... ////
 
   printf("End of MCP solvers test. \n");
+  mcp_driver_reset(problem, &options);
+  freeMixedComplementarityProblem(problem);
 
   return info;
 }

@@ -46,6 +46,8 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
 
   double* qtmp = (double*)malloc(n * sizeof(double));
   double* globalVelocitytmp = (double*)malloc(n * sizeof(double));
+  for (unsigned int i = 0; i < n; i++)
+    globalVelocitytmp[i] = 0;
   DCOPY(n, q, 1, qtmp, 1);
 
   double alpha = 1.0;

@@ -51,8 +51,10 @@ extern "C"
    */
   int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*, SolverOptions * options);
 
-  /** free memory for friction contact 3D Newton solver */
-  void frictionContact3D_Newton_free();
+  /** free memory for friction contact 3D Newton solver
+   * \param localproblem for freeing matrix0
+   */
+  void frictionContact3D_Newton_free(FrictionContactProblem* localproblem);
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem

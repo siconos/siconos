@@ -64,5 +64,7 @@ int main(void)
   assert(getValueSBM(m, 0, 0) == 2.);
   assert(getValueSBM(m, 8, 8) == 9.);
 
+  freeSBMFromSBCM(m);
+
 }
 

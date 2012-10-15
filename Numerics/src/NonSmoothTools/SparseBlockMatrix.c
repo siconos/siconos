@@ -1487,7 +1487,6 @@ int SBMtoSparseInitMemory(const SparseBlockStructuredMatrix* const A, SparseMatr
   return 0;
 }
 
-
 /* a basic iterator scheme for different kind of sparse
  * matrices (csc, csr, triplet) */
 typedef struct
@@ -1751,6 +1750,14 @@ SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
   return M;
 }
 
+void freeSBMFromSBCM(SparseBlockStructuredMatrix* M)
+{
+  free(M->index1_data);
+  free(M->index2_data);
+  free(M->block);
+  free(M);
+  M = NULL;
+}
 
 int sparseToSBM(int blocksize, const SparseMatrix* const sparseMat, SparseBlockStructuredMatrix* A)
 {

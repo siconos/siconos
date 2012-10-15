@@ -162,6 +162,7 @@ int main()
   free(mus);
   free(rhos);
 
+  fclose(file);
   return (info);
 }
 

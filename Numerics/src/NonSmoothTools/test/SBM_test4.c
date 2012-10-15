@@ -57,6 +57,7 @@ int main(void)
     return 1;
   }
   printSparse(&sparseMat);
+  freeSparse(&sparseMat);
 
   int n = M.blocksize0[M.blocknumber0 - 1];
   int m = M.blocksize1[M.blocknumber1 - 1];

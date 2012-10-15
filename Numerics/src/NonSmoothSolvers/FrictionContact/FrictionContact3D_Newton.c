@@ -166,8 +166,10 @@ int frictionContact3D_Newton_solve(FrictionContactProblem* localproblem, double*
   /*  (*postSolver)(contact,reaction); */
 }
 
-void frictionContact3D_Newton_free()
+void frictionContact3D_Newton_free(FrictionContactProblem* localproblem)
 {
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
   F = NULL;
   jacobianF = NULL;
   updateSolver = NULL;

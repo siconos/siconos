@@ -83,6 +83,7 @@ int relay_test_function(FILE * f, int  solverId)
 
   freeRelay_problem(problem);
 
+  fclose(foutput);
 
   return info;
 
