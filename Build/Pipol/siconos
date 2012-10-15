@@ -321,9 +321,9 @@ nightly_submit() {
 swig_setup() { 
     rm -rf `which swig`
     
-    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.1.tar.gz
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
 
-    cd swig-2.0.1; { 
+    cd swig-2.0.7; { 
         ./configure
         make
         sudo make install
@@ -432,7 +432,7 @@ pack_trunk IO Release
 save_packed_1 IO Release
 ##
 ### front-end (not with IO yet)
-#swig_setup
+swig_setup
 configure_trunk Front-End Release
 nightly_build Front-End Release
 nightly_test Front-End Release
