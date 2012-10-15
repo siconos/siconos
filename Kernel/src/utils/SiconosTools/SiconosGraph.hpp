@@ -73,11 +73,6 @@ namespace std11 = boost;
 enum vertex_old_index_t { vertex_old_index };
 enum edge_old_index_t { edge_old_index };
 
-// may be needed if a subgraph must share some common properties with
-// main graph. BUT this need a special case for serialization (maybe
-// look in bgl to see how VDescriptor are serialized
-// enum vertex_descriptor0_t { vertex_descriptor0 };
-//enum edge_descriptor0_t { edge_descriptor0 };
 enum vertex_properties_t { vertex_properties };
 enum edge_properties_t { edge_properties };
 enum graph_properties_t { graph_properties };
@@ -86,8 +81,6 @@ namespace boost
 {
 BOOST_INSTALL_PROPERTY(vertex, old_index);
 BOOST_INSTALL_PROPERTY(edge, old_index);
-//  BOOST_INSTALL_PROPERTY(vertex, descriptor0);
-//  BOOST_INSTALL_PROPERTY(edge, descriptor0);
 BOOST_INSTALL_PROPERTY(vertex, properties);
 BOOST_INSTALL_PROPERTY(edge, properties);
 BOOST_INSTALL_PROPERTY(graph, properties);
@@ -95,14 +88,16 @@ BOOST_INSTALL_PROPERTY(graph, properties);
 
 
 
-template <class V, class E, class VProperties, class EProperties, class GProperties>
+template < class V, class E, class VProperties,
+         class EProperties, class GProperties >
 class SiconosGraph
 {
 public:
 
   /* note : OutEdgeList as multisetS => cannot compile remove_out_edge_if :
      /usr/include/boost/graph/detail/adjacency_list.hpp:440: error: passing 'const ... */
-  typedef boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS> proxy_graph_t;
+  typedef boost::adjacency_list < boost::listS, boost::listS,
+          boost::undirectedS > proxy_graph_t;
 
   typedef typename
   boost::graph_traits<proxy_graph_t>::edge_descriptor EDescriptor;
@@ -113,20 +108,29 @@ public:
 
   typedef boost::adjacency_list <
   boost::listS, boost::listS, boost::undirectedS,
-        boost::property < boost::vertex_bundle_t, V,
+        boost::property
+        < boost::vertex_bundle_t, V,
         boost::property < boost::vertex_color_t ,
         boost::default_color_type ,
-        boost::property < boost::vertex_index_t, size_t,
-        boost::property < vertex_old_index_t, size_t,
-        //                                             property< vertex_descriptor0_t, VDescriptor,
-        boost::property< vertex_properties_t , VProperties > > > > > ,
-        boost::property < boost::edge_bundle_t, E,
-        boost::property < boost::edge_color_t ,
+        boost::property < boost::vertex_index_t,
+        size_t,
+        boost::property <
+        vertex_old_index_t,
+        size_t,
+        boost::property < vertex_properties_t,
+        VProperties
+        > > > > > ,
+        boost::property
+        < boost::edge_bundle_t, E,
+        boost::property <
+        boost::edge_color_t ,
         boost::default_color_type ,
         boost::property < boost::edge_index_t, size_t,
-        boost::property < edge_old_index_t, size_t,
-        //                                             property< edge_descriptor0_t, EDescriptor,
-        boost::property< edge_properties_t , EProperties > > > > > ,
+        boost::property < edge_old_index_t,
+        size_t,
+        boost::property < edge_properties_t ,
+        EProperties
+        > > > > > ,
         boost::property < graph_properties_t, GProperties > >
         graph_t;
 
@@ -198,7 +202,9 @@ protected:
   */
   typedef void serializable;
   template<typename Archive>
-  friend void siconos_io(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&, const unsigned int);
+  friend void siconos_io(Archive&, SiconosGraph < V, E, VProperties, EProperties,
+                         GProperties > &,
+                         const unsigned int);
   friend class boost::serialization::access;
 
   graph_t g;
@@ -480,7 +486,6 @@ public:
   VDescriptor add_vertex(const V& vertex_bundle)
   {
     assert(vertex_descriptor.size() == size()) ;
-    //    assert ( vertex_descriptor.find(vertex_bundle) == vertex_descriptor.end() );
 
     VDescriptor new_vertex_descriptor;
     typename VMap::iterator current_vertex_iterator =
@@ -692,10 +697,11 @@ public:
             assert(!ag.is_edge(new_ve, ag.descriptor(bundle(*ied)),
                                bundle(vdx)));
 
+#ifndef NDEBUG
             typename AdjointG::EDescriptor aed =
               ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
                           bundle(vdx));
-
+#endif
             assert(ag.bundle(aed) == bundle(vdx));
           }
         }
@@ -703,7 +709,8 @@ public:
       }
     }
     assert(ag.size() == edges_number());
-    return std::pair<EDescriptor, typename AdjointG::VDescriptor>(new_ed, new_ve);
+    return std::pair<EDescriptor, typename AdjointG::VDescriptor>(new_ed,
+           new_ve);
   }
 
   void remove_edge(const EDescriptor& ed)
@@ -806,7 +813,9 @@ public:
       }
       else
       {
-        old_index(*vi) = std::numeric_limits<size_t>::max(); // old_index not needed
+        old_index(*vi) = std::numeric_limits<size_t>::max(); // old_index
+        // not
+        // needed
       }
       index(*vi) = i;
 
@@ -830,7 +839,9 @@ public:
       }
       else
       {
-        old_index(*ei) = std::numeric_limits<size_t>::max(); // old_index not needed
+        old_index(*ei) = std::numeric_limits<size_t>::max(); // old_index
+        // not
+        // needed
       }
       index(*ei) = i;
 

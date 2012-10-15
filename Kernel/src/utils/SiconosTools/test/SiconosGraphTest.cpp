@@ -353,12 +353,11 @@ void SiconosGraphTest::t8()
   vd5 = g.add_vertex("two");
   vd6 = g.add_vertex("three");
 
-  std::ostringstream r;
+  CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
+  CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
+  CPPUNIT_ASSERT(g.bundle(vd3) == "bye");
+  CPPUNIT_ASSERT(g.bundle(vd4) == "one");
+  CPPUNIT_ASSERT(g.bundle(vd5) == "two");
+  CPPUNIT_ASSERT(g.bundle(vd6) == "three");
 
-  for (G::VIterator vi = g.begin(); vi != g.end(); ++vi)
-  {
-    r << g.bundle(*vi);
-  }
-
-  CPPUNIT_ASSERT(r.str() == "hellogoodbyebyeonetwothree");
 }
