@@ -2,6 +2,8 @@ SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Numerics.i Kernel.i PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall")
 
+# cf LIBRARY_PROJECT_SETUP, but we do not use it here.
+
 # do not skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 
@@ -10,7 +12,8 @@ SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
 # the RPATH to be used when installing
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+ASSERT(CMAKE_INSTALL_LIBDIR)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_LIBDIR}")
 
 # don't add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH

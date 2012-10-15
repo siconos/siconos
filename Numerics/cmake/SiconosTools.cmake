@@ -387,3 +387,8 @@ function(find_python_module module)
 	find_package_handle_standard_args(PY_${module} DEFAULT_MSG PY_${module_upper})
 endfunction(find_python_module)
 
+MACRO(ASSERT VAR)
+  IF (NOT DEFINED ${VAR})
+    MESSAGE( FATAL_ERROR "ASSERTION ERROR : ${VAR} UNSET" )
+  ENDIF()
+ENDMACRO()    

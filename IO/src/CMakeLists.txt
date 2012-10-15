@@ -72,30 +72,6 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
-#set correct lib install path on linux
-IF(CMAKE_SYSTEM_NAME MATCHES Linux)
-  IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(LIB_SUFFIX "")
-  ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(LIB_SUFFIX "64")
-  ENDIF()
-ENDIF()
-
-
-# do not skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-
-# the RPATH to be used when installing
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
-
-# don't add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 LIBRARY_PROJECT_SETUP()
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/test/result.ref test/result.ref COPYONLY)

@@ -118,15 +118,6 @@ IF(UNIX)
 ENDIF(UNIX)
 APPEND_FLAGS(CMAKE_CXX_FLAGS "-D_NUMERICS_INTERNAL_CXX_")
 
-#set correct lib install path on linux
-IF(CMAKE_SYSTEM_NAME MATCHES Linux)
-  IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(LIB_SUFFIX "")
-  ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(LIB_SUFFIX "64")
-  ENDIF()
-ENDIF()
-
 IF(LLVM_ANALYSE)
   SET(CMAKE_C_OUTPUT_EXTENSION ".bc")
   SET(CMAKE_C_FLAGS "-emit-llvm")
@@ -138,32 +129,9 @@ IF(MlcpSimplex_FOUND)
 SET(SiconosNumerics_LINKER_LANGUAGE CXX)
 ENDIF(MlcpSimplex_FOUND)
 
-# do not skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-
-# the RPATH to be used when installing
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
-
-# don't add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 LIBRARY_PROJECT_SETUP()
 
 # F95 Cmake Bug. No more needed? 
-#CONFIGURE_FILE(SiconosNumerics.h  DPCG.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  DPCGS.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  DSOLBT.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  DUSOL.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  if.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 
-#CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY) 
-
 # The library tests
 
 # wrapper are not needed

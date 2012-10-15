@@ -1457,7 +1457,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       if ( array_size(array,0) !=  array_size(array,1))
       {
         PyErr_Format(PyExc_ValueError,
-                     "A non square matrix (%d,%d) has been given",
+                     "A non square matrix (%ld,%ld) has been given",
                      array_size(array,0), array_size(array,1));
       }
       
@@ -1493,7 +1493,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
         //printf("size of M = %i\n",  array_size(array,0));
         
         PyErr_Format(PyExc_ValueError,
-                     "Matrix and vector of incompatible lengths (%d != %d) ",
+                     "Matrix and vector of incompatible lengths (%ld != %ld) ",
                      array_size(array,0), array_size(vector,0) );
       }
       MLCP->q = (double *) malloc(M->size0*sizeof(double));

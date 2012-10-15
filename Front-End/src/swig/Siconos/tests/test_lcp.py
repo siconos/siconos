@@ -18,10 +18,10 @@ w = array([0., 0.])
 
 # solution
 zsol = array([4./3., 7./3.])
-wsol = array([0. , 0.])
+wsol = array([0., 0.])
 
 # problem
-lcp=N.LCP(M,q)
+lcp = N.LCP(M, q)
 
 ztol = 1e-4
 
@@ -40,7 +40,7 @@ def test_lcp_qp():
     assert not info
 
 def test_lcp_lexicolemke():
-    SO=N.SolverOptions(lcp,N.SICONOS_LCP_LEMKE)
+    SO=N.SolverOptions(lcp, N.SICONOS_LCP_LEMKE)
     info = N.lcp_lexicolemke(lcp, z, w, SO)
     print 'lexicolemke iter =', SO.iparam[1]
     assert (linalg.norm(z-zsol) <= ztol)
@@ -51,4 +51,3 @@ def test_lcp_enum():
     info = N.lcp_enum(lcp, z, w, SO)
     assert (linalg.norm(z-zsol) <= ztol)
     assert not info
-

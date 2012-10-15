@@ -19,6 +19,20 @@ MACRO(LIBRARY_PROJECT_SETUP)
   MESSAGE(STATUS "")
   MESSAGE(STATUS "Setting up ${PROJECT_NAME} library build")
 
+  # do not skip the full RPATH for the build tree
+  SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+  # when building, don't use the install RPATH already
+  # (but later on when installing)
+  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+  # the RPATH to be used when installing
+  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+
+  # don't add the automatically determined parts of the RPATH
+  # which point to directories outside the build tree to the install RPATH
+  SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
   #+RPG add a reset of _ALL_EXTS
   SET(_ALL_EXTS)
   SET(_ALL_DIRS ${${PROJECT_NAME}_DIRS})
@@ -193,7 +207,8 @@ MACRO(LIBRARY_PROJECT_SETUP)
     IF(${PROJECT_NAME}_INSTALL_LIB_DIR)
       SET(_install_lib ${${PROJECT_NAME}_INSTALL_LIB_DIR})
     ELSE(${PROJECT_NAME}_INSTALL_LIB_DIR)
-      SET(_install_lib lib${LIB_SUFFIX})
+      ASSERT(CMAKE_INSTALL_LIBDIR)
+      SET(_install_lib ${CMAKE_INSTALL_LIBDIR})
       SET(${PROJECT_NAME}_INSTALL_LIB_DIR ${_install_lib})
     ENDIF(${PROJECT_NAME}_INSTALL_LIB_DIR)
     

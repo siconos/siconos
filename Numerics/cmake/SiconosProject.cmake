@@ -38,7 +38,13 @@ MACRO(SICONOS_PROJECT
   SET(PROJECT_SHORT_NAME ${_PROJECT_NAME})
   
   SET(PROJECT_PACKAGE_NAME "siconos-${_LPROJECT_NAME}")
-  
+
+  # Install lib directory 32, 64 etc. on Fedora, Debian 
+  # http://public.kitware.com/Bug/view.php?id=11964
+  INCLUDE(GNUInstallDirs)
+  ASSERT(CMAKE_INSTALL_LIBDIR)
+
+
   # PACKAGE PROJECT SETUP
   PROJECT(${PROJECT_PACKAGE_NAME})
 
