@@ -1281,7 +1281,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 // MCP 
 %include "MixedComplementarityProblem.h"
 %include "MCP_Solvers.h"
-%include "mcp_cst.h"
+%include "MCP_cst.h"
 
 %extend NumericsOptions
 {
