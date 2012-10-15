@@ -467,8 +467,6 @@ int frictionContact3D_projectionOnCone_solve(FrictionContactProblem* localproble
 
 void frictionContact3D_projection_free(FrictionContactProblem* localproblem)
 {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
 }
 
 void frictionContact3D_projection_with_regularization_free(FrictionContactProblem* localproblem)
