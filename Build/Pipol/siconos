@@ -14,6 +14,9 @@
 
 #PIPOL mac 03:00
 
+#release = false
+release = true
+
 set -x
 #set -e
 mode=${1:-Nightly}
@@ -101,6 +104,16 @@ setup_3_4() {
     cd $PIPOL_WDIR/siconos/branches/3.4.0; { 
         for mod in Numerics Kernel Examples Front-End; do 
             svn co -r3194 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+        done
+    }; cd $current_dir
+}
+
+setup_3_5() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR/siconos/branches/3.5.0
+    cd $PIPOL_WDIR/siconos/branches/3.5.0; { 
+        for mod in Numerics Kernel Examples Front-End; do 
+            svn co -r3522 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
@@ -207,6 +220,19 @@ configure_3_4() {
 
 }
 
+configure_3_5() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    mkdir -p $PIPOL_WDIR/build/$mod/$btype
+    cd $PIPOL_WDIR/build/$mod/$btype; {
+        rm -f CMakeCache.txt
+        eval cmake --debug-trycompile $PIPOL_WDIR/siconos/branches/3.5.0/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=FALSE -DSVN_REVISION=stable -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+    }; cd -
+
+}
+
 pack_trunk() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
         cmake $PIPOL_WDIR/siconos/trunk/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2 -DWITH_TESTING=FALSE
@@ -242,6 +268,14 @@ pack_3_3() {
 pack_3_4() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
         cmake $PIPOL_WDIR/siconos/branches/3.4.0/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
+        cpack -G $PIPOL_CPACK_G 
+    }; cd -
+    
+}
+
+pack_3_5() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        cmake $PIPOL_WDIR/siconos/branches/3.5.0/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
         cpack -G $PIPOL_CPACK_G 
     }; cd -
     
@@ -290,6 +324,12 @@ nightly_build_3_3() {
 }
 
 nightly_build_3_4() {
+    make_1 $1 $2 ${mode}Start
+    make_1 $1 $2 ${mode}Configure
+    make_1 $1 $2 ${mode}Build
+}
+
+nightly_build_3_5() {
     make_1 $1 $2 ${mode}Start
     make_1 $1 $2 ${mode}Configure
     make_1 $1 $2 ${mode}Build
@@ -353,123 +393,127 @@ esac
 
 #sudo rm -f /usr/local/bin/ctest
 
-#Stable 
-#setup_3_4
-#
-#configure_3_4 Numerics Release
-#nightly_build_3_4 Numerics Release
-#nightly_test Numerics Release
-#nightly_submit Numerics Release
-#nightly_memcheck Numerics Release
-#nightly_submit Numerics Release
-#install_1 Numerics Release
-#
-#configure_3_4 Kernel Release
-#nightly_build_3_4 Kernel Release
-#nightly_test Kernel Release
-#nightly_submit Kernel Release
-#nightly_memcheck Kernel Release
-#nightly_submit Kernel Release
-#install_1 Kernel Release
-#
-#configure_3_4 Examples Release
-#nightly_build_3_4 Examples Release
-#nightly_test Examples Release
-#nightly_memcheck Examples Release
-#nightly_submit Examples Release
-#
-#swig_setup
-#configure_3_4 Front-End Release
-#nightly_build_3_4 Front-End Release
-#nightly_test Front-End Release
-#nightly_submit Front-End Release
-#
-#pack_3_4 Numerics Release
-#save_packed_1 Numerics Release
-#
-#pack_3_4 Kernel Release
-#save_packed_1 Kernel Release
-#
-#pack_3_4 Examples Release
-#save_packed_1 Examples Release
-#
-#pack_3_4 Front-End Release
-#save_packed_1 Front-End Release
+if [ release = "true" ]; then
 
-# trunk tests
-setup_trunk
-configure_trunk Numerics Release
-nightly_build Numerics Release
-nightly_test Numerics Release
-nightly_memcheck Numerics Release
-nightly_submit Numerics Release
-install_1 Numerics Release
-clean_1 Numerics Release
-#
-configure_trunk Kernel Release
-nightly_build Kernel Release
-nightly_test Kernel Release
-nightly_memcheck Kernel Release
-nightly_submit Kernel Release
-install_1 Kernel Release
-clean_1 Kernel Release
-#
-configure_trunk IO Release
-nightly_build IO Release
-nightly_test IO Release
-nightly_memcheck IO Release
-nightly_submit IO Release
-install_1 IO Release
-clean_1 IO Release
-### Snapshot packages
-pack_trunk Numerics Release
-save_packed_1 Numerics Release
-##
-pack_trunk Kernel Release
-save_packed_1 Kernel Release
-##
-pack_trunk IO Release
-save_packed_1 IO Release
-##
-### front-end (not with IO yet)
-swig_setup
-configure_trunk Front-End Release
-nightly_build Front-End Release
-nightly_test Front-End Release
-nightly_submit Front-End Release
-install_1 Front-End Release
-clean_1 Front-End Release
-pack_trunk Front-End Release
-save_packed_1 Front-End Release
-##
-### Coverage
-setup_trunk
-configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
-nightly_build Numerics Debug
-nightly_coverage Numerics Debug
-nightly_submit Numerics Debug
-install_1 Numerics Debug
-clean_1 Numerics Debug
-##
-#setup_trunk
-configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
-nightly_build Kernel Debug
-nightly_coverage Kernel Debug
-nightly_submit Kernel Debug
-install_1 Kernel Debug
-clean_1 Kernel Debug
-##
-### Examples
-rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
-rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
-configure_trunk Examples Debug
-nightly_build Examples Debug
-nightly_test Examples Debug
-nightly_submit Examples Debug
-##
-nightly_memcheck Examples Debug
-nightly_submit Examples Debug
+# Stable 
+    setup_3_5
 
-# end
-date
-df -k
+    configure_3_5 Numerics Release
+    nightly_build_3_5 Numerics Release
+    nightly_test Numerics Release
+    nightly_submit Numerics Release
+    nightly_memcheck Numerics Release
+    nightly_submit Numerics Release
+    install_1 Numerics Release
+
+    configure_3_5 Kernel Release
+    nightly_build_3_5 Kernel Release
+    nightly_test Kernel Release
+    nightly_submit Kernel Release
+    nightly_memcheck Kernel Release
+    nightly_submit Kernel Release
+    install_1 Kernel Release
+
+    configure_3_5 Examples Release
+    nightly_build_3_5 Examples Release
+    nightly_test Examples Release
+    nightly_memcheck Examples Release
+    nightly_submit Examples Release
+    
+    swig_setup
+    configure_3_5 Front-End Release
+    nightly_build_3_5 Front-End Release
+    nightly_test Front-End Release
+    nightly_submit Front-End Release
+    
+    pack_3_5 Numerics Release
+    save_packed_1 Numerics Release
+    
+    pack_3_5 Kernel Release
+    save_packed_1 Kernel Release
+
+    pack_3_5 Examples Release
+    save_packed_1 Examples Release
+
+    pack_3_5 Front-End Release
+    save_packed_1 Front-End Release
+else
+
+    # trunk tests
+    setup_trunk
+    configure_trunk Numerics Release
+    nightly_build Numerics Release
+    nightly_test Numerics Release
+    nightly_memcheck Numerics Release
+    nightly_submit Numerics Release
+    install_1 Numerics Release
+    clean_1 Numerics Release
+    #
+    configure_trunk Kernel Release
+    nightly_build Kernel Release
+    nightly_test Kernel Release
+    nightly_memcheck Kernel Release
+    nightly_submit Kernel Release
+    install_1 Kernel Release
+    clean_1 Kernel Release
+    #
+    configure_trunk IO Release
+    nightly_build IO Release
+    nightly_test IO Release
+    nightly_memcheck IO Release
+    nightly_submit IO Release
+    install_1 IO Release
+    clean_1 IO Release
+    ### Snapshot packages
+    pack_trunk Numerics Release
+    save_packed_1 Numerics Release
+    ##
+    pack_trunk Kernel Release
+    save_packed_1 Kernel Release
+    ##
+    pack_trunk IO Release
+    save_packed_1 IO Release
+    ##
+    ### front-end (not with IO yet)
+    swig_setup
+    configure_trunk Front-End Release
+    nightly_build Front-End Release
+    nightly_test Front-End Release
+    nightly_submit Front-End Release
+    install_1 Front-End Release
+    clean_1 Front-End Release
+    pack_trunk Front-End Release
+    save_packed_1 Front-End Release
+    ##
+    ### Coverage
+    setup_trunk
+    configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+    nightly_build Numerics Debug
+    nightly_coverage Numerics Debug
+    nightly_submit Numerics Debug
+    install_1 Numerics Debug
+    clean_1 Numerics Debug
+    ##
+    #setup_trunk
+    configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+    nightly_build Kernel Debug
+    nightly_coverage Kernel Debug
+    nightly_submit Kernel Debug
+    install_1 Kernel Debug
+    clean_1 Kernel Debug
+    ##
+    ### Examples
+    rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
+    rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
+    configure_trunk Examples Debug
+    nightly_build Examples Debug
+    nightly_test Examples Debug
+    nightly_submit Examples Debug
+    ##
+    nightly_memcheck Examples Debug
+    nightly_submit Examples Debug
+    
+    # end
+    date
+    df -k
+fi
