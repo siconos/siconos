@@ -27,7 +27,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
   SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
   # the RPATH to be used when installing
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
   # don't add the automatically determined parts of the RPATH
   # which point to directories outside the build tree to the install RPATH
