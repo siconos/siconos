@@ -235,7 +235,7 @@ MACRO(SICONOS_PROJECT
   # man files
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
     CONFIGURE_FILE(man/siconos.1.in man/siconos.1)
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION man/man1)
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
 
   # scripts
