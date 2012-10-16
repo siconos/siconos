@@ -374,14 +374,14 @@ swig_setup() {
 
 cmake_setup() {
     case `cmake --version` in 
-        *2.8.4*);;
+        *2.8.9*);;
         *) 
             sudo rm -rf `which cmake`
             sudo rm -rf `which cpack`
             sudo rm -rf `which ctest`
-            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.4-rc1.tar.gz
-            cd cmake-2.8.4-rc1; { 
-                ./bootstrap -j2
+            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.9.tar.gz
+            cd cmake-2.8.9; { 
+                ./bootstrap
                 make -j2
                 sudo make install
             };;
@@ -397,7 +397,10 @@ esac
 
 if [ release = "true" ]; then
 
-# Stable 
+# force cmake to be correct
+    cmake_setup
+
+# Stable version
     setup_3_5
 
     configure_3_5 Numerics Release
