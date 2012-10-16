@@ -1578,20 +1578,20 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
      return MCP;
    }
 
-  int set_computeFmcp(PyObject *o)
+  void set_computeFmcp(PyObject *o)
   {
     set_my_callback_Fmcp(o);
     $self->computeFmcp = (my_call_to_callback_Fmcp);
   }
   
-  int set_computeNablaFmcp(PyObject *o)
+  void set_computeNablaFmcp(PyObject *o)
   {
 
     set_my_callback_NablaFmcp(o);
     $self->computeNablaFmcp = (my_call_to_callback_NablaFmcp);
   }
   
-  int test_call_to_callback()
+  void test_call_to_callback()
   {
     printf("I am in test_call_to_callback()\n");
     
