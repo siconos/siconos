@@ -360,6 +360,8 @@ nightly_submit() {
 
 swig_setup() { 
     rm -rf `which swig`
+    rm -rf `which swig2.0`
+    rm -rf `which swig1.3`
     
     tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
 
