@@ -113,7 +113,7 @@ setup_3_5() {
     mkdir -p $PIPOL_WDIR/siconos/branches/3.5.0
     cd $PIPOL_WDIR/siconos/branches/3.5.0; { 
         for mod in Numerics Kernel Examples Front-End; do 
-            svn co -r3530 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+            svn co -r3534 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
         done
     }; cd $current_dir
 }
@@ -359,9 +359,9 @@ nightly_submit() {
 }
 
 swig_setup() { 
-    rm -rf `which swig`
-    rm -rf `which swig2.0`
-    rm -rf `which swig1.3`
+    sudo rm -rf `which swig`
+    sudo rm -rf `which swig2.0`
+    sudo rm -rf `which swig1.3`
     
     tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
 
@@ -443,7 +443,8 @@ if [ $release = "true" ]; then
     pack_3_5 Front-End Release
     save_packed_1 Front-End Release
 else
-
+# force cmake version
+    cmake_setup
     # trunk tests
     setup_trunk
     configure_trunk Numerics Release
