@@ -184,8 +184,6 @@ IF(WITH_TESTING)
   # the main test driver
   SET(TEST_MAIN model/test/TestMain.cpp)
 
-  # used in ldwrap.c.in
-  SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
   # For Windows
   SET(PATH_FOR_PLUGIN
    ".\;${CMAKE_CURRENT_BINARY_DIR}/plugin\;${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
