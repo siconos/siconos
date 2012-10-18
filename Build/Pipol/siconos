@@ -14,8 +14,8 @@
 
 #PIPOL mac 03:00
 
-#release = false
-release = true
+#release=false
+release=true
 
 set -x
 #set -e
@@ -395,7 +395,7 @@ esac
 
 #sudo rm -f /usr/local/bin/ctest
 
-if [ release = "true" ]; then
+if [ $release = "true" ]; then
 
 # force cmake to be correct
     cmake_setup
