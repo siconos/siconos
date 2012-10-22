@@ -16,33 +16,21 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
-
-
-
-int main(void)
+#ifndef GLOBALFRICTIONCONTACT_TEST_FUNCTION_H
+#define GLOBALFRICTIONCONTACT_TEST_FUNCTION_H
+#include "SolverOptions.h"
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
 {
-  int info = 0 ;
+#endif
 
-  char filename[50] = "./data/problem-checkTwoRods1.dat";
-
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR);
-
-  info = primalFrictionContact_test_function(finput, options);
-  deleteSolverOptions(options);
-  free(options);
-  fclose(finput);
-  printf("End of test on %s\n", filename);
+  int globalFrictionContact_test_function(FILE * f, SolverOptions *);
 
 
-  return info;
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+
+#endif
+
+

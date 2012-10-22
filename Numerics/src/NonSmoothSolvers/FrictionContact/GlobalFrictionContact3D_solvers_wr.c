@@ -25,7 +25,7 @@
 
 #include "LA.h"
 #include "NumericsOptions.h"
-#include "PrimalFrictionContact3D_Solvers.h"
+#include "GlobalFrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "cond.h"
@@ -33,13 +33,13 @@
 #include <string.h>
 //#define TEST_COND
 //#define OUTPUT_DEBUG
-extern int *Primal_ipiv;
-extern int  Primal_MisInverse;
-extern int  Primal_MisLU;
+extern int *Global_ipiv;
+extern int  Global_MisInverse;
+extern int  Global_MisLU;
 
 /* Global Variable for the reformulation of the problem */
 
-int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
+int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   int info = -1;
 
@@ -70,7 +70,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     int nm = n * m;
     int infoDGETRF = 0;
     int infoDGETRS = 0;
-    Primal_ipiv = (int *)malloc(n * sizeof(int));
+    Global_ipiv = (int *)malloc(n * sizeof(int));
 
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
@@ -78,14 +78,14 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
-    Primal_MisLU = 0; /*  Assume that M is not already LU */
-    DGETRF(n, n, M->matrix0, n, Primal_ipiv, &infoDGETRF);
+    Global_MisLU = 0; /*  Assume that M is not already LU */
+    DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-    Primal_MisLU = 1;
+    Global_MisLU = 1;
 #ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, m,  M->matrix0, n, Primal_ipiv, Htmp, n, infoDGETRS);
+    DGETRS(CLA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, infoDGETRS);
 #else
-    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Primal_ipiv, Htmp, n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, &infoDGETRS);
 #endif
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
@@ -121,11 +121,11 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
     // compute H^T M^(-1) q + b
 
-    assert(Primal_MisLU);
+    assert(Global_MisLU);
 #ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, qtmp , n, infoDGETRS);
+    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, infoDGETRS);
 #else
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, qtmp , n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, &infoDGETRS);
 #endif
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
@@ -148,8 +148,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     int m = H->size1;
 
     int infoInverseSBM = 0;
-    assert(!Primal_ipiv);
-    Primal_ipiv = (int *)malloc(n * sizeof(int));
+    assert(!Global_ipiv);
+    Global_ipiv = (int *)malloc(n * sizeof(int));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
@@ -168,7 +168,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
     infoInverseSBM = inverseDiagSBM(M->matrix1);
     assert(!infoInverseSBM);
-    Primal_MisInverse = 1;
+    Global_MisInverse = 1;
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataMinv.sci", "w");
     printInFileForScilab(M, fileout);
@@ -312,7 +312,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
   return info;
 }
-int computeGlobalVelocity(PrimalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
+int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
 {
   int info = -1;
 
@@ -329,18 +329,18 @@ int computeGlobalVelocity(PrimalFrictionContactProblem* problem, double * reacti
     /* globalVelocity <-  H*reaction + globalVelocity*/
     DGEMV(LA_NOTRANS, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
-    assert(Primal_ipiv);
-    assert(Primal_MisLU);
+    assert(Global_ipiv);
+    assert(Global_MisLU);
     int infoDGETRS = 0;
 #ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,   problem->M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+    DGETRS(CLA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, infoDGETRS);
 #else
-    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Primal_ipiv, globalVelocity , n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
 #endif
     assert(!infoDGETRS);
 
-    free(Primal_ipiv);
-    Primal_ipiv = NULL;
+    free(Global_ipiv);
+    Global_ipiv = NULL;
 
 
   }
@@ -361,14 +361,14 @@ int computeGlobalVelocity(PrimalFrictionContactProblem* problem, double * reacti
 
 
     /*      inverseDiagSBM(M->matrix1); We assume that M->matrix1 is already inverse*/
-    assert(Primal_MisInverse);
+    assert(Global_MisInverse);
 
     double beta2 = 0.0;
     prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
     free(qtmp);
-    free(Primal_ipiv);
-    Primal_ipiv = NULL;
+    free(Global_ipiv);
+    Global_ipiv = NULL;
   }
 
   return info;
@@ -399,7 +399,7 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
 
 
 
-void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
@@ -414,7 +414,7 @@ void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContactProblem* problem, dou
 
 
 }
-int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -423,7 +423,7 @@ int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
     printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGS_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGS_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -441,7 +441,7 @@ int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
 
 
 
-void  primalFrictionContact3D_globalAlartCurnier_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_globalAlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
@@ -475,7 +475,7 @@ void  primalFrictionContact3D_globalAlartCurnier_wr(PrimalFrictionContactProblem
 
 
 }
-int primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -484,7 +484,7 @@ int primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(Solver
     printf("Set the Default SolverOptions for the GLOBALAC_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_GLOBALAC_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -500,7 +500,7 @@ int primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(Solver
   return 0;
 }
 
-void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
@@ -529,7 +529,7 @@ void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* pro
   freeLocalProblem(localproblem);
 
 }
-int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -540,7 +540,7 @@ int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptio
     printf("Set the Default SolverOptions for the NSGSV_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -557,7 +557,7 @@ int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptio
 
 }
 
-void  primalFrictionContact3D_proximal_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
@@ -572,7 +572,7 @@ void  primalFrictionContact3D_proximal_wr(PrimalFrictionContactProblem* problem,
 
 
 }
-int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -581,7 +581,7 @@ int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* o
     printf("Set the Default SolverOptions for the PROX_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_PROX_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_PROX_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -596,7 +596,7 @@ int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* o
   frictionContact3D_proximal_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
-void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
@@ -611,7 +611,7 @@ void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContactProblem*
 
 
 }
-int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -620,7 +620,7 @@ int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOpti
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_DSFP_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_DSFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
@@ -636,7 +636,7 @@ int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOpti
   return 0;
 }
 
-void  primalFrictionContact3D_TrescaFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  globalFrictionContact3D_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
@@ -651,7 +651,7 @@ void  primalFrictionContact3D_TrescaFixedPoint_wr(PrimalFrictionContactProblem* 
 
 
 }
-int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+int globalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
 
 
@@ -660,7 +660,7 @@ int primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptio
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_PRIMAL_TFP_WR;
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_TFP_WR;
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

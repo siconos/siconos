@@ -74,7 +74,7 @@ extern "C"
   */
   int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-  /**  cpg (conjugated projected gradient) solver for primal contact problems with friction (2D)
+  /**  cpg (conjugated projected gradient) solver for global contact problems with friction (2D)
        \param[in]  problem the friction-contact problem
        \param[out] reaction vector
        \param[out] velocity vector
@@ -87,7 +87,7 @@ extern "C"
    \param  options SolverOptions * the pointer to the options to set
    */
   int frictionContact2D_cpg_setDefaultSolverOptions(SolverOptions* options);
-  /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.
+  /**  Non Linear Gauss Seidel solver for global contact problem with friction in 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction vector
        \param[out] velocity vector
@@ -101,7 +101,7 @@ extern "C"
   */
   int frictionContact2D_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
-  /**  latin solver for primal contact problem with friction in the 2D case.
+  /**  latin solver for global contact problem with friction in the 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction global vector
        \param[out] velocity global vector
@@ -116,7 +116,7 @@ extern "C"
   */
   int frictionContact2D_latin_setDefaultSolverOptions(SolverOptions* options);
 
-  /** FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
+  /** FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.\n
    *
    *
    * \param[in] xi  the intermediate iterate which goes to be projected (projc1).
@@ -131,7 +131,7 @@ extern "C"
   void FrictionContact2D_projc(double xi[], int *n, int statusi[], double p[], double fric[], double *reaction, int *status);
 
   /** FrictionContact2D_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
-   *              for primal contact problem with friction.\n
+   *              for global contact problem with friction.\n
    *
    *
    * \param[in] etat  parameter which represents the status vector.

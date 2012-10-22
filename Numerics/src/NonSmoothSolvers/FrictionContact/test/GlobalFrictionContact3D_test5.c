@@ -16,21 +16,34 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
-#define PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
-#include "SolverOptions.h"
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "globalFrictionContact_test_function.h"
+
+
+
+int main(void)
 {
-#endif
+  int info = 0 ;
 
-  int primalFrictionContact_test_function(FILE * f, SolverOptions *);
+  char filename[50] = "./data/Example_GlobalFrictionContact.dat";
+
+  printf("Test on %s\n", filename);
+
+  FILE * finput  =  fopen(filename, "r");
+
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
+
+  globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_DSFP_WR);
 
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+  info = globalFrictionContact_test_function(finput, options);
+  deleteSolverOptions(options);
+  free(options);
+  fclose(finput);
+  printf("End of test on %s\n", filename);
+
+
+  return info;
 }
-#endif
-
-#endif
-
-

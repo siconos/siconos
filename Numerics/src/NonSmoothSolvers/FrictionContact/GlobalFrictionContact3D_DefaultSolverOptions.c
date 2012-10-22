@@ -23,55 +23,55 @@
 #include <float.h>
 #include "LA.h"
 #include "NumericsOptions.h"
-#include "PrimalFrictionContact3D_Solvers.h"
+#include "GlobalFrictionContact3D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
 
-int primalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
+int globalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   int info = -1;
   switch (solverId)
   {
-  case SICONOS_FRICTION_3D_PRIMAL_NSGS:
+  case SICONOS_FRICTION_3D_GLOBAL_NSGS:
   {
     info =    frictionContact3D_nsgs_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_FRICTION_3D_PRIMAL_NSGS;
+    options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGS;
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_GLOBALAC_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_GLOBALAC_WR:
   {
-    info =    primalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_NSGS_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_NSGS_WR:
   {
-    info =    primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_NSGSV_WR:
   {
-    info =    primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_PROX_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_PROX_WR:
   {
-    info =    primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_proximal_wr_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_DSFP_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_DSFP_WR:
   {
-    info =    primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_PRIMAL_TFP_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_TFP_WR:
   {
-    info =    primalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
+    info =    globalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
   default:
   {
-    numericsError("primalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");
+    numericsError("globalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

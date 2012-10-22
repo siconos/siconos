@@ -450,25 +450,25 @@ ENDIF(MUMPS_FOUND)
   NEW_TEST(FrictionContact2D_Problemtest41 FrictionContact2D_test41.c)
 
 
-  NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
-  NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)
-  NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
-  NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)
-  NEW_TEST(PFC3D_test5 PrimalFrictionContact3D_test5.c)
+  NEW_TEST(GFC3D_test1 GlobalFrictionContact3D_test1.c)
+  NEW_TEST(GFC3D_test2 GlobalFrictionContact3D_test2.c)
+  NEW_TEST(GFC3D_test3 GlobalFrictionContact3D_test3.c)
+  NEW_TEST(GFC3D_test4 GlobalFrictionContact3D_test4.c)
+  NEW_TEST(GFC3D_test5 GlobalFrictionContact3D_test5.c)
 
 
-  SET(PFC3D_test6_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(PFC3D_test6 PrimalFrictionContact3D_test6.c)
+  SET(GFC3D_test6_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(GFC3D_test6 GlobalFrictionContact3D_test6.c)
 
-  NEW_TEST(PFC3D_test7 PrimalFrictionContact3D_test7.c)
+  NEW_TEST(GFC3D_test7 GlobalFrictionContact3D_test7.c)
 
-  NEW_TEST(PFC3D_test10 PrimalFrictionContact3D_test10.c)
-  NEW_TEST(PFC3D_test11 PrimalFrictionContact3D_test11.c)
-  NEW_TEST(PFC3D_test12 PrimalFrictionContact3D_test12.c)
-  NEW_TEST(PFC3D_test13 PrimalFrictionContact3D_test13.c)
-  NEW_TEST(PFC3D_test14 PrimalFrictionContact3D_test14.c)
-  NEW_TEST(PFC3D_test14bis PrimalFrictionContact3D_test14bis.c)
-  NEW_TEST(PFC3D_test15 PrimalFrictionContact3D_test15.c)
+  NEW_TEST(GFC3D_test10 GlobalFrictionContact3D_test10.c)
+  NEW_TEST(GFC3D_test11 GlobalFrictionContact3D_test11.c)
+  NEW_TEST(GFC3D_test12 GlobalFrictionContact3D_test12.c)
+  NEW_TEST(GFC3D_test13 GlobalFrictionContact3D_test13.c)
+  NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
+  NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
+  NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
 
   
   ## Alart Curnier functions

@@ -19,16 +19,16 @@
 
 #include "LA.h"
 #include "NumericsOptions.h" // for global options
-#include "PrimalFrictionContactProblem.h"
-#include "PrimalFrictionContact3D_Solvers.h"
+#include "GlobalFrictionContactProblem.h"
+#include "GlobalFrictionContact3D_Solvers.h"
 #include "projectionOnCone.h"
 #include <math.h>
 #include <assert.h>
-extern int *Primal_ipiv;
-extern int  Primal_MisInverse;
-extern int  Primal_MisLU;
+extern int *Global_ipiv;
+extern int  Global_MisInverse;
+extern int  Global_MisLU;
 
-int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
+int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
@@ -46,8 +46,6 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
 
   double* qtmp = (double*)malloc(n * sizeof(double));
   double* globalVelocitytmp = (double*)malloc(n * sizeof(double));
-  for (unsigned int i = 0; i < n; i++)
-    globalVelocitytmp[i] = 0;
   DCOPY(n, q, 1, qtmp, 1);
 
   double alpha = 1.0;
@@ -57,7 +55,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
   if (M->storageType == 1)
   {
     beta = 0.0;
-    assert(Primal_MisInverse);
+    assert(Global_MisInverse);
     prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocitytmp);
 
   }
@@ -65,11 +63,11 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
   {
     int infoDGETRS = -1;
     DCOPY(n, qtmp, 1, globalVelocitytmp, 1);
-    assert(Primal_MisLU);
+    assert(Global_MisLU);
 #ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, infoDGETRS);
+    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, infoDGETRS);
 #else
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, &infoDGETRS);
 #endif
     assert(!infoDGETRS);
   }
@@ -119,7 +117,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem,
 
   if (*error > tolerance)
   {
-    /*       if (verbose > 0) printf(" Numerics - PrimalFrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    /*       if (verbose > 0) printf(" Numerics - GlobalFrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
     return 1;
   }
   else

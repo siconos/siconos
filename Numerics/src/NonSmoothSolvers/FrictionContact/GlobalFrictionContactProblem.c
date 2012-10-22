@@ -17,14 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include <stdlib.h>
-#include "PrimalFrictionContactProblem.h"
+#include "GlobalFrictionContactProblem.h"
 #include "misc.h"
 
-int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FILE* file)
+int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file)
 {
   if (! problem)
   {
-    fprintf(stderr, "Numerics, PrimalFrictionContactProblem printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
@@ -52,7 +52,7 @@ int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FI
   return 0;
 }
 
-int primalFrictionContact_newFromFile(PrimalFrictionContactProblem* problem, FILE* file)
+int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FILE* file)
 {
   int nc = 0, d = 0;
   int i;
@@ -87,7 +87,7 @@ int primalFrictionContact_newFromFile(PrimalFrictionContactProblem* problem, FIL
   return 0;
 }
 
-void freePrimalFrictionContact_problem(PrimalFrictionContactProblem* problem)
+void freeGlobalFrictionContact_problem(GlobalFrictionContactProblem* problem)
 {
 
   freeNumericsMatrix(problem->M);

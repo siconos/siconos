@@ -17,9 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "FrictionContact3D_projection.h"
-//#include "PrimalFrictionContact3D_projection.h"
-#include "PrimalFrictionContact3D_Solvers.h"
-#include "PrimalFrictionContact3D_compute_error.h"
+//#include "GlobalFrictionContact3D_projection.h"
+#include "GlobalFrictionContact3D_Solvers.h"
+#include "GlobalFrictionContact3D_compute_error.h"
 #include "projectionOnCone.h"
 #include "LA.h"
 #include "SparseBlockMatrix.h"
@@ -28,29 +28,29 @@
 #include <assert.h>
 #include <math.h>
 
-extern int *Primal_ipiv;
-extern int  Primal_MisInverse;
-extern int  Primal_MisLU;
+extern int *Global_ipiv;
+extern int  Global_MisInverse;
+extern int  Global_MisLU;
 
-void PrimalfrictionContact3D_projection_free(PrimalFrictionContactProblem* problem)
+void GlobalfrictionContact3D_projection_free(GlobalFrictionContactProblem* problem)
 {
   assert(problem->M);
   if (problem->M->storageType == 0)
   {
-    free(Primal_ipiv);
+    free(Global_ipiv);
   }
 }
 
 
-void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimalPtr* freeSolver, ComputeErrorPrimalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
+void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolverGlobalPtr* freeSolver, ComputeErrorGlobalPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
   /** Connect to local solver */
   /* Projection */
   if (iparam[4] == 0)
   {
     /*       *solve = &frictionContact3D_projectionOnCone_solve; */
-    *freeSolver = &PrimalfrictionContact3D_projection_free;
-    *computeError = (ComputeErrorPrimalPtr)&PrimalFrictionContact3D_compute_error;
+    *freeSolver = &GlobalfrictionContact3D_projection_free;
+    *computeError = (ComputeErrorGlobalPtr)&GlobalFrictionContact3D_compute_error;
     /*       frictionContact3D_projection_initialize(n,M,q,mu); */
   }
   else
@@ -61,7 +61,7 @@ void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimal
 }
 
 
-void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
+void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -82,17 +82,17 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  *info = checkTrivialCasePrimal(n, q, velocity, reaction, globalVelocity, options);
+  *info = checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
   if (*info == 0)
     return;
 
-  SolverPrimalPtr local_solver = NULL;
-  FreeSolverPrimalPtr freeSolver = NULL;
-  ComputeErrorPrimalPtr computeError = NULL;
+  SolverGlobalPtr local_solver = NULL;
+  FreeSolverGlobalPtr freeSolver = NULL;
+  ComputeErrorGlobalPtr computeError = NULL;
 
   /* Connect local solver */
-  initializePrimalLocalSolver(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
+  initializeGlobalLocalSolver(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -105,23 +105,23 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
   if (H->storageType != M->storageType)
   {
     //     if(verbose==1)
-    fprintf(stderr, "Numerics, PrimalFrictionContact3D_nsgs. H->storageType != M->storageType :This case is not taken into account.\n");
+    fprintf(stderr, "Numerics, GlobalFrictionContact3D_nsgs. H->storageType != M->storageType :This case is not taken into account.\n");
     exit(EXIT_FAILURE);
   }
   else if (M->storageType == 1)
   {
     inverseDiagSBM(M->matrix1);
-    Primal_MisInverse = 1;
+    Global_MisInverse = 1;
     transposeSBM(H->matrix1, Htrans);
   }
   else if (M->storageType == 0)
   {
     /*  Assume that M is not already LU */
     int infoDGETRF = -1;
-    Primal_ipiv = (int *)malloc(n * sizeof(int));
-    assert(!Primal_MisLU);
-    DGETRF(n, n, M->matrix0, n, Primal_ipiv, &infoDGETRF);
-    Primal_MisLU = 1;
+    Global_ipiv = (int *)malloc(n * sizeof(int));
+    assert(!Global_MisLU);
+    DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
+    Global_MisLU = 1;
     assert(!infoDGETRF);
   }
 
@@ -147,7 +147,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
     if (M->storageType == 1)
     {
       beta = 0.0;
-      assert(Primal_MisInverse);
+      assert(Global_MisInverse);
       /*  globalVelocity = M^-1 qtmp */
       prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocity);
     }
@@ -155,11 +155,11 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
     {
       int infoDGETRS = -1;
       DCOPY(n, qtmp, 1, globalVelocity, 1);
-      assert(Primal_MisLU);
+      assert(Global_MisLU);
 #ifdef USE_MKL
-      DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+      DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocity , n, infoDGETRS);
 #else
-      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, &infoDGETRS);
+      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
 #endif
       assert(!infoDGETRS);
     }
@@ -215,7 +215,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
   }
   free(Htrans);
   free(qtmp);
-  /*   free(Primal_ipiv); */
+  /*   free(Global_ipiv); */
   dparam[0] = tolerance;
   dparam[1] = error;
 

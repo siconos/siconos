@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
+#include "globalFrictionContact_test_function.h"
 
 
 
@@ -35,10 +35,10 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_NSGS_WR);
+  globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_NSGS_WR);
 
 
-  info = primalFrictionContact_test_function(finput, options);
+  info = globalFrictionContact_test_function(finput, options);
   deleteSolverOptions(options);
   free(options);
   fclose(finput);

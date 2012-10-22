@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef PRIMALFRICTIONCONTACTPROBLEM_H
-#define PRIMALFRICTIONCONTACTPROBLEM_H
+#ifndef GLOBALFRICTIONCONTACTPROBLEM_H
+#define GLOBALFRICTIONCONTACTPROBLEM_H
 
-/*! \page primalFcProblem Primal-Friction-contact problems (2 or 3-dimensional)
+/*! \page globalFcProblem Global-Friction-contact problems (2 or 3-dimensional)
  * \section pfcIntro Problem statement.
  *  Given
  * <ul>
@@ -29,14 +29,14 @@
  *   <li> a vector \f$ {b} \in {{\mathrm{I\!R}}}^{d\, n_c}\f$</li>
  *   <li> a vector of coefficients of friction \f$\mu \in{{\mathrm{I\!R}}}^{n_c}\f$</li>
  *</ul>
- * the (global or primal) frictional contact problem  is to find three vectors \f$v\in{{\mathrm{I\!R}}}^n\f$,
+ * the (global or global) frictional contact problem  is to find three vectors \f$v\in{{\mathrm{I\!R}}}^n\f$,
  * the (global) velocity \f$u\in{{\mathrm{I\!R}}}^{d\,n_c}\f$,
  * the relative local velocity and \f$r\in {{\mathrm{I\!R}}}^{d,n_c}\f$,
  * the contact forces denoted by \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
  *  M v =  q +  H r \\
- *   u = H^\top r + q \\
+ *   u = H^\top v + b \\
  *    \hat u = u +\left[
  *      \left[\begin{array}{c}
  *          \mu^\alpha \|u^\alpha_{T}\|\\
@@ -73,35 +73,35 @@
  * </ul>
  *
  * The problem is stored and given to the solver in Siconos/Numerics thanks to
- *  a C structure PrimalFrictionContactProblem .
+ *  a C structure GlobalFrictionContactProblem .
  *
  *
  * \section pfc3DSolversList Available solvers for Friction Contact 3D
- * Use the generic function primalFrictionContact3D_driver() to call one the the specific solvers listed below:
+ * Use the generic function globalFrictionContact3D_driver() to call one the the specific solvers listed below:
  * <ul>
- *  <li> primalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver </li>
+ *  <li> globalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver </li>
  * </ul>
- * (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
+ * (see the functions/solvers list in GlobalFrictionContact3D_Solvers.h)
  *
  * \section pfc3DParam Required and optional parameters
- * PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
+ * GlobalFrictionContact3D problems needs some specific parameters, given to the GlobalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
  *
  *
  */
 
-/*!\file PrimalFrictionContactProblem.h
+/*!\file GlobalFrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
   \author Vincent Acary.
 */
 
 #include "NumericsMatrix.h"
 
-/** \struct PrimalFrictionContactProblem PrimalFrictionContactProblem.h
+/** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
  * The structure that defines a Friction-Contact (3D or 2D)problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
  * \f{eqnarray*}{
  * \begin{cases}
  *  M v =  q +  H r \\
- *   u = H^\top r + q \\
+ *  u = H^\top v + b \\
  *    \hat u = u +\left[
  *      \left[\begin{array}{c}
  *          \mu^\alpha \|u^\alpha_{T}\|\\
@@ -134,17 +134,17 @@ typedef struct
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
-} PrimalFrictionContactProblem;
+} GlobalFrictionContactProblem;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-  int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FILE* file);
+  int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
-  int primalFrictionContact_newFromFile(PrimalFrictionContactProblem*  problem, FILE* file);
+  int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
-  void freePrimalFrictionContact_problem(PrimalFrictionContactProblem* problem);
+  void freeGlobalFrictionContact_problem(GlobalFrictionContactProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

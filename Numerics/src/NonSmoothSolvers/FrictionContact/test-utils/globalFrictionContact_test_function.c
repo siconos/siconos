@@ -19,19 +19,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
+#include "globalFrictionContact_test_function.h"
 
 
-int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
+int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  PrimalFrictionContactProblem* problem = (PrimalFrictionContactProblem *)malloc(sizeof(PrimalFrictionContactProblem));
+  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
 
-  info = primalFrictionContact_newFromFile(problem, f);
+  info = globalFrictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = primalFrictionContact_printInFile(problem, foutput);
+  info = globalFrictionContact_printInFile(problem, foutput);
 
 
   NumericsOptions global_options;
@@ -61,7 +61,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
   }
   else if (dim == 3)
   {
-    info = primalFrictionContact3D_driver(problem,
+    info = globalFrictionContact3D_driver(problem,
                                           reaction , velocity, globalvelocity,
                                           options, &global_options);
   }
@@ -89,7 +89,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
   free(globalvelocity);
   fclose(foutput);
 
-  freePrimalFrictionContact_problem(problem);
+  freeGlobalFrictionContact_problem(problem);
 
 
   return info;

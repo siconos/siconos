@@ -16,34 +16,34 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
 
+#ifndef GlobalFrictionContact3D_compute_error_H
+#define GlobalFrictionContact3D_compute_error_H
+#include "GlobalFrictionContactProblem.h"
+/*!\file FrictionContact3D_compute_error.h
+  \brief functions related to error computation for friction-contact problems
 
+  \author Vincent Acary, 26/05/2008
 
-int main(void)
+*/
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
 {
-  int info = 0 ;
+#endif
 
-  char filename[50] = "./data/Example_PrimalFrictionContact.dat";
+  /** Error computation for friction-contact 3D problem
+      \param problem the structure which defines the friction-contact problem
+      \param reaction
+      \param velocity
+      \param globalVelocity
+      \param tolerance value for error computation
+      \param[in,out] error value
+   */
+  int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
 
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  primalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PRIMAL_NSGSV_WR);
-
-
-  info = primalFrictionContact_test_function(finput, options);
-  deleteSolverOptions(options);
-  free(options);
-  fclose(finput);
-  printf("End of test on %s\n", filename);
-
-
-  return info;
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+
+#endif

@@ -40,7 +40,7 @@
 #include "MixedComplementarityProblem.h"
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
-#include "PrimalFrictionContact3D_Solvers.h"
+#include "GlobalFrictionContact3D_Solvers.h"
 #include "GenericMechanical_Solvers.h"
 
 #include "NonSmoothNewton.h"

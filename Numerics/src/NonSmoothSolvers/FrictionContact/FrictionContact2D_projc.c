@@ -18,7 +18,7 @@
 */
 /*!\file FrictionContact2D_projc.c
  *
- * FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
+ * FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.\n
  *
  * \author Sheherazade Nineb.
  *
