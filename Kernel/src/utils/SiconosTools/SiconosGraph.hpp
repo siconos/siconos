@@ -697,11 +697,10 @@ public:
             assert(!ag.is_edge(new_ve, ag.descriptor(bundle(*ied)),
                                bundle(vdx)));
 
-#ifndef NDEBUG
             typename AdjointG::EDescriptor aed =
               ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
                           bundle(vdx));
-#endif
+
             assert(ag.bundle(aed) == bundle(vdx));
           }
         }
