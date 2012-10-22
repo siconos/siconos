@@ -16,7 +16,7 @@ Numerics package proposes a set of non-smooth solvers dedicated to some specific
 \subpage MLCProblem \n\n
 \subpage NCProblem \n\n
 \subpage fcProblem \n\n
-\subpage primalFcProblem \n\n
+\subpage globalFcProblem \n\n
 \subpage RelayProblem \n\n
 \subpage QPSolvers\n\n
 
