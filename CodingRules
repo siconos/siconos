@@ -1,11 +1,29 @@
+# -*- org -*-
 
 * Names
- - We are using the CamelCase naming convention. In C++, the first letter is
- capitalized for class names, whereas it is not for method names. Private
- attributes begin with an underscore followed by a lower case letter.
- Underscores are forbidden in class and method names.
-- SWIG is used to generate Python bindings. It processes headers files to do
-  its magic. Therefore the parameter names in headers are not meaningless.
+
+ - We are using the CamelCas naming convention. In C++, the first
+   letter is capitalized for class names, whereas it is not for method
+   names. Private attributes begin with an underscore followed by a
+   lower case letter.  Underscores are forbidden in class and method
+   names.
+
+ - SWIG is used to generate Python bindings. It processes headers
+   files to do its magic. Therefore the parameter names in headers are
+   not meaningless.
+
+* code style c, c++ 
+
+ - cf astyle documentation. We use ansi style with
+   unpad parenthesis and 2 spaces for indentation
+
+   astyle --style=ansi -U -v -s2
+
+* code style python
+
+  we prefer pep8 style
+  use [[../Tools/emacs/siconos-dot-emacs.el]]
+
 
 * Pointers
  - We use a lot of shared_ptr (SP in Siconos) but make sure to not abuse them
