@@ -98,9 +98,16 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       ENDIF()
     ENDIF()
   ENDFOREACH(_L ${${PROJECT_NAME}_TARGET_LINK_LIBRARIES})
-  
+
+  FOREACH(_L ${TEST_LIBS})
+    TARGET_LINK_LIBRARIES(${_EXE} ${_L})
+  ENDFOREACH()
+  FOREACH(_D ${TEST_INCLUDE_DIR})
+    include_directories(${_D})
+  ENDFOREACH()
+
   IF(CPPUNIT_FOUND)
-    
+
     # each test in the test suite becomes a cmake test
     IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       ADD_CUSTOM_COMMAND(TARGET ${_EXE}
