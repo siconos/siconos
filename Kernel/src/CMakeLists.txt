@@ -133,7 +133,11 @@ ENDIF(NOT WITHOUT_ATLAS)
 COMPILE_WITH(GMP REQUIRED)
 
 IF(WITH_TESTING)
-  COMPILE_WITH(CppUnit REQUIRED)
+  # We don't use COMPILE_WITH since we don't want to link cppunit with the
+  # kernel library
+  find_package(CppUnit REQUIRED)
+  set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES})
+  set(TEST_INCLURE_DIR ${TEST_INCLURE_DIR} ${CPPUNIT_INCLUDE_DIR})
 ENDIF(WITH_TESTING)
 
 # contact detection
