@@ -24,10 +24,23 @@ ELSE(SiconosNumerics_LIBRARY_DIRECTORY)
 ENDIF(SiconosNumerics_LIBRARY_DIRECTORY)
 
 IF(SiconosNumerics_FOUND)
-  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS ${SiconosNumerics_FOUND} PATH)
   SET(SiconosNumerics_LIBRARIES ${SiconosNumerics_FOUND})
+  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS ${SiconosNumerics_FOUND} PATH)
   GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS_DIR ${SiconosNumerics_LIBRARY_DIRS} PATH)
-  SET(SiconosNumerics_INCLUDE_DIRS ${SiconosNumerics_LIBRARY_DIRS_DIR}/include/Siconos/Numerics)
+  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS_DIR_DIR ${SiconosNumerics_LIBRARY_DIRS_DIR} PATH)
+
+  FIND_PATH(SiconosNumerics_INCLUDE_DIRS SiconosNumerics.h 
+    HINTS ${SiconosNumerics_LIBRARY_DIRS_DIR} ${SiconosNumerics_LIBRARY_DIRS_DIR_DIR} 
+    ENV PATH
+    PATH_SUFFIXES Siconos/Numerics)
+  
+  IF(NOT SiconosNumerics_INCLUDE_DIRS)
+    IF(SiconosNumerics_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR
+        "Required Siconos Numerics headers not found. Please specify headers location in CMAKE_INCLUDE_PATH")
+    ENDIF(SiconosNumerics_FIND_REQUIRED)
+  ENDIF(NOT SiconosNumerics_INCLUDE_DIRS)
+
 ELSE(SiconosNumerics_FOUND)
   IF(SiconosNumerics_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
