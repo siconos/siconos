@@ -14,8 +14,8 @@
 
 #PIPOL mac 03:00
 
-#release=false
-release=true
+release=false
+#release=true
 
 set -x
 #set -e
