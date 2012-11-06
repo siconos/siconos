@@ -77,6 +77,12 @@ enum vertex_properties_t { vertex_properties };
 enum edge_properties_t { edge_properties };
 enum graph_properties_t { graph_properties };
 
+// We need those with Boost >= 1.51
+// vertex_bundle_t and edge_bundle_t are already defined in
+// boost/pending/property.hpp
+enum vertex_siconos_bundle_t { vertex_siconos_bundle };
+enum edge_siconos_bundle_t { edge_siconos_bundle };
+
 namespace boost
 {
 BOOST_INSTALL_PROPERTY(vertex, old_index);
@@ -84,6 +90,8 @@ BOOST_INSTALL_PROPERTY(edge, old_index);
 BOOST_INSTALL_PROPERTY(vertex, properties);
 BOOST_INSTALL_PROPERTY(edge, properties);
 BOOST_INSTALL_PROPERTY(graph, properties);
+BOOST_INSTALL_PROPERTY(vertex, siconos_bundle);
+BOOST_INSTALL_PROPERTY(edge, siconos_bundle);
 }
 
 
@@ -109,8 +117,9 @@ public:
   typedef boost::adjacency_list <
   boost::listS, boost::listS, boost::undirectedS,
         boost::property
-        < boost::vertex_bundle_t, V,
-        boost::property < boost::vertex_color_t ,
+        < vertex_siconos_bundle_t, V,
+        boost::property <
+        boost::vertex_color_t ,
         boost::default_color_type ,
         boost::property < boost::vertex_index_t,
         size_t,
@@ -121,7 +130,7 @@ public:
         VProperties
         > > > > > ,
         boost::property
-        < boost::edge_bundle_t, E,
+        < edge_siconos_bundle_t, E,
         boost::property <
         boost::edge_color_t ,
         boost::default_color_type ,
@@ -157,10 +166,10 @@ public:
   boost::graph_traits<graph_t>::adjacency_iterator AVIterator;
 
   typedef typename
-  boost::property_map<graph_t, boost::edge_bundle_t >::type EBundleAccess;
+  boost::property_map<graph_t, edge_siconos_bundle_t >::type EBundleAccess;
 
   typedef typename
-  boost::property_map<graph_t, boost::vertex_bundle_t >::type VBundleAccess;
+  boost::property_map<graph_t, vertex_siconos_bundle_t >::type VBundleAccess;
 
   typedef typename
   boost::property_map<graph_t, boost::edge_color_t >::type EColorAccess;
@@ -186,8 +195,9 @@ public:
   typedef typename
   boost::property_map<graph_t, vertex_properties_t >::type VPropertiesAccess;
 
-  typedef typename
-  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
+  // Need some Base, otherwise, we have a compile error with boost >= 1.51
+  //  typedef typename
+  //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
   typedef typename std::map<V, VDescriptor> VMap;
 
@@ -363,12 +373,12 @@ public:
 
   inline V& bundle(const VDescriptor& vd)
   {
-    return boost::get(boost::vertex_bundle, g)[vd];
+    return boost::get(vertex_siconos_bundle, g)[vd];
   };
 
   inline E& bundle(const EDescriptor& ed)
   {
-    return boost::get(boost::edge_bundle, g)[ed];
+    return boost::get(edge_siconos_bundle, g)[ed];
   };
 
   inline boost::default_color_type& color(const VDescriptor& vd)
