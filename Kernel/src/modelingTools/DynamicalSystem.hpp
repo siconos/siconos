@@ -150,7 +150,7 @@ public:
   /** List of indices used to save tmp work vectors
    * The last value is the size of the present list, so you HAVE to leave it at the end position.
    */
-  enum WorkNames {local_buffer, qtmp, sizeWorkV};
+  enum WorkNames {local_buffer, qtmp, acce_memory, acce_like, sizeWorkV};
 
 private:
   /** serialization hooks

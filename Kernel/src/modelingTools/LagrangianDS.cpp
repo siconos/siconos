@@ -344,6 +344,7 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 
 void LagrangianDS::initForces()
 {
+  cout << "initForces is called" << endl;
 
   _forces.reset(new SiconosVector(_ndof));
 

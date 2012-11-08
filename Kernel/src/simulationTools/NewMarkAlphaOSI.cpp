@@ -173,6 +173,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
       scal(-1.0, *K, *W, false);
     //
 #ifdef DEBUG_NEWMARK
+    cout.precision(15);
     cout << "Iteration matrix W: ";
     W->display();
 #endif

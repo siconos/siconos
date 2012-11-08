@@ -33,6 +33,7 @@
   REGISTER(MoreauProjectOnConstraintsOSI)         \
   REGISTER(MoreauCombinedProjectionOSI)           \
   REGISTER(Lsodar)                                \
+  REGISTER(NewMarkAlphaOSI)                       \
   REGISTER(D1MinusLinear)                         \
   REGISTER(SchatzmanPaoli)                        \
   REGISTER(ZeroOrderHold)                         \
