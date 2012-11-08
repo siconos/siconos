@@ -292,7 +292,6 @@ public:
    */
   virtual void updateState(const unsigned int level) = 0;
 
-
   /** print the data to the screen
    */
   virtual void display() = 0;

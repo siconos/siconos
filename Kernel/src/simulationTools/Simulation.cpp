@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "Simulation.hpp"
+#include "EventDriven.hpp"
 #include "SimulationXML.hpp"
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -30,6 +31,7 @@
 // One Step Integrators
 #include "Moreau.hpp"
 #include "Lsodar.hpp"
+#include "NewMarkAlphaOSI.hpp"
 #include "D1MinusLinear.hpp"
 #include "SchatzmanPaoli.hpp"
 #include "ZeroOrderHold.hpp"
@@ -241,7 +243,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   if (withOSI)
   {
     // === OneStepIntegrators initialization ===
-
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
     {
@@ -261,9 +262,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     }
   }
 
-
-
-  // === IndexSets building ===
   // This is the default
   _levelMinForInput = LEVELMAX;
   _levelMaxForInput = 0;
@@ -283,8 +281,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     // Initialize OneStepNSProblem: in derived classes specific functions.
     initOSNS();
   }
-
-
   // Process events at time _tinit. Useful to save values in memories
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
@@ -295,6 +291,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // Set Model current time (warning: current time of the model
   // corresponds to the time of the next event to be treated).
   model()->setCurrentTime(nextTime());
+
 
   // End of initialize:
 
@@ -765,7 +762,63 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
     _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
 
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
 
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
+
+    _interaction->setSteps(1);
+  };
+
+
+  void visit(const NewMarkAlphaOSI&)
+  {
+    unsigned int lowerLevelForOutput = LEVELMAX;
+    unsigned int upperLevelForOutput = 0;
+    unsigned int lowerLevelForInput = LEVELMAX;
+    unsigned int upperLevelForInput = 0;
+
+    Type::Siconos dsType = Type::value(*_ds);
+
+    /** there is only a test on the dstype and simulation since  we assume that
+     * we implicitely the nonsmooth law when a DS type is chosen
+     */
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    {
+      if (Type::value(*_parent) == Type::EventDriven)
+      {
+        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
+        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
+        {
+          lowerLevelForOutput = 0;
+          upperLevelForOutput = 2 ;
+          lowerLevelForInput = 1;
+          upperLevelForInput = 2;
+        }
+        else if (nslType ==  Type::NewtonImpactFrictionNSL)
+        {
+          lowerLevelForOutput = 0;
+          upperLevelForOutput = 4;
+          lowerLevelForInput = 1;
+          upperLevelForInput = 2;
+          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+        }
+        else
+        {
+          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
+        }
+      }
+      else
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
+    }
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
+
+    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
+    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
+    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
+    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
 
     _interaction->setLowerLevelForOutput(lowerLevelForOutput);
     _interaction->setUpperLevelForOutput(upperLevelForOutput);
@@ -775,6 +828,9 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setSteps(1);
   };
+
+
+
 
   void visit(const ZeroOrderHold&)
   {

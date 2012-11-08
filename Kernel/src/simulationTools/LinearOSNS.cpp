@@ -23,6 +23,7 @@
 #include "Model.hpp"
 #include "Moreau.hpp"
 #include "Lsodar.hpp"
+#include "NewMarkAlphaOSI.hpp"
 #include "ZeroOrderHold.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderLinearR.hpp"
@@ -185,17 +186,17 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     DS2 = DS1;
 
 
-    // #ifdef LINEAROSNS_DEBUG
-    //   cout<<"\nLinearOSNS::computeDiagonalInteractionBlock"<<endl;
-    //   std::cout << "levelMin()" << levelMin()<<std::endl;
-    //   std::cout << "indexSet :"<< indexSet << std::endl;
-    //   std::cout << "vd :"<< vd << std::endl;
-    //   indexSet->display();
-    //   std::cout << "DS1 :" << std::endl;
-    //   DS1->display();
-    //   std::cout << "DS2 :" << std::endl;
-    //   DS2->display();
-    // #endif
+    // IFDEF LINEAROSNS_DEBUG
+    //   COUT<<"\NLINEAROSNS::COMPUTEDIAGONALINTERACTIONBLOCK"<<ENDL;
+    //   STD::COUT << "LEVELMIN()" << LEVELMIN()<<STD::ENDL;
+    //   STD::COUT << "INDEXSET :"<< INDEXSET << STD::ENDL;
+    //   STD::COUT << "VD :"<< VD << STD::ENDL;
+    //   INDEXSET->DISPLAY();
+    //   STD::COUT << "DS1 :" << STD::ENDL;
+    //   DS1->DISPLAY();
+    //   STD::COUT << "DS2 :" << STD::ENDL;
+    //   DS2->DISPLAY();
+    // #ENDIF
 
 
     InteractionsGraph::OEIterator oei, oeiend;
@@ -236,7 +237,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
   // centralInteractionBlocks = M (mass matrices)
   MapOfDSMatrices centralInteractionBlocks;
-  getOSIMaps(inter , centralInteractionBlocks);
+  getOSIMaps(inter, centralInteractionBlocks);
 
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
@@ -262,7 +263,6 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
     endl = (ds == DS2);
     unsigned int sizeDS = ds->getDim();
-
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
@@ -275,6 +275,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
 
       inter->getRightInteractionBlockForDS(ds, rightInteractionBlock);
+
       SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
       OSI::TYPES  osiType = Osi->getType();
 
@@ -285,7 +286,6 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
           *rightInteractionBlock *= (std11::static_pointer_cast<Moreau> (Osi))->gamma();
         }
       }
-
 
       // for ZOH, we have a different formula ...
       if (osiType == OSI::ZOH && indexSet->properties(vd).forControl)
@@ -336,21 +336,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       // (inter1 == inter2)
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
-      //
-      //        cout<<"LinearOSNS : leftUBlock\n";
-      //        work->display();
       work->trans();
-      //        cout<<"LinearOSNS::computeInteractionBlock leftInteractionBlock"<<endl;
-      //        leftInteractionBlock->display();
       centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-
-
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       //*currentInteractionBlock *=h;
-      //        cout<<"LinearOSNS::computeInteractionBlock interactionBlock"<<endl;
-      //        currentInteractionBlock->display();
 #ifdef LINEAROSNS_DEBUG
       std::cout << "LinearOSNS::computeDiagonalInteractionBlock : DiagInteractionBlock" << std::endl;
       currentInteractionBlock->display();
@@ -559,12 +550,20 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
   if (osiType == OSI::MOREAU ||
       osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI ||
       osiType == OSI::LSODAR ||
+      osiType == OSI::NEWMARKALPHAOSI ||
       osiType == OSI::D1MINUSLINEAR ||
       osiType == OSI::SCHATZMANPAOLI ||
       osiType == OSI::ZOH)
   {
     Osi->computeFreeOutput(inter , this);
     setBlock(*inter->yp(), _q, sizeY , 0, pos);
+    //
+#ifdef LINEAROSNS_DEBUG
+    cout << "_q vector: ";
+    _q->display();
+#endif
+
+
   }
   else if (osiType == OSI::MOREAU2)
   {
@@ -644,6 +643,10 @@ void LinearOSNS::preCompute(double time)
     SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
     //    _M->fill(indexSet);
     _M->fill(indexSet, !_hasBeenUpdated);
+#ifdef LINEAROSNS_DEBUG
+    cout << "M matrix: ";
+    _M->display();
+#endif
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 
@@ -725,6 +728,10 @@ void LinearOSNS::postCompute()
     //setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
+#ifdef LINEAROSNS_DEBUG
+    cout << "Contact force: ";
+    lambda->display();
+#endif
   }
 
 }

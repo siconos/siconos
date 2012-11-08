@@ -49,14 +49,15 @@ private:
    */
   int _istate;
 
-  /** an epsilon to define the contraint g for Urs in IndexSet[1]
-  */
-  static double TOL_ED;
-
-  /** initialisation specific to EventDriven for OneStepNSProblem.
-  */
   void initOSNS();
 
+  /** Initialize OneStepIntergrators */
+
+  void initOSIs();
+protected:
+  /** an epsilon to define the contraint g for Urs in IndexSet[1]
+   */
+  static double TOL_ED;
   /** initialisation specific to EventDriven for Interactions.
    */
   void initializeInteraction(SP::Interaction inter);
@@ -68,7 +69,30 @@ private:
   // /** compute LevelMax */
   // void initLevelMax();
 
+  /** boolean variable to known whether Newton iterations converges or not */
+  bool _isNewtonConverge;
 
+  /** Default maximum number of Newton iteration*/
+  unsigned int _newtonMaxIteration;
+
+  /** Number of steps perfomed is the Newton Loop */
+  unsigned int _newtonNbSteps;
+
+  /** Maximum Residual for the Dynamical system */
+  double _newtonResiduDSMax;
+
+  /** Maximum Residual for the output of the relation */
+  double _newtonResiduYMax;
+
+  /** Tolerance to check Newton iteration convergence */
+  double _newtonTolerance;
+
+  /** Maximum number of iterations to localize events */
+
+  unsigned int _localizeEventMaxIter;
+
+  /**  number of OneStepNSProblems considered in the simulation */
+  unsigned int _numberOfOneStepNSproblems;
 public:
 
 
@@ -101,6 +125,9 @@ public:
   */
   ~EventDriven() {};
 
+  /** Overload Simulation::initialize */
+  void initialize(SP::Model, bool = true);
+
   /* type name because parent class needs it */
   inline std::string typeName()
   {
@@ -128,9 +155,86 @@ public:
   {
     return TOL_ED;
   }
+
+  /** To know if Newton Iteratio is convergent*/
+  bool isNewtonConverge()
+  {
+    return _isNewtonConverge;
+  };
+
+  /** To known the number of steps performed by the Newton algorithm */
+  unsigned int getNewtonNbSteps()
+  {
+    return _newtonNbSteps;
+  }
+
+  /** Set value to the maximum number of iterations
+   *\param unsigned int : maximum number of step
+   */
+  void setNewtonMaxIteration(unsigned int maxStep)
+  {
+    _newtonMaxIteration = maxStep;
+  };
+
+  /** To set maximum number of iterations to localize events
+   *\param unsigned int : maximum number of iterations
+   */
+  void setLocalizeEventsMaxIteration(unsigned int _maxNum)
+  {
+    _localizeEventMaxIter = _maxNum;
+  }
+
+  /** get the maximum number of Newton iteration
+   *  \return unsigned int
+   */
+  double newtonMaxIteration()
+  {
+    return _newtonMaxIteration;
+  };
+
+  /** get the maximum number of iterations to localize events
+   * \return unsigned int: maximum number of iterations
+   */
+  unsigned int LocalizeEventsMaxIteration()
+  {
+    return _localizeEventMaxIter;
+  }
+
+  /** accessor to _newtonResiduDSMax */
+  double newtonResiduDSMax()
+  {
+    return _newtonResiduDSMax;
+  };
+
+  /** accessor to _newtonResiduYMax */
+  double newtonResiduYMax()
+  {
+    return _newtonResiduYMax;
+  };
+
+  /** set the Default Newton tolerance
+   *  \param double: Tolerance
+   */
+  void setNewtonTolerance(double tol)
+  {
+    _newtonTolerance = tol;
+  };
+
+  /** get the Newton tolerance
+   *  \return double: Tolerance
+   */
+  double newtonTolerance()
+  {
+    return _newtonTolerance;
+  };
+
+  /** Redefine method insertIntegrator of the class Simulation */
+  void insertIntegrator(SP::OneStepIntegrator);
+
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *  \param unsigned int: the number of the set to be updated
    */
+
   void updateIndexSet(unsigned int);
 
   /** update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
@@ -155,6 +259,9 @@ public:
    */
   void computeJacobianfx(SP::OneStepIntegrator, integer*, doublereal*, doublereal*,  doublereal*);
 
+  /** compute the size of constraint function g(x,t,...) for osi */
+  virtual unsigned int computeSizeOfg();
+
   /** compute constraint function g(x,t,...) for osi.
    *  \param pointer to OneStepIntegrator.
    *  \param integer*, size of vector x
@@ -163,11 +270,15 @@ public:
    *  \param integer*, size of vector g (ie number of constraints)
    *  \param doublereal*, g (in-out parameter)
    */
-  void computeg(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
+  virtual void computeg(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
 
   /** update input for impact case (ie compute p[1])
   */
   void updateImpactState();
+
+  /** update state for smooth dynamic case (i.e. compute p[2] and update acceleration) */
+
+  void updateSmoothState();
 
   using Simulation::update;
 
@@ -191,6 +302,46 @@ public:
 
   /** visitors hook
   */
+
+  /** Methods for NewMarkAlphaOSI scheme */
+
+
+  /** compute maximum residu over all gap functions of Index2 contacts
+   * \return double: maximum residu for all gap functions
+   */
+  double computeResiduGaps();
+
+  /** prepare for Newton iterations for all OSIs
+   *\return maximum residu over all DSs
+  */
+  void prepareNewtonIteration();
+
+  /** Check convergence of Newton iteration
+   *\return bool: true if convergent, false otherwise
+   */
+  bool newtonCheckConvergence(double);
+
+  /** Predict the state of all Dynamical Systems before Newton iterations */
+  void predictionNewtonIteration();
+
+  /** Correct the state of all Dynamical Systems during Newton iterations */
+  void correctionNewtonIteration();
+
+  /** Newton iteration to get the state of all Dynamical Systems at the end of step
+   *\param double: tolerance to check convergence
+   *\param unsigned int: maximum number of steps
+   */
+  void newtonSolve(double, unsigned int);
+
+  /** Detect whether or not events occur during each integration step
+   *\return double, maximum of absolute values of constraint fonctions over all activated ot deactivated contacts
+   */
+  double detectEvents();
+
+  /** Localize time of the first event */
+  void LocalizeFirstEvent();
+
+
   ACCEPT_STD_VISITORS();
 
 };

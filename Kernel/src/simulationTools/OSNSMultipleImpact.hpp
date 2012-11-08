@@ -12,7 +12,9 @@
 using namespace std;
 using namespace RELATION;
 
-const double DEFAULT_TOL_IMPACT = 100 * MACHINE_PREC;
+const double DEFAULT_TOL_IMPACT = MACHINE_PREC;
+const double DEFAULT_TOL_VEL = MACHINE_PREC;
+const double DEFAULT_TOL_ENER = MACHINE_PREC;
 class OSNSMultipleImpact : public LinearOSNS
 {
 private:
@@ -101,16 +103,22 @@ private:
   bool IsNumberOfStepsEst;
   // Matrix on which the data during impact is saved
   SP::SiconosMatrix _DataMatrix;
-  // indicator to save the data
-  // YesSaveByMatrix = true ==> we save data by a matrix allocated before impact computation
-  // YesSaveByMatrix = false ==> we save data by writing in to a file.dat
-  bool YesSaveByMatrix;
   // Number of points to be save during impacts
   unsigned int SizeDataSave;
   // indicator on the termination of the multiple impact process
   // _IsImpactEnd = true: impact is terminated
   // _IsImpactEnd = false: otherwise
   bool _IsImpactEnd;
+  // Tolerance to define a negligeble value for a velocity grandeur
+  double _Tol_Vel;
+  // Tolerance to define a negligeable value for a potential energy grandeur
+  double _Tol_Ener;
+  // Epsilon to define a zero value for relative velocity in termination condition
+  double _ZeroVel_EndIm;
+  // Epsilon to define a zero value for potential energy in termination condition
+  double _ZeroEner_EndIm;
+  // we start to save data from Step_min_save to Step_min_save
+  unsigned int Step_min_save, Step_max_save;
 public:
   //Default constructor
   OSNSMultipleImpact();
@@ -156,12 +164,24 @@ public:
   void SetNstepSave(unsigned int var);
   // To set the maximal number of steps allowed for each computation
   void SetNstepMax(unsigned int var);
-  // To set the indicator YesSaveByMatrix
-  void SetYesSaveByMatrix(bool);
   // Set number of points to be saved during impact
   void SetSizeDataSave(unsigned int);
+  // Set tolerence to define whether or not a velocity is zero
+  void SetTolVel(double);
+  // Set tolerence to define whether or not a potential energy is zero
+  void SetTolEner(double);
+  // Set epsilon _ZeroVel_EndIm
+  void SetZeroVelEndImp(double);
+  // Set epsilon _ZeroEner_EndIm
+  void SetZeroEnerEndImp(double);
+  // Set the step number to start the data save and step number to stop save
+  void SetStepMinMaxSave(unsigned int, unsigned int);
   // To compare a double number with zero
   bool isZero(const double);
+  // To compare a velocity grandeur with zero
+  bool isVelNegative(const double);
+  // To compare an energy grandeur with zero
+  bool isEnerZero(const double);
   // To calculate the step size for the iterative procedure
   void ComputeStepSize();
   // To select the pramary contact
@@ -182,10 +202,7 @@ public:
   void PostComputeImpact();
   // Check if the multiple impacts process is terminated or not
   //bool IsMulImpactTerminate();
-  inline bool IsMulImpactTerminate()
-  {
-    return _IsImpactEnd;
-  }
+  bool IsMulImpactTerminate();
   // To allocate the memory
   void AllocateMemory();
   // To build the vector of stiffnesses and restitution coefficient at contacts
@@ -215,8 +232,6 @@ public:
   void initialize(SP::Simulation);
   // print the data to the screen
   void display() const;
-  // To write a SiconosVector into an ouput file
-  void WriteSiconosVector(const SiconosVector&);
   // To write a SiconosVector into a matrix
   // row and columns positions starting to write
   void WriteVectorIntoMatrix(const SiconosVector, const unsigned int, const unsigned int);

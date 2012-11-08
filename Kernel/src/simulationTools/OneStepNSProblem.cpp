@@ -25,6 +25,7 @@
 #include "Simulation.hpp"
 #include "Model.hpp"
 #include "Moreau.hpp"
+#include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "ZeroOrderHold.hpp"
@@ -605,11 +606,11 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     Osi = simulation()->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
     unsigned int itN = (*itDS)->number();
+    dsType = Type::value(**itDS);
     if (osiType == OSI::MOREAU
         || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
         || osiType == OSI::SCHATZMANPAOLI)
     {
-      dsType = Type::value(**itDS);
       if (dsType != Type::NewtonEulerDS)
         centralInteractionBlocks[itN] = (std11::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
       else
@@ -617,18 +618,32 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {
-      dsType = Type::value(**itDS);
       if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
       // get lu-factorized mass
       centralInteractionBlocks[itN] =
         (std11::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
-
+    }
+    else if (osiType == OSI::NEWMARKALPHAOSI)
+    {
+      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+      {
+        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
+      }
+      //
+      SP::OneStepNSProblems  allOSNS  = Osi->simulation()->oneStepNSProblems();
+      if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) // If LCP at acceleration level
+      {
+        centralInteractionBlocks[itN] = (std11::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
+      }
+      else // It LCP at position level
+      {
+        centralInteractionBlocks[itN] = (std11::static_pointer_cast<NewMarkAlphaOSI>(Osi))->W(*itDS);
+      }
     }
     else if (osiType == OSI::D1MINUSLINEAR)
     {
-      dsType = Type::value(**itDS);
       if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
 

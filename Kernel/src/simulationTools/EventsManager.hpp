@@ -282,8 +282,9 @@ public:
 
   /** add a new Event in the allEvents list and update nextEvent value
    * \param the time (double format) of occurence of the event
+   * \param indicator to update or not the next event (default value is true)
    */
-  void scheduleNonSmoothEvent(double);
+  void scheduleNonSmoothEvent(double, bool yes_update = true);
 
   /** remove an Event from the unProcessed events list
    */

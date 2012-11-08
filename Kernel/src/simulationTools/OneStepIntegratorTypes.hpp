@@ -46,7 +46,9 @@ enum TYPES
   /** */
   SCHATZMANPAOLI,
   /**  */
-  ZOH
+  ZOH,
+  /** */
+  NEWMARKALPHAOSI
 };
 
 }

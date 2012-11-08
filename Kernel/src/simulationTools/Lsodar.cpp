@@ -215,7 +215,8 @@ void Lsodar::initialize()
   _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
-  intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+  intData[1] = boost::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  //intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 
   // 3 - Itol, itask, iopt
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
@@ -464,7 +465,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
        */
 
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
-  if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+  if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
   {
     Xfree  = inter->dataFree();
     //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
@@ -509,7 +510,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == RheonomousR)
     {
-      if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+      if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
         RuntimeException::selfThrow("Lsodar::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
       }
@@ -524,7 +525,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == ScleronomousR)
     {
-      if (((*allOSNS)[SICONOS_OSNSP_ED_ACCELERATION]).get() == osnsp)
+      if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
         std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false); // y += NonLinearPart

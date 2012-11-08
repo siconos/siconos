@@ -67,6 +67,8 @@ void EventsManager::preUpdate()
   // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
   EventsContainer bckUp(rangeNew.first, rangeNew.second);
   _allEvents.erase(_allEvents.lower_bound(_currentEvent), _allEvents.upper_bound(_currentEvent));
+
+
   for (EventsContainerIterator it = bckUp.begin(); it != bckUp.end() ; ++it)
   {
     (*it)->process(simulation());
@@ -217,7 +219,7 @@ void EventsManager::update()
 
 // Creates (if required) and update the non smooth event of the set
 // Useful during simulation when a new event is detected.
-void EventsManager::scheduleNonSmoothEvent(double time)
+void EventsManager::scheduleNonSmoothEvent(double time, bool yes_update)
 {
   if (!_ENonSmooth)
   {
@@ -231,7 +233,8 @@ void EventsManager::scheduleNonSmoothEvent(double time)
   }
   _allEvents.insert(_ENonSmooth);
   _hasNS = true;
-  update();
+  if (yes_update) // if we need update the the next event
+    update();
 }
 
 
@@ -264,9 +267,12 @@ void EventsManager::processEvents()
 void EventsManager::OptimizedProcessEvents()
 {
   // ==== Valid only when no Non Smooth event occurs and without control manager ====
-
   _nextEvent->process(simulation());
-  simulation()->updateIndexSets();
+  // // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme,
+  // if(Type::value(*simulation())== Type::TimeStepping)
+  //   {
+  //     simulation()->updateIndexSets();
+  //   }
   _currentEvent->setTime(_nextEvent->getDoubleTimeOfEvent());
   simulation()->timeDiscretisation()->increment();
   _ETD->setTime(simulation()->getTkp1());

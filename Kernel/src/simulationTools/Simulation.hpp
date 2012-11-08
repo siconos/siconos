@@ -159,8 +159,6 @@ protected:
    * initialized */
   bool _levelsAreComputed;
 
-
-
   /**Output file for stats*/
   std::ofstream statOut;
 
@@ -364,7 +362,7 @@ public:
   /** insert an Integrator into the simulation list of integrators
    *  \param a smart pointer to a OneStepIntegrator
    */
-  void insertIntegrator(SP::OneStepIntegrator);
+  virtual void insertIntegrator(SP::OneStepIntegrator);
 
   /** register a DS and its OSI into the osiMap.
       \param a pointer to a DynamicalSystem.
@@ -538,7 +536,7 @@ public:
       \param the model, which will own the Simulation
       \param optional flag for partial initialisation
   */
-  void initialize(SP::Model, bool = true);
+  virtual void initialize(SP::Model, bool = true);
 
   /** Set OSI (DS) non-smooth part to zero.
    */
