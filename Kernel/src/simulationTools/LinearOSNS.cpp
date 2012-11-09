@@ -40,7 +40,10 @@
 
 using namespace std;
 using namespace RELATION;
-#define LINEAROSNS_DEBUG
+
+//#define LINEAROSNS_DEBUG
+
+
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
 {
 }
