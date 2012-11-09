@@ -54,6 +54,9 @@ private:
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
 
+  /* default constructor */
+  QP() {};
+
 public:
 
   /** xml constructor

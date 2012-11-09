@@ -110,8 +110,7 @@ TYPEDEF_SPTR(FMatrix)
 /* relations pool */
 typedef std::pair<double, double> CircleCircleRDeclared;
 typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std11::tuple<double, double, double, double, double, double, double>
-DiskPlanRDeclared;
+typedef std11::array<double, 6> DiskPlanRDeclared;
 
 
 typedef std::map<CircleCircleRDeclared, SP::CircularR>

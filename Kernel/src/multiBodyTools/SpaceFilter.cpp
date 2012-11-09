@@ -944,13 +944,12 @@ bool operator ==(std::pair<double, double> const& a,
 
 bool operator ==(DiskPlanRDeclared const& a, DiskPlanRDeclared const& b)
 {
-  return ((std11::get<0>(a) == std11::get<0>(b) &&
-           std11::get<1>(a) == std11::get<1>(b) &&
-           std11::get<2>(a) == std11::get<2>(b) &&
-           std11::get<3>(a) == std11::get<3>(b) &&
-           std11::get<4>(a) == std11::get<4>(b) &&
-           std11::get<5>(a) == std11::get<5>(b) &&
-           std11::get<6>(a) == std11::get<6>(b)));
+  return ((a[0] == b[0] &&
+           a[1] == b[1] &&
+           a[2] == b[2] &&
+           a[3] == b[3] &&
+           a[4] == b[4] &&
+           a[5] == b[5]));
 }
 
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
