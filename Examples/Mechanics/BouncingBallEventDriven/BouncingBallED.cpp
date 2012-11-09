@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     SP::EventDriven s(new EventDriven(t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
-    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
+    s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
 
     // =========================== End of model definition ===========================
 

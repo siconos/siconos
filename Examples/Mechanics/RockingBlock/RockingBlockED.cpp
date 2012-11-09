@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     SP::Simulation EDscheme(new EventDriven(TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
-    EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
+    EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     // bool check1 = EDscheme->hasOneStepNSProblem(impact);
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
