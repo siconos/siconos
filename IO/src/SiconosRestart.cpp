@@ -34,7 +34,7 @@ namespace Siconos
 
 /** save Siconos model into a file
  *  \param model
- *  \param filename with extension : .xml, .dat
+ *  \param filename with extension : .xml, .bin
  */
 void save(SP::Model model, std::string filename)
 {

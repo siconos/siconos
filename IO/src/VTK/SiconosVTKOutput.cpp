@@ -1,51 +1,65 @@
 #include "SiconosVTKOutput.hpp"
-#include <vtkSphereSource.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 
 #include <SphereNEDS.hpp>
 
+
 struct SiconosVTKOutput::_DataSetMaker : public SiconosVisitor
 {
   SiconosVTKOutput& parent;
+  vtkSmartPointer<vtkStringArray> shape_info;
+  vtkSmartPointer<vtkDoubleArray> attributes;
+  vtkSmartPointer<vtkDoubleArray> translation;
+  vtkSmartPointer<vtkDoubleArray> orientation;
 
-  _DataSetMaker(SiconosVTKOutput& p) : parent(p) {};
+  _DataSetMaker(SiconosVTKOutput& p) : parent(p)
+  {
+    shape = vtkSmartPointer<vtkStringArray>::New();
+    shape->SetName('shape');
+    attributes = vtkSmartPointer<vtkDoubleArray>::New();
+    attributes->SetName('attributes');
+    attributes->SetNumberOfComponents(3);
+    translation = vtkSmartPointer<vtkDoubleArray>::New();
+    translation->SetName('translation');
+    translation->SetNumberOfComponents(3);
+    orientation = vtkSmartPointer<vtkDoubleArray>::New();
+    orientation->SetName('orientation');
+    orientation->SetNumberOfComponents(4);
+  };
 
   void visit(const SphereNEDS& sphere)
   {
-    vtkSmartPointer<vtkSphereSource> vtksphere =
-      vtkSmartPointer<vtkSphereSource>::New();
 
-    parent._sources.push_back(vtksphere);
+    shape_info->InsertNextValue('S');
+    attributes->InsertNextTuple3(sphere->radius(), 0., 0.);
 
-    vtkSmartPointer<vtkPolyDataMapper> vtkspheremapper =
-      vtkSmartPointer<vtkPolyDataMapper>::New();
+    translation->InsertNextTuple3(sphere.q()->getValue(0),
+                                  sphere.q()->getValue(1),
+                                  sphere.q()->getValue(2));
 
-    vtkspheremapper->SetInputConnection(vtksphere->GetOutputPort());
+    orientation->InsertNextTuple4(sphere.q()->getValue(0),
+                                  sphere.q()->getValue(1),
+                                  sphere.q()->getValue(2),
+                                  sphere.q()->getValue(3),
+                                  sphere.q()->getValue(4));
 
-    parent._multiblock->SetBlock(sphere.number(),
-                                 vtkspheremapper->GetInput());
+
   }
 
-};
-
-struct SiconosVTKOutput::_DataSetUpdater : public SiconosVisitor
-{
-  SiconosVTKOutput& parent;
-
-  _DataSetUpdater(SiconosVTKOutput& p) : parent(p) {};
-
-  void visit(const SphereNEDS& sphere)
+  void setTime(double time)
   {
-    vtkSphereSource* vtksphere =
-      static_cast<vtkSphereSource*>(parent._sources[sphere.number()]);
+    vtkSmartPointer<vtkUnstructuredGrid> grid =
+      vtkSmartPointer<vtkUnstructuredGrid>::New();
 
-    vtksphere->SetCenter(sphere.q()->getValue(0),
-                         sphere.q()->getValue(1),
-                         sphere.q()->getValue(2));
+    grid->GetPointData()->AddArray(shape);
+    grid->GetPointData()->AddArray(attributes);
+    grid->GetPointData()->AddArray(translation);
+    grid->GetPointData()->AddArray(rotation);
 
-    vtksphere->SetRadius(sphere.getRadius());
+    parent._temporal_data.SetTimeStep(time, grid);
   }
+
 };
 
 
@@ -57,6 +71,8 @@ SiconosVTKOutput::SiconosVTKOutput(SP::Model model, std::string filename) :
   _writer->SetFileName(filename.c_str());
 
   _DataSetMaker dataSetMaker(*this);
+  _DataSetUpdater dataSetUpdater = _DataSetUpdater(*this);
+
 
   SP::DynamicalSystemsGraph dsg = _model->
                                   nonSmoothDynamicalSystem()->topology()->dSG(0);
@@ -68,6 +84,8 @@ SiconosVTKOutput::SiconosVTKOutput(SP::Model model, std::string filename) :
     dsg->bundle(*vi)->accept(dataSetMaker);
   }
 
+  dataSetMaker.setTime(_model->currentTime());
+
 };
 
 SiconosVTKOutput::~SiconosVTKOutput()
@@ -77,29 +95,17 @@ SiconosVTKOutput::~SiconosVTKOutput()
     _multiblock->Delete();
   }
 
+  if (_temporal_data)
+  {
+    _temporal_data->Delete();
+  }
+
+
   if (_writer)
   {
     _writer->Delete();
   }
 };
-
-
-void SiconosVTKOutput::update()
-{
-
-  _DataSetUpdater dataSetUpdater = _DataSetUpdater(*this);
-
-  SP::DynamicalSystemsGraph dsg = _model->
-                                  nonSmoothDynamicalSystem()->topology()->dSG(0);
-
-  // parallel IO -> use dfs or bfs algorithm
-  DynamicalSystemsGraph::VIterator vi, viend;
-  for (tie(vi, viend) = dsg->vertices();
-       vi != viend; ++vi)
-  {
-    dsg->bundle(*vi)->accept(dataSetUpdater);
-  }
-}
 
 void SiconosVTKOutput::write()
 {

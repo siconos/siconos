@@ -4,6 +4,7 @@
 #define SICONOSVTKOUTPUT_HPP
 
 #include <vtkMultiBlockDataSet.h>
+#include <vtkTemporalDataSet.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkXMLMultiBlockDataWriter.h>
@@ -14,15 +15,13 @@ class SiconosVTKOutput : public SiconosOutput
 {
 protected:
 
-  std::vector<vtkAlgorithm*> _sources;
   vtkMultiBlockDataSet* _multiblock;
+  vtkTemporalDataSet* _temporal_data;
   vtkXMLMultiBlockDataWriter* _writer;
 
   struct _DataSetMaker;
-  struct _DataSetUpdater;
 
   friend class SiconosVTKOutput::_DataSetMaker;
-  friend class SiconosVTKOutput::_DataSetUpdater;
 
 public:
 
@@ -32,9 +31,7 @@ public:
 
   virtual ~SiconosVTKOutput();
 
-  virtual void write();
-
-  void update();
+  void write();
 
 };
 

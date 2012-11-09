@@ -30,7 +30,7 @@ namespace Siconos
 /** save a Siconos Model with the full simulation state into a
  *  file
  * \param model
-   * \param filename with extension : .xml, .dat (binary archive)
+   * \param filename with extension : .xml, .bin (binary archive)
    */
 void save(SP::Model model, std::string filename);
 
