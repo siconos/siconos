@@ -2,26 +2,56 @@
 # The following variables are set if gmp library is found.  If gmp is not
 # found, GMP_FOUND is set to false.
 #  GMP_FOUND        - True when the GMP include directory is found.
-#  GMP_INCLUDE_DIRS - the path to where the gmp include files are.
+#  GMP_INCLUDE_DIR - the path to where the gmp include files are.
 #  GMP_LIBRARY_DIRS - The path to where the gmp library files are.
 #  GMP_LIBRARIES    - The libraries to link against gmp
 
-# One may want to use a specific Numerics Library by setting
-# GMP_LIBRARY_DIRECTORY before FIND_PACKAGE(GMP)
+# Set GMP_DIR=where_fftw_is_installed if it's not in a "classic" place or if you want a specific version
+#
+# Note FP : see http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
+include(LibFindMacros)
 
-IF(GMP_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(GMP_FOUND gmp PATHS "${GMP_LIBRARY_DIRECTORY}")
-ELSE(GMP_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(GMP_FOUND gmp)
-ENDIF(GMP_LIBRARY_DIRECTORY)
+# Use pkg-config to get hints about paths
+libfind_pkg_check_modules(GMP_PKGCONF gmp)
 
-IF(GMP_FOUND)
-  GET_FILENAME_COMPONENT(GMP_LIBRARY_DIRS ${GMP_FOUND} PATH)
-  SET(GMP_LIBRARIES ${GMP_FOUND})
-  FIND_PATH(GMP_INCLUDE_DIRS NAMES gmp.h PATHS ${GMP_INCLUDE_DIR})
-ELSE(GMP_FOUND)
-  IF(GMP_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR
-      "Required gmp library not found. Please specify library location in GMP_LIBRARY_DIRECTORY")
-  ENDIF(GMP_FIND_REQUIRED)
-ENDIF(GMP_FOUND)
+# First search library and header in GMP_DIR, if given
+if(GMP_DIR)
+  find_library(GMP_LIBRARY 
+    NAMES gmp 
+    PATHS ${GMP_DIR}
+    PATH_SUFFIXES lib
+    NO_DEFAULT_PATH
+    )
+  find_path(GMP_INCLUDE_DIR
+    NAMES gmp.h
+    PATHS ${GMP_DIR}
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH)
+# else check env variables 
+else()
+  find_library(GMP_LIBRARY
+    NAMES gmp 
+    PATHS ENV DYLD_LIBRARY_PATH ENV LD_LIBRARY_PATH ${GMP_PKGCONF_LIBRARY_DIRS}
+    NO_DEFAULT_PATH
+    )
+  if(GMP_LIBRARY) 
+    get_filename_component(GMP_LIBRARY_DIR ${GMP_LIBRARY} PATH)
+  endif()
+  find_path(GMP_INCLUDE_DIR 
+    NAMES gmp.h 
+    PATHS ENV INCLUDE ${GMP_LIBRARY_DIR} ${GMP_PKGCONF_INCLUDE_DIRS}
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH
+    )
+endif()
+
+# Last try if nothing has been found before
+find_library(GMP_LIBRARY NAMES gmp)
+find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+
+# Set the required variables 
+set(GMP_PROCESS_INCLUDES GMP_INCLUDE_DIR)
+set(GMP_PROCESS_LIBS GMP_LIBRARY)
+# This will set properly ${GMP_INCLUDE_DIR} ${GMP_LIBRARY} ${GMP_INCLUDE_DIRS} ${GMP_LIBRARIES}
+libfind_process(GMP)
+
