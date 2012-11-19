@@ -54,6 +54,9 @@ private:
   /** Initialize OneStepIntergrators */
 
   void initOSIs();
+
+  /** Initialize the Rhs of the OSI */
+  void initOSIRhs();
 protected:
   /** an epsilon to define the contraint g for Urs in IndexSet[1]
    */

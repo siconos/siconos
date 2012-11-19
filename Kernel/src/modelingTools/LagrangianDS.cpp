@@ -78,6 +78,9 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
   // set allocation flags: true for required input, false for others
   _p.resize(3);
+  _p[0].reset(new SiconosVector(_ndof));
+  _p[1].reset(new SiconosVector(_ndof));
+  _p[2].reset(new SiconosVector(_ndof));
 }
 
 // -- Default constructor --
@@ -262,6 +265,9 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
 
   _p.resize(3);
+  _p[0].reset(new SiconosVector(_ndof));
+  _p[1].reset(new SiconosVector(_ndof));
+  _p[2].reset(new SiconosVector(_ndof));
 }
 
 // From a set of data - Mass loaded from a plugin
@@ -285,6 +291,9 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 
   _p.resize(3);
+  _p[0].reset(new SiconosVector(_ndof));
+  _p[1].reset(new SiconosVector(_ndof));
+  _p[2].reset(new SiconosVector(_ndof));
 }
 
 // Destructor
