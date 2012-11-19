@@ -102,6 +102,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1)
 EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1)
 {
   (*_allNSProblems).resize(nb);
+  _numberOfOneStepNSproblems = 0;
   _newtonTolerance = DEFAULT_TOL_ED;
   _newtonMaxIteration = 50;
   _newtonNbSteps = 0;
@@ -290,20 +291,6 @@ void EventDriven::initOSNS()
   assert(!_model.expired());
   assert(model()->nonSmoothDynamicalSystem());
   assert(model()->nonSmoothDynamicalSystem()->topology());
-  // === initialization for OneStepIntegrators ===
-  OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-  for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
-  {
-    //Check whether OSIs used are of the same type
-    if ((*itosi)->getType() != osiType)
-      RuntimeException::selfThrow("OSIs used must be of the same type");
-    for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-         itds != (*itosi)->dynamicalSystems()->end(); ++itds)
-    {
-      // Initialize right-hand side
-      (*itds)->initRhs(model()->t0());
-    }
-  }
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   InteractionsGraph::VIterator ui, uiend;
@@ -324,6 +311,7 @@ void EventDriven::initOSNS()
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem built.
   {
+    OSI::TYPES  osiType = (*_allOSI->begin())->getType();
     if (osiType == OSI::LSODAR) //EventDriven associated with Lsodar OSI
     {
       // === OneStepNSProblem initialization. === First check that
@@ -395,6 +383,23 @@ void EventDriven::initOSIs()
   }
 }
 
+void EventDriven::initOSIRhs()
+{
+  // === initialization for OneStepIntegrators ===
+  OSI::TYPES  osiType = (*_allOSI->begin())->getType();
+  for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
+  {
+    //Check whether OSIs used are of the same type
+    if ((*itosi)->getType() != osiType)
+      RuntimeException::selfThrow("OSIs used must be of the same type");
+    for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
+         itds != (*itosi)->dynamicalSystems()->end(); ++itds)
+    {
+      // Initialize right-hand side
+      (*itds)->initRhs(model()->t0());
+    }
+  }
+}
 
 void EventDriven::initialize(SP::Model m, bool withOSI)
 {
@@ -402,6 +407,7 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
   Simulation::initialize(m, withOSI);
   // Initialization for all OneStepIntegrators
   initOSIs();
+  initOSIRhs();
 }
 
 
