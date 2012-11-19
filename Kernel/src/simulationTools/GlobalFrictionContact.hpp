@@ -19,15 +19,15 @@
 /*! \file
   Primal Fricton-Contact Non-Smooth Problem
 */
-#ifndef PrimalFrictionContact_H
-#define PrimalFrictionContact_H
+#ifndef GlobalFrictionContact_H
+#define GlobalFrictionContact_H
 
 #include "LinearOSNS.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-/** Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics */
-typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
+/** Pointer to function of the type used for drivers for GlobalFrictionContact problems in Numerics */
+typedef int (*PFC_Driver)(GlobalFrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
@@ -64,22 +64,22 @@ typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, Solve
  *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
  *  the interactionBlock-matrices saved in the field interactionBlocks.\n
  *  Functions: initialize(), computeInteractionBlock(), preCompute()
- *  - solving of the PrimalFrictionContact problem: function compute(), used to call solvers from Numerics through \n
+ *  - solving of the GlobalFrictionContact problem: function compute(), used to call solvers from Numerics through \n
  * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
  *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
  */
-class PrimalFrictionContact : public LinearOSNS
+class GlobalFrictionContact : public LinearOSNS
 {
 private:
   /** default constructor */
-  PrimalFrictionContact() {};
+  GlobalFrictionContact() {};
 
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(PrimalFrictionContact);
+  ACCEPT_SERIALIZATION(GlobalFrictionContact);
 
 
   /** Type (dimension) of the contact problem (2D or 3D) */
@@ -88,19 +88,19 @@ protected:
   /** size of the local problem to solve */
   unsigned int _sizeLocalOutput;
 
-  /** contains the vector localVelocity of a PrimalFrictionContact system */
+  /** contains the vector localVelocity of a GlobalFrictionContact system */
   SP::SiconosVector _localVelocity;
 
-  /** contains the vector localReaction of a PrimalFrictionContact system */
+  /** contains the vector localReaction of a GlobalFrictionContact system */
   SP::SiconosVector _localReaction;
 
-  /** contains the vector localVelocity of a PrimalFrictionContact system */
+  /** contains the vector localVelocity of a GlobalFrictionContact system */
   SP::SiconosVector _tildeLocalVelocity;
 
-  /** contains the matrix M of a PrimalFrictionContact system */
+  /** contains the matrix M of a GlobalFrictionContact system */
   SP::OSNSMatrix H;
 
-  /** contains the vector q of a PrimalFrictionContact system */
+  /** contains the vector q of a GlobalFrictionContact system */
   SP::MuStorage _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
@@ -111,28 +111,28 @@ public:
   /** xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
-  PrimalFrictionContact(SP::OneStepNSProblemXML);
+  GlobalFrictionContact(SP::OneStepNSProblemXML);
 
   /** constructor from data
    *  \param int dim (2D or 3D) of the friction-contact problem
    *  \param string numericsSolvername
    *  \param string id of the problem (optional)
    */
-  PrimalFrictionContact(int dimPb,
+  GlobalFrictionContact(int dimPb,
                         const int newNumericsSolverId =
                           SICONOS_FRICTION_3D_PRIMAL_NSGS_WR ,
                         const std::string& newId = "unamed_primal_friction_contact_problem");
 
   /** destructor
    */
-  ~PrimalFrictionContact() {};
+  ~GlobalFrictionContact() {};
 
   // GETTERS/SETTERS
 
-  /** get the type of PrimalFrictionContact problem (2D or 3D)
+  /** get the type of GlobalFrictionContact problem (2D or 3D)
    *  \return an int (2 or 3)
    */
-  inline int getPrimalFrictionContactDim() const
+  inline int getGlobalFrictionContactDim() const
   {
     return _contactProblemDim;
   }
@@ -306,7 +306,7 @@ public:
 
   // --- Others functions ---
 
-  /** initialize the PrimalFrictionContact problem(compute topology ...)
+  /** initialize the GlobalFrictionContact problem(compute topology ...)
     \param the simulation, owner of this OSNSPB
     */
   void initialize(SP::Simulation);
@@ -376,7 +376,7 @@ public:
    *  \param OneStepNSProblem* : the one step problem which must be converted
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
-  static PrimalFrictionContact* convert(OneStepNSProblem* osnsp);
+  static GlobalFrictionContact* convert(OneStepNSProblem* osnsp);
 };
 
-#endif // PrimalFrictionContact_H
+#endif // GlobalFrictionContact_H

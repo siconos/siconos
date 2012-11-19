@@ -137,23 +137,26 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   int i = 0;
   int n = problem->size;
   double *q = problem->q;
-  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
-  if ((i == (n - 1)) && (q[n - 1] >= 0.))
-  {
-    /* TRIVIAL CASE : q >= 0
-     * z = 0 and w = q is solution of LCP(q,M)
-     */
-    for (int j = 0 ; j < n; j++)
-    {
-      z[j] = 0.0;
-      w[j] = q[j];
+/*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[0] == 1 )))*/
+    {      
+      while ((i < (n - 1)) && (q[i] >= 0.)) i++;
+      if ((i == (n - 1)) && (q[n - 1] >= 0.))
+      {
+        /* TRIVIAL CASE : q >= 0
+         * z = 0 and w = q is solution of LCP(q,M)
+         */
+        for (int j = 0 ; j < n; j++)
+        {
+          z[j] = 0.0;
+          w[j] = q[j];
+        }
+        info = 0;
+        options->dparam[1] = 0.0; /* Error */
+        if (verbose > 0)
+          printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+        return info;
+      }
     }
-    info = 0;
-    options->dparam[1] = 0.0; /* Error */
-    if (verbose > 0)
-      printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
-    return info;
-  }
 
   /*************************************************
    *  2 - Call specific solver (if no trivial sol.)

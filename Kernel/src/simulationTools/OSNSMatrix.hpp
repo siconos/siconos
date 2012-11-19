@@ -126,7 +126,7 @@ protected:
   /** map that links each DynamicalSystem with an int that gives the
    * position (in number of scalar elements, not DSBlocks) of the
    * corresponding DSBlock matrix in the full matrix (M in
-   * PrimalFrictionalCase case) - Warning: it depends on the
+   * GlobalFrictionalCase case) - Warning: it depends on the
    * considered index set (ie on which constraints are "active")
    */
   SP::DS_int DSBlocksPositions;

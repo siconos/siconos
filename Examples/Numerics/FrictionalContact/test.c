@@ -57,10 +57,10 @@
 
   - primalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
 
-  (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
+  (see the functions/solvers list in GlobalFrictionContact3D_Solvers.h)
 
   \section pfc3DParam Required and optional parameters
-  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
+  GlobalFrictionContact3D problems needs some specific parameters, given to the GlobalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
 
   \brief
 */
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
   int m = 3 * NC;
   int n = Ndof;
 
-  PrimalFrictionContactProblem NumericsProblem;
+  GlobalFrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
   NumericsProblem.mu = mu;

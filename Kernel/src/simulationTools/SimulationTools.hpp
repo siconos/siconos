@@ -27,7 +27,7 @@ Note that not all files from the current location are listed below, since some o
 #include "EventsManager.hpp"
 #include "EventFactory.hpp"
 #include "FrictionContact.hpp"
-//#include "PrimalFrictionContact.hpp"
+//#include "GlobalFrictionContact.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TimeSteppingD1Minus.hpp"

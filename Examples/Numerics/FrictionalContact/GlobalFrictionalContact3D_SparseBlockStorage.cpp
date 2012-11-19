@@ -53,14 +53,14 @@
 
 
   \section pfc3DSolversList Available solvers for Friction Contact 3D
-  Use the generic function primalFrictionContact3D_driver() to call one the the specific solvers listed below:
+  Use the generic function globalFrictionContact3D_driver() to call one the the specific solvers listed below:
 
-  - primalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
+  - globalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
 
-  (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
+  (see the functions/solvers list in GlobalFrictionContact3D_Solvers.h)
 
   \section pfc3DParam Required and optional parameters
-  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
+  GlobalFrictionContact3D problems needs some specific parameters, given to the GlobalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
 
   \brief
 */
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   int m = 3 * NC;
   int n = Ndof;
 
-  PrimalFrictionContactProblem numericsProblem;
+  GlobalFrictionContactProblem numericsProblem;
   numericsProblem.numberOfContacts = NC;
   numericsProblem.dimension = 3;
   numericsProblem.mu = mu;
@@ -199,8 +199,8 @@ int main(int argc, char* argv[])
   HBlockMatrix->index1_data =  hindex1_data;
   HBlockMatrix->index2_data =  hindex2_data;
 
-  FILE * foutput = fopen("Example_PrimalFrictionContact_SBM.dat", "w");
-  primalFrictionContact_printInFile(&numericsProblem,  foutput);
+  FILE * foutput = fopen("Example_GlobalFrictionContact_SBM.dat", "w");
+  globalFrictionContact_printInFile(&numericsProblem,  foutput);
   fclose(foutput);
 
 
@@ -229,13 +229,13 @@ int main(int argc, char* argv[])
   SolverOptions * numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions));
   //    char solvername[10]= "NSGS";
 
-  /*\warning Must be adpated  for future primalFrictionContact3D_setDefaultSolverOptions*/
-  primalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_PRIMAL_NSGS);
+  /*\warning Must be adpated  for future globalFrictionContact3D_setDefaultSolverOptions*/
+  globalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_GLOBAL_NSGS);
   numerics_solver_options->dparam[0] = 1e-14;
   numerics_solver_options->iparam[0] = 100000;
 
   //Driver call
-  info = primalFrictionContact3D_driver(&numericsProblem,
+  info = globalFrictionContact3D_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
                                         numerics_solver_options, &numerics_options);
 

@@ -89,7 +89,7 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
       else if (typeOSNS == QP_TAG)
         OSNSPBXMLSet.insert(SP::QPXML(new QPXML(OSNSPBNode)));
 
-      else if (typeOSNS == "FrictionContact" || typeOSNS == "PrimalFrictionContact")
+      else if (typeOSNS == "FrictionContact" || typeOSNS == "GlobalFrictionContact")
         OSNSPBXMLSet.insert(SP::FrictionContactXML(new FrictionContactXML(OSNSPBNode)));
 
       else // if (typeOSNS == RELAY_TAG) //--Not implemented for the moment

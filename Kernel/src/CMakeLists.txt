@@ -44,7 +44,7 @@ SET(SiconosKernel_DIRS
 # If you want to compile those, don't forget to uncomment the
 # include in SimulationTools.hpp
 SET(SiconosKernel_Unstable_SRCS 
-  simulationTools/PrimalFrictionContact.cpp
+  simulationTools/GlobalFrictionContact.cpp
   simulationTools/MLCP2.cpp
   )
 

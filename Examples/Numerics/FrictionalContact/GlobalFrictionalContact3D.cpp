@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
 
   int i = 0, k = 0;
 
-  PrimalFrictionContactProblem numericsProblem;
+  GlobalFrictionContactProblem numericsProblem;
   numericsProblem.numberOfContacts = NC;
   numericsProblem.dimension = 3;
   numericsProblem.mu = mu;
@@ -142,8 +142,8 @@ int main(int argc, char* argv[])
   HH->size1 = m;
 
 
-  /*     FILE * foutput = fopen("Example_PrimalFrictionContact.dat", "w"); */
-  /*     primalFrictionContact_printInFile(&numericsProblem,  foutput ); */
+  /*     FILE * foutput = fopen("Example_GlobalFrictionContact.dat", "w"); */
+  /*     globalFrictionContact_printInFile(&numericsProblem,  foutput ); */
   /*     fclose(foutput); */
 
 
@@ -171,13 +171,13 @@ int main(int argc, char* argv[])
 
   SolverOptions * numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions)) ;
   //char solvername[10]= "NSGS";
-  /*\warning Must be adpated  for future primalFrictionContact3D_setDefaultSolverOptions*/
-  primalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_PRIMAL_NSGS);
+  /*\warning Must be adpated  for future globalFrictionContact3D_setDefaultSolverOptions*/
+  globalFrictionContact3D_setDefaultSolverOptions(numerics_solver_options, SICONOS_FRICTION_3D_GLOBAL_NSGS);
   numerics_solver_options->dparam[0] = 1e-14;
   numerics_solver_options->iparam[0] = 100000;
   //Driver call
   i = 0;
-  info = primalFrictionContact3D_driver(&numericsProblem,
+  info = globalFrictionContact3D_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
                                         numerics_solver_options, &numerics_options);
 

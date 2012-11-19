@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "SiconosPointers.hpp"
-#include "PrimalFrictionContact.hpp"
+#include "GlobalFrictionContact.hpp"
 #include "FrictionContactXML.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"
@@ -31,15 +31,15 @@
 using namespace std;
 
 // xml constructor
-PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
-  LinearOSNS(osNsPbXml, "PrimalFrictionContact"), _contactProblemDim(3)
+GlobalFrictionContact::GlobalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
+  LinearOSNS(osNsPbXml, "GlobalFrictionContact"), _contactProblemDim(3)
 {
   SP::FrictionContactXML xmlFC = std11::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
   // Read dimension of the problem (required parameter)
   if (!xmlFC->hasProblemDim())
     RuntimeException::selfThrow(
-      "PrimalFrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
+      "GlobalFrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
 
   _contactProblemDim = xmlFC->getProblemDim();
 }
@@ -47,28 +47,28 @@ PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 // Constructor from a set of data
 // Required input: simulation
 // Optional: newNumericsSolverName
-PrimalFrictionContact::PrimalFrictionContact(int dimPb,
+GlobalFrictionContact::GlobalFrictionContact(int dimPb,
     const int newNumericsSolverId,
     const string& newId):
-  LinearOSNS(newNumericsSolverId, "PrimalFrictionContact", newId), _contactProblemDim(dimPb)
+  LinearOSNS(newNumericsSolverId, "GlobalFrictionContact", newId), _contactProblemDim(dimPb)
 {}
 
-void PrimalFrictionContact::setLocalVelocity(const SiconosVector& newValue)
+void GlobalFrictionContact::setLocalVelocity(const SiconosVector& newValue)
 {
   assert(0);
 }
 
-void PrimalFrictionContact::setLocalReaction(const SiconosVector& newValue)
+void GlobalFrictionContact::setLocalReaction(const SiconosVector& newValue)
 {
   assert(0);
 }
 
-void PrimalFrictionContact::setTildeLocalVelocity(const SiconosVector& newValue)
+void GlobalFrictionContact::setTildeLocalVelocity(const SiconosVector& newValue)
 {
   assert(0);
 }
 
-void PrimalFrictionContact::initialize(SP::Simulation sim)
+void GlobalFrictionContact::initialize(SP::Simulation sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -151,14 +151,14 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
 
 }
 
-void PrimalFrictionContact::computeInteractionBlock(SP::Interaction inter1, SP::Interaction inter2)
+void GlobalFrictionContact::computeInteractionBlock(SP::Interaction inter1, SP::Interaction inter2)
 {
   // Computes matrix interactionBlocks[inter1][inter2] (and allocates memory if necessary) if inter1 and inter2 have commond DynamicalSystem.
   // How interactionBlocks are computed depends explicitely on the type of Relation of each Interaction.
 
 }
 
-void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
+void GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
 {
   // Computes matrix DSBlocks[DS1](and allocates memory if necessary)
 
@@ -172,15 +172,15 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   if (osiType == MOREAU || osiType == MOREAU2)
   {
     DSBlocks[DS] = (std11::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
-    //       cout << "PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
+    //       cout << "GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
     //       DSBlocks[DS]->display();
   }
   else if (osiType == LSODAR) // Warning: LagrangianDS only at the time !!!
   {
-    RuntimeException::selfThrow("PrimalFrictionContact::computeDSBlocks. Not yet implemented for Lsodar Integrator");
+    RuntimeException::selfThrow("GlobalFrictionContact::computeDSBlocks. Not yet implemented for Lsodar Integrator");
   }
   else
-    RuntimeException::selfThrow("PrimalFrictionContact::computeDSBlocks. nNot yet implemented for Integrator of type " + osiType);
+    RuntimeException::selfThrow("GlobalFrictionContact::computeDSBlocks. nNot yet implemented for Integrator of type " + osiType);
 }
 
 /** computes  DSInteractionBlock-matrix that corresponds to inter1 and DS2
@@ -188,7 +188,7 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
  *  \param a pointer to Interaction inter1
  *  \param a pointer to DynamicalSystems DS2
  */
-void PrimalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem DS)
+void GlobalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem DS)
 {
   unsigned int sizeDS = (DS)->getDim();
   unsigned int nslawSize = inter->getNonSmoothLawSize();
@@ -199,10 +199,10 @@ void PrimalFrictionContact::computeInteractionDSBlock(SP::Interaction inter, SP:
     interactionDSBlocks[inter][DS].reset(new SimpleMatrix(nslawSize, sizeDS));
     inter->getLeftInteractionBlockForDS(DS, interactionDSBlocks[inter][DS]);
   }
-  else RuntimeException::selfThrow("PrimalFrictionContact::computeInteractionDSBlock not yet implemented for relation of type " + relationType);
+  else RuntimeException::selfThrow("GlobalFrictionContact::computeInteractionDSBlock not yet implemented for relation of type " + relationType);
 }
 
-void PrimalFrictionContact::computeq(const double time)
+void GlobalFrictionContact::computeq(const double time)
 {
   if (q->size() != _sizeOutput)
     q->resize(_sizeOutput);
@@ -220,7 +220,7 @@ void PrimalFrictionContact::computeq(const double time)
   }
 }
 
-void PrimalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int pos)
+void GlobalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int pos)
 {
   SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
   string osiType = Osi->getType();
@@ -232,10 +232,10 @@ void PrimalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int
   }
   else
   {
-    RuntimeException::selfThrow("PrimalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
+    RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
   }
 }
-void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos)
+void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter, unsigned int pos)
 {
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->getRelationType();
@@ -265,7 +265,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
   {
   }
   else
-    RuntimeException::selfThrow("PrimalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
+    RuntimeException::selfThrow("GlobalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
   if (inter->getRelationType() == Lagrangian)
@@ -314,7 +314,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
 
 
 }
-void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
+void GlobalFrictionContact::computeTildeLocalVelocity(const double time)
 {
   if (_tildeLocalVelocity->size() != _sizeLocalOutput)
     _tildeLocalVelocity->resize(_sizeLocalOutput);
@@ -333,9 +333,9 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
 
 }
 
-void PrimalFrictionContact::preCompute(const double time)
+void GlobalFrictionContact::preCompute(const double time)
 {
-  // This function is used to prepare data for the PrimalFrictionContact problem
+  // This function is used to prepare data for the GlobalFrictionContact problem
   // - computation of M, H _tildeLocalVelocity and q
   // - set _sizeOutput, sizeLocalOutput
 
@@ -401,22 +401,22 @@ void PrimalFrictionContact::preCompute(const double time)
 
 }
 
-int PrimalFrictionContact::compute(double time)
+int GlobalFrictionContact::compute(double time)
 {
   int info = 0;
-  // --- Prepare data for PrimalFrictionContact computing ---
+  // --- Prepare data for GlobalFrictionContact computing ---
   preCompute(time);
 
   // --- Call Numerics solver ---
   if (_sizeOutput != 0)
   {
-    // The PrimalFrictionContact Problem in Numerics format
-    PrimalFrictionContactProblem numerics_problem;
+    // The GlobalFrictionContact Problem in Numerics format
+    GlobalFrictionContactProblem numerics_problem;
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
     numerics_problem.mu = &((*_mu)[0]);
-    // Call Numerics Driver for PrimalFrictionContact
+    // Call Numerics Driver for GlobalFrictionContact
     //  {
     //    int info2 = -1;
     //    int iparam2[7];
@@ -455,7 +455,7 @@ int PrimalFrictionContact::compute(double time)
   return info;
 }
 
-void PrimalFrictionContact::postCompute()
+void GlobalFrictionContact::postCompute()
 {
   // This function is used to set y/lambda values using output from primalfrictioncontact_driver
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
@@ -499,7 +499,7 @@ void PrimalFrictionContact::postCompute()
   //     {
   //       dsType = (*itDS) -> getType();
   //       if(dsType!=Type::LagrangianDS && dsType!=Type::LagrangianLinearTIDS)
-  //      RuntimeException::selfThrow("PrimalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
+  //      RuntimeException::selfThrow("GlobalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
 
   //       pos = M->getPositionOfDSBlock(*itDS);
   //       sizeDS = (*itDS)->getDim();
@@ -511,7 +511,7 @@ void PrimalFrictionContact::postCompute()
 
 }
 
-void PrimalFrictionContact::display() const
+void GlobalFrictionContact::display() const
 {
   cout << "===== " << _contactProblemDim << "D Primal Friction Contact Problem " << endl;
   cout << "size (_sizeOutput) " << _sizeOutput << endl;
@@ -534,9 +534,9 @@ void PrimalFrictionContact::display() const
   cout << "============================================================" << endl;
 }
 
-PrimalFrictionContact* PrimalFrictionContact::convert(OneStepNSProblem* osnsp)
+GlobalFrictionContact* GlobalFrictionContact::convert(OneStepNSProblem* osnsp)
 {
-  PrimalFrictionContact* fc2d = dynamic_cast<PrimalFrictionContact*>(osnsp);
+  GlobalFrictionContact* fc2d = dynamic_cast<GlobalFrictionContact*>(osnsp);
   return fc2d;
 }
 
