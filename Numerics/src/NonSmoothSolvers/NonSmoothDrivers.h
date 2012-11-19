@@ -140,6 +140,49 @@ extern "C"
                                    int verbose,
                                    int outputFile);
 
+  /** LMGC interface to solvers for global friction-contact 3D problem
+   *  \param[in,out] reaction global vector (nc*3)
+   *  \param[in,out] velocity global vector (nc*3)
+   *  \param[in,out] globalVelocity global velocity vector (n)
+   *  \param[in] q global vector (n)
+   *  \param[in] b global vector (nc*3)
+   *  \param[in] mu global vector (nc)
+   *  \param[in] M the sparse matrix in coordinate format
+   *  \param[in] rowM  row indices of M
+   *  \param[in] columnM  column indices of M
+   *  \param[in] H the sparse matrix in coordinate format
+   *  \param[in] rowH  row indices of H
+   *  \param[in] columnH  column indices of H
+   *  \param[in] n size of global velocity
+   *  \param[in] nc number of contacts
+   *  \param[in] solver_id id an int to be mapped to actual solver in Numerics
+   *  \param[in] tolerance
+   *  \param[in] itermax the maximum number of iteration
+   *  \param[in] verbose level 0 : nothing, 1: mid level 2: high level
+   *  \param[in] outputFile outputFile option 0 : nothing 1 : C file , 1 :  dat file 3: FCLIB HDF5 file if FCLIB is found
+   *  \return result (0 if successful otherwise 1).
+   *
+   */
+  int globalFrictionContact3D_LmgcDriver(double *reaction,
+                                         double *velocity,
+                                         double *globalVelocity,
+                                         double *q,
+                                         double *b,
+                                         double *mu,
+                                         double *M,
+                                         unsigned int *rowM,
+                                         unsigned int *columnM,
+                                         double* H,
+                                         unsigned int *rowH,
+                                         unsigned int *columnH,
+                                         unsigned int n,
+                                         unsigned int nc,
+                                         int solver_id,
+                                         double tolerance,
+                                         int itermax,
+                                         int verbose,
+                                         int outputFile);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
