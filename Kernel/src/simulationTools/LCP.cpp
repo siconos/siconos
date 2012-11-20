@@ -18,8 +18,8 @@
  */
 #include "LCP.hpp"
 
+//#define DEBUG_MESSAGES 1
 #include "debug.h"
-#define DEBUG_MESSAGES 1
 
 using namespace std;
 using namespace RELATION;
@@ -61,11 +61,11 @@ int LCP::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
+   DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
 
   if (_sizeOutput != 0)
   {
-    DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
-
+ 
     // The LCP in Numerics format
     _numerics_problem->M = &*_M->getNumericsMatrix();
     _numerics_problem->q = _q->getArray();

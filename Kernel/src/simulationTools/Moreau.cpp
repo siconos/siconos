@@ -1822,7 +1822,7 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("Moreau::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("Moreau::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
