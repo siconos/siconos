@@ -10,7 +10,7 @@ rm -f /sw/bin/gfortran
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
 /opt/local/bin/port install wget
-
+/opt/local/bin/port install git-core
 
 
 /opt/local/bin/port selfupdate
