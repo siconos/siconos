@@ -1,14 +1,18 @@
 #!/bin/sh
 
-#PRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
+#XXXXPRE-PIPOL  src/siconos/trunk/Build/Pipol/pre-siconos
 
 #PIPOL fedora-core14 03:00
 
 #PIPOL fedora-core16 03:00
 
+#PIPOL fedora-core17 03:00
+
 #PIPOL ubuntu-lucid 03:00
 
 #PIPOL ubuntu-precise 03:00
+
+#PIPOL ubuntu-quantal 03:00
 
 #PIPOL ia64-linux-debian-squeeze 05:00
 
@@ -55,16 +59,17 @@ esac
 env
 
 # a local copy because make Nightly will update this sources.
-setup_trunk() {
+setup_src() {
     current_dir=$PWD
-    mkdir -p $PIPOL_WDIR/siconos/trunk
-    cd $PIPOL_WDIR/siconos/trunk; { 
-        for mod in Numerics Kernel Examples Front-End IO; do 
-            [ -d $mod ] || svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
-            cd $mod; { 
-                svn update -r $local_revision
-            }; cd ..
-        done
+    mkdir -p $PIPOL_WDIR/siconos
+    cd $PIPOL_WDIR/siconos; { 
+        git clone git+ssh://bremond@scm.gforge.inria.fr//gitroot/siconos/siconos.git
+#        for mod in Numerics Kernel Examples Front-End IO; do 
+#            [ -d $mod ] || git clone $HOME/src/git/siconos/$mod </dev/null
+#            cd $mod; { 
+#                git update $local_revision
+#            }; cd ..
+#        done
     }; cd $current_dir
 }
 
@@ -155,7 +160,7 @@ make_2() {
 }
 
 
-configure_trunk() {
+configure_src() {
     mod=$1
     btype=$2
     shift; shift
@@ -163,7 +168,7 @@ configure_trunk() {
     mkdir -p $PIPOL_WDIR/build/$mod/$btype
     cd $PIPOL_WDIR/build/$mod/$btype; {
         rm -f CMakeCache.txt
-        eval cmake $PIPOL_WDIR/siconos/trunk/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+        eval cmake $PIPOL_WDIR/siconos/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_GIT=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
     }; cd -
 
 }
@@ -233,9 +238,9 @@ configure_3_5() {
 
 }
 
-pack_trunk() {
+pack_src() {
     cd $PIPOL_WDIR/build/$1/$2 ;{
-        cmake $PIPOL_WDIR/siconos/trunk/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2 -DWITH_TESTING=FALSE
+        cmake $PIPOL_WDIR/siconos/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2 -DWITH_TESTING=FALSE
         cpack -G $PIPOL_CPACK_G 
     }; cd -
     
@@ -446,8 +451,8 @@ else
 # force cmake version
     cmake_setup
     # trunk tests
-    setup_trunk
-    configure_trunk Numerics Release
+    setup_src
+    configure_src Numerics Release
     nightly_build Numerics Release
     nightly_test Numerics Release
     nightly_memcheck Numerics Release
@@ -455,7 +460,7 @@ else
     install_1 Numerics Release
     clean_1 Numerics Release
     #
-    configure_trunk Kernel Release
+    configure_src Kernel Release
     nightly_build Kernel Release
     nightly_test Kernel Release
     nightly_memcheck Kernel Release
@@ -463,7 +468,7 @@ else
     install_1 Kernel Release
     clean_1 Kernel Release
     #
-    configure_trunk IO Release
+    configure_src IO Release
     nightly_build IO Release
     nightly_test IO Release
     nightly_memcheck IO Release
@@ -471,37 +476,37 @@ else
     install_1 IO Release
     clean_1 IO Release
     ### Snapshot packages
-    pack_trunk Numerics Release
+    pack_src Numerics Release
     save_packed_1 Numerics Release
     ##
-    pack_trunk Kernel Release
+    pack_src Kernel Release
     save_packed_1 Kernel Release
     ##
-    pack_trunk IO Release
+    pack_src IO Release
     save_packed_1 IO Release
     ##
     ### front-end (not with IO yet)
     swig_setup
-    configure_trunk Front-End Release
+    configure_src Front-End Release
     nightly_build Front-End Release
     nightly_test Front-End Release
     nightly_submit Front-End Release
     install_1 Front-End Release
     clean_1 Front-End Release
-    pack_trunk Front-End Release
+    pack_src Front-End Release
     save_packed_1 Front-End Release
     ##
     ### Coverage
-    setup_trunk
-    configure_trunk Numerics Debug -DWITH_TESTS_COVERAGE=ON
+    setup_src
+    configure_src Numerics Debug -DWITH_TESTS_COVERAGE=ON
     nightly_build Numerics Debug
     nightly_coverage Numerics Debug
     nightly_submit Numerics Debug
     install_1 Numerics Debug
     clean_1 Numerics Debug
     ##
-    #setup_trunk
-    configure_trunk Kernel Debug -DWITH_TESTS_COVERAGE=ON
+    #setup_src
+    configure_src Kernel Debug -DWITH_TESTS_COVERAGE=ON
     nightly_build Kernel Debug
     nightly_coverage Kernel Debug
     nightly_submit Kernel Debug
@@ -509,9 +514,9 @@ else
     clean_1 Kernel Debug
     ##
     ### Examples
-    rm -rf $PIPOL_WDIR/siconos/trunk/Numerics/src
-    rm -rf $PIPOL_WDIR/siconos/trunk/Kernel/src
-    configure_trunk Examples Debug
+    rm -rf $PIPOL_WDIR/siconos/Numerics/src
+    rm -rf $PIPOL_WDIR/siconos/Kernel/src
+    configure_src Examples Debug
     nightly_build Examples Debug
     nightly_test Examples Debug
     nightly_submit Examples Debug
