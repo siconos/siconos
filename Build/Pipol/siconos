@@ -61,8 +61,8 @@ env
 # a local copy because make Nightly will update this sources.
 setup_src() {
     current_dir=$PWD
-    mkdir -p $PIPOL_WDIR/siconos
-    cd $PIPOL_WDIR/siconos; { 
+    mkdir -p $PIPOL_WDIR
+    cd $PIPOL_WDIR; { 
         git clone git+ssh://bremond@scm.gforge.inria.fr//gitroot/siconos/siconos.git
 #        for mod in Numerics Kernel Examples Front-End IO; do 
 #            [ -d $mod ] || git clone $HOME/src/git/siconos/$mod </dev/null
