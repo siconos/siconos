@@ -7,13 +7,11 @@ env
 chgrp -R wheel /opt/local
 rm -f /sw/bin/gfortran
 
+/opt/local/bin/port selfupdate
+
 /opt/local/bin/port install rsync
 /opt/local/bin/port install cppunit
 /opt/local/bin/port install wget
-/opt/local/bin/port install git-core
-
-
-/opt/local/bin/port selfupdate
 
 sudo port uninstall perl5.8 perl5 @5.8.9_0
 sudo port install perl5
@@ -27,8 +25,11 @@ port select --set gcc mp-gcc47
 /opt/local/bin/port install swig-python
 /opt/local/bin/port install py27-numpy
 /opt/local/bin/port install py27-py
-# big quirk
 
+# git
+/opt/local/bin/port install git-core
+
+# big quirk
 rm -f /sw/bin/gfortran-fsf-4.5
 rm -f /usr/local/bin/gfortran
 cd /usr/local/lib

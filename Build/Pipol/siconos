@@ -31,7 +31,7 @@ mode=${1:-Nightly}
 # echo com | sudo -H -u $u -i (cf PipolBuild) does not work (system dependant?)
 . $HOME/.profile
 
-
+export PATH=/usr/local/bin:$PATH
 GFORGE_USER=${GFORGE_USER:-$USER}
 
 export LC_ALL=C
