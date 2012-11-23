@@ -1,2 +1,34 @@
 #!/bin/sh
 
+cmake_setup() {
+    case `cmake --version` in 
+        *2.8.9*);;
+        *) 
+            sudo rm -rf `which cmake`
+            sudo rm -rf `which cpack`
+            sudo rm -rf `which ctest`
+            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.9.tar.gz
+            cd cmake-2.8.9; { 
+                ./bootstrap
+                make -j2
+                sudo make install
+            };;
+    esac
+}
+
+swig_setup() { 
+    sudo rm -rf `which swig`
+    sudo rm -rf `which swig2.0`
+    sudo rm -rf `which swig1.3`
+    
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
+
+    cd swig-2.0.7; { 
+        ./configure
+        make
+        sudo make install
+    }
+}
+
+cmake_setup
+swig_setup

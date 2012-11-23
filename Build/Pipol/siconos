@@ -363,47 +363,9 @@ nightly_submit() {
     make_1 $1 $2 ${mode}Submit
 }
 
-swig_setup() { 
-    sudo rm -rf `which swig`
-    sudo rm -rf `which swig2.0`
-    sudo rm -rf `which swig1.3`
-    
-    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
-
-    cd swig-2.0.7; { 
-        ./configure
-        make
-        sudo make install
-    }
-}
-
-cmake_setup() {
-    case `cmake --version` in 
-        *2.8.9*);;
-        *) 
-            sudo rm -rf `which cmake`
-            sudo rm -rf `which cpack`
-            sudo rm -rf `which ctest`
-            tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.9.tar.gz
-            cd cmake-2.8.9; { 
-                ./bootstrap
-                make -j2
-                sudo make install
-            };;
-    esac
-}
-
-case $PIPOL_IMAGE in 
-    x86_64_mac-mac-osx-server-snow-leopard*)
-        cmake_setup;; # cmake 2.8.3 on this image
-esac
-
 #sudo rm -f /usr/local/bin/ctest
 
 if [ $release = "true" ]; then
-
-# force cmake to be correct
-    cmake_setup
 
 # Stable version
     setup_3_5
@@ -430,7 +392,6 @@ if [ $release = "true" ]; then
     nightly_memcheck Examples Release
     nightly_submit Examples Release
     
-    swig_setup
     configure_3_5 Front-End Release
     nightly_build_3_5 Front-End Release
     nightly_test Front-End Release
@@ -448,8 +409,7 @@ if [ $release = "true" ]; then
     pack_3_5 Front-End Release
     save_packed_1 Front-End Release
 else
-# force cmake version
-    cmake_setup
+
     # trunk tests
     setup_src
     configure_src Numerics Release
@@ -486,7 +446,6 @@ else
     save_packed_1 IO Release
     ##
     ### front-end (not with IO yet)
-    swig_setup
     configure_src Front-End Release
     nightly_build Front-End Release
     nightly_test Front-End Release
