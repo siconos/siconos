@@ -20,9 +20,15 @@
 
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
     TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMC
-from matplotlib.pyplot import subplot, title, plot, grid, show
+from matplotlib.pyplot import subplot, title, plot, grid, show, xlabel, ylabel
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
+from matplotlib import rc
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy
+from scipy import arange
+rc('text', usetex=True)
 
 # variable declaration
 ndof = 2  # Number of degrees of freedom of your system
@@ -33,16 +39,16 @@ hControl = 1.0e-2  # time step for control
 Xinit = 1.0  # initial position
 theta = 0.5
 N = ceil((T-t0)/h + 10)  # number of time steps
-outputSize = 3  # number of variable to store at each time step
+outputSize = 5  # number of variable to store at each time step
 
 # Matrix declaration
 A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
 sensorD = zeros((ndof, ndof))
-Csurface = eye(ndof)
-Brel = eye(ndof)
-Drel = zeros((ndof, ndof))
+Csurface = [[0, 1]]
+Brel = [[0], [2]]
+#Drel = [[0, 0]]
 # Simple check
 if h > hControl:
     print "hControl must be bigger than h"
@@ -50,7 +56,7 @@ if h > hControl:
 
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
-processDS.setComputebFunction("RelayPlugin.so", "computeB")
+processDS.setComputebFunction("RelayPluginUnperturbed.so", "computeB")
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
@@ -71,7 +77,7 @@ control.addSensorPtr(sens)
 act = LinearSMC(tActuator, processDS)
 act.setCsurfacePtr(Csurface)
 act.setBPtr(Brel)
-act.setDPtr(Drel)
+#act.setDPtr(Drel)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
@@ -87,6 +93,9 @@ dataPlot = empty((3*(N+1), outputSize))
 dataPlot[0, 0] = t0
 dataPlot[0, 1] = processDS.x()[0]
 dataPlot[0, 2] = processDS.x()[1]
+dataPlot[0, 3] = processDS.z()[0]
+dataPlot[0, 4] = processDS.z()[1]
+
 
 # Main loop
 k = 1
@@ -95,6 +104,8 @@ while(processSimulation.nextTime() < T):
     dataPlot[k, 0] = processSimulation.nextTime()
     dataPlot[k, 1] = processDS.x()[0]
     dataPlot[k, 2] = processDS.x()[1]
+    dataPlot[k, 3] = processDS.z()[0]
+    dataPlot[k, 4] = processDS.z()[1]
     k += 1
     processSimulation.nextStep()
 # Resize
@@ -102,15 +113,66 @@ dataPlot.resize(k, outputSize)
 # Save to disk
 savetxt('SMCExampleImplicit-py.dat', dataPlot)
 # Plot interesting data
+
+#subplot(411)
+#title('x1')
+#plot(dataPlot[:, 0], dataPlot[:, 1])
+#grid()
+#subplot(412)
+#title('x2')
+#plot(dataPlot[:, 0], dataPlot[:, 2])
+#grid()
+#subplot(413)
+#title('u1')
+#plot(dataPlot[:, 0], dataPlot[:, 3])
+#grid()
+#subplot(414)
+#title('u2')
+#plot(dataPlot[:, 0], dataPlot[:, 4])
+#show()
+
 subplot(211)
-title('x1')
-plot(dataPlot[:, 0], dataPlot[:, 1])
-grid()
-subplot(212)
-title('x2')
+ylabel(r'$\sigma$')
+xlabel(r't')
 plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
+subplot(212)
+ylabel(r'$\bar{u}^s$')
+xlabel(r't')
+plt.ylim(-2.1, 2.1)
+plot(dataPlot[:, 0], dataPlot[:, 4])
 show()
+
+subplot(211)
+ylabel(r'$\sigma$')
+xlabel(r't')
+plt.xlim(xmin=.49)
+plt.ylim(-0.03, 0.03)
+plot(dataPlot[4900:, 0], dataPlot[4900:, 2])
+grid()
+subplot(212)
+ylabel(r'$\bar{u}^s$')
+xlabel(r't')
+plt.ylim(-2.1, 2.1)
+plt.xlim(xmin=.49)
+p1 = plot(dataPlot[4900:, 0], dataPlot[4900:, 4])
+#p2 = plot(dataPlot[4900:, 0], np.sin(50*dataPlot[4900:, 0]))
+#plt.legend((p1[0], p2[0]), (r'$\bar{u}^s(t)$', r'$-\rho(t)$'), ncol=2)
+show()
+
+u_z = dataPlot[5100:, 4]
+n = len(u_z)
+Y = scipy.fft(dataPlot[5100:, 4])/n
+k = arange(n)
+T = n*h
+frq = k/T
+frq = frq[range(n/2)]
+Y = Y[range(n/2)]
+plot(frq, abs(Y), 'r')
+xlabel(r'freq (Hz)')
+title(r'Frequency spectrum of $\bar{u}^s$')
+show()
+
 # TODO
 # compare with the reference
 #ref = getMatrix(SimpleMatrix("result.ref"))

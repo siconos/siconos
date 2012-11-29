@@ -19,21 +19,21 @@
 # Contact: Vincent ACARY, siconos-team@lists.gforge.fr
 from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
     TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
-from matplotlib.pyplot import subplot, title, plot, grid, show
+from matplotlib.pyplot import subplot, title, plot, grid, show, xlabel, ylabel
+import matplotlib.pyplot as plt
 from numpy import eye, empty, zeros, savetxt
 from math import ceil
-from numpy.linalg import norm
 
 # variable declaration
 ndof = 2   # Number of degrees of freedom of your system
 t0 = 0.0   # start time
 T = 1    # end time
 h = 1.0e-4  # time step for simulation
-hControl = 1.0e-2 # time step for control
-Xinit = 1.0 # initial position
+hControl = 1.0e-2  # time step for control
+Xinit = 1.0  # initial position
 theta = 0.5
-N = 2*ceil((T-t0)/h) # number of time steps
-outputSize = 5 # number of variable to store at each time step
+N = 2*ceil((T-t0)/h)  # number of time steps
+outputSize = 5  # number of variable to store at each time step
 
 # Matrix declaration
 A = zeros((ndof, ndof))
@@ -49,7 +49,7 @@ if h > hControl:
 
 # Declaration of the Dynamical System
 processDS = FirstOrderLinearDS(x0, A)
-processDS.setComputebFunction("RelayPlugin.so","computeB")
+processDS.setComputebFunction("RelayPlugin.so", "computeB")
 # Model
 process = Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
@@ -72,7 +72,7 @@ act.setCsurfacePtr(Csurface)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
-# Initialization 
+# Initialization
 process.initialize(processSimulation)
 control.initialize()
 # This is not working right now
@@ -119,6 +119,17 @@ grid()
 subplot(414)
 title('u2')
 plot(dataPlot[:, 0], dataPlot[:, 4])
+show()
+
+subplot(211)
+p1 = plot(dataPlot[:, 0], dataPlot[:, 2])
+plt.ylabel('$\sigma$')
+plt.xlabel('t')
+grid()
+subplot(212)
+p2 = plot(dataPlot[:, 0], dataPlot[:, 4])
+plt.ylabel('u')
+plt.xlabel('t')
 show()
 
 # TODO
