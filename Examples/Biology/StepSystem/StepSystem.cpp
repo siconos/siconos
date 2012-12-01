@@ -14,36 +14,36 @@ using namespace std;
 int main(int argc, char *argv[])
 {
   //printf("argc %i\n", argc);
-  int cmp = 0;
+  int cmp=0;
   int dimX = 2;
 
   char  filename[50] = "simu.";
 
-  //***** Set the initial condition
-  SiconosVector* xti = new SiconosVector(dimX);
-  if (argc == 1)
+//***** Set the initial condition
+  SiconosVector* xti= new SiconosVector(dimX);
+  if (argc==1)
   {
-    xti->setValue(0, 1);
-    xti->setValue(1, 6);
-    strncpy(&filename[5], "1.6.log", 7);
+    xti->setValue(0,1);
+    xti->setValue(1,6);
+    strncpy(&filename[5],"1.6.log",7);
   }
-  else if (argc == 3)
+  else if (argc==3)
   {
     //printf("argv[0] %s\n", argv[0]);
     printf("xti(0) is set to %f\n", atof(argv[1]));
     printf("xti(1) is set to %f\n", atof(argv[2]));
 
-    xti->setValue(0, atof(argv[1]));
-    xti->setValue(1, atof(argv[2]));
+    xti->setValue(0,atof(argv[1]));
+    xti->setValue(1,atof(argv[2]));
     int sizeofargv1 = strlen(argv[1]);
     // printf("sizeofargv1 %i\n",sizeofargv1);
-    strncpy(&filename[5], argv[1], sizeofargv1);
+    strncpy(&filename[5],argv[1],sizeofargv1);
     int sizeofargv2 = strlen(argv[2]);
     //printf("sizeofargv2 %i\n",sizeofargv2);
-    strncpy(&filename[5 + sizeofargv1], ".", 1);
+    strncpy(&filename[5+sizeofargv1],".",1);
 
-    strncpy(&filename[5 + sizeofargv1 + 1], argv[2], sizeofargv2);
-    strncpy(&filename[5 + sizeofargv1 + sizeofargv2 + 1], ".log", 4);
+    strncpy(&filename[5+sizeofargv1+1],argv[2],sizeofargv2);
+    strncpy(&filename[5+sizeofargv1+sizeofargv2+1],".log",4);
 
     printf("Output is written in filename %s\n",  filename);
   }
@@ -52,9 +52,9 @@ int main(int argc, char *argv[])
     cout << "wrong  number of arguments = " << argc << endl;
   }
 
-  int NBStep = (int) floor(sTf / sStep);
+  int NBStep = (int) floor(sTf/sStep);
   // NBStep =1;
-  //*****BUILD THE DYNAMICAL SYSTEM
+//*****BUILD THE DYNAMICAL SYSTEM
 
   SP::MyDS aDS ;
   aDS.reset(new MyDS(*xti));
@@ -62,53 +62,53 @@ int main(int argc, char *argv[])
   DynamicalSystemsSet  Inter_DS ;
   Inter_DS.insert(aDS);
 
-  //******BUILD THE RELATION
+//******BUILD THE RELATION
   SP::NonlinearRelation aR;
   aR.reset(new NonlinearRelation());
 
-  //*****BUILD THE NSLAW
+//*****BUILD THE NSLAW
   SP::NonSmoothLaw aNSL;
   RelayNSL * rNSL = new RelayNSL(sNSLawSize);
   aNSL.reset(rNSL); //nr de lambda din pb LCP
   rNSL->setLb(-0.0);
   rNSL->setUb(1.0);
-  // unsigned int sNSLawSize = 4;
+// unsigned int sNSLawSize = 4;
 
-  //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction("MLCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
+//****BUILD THE INTERACTION
+  SP::Interaction aI(new Interaction("MLCP",Inter_DS,1,sNSLawSize,aNSL,aR));
 
-  //****BUILD THE SYSTEM
-  SP::Model  aM(new Model(0, sTf));
+//****BUILD THE SYSTEM
+  SP::Model  aM(new Model(0,sTf));
   aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
-  aM->nonSmoothDynamicalSystem()->link(aI, aDS);
+  aM->nonSmoothDynamicalSystem()->link(aI,aDS);
 
-  // -- (1) OneStepIntegrators --
+// -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aMoreau ;
-  aMoreau.reset(new Moreau(aDS, 0.5));
+  aMoreau.reset(new Moreau(aDS,0.5));
 
-  // -- (2) Time discretisation --
-  SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
+// -- (2) Time discretisation --
+  SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));
 
-  // -- (3) Non smooth problem
+// -- (3) Non smooth problem
   SP::Relay osnspb(new Relay(SICONOS_RELAY_LEMKE));
-  osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
-  osnspb->numericsSolverOptions()->iparam[0] = 0; // Multiple solutions 0 or 1
-  //  osnspb->numericsSolverOptions()->iparam[3]=48;
+  osnspb->numericsSolverOptions()->dparam[0]=1e-08;
+  osnspb->numericsSolverOptions()->iparam[0]=0;  // Multiple solutions 0 or 1
+//  osnspb->numericsSolverOptions()->iparam[3]=48;
 
   osnspb->setNumericsVerboseMode(0);
 
-  // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD, aMoreau, osnspb));
+// -- (4) Simulation setup with (1) (2) (3)
+  SP::TimeStepping aS(new TimeStepping(aTD,aMoreau,osnspb));
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
 
-  // Initialization
+// Initialization
   printf("-> Initialisation \n");
   aM->initialize(aS);
   printf("-> End of initialization \n");
 
-  // BUILD THE STEP INTEGRATOR
+// BUILD THE STEP INTEGRATOR
 
   SP::SiconosVector  x = aDS->x();
   SP::SiconosVector  vectorfield = aDS->rhs();
@@ -116,19 +116,19 @@ int main(int argc, char *argv[])
   SP::SiconosVector  lambda = aI->lambda(0);
 
   unsigned int outputSize = 9;
-  SimpleMatrix dataPlot(NBStep + 1, outputSize);
+  SimpleMatrix dataPlot(NBStep+1,outputSize);
 
 
 
 
 
-  cout << "=== Start of simulation: " << NBStep << " steps ===" << endl;
+  cout << "=== Start of simulation: "<<NBStep<<" steps ===" << endl;
 
   printf("=== Start of simulation: %d steps ===  \n", NBStep);
 
   dataPlot(0, 0) = aM->t0();
-  dataPlot(0, 1) = x->getValue(0);
-  dataPlot(0, 2) = x->getValue(1);
+  dataPlot(0,1) = x->getValue(0);
+  dataPlot(0,2) = x->getValue(1);
   dataPlot(0, 3) = lambda->getValue(0);
   dataPlot(0, 4) = lambda->getValue(1);
   dataPlot(0, 5) = lambda->getValue(2);
@@ -142,10 +142,10 @@ int main(int argc, char *argv[])
   boost::timer time;
   time.restart();
 
-  for (int k = 0 ; k < NBStep ; k++)
+  for(int k = 0 ; k < NBStep ; k++)
   {
 #ifdef SICONOS_DEBUG
-    std::cout << "-> Running step:" << k << std::endl;
+    std::cout<<"-> Running step:"<<k<<std::endl;
 #endif
     cmp++;
 
@@ -160,12 +160,12 @@ int main(int argc, char *argv[])
     dataPlot(cmp, 5) = lambda->getValue(2);
     dataPlot(cmp, 6) = lambda->getValue(3);
 
-    aDS->computeRhs(aS->nextTime(), true);
+    aDS->computeRhs(aS->nextTime(),true);
 
-    if (cmp == 1) // tricks just for display to avoid the computation of the initial Rhs
+    if (cmp==1) // tricks just for display to avoid the computation of the initial Rhs
     {
-      dataPlot(cmp - 1, 7) = vectorfield->getValue(0);
-      dataPlot(cmp - 1, 8) = vectorfield->getValue(1);
+      dataPlot(cmp-1, 7) = vectorfield->getValue(0);
+      dataPlot(cmp-1, 8) = vectorfield->getValue(1);
     }
 
     dataPlot(cmp, 7) = vectorfield->getValue(0);
@@ -175,25 +175,25 @@ int main(int argc, char *argv[])
     // (*fout)<<cmp<<" "<<x->getValue(0)<<" "<<x->getValue(1)<<" "<<lambda->getValue(0)<<" "<<lambda->getValue(1)<<" "<<lambda->getValue(2)<<" "<<lambda->getValue(3)<<endl;
   }
 
+  cout << "Computational time = "<<  time.elapsed() << endl;
 
-  dataPlot.resize(cmp, outputSize);
+  dataPlot.resize(cmp,outputSize);
   ioMatrix::write(filename, "ascii", dataPlot, "noDim");
 
-  if (argc == 1)
+  if (argc==1)
   {
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("simu.1.6.ref", "ascii", dataPlotRef);
-    cout << "====> Comparison with reference file ..." << endl;
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    cout<<"====> Comparison with reference file ..."<<endl;
+    std::cout << "Error w.r.t. reference file : " <<(dataPlot-dataPlotRef).normInf() << std::endl;
+    if ((dataPlot-dataPlotRef).normInf() > 1e-12)
     {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      std::cout << "Warning. The result is rather different from the reference file."<< std::endl;
       return 1;
     }
 
   }
-
 
   cout << "=== End of simulation. === " << endl;
   return 0;

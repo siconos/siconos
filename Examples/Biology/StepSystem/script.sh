@@ -8,6 +8,7 @@ siconos StepSystem.cpp 3 11
 siconos StepSystem.cpp 3 1
 siconos StepSystem.cpp 3.5 0
 siconos StepSystem.cpp 4 4
+siconos StepSystem.cpp 4.02 4.02
 siconos StepSystem.cpp 5 0
 siconos StepSystem.cpp 6.5 10
 siconos StepSystem.cpp 7 12
