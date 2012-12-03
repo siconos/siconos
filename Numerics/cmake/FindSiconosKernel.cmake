@@ -10,16 +10,33 @@
 # SiconosKernel_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosKernel)
 
 IF(SiconosKernel_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel PATHS "${SiconosKernel_LIBRARY_DIRECTORY}")
+  MESSAGE(STATUS "Looking for Kernel library in ${SiconosKernel_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel PATHS "${SiconosKernel_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(SiconosKernel_FOUND)
+    MESSAGE(STATUS "Found : ${SiconosKernel_FOUND}")
+  ENDIF(SiconosKernel_FOUND)
 ELSE(SiconosKernel_LIBRARY_DIRECTORY)
   FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel  ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosKernel_LIBRARY_DIRECTORY)
 
 IF(SiconosKernel_FOUND)
-  GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS ${SiconosKernel_FOUND} PATH)
   SET(SiconosKernel_LIBRARIES ${SiconosKernel_FOUND})
+  GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS ${SiconosKernel_FOUND} PATH)
   GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR ${SiconosKernel_LIBRARY_DIRS} PATH)
-  SET(SiconosKernel_INCLUDE_DIRS ${SiconosKernel_LIBRARY_DIRS_DIR}/include/Siconos/Kernel)
+  GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR_DIR ${SiconosKernel_LIBRARY_DIRS_DIR} PATH)
+
+  FIND_PATH(SiconosKernel_INCLUDE_DIRS SiconosKernel.hpp
+    HINTS ${SiconosKernel_LIBRARY_DIRS_DIR} ${SiconosKernel_LIBRARY_DIRS_DIR_DIR} 
+    ENV PATH
+    PATH_SUFFIXES Siconos/Kernel)
+  
+  IF(NOT SiconosKernel_INCLUDE_DIRS)
+    IF(SiconosKernel_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR
+        "Required Siconos Kernel headers not found. Please specify headers location in CMAKE_INCLUDE_PATH")
+    ENDIF(SiconosKernel_FIND_REQUIRED)
+  ENDIF(NOT SiconosKernel_INCLUDE_DIRS)
+
 ELSE(SiconosKernel_FOUND)
   IF(SiconosKernel_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
