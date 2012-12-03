@@ -20,7 +20,13 @@ INCLUDE(${SWIG_USE_FILE})
 
 FIND_PACKAGE(PythonInterp)
 
+# on ubuntu precise with cmake >= 2.8.8 pythonlibs find python 3.0
+# before python 2.7 (in Release but not in Debug ...)
+SET(Python_ADDITIONAL_VERSIONS "2.6;2.7")
+
 FIND_PACKAGE(PythonLibs)
+
+MESSAGE("Python libs version : ${PYTHONLIBS_VERSION_STRING}")
 
 MESSAGE("PYTHON EXECUTABLE : ${PYTHON_EXECUTABLE}")
 MESSAGE("Python_ADDITIONAL_VERSIONS : ${Python_ADDITIONAL_VERSIONS}")
