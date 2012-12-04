@@ -999,8 +999,6 @@ void LagrangianDS::resetAllNonSmoothPart()
     _p[2]->zero();
 }
 
-#define LEVELMAX 999
-
 void LagrangianDS::resetNonSmoothPart(unsigned int level)
 {
   if (level < LEVELMAX)

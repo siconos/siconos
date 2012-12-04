@@ -34,7 +34,7 @@ char *  SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
-#define DUMP_PROBLEM_IF_INFO
+//#define DUMP_PROBLEM_IF_INFO
 #ifdef DUMP_PROBLEM_IF_INFO
 static int fccounter = 0;
 #endif
@@ -47,7 +47,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
   char fname[256];
   sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
   printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
-
+  
   FILE * foutput  =  fopen(fname, "w");
   frictionContact_printInFile(problem, foutput);
   fclose(foutput);
@@ -161,7 +161,7 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
     {
       char fname[256];
       sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
-      printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
+      printf("Dump of FrictionContactProblem%.5d.dat\n", fccounter);
 
       FILE * foutput  =  fopen(fname, "w");
       frictionContact_printInFile(problem, foutput);
@@ -171,7 +171,8 @@ int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction ,
   }
   else
   {
-    numericsError("FrictionContact2D_driver", " error: unknown storagetype named");
+    numericsError("FrictionContact2D_driver", 
+                  " error: unknown storagetype named");
     exit(EXIT_FAILURE);
   }
 
