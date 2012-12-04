@@ -999,10 +999,13 @@ void LagrangianDS::resetAllNonSmoothPart()
     _p[2]->zero();
 }
 
+#define LEVELMAX 999
+
 void LagrangianDS::resetNonSmoothPart(unsigned int level)
 {
-  if (_p[level])
-    _p[level]->zero();
+  if (level < LEVELMAX)
+    if (_p[level])
+      _p[level]->zero();
 }
 
 void LagrangianDS::computePostImpactVelocity()

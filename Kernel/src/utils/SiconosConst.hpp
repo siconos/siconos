@@ -22,6 +22,12 @@
 #ifndef __SICONOSCONST__
 #define __SICONOSCONST__
 
+/**
+   Internal bound max levels for time integrators.
+   This value may be checked to see if initialization has occured.
+ */
+#define LEVELMAX 999
+
 #ifndef NULL
 const int NULL = 0;
 #endif

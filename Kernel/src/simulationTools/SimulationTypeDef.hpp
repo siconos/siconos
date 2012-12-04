@@ -302,8 +302,6 @@ enum SICONOS_OSNSP_TS
 const int SICONOS_NB_OSNSP_TS = 1;
 const int SICONOS_NB_OSNSP_TSP = 2;
 
-#define LEVELMAX 999
-
 /** Event constants */
 #define TD_EVENT 1
 #define NS_EVENT 2
