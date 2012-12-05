@@ -89,7 +89,7 @@ dataPlot[0, 4] = processDS.z()[1]
 
 # Main loop
 k = 1
-while(processSimulation.nextTime() < T):
+while(processSimulation.hasNextEvent()):
     processSimulation.computeOneStep()
     dataPlot[k, 0] = processSimulation.nextTime()
     dataPlot[k, 1] = processDS.x()[0]
@@ -97,8 +97,8 @@ while(processSimulation.nextTime() < T):
     dataPlot[k, 3] = processDS.z()[0]
     dataPlot[k, 4] = processDS.z()[1]
     k += 1
-    processSimulation.nextStep()
     print processSimulation.nextTime()
+    processSimulation.nextStep()
 # Resize matrix
 dataPlot.resize(k, outputSize)
 # Save to disk

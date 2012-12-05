@@ -234,10 +234,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   assert(m || !"Simulation::initialize(model) - model = NULL.");
   _model = std11::weak_ptr<Model>(m);
 
+  _T = m->finalT();
+
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   // === Events manager initialization ===
-  _eventsManager->initialize(shared_from_this());
+  _eventsManager->initialize(*this);
   _tinit = _eventsManager->startingTime();
   //===
   if (withOSI)
@@ -285,7 +287,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
   // OSI, OSNS ...
-  _eventsManager->preUpdate();
+  _eventsManager->preUpdate(*this);
+
   _tend =  _eventsManager->nextTime();
 
   // Set Model current time (warning: current time of the model
@@ -436,10 +439,10 @@ void Simulation::run()
 {
   unsigned int count = 0; // events counter.
   cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" << endl;
-  while (nextTime() <= model()->finalT())
+  while (hasNextEvent())
   {
     advanceToEvent();
-    _eventsManager->processEvents();
+    processEvents();
     count++;
   }
   cout << "===== End of " << typeName() << "simulation. " << count << " events have been processed. ==== " << endl;
@@ -447,7 +450,18 @@ void Simulation::run()
 
 void Simulation::processEvents()
 {
-  _eventsManager->processEvents();
+  _eventsManager->processEvents(*this);
+
+  if (_eventsManager->hasNextEvent())
+  {
+    // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
+    if(Type::value(*this) != Type::EventDriven)
+    {
+      updateIndexSets();
+    }
+  }
+  // Set Model current time
+  model()->setCurrentTime(_eventsManager->startingTime());
 
   /* should be evaluated only if needed */
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();

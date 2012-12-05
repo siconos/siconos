@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
     // --- Compute elapsed time ---
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->nextTime() <= bouncingBall->finalT())
+    while (s->hasNextEvent())
     {
       // solve ...
       s->computeOneStep();

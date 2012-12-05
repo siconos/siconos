@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 
 
     time.restart();
-    while (s->nextTime() <= T)
+    while (s->hasNextEvent())
     {
       s->advanceToEvent();
       s->processEvents();

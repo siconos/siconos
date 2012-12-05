@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   dataPlot(0, 1) = (*xProc)(0);
   dataPlot(0, 2) = (*xProc)(1);
 
-  SP::EventsManager eventsManager = processSimulation->eventsManager();
+  EventsManager& eventsManager = *processSimulation->eventsManager();
 
   // ==== Simulation loop =====
   cout << "====> Start computation ... " << endl << endl;
@@ -138,12 +138,11 @@ int main(int argc, char* argv[])
   boost::progress_display show_progress(N);
   boost::timer time;
   time.restart();
-  SP::Event nextEvent;
-  while (processSimulation->nextTime() < T)
+  while (processSimulation->hasNextEvent())
   {
     processSimulation->computeOneStep();
-    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
-    if (nextEvent->getType() == TD_EVENT)
+    Event& nextEvent = *eventsManager.nextEvent();
+    if (nextEvent.getType() == TD_EVENT)
     {
       k++;
       dataPlot(k, 0) = processSimulation->nextTime();

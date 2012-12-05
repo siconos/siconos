@@ -100,6 +100,8 @@ protected:
   */
   double _tout;
 
+  double _T;
+
   /** the dynamical systems integrators */
   SP::OSISet _allOSI;
 
@@ -273,11 +275,15 @@ public:
   /** get time instant k+1 of the time discretisation - Warning: this
       instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
-      \return a double.
+      \return a double. If the simulation if done (t_{k+1} >= T), returns NaN
   */
   inline double getTkp1() const
   {
-    return _timeDiscretisation->nextTime();
+    double tkp1 = _timeDiscretisation->nextTime();
+    if (tkp1 <= _T + 100.0*std::numeric_limits<double>::epsilon())
+      return tkp1;
+    else
+      return std::numeric_limits<double>::quiet_NaN();
   };
 
   /** get the EventsManager
@@ -677,6 +683,12 @@ public:
   {
     _staticLevels = b;
   }
+
+  /** This updates the end of the Simulation.
+   * \warning this should be called only from the Model, to synchronise the 2 values
+   * \param T the new final time
+   */
+  inline void updateT(const double& T) { _T = T; };
 
   /** visitors hook
    */

@@ -26,8 +26,8 @@
 #include "SiconosConst.hpp"
 #include "Event.hpp"
 #include <gmp.h>
-#include<iostream>
-#include<set>
+#include <iostream>
+#include <set>
 
 class Simulation;
 class TimeDiscretisation;
@@ -47,19 +47,14 @@ struct compareEvent
   }
 };
 
-/** set of events, with an ordering based on Event time value (mpz_t) to compare Events
- *  A stl container of type "multiset" is used at the time
- *  \warning This may be not the best choice => review all possibi lities */
-typedef std::multiset<SP::Event, compareEvent > EventsContainer; // sort in a chronological way
-
-/** Iterator through a set of Events */
-typedef EventsContainer::iterator EventsContainerIterator;
+/** set of events, with an ordering based on Event time value (mpz_t) to compare Events */
+typedef std::vector<SP::Event> EventsContainer; // Event are already sorted
 
 /** Tools to handle a set of Events for the Simulation
 
    \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 22, 2006
+   \version 3.6.0.
+   \date (Creation) December 22, 2012
 
    The EventsManager handles a set of events (from user time-discretisation, sensors, non-smooth ...),
    and is supposed to provide to the simulation the values of "current" and "next" events to define
@@ -69,7 +64,7 @@ typedef EventsContainer::iterator EventsContainerIterator;
    - currentEvent: starting time for integration. Initialized with t0 of the simulation time-discretisation.
    - ETD: corresponds to the instant t[k+1] of the Simulation (user) TimeDiscretisation.
    - ENonSmooth: for EventDriven simulation only. Present only if one or more non-smooth events have been
-   detected between currentEvent and ETD.
+   detected between currentEvent and the next event.
    - Sensor or Actuators Events. To each Sensor or Actuator declared in the ControlManager, corresponds
    an Event in the manager. When this event is processed, its time value is increased to next instant
    in the time-discretisation of the sensor/actuator.
@@ -96,48 +91,29 @@ protected:
   */
   ACCEPT_SERIALIZATION(EventsManager);
 
-
-  /** list of future, not processed, events.
-   *  This list is not fixed and can be updated at any time
-   *  depending on the simulation, user add ...
-   *  The first event of this set is currentEvent, and the second is nextEvent.
-   * ("first" and "second" defined according to event comparison operator)
+  /** list of events
+   * The first element is the last processed event. All the others
+   * are unprocessed events.
+   * This list is not fixed and can be updated at any time
+   * depending on the simulation, user add ...
    */
-  EventsContainer _allEvents;
+  EventsContainer _events;
 
-  /** Pointer to currentEvent, ie the simulation starting point.
-   * It correponds to the first object in allEvents.
-   */
-  SP::Event _currentEvent;
-
-  /** Pointer to nextEvent, ie the simulation ending point.
-   * It correponds to the event following currentEvent and so
-   * to the second object in allEvents.
-   */
-  SP::Event _nextEvent;
-
-  /** Event which corresponds to time tk+h of the simulation time discretisation */
-  SP::Event _ETD;
-
-  /** Non Smooth Event: corresponds to the last non-smooth event detected*/
-  SP::Event _ENonSmooth;
-
-  /* link to the simulation that owns this manager*/
-  SP::Simulation _simulation;
-
-  /** bool to check if some NonSmooth events has already been inserted */
-  bool _hasNS;
-
-  /** bool to check if a ControlManager is associated to the simulation */
-  bool _hasCM;
+  /** Placeholder for the non smooth event */
+  SP::Event _eNonSmooth;
 
   /** unsigned long int variable to check if two events are too close */
   static unsigned long int _GapLimit2Events;
 
-  /** Creates and adds a new Event in the allEvents list
-   *  \return false if Event already exists
+  /** Insert an event in the event stack
+   * \param e the event to insert
+   * \return the position of the inserted event in the stack
    */
-  bool createAndInsertEvent(int, double);
+  unsigned int insertEv(SP::Event e);
+
+  /** Update the set of events
+   */
+  void update(Simulation& sim);
 
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
@@ -162,108 +138,43 @@ public:
   };
 
   /** Get the gap limit between two events  */
-  inline unsigned long int getGapLimitEvents()
+  inline unsigned long int getGapLimitEvents() const
   {
     return _GapLimit2Events;
   };
 
   /** initialize current, next events and the events stack.
-      \param simulation, owner of the present eventsManager.
+      \param sim the simulation that owns the present eventsManager
    */
-  void initialize(SP::Simulation);
-
-  /** Run process of all events simultaneous to currentEvent + synchr. with actuators/sensors
-      Must be run at the end of simulation->initialize()
-   */
-  void preUpdate();
-
-  /** add a set of existing Events into allEvents list
-   *  \param an EventsContainer
-   */
-  void insertEvents(const EventsContainer&);
-
-  /** get the list of all Events in the set
-   *  \return a set of Events*
-   */
-  inline const EventsContainer events() const
-  {
-    return _allEvents ;
-  };
-
-  /** get the event that occurs at time inputTime
-   *  \param a mpz_t
-   *  \return a pointer to Event
-   */
-  SP::Event event(const mpz_t& inputTime) const;
+  void initialize(const Simulation& sim);
 
   /** get the current event
    *  \return a pointer to Event
    */
-  inline SP::Event currentEvent() const
-  {
-    return _currentEvent;
-  };
+  inline SP::Event currentEvent() const { return _events[0]; };
 
   /** get the next event to be processed.
    *  \return a pointer to Event
    */
-  inline SP::Event nextEvent() const
-  {
-    return _nextEvent;
-  };
+  inline SP::Event nextEvent() const { return _events[1]; };
 
-  /** get the event following inputEvent ("following" defined with
-   *   operator(s) comparison of events)
-   *  \param a pointer to Event
-   *  \return a pointer to Events
+  /** return all the events 
+   * \return a reference to the events set
    */
-  SP::Event followingEvent(SP::Event) const;
+  inline EventsContainer& events() { return _events; };
 
-  /** get the event that follows the event at time inputTime
-   *   ("following" defined with operator(s) comparison of events)
-   *  \param a mpz_t
-   *  \return a pointer to Event
+  /** check if there are some unprocessed events
+   *  \return true if there are unprocessed events
    */
-  SP::Event followingEvent(const mpz_t& inputTime) const;
-
-  /** get the Simulation
-   *  \return a pointer to Simulation
-   */
-  inline SP::Simulation simulation() const
-  {
-    return _simulation;
-  }
-
-  /** set the Simulation of the OneStepNSProblem
-   *  \param: a pointer on Simulation
-   */
-  inline void setSimulationPtr(SP::Simulation str)
-  {
-    _simulation = str;
-  }
-
-  /** check if event is present in allEvents list
-   *  \return a bool
-   */
-  bool hasEvent(SP::Event) const ;
-
-  /** check if some events remain in allEvents list
-   *  \return a bool
-   */
-  bool hasNextEvent() const ;
-
-  /** get the time (double format) of an event
-   *  \return a double
-   */
-  double getTimeOfEvent(SP::Event) const;
+  inline bool hasNextEvent() const { return _events.size() > 1; };
 
   /** get the time of current event, in double format
-   *  \return a double
+   *  \return the time of the last processed events
    */
   double startingTime() const ;
 
   /** get the time of next event, in double format
-   *  \return a double
+   *  \return the time of the next events
    */
   double nextTime() const ;
 
@@ -271,42 +182,31 @@ public:
    */
   void display() const ;
 
-  /** Insert an existing event into the set
-      \param Event*, the event to be nserted
-   */
-  void insertEvent(SP::Event);
-
-  /** Update nextEvent (useful in case of a new insertion)
-   */
-  void update();
-
   /** add a new Event in the allEvents list and update nextEvent value
-   * \param the time (double format) of occurence of the event
-   * \param indicator to update or not the next event (default value is true)
+   * \param sim the simulation that owns this EventsManager
+   * \param time the time (double format) of occurence of the event
+   * \param yes_update indicator to update or not the next event (default value is true)
    */
-  void scheduleNonSmoothEvent(double, bool yes_update = true);
+  void scheduleNonSmoothEvent(Simulation& sim, double time, bool yes_update = true);
 
-  /** remove an Event from the unProcessed events list
+  /** Process the next event, update the indexSets if necessary
+   * \param sim the simulation that owns this EventsManager
    */
-  void removeEvent(SP::Event);
+  void processEvents(Simulation& sim);
 
-  /** update current and next event positions and run process functions of current event
+  /** function to be called once after initialization
+   * \param sim the simulation that owns this EventsManager
    */
-  void processEvents();
+  void preUpdate(Simulation& sim);
 
-  /** processEvents when neither non-smooth events nor control-related events are present.
+  /** insert an event of a certain type. The event is created on the fly.
+   * \param type the type of the event
+   * \param time the time of the event
+   * \return a reference to the Event
    */
-  void OptimizedProcessEvents();
-
-  /** processEvents for general case
-   */
-  void GeneralProcessEvents();
-
-  /** used when event's time has changed to resort it properly in allEvents set
-      \param the event to be sorted
-   */
-  void SortEvent(SP::Event);
+  Event& insertEvent(const int type, const double& time);
 };
+
 
 DEFINE_SPTR(EventsManager)
 

@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     time.restart();
     int ncontact = 0 ;
     bool isOSNSinitialized = false;
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       // for( int toto=0; toto<1;toto++)
       //   std::cout <<"============> Step Number : " << k << "======================"  <<std::endl;

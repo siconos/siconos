@@ -116,7 +116,7 @@ dataPlot[0, 3] = block.q()[5]
 k = 1
 
 # time loop
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
     name = 'titi'+str(k)+'.vtk'
     dataPlot[k,0]=s.nextTime()

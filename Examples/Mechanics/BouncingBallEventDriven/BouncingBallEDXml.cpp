@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     double T = bouncingBall->finalT();
     bool nonSmooth = false;
 
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       k++;
 

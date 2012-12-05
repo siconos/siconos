@@ -506,7 +506,7 @@ void TimeStepping::run()
 
     advanceToEvent();
 
-    _eventsManager->processEvents();
+    processEvents();
     count++;
   }
   cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;

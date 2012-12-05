@@ -200,7 +200,7 @@ int main()
     boost::timer time;
     time.restart();
 
-    while (simulation->nextTime() < T)
+    while (simulation->hasNextEvent())
     {
       space_filter->buildInteractions(model->currentTime());
 

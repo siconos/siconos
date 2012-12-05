@@ -163,7 +163,7 @@ dataPlot[0,15] = v[2]
 k = 1
 
 # time loop
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()

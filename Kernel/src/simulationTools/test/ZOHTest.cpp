@@ -116,7 +116,7 @@ void ZOHTest::testMatrixIntegration1()
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
   dataPlot(0, 2) = (*_x0)(1);
-  while (_sim->nextTime() < _T)
+  while (_sim->hasNextEvent())
   {
     _sim->computeOneStep();
     k++;
@@ -180,7 +180,7 @@ void ZOHTest::testMatrixIntegration2()
   dataPlot(0, 2) = (*_x0)(1);
   dataPlot(0, 3) = 0;
   dataPlot(0, 4) = 0;
-  while (_sim->nextTime() < _T)
+  while (_sim->hasNextEvent())
   {
     _sim->computeOneStep();
     k++;
@@ -250,7 +250,7 @@ void ZOHTest::testMatrixIntegration3()
   dataPlot(0, 4) = 0;
   dataPlot(0, 5) = 0;
   dataPlot(0, 6) = 0;
-  while (_sim->nextTime() < _T)
+  while (_sim->hasNextEvent())
   {
     _sim->computeOneStep();
     prod(*B, lambda, sampledControl, true);
@@ -323,7 +323,7 @@ void ZOHTest::testMatrixIntegration4()
   dataPlot(0, 4) = 0;
   dataPlot(0, 5) = 0;
   dataPlot(0, 6) = 0;
-  while (_sim->nextTime() < _T)
+  while (_sim->hasNextEvent())
   {
     _sim->computeOneStep();
     prod(*B, lambda, sampledControl, true);

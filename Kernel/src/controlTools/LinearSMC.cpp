@@ -79,7 +79,7 @@ void LinearSMC::initialize(SP::Model m)
   else
   {
     double t0 = _model->t0();
-    double T = _model->finalT();
+    double T = _model->finalT() + _timeDiscretisation->currentTimeStep();
     // create the SMC Model
     _SMC.reset(new Model(t0, T));
     // create the interaction

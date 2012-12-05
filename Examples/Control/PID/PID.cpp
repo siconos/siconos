@@ -151,10 +151,10 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       s->computeOneStep();
-      nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
+      nextEvent = eventsManager->nextEvent();
       // --- Get values to be plotted ---
       // the following check prevents saving the same data multiple times
       // XXX what happends if we have NS Events ?
@@ -181,6 +181,8 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
+
+    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {

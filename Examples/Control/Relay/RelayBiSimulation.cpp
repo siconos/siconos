@@ -209,10 +209,10 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (processSimulation->nextTime() < T)
+    while (processSimulation->hasNextEvent())
     {
       kcontroller ++ ;
-      cout << "step controller--> " << kcontroller << " at time t =" << controllerSimulation->nextTime() << endl;
+//      cout << "step controller--> " << kcontroller << " at time t =" << controllerSimulation->nextTime() << endl;
 
       // Computation of the controller over the sampling time
       controllerSimulation->computeOneStep();
@@ -220,10 +220,10 @@ int main(int argc, char* argv[])
       //  input of the controller in the process thanks to z and sampledControl
       prod(1.0, *B, *lambda, *sampledControl, true);
 
-      while (processSimulation->nextTime() < controllerSimulation->nextTime())
+      while (processSimulation->hasNextEvent() && processSimulation->nextTime() < controllerSimulation->nextTime())
       {
         k++;
-        cout << "         step --> " << k  << " at time t =" << processSimulation->nextTime() << endl;
+//        cout << "         step --> " << k  << " at time t =" << processSimulation->nextTime() << endl;
 
         processSimulation->computeOneStep();
         dataPlot(k, 0) = processSimulation->nextTime();

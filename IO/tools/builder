@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
-# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 > ../src/SiconosFullGenerated.hpp 
+# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 > ../src/SiconosFullGenerated.hpp
 
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
 
-import sys, os, getopt, re, itertools
-
+import sys
+import getopt
+import re
+import itertools
 from pygccxml import parser
 from pygccxml import declarations
 
 myname = sys.argv[0]
 include_paths=[]
 siconos_namespace = '::'
+
 
 def usage():
     print '{0} [--namespace=<namespace>] -I<path> [-I<path> ...] header'.format(myname)
@@ -27,7 +30,7 @@ except getopt.GetoptError, err:
 
 for opt, arg in opts:
     if opt == '-I':
-        include_paths += [ arg ]
+        include_paths += [arg]
     if opt == '--namespace':
         siconos_namespace = arg
     if opt == '--help':
@@ -35,36 +38,39 @@ for opt, arg in opts:
         sys.exit(0)
 
 
-if len(args) <> 0:
+if len(args) != 0:
     usage()
-    sys.exit(1)        
+    sys.exit(1)
 
-input_headers = [ "SiconosKernel.hpp",
-                  "Circle.hpp", "CircleCircleR.hpp", "CircularDS.hpp", "Disk.hpp", "DiskDiskR.hpp",
-                  "DiskMovingPlanR.hpp", "DiskPlanR.hpp",
-                  "SphereLDS.hpp", "SphereLDSPlanR.hpp", "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
-                  "SphereNEDSPlanR.hpp", "SphereNEDSSphereNEDSR.hpp",
-                  "SiconosBodies.hpp", "SpaceFilter.hpp", "ExternalBody.hpp" ]
+input_headers = ["SiconosKernel.hpp",
+                 "Circle.hpp", "CircleCircleR.hpp", "CircularDS.hpp",
+                 "Disk.hpp", "DiskDiskR.hpp", "DiskMovingPlanR.hpp",
+                 "DiskPlanR.hpp", "SphereLDS.hpp", "SphereLDSPlanR.hpp",
+                 "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
+                 "SphereNEDSPlanR.hpp", "SphereNEDSSphereNEDSR.hpp",
+                 "SiconosBodies.hpp", "SpaceFilter.hpp", "ExternalBody.hpp"]
 
-config = parser.config_t( include_paths=include_paths )
+config = parser.config_t(include_paths=include_paths)
 
-decls = parser.parse( input_headers, config )
-global_ns = declarations.get_global_namespace( decls )
+decls = parser.parse(input_headers, config)
+global_ns = declarations.get_global_namespace(decls)
 
 
 def is_serializable(c):
-    return 'serializable' in [ c.name for c in c.typedefs(allow_empty=True) ]
+    return 'serializable' in [c.name for c in c.typedefs(allow_empty=True)]
+
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err',s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err', s)
     # note _err -> boost::circular_buffer issue with serialization
     return m != None
 
+
 def name(t):
-    if isinstance(t,declarations.class_t):
+    if isinstance(t, declarations.class_t):
         return t.name
-    elif isinstance(t,declarations.typedef_t):
-        return t.decl_string[2:] # remove ::
+    elif isinstance(t, declarations.typedef_t):
+        return t.decl_string[2:]  # remove ::
 
 # classes in siconos_namespace
 class_names = dict()
@@ -80,10 +86,11 @@ typedef = dict()
 for t in global_ns.typedefs():
     typedef[str(t._type)] = name(t)
 
+
 def replace_by_typedef(some_type):
     if typedef.has_key(str(some_type)):
         rep_typedef = typedef[str(some_type)]
-        if not '<' in rep_typedef: # replace only if not a template
+        if not '<' in rep_typedef:  # replace only if not a template
             return rep_typedef
     return str(some_type)
 
@@ -94,10 +101,10 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
 
     is_typedef = False
 
-    if isinstance(type_,declarations.class_t):
+    if isinstance(type_, declarations.class_t):
         class_names[declarations.full_name(type_)] = type_
         class_ = type_
-    elif isinstance(type_,declarations.typedef_t):
+    elif isinstance(type_, declarations.typedef_t):
         try:
             is_typedef=True
             class_ = class_names['::' + str(type_.type)]
@@ -106,33 +113,33 @@ for type_ in filter(lambda c: c.parent.name == siconos_namespace,
     # with the serializabe tag
     # (could not find friend functions with pygccxml)
     if class_ is not None and \
-           is_serializable(class_) and \
-           ( is_typedef or not \
-             declarations.templates.is_instantiation(class_.name) ):
+        is_serializable(class_) and \
+        (is_typedef or not
+         declarations.templates.is_instantiation(class_.name)):
 
         if not unwanted(class_.name):
 
             if not class_.is_abstract:
-                with_base += [ class_.name ]
+                with_base += [class_.name]
 
             # print registration macros depending on inheritance
             if class_.bases == []:
                 print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
             else:
                 serializable_bases = \
-                                   reduce(lambda r,b:
-                                          r + [b.related_class] if is_serializable(b.related_class)
-                                          and b.related_class.parent.name == siconos_namespace
-                                          else r, class_.bases, [])
+                    reduce(lambda r, b:
+                           r + [b.related_class] if is_serializable(b.related_class)
+                           and b.related_class.parent.name == siconos_namespace
+                           else r, class_.bases, [])
                 if len(serializable_bases) > 0:
                     print 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},'.format(name(type_),
-                    ''.join(['({0})'.format(replace_by_typedef(c.name)) for c in serializable_bases]))
+                          ''.join(['({0})'.format(replace_by_typedef(c.name)) for c in serializable_bases]))
                 else:
                     print 'SICONOS_IO_REGISTER({0},'.format(name(type_))
 
-            variables = [ v.name for v in filter(lambda x: not 'void' in str(x._get_type()),class_.variables(allow_empty=True)) ]
+            variables = [v.name for v in filter(lambda x: not 'void' in str(x._get_type()), class_.variables(allow_empty=True))]
 
-            print '{0})'.format('\n'.join( '  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
+            print '{0})'.format('\n'.join('  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables)))
 
 
 # filtering is not correct at this point : some unwanted classes are necessary
@@ -142,5 +149,3 @@ print
 print 'template <class Archive>'
 print 'void siconos_io_register_generated(Archive& ar)'
 print '{{\n{0}\n}}'.format('\n'.join('  ar.register_type(static_cast<{0}*>(NULL));'.format(x) for x in with_base))
-
-

@@ -56,9 +56,9 @@ public:
   ~TimeDiscretisationEvent();
 
   /**
-  *  \param simulation a SP to the simulation that owns this Event (through the EventsManager)
+  *  \param simulation the simulation that owns this Event (through the EventsManager)
   */
-  void process(SP::Simulation simulation);
+  void process(Simulation& simulation);
 };
 
 #endif // TimeDiscretisationEvent_H

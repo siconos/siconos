@@ -79,7 +79,7 @@ public:
   /** Call the capture method of the linked Sensor
    *  \param sim a SP::Simulation (ignored).
    */
-  void process(SP::Simulation sim);
+  void process(Simulation& sim);
 
   /** Increment time of the present event according to
       the time discretisation of the linked Actuator

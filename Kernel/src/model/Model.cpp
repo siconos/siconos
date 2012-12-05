@@ -328,3 +328,9 @@ void Model::display() const
   cout << " ============================" << endl;
 }
 
+void Model::setT(const double& newValue)
+{
+  _T = newValue;
+  _strat->updateT(newValue);
+}
+

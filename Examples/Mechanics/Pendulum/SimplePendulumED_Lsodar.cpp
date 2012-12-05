@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     unsigned int NumberNSEvent = 0;
     unsigned int k = 1;
     boost::progress_display show_progress(N);
-    while ((EDscheme->nextTime() < T) && (k < N))
+    while ((EDscheme->hasNextEvent()) && (k < N))
     {
       EDscheme->advanceToEvent(); // lead the simulation run from one event to the next
       //---------- detect the statue of the current event ------------------------------------
@@ -217,6 +217,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(DataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result_Lsodar.ref", "ascii", dataPlotRef);
+    std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;
     if ((DataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;

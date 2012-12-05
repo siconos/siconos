@@ -125,7 +125,7 @@ void Disks::init(std::string disks_input)
 
   double t0 = 0;                   // initial computation time
 
-  double T = 0.02;
+  double T = 10;
 
   double h = 0.01;                // time step
   double g = 9.81;

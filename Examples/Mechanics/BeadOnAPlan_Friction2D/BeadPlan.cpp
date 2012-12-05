@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->nextTime() <= oscillator->finalT())
+    while (s->hasNextEvent())
     {
       // solve ...
       s->computeOneStep();

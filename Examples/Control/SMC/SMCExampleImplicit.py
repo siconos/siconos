@@ -99,7 +99,7 @@ dataPlot[0, 4] = processDS.z()[1]
 
 # Main loop
 k = 1
-while(processSimulation.nextTime() < T):
+while(processSimulation.hasNextEvent()):
     processSimulation.computeOneStep()
     dataPlot[k, 0] = processSimulation.nextTime()
     dataPlot[k, 1] = processDS.x()[0]

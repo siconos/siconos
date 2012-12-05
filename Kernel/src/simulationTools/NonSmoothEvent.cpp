@@ -35,14 +35,14 @@ NonSmoothEvent::NonSmoothEvent(double time, int): Event(time, NS_EVENT)
 NonSmoothEvent::~NonSmoothEvent()
 {}
 
-void NonSmoothEvent::process(SP::Simulation simulation)
+void NonSmoothEvent::process(Simulation& simulation)
 {
-  if (Type::value(*simulation) != Type::EventDriven)
+  if (Type::value(simulation) != Type::EventDriven)
     RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
-  if (!(simulation->oneStepNSProblems()->empty()))
+  if (!(simulation.oneStepNSProblems()->empty()))
   {
-    SP::EventDriven eventDriven = std11::static_pointer_cast<EventDriven>(simulation);
+    EventDriven& eventDriven = static_cast<EventDriven&>(simulation);
 
     // Compute y[0], y[1] and update index sets. => already done
     // during advance to event ...
@@ -52,14 +52,14 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    SP::InteractionsGraph indexSet0 = simulation->indexSet(0);
-    SP::DynamicalSystemsGraph dsG = simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    SP::InteractionsGraph indexSet0 = simulation.indexSet(0);
+    SP::DynamicalSystemsGraph dsG = simulation.model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
     DynamicalSystemsGraph::VIterator vi, viend;
 
     // Update all the index sets ...
-    eventDriven->updateIndexSets();
-    SP::InteractionsGraph indexSet1 = simulation->indexSet(1);
-    SP::InteractionsGraph indexSet2 = simulation->indexSet(2);
+    eventDriven.updateIndexSets();
+    SP::InteractionsGraph indexSet1 = simulation.indexSet(1);
+    SP::InteractionsGraph indexSet2 = simulation.indexSet(2);
     bool found = true;
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
@@ -75,14 +75,14 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       // in) for post-event values and last interactionBlock (pos 1,
       // first in) for pre-event values.
 
-      simulation->saveInMemory();  // To save pre-impact values
+      simulation.saveInMemory();  // To save pre-impact values
 
       // solve the LCP-impact => y[1],lambda[1]
-      eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_IMPACT); // solveLCPImpact();
+      eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_IMPACT); // solveLCPImpact();
       // compute p[1], post-impact velocity, y[1] and indexSet[2]
-      simulation->update(1);
+      simulation.update(1);
       // Update the corresponding index set ...
-      eventDriven->updateIndexSets();
+      eventDriven.updateIndexSets();
     }
 
     /*
@@ -112,15 +112,15 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       //                           (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
-      eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_ACC); // solveLCPAcceleration();
+      eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_ACC); // solveLCPAcceleration();
       // update input of level 2, acceleration and output of level 2
-      simulation->update(2);
+      simulation.update(2);
       // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
-      eventDriven->updateIndexSetsWithDoubleCondition();
+      eventDriven.updateIndexSetsWithDoubleCondition();
     }
 
     // Save results in memory
-    simulation->saveInMemory();
+    simulation.saveInMemory();
   }
 }
 

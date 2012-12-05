@@ -4,7 +4,7 @@
 
 
 def test_bouncing_ball1():
-    
+
     from Siconos.Kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
          LagrangianLinearTIR, Interaction, Model, Moreau, TimeDiscretisation, LCP, TimeStepping
 
@@ -32,7 +32,7 @@ def test_bouncing_ball1():
     # the dynamical system
     ball = LagrangianLinearTIDS(x, v, mass)
 
-    # set external forces 
+    # set external forces
     weight = array([-m * g, 0, 0])
     ball.setFExtPtr(weight)
 
@@ -102,7 +102,7 @@ def test_bouncing_ball1():
     # the number of time steps
     N = (T-t0)/h
 
-    # Get the values to be plotted 
+    # Get the values to be plotted
     # ->saved in a matrix dataPlot
 
     dataPlot = empty((N,5))
@@ -129,7 +129,7 @@ def test_bouncing_ball1():
     k = 1
 
     # time loop
-    while(s.nextTime() < T):
+    while(s.hasNextEvent()):
         s.computeOneStep()
 
         dataPlot[k, 0] = s.nextTime()
@@ -139,8 +139,8 @@ def test_bouncing_ball1():
         dataPlot[k, 4] = lambda_[0]
 
         k += 1
-        s.nextStep()
         print s.nextTime()
+        s.nextStep()
 
     #
     # comparison with the reference file
@@ -154,12 +154,12 @@ def test_bouncing_ball1():
 
 
 def xtest_bouncing_ball_from_xml():
-    
+
     assert False # just have to load from xml...
 
 
 def xtest_bouncing_ball_from_binary():
-    
+
     assert False # just have to load from .dat...
 
 
@@ -188,11 +188,11 @@ def test_bouncing_ball2():
     v = array([0,0,0]) # initial velocity
     mass = eye(3)      # mass matrix
     mass[2,2]=3./5 * r * r
-                    
+
     # the dynamical system
     ball = K.LagrangianLinearTIDS(x,v,mass)
 
-    # set external forces 
+    # set external forces
     weight = array([-m * g, 0, 0])
     ball.setFExtPtr(weight)
 
@@ -217,7 +217,7 @@ def test_bouncing_ball2():
 
     nslaw = K.NewtonImpactNSL(e)
     nslaw_d = K.NewtonImpactNSL(e)
-    
+
     relation = K.LagrangianLinearTIR(H)
     relation_d = K.LagrangianLinearTIR(H)
 
@@ -239,7 +239,7 @@ def test_bouncing_ball2():
     bouncingBall.nonSmoothDynamicalSystem().link(inter,ball);
     bouncingBall_d.nonSmoothDynamicalSystem().link(inter_d,ball_d);
 
-    
+
 
 
     #
@@ -260,12 +260,12 @@ def test_bouncing_ball2():
     t = K.TimeDiscretisation(t0,h)
 
     t_d = K.TimeDiscretisation(t0,h)
-    
+
     # (3) one step non smooth problem
     osnspb = K.LCP()
 
     osnspb_d = K.LCP()
-    
+
     # (4) Simulation setup with (1) (2) (3)
     s = K.TimeStepping(t)
     s.insertIntegrator(OSI)
@@ -276,7 +276,7 @@ def test_bouncing_ball2():
     s_d.insertNonSmoothProblem(osnspb_d)
 
     # end of model definition
-    
+
     #
     # computation
     #
@@ -290,7 +290,7 @@ def test_bouncing_ball2():
     # the number of time steps
     N = (T-t0)/h
 
-    # Get the values to be plotted 
+    # Get the values to be plotted
     # ->saved in a matrix dataPlot
 
     s_d.computeOneStep()
@@ -315,7 +315,7 @@ def test_bouncing_ball2():
     k = 1
 
     # time loop
-    while(s.nextTime() < T):
+    while(s.hasNextEvent()):
         s.computeOneStep()
         s_d.computeOneStep()
 
@@ -333,10 +333,10 @@ def test_bouncing_ball2():
 
         assert dataPlot[k,1] == dataPlot_d[k,1]
 
+        print s.nextTime()
         k += 1
         s.nextStep()
         s_d.nextStep()
-        print s.nextTime()
 
 
 

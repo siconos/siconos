@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     cout << "Number of time step" << N << "\n";
-    while (s->nextTime() <= Pendulum->finalT())
+    while (s->hasNextEvent())
     {
       k++;
       if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";

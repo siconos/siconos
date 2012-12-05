@@ -263,7 +263,7 @@ nbNodes = sico.mesh.pts().shape[1]
 
 k = 1
 # time loop
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
     name = 'friction'+str(k)+'.vtk'
     dataPlot[k,0]=s.nextTime()

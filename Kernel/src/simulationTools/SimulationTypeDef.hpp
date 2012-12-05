@@ -95,6 +95,9 @@ typedef std::map<unsigned int, SP::SiconosVector> MapOfVectors;
 
 typedef std::map<unsigned int, SP::Relation> MapOfRelation;
 
+/** Map of boolean; key = the number of the related DS*/
+typedef std::map<unsigned int, bool> MapOfBool;
+
 // ================== Objects to handle Interactions ==================
 
 /** Map of SiconosMatrices with a Interactions as a key - Used for diagonal interactionBlock-terms in assembled matrices of LCP etc ...*/

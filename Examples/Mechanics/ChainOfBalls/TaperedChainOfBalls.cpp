@@ -259,7 +259,7 @@ int main(int argc, char* argv[]){
     unsigned int k = 0;
     DynamicalSystemsGraph::VIterator ui, uiend;
    //====================================================================
-    while((k < Npointsave)&(s->nextTime() < T))
+    while((k < Npointsave)&(s->hasNextEvent()))
         {
 	  dataPlot(k,0) =  s->startingTime();
 	  // Save state of the balls
@@ -321,6 +321,7 @@ int main(int argc, char* argv[]){
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("resultTaperedChain_LZBModel.ref", "ascii", dataPlotRef);
+    std::cout << (dataPlot-dataPlotRef).normInf() << std::endl;
     if ((dataPlot-dataPlotRef).normInf() > 1e-12) 
       {
 	std::cout << "Warning. The results is rather different from the reference file."<< std::endl;

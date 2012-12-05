@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
     unsigned int NumberNSEvent = 0;
     unsigned int k = 1;
     boost::progress_display show_progress(NpointSave);
-    while ((EDscheme->nextTime() < TimeFinal) && (k < NpointSave))
+    while (EDscheme->hasNextEvent() && (k < NpointSave))
     {
       EDscheme->advanceToEvent(); // lead the simulation run from one event to the next
       //---------- detect the statue of the current event ------------------------------------

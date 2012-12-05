@@ -78,7 +78,7 @@ public:
   /** Call the actuate method of the Actuator
    *  \param sim ignored argument.
    */
-  void process(SP::Simulation sim);
+  void process(Simulation& sim);
 
   /** Increment the time discretisation of the linked Actuator
   */

@@ -4,7 +4,7 @@
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
-            TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
+        TimeStepping, Moreau, ControlManager, LinearSensor, LinearSMCOT2
     from numpy import eye, empty, zeros
     from math import ceil, sin
 
@@ -88,7 +88,7 @@ def test_smc1():
 
     # Main loop
     k = 1
-    while(processSimulation.nextTime() < T):
+    while(processSimulation.hasNextEvent()):
         processSimulation.computeOneStep()
         dataPlot[k, 0] = processSimulation.nextTime()
         dataPlot[k, 1] = processDS.x()[0]
@@ -105,8 +105,8 @@ def test_smc1():
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
-            ControlFirstOrderLinearDS, LinearSensor, \
-            LinearSMCOT2, getMatrix, SimpleMatrix
+        ControlFirstOrderLinearDS, LinearSensor, \
+        LinearSMCOT2, getMatrix, SimpleMatrix
     from numpy import eye, zeros
     from math import sin
     from numpy.linalg import norm
@@ -173,7 +173,7 @@ def test_smc2():
     # compare with the reference
     ref = getMatrix(SimpleMatrix("smc_2.ref"))
     print("%e" % norm(dataPlot - ref))
-    if (norm(dataPlot - ref) > 1e-12):
+    if (norm(dataPlot - ref) > 5e-12):
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
-    assert norm(dataPlot - ref) < 1e-12
+    assert norm(dataPlot - ref) < 5e-12

@@ -258,7 +258,7 @@ int main(int argc, char* argv[]){
     unsigned int k = 0;
     DynamicalSystemsGraph::VIterator ui, uiend;
    //====================================================================
-    while((k < Npointsave)&(s->nextTime() < T))
+    while((k < Npointsave)&(s->hasNextEvent()))
         {
 	  dataPlot(k,0) =  s->startingTime();
 	  // Save state of the balls

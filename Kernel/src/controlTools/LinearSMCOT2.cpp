@@ -79,7 +79,7 @@ void LinearSMCOT2::initialize(SP::Model m)
   //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
   double _t0 = _model->t0();
-  double _T = _model->finalT();
+  double _T = _model->finalT() + _timeDiscretisation->currentTimeStep();
 
   _timeDPhi.reset(new TimeDiscretisation(*_timeDiscretisation));
   _timeDPred.reset(new TimeDiscretisation(*_timeDiscretisation));
@@ -132,8 +132,8 @@ void LinearSMCOT2::actuate()
     _simulPred->setIstate(3);
   }
   // Compute _XPhi = \Phi*X
-  _simulPhi->processEvents();
   _simulPhi->advanceToEvent();
+  _simulPhi->processEvents();
   // XXX small hack here
   SP::SiconosVector CS(new SiconosVector(_nDim));
   _Csurface->getRow(0, *CS);
@@ -148,8 +148,8 @@ void LinearSMCOT2::actuate()
   _indx++;
   *_Xhat = *_X;
   // Compute \hat{x}_k
-  _simulPred->processEvents();
   _simulPred->advanceToEvent();
+  _simulPred->processEvents();
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC_OT2, LinearSMCOT2)

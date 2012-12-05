@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
     unsigned int numberOfEvent = 0 ;
     SP::EventsManager eventsManager = s->eventsManager();
     bool nonSmooth = false;
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       // get current time step
       k++;

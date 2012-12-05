@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       // get current time step
       k++;

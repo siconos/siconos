@@ -400,7 +400,7 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
       }
       else
       {
-        RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exit");
+        RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
       }
     }
 #ifdef DEBUG_NEWMARK

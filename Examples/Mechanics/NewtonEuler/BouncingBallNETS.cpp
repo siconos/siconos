@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     dataPlot(k, 6) = relation0->contactForce()->norm2();
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       //      s->computeOneStep();
       s->advanceToEvent();

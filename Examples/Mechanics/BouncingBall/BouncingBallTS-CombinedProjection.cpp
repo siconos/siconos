@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    //while (s->nextTime() < T && k < 95)
-    while (s->nextTime() < T)
+    //while (s->hasNextEvent() && k < 95)
+    while (s->hasNextEvent())
     {
 
       // for( int toto=0; toto<3;toto++)

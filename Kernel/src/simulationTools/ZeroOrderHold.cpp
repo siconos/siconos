@@ -173,16 +173,11 @@ void ZeroOrderHold::initialize()
           else if (dsType == Type::FirstOrderLinearDS)
           {
             FirstOrderLinearDS& d = *std11::static_pointer_cast<FirstOrderLinearDS>(*itDS);
-            if (_constH)
+            if (_constH && !(rel.isJacLgPlugged() || d.getPluginA()->isPlugged()))
             {
-              computePhi(d);
-              if (!(rel.isJacLgPlugged() || d.getPluginA()->isPlugged()))
-              {
-                // in fact everything is constant ...
-                computePsiTI(d, rel);
-              }
-              else
-                computePsi(d, rel);
+              // in fact everything is constant ...
+               computePsiTI(d, rel);
+               _isPsiConst[d.number()] = true;
             }
           }
         }
@@ -266,6 +261,7 @@ void ZeroOrderHold::initMatrices(const double t, SP::DynamicalSystem ds, const I
   if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     _PsiMap[dsN].reset(new SimpleMatrix(sizeN, sizeP));
+    _isPsiConst[dsN] = false;
 
   }
   else RuntimeException::selfThrow("ZeroOrderHold::initMatrices - not yet implemented for Dynamical system type: " + dsType);
@@ -353,11 +349,11 @@ void ZeroOrderHold::computePhi(const DynamicalSystem& ds)
     x = *canonicalVector;
     //Reset Lsodar
     sim.setIstate(3);
-    sim.processEvents();
     sim.advanceToEvent();
     phi.setCol(i, x);
     (*canonicalVector)(i) = 0;
   }
+  sim.processEvents();
   delete canonicalVector;
 }
 
@@ -389,7 +385,6 @@ void ZeroOrderHold::computePsiTI(const DynamicalSystem& ds, const Relation& rel)
   }
 }
 
-// XXX untested
 void ZeroOrderHold::computePsi(const DynamicalSystem& ds, const Relation& rel)
 {
   // Get relation and non smooth law types
@@ -756,7 +751,7 @@ void ZeroOrderHold::updateState(const unsigned int level)
       {
         if (_PsiMap[(*it)->number()])
         {
-          if (dsType == Type::FirstOrderLinearDS)
+          if (dsType == Type::FirstOrderLinearDS && !_isPsiConst[(*it)->number()])
           {
             Relation& rel = *interC->relation();
             computePsi(d, rel);

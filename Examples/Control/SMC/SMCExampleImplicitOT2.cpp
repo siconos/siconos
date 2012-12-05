@@ -138,10 +138,10 @@ int main(int argc, char* argv[])
   boost::timer time;
   time.restart();
   SP::Event nextEvent;
-  while (processSimulation->nextTime() < T)
+  while (processSimulation->hasNextEvent())
   {
     processSimulation->computeOneStep();
-    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
+    nextEvent = eventsManager->nextEvent();
     if (nextEvent->getType() == TD_EVENT)
     {
       k++;

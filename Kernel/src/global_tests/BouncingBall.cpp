@@ -64,7 +64,7 @@ bool BouncingBall()
     dataPlot(0, 3) = (*p)(0);
 
     int k = 1;
-    while (s->nextTime() < bouncingBall->finalT())
+    while (s->hasNextEvent())
     {
       s->computeOneStep();
       // --- Get values to be plotted ---

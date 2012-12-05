@@ -82,10 +82,10 @@ void ControlDynamicalSystem::run()
   time.restart();
   SP::Event nextEvent;
 
-  while (_processSimulation->nextTime() < _T)
+  while (_processSimulation->hasNextEvent())
   {
     _processSimulation->computeOneStep();
-    nextEvent = eventsManager->followingEvent(eventsManager->currentEvent());
+    nextEvent = eventsManager->nextEvent();
     if (nextEvent->getType() == 1)
     {
       k++;

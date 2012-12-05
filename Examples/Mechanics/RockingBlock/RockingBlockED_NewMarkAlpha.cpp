@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
     double alpha_m, alpha_f, beta, gamma;
     unsigned int k = 1;
     boost::progress_display show_progress(NpointSave);
-    while ((EDscheme->nextTime() < TimeFinal) && (k < NpointSave))
+    while (EDscheme->hasNextEvent() && (k < NpointSave))
     {
       if (IsTreatFirstSteps)
       {

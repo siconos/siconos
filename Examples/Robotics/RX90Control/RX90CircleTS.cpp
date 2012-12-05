@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
     dataPlot(k, 12) = (*v)(5);
 
 
-    while (s->nextTime() <= T)
+    while (s->hasNextEvent())
     {
       s->advanceToEvent();
       s->processEvents();

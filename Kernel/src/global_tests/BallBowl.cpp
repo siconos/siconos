@@ -58,7 +58,7 @@ bool BallBowl()
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->nextTime() < bouncingBall->finalT())
+    while (s->hasNextEvent())
     {
       // solve ...
       s->computeOneStep();

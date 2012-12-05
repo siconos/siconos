@@ -142,10 +142,10 @@ int main(int argc, char* argv[])
   boost::progress_display show_progress(N);
   boost::timer time;
   time.restart();
-  while (processSimulation->nextTime() < T)
+  while (processSimulation->hasNextEvent())
   {
     processSimulation->computeOneStep();
-    Event& nextEvent = *eventsManager.followingEvent(eventsManager.currentEvent());
+    Event& nextEvent = *eventsManager.nextEvent();
     if (nextEvent.getType() == TD_EVENT)
     {
       k++;

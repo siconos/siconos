@@ -163,12 +163,9 @@ public:
   }
 
   /** set final time
-   *  \param a double
+   *  \param newValue the new final time for the Simulatiom
    */
-  inline void setT(const double& newValue)
-  {
-    _T = newValue;
-  }
+  void setT(const double& newValue);
 
   /** get the Simulation of the Model
    *  \return a pointer on Simulation

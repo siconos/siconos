@@ -285,7 +285,7 @@ nbNodes = m.pts().shape[1]
 
 k = 1
 # time loop
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
     name = 'extr'+str(k)+'.vtk'
     #dataPlot[k,0]=s.nextTime()

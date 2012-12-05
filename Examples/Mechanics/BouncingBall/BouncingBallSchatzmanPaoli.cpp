@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       //cout << "iteration  " << k <<endl;
       s->computeOneStep();

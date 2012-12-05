@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     double h = 0.001;       // pas de discrétisation du temps
     const double theta = 0.5;   // coefficient pour le générateur de simulation
     double e = 0; // coefficient de restitution
-    int N = ceil((T - t0) / h);
+    int N = ceil((T - t0) / h) + 1;
 
 
     // déclarations
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
       k++;
 
 
-      while (k < N  && (*q)(0) > 0.0)
+      while (s->hasNextEvent() && (*q)(0) > 0.0)
       {
         s->computeOneStep();
         // --- Get values to be plotted ---
@@ -188,62 +188,65 @@ int main(int argc, char* argv[])
       (*M)(0, 0) = I;
 
       t0 = dataPlot(k - 1, 0) + h;
-      (*q0)(0) = 0;
-      (*q0)(2) = (*q)(2);
-      (*q0)(1) = (*q0)(2) - L;
-      (*v0)(0) = -(*v)(0);
-      (*v0)(2) = (*v)(2);
-      (*v0)(1) = -r * (*v0)(0) + (*v0)(2);
-
-      // libération de mémoire
-      allDS.clear();
-      allInteractions.clear();
-
-      yoyo.reset(new LagrangianDS(q0, v0, M));
-      yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
-      yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
-      yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFIntf");
-      yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntqf");
-
-      allDS.insert(yoyo);
-
-      inter.reset(new Interaction("impact", allDS, 0, 1, loi, relation));
-      allInteractions.insert(inter);
-
-      system.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
-      jeu.reset(new Model(t0, T));
-      jeu->setNonSmoothDynamicalSystemPtr(system);
-
-
-      t.reset(new TimeDiscretisation(t0, h));
-      s.reset(new TimeStepping(t));
-      OSI.reset(new Moreau(yoyo, theta));
-      s->insertIntegrator(OSI);
-      osnspb.reset(new LCP());
-      s->insertNonSmoothProblem(osnspb);
-      jeu->initialize(s);
-
-      q = yoyo->q();
-      v = yoyo->velocity();
-      p = yoyo->p(1);
-      lambda = inter->lambda(1);
-
-      while (k < N)
+      if (t0 + h < T)
       {
-        s->computeOneStep();
-        dataPlot(k, 0) =  s->nextTime();
-        dataPlot(k, 1) = (*q)(0);
-        dataPlot(k, 2) = (*v)(0);
-        dataPlot(k, 3) = (*p)(0);
-        dataPlot(k, 4) = (*lambda)(0);
-        dataPlot(k, 5) = (*q)(1);
-        dataPlot(k, 6) = (*v)(1);
-        dataPlot(k, 7) = L + (*q)(1) - r * (*q)(0) - (*q)(2);
-        dataPlot(k, 8) = (*q)(1) - (*q)(2);
-        k++;
-        if ((*lambda)(0) > 0 && (-r * (*v)(0) + (*v)(1) - (*v)(2)) < 10e-14) break;
-        s->nextStep();
-        ++show_progress;
+        (*q0)(0) = 0;
+        (*q0)(2) = (*q)(2);
+        (*q0)(1) = (*q0)(2) - L;
+        (*v0)(0) = -(*v)(0);
+        (*v0)(2) = (*v)(2);
+        (*v0)(1) = -r * (*v0)(0) + (*v0)(2);
+  
+        // libération de mémoire
+        allDS.clear();
+        allInteractions.clear();
+  
+        yoyo.reset(new LagrangianDS(q0, v0, M));
+        yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
+        yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
+        yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFIntf");
+        yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntqf");
+  
+        allDS.insert(yoyo);
+  
+        inter.reset(new Interaction("impact", allDS, 0, 1, loi, relation));
+        allInteractions.insert(inter);
+  
+        system.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
+        jeu.reset(new Model(t0, T));
+        jeu->setNonSmoothDynamicalSystemPtr(system);
+  
+  
+        t.reset(new TimeDiscretisation(t0, h));
+        s.reset(new TimeStepping(t));
+        OSI.reset(new Moreau(yoyo, theta));
+        s->insertIntegrator(OSI);
+        osnspb.reset(new LCP());
+        s->insertNonSmoothProblem(osnspb);
+        jeu->initialize(s);
+  
+        q = yoyo->q();
+        v = yoyo->velocity();
+        p = yoyo->p(1);
+        lambda = inter->lambda(1);
+  
+        while (s->hasNextEvent())
+        {
+          s->computeOneStep();
+          dataPlot(k, 0) =  s->nextTime();
+          dataPlot(k, 1) = (*q)(0);
+          dataPlot(k, 2) = (*v)(0);
+          dataPlot(k, 3) = (*p)(0);
+          dataPlot(k, 4) = (*lambda)(0);
+          dataPlot(k, 5) = (*q)(1);
+          dataPlot(k, 6) = (*v)(1);
+          dataPlot(k, 7) = L + (*q)(1) - r * (*q)(0) - (*q)(2);
+          dataPlot(k, 8) = (*q)(1) - (*q)(2);
+          k++;
+          if ((*lambda)(0) > 0 && (-r * (*v)(0) + (*v)(1) - (*v)(2)) < 10e-14) break;
+          s->nextStep();
+          ++show_progress;
+        }
       }
     }
 

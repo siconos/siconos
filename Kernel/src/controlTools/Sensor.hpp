@@ -128,9 +128,6 @@ protected:
   /** A time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
 
-  /** The event which will linked this sensor to the eventsManager of the simulation */
-  SP::Event _eSensor;
-
   /** default constructor
    */
   Sensor();
@@ -193,14 +190,6 @@ public:
     return _timeDiscretisation;
   };
 
-  /** get the Event associated with this sensor
-   *  \return a SP::Event
-   */
-  inline SP::Event event() const
-  {
-    return _eSensor;
-  };
-
   /** get all the data saved for this sensor
    *  \return a DataSet
    */
@@ -211,10 +200,6 @@ public:
    * \param m the SP::Model containing the EventsManager
    */
   virtual void initialize(SP::Model m);
-
-  /** Add the sensor into the simulation EventsManager.
-   */
-  void recordInSimulation();
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

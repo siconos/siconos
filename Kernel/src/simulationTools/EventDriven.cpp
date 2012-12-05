@@ -356,7 +356,7 @@ void EventDriven::initOSNS()
     SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
     if (indexSet1->size() != 0) // There is one non-smooth event to be added
     {
-      _eventsManager->scheduleNonSmoothEvent(_eventsManager->startingTime(), false);
+      _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
     };
   }
 }
@@ -742,7 +742,7 @@ void EventDriven::advanceToEvent()
       }
       // add new event to the list to be handled
       std::cout << "A new event occurs at time: " << _tout << endl;
-      _eventsManager->scheduleNonSmoothEvent(_tout);
+      _eventsManager->scheduleNonSmoothEvent(*this, _tout);
       model()->setCurrentTime(_tout);
     }
   }
@@ -794,7 +794,7 @@ void EventDriven::advanceToEvent()
       {
         isNewEventOccur = true;
         // Add an event into the events manager list
-        _eventsManager->scheduleNonSmoothEvent(_tout);
+        _eventsManager->scheduleNonSmoothEvent(*this, _tout);
         if (_printStat)
           statOut << " -----------> New non-smooth event at time " << _tout << endl;
       }

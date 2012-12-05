@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();

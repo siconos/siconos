@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     boost::progress_display show_progress(N);
-    while (s->nextTime() < T && k < N)
+    while (s->hasNextEvent() && k < N)
     {
       s->advanceToEvent();
       if (eventsManager->nextEvent()->getType() == 2)

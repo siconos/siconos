@@ -82,7 +82,7 @@ dataPlot[0, 4] = doubleIntegrator.b()[1]
 
 # Main loop
 k = 1
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
     dataPlot[k, 0] = s.nextTime()
     dataPlot[k, 1] = doubleIntegrator.x()[0]

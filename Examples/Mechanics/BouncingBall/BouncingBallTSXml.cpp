@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
     int k = 1;
-    while (s->nextTime() <= bouncingBall->finalT())
+    while (s->hasNextEvent())
     {
       s->computeOneStep();
       // --- Get values to be plotted ---

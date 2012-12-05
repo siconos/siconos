@@ -174,9 +174,9 @@ public:
   void display() const ;
 
   /** virtual function which actions depends on event type
-   * \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
+   * \param sim the simulation that owns this Event (through the EventsManager)
    */
-  virtual void process(SP::Simulation) = 0;
+  virtual void process(Simulation& sim) = 0;
 
   /** virtual function which actions depends on event type */
   virtual void update();

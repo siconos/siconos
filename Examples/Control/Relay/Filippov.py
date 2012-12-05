@@ -83,7 +83,7 @@ dataPlot[0, 3] = myProcessInteraction.lambda_(0)[0]
 
 # time loop
 k = 1
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
      s.computeOneStep()
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]

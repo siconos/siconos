@@ -117,7 +117,7 @@ void KernelTest::t3()
 {
   SP::SolverOptions so(new SolverOptions);
   SP::SolverOptions sor(new SolverOptions);
-  so->solverId = SICONOS_FRICTION_3D_GLOBALAC;
+  so->solverId = SICONOS_FRICTION_3D_LOCALAC;
   so->isSet = 36;
   so->iSize = 10;
   so->iparam = (int*) malloc(sizeof(int) * so->iSize);
@@ -343,7 +343,7 @@ void KernelTest::t6()
     boost::timer time;
     time.restart();
 
-    while (s->nextTime() < T)
+    while (s->hasNextEvent())
     {
       s->computeOneStep();
 

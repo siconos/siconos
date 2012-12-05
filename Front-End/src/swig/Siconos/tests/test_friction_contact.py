@@ -51,10 +51,10 @@ def lineSearch(problem, reaction, rho, delta_reaction, maxiter):
 
         iter += 1
 
-        reaction = reaction0 + alpha*delta_reaction 
-        
+        reaction = reaction0 + alpha*delta_reaction
+
         velocity = W * reaction + problem.q
-        
+
 
         F,A,B = N.frictionContact3D_globalAlartCurnierFunction(reaction, velocity, problem.mu, rho)
 
@@ -79,7 +79,7 @@ def lineSearch(problem, reaction, rho, delta_reaction, maxiter):
 
             else:
                 alpha = alphamin
-            
+
     return alpha
 
 def globalAlartCurnier(problem, reaction, velocity, options):
@@ -88,11 +88,11 @@ def globalAlartCurnier(problem, reaction, velocity, options):
     itermax = options.iparam[0]
     erritermax = options.iparam[1]
     rho = matrix(ones(problemSize)).transpose()
-    
+
     tolerance = options.dparam[0]
 
     W = problem.M
-    
+
     velocity = W*reaction + problem.q
 
     iter = 0
@@ -136,14 +136,14 @@ def test_fc3dnsgs():
     SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSGS)
     r=N.frictionContact3D_nsgs(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
-    assert not r 
+    assert not r
 
 
 def test_fc3dglobalac_simple_case():
     N.setNumericsVerbose(2)
     FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_GLOBALAC)
-    
+    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_LOCALAC)
+
     r=N.frictionContact3D_globalAlartCurnier(FCP, reactions, velocities, SO)
     assert SO.dparam[1] < 1e-10
     assert not r
@@ -154,7 +154,7 @@ def test_fc3dglobalac_full():
     print 'problem dimension :',problem.dimension
     print 'number of contacts : ', problem.numberOfContacts
 
-    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_GLOBALAC)
+    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_LOCALAC)
 
     SO.iparam[1]=1
 

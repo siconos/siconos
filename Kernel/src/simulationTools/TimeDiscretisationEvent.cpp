@@ -32,12 +32,12 @@ TimeDiscretisationEvent::TimeDiscretisationEvent(double time, int notUsed): Even
 TimeDiscretisationEvent::~TimeDiscretisationEvent()
 {}
 
-void TimeDiscretisationEvent::process(SP::Simulation simulation)
+void TimeDiscretisationEvent::process(Simulation& simulation)
 {
   // Update y[i] values in Interactions with new DS states.
   //simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation->saveInMemory();
+  simulation.saveInMemory();
 }
 
 AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEvent)

@@ -161,11 +161,10 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     // Simulation loop
-    while (k < N - 1)
+    while (s->hasNextEvent())
     {
       k++;
 
-      s->nextStep();
       // get current time step
 
       s->computeOneStep();
@@ -182,6 +181,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 9) = abs((*processObserver->x())(1) - (*processObserver->x())(3))  ;
       ++show_progress;
 
+      s->nextStep();
     }
 
     // Write the results into the file "ObserverLCS.dat"

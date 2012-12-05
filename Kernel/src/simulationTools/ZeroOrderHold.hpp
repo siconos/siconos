@@ -111,6 +111,8 @@ protected:
   /** Stl map used to store the Simulation for computing \f$\Psi\f$ */
   MapOfSimulation _simulPsiMap;
 
+  MapOfBool _isPsiConst;
+
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;

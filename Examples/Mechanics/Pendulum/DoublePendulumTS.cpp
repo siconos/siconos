@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 
     boost::progress_display show_progress(N);
 
-    while (k < N)
+    while (s->hasNextEvent())
     {
       k++;
       ++show_progress;

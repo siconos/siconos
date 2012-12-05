@@ -244,10 +244,6 @@ public:
    */
   virtual void initialize(SP::Model m);
 
-  /** Add the actuator into the simulation EventsManager.
-   */
-  void recordInSimulation();
-
   /** capture data when the ActuatorEvent is processed => set data[ActuatorEvent]=...
    */
   virtual void actuate() = 0;

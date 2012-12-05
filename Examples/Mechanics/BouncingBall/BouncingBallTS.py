@@ -130,7 +130,7 @@ dataPlot[0, 4] = lambda_[0]
 k = 1
 
 # time loop
-while(s.nextTime() < T):
+while(s.hasNextEvent()):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()
