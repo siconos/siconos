@@ -54,8 +54,6 @@ int nz ;      : # of entries in triplet matrix;
 } */
 
 
-*/
-
 #define SparseMatrix struct cs_sparse
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

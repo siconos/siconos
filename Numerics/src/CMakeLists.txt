@@ -170,6 +170,7 @@ IF(WITH_TESTING)
   NEW_TEST(SBMTest3 SBM_test3.c)
   NEW_TEST(SBMTest4 SBM_test4.c)
   NEW_TEST(SBMTest5 SBM_test5.c)
+  NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
  END_TEST()
   
   BEGIN_TEST(NonSmoothSolvers/LCP/test)

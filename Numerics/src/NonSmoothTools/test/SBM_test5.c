@@ -61,10 +61,12 @@ int main(void)
 
   printSBM(m);
 
-  assert(getValueSBM(m, 0, 0) == 2.);
-  assert(getValueSBM(m, 8, 8) == 9.);
+  int info1 = getValueSBM(m, 0, 0) == 2.;
+  int info2 = getValueSBM(m, 8, 8) == 9.;
 
   freeSBMFromSBCM(m);
+
+  return 1-info1 + 1-info2;
 
 }
 
