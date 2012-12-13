@@ -9,6 +9,68 @@
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
 
+#ifdef WITH_FCLIB
+#include <fclib.h>
+#endif
+
+#ifdef WITH_FCLIB
+int globalFrictionContact_fclib_write(
+  GlobalFrictionContactProblem* problem, 
+  char * title, 
+  char * description, 
+  char * math_info,
+  const char *path)
+{
+  int rinfo = 0;
+
+  struct fclib_global fclib_problem;
+  struct fclib_info info;
+
+  fclib_problem.spacedim = problem->dimension;
+  fclib_problem.mu =  problem->mu;
+  fclib_problem.b =  problem->b;
+  fclib_problem.f =  problem->q;
+
+  fclib_problem.info = &info;
+  info.title = title;
+  info.description = description;
+  info.math_info = math_info;
+
+  struct fclib_matrix M, H;
+
+  fclib_problem.M = &M;
+  fclib_problem.H = &H;
+
+  /* only coordinates */
+  assert(problem->M->matrix2);
+  assert(problem->H->matrix2);
+
+  SparseMatrix* _M = problem->M->matrix2;
+  SparseMatrix* _H = problem->H->matrix2;
+
+  M.m = _M->m;
+  M.n = _M->n;
+  M.p = _M->p;
+  M.i = _M->i;
+  M.x = _M->x;
+  M.nzmax = _M->nzmax;
+  M.nz = _M->nz;
+
+  H.m = _H->m;
+  H.n = _H->n;
+  H.p = _H->p;
+  H.i = _H->i;
+  H.x = _H->x;
+  H.nzmax = _H->nzmax;
+  H.nz = _H->nz;
+
+  rinfo = fclib_write_global(&fclib_problem, path);
+
+  return rinfo;
+
+}
+#endif
+
 static int fccounter = 0;
 
 int globalFrictionContact3D_LmgcDriver(double *reaction,
@@ -17,12 +79,14 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        double *q,
                                        double *b,
                                        double *mu,
-                                       double *M,
+                                       double *Mdata,
+                                       unsigned int nzM,
                                        unsigned int *rowM,
-                                       unsigned int *columnM,
-                                       double* H,
+                                       unsigned int *colM,
+                                       double* Hdata,
+                                       unsigned int nzH,
                                        unsigned int *rowH,
-                                       unsigned int *columnH,
+                                       unsigned int *colH,
                                        unsigned int n,
                                        unsigned int nc,
                                        int solver_id,
@@ -31,139 +95,106 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
                                        int verbose,
                                        int outputFile)
 {
-  int info;
+  GlobalFrictionContactProblem problem;
+  NumericsMatrix M, H;
 
-  /*   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc,nc,nb,row,column,W); */
+  SparseMatrix _M, _H;
 
-  /*   SparseBlockStructuredMatrix* M = SBCMToSBM(MC); */
+  M.storageType = 2;
+  M.size0 = n;
+  M.size1 = n;
 
-  /*   NumericsMatrix* NM = newSparseNumericsMatrix(nc*3,nc*3,M); */
+  _M.nzmax = nzM;
+  _M.nz = nzM;
+  _M.m = M.size0;
+  _M.n = M.size1;
+  _M.p = (int *) rowM;
+  _M.i = (int *) colM;
+  _M.x = Mdata;
 
-  /*   FrictionContactProblem* FC = frictionContactProblem_new(3, nc, NM, q, mu); */
+  H.storageType = 2;
+  H.size0 = M.size0;
+  H.size1 = 3 * nc;
 
-  /*   /\* frictionContact_display(FC); *\/ */
+  _H.nzmax = nzH;
+  _H.nz = nzH;
+  _H.m = H.size0;
+  _H.n = H.size1;
+  _H.p = (int *) rowH;
+  _H.i = (int *) colH;
+  _H.x = Hdata;
 
-  /*   NumericsOptions numerics_options; */
+  M.matrix2 = &_M;
+  H.matrix2 = &_H;
 
-  /*   numerics_options.verboseMode = verbose; // turn verbose mode to off by default */
+  problem.dimension = 3;
+  problem.numberOfContacts = nc;
 
-  /*   //  uncomment to save FrictionContactProblem */
+  problem.M = &M;
+  problem.H = &H;
+  problem.q = q;
+  problem.b = b;
+  problem.mu = mu;
 
-  /*   if (outputFile == 1) */
-  /*   { */
-  /*     FILE * file = fopen("tutu.c","w"); */
+  NumericsOptions numerics_options; 
+  numerics_options.verboseMode = verbose;
 
-  /*     fprintf(file,"int nc = %i ;\n ", nc); */
-  /*     fprintf(file,"int nb = %i ;\n ", nb); */
-  /*     fprintf(file,"double mu[%i] ={\n",nc); */
-  /*     for (int i =0; i < nc-1 ; i++ ) */
-  /*     { */
-  /*       fprintf(file, "%32.24e, \t",mu[i]); */
-  /*     }   */
-  /*     fprintf(file,"%32.24e };\n",mu[nc-1]); */
-  /*     fprintf(file,"int row[%i] ={\n",nb); */
-  /*     for (int i =0; i < nb-1 ; i++ ) */
-  /*     { */
-  /*       fprintf(file, "%i,\t",row[i]); */
-  /*     } */
+  SolverOptions numerics_solver_options;
 
-  /*     fprintf(file," %i};\n",row[nb-1]); */
-  /*     fprintf(file,"int column[%i] ={\n",nb); */
-  /*     for (int i =0; i < nb-1 ; i++ ) */
-  /*     { */
-  /*       fprintf(file, "%i,\t",column[i]); */
-  /*     } */
-  /*     fprintf(file," %i};\n",column[nb-1]); */
-  /*     fprintf(file,"double q[%i] ={\n",3*nc); */
-  /*     for (int i =0; i < 3*nc-1 ; i++ ) */
-  /*     { */
-  /*       fprintf(file, "%32.24e,\t",q[i]); */
-  /*     } */
-  /*     fprintf(file," %32.24e};\n",q[3*nc-1]); */
+  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
-  /*     fprintf(file,"double W[%i] ={\n",3*3*nb); */
-  /*     for (int i =0; i < nb-1 ; i++ ) */
-  /*       {  */
-  /*         for (int j =0; j < 3*3 ; j++ ) */
-  /*     	  {  */
-  /* 	    fprintf(file, "%32.24e, \t",W[i*9+j]); */
-  /*   	  } */
-  /*         fprintf(file,"\n"); */
-  /*       } */
-  /*     for (int j =0; j < 3*3-1 ; j++ ) */
-  /*       { */
-  /* 	fprintf(file, "%32.24e, \t",W[(nb-1)*9+j]); */
-  /*       } */
-  /*     fprintf(file,"%32.24e};\n", W[(nb-1)*9+8] ); */
-  /*     fclose(file); */
-  /*   } */
-  /*   else if (outputFile == 2) */
-  /*   { */
-  /*      char fname[256]; */
-  /*      sprintf(fname,"LMGC_FrictionContactProblem%.5d.dat",fccounter++); */
-  /*      printf("Dump of LMGC_FrictionContactProblem%.5d.dat",fccounter); */
+  numerics_solver_options.dparam[0] = tolerance;
+  numerics_solver_options.iparam[0] = itermax;
 
-  /*      FILE * foutput  =  fopen(fname,"w"); */
-  /*      frictionContact_printInFile(FC, foutput); */
-  /*      fclose(foutput); */
-  /*   } */
-  /*   else if (outputFile ==3) */
-  /*   { */
-  /* #ifdef WITH_FCLIB     */
-  /*     char fname[256]; */
-  /*     sprintf(fname,"LMGC_FrictionContactProblem%.5d.hdf5",fccounter++); */
-  /*     printf("Dump of LMGC_FrictionContactProblem%.5d.hdf5",fccounter); */
+  int rinfo = globalFrictionContact3D_driver(&problem,
+                                             reaction, 
+                                             velocity,
+                                             globalVelocity,
+                                             &numerics_solver_options,
+                                             &numerics_options);
 
-  /*     FILE * foutput  =  fopen(fname,"w"); */
-  /*     int n =100; */
-  /*     char * title = (char *)malloc(n*sizeof(char *)); */
-  /*     strcpy(title,"LMGC dump in hdf5"); */
-  /*     char * description = (char *)malloc(n*sizeof(char *)); */
+  if(outputFile == 1)
+  {
+    /* dump in C format */
+  }
+  else if (outputFile == 2)
+  {
+    /* dump in Numerics .dat format */
+  }
+  else if (outputFile == 3)
+  {
+#ifdef WITH_FCLIB
+    char fname[256];
+    sprintf(fname, "LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter++);
+    printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter);
 
-  /*     strcat(description,"Rewriting in hdf5 through siconos of  "); */
-  /*     strcat(description,fname); */
-  /*     strcat(description, " in FCLIB format"); */
-  /*     char * math_info = (char *)malloc(n*sizeof(char *)); */
-  /*     strcpy(math_info,  "unknown"); */
+    FILE * foutput  =  fopen(fname, "w");
+    int n = 100;
+    char * title = (char *)malloc(n * sizeof(char *));
+    strcpy(title, "LMGC dump in hdf5");
+    char * description = (char *)malloc(n * sizeof(char *));
 
-  /*     frictionContact_fclib_write(FC, */
-  /*                                 title, */
-  /*                                 description, */
-  /*                                 math_info, */
-  /*                                 fname); */
+    strcat(description, "Rewriting in hdf5 through siconos of  ");
+    strcat(description, fname);
+    strcat(description, " in FCLIB format");
+    char * math_info = (char *)malloc(n * sizeof(char *));
+    strcpy(math_info,  "unknown");
+
+    globalFrictionContact_fclib_write(&problem,
+                                      title,
+                                      description,
+                                      math_info,
+                                      fname);
 
 
 
-  /*     fclose(foutput); */
-  /* #else */
-  /*     printf("Fclib is not available ...\n"); */
-  /* #endif */
+    fclose(foutput);
+#else
+    printf("Fclib is not available ...\n");
+#endif
 
-  /*   } */
+  }
 
-  /*   SolverOptions numerics_solver_options; */
-
-  /*   frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solver_id); */
-
-  /*   numerics_solver_options.dparam[0]=tolerance; */
-  /*   numerics_solver_options.iparam[0]=itermax; */
-
-  /*   int info = frictionContact3D_driver(FC,  */
-  /*                                       reaction , velocity,  */
-  /*                                       &numerics_solver_options, &numerics_options); */
-
-
-  /*   freeSparseBlockCoordinateMatrix3x3fortran(MC);  */
-
-  /*   free(M->index1_data); */
-  /*   free(M->index2_data); */
-  /*   free(M->block); */
-  /*   free(M); */
-  /*   free(FC); */
-  /*   deleteSolverOptions(&numerics_solver_options); */
-  /*   free(NM); */
-  /*   free(MC); */
-
-  return info; 
+  return rinfo; 
 }
 

@@ -147,10 +147,12 @@ extern "C"
    *  \param[in] q global vector (n)
    *  \param[in] b global vector (nc*3)
    *  \param[in] mu global vector (nc)
-   *  \param[in] M the sparse matrix in coordinate format
+   *  \param[in] Mdata the sparse matrix in coordinate format
+   *  \param[in] nzM number of non zeros in Mdata
    *  \param[in] rowM  row indices of M
-   *  \param[in] columnM  column indices of M
-   *  \param[in] H the sparse matrix in coordinate format
+   *  \param[in] colM  column indices of M
+   *  \param[in] Hdata the sparse matrix in coordinate format
+   *  \param[in] nzH number of non zeros in Hdata
    *  \param[in] rowH  row indices of H
    *  \param[in] columnH  column indices of H
    *  \param[in] n size of global velocity
@@ -169,12 +171,14 @@ extern "C"
                                          double *q,
                                          double *b,
                                          double *mu,
-                                         double *M,
+                                         double *Mdata,
+                                         unsigned int nzM,
                                          unsigned int *rowM,
-                                         unsigned int *columnM,
-                                         double* H,
+                                         unsigned int *colM,
+                                         double* Hdata,
+                                         unsigned int nzH,
                                          unsigned int *rowH,
-                                         unsigned int *columnH,
+                                         unsigned int *colH,
                                          unsigned int n,
                                          unsigned int nc,
                                          int solver_id,
