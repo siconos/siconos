@@ -25,25 +25,38 @@
 */
 
 
-
-
 /*!\file SparseMatrix.h
   \brief Structure definition and functions related to sparse matrix storage in Numerics
 */
 #include <stdio.h>
+#include "csparse.h"
 
-typedef struct   /* matrix in compressed row/column or triplet form */
+/*  we use csparse from Timothy Davis
+ 
+    Timothy Davis,
+    Direct Methods for Sparse Linear Systems,
+    SIAM, 2006,
+    ISBN: 0898716136,
+    LC: QA188.D386.
+
+   matrix in compressed row/column or triplet form :
 {
-  int nzmax ;     /* maximum number of entries */
-  int m ;     /* number of rows */
-  int n ;     /* number of columns */
-  int *p ;      /* compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz) */
-  int *i ;      /* compressed: column or row indices, size nzmax; triplet: column indices (size nz) */
-  double *x ;     /* numerical values, size nzmax */
-  int nz ;      /* # of entries in triplet matrix;
-           -1 for compressed columns;
-           -2 for compressed rows */
-} SparseMatrix;
+int nzmax ;   : maximum number of entries 
+int m  ;      : number of rows 
+int n ;       : number of columns 
+int *p ;      : compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz) 
+int *i ;      : compressed: column or row indices, size nzmax; triplet: column indices (size nz) 
+double *x ;   :  numerical values, size nzmax 
+int nz ;      : # of entries in triplet matrix;
+-1 for compressed columns;
+-2 for compressed rows 
+
+} */
+
+
+*/
+
+#define SparseMatrix struct cs_sparse
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
