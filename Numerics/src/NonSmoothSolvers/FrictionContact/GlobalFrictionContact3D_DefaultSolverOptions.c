@@ -39,7 +39,7 @@ int globalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int 
     options->solverId = SICONOS_FRICTION_3D_GLOBAL_NSGS;
     break;
   }
-  case SICONOS_FRICTION_3D_GLOBAL_GLOBALAC_WR:
+  case SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR:
   {
     info =    globalFrictionContact3D_globalAlartCurnier_wr_setDefaultSolverOptions(options);
     break;

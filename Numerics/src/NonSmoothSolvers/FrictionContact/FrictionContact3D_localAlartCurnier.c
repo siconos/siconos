@@ -414,7 +414,7 @@ void frictionContact3D_globalAlartCurnier(
 
     if (info2 > 0)
       /*if (verbose>0)*/
-      printf("GLOBALAC: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
+      printf("LOCALAC: warning DGESV failed with U(%d,%d) == 0.\n", info2, info2);
 
     // line search
     double alpha = 1;
@@ -454,7 +454,7 @@ void frictionContact3D_globalAlartCurnier(
     }
 
     if (verbose > 0)
-      printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+      printf("LOCALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
 
     if (options->dparam[1] < tolerance)
     {
@@ -470,11 +470,11 @@ void frictionContact3D_globalAlartCurnier(
   if (verbose > 0)
   {
     if (!info[0])
-      printf("GLOBALAC: convergence after %d iterations, error : %g\n",
+      printf("LOCALAC: convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
+      printf("LOCALAC: no convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     }
   }
@@ -484,8 +484,8 @@ void frictionContact3D_globalAlartCurnier(
   {
     static int file_counter = 0;
     char filename[64];
-    printf("GLOBALAC: dumping problem\n");
-    sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
+    printf("LOCALAC: dumping problem\n");
+    sprintf(filename, "LOCALAC_failure%d.dat", file_counter++);
     FILE* file = fopen(filename, "w");
     frictionContact_printInFile(problem, file);
     fclose(file);
@@ -514,10 +514,10 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
 {
   if (verbose > 0)
   {
-    printf("Set the default solver options for the GLOBALAC Solver\n");
+    printf("Set the default solver options for the LOCALAC Solver\n");
   }
 
-  options->solverId = SICONOS_FRICTION_3D_GLOBALAC;
+  options->solverId = SICONOS_FRICTION_3D_LOCALAC;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
@@ -832,7 +832,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
                                                  // A(3), B(3), rho (1)
                      nzmax) * sizeof(double) +   // AWpB
                     2 * nzmax * sizeof(int) +    // irn,  jcn
-                    sizeof(SparseBlockStructuredMatrix *)); // blockAWpB 
+                    sizeof(SparseBlockStructuredMatrix)); // blockAWpB 
   else
     buffer = options->dWork;
 
@@ -903,7 +903,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
 
     if (mumps_id->info[0] > 0)
       /*if (verbose>0)*/
-      printf("GLOBALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
+      printf("LOCALAC: MUMPS warning : info(1)=%d, info(2)=%d\n", mumps_id->info[0], mumps_id->info[1]);
 
 
     if (verbose > 0)
@@ -956,7 +956,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     }
 
     if (verbose > 0)
-      printf("GLOBALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
+      printf("LOCALAC: iteration %d : error=%g\n", iter, options->dparam[1]);
 
     if (options->dparam[1] < tolerance)
     {
@@ -972,11 +972,11 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   if (verbose > 0)
   {
     if (!info[0])
-      printf("GLOBALAC: convergence after %d iterations, error : %g\n",
+      printf("LOCALAC: convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("GLOBALAC: no convergence after %d iterations, error : %g\n",
+      printf("LOCALAC: no convergence after %d iterations, error : %g\n",
              iter, options->dparam[1]);
     }
   }
@@ -988,8 +988,8 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   {
     static int file_counter = 0;
     char filename[64];
-    printf("GLOBALAC: dumping problem\n");
-    sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
+    printf("LOCALAC: dumping problem\n");
+    sprintf(filename, "LOCALAC_failure%d.dat", file_counter++);
     FILE* file = fopen(filename, "w");
     frictionContact_printInFile(problem, file);
     fclose(file);

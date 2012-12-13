@@ -12,7 +12,7 @@
 #include "op3x3.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_AlartCurnier.h"
-#include "FrictionContact3D_globalAlartCurnier.h"
+#include "FrictionContact3D_localAlartCurnier.h"
 #include "AlartCurnierGenerated.h"
 
 void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9]);

@@ -35,7 +35,7 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_GLOBALAC_WR);
+  globalFrictionContact3D_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_GLOBAL_LOCALAC_WR);
 
   info = globalFrictionContact_test_function(finput, options);
   deleteSolverOptions(options);

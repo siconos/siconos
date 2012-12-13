@@ -36,6 +36,17 @@
 #include <mpi.h>
 #include <dmumps_c.h>
 
+void prodSMCooVector(SparseMatrix *M, double *v)
+{
+  for(unsigned int i = 0; i<M->nz; ++i)
+  {
+    
+  }
+
+}
+
+
+
 unsigned int sizeOfACPsiJacobian(
   SparseMatrix* M,
   SparseMatrix* H)

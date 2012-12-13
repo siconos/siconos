@@ -75,7 +75,7 @@ int main(void)
 
 
 
-  int solver_id = SICONOS_FRICTION_3D_GLOBALAC; // 500
+  int solver_id = SICONOS_FRICTION_3D_LOCALAC; // 500
   double tolerance = 1e-10;
   int itermax = 500;
 
