@@ -117,6 +117,7 @@ typedef struct
   int size1;
   double* matrix0;
   SparseBlockStructuredMatrix* matrix1;
+  SparseMatrix* matrix2;
 } NumericsMatrix;
 
 

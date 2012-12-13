@@ -1696,7 +1696,8 @@ void freeSparseBlockCoordinateMatrix3x3fortran(SparseBlockCoordinateMatrix *MC)
 /* i.e coo.h file under scipy sparsetools */
 SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
 {
-  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *) malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *) 
+    malloc(sizeof(SparseBlockStructuredMatrix));
 
   M->nbblocks = MC->nbblocks;
   M->filled2 = MC->nbblocks;

@@ -828,9 +828,11 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   void *buffer;
 
   if (!options->dWork)
-    buffer = malloc((10 * problemSize +
-                     3 * nzmax) * sizeof(double) +
-                    problemSize * sizeof(int));
+    buffer = malloc((10 * problemSize +          // F(1), tmp1(1), tmp2(1), 
+                                                 // A(3), B(3), rho (1)
+                     nzmax) * sizeof(double) +   // AWpB
+                    2 * nzmax * sizeof(int) +    // irn,  jcn
+                    sizeof(SparseBlockStructuredMatrix *)); // blockAWpB 
   else
     buffer = options->dWork;
 
