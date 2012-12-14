@@ -106,8 +106,10 @@ However, if required, a function freeNumericsMatrix() is available.
     \param storageType, int that identifies the type of storage (0: double*, 1:SparseBlockStructuredMatrix)
     \param size0, number of rows
     \param size1, number of columns
-    \param double*, matrix saved as a double * (if storage=0, else equal to NULL)
-    \param SparseBlockStructuredMatrix* (if storageType =1 ,else equal to NULL)\n
+    \param matrix0 dense storage
+    \param matrix1 sparse block storage
+    \param matrix2 triplet storage
+    \param matrix3 compressed column storage
     Related functions: prod(), subRowProd(), freeNumericsMatrix(), display()
 */
 typedef struct
@@ -117,7 +119,9 @@ typedef struct
   int size1;
   double* matrix0;
   SparseBlockStructuredMatrix* matrix1;
-  SparseMatrix* matrix2;
+  SparseMatrix* matrix2; /* triplet */
+  SparseMatrix* matrix3; /* compressed col */
+  SparseMatrix* matrix4; /* compressed transpose */
 } NumericsMatrix;
 
 

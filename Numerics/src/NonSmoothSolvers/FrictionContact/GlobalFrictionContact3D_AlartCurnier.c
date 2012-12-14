@@ -20,6 +20,8 @@
 
 /* /!\ work in progress */
 
+#include "NumericsConfig.h"
+
 #ifdef WITH_MUMPS
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "GlobalFrictionContact3D_compute_error.h"
@@ -30,21 +32,119 @@
 #include <assert.h>
 #include <math.h>
 
-#include "FrictionContact3D_globalAlartCurnier.h"
+#include "SparseMatrix.h"
+#include "FrictionContact3D_localAlartCurnier.h"
 
+#include "GlobalFrictionContact3D_compute_error.h"
 
 #include <mpi.h>
 #include <dmumps_c.h>
 
-void prodSMCooVector(SparseMatrix *M, double *v)
-{
-  for(unsigned int i = 0; i<M->nz; ++i)
-  {
-    
-  }
+#define JOB_INIT -1
+#define JOB_END -2
+#define USE_COMM_WORLD -987654
+#define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
 
+#define CHECK(EXPR)                                                     \
+  do                                                                    \
+  {                                                                     \
+    if (!EXPR)                                                          \
+    {                                                                   \
+      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d ", #EXPR, __FILE__, __LINE__); \
+    }                                                                   \
+  } while (0)
+
+
+/* y = alpha*A*x+beta*y */
+int cs_aaxpy(const double alpha, const cs *A, const double *x, double *y)
+{
+  int p, j, n, *Ap, *Ai ;
+  double *Ax ;
+  if(!A || !x || !y) return (0) ;	     /* check inputs */
+  n = A->n ;
+  Ap = A->p ;
+  Ai = A->i ;
+  Ax = A->x ;
+  for(j = 0 ; j < n ; j++)
+  {
+    for(p = Ap [j] ; p < Ap [j+1] ; p++)
+    {
+      y [Ai [p]] += alpha * Ax [p] * x [j] ;
+    }
+  }
+  return (1) ;
 }
 
+SparseMatrix* NM_csc(NumericsMatrix *A)
+{
+  if (!A->matrix3)
+  {
+    assert(A->matrix2);
+    A->matrix3 = cs_triplet(A->matrix2); /* triplet -> csc */
+  }
+  return A->matrix3;
+}
+
+SparseMatrix* NM_trans(NumericsMatrix* A)
+{
+  if(!A->matrix4)
+  {
+    A->matrix4 = cs_transpose(NM_csc(A), 1); /* value = 1 -> allocation */
+  }
+  return A->matrix4;
+}
+
+
+/* Numerics Matrix wrapper */
+void NM_aaxpy(const double alpha, NumericsMatrix* A, const double *x, 
+              double *y)
+{
+  CHECK(cs_aaxpy(alpha, NM_csc(A), x, y));
+}
+
+/* Numerics Matrix wrapper */
+void NM_aatxpy(const double alpha, NumericsMatrix* A, const double *x, 
+              double *y)
+{
+  CHECK(cs_aaxpy(alpha, NM_trans(A), x, y));
+}
+
+void NM_setup(NumericsMatrix* A)
+{
+  if (!A->matrix2)
+  {
+    assert(A->matrix1);
+    A->matrix2 = cs_spalloc(0,0,1,1,1);
+    for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
+    {
+      for(unsigned int bn = A->matrix1->index1_data[cr];
+          bn < A->matrix1->index1_data[cr + 1]; ++bn)
+      {
+        unsigned int cn = A->matrix1->index2_data[bn];
+        unsigned int inbr = A->matrix1->blocksize0[cr];
+        if (cr != 0)
+        {
+          inbr -= A->matrix1->blocksize0[cr - 1];
+        }
+        unsigned int inbc = A->matrix1->blocksize1[cr];
+        if (cn != 0)
+        {
+          inbc -= A->matrix1->blocksize1[cn - 1];
+        }
+        for (unsigned j = 0; j < inbc; ++j)
+        {
+          for(unsigned i = 0; i < inbr; ++i)
+          {
+            CHECK(cs_entry(A->matrix2, i + A->matrix1->blocksize1[cr], j + 
+                           A->matrix1->blocksize0[cr], 
+                           A->matrix1->block[bn][i + j*inbr]));
+          }
+        }
+      }
+    }
+  }
+}
 
 
 unsigned int sizeOfACPsiJacobian(
@@ -68,14 +168,23 @@ void ACpsi(GlobalFrictionContactProblem* problem,
   unsigned int globalProblemSize = sizeOfACPsiJacobian(problem->M->matrix2, 
                                                        problem->H->matrix2);
 
-  /* psi <- 
+
+/* psi <- 
      compute -problem->M * globalVelocity + problem->H * reaction + problem->q
    ... */
+  DSCAL(globalProblemSize, 0., psi, 1);
+  NM_aaxpy(1., problem->H, reaction, psi);
+  NM_aaxpy(-1., problem->M, globalVelocity, psi); 
 
 
   /* psi + problem->M->size0 <- 
      compute -velocity + trans(problem->H) * globalVelocity + problem->b
    ... */
+  DAXPY(localProblemSize, -1., velocity, 1, psi + problem->M->size0, 1);
+  DAXPY(localProblemSize, 1, problem->b, 1, psi + problem->M->size0, 1);
+  NM_aatxpy(1., problem->H, globalVelocity, psi + problem->M->size0);
+
+
 
   /* compute AC function */
   frictionContact3D_globalAlartCurnierFunction(localProblemSize, 
@@ -117,73 +226,41 @@ void initACPsiJacobian(
 
   assert(A->nz == B->nz);
 
-  J->n = M->n + A->m + B->m;
-  J->m = M->m + A->n + B->n;
-    
-  J->nzmax = M->nzmax + 2*H->nzmax + 2*A->n + A->nzmax + B->nzmax;
-  J->nz = J->nzmax;
-
-  J->p = (int*) malloc((J->nz) * sizeof(int));
-  J->i = (int*) malloc((J->nz) * sizeof(int));
-  J->x = (double*) malloc((J->nz) * sizeof(double));
-  
-  unsigned int offset = 0;
-
   /* M */
   for (unsigned int e=0; e<M->nz; ++e)
   {
-    J->x[offset+e] = M->x[e];
-    J->p[offset+e] = M->p[e];
-    J->i[offset+e] = M->i[e];
+    CHECK(cs_entry(J, M->p[e], M->i[e], M->x[e]));
   }
-  offset = M->nz;
 
   /* H */
   for (unsigned int e=0; e<H->nz; ++e)
   {
-    J->x[offset+e] = H->x[e];
-    J->p[offset+e] = H->p[e] + M->m + A->m;
-    J->i[offset+e] = H->i[e];
+    CHECK(cs_entry(J, H->p[e], H->i[e] + M->n + A->n, H->x[e]));
   }
-  offset += H->nz;
 
   /* Ht */
   for (unsigned int e=0; e<H->nz; ++e)
   {
-    J->x[offset+e] = H->x[e];
-    J->i[offset+e] = H->p[e];
-    J->p[offset+e] = H->i[e] + M->n + A->n;
+    CHECK(cs_entry(J, H->i[e] + M->m + A->m, H->p[e], H->x[e]));
   }
-  offset += H->nz;
 
   /* I */
   for (unsigned int e=0; e<A->m; ++e)
   {
-    J->x[offset+e] = 1.;
-    J->p[offset+e] = e + M->n;
-    J->i[offset+e] = e + M->m;
+    CHECK(cs_entry(J, e + M->n, e + M->m, 1.));
   }
-  offset += A->m;
 
   /* A */
   for (unsigned int e=0; e<A->nz; ++e)
   {
-    J->x[offset+e] = A->x[e];
-    J->p[offset+e] = A->p[e] + M->n;
-    J->i[offset+e] = A->i[e] + M->m;
+    CHECK(cs_entry(J, A->p[e] + M->n, A->i[e] + M->m, A->x[e]));
   }
-  offset += A->nz;
 
   /* B */
   for (unsigned int e=0; e<B->nz; ++e)
   {
-    J->x[offset+e] = B->x[e];
-    J->p[offset+e] = B->p[e] + M->n;
-    J->i[offset+e] = B->i[e] + M->m;
+    CHECK(cs_entry(J, B->p[e] + M->n, B->i[e] + M->m, B->x[e]));
   }
-
-  J->nz = offset + B->nz;
-
 }
 
 /* update J with new A and B */
@@ -213,36 +290,23 @@ void updateACPsiJacobian(
   assert(J->m == M->m + A->n + B->n);
     
   assert(J->nzmax == M->nzmax + 2*H->nzmax + 2*A->n + A->nzmax + B->nzmax);
-  assert(J->nz    == J->nzmax);
+//  assert(J->nz    == J->nzmax);
 
   assert(J->p);
   assert(J->i);
   assert(J->x);
   
-  unsigned int offset = 0;
-
-  offset = M->nz;    /* M */
-  offset += H->nz;   /* H */
-  offset += H->nz;   /* Ht */
-  offset += A->m;    /* I */
-
   /* A */
   for (unsigned int e=0; e<A->nz; ++e)
   {
-    J->x[offset+e] = A->x[e];
-    J->p[offset+e] = A->p[e] + M->n;
-    J->i[offset+e] = A->i[e] + M->m;
+    CHECK(cs_entry(J, A->p[e] + M->n, A->i[e] + M->m, A->x[e]));
   }
-  offset += A->nz;
 
   /* B */
   for (unsigned int e=0; e<B->nz; ++e)
   {
-    J->x[offset+e] = B->x[e];
-    J->p[offset+e] = B->p[e] + M->n;
-    J->i[offset+e] = B->i[e] + M->m;
+    CHECK(cs_entry(J, B->p[e] + M->n, B->i[e] + M->m, B->x[e]));
   }
-
 }
 
 void SparseMatrixFrom3x3DiagBlocks(int nc, double* P, SparseMatrix* R)
@@ -251,6 +315,8 @@ void SparseMatrixFrom3x3DiagBlocks(int nc, double* P, SparseMatrix* R)
   R->m = 3 * nc;
   R->n = 3 * nc;
   R->x = P;
+  R->nz = 9*nc;
+  R->nzmax = R->nz;
 
   for (unsigned int ib = 0; ib < nc; ++ib)
   {
@@ -299,9 +365,7 @@ int _globalLineSearchSparseGP(
 
   //  tmp <- J * direction
   DSCAL(globalProblemSize, 0., tmp, 1);
-
-  /* to be done */
-  /*prodSparseMatrixCoo(globalProblemSize, globalProblemSize, 1., J->matrix2, direction, 1, tmp);*/
+  cs_gaxpy(J, direction, tmp);
 
   double dqdt0 = DDOT(globalProblemSize, psi, 1, tmp, 1);
 
@@ -366,6 +430,77 @@ int _globalLineSearchSparseGP(
   return -1;
 }
 
+int globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(
+  SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the default solver options for the LOCALAC Solver\n");
+  }
+
+  options->solverId = SICONOS_FRICTION_3D_GLOBAL_AC;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 9;
+  options->dSize = 9;
+  options->iparam = (int *) malloc(options->iSize * sizeof(int));
+  options->dparam = (double *) malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  for (unsigned int i = 0; i < 9; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 200;
+  options->iparam[1] = 1;
+  options->iparam[3] = 100000; /* nzmax*/
+  options->iparam[5] = 1;  
+  options->iparam[7] = 1;      /* erritermax */
+  options->dparam[0] = 1e-3;
+
+  options->iparam[8] = -1;     /* mpi com fortran */
+  options->internalSolvers = NULL;
+
+  return 0;
+}
+
+void globalFrictionContact3D_sparseGlobalAlartCurnierInit(
+  SolverOptions *SO)
+{
+  DMUMPS_STRUC_C* mumps_id = malloc(sizeof(DMUMPS_STRUC_C));
+
+  // SO with void pointers ?
+  SO->dparam[7] = (long) mumps_id;
+
+  // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
+  mumps_id->job = JOB_INIT;
+  mumps_id->par = 1;
+  mumps_id->sym = 0;
+  mumps_id->comm_fortran = USE_COMM_WORLD;
+  dmumps_c(mumps_id);
+
+  if (0)
+  {
+    mumps_id->ICNTL(4) = 0;
+    mumps_id->ICNTL(10) = 1;
+    mumps_id->ICNTL(11) = 1;
+  }
+  else
+  {
+    mumps_id->ICNTL(1) = -1;
+    mumps_id->ICNTL(2) = -1;
+    mumps_id->ICNTL(3) = -1;
+  }
+
+  mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
+  // ok for a cube on a plane & four contact points
+  // computeAlartCurnierSTD != generated in this case...
+
+  //mumps_id->CNTL(3) = ...;
+  //mumps_id->CNTL(5) = ...;
+}
 
 
 void globalFrictionContact3D_AlartCurnier(
@@ -398,26 +533,31 @@ void globalFrictionContact3D_AlartCurnier(
 
   assert(!options->iparam[4]); // only host
   
-  unsigned int problemSize = 3 * problem->numberOfContacts;
+  unsigned int globalProblemSize = problem->M->size0;
   
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+  int mumps_com = options->iparam[8];
 
-  if (!mumps_id)
+  if (mumps_com<0)
   {
     /* we suppose no mpi init has been done */
-    /* if this not the case you *must* call
-       frictionContact3D_sparseGlobalAlartCurnierInit yourself */
     int ierr, myid;
     int argc = 0;
     char **argv;
     ierr = MPI_Init(&argc, &argv);
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    frictionContact3D_sparseGlobalAlartCurnierInit(options);
+    globalFrictionContact3D_sparseGlobalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+  }
+  else /* we suppose mpi init has been done */
+  {
+    globalFrictionContact3D_sparseGlobalAlartCurnierInit(options);
+    mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+    mumps_id->comm_fortran = mumps_com;
   }
 
   assert(mumps_id);
@@ -428,9 +568,13 @@ void globalFrictionContact3D_AlartCurnier(
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
   
-  unsigned int _3problemSize = 3 * problemSize;
+  unsigned int _3problemSize = 3 * globalProblemSize;
+
+  /* sparse triplet storage */
+  NM_setup(problem->M);
+  NM_setup(problem->H);
   
-  unsigned int globalProblemSize = sizeOfACPsiJacobian(problem->M->matrix2, 
+  unsigned int ACProblemSize = sizeOfACPsiJacobian(problem->M->matrix2, 
                                                        problem->H->matrix2);
 
   unsigned int localProblemSize = problem->H->size1;
@@ -443,50 +587,49 @@ void globalFrictionContact3D_AlartCurnier(
                                                                    // rho (1)
                     2 * localProblemSize * sizeof(int) +           // irn,  jcn
                     3 * sizeof(SparseMatrix *) +         // A_,B_,J
-                    3 * globalProblemSize * sizeof(double) // psi, tmp1 +
+                    3 * ACProblemSize * sizeof(double) // psi, tmp1 +
       );
 
   else
     buffer = options->dWork;
 
   double *F = (double *) buffer;
-  double *A = F + problemSize;
-  double *B = A + _3problemSize;
-  double *rho = B + _3problemSize;
-  int *irn = (int *)(rho + problemSize);
-  int *jcn = irn + _3problemSize;
+  double *A = F + localProblemSize;
+  double *B = A + 9*localProblemSize;
+  double *rho = B + 9*localProblemSize;
+  int *irn = (int *)(rho + localProblemSize);
+  int *jcn = irn + localProblemSize;
 
-  SparseMatrix *A_ = (SparseMatrix *)(jcn + nzmax);
-  SparseMatrix *B_ = A_ + 1;
-  SparseMatrix *J  = B_ + 1;
+  SparseMatrix A_;
+  SparseMatrix B_;
+  SparseMatrix *J;
 
-  double * psi = (double *) (J + 1);
-  double * tmp1 = psi + globalProblemSize;
-  double * tmp2 = tmp1 + globalProblemSize;
-  double * solution = tmp2 + globalProblemSize;
+  double * psi = (double *) (jcn + localProblemSize);
+  double * tmp1 = psi + ACProblemSize;
+  double * tmp2 = tmp1 + ACProblemSize;
+  double * solution = tmp2 + ACProblemSize;
 
-  int nz[1];
+  A_.p = irn;
+  B_.p = irn;
+  A_.i = jcn;
+  B_.i = jcn;
 
-  SparseMatrixFrom3x3DiagBlocks(problem->numberOfContacts, A, A_);
-  SparseMatrixFrom3x3DiagBlocks(problem->numberOfContacts, B, B_);
+  J = cs_spalloc(problem->M->matrix2->n + A_.m + B_.m, problem->M->matrix2->n + A_.m + B_.m, 
+                 problem->M->matrix2->nzmax + 2*problem->H->matrix2->nzmax + 
+                 2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
 
-  A_->p = irn;
-  B_->p = irn;
-  A_->i = jcn;
-  B_->i = jcn;
-
-  initACPsiJacobian(problem->M->matrix2, problem->H->matrix2, A_, B_, J);
+  initACPsiJacobian(problem->M->matrix2, problem->H->matrix2, &A_, &B_, J);
 
   // compute rho here
   for (unsigned int i = 0; i < localProblemSize; ++i) rho[i] = 1.;
 
-  for (unsigned int i = 0; i < globalProblemSize; ++i) tmp1[i] = 0.;
+  for (unsigned int i = 0; i < ACProblemSize; ++i) tmp1[i] = 0.;
 
   mumps_id->n = J->m;
   mumps_id->nz = J->nz;
   mumps_id->irn = J->p;
   mumps_id->jcn = J->i;
-  mumps_id->a = J;
+  mumps_id->a = J->x;
   mumps_id->rhs = tmp1;
 
   mumps_id->job = 6;
@@ -496,18 +639,22 @@ void globalFrictionContact3D_AlartCurnier(
   while (iter++ < itermax)
   {
 
-    frictionContact3D_globalAlartCurnierFunction(problemSize,
+    /* psi */
+    ACpsi(problem, globalVelocity, reaction, velocity, rho, psi);
+
+    /* A & B */
+    frictionContact3D_globalAlartCurnierFunction(localProblemSize,
                                                  reaction, velocity,
                                                  problem->mu, rho,
                                                  F, A, B);
-    /* J */
+    /* update J */
     updateACPsiJacobian(problem->M->matrix2,
                         problem->H->matrix2,
-                        A_, B_, J);
+                        &A_, &B_, J);
 
     /* rhs = -F */
-    DCOPY(problemSize, F, 1, tmp1 + problem->M->size0 + problem->H->size1, 1);
-    DSCAL(problemSize, -1., tmp1 + problem->M->size0 + problem->H->size1, 1);
+    DCOPY(ACProblemSize, psi, 1, tmp1, 1);
+    DSCAL(ACProblemSize, -1., tmp1, 1);
 
     /* Solve: J X = -F */
     dmumps_c(mumps_id);
@@ -544,11 +691,11 @@ void globalFrictionContact3D_AlartCurnier(
 
     if (!info_ls)
     {
-      DAXPY(globalProblemSize, alpha, tmp1, 1, solution, 1);
+      DAXPY(ACProblemSize, alpha, tmp1, 1, solution, 1);
     }
     else
     {
-      DAXPY(problemSize, 1, tmp1, 1., solution, 1);
+      DAXPY(ACProblemSize, 1, tmp1, 1., solution, 1);
     }
 
     options->dparam[1] = INFINITY;
@@ -562,9 +709,10 @@ void globalFrictionContact3D_AlartCurnier(
 
 
 
-      FrictionContact3D_compute_error(problem, reaction, velocity,
-                                      tolerance, options, 
-                                      &(options->dparam[1]));
+      GlobalFrictionContact3D_compute_error(problem, 
+                                            reaction, velocity, globalVelocity, 
+                                            tolerance, 
+                                            &(options->dparam[1]));
 
 
       //     assert((DNRM2(problemSize, F, 1)

@@ -69,6 +69,11 @@ int globalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int 
     info =    globalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_GLOBAL_AC:
+  {
+    info =    globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(options);
+    break;
+  }
   default:
   {
     numericsError("globalFrictionContact3D_setDefaultSolverOptions", "Unknown Solver");

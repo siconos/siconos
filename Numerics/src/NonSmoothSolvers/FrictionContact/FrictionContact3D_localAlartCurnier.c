@@ -521,27 +521,25 @@ int frictionContact3D_globalAlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 8;
+  options->iSize = 9;
   options->dSize = 9;
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-  for (unsigned int i = 0; i < 8; i++)
+  for (unsigned int i = 0; i < 9; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 200;
   options->iparam[1] = 1;
-  options->iparam[3] = 100000; // nzmax
-  options->iparam[5] = 1;    // mpi goes on
-  //options->iparam[6] => & DMUMPS_STRUC_C
-
-
-  options->iparam[7] = 1; // erritermax
+  options->iparam[3] = 100000; /* nzmax*/
+  options->iparam[5] = 1;  
+  options->iparam[7] = 1;      /* erritermax */
   options->dparam[0] = 1e-3;
 
+  options->iparam[8] = -1;     /* mpi com fortran */
   options->internalSolvers = NULL;
 
   return 0;
@@ -800,12 +798,10 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   unsigned int erritermax = options->iparam[7];
   int nzmax = options->iparam[3];
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+  int mumps_com = options->iparam[8];
 
-  if (!mumps_id)
+  if (mumps_com<0)
   {
-    /* we suppose no mpi init has been done */
-    /* if this not the case you *must* call
-       frictionContact3D_sparseGlobalAlartCurnierInit yourself */
     int ierr, myid;
     int argc = 0;
     char **argv;
@@ -813,6 +809,12 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
     frictionContact3D_sparseGlobalAlartCurnierInit(options);
     mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+  }
+  else /* we suppose mpi init has been done */
+  {
+    frictionContact3D_sparseGlobalAlartCurnierInit(options);
+    mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
+    mumps_id->comm_fortran = mumps_com;
   }
 
   assert(mumps_id);

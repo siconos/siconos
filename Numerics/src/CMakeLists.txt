@@ -470,6 +470,7 @@ ENDIF(MUMPS_FOUND)
   NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
   NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
   NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
+ NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
 
   
   ## Alart Curnier functions

@@ -55,7 +55,11 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   if (M->storageType == 1)
   {
     beta = 0.0;
-    assert(Global_MisInverse);
+    if (!Global_MisInverse)
+    {
+      inverseDiagSBM(M->matrix1);
+      Global_MisInverse = 1;
+    }
     prodNumericsMatrix(n, n, alpha, M, qtmp , beta, globalVelocitytmp);
 
   }

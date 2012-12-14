@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "NumericsOptions.h"
+#include "NumericsConfig.h"
 #include "GlobalFrictionContact3D_Solvers.h"
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
@@ -35,6 +36,7 @@ char *SICONOS_FRICTION_3D_GLOBAL_PROX_WR_STR = "F3DP_PROX_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_DSFP_WR_STR = "F3DP_DSFP_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_TFP_WR_STR = "F3DP_TFP_WR";
 char *SICONOS_FRICTION_3D_GLOBAL_NSGS_STR = "F3DP_NSGS";
+char *SICONOS_FRICTION_3D_GLOBAL_AC_STR = "F3DP_AC";
 
 
 int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
@@ -135,10 +137,20 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
-    globalFrictionContact3D_nsgs(problem, reaction , velocity, globalVelocity, &info , options);
+    globalFrictionContact3D_nsgs(problem, reaction , velocity, globalVelocity, 
+                                 &info , options);
     break;
 
   }
+#ifdef WITH_MUMPS
+  case SICONOS_FRICTION_3D_GLOBAL_AC:
+  {
+    globalFrictionContact3D_AlartCurnier(problem, reaction , velocity, 
+                                         globalVelocity, &info , options);
+    break;
+
+  }
+#endif
   default:
   {
     fprintf(stderr, "Numerics, GlobalFrictionContact3D_driver failed. Unknown solver.\n");
