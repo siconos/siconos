@@ -681,7 +681,7 @@ int globalLineSearchSparseGP(
         velocity, mu, rho, F,
         NULL, NULL);
 
-    double q  = 0.5 * DDOT(problemSize, F, 1, F, 1);
+    double q  = 0.5 * DDOT(problemSize, F, 1, F, 1); 
 
     assert(q >= 0);
 
