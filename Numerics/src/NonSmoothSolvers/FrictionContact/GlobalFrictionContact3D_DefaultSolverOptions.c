@@ -69,7 +69,7 @@ int globalFrictionContact3D_setDefaultSolverOptions(SolverOptions* options, int 
     info =    globalFrictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
-#idef WITH_MUMPS
+#ifdef WITH_MUMPS
   case SICONOS_FRICTION_3D_GLOBAL_AC:
   {
     info =    globalFrictionContact3D_AlartCurnier_setDefaultSolverOptions(options);
