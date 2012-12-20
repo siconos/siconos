@@ -56,7 +56,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     SP::DynamicalSystemsGraph dsG = simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
     DynamicalSystemsGraph::VIterator vi, viend;
 
-    //
+    // Update all the index sets ...
+    eventDriven->updateIndexSets();
     SP::InteractionsGraph indexSet1 = simulation->indexSet(1);
     SP::InteractionsGraph indexSet2 = simulation->indexSet(2);
     bool found = true;
@@ -66,22 +67,6 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
       if (!found) break;
     }
-    /*
-    // Display the variable before processing NSEvent
-    cout<< "-------Before processing NS events---------" << endl;
-    for (std11::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
-      {
-        SP::Interaction inter = indexSet0->bundle(*ui);
-        cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
-      }
-
-    for (std11::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
-      {
-        SP::DynamicalSystem ds = dsG->bundle(*vi);
-        SP::LagrangianDS  Lag_ds = std11::static_pointer_cast<LagrangianDS>(ds);
-        cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
-      }
-    */
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!found)
     {
@@ -94,12 +79,12 @@ void NonSmoothEvent::process(SP::Simulation simulation)
 
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem(SICONOS_OSNSP_ED_IMPACT); // solveLCPImpact();
+      // compute p[1], post-impact velocity, y[1] and indexSet[2]
+      simulation->update(1);
+      // Update the corresponding index set ...
+      eventDriven->updateIndexSets();
     }
 
-    // compute p[1], post-impact velocity, y[1] and indexSet[2]
-    simulation->update(1);
-    // Update the corresponding index set ...
-    eventDriven->updateIndexSets();
     /*
     // Display the variable after processing NSEvent
     cout<< "-------After processing NS events---------" << endl;
@@ -117,11 +102,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
       }
     //
     */
-    // check that IndexSet[1]-IndexSet[2] is now empty if(
-    //    !((*indexSet1-*indexSet2).isEmpty()))
-    //    RuntimeException::selfThrow("NonSmoothEvent::process,
-    //    error after impact-LCP solving."); ---> solve
-    //    acceleration LCP if IndexSet[2] is not empty
+    //---> solve acceleration LCP if IndexSet[2] is not empty
     if (indexSet2->size() > 0)
     {
       // // Update the state of the DS

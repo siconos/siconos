@@ -34,7 +34,7 @@
 #include "BlockMatrix.hpp"
 #include "NewMarkAlphaOSI.hpp"
 
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 
 #include <debug.h>
 
@@ -451,6 +451,16 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
 
   double t = *time;
   model()->setCurrentTime(t);
+  // Update Jacobian matrices at all interactions
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet0->bundle(*ui);
+    inter->computeJach(t);
+  }
+
+
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty())
   {
@@ -572,7 +582,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
-  SP::SiconosVector y, ydot, lambda;
+  SP::SiconosVector y, ydot, yddot, lambda;
   SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(osi);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
@@ -594,6 +604,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   // Update the output from level 0 to level 1
   updateOutput(0);
   updateOutput(1);
+  updateOutput(2);
   //
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -601,24 +612,25 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
     nsLawSize = inter->getNonSmoothLawSize();
     y = inter->y(0);   // output y at this Interaction
     ydot = inter->y(1); // output of level 1 at this Interaction
+    yddot = inter->y(2);
     lambda = inter->lambda(2); // input of level 2 at this Interaction
     if (!(indexSet2->is_vertex(inter))) // if Interaction is not in the indexSet[2]
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        if ((*y)(i) >= TOL_ED) // y[0] > 0
+        if ((*y)(i) > TOL_ED)
         {
           gOut[k] = (*y)(i);
         }
-        else // y[0] = 0
+        else
         {
-          if ((*ydot)(i) >= 0) // if y[1] >= 0;
+          if ((*ydot)(i) > -TOL_ED)
           {
-            gOut[k] = TOL_ED; // g = TOL_ED temporarily
+            gOut[k] = 100 * TOL_ED;
           }
-          else  // if y[1] < 0
+          else
           {
-            gOut[k] = (*y)(i); // g = y[0]
+            gOut[k] = (*y)(i);
           }
         }
         k++;
@@ -628,10 +640,25 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        gOut[k] = (*lambda)(i); // g = lambda[2]
+        if ((*lambda)(i) > TOL_ED)
+        {
+          gOut[k] = (*lambda)(i); // g = lambda[2]
+        }
+        else
+        {
+          if ((*yddot)(i) > TOL_ED)
+          {
+            gOut[k] = (*lambda)(i);
+          }
+          else
+          {
+            gOut[k] = 100 * TOL_ED;
+          }
+        }
         k++;
       }
     }
+
   }
 }
 void EventDriven::updateImpactState()
@@ -679,7 +706,7 @@ void EventDriven::advanceToEvent()
   _tout = _tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   OSI::TYPES  osiType = (*_allOSI->begin())->getType(); // Type of OSIs
-  double _maxConstraint = 0.0;
+  double _minConstraint = 0.0;
   if (osiType == OSI::NEWMARKALPHAOSI)
   {
     newtonSolve(_newtonTolerance, _newtonMaxIteration);
@@ -691,27 +718,31 @@ void EventDriven::advanceToEvent()
     updateOutput(1);
     updateOutput(2);
     // Detect whether or not some events occur during the integration step
-    _maxConstraint = detectEvents();
-    LocalizeFirstEvent();
+    _minConstraint = detectEvents();
     //
 #ifdef DEBUG_MESSAGES
     cout << "========== EventDriven::advanceToEvent =============" << endl;
+    cout.precision(15);
     cout << "Istate: " << _istate << endl;
-    cout << "Maximum value of constraint functions: " << _maxConstraint << endl;
+    cout << "Maximum value of constraint functions: " << _minConstraint << endl;
 #endif
     //
     if (_istate != 2) //some events occur
     {
       cout << "In EventDriven::advanceToEvent, some events are detected!!!" << endl;
-      if (_maxConstraint < TOL_ED) // events occur at the end of the integration step
+      if (std::abs(_minConstraint) < TOL_ED) // events occur at the end of the integration step
       {
         isNewEventOccur = true;
       }
       else // events need to be localized
       {
         isNewEventOccur = true;
-        // LocalizeFirstEvent();
+        LocalizeFirstEvent();
       }
+      // add new event to the list to be handled
+      std::cout << "A new event occurs at time: " << _tout << endl;
+      _eventsManager->scheduleNonSmoothEvent(_tout);
+      model()->setCurrentTime(_tout);
     }
   }
   else if (osiType == OSI::LSODAR)
@@ -741,7 +772,14 @@ void EventDriven::advanceToEvent()
       //====================================================================================
       //    std::cout << " Start of Lsodar integration" << std::endl;
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
-      //    std::cout << " End of Lsodar integration" << std::endl;
+
+      // std::cout << " End of Lsodar integration" << std::endl;
+      // SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
+      // SA::integer iwork = lsodar->getIwork();
+      // SA::doublereal rwork = lsodar->getRwork();
+      // std::cout << "Number of steps used: " << iwork[10] << endl;
+      // std::cout << "Method order last used: " << iwork[13] << endl;
+      // std::cout << "Step size last used: " << rwork[10] << endl;
       // return a flag (_istate) telling if _tend has been  reached or not.
       //====================================================================================
 
@@ -759,22 +797,21 @@ void EventDriven::advanceToEvent()
         if (_printStat)
           statOut << " -----------> New non-smooth event at time " << _tout << endl;
       }
-      if (_printStat)
-      {
-        SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
-        statOut << "Results at time " << _tout << ":" << endl;
-        SA::integer iwork = lsodar->getIwork();
-        SA::doublereal Rwork = lsodar->getRwork();
-        statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
-      }
+      // if(_printStat)
+      //   {
+      //     SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
+      //     statOut << "Results at time " << _tout << ":" << endl;
+      //     SA::integer iwork = lsodar->getIwork();
+      //     SA::doublereal Rwork = lsodar->getRwork();
+      //     statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
+      //   }
     }
     // Set model time to _tout
     model()->setCurrentTime(_tout);
-    //update output[0], output[1]
+    //update output[0], output[1], output[2]
     updateOutput(0);
     updateOutput(1);
-    // Update all the index sets ...
-    updateIndexSets();
+    updateOutput(2);
     //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
     // update is done when the new event is processed
     if (!isNewEventOccur)
@@ -784,12 +821,15 @@ void EventDriven::advanceToEvent()
         // Solve LCP at acceleration level
         if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->interactions())->isEmpty())
         {
-          (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(_tout);
-          updateInput(2); //
-          //  updateInput(1); // this is done to reset the nonsmoothinput at the level of impact
+          SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+          if (indexSet2->size() != 0)
+          {
+            (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(_tout);
+            updateInput(2);
+            // update indexSet[2] with double condition
+            //updateIndexSetsWithDoubleCondition();
+          }
         }
-        // update indexSet[2] with double condition
-        updateIndexSetsWithDoubleCondition();
       }
     }
   }
@@ -801,34 +841,54 @@ void EventDriven::advanceToEvent()
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-double EventDriven::computeResiduGaps()
+double EventDriven::computeResiduConstraints()
 {
   // Make sure that the state of all Dynamical Systems was updated
   double t = nextTime(); // time at the end of the step
   SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-  SP::SiconosVector _y;
+  double _y;
   // Loop over all interactions of indexSet2
   InteractionsGraph::VIterator ui, uiend;
   double _maxResiduGap = 0.0;
-  for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+  for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
   {
-    SP::Interaction inter = indexSet2->bundle(*ui);
-    inter->computeOutput(t, 0); // compute y[0] for the interaction at the end time
-    _y = inter->y(0);
-    if (_maxResiduGap < abs((*_y)(0))) // (*_y)[0] gives gap at this interaction
+    if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
-      _maxResiduGap = abs((*_y)(0));
-    }
-    //
+      SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+      bool _flag = osi_NewMark->getFlagVelocityLevel();
+      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter = indexSet2->bundle(*ui);
+        if (!_flag) // constraints at the position level
+        {
+          inter->computeOutput(t, 0); // compute y[0] for the interaction at the end time
+          _y = (*inter->y(0))(0);
+        }
+        else // constraints at the velocity level
+        {
+          inter->computeOutput(t, 1); // compute y[1] for the interaction at the end time
+          _y = (*inter->y(1))(0);
+        }
+
+        if (_maxResiduGap < abs(_y))
+        {
+          _maxResiduGap = abs(_y);
+        }
+        //
 #ifdef DEBUG_MESSAGES
-    cout << "gap at contact: ";
-    _y->display();
+        cout << "Contraint residu: " << _y << endl;
 #endif
-    //
+        //
+      }
+    }
+    else
+    {
+      RuntimeException::selfThrow("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+    }
   }
   //
 #ifdef DEBUG_MESSAGES
-  cout << "Maximum gap residu: " << _maxResiduGap << endl;
+  cout << "Maximum constraint residu: " << _maxResiduGap << endl;
 #endif
   //
   return _maxResiduGap;
@@ -869,7 +929,7 @@ void EventDriven::prepareNewtonIteration()
     (*itosi)->computeFreeState();
   }
   // Compute maximum gap residu
-  _newtonResiduYMax = computeResiduGaps();
+  _newtonResiduYMax = computeResiduConstraints();
 }
 
 
@@ -964,8 +1024,9 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     {
       cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep << endl;
     }
-    // If no convergence, solve LCP
-    if (!_allNSProblems->empty() && !allInteractions->isEmpty())
+    // If no convergence, proceed iteration
+    SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    if (indexSet2->size() != 0) // if indexSet2 is not empty, solve LCP to determine contact forces
     {
       info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
       if (info != 0)
@@ -979,12 +1040,13 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-double EventDriven::detectEvents()
+double EventDriven::detectEvents(bool _IsUpdateIstate)
 {
-  double _maxResiduOutput = 0.0; // maximum of abs(g_i) with i running over all activated or deactivated contacts
+  double _minResiduOutput = 0.0; // maximum of g_i with i running over all activated or deactivated contacts
   // Loop over all interactions to detect whether some constraints are activated or deactivated
   bool _IsContactClosed = false;
   bool _IsContactOpened = false;
+  bool _IsFirstTime = true;
   InteractionsGraph::VIterator ui, uiend;
   SP::SiconosVector y, ydot, lambda;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
@@ -1010,9 +1072,18 @@ double EventDriven::detectEvents()
       if ((*y)(0) < TOL_ED) // gap at the current interaction <= 0
       {
         _IsContactClosed = true;
-        if (_maxResiduOutput < std::abs((*y)(0)))
+      }
+
+      if (_IsFirstTime)
+      {
+        _minResiduOutput = (*y)(0);
+        _IsFirstTime = false;
+      }
+      else
+      {
+        if (_minResiduOutput > (*y)(0))
         {
-          _maxResiduOutput = std::abs((*y)(0));
+          _minResiduOutput = (*y)(0);
         }
       }
     }
@@ -1021,14 +1092,24 @@ double EventDriven::detectEvents()
       if ((*lambda)(0) < TOL_ED) // normal force at the current interaction <= 0
       {
         _IsContactOpened = true;
-        if (_maxResiduOutput < std::abs((*lambda)(0)))
+      }
+
+      if (_IsFirstTime)
+      {
+        _minResiduOutput = (*lambda)(0);
+        _IsFirstTime = false;
+      }
+      else
+      {
+        if (_minResiduOutput > (*lambda)(0))
         {
-          _maxResiduOutput = std::abs((*lambda)(0));
+          _minResiduOutput = (*lambda)(0);
         }
       }
     }
     //
 #ifdef DEBUG_MESSAGES
+    cout.precision(15);
     cout << "Contact number: " << inter->number() << endl;
     cout << "Contact gap: " << (*y)(0) << endl;
     cout << "Contact force: " << (*lambda)(0) << endl;
@@ -1038,24 +1119,27 @@ double EventDriven::detectEvents()
     //
   }
   //
-  if ((!_IsContactClosed) && (!_IsContactOpened))
+  if (_IsUpdateIstate)
   {
-    _istate = 2; //no event is detected
-  }
-  else if ((_IsContactClosed) && (!_IsContactOpened))
-  {
-    _istate = 3; // Only some contacts are closed
-  }
-  else if ((!_IsContactClosed) && (_IsContactOpened))
-  {
-    _istate = 4; // Only some contacts are opened
-  }
-  else
-  {
-    _istate = 5; // Some contacts are closed AND some contacts are opened
+    if ((!_IsContactClosed) && (!_IsContactOpened))
+    {
+      _istate = 2; //no event is detected
+    }
+    else if ((_IsContactClosed) && (!_IsContactOpened))
+    {
+      _istate = 3; // Only some contacts are closed
+    }
+    else if ((!_IsContactClosed) && (_IsContactOpened))
+    {
+      _istate = 4; // Only some contacts are opened
+    }
+    else
+    {
+      _istate = 5; // Some contacts are closed AND some contacts are opened
+    }
   }
   //
-  return  _maxResiduOutput;
+  return  _minResiduOutput;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1076,63 +1160,62 @@ void EventDriven::LocalizeFirstEvent()
     }
   }
   //
-  /*
   double t_a = startingTime();
   double t_b = nextTime();
-  double _maxConstraint = 0.0;
+  double _minConstraint = 0.0;
   bool found = false;
+  bool _IsupdateIstate = false;
   unsigned int _numIter = 0;
   while (!found)
-    {
-      _numIter++;
-      double t_i = (t_b - t_a)/2.0; // mid-time of the current interval
-      // set t_i as the current time
-      model()->setCurrentTime(t_i);
-      // Generate dense output for all DSs at the time t_i
-      for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
   {
-    if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
+    _numIter++;
+    double t_i = (t_b + t_a) / 2.0; // mid-time of the current interval
+    // set t_i as the current time
+    model()->setCurrentTime(t_i);
+    // Generate dense output for all DSs at the time t_i
+    for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
+    {
+      if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
       {
         SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
         osi_NewMark->DenseOutputallDSs(t_i);
       }
-  }
-      // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
-      if ((_istate == 3)||(_istate == 5)) // some contacts are closed
-  {
-    updateOutput(0);
-  }
-      // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
-      if ((_istate == 4)||(_istate == 5)) // some contacts are opened
-  {
-    if(!_allNSProblems->empty())
+    }
+    // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
+    if ((_istate == 3) || (_istate == 5)) // some contacts are closed
+    {
+      updateOutput(0);
+    }
+    // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
+    if ((_istate == 4) || (_istate == 5)) // some contacts are opened
+    {
+      if (!_allNSProblems->empty())
       {
         (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t_i);
       }
-  }
-      // Check whether or not some events occur in the interval [t_a, t_i]
-       _maxConstraint = detectEvents();
-       if ((_istate != 2)&&(_maxConstraint < TOL_ED)) // first event is found
-   {
-     _tout = t_i;
-     found = true;
-   }
-      // if some events are detected in the interval [t_a, t_i] (if _istate != 2), set t_b = t_i
-      if (_istate != 2)
-  {
-    t_b = t_i;
-  }
-      else // if no event is detected in [t_a, t_i], then we have to detect events in the interval [t_i, t_b]
-  {
-    t_a = t_i;
-  }
-      //
-      if (_numIter > _localizeEventMaxIter)
-  {
-    RuntimeException::selfThrow("In EventDriven::LocalizeFirstEvent, the numbner of iterations performed is too large!!!");
-  }
     }
-  */
+    // Check whether or not some events occur in the interval [t_a, t_i]
+    _minConstraint = detectEvents(_IsupdateIstate);
+    if (std::abs(_minConstraint) < TOL_ED) // first event is found
+    {
+      _tout = t_i;
+      found = true;
+    }
+    // if some events are detected in the interval [t_a, t_i] (if _istate != 2), set t_b = t_i
+    if (_minConstraint < -TOL_ED)
+    {
+      t_b = t_i;
+    }
+    else // if no event is detected in [t_a, t_i], then we have to detect events in the interval [t_i, t_b]
+    {
+      t_a = t_i;
+    }
+    //
+    if (_numIter > _localizeEventMaxIter)
+    {
+      RuntimeException::selfThrow("In EventDriven::LocalizeFirstEvent, the numbner of iterations performed is too large!!!");
+    }
+  }
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

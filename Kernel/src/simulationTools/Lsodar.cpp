@@ -33,7 +33,6 @@
 using namespace std;
 using namespace RELATION;
 
-//====================================== modified by Son ================================================
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
@@ -110,6 +109,19 @@ void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newA
   atol = newAtol;
 }
 
+void Lsodar::setMinMaxStepSizes(doublereal _minStep, doublereal _maxStep)
+{
+  intData[5] = 1; // set IOPT = 1
+  rwork[5] = _minStep;
+  rwork[6] = _maxStep;
+}
+
+void Lsodar::setMaxNstep(integer _maxNumberSteps)
+{
+  intData[5] = 1; // set IOPT = 1
+  iwork[5] = _maxNumberSteps;
+}
+
 void Lsodar::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
   intData[2] = newItol; // itol
@@ -117,9 +129,11 @@ void Lsodar::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
   atol[0] = newRtol;  // atol
 }
 
-void Lsodar::setMaxNstep(int var)
+void Lsodar::setMaxOrder(integer _maxorderNonStiff, integer _maxorderStiff)
 {
-  iwork[5] = var;
+  intData[5] = 1; // set IOPT = 1
+  iwork[7] = _maxorderNonStiff;
+  iwork[8] = _maxorderStiff;
 }
 
 void Lsodar::updateData()
@@ -221,7 +235,7 @@ void Lsodar::initialize()
   // 3 - Itol, itask, iopt
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
-  intData[5] = 1; // iopt: 0 if no optional input else 1.
+  intData[5] = 0; // iopt: 0 if no optional input else 1.
 
   // 4 - Istate
   intData[4] = 1; // istate, an index used for input and output to specify the state of the calculation.
@@ -267,15 +281,10 @@ void Lsodar::initialize()
   iwork[7] = 0;
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   iwork[8] = 0;
-
-
-  //
   // Set atol and rtol values ...
-  rtol[0] = ATOL_DEFAUTL; // rtol
-  atol[0] = RTOL_DEFAULT;  // atol
-  //
-  // rtol[0] = MACHINE_PREC; // rtol
-  //atol[0] = MACHINE_PREC;  // atol
+  rtol[0] = RTOL_DEFAULT ; // rtol
+  atol[0] = ATOL_DEFAUTL ;  // atol
+
   // === Error handling in LSODAR===
 
   //   parameters: itol, rtol, atol.
@@ -325,7 +334,8 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   F77NAME(dlsodar)(pointerToF,
                    &(intData[0]),
                    &(*_xtmp)(0),
-                   &tinit_DR, &tend_DR,
+                   &tinit_DR,
+                   &tend_DR,
                    &(intData[2]),
                    rtol.get(),
                    atol.get(),

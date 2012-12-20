@@ -40,10 +40,7 @@
 
 using namespace std;
 using namespace RELATION;
-
 //#define LINEAROSNS_DEBUG
-
-
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
 {
 }
@@ -214,6 +211,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   assert(DS1);
   assert(DS2);
 
+
   /*
     SP::DynamicalSystemsSet commonDS = inter->dynamicalSystems();
     assert (!commonDS->isEmpty()) ;
@@ -338,6 +336,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       }
 
       // (inter1 == inter2)
+#ifdef LINEAROSNS_DEBUG
+      cout << "leftInteractionBlock: ";
+      leftInteractionBlock->display();
+      cout << "centralInteractionBlocks: ";
+      centralInteractionBlocks[ds->number()]->display();
+#endif
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
       centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*work);
@@ -345,10 +349,6 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       //*currentInteractionBlock *=h;
-#ifdef LINEAROSNS_DEBUG
-      std::cout << "LinearOSNS::computeDiagonalInteractionBlock : DiagInteractionBlock" << std::endl;
-      currentInteractionBlock->display();
-#endif
     }
 
 
@@ -516,10 +516,6 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     centralInteractionBlocks[ds->number()]->PLUForwardBackwardInPlace(*rightInteractionBlock);
     //*currentInteractionBlock +=  *leftInteractionBlock ** work;
     prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
-#ifdef LINEAROSNS_DEBUG
-    std::cout << "LinearOSNS::computeInteractionBlock : currentInteractionBlock" << std::endl;
-    currentInteractionBlock->display();
-#endif
   }
   else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
 

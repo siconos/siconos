@@ -312,7 +312,7 @@ public:
   /** compute maximum residu over all gap functions of Index2 contacts
    * \return double: maximum residu for all gap functions
    */
-  double computeResiduGaps();
+  double computeResiduConstraints();
 
   /** prepare for Newton iterations for all OSIs
    *\return maximum residu over all DSs
@@ -337,9 +337,10 @@ public:
   void newtonSolve(double, unsigned int);
 
   /** Detect whether or not events occur during each integration step
+   *\param bool: true if we need to update the flag _istate, false otherwise
    *\return double, maximum of absolute values of constraint fonctions over all activated ot deactivated contacts
    */
-  double detectEvents();
+  double detectEvents(bool _IsUpdateIstate = true);
 
   /** Localize time of the first event */
   void LocalizeFirstEvent();

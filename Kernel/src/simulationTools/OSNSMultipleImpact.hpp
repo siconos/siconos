@@ -28,8 +28,6 @@ private:
   double Time_variable;
   // Number of contacts (only the active contacts)
   unsigned int Ncontact;
-  // Number of calculation steps estimated
-  unsigned int NstepEst;
   // Maximal number of steps for each computation
   unsigned int NstepMax;
   // Tolerance to define zero
@@ -98,9 +96,7 @@ private:
   // bool variable to set the step size for multiple impact computation
   // If IsNumberOfStepsEst = true ==> estimate the step size from the state of the dynamic system before impact and the number of step needed
   // Number of steps after which the data is saved
-  unsigned int NstepSave;
-  // If IsNumberOfStepsEst = false ==> user choose the step size
-  bool IsNumberOfStepsEst;
+  unsigned int NstepSave; // If IsNumberOfStepsEst = false ==> user choose the step size
   // Matrix on which the data during impact is saved
   SP::SiconosMatrix _DataMatrix;
   // Number of points to be save during impacts
@@ -122,10 +118,6 @@ private:
 public:
   //Default constructor
   OSNSMultipleImpact();
-  //Constructor from data (number of steps is required here)
-  //1st parameter: the type of the compliance law
-  //3rd parameter: number of steps estimated
-  OSNSMultipleImpact(string, unsigned int);
   //Constructor from data (step size is required here)
   //1st parameter: the type of the compliance law
   //3rd parameter: step size estimated
@@ -182,8 +174,6 @@ public:
   bool isVelNegative(const double);
   // To compare an energy grandeur with zero
   bool isEnerZero(const double);
-  // To calculate the step size for the iterative procedure
-  void ComputeStepSize();
   // To select the pramary contact
   void SelectPrimaContact();
   // Calculate the vector of distributing rule
@@ -201,7 +191,6 @@ public:
   // Post-compute for multiple impacts
   void PostComputeImpact();
   // Check if the multiple impacts process is terminated or not
-  //bool IsMulImpactTerminate();
   bool IsMulImpactTerminate();
   // To allocate the memory
   void AllocateMemory();

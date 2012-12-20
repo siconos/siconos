@@ -189,12 +189,9 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 void Simulation::addInteractionInOSIMap(SP::Interaction inter, SP::OneStepIntegrator  osi)
 {
   if (_interactionOsiMap.find(inter) != _interactionOsiMap.end())
-  {
     // in the map with another
     // integrator
-    inter->display();
-    RuntimeException::selfThrow("Simulation::addInInteractionOSIMap(inter,osi), this inter is already associated with another one-step integrator");
-  }
+    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
   _interactionOsiMap[inter] = osi;
 }
 
@@ -309,7 +306,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // If _printStat is true, open output file.
   if (_printStat)
   {
-    statOut.open("simulationStat.dat", std::ofstream::out);
+    statOut.open("simulationStat.dat", ios::out | ios::trunc);
+    if (!statOut.is_open())
+      SiconosVectorException::selfThrow("writing error : Fail to open file simulationStat.dat ");
     statOut << "============================================" << endl;
     statOut << " Siconos Simulation of type " << typeName() << "." << endl;
     statOut << endl;

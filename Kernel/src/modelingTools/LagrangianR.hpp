@@ -177,15 +177,15 @@ public:
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJachx(double);*/
-  void computeJachlambda(const double time, Interaction& inter)
+  virtual void computeJachlambda(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJachq(const double time, Interaction& inter)
+  virtual void computeJachq(const double time, Interaction& inter)
   {
     ;
   }
-  void computeJachqDot(const double time, Interaction& inter)
+  virtual void computeJachqDot(const double time, Interaction& inter)
   {
     ;
   }

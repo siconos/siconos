@@ -136,9 +136,8 @@ void LagrangianScleronomousR::computeJachqDot(const double time, Interaction& in
       SiconosVector workQ = *inter.data(q0);
       SiconosVector workZ = *inter.data(z);
       SiconosVector workQdot = *inter.data(q1);
-
-      // get vector lambda of the current interaction
-      ((FPtr2)(_pluginJachq->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
+      // get vector _jachqDo of the current interaction
+      ((FPtr2)(_pluginjqhdot->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *inter.data(z) = workZ;
     }
@@ -161,11 +160,16 @@ void LagrangianScleronomousR::computeOutput(const double time, Interaction& inte
   else
   {
     computeJachq(time, inter);
+
     SiconosVector& y = *inter.y(derivativeNumber);
     if (derivativeNumber == 1)
       prod(*_jachq, *inter.data(q1), y);
     else if (derivativeNumber == 2)
+    {
+      computeJachqDot(time, inter);
       prod(*_jachq, *inter.data(q2), y);
+      prod(*_jachqDot, *inter.data(q1), y, false);
+    }
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }

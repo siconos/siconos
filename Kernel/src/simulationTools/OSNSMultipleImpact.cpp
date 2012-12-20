@@ -13,7 +13,6 @@ using namespace std;
 OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
 {
   TypeCompLaw = "BiStiffness";
-  NstepEst = 10000;
   NstepSave = 100;
   TOL_IMPACT = DEFAULT_TOL_IMPACT;
   _Tol_Vel = DEFAULT_TOL_VEL;
@@ -21,33 +20,11 @@ OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
   _ZeroVel_EndIm = DEFAULT_TOL_VEL;
   _ZeroEner_EndIm = DEFAULT_TOL_ENER;
   YesSaveData = false;
-  IsNumberOfStepsEst = true;
   SizeDataSave = 1000;
   NstepMax = 100000;
   Step_min_save = 1;
   Step_max_save = NstepMax;
   NameFile = "DataMultipleImpact.dat";
-}
-//------------------------------ -------------------------------------------------------------
-OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, unsigned int newNstepEst = 10000): LinearOSNS()
-{
-  TypeCompLaw = newTypeLaw;
-  NstepEst = newNstepEst;
-  NstepSave = 100;
-  TOL_IMPACT = DEFAULT_TOL_IMPACT;
-  _Tol_Vel = DEFAULT_TOL_VEL;
-  _Tol_Ener = DEFAULT_TOL_ENER;
-  _ZeroVel_EndIm = DEFAULT_TOL_VEL;
-  _ZeroEner_EndIm = DEFAULT_TOL_ENER;
-  YesSaveData = false;
-  IsNumberOfStepsEst = true;
-  NameFile = "DataMultipleImpact.dat";
-  SizeDataSave = 1000;
-  NstepMax = 100000;
-  Step_min_save = 1;
-  Step_max_save = NstepMax;
-  if ((TypeCompLaw != "MonoStiffness") && (TypeCompLaw != "BiStiffness"))
-    RuntimeException::selfThrow("OSNSMultipleImpact::TypeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
 //------------------------------ -------------------------------------------------------------
 OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newDelP = 1.0e-5): LinearOSNS()
@@ -61,7 +38,6 @@ OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newDelP = 1.0e-
   _ZeroVel_EndIm = DEFAULT_TOL_VEL;
   _ZeroEner_EndIm = DEFAULT_TOL_ENER;
   YesSaveData = false;
-  IsNumberOfStepsEst = false;
   NameFile = "DataMultipleImpact.dat";
   SizeDataSave = 1000;
   NstepMax = 100000;
@@ -333,49 +309,6 @@ void OSNSMultipleImpact::BuildParaContact()
   */
 
 }
-//======================================================================================
-void OSNSMultipleImpact::ComputeStepSize()
-{
-  SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  SP::InteractionsGraph indexSet1 = simulation()->indexSet(1); // get indexSet[1]
-  //Loop over alls DS
-  DynamicalSystemsGraph::VIterator ui, uiend;
-  DynamicalSystemsGraph::OEIterator edi, ediend;
-  double Pest = 0.0;
-  for (std11::tie(ui, uiend) = DSG->vertices(); ui != uiend; ++ui)
-  {
-    // Check if this DS is involved in the impact or not
-    bool found = false;
-    // Loop over all edges comming from this DS
-    for (boost::tie(edi, ediend) = DSG->out_edges(*ui); edi != ediend; ++edi)
-    {
-      SP::Interaction urp = DSG->bundle(*edi);
-      if (indexSet1->is_vertex(urp)) // there exist at least one edge of this DS in the indexSet[1]
-      {
-        found = true;
-        break;
-      }
-    }
-    //
-    if (found) // if this DS involved in the impact
-    {
-      SP::DynamicalSystem ds = DSG->bundle(*ui); // DS
-      SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
-      SP::SiconosMatrix mass_ds =  Lagds->mass();    // Mass matrix of DS
-      SP::SiconosVector vel_ds = Lagds->velocityMemory()->getSiconosVector(1);  // Pre-impact velocity of DS
-      SP::SiconosVector abs_vel_ds(new SiconosVector(vel_ds->size()));
-      abs_wise(*vel_ds, *abs_vel_ds); // get the absolute (velocity vector of ds)
-      SP::SiconosVector prod_mass_vel(new SiconosVector(mass_ds->size(0)));
-      prod(*mass_ds, *abs_vel_ds, *prod_mass_vel);
-      Pest = Pest + prod_mass_vel->sum();
-    }
-  };
-  DeltaP = Pest / NstepEst;
-  //cout << "Size of setOfDS" << setOfDS.size() << endl;
-  //cout << "Step size is: " << DeltaP << endl;
-  if (DeltaP <= 0.0)
-    RuntimeException::selfThrow("OSNSMultipleImpact::ComputeStepSize the step size DeltaP must be positive  !!");
-}
 //========================================================================================
 void OSNSMultipleImpact::PreComputeImpact()
 {
@@ -476,12 +409,7 @@ void OSNSMultipleImpact::PreComputeImpact()
   ForceContact->zero();
   //4. Initialize the relative velocity, potential energy, impulse at contacts
   InitializeInput();
-  //5. Compute the step size
-  if (IsNumberOfStepsEst) // We need to estimate the step size from the initial date of the dynamic system
-  {
-    ComputeStepSize();
-  };
-  //6. Build the vectors of stifnesseses, of restitution coefficients, and of elaticity coefficients
+  //5. Build the vectors of stifnesseses, of restitution coefficients, and of elaticity coefficients
   BuildParaContact();
 }
 //=======================================================================================
@@ -888,8 +816,8 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   // Save the total impulse at the primary contacts (time-like independent variable) and the time evolution during impact
   if (_ithPoint >= _DataMatrix->size(0))
     RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of points saved exceeds the size of matrix allocated!!!");
-  (*_DataMatrix)(_ithPoint, 0) = Time_variable;
-  //(*_DataMatrix)(_ithPoint,0) = Impulse_variable;
+  //(*_DataMatrix)(_ithPoint,0) = Time_variable;
+  (*_DataMatrix)(_ithPoint, 0) = Impulse_variable;
   // Save the data related to UnitaryRelations
   SP::InteractionsGraph indexSet0 = simulation()->indexSet(0);
   SP::InteractionsGraph indexSet1 = simulation()->indexSet(levelMin());
@@ -918,6 +846,8 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
     };
     // Write the force at the UR
     WriteVectorIntoMatrix(*F_ur, _ithPoint, col_pos);
+    //WriteVectorIntoMatrix(*P_ur, _ithPoint, col_pos);
+    //WriteVectorIntoMatrix(*E_ur, _ithPoint, col_pos);
     col_pos = col_pos + F_ur->size();
   } // Save the data related to DS
   SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -1009,7 +939,7 @@ void OSNSMultipleImpact::ComputeImpact()
     {
       RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps perfomed exceeds the maximal number of steps allowed!!!");
       //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " << endl;
-      // break;
+      break;
     }
     // cout << "Distribution vector: ";
     // DistriVector->display();
@@ -1027,7 +957,6 @@ void OSNSMultipleImpact::ComputeImpact()
   //
   // cout << "*****************Impact computation is terminated******************" << endl;
   // cout << "Number of integration steps: " << number_step << endl;
-
   // cout << "Velocity at contacts: ";
   // VelContact->display();
   // cout << "Impulse at contact: ";
@@ -1103,4 +1032,26 @@ void OSNSMultipleImpact::display() const
   cout << "Step size used: " << DeltaP << endl;
   cout << "Primary impulse at the end of impact: " << Impulse_variable << endl;
   cout << "Duration of the multiple impacs process: " << Time_variable << endl;
+  // Display post-impact velocities
+  SP::DynamicalSystemsGraph DSG0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
+  {
+    SP::DynamicalSystem ds = DSG0->bundle(*ui);
+    SP::LagrangianDS lag_ds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+    cout << "DS number: " << ds->number() << endl;
+    cout << "Pre-impact velocity: ";
+    (lag_ds->velocityMemory()->getSiconosVector(1))->display();
+    cout << "Post-impact velocity: ";
+    (lag_ds->velocity())->display();
+  }
+  // Display impulses at contact points
+  SP::InteractionsGraph IndexSet0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  InteractionsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
+  {
+    SP::Interaction inter = IndexSet0->bundle(*vi);
+    cout << "Impulse at contact point " << inter->number() << ":";
+    (inter->lambda(1))->display();
+  }
 };

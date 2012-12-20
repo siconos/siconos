@@ -23,9 +23,9 @@
 #include "LagrangianR.hpp"
 using namespace std;
 using namespace RELATION;
-#define DEBUG_NEWMARK
+//#define DEBUG_NEWMARK
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f) :
+NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false) :
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -34,10 +34,11 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double new_beta, dou
   alpha_m = new_alpha_m;
   alpha_f = new_alpha_f;
   _orderDenseOutput = 5;
+  _IsVelocityLevel = _flag;
 }
 
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty) :
+NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty, bool _flag = false) :
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   OSIDynamicalSystems->insert(newDS);
@@ -46,10 +47,11 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(SP::DynamicalSystem newDS, double _rho_infty) :
   gamma = 0.5 + alpha_f - alpha_m;
   beta = 0.25 * std::pow((gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
+  _IsVelocityLevel = _flag;
 }
 
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f):
+NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI, new_list_DS)
 {
   beta = new_beta;
@@ -57,9 +59,10 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double new_be
   alpha_m = new_alpha_m;
   alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
+  _IsVelocityLevel = _flag;
 }
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double _rho_infty):
+NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double _rho_infty, bool _flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI, new_list_DS)
 {
   alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
@@ -67,10 +70,11 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(DynamicalSystemsSet& new_list_DS, double _rho_i
   gamma = 0.5 + alpha_f - alpha_m;
   beta = 0.25 * std::pow((gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
+  _IsVelocityLevel = _flag;
 }
 
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f):
+NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool _flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   beta = new_beta;
@@ -78,9 +82,10 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
   alpha_m = new_alpha_m;
   alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
+  _IsVelocityLevel = _flag;
 }
 
-NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty):
+NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool _flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
   alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
@@ -88,6 +93,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty):
   gamma = 0.5 + alpha_f - alpha_m;
   beta = 0.25 * std::pow((gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
+  _IsVelocityLevel = _flag;
 }
 
 
@@ -263,6 +269,7 @@ double NewMarkAlphaOSI::computeResidu()
       }
       //
 #ifdef DEBUG_NEWMARK
+      cout.precision(15);
       cout << "Residu Free: ";
       _residuFree->display();
       cout << "Residu: ";
@@ -368,16 +375,27 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
         xcoord[5] = sizeY;
         xcoord[6] = 0;
         xcoord[7] = sizeY;
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(t, *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *y_free, xcoord, false); // y += NonLinearPart
+        SP::LagrangianScleronomousR _SclerR = std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation());
+        _SclerR->computeNonLinearH2dot(t, *inter);
+        subprod(*ID, *(_SclerR->Nonlinearh2dot()), *y_free, xcoord, false); // y += NonLinearPart
       }
       else if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp) // LCP at position level
       {
-        // Update g, Jacobian matrix
-        inter->computeOutput(t, 0);
+        // Update Jacobian matrix
         inter->computeJach(t);
-        // cumpute y_free = g_{n,k} + G*q_free
-        *y_free = *(inter->y(0)); //g_{n,k}
+        // cumpute y_free = y_{n,k} + G*q_free
+        if (!_IsVelocityLevel) // output at the position level y_{n,k} = g_{n,k}
+        {
+          inter->computeOutput(t, 0); // Update output of level 0
+          *y_free = *(inter->y(0)); //g_{n,k}
+        }
+        else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
+        {
+          double h = simulationLink->nextTime() - simulationLink->startingTime();
+          double gamma_prime = gamma / beta;
+          inter->computeOutput(t, 1); // Update output of level 1
+          *y_free = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
+        }
         subprod(*C, *q_free, *y_free, coord, false);
       }
       else
@@ -460,6 +478,7 @@ void NewMarkAlphaOSI::prediction()
       *(d->getWorkVector(DynamicalSystem::acce_memory)) = *(_ddotq);
       //
 #ifdef DEBUG_NEWMARK
+      cout.precision(15);
       cout << "Before prediction" << endl;
       cout << "Position q: ";
       _q->display();
@@ -479,6 +498,7 @@ void NewMarkAlphaOSI::prediction()
       _ddotq->zero();
       // Display message for debug
 #ifdef DEBUG_NEWMARK
+      cout.precision(15);
       cout << "After prediction" << endl;
       cout << "Position q: ";
       _q->display();
@@ -528,6 +548,7 @@ void NewMarkAlphaOSI::correction()
       *(d->getWorkVector(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / pow(h, 2.0)) * (*delta_q));
       //
 #ifdef DEBUG_NEWMARK
+      cout.precision(15);
       cout << "After correction" << endl;
       cout << "Position q : ";
       d->q()->display();
@@ -600,21 +621,33 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     //a0 = q_n
     (*_vec) = (*q_n);
     _CoeffsDense->setCol(0, (*_vec));
+    cout << "a0: ";
+    _vec->display();
     //a1 = h*dotq_n
     (*_vec) = h * (*dotq_n);
     _CoeffsDense->setCol(1, (*_vec));
+    cout << "a1: ";
+    _vec->display();
     //a2 = 0.5*h^2*ddotq_n
     (*_vec) = (0.5 * std::pow(h, 2)) * (*ddotq_n);
     _CoeffsDense->setCol(2, (*_vec));
+    cout << "a2: ";
+    _vec->display();
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * std::pow(h, 2)) * (*ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(3, (*_vec));
+    cout << "a3: ";
+    _vec->display();
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
     (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * std::pow(h, 2)) * (*ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - (std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(4, (*_vec));
+    cout << "a4: ";
+    _vec->display();
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * std::pow(h, 2)) * (*ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(5, (*_vec));
+    cout << "a5: ";
+    _vec->display();
     //
 #ifdef DEBUG_NEWMARK
     cout << "==================== In NewMarkAlphaOSI::computeCoefsDenseOutput ================" << endl;
@@ -631,7 +664,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     dotq_np1->display();
     cout << "ddotq_n+1: ";
     ddotq_np1->display();
-    cout << "Dense output coefficient matrix: ";
+    cout << "Dense output coefficient matrix: " << endl;
     _CoeffsDense->display();
 #endif
   }
@@ -655,7 +688,7 @@ void NewMarkAlphaOSI::DenseOutputallDSs(double t)
 {
   // Make sure that all coefficients of the dense output polynomial for all DSs has been computed before
   double t_n = simulationLink->startingTime();
-  double t_np1 = simulationLink->startingTime();
+  double t_np1 = simulationLink->nextTime();
   double h = t_np1 - t_n;
   double theta = (t - t_n) / h;
   SP::SiconosVector _vec1(new SiconosVector(_orderDenseOutput + 1));

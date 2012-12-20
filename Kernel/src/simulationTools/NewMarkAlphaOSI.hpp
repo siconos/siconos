@@ -51,6 +51,12 @@ protected:
 
   /** Order of the polynomial for dense output*/
   unsigned int _orderDenseOutput;
+
+  /** Indicator whether or not constraints at the velocity level are handled
+   * _IsVelocityLevel = true: constraints at the velocity level are handled
+   * _IsVelocityLevel = false: constraints at the position are handled
+   */
+  bool _IsVelocityLevel;
   /**
    * Default constructor
   */
@@ -59,20 +65,20 @@ protected:
 public:
 
   /** constructor with one DS and parameters beta, gamma, alpha_m, alpha_f
-   *  \param ds SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param beta double : value of beta
+   *  \param ds the DynamicalSystem linked to the OneStepIntegrator
+   *  \param beta value of beta
    *  \param gamma double : value of gamma
    *  \param alpha_m double : value of alpha_m
    *  \param alpha_f double : value of alpha_f
    */
-  NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double);
+  NewMarkAlphaOSI(SP::DynamicalSystem, double, double, double, double, bool);
 
   /** constructor with one DS and the parameter rho_infty from which values of beta, gamma, alpha_m, alpha_f can be deduced
    * \param ds SP::DynamicalSystem
    * \param rho_infty double : value of rho_infty
    */
 
-  NewMarkAlphaOSI(SP::DynamicalSystem, double);
+  NewMarkAlphaOSI(SP::DynamicalSystem, double, bool);
 
   /** constructor with a list of concerned Dynamical Systems and parameters beta, gamma, alpha_m, alpha_f
   * \param listOfDS DynamicalSystemsSet : list of Dynamical Systems to be integrated
@@ -82,14 +88,14 @@ public:
   * \param alpha_f double
   */
 
-  NewMarkAlphaOSI(DynamicalSystemsSet&, double, double, double, double);
+  NewMarkAlphaOSI(DynamicalSystemsSet&, double, double, double, double, bool);
 
   /** constructor with a list of concerned Dynamical Systems and the parameter rho_infty
    * \param listOfDS DynamicalSystemsSet
    * \param rho_infty double
    */
 
-  NewMarkAlphaOSI(DynamicalSystemsSet&, double);
+  NewMarkAlphaOSI(DynamicalSystemsSet&, double, bool);
 
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
@@ -98,13 +104,13 @@ public:
   * \param alpha_f double
   */
 
-  NewMarkAlphaOSI(double, double, double, double);
+  NewMarkAlphaOSI(double, double, double, double, bool);
 
   /** constructor with only the parameter rho_infty
   * \param rho_infty double
   */
 
-  NewMarkAlphaOSI(double);
+  NewMarkAlphaOSI(double, bool);
 
   /** destructor
    */
@@ -193,6 +199,23 @@ public:
   {
     return _orderDenseOutput;
   }
+
+  /** set the flag _IsVelocityLevel
+   * \param bool
+   */
+  inline void setFlagVelocityLevel(bool _flag)
+  {
+    _IsVelocityLevel = _flag;
+  }
+
+  /** get the flag _IsVelocityLevel
+   * \return bool
+   */
+  inline bool getFlagVelocityLevel()
+  {
+    return _IsVelocityLevel;
+  }
+
   /** get matrix W
    *\param SP::DynamicalSystem DynamicalSystem concerned
    */

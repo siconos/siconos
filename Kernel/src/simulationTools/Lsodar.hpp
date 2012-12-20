@@ -193,7 +193,19 @@ public:
   /** set the maximul number of steps for one call of Lsodar
    *\param an integer
    */
-  void setMaxNstep(int);
+  void setMaxNstep(integer);
+
+  /** set the minimum and maximum step sizes
+   *\param double (minimum step size)
+   *\param double (maximul step size)
+   */
+  void setMinMaxStepSizes(doublereal, doublereal);
+
+  /** set maximum method order
+   *\param integer (maximum order for nonstiff method)
+   *\param integer (maximum order for stiff method)
+   */
+  void setMaxOrder(integer, integer);
 
   /** update doubleData and iwork memory size, when changes occur in intData.
    */

@@ -269,10 +269,10 @@ void EventsManager::OptimizedProcessEvents()
   // ==== Valid only when no Non Smooth event occurs and without control manager ====
   _nextEvent->process(simulation());
   // // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme,
-  if(Type::value(*simulation())!= Type::EventDriven)
-    {
-      simulation()->updateIndexSets();
-    }
+  if (Type::value(*simulation()) != Type::EventDriven)
+  {
+    simulation()->updateIndexSets();
+  }
   _currentEvent->setTime(_nextEvent->getDoubleTimeOfEvent());
   simulation()->timeDiscretisation()->increment();
   _ETD->setTime(simulation()->getTkp1());

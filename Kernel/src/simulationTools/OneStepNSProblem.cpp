@@ -269,8 +269,9 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       if (!isLinear || !_hasBeenUpdated)
       {
-        computeInteractionBlock(*ei);
-
+        {
+          computeInteractionBlock(*ei);
+        }
 
         // allocation for transposed block
         // should be avoided
