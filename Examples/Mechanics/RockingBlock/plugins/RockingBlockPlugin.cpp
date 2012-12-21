@@ -31,14 +31,14 @@ extern "C" void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfy, 
   Wn[2] = 0.5 * LengthBlock * cos(q[2]) + 0.5 * HeightBlock * sin(q[2]);
 }
 // Plugin function to calculate the derivative of the Jacobian H with respect to the time (G1dot for contact 1 and G2dot for contact 2)
-extern "C" void G1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, unsigned int sizeOfS1, double* S1, unsigned int sizeOfZ, double* z)
+extern "C" void G1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S1, unsigned int sizeOfZ, double* z)
 {
   S1[0] = 0.0;
   S1[1] = 0.0;
   S1[2] = (0.5 * LengthBlock * sin(q[2]) + 0.5 * HeightBlock * cos(q[2])) * qdot[2];
 }
 //
-extern "C" void G2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, unsigned int sizeOfS2, double* S2, unsigned int sizeOfZ, double* z)
+extern "C" void G2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
 {
   S2[0] = 0.0;
   S2[1] = 0.0;

@@ -307,6 +307,7 @@ void EventDriven::initOSNS()
 
   // === update all index sets ===
   updateIndexSets();
+  initOSIRhs();
 
   if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem built.
