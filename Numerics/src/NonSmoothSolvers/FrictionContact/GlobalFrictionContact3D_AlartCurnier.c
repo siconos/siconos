@@ -133,7 +133,7 @@ void NM_setup(NumericsMatrix* A)
           roffset = A->matrix1->blocksize0[cr - 1];
           inbr -= roffset;
         }
-        unsigned int inbc = A->matrix1->blocksize1[cr];
+        unsigned int inbc = A->matrix1->blocksize1[cn];
         if (cn != 0)
         {
           coffset = A->matrix1->blocksize1[cn - 1];
@@ -247,8 +247,6 @@ int initACPsiJacobian(
   assert(M->n == H->m);
   for (unsigned int e = 0; e < H->nz; ++e)
   {
-    printf("i=%d, j=%d, J->m=%d, J->n=%d\n", H->p[e], H->i[e] + M->n + A->n, 
-           J->m, J->n);
     CHECK(cs_entry(J, H->p[e], H->i[e] + M->n + A->n, H->x[e]));
   }
 
@@ -261,7 +259,7 @@ int initACPsiJacobian(
   /* I */
   for (unsigned int e = 0; e < A->m; ++e)
   {
-    CHECK(cs_entry(J, e + M->n, e + M->m, 1.));
+    CHECK(cs_entry(J, e + M->m, e + M->n, 1.));
   }
 
   /* keep A start indice for update */
@@ -269,13 +267,13 @@ int initACPsiJacobian(
   /* A */
   for (unsigned int e = 0; e < A->nz; ++e)
   {
-    CHECK(cs_entry(J, A->p[e] + M->n + H->n, A->i[e] + M->m, A->x[e]));
+    CHECK(cs_entry(J, A->p[e] + M->m + H->n, A->i[e] + M->n, A->x[e]));
   }
 
   /* B */
   for (unsigned int e = 0; e < B->nz; ++e)
   {
-    CHECK(cs_entry(J, B->p[e] + M->n + H->n, B->i[e] + M->m + A->m, B->x[e]));
+    CHECK(cs_entry(J, B->p[e] + M->m + H->n, B->i[e] + M->n + A->n, B->x[e]));
   }
 
   return Astart;
@@ -604,9 +602,11 @@ void globalFrictionContact3D_AlartCurnier(
   unsigned int ACProblemSize = sizeOfACPsiJacobian(problem->M->matrix2, 
                                                    problem->H->matrix2);
 
+  unsigned int globalProblemSize = problem->M->size0;
+
   unsigned int localProblemSize = problem->H->size1;
 
-  unsigned int globalProblemSize = problem->M->size0;
+  assert(localProblemSize == problem->numberOfContacts * problem->dimension);
 
 /*
   void *buffer;
@@ -668,11 +668,6 @@ void globalFrictionContact3D_AlartCurnier(
                  problem->M->matrix2->n + A_.m + B_.m, 
                  problem->M->matrix2->nzmax + 2*problem->H->matrix2->nzmax + 
                  2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
-
-  for (unsigned int i=0; i<A_.nz ;++i)
-  {
-    printf("i=%d, p[i]=%d, i[i]=%d\n", i, A_.p[i], A_.i[i]);
-  }
 
   assert(A_.n == problem->H->size1);
   assert(A_.nz == problem->numberOfContacts * 9);
@@ -743,12 +738,6 @@ void globalFrictionContact3D_AlartCurnier(
     DSCAL(ACProblemSize, -1., rhs, 1);
 
     /* Solve: J X = -F */
-    for (unsigned int i=0; i<A_.nz ;++i)
-    {
-      printf("i=%d, p[i]=%d, i[i]=%d\n", i, A_.p[i], A_.i[i]);
-    }
-
-
     dmumps_c(mumps_id);
 
     assert(mumps_id->info[0] >= 0);
