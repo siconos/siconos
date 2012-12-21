@@ -188,14 +188,14 @@ void freeNumericsMatrix(NumericsMatrix* m)
   {
     freeSBM(m->matrix1);
     free(m->matrix1);
-  }
-  if (m->matrix2)
-  {
-    cs_spfree(m->matrix2);
-  }
-  if (m->matrix3)
-  {
-    cs_spfree(m->matrix3);
+    if (m->matrix2)
+    {
+      cs_spfree(m->matrix2);
+    }
+    if (m->matrix3)
+    {
+      cs_spfree(m->matrix3);
+    }
   }
 }
 
@@ -464,6 +464,8 @@ NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructu
   M->size1 = size1;
   M->matrix0 = NULL;
   M->matrix1 = m1;
+  M->matrix2 = NULL;
+  M->matrix3 = NULL;
 
   return M;
 }

@@ -136,6 +136,8 @@ void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, d
   local_problem->M->storageType = 0; // dense storage
   local_problem->M->matrix0 = NULL;
   local_problem->M->matrix1 = NULL;
+  local_problem->M->matrix2 = NULL;
+  local_problem->M->matrix3 = NULL;
 
   /* Memory allocation for q. Size of q = blsizemax, size of the
      largest square-block in blmat */

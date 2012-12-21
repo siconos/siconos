@@ -318,11 +318,15 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
   {
     localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
     localproblem->M->matrix1 = NULL;
+    localproblem->M->matrix2 = NULL;
+    localproblem->M->matrix3 = NULL;
   }
   else
   {
     localproblem->M->matrix0 = NULL;
     localproblem->M->matrix1 = NULL;
+    localproblem->M->matrix2 = NULL;
+    localproblem->M->matrix3 = NULL;
   }
 
   initializeLocalSolver_nsgs(&local_solver, &update_localproblem, (FreeSolverPtr *)&freeSolver, &computeError, problem , localproblem, localsolver_options);

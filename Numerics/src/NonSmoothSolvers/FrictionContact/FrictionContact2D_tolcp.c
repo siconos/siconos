@@ -41,6 +41,8 @@ int FrictionContact2D_tolcp(FrictionContactProblem* problem, LinearComplementari
 
   lcp_problem->M->storageType = 0;
   lcp_problem->M->matrix1 = NULL;
+  lcp_problem->M->matrix2 = NULL;
+  lcp_problem->M->matrix3 = NULL;
   lcp_problem->M->matrix0 = (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));;
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
   int n = 2 * nc;
