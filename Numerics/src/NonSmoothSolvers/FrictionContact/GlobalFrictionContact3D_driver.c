@@ -142,7 +142,6 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
     break;
 
   }
-#ifdef WITH_MUMPS
   case SICONOS_FRICTION_3D_GLOBAL_AC:
   {
     globalFrictionContact3D_AlartCurnier(problem, reaction , velocity, 
@@ -150,7 +149,6 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
     break;
 
   }
-#endif
   default:
   {
     fprintf(stderr, "Numerics, GlobalFrictionContact3D_driver failed. Unknown solver.\n");

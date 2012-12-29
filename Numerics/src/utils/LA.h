@@ -396,7 +396,6 @@ static inline void DGETRI(int N, double* A, int LDA, int* IPIV, int* INFO)
 {
   int C_N = N;
   int C_LDA = LDA;
-  printf("C_LDA = %i\n", C_LDA);
   LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGERP(INFO));
 }
 
