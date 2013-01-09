@@ -45,7 +45,7 @@
 #include "Friction_cst.h"
 #include "frictionContact_test_function.h"
 #include "FrictionContact3D_AlartCurnier.h"
-#include "FrictionContact3D_globalAlartCurnier.h"
+#include "FrictionContact3D_localAlartCurnier.h"
 #include "FrictionContact3D_compute_error.h"
 #include "fclib_interface.h"
 
@@ -1734,7 +1734,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 %include "FrictionContact3D_Solvers.h"
 %include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
-%include "FrictionContact3D_globalAlartCurnier.h"
+%include "FrictionContact3D_localAlartCurnier.h"
 %include "FrictionContact3D_compute_error.h"
 %include "fclib_interface.h"
 
@@ -1877,7 +1877,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 
 
-%extend SparseMatrix
+%extend cs_sparse
 {
   %fragment("NumPy_Fragments");
 
@@ -1993,7 +1993,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     }
   }
 
-  ~SparseMatrix()
+  ~cs_sparse()
   {
     freeSparse($self);
   }
