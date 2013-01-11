@@ -10,8 +10,8 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
     gcc_compiler_version ${_compiler_output})
   MESSAGE(STATUS "C++ compiler version: ${gcc_compiler_version} [${CMAKE_CXX_COMPILER}]")
   
-  IF(gcc_compiler_version VERSION_LESS "4.5")
-    MESSAGE(FATAL_ERROR "gcc greater than 4.5 needed")
+  IF(gcc_compiler_version VERSION_LESS "4.4")
+    MESSAGE(FATAL_ERROR "gcc greater than 4.4 needed")
   ENDIF()
 ENDIF()
 
