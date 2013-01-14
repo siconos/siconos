@@ -274,13 +274,13 @@ nightly_submit Kernel Release
 install_1 Kernel Release
 clean_1 Kernel Release
 #
-configure_src IO Release
-nightly_build IO Release
-nightly_test IO Release
-nightly_memcheck IO Release
-nightly_submit IO Release
-install_1 IO Release
-clean_1 IO Release
+#configure_src IO Release
+#nightly_build IO Release
+#nightly_test IO Release
+#nightly_memcheck IO Release
+#nightly_submit IO Release
+#install_1 IO Release
+#clean_1 IO Release
 ### Snapshot packages
 pack_src Numerics Release
 save_packed_1 Numerics Release
@@ -288,10 +288,10 @@ save_packed_1 Numerics Release
 pack_src Kernel Release
 save_packed_1 Kernel Release
 ##
-pack_src IO Release
-save_packed_1 IO Release
+#pack_src IO Release
+#save_packed_1 IO Release
 ##
-### front-end (not with IO yet)
+### front-end (not with IO for a release)
 configure_src Front-End Release
 nightly_build Front-End Release
 nightly_test Front-End Release
