@@ -232,9 +232,26 @@ nightly_submit() {
     make_1 $1 $2 ${mode}Submit
 }
 
+# post rc.*  (need pcre)
+swig_setup() { 
+    sudo rm -rf `which swig`
+    sudo rm -rf `which swig2.0`
+    sudo rm -rf `which swig1.3`
+    
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
+
+    cd swig-2.0.7; { 
+        ./configure
+        make
+        sudo make install
+    }
+    cd ..
+}
+
 #sudo rm -f /usr/local/bin/ctest
 
 # trunk tests
+swig_setup
 setup_src
 
 if [ $release = "true" ]; then
