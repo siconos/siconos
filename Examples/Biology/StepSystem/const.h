@@ -7,7 +7,7 @@ static int sNSLawSize = 4;
 //  static double SR1 = 1;
 
 static double sTf = 3;
-static double sStep = 0.01;
+static double sStep = 0.001;
 
 #endif
 

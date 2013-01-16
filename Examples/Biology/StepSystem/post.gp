@@ -34,8 +34,9 @@ set arrow from 0,8 to 12.5,8 nohead ls 3
 vec1(x,y) =  ( x/(sqrt(x*x+y*y))*coeff     ) 
 vec2(x,y) =  ( y/(sqrt(x*x+y*y))*coeff     ) 
 
-set xlabel "x1"
-set ylabel "x2"
+set xlabel "\$x_1\$"
+set ylabel "\$x_2\$"
+
 set label "\$\\theta_2^1\$" at first 12.5, first 4
 set label "\$\\theta_2^2\$" at first 12.5, first 8
 set label "\$\\theta_1^1\$" at first 3.7, first 12.8

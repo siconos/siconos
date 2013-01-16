@@ -3,7 +3,7 @@ set term X11
 #set term pdf
 #extension= ".pdf"
 #set term tikz standalone color solid size 5in,3in
-set term tikz standalone monochrome  size 5in,5in font '\small\sf' 
+set term tikz standalone monochrome  size 5in,5in font '\large\sf'
 extension=".tex"
 
 xmin=7.9
@@ -11,7 +11,8 @@ xmax=8.5
 ymin=6.4
 ymax=8.2
 
-
+set xlabel "x1"
+set ylabel "x2"
 set xrange [xmin:xmax]
 set yrange [ymin:ymax]
 set output "phase-explicit-zoom1".extension
@@ -65,8 +66,7 @@ set arrow from xmin,8 to xmax,8 nohead ls 3
 vec1(x,y) =  ( x/(sqrt(x*x+y*y))*coeff     ) 
 vec2(x,y) =  ( y/(sqrt(x*x+y*y))*coeff     ) 
 
-set xlabel "x1"
-set ylabel "x2"
+
 set label "\$\\theta_2^2\$" at first 10.5, first 8
 set label "\$\\theta_1^2\$" at first 7.7, first 10.8
 
