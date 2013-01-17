@@ -114,7 +114,9 @@ private:
   \param  inter the Interaction to add
   \return a vertex descriptor of the new vertex in IndexSet0
   */
-  InteractionsGraph::VDescriptor addInteractionInIndexSet(SP::Interaction inter);
+  std::pair<DynamicalSystemsGraph::EDescriptor, 
+            InteractionsGraph::VDescriptor> 
+  addInteractionInIndexSet(SP::Interaction inter);
 
   /** remove the Interactions of the interactions from _IG and
    * _DSG
@@ -176,7 +178,8 @@ public:
    * \param a shared pointer to the interaction
    * \return a vertex descriptor to the new vertex in IndexSet0
    */
-  InteractionsGraph::VDescriptor insertInteraction(SP::Interaction inter);
+  std::pair<DynamicalSystemsGraph::EDescriptor, 
+            InteractionsGraph::VDescriptor> insertInteraction(SP::Interaction inter);
 
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.

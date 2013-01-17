@@ -113,7 +113,8 @@ Topology::~Topology()
   clear();
 }
 
-InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interaction inter)
+std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
+Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
@@ -194,6 +195,8 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
           assert(_IG[0]->bundle(ig_new_ve) == inter);
           assert(_IG[0]->is_vertex(inter));
           assert(_DSG[0]->is_edge(dsgv, dsgv, inter));
+          return std::pair<DynamicalSystemsGraph::EDescriptor, 
+                           InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
         }
       }
       else
@@ -224,13 +227,15 @@ InteractionsGraph::VDescriptor Topology::addInteractionInIndexSet(SP::Interactio
             assert(_IG[0]->bundle(ig_new_ve) == inter);
             assert(_IG[0]->is_vertex(inter));
             assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
+            return std::pair<DynamicalSystemsGraph::EDescriptor, 
+                             InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
           }
         }
     }
   }
 
   // note: only one or two ds => only one vertex in IG
-  return ig_new_ve;
+  
 
 }
 
@@ -294,17 +299,23 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 }
 
-InteractionsGraph::VDescriptor Topology::insertInteraction(SP::Interaction inter)
+std::pair<DynamicalSystemsGraph::EDescriptor, 
+            InteractionsGraph::VDescriptor> 
+Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 
   _allInteractions->insert(inter);
-  InteractionsGraph::VDescriptor ig_new_ve = addInteractionInIndexSet(inter);
+  
+
+  std::pair<DynamicalSystemsGraph::EDescriptor, 
+            InteractionsGraph::VDescriptor> descriptors = 
+    addInteractionInIndexSet(inter);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 
-  return ig_new_ve;
+  return descriptors;
 
 }
 

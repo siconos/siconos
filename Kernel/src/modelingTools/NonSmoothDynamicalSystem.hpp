@@ -277,10 +277,14 @@ public:
   }
 
   /** specify id the given Interaction is for controlling the DS
-   * \param vd the descriptor of the Interaction owning the Interaction
-   * \param isControlInteraction true if the Interaction is used for control purposes
+   * \param vd the descriptor of the Interaction in InteractionGraph
+   * \param ed the descriptor of the Interaction in DynamicalSystemsGraph
+   * \param isControlInteraction true if the Interaction is used for
+   * control purposes
    **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd, const bool isControlInteraction);
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
+                          const DynamicalSystemsGraph::EDescriptor& ed,
+                          const bool isControlInteraction);
 };
 
 #endif
