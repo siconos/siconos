@@ -1,0 +1,260 @@
+
+\section{Reduced formulation to local variables.}
+
+\subsection{Formulation}
+
+Let us start with 
+\begin{equation}
+  \label{eq:AC-L7}
+  \begin{array}{l}
+  \varPhi_1(U,P) =  - U_{k+1}  + \widehat W P_{k+1}  + U_{\mathrm{free}}\\ \\
+  \varPhi_2(U,P) =  P_{\n} - \proj_{\nbR^{a}_+} (P_{\n} - \rho_{\n}\circ (U_{\n} +e \circ  U_{\n,k}) ) \\ \\
+  \varPhi_3(U,P) =  P_{\t} - \proj_{\widehat {\bf D}(P_{\n},U_{\n})} (P_{{\t}} - \rho_{\t}\circ \,U_{\t} )
+\end{array}
+\end{equation}
+where the modified friction disk for a contact $\alpha$ is
+\begin{equation}\label{eq:AC-L3}
+  \widehat {\bf D}^\alpha(P^\alpha_{\n,k+1},U_{\n,k+1}^{\alpha}) = {\bf D}(\mu(\proj_{\nbR_+} (P^\alpha_{\n,k+1} - \rho^\alpha_{\n}\,(U_{\n,k+1}^{\alpha}+e^\alpha U_{\n,k}^{\alpha}) )).
+\end{equation}
+\subsection{Structure of the Jacobians}
+
+Let us denote the one element of the  generalized Jacobian by  $ H(U,P) \in \partial \Phi(U,P)$ which has the structure
+\begin{equation}
+  \label{eq:AC-L6}
+   H(U,P) = 
+   \left[\begin{array}{cccc}
+       - I & 0 &  \widehat W_{\n\n} & \widehat W_{\n\t} \\ \\
+       0  & -I  &  \widehat W_{\t\n} & \widehat W_{\t\t} \\ \\
+       \partial_{U_{\n}} \Phi_2(U,P) & 0 &   \partial_{P_{\n}} \Phi_2(U,P) & 0 \\ \\
+       \partial_{U_{\n}} \Phi_3(U,P) &  \partial_{U_{\t}} \Phi_3(U,P) &  \partial_{P_{\n}} \Phi_3(U,P)  & \partial_{P_{\t}} \Phi_3(U,P)
+   \end{array}\right]
+\end{equation}
+
+
+\subsection{Computation of the gradients}
+
+
+Let us consider the single contact case.
+\paragraph{Computation of the gradients of $\Phi_2$}
+\begin{equation}
+  \label{eq:AC-T1}
+  \begin{array}{l}
+  \varPhi_2(U,P) =  P_{\n} - \proj_{\nbR^{a}_+} (P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \\ \\
+\end{array}
+\end{equation}
+\begin{itemize}
+\item \textbf{If} $P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) \geq 0 $, we get 
+  \begin{equation}
+    \label{eq:AC-T2}
+    \begin{array}{l}
+      \varPhi_2(U,P) =  + \rho_{\n} (U_{\n} +e  U_{\n,k})
+    \end{array}
+  \end{equation}
+  and 
+  \begin{equation}
+    \label{eq:AC-T3}
+    \begin{array}{l}
+     \partial_{U_{\n}} \varPhi_2(U,P) =  + \rho_{\n} \\ \\
+     \partial_{P_{\n}} \varPhi_2(U,P) =  0 \\ \\ 
+    \end{array}
+  \end{equation}
+\item \textbf{If} $P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k})  < 0 $, we get 
+  \begin{equation}
+    \label{eq:AC-T4}
+    \begin{array}{l}
+      \varPhi_2(U,P) =  P_{\n}
+    \end{array}
+  \end{equation}
+  and 
+  \begin{equation}
+    \label{eq:AC-T5}
+    \begin{array}{l}
+     \partial_{U_{\n}} \varPhi_2(U,P) =  0 \\ \\
+     \partial_{P_{\n}} \varPhi_2(U,P) =  1 \\ \\ 
+    \end{array}
+  \end{equation}
+\end{itemize}
+\paragraph{Computation of the gradients of $\Phi_3$}
+\begin{equation}
+  \label{eq:AC-TT1}
+  \begin{array}{l}
+  \varPhi_3(U,P) =  P_{\t} - \proj_{\widehat {\bf D}(P_{\n},U_{\n})} (P_{\t} - \rho_{\t} U_{\t} ) \\ \\
+\end{array}
+\end{equation}
+\begin{itemize}
+\item \textbf{If} $\|P_{\t} - \rho_{\t} U_{\t}\| \leq \mu \max (0 ,P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) $  , we get 
+\begin{equation}
+  \label{eq:AC-TT2}
+  \begin{array}{l}
+  \varPhi_3(U,P) =  + \rho_{\t} U_{\t} 
+\end{array}
+\end{equation}
+and
+ \begin{equation}
+    \label{eq:AC-TT3}
+    \begin{array}{l}
+     \partial_{U_{\n}} \varPhi_3(U,P) =  0 \\ \\
+     \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\ 
+     \partial_{U_{\t}} \varPhi_3(U,P) =  + \rho_{\t} \\ \\
+     \partial_{P_{\t}} \varPhi_3(U,P) =  0 \\ \\ 
+    \end{array}
+  \end{equation}
+\item \textbf{If} $\|P_{\t} - \rho_{\t} U_{\t}\| > \mu \max (0 ,P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) $  , we get 
+\begin{equation}
+  \label{eq:AC-TT4}
+  \begin{array}{l}
+  \varPhi_3(U,P) =  P_{\t} - \mu \max(0,P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) )  \Frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }
+\end{array}
+\end{equation}
+
+\begin{itemize}
+\item  \textbf{If} $P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) \leq 0$, we get 
+  \begin{equation}
+  \label{eq:AC-TT5}
+  \begin{array}{l}
+  \varPhi_3(U,P) =   P_{\t}
+\end{array}
+\end{equation}
+and 
+ \begin{equation}
+   \label{eq:AC-TT6}
+   \begin{array}{l}
+     \partial_{U_{\n}} \varPhi_3(U,P) =  0 \\ \\
+     \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\ 
+     \partial_{U_{\t}} \varPhi_3(U,P) =  0 \\ \\
+     \partial_{P_{\t}} \varPhi_3(U,P) =  I_2 \\ \\ 
+   \end{array}
+ \end{equation}
+\item  \textbf{If} $P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) > 0$, we get 
+\begin{equation}
+  \label{eq:AC-TT7}
+  \begin{array}{l}
+  \varPhi_3(U,P) =  P_{\t} - \mu (P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) )  \Frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }
+\end{array}
+\end{equation}
+and 
+ \begin{equation}
+   \label{eq:AC-TT8}
+   \begin{array}{l}
+     \partial_{U_{\n}} \varPhi_3(U,P) =  \mu \rho_{\n}  \Frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }\text{{\bf WARNING} case was not taken into account}\\ \\
+     \partial_{P_{\n}} \varPhi_3(U,P) =  -\mu  \Frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| } \\ \\ 
+     \partial_{U_{\t}} \varPhi_3(U,P) =  \mu\rho_{\t}(P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \Gamma(P_{\t} - \rho_{\t} U_{\t})  \\ \\
+     \partial_{P_{\t}} \varPhi_3(U,P) =  I_2-\mu(P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \Gamma(P_{\t} - \rho_{\t} U_{\t})  \\ \\ 
+   \end{array}
+ \end{equation}
+\end{itemize}
+
+
+
+\end{itemize}
+
+\subsection{Rearranging the cases}
+
+{\bf TO BE COMPLETED}
+\section{Formulation with global variables.}
+
+\subsection{Formulation}
+Let us start with 
+\begin{equation}
+  \label{eq:GAC-L1}
+  \begin{array}{l}
+  \Psi_{1}^{a}(v,U,P) =  - \widehat M v_{k+1}  +  H P_{k+1}  + q \\ \\
+  \Psi_{1}^{b}(v,U,P) =  - U_{k+1}  + H^\top v _{k+1}  + b \\ \\
+  \Psi_2(v,U,P) =  P_{\n} - \proj_{\nbR^{a}_+} (P_{\n} - \rho_{\n}\circ (U_{\n} +e \circ  U_{\n,k}) ) \\ \\
+  \Psi_3(v,U,P) =  P_{\t} - \proj_{\widehat {\bf D}(P_{\n},U_{\n})} (P_{{\t}} - \rho_{\t}\circ \,U_{\t} )
+\end{array}
+\end{equation}
+where the modified friction disk for a contact $\alpha$ is
+\begin{equation}\label{eq:GAC-L2}
+  \widehat {\bf D}^\alpha(P^\alpha_{\n,k+1},U_{\n,k+1}^{\alpha}) = {\bf D}(\mu(\proj_{\nbR_+} (P^\alpha_{\n,k+1} - \rho^\alpha_{\n}\,(U_{\n,k+1}^{\alpha}+e^\alpha U_{\n,k}^{\alpha}) )).
+\end{equation}
+
+\subsection{Structure of the Jacobians}
+
+ Let us denote the one element of the  generalized Jacobian by  $ H(v,U,P) \in \partial \Psi(s,U,P)$ which has the structure
+\begin{equation}
+  \label{eq:GAC-L3}
+   H(v,U,P) = 
+   \left[\begin{array}{ccccc}
+       - \widehat M & 0 & 0 & H_{\n} & H_{\t} \\ \\
+        H_{\n}^\top &  - I & 0 & 0 &0 \\ \\
+        H_{\t}^\top &  0  & -I & 0 &0 \\ \\
+        0 & \partial_{U_{\n}} \Psi_2(v,U,P) & 0 &   \partial_{P_{\n}} \Psi_2(v,U,P) & 0 \\ \\
+        0 & \partial_{U_{\n}} \Psi_3(v,U,P) &  \partial_{U_{\t}} \Psi_3(v,U,P) &  \partial_{P_{\n}} \Psi_3(v,U,P)  & \partial_{P_{\t}} \Psi_3(v,U,P)
+   \end{array}\right]
+\end{equation}
+
+We clearly have
+\begin{equation}
+  \label{eq:equivalentJacobian}
+  \begin{array}{lcl}
+     \partial_{U} \Psi_2(v,U,P) &=& \partial_{U} \Phi_2(U,P) \\ 
+     \partial_{P} \Psi_2(v,U,P) &=& \partial_{P} \Phi_2(U,P) \\     
+     \partial_{U} \Psi_3(v,U,P) &=& \partial_{U} \Phi_3(U,P) \\ 
+     \partial_{P} \Psi_3(v,U,P) &=& \partial_{P} \Phi_3(U,P) \\
+  \end{array}
+\end{equation}
+and we get
+\begin{equation}
+  \label{eq:GAC-L4}
+   H(v,U,P) = 
+   \left[\begin{array}{ccccc}
+       - \widehat M & 0 & 0 & H_{\n} & H_{\t} \\ \\
+        H_{\n}^\top &  - I & 0 & 0 &0 \\ \\
+        H_{\t}^\top &  0  & -I & 0 &0 \\ \\
+        0 & \partial_{U_{\n}} \Phi_2(U,P) & 0 &   \partial_{P_{\n}} \Phi_2(U,P) & 0 \\ \\
+        0 & \partial_{U_{\n}} \Phi_3(U,P) &  \partial_{U_{\t}} \Phi_3(U,P) &  \partial_{P_{\n}} \Phi_3(U,P)  & \partial_{P_{\t}} \Phi_3(U,P)
+   \end{array}\right]
+\end{equation}
+
+
+\subsection{Simplification ?}
+Since the second line $\Psi_1^b$ is linear, we should be able to derive a reduced Jacobian using the chain rule. Let us define $\widetilde \Psi$
+\begin{equation}
+  \label{eq:chainrule}
+  \widetilde \Psi(v,P)  = \Psi(v,H^\top v +b,P)
+\end{equation}
+
+\begin{equation}
+  \label{eq:GAC-L5}
+  \begin{array}{l}
+  \widetilde \Psi_{1}(v,P) =  - \widehat M v_{k+1}  +  H P_{k+1}  + q \\ \\
+  \widetilde \Psi_2(v,P) =  P_{\n} - \proj_{\nbR^{a}_+} (P_{\n} - \rho_{\n}\circ (H^\top_{\n}v+b_{\n} +e \circ  U_{\n,k}) ) \\ \\
+  \widetilde \Psi_3(v,P) =  P_{\t} - \proj_{\widehat {\bf D}(P_{\n},U_{\n})} (P_{{\t}} - \rho_{\t}\circ \,(H^\top_\t v + b_\t) )
+\end{array}
+\end{equation}
+
+\paragraph{Chain rule}
+\begin{equation}
+  \label{eq:chainrule1}
+  \begin{array}{lcl}
+  \partial_v \widetilde \Psi_{2,3}(v,P) &=&  \partial_v \Psi_{2,3}(v,H^\top v +b,P)  \\ \\
+  &=& H_{\n}^\top \partial_{U_\n} \Phi_{2,3}(H^\top v + b,P) + H_{\t}^\top \partial_{U_\t} \Phi_{2,3}(H^\top v + b,P)  
+\end{array}
+\end{equation}
+
+\begin{equation}
+  \label{eq:GAC-L6}
+   H(v,P) = 
+   \left[\begin{array}{ccc}
+       - \widehat M &   H_{\n} & H_{\t} \\ \\
+       H_{\n}^\top \partial_{U_\n} \Phi_{2}(H^\top v + b,P) &   \partial_{P_{\n}} \Phi_2(H^\top v + b,P) & 0 \\ \\
+       \begin{array}{c}
+         H_{\n}^\top \partial_{U_\n} \Phi_{3}(H^\top v + b,P) \\
+         \quad \quad + H_{\t}^\top \partial_{U_\t} \Phi_{3}(H^\top v + b,P)\\
+     \end{array}
+     &  \partial_{P_{\n}} \Phi_3(H^\top v + b,P)  & \partial_{P_{\t}} \Phi_3(H^\top v + b,P)
+   \end{array}\right]
+\end{equation}
+
+\paragraph{discussion}
+\begin{itemize}
+\item Formulae has to be checked carefully
+\item I do not known if there an interest in the simplification. With sparse matrices, it is perhaps easier to deal with~(\ref{eq:GAC-L4})
+\end{itemize}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
