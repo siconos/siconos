@@ -267,6 +267,8 @@ void NonSmoothDynamicalSystem::setControlProperty(
 {
   InteractionsGraph& IG0 = *_topology->indexSet0();
   IG0.properties(vd).forControl = isControlInteraction;
+  DynamicalSystemsGraph& DSG0 = *_topology->dSG(0);
+  DSG0.properties(ed).forControl = isControlInteraction;
 }
 void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const int isControlInteraction)
 {

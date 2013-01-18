@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 # this test is taken almost verbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
     from Siconos.Kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
@@ -26,11 +27,11 @@ def test_smc1():
     t0 = 0.0   # start time
     T = 1    # end time
     h = 1.0e-4  # time step for simulation
-    hControl = 1.0e-2 # time step for control
-    Xinit = 1.0 # initial position
+    hControl = 1.0e-2  # time step for control
+    Xinit = 1.0  # initial position
     theta = 0.5
-    N = ceil((T-t0)/h + 10) # number of time steps
-    outputSize = 5 # number of variable to store at each time step
+    N = ceil((T-t0)/h + 10)  # number of time steps
+    outputSize = 5  # number of variable to store at each time step
 
     # Matrix declaration
     A = zeros((ndof, ndof))
@@ -100,6 +101,7 @@ def test_smc1():
     # Resize matrix
     dataPlot.resize(k, outputSize)
 
+
 #Same test, but with the simplified interface
 def test_smc2():
     from Siconos.Kernel import FirstOrderLinearDS, TimeDiscretisation, \
@@ -126,8 +128,8 @@ def test_smc2():
     t0 = 0.0   # start time
     T = 1    # end time
     h = 1.0e-4  # time step for simulation
-    hControl = 1.0e-2 # time step for control
-    Xinit = 1.0 # initial position
+    hControl = 1.0e-2  # time step for control
+    Xinit = 1.0  # initial position
 
     # Matrix declaration
     A = zeros((ndof, ndof))
@@ -174,3 +176,4 @@ def test_smc2():
     if (norm(dataPlot - ref) > 1e-12):
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
+    assert norm(dataPlot - ref) < 1e-12

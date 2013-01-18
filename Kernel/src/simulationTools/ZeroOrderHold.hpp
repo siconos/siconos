@@ -233,11 +233,6 @@ public:
   void computePhi(const DynamicalSystem& ds);
 
   /** Unused
-   *  \param t time
-   *  \param ds the DynamicalSystem
-   */
-  void computeMatrices(const double t, const DynamicalSystem& ds);
-  /** Unused
    *  \param ds the DynamicalSystem
    */
   void computeNextX(const DynamicalSystem& ds);

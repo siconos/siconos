@@ -187,8 +187,10 @@ void ZeroOrderHold::initialize()
           }
         }
         else
+        {
           //        RuntimeException::selfThrow("ZeroOrderHold::initialize - DS linked with more that one iteraction");
-          cout << "number of iteraction attached to the process : " << indxIter << endl;
+          DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
+        }
       }
     }
     if (indxIter == 0)
@@ -409,10 +411,8 @@ void ZeroOrderHold::computePsi(const DynamicalSystem& ds, const Relation& rel)
   bool isBPlugged = rel.isJacLgPlugged();
   if (isAPlugged)
   {
-    RuntimeException::selfThrow("ZeroOrderHold::computePsiTI - Phi has to be constant for now");
+    RuntimeException::selfThrow("ZeroOrderHold::computePsi - Phi has to be constant for now");
   }
-  else
-    foldsPsi.setA(phi);
   SP::SubPluggedObject spo;
   if (isBPlugged)
   {
@@ -431,42 +431,12 @@ void ZeroOrderHold::computePsi(const DynamicalSystem& ds, const Relation& rel)
     //Reset Lsodar
     sim.setIstate(3);
     //Compute
-    sim.processEvents();
     sim.advanceToEvent();
     psi.setCol(i, x);
   }
+  sim.processEvents();
 
 }
-
-void ZeroOrderHold::computeMatrices(const double t, const DynamicalSystem& ds)
-{
-  // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
-
-  // When this function is called, WMap[ds] is supposed to exist and not to be null
-  // Memory allocation has been done during initW.
-
-  //assert(ds && "ZeroOrderHold::computeMatrices(t,ds) - ds == NULL");
-
-  assert((_PhiMap.find(ds.number()) != _PhiMap.end()) &&
-         "ZeroOrderHold::computeMatrices(t,ds) - Phi(ds) does not exists. Maybe you forget to initialize the osi?");
-
-  Type::Siconos dsType = Type::value(ds);
-
-
-  // 1 - First order linear TI systems
-  if (dsType == Type::FirstOrderLinearTIDS)
-  {
-    //Nothing to be done here
-  }
-  // 2 - First order linear systems
-  else if (dsType == Type::FirstOrderLinearDS)
-  {
-  }
-  else RuntimeException::selfThrow("ZeroOrderHold::computeMatrices - not yet implemented for Dynamical system type :" + dsType);
-}
-
-
-
 
 double ZeroOrderHold::computeResidu()
 {
@@ -685,23 +655,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
       *Yp += *H_alpha;
     }
 
-    else if (relationType == NewtonEuler)
-    {
-      SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(rel)->jachqT();
-
-      if (CT)
-      {
-        coord[3] = CT->size(1);
-        coord[5] = CT->size(1);
-        assert(Yp);
-        assert(Xfree);
-        // creates a POINTER link between workX[ds] (xfree) and the
-        // corresponding interactionBlock in each Interactionfor each ds of the
-        // current Interaction.
-        subprod(*CT, *Xfree, *Yp, coord, true);
-      }
-
-    }
     else
     {
       SP::SiconosMatrix C = rel->C();
@@ -728,38 +681,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
         }
       }
 
-      if (relationType == Lagrangian)
-      {
-        SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-        ID->eye();
-
-        Index xcoord(8);
-        xcoord[0] = 0;
-        xcoord[1] = sizeY;
-        xcoord[2] = 0;
-        xcoord[3] = sizeY;
-        xcoord[4] = 0;
-        xcoord[5] = sizeY;
-        xcoord[6] = 0;
-        xcoord[7] = sizeY;
-
-        // For the relation of type LagrangianRheonomousR
-        if (relationSubType == RheonomousR)
-        {
-          if (((allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
-          {
-            std11::static_pointer_cast<LagrangianRheonomousR>(rel)->computehDot(simulation()->getTkp1(), *inter);
-            subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(rel)->hDot()), *Yp, xcoord, false); // y += hDot
-          }
-          else
-            RuntimeException::selfThrow("ZeroOrderHold::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
-        }
-        // For the relation of type LagrangianScleronomousR
-        if (relationSubType == ScleronomousR)
-        {
-
-        }
-      }
       if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
       {
         // In the first order linear case it may be required to add e + FZ to q.
@@ -789,12 +710,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
       }
 
     }
-
-    if (inter->getRelationType() == Lagrangian || inter->getRelationType() == NewtonEuler)
-    {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
-    }
   }
 
 
@@ -812,11 +727,23 @@ void ZeroOrderHold::updateState(const unsigned int level)
     simulationLink->setRelativeConvergenceCriterionHeld(true);
 
   DSIterator it;
+  SP::Interaction interC;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     DynamicalSystem& ds = **it;
     Type::Siconos dsType = Type::value(ds);
 
+    // we have to find the control interaction
+    DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = DSG0.out_edges(DSG0.descriptor(*it)); oei != oeiend; ++oei)
+    {
+      if (DSG0.properties(*oei).forControl)
+      {
+        interC = DSG0.bundle(*oei);
+        break;
+      }
+    }
     // 1 - First Order Linear Systems
     if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
@@ -831,21 +758,11 @@ void ZeroOrderHold::updateState(const unsigned int level)
         {
           if (dsType == Type::FirstOrderLinearDS)
           {
-            // we have to find the control interaction
-            DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-            DynamicalSystemsGraph::OEIterator oei, oeiend;
-            for (std11::tie(oei, oeiend) = DSG0.out_edges(DSG0.descriptor(*it)); oei != oeiend; ++oei)
-            {
-              if (DSG0.properties(*oei).forControl)
-              {
-                Relation& rel = *DSG0.bundle(*oei)->relation();
-                computePsi(d, rel);
-                break;
-              }
-            }
+            Relation& rel = *interC->relation();
+            computePsi(d, rel);
           }
           SiconosMatrix& Psi = *_PsiMap[(*it)->number()];
-          prod(Psi, *d.r(), x, false); // x += Psi*u
+          prod(Psi, *interC->lambda(0), x, false); // x += Psi*\lambda
         }
       }
     }
