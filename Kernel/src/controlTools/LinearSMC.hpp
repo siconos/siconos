@@ -33,6 +33,8 @@ private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(LinearSMC);
 
+
+protected:
   /** default constructor */
   LinearSMC() {};
 
@@ -45,7 +47,7 @@ private:
   /** Simulation for the controller */
   SP::TimeStepping _simulationSMC;
   /** Integrator for the controller */
-  SP::Moreau _integratorSMC;
+  SP::OneStepIntegrator _integratorSMC;
   /** Theta for the controller */
   double _thetaSMC;
   /** OneStepNsProblem for the controller */
@@ -57,28 +59,38 @@ private:
   /** SP::NonSmoothLaw for computing the control law */
   SP::NonSmoothLaw _nsLawSMC;
 
+  /** inverse of CB */
+  SP::SimpleMatrix _invCB;
+  /** Store \f$u_{eq}\f$ */
+  SP::SiconosVector _ueq;
+  /** Store \f$u^s\f$ */
+  SP::SiconosVector _us;
+
 public:
 
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
+   * \param name do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds);
+  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, int name = LINEAR_SMC);
 
   /** Constructor with a TimeDiscretisation and a DynamicalSystem.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
+   * \param name do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D);
+  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D, int name = LINEAR_SMC);
 
   /** Constructor with a TimeDiscretisation, a DynamicalSystem and a set of Sensor.
    * \param t a SP::TimeDiscretisation (/!\ it should not be used elsewhere !)
    * \param ds the SP::DynamicalSystem we are controlling
    * \param sensorList a set of Sensor linked to this Actuator.
+   * \param name do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList);
+  LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList, int name = LINEAR_SMC);
 
   /** Initialize
    * \param m a SP::Model
@@ -93,7 +105,7 @@ public:
    * Here we are using the following formula:
    * TODO
    */
-  void actuate();
+  virtual void actuate();
 
 
   /** Set the D matrix
@@ -111,6 +123,10 @@ public:
     _D = D;
   };
 
+  inline SiconosVector& ueq() { return *_ueq; };
+  inline SiconosVector& us() { return *_us; };
+
+  inline void setTheta(const double& newTheta) { _thetaSMC = newTheta; };
 
 };
 DEFINE_SPTR(LinearSMC)

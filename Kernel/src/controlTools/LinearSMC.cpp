@@ -22,16 +22,18 @@
 
 using namespace ActuatorFactory;
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC, t, ds), _thetaSMC(0.5)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, int name):
+  CommonSMC(name, t, ds), _thetaSMC(0.5)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D):
-  CommonSMC(LINEAR_SMC, t, ds, B, D), _thetaSMC(0.5)
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SiconosMatrix B, SP::SiconosMatrix D, int name):
+  CommonSMC(name, t, ds, B, D), _thetaSMC(0.5)
 {
 }
 
-LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList): CommonSMC(LINEAR_SMC, t, ds, sensorList),
+LinearSMC::LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList, int name):
+  CommonSMC(name, t, ds, sensorList),
   _thetaSMC(0.5)
 {
 }
@@ -83,15 +85,16 @@ void LinearSMC::initialize(SP::Model m)
     // create the SMC Model
     _SMC.reset(new Model(t0, T));
     // create the interaction
-    _relationSMC.reset(new FirstOrderLinearR(_Csurface, _B));
-    _relationSMC->setDPtr(_D);
+    _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
+    std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
     _nsLawSMC.reset(new RelayNSL(_sDim));
 
-    _interactionSMC.reset(new Interaction(_sDim, _nsLawSMC, _relationSMC));
+    std::string id = "interaction for control";
+    _interactionSMC.reset(new Interaction(id, _DS_SMC, _sDim, _sDim, _nsLawSMC, _relationSMC));
     //_interactionSMC.reset(new Interaction("SMC Interation", _DS_SMC, 0, _sDim, _nsLawSMC, _relationSMC));
     _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
     //    _SMC->nonSmoothDynamicalSystem()->insertInteraction(_interactionSMC);
-    _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
+    _SMC->nonSmoothDynamicalSystem()->insertInteraction(_interactionSMC, true);
     //    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(_DS_SMC, _interactionSMC));
     //    _SMC->setNonSmoothDynamicalSystemPtr(myNSDS);
     // Copy the TD
@@ -99,7 +102,8 @@ void LinearSMC::initialize(SP::Model m)
     // Set up the simulation
     _simulationSMC.reset(new TimeStepping(_tD_SMC));
     _simulationSMC->setName("linear sliding mode controller simulation");
-    _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
+//    _integratorSMC.reset(new Moreau(_DS_SMC, _thetaSMC));
+    _integratorSMC.reset(new ZeroOrderHold(_DS_SMC));
     _simulationSMC->insertIntegrator(_integratorSMC);
     // OneStepNsProblem
     _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
@@ -121,17 +125,53 @@ void LinearSMC::initialize(SP::Model m)
     _DS->setzPtr(_sampledControl);
   }
   _indx = 0;
+  SP::SimpleMatrix tmpM(new SimpleMatrix(_Csurface->size(0), _B->size(1)));
+  _invCB.reset(new SimpleMatrix(*tmpM));
+  prod(*_Csurface, *_B, *tmpM);
+  invertMatrix(*tmpM, *_invCB);
+  _us.reset(new SiconosVector(_sDim));
+  _ueq.reset(new SiconosVector(_sDim));
 }
 
 void LinearSMC::actuate()
 {
+  unsigned int n = _DS_SMC->A()->size(1);
+  // equivalent part, explicit contribution
+  SP::SimpleMatrix tmpM1(new SimpleMatrix(_Csurface->size(0), n));
+  SP::SimpleMatrix quasiProjB_A(new SimpleMatrix(_invCB->size(0), n));
+  SP::SimpleMatrix tmpW(new SimpleMatrix(n, n, 0));
+  SP::SiconosVector xTk(new SiconosVector(*(_sensor->y())));
+  tmpW->eye();
+  prod(*_Csurface, *_DS_SMC->A(), *tmpM1);
+  prod(*_invCB, *tmpM1, *quasiProjB_A);
+  prod(_thetaSMC-1, *quasiProjB_A, *xTk, *_ueq);
+
+  // equivalent part, implicit contribution
+  // XXX when to call this ?
+  ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
+  zoh.updateMatrices(*_DS_SMC);
+
+  axpy_prod(zoh.getPsi(*_DS_SMC), *quasiProjB_A, *tmpW, false);
+  // compute e^{Ah}x_k
+  prod(zoh.getPhi(*_DS_SMC), *xTk, *xTk);
+  // compute the solution x_{k+1} of the system W*X = e^{Ah}x_k
+  tmpW->PLUForwardBackwardInPlace(*xTk);
+  // add the contribution from the implicit part to ueq
+  prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);
+
   if (_indx > 0)
   {
     *(_DS_SMC->x()) = *(_sensor->y()); // XXX this is sooo wrong
+    prod(*_B, *_ueq, *(_DS_SMC->b()));
     _simulationSMC->nextStep();
   }
   _simulationSMC->computeOneStep();
-  prod(1.0, *_B, *_lambda, *_sampledControl, true);
+
+
+  // discontinous part
+  *_us = *_lambda;
+  prod(1.0, *_B, *_us, *_sampledControl);
+  prod(1.0, *_B, *_ueq, *_sampledControl, false);
   _indx++;
 
 }

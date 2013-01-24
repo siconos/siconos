@@ -71,7 +71,7 @@ protected:
   SP::SiconosMatrix _D;
 
   /** the Relation for the Controller */
-  SP::FirstOrderLinearR _relationSMC;
+  SP::Relation _relationSMC;
 
   /** the NonSmoothLaw for the controller */
   SP::NonSmoothLaw _sign;

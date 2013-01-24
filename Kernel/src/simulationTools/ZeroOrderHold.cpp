@@ -167,17 +167,28 @@ void ZeroOrderHold::initialize()
             if (_constH)
             {
               computePhi(d);
+              _isPhiConst[d.number()] = true;
               computePsiTI(d, rel);
+              _isPsiConst[d.number()] = true;
+              computeIntegralPhi(d);
+              _isIntegralPhiConst[d.number()] = true;
             }
           }
           else if (dsType == Type::FirstOrderLinearDS)
           {
             FirstOrderLinearDS& d = *std11::static_pointer_cast<FirstOrderLinearDS>(*itDS);
-            if (_constH && !(rel.isJacLgPlugged() || d.getPluginA()->isPlugged()))
+            if (_constH && !(d.getPluginA()->isPlugged()))
             {
               // in fact everything is constant ...
-               computePsiTI(d, rel);
-               _isPsiConst[d.number()] = true;
+              computePhi(d);
+              _isPhiConst[d.number()] = true;
+              computeIntegralPhi(d);
+              _isIntegralPhiConst[d.number()] = true;
+              if (!rel.isJacLgPlugged())
+              {
+                computePsiTI(d, rel);
+                _isPsiConst[d.number()] = true;
+               }
             }
           }
         }
@@ -198,6 +209,21 @@ void ZeroOrderHold::initialize()
         if (_constH)
         {
           computePhi(d);
+          _isPhiConst[d.number()] = true;
+          computeIntegralPhi(d);
+          _isIntegralPhiConst[d.number()] = true;
+        }
+      }
+      else if (dsType == Type::FirstOrderLinearDS)
+      {
+        FirstOrderLinearDS& d = *std11::static_pointer_cast<FirstOrderLinearDS>(*itDS);
+        if (_constH && !(d.getPluginA()->isPlugged()))
+        {
+          // in fact everything is constant ...
+          computePhi(d);
+          _isPhiConst[d.number()] = true;
+          computeIntegralPhi(d);
+          _isIntegralPhiConst[d.number()] = true;
         }
       }
     }
@@ -233,7 +259,10 @@ void ZeroOrderHold::initMatrixPhi(const double t, SP::DynamicalSystem ds)
   if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     _PhiMap[dsN].reset(new SimpleMatrix(sizeN, sizeN));
+    _isPhiConst[dsN] = false;
     _xNext[dsN].reset(new SiconosVector(sizeN));
+    _IntegralPhiMap[dsN].reset(new SimpleMatrix(sizeN, sizeN));
+    _isIntegralPhiConst[dsN] = false;
   }
   else RuntimeException::selfThrow("ZeroOrderHold::initMatrixPhi - not yet implemented for Dynamical system type: " + dsType);
 
@@ -271,8 +300,8 @@ void ZeroOrderHold::initMatrices(const double t, SP::DynamicalSystem ds, const I
 void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withInteraction)
 {
   unsigned int dsN = ds.number();
-  unsigned int t0 = simulationLink->model()->t0();
-  unsigned int T = simulationLink->model()->finalT();
+  double t0 = simulationLink->model()->t0();
+  double T = simulationLink->model()->finalT();
   Type::Siconos dsType = Type::value(ds);
 
   if (dsType == Type::FirstOrderLinearTIDS)
@@ -280,7 +309,7 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
     _DSPhiMap[dsN].reset(new FirstOrderLinearTIDS(static_cast<const FirstOrderLinearTIDS&>(ds)));
     if (withInteraction)
       _DSPsiMap[dsN].reset(new FirstOrderLinearTIDS(static_cast<const FirstOrderLinearTIDS&>(ds)));
-    //    _DSPsiMap[dsN]->setx0(
+    _DSIntegralPhiMap[dsN].reset(new FirstOrderLinearTIDS(static_cast<const FirstOrderLinearTIDS&>(ds)));
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
@@ -290,7 +319,12 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
     foldsPhi.zeroPlugin();
     if (cfolds.getPluginA()->isPlugged())
       foldsPhi.setPluginA(cfolds.getPluginA());
-    if (withInteraction)
+     _DSIntegralPhiMap[dsN].reset(new FirstOrderLinearDS(cfolds));
+    FirstOrderLinearDS& foldsIntegralPhi = static_cast<FirstOrderLinearDS&>(*_DSIntegralPhiMap[dsN]);
+    foldsIntegralPhi.zeroPlugin();
+    if (cfolds.getPluginA()->isPlugged())
+      foldsIntegralPhi.setPluginA(cfolds.getPluginA());
+   if (withInteraction)
     {
       _DSPsiMap[dsN].reset(new FirstOrderLinearDS(cfolds));
       FirstOrderLinearDS& foldsPsi = static_cast<FirstOrderLinearDS&>(*_DSPsiMap[dsN]);
@@ -308,6 +342,13 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
   _simulPhiMap[dsN]->insertIntegrator(_PhiOSIMap[dsN]);
   _modelPhiMap[dsN]->initialize(_simulPhiMap[dsN]);
 
+  _modelIntegralPhiMap[dsN].reset(new Model(t0, T));
+  _modelIntegralPhiMap[dsN]->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSIntegralPhiMap[dsN]);
+  _IntegralPhiOSIMap[dsN].reset(new Lsodar(_DSIntegralPhiMap[dsN]));
+  _TDIntegralPhiMap[dsN].reset(new TimeDiscretisation(*simulationLink->timeDiscretisation()));
+  _simulIntegralPhiMap[dsN].reset(new EventDriven(_TDIntegralPhiMap[dsN], 0));
+  _simulIntegralPhiMap[dsN]->insertIntegrator(_IntegralPhiOSIMap[dsN]);
+  _modelIntegralPhiMap[dsN]->initialize(_simulIntegralPhiMap[dsN]);
   if (withInteraction)
   {
     SP::SiconosVector tmpb(new SiconosVector(ds.getDim(), 0));
@@ -357,6 +398,37 @@ void ZeroOrderHold::computePhi(const DynamicalSystem& ds)
   delete canonicalVector;
 }
 
+void ZeroOrderHold::computeIntegralPhi(const DynamicalSystem& ds)
+{
+  unsigned int dsN = ds.number();
+  unsigned int n = ds.getN();
+  SiconosVector* canonicalVector = new SiconosVector(n, 0);
+  EventDriven& sim = static_cast<EventDriven&>(*_simulIntegralPhiMap[dsN]);
+  SimpleMatrix& intPhi = *_IntegralPhiMap[dsN];
+  SiconosVector& x = *_DSIntegralPhiMap[dsN]->x();
+  SP::SiconosVector Bcol = static_cast<FirstOrderLinearDS&>(*_DSIntegralPhiMap[dsN]).b();
+  if (!Bcol)
+  {
+    Bcol.reset(new SiconosVector(n, 0));
+    static_cast<FirstOrderLinearDS&>(*_DSIntegralPhiMap[dsN]).setb(Bcol);
+  }
+
+  //compute the matrix whose column are \int e^{A\Delta \tau}d\tau e_i
+  for (unsigned int i = 0; i < n; i++)
+  {
+    (*canonicalVector)(i) = 1;
+    x.zero();
+    *Bcol = *canonicalVector;
+    //Reset Lsodar
+    sim.setIstate(3);
+    sim.advanceToEvent();
+    intPhi.setCol(i, x);
+    (*canonicalVector)(i) = 0;
+  }
+  sim.processEvents();
+  delete canonicalVector;
+}
+
 void ZeroOrderHold::computePsiTI(const DynamicalSystem& ds, const Relation& rel)
 {
   // Get relation and non smooth law types
@@ -391,7 +463,7 @@ void ZeroOrderHold::computePsi(const DynamicalSystem& ds, const Relation& rel)
   RELATION::TYPES relationType = rel.getType();
   RELATION::SUBTYPES relationSubType = rel.getSubType();
   if ((relationType != FirstOrder) || (relationSubType != LinearTIR))
-    RuntimeException::selfThrow("ZeroOrderHold::computePsiTI - the associated Relation is not of type FirstOrderLinearTIR");
+    RuntimeException::selfThrow("ZeroOrderHold::computePsi - the associated Relation is not of type FirstOrderLinearTIR");
   unsigned int dsN = ds.number();
   EventDriven& sim = static_cast<EventDriven&>(*_simulPsiMap[dsN]);
   SimpleMatrix& psi = *_PsiMap[dsN];
@@ -494,6 +566,9 @@ void ZeroOrderHold::computeFreeState()
   {
     DynamicalSystem& ds = **it; // the considered dynamical system
     dsType = Type::value(ds); // Its type
+
+    updateMatrices(ds);
+
     unsigned int dsN = ds.number();
     // 1 - First Order Linear Time Invariant Systems
     // The transition matrix is constant
@@ -504,6 +579,12 @@ void ZeroOrderHold::computeFreeState()
       SiconosVector& xfree = *d.workFree();//workX[d];
       SiconosMatrix& Phi = *_PhiMap[dsN]; // Phi is constant
       prod(Phi, *d.x(), xfree); // done
+      if (d.b())
+      {
+        SiconosMatrix& IntegralPhi = *_IntegralPhiMap[dsN];
+        d.updatePlugins(0);
+        prod(IntegralPhi, *d.b(), xfree, false);
+      }
       *_xNext[dsN] = xfree;
     }
     else if (dsType == Type::FirstOrderLinearDS)
@@ -511,12 +592,16 @@ void ZeroOrderHold::computeFreeState()
       FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(ds);
       SiconosVector& xfree = *(d.workFree());
 
-      // Update _xNext
-      //computeNextX(ds);
-      computePhi(d);
       SiconosMatrix& Phi = *_PhiMap[dsN];
       prod(Phi, *d.x(), xfree);
       *_xNext[dsN] = xfree;
+
+      if (d.b())
+      {
+        SiconosMatrix& IntegralPhi = *_IntegralPhiMap[dsN];
+        d.updatePlugins(0);
+        prod(IntegralPhi, *d.b(), xfree, false);
+      }
     }
     else
       RuntimeException::selfThrow("ZeroOrderHold::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
@@ -830,8 +915,18 @@ void ZeroOrderHold::display()
   }
   cout << "================================" << endl;
 }
+
 ZeroOrderHold* ZeroOrderHold::convert(OneStepIntegrator* osi)
 {
   ZeroOrderHold* zeroOrderHold = dynamic_cast<ZeroOrderHold*>(osi);
   return zeroOrderHold;
+}
+
+void ZeroOrderHold::updateMatrices(const DynamicalSystem& ds)
+{
+  unsigned int dsN = ds.number();
+  if (!_isPhiConst[dsN])
+    computePhi(ds);
+  if (!_isIntegralPhiConst[dsN])
+    computeIntegralPhi(ds);
 }

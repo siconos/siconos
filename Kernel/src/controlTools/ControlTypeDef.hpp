@@ -15,29 +15,31 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 
 /*! \file
 
-Typedef for control-related objects
-*/
+  Typedef for control-related objects
+  */
 
 #ifndef ControlTypeDef_H
 #define ControlTypedef_H
 
 /** Actuator types */
-#define SAMPLED_PID_ACTUATOR  100
-#define LINEAR_SMC            101
-#define LINEAR_CHATTERING_SMC 103
-#define LINEAR_SMC_OT2        104
+#define SAMPLED_PID_ACTUATOR       100
+#define LINEAR_SMC                 101
+#define LINEAR_CHATTERING_SMC      103
+#define LINEAR_SMC_OT2             104
+#define LINEAR_SMC_IMPROVED        105
+
 
 /** Sensor types */
-#define LINEAR_SENSOR         100
+#define LINEAR_SENSOR              100
 
 /** Event types
-\warning Event.hpp has also to be updated
+  \warning Event.hpp has also to be updated
 */
-#define SENSOR_EVENT          3
-#define ACTUATOR_EVENT        4
+#define SENSOR_EVENT               3
+#define ACTUATOR_EVENT             4
 
 #endif

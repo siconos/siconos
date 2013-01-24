@@ -650,8 +650,11 @@ public:
 
   friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool);
 
+  friend void invertMatrix(const SimpleMatrix&, SimpleMatrix&);
+
 };
 
 typedef std::vector<SP::SimpleMatrix> VectorOfSimpleMatrices;
 
 #endif
+

@@ -151,6 +151,8 @@ Topology::addInteractionInIndexSet(SP::Interaction inter)
 
   // for all couples of ds in the interaction
   DEBUG_PRINTF("addInteractionInIndexSet systems->size() : %d\n", systems->size());
+  if (systems->size() == 0)
+    RuntimeException::selfThrow("There is no DS associated with this interaction");
 
 
   InteractionsGraph::VDescriptor ig_new_ve;
