@@ -33,20 +33,6 @@ class Simulation;
 class TimeDiscretisation;
 const unsigned long int GAPLIMIT_DEFAULT = 100;
 
-/** Structure used for Events sorting. The time of occurence (in mpz_t format!!!)  is used to compare two Events. */
-struct compareEvent
-{
-  bool operator()(const SP::Event e1, const SP::Event e2) const
-  {
-    const mpz_t *t1 = e1->getTimeOfEvent();
-    const mpz_t *t2 = e2->getTimeOfEvent();
-    int res = mpz_cmp(*t1, *t2); // res>0 if t1>t2, 0 if t1=t2 else res<0.
-    //if (res == 0)
-    //   res = e1->getType() - e2->getType();
-    return (res < 0);
-  }
-};
-
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events */
 typedef std::vector<SP::Event> EventsContainer; // Event are already sorted
 
@@ -118,18 +104,17 @@ protected:
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
    */
-  EventsManager(const EventsManager&);
+//  EventsManager(const EventsManager&);
 
 public:
 
   /**  default constructor
-   *  \param the simulation that owns this manager
    */
   EventsManager();
 
   /** destructor
    */
-  ~EventsManager() {};
+  virtual ~EventsManager() {};
 
   /** Set the gap limit between two events */
   inline void setGapLimitEvents(unsigned long int var)

@@ -65,6 +65,7 @@
   PY_REGISTER(Simulation);                                         \
   PY_REGISTER(TimeStepping);                                       \
   PY_REGISTER(EventDriven);                                        \
+  PY_REGISTER(EventsManager);                                      \
   PY_REGISTER(Model);                                              \
   PY_REGISTER(CircularDS);                                         \
   PY_REGISTER(Disk);                                               \
