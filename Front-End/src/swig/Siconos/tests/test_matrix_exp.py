@@ -23,10 +23,11 @@ import numpy as np
 from scipy.linalg import expm
 
 
-def compute_phi_psi(A, B, n, m, h, TV=False):
+def compute_phi_psi(A, B, h, TV=False):
     # variable declaration
     t0 = 0.0  # start time
     T = 1  # end time
+    n, m = B.shape
 
      # Matrix declaration
     x0 = np.random.random(n)
@@ -87,7 +88,7 @@ def test_TI():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, n, m, h)
+                (AexpS, PsiS) = compute_phi_psi(A, B, h)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))
@@ -119,7 +120,7 @@ def test_SISO():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, n, m, h)
+                (AexpS, PsiS) = compute_phi_psi(A, B, h)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))
@@ -151,7 +152,7 @@ def test_TV():
             pass
         if errInv < 1.0e-12:
             try:
-                (AexpS, PsiS) = compute_phi_psi(A, B, n, m, h, TV=True)
+                (AexpS, PsiS) = compute_phi_psi(A, B, h, TV=True)
             except:
                 print(n, m)
             errPhi = np.linalg.norm((Aexp - AexpS))
