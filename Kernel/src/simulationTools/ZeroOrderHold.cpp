@@ -52,13 +52,13 @@ ZeroOrderHold::ZeroOrderHold(SP::OneStepIntegratorXML osiXML, SP::DynamicalSyste
 
 // --- constructor from a set of data ---
 ZeroOrderHold::ZeroOrderHold(DynamicalSystemsSet& allDS):
-  OneStepIntegrator(OSI::ZOH, allDS)
+  OneStepIntegrator(OSI::ZOH, allDS), _useGammaForRelation(false)
 {
 }
 
 // --- constructor from a minimum set of data ---
 ZeroOrderHold::ZeroOrderHold(SP::DynamicalSystem ds):
-  OneStepIntegrator(OSI::ZOH)
+  OneStepIntegrator(OSI::ZOH), _useGammaForRelation(false)
 {
   OSIDynamicalSystems->insert(ds);
 }
