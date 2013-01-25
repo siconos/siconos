@@ -11,11 +11,10 @@ def returnWinePrefix():
     else:
         return os.environ['HOME'] + ".wine"
 
-retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True, env={
-"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig",
-"PYTHONDONTWRITEBYTECODE": "1",
-"HOME": os.environ['HOME'],
-"WINEPREFIX": returnWinePrefix(),
-"Path": "${SICONOS_NUMERICS_PATH}"
-})
+retcode = call("${EMULATOR}py.test${EXE_EXT} " + sys.argv[1], shell=True,
+               env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/src/swig:${CMAKE_CURRENT_SOURCE_DIR}/Siconos/functions",
+                    "PYTHONDONTWRITEBYTECODE": "1",
+                    "HOME": os.environ['HOME'],
+                    "WINEPREFIX": returnWinePrefix(),
+                    "Path": "${SICONOS_NUMERICS_PATH}"})
 exit(retcode)
