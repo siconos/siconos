@@ -45,6 +45,7 @@
   PY_REGISTER(LinearSMC)                                                \
   PY_REGISTER(LinearChatteringSMC)                                      \
   PY_REGISTER(LinearSMCOT2)                                             \
+  PY_REGISTER(LinearSMCimproved)                                        \
   PY_REGISTER(ControlManager)                                           \
   PY_REGISTER(ControlDynamicalSystem)                                   \
   PY_REGISTER(ControlFirstOrderLinearDS)                                \
@@ -66,6 +67,7 @@
   PY_REGISTER(TimeStepping);                                            \
   PY_REGISTER(EventDriven);                                             \
   PY_REGISTER(EventsManager);                                           \
+  PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
   PY_REGISTER(CircularDS);                                              \
   PY_REGISTER(Disk);                                                    \

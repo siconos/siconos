@@ -18,6 +18,13 @@
 */
 
 #include "SampledPIDActuator.hpp"
+
+#include "FirstOrderLinearTIDS.hpp"
+#include "SiconosVector.hpp"
+#include "ActuatorFactory.hpp"
+#include "TimeDiscretisation.hpp"
+#include "ControlSensor.hpp"
+
 using namespace std;
 using namespace ActuatorFactory;
 

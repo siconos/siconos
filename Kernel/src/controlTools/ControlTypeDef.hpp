@@ -23,7 +23,7 @@
   */
 
 #ifndef ControlTypeDef_H
-#define ControlTypedef_H
+#define ControlTypeDef_H
 
 /** Actuator types */
 #define SAMPLED_PID_ACTUATOR       100
@@ -41,5 +41,11 @@
 */
 #define SENSOR_EVENT               3
 #define ACTUATOR_EVENT             4
+
+
+/** Base type forward declaration */
+DEFINE_SPTR(Actuator)
+DEFINE_SPTR(Sensor)
+DEFINE_SPTR(ControlSensor)
 
 #endif

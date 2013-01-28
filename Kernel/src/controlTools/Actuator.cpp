@@ -23,9 +23,11 @@
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
+#include "DynamicalSystemsSet.hpp"
 #include "DynamicalSystem.hpp"
 #include "Simulation.hpp"
 #include <iostream>
+
 using namespace std;
 
 Actuator::Actuator(): _type(0), _id("none")

@@ -16,7 +16,15 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+#include "TimeDiscretisation.hpp"
+#include "ModelingTools.hpp"
+#include "SimulationTools.hpp"
+#include "ControlManager.hpp"
+#include "Sensor.hpp"
+#include "Actuator.hpp"
 #include "ControlDynamicalSystem.hpp"
+#include <boost/progress.hpp>
+#include <boost/timer.hpp>
 
 using namespace std;
 

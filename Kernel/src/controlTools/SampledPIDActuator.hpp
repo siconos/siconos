@@ -24,7 +24,8 @@
 #ifndef SampledPIDActuator_H
 #define SampledPIDActuator_H
 
-#include "SiconosKernel.hpp"
+#include "Actuator.hpp"
+#include "SiconosAlgebraTypeDef.hpp"
 #include <boost/circular_buffer.hpp>
 
 class SampledPIDActuator : public Actuator

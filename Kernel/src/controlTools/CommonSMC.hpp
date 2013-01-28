@@ -24,14 +24,8 @@
 #ifndef CommonSMC_H
 #define CommonSMC_H
 
-#include "SimulationTools.hpp"
-#include "ModelingTools.hpp"
 #include "Actuator.hpp"
-#include <boost/circular_buffer.hpp>
-
-#ifndef ControlSensor_H
-DEFINE_SPTR(ControlSensor)
-#endif
+#include "SiconosAlgebraTypeDef.hpp"
 
 class CommonSMC : public Actuator
 {
@@ -159,10 +153,7 @@ public:
   /** Set the B matrix
    * \param B the new B matrix
   */
-  inline void setB(SiconosMatrix & B)
-  {
-    _B.reset(new SimpleMatrix(B));
-  };
+  void setB(const SiconosMatrix& B);
 
   /** Set the B matrix
    * \param B the new B matrix

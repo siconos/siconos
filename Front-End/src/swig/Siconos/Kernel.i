@@ -327,9 +327,15 @@ TYPEDEF_SPTR(InteractionsGraph);
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
+%import "ControlTypeDef.hpp"
+
 %include "Tools.hpp"
 
 %include "addons.hpp"
+
+%include "ControlTools.hpp"
+
+%import "gmp.h"
 
 %include "KernelRegistration.i"
 

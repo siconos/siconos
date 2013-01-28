@@ -25,16 +25,18 @@
 #define CONTROLDYNAMICALSYSTEM_H
 
 #include "SiconosPointers.hpp"
-#include "TimeDiscretisation.hpp"
-#include "ModelingTools.hpp"
-#include "SimulationTools.hpp"
-#include "ControlManager.hpp"
-#include "Sensor.hpp"
-#include "Actuator.hpp"
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
+#include "SiconosAlgebraTypeDef.hpp"
+#include "ControlTypeDef.hpp"
 
-class DynamicalSystem;
+#ifndef TimeStepping_H
+DEFINE_SPTR(TimeStepping)
+#endif
+#ifndef Moreau_H
+DEFINE_SPTR(Moreau)
+#endif
+#ifndef ControlManager_H
+DEFINE_SPTR(ControlManager)
+#endif
 
 class ControlDynamicalSystem : public std11::enable_shared_from_this<ControlDynamicalSystem>
 {

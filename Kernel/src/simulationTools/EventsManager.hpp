@@ -20,8 +20,8 @@
   \brief Management of a Set (STL) of Events for the Simulation process
 */
 
-#ifndef EVENTSMANAGER_H
-#define EVENTSMANAGER_H
+#ifndef EventsManager_H
+#define EventsManager_H
 
 #include "SiconosConst.hpp"
 #include "Event.hpp"

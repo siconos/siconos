@@ -20,8 +20,8 @@
   Moreau Time-Integrator for Dynamical Systems
 */
 
-#ifndef MOREAU_H
-#define MOREAU_H
+#ifndef Moreau_H
+#define Moreau_H
 
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
@@ -387,4 +387,4 @@ public:
 
 TYPEDEF_SPTR(Moreau)
 
-#endif // MOREAU_H
+#endif // Moreau_H

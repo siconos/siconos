@@ -24,7 +24,6 @@
 #ifndef CONTROLFIRSTORDERLINEARDS_H
 #define CONTROLFIRSTORDERLINEARDS_H
 
-#include "SiconosKernel.hpp"
 #include "ControlDynamicalSystem.hpp"
 
 class ControlFirstOrderLinearDS : public ControlDynamicalSystem

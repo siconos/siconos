@@ -30,8 +30,6 @@
 #include "SiconosPointers.hpp"
 #include "SiconosVisitor.hpp"
 
-class Interaction;
-
 /** Non Smooth Laws Base Class
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -144,7 +142,5 @@ public:
   VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
 
 };
-
-DEFINE_SPTR(NonSmoothLaw)
 
 #endif

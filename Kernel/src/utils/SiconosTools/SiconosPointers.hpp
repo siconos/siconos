@@ -145,7 +145,6 @@ struct nullDeleter
   class X; \
   TYPEDEF_SPTR(X)
 
-
 #define DEFINE_SAPTR(X) \
   class X; \
   TYPEDEF_SAPTR(X)
@@ -216,6 +215,11 @@ TYPEDEF_SPTR(MixedLinearComplementarityProblem)
 
 DEFINE_SPTR(TimeDiscretisationXML)
 DEFINE_SPTR(TimeDiscretisation)
+
+DEFINE_SPTR(DynamicalSystem)
+DEFINE_SPTR(Event)
+DEFINE_SPTR(NonSmoothLaw)
+DEFINE_SPTR(DynamicalSystemsSet)
 
 TYPEDEF_SAPTR(integer)
 TYPEDEF_SPTR(integer)

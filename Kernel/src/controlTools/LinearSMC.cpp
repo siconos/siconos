@@ -17,8 +17,20 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
+#include "FirstOrderLinearTIDS.hpp"
+#include "TimeStepping.hpp"
+#include "Relay.hpp"
+#include "EventsManager.hpp"
 
 #include "LinearSMC.hpp"
+
+#include "SiconosVector.hpp"
+#include "ControlSensor.hpp"
+#include "ZeroOrderHold.hpp"
+#include "TimeDiscretisation.hpp"
+#include "ActuatorFactory.hpp"
+#include "FirstOrderLinearTIR.hpp"
+#include "RelayNSL.hpp"
 
 using namespace ActuatorFactory;
 
@@ -174,6 +186,11 @@ void LinearSMC::actuate()
   prod(1.0, *_B, *_ueq, *_sampledControl, false);
   _indx++;
 
+}
+
+void LinearSMC::setD(const SiconosMatrix& D)
+{
+  _D.reset(new SimpleMatrix(D));
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC, LinearSMC)

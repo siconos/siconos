@@ -467,7 +467,6 @@ void ZeroOrderHold::computePsi(const DynamicalSystem& ds, const Relation& rel)
   unsigned int dsN = ds.number();
   EventDriven& sim = static_cast<EventDriven&>(*_simulPsiMap[dsN]);
   SimpleMatrix& psi = *_PsiMap[dsN];
-  SimpleMatrix& phi = *_PhiMap[dsN];
   FirstOrderLinearDS& foldsPsi = static_cast<FirstOrderLinearDS&>(*_DSPsiMap[dsN]);
   SiconosVector& x = *foldsPsi.x();
   SiconosVector& Bcol = *foldsPsi.b();
@@ -665,8 +664,6 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
   /** \warning: ensures that it can also work with two different osi for two different ds ?
   */
 
-
-  OneStepNSProblems&  allOSNS = *simulationLink->oneStepNSProblems();
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->getRelationType();

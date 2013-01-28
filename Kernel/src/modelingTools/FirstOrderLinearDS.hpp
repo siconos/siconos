@@ -19,12 +19,11 @@
 /*! \file FirstOrderLinearDS.hpp
 
  */
-#ifndef FOLINEARDS_H
-#define FOLINEARDS_H
+#ifndef FirstOrderLinearDS_H
+#define FirstOrderLinearDS_H
 
 #include "FirstOrderNonLinearDS.hpp"
 
-class FirstOrderNonLinearDS;
 typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, double*);
 
 
@@ -365,4 +364,4 @@ public:
 
 TYPEDEF_SPTR(FirstOrderLinearDS)
 
-#endif // FOLINEARDS_H
+#endif // FirstOrderLinearDS_H

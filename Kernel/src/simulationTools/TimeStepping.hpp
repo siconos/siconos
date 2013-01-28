@@ -19,8 +19,8 @@
 /*! \file
   Time-Stepping simulation
   */
-#ifndef TIMESTEPPING_H
-#define TIMESTEPPING_H
+#ifndef TimeStepping_H
+#define TimeStepping_H
 
 #include "Simulation.hpp"
 
@@ -365,9 +365,4 @@ public:
 
 DEFINE_SPTR(TimeStepping)
 
-#endif // TIMESTEPPING_H
-
-
-
-
-
+#endif // TimeStepping_H

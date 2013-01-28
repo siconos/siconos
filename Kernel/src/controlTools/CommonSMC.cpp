@@ -18,6 +18,9 @@
 */
 
 #include "CommonSMC.hpp"
+#include "ModelingTools.hpp"
+#include "SimulationTools.hpp"
+
 
 void CommonSMC::initialize(SP::Model m)
 {
@@ -99,3 +102,7 @@ void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
   }
 }
 
+void CommonSMC::setB(const SiconosMatrix& B)
+{
+    _B.reset(new SimpleMatrix(B));
+}

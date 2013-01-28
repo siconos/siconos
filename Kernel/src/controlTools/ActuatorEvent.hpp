@@ -23,7 +23,6 @@
 #define ActuatorEvent_H
 
 #include "Event.hpp"
-#include "Actuator.hpp"
 
 /** Events when sensor data capture is done.
  *

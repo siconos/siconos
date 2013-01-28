@@ -24,8 +24,7 @@
 #ifndef LinearChatteringSMC_H
 #define LinearChatteringSMC_H
 
-#include "SiconosKernel.hpp"
-#include <boost/circular_buffer.hpp>
+#include "CommonSMC.hpp"
 
 class LinearChatteringSMC : public CommonSMC
 {

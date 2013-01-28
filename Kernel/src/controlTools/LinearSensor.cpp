@@ -17,11 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LinearSensor.hpp"
+
 #include "SensorFactory.hpp"
+#include "SiconosVector.hpp"
 #include "DynamicalSystem.hpp"
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
 
 using namespace std;
 using namespace SensorFactory;
@@ -80,4 +81,14 @@ void LinearSensor::capture()
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;
 }
+void  LinearSensor::setC(const SimpleMatrix& C)
+{
+  *_matC = C;
+}
+
+void  LinearSensor::setD(const SimpleMatrix& D)
+{
+  *_matD = D;
+}
+
 AUTO_REGISTER_SENSOR(LINEAR_SENSOR, LinearSensor)

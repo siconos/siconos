@@ -20,12 +20,12 @@
   \brief Linear Complementarity Problem formulation and solving
 */
 
-#ifndef RELAY_H
-#define RELAY_H
+#ifndef Relay_H
+#define Relay_H
 
 #include "LinearOSNS.hpp"
 TYPEDEF_SPTR(RelayProblem)
-class LinearOSNS;
+
 class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
  *
@@ -193,4 +193,4 @@ public:
 
 TYPEDEF_SPTR(Relay)
 
-#endif // RELAY_H
+#endif // Relay_H

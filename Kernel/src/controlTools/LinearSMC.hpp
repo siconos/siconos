@@ -24,8 +24,20 @@
 #ifndef LinearSMC_H
 #define LinearSMC_H
 
-#include "SiconosKernel.hpp"
-#include <boost/circular_buffer.hpp>
+#include "CommonSMC.hpp"
+
+#ifndef FirstOrderLinearDS_H
+DEFINE_SPTR(FirstOrderLinearDS)
+#endif
+#ifndef TimeStepping_H
+DEFINE_SPTR(TimeStepping)
+#endif
+#ifndef Relay_H
+DEFINE_SPTR(Relay)
+#endif
+#ifndef EventsManager_H
+DEFINE_SPTR(EventsManager)
+#endif
 
 class LinearSMC : public CommonSMC
 {
@@ -111,11 +123,9 @@ public:
   /** Set the D matrix
    * \param D the new D matrix
   */
-  inline void setD(SiconosMatrix & D)
-  {
-    _D.reset(new SimpleMatrix(D));
-  };
-  /** Set the D matrix
+  void setD(const SiconosMatrix & D);
+
+    /** Set the D matrix
    * \param D the new D matrix
   */
   inline void setDPtr(SP::SiconosMatrix D)

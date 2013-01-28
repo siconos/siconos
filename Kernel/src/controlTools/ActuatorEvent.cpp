@@ -20,6 +20,7 @@
 #include "EventFactory.hpp"
 #include "Actuator.hpp"
 #include "TimeDiscretisation.hpp"
+
 using namespace std;
 using namespace EventFactory;
 

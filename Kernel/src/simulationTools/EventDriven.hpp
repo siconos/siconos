@@ -19,8 +19,8 @@
 /*! \file
   Event Driven Simulation
   */
-#ifndef EVENTDRIVEN_H
-#define EVENTDRIVEN_H
+#ifndef EventDriven_H
+#define EventDriven_H
 
 #include "Simulation.hpp"
 #include "SiconosNumerics.h"
@@ -350,4 +350,4 @@ public:
 
 };
 DEFINE_SPTR(EventDriven)
-#endif // EVENTDRIVEN_H
+#endif // EventDriven_H

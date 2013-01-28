@@ -18,7 +18,15 @@
 */
 
 
+#include "FirstOrderLinearDS.hpp"
+#include "TimeStepping.hpp"
+
 #include "LinearSMCimproved.hpp"
+#include "SiconosVector.hpp"
+#include "ControlSensor.hpp"
+#include "ZeroOrderHold.hpp"
+#include "TimeDiscretisation.hpp"
+#include "ActuatorFactory.hpp"
 
 using namespace ActuatorFactory;
 
@@ -43,7 +51,6 @@ LinearSMCimproved::~LinearSMCimproved()
 
 void LinearSMCimproved::actuate()
 {
-  unsigned int n = _DS_SMC->A()->size(1);
   // equivalent part, explicit contribution
   SP::SimpleMatrix tmpM1(new SimpleMatrix(*_Csurface));
   SP::SimpleMatrix tmpD(new SimpleMatrix(_sDim, _sDim, 0));

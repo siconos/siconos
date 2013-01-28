@@ -20,8 +20,8 @@
   General interface for Events
 */
 
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef Event_H
+#define Event_H
 
 #include <cmath>
 #include <iostream> // Warning (FP): iostream must be included before gmp
@@ -96,7 +96,7 @@ protected:
 
   /** assignment operator private => no assign allowed
    */
-  Event& operator = (const Event&);
+//  Event& operator = (const Event&);
 
 public:
 
@@ -182,5 +182,4 @@ public:
   virtual void update();
 
 };
-DEFINE_SPTR(Event)
 #endif // Event_H

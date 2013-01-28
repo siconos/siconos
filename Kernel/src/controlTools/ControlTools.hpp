@@ -39,6 +39,7 @@
 #include "LinearSMC.hpp"
 #include "LinearChatteringSMC.hpp"
 #include "LinearSMCOT2.hpp"
+#include "LinearSMCimproved.hpp"
 
 // Misc
 #include "ControlManager.hpp"

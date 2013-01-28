@@ -24,10 +24,9 @@
 #ifndef ControlSensor_H
 #define ControlSensor_H
 
-#include "SiconosKernel.hpp"
+#include "Sensor.hpp"
 
-class SiconosMatrix;
-class SimpleMatrix;
+
 /** \class ControlSensor
  *  \brief Generic control Sensor to get the output of the system
  *  \author SICONOS Development Team - copyright INRIA
@@ -77,5 +76,4 @@ public:
     return _storedY;
   };
 };
-DEFINE_SPTR(ControlSensor)
 #endif

@@ -19,8 +19,8 @@
 /*! \file DynamicalSystemsSet.hpp
 Set of SP::DynamicalSystem
 */
-#ifndef DSSET_H
-#define DSSET_H
+#ifndef DynamicalSystemsSet_H
+#define DynamicalSystemsSet_H
 
 #include "DynamicalSystem.hpp"
 #include "SiconosSet.hpp"
@@ -135,7 +135,5 @@ typedef DynamicalSystemsSet::const_iterator ConstDSIterator;
 /** return type value for insert function - bool = false if insertion
     failed. */
 typedef std::pair<DSIterator, bool> CheckInsertDS;
-
-TYPEDEF_SPTR(DynamicalSystemsSet)
 
 #endif

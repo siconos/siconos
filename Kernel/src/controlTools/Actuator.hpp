@@ -24,26 +24,18 @@
 #ifndef Actuator_H
 #define Actuator_H
 
-#include "SiconosPointers.hpp"
-#include "DynamicalSystemsSet.hpp"
-#include "EventsManager.hpp"
-#include "TimeDiscretisation.hpp"
-#include "Sensor.hpp"
 #include <string>
+#include <set>
+#include "RuntimeException.hpp"
+#include "SiconosPointers.hpp"
 
-class Model;
-class Event;
-class DynamicalSystem;
-
+#include "ControlTypeDef.hpp"
 
 /** A set of Sensors */
 typedef std::set<SP::Sensor> Sensors;
 
 /** An iterator through a set of Sensors */
 typedef Sensors::iterator SensorsIterator;
-
-/** Return-type for Actuators insertion. */
-typedef std::pair<SensorsIterator, bool> SensorsCheckInsert;
 
 TYPEDEF_SPTR(Sensors)
 
@@ -253,5 +245,4 @@ public:
   void display() const;
 
 };
-DEFINE_SPTR(Actuator)
 #endif

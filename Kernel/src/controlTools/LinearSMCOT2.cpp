@@ -17,7 +17,16 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
+#include "FirstOrderLinearTIDS.hpp"
+#include "EventDriven.hpp"
+
 #include "LinearSMCOT2.hpp"
+
+#include "ActuatorFactory.hpp"
+#include "SiconosVector.hpp"
+#include "Lsodar.hpp"
+#include "ControlSensor.hpp"
+
 using namespace std;
 using namespace ActuatorFactory;
 

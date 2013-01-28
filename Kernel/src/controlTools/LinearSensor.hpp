@@ -24,10 +24,8 @@
 #ifndef LinearSensor_H
 #define LinearSensor_H
 
-#include "SiconosKernel.hpp"
+#include "ControlSensor.hpp"
 
-class SiconosMatrix;
-class SimpleMatrix;
 /** \class LinearSensor
  *  \brief Common linear Sensor to get output of the system
  *  \author SICONOS Development Team - copyright INRIA
@@ -80,7 +78,7 @@ public:
 
   /** Destructor
    */
-  ~LinearSensor();
+  virtual ~LinearSensor();
 
   /** initialize sensor data
    * \param m a SP::Model
@@ -94,15 +92,12 @@ public:
   /** Set the C matrix.
    * \param C a SimpleMatrix
    */
-  void setC(const SimpleMatrix& C)
-  {
-    *_matC = C;
-  };
+  void setC(const SimpleMatrix& C);
 
   /** Set the C matrix
    * \param C a SP::SimpleMatrix
    */
-  void setCPtr(SP::SimpleMatrix C)
+  inline void setCPtr(SP::SimpleMatrix C)
   {
     _matC = C;
   };
@@ -110,15 +105,12 @@ public:
   /** Set the D matrix
    * \param D a SimpleMatrix
    */
-  void setD(const SimpleMatrix& D)
-  {
-    *_matD = D;
-  };
+  void setD(const SimpleMatrix& D);
 
   /** Set the D matrix
    * \param D a SP::SimpleMatrix
    */
-  void setDPtr(SP::SimpleMatrix D)
+  inline void setDPtr(SP::SimpleMatrix D)
   {
     _matD = D;
   };

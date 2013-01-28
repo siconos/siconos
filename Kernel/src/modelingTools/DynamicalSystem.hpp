@@ -21,8 +21,8 @@
   \brief Abstract class - General interface for all Dynamical Systems.
 */
 
-#ifndef DYNAMICALSYSTEM_H
-#define DYNAMICALSYSTEM_H
+#ifndef DynamicalSystem_H
+#define DynamicalSystem_H
 
 #include "SiconosPointers.hpp"
 #include "SSLH.hpp"
@@ -877,6 +877,5 @@ public:
 
 };
 
-TYPEDEF_SPTR(DynamicalSystem)
 
-#endif // DYNAMICALSYSTEM_H
+#endif // DynamicalSystem_H
