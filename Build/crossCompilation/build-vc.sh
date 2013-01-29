@@ -66,8 +66,10 @@ build_Kernel_VS() {
 		-DSiconosNumerics_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Numerics/" \
 		-DLIBXML2_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libxml2.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libiconv.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libz.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libws2_32.a;/scratch/Olivier/mingw32/mxe/usr/lib/gcc/i686-pc-mingw32/4.7.0/libgcc.a" \
 		-DLIBXML2_INCLUDE_DIR=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/include-VC/libxml2 \
-		-DGMP_FOUND=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
+		-DGMP_INCLUDE_DIR=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC \
 		-DGMP_INCLUDE_DIRS=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC \
+		-DGMP_LIBRARY=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
+		-DGMP_LIBRARIES=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
 		-DCPPUNIT_FOUND=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/${REL_TYPE}/cppunit.lib \
 		-DCPPUNIT_INCLUDE_DIR=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC/cppunit \
 		-DCPPUNIT_LIBRARIES=/scratch/Olivier/mingw32/cppunit-1.12.1/src/cppunit/${REL_TYPE}/cppunit.lib \
@@ -95,7 +97,7 @@ build_FE_VS() {
 		-DSiconosKernel_INCLUDE_DIRS="${INSTALL_PREFIX}/include/Siconos/Kernel/" \
 		-DSiconosKernel_FOUND="${INSTALL_PREFIX}/lib/libSiconosKernel.dll.a" \
 		-DSWIG_DIR="/usr/share/swig/2.0.7/" \
-		-DPYTHON_LIBRARIES="${MXE_PREFIX}/python/python27.lib" \
+		-DPYTHON_LIBRARY="${MXE_PREFIX}/python/python27.lib" \
 		-DPYTHON_INCLUDE_DIR="${MXE_PREFIX}/python/" \
 		-DPYTHON_NUMPY_INCLUDE_DIR="${MXE_PREFIX}/numpy/PLATLIB/numpy/core/include" \
 		-DBOOST_ROOT="${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/" \
@@ -103,6 +105,8 @@ build_FE_VS() {
 		-DLIBXML2_LIBRARIES="/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libxml2.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libiconv.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libz.a;/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libws2_32.a;/scratch/Olivier/mingw32/mxe/usr/lib/gcc/i686-pc-mingw32/4.7.0/libgcc.a" \
 		-DLIBXML2_INCLUDE_DIR=${MXE_PREFIX}/mxe/usr/i686-pc-mingw32/include-VC/libxml2 \
 		-DGMP_FOUND=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
+		-DGMP_LIBRARY=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/lib/libgmp.a \
+		-DGMP_INCLUDE_DIR=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC \
 		-DGMP_INCLUDE_DIRS=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/include-VC \
 		-DCMAKE_BUILD_TYPE=Release \
 		${SICONOS_SOURCES}/Front-End
@@ -115,18 +119,18 @@ build_FE_VS() {
 }
 
 source /scratch/Olivier/mingw32/msvc/env.sh
-build_siconos
+#build_siconos
 
-cd ${SICONOS_SOURCES}
-git pull
-CURRENT_SHA=`git rev-parse HEAD`
-if [ -f /tmp/.sha-siconos-windows.old ]; then
-	OLD_SHA=`cat /tmp/.sha-siconos-windows.old`
-else
-	OLD_SHA=""
-fi
-
-if [ ${CURRENT_SHA} != ${OLD_SHA} ]; then
-	build_siconos
-	echo ${CURRENT_SHA} > /tmp/.sha-siconos-windows.old
-fi
+#cd ${SICONOS_SOURCES}
+#git pull
+#CURRENT_SHA=`git rev-parse HEAD`
+#if [ -f /tmp/.sha-siconos-windows.old ]; then
+#	OLD_SHA=`cat /tmp/.sha-siconos-windows.old`
+#else
+#	OLD_SHA=""
+#fi
+#
+#if [ ${CURRENT_SHA} != ${OLD_SHA} ]; then
+#	build_siconos
+#	echo ${CURRENT_SHA} > /tmp/.sha-siconos-windows.old
+#fi

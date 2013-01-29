@@ -42,7 +42,7 @@ You should be all set
 
 ## Sampled command to build Siconos:
 
-You can also have a look at build-mingw.sh.
+You can also have a look at build-VS.sh.
 
 * Numerics
 CFLAGS='-U__STRICT_ANSI__' cmake -DBUILD_STATIC_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=/scratch/Olivier/mingw32/mxe/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake -DCROSSCOMPILING_LINUX_TO_WINDOWS=1 -DCMAKE_INSTALL_PREFIX=/scratch/Olivier/siconos-windows/install ~/siconos/Numerics/
