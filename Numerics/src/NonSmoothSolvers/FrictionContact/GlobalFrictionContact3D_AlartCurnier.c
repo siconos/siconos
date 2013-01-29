@@ -393,7 +393,7 @@ void updateACPsiJacobian(
   /* B */
   for(unsigned int e = 0; e < B->nz; ++e)
   {
-    if(fabs(B->x[e] > DBL_EPSILON))
+    if(fabs(B->x[e]) > DBL_EPSILON)
     {
       J->i[J->nz] = B->i[e] + M->m + H->n;
       J->p[J->nz] = B->p[e] + M->n + A->n;
