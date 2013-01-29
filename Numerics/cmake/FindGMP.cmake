@@ -9,6 +9,8 @@
 # Set GMP_DIR=where_fftw_is_installed if it's not in a "classic" place or if you want a specific version
 #
 # Note FP : see http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
+INCLUDE(FindPackageHandleStandardArgs)
+
 include(LibFindMacros)
 
 # Use pkg-config to get hints about paths
@@ -55,3 +57,5 @@ set(GMP_PROCESS_LIBS GMP_LIBRARY)
 # This will set properly ${GMP_INCLUDE_DIR} ${GMP_LIBRARY} ${GMP_INCLUDE_DIRS} ${GMP_LIBRARIES}
 libfind_process(GMP)
 
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GMP
+  REQUIRED_VARS GMP_LIBRARY)

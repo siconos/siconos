@@ -8,25 +8,43 @@
 
 # One may want to use a specific IO Library by setting
 # SiconosIO_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosIO)
+INCLUDE(FindPackageHandleStandardArgs)
 
 IF(SiconosIO_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for IO library in ${SiconosIO_LIBRARY_DIRECTORY}")
-  FIND_LIBRARY(SiconosIO_FOUND SiconosIO PATHS "${SiconosIO_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(SiconosIO_FOUND)
-    MESSAGE(STATUS "Found : ${SiconosIO_FOUND}")
-  ENDIF(SiconosIO_FOUND)
+  FIND_LIBRARY(SiconosIO_LIBRARY SiconosIO PATHS "${SiconosIO_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(SiconosIO_LIBRARY)
+    MESSAGE(STATUS "Found : ${SiconosIO_LIBRARY}")
+  ENDIF(SiconosIO_LIBRARY)
 ELSE(SiconosIO_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosIO_FOUND SiconosIO)
+  FIND_LIBRARY(SiconosIO_LIBRARY SiconosIO)
 ENDIF(SiconosIO_LIBRARY_DIRECTORY)
 
-IF(SiconosIO_FOUND)
-  GET_FILENAME_COMPONENT(SiconosIO_LIBRARY_DIRS ${SiconosIO_FOUND} PATH)
-  SET(SiconosIO_LIBRARIES ${SiconosIO_FOUND})
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SiconosIO
+  REQUIRED_VARS SiconosIO_LIBRARY)
+
+SET(SiconosIO_FOUND ${SICONOSIO_FOUND})
+
+IF(SiconosIO_LIBRARY)
+  GET_FILENAME_COMPONENT(SiconosIO_LIBRARY_DIRS ${SiconosIO_LIBRARY} PATH)
+  SET(SiconosIO_LIBRARIES ${SiconosIO_LIBRARY})
   GET_FILENAME_COMPONENT(SiconosIO_LIBRARY_DIRS_DIR ${SiconosIO_LIBRARY_DIRS} PATH)
-  SET(SiconosIO_INCLUDE_DIRS ${SiconosIO_LIBRARY_DIRS_DIR}/include/Siconos/IO)
-ELSE(SiconosIO_FOUND)
+
+   FIND_PATH(SiconosIO_INCLUDE_DIRS SiconosRestart.hpp
+    HINTS ${SiconosIO_LIBRARY_DIRS_DIR} ${SiconosIO_LIBRARY_DIRS_DIR_DIR} 
+    ENV PATH
+    PATH_SUFFIXES Siconos/IO)
+
+  IF(NOT SiconosIO_INCLUDE_DIRS)
+    IF(SiconosIO_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR
+        "Required Siconos IO headers not found. Please specify headers location in CMAKE_INCLUDE_PATH")
+    ENDIF(SiconosIO_FIND_REQUIRED)
+  ENDIF(NOT SiconosIO_INCLUDE_DIRS)
+
+ELSE(SiconosIO_LIBRARY)
   IF(SiconosIO_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Siconos IO library not found. Please specify library location in SiconosIO_LIBRARY_DIRECTORY")
   ENDIF(SiconosIO_FIND_REQUIRED)
-ENDIF(SiconosIO_FOUND)
+ENDIF(SiconosIO_LIBRARY)

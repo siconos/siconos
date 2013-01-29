@@ -8,23 +8,29 @@
 
 # One may want to use a specific Ferris Library by setting
 # MlcpSimplex_LIBRARY_DIRECTORY before FIND_PACKAGE(MlcpSimplex)
+INCLUDE(FindPackageHandleStandardArgs)
 
 IF(MlcpSimplex_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(MlcpSimplex_FOUND MlcpSimplex PATHS "${MlcpSimplex_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(MlcpSimplex_LIBRARY MlcpSimplex PATHS "${MlcpSimplex_LIBRARY_DIRECTORY}")
 ELSE(MlcpSimplex_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(MlcpSimplex_FOUND MlcpSimplex)
+  FIND_LIBRARY(MlcpSimplex_LIBRARY MlcpSimplex)
 ENDIF(MlcpSimplex_LIBRARY_DIRECTORY)
 
-IF(MlcpSimplex_FOUND)
-  GET_FILENAME_COMPONENT(MlcpSimplex_LIBRARY_DIRS ${MlcpSimplex_FOUND} PATH)
-  GET_FILENAME_COMPONENT(MlcpSimplex_LIBRARIES ${MlcpSimplex_FOUND} NAME)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MlcpSimplex
+  REQUIRED_VARS MlcpSimplex_LIBRARY)
+
+SET(MlcpSimplex_FOUND ${MLCPSIMPLEX_FOUND})
+
+IF(MlcpSimplex_LIBRARY)
+  GET_FILENAME_COMPONENT(MlcpSimplex_LIBRARY_DIRS ${MlcpSimplex_LIBRARY} PATH)
+  GET_FILENAME_COMPONENT(MlcpSimplex_LIBRARIES ${MlcpSimplex_LIBRARY} NAME)
   GET_FILENAME_COMPONENT(MlcpSimplex_LIBRARY_DIRS_DIR ${MlcpSimplex_LIBRARY_DIRS} PATH)
   SET(MlcpSimplex_INCLUDE_DIRS ${MlcpSimplex_LIBRARY_DIRS_DIR}/include)
   SET(HAVE_MLCPSIMPLEX 1)
-ELSE(MlcpSimplex_FOUND)
+ELSE(MlcpSimplex_LIBRARY)
   IF(MlcpSimplex_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required MlcpSimplex library not found. Please specify library location in MlcpSimplex_LIBRARY_DIRECTORY")
   ENDIF(MlcpSimplex_FIND_REQUIRED)
   
-ENDIF(MlcpSimplex_FOUND)
+ENDIF(MlcpSimplex_LIBRARY)

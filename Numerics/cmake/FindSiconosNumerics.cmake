@@ -8,6 +8,8 @@
 
 # One may want to use a specific Numerics Library by setting
 # SiconosNumerics_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosNumerics)
+INCLUDE(FindPackageHandleStandardArgs)
+
 
 IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   SET(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -15,17 +17,22 @@ ENDIF()
 
 IF(SiconosNumerics_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for Numerics library in ${SiconosNumerics_LIBRARY_DIRECTORY}")
-  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics PATHS "${SiconosNumerics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(SiconosNumerics_FOUND)
-    MESSAGE(STATUS "Found : ${SiconosNumerics_FOUND}")
-  ENDIF(SiconosNumerics_FOUND)
+  FIND_LIBRARY(SiconosNumerics_LIBRARY SiconosNumerics PATHS "${SiconosNumerics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(SiconosNumerics_LIBRARY)
+    MESSAGE(STATUS "Found : ${SiconosNumerics_LIBRARY}")
+  ENDIF(SiconosNumerics_LIBRARY)
 ELSE(SiconosNumerics_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosNumerics_FOUND SiconosNumerics ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+  FIND_LIBRARY(SiconosNumerics_LIBRARY SiconosNumerics ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosNumerics_LIBRARY_DIRECTORY)
 
-IF(SiconosNumerics_FOUND)
-  SET(SiconosNumerics_LIBRARIES ${SiconosNumerics_FOUND})
-  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS ${SiconosNumerics_FOUND} PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SiconosNumerics 
+  REQUIRED_VARS SiconosNumerics_LIBRARY)
+
+SET(SiconosNumerics_FOUND ${SICONOSNUMERICS_FOUND})
+
+IF(SiconosNumerics_LIBRARY)
+  SET(SiconosNumerics_LIBRARIES ${SiconosNumerics_LIBRARY})
+  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS ${SiconosNumerics_LIBRARY} PATH)
   GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS_DIR ${SiconosNumerics_LIBRARY_DIRS} PATH)
   GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS_DIR_DIR ${SiconosNumerics_LIBRARY_DIRS_DIR} PATH)
 
@@ -41,9 +48,9 @@ IF(SiconosNumerics_FOUND)
     ENDIF(SiconosNumerics_FIND_REQUIRED)
   ENDIF(NOT SiconosNumerics_INCLUDE_DIRS)
 
-ELSE(SiconosNumerics_FOUND)
+ELSE(SiconosNumerics_LIBRARY)
   IF(SiconosNumerics_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Siconos Numerics library not found. Please specify library location in SiconosNumerics_LIBRARY_DIRECTORY")
   ENDIF(SiconosNumerics_FIND_REQUIRED)
-ENDIF(SiconosNumerics_FOUND)
+ENDIF(SiconosNumerics_LIBRARY)

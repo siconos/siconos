@@ -5,6 +5,8 @@
 # an encourage to out of source builds 
 INCLUDE(OutOfSourcesBuild)
 
+
+
 # misc tools
 INCLUDE(SiconosTools)
 
@@ -24,6 +26,21 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_TIMERS "Enable timers" OFF)
   OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
   OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
+  OPTION(WITH_SYSTEM_INFO "Print some CMake variables. Default = off." OFF)
+
+  # get system architecture 
+  # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
+  INCLUDE(TargetArch)
+  TARGET_ARCHITECTURE(SYSTEM_ARCHITECTURE)
+
+  # some informations
+  IF(WITH_SYSTEM_INFO)
+    INCLUDE(CMakePrintSystemInformation)
+    MESSAGE(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
+  ENDIF(WITH_SYSTEM_INFO)
+
+  # features summary
+  INCLUDE(FeatureSummary)
 
   # Build type
   IF(WITH_DEFAULT_BUILD_TYPE)

@@ -8,22 +8,28 @@
 
 # One may want to use a specific Ferris Library by setting
 # Pthread_LIBRARY_DIRECTORY before FIND_PACKAGE(Pthread)
+INCLUDE(FindPackageHandleStandardArgs)
 
 IF(Pthread_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(Pthread_FOUND pthread PATHS "${Pthread_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(Pthread_LIBRARY pthread PATHS "${Pthread_LIBRARY_DIRECTORY}")
 ELSE(Pthread_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(Pthread_FOUND pthread)
+  FIND_LIBRARY(Pthread_LIBRARY pthread)
 ENDIF(Pthread_LIBRARY_DIRECTORY)
 
-IF(Pthread_FOUND)
-  GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS ${Pthread_FOUND} PATH)
-  GET_FILENAME_COMPONENT(Pthread_LIBRARIES ${Pthread_FOUND} NAME)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pthread
+  REQUIRED_VARS Pthread_LIBRARY)
+
+SET(Pthread_FOUND ${PTHREAD_FOUND})
+
+IF(Pthread_LIBRARY)
+  GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS ${Pthread_LIBRARY} PATH)
+  GET_FILENAME_COMPONENT(Pthread_LIBRARIES ${Pthread_LIBRARY} NAME)
   GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS_DIR ${Pthread_LIBRARY_DIRS} PATH)
   SET(Pthread_INCLUDE_DIRS ${Pthread_LIBRARY_DIRS_DIR}/include)
-ELSE(Pthread_FOUND)
+ELSE(Pthread_LIBRARY)
   IF(Pthread_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Pthread library not found. Please specify library location in Pthread_LIBRARY_DIRECTORY")
   ENDIF(Pthread_FIND_REQUIRED)
 
-ENDIF(Pthread_FOUND)
+ENDIF(Pthread_LIBRARY)

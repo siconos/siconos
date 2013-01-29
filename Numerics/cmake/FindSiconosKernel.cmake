@@ -8,20 +8,26 @@
 
 # One may want to use a specific Kernel Library by setting
 # SiconosKernel_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosKernel)
+INCLUDE(FindPackageHandleStandardArgs)
 
 IF(SiconosKernel_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for Kernel library in ${SiconosKernel_LIBRARY_DIRECTORY}")
-  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel PATHS "${SiconosKernel_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(SiconosKernel_FOUND)
-    MESSAGE(STATUS "Found : ${SiconosKernel_FOUND}")
-  ENDIF(SiconosKernel_FOUND)
+  FIND_LIBRARY(SiconosKernel_LIBRARY SiconosKernel PATHS "${SiconosKernel_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(SiconosKernel_LIBRARY)
+    MESSAGE(STATUS "Found : ${SiconosKernel_LIBRARY}")
+  ENDIF(SiconosKernel_LIBRARY)
 ELSE(SiconosKernel_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosKernel_FOUND SiconosKernel  ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+  FIND_LIBRARY(SiconosKernel_LIBRARY SiconosKernel  ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosKernel_LIBRARY_DIRECTORY)
 
-IF(SiconosKernel_FOUND)
-  SET(SiconosKernel_LIBRARIES ${SiconosKernel_FOUND})
-  GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS ${SiconosKernel_FOUND} PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SiconosKernel
+  REQUIRED_VARS SiconosKernel_LIBRARY)
+
+SET(SiconosKernel_FOUND ${SICONOSKERNEL_FOUND})
+
+IF(SiconosKernel_LIBRARY)
+  SET(SiconosKernel_LIBRARIES ${SiconosKernel_LIBRARY})
+  GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS ${SiconosKernel_LIBRARY} PATH)
   GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR ${SiconosKernel_LIBRARY_DIRS} PATH)
   GET_FILENAME_COMPONENT(SiconosKernel_LIBRARY_DIRS_DIR_DIR ${SiconosKernel_LIBRARY_DIRS_DIR} PATH)
 
@@ -37,9 +43,9 @@ IF(SiconosKernel_FOUND)
     ENDIF(SiconosKernel_FIND_REQUIRED)
   ENDIF(NOT SiconosKernel_INCLUDE_DIRS)
 
-ELSE(SiconosKernel_FOUND)
+ELSE(SiconosKernel_LIBRARY)
   IF(SiconosKernel_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Siconos Kernel library not found. Please specify library location in SiconosKernel_LIBRARY_DIRECTORY")
   ENDIF(SiconosKernel_FIND_REQUIRED)
-ENDIF(SiconosKernel_FOUND)
+ENDIF(SiconosKernel_LIBRARY)

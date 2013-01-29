@@ -26,7 +26,7 @@ ELSE()
 ENDIF()
 
 # For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
-GET_FILENAME_COMPONENT(SiconosNumerics_PATH "${SiconosNumerics_FOUND}" PATH)
+GET_FILENAME_COMPONENT(SiconosNumerics_PATH "${SiconosNumerics_LIBRARY}" PATH)
 set(LIBFORTests ${SiconosNumerics_PATH}:${CMAKE_BINARY_DIR}/src/plugin/test)
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})

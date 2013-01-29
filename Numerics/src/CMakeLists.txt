@@ -59,14 +59,12 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/NumericsConfig.h DESTINATION include/Siconos/N
 #
 # compilation setup 
 #
+# we should remove BlasLapack stuff
 # Atlas is not required
 
 if(USE_MKL)
   compile_with(MKL REQUIRED)
 else()
- if(NOT WITHOUT_ATLAS)
-  COMPILE_WITH(ATLAS)
- endif(NOT WITHOUT_ATLAS)
   COMPILE_WITH(LAPACK REQUIRED COMPLETE)
   COMPILE_WITH(BLAS REQUIRED)
 endif()
@@ -125,9 +123,9 @@ ENDIF()
 
 # CXX may be needed with MlcpSimplex
 SET(SiconosNumerics_LINKER_LANGUAGE C)
-IF(MlcpSimplex_FOUND) 
+IF(MLCPSIMPLEX_FOUND) 
 SET(SiconosNumerics_LINKER_LANGUAGE CXX)
-ENDIF(MlcpSimplex_FOUND)
+ENDIF(MLCPSIMPLEX_FOUND)
 
 LIBRARY_PROJECT_SETUP()
 
@@ -185,9 +183,9 @@ IF(WITH_TESTING)
   #SET(test-LCP_NEWTONMIN-lcp_mmc_PROPERTIES WILL_FAIL TRUE)
   #NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_mmc.dat)
   
-  IF(PathFerris_FOUND)
+  IF(PATHFERRIS_FOUND)
     NEW_LCP_TEST(SICONOS_LCP_PATH lcp_mmc.dat)
-  ENDIF(PathFerris_FOUND)
+  ENDIF(PATHFERRIS_FOUND)
  
   NEW_LCP_TEST(SICONOS_LCP_PGS lcp_deudeu.dat)
   NEW_LCP_TEST(SICONOS_LCP_RPGS lcp_deudeu.dat)
@@ -199,9 +197,9 @@ IF(WITH_TESTING)
   NEW_LCP_TEST(SICONOS_LCP_QP lcp_deudeu.dat)
   NEW_LCP_TEST(SICONOS_LCP_NSQP lcp_deudeu.dat)
   NEW_LCP_TEST(SICONOS_LCP_NEWTONMIN lcp_deudeu.dat)
-  IF(PathFerris_FOUND)
+  IF(PATHFERRIS_FOUND)
     NEW_LCP_TEST(SICONOS_LCP_PATH lcp_deudeu.dat)
-  ENDIF(PathFerris_FOUND)
+  ENDIF(PATHFERRIS_FOUND)
 
 
   NEW_LCP_TEST(SICONOS_LCP_PGS lcp_deudeu_block.dat 1)
@@ -259,9 +257,9 @@ IF(WITH_TESTING)
   NEW_TEST(Relaytest1 relay_test1.c)
   NEW_TEST(Relaytest2 relay_test2.c)
   
-  IF(PathFerris_FOUND)
+  IF(PATHFERRIS_FOUND)
     NEW_TEST(Relaytest3 relay_test3.c)
-  ENDIF(PathFerris_FOUND)
+  ENDIF(PATHFERRIS_FOUND)
   
   NEW_TEST(Relaytest10 relay_test10.c)
   NEW_TEST(Relaytest11 relay_test11.c)
@@ -301,10 +299,10 @@ IF(WITH_TESTING)
   SET(FC3Dtest5_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest5 FrictionContact3D_test5.c)
   
-  IF(PathFerris_FOUND)
+  IF(PATHFERRIS_FOUND)
     NEW_TEST(FC3Dtest6 FrictionContact3D_test6.c)
     SET(FC3Dtest6_PROPERTIES WILL_FAIL TRUE)
-  ENDIF(PathFerris_FOUND)
+  ENDIF(PATHFERRIS_FOUND)
   
   SET(FC3Dtest7_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(FC3Dtest7 FrictionContact3D_test7.c)
@@ -544,5 +542,8 @@ IF(PRINT_VAR)
   PRINT_VAR(${PRINT_VAR})
   MESSAGE(STATUS)
 ENDIF(PRINT_VAR)
+
+# print all features
+FEATURE_SUMMARY(WHAT ALL)
 
 WRITE_NOTES()

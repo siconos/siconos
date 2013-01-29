@@ -127,9 +127,6 @@ ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 
 COMPILE_WITH(LAPACK REQUIRED)
 COMPILE_WITH(BLAS REQUIRED)
-IF(NOT WITHOUT_ATLAS)
-COMPILE_WITH(ATLAS)
-ENDIF(NOT WITHOUT_ATLAS)
 COMPILE_WITH(GMP REQUIRED)
 
 IF(WITH_TESTING)
@@ -306,6 +303,8 @@ IF(PRINT_VAR)
   MESSAGE(STATUS)
 ENDIF(PRINT_VAR)
 
+# print all features
+FEATURE_SUMMARY(WHAT ALL)
 
 # To have a full print of variables, use -DPRINT_ENV=ON
 MESSAGE(STATUS "\n============================================ Summary ============================================")
@@ -324,3 +323,5 @@ MESSAGE(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
 MESSAGE(STATUS "=================================================================================================\n")
 
 WRITE_NOTES()
+
+

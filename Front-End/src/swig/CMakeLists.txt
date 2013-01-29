@@ -60,7 +60,6 @@ ENDIF(NOT Boost_GRAPH_FOUND)
 
 COMPILE_WITH(LibXml2 REQUIRED)
 COMPILE_WITH(GMP REQUIRED)
-COMPILE_WITH(ATLAS)
 
 COMPILE_WITH(LAPACK REQUIRED COMPLETE)
 COMPILE_WITH(BLAS REQUIRED)
@@ -78,7 +77,9 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
-#SET(CMAKE_SWIG_FLAGS "")
+IF(SYSTEM_ARCHITECTURE)
+  SET(CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
+ENDIF()
 
 IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   SET(EMULATOR "wine ")
@@ -119,6 +120,8 @@ INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATI
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/Common.i DESTINATION include/Siconos/FrontEnd)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
 
+# print all features
+FEATURE_SUMMARY(WHAT ALL)
 
 # To have a full print of variables, use -DPRINT_ENV=ON
 message(STATUS "\n============================================ Summary ============================================")

@@ -1,7 +1,7 @@
 #
 # The Atlas find mecanism goes through FindBLAS and FindLAPACK macros
 #
-
+INCLUDE(FindPackageHandleStandardArgs)
 
 #
 # Try to find Atlas with LAPACK (and then BLAS)
@@ -100,3 +100,6 @@ ELSE(ATLAS_FOUND)
     MESSAGE(FATAL_ERROR "ATLAS library not found")
   ENDIF(ATLAS_FIND_REQUIRED)
 ENDIF(ATLAS_FOUND)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ATLAS
+  REQUIRED_VARS HAVE_ATLAS)
