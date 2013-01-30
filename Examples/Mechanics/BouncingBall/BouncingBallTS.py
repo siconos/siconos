@@ -40,7 +40,7 @@ theta = 0.5  # theta scheme
 x = [1, 0, 0]    # initial position
 v = [0, 0, 0]    # initial velocity
 mass = eye(3)  # mass matrix
-mass[2, 2] = 3. / 5 * r * r
+mass[2, 2] = 2. / 5 * r * r
 
 # the dynamical system
 ball = LagrangianLinearTIDS(x, v, mass)
