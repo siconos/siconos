@@ -238,9 +238,9 @@ swig_setup() {
     sudo rm -rf `which swig2.0`
     sudo rm -rf `which swig1.3`
     
-    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.7.tar.gz
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.9.tar.gz
 
-    cd swig-2.0.7; { 
+    cd swig-2.0.9; { 
         ./configure
         make
         sudo make install
