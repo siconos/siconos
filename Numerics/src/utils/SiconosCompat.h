@@ -47,6 +47,7 @@ inline double fmin(double x, double y)
 #define NAN (INFINITY-INFINITY)
 #define _USE_MATH_DEFINES
 #define copysign _copysign
+#define snprintf _snprintf
 
 #endif
 #endif

@@ -7,6 +7,10 @@ http://code.google.com/p/wrapmsvc/
 Get a release tarball of checkout the svn. Follow the README to install the win7 SDK
 and the wrapper.
 
+On some linux distribution, you may have to export some CFLAGS in order to link with the 32-bits libs,
+since the binaries are built using "-m32". For instance this works on Ubuntu 12.04:
+CFLAGS='-L/usr/lib/i386-linux-gnu/wine/' ./build.sh  ../msvc/bin/
+
 For the Fortran compiler and some external dependencies, you will need the mxe toolchain
 See README-mingw on how to install it. You can also install Python, numpy, ...
 
