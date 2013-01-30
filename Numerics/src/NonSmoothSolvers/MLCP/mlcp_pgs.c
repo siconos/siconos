@@ -40,6 +40,13 @@ int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplement
 void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
+  if (!problem->isStorageType2)
+  {
+    printf("Siconos/Numerics: mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
+    exit(EXIT_FAILURE);
+  }
+
+
   double* A = problem->A;
   double* B = problem->B;
   double* C = problem->C;

@@ -38,6 +38,14 @@ int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplemen
 }
 void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+
+
+  if (!problem->isStorageType2)
+  {
+    printf("Siconos/Numerics: mlcp_psor: Wrong Storage (!isStorageType2) for PSOR solver\n");
+    exit(EXIT_FAILURE);
+  }
+
   double* A = problem->A;
   double* B = problem->B;
   double* C = problem->C;

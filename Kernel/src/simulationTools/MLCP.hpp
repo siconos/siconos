@@ -24,7 +24,7 @@
 #define MLCP_H
 
 #include "LinearOSNS.hpp"
-#define MLCP_NB_BLOCKS 30
+#define MLCP_NB_BLOCKS 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  *
  *  \author SICONOS Development Team - copyright INRIA

@@ -127,6 +127,11 @@ int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarit
     info =    mixedLinearComplementarity_pgs_setDefaultSolverOptions(problem, pOptions);
     break;
   }
+  case SICONOS_MLCP_PGS_SBM:
+  {
+    info =    mixedLinearComplementarity_pgs_SBM_setDefaultSolverOptions(problem, pOptions);
+    break;
+  }
   case SICONOS_MLCP_RPGS:
   {
     info =    mixedLinearComplementarity_rpgs_setDefaultSolverOptions(problem, pOptions);

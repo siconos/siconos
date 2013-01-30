@@ -297,6 +297,8 @@ char * idToName(int Id)
     /*MCLP*/
   case    SICONOS_MLCP_PGS:
     return SICONOS_MLCP_PGS_STR;
+ case    SICONOS_MLCP_PGS_SBM:
+    return SICONOS_MLCP_PGS_SBM_STR;
   case   SICONOS_MLCP_RPGS:
     return SICONOS_MLCP_RPGS_STR;
   case   SICONOS_MLCP_PSOR :
@@ -455,6 +457,8 @@ int nameToId(char * pName)
   /*MLCP*/
   if (strcmp(SICONOS_MLCP_PGS_STR, pName) == 0)
     return SICONOS_MLCP_PGS;
+  else if (strcmp(SICONOS_MLCP_PGS_SBM_STR, pName) == 0)
+    return SICONOS_MLCP_PGS_SBM;
   else if (strcmp(SICONOS_MLCP_RPGS_STR, pName) == 0)
     return SICONOS_MLCP_RPGS;
   else if (strcmp(SICONOS_MLCP_PSOR_STR, pName) == 0)

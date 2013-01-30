@@ -44,6 +44,8 @@ char  SICONOS_MLCP_DIRECT_PATH_STR[] = "MLCP_DIRECT_PATH";
 char  SICONOS_MLCP_DIRECT_PATH_ENUM_STR[] = "MLCP_DIRECT_PATH_ENUM";
 char  SICONOS_MLCP_FB_STR[] = "MLCP_FB";
 char  SICONOS_MLCP_DIRECT_FB_STR[] = "MLCP_DIRECT_FB";
+char  SICONOS_MLCP_PGS_SBM_STR[] = "MLCP_PGS_SBM";
+
 
 int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -272,6 +274,9 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   {
   case  SICONOS_MLCP_PGS:/****** PGS algorithm ******/
     mlcp_pgs(problem, z , w , &info , options);
+    break;
+  case  SICONOS_MLCP_PGS_SBM:/****** PGS algorithm ******/
+    mlcp_pgs_SBM(problem, z , w , &info , options);
     break;
   case SICONOS_MLCP_RPGS:
     /****** RPGS algorithm ******/

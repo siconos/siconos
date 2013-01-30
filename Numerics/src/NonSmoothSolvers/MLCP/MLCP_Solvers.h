@@ -47,6 +47,15 @@ Projected Gauss-Seidel solver
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 
+\section mlcpPGS_SBM PGS Solver for SBM storage
+Projected Gauss-Seidel solver
+- iparam[0] (in): maximum number of iterations allowed for GS process
+- iparam[1] (out): number of GS iterations processed
+- iparam[2] (out): sum of all local number of iterations (if it has sense for the local solver)
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): sum of all local error values
+
 \section mlcpRPGS RPGS Solver
 Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrices with null diagonal terms
 
@@ -435,6 +444,23 @@ extern "C"
   */
   void mlcp_direct_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
+
+  /** generic interface used to call any MLCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
+   * to solve the global problem (formulation/solving of local problems for each row of blocks)
+   * \param[in] problem structure that represents the LCP (M, q...). M must be a SparseBlockStructuredMatrix
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param info an integer which returns the termination value:\n
+   0 : convergence\n
+   >0 : failed, depends on local solver
+   * \param[in,out] options structure used to define the solver and its parameters.
+   * \author Vincent Acary
+   */
+  void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param options the pointer to  the array of options to set
+  */
+  int mixedLinearComplementarity_pgs_SBM_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   // need a svn add mlcp_GaussSeidel_SBM ...
   //  void mlcp_GaussSeidel_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options, int numberOfSolvers);
 

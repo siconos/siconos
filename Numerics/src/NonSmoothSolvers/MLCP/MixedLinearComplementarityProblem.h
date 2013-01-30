@@ -135,15 +135,21 @@
  */
 typedef struct
 {
-  int isStorageType1; /**< boolean for storageType1 1 if the problem is saved using (M,q), 0 otherwise */
-  int isStorageType2; /**< boolean for storageType1 1 if the problem is saved using (A,B,C,D,a,b), 0 otherwise*/
+  int isStorageType1; /**< boolean for storageType1 1 if the problem
+                         is saved using (M,q),  0 otherwise */
+  int isStorageType2; /**< boolean for storageType2 1 if the problem
+                         is saved using (A,B,C,D,a,b), 0 otherwise*/
   int n; /**< number of the linear constraints*/
   int m; /**< number of the complementarity constraints*/
-  int * blocksRows;  /**< The rows from blocksRows[i] to blocksRows[i+1]-1 forms a block of equalities iif bloksIsComp[i]=0,
-                       else the block is a complementarity block. */
-  int * blocksIsComp; /**< if bloksIsComp[i]=0, then block i formed by the  rows from blocksRows[i] to blocksRows[i+1]-1 is an equality block
-                       else the block is a complementarity block.
-                       The number of total blocks is given by NbBlocks such that blocksRows[NbBlocks] = n+m*/
+  int * blocksRows;  /**< The rows from blocksRows[i] to blocksRows[i+1]-1
+                        forms a block of equalities iif bloksIsComp[i]=0,
+                        else the block is a complementarity block.
+                        The number of total blocks is given by NbBlocks
+                        such that blocksRows[NbBlocks] = n+m */
+  int * blocksIsComp; /**< if bloksIsComp[i]=0, then block i formed by the rows
+                         from blocksRows[i] to blocksRows[i+1]-1 is an equality block
+                         else the block is a complementarity block.
+                      */
   NumericsMatrix* M; /**< M matrix of the MLCP */
   /** NumericsMatrix* Bblock;*/ /**< Bblock  ?*/
   double *q; /**< q vector of the MLCP */
