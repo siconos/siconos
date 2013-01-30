@@ -154,7 +154,7 @@ We assume that the system of a bouncing ball on a plane belongs to the abstract 
 
 \subsection EMBouncingBallDynamics Dynamical equation
 
- From the input of the physical data, we construct all of the terms which defined a Lagrangian NSDS.   In our special case, the model is completly linear:
+ From the input of the physical data, we construct all of the terms which defined a Lagrangian NSDS.   In our special case, the model is completely linear:
 \f{eqnarray}
   q&=&\left[\begin{array}{c}
   z \\
@@ -166,7 +166,7 @@ We assume that the system of a bouncing ball on a plane belongs to the abstract 
   m &0 &0 \\
   0 & m & 0 \\
   0 & 0 & I
-  \end{array}\right] \ where \ I=\frac{3}{5} m R^2 \\
+  \end{array}\right] \ where \ I=\frac{2}{5} m R^2 \\
   Q(q,\dot q )& = &\left[\begin{array}{c}
   0 \\
   0  \\
@@ -229,9 +229,12 @@ In the case of the bouncing ball, there is just one unilateral constraint such t
 
 We provide in this section a time discretization method of the Lagrange dynamical system consistent with the non smooth character of the solution. Let us consider here only the linear time invariant case. The equation  may be reformulated equivalently in terms of an integral over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  such that :
 \f{eqnarray}
-  \int_{[t_i,t_{i+1}]} M \ddot q + C \dot q + K q \,dt =  \int_{[t_i,t_{i+1}]} F_{ext}(t)\,dt +  \int_{[t_i,t_{i+1}]} r \,d\nu
+  \int_{[t_i,t_{i+1}]} M \ddot q + C \dot q + K q \,dt =  \int_{[t_i,t_{i+1}]} F_{ext}(t)\,dt +  \int_{[t_i,t_{i+1}]} \,di
 \f}
-
+where $di$ is the impulse measure. If the motion is non impulsive, the reaction force $r$ is related to $di$ thanks
+\f{eqnarray}
+ di = r dt \iff r = \frac{di}{dt}
+\f}
 Due to the non smooth character of the motion, the first term is integrated by an one order scheme( backward Euler-like) such that :
 \f{eqnarray}
    \int_{[t_i,t_{i+1}]} M \ddot q  \, dt \approx M (\dot q(t_{i+1})-\dot q(t_{i})) 
@@ -250,7 +253,7 @@ For simplicity sake, we note the approximation of \f$ q\f$  and \f$ \dot q\f$ :
 
 For the term which contains the reaction force, we state a new variable such as :
 \f{eqnarray}
-  R_{i+1} = \frac  1 h \int_{[t_i,t_{i+1}]} r \,d\nu
+  P_{i+1} = \frac  1 h \int_{[t_i,t_{i+1}]} di
 \f}
 
 The displacement is integrated through the velocity with :
@@ -261,11 +264,11 @@ The displacement is integrated through the velocity with :
 Finally, we obtain the time discretized equation of motion as follows :
 \f{eqnarray}
   \left[M+h\theta C + h^2 \theta^2 K\right] (\dot q_{i+1} - \dot q_{i}) = - h  C \dot q_{i} - h K q_{i} - h^2 \theta  K \dot q_{i}
-+  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]  +h R_{i+1},
++  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]  + P_{i+1},
 \f}
 which can be written :
 \f{eqnarray}
-   \dot q_{i+1} = \dot q_{free}  + h W R_{i+1}
+   \dot q_{i+1} = \dot q_{free}  + W P_{i+1}
 \f}
 where 
 \f{eqnarray}
@@ -274,14 +277,14 @@ where
 +  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]       \right]
 \f}
 
-The free velocity \f$  \dot q_{free}  \f$  correponds to the velocity of the system without any constraints.
+The free velocity \f$  \dot q_{free}  \f$  corresponds to the velocity of the system without any constraints.
 
 \subsection EMBouncingBallRelationsTD Time discretization of the relations
 The Time discretization of the relations is fully implicit and may be written as :
 \f{eqnarray}
       y_{i+1} &=& H^{T} q_{i+1} + b\\
       \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
-      R_{i+1} &=& H \lambda_{i+1}
+      P_{i+1} &=& H \lambda_{i+1}
 \f}
 
 \subsection EMBouncingBallNSLawTD Time discretization of the Non Smooth laws
@@ -295,7 +298,7 @@ In the Moreau's time--stepping, we use a reformulation of the unilateral constra
 \f[
    \ If \ y(t) =0, \ then \ 0 \leq \dot y \perp  \lambda  \geq 0
 \f]
-which leads to the following discretisation :
+which leads to the following discretization :
 \f[
    \ If y^{p} \leq 0, \ then \ 0 \leq \dot y_{i+1} \perp  \lambda_{i+1}  \geq 0
 \f]
@@ -313,10 +316,10 @@ and we apply the constraints directly on this velocity :
 
 \subsection EMBouncingBallTDSum Summary of the time discretized equations
 \f{eqnarray}
-  \dot q_{i+1} &=& \dot q_{free}  + h W R_{i+1} \\
+  \dot q_{i+1} &=& \dot q_{free}  +  W P_{i+1} \\
   q_{i+1} &=& q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right] \\
   \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
-  R_{i+1} &=& H \lambda_{i+1}\\
+  P_{i+1} &=& H \lambda_{i+1}\\
   y^{p} &=& y_{i} + \frac{h}{2}  \dot y_i\\
   If \ &y^{p}& \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
 \f}
@@ -330,14 +333,14 @@ This set of equations can be reduced to a ``condensed'' system in terms of \f$ \
 
 \subsection EMBouncingBallNumStrat Numerical Strategy
 
-The numerical stratgey is given by the pseudo-algorithm below.
+The numerical strategy is given by the pseudo-algorithm below.
 
-    \b Require Classical form of the synamical equation : \f$  M, K, C, F_{ext}, q_0, \dot q_0\f$  \n
+    \b Require Classical form of the dynamical equation : \f$  M, K, C, F_{ext}, q_0, \dot q_0\f$  \n
     \b Require  Classical form of the relations : \f$  H, b\f$  \n
     \b Require  Classical form of the non smooth law  : \f$  e\f$  \n
     \b Require Numerical parameter : \f$  h, \theta, T, t_0\f$  \n
-    \b Ensure  \f$ (\{ q_n\}, \{ \dot q_n\},\{R_n\}) \f$      \n 
-     // Construction of time independant operators : \n
+    \b Ensure  \f$ (\{ q_n\}, \{ \dot q_n\},\{P_n\}) \f$      \n
+     // Construction of time independent operators : \n
      \f$  W = \left[M+h\theta C + h^2 \theta^2 K\right]^{-1}\f$  // The iteration matrix  \n
      \f$  w = H^{T} W H \f$  // The LCP matrix (Delassus operator) \n
      // Time discretization \f$ n_{step} := [ \frac{T-t_0}{h}]\f$  \n
@@ -350,13 +353,13 @@ The numerical stratgey is given by the pseudo-algorithm below.
          // Contact detection \n
         if \f$ y^{p} \leq 0\f$ then  \n
          // Formalization of the one-step  LCP \n
-         \f$  bLCP =  H^{T} \dot q_{free}  + e \dot y_{i}\f$  \n
+         \f$  q =  H^{T} \dot q_{free}  + e \dot y_{i}\f$  \n
          // Resolution  of the one-step LCP \n
-         \f$  [\dot y^{e}_{i+1}, \lambda_{i+1}]=\f$ \e solveLCP\f$ (w,bLCP)\f$  \n
+         \f$  [\dot y^{e}_{i+1}, \lambda_{i+1}]=\f$ \e solveLCP\f$ (w,q)\f$  \n
 	end if \n
-         // State Actualisation \n
-         \f$ R_{i+1} = H \lambda_{i+1} \f$  \n 
-         \f$ \dot q_{i+1} = \dot q_{free}  + h W R_{i+1}\f$  \n 
+         // State update \n
+         \f$ P_{i+1} = H \lambda_{i+1} \f$  \n
+         \f$ \dot q_{i+1} = \dot q_{free}  + W P_{i+1}\f$  \n
          \f$ q_{i+1} = q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right]\f$  \n
      end for \n
 
