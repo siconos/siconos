@@ -33,6 +33,7 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "FirstOrderType2R.hpp"
 
+//#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
@@ -603,7 +604,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
 double Moreau::computeResidu()
 {
-
+  DEBUG_PRINT("Moreau::computeResidu(), start");
   // This function is used to compute the residu for each "Moreau-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -740,6 +741,7 @@ double Moreau::computeResidu()
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
     {
+      DEBUG_PRINT("Moreau::computeResidu(), dsType == Type::LagrangianDS");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
@@ -823,6 +825,7 @@ double Moreau::computeResidu()
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
     {
+      DEBUG_PRINT("Moreau::computeResidu(), dsType == Type::LagrangianLinearTIDS");
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual for v = v_i
       // otherwise the complete formulae must be applied, that is
@@ -837,6 +840,18 @@ double Moreau::computeResidu()
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
+      DEBUG_PRINT("Moreau::computeResidu(), qold :");
+#ifdef DEBUG_MESSAGES
+      qold->display();
+#endif
+      DEBUG_PRINT("Moreau::computeResidu(), vold :");
+#ifdef DEBUG_MESSAGES
+      vold->display();
+#endif
+      DEBUG_PRINT("Moreau::computeResidu(), q :");
+#ifdef DEBUG_MESSAGES
+      d->q()->display();
+#endif
 
       // --- ResiduFree computation Equation (1) ---
       residuFree->zero();

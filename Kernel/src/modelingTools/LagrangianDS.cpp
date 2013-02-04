@@ -517,6 +517,17 @@ void LagrangianDS::setQ0Ptr(SP::SiconosVector newPtr)
   _q0 = newPtr;
 }
 
+void LagrangianDS::setVelocity0(const SiconosVector& newValue)
+{
+  if (newValue.size() != _ndof)
+    RuntimeException::selfThrow("LagrangianDS - setVelocity0: inconsistent input vector size ");
+
+  if (! _velocity0)
+    _velocity0.reset(new SiconosVector(newValue));
+  else
+    *_velocity0 = newValue;
+}
+
 void LagrangianDS::setVelocity(const SiconosVector& newValue)
 {
   if (newValue.size() != _ndof)

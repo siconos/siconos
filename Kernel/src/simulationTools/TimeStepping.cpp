@@ -32,7 +32,7 @@
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
 #include "FirstOrderNonLinearDS.hpp"
-
+//#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
 
 #include <debug.h>
@@ -171,8 +171,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
@@ -304,8 +304,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   assert(indexSet1->size() <= indexSet0->size());
 
-  DEBUG_PRINTF("update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
-  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
 }
 
 // void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
@@ -530,6 +530,7 @@ void TimeStepping::advanceToEvent()
   //   // Update
   //   update(_levelMin);
 
+  DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
 
@@ -593,10 +594,11 @@ void TimeStepping::saveYandLambdaInMemory()
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
+  DEBUG_PRINT("TimeStepping::newtonSolve()\n");
   _isNewtonConverge = false;
   _newtonNbSteps = 0; // number of Newton iterations
   int info = 0;
-  //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
+  //cout<<"||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
 
@@ -606,6 +608,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       || isLinear)
   {
     _newtonNbSteps++;
+    DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbSteps = %i\n", _newtonNbSteps);
     prepareNewtonIteration();
     computeFreeState();
     if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())

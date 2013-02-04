@@ -294,6 +294,14 @@ public:
     return _eventsManager;
   };
 
+  /** get the EventsManager
+   *  \return a pointer to EventsManager
+   */
+  inline void setEventsManager(SP::EventsManager newEM)
+  {
+    _eventsManager = newEM;
+  }
+
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)
    *  \return a double.

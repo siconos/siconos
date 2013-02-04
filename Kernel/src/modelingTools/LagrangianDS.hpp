@@ -476,6 +476,11 @@ public:
     return _velocity0;
   }
 
+  /** set the value of velocity0 to newValue
+   *  \param SiconosVector newValue
+   */
+  void setVelocity0(const SiconosVector&);
+
   /** set Velocity0 to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
