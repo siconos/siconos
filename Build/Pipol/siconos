@@ -274,6 +274,14 @@ nightly_submit Kernel Release
 install_1 Kernel Release
 clean_1 Kernel Release
 #
+configure_src Mechanics Release
+nightly_build Mechanics Release
+nightly_test Mechanics Release
+nightly_memcheck Mechanics Release
+nightly_submit Mechanics Release
+install_1 Mechanics Release
+clean_1 Mechanics Release
+#
 configure_src IO Release
 nightly_build IO Release
 nightly_test IO Release
@@ -318,9 +326,24 @@ nightly_submit Kernel Debug
 install_1 Kernel Debug
 clean_1 Kernel Debug
 ##
+configure_src Mechanics Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Mechanics Debug
+nightly_coverage Mechanics Debug
+nightly_submit Mechanics Debug
+install_1 Mechanics Debug
+clean_1 Mechanics Debug
+##
+configure_src IO Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build IO Debug
+nightly_coverage IO Debug
+nightly_submit IO Debug
+install_1 IO Debug
+clean_1 IO Debug
 ### Examples
 rm -rf $PIPOL_WDIR/siconos/Numerics/src
 rm -rf $PIPOL_WDIR/siconos/Kernel/src
+rm -rf $PIPOL_WDIR/siconos/Mechanics/src
+rm -rf $PIPOL_WDIR/siconos/IO/src
 configure_src Examples Debug
 nightly_build Examples Debug
 nightly_test Examples Debug
@@ -328,7 +351,7 @@ nightly_submit Examples Debug
 ##
 nightly_memcheck Examples Debug
 nightly_submit Examples Debug
-
 # end
 date
 df -k
+
