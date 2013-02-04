@@ -32,10 +32,6 @@ SET(SiconosKernel_DIRS
   modelingTools
   simulationTools
   controlTools
-  multiBodyTools
-  multiBodyTools/2D
-  multiBodyTools/3D
-  multiBodyTools/joints
 )
 
 #
@@ -136,18 +132,7 @@ IF(WITH_TESTING)
   set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES})
   set(TEST_INCLUDE_DIR ${TEST_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR})
 ENDIF(WITH_TESTING )
-# contact detection
-IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED)
-  IF(BULLET_FOUND)
-    SET(HAVE_BULLET TRUE)
-    MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
-    SET(SiconosKernel_DIRS ${SiconosKernel_DIRS} multiBodyTools/contactDetection/bullet)
-    IF(BULLET_USE_DOUBLE_PRECISION)
-      APPEND_FLAGS(CMAKE_CXX_FLAGS "-DBT_USE_DOUBLE_PRECISION")
-    ENDIF(BULLET_USE_DOUBLE_PRECISION)
-  ENDIF(BULLET_FOUND)
-ENDIF(WITH_BULLET)
+
 
 # Plugin library for tests
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
@@ -247,12 +232,6 @@ IF(WITH_TESTING)
 
   END_TEST()
 
-  BEGIN_TEST(multiBodyTools/test)
-
-  NEW_TEST(testMultiBodyTools MultiBodyTest.cpp)
-
-  END_TEST()
-
   # Simulation tests
   BEGIN_TEST(simulationTools/test)
 
@@ -287,6 +266,22 @@ INSTALL(FILES
 # other needed cmake macros
 INSTALL(FILES 
   ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosNumerics.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosIO.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/FindSiconosMechanics.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/SiconosTools.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
 #

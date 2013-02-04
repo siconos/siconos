@@ -45,6 +45,12 @@ COMPILE_WITH(Python_Numpy REQUIRED)
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
 
+
+COMPILE_WITH(SiconosMechanics)
+IF(SiconosMechanics_FOUND)
+  SET(HAVE_SICONOS_MECHANICS 1)
+ENDIF()
+
 COMPILE_WITH(SiconosIO)
 
 IF(SiconosIO_FOUND)
@@ -113,6 +119,13 @@ ADD_CUSTOM_TARGET(distutils-install
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Installing with distutils")
+
+#
+
+IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
+ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/FrontEndConfig.h DESTINATION include/Siconos/FrontEnd)

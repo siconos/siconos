@@ -31,7 +31,7 @@ IF(APPLE)
   SET (CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
 ENDIF(APPLE)
 
-SICONOS_PROJECT(Numerics 3 5 0)
+SICONOS_PROJECT(Numerics)
 
 # ============= Summary =============
 # To have a full print of variables, use -DPRINT_ENV=ON

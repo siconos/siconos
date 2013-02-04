@@ -28,9 +28,6 @@
   PY_REGISTER(NewtonEulerR);                                            \
   PY_REGISTER(NewtonEulerFrom1DLocalFrameR);                            \
   PY_REGISTER(NewtonEulerFrom3DLocalFrameR);                            \
-  PY_REGISTER(KneeJointR)                                               \
-  PY_REGISTER(PivotJointR)                                              \
-  PY_REGISTER(PrismaticJointR)                                          \
   PY_REGISTER(FirstOrderR);                                             \
   PY_REGISTER(FirstOrderLinearR);                                       \
   PY_REGISTER(FirstOrderLinearTIR);                                     \
@@ -69,6 +66,20 @@
   PY_REGISTER(EventsManager);                                           \
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
+  PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                          \
+  PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
+  PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                          \
+  PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
+  PY_REGISTER(InteractionsSet);                                         \
+  PY_REGISTER(BoundaryCondition);                                       \
+  PY_REGISTER_SICONOS_MECHANICS_MAYBE();                                \
+  PY_REGISTER_BULLET_MAYBE();
+
+#ifdef HAVE_SICONOS_MECHANICS
+#define PY_REGISTER_SICONOS_MECHANICS_MAYBE()                           \
+  PY_REGISTER(KneeJointR)                                               \
+  PY_REGISTER(PivotJointR)                                              \
+  PY_REGISTER(PrismaticJointR)                                          \
   PY_REGISTER(CircularDS);                                              \
   PY_REGISTER(Disk);                                                    \
   PY_REGISTER(Circle);                                                  \
@@ -84,14 +95,8 @@
   PY_REGISTER(SphereLDSSphereLDSR);                                     \
   PY_REGISTER(SphereNEDSSphereNEDSR);                                   \
   PY_REGISTER(SiconosBodies);                                           \
-  PY_REGISTER(SpaceFilter);                                             \
-  PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                          \
-  PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
-  PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                          \
-  PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
-  PY_REGISTER(InteractionsSet);                                         \
-  PY_REGISTER(BoundaryCondition);                                       \
-  PY_REGISTER_BULLET_MAYBE();
+  PY_REGISTER(SpaceFilter);                                             
+#endif
 
 #ifdef WITH_BULLET
 #define PY_REGISTER_BULLET_MAYBE()                                      \

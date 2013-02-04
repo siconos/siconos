@@ -21,7 +21,9 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
+#include "debug.h"
 #include <iostream>
+
 using namespace std;
 
 // Private function to set linked with members of Dynamical top class
@@ -353,7 +355,7 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 
 void LagrangianDS::initForces()
 {
-  cout << "initForces is called" << endl;
+  DEBUG_PRINTF("initForces is called\n");
 
   _forces.reset(new SiconosVector(_ndof));
 

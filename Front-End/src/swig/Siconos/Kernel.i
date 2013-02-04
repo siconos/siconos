@@ -49,20 +49,7 @@
 #include <SiconosKernel.hpp>
 #include <SiconosVisitor.hpp>
 #include "SiconosPointers.hpp"
-#include "Disk.hpp"
-#include "Circle.hpp"
-#include "DiskDiskR.hpp"
-#include "DiskPlanR.hpp"
-#include "DiskMovingPlanR.hpp"
-#include "CircleCircleR.hpp"
-#include "ExternalBody.hpp"
-#include "SpaceFilter.hpp"
-#include "SiconosBodies.hpp"
 #include "addons.hpp"
-#include "KneeJointR.hpp"
-#include "PivotJointR.hpp"
-#include "PrismaticJointR.hpp"
-
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -73,10 +60,32 @@
 #include <debug.h>
 
 #include "FrontEndConfig.h"
-#ifdef HAVE_SICONOS_IO
-#include <SiconosRestart.hpp>
-#endif
 %} 
+
+#ifdef HAVE_SICONOS_MECHANICS
+%{
+#include "Disk.hpp"
+#include "Circle.hpp"
+#include "DiskDiskR.hpp"
+#include "DiskPlanR.hpp"
+#include "DiskMovingPlanR.hpp"
+#include "CircleCircleR.hpp"
+#include "ExternalBody.hpp"
+#include "SpaceFilter.hpp"
+#include "SiconosBodies.hpp"
+#include "KneeJointR.hpp"
+#include "PivotJointR.hpp"
+#include "PrismaticJointR.hpp"
+%}
+#endif
+
+#ifdef HAVE_SICONOS_IO
+%{
+#include <SiconosRestart.hpp>
+%}
+#endif
+
+
 
 #ifdef WITH_BULLET
 %include "KernelBullet.i"

@@ -152,6 +152,93 @@ void BulletBodies::init()
       }
     }
 
+////////////////////////////////////////////////////////////////////////////////
+
+    //triangle mesh creation
+
+    btTriangleMesh* mTriMesh = new btTriangleMesh(); 
+
+    //read-in of triangles////////////////////////////////////////////////////////
+
+    //number of triangles 
+
+    int NumTr;
+
+    //reading from the BULLETout.txt file 
+
+    string str;
+
+    vector<vector<double> > outerVec;
+    vector<vector<double> >::iterator outerIt;
+  
+    vector<double> innerVec;
+    vector<double>::iterator innerIt;
+
+    ifstream inpFile("BULLETout.txt");
+
+    if(inpFile.is_open()){
+
+      getline(inpFile, str);
+
+      istringstream linNumbers(str);
+
+      linNumbers >> NumTr;
+     
+      while(getline(inpFile, str)){
+      
+        cout << str << endl;
+
+        //inner loop for extracting doubles
+
+        istringstream iss(str);
+
+        double d;
+        
+        while(iss >> setprecision(5) >> d){
+
+          innerVec.push_back(d);
+
+        }
+
+        outerVec.push_back(innerVec);
+
+        innerVec.clear();
+
+      }
+
+      inpFile.close();
+
+    }
+    else{
+
+      cout << "Can't open the file";
+    
+    }
+    
+    //end of file reading
+      
+    for(outerIt = outerVec.begin(); outerIt != outerVec.end(); ++outerIt){
+          
+      btVector3 v0((*outerIt).at(0),(*outerIt).at(1),(*outerIt).at(2));
+      btVector3 v1((*outerIt).at(3),(*outerIt).at(4),(*outerIt).at(5));
+      btVector3 v2((*outerIt).at(6),(*outerIt).at(7),(*outerIt).at(8));
+
+      //Then add the triangle to the mesh:
+    
+      mTriMesh->addTriangle(v0,v1,v2);
+
+      cout << (*outerIt).at(0) << (*outerIt).at(1) << (*outerIt).at(2) << (*outerIt).at(3) << (*outerIt).at(4) << (*outerIt).at(5) << (*outerIt).at(6) << (*outerIt).at(7) << (*outerIt).at(8) << endl;
+
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    SP::btCollisionObject ground(new btCollisionObject());
+    ground->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+
+    ///create a triangular mesh collision shape for the ground
+    SP::btCollisionShape groundShape(new btBvhTriangleMeshShape(mTriMesh, true));
+
 
     SP::btCollisionObject ground(new btCollisionObject());
     SP::btCollisionObject wall1(new btCollisionObject());
@@ -164,7 +251,7 @@ void BulletBodies::init()
     wall3->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     wall4->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
 
-    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, .5)));
+//    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, .5)));
     SP::btCollisionShape wallShape(new btBoxShape(btVector3(3, 30, .5)));
     //    groundShape->setMargin(1.);
     //    wallShape->setMargin(1.);

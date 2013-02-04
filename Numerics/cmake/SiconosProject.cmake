@@ -5,14 +5,13 @@
 # an encourage to out of source builds 
 INCLUDE(OutOfSourcesBuild)
 
-
+INCLUDE(SiconosVersion)
 
 # misc tools
 INCLUDE(SiconosTools)
 
 MACRO(SICONOS_PROJECT 
-    _PROJECT_NAME 
-    MAJOR_VERSION MINOR_VERSION PATCH_VERSION)
+    _PROJECT_NAME)
   
   # Build options
   # Static and shared libs : defaults
@@ -237,10 +236,10 @@ MACRO(SICONOS_PROJECT
 
   # NumericsConfig.h/KernelConfig.h and include
   IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-    IF(NOT CONFIG_H_GLOBAL_CONFIGURED)
-      SET(CONFIG_H_GLOBAL_CONFIGURED 1 CACHE BOOL "${PROJECT_SHORT_NAME}Config.h global generation." )
-      CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
-    ENDIF(NOT CONFIG_H_GLOBAL_CONFIGURED)
+#    IF(NOT CONFIG_H_GLOBAL_CONFIGURED)
+#      SET(CONFIG_H_GLOBAL_CONFIGURED 1 CACHE BOOL "${PROJECT_SHORT_NAME}Config.h global generation." )
+    CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
+#    ENDIF(NOT CONFIG_H_GLOBAL_CONFIGURED)
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
   ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
 

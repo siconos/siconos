@@ -41,6 +41,7 @@ endif()
 
 option(FROM_REPO "Build Siconos from repository. Default = OFF" OFF)
 option(WITH_KERNEL "Build Kernel. Default = ON" ON)
+option(WITH_MECHANICS "Build Mechanics. Default = off" OFF)
 option(WITH_IO "Build IO. Default = off" OFF)
 option(WITH_FRONTEND "Build FrontEnd. Default = ON" ON)
 option(WITH_EXAMPLES "Build Examples. Default = OFF" OFF) # not tested
@@ -64,12 +65,14 @@ if(FROM_REPO)
     )
 
   set(SOURCE_DIR Siconos-prefix/src/Siconos)
-  set(numerics_depends Siconos)
+# Note that this force a configure which is done by build if needed :
+  set(numerics_depends Siconos) 
 else()
   set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
   set(numerics_depends)
 endif()
-  
+
+ 
 macro(AddSiconosProject)
   set(options)
   set(oneValueArgs)
@@ -78,7 +81,7 @@ macro(AddSiconosProject)
   set(_project ${project_UNPARSED_ARGUMENTS})
 
   ExternalProject_Add(${_project}
-    DOWNLOAD_COMMAND echo hello
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
     DEPENDS ${project_DEPENDS}
     SOURCE_DIR ${SOURCE_DIR}/${_project}
     CMAKE_ARGS ${project_CMAKE_ARGS}
@@ -98,9 +101,16 @@ set(frontend_depends Numerics)
 
 if(WITH_KERNEL)
   AddSiconosProject(Kernel DEPENDS Numerics CMAKE_ARGS ${ARGS})
+  list(APPEND frontend_depends Kernel)
 endif()
 
-list(APPEND frontend_depends Kernel)
+
+
+if(WITH_MECHANICS)
+  AddSiconosProject(Mechanics DEPENDS Kernel CMAKE_ARGS ${ARGS})
+  list(APPEND frontend_depends Mechanics)
+endif()
+
 
 if(WITH_IO)
   AddSiconosProject(IO DEPENDS Kernel CMAKE_ARGS ${ARGS})
