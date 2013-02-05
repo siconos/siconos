@@ -141,18 +141,16 @@ ENDIF()
 #
 # Link
 #
+
+MESSAGE(STATUS "Link directories : ${${PROJECT_NAME}_LINK_DIRECTORIES}")
+MESSAGE(STATUS "Link libraries : ${${PROJECT_NAME}_LINK_LIBRARIES}")
+
 SWIG_LINK_LIBRARIES(Numerics ${PYTHON_LIBRARIES} 
-  ${SiconosNumerics_LIBRARIES} 
+  ${${PROJECT_NAME}_LINK_LIBRARIES}
   ${FORTRAN_LIBRARIES})
 
 SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES} 
-  ${SiconosKernel_LIBRARIES} 
-  ${SiconosNumerics_LIBRARIES}
-  ${SiconosMechanics_LIBRARIES}
-  ${SiconosIO_LIBRARIES}
-  ${FORTRAN_LIBRARIES} 
-  ${Boost_LIBRARIES}
-  ${BULLET_LIBRARIES})
+  ${${PROJECT_NAME}_LINK_LIBRARIES})
 
 # get python dist-packages
 # warning python may not know cmake_install_prefix

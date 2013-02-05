@@ -344,8 +344,11 @@ TYPEDEF_SPTR(InteractionsGraph);
 
 %include "ControlTools.hpp"
 
-%import "gmp.h"
-
+// fix : how to prevent swig to generate getter/setter for mpz_t ?
+// on some distrib %import gmp.h is not sufficient as gmp-<arch>.h may be used
+typedef struct
+{} __mpz_struct;
+typedef __mpz_struct mpz_t[1];
 %include "KernelRegistration.i"
 
 
@@ -541,7 +544,6 @@ KERNEL_REGISTRATION();
   {
     return v;
   };
-
 
 %}
 
