@@ -60,10 +60,8 @@
 #include <debug.h>
 
 #include "FrontEndConfig.h"
-%} 
 
 #ifdef HAVE_SICONOS_MECHANICS
-%{
 #include "Disk.hpp"
 #include "Circle.hpp"
 #include "DiskDiskR.hpp"
@@ -76,16 +74,13 @@
 #include "KneeJointR.hpp"
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
-%}
 #endif
-
 #ifdef HAVE_SICONOS_IO
-%{
 #include <SiconosRestart.hpp>
-%}
 #endif
+%}
 
-
+%include "FrontEndConfig.h";
 
 #ifdef WITH_BULLET
 %include "KernelBullet.i"
@@ -609,8 +604,6 @@ TYPEDEF_SPTR(_SolverOptions);
 %include "SolverOptions.h"
 
 KERNEL_REGISTRATION();
-
-%include "FrontEndConfig.h";
 
 #ifdef HAVE_SICONOS_IO
 %include "SiconosRestart.hpp";
