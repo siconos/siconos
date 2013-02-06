@@ -387,6 +387,11 @@ public:
    */
   double normInf() const;
 
+  /** compute the determinant of the matrix (use LU factorization)
+   *  \return a double
+   */
+  double det() const;
+
   /** display data on standard output
    */
   void display() const;

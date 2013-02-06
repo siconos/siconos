@@ -19,9 +19,12 @@
 
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 
+
 #include "KernelConfig.h"
+#include "determinant.hpp"
 
 #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 
@@ -55,6 +58,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 #endif
 
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
@@ -593,6 +597,32 @@ double SimpleMatrix::normInf() const
   else // if(num==7)
     return 1;
 }
+
+//=======================
+//       determinant
+//=======================
+
+double SimpleMatrix::det() const
+{
+  if (num == 1)
+    return determinant(*mat.Dense);
+  else if (num == 2)
+    return determinant(*mat.Triang);
+  else if (num == 3)
+    return determinant(*mat.Sym);
+  else if (num == 4)
+    return determinant(*mat.Sparse);
+  else if (num == 5)
+    return determinant(*mat.Banded);
+  else if (num == 6)
+    return 0;
+  else // if(num==7)
+    return 1;
+}
+
+
+
+
 
 //=====================
 // screen display
