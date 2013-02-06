@@ -85,9 +85,9 @@ IF(WITH_TESTING)
   # the main test driver
   SET(TEST_MAIN multiBodyTools/test/TestMain.cpp)
 
-  BEGIN_TEST(test)
-  NEW_TEST(testMultiBody MultiBodytest.cpp)
-  END_TEST(test)
+  BEGIN_TEST(multiBodyTools/test)
+  NEW_TEST(testMultiBody MultiBodyTest.cpp)
+  END_TEST()
 
 ENDIF(WITH_TESTING)
 
