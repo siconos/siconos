@@ -392,6 +392,7 @@ void KernelTest::t6()
 
 }
 
+#ifdef HAVE_SICONOS_MECHANICS
 void KernelTest::t7()
 {
 
@@ -421,4 +422,4 @@ void KernelTest::t7()
   CPPUNIT_ASSERT(std11::static_pointer_cast<Disk>(ds1)->getRadius() ==
                  std11::static_pointer_cast<Disk>(ds2)->getRadius());
 }
-
+#endif

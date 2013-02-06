@@ -1,4 +1,5 @@
-// generated with the command : ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
+// generated with the command : ./builder.py -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
+#include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER_WITH_BASES(ControlFirstOrderLinearDS,(ControlDynamicalSystem),
   (_x0)
   (_A))
@@ -617,7 +618,7 @@ SICONOS_IO_REGISTER_WITH_BASES(MoreauProjectOnConstraintsOSI,(Moreau),
   (_activateYVelThreshold))
 
 template <class Archive>
-void siconos_io_register_generated(Archive& ar)
+void siconos_io_register_Kernel_generated(Archive& ar)
 {
   ar.register_type(static_cast<ControlFirstOrderLinearDS*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));

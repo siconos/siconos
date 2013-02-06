@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 
+# ./builder.py -I/usr/local/include/Siconos/Kernel \
+#    -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2
 
 # Mechanics
-# ./builder -I/usr/local/include/Siconos/Kernel -I/usr/local/include/Siconos/Mechanics -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 --target=Mechanics
+# ./builder.py -I/usr/local/include/Siconos/Kernel \
+# -I/usr/local/include/Siconos/Mechanics \
+# -I/usr/local/include/Siconos/Numerics -I/usr/include/libxml2 \
+# --target=Mechanics
 
 # we use pygccxml from Roman Yakovenko.
 # http://sourceforge.net/projects/pygccxml/
@@ -16,14 +20,12 @@ from pygccxml import parser
 from pygccxml import declarations
 
 myname = sys.argv[0]
-include_paths=[]
+include_paths = []
 siconos_namespace = '::'
 
-def generated_file(target):
-    if target == 'Kernel':
-        return '../src/SiconosFullGenerated.hpp'
-    else:
-        return '../src/Siconos{0}Generated.hpp'.format(target)
+
+def generated_file(targ):
+    return '../src/Siconos{0}Generated.hpp'.format(targ)
 
 
 def usage():
@@ -39,7 +41,7 @@ except getopt.GetoptError, err:
     usage()
     sys.exit(2)
 
-target='Kernel'
+target = 'Kernel'
 
 for opt, arg in opts:
     if opt == '--target':
@@ -61,12 +63,17 @@ input_headers = dict()
 
 input_headers['Kernel'] = ["SiconosKernel.hpp"]
 
-input_headers['Mechanics'] = [ "SiconosKernel.hpp", "Circle.hpp", "CircleCircleR.hpp", "CircularDS.hpp",
-                               "Disk.hpp", "DiskDiskR.hpp", "DiskMovingPlanR.hpp",
-                               "DiskPlanR.hpp", "SphereLDS.hpp", "SphereLDSPlanR.hpp",
-                               "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
-                               "SphereNEDSPlanR.hpp", "SphereNEDSSphereNEDSR.hpp",
-                               "SiconosBodies.hpp", "SpaceFilter.hpp", "ExternalBody.hpp" ]
+input_headers['Mechanics'] = ["Circle.hpp",
+                              "CircleCircleR.hpp", "CircularDS.hpp",
+                              "Disk.hpp", "DiskDiskR.hpp",
+                              "DiskMovingPlanR.hpp",
+                              "DiskPlanR.hpp", "SphereLDS.hpp",
+                              "SphereLDSPlanR.hpp",
+                              "SphereLDSSphereLDSR.hpp", "SphereNEDS.hpp",
+                              "SphereNEDSPlanR.hpp",
+                              "SphereNEDSSphereNEDSR.hpp",
+                              "SiconosBodies.hpp",
+                              "SpaceFilter.hpp", "ExternalBody.hpp"]
 
 
 config = parser.config_t(include_paths=include_paths)
@@ -113,12 +120,16 @@ def replace_by_typedef(some_type):
             return rep_typedef
     return str(some_type)
 
-with open(generated_file(target),'w') as dest_file:
+with open(generated_file(target), 'w') as dest_file:
 
-    dest_file.write("// generated with the command : {0}\n".format(' '.join(sys.argv)))
+    dest_file.write('// generated with the command : {0}\n'
+                    .format(' '.join(sys.argv)))
+    for header in input_headers[target]:
+        dest_file.write('#include "{0}"\n'.format(header))
 
     for type_ in filter(lambda c: c.parent.name == siconos_namespace,
-                        itertools.chain(global_ns.classes(), global_ns.typedefs())):
+                        itertools.chain(
+                            global_ns.classes(), global_ns.typedefs())):
 
         is_typedef = False
 
@@ -127,7 +138,7 @@ with open(generated_file(target),'w') as dest_file:
             class_ = type_
         elif isinstance(type_, declarations.typedef_t):
             try:
-                is_typedef=True
+                is_typedef = True
                 class_ = class_names['::' + str(type_.type)]
             except:
                 class_ = None
@@ -145,28 +156,51 @@ with open(generated_file(target),'w') as dest_file:
 
                 # print registration macros depending on inheritance
                 if class_.bases == []:
-                    dest_file.write('SICONOS_IO_REGISTER({0},\n'.format(name(type_)))
+                    dest_file.write(
+                        'SICONOS_IO_REGISTER({0},\n'.format(name(type_)))
                 else:
                     serializable_bases = \
                         reduce(lambda r, b:
-                               r + [b.related_class] if is_serializable(b.related_class)
-                               and b.related_class.parent.name == siconos_namespace
+                               r + [b.related_class]
+                               if is_serializable(b.related_class)
+                               and
+                               b.related_class.parent.name == siconos_namespace
                                else r, class_.bases, [])
                     if len(serializable_bases) > 0:
-                        dest_file.write('SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n'.format(name(type_),
-                              ''.join(['({0})'.format(replace_by_typedef(c.name)) for c in serializable_bases])))
+                        dest_file.write(
+                        'SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n'
+                        .format(name(type_),
+                              ''.join(['({0})'
+                                       .format(replace_by_typedef(c.name))
+                                       for c in serializable_bases])))
                     else:
-                        dest_file.write('SICONOS_IO_REGISTER({0},\n'.format(name(type_)))
+                        dest_file.write('SICONOS_IO_REGISTER({0},\n'
+                                        .format(name(type_)))
 
-                variables = [v.name for v in filter(lambda x: not 'void' in str(x._get_type()), class_.variables(allow_empty=True))]
+                variables = [v.name
+                             for v in filter(lambda x: not 'void'
+                                             in str(x._get_type()),
+                                             class_.variables(
+                                                 allow_empty=True))]
 
-                dest_file.write('{0})\n'.format('\n'.join('  ({0})'.format(vn) for vn in filter(lambda x: not unwanted(x), variables))))
+                dest_file.write('{0})\n'
+                                .format('\n'
+                                        .join('  ({0})'
+                                              .format(vn)
+                                              for vn in
+                                              filter(lambda x: not unwanted(x),
+                                                     variables))))
 
-
-    # filtering is not correct at this point : some unwanted classes are necessary
+    # filtering is not correct at this point
+    # some unwanted classes are necessary
     # (the ones in SiconosFull.hpp) others not (xml)
     # some leads to compilation errors.
     dest_file.write('\n')
     dest_file.write('template <class Archive>\n')
-    dest_file.write('void siconos_io_register_generated(Archive& ar)\n')
-    dest_file.write('{{\n{0}\n}}\n'.format('\n'.join('  ar.register_type(static_cast<{0}*>(NULL));'.format(x) for x in with_base)))
+    dest_file.write('void siconos_io_register_{0}_generated(Archive& ar)\n'
+                    .format(target))
+    dest_file.write('{{\n{0}\n}}\n'
+                    .format('\n'
+                            .join(
+                                '  ar.register_type(static_cast<{0}*>(NULL));'
+                                .format(x) for x in with_base)))

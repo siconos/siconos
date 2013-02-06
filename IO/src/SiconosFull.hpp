@@ -26,25 +26,11 @@
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
-#include <SiconosKernel.hpp>
-#include <Circle.hpp>
-#include <CircleCircleR.hpp>
-#include <CircularDS.hpp>
-#include <Disk.hpp>
-#include <DiskDiskR.hpp>
-#include <DiskMovingPlanR.hpp>
-#include <DiskPlanR.hpp>
-#include <SphereLDS.hpp>
-#include <SphereLDSPlanR.hpp>
-#include <SphereLDSSphereLDSR.hpp>
-#include <SphereNEDS.hpp>
-#include <SphereNEDSPlanR.hpp>
-#include <SphereNEDSSphereNEDSR.hpp>
-#include <SiconosBodies.hpp>
-#include <SpaceFilter.hpp>
-#include <ExternalBody.hpp>
+#include "SiconosKernelGenerated.hpp"
 
-#include "SiconosFullGenerated.hpp"
+#ifdef HAVE_SICONOS_MECHANICS
+#include "SiconosMechanicsGenerated.hpp"
+#endif
 
 /* hand written */
 
@@ -409,14 +395,18 @@ void serialize(Archive& ar, Siconos::EdgeProperties<T, _InteractionsGraph>& p, u
 }
 
 
-}
-}
+} // namespace serialization
+} // namespace boost
 
 
 template <class Archive>
 void siconos_io_register(Archive& ar)
 {
-  siconos_io_register_generated(ar);
+  siconos_io_register_Kernel_generated(ar);
+#ifdef HAVE_SICONOS_MECHANICS
+  siconos_io_register_Mechanics_generated(ar);
+#endif
+
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
   ar.register_type(static_cast<SiconosVector*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
