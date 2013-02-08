@@ -2389,9 +2389,9 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
     case 7:
       *this = m;
     }
-    unsigned int tmp = dimRow;
-    dimRow = dimCol;
-    dimCol = tmp;
+    // unsigned int tmp = dimRow;
+    // dimRow = dimCol;
+    // dimCol = tmp;
     resetLU();
   }
 }
