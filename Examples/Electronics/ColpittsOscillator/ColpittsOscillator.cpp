@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
     // -- (3) Non smooth problem
     SP::LCP aLCP(new LCP(SICONOS_LCP_LEMKE));
     aLCP->numericsSolverOptions()->iparam[0]=1;  // Multiple solutions 0 or 1
-    aLCP->numericsSolverOptions()->iparam[3]=1;  // choice of seeds for multiple solutions
+    aLCP->numericsSolverOptions()->iparam[3]=0;  // choice of seeds for multiple solutions
     aLCP->numericsSolverOptions()->iparam[4]=1;  // LS for enum
     // aLCP->setNumericsVerboseMode(1);
 
@@ -175,7 +175,6 @@ int main(int argc, char* argv[])
     boost::timer t;
     t.restart();
 
-    LSCollpitts->display();
 
     boost::progress_display show_progress(N);
 
