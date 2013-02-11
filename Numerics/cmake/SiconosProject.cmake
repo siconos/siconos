@@ -26,6 +26,7 @@ MACRO(SICONOS_PROJECT
   OPTION(WITH_MUMPS "Compilation with MUMPS solver" OFF)
   OPTION(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
   OPTION(WITH_SYSTEM_INFO "Print some CMake variables. Default = off." OFF)
+  OPTION(WITH_CPACK "Configuration for cpack. Default = on." ON)
 
   # get system architecture 
   # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
@@ -180,64 +181,10 @@ MACRO(SICONOS_PROJECT
   SET(PIPOL_CONFIGURE_COMMAND cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DWITH_TESTING=True  -DWITH_GIT=0 -DSOURCE_ABBREV_GIT_SHA1=${SOURCE_ABBREV_GIT_SHA1} ${CMAKE_SOURCE_DIR})
 
   INCLUDE(Pipol)
-
+  
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
-    
-    IF(BUILDNAME_OPTIONS)
-      SET(BUILDNAME "${_PROJECT_NAME}-${BUILDNAME_OPTIONS}")
-    ELSE(BUILDNAME_OPTIONS)
-      SET(BUILDNAME "${_PROJECT_NAME}")
-    ENDIF(BUILDNAME_OPTIONS)
-    
-    IF(CMAKE_BUILD_TYPE)
-      SET(BUILDNAME "${BUILDNAME}-${CMAKE_BUILD_TYPE}")
-    ENDIF(CMAKE_BUILD_TYPE)
-    
-    IF(PIPOL_IMAGE)
-      SET(BUILDNAME "${BUILDNAME}-${PIPOL_IMAGE_NAME}")
-      SET(SITE ${PIPOL_SITE})
-    ELSE(PIPOL_IMAGE)
-      SET(BUILDNAME "${BUILDNAME}-${CMAKE_SYSTEM_NAME}")
-      IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
-        SET(BUILDNAME "${BUILDNAME}-CrossCompilingFromLinux")
-      ENDIF()
-    ENDIF(PIPOL_IMAGE)
-    
-    # Tests coverage (taken from ViSp)
-    
-    #
-    # Note: all of this is done with a recent cmake version (>2.6.0) with:
-    # cmake -DCMAKE_BUILD_TYPE=Profile
-    #
-    IF(WITH_TESTS_COVERAGE)
-      # Add build options for test coverage. Currently coverage is only supported
-      # on gcc compiler
-      # Because using -fprofile-arcs with shared lib can cause problems like:
-      # hidden symbol `__bb_init_func', we add this option only for static
-      # library build
-      SET(BUILD_SHARED_LIBS)
-      SET(CMAKE_BUILD_TYPE Debug)
-      CHECK_CXX_ACCEPTS_FLAG(-ftest-coverage CXX_HAVE_FTEST_COVERAGE)
-      CHECK_CXX_ACCEPTS_FLAG(-fprofile-arcs CXX_HAVE_PROFILE_ARCS)
-      CHECK_C_COMPILER_FLAG(-ftest-coverage C_HAVE_FTEST_COVERAGE)
-      CHECK_C_COMPILER_FLAG(-fprofile-arcs C_HAVE_PROFILE_ARCS)
-      IF(CXX_HAVE_FTEST_COVERAGE AND CXX_HAVE_PROFILE_ARCS)
-        MESSAGE("Adding test coverage flags to CXX compiler : -ftest-coverage -fprofile-arcs")
-        SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ftest-coverage -fprofile-arcs")
-        SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
-        SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
-      ENDIF(CXX_HAVE_FTEST_COVERAGE AND CXX_HAVE_PROFILE_ARCS)
-      
-      IF(C_HAVE_FTEST_COVERAGE)
-        MESSAGE("Adding test coverage flags to C compiler : -ftest-coverage")
-        SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ftest-coverage -fprofile-arcs")
-        SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
-        SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
-      ENDIF(C_HAVE_FTEST_COVERAGE)
-      
-    ENDIF(WITH_TESTS_COVERAGE)
-
+    INCLUDE(SiconosCTest)
     INCLUDE(CTest)
     ENABLE_TESTING()  # Useless? done in CTest.cmake
   
@@ -312,33 +259,37 @@ MACRO(SICONOS_PROJECT
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
   
   # Packaging
-  INCLUDE(InstallRequiredSystemLibraries)
-  
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_DESCRIPTION_SUMMARY}")
-  SET(CPACK_PACKAGE_DESCRIPTION "${PACKAGE_DESCRIPTION}")
-  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 
-  # a package generation failure on mac ...
-  IF(APPLE)
-  ELSE(APPLE)
-    SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
-  ENDIF(APPLE)
+  IF(WITH_CPACK)
+    INCLUDE(InstallRequiredSystemLibraries)
+  
+    SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_DESCRIPTION_SUMMARY}")
+    SET(CPACK_PACKAGE_DESCRIPTION "${PACKAGE_DESCRIPTION}")
+    SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+    
+    # a package generation failure on mac ...
+    IF(APPLE)
+    ELSE(APPLE)
+      SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+    ENDIF(APPLE)
+    
+    IF(PIPOL_IMAGE)
+      SET(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-r${SOURCE_ABBREV_GIT_SHA1}-${CMAKE_BUILD_TYPE}-${PIPOL_IMAGE_NAME}")
+    ENDIF(PIPOL_IMAGE)
+    SET(CPACK_PACKAGE_NAME "${PROJECT_PACKAGE_NAME}")
+  
+    SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
+    SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
+    SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
+    SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Siconos-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
+    
+    SET(CPACK_PACKAGE_CONTACT "Siconos development team <siconos-team@lists.gforge.inria.fr>")
+    
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEBIAN_PACKAGE_DEPENDS})
+  
+    INCLUDE(CPack)
 
-  IF(PIPOL_IMAGE)
-    SET(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-r${SOURCE_ABBREV_GIT_SHA1}-${CMAKE_BUILD_TYPE}-${PIPOL_IMAGE_NAME}")
-  ENDIF(PIPOL_IMAGE)
-  SET(CPACK_PACKAGE_NAME "${PROJECT_PACKAGE_NAME}")
-  
-  SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
-  SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
-  SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Siconos-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
-  
-  SET(CPACK_PACKAGE_CONTACT "Siconos development team <siconos-team@lists.gforge.inria.fr>")
-
-  SET(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEBIAN_PACKAGE_DEPENDS})
-  
-  INCLUDE(CPack)
+  ENDIF(WITH_CPACK)
 
 ENDMACRO(SICONOS_PROJECT)
 
