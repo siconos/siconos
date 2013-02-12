@@ -54,6 +54,8 @@ find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
 set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all") 
 set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
 
+set(CTEST_NOTES_FILES "${CMAKE_BINARY_DIR}/Testing/Notes/Build")
+
 # source directory should be set by meta CMakeLists.txt
 #if(NOT EXISTS "${SOURCE_DIRECTORY}")
 #  set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone git+ssh://${GFORGE_USER}@scm.gforge.inria.fr//gitroot/siconos/siconos.git ${SOURCE_DIRECTORY}")
