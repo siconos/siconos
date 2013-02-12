@@ -349,7 +349,11 @@ void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
     removeInteractionFromIndexSet(inter);
   }
 
+  DEBUG_PRINT("Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)");
+
   inter->insert(ds);
+
+
   insertInteraction(inter);
 
 }

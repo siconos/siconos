@@ -48,6 +48,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
   double G1x = d1->q()->getValue(0);
   double G1y = d1->q()->getValue(1);
   double G1z = d1->q()->getValue(2);
+
+  assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consitent ") ;
+
+
 #ifdef NEFC3D_DEBUG
   printf("contact normal:\n");
   _Nc->display();
@@ -92,11 +96,29 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
 
 #ifdef NEFC3D_DEBUG
   printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
-  Mobj1_abs->display();
+  Mobj1_abs.display();
 #endif
 
+
   prod(*_NPG1, Mobj1_abs, *_AUX1, true);
+#ifdef NEFC3D_DEBUG
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mobj1_abs:");
+  Mobj1_abs.display();
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
+  _AUX1->display();
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
+  _AUX2->display();
+#endif
+
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+#ifdef NEFC3D_DEBUG
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mabs_C:");
+  _Mabs_C->display();
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
+  _AUX1->display();
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
+  _AUX2->display();
+#endif
 
 
   for (unsigned int ii = 0; ii < 3; ii++)
@@ -107,9 +129,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::NewtonEuler
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 #ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, jhqT:\n");
+  printf("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
   _jachqT->display();
-  SP::SimpleMatrix jaux(new SimpleMatrix(*jhqT));
+  SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
   jaux->trans();
   SP::SiconosVector v(new SiconosVector(3));
   SP::SiconosVector vRes(new SiconosVector(6));

@@ -125,12 +125,25 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
   SiconosVector& lambda = *inter.lambda(level);
 #ifdef NER_DEBUG
   printf("\n");
+  printf("\n");
+  printf("\n");
+  printf("\n");
   printf("NewtonEulerR::computeInput start for level %i:", level);
+  printf("interaction %p\n",&inter);
+  inter.display();
+
+
+
+
   std::cout << "lambda( "  << level << ")" << std::endl;
-  lambda->display();
+  lambda.display();
   std::cout << "data[p0+level] before " << std::endl;
   inter.data(p0 + level)->display();
 #endif
+
+
+
+
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[1] */
   {
     prod(lambda, *_jachqT, *_contactForce, true);
@@ -142,6 +155,28 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
     prod(lambda, *_jachqT, *inter.data(p0 + level), false);
+
+#ifdef NER_DEBUG
+    std::cout << "_jachqT" << std::endl;
+    _jachqT->display();
+    std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
+    std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
+    if (inter.data(p0 + level)->getNumberOfBlocks() > 1)
+      std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
+    inter.data(p0 + level)->display();
+
+
+    SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
+    prod(lambda, *_jachqT, *buffer, true);
+    std::cout << "added part to p" << buffer <<  std::endl;
+    buffer->display();
+
+    printf("NewtonEulerR::computeInput end for level %i:", level);
+    printf("\n");
+#endif
+
+
+
   }
   else if (level == 0)
   {
@@ -157,7 +192,7 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
 
 
     SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
-    prod(*lambda, *_jachq, *buffer, true);
+    prod(lambda, *_jachq, *buffer, true);
     std::cout << "added part to p" << buffer <<  std::endl;
     buffer->display();
 
@@ -180,6 +215,17 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
   Index dimIndex(2);
   Index startIndex(4);
   itDS = inter.dynamicalSystemsBegin();
+
+#ifdef NER_DEBUG
+  printf("\n");
+  printf("\n");
+  printf("\n");
+  printf("\n");
+  printf("NewtonEulerR::computeJachqT start");
+  printf("interaction %p\n",&inter);
+  inter.display();
+#endif
+
   while (itDS != inter.dynamicalSystemsEnd())
   {
     startIndex[0] = 0;
@@ -189,8 +235,19 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
     dimIndex[0] = ySize;
     dimIndex[1] = 7;
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
+
     NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (*itDS);
+#ifdef NER_DEBUG
+    printf("ds %p\n",&d);
+    d.display();
+#endif
+
     SiconosMatrix& T = *d.T();
+
+#ifdef NER_DEBUG
+    printf("ds.T() %p\n",&d);
+    (d.T())->display();
+#endif
 
     prod(*auxBloc, T, *auxBloc2);
 

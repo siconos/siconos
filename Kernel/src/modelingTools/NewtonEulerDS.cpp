@@ -22,6 +22,8 @@
 #include <boost/math/quaternion.hpp>
 using namespace std;
 
+//#define DEBUG_MESSAGES
+#include <debug.h>
 // Private function to set linked with members of Dynamical top class
 void NewtonEulerDS::connectToDS()
 {
@@ -163,6 +165,7 @@ bool NewtonEulerDS::checkDynamicalSystem()
 
 void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
+  DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
 
   if (level == 0)
   {
@@ -174,6 +177,12 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
     if (!_p[level])
       _p[level].reset(new SiconosVector(_n));
   }
+
+
+#ifdef DEBUG_MESSAGES
+  DEBUG_PRINT("display() after initialization");
+  display();
+#endif
 }
 
 void NewtonEulerDS::initForces()
@@ -433,7 +442,13 @@ void NewtonEulerDS::display() const
   cout << "- v0 " << endl;
   if (_v0) _v0->display();
   else cout << "-> NULL" << endl;
-  cout << "- p " << endl;
+  cout << "- p[0] " << endl;
+  if (_p[0]) _p[0]->display();
+  else cout << "-> NULL" << endl;
+  cout << "- p[1] " << endl;
+  if (_p[1]) _p[1]->display();
+  else cout << "-> NULL" << endl;
+  cout << "- p[2] " << endl;
   if (_p[2]) _p[2]->display();
   else cout << "-> NULL" << endl;
   cout << "===================================== " << endl;

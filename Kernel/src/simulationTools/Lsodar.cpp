@@ -60,8 +60,8 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, 
   OneStepIntegrator(OSI::LSODAR, osiXML, dsList, interactionsList)
 {
   // local time discretisation is set by default to those of the simulation.
-  intData.resize(9);
-  for (int i = 0; i < 9; i++) intData[i] = 0;
+  _intData.resize(9);
+  for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
 }
 
@@ -71,16 +71,16 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
 
-  intData.resize(9);
-  for (int i = 0; i < 9; i++) intData[i] = 0;
+  _intData.resize(9);
+  for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
 }
 
 Lsodar::Lsodar(DynamicalSystemsSet& newDS):
   OneStepIntegrator(OSI::LSODAR, newDS)
 {
-  intData.resize(9);
-  for (int i = 0; i < 9; i++) intData[i] = 0;
+  _intData.resize(9);
+  for (int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
 }
 
@@ -103,7 +103,7 @@ void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newA
   //             3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //             4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
 
-  intData[2] = newItol; // itol
+  _intData[2] = newItol; // itol
 
   rtol = newRtol;
   atol = newAtol;
@@ -111,39 +111,39 @@ void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newA
 
 void Lsodar::setMinMaxStepSizes(doublereal _minStep, doublereal _maxStep)
 {
-  intData[5] = 1; // set IOPT = 1
+  _intData[5] = 1; // set IOPT = 1
   rwork[5] = _minStep;
   rwork[6] = _maxStep;
 }
 
 void Lsodar::setMaxNstep(integer _maxNumberSteps)
 {
-  intData[5] = 1; // set IOPT = 1
+  _intData[5] = 1; // set IOPT = 1
   iwork[5] = _maxNumberSteps;
 }
 
 void Lsodar::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
-  intData[2] = newItol; // itol
+  _intData[2] = newItol; // itol
   rtol[0] = newRtol; // rtol
   atol[0] = newRtol;  // atol
 }
 
 void Lsodar::setMaxOrder(integer _maxorderNonStiff, integer _maxorderStiff)
 {
-  intData[5] = 1; // set IOPT = 1
+  _intData[5] = 1; // set IOPT = 1
   iwork[7] = _maxorderNonStiff;
   iwork[8] = _maxorderStiff;
 }
 
 void Lsodar::updateData()
 {
-  // Used to update some data (iwork ...) when intData is modified.
+  // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
-  unsigned int sizeTol = intData[0]; // size of rtol, atol ... If itol (intData[0]) = 1 => scalar else, vector of size neq (intData[0]).
-  //  if(intData[0]==1) sizeTol = 1;
-  //  else sizeTol = intData[0];
+  unsigned int sizeTol = _intData[0]; // size of rtol, atol ... If itol (_intData[0]) = 1 => scalar else, vector of size neq (_intData[0]).
+  //  if(_intData[0]==1) sizeTol = 1;
+  //  else sizeTol = _intData[0];
 
   rtol.reset(new doublereal[sizeTol]) ;    // rtol, relative tolerance
 
@@ -155,14 +155,14 @@ void Lsodar::updateData()
 
 
 
-  iwork.reset(new integer[intData[7]]);
-  for (int i = 0; i < intData[7]; i++) iwork[i] = 0;
+  iwork.reset(new integer[_intData[7]]);
+  for (int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
-  rwork.reset(new doublereal[intData[6]]);
-  for (int i = 0; i < intData[6]; i++) rwork[i] = 0.0;
+  rwork.reset(new doublereal[_intData[6]]);
+  for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
 
-  jroot.reset(new integer[intData[1]]);
-  for (int i = 0; i < intData[1]; i++) jroot[i] = 0;
+  jroot.reset(new integer[_intData[1]]);
+  for (int i = 0; i < _intData[1]; i++) jroot[i] = 0;
 
 }
 
@@ -225,20 +225,20 @@ void Lsodar::initialize()
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 1 - Neq; x vector size.
-  intData[0] = _xWork->size();
+  _intData[0] = _xWork->size();
   _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
-  intData[1] = boost::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
-  //intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+  _intData[1] = boost::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  //_intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 
   // 3 - Itol, itask, iopt
-  intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
-  intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
-  intData[5] = 0; // iopt: 0 if no optional input else 1.
+  _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
+  _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
+  _intData[5] = 0; // iopt: 0 if no optional input else 1.
 
   // 4 - Istate
-  intData[4] = 1; // istate, an index used for input and output to specify the state of the calculation.
+  _intData[4] = 1; // istate, an index used for input and output to specify the state of the calculation.
   // On input:
   //                 1: first call for the problem (initializations will be done).
   //                 2: means this is not the first call, and the calculation is to continue normally, with no change in any input
@@ -253,19 +253,19 @@ void Lsodar::initialize()
 
 
   // 5 - lrw, size of rwork
-  intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1];
+  _intData[6] = 22 + _intData[0] * max(16, (int)_intData[0] + 9) + 3 * _intData[1];
 
   // 6 - liw, size of iwork
-  intData[7] = 20 + intData[0];
+  _intData[7] = 20 + _intData[0];
 
   // 7 - JT, Jacobian type indicator
-  intData[8] = 2;   // jt, Jacobian type indicator.
+  _intData[8] = 2;   // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ extra calls to f per df/dx value).
   //           4 means a user-supplied banded Jacobian.
   //           5 means an internally generated banded Jacobian (using ML+MU+1 extra calls to f per df/dx evaluation).
 
-  // memory allocation for doublereal*, according to intData values ...
+  // memory allocation for doublereal*, according to _intData values ...
   updateData();
 
   // set the optional input flags of LSODAR to 0
@@ -329,35 +329,35 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
     istate = 1; // restart TEMPORARY
   }
 
-  intData[4] = istate;
+  _intData[4] = istate;
   // call LSODAR to integrate dynamical equation
   F77NAME(dlsodar)(pointerToF,
-                   &(intData[0]),
+                   &(_intData[0]),
                    &(*_xtmp)(0),
                    &tinit_DR,
                    &tend_DR,
-                   &(intData[2]),
+                   &(_intData[2]),
                    rtol.get(),
                    atol.get(),
-                   &(intData[3]),
-                   &(intData[4]),
-                   &(intData[5]),
+                   &(_intData[3]),
+                   &(_intData[4]),
+                   &(_intData[5]),
                    rwork.get(),
-                   &(intData[6]),
+                   &(_intData[6]),
                    iwork.get(),
-                   &(intData[7]),
+                   &(_intData[7]),
                    pointerToJacobianF,
-                   &(intData[8]),
+                   &(_intData[8]),
                    pointerToG, &
-                   (intData[1]),
+                   (_intData[1]),
                    jroot.get());
 
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
-  if (intData[4] < 0) // if istate < 0 => LSODAR failed
+  if (_intData[4] < 0) // if istate < 0 => LSODAR failed
   {
-    cout << "LSodar::integrate(...) failed - Istate = " << intData[4] << endl;
+    cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] << endl;
     cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" << endl;
     cout << " -2 means excess accuracy requested (tolerances too small)." << endl;
     cout << " -3 means illegal input detected (see printed message)." << endl;
@@ -369,7 +369,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   }
 
   *_xWork = *_xtmp;
-  istate = intData[4];
+  istate = _intData[4];
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
 
@@ -558,10 +558,10 @@ void Lsodar::display()
 {
   OneStepIntegrator::display();
   cout << " --- > Lsodar specific values: " << endl;
-  cout << "Number of equations: " << intData[0] << endl;
-  cout << "Number of constraints: " << intData[1] << endl;
+  cout << "Number of equations: " << _intData[0] << endl;
+  cout << "Number of constraints: " << _intData[1] << endl;
   cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" << endl;
-  cout << intData[2] << ", " << intData[3] << ", " << intData[4] << ", " << intData[5] << ", " << intData[6]  << ", " << intData[7]  << ", " << intData[8] << endl;
+  cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] << endl;
   cout << "====================================" << endl;
 }
 

@@ -59,7 +59,7 @@ private:
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
    * See opkdmain.f and lsodar routine for details on those variables.
    */
-  std::vector<integer> intData;
+  std::vector<integer> _intData;
   /** relative tolerance */
   SA::doublereal rtol;
   /** absolute tolerance */
@@ -107,17 +107,24 @@ public:
   /** get vector of integer parameters for lsodar
    *  \return a vector<integer>
    */
-  inline const std::vector<integer> getIntData() const
+  inline const std::vector<integer> intData() const
   {
-    return intData;
+    return _intData;
   }
 
-  /** get intData[i]
+  /** get _intData[i]
    *  \return an integer
    */
-  inline integer getIntData(unsigned int i) const
+  inline integer intData(unsigned int i) const
   {
-    return intData[i];
+    return _intData[i];
+  }
+  /** get _intData[i]
+   *  \return an integer
+   */
+  inline void setIntData(unsigned int i, int newValue)
+  {
+    _intData[i] = newValue;
   }
 
   /** get relative tolerance parameter for lsodar
@@ -173,7 +180,7 @@ public:
    */
   inline void setJT(integer newValue)
   {
-    intData[8] = newValue;
+    _intData[8] = newValue;
   };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
@@ -207,7 +214,7 @@ public:
    */
   void setMaxOrder(integer, integer);
 
-  /** update doubleData and iwork memory size, when changes occur in intData.
+  /** update doubleData and iwork memory size, when changes occur in _intData.
    */
   void updateData();
 

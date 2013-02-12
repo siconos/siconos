@@ -38,6 +38,7 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
+//#define MOREAU_NE_DEBUG
 using namespace std;
 using namespace RELATION;
 // --- xml constructor ---
@@ -1539,6 +1540,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       // get p pointer
+
       SP::SiconosVector p = d->p(1);
 
       // velocity computation :
@@ -1677,6 +1679,9 @@ void Moreau::updateState(const unsigned int level)
       // level == LEVELMAX => p(level) does not even exists (segfault)
       if (level != LEVELMAX && d->p(level))
       {
+
+        assert(((d->p(level)).get()) &&
+               " Moreau::updateState() *d->p(level) == NULL.");
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
           for (vector<unsigned int>::iterator
@@ -1756,9 +1761,16 @@ void Moreau::updateState(const unsigned int level)
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
 #ifdef MOREAU_NE_DEBUG
-      cout << "Moreau::updatestate prev v" << endl;
+
+      cout << "Moreau::updateState() " << endl;
+      d->display();
+
+      cout << "Moreau::updateState() prev v" << endl;
       v->display();
 #endif
+      assert(((d->p(level)).get()) &&
+             " Moreau::updateState() *d->p(level) == NULL.");
+
       if (level != LEVELMAX && d->p(level))
       {
         /*d->p has been fill by the Relation->computeInput, it contains
