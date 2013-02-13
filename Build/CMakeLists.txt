@@ -16,6 +16,12 @@
 
 # cmake ~/S/Build  -DFROM_REPO=1 -DGIT_REPOSITORY=/home/maurice/src/git/siconos -DINSTALL_COMMAND='gksudo;make;install' -DON_DASHBOARD=1
 
+# CTest options : -DCTEST_OPTIONS='-j2'
+
+# install prefix : -DINSTALL_PREFIX='/tmp'
+
+# SOURCE_DIRECTORY : -DSOURCE_DIRECTORY=/some/where
+
 cmake_minimum_required(VERSION 2.8.5)
 include(${CMAKE_SOURCE_DIR}/../Numerics/cmake/OutOfSourcesBuild.cmake)
 
@@ -40,7 +46,7 @@ if(NOT GIT_REPOSITORY)
   set(GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/..)
 endif()
 
-option(FROM_REPO "Build Siconos from repository. Default = OFF" OFF)
+option(FROM_REPO "Build Siconos from repository. Default = ON" ON)
 option(WITH_KERNEL "Build Kernel. Default = ON" ON)
 option(WITH_MECHANICS "Build Mechanics. Default = off" OFF)
 option(WITH_IO "Build IO. Default = off" OFF)
@@ -62,6 +68,10 @@ else()
 endif()
 
 if(FROM_REPO)
+
+  if(NOT SOURCE_DIR)
+    set(SOURCE_DIR ${CMAKE_BINARY_DIR}/Siconos-prefix/src/Siconos)
+  endif()
   # get sources from git
   ExternalProject_Add(Siconos
     GIT_REPOSITORY ${GIT_REPOSITORY}
@@ -69,13 +79,15 @@ if(FROM_REPO)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "no configure"
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "no build"
     INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "no install"
+    SOURCE_DIR ${SOURCE_DIR}
     )
 
-  set(SOURCE_DIR ${CMAKE_BINARY_DIR}/Siconos-prefix/src/Siconos)
 # Note that this force a configure which is done by build if needed :
   set(numerics_depends Siconos) 
 else()
-  set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
+  if(NOT SOURCE_DIR)
+    set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
+  endif()
   set(numerics_depends)
 endif()
 
@@ -105,7 +117,8 @@ macro(AddSiconosProject)
       BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${project_CMAKE_ARGS}
+      CMAKE_ARGS ${${_project}_CMAKE_ARGS}
+      INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
       TEST_BEFORE_INSTALL 0)
   else()
@@ -113,7 +126,8 @@ macro(AddSiconosProject)
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${project_CMAKE_ARGS}
+      CMAKE_ARGS ${${_project}_CMAKE_ARGS}
+      INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
       TEST_BEFORE_INSTALL ${WITH_TESTING})
   endif()
