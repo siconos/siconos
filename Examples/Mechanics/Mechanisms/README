@@ -1,0 +1,11 @@
+This directory contains some tests ot the mechanisms toolbox from CAD
+Each example directory contains a bodydef.py describing the multibody.
+It assumes that environment variable SALADYN_BUILD and SALADYN_DIR have been previously defined.
+
+   SiconosMechanisms_BUILD is the directory containing the directory MBTB used for the compilation.
+   SiconosMechanisms_DIR is the main directory of saladyn.
+To run an example:
+->Go to the directory of the example.
+->Copy the file ./SliderCrank/env.csh, and make necessary adaptations.
+->source env.csh		       
+->python <path-to>/run.py	       

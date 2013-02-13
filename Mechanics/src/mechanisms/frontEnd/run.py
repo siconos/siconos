@@ -6,20 +6,20 @@ import array
 import os
 import sys
 
-SALADYN_BUILD=os.environ.get("SALADYN_BUILD")
-SALADYN_DIR=os.environ.get("SALADYN_DIR")
+SiconosMechanisms_BUILD=os.environ.get("SiconosMechanisms_BUILD")
+SiconosMechanisms_DIR=os.environ.get("SiconosMechanisms_DIR")
 my_PI=3.14159265
 
-if SALADYN_BUILD is None:
-   print "Can not find SALADYN_BUILD from the environement, need it."
+if SiconosMechanisms_BUILD is None:
+   print "Can not find SiconosMechanisms_BUILD from the environement, need it."
    sys.exit()
 
 
-if SALADYN_DIR is None:
-   print "Can not find SALADYN_DIR from the environement, need it."
+if SiconosMechanisms_DIR is None:
+   print "Can not find SiconosMechanisms_DIR from the environement, need it."
    sys.exit()
 
-execfile(SALADYN_DIR+"/trunk/Multibody/Tests/mbtbDefaultOptions.py")
+execfile(SiconosMechanisms_DIR+"frontEnd/mbtbDefaultOptions.py")
 print "run.py: ../mbtbDefaultOptions.py loaded"
  
 try:
