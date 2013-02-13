@@ -1,0 +1,63 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/)
+FIND_PACKAGE(SWIG REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../CADMBTB ${CMAKE_CURRENT_SOURCE_DIR}/../TIMERMBTB)
+SET_SOURCE_FILES_PROPERTIES(cadmbtb.i PROPERTIES CPLUSPLUS ON)
+SWIG_ADD_MODULE(cadmbtb python cadmbtb.i)
+
+SET(OCE_TOOLKITS "TKernel" "PTKernel" "TKMath" "TKService" "TKV3d" "TKV2d" "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
+
+#find_package(OCE COMPONENTS ${OCE_TOOLKITS})
+
+if(OCE_FOUND)
+    message(STATUS "Found OCE version ${OCE_VERSION}")
+    if(NOT OCE_ALL_FOUND)
+      set(OCE_FOUND false)
+      message(WARNING "Ignoring OCE installation due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
+    endif(NOT OCE_ALL_FOUND)
+endif(OCE_FOUND)
+
+if(OCE_FOUND)
+  # Include files reside in ${OCE_INCLUDE_DIRS};
+  include_directories(${OCE_INCLUDE_DIRS})
+  SWIG_LINK_LIBRARIES(cadmbtb ${OpenCASCADE_LIBRARIES} )
+  # We do not need library path, they will be automatically imported.
+else(OCE_FOUND)
+  # OCE not found; either it is not found and user
+  # has to set OCE_DIR to the directory containing
+  # OCEConfig.cmake, or OCE is not installed and we
+  # try to find OpenCascade files.
+  message(STATUS "OCE not found.  Try to find OpenCascade files.")
+  
+  FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
+
+  IF(OpenCASCADE_FOUND) 
+    MESSAGE(STATUS "OpenCascade Libraries found")
+    message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
+    message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
+    message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
+    include_directories(${OpenCASCADE_INCLUDE_DIR})
+
+    SWIG_LINK_LIBRARIES(cadmbtb ${OpenCASCADE_LIBRARIES} )
+  ELSE(OpenCASCADE_FOUND)
+    MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
+  ENDIF(OpenCASCADE_FOUND)
+
+endif(OCE_FOUND)
+
+FIND_PACKAGE(PythonLibs)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+
+
+
+COMPILE_WITH(Boost REQUIRED)
+
+
+
+
+SET(LIB_FRONTEND_CADMBTB_DEP CADMBTB TIMERMBTB)
+
+SWIG_LINK_LIBRARIES(cadmbtb ${PYTHON_LIBRARIES} ${LIB_FRONTEND_CADMBTB_DEP})
+
+

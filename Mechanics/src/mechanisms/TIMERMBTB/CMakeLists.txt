@@ -1,0 +1,3 @@
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/)
+
+add_library (TIMERMBTB SHARED  ace.cpp acetime.cpp)
