@@ -99,6 +99,9 @@ macro(AddSiconosProject)
   cmake_parse_arguments(project "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(_project ${project_UNPARSED_ARGUMENTS})
 
+  if(INSTALL_PREFIX)
+    set(${_project}_CMAKE_ARGS ${${_project}_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
+  endif()
   message(STATUS "Adding ${_project}")
   message(STATUS "Sources are in ${SOURCE_DIR}/${_project}")
   message(STATUS "Binaries are in ${CMAKE_BINARY_DIR}/${_project}")
@@ -112,6 +115,8 @@ macro(AddSiconosProject)
       -DMODE=${MODE}
       -DSOURCE_DIRECTORY=${SOURCE_DIR}
       -DBINARY_DIRECTORY=${CMAKE_BINARY_DIR}/${_project}
+      -DEXTRA_CMAKE_ARGS=${${_project}_CMAKE_ARGS}
+      -DFROM_REPO=${FROM_REPO}
       -S ${SOURCE_DIR}/Build/CTestDriver.cmake
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
