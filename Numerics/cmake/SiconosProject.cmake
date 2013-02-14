@@ -184,7 +184,9 @@ MACRO(SICONOS_PROJECT
   
   # Tests+Dashboard configuration
   IF(WITH_TESTING)
-    SET(BUILDNAME "${_PROJECT_NAME}")
+    IF(NOT BUILDNAME)
+      SET(BUILDNAME "${_PROJECT_NAME}")
+    ENDIF()
     INCLUDE(SiconosCTest)
     INCLUDE(CTest)
     ENABLE_TESTING()  # Useless? done in CTest.cmake
