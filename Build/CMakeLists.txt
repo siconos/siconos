@@ -117,6 +117,8 @@ macro(AddSiconosProject)
       -DBINARY_DIRECTORY=${CMAKE_BINARY_DIR}/${_project}
       -DEXTRA_CMAKE_ARGS=${${_project}_CMAKE_ARGS}
       -DFROM_REPO=${FROM_REPO}
+      -DBUILD_TYPE=${BUILD_TYPE}
+      -DWITH_TESTING=${WITH_TESTING}
       -S ${SOURCE_DIR}/Build/CTestDriver.cmake
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
