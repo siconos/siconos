@@ -94,10 +94,22 @@ endif()
  
 macro(AddSiconosProject)
   set(options)
-  set(oneValueArgs)
+  set(oneValueArgs TEST_BEFORE_INSTALL TEST_AFTER_INSTALL)
   set(multiValueArgs DEPENDS CMAKE_ARGS)
   cmake_parse_arguments(project "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(_project ${project_UNPARSED_ARGUMENTS})
+  
+  if(NOT ${_project}_TEST_BEFORE_INSTALL)
+    if(NOT ${_project}_TEST_AFTER_INSTALL)
+      set(${_project}_TEST_BEFORE_INSTALL 1)
+    else()
+      set(${_project}_TEST_BEFORE_INSTALL 0)
+    endif()
+  endif()
+  if(NOT ${_project}_TEST_AFTER_INSTALL)
+    set(${_project}_TEST_AFTER_INSTALL 0)
+  endif()
+
 
   if(INSTALL_PREFIX)
     set(${_project}_CMAKE_ARGS ${${_project}_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
@@ -124,10 +136,10 @@ macro(AddSiconosProject)
       BINARY_DIR ${CMAKE_BINARY_DIR}/${_project}
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${${_project}_CMAKE_ARGS}
       INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
-      TEST_BEFORE_INSTALL 0)
+      TEST_BEFORE_INSTALL ${${_project}_TEST_BEFORE_INSTALL}
+      TEST_AFTER_INSTALL ${${_project}_TEST_AFTER_INSTALL})
   else()
     ExternalProject_Add(${_project}
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
@@ -170,5 +182,8 @@ if(WITH_FRONTEND)
 endif()
 
 if(WITH_EXAMPLES)
-  AddSiconosProject(Examples DEPENDS ${frontend_depends} CMAKE_ARGS ${ARGS})
+  AddSiconosProject(Examples 
+    DEPENDS ${frontend_depends} 
+    CMAKE_ARGS ${ARGS}
+    TEST_AFTER_INSTALL 1)
 endif()
