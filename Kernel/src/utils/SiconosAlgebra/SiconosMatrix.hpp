@@ -121,18 +121,28 @@ public:
   /** determines if the matrix has been inversed in place
    *  \return true if the matrix is inversed
    */
-  inline virtual bool isInversed() const
+  inline virtual bool isPLUInversed() const
   {
     return false;
   };
 
-  /** determines if the matrix has been factorized in place
+  /** determines if the matrix has been PLU factorized in place
    *  \return true if the matrix is factorized
    */
-  inline virtual bool isFactorized() const
+  inline virtual bool isPLUFactorized() const
   {
     return false;
   };
+
+
+  /** determines if the matrix has been QR factorized
+   *  \return true if the matrix is factorized
+   */
+  inline bool isQRFactorized() const
+  {
+    return false;
+  }
+
 
   /** get the number of rows or columns of the matrix
    *  \param : unsigned int, 0 for rows, 1 for columns

@@ -75,15 +75,20 @@ private:
    */
   SP::VInt ipiv;
 
-  /** bool isPLUFactorized;
+  /** bool _isPLUFactorized;
    *  Boolean = true if the Matrix has been PLU Factorized in place.
    */
-  bool isPLUFactorized;
+  bool _isPLUFactorized;
 
-  /** bool isPLUInversed;
+  /** bool _isQRFactorized;
+   *  Boolean = true if the Matrix has been QR Factorized in place.
+   */
+  bool _isQRFactorized;
+
+  /** bool _isPLUInversed;
    *  Boolean = true if the Matrix has been Inversed in Place
    */
-  bool isPLUInversed;
+  bool _isPLUInversed;
 
   /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -251,17 +256,25 @@ public:
   /** determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */
-  inline bool isInversed() const
+  inline bool isPLUInversed() const
   {
-    return isPLUInversed;
+    return _isPLUInversed;
   }
 
   /** determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  inline bool isFactorized() const
+  inline bool isPLUFactorized() const
   {
-    return isPLUFactorized;
+    return _isPLUFactorized;
+  }
+
+  /** determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline bool isQRFactorized() const
+  {
+    return _isQRFactorized;
   }
 
   /** get DenseMat matrix
@@ -576,10 +589,28 @@ public:
    */
   void PLUForwardBackwardInPlace(SiconosVector& B);
 
+  /** solves a system of linear equations A * X = B  (A=this)
+      with a general N-by-N matrix A using the Least squares method
+   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+   */
+  void SolveByLeastSquares(SiconosMatrix& B);
+
+ /** solves a system of linear equations A * X = B  (A=this)
+      with a general N-by-N matrix A using the Least squares method
+   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+   */
+  void SolveByLeastSquares(SiconosVector& B);
+
   /** set to false all LU indicators. Useful in case of
       assignment for example.
   */
+
   void resetLU();
+
+  /** set to false all QR indicators. Useful in case of
+      assignment for example.
+  */
+  void resetQR();
 
 
   /** Visitors hook
