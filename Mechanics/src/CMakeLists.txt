@@ -3,6 +3,8 @@
 #
 PROJECT(SiconosMechanics CXX)
 
+OPTION(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
+
 #
 # VERSION defined in top-level CMakeLists.txt
 #
@@ -12,10 +14,30 @@ SET(SiconosMechanics_VERSION "${VERSION}")
 # Project directories 
 #
 SET(SiconosMechanics_DIRS
-  multiBodyTools
-  multiBodyTools/2D
-  multiBodyTools/3D
-  multiBodyTools/joints)
+  bodies
+  joints
+  contactDetection/basicBroadphase)
+
+IF(WITH_MECHANISMS)
+  SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d" "TKV2d" "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
+  FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
+  COMPILE_WITH(OpenCASCADE)
+
+  IF(OpenCASCADE_FOUND) 
+    message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
+    message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
+    message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
+    include_directories(${OpenCASCADE_INCLUDE_DIR})
+  ENDIF()
+
+  SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS}
+    mechanisms/CADMBTB
+    mechanisms/MBTB
+    mechanisms/TIMERMBTB)
+
+ENDIF(WITH_MECHANISMS)
+
+
 
 #
 # Installation layout
@@ -37,7 +59,7 @@ IF(WITH_BULLET)
   IF(BULLET_FOUND)
     SET(HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
-    SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} multiBodyTools/contactDetection/bullet)
+    SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS} contactDetection/bullet)
     IF(BULLET_USE_DOUBLE_PRECISION)
       APPEND_FLAGS(CMAKE_CXX_FLAGS "-DBT_USE_DOUBLE_PRECISION")
     ENDIF(BULLET_USE_DOUBLE_PRECISION)
@@ -83,9 +105,9 @@ IF(WITH_TESTING)
   ENABLE_TESTING()
 
   # the main test driver
-  SET(TEST_MAIN multiBodyTools/test/TestMain.cpp)
+  SET(TEST_MAIN contactDetection/basicBroadphase/test/TestMain.cpp)
 
-  BEGIN_TEST(multiBodyTools/test)
+  BEGIN_TEST(contactDetection/basicBroadphase/test)
   NEW_TEST(testMultiBody MultiBodyTest.cpp)
   END_TEST()
 
