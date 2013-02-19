@@ -75,9 +75,6 @@
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
 #endif
-#ifdef HAVE_SICONOS_IO
-#include <SiconosRestart.hpp>
-#endif
 %}
 
 %include "FrontEndConfig.h";
@@ -604,10 +601,6 @@ TYPEDEF_SPTR(_SolverOptions);
 %include "SolverOptions.h"
 
 KERNEL_REGISTRATION();
-
-#ifdef HAVE_SICONOS_IO
-%include "SiconosRestart.hpp";
-#endif
 
 %fragment("StdSequenceTraits");
 

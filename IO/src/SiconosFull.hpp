@@ -186,8 +186,8 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
   ar & boost::serialization::make_nvp("dimRow", m.dimRow);
   ar & boost::serialization::make_nvp("dimCol", m.dimCol);
   ar & boost::serialization::make_nvp("ipiv", m.ipiv);
-  ar & boost::serialization::make_nvp("isPLUFactorized", m.isPLUFactorized);
-  ar & boost::serialization::make_nvp("isPLUInversed", m.isPLUInversed);
+  ar & boost::serialization::make_nvp("_isPLUFactorized", m._isPLUFactorized);
+  ar & boost::serialization::make_nvp("_isPLUInversed", m._isPLUInversed);
   switch (m.num)
   {
   case 1:

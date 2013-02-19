@@ -1,6 +1,7 @@
 SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(Numerics.i Kernel.i PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall")
+SET_SOURCE_FILES_PROPERTIES(IO.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(Numerics.i Kernel.i IO.i PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall")
 
 # cf LIBRARY_PROJECT_SETUP, but we do not use it here.
 
@@ -128,6 +129,13 @@ SWIG_ADD_MODULE(Kernel python Kernel.i)
 SET(Kernel_generated_file_fullname ${swig_generated_file_fullname})
 MESSAGE(STATUS "Kernel generated files ${swig_generated_file_fullname}")
 
+IF(HAVE_SICONOS_IO)
+  SWIG_ADD_MODULE(IO python IO.i)
+  SET(IO_generated_file_fullname ${swig_generated_file_fullname})
+  MESSAGE(STATUS "IO generated files ${swig_generated_file_fullname}")
+  ADD_DEPENDENCIES(${SWIG_MODULE_IO_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})
+ENDIF()
+
 #
 # dependencies for libraries compilation
 #
@@ -151,6 +159,12 @@ SWIG_LINK_LIBRARIES(Numerics ${PYTHON_LIBRARIES}
 
 SWIG_LINK_LIBRARIES(Kernel ${PYTHON_LIBRARIES} 
   ${${PROJECT_NAME}_LINK_LIBRARIES})
+
+
+IF(HAVE_SICONOS_IO)
+  SWIG_LINK_LIBRARIES(IO ${PYTHON_LIBRARIES} 
+    ${${PROJECT_NAME}_LINK_LIBRARIES})
+ENDIF()
 
 # get python dist-packages
 # warning python may not know cmake_install_prefix
@@ -182,6 +196,11 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Numerics.py
 INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Kernel.py 
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 
+IF(HAVE_SICONOS_IO)
+  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/IO.py 
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
+ENDIF()
+
 CONFIGURE_FILE(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
 CONFIGURE_FILE(doxy2swig.py  ${CMAKE_CURRENT_BINARY_DIR}/doxy2swig.py COPYONLY)
@@ -200,8 +219,14 @@ MESSAGE(STATUS "swig modules: ${SWIG_MODULE_Numerics_REAL_NAME},  ${SWIG_MODULE_
 INSTALL(TARGETS ${SWIG_MODULE_Numerics_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME}
   DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 
+IF(HAVE_SICONOS_IO)
+  INSTALL(TARGETS ${SWIG_MODULE_IO_REAL_NAME}
+    DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
+ENDIF()
+
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 	      ${CMAKE_CURRENT_SOURCE_DIR}/Kernel.i
+              ${CMAKE_CURRENT_SOURCE_DIR}/IO.i
 	      ${CMAKE_CURRENT_SOURCE_DIR}/addons.hpp
   DESTINATION share/siconos-front-end/swig)
 

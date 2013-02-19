@@ -4,6 +4,7 @@
 PROJECT(SiconosMechanics CXX)
 
 OPTION(WITH_MECHANISMS "compilation with OpenCascade Bindings. Default = OFF" OFF)
+OPTION(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
 
 #
 # VERSION defined in top-level CMakeLists.txt
@@ -68,17 +69,6 @@ ENDIF(WITH_BULLET)
 
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(SiconosKernel REQUIRED)
-
-COMPILE_WITH(LibXml2 REQUIRED)
-# This is needed to overcome some shortcomings in the FindXml2 Module
-# When we are crosscompiling to windows, we want to link external lib statically
-# But libxml2 archive needs zlib, iconv and an obscure W32api lib. pkg-config
-# gives this information, but it is not taken into account in the cmake Module
-IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
-  FOREACH(_EXTRA_LIB ${PC_LIBXML_LIBRARIES})
-    LIST(APPEND ${PROJECT_NAME}_LINK_LIBRARIES ${_EXTRA_LIB})
-  ENDFOREACH()
-ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 
 COMPILE_WITH(BLAS REQUIRED)
 COMPILE_WITH(LAPACK REQUIRED)

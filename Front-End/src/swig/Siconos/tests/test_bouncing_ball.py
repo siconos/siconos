@@ -91,13 +91,12 @@ def test_bouncing_ball1():
     # save and load data from xml and .dat
     #
     try:
-        from Siconos.Kernel import save
-
+        from Siconos.IO import save
         save(bouncingBall,"bouncingBall.xml")
-        save(bouncingBall,"bouncingBall.dat")
+        save(bouncingBall,"bouncingBall.bin")
 
     except:
-        print "Warning : could not import save from Siconos.Kernel"
+        print "Warning : could not import save from Siconos.IO"
 
     # the number of time steps
     N = (T-t0)/h
