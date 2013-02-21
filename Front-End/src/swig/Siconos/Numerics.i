@@ -42,13 +42,6 @@
 #include <boost/preprocessor/cat.hpp>
 %}
 
-// numpy macros
-%include numpy.i 	
-
-%init %{
-  import_array();
-%}
-
  // needed macros
  %include "NumericsConfig.h"
 

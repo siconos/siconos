@@ -21,13 +21,6 @@
 // SWIG interface for Siconos Kernel
 %module(directors="1", allprotected="1") Kernel
 
-%feature("director:except") {
-  if ($error != NULL) {
-    throw Swig::DirectorMethodException();
-  }
- }
-
-
  // signatures
 %feature("autodoc", 1);
 
@@ -44,38 +37,10 @@
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
-
-#include <assert.h>
-
-//#define DEBUG_MESSAGES 1
-#include <debug.h>
-
-#include "FrontEndConfig.h"
-
-#ifdef HAVE_SICONOS_MECHANICS
-#include "Disk.hpp"
-#include "Circle.hpp"
-#include "DiskDiskR.hpp"
-#include "DiskPlanR.hpp"
-#include "DiskMovingPlanR.hpp"
-#include "CircleCircleR.hpp"
-#include "ExternalBody.hpp"
-#include "SpaceFilter.hpp"
-#include "SiconosBodies.hpp"
-#include "KneeJointR.hpp"
-#include "PivotJointR.hpp"
-#include "PrismaticJointR.hpp"
-#endif
 %}
-
-%include "FrontEndConfig.h";
 
 // mandatory !
 %rename (lambda_) lambda;
-
-#ifdef WITH_BULLET
-%include "KernelBullet.i"
-#endif
 
 // common declarations with Numerics
 %include solverParams.i
@@ -83,57 +48,14 @@
  // common declarations with upper modules : Mechanics, IO, ...
 %include handleException.i
 
-// shared ptr management
-#define SWIG_SHARED_PTR_NAMESPACE std11
-%include "boost_shared_ptr.i"
-
-// numpy macros
-%include numpy.i 	
-
-%init %{
-  import_array();
-%}
+%include sharedPointers.i
 
 // handle stl data types
-%include "stl.i"
+%include stl.i
 
 // 1. Vector and Matrix <=> numpy array (dense only)
-%include "KernelTypes.i"
+%include KernelTypes.i
 
-
-// python int sequence => std::vector<unsigned int>
-%{
-  static int sequenceToUnsignedIntVector(
-    PyObject *input, 
-    std11::shared_ptr<std::vector<unsigned int> > ptr) 
-  {
-    int i;
-    if (!PySequence_Check(input)) {
-      PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
-      return 0;
-    }
-    
-    assert(ptr);
-    
-    for (i =0; i <  PyObject_Length(input); i++) 
-    {
-      PyObject *o = PySequence_GetItem(input,i);
-      if (!PyInt_Check(o)) {
-        Py_XDECREF(o);
-        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-        return 0;
-      }
-      
-      if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
-        return 0;
-      
-      ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
-      
-      Py_DECREF(o);
-    }
-    return 1;
-  }
-%}
 
 // 2. try to hide SP::Type on python side
 
@@ -161,19 +83,7 @@ namespace std
   typedef size_t size_t;
 }
 
-#if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
-#define STD11 std
-#else
-#define STD11 boost
-// boost >= 1.40
-%import "boost/version.hpp"
-#if (BOOST_VERSION >= 104000)
-%ignore std11::enable_shared_from_this::operator=;
-%import "boost/smart_ptr/enable_shared_from_this.hpp"
-#else
-%import "boost/enable_shared_from_this.hpp"
-#endif
-#endif
+
 
 // SimpleMatrix operators 
 %rename  (__add__) operator+;
@@ -188,8 +98,6 @@ namespace std
 %rename  (__ne__) operator!=;
 
 
-%rename("$ignore", regexmatch$name="^createSPtr.*") "";
-
 // swig see those classes as abstract => no wrappers for constructors
 // note: this means something may be wrong in .hpp headers => use -Wall to
 // detect it
@@ -199,10 +107,6 @@ namespace std
 %feature("notabstract") EventDriven;
 
 
-
-
-// includes and imports
-%include "SiconosPointers.hpp"
 %include "SiconosVisitables.hpp"
 
 %import "SiconosVisitor.hpp"
@@ -367,56 +271,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(X)
 
 %import "RelationNamespace.hpp";
 
-%{
-  // when we call FPyArray_SimpleNewFromData with a $1->getArray() we
-  // lost the shared pointer count, so we can be in the case where the
-  // memory pointed by a shared ptr is erased after the call
-  // FPyArray_SimpleNewFromData (=>segfault...)
-
-  // here we keep another shared pointer on the original shared ptr
-  // (i.e. we do an incref) associated with the memory from
-  // FPyArray_SimpleNewFromData
-
-  // we need to register a PyCObject (deprecated for python >= 2.7 see
-  // PyCapsule) in order to call the destruction function
-  // sharedPyArrayDelete
-
-
-  struct SharedPointerKeeper
-  {
-    // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
-    std11::shared_ptr<void> ref;
-
-    SharedPointerKeeper(std11::shared_ptr<void> v) : ref(v) 
-    {
-      DEBUG_PRINTF("SharedPointerKeeper : use_count %ld\n",v.use_count());
-    };
-
-    ~SharedPointerKeeper()
-    {
-      DEBUG_PRINT("~SharedPointerKeeper()\n");
-      //    ref.reset(); // destructor called
-    }
-
-  };
-  
-  /* the PyCObject deleter 
-     example: 
-     SharedPointerKeeper* savedSharePtr = 
-       new SharedPointerKeeper(std11::static_pointer_cast<void>(mysharedptr));
-     PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);
-  */
-
-  /* note PyCObject is deprecated for Python >= 2.7 ... */
-  static  void sharedPointerKeeperDelete(void * o)
-  {
-    DEBUG_PRINT("sharedPointerKeeperDelete\n");
-
-    delete static_cast<SharedPointerKeeper *>(o);
-    return;
-  };
-
-%}
 
 
 
@@ -478,20 +332,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(X)
 
 // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
-
-// include registered headers
-// FIX: maybe this can be done in PY_REGISTER macros
-
-#undef PY_REGISTER
-%define PY_REGISTER(X)
-%include "X.hpp";
-%enddef
-
-
-#undef PY_REGISTER_WITHOUT_DIRECTOR
-%define PY_REGISTER_WITHOUT_DIRECTOR(X)
-%include "X.hpp";
-%enddef
 
 #undef PY_REGISTER_BULLET_COLLISION_DETECTION
 %define PY_REGISTER_BULLET_COLLISION_DETECTION(X)

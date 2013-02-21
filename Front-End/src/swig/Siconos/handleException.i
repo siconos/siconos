@@ -1,3 +1,13 @@
+%{
+#include <SiconosException.hpp>
+%}
+
+%feature("director:except") {
+  if ($error != NULL) {
+    throw Swig::DirectorMethodException();
+  }
+ }
+
 // handle standard exceptions
 %{
  static void handle_exception(void) {

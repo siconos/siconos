@@ -1,5 +1,9 @@
 // -*- c++ -*-
 %define PY_REGISTER(TYPE)
+%inline
+%{
+#include <TYPE.hpp>
+%}
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
 %rename  (__mul__) TYPE ## ::operator*;
@@ -26,6 +30,10 @@
 %enddef
 
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%inline
+%{
+#include <TYPE.hpp>
+%}
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
 %rename  (__mul__) TYPE ## ::operator*;

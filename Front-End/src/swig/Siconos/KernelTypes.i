@@ -19,6 +19,51 @@
 //	
 // SWIG interface for Siconos Kernel types
 
+//PyArray_UpdateFlags does not seem to have any effect
+//>>> r = K.FirstOrderLinearTIR()
+//>>> r.setCPtr([[1,2,3],[4,5,6]])
+//>>> C=r.C()
+//>>> C.flags
+//  C_CONTIGUOUS : True
+//  F_CONTIGUOUS : False            <---- !!!
+//  OWNDATA : False
+//  WRITEABLE : True
+//  ALIGNED : True
+//  UPDATEIFCOPY : False
+//
+//
+// with this macro : ok
+#define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
+  PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
+              data, 0, NPY_FARRAY, NULL)
+
+
+// copy shared ptr reference in a base PyCObject 
+#define PYARRAY_FROM_SHARED_SICONOS_DATA(TYPE,NDIM,DIMS,NAME,RESULT)    \
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
+                                                 DIMS,                  \
+                                                 TYPE,                  \
+                                                 NAME->getArray());     \
+  SharedPointerKeeper* savedSharedPointer = new                         \
+    SharedPointerKeeper(std11::static_pointer_cast<void>(NAME));        \
+  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
+    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
+                          &sharedPointerKeeperDelete);                  \
+  RESULT = pyarray
+
+#define PYARRAY_FROM_SHARED_STL_VECTOR(TYPE,NDIM,DIMS,NAME,RESULT)      \
+  PyObject* pyarray = FPyArray_SimpleNewFromData(NDIM,                  \
+                                                 DIMS,                  \
+                                                 TYPE,                  \
+                                                 &(*NAME)[0]);          \
+  SharedPointerKeeper* savedSharedPointer = new                         \
+    SharedPointerKeeper(std11::static_pointer_cast<void>(NAME));        \
+  reinterpret_cast<PyArrayObject*>(pyarray)->base =                     \
+    PyCObject_FromVoidPtr((void*) savedSharedPointer,                   \
+                          &sharedPointerKeeperDelete);                  \
+  RESULT = pyarray
+
+
 
 %typemap(in) PyArrayObject* {
    $1 = (PyArrayObject*) $input;
@@ -453,6 +498,40 @@
   // %typecheck(std11::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
   PySequence_Check($input);
 }
+
+// python int sequence => std::vector<unsigned int>
+%{
+  static int sequenceToUnsignedIntVector(
+    PyObject *input, 
+    std11::shared_ptr<std::vector<unsigned int> > ptr) 
+  {
+    int i;
+    if (!PySequence_Check(input)) {
+      PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
+      return 0;
+    }
+    
+    assert(ptr);
+    
+    for (i =0; i <  PyObject_Length(input); i++) 
+    {
+      PyObject *o = PySequence_GetItem(input,i);
+      if (!PyInt_Check(o)) {
+        Py_XDECREF(o);
+        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+        return 0;
+      }
+      
+      if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
+        return 0;
+      
+      ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
+      
+      Py_DECREF(o);
+    }
+    return 1;
+  }
+%}
 
 
 // int sequence => std::vector<unsigned int>
