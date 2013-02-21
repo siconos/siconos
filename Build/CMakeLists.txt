@@ -99,20 +99,20 @@ macro(AddSiconosProject)
   cmake_parse_arguments(project "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(_project ${project_UNPARSED_ARGUMENTS})
   
-  if(NOT ${_project}_TEST_BEFORE_INSTALL)
-    if(NOT ${_project}_TEST_AFTER_INSTALL)
-      set(${_project}_TEST_BEFORE_INSTALL 1)
+  if(NOT project_TEST_BEFORE_INSTALL)
+    if(NOT project_TEST_AFTER_INSTALL)
+      set(project_TEST_BEFORE_INSTALL 1)
     else()
-      set(${_project}_TEST_BEFORE_INSTALL 0)
+      set(project_TEST_BEFORE_INSTALL 0)
     endif()
   endif()
-  if(NOT ${_project}_TEST_AFTER_INSTALL)
-    set(${_project}_TEST_AFTER_INSTALL 0)
+  if(NOT project_TEST_AFTER_INSTALL)
+    set(project_TEST_AFTER_INSTALL 0)
   endif()
 
 
   if(INSTALL_PREFIX)
-    set(${_project}_CMAKE_ARGS ${${_project}_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
+    set(${_project}_CMAKE_ARGS ${project_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
   endif()
   message(STATUS "Adding ${_project}")
   message(STATUS "Sources are in ${SOURCE_DIR}/${_project}")
@@ -127,7 +127,7 @@ macro(AddSiconosProject)
       -DMODE=${MODE}
       -DSOURCE_DIRECTORY=${SOURCE_DIR}
       -DBINARY_DIRECTORY=${CMAKE_BINARY_DIR}/${_project}
-      -DEXTRA_CMAKE_ARGS=${${_project}_CMAKE_ARGS}
+      -DEXTRA_CMAKE_ARGS=${project_CMAKE_ARGS}
       -DFROM_REPO=${FROM_REPO}
       -DBUILD_TYPE=${BUILD_TYPE}
       -DWITH_TESTING=${WITH_TESTING}
@@ -138,14 +138,14 @@ macro(AddSiconosProject)
       SOURCE_DIR ${SOURCE_DIR}/${_project}
       INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
-      TEST_BEFORE_INSTALL ${${_project}_TEST_BEFORE_INSTALL}
-      TEST_AFTER_INSTALL ${${_project}_TEST_AFTER_INSTALL})
+      TEST_BEFORE_INSTALL ${project_TEST_BEFORE_INSTALL}
+      TEST_AFTER_INSTALL ${project_TEST_AFTER_INSTALL})
   else()
     ExternalProject_Add(${_project}
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${${_project}_CMAKE_ARGS}
+      CMAKE_ARGS ${project_CMAKE_ARGS}
       INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
       TEST_BEFORE_INSTALL ${WITH_TESTING})
