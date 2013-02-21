@@ -21,20 +21,9 @@
 // Siconos.i - SWIG interface for Siconos
 %module Numerics
 
-
+%include start.i
 
 %{
-#define SWIG_FILE_WITH_INIT
-#include <sstream>
-#if defined(Py_COMPLEXOBJECT_H)
-#undef c_sum
-#undef c_diff
-#undef c_neg
-#undef c_prod
-#undef c_quot
-#undef c_pow
-#undef c_abs
-#endif
 #include "SiconosNumerics.h"
 #include "NumericsConfig.h"
 #include "SolverOptions.h"
@@ -59,11 +48,6 @@
 %init %{
   import_array();
 %}
-
-
-
-
-
 
  // needed macros
  %include "NumericsConfig.h"
@@ -140,7 +124,7 @@
    }
  }
 
- %include "Common.i"
+ %include solverParams.i
 
 
 

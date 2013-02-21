@@ -1,7 +1,15 @@
 SET_SOURCE_FILES_PROPERTIES(Numerics.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(Kernel.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(IO.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(Numerics.i Kernel.i IO.i PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall")
+SET_SOURCE_FILES_PROPERTIES(Mechanics/bodies.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(Mechanics/joints.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(
+  Numerics.i 
+  Kernel.i 
+  IO.i 
+  Mechanics/bodies.i 
+  Mechanics/joints.i 
+  PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-Wall")
 
 # cf LIBRARY_PROJECT_SETUP, but we do not use it here.
 
@@ -107,14 +115,19 @@ IF(DOXYGEN_FOUND)
     KernelTypes.i
     KernelBullet.i
     KernelRegistration.i
-    Common.i
+    solverParams.i
+    handleException.i
+    start.i
+    end.i
     numpy.i
     Kernel-docstrings.i)
   
   SET(SWIG_MODULE_Numerics_EXTRA_DEPS
     KernelTypes.i
     KernelRegistration.i
-    Common.i
+    solverParams.i
+    start.i
+    end.i
     numpy.i
     Numerics-docstrings.i)
 ENDIF()
@@ -135,6 +148,14 @@ IF(HAVE_SICONOS_IO)
   MESSAGE(STATUS "IO generated files ${swig_generated_file_fullname}")
   ADD_DEPENDENCIES(${SWIG_MODULE_IO_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})
 ENDIF()
+
+IF(HAVE_SICONOS_MECHANICS)
+  SUBDIRS(Mechanics)
+ENDIF()
+
+
+
+
 
 #
 # dependencies for libraries compilation
@@ -165,6 +186,11 @@ IF(HAVE_SICONOS_IO)
   SWIG_LINK_LIBRARIES(IO ${PYTHON_LIBRARIES} 
     ${${PROJECT_NAME}_LINK_LIBRARIES})
 ENDIF()
+
+
+
+
+
 
 # get python dist-packages
 # warning python may not know cmake_install_prefix
@@ -201,6 +227,10 @@ IF(HAVE_SICONOS_IO)
     DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 ENDIF()
 
+
+
+
+
 CONFIGURE_FILE(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
 CONFIGURE_FILE(doxy2swig.py  ${CMAKE_CURRENT_BINARY_DIR}/doxy2swig.py COPYONLY)
@@ -224,11 +254,17 @@ IF(HAVE_SICONOS_IO)
     DESTINATION ${PYTHON_DIST_PACKAGES}/Siconos)
 ENDIF()
 
+
+
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/KernelTypes.i
 	      ${CMAKE_CURRENT_SOURCE_DIR}/Kernel.i
               ${CMAKE_CURRENT_SOURCE_DIR}/IO.i
 	      ${CMAKE_CURRENT_SOURCE_DIR}/addons.hpp
   DESTINATION share/siconos-front-end/swig)
+
+#INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
+#INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
+
 
 
 ENABLE_TESTING()

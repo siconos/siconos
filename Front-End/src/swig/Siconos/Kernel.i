@@ -34,18 +34,9 @@
 // generated docstrings from doxygen xml output
 %include Kernel-docstrings.i
 
+%include start.i
+
 %{
-#define SWIG_FILE_WITH_INIT
-#include <sstream>
-#if defined(Py_COMPLEXOBJECT_H)
-#undef c_sum
-#undef c_diff
-#undef c_neg
-#undef c_prod
-#undef c_quot
-#undef c_pow
-#undef c_abs
-#endif
 #include <SiconosKernel.hpp>
 #include <SiconosVisitor.hpp>
 #include "SiconosPointers.hpp"
@@ -79,16 +70,18 @@
 
 %include "FrontEndConfig.h";
 
+// mandatory !
+%rename (lambda_) lambda;
+
 #ifdef WITH_BULLET
 %include "KernelBullet.i"
 #endif
 
 // common declarations with Numerics
+%include solverParams.i
 
-%include Common.i
-
-// mandatory !
-%rename (lambda_) lambda;
+ // common declarations with upper modules : Mechanics, IO, ...
+%include handleException.i
 
 // shared ptr management
 #define SWIG_SHARED_PTR_NAMESPACE std11
@@ -101,55 +94,11 @@
   import_array();
 %}
 
-// handle standard exceptions
-%{
- static void handle_exception(void) {
-    try {
-      throw;
-    } 
-    catch (const std::invalid_argument& e)
-    {
-      PyErr_SetString(PyExc_ValueError, e.what());
-    }
-    catch (const std::out_of_range& e)
-    {
-      PyErr_SetString(PyExc_IndexError, e.what());
-    }
-    catch (const SiconosException& e)
-    {
-      PyErr_SetString(PyExc_Exception, e.report().c_str());
-    }
-    catch (const Swig::DirectorException& e)
-    {
-      PyErr_SetString(PyExc_ValueError, e.getMessage());
-    }
-  }
-%} 
-
-
-%include "exception.i"
-%exception
-{
-  try
-  {
-    $action;
-  }
-  catch (...) {
-    if (!PyErr_Occurred()) {
-      handle_exception();
-    }
-    SWIG_fail;
-  } 
-}
-
 // handle stl data types
 %include "stl.i"
 
 // 1. Vector and Matrix <=> numpy array (dense only)
-
 %include "KernelTypes.i"
-
-
 
 
 // python int sequence => std::vector<unsigned int>
@@ -341,50 +290,8 @@ TYPEDEF_SPTR(InteractionsGraph);
 typedef struct
 {} __mpz_struct;
 typedef __mpz_struct mpz_t[1];
-%include "KernelRegistration.i"
-
-
-%define PY_REGISTER(TYPE)
-%rename  (__getitem__) TYPE ## ::operator[];
-%rename  (__add__) TYPE ## ::operator+;
-%rename  (__mul__) TYPE ## ::operator*;
-%rename  (__div__) TYPE ## ::operator/;
-%rename  (__iadd__) TYPE ## ::operator+=;
-%rename  (__imul__) TYPE ## ::operator*=;
-%rename  (__idiv__) TYPE ## ::operator/=;
-%rename  (__eq__) TYPE ## ::operator==;
-%rename  (__ne__) TYPE ## ::operator!=;
-%rename  (__copy__) TYPE ## ::operator=;
-%feature("director") TYPE;
-%ignore STD11::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
-%typemap(directorin) TYPE& ()
-{
-  // %typemap(directorin) (TYPE&) ()
-  // swig issue shared pointer check in wrappers even if arg is a ref
-  SP::TYPE myptemp(createSPtr##TYPE($1));
-  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp), 
-                              SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
-}
-%shared_ptr(TYPE); 
-%enddef
-
-
-%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
-%rename  (__getitem__) TYPE ## ::operator[];
-%rename  (__add__) TYPE ## ::operator+;
-%rename  (__mul__) TYPE ## ::operator*;
-%rename  (__div__) TYPE ## ::operator/;
-%rename  (__iadd__) TYPE ## ::operator+=;
-%rename  (__imul__) TYPE ## ::operator*=;
-%rename  (__idiv__) TYPE ## ::operator/=;
-%rename  (__eq__) TYPE ## ::operator==;
-%rename  (__ne__) TYPE ## ::operator!=;
-%rename  (__copy__) TYPE ## ::operator=;
-%ignore STD11::enable_shared_from_this<TYPE>;
-%template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
-%shared_ptr(TYPE); 
-%enddef
+%include KernelRegistration.i
+%include pyRegister.i
 
 %define PY_REGISTER_BULLET_COLLISION_DETECTION(X) 
 TYPEDEF_SPTR(X);
@@ -396,8 +303,7 @@ TYPEDEF_SPTR(X);
 PY_REGISTER_WITHOUT_DIRECTOR(X)
 %enddef
 
- // registered classes in KernelRegistration.i
-KERNEL_REGISTRATION();
+ 
 
 // ignores
 
@@ -570,7 +476,11 @@ KERNEL_REGISTRATION();
 %template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
 
 
+// registered classes in KernelRegistration.i
+KERNEL_REGISTRATION();
+
 // include registered headers
+// FIX: maybe this can be done in PY_REGISTER macros
 
 #undef PY_REGISTER
 %define PY_REGISTER(X)
@@ -600,7 +510,7 @@ TYPEDEF_SPTR(_SolverOptions);
 
 %include "SolverOptions.h"
 
-KERNEL_REGISTRATION();
+ //KERNEL_REGISTRATION();
 
 %fragment("StdSequenceTraits");
 

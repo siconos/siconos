@@ -129,9 +129,6 @@ ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/FrontEndConfig.h DESTINATION include/Siconos/FrontEnd)
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/KernelRegistration.i DESTINATION include/Siconos/FrontEnd)
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Siconos/Common.i DESTINATION include/Siconos/FrontEnd)
-INSTALL(FILES ${CMAKE_BINARY_DIR}/src/swig/Siconos/Kernel-docstrings.i DESTINATION include/Siconos/FrontEnd)
 
 # print all features
 FEATURE_SUMMARY(WHAT ALL)
