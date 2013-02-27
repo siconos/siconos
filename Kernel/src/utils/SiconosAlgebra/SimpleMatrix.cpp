@@ -2602,7 +2602,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
   info += lapack::gels('N', *mat.Dense, *(B.dense()), lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-  info += lapack::gels('N', minimalmat, minimalvec, lapack::minimal_workspace());
+  info += lapack::gels('N', *mat.Dense, *(B.dense()), lapack::minimal_workspace());
 #endif
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
@@ -2618,16 +2618,19 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
-  int info;
+  int info=0;
 
 #ifdef USE_OPTIMAL_WORKSPACE
   info += lapack::gels('N', *mat.Dense, tmpB, lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-  info += lapack::gels('N', minimalmat, minimalvec, lapack::minimal_workspace());
+  info += lapack::gels('N', *mat.Dense, tmpB, lapack::minimal_workspace());
 #endif
   if (info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
+  {
+    std::cout << "info = " << info << std::endl;
+    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(SiconosVector &B) failed.");
+  }
   else
   {
     noalias(*(B.dense())) = ublas::column(tmpB, 0);

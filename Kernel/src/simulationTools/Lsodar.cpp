@@ -33,6 +33,11 @@
 using namespace std;
 using namespace RELATION;
 
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
+
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
@@ -283,7 +288,7 @@ void Lsodar::initialize()
   iwork[8] = 0;
   // Set atol and rtol values ...
   rtol[0] = RTOL_DEFAULT ; // rtol
-  atol[0] = ATOL_DEFAUTL ;  // atol
+  atol[0] = ATOL_DEFAULT ;  // atol
 
   // === Error handling in LSODAR===
 
@@ -302,8 +307,11 @@ void Lsodar::initialize()
 
 void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 {
-  // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
 
+  DEBUG_PRINT("Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
+  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, istate );
+
+  // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
   doublereal tinit_DR = tinit;       // current (starting) time
 

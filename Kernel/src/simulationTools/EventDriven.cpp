@@ -159,7 +159,7 @@ void EventDriven::updateIndexSet(unsigned int i)
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
   std11::tie(uibegin, uipend) = indexSet0->vertices();
-  // loop over all vextice of the indexSet[i-1]
+  // loop over all vertices of the indexSet[i-1]
   for (uip = uibegin; uip != uipend; ++uip)
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
@@ -178,6 +178,8 @@ void EventDriven::updateIndexSet(unsigned int i)
          */
       if (y < -TOL_ED) // y[0] < 0
       {
+        inter->display();
+        std::cout << "y = " << y << " < -TOL_ED =  "   << -TOL_ED  <<std::endl;
         RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
       }
       // 1 - If the Interaction is not yet in the set

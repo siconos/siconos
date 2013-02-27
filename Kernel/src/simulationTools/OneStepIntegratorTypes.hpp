@@ -59,6 +59,7 @@ enum TYPES
 DEFINE_SPTR(MoreauProjectOnConstraintsOSI)
 DEFINE_SPTR(MoreauCombinedProjectionOSI)
 DEFINE_SPTR(Lsodar)
+DEFINE_SPTR(Hem5)
 DEFINE_SPTR(D1MinusLinear)
 DEFINE_SPTR(SchatzmanPaoli)
 DEFINE_SPTR(ZeroOrderHold)
