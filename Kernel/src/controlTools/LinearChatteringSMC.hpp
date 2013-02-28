@@ -35,8 +35,8 @@ private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(LinearChatteringSMC);
 
-  /** sign of Cx*/
-  SP::SiconosVector _s;
+  /** \f$\sigma = Cx\f$ */
+  SP::SiconosVector _sigma;
 
 public:
 
@@ -57,10 +57,7 @@ public:
   */
   virtual ~LinearChatteringSMC();
 
-  /** initialize actuator data.
-   * \param m a SP::Model
-  */
-  void initialize(SP::Model m);
+  virtual void initialize(SP::Model m);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:

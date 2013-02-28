@@ -51,7 +51,6 @@ LinearSMCimproved::~LinearSMCimproved()
 
 void LinearSMCimproved::actuate()
 {
-  // equivalent part, explicit contribution
   SP::SimpleMatrix tmpM1(new SimpleMatrix(*_Csurface));
   SP::SimpleMatrix tmpD(new SimpleMatrix(_sDim, _sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(*(_sensor->y())));
@@ -69,19 +68,17 @@ void LinearSMCimproved::actuate()
   // compute the solution x_{k+1} of the system W*X = e^{Ah}x_k
   tmpD->PLUForwardBackwardInPlace(*_ueq);
 
-  if (_indx > 0)
-  {
-    *(_DS_SMC->x()) = *xTk; // XXX this is sooo wrong
-    prod(*_B, *_ueq, *(_DS_SMC->b()));
-    _simulationSMC->nextStep();
-  }
+  *(_DS_SMC->x()) = *xTk; // XXX this is sooo wrong
+  prod(*_B, *_ueq, *(_DS_SMC->b()));
   _simulationSMC->computeOneStep();
+  _simulationSMC->nextStep();
 
 
   // discontinous part
-  double h = _timeDiscretisation->currentTimeStep();
-  prod(h, prod(*_Csurface, *_B), *_lambda, *_us);
-  tmpD->PLUForwardBackwardInPlace(*_us);
+  *_us = *_lambda;
+//  double h = _timeDiscretisation->currentTimeStep();
+//  prod(h, prod(*_Csurface, *_B), *_lambda, *_us);
+//  tmpD->PLUForwardBackwardInPlace(*_us);
 
   // inject those in the system
   prod(1.0, *_B, *_us, *_sampledControl);

@@ -560,6 +560,8 @@ void ZeroOrderHold::computeFreeState()
 
   DSIterator it; // Iterator through the set of DS.
 
+  double t = simulationLink->startingTime();
+
   Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -581,7 +583,7 @@ void ZeroOrderHold::computeFreeState()
       if (d.b())
       {
         SiconosMatrix& IntegralPhi = *_IntegralPhiMap[dsN];
-        d.updatePlugins(0);
+        d.updatePlugins(t);
         prod(IntegralPhi, *d.b(), xfree, false);
       }
       *_xNext[dsN] = xfree;
@@ -598,7 +600,7 @@ void ZeroOrderHold::computeFreeState()
       if (d.b())
       {
         SiconosMatrix& IntegralPhi = *_IntegralPhiMap[dsN];
-        d.updatePlugins(0);
+        d.updatePlugins(t);
         prod(IntegralPhi, *d.b(), xfree, false);
       }
     }

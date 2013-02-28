@@ -77,6 +77,9 @@ void LinearSensor::initialize(SP::Model m)
 void LinearSensor::capture()
 {
   *_storedY = prod(*_matC, *_DSx);
+  // untested
+  if (_matD)
+    *_storedY += prod(*_matD, *_DS->z());
   //  (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
   //  _dataPlot->setSubRow(_k, 1, _storedY);
   _k++;

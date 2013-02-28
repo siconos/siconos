@@ -26,18 +26,6 @@
 
 #include "CommonSMC.hpp"
 
-#ifndef FirstOrderLinearDS_H
-DEFINE_SPTR(FirstOrderLinearDS)
-#endif
-#ifndef TimeStepping_H
-DEFINE_SPTR(TimeStepping)
-#endif
-#ifndef Relay_H
-DEFINE_SPTR(Relay)
-#endif
-#ifndef EventsManager_H
-DEFINE_SPTR(EventsManager)
-#endif
 
 class LinearSMC : public CommonSMC
 {
@@ -50,33 +38,6 @@ protected:
   /** default constructor */
   LinearSMC() {};
 
-  /** the Model for the controller */
-  SP::Model _SMC;
-  /** the DynamicalSystem for the controller */
-  SP::FirstOrderLinearDS _DS_SMC;
-  /** the TimeDiscretisation for the controller */
-  SP::TimeDiscretisation _tD_SMC;
-  /** Simulation for the controller */
-  SP::TimeStepping _simulationSMC;
-  /** Integrator for the controller */
-  SP::OneStepIntegrator _integratorSMC;
-  /** Theta for the controller */
-  double _thetaSMC;
-  /** OneStepNsProblem for the controller */
-  SP::Relay _OSNSPB_SMC;
-  /** SP::SiconosVector containing the control */
-  SP::SiconosVector _sampledControl;
-  /** SP::EventsManager of the SMC Simulation */
-  SP::EventsManager _eventsManager;
-  /** SP::NonSmoothLaw for computing the control law */
-  SP::NonSmoothLaw _nsLawSMC;
-
-  /** inverse of CB */
-  SP::SimpleMatrix _invCB;
-  /** Store \f$u_{eq}\f$ */
-  SP::SiconosVector _ueq;
-  /** Store \f$u^s\f$ */
-  SP::SiconosVector _us;
 
 public:
 
@@ -104,11 +65,6 @@ public:
    */
   LinearSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds, const Sensors& sensorList, int name = LINEAR_SMC);
 
-  /** Initialize
-   * \param m a SP::Model
-   */
-  void initialize(SP::Model m);
-
   /** destructor
    */
   virtual ~LinearSMC();
@@ -133,10 +89,6 @@ public:
     _D = D;
   };
 
-  inline SiconosVector& ueq() { return *_ueq; };
-  inline SiconosVector& us() { return *_us; };
-
-  inline void setTheta(const double& newTheta) { _thetaSMC = newTheta; };
 
 };
 DEFINE_SPTR(LinearSMC)

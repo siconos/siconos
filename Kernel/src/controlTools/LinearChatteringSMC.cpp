@@ -17,12 +17,13 @@
 * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "LinearChatteringSMC.hpp"
 
 #include "ActuatorFactory.hpp"
 #include "SiconosVector.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "ControlSensor.hpp"
+
+#include "LinearChatteringSMC.hpp"
 
 using namespace std;
 using namespace ActuatorFactory;
@@ -37,58 +38,36 @@ LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::Dynamical
 
 LinearChatteringSMC::~LinearChatteringSMC()
 {
+  _sigma.reset();
 }
 
 void LinearChatteringSMC::initialize(SP::Model m)
 {
   CommonSMC::initialize(m);
 
-  // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
-  // We can use the Visitor mighty power to check if we have the right type
-  Type::Siconos dsType;
-  dsType = Type::value(*_DS);
-  if (dsType != Type::FirstOrderLinearDS && dsType != Type::FirstOrderLinearTIDS)
-  {
-    RuntimeException::selfThrow("LinearChatteringSMC::initialize - the control of nonlinear System is not yet implemented");
-  }
-
-  // Get the dimension of the output
-  // XXX What if there is more than one sensor ...
-
-  _sensor = std11::dynamic_pointer_cast<ControlSensor>(*(_allSensors->begin()));
-  if (_sensor == NULL)
-  {
-    RuntimeException::selfThrow("LinearChatteringSMC::initialize - the given sensor is not a ControlSensor");
-  }
-  else
-  {
-    _u.reset(new SiconosVector(_nDim, 0));
-
-    // XXX really stupid stuff
-    _DS->setzPtr(_u);
-  }
-  _indx = 0;
-  _s.reset(new SiconosVector(_sDim));
-  _lambda.reset(new SiconosVector(_sDim));
+  _sigma.reset(new SiconosVector(_sDim));
 }
 
 void LinearChatteringSMC::actuate()
 {
-  prod(*_Csurface, *(_sensor->y()), *_s);
+  computeUeq();
+
+  prod(*_Csurface, *(_sensor->y()), *_sigma);
+
   if (_D) // we are using a saturation
   {
     for (unsigned int i = 0; i < _sDim; i++)
     {
-      if ((*_s)(i) > (*_D)(i, i))
-        (*_lambda)(i) = -1;
-      else if ((*_s)(i) < -(*_D)(i, i))
-        (*_lambda)(i) = 1;
+      if ((*_sigma)(i) > (*_D)(i, i))
+        (*_us)(i) = -1;
+      else if ((*_sigma)(i) < -(*_D)(i, i))
+        (*_us)(i) = 1;
       else
       {
         if ((*_D)(i, i) != 0)
-          (*_lambda)(i) = -(*_s)(i) / (*_D)(i, i);
+          (*_us)(i) = -(*_sigma)(i) / (*_D)(i, i);
         else
-          (*_lambda)(i) = 0;
+          (*_us)(i) = 0;
       }
     }
   }
@@ -96,15 +75,16 @@ void LinearChatteringSMC::actuate()
   {
     for (unsigned int i = 0; i < _sDim; i++)
     {
-      if ((*_s)(i) > 0)
-        (*_lambda)(i) = -1;
-      else if ((*_s)(i) < 0)
-        (*_lambda)(i) = 1;
+      if ((*_sigma)(i) > 0)
+        (*_us)(i) = -1;
+      else if ((*_sigma)(i) < 0)
+        (*_us)(i) = 1;
       else
-        (*_lambda)(i) = 0;
+        (*_us)(i) = 0;
     }
   }
-  prod(1.0, *_B, *_lambda, *_u);
+  prod(1.0, *_B, *_us, *_sampledControl);
+  prod(1.0, *_B, *_ueq, *_sampledControl, false);
   _indx++;
 }
 
