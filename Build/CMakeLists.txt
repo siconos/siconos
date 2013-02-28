@@ -67,6 +67,11 @@ else()
   list(APPEND ARGS -DWITH_TESTING=0)
 endif()
 
+if(INSTALL_PREFIX)
+  set(_project_CMAKE_ARGS ${project_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
+  list(APPEND ARGS -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
+endif()
+
 if(FROM_REPO)
 
   if(NOT SOURCE_DIR)
@@ -110,10 +115,12 @@ macro(AddSiconosProject)
     set(project_TEST_AFTER_INSTALL 0)
   endif()
 
+  # do crazy thing because cmake is stubborn
+  set(project_CMAKE_ARGS_sanitized)
+  foreach(elt ${project_CMAKE_ARGS})
+    set(project_CMAKE_ARGS_sanitized ${elt}__00__${project_CMAKE_ARGS_sanitized})
+  endforeach(elt)
 
-  if(INSTALL_PREFIX)
-    set(${_project}_CMAKE_ARGS ${project_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX})
-  endif()
   message(STATUS "Adding ${_project}")
   message(STATUS "Sources are in ${SOURCE_DIR}/${_project}")
   message(STATUS "Binaries are in ${CMAKE_BINARY_DIR}/${_project}")
@@ -127,7 +134,7 @@ macro(AddSiconosProject)
       -DMODE=${MODE}
       -DSOURCE_DIRECTORY=${SOURCE_DIR}
       -DBINARY_DIRECTORY=${CMAKE_BINARY_DIR}/${_project}
-      -DEXTRA_CMAKE_ARGS=${project_CMAKE_ARGS}
+      -DEXTRA_CMAKE_ARGS=${project_CMAKE_ARGS_sanitized}
       -DFROM_REPO=${FROM_REPO}
       -DBUILD_TYPE=${BUILD_TYPE}
       -DWITH_TESTING=${WITH_TESTING}
@@ -145,7 +152,7 @@ macro(AddSiconosProject)
       DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "sources are in ${SOURCE_DIR}/${_project}"
       DEPENDS ${project_DEPENDS}
       SOURCE_DIR ${SOURCE_DIR}/${_project}
-      CMAKE_ARGS ${project_CMAKE_ARGS}
+      CMAKE_ARGS ${project_CMAKE_ARGS_sanitized}
       INSTALL_DIR ${INSTALL_PREFIX}
       INSTALL_COMMAND ${INSTALL_COMMAND}
       TEST_BEFORE_INSTALL ${WITH_TESTING})
