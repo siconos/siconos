@@ -67,7 +67,6 @@ int main(int argc, char* argv[])
   // For the Sensor
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
-  SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
   // For the Actuator
   SP::SimpleMatrix Csurface(new SimpleMatrix(2, 2));
   Csurface->eye();
@@ -89,7 +88,7 @@ int main(int argc, char* argv[])
   // Control stuff
   SP::ControlManager control = controlProcess->CM();
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
   control->addSensorPtr(sens);
   // add the sliding mode controller
   SP::LinearSMC act = std11::static_pointer_cast<LinearSMC>

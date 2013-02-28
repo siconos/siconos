@@ -66,7 +66,6 @@ Csurface = np.array(Brel).T
   // For the Sensor
   SP::SimpleMatrix sensorC(new SimpleMatrix(n, n));
   sensorC->eye();
-  SP::SimpleMatrix sensorD(new SimpleMatrix(n, n, 0));
   // For the Actuator
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, n));
   (*Csurface)(0, 0) = 1.452;
@@ -108,7 +107,7 @@ Csurface = np.array(Brel).T
   // Control stuff
   SP::ControlManager control(new ControlManager(process));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
   control->addSensorPtr(sens);
   // add the sliding mode controller
   LinearSMC& act = *std11::static_pointer_cast<LinearSMC>(control->addActuator

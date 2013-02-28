@@ -213,7 +213,7 @@ void CommonSMC::setSaturationMatrix(const SiconosMatrix& newValue)
 void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(1) != _nDim)
+  if (newPtr->size(1) != _sDim)
   {
     RuntimeException::selfThrow("CommonSMC::setSaturationMatrixPtr - inconstency between the dimension of the state space and D");
   }

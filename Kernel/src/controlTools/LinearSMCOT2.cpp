@@ -44,7 +44,7 @@ LinearSMCOT2::~LinearSMCOT2()
 
 void LinearSMCOT2::initialize(SP::Model m)
 {
-  CommonSMC::initialize(m);
+  Actuator::initialize(m);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type

@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
   (*x0)(1) = -Xinit;
   SP::SimpleMatrix sensorC(new SimpleMatrix(2, 2));
   sensorC->eye();
-  SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
   (*Csurface)(0, 1) = 1;
 
@@ -95,7 +94,7 @@ int main(int argc, char* argv[])
   // Control stuff
   SP::ControlManager control(new ControlManager(process));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
   control->addSensorPtr(sens);
   // add the sliding mode controller
   SP::LinearSMCOT2 act = std11::static_pointer_cast<LinearSMCOT2>

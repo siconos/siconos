@@ -72,7 +72,6 @@ outputSize = 5 # number of variable to store at each time step
 A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
-sensorD = zeros((ndof, ndof))
 Csurface = [[0, 1.0]]
 
 # Simple check
@@ -99,14 +98,14 @@ processIntegrator = Moreau(processDS, theta)
 processSimulation.insertIntegrator(processIntegrator)
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)
-sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
+sens = LinearSensor(tSensor, processDS, sensorC)
 control.addSensorPtr(sens)
 act = LinearSMCOT2(tActuator, processDS)
 act.setCsurfacePtr(Csurface)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
-# Initialization 
+# Initialization
 process.initialize(processSimulation)
 control.initialize()
 # This is not working right now

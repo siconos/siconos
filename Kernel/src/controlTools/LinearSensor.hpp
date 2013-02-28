@@ -74,7 +74,7 @@ public:
    * \param C a SP::SiconosMatrix.
    * \param D a SP::SiconosMatrix (optional).
    */
-  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix C, SP::SimpleMatrix D);
+  LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP::SimpleMatrix C, SP::SimpleMatrix D = SP::SimpleMatrix());
 
   /** Destructor
    */

@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
   sensorC->eye();
   SP::SimpleMatrix sensorD(new SimpleMatrix(2, 2, 0));
   SP::SimpleMatrix Csurface(new SimpleMatrix(1, 2, 0));
+  (*Csurface)(0, 1) = 1;
   SP::SimpleMatrix Brel(new SimpleMatrix(2, 1, 0));
   (*Brel)(1, 0) = 2;
-  SP::SimpleMatrix Drel(new SimpleMatrix(2, 2, 0));
-  (*Csurface)(0, 1) = 1;
+  SP::SimpleMatrix Drel(new SimpleMatrix(1, 1, 0));
 
   // Dynamical Systems
   SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   // Control stuff
   SP::ControlManager control(new ControlManager(process));
   // use a controlSensor
-  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC, sensorD));
+  SP::LinearSensor sens(new LinearSensor(tSensor, processDS, sensorC));
   control->addSensorPtr(sens);
   // add the sliding mode controller
   SP::LinearChatteringSMC act = std11::static_pointer_cast<LinearChatteringSMC>

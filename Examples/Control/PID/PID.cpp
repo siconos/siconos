@@ -99,8 +99,7 @@ int main(int argc, char* argv[])
     // use a controlSensor
     SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
     (*C)(0, 0) = 1;
-    SP::SimpleMatrix D(new SimpleMatrix(1, 2, 0));
-    SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C, D));
+    SP::LinearSensor sens(new LinearSensor(tSensor, doubleIntegrator, C));
     control->addSensorPtr(sens);
     // add the PID controller
     SP::SiconosVector K(new SiconosVector(3, 0));

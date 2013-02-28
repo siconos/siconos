@@ -39,7 +39,6 @@ A[0,1] = 1
 B = zeros(2)
 x0 = [10.,10.]
 C = [[1., 0]] # we have to specify ndmin=2, so it's understood as
-D = [[0, 0]]  # a matrix and not a vector
 K = [.25, .125, 2]
 
 # Declaration of the Dynamical System
@@ -58,13 +57,13 @@ s.insertIntegrator(OSI)
 
 # Actuator, Sensor & ControlManager
 control = ControlManager(process)
-sens = LinearSensor(tSensor, doubleIntegrator, C, D)
+sens = LinearSensor(tSensor, doubleIntegrator, C)
 control.addSensorPtr(sens)
 act = SampledPIDActuator(tActuator, doubleIntegrator)
 act.addSensorPtr(sens)
 control.addActuatorPtr(act)
 
-# Initialization 
+# Initialization
 process.initialize(s)
 control.initialize()
 act.setRef(xFinal)
@@ -91,7 +90,6 @@ while(s.hasNextEvent()):
     dataPlot[k, 4] = doubleIntegrator.b()[1]
     k += 1
     s.nextStep()
-    print s.nextTime()
 # Save to disk
 savetxt('output.txt', dataPlot)
 # Plot interesting data

@@ -40,7 +40,6 @@ outputSize = 3 # number of variable to store at each time step
 A = zeros((ndof, ndof))
 x0 = [Xinit, -Xinit]
 sensorC = eye(ndof)
-sensorD = zeros((ndof, ndof))
 Csurface = eye(ndof)
 Brel = eye(ndof)
 Drel = eye(ndof)
@@ -61,7 +60,7 @@ tSensor = TimeDiscretisation(t0, hControl)
 tActuator = TimeDiscretisation(t0, hControl)
 # Actuator, Sensor & ControlManager
 control = controlProcess.CM()
-sens = LinearSensor(tSensor, processDS, sensorC, sensorD)
+sens = LinearSensor(tSensor, processDS, sensorC)
 control.addSensorPtr(sens)
 act = LinearSMC(tActuator, processDS)
 act.setCsurfacePtr(Csurface)
