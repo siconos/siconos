@@ -31,6 +31,7 @@
 // One Step Integrators
 #include "Moreau.hpp"
 #include "Lsodar.hpp"
+#include "Hem5.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "D1MinusLinear.hpp"
 #include "SchatzmanPaoli.hpp"
@@ -787,6 +788,65 @@ struct Simulation::SetupLevels : public SiconosVisitor
     _interaction->setSteps(1);
   };
 
+
+
+  void visit(const Hem5&)
+  {
+    unsigned int lowerLevelForOutput = LEVELMAX;
+    unsigned int upperLevelForOutput = 0;
+    unsigned int lowerLevelForInput = LEVELMAX;
+    unsigned int upperLevelForInput = 0;
+
+    Type::Siconos dsType = Type::value(*_ds);
+
+    /** there is only a test on the dstype and simulation since  we assume that
+     * we implicitely the nonsmooth law when a DS type is chosen
+     */
+
+    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
+    {
+      if (Type::value(*_parent) == Type::EventDriven)
+      {
+        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
+
+        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
+        {
+          lowerLevelForOutput = 0;
+          upperLevelForOutput = 2 ;
+          lowerLevelForInput = 1;
+          upperLevelForInput = 2;
+        }
+        else if (nslType ==  Type::NewtonImpactFrictionNSL)
+        {
+          lowerLevelForOutput = 0;
+          upperLevelForOutput = 4;
+          lowerLevelForInput = 1;
+          upperLevelForInput = 2;
+          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+        }
+        else
+        {
+          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
+        }
+      }
+      else
+        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
+    }
+    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
+
+    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
+    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
+    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
+    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
+
+    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
+    _interaction->setUpperLevelForOutput(upperLevelForOutput);
+
+    _interaction->setLowerLevelForInput(lowerLevelForInput);
+    _interaction->setUpperLevelForInput(upperLevelForInput);
+
+    _interaction->setSteps(1);
+  };
 
   void visit(const NewMarkAlphaOSI&)
   {

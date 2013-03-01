@@ -36,6 +36,8 @@ enum TYPES
   /** */
   LSODAR,
   /** */
+  HEM5,
+  /** */
   MOREAU2,
   /** */
   MOREAUPROJECTONCONSTRAINTSOSI,

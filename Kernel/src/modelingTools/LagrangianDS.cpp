@@ -1,4 +1,3 @@
-
 /* Siconos-Kernel, Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -21,6 +20,8 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
+
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -355,7 +356,7 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 
 void LagrangianDS::initForces()
 {
-  DEBUG_PRINTF("initForces is called\n");
+  DEBUG_PRINT("LagrangianDS::initForces() is called\n");
 
   _forces.reset(new SiconosVector(_ndof));
 
@@ -737,64 +738,37 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
 
 void LagrangianDS::computeForces(double time)
 {
-  // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_forces)
-  {
-    // 1 - Computes the required functions
-    computeFInt(time);
-    computeFExt(time);
-    computeNNL();
-
-    // 2 - set fL = fExt - fInt - NNL
-
-    // seems ok.
-    if (_forces.use_count() == 1)
-    {
-      //if not that means that fL is already (pointer-)connected with
-      // either fInt, NNL OR fExt.
-      _forces->zero();
-
-      if (_fInt)
-        *_forces -= *_fInt;
-
-      if (_fExt)
-        *_forces += *_fExt;
-
-      if (_NNL)
-        *_forces -= *_NNL;
-    }
-  }
-  // else nothing.
+  computeForces(time, _q[0], _q[1]);
 }
 
 void LagrangianDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_forces)
+  if (!_forces)
   {
-    // 1 - Computes the required functions
-    computeFInt(time, q2, v2);
-    computeFExt(time);
-    computeNNL(q2, v2);
-
-    // seems ok.
-    if (_forces.use_count() == 1)
-    {
-      //if not that means that fL is already (pointer-)connected with
-      // either fInt, NNL OR fExt.
-      _forces->zero();
-
-      if (_fInt)
-        *_forces -= *_fInt;
-
-      if (_fExt)
-        *_forces += *_fExt;
-
-      if (_NNL)
-        *_forces -= *_NNL;
-    }
+    _forces.reset(new SiconosVector(_ndof));
   }
-  // else nothing.
+  // 1 - Computes the required functions
+  computeFInt(time, q2, v2);
+  computeFExt(time);
+  computeNNL(q2, v2);
+
+  // seems ok.
+  if (_forces.use_count() == 1)
+  {
+    //if not that means that fL is already (pointer-)connected with
+    // either fInt, NNL OR fExt.
+    _forces->zero();
+
+    if (_fInt)
+      *_forces -= *_fInt;
+
+    if (_fExt)
+      *_forces += *_fExt;
+
+    if (_NNL)
+        *_forces -= *_NNL;
+  }
 }
 
 void LagrangianDS::computeJacobianqForces(double time)

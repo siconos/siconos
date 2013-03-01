@@ -217,6 +217,18 @@ public:
    */
   void computeRhs(double, bool  = false);
 
+  /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
+   *  \param double time : the current time
+   *  \param SP::SiconosVector: pointers on q
+   *  \param SP::SiconosVector: pointers on velocity
+   */
+  void computeForces(double , SP::SiconosVector, SP::SiconosVector);
+
+  /** Default function to compute forces
+   *  \param double, the current time
+   */
+  void computeForces(double);
+
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators

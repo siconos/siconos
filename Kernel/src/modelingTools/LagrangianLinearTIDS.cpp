@@ -19,6 +19,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearTIDSXML.hpp"
 #include "BlockMatrix.hpp"
+#include "debug.h"
 
 using namespace std;
 
@@ -219,40 +220,24 @@ void LagrangianLinearTIDS::display() const
 
 void LagrangianLinearTIDS::computeRhs(double time, bool)
 {
+
+  computeForces(time, _q[0], _q[1]);
+
   // second argument is useless but present because of top-class function overloading.
   *_q[2] = *_p[2]; // Warning: p update is done in Interactions/Relations
   //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
   //   std::cout << " p[2] " << std::endl ;
   //  _p[2]->display();
-  if (_fExt)
-  {
-    computeFExt(time);
-    *_q[2] += *_fExt; // This supposes that _fExt is up to date!!
-  }
-  if (_K)
-    *_q[2] -= prod(*_K, *_q[0]);
-
-  if (_C)
-    *_q[2] -= prod(*_C, *_q[1]);
-
+  *_q[2] += *_forces;
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
+
+
   _workFree->zero();
-  if (_fExt)
-  {
-    computeFExt(time);
-    *_workFree += *_fExt; // This supposes that _fExt is up to date!!
-  }
-
-  if (_K)
-    *_workFree -= prod(*_K, *_q[0]);
-
-  if (_C)
-    *_workFree -= prod(*_C, *_q[1]);
-
+  computeForces(time, _q[0], _q[1]);
+  *_workFree = *_forces;
   // Then we search for _workFree, such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workFree);
-
 
   //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
   //   std::cout << " q[2] " << std::endl ;
@@ -260,6 +245,33 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   //   std::cout << " _workFree " << std::endl ;
   //   _workFree->display();
 
+}
+void LagrangianLinearTIDS::computeForces(double time)
+{
+  computeForces(time, _q[0], _q[1]);
+}
+
+void LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
+{
+
+  DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
+  // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
+  if (!_forces)
+  {
+    _forces.reset(new SiconosVector(_ndof));
+  }
+  // 1 - Computes the required forces
+  //_forces->zero();
+
+  if (_fExt)
+  {
+    computeFExt(time);
+    *_forces = *_fExt; // This supposes that _fExt is up to date!!
+  }
+  if (_K)
+    *_forces -= prod(*_K, *q2);
+  if (_C)
+    *_forces -= prod(*_C, *v2);
 }
 
 void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)

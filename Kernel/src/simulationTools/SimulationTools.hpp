@@ -43,6 +43,7 @@ Note that not all files from the current location are listed below, since some o
 //#include "mlcpDefaultSolver.hpp"
 #include "QP.hpp"
 #include "Lsodar.hpp"
+#include "Hem5.hpp"
 #include "Moreau.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "MoreauProjectOnConstraintsOSI.hpp"

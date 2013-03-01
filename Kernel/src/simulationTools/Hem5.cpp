@@ -33,8 +33,8 @@
 using namespace std;
 using namespace RELATION;
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -215,9 +215,9 @@ void Hem5::fprob(integer* IFCN,
              doublereal* GQQ, doublereal* GT, doublereal * FL,
              doublereal* QDOT, doublereal* UDOT, doublereal * AM)
 {
-  DEBUG_PRINTF("Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)IFCN);
-  DEBUG_PRINTF("NQ = %i\t NV = %i \t NU = %i, NL = %i \n", (int)NQ, (int)NV, (int)NU, (int)NL);
-  DEBUG_PRINTF("LDG = %i\t LDF = %i \t LDA = %i \n", (int)LDG, (int)LDF, (int)LDA);
+  DEBUG_PRINTF("Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)*IFCN);
+  DEBUG_PRINTF("NQ = %i\t NV = %i \t NU = %i, NL = %i \n", (int)*NQ, (int)*NV, (int)*NU, (int)*NL);
+  DEBUG_PRINTF("LDG = %i\t LDF = %i \t LDA = %i \n", (int)*LDG, (int)*LDF, (int)*LDA);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   fillqWork(NQ, q);
@@ -226,26 +226,20 @@ void Hem5::fprob(integer* IFCN,
   double t = *time;
   simulationLink->model()->setCurrentTime(t);
 
+  SP::DynamicalSystemsGraph dsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
 
-  switch ((int)(*IFCN))
+
+  int ifcn = (int)(*IFCN);
+
+  if ((ifcn ==1) or (ifcn>=7)) // compute Mass AM
   {
-  case 0:// Computation of UDOT
-  {
-    RuntimeException::selfThrow("Hem5::fprob(), Computation of UDOT should not be called");
-  }
-  case 1:// Computation of F, AM, QDOT, FL
-  {
-
-
-
-
     if (!_massMatrix)
     {
+      DEBUG_PRINT("Hem5::fprob(), Initialize Mass Matrix\n");
       _massMatrix.reset(new SimpleMatrix((int)(*NV),(int)(*NV)));
     }
     unsigned int pos=0;
-    SP::DynamicalSystemsGraph dsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*vi);
@@ -261,16 +255,49 @@ void Hem5::fprob(integer* IFCN,
       {
         RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
       }
+      DEBUG_EXPR(_massMatrix->display());
       AM = _massMatrix->getArray(0,0); // how can we be sure that it will not collect by the garbage collector ?
-
     }
-
-
   }
-  }// end switch
-
-
-
+  if ((ifcn ==1) or (ifcn == 5) or (ifcn == 7) or (ifcn==8)) // compute F
+  {
+    if (!_forcestmp)
+    {
+      DEBUG_PRINT("Hem5::fprob(), Initialize _forcestmp\n");
+      _forcestmp.reset(new SiconosVector((int)(*NV)));
+    }
+    for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+    {
+      SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+      if (Type::value(*ds) == Type::LagrangianDS ||
+          Type::value(*ds) == Type::LagrangianLinearTIDS)
+      {
+        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+        fillqWork(NQ,q);
+        fillvWork(NV,v);
+        lds.computeForces((double)*time);
+      }
+      else
+      {
+        RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
+      }
+      *_forcestmp=*_forcesWork;
+      DEBUG_EXPR(_forcestmp->display());
+      F = _forcestmp->getArray(0); // how can we be sure that it will not collect by the garbage collector ?
+    }
+  }
+  if ((ifcn == 4)) // compute G (constraints)
+  {
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0
+      = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    assert(indexSet0);
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->computeOutput(t,0);
+    }
+  }
   // // Update Jacobian matrices at all interactions
   // InteractionsGraph::VIterator ui, uiend;
   // SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
@@ -321,7 +348,7 @@ void Hem5::fprob(integer* IFCN,
   //   }
   // }
 
-  DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)IFCN);
+  DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)*IFCN);
   //std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
 
 }
@@ -338,53 +365,91 @@ void Hem5::fprob(integer* IFCN,
 
 void Hem5::initialize()
 {
+
+  DEBUG_PRINT("Hem5::initialize()\n");
+
   OneStepIntegrator::initialize();
   _qWork.reset(new BlockVector());
   _vWork.reset(new BlockVector());
   _aWork.reset(new BlockVector());
   _uWork.reset(new BlockVector());
   _lambdaWork.reset(new BlockVector());
+  _forcesWork.reset(new BlockVector());
 
+  // initialize xxxWork with xxx values of the dynamical systems present in the set.
+  SP::DynamicalSystemsGraph dsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
-  DSIterator itDS;
-  string type;
-  // initialize xWork with x values of the dynamical systems present in the set.
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
-    if (Type::value(**itDS) == Type::LagrangianDS ||
-        Type::value(**itDS) == Type::LagrangianLinearTIDS)
+    SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+
+    if (Type::value(*ds) == Type::LagrangianDS ||
+        Type::value(*ds) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*itDS);
-      _qWork->insertPtr(LDS.q());
-      _vWork->insertPtr(LDS.velocity());
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+      _qWork->insertPtr(lds.q());
+      _vWork->insertPtr(lds.velocity());
+      _aWork->insertPtr(lds.acceleration());
+      if (!lds.forces())
+      {
+        lds.initForces();
+      }
+      _forcesWork->insertPtr(lds.forces());
     }
     else
     {
     RuntimeException::selfThrow("Hem5::initialize(), Only integration of Lagrangian DS is allowed");
     }
   }
-  //   Integer parameters for LSODAR are saved in vector intParam.
-  //   The link with variable names in opkdmain.f is indicated in comments
+
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0
+    = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  assert(indexSet0);
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet0->bundle(*ui);
+    _lambdaWork->insertPtr(inter->lambda(0));
+  }
+
+  //   Integer parameters for HEM5 are saved in vector intData.
 
   // 1 - _intData[0] NQ size of the position vector q
   _intData[0] = _qWork->size();
   _qtmp.reset(new SiconosVector(_qWork->size()));
+  DEBUG_PRINTF("Hem5::initialize() _intData[0] (NQ) = %i \n",_intData[0]);
+
 
   // 2 - _intData[1] NV size of the position vector v
   _intData[1] = _vWork->size();
   _vtmp.reset(new SiconosVector(_vWork->size()));
+  DEBUG_PRINTF("Hem5::initialize() _intData[1] (NV) = %i \n",_intData[1]);
+
+  _utmp.reset(new SiconosVector(1));
+  _atmp.reset(new SiconosVector(_vWork->size()));
 
   // 3 - _intData[2] NU size of the external dynamic vector u
   _intData[2] = 0;
 
   // 4 -  _intData[3] NL size of the Lagrange multiplier vector lambda
-  _intData[3] = boost::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  _intData[3] = numberOfConstraints();
+  DEBUG_PRINTF("Hem5::initialize() _intData[3] (NL) = %i \n",_intData[3]);
+  _lambdatmp.reset(new SiconosVector(_intData[3],0.0));
+
+
   //_intData[3] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+  DEBUG_PRINTF("Hem5::initialize() _intData[3] (NL) = %i \n",_intData[3]);
 
   // 3 - Itol, itask, iopt
   _intData[4] = 1; // ITOL indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
                    //  dimension NQ + NV + NU (ITOL=1)
   _intData[5] = 1; // IOUT selects the dense output formula
+
+
+
+
+  // this computation has to be redone every time _indData[3] is recompyuted.
+
 
 
   // IWK(14)  MODE (=0: FULL LINEAR ALGEBRA WITH DEC, =1: IDEM WITH FL,
@@ -405,8 +470,8 @@ void Hem5::initialize()
 
   if (MODE <=3 )
   {
-    LL = 8 * ( (int)_intData[1] * (int)_intData[4]  )
-       + 4 * ( (int)_intData[1] + (int)_intData[4]  )*( (int)_intData[1] + (int)_intData[4]);
+    LL = 8 * ( (int)_intData[1] * (int)_intData[3]  )
+       + 4 * ( (int)_intData[1] + (int)_intData[3]  )*( (int)_intData[1] + (int)_intData[3]);
     LDG = _intData[3];
     LDF = _intData[3];
     NZA = LDG + std::max(LDG,LDF) + NMRC*NMRC*NBLK;
@@ -420,10 +485,13 @@ void Hem5::initialize()
 
   // 5 - LWK length of real array rwork
   _intData[6] = 19 + 27*(int)_intData[0] + 28 * (int)_intData[1] + 27 *  (int)_intData[2]
-    + 5*((int)_intData[1] + (int)_intData[4]) + 4*NZA + 2*IXS + LL;
+    + 5*((int)_intData[1] + (int)_intData[3]) + 4*NZA + 2*IXS + LL;
+  DEBUG_PRINTF("Hem5::initialize() _intData[6] (LWK) = %i \n",_intData[6]);
 
   // 6 - LIWK length of integer array iwork
-  _intData[7] = 95 + 2*(int)_intData[1] + 2*IS + 12*LDG + 4 * LDF + 4 *NZA;
+  _intData[7] = 95 + 2*((int)_intData[1]+(int)_intData[3]) + 2*IS + 12*LDG + 4 * LDF + 4 *NZA;
+  _intData[7] *= 2;
+  DEBUG_PRINTF("Hem5::initialize() _intData[7] (LIWK) = %i \n",_intData[7]);
 
   // memory allocation for doublereal*, according to _intData values ...
   updateData();
@@ -476,8 +544,8 @@ void Hem5::initialize()
   _timeStep = 1.e-3; // initial step size guess (typical value 1e-3)
 
   // Set atol and rtol values ...
-  rtol[0] = RTOL_DEFAULT ; // rtol
-  atol[0] = ATOL_DEFAULT ;  // atol
+  rtol[0] = HEM5_RTOL_DEFAULT ; // rtol
+  atol[0] = HEM5_ATOL_DEFAULT ;  // atol
 
 }
 void Hem5::solout(integer* MODE,
@@ -495,11 +563,28 @@ void Hem5::solout(integer* MODE,
 {
 }
 
+unsigned int Hem5::numberOfConstraints()
+{
+  DEBUG_PRINT("Hem5::updateConstraints() \n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet2
+    = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  assert(indexSet2);
+  SP::SiconosVector y;
+  unsigned int n = 0;
+  for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet2->bundle(*ui);
+    n++;
+  }
+  return n;
+}
+
 void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 {
 
   DEBUG_PRINT("Hem5::integrate(double& tinit, double& tend, double& tout, int& idid) with \n");
-  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, idid );
+  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, idid = %i\n", tinit, tend,  tout, idid );
 
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
   doublereal tinit_DR = tinit;       // current (starting) time
@@ -520,7 +605,23 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   *_vtmp = *_vWork; // Copy into a continuous memory chuck
   *_utmp = *_uWork; // Copy into a continuous memory chuck
   *_atmp = *_aWork; // Copy into a continuous memory chuck
-  *_lambdatmp = *_lambdaWork; // Copy into a continuous memory chuck
+
+  _intData[3] = numberOfConstraints();
+  DEBUG_PRINTF("Hem5::integrate() _intData[3] (NL) = %i \n",_intData[3]);
+  _lambdatmp.reset(new SiconosVector(_intData[3],0.0));
+
+
+
+  //*_lambdatmp = *_lambdaWork; // Copy into a continuous memory chuck
+
+
+  assert(_qtmp);
+  assert(_vtmp);
+  assert(_utmp);
+  assert(_atmp);
+  assert(_lambdatmp);
+  assert(_intData[7]);
+
 
   // call HEM5 to integrate dynamical equation
   F77NAME(hem5)(&(_intData[0]),
@@ -531,7 +632,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
                 &tinit_DR,
                 &(*_qtmp)(0),
                 &(*_vtmp)(0),
-                &(*_utmp)(0),
+                NULL, // &(*_utmp)(0),
                 &(*_atmp)(0),
                 &(*_lambdatmp)(0) ,
                 &_timeStep,
@@ -550,22 +651,32 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   // === Post ===
   if (_idid < 0) // if istate < 0 => LSODAR failed
   {
-    cout << "Hem5::integrate(...) failed - idid = " << idid<< endl;
-    cout << " -1 meand inout is not consistent" << endl;
+    cout << "Hem5::integrate(...) failed - idid = " << _idid << endl;
+    cout << " -1 means input is not consistent" << endl;
     cout << " -2 means larger NMAX needed." << endl;
     cout << " -3 means step size becomes too small." << endl;
     cout << " -4 means matrix is singular" << endl;
-    cout << " -5 means initial projection: non convergence" << endl;
-    RuntimeException::selfThrow("Hem5, integration failed");
+    cout << " -5 means initial projection: no convergence" << endl;
+    RuntimeException::selfThrow("Hem5::integrate(), integration failed");
   }
 
   *_qWork = *_qtmp;
   *_vWork = *_vtmp;
-  *_uWork = *_utmp;
+  //*_uWork = *_utmp;
   *_aWork = *_atmp;
-  *_lambdaWork = *_lambdatmp;
 
-
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet2
+    = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  assert(indexSet2);
+  SP::SiconosVector y;
+  unsigned int pos=0;
+  for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet2->bundle(*ui);
+    inter->lambda(2)->setValue(0,*lambdatmp[pos]);
+    pos++;
+  }
 
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR;  // necessary for next start of HEM5

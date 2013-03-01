@@ -26,8 +26,8 @@
 #include"OneStepIntegrator.hpp"
 #include"SiconosNumerics.h"
 #include<vector>
-const doublereal ATOL_DEFAULT = 100 * MACHINE_PREC;
-const doublereal RTOL_DEFAULT = 10 * MACHINE_PREC;
+const doublereal HEM5_ATOL_DEFAULT = 100 * MACHINE_PREC;
+const doublereal HEM5_RTOL_DEFAULT = 10 * MACHINE_PREC;
 class BlockVector;
 
 /** Hem5 solver (odepack)
@@ -93,6 +93,8 @@ private:
   SP::BlockVector _aWork;
   /** temporary vector to save lambda values */
   SP::BlockVector _lambdaWork;
+  /** temporary vector to save forces values */
+  SP::BlockVector _forcesWork;
 
   Hem5() {};
 
@@ -101,9 +103,11 @@ private:
   SP::SiconosVector _utmp;
   SP::SiconosVector _atmp;
   SP::SiconosVector _lambdatmp;
+  SP::SiconosVector _forcestmp;
 
 
   SP::SimpleMatrix _massMatrix;
+  SP::SiconosVector _forces;
   SP::SimpleMatrix _jacobianGq;
 
 
@@ -239,6 +243,7 @@ public:
    */
   void computeJacobianRhs(double) ;
 
+  void numberOfConstraints();
 
   void fprob(integer* IFCN,
              integer* NQ,

@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <assert.h>
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
 #include "Interaction.hpp"
 #include "InteractionXML.hpp"
 #include "NonSmoothLawXML.hpp"
@@ -27,6 +30,8 @@
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "DynamicalSystem.hpp"
+
+
 
 #include "NewtonEulerR.hpp" // ??
 #include "NewtonEulerDS.hpp" // ??
@@ -201,6 +206,7 @@ Interaction::~Interaction()
 
 void Interaction::initialize(double t0)
 {
+  DEBUG_PRINTF("Interaction::initialize(double t0) with t0 = %f \n", t0);
 
   if (!_initialized)
   {
@@ -267,6 +273,8 @@ void Interaction::initialize(double t0)
 // non smooth law are required inputs to compute the relative degree.
 void Interaction::initializeMemory()
 {
+
+  DEBUG_PRINT("Interaction::initializeMemory() \n");
   // Warning: this function is called from Simulation initialize,
   // since we need to know :
   // the levels _lowerLevelForOutput and _upperLevelForOutput to size Y
@@ -280,6 +288,8 @@ void Interaction::initializeMemory()
   assert(_upperLevelForOutput >= _lowerLevelForOutput);
   //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
+
+
 
   // in order to simplify we size from 0 to _upperLevelForXXX
   _y.resize(_upperLevelForOutput + 1) ;
@@ -311,10 +321,13 @@ void Interaction::initializeMemory()
     _yOld[i]->zero();
     _y_k[i]->zero();
   }
+
+
   for (unsigned int i = _lowerLevelForInput ;
        i < _upperLevelForInput + 1 ;
        i++)
   {
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
     _lambda[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();

@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector RadiusBalls(new SiconosVector(NumberBalls));
     for (unsigned int k = 0; k < NumberBalls; ++k)
     {
-      (*RadiusBalls)(k) = (pow((1.0 - q_taper), (k + 1))) * R_base_taper;
+      (*RadiusBalls)(k) = (pow((1.0 - q_taper), (int)(k + 1))) * R_base_taper;
     }
     // (2) Mass of balls
     SP::SiconosVector MassBalls(new SiconosVector(NumberBalls));
