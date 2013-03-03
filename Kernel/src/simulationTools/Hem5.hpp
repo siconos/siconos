@@ -219,6 +219,10 @@ public:
    */
   void setMaxStepSize(doublereal );
 
+  /** update _intData
+   */
+  void updateIntData();
+
   /** update doubleData and iwork memory size, when changes occur in _intData.
    */
   void updateData();
@@ -243,7 +247,7 @@ public:
    */
   void computeJacobianRhs(double) ;
 
-  void numberOfConstraints();
+  unsigned int numberOfConstraints();
 
   void fprob(integer* IFCN,
              integer* NQ,

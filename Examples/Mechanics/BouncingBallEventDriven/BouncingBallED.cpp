@@ -107,8 +107,8 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- (1) OneStepIntegrators --
-#define LSODAR
-//#define HEM5
+//#define LSODAR
+#define HEM5
 #ifdef LSODAR
     SP::OneStepIntegrator OSI(new Lsodar(ball));
 #endif
@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
     bool nonSmooth = false;
     unsigned int numberOfEvent = 0 ;
     int k = 0;
+    int kns = 0;
     boost::progress_display show_progress(N);
     while (s->hasNextEvent() && k < N)
     {
@@ -180,6 +181,7 @@ int main(int argc, char* argv[])
         dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
         k++;
+        kns++;
         nonSmooth = false;
         ++show_progress;
       }
@@ -195,7 +197,12 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << endl;
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "===== End of Event Driven simulation. " << endl;
+    cout << numberOfEvent << " events have been processed. ==== " << endl;
+
+    cout << numberOfEvent- kns << " events are of time--discretization type  ==== " << endl;
+    cout << kns << " events are  of nonsmooth type  ==== " << endl << endl;
+
     cout << "====> Output file writing ..." << endl << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");

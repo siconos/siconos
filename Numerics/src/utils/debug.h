@@ -40,10 +40,12 @@
 #define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
 #define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
+#define DEBUG_EXPR_WE(E) do { E ; } while(0)
 #else
 #define DEBUG_PRINTF(_fmt, ...)
 #define DEBUG_PRINT(M)
 #define DEBUG_EXPR(E)
+#define DEBUG_EXPR_WE(E)
 #endif
 
 #endif
