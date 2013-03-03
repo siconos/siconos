@@ -297,11 +297,6 @@ void Hem5::fprob(integer* IFCN,
 
   if ((ifcn ==1) or (ifcn>=7)) // compute Mass AM
   {
-    if (!_massMatrix)
-    {
-      DEBUG_PRINT("Hem5::fprob(), Initialize Mass Matrix\n");
-      _massMatrix.reset(new SimpleMatrix((int)(*NV),(int)(*NV)));
-    }
     unsigned int pos=0;
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
@@ -311,25 +306,19 @@ void Hem5::fprob(integer* IFCN,
       {
         LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
         lds.computeMass();
-        _massMatrix->setBlock(pos, pos, *(lds.mass()));
+        for (unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
+        {
+          for (unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
+          {
+            AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
+          }
+        }
         pos += lds.getDim();
       }
       else
       {
         RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
       }
-      DEBUG_EXPR(_massMatrix->display());
-      //AM = _massMatrix->getArray(0,0); // how can we be sure that it will not collect by the garbage collector ?
-
-      for (int ii =0 ; ii < (int)(*NV); ii ++)
-      {
-        for (int jj =0 ; jj < (int)(*NV); jj ++)
-        {
-          AM[ii + jj*(int)(*NV)] = _massMatrix->getValue(ii,jj) ;
-        }
-      }
-
-
       DEBUG_EXPR(
         for (int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
         {
@@ -340,11 +329,6 @@ void Hem5::fprob(integer* IFCN,
   }
   if ((ifcn ==1) or (ifcn == 5) or (ifcn == 7) or (ifcn==8)) // compute F
   {
-    if (!_forcestmp)
-    {
-      DEBUG_PRINT("Hem5::fprob(), Initialize _forcestmp\n");
-      _forcestmp.reset(new SiconosVector((int)(*NV)));
-    }
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*vi);
@@ -364,14 +348,10 @@ void Hem5::fprob(integer* IFCN,
       {
         RuntimeException::selfThrow("Hem5::fprob(), Only integration of Lagrangian DS is allowed");
       }
-      *_forcestmp=*_forcesWork;
-      DEBUG_EXPR(_forcestmp->display());
-      //F = _forcestmp->getArray(0); // how can we be sure that it will not collect by the garbage collector ?
-      for (int ii =0 ; ii < (int)(*NV); ii ++)
-      {
-        F[ii] = _forcestmp->getValue(ii) ;
-      }
-
+    }
+    for (unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
+    {
+      F[ii] = _forcesWork->getValue(ii) ;
     }
   }
   if ((ifcn == 4)) // compute G (constraints)
@@ -400,11 +380,13 @@ void Hem5::fprob(integer* IFCN,
       assert(0);
     }
   }
+
   if ((ifcn == 5) or (ifcn == 7) ) // compute GPP ( Hessian of the constraints)
   {
     //RuntimeException::selfThrow("Hem5::fprob(), G_qq is not available");
     std::cout << "Hem5::fprob(), G_qq is not available " << std::endl;
   }
+
   if ((ifcn == 3) or (ifcn == 6) or (ifcn >= 10) ) // compute GT (partial time derivative of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
@@ -416,6 +398,7 @@ void Hem5::fprob(integer* IFCN,
       assert(0);
     }
   }
+
   if ((ifcn == 0) ) // compute UDOT
   {
     for (int ii ; ii < (int)*NU ; ii++)
@@ -423,6 +406,7 @@ void Hem5::fprob(integer* IFCN,
       assert(0);
     }
   }
+
   if ((ifcn == 1) or (ifcn == 2) or (ifcn == 10) ) // compute QDOT
   {
     unsigned int pos=0;
@@ -448,62 +432,17 @@ void Hem5::fprob(integer* IFCN,
       {
         RuntimeException::selfThrow("Hem5::fprob(), Only integration of Mechanical DS is allowed");
       }
-      DEBUG_EXPR(
-        for (int kk =0 ; kk < (int)(*NV); kk ++)
-        {
-          std::cout << QDOT[kk] << std::endl;
-        }
-        );
+
     }
+    DEBUG_EXPR(
+      for (int kk =0 ; kk < (int)(*NV); kk ++)
+      {
+        std::cout << QDOT[kk] << std::endl;
+      }
+      );
   }
 
-
-
-  // // solve a LCP at "acceleration" level if required
-  // if (!_allNSProblems->empty())
-  // {
-  //   if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->interactions())->isEmpty())
-  //   {
-  //     // Update the state of the DS
-  //     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
-  //     updateInput(2); // Necessary to compute DS state below
-  //   }
-  //   // Compute the right-hand side ( xdot = f + r in DS) for all the
-  //   //ds, with the new value of input.  lsodar->computeRhs(t);
-  // }
-  // // update the DS of the OSI.
-  // lsodar.computeRhs(t);
-  // //  for the DS state, ie the ones computed by lsodar (x above)
-  // // Update Index sets? No !!
-
-  // // Get the required value, ie xdot for output.
-  // DSIterator it;
-  // unsigned int i = 0;
-  // for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
-  // {
-  //   if (Type::value(**it) == Type::LagrangianDS ||
-  //       Type::value(**it) == Type::LagrangianLinearTIDS)
-  //   {
-  //     LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*it)      SiconosVector& qDotTmp = *LDS.velocity();
-  //     SiconosVector& qDotDotTmp = *LDS.acceleration();
-  //     for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-  //       xdot[i++] = qDotTmp(j);
-  //     for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-  //       xdot[i++] = qDotDotTmp(j);
-  //   }
-  //   else
-  //   {
-  //     SiconosVector& xtmp2 = *(*it)->rhs(); // Pointer link !
-  //     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
-  //       xdot[i++] = xtmp2(j);
-  //   }
-  // }
-
-
-  DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n", (int)*IFCN);
-  //std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
-
-
+  DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
 }
 // void Hem5::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {

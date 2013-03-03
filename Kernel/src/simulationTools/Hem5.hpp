@@ -105,12 +105,6 @@ private:
   SP::SiconosVector _lambdatmp;
   SP::SiconosVector _forcestmp;
 
-
-  SP::SimpleMatrix _massMatrix;
-  SP::SiconosVector _forces;
-  SP::SimpleMatrix _jacobianGq;
-
-
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
