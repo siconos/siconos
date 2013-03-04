@@ -107,9 +107,15 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- (1) OneStepIntegrators --
+//#define LSODAR
+#define HEM5
+#ifdef LSODAR
     SP::OneStepIntegrator OSI(new Lsodar(ball));
-
-    // -- (2) Time discretisation --
+#endif
+#ifdef HEM5
+    SP::OneStepIntegrator OSI(new Hem5(ball));
+#endif
+      // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) Non smooth problem --
