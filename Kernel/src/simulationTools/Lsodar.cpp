@@ -234,7 +234,7 @@ void Lsodar::initialize()
   _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
-  _intData[1] = boost::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  _intData[1] = std11::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
   //_intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 
   // 3 - Itol, itask, iopt

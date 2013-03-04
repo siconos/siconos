@@ -157,8 +157,14 @@ void EventsManager::update(Simulation& sim)
   // reschedule an TD event if needed
   if (event0Type == TD_EVENT)
   {
+
     double tkp1 = sim.getTkp1();
+
+#if __cplusplus >= 201103L
+    if (!::isnan(tkp1))
+#else
     if (!isnan(tkp1))
+#endif
     {
       _events[0]->setTime(tkp1);
       insertEv(_events[0]);

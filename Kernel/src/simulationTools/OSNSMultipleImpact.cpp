@@ -291,7 +291,7 @@ void OSNSMultipleImpact::BuildParaContact()
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     SP::NonSmoothLaw nslaw = inter->nslaw();
-    SP::MultipleImpactNSL Mulnslaw = boost::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
+    SP::MultipleImpactNSL Mulnslaw = std11::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of inter-interactionBlock in the vector VelContact
     unsigned int pos = _M->getPositionOfInteractionBlock(inter);
@@ -855,7 +855,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   for (std11::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
     SP::DynamicalSystem ds = DSG->bundle(*dsi); // DS
-    SP::LagrangianDS Lagds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+    SP::LagrangianDS Lagds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
     SP::SiconosVector qdot = Lagds->velocity();
     // Write
 
@@ -1035,10 +1035,10 @@ void OSNSMultipleImpact::display() const
   // Display post-impact velocities
   SP::DynamicalSystemsGraph DSG0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VIterator ui, uiend;
-  for (boost::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
   {
     SP::DynamicalSystem ds = DSG0->bundle(*ui);
-    SP::LagrangianDS lag_ds = boost::dynamic_pointer_cast<LagrangianDS>(ds);
+    SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
     cout << "DS number: " << ds->number() << endl;
     cout << "Pre-impact velocity: ";
     (lag_ds->velocityMemory()->getSiconosVector(1))->display();
@@ -1048,7 +1048,7 @@ void OSNSMultipleImpact::display() const
   // Display impulses at contact points
   SP::InteractionsGraph IndexSet0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator vi, viend;
-  for (boost::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
+  for (std11::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
   {
     SP::Interaction inter = IndexSet0->bundle(*vi);
     cout << "Impulse at contact point " << inter->number() << ":";

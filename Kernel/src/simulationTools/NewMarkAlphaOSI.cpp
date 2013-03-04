@@ -154,7 +154,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
   {
     if (dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS>(ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
       d->computeMass(); // update mass matrix
       M = d->mass();    // mass matrix
       K = d->jacobianqForces(); // jacobian according to q
@@ -162,7 +162,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
     }
     else // LagrangianLinearTIDS
     {
-      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
       M = d->mass();    // mass matrix
       K = d->K();       // matrix K
       if (K)
@@ -217,7 +217,7 @@ double NewMarkAlphaOSI::computeResidu()
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS>(ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
       // get position, velocity and acceleration
       SP::SiconosVector q = d->q();
       SP::SiconosVector v = d->velocity();
@@ -242,7 +242,7 @@ double NewMarkAlphaOSI::computeResidu()
       if (dsType == Type::LagrangianLinearTIDS)
       {
         // We need to add F_int = Cv + Kq to _residuFree
-        SP::LagrangianLinearTIDS dtids = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
+        SP::LagrangianLinearTIDS dtids = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
         SP::SiconosMatrix K = dtids->K();
         SP::SiconosMatrix C = dtids->C();
         F = dtids->fExt(); // Note that for LagrangianLinearTIDS, F = F_ext
@@ -305,7 +305,7 @@ void NewMarkAlphaOSI::computeFreeState()
     // -- Convert the DS into a Lagrangian one.
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS>(ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
       *_qfree = *(_residuFree);
       W->PLUForwardBackwardInPlace(*_qfree); //_qfree = (W^-1)*R_free
       *_qfree *= -1.0; //_qfree = -(W^-1)*R_free
@@ -469,7 +469,7 @@ void NewMarkAlphaOSI::prediction()
     dsType = Type::value(**itDS); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS>(*itDS);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(*itDS);
       _q = d->q();                // generalized coordinate
       _dotq = d->velocity();      // generalized velocity
       _ddotq = d->acceleration(); // generalized acceleration
@@ -535,7 +535,7 @@ void NewMarkAlphaOSI::correction()
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS>(ds);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
       SP::SiconosVector _p = d->p(2); // resultant force p_{n+1,k+1} of DS at (k+1)th iteration
       // Compute delta_q = W_{n+1,k}^{-1}(p_{n+1,k+1} - r_{n+1,k})
       delta_q.reset(new SiconosVector(*_p - *_r)); // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
