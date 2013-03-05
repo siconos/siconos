@@ -1,0 +1,567 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>LAPACK</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../reference.html" title="Reference">
+<link rel="prev" href="blas/level_3_blas/trsm.html" title="trsm">
+<link rel="next" href="lapack/driver_routines.html" title="Driver Routines">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="blas/level_3_blas/trsm.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="lapack/driver_routines.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="boost_numeric_bindings.reference.lapack"></a><a class="link" href="lapack.html" title="LAPACK"> LAPACK</a>
+</h3></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section"><a href="lapack/driver_routines.html">Driver
+        Routines</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="lapack/driver_routines/gegv.html">gegv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gges.html">gges</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ggesx.html">ggesx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ggev.html">ggev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ggevx.html">ggevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ggsvd.html">ggsvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbgv.html">hbgv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbgvd.html">hbgvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbgvx.html">hbgvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hegv.html">hegv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hegvd.html">hegvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hegvx.html">hegvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpgv.html">hpgv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpgvd.html">hpgvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpgvx.html">hpgvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbgv.html">sbgv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbgvd.html">sbgvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbgvx.html">sbgvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spgv.html">spgv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spgvd.html">spgvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spgvx.html">spgvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sygv.html">sygv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sygvd.html">sygvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sygvx.html">sygvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ggglm.html">ggglm</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gglse.html">gglse</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gbsv.html">gbsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gbsvx.html">gbsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gejsv.html">gejsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gesv.html">gesv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gesvx.html">gesvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gtsv.html">gtsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gtsvx.html">gtsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hesv.html">hesv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hesvx.html">hesvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpsv.html">hpsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpsvx.html">hpsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/iter_gesv.html">iter_gesv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/iter_posv.html">iter_posv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/pbsv.html">pbsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/pbsvx.html">pbsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/posv.html">posv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/posvx.html">posvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ppsv.html">ppsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ppsvx.html">ppsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ptsv.html">ptsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/ptsvx.html">ptsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spsv.html">spsv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spsvx.html">spsvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sysv.html">sysv</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sysvx.html">sysvx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gees.html">gees</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/geesx.html">geesx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/geev.html">geev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/geevx.html">geevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gesdd.html">gesdd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gesvd.html">gesvd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbev.html">hbev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbevd.html">hbevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hbevx.html">hbevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/heev.html">heev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/heevd.html">heevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/heevr.html">heevr</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/heevx.html">heevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpev.html">hpev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpevd.html">hpevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/hpevx.html">hpevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbev.html">sbev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbevd.html">sbevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/sbevx.html">sbevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spev.html">spev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spevd.html">spevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/spevx.html">spevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/stev.html">stev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/stevd.html">stevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/stevr.html">stevr</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/stevx.html">stevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/syev.html">syev</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/syevd.html">syevd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/syevr.html">syevr</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/syevx.html">syevx</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gels.html">gels</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gelsd.html">gelsd</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gelss.html">gelss</a></span></dt>
+<dt><span class="section"><a href="lapack/driver_routines/gelsy.html">gelsy</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="lapack/computational_routines.html">Computational
+        Routines</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="lapack/computational_routines/hbgst.html">hbgst</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hegst.html">hegst</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbstf.html">pbstf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sbgst.html">sbgst</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sygst.html">sygst</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ggqrf.html">ggqrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ggrqf.html">ggrqf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gelqf.html">gelqf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/geqlf.html">geqlf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/geqp3.html">geqp3</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/geqrf.html">geqrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gerqf.html">gerqf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orglq.html">orglq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orgql.html">orgql</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orgqr.html">orgqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orgrq.html">orgrq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormlq.html">ormlq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormql.html">ormql</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormqr.html">ormqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormrq.html">ormrq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormrz.html">ormrz</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tzrzf.html">tzrzf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unglq.html">unglq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ungql.html">ungql</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ungqr.html">ungqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ungrq.html">ungrq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmlq.html">unmlq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmql.html">unmql</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmqr.html">unmqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmrq.html">unmrq</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmrz.html">unmrz</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/bdsdc.html">bdsdc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/bdsqr.html">bdsqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbbrd.html">gbbrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gebrd.html">gebrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orgbr.html">orgbr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormbr.html">ormbr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ungbr.html">ungbr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmbr.html">unmbr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gebak.html">gebak</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gebal.html">gebal</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gehrd.html">gehrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hsein.html">hsein</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hseqr.html">hseqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orghr.html">orghr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormhr.html">ormhr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trevc.html">trevc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trexc.html">trexc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trsen.html">trsen</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trsna.html">trsna</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trsyl.html">trsyl</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unghr.html">unghr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmhr.html">unmhr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbcon.html">gbcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbequ.html">gbequ</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbrfs.html">gbrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbtrf.html">gbtrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gbtrs.html">gbtrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gecon.html">gecon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/geequ.html">geequ</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gerfs.html">gerfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/getrf.html">getrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/getri.html">getri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/getrs.html">getrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gtrfs.html">gtrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gttrs.html">gttrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hecon.html">hecon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/herfs.html">herfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hetrf.html">hetrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hetri.html">hetri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hetrs.html">hetrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hpcon.html">hpcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hprfs.html">hprfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hptrf.html">hptrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hptri.html">hptri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hptrs.html">hptrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbcon.html">pbcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbequ.html">pbequ</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbrfs.html">pbrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbtrf.html">pbtrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pbtrs.html">pbtrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pftrf.html">pftrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pftri.html">pftri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pftrs.html">pftrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pocon.html">pocon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/poequ.html">poequ</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/porfs.html">porfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/potrf.html">potrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/potri.html">potri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/potrs.html">potrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ppcon.html">ppcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ppequ.html">ppequ</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pprfs.html">pprfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pptrf.html">pptrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pptri.html">pptri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pptrs.html">pptrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pstrf.html">pstrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ptcon.html">ptcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ptrfs.html">ptrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pttrf.html">pttrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pttrs.html">pttrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/spcon.html">spcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sprfs.html">sprfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sptrf.html">sptrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sptri.html">sptri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sptrs.html">sptrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sycon.html">sycon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/syrfs.html">syrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sytrf.html">sytrf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sytri.html">sytri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sytrs.html">sytrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tbcon.html">tbcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tbrfs.html">tbrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tbtrs.html">tbtrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tftri.html">tftri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tpcon.html">tpcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tprfs.html">tprfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tptri.html">tptri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tptrs.html">tptrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trcon.html">trcon</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trrfs.html">trrfs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trtri.html">trtri</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/trtrs.html">trtrs</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hbtrd.html">hbtrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hetrd.html">hetrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hptrd.html">hptrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/opgtr.html">opgtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/opmtr.html">opmtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/orgtr.html">orgtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ormtr.html">ormtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/pteqr.html">pteqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sbtrd.html">sbtrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sptrd.html">sptrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/stebz.html">stebz</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/stedc.html">stedc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/stegr.html">stegr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/stein.html">stein</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/stemr.html">stemr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/steqr.html">steqr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sterf.html">sterf</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/sytrd.html">sytrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ungtr.html">ungtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/unmtr.html">unmtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/upgtr.html">upgtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/upmtr.html">upmtr</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ggbak.html">ggbak</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ggbal.html">ggbal</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/gghrd.html">gghrd</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/hgeqz.html">hgeqz</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgevc.html">tgevc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgexc.html">tgexc</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgsen.html">tgsen</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgsna.html">tgsna</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgsyl.html">tgsyl</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/ggsvp.html">ggsvp</a></span></dt>
+<dt><span class="section"><a href="lapack/computational_routines/tgsja.html">tgsja</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="lapack/auxiliary_routines.html">Auxiliary
+        Routines</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larf.html">larf</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larfb.html">larfb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larfg.html">larfg</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larft.html">larft</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larfx.html">larfx</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/largv.html">largv</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larnv.html">larnv</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larrb.html">larrb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larre.html">larre</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/langb.html">langb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lange.html">lange</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lanhb.html">lanhb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lanhe.html">lanhe</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lanhp.html">lanhp</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lanhs.html">lanhs</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lansb.html">lansb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lansp.html">lansp</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lansy.html">lansy</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lantb.html">lantb</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lantp.html">lantp</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lantr.html">lantr</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/labrd.html">labrd</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lacgv.html">lacgv</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lacon.html">lacon</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/laebz.html">laebz</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/lalsd.html">lalsd</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/largv.html">largv</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/larz.html">larz</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/latrd.html">latrd</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/latrs.html">latrs</a></span></dt>
+<dt><span class="section"><a href="lapack/auxiliary_routines/latrz.html">latrz</a></span></dt>
+</dl></dd>
+</dl></div>
+<p>
+        Here, the high-level LAPACK bindings will be described.
+      </p>
+<p>
+        LAPACK consists of three levels of routines:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            <span class="bold"><strong>driver</strong></span> routines solve a complete problem,
+            e.g., solving a system of linear equations, determining eigenvalues,
+          </li>
+<li class="listitem">
+            <span class="bold"><strong>computational</strong></span> routines solve a distinct
+            computational task, such as a LU or QR decomposition.
+          </li>
+<li class="listitem">
+            <span class="bold"><strong>auxiliary</strong></span> routines carry out underlying
+            tasks such as the non-blocked versions of matrix-vector operations.
+          </li>
+</ul></div>
+<p>
+        Like with lapack, the bindings focus on the first two levels of routines:
+        driver and computational.
+      </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.lapack_driver_routines"></a><p class="title"><b>Table&#160;1.100.&#160;LAPACK driver routines</b></p>
+<div class="table-contents"><table class="table" summary="LAPACK driver routines">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                <p>
+                  Fortran Subroutines
+                </p>
+              </th>
+<th>
+                <p>
+                  Boost.Numeric_Bindings Equivalent
+                </p>
+              </th>
+<th>
+                <p>
+                  Boost.Numeric_Bindings High-level Interface
+                </p>
+              </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                <p>
+                  SGESV, CGESV, DGESV, ZGESV
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::gesv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  xGBSV
+                </p>
+              </td>
+<td>
+                <p>
+                  gbsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  gtsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  hesv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  hpsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  posv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  ppsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  pbsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  ptsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  sysv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  NAME
+                </p>
+              </td>
+<td>
+                <p>
+                  spsv.hpp
+                </p>
+              </td>
+<td>
+                <p>
+                  lapack::solve
+                </p>
+              </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+        <code class="computeroutput"><span class="identifier">lapack</span><span class="special">::</span><span class="identifier">solve</span><span class="special">(</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">b</span>
+        <span class="special">);</span></code>
+      </p>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="blas/level_3_blas/trsm.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../reference.html"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="lapack/driver_routines.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

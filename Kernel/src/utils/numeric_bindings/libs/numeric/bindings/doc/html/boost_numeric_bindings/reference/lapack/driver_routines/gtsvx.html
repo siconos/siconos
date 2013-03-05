@@ -1,0 +1,253 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gtsvx</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="gtsv.html" title="gtsv">
+<link rel="next" href="hesv.html" title="hesv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gtsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hesv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx"></a><a class="link" href="gtsvx.html" title="gtsvx">gtsvx</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.prototype"></a><h6>
+<a name="id845527"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gtsvx</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gtsvx</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">fact</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorDL</span><span class="special">&amp;</span> <span class="identifier">dl</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">VectorDU</span><span class="special">&amp;</span> <span class="identifier">du</span><span class="special">,</span> <span class="identifier">VectorDLF</span><span class="special">&amp;</span> <span class="identifier">dlf</span><span class="special">,</span> <span class="identifier">VectorDF</span><span class="special">&amp;</span> <span class="identifier">df</span><span class="special">,</span> <span class="identifier">VectorDUF</span><span class="special">&amp;</span> <span class="identifier">duf</span><span class="special">,</span>
+        <span class="identifier">VectorDU2</span><span class="special">&amp;</span> <span class="identifier">du2</span><span class="special">,</span> <span class="identifier">VectorIPIV</span><span class="special">&amp;</span> <span class="identifier">ipiv</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">MatrixX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span>
+        <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorFERR</span><span class="special">&amp;</span> <span class="identifier">ferr</span><span class="special">,</span> <span class="identifier">VectorBERR</span><span class="special">&amp;</span> <span class="identifier">berr</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.description"></a><h6>
+<a name="id845923"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gtsvx</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGTSVX, DGTSVX, CGTSVX, and
+            ZGTSVX. <code class="computeroutput"><span class="identifier">gtsvx</span></code> uses the
+            LU factorization to compute the solution to a complex system of linear
+            equations A * X = B, A<span class="bold"><strong>*T * X = B, or A</strong></span>*H
+            * X = B, where A is a tridiagonal matrix of order N and X and B are N-by-NRHS
+            matrices.
+          </p>
+<p>
+            Error bounds on the solution and a condition estimate are also provided.
+          </p>
+<p>
+            Description <code class="literal">=</code><code class="literal">=</code><code class="literal">=</code>==
+          </p>
+<p>
+            The following steps are performed:
+          </p>
+<p>
+            1. If FACT = 'N', the LU decomposition is used to factor the matrix A
+            as A = L * U, where L is a product of permutation and unit lower bidiagonal
+            matrices and U is upper triangular with nonzeros in only the main diagonal
+            and first two superdiagonals.
+          </p>
+<p>
+            2. If some U(i,i)=0, so that U is exactly singular, then the routine
+            returns with INFO = i. Otherwise, the factored form of A is used to estimate
+            the condition number of the matrix A. If the reciprocal of the condition
+            number is less than machine precision, INFO = N+1 is returned as a warning,
+            but the routine still goes on to solve for X and compute error bounds
+            as described below.
+          </p>
+<p>
+            3. The system of equations is solved for X using the factored form of
+            A.
+          </p>
+<p>
+            4. Iterative refinement is applied to improve the computed solution matrix
+            and calculate error bounds and backward error estimates for it.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorDL</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorDL</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.dispatching_of_gtsvx"></a><p class="title"><b>Table&#160;1.132.&#160;Dispatching of gtsvx</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gtsvx">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorDL
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGTSVX
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.definition"></a><h6>
+<a name="id846324"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gtsvx.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.parameters_or_requirements_on_types"></a><h6>
+<a name="id846366"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.complexity"></a><h6>
+<a name="id846454"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.example"></a><h6>
+<a name="id846481"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gtsvx</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gtsvx</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.notes"></a><h6>
+<a name="id846766"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.see_also"></a><h6>
+<a name="id846791"></a>
+            <a class="link" href="gtsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.gtsvx.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgtsvx.f" target="_top">sgtsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgtsvx.f" target="_top">dgtsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgtsvx.f" target="_top">cgtsvx.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgtsvx.f" target="_top">zgtsvx.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gtsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hesv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

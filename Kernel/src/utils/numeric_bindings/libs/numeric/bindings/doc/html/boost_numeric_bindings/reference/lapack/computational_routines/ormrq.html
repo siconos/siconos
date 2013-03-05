@@ -1,0 +1,204 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ormrq</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="ormqr.html" title="ormqr">
+<link rel="next" href="ormrz.html" title="ormrz">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ormqr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ormrz.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq"></a><a class="link" href="ormrq.html" title="ormrq">ormrq</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.prototype"></a><h6>
+<a name="id924599"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">ormrq</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ormrq</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Side</span> <span class="identifier">side</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">k</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">VectorTAU</span><span class="special">&amp;</span> <span class="identifier">tau</span><span class="special">,</span> <span class="identifier">MatrixC</span><span class="special">&amp;</span> <span class="identifier">c</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.description"></a><h6>
+<a name="id924788"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ormrq</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SORMRQ and DORMRQ. <code class="computeroutput"><span class="identifier">ormrq</span></code> overwrites the general real M-by-N
+            matrix C with
+          </p>
+<p>
+            SIDE = 'L' SIDE = 'R' TRANS = 'N': Q * C C * Q TRANS = 'T': Q<span class="bold"><strong>*T * C C * Q</strong></span>*T
+          </p>
+<p>
+            where Q is a real orthogonal matrix defined as the product of k elementary
+            reflectors
+          </p>
+<p>
+            Q = H(1) H(2) . . . H(k)
+          </p>
+<p>
+            as returned by DGERQF. Q is of order M if SIDE = 'L' and of order N if
+            SIDE = 'R'.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.dispatching_of_ormrq"></a><p class="title"><b>Table&#160;1.204.&#160;Dispatching of ormrq</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ormrq">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SORMRQ
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DORMRQ
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.definition"></a><h6>
+<a name="id925055"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/ormrq.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.parameters_or_requirements_on_types"></a><h6>
+<a name="id925094"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.complexity"></a><h6>
+<a name="id925181"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.example"></a><h6>
+<a name="id925206"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">ormrq</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">ormrq</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.notes"></a><h6>
+<a name="id925490"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ormrq.see_also"></a><h6>
+<a name="id925515"></a>
+            <a class="link" href="ormrq.html#boost_numeric_bindings.reference.lapack.computational_routines.ormrq.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sormrq.f" target="_top">sormrq.f</a>
+                and <a href="http://www.netlib.org/lapack/double/dormrq.f" target="_top">dormrq.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ormqr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ormrz.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

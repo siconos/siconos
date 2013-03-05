@@ -1,0 +1,222 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gbbrd</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="bdsqr.html" title="bdsqr">
+<link rel="next" href="gebrd.html" title="gebrd">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="bdsqr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gebrd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd"></a><a class="link" href="gbbrd.html" title="gbbrd">gbbrd</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.prototype"></a><h6>
+<a name="id939350"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gbbrd</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gbbrd</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">vect</span><span class="special">,</span> <span class="identifier">MatrixAB</span><span class="special">&amp;</span> <span class="identifier">ab</span><span class="special">,</span> <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span> <span class="identifier">VectorE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="identifier">MatrixQ</span><span class="special">&amp;</span> <span class="identifier">q</span><span class="special">,</span>
+        <span class="identifier">MatrixPT</span><span class="special">&amp;</span> <span class="identifier">pt</span><span class="special">,</span> <span class="identifier">MatrixC</span><span class="special">&amp;</span> <span class="identifier">c</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.description"></a><h6>
+<a name="id939569"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gbbrd</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGBBRD, DGBBRD, CGBBRD, and
+            ZGBBRD. <code class="computeroutput"><span class="identifier">gbbrd</span></code> reduces
+            a complex general m-by-n band matrix A to real upper bidiagonal form
+            B by a unitary transformation: Q' * A * P = B.
+          </p>
+<p>
+            The routine computes B, and optionally forms Q or P', or computes Q'*C
+            for a given matrix C.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAB</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAB</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.dispatching_of_gbbrd"></a><p class="title"><b>Table&#160;1.218.&#160;Dispatching of gbbrd</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gbbrd">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAB
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGBBRD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGBBRD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGBBRD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGBBRD
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.definition"></a><h6>
+<a name="id939906"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/gbbrd.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.parameters_or_requirements_on_types"></a><h6>
+<a name="id939946"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.complexity"></a><h6>
+<a name="id940033"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.example"></a><h6>
+<a name="id940059"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">gbbrd</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gbbrd</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.notes"></a><h6>
+<a name="id940344"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.see_also"></a><h6>
+<a name="id940369"></a>
+            <a class="link" href="gbbrd.html#boost_numeric_bindings.reference.lapack.computational_routines.gbbrd.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgbbrd.f" target="_top">sgbbrd.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgbbrd.f" target="_top">dgbbrd.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgbbrd.f" target="_top">cgbbrd.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgbbrd.f" target="_top">zgbbrd.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="bdsqr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gebrd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

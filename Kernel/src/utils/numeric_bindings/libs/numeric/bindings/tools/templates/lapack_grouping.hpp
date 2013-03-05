@@ -1,0 +1,9 @@
+$TEMPLATE[lapack.group.DSGESV]
+ITER_GESV
+$TEMPLATE[lapack.group.ZCGESV]
+ITER_GESV
+$TEMPLATE[lapack.group.DSPOSV]
+ITER_POSV
+$TEMPLATE[lapack.group.ZCPOSV]
+ITER_POSV
+$TEMPLATE[end]

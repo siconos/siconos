@@ -1,0 +1,239 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ger</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="prev" href="gerc.html" title="gerc">
+<link rel="next" href="geru.html" title="geru">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gerc.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="geru.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger"></a><a class="link" href="ger.html" title="ger">ger</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.prototype"></a><h6>
+<a name="id765079"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">ger</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ger</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorY</span><span class="special">&amp;</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.description"></a><h6>
+<a name="id765238"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ger</span></code> (short for generic
+            rank-1 update) provides a C++ interface to BLAS routines SGER and DGER.
+            <code class="computeroutput"><span class="identifier">ger</span></code> performs the rank
+            1 operation
+          </p>
+<p>
+            A := alpha*x*y' + A,
+          </p>
+<p>
+            where alpha is a scalar, x is an m element vector, y is an n element
+            vector and A is an m by n matrix.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorX</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorX</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.dispatching_of_ger_"></a><p class="title"><b>Table&#160;1.38.&#160;Dispatching of ger.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ger.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorX
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGER
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_sger
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasSger
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGER
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dger
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasDger
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines SGER and DGER have nine arguments, whereas <code class="computeroutput"><span class="identifier">ger</span></code> requires four arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.deduction_of_arguments_of_ger_"></a><p class="title"><b>Table&#160;1.39.&#160;Deduction of arguments of ger.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of ger.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.definition"></a><h6>
+<a name="id765576"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level2/ger.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.parameters_or_requirements_on_types"></a><h6>
+<a name="id765615"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.complexity"></a><h6>
+<a name="id765702"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.example"></a><h6>
+<a name="id765727"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level2</span><span class="special">/</span><span class="identifier">ger</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">ger</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.notes"></a><h6>
+<a name="id766010"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.ger.see_also"></a><h6>
+<a name="id766034"></a>
+            <a class="link" href="ger.html#boost_numeric_bindings.reference.blas.level_2_blas.ger.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/sger.f" target="_top">sger.f</a>
+                and <a href="http://www.netlib.org/blas/dger.f" target="_top">dger.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gerc.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="geru.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>pptri</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="pptrf.html" title="pptrf">
+<link rel="next" href="pptrs.html" title="pptrs">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="pptrf.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="pptrs.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri"></a><a class="link" href="pptri.html" title="pptri">pptri</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.prototype"></a><h6>
+<a name="id1005440"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">pptri</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">pptri</span><span class="special">(</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.description"></a><h6>
+<a name="id1005524"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">pptri</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SPPTRI, DPPTRI, CPPTRI, and
+            ZPPTRI. <code class="computeroutput"><span class="identifier">pptri</span></code> computes
+            the inverse of a complex Hermitian positive definite matrix A using the
+            Cholesky factorization A = U**H*U or A = L<span class="bold"><strong>L</strong></span>*H
+            computed by ZPPTRF.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.dispatching_of_pptri"></a><p class="title"><b>Table&#160;1.279.&#160;Dispatching of pptri</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of pptri">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SPPTRI
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DPPTRI
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CPPTRI
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZPPTRI
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.definition"></a><h6>
+<a name="id1005864"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/pptri.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.parameters_or_requirements_on_types"></a><h6>
+<a name="id1005903"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.complexity"></a><h6>
+<a name="id1005990"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.example"></a><h6>
+<a name="id1006016"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">pptri</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">pptri</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.notes"></a><h6>
+<a name="id1006301"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.pptri.see_also"></a><h6>
+<a name="id1006327"></a>
+            <a class="link" href="pptri.html#boost_numeric_bindings.reference.lapack.computational_routines.pptri.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/spptri.f" target="_top">spptri.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dpptri.f" target="_top">dpptri.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cpptri.f" target="_top">cpptri.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zpptri.f" target="_top">zpptri.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="pptrf.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="pptrs.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

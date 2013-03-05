@@ -1,0 +1,294 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>herk</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_3_blas.html" title="Level 3 BLAS">
+<link rel="prev" href="her2k.html" title="her2k">
+<link rel="next" href="symm.html" title="symm">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="her2k.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_3_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="symm.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk"></a><a class="link" href="herk.html" title="herk">herk</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.prototype"></a><h6>
+<a name="id798556"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">herk</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">herk</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">MatrixC</span><span class="special">&amp;</span> <span class="identifier">c</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.description"></a><h6>
+<a name="id798706"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">herk</span></code> (short for hermitian
+            rank-k update) provides a C++ interface to BLAS routines SSYRK, DSYRK,
+            CHERK, and ZHERK. <code class="computeroutput"><span class="identifier">herk</span></code>
+            performs one of the hermitian rank k operations
+          </p>
+<p>
+            C := alpha*A*conjg( A' ) + beta*C,
+          </p>
+<p>
+            or
+          </p>
+<p>
+            C := alpha*conjg( A' )*A + beta*C,
+          </p>
+<p>
+            where alpha and beta are real scalars, C is an n by n hermitian matrix
+            and A is an n by k matrix in the first case and a k by n matrix in the
+            second case.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.dispatching_of_herk_"></a><p class="title"><b>Table&#160;1.88.&#160;Dispatching of herk.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of herk.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSYRK
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_ssyrk
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasSsyrk
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSYRK
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dsyrk
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasDsyrk
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CHERK
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_cherk
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasCherk
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZHERK
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_zherk
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines SSYRK, DSYRK, CHERK, and ZHERK have ten arguments,
+            whereas <code class="computeroutput"><span class="identifier">herk</span></code> requires
+            four arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.deduction_of_arguments_of_herk_"></a><p class="title"><b>Table&#160;1.89.&#160;Deduction of arguments of herk.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of herk.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.definition"></a><h6>
+<a name="id799179"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level3/herk.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.parameters_or_requirements_on_types"></a><h6>
+<a name="id799219"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.complexity"></a><h6>
+<a name="id799305"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.example"></a><h6>
+<a name="id799331"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level3</span><span class="special">/</span><span class="identifier">herk</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">herk</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.notes"></a><h6>
+<a name="id799615"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_3_blas.herk.see_also"></a><h6>
+<a name="id799639"></a>
+            <a class="link" href="herk.html#boost_numeric_bindings.reference.blas.level_3_blas.herk.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/ssyrk.f" target="_top">ssyrk.f</a>,
+                <a href="http://www.netlib.org/blas/dsyrk.f" target="_top">dsyrk.f</a>,
+                <a href="http://www.netlib.org/blas/cherk.f" target="_top">cherk.f</a>,
+                and <a href="http://www.netlib.org/blas/zherk.f" target="_top">zherk.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="her2k.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_3_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="symm.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

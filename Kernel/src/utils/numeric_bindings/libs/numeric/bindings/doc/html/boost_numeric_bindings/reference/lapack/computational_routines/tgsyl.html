@@ -1,0 +1,264 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>tgsyl</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="tgsna.html" title="tgsna">
+<link rel="next" href="ggsvp.html" title="ggsvp">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="tgsna.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggsvp.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl"></a><a class="link" href="tgsyl.html" title="tgsyl">tgsyl</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.prototype"></a><h6>
+<a name="id1069951"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">tgsyl</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">tgsyl</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">ijob</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span>
+        <span class="identifier">MatrixC</span><span class="special">&amp;</span> <span class="identifier">c</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="identifier">MatrixF</span><span class="special">&amp;</span> <span class="identifier">f</span><span class="special">,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span>
+        <span class="identifier">Scalar</span> <span class="special">&gt;</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.description"></a><h6>
+<a name="id1070226"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">tgsyl</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines STGSYL, DTGSYL, CTGSYL, and
+            ZTGSYL. <code class="computeroutput"><span class="identifier">tgsyl</span></code> solves
+            the generalized Sylvester equation:
+          </p>
+<p>
+            A * R - L * B = scale * C (1) D * R - L * E = scale * F
+          </p>
+<p>
+            where R and L are unknown m-by-n matrices, (A, D), (B, E) and (C, F)
+            are given matrix pairs of size m-by-m, n-by-n and m-by-n, respectively,
+            with complex entries. A, B, D and E are upper triangular (i.e., (A,D)
+            and (B,E) in generalized Schur form).
+          </p>
+<p>
+            The solution (R, L) overwrites (C, F). 0 &lt;= SCALE &lt;= 1 is an output
+            scaling factor chosen to avoid overflow.
+          </p>
+<p>
+            In matrix notation (1) is equivalent to solve Zx = scale*b, where Z is
+            defined as
+          </p>
+<p>
+            Z = [ kron(In, A) -kron(B', Im) ] (2) [ kron(In, D) -kron(E', Im) ],
+          </p>
+<p>
+            Here Ix is the identity matrix of size x and X' is the conjugate transpose
+            of X. Kron(X, Y) is the Kronecker product between the matrices X and
+            Y.
+          </p>
+<p>
+            If TRANS = 'C', y in the conjugate transposed system Z'*y = scale*b is
+            solved for, which is equivalent to solve for R and L in
+          </p>
+<p>
+            A' * R + D' * L = scale * C (3) R * B' + L * E' = scale * -F
+          </p>
+<p>
+            This case (TRANS = 'C') is used to compute an one-norm-based estimate
+            of Dif[(A,D), (B,E)], the separation between the matrix pairs (A,D) and
+            (B,E), using ZLACON.
+          </p>
+<p>
+            If IJOB &gt;= 1, <code class="computeroutput"><span class="identifier">tgsyl</span></code>
+            computes a Frobenius norm-based estimate of Dif[(A,D),(B,E)]. That is,
+            the reciprocal of a lower bound on the reciprocal of the smallest singular
+            value of Z.
+          </p>
+<p>
+            This is a level-3 BLAS algorithm.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.dispatching_of_tgsyl"></a><p class="title"><b>Table&#160;1.338.&#160;Dispatching of tgsyl</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of tgsyl">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      STGSYL
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DTGSYL
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CTGSYL
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZTGSYL
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.definition"></a><h6>
+<a name="id1070641"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/tgsyl.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.parameters_or_requirements_on_types"></a><h6>
+<a name="id1070682"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.complexity"></a><h6>
+<a name="id1070769"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.example"></a><h6>
+<a name="id1070795"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">tgsyl</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">tgsyl</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.notes"></a><h6>
+<a name="id1071079"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.see_also"></a><h6>
+<a name="id1071105"></a>
+            <a class="link" href="tgsyl.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsyl.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/stgsyl.f" target="_top">stgsyl.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dtgsyl.f" target="_top">dtgsyl.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/ctgsyl.f" target="_top">ctgsyl.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/ztgsyl.f" target="_top">ztgsyl.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="tgsna.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggsvp.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gbsv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="gglse.html" title="gglse">
+<link rel="next" href="gbsvx.html" title="gbsvx">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gglse.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gbsvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv"></a><a class="link" href="gbsv.html" title="gbsv">gbsv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.prototype"></a><h6>
+<a name="id838705"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gbsv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gbsv</span><span class="special">(</span> <span class="identifier">MatrixAB</span><span class="special">&amp;</span> <span class="identifier">ab</span><span class="special">,</span> <span class="identifier">VectorIPIV</span><span class="special">&amp;</span> <span class="identifier">ipiv</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.description"></a><h6>
+<a name="id838833"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gbsv</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGBSV, DGBSV, CGBSV, and
+            ZGBSV. <code class="computeroutput"><span class="identifier">gbsv</span></code> computes
+            the solution to a complex system of linear equations A * X = B, where
+            A is a band matrix of order N with KL subdiagonals and KU superdiagonals,
+            and X and B are N-by-NRHS matrices.
+          </p>
+<p>
+            The LU decomposition with partial pivoting and row interchanges is used
+            to factor A as A = L * U, where L is a product of permutation and unit
+            lower triangular matrices with KL subdiagonals, and U is upper triangular
+            with KL+KU superdiagonals. The factored form of A is then used to solve
+            the system of equations A * X = B.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAB</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAB</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.dispatching_of_gbsv"></a><p class="title"><b>Table&#160;1.126.&#160;Dispatching of gbsv</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gbsv">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAB
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGBSV
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.definition"></a><h6>
+<a name="id839177"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gbsv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.parameters_or_requirements_on_types"></a><h6>
+<a name="id839217"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.complexity"></a><h6>
+<a name="id839303"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.example"></a><h6>
+<a name="id839329"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gbsv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gbsv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.notes"></a><h6>
+<a name="id839613"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gbsv.see_also"></a><h6>
+<a name="id839638"></a>
+            <a class="link" href="gbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gbsv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgbsv.f" target="_top">sgbsv.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgbsv.f" target="_top">dgbsv.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgbsv.f" target="_top">cgbsv.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgbsv.f" target="_top">zgbsv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gglse.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gbsvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+
+[section:tutorial Tutorial]
+
+[section Hello, World!]
+
+To work with numeric bindings, usually you need
+to do at least two includes: one for the container you're using, 
+and one for some operation you would like to perform.
+
+Please see below.
+
+``
+#include <boost/numeric/bindings/std/vector.hpp>
+#include <boost/numeric/bindings/size.hpp>
+
+int main() {
+    std::vector<double> a;
+    a.push_back( 1.0 );
+    a.push_back( 2.0 );
+    a.push_back( 3.0 );
+    std::cout << bindings::size( a ) << std::endl;
+}
+
+``
+
+Although this isn't that interesting, it illustrates you're 
+bringing in support for standard vectors and the size operation.
+
+[endsect]
+
+
+[section Basic Linear Algebra]
+[endsect]
+
+[section Advanced Linear Algebra]
+[endsect]
+
+[section Inverting a matrix]
+
+Suppose you would like to invert a matrix given by
+
+``
+    [ 1 2 3 ]
+A = [ 3 1 2 ]
+    [ 2 3 1 ] ``
+
+[endsect]
+
+
+[section Inspecting a type]
+[endsect]
+
+[section Writing a generic numeric algorithm]
+
+* Generic in the sense that you don't know the matrix and/or vector
+  classes that you will be supplied with.
+* No memory allocations.
+
+[endsect]
+
+[section Adapting your own type]
+[endsect]
+
+
+
+
+
+[endsect]

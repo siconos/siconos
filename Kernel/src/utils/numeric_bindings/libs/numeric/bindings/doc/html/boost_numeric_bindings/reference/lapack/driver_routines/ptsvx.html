@@ -1,0 +1,250 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ptsvx</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="ptsv.html" title="ptsv">
+<link rel="next" href="spsv.html" title="spsv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ptsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="spsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx"></a><a class="link" href="ptsvx.html" title="ptsvx">ptsvx</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.prototype"></a><h6>
+<a name="id861256"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">ptsvx</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ptsvx</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">fact</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="identifier">VectorDF</span><span class="special">&amp;</span> <span class="identifier">df</span><span class="special">,</span>
+        <span class="identifier">VectorEF</span><span class="special">&amp;</span> <span class="identifier">ef</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">MatrixX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span>
+        <span class="identifier">VectorFERR</span><span class="special">&amp;</span> <span class="identifier">ferr</span><span class="special">,</span> <span class="identifier">VectorBERR</span><span class="special">&amp;</span> <span class="identifier">berr</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.description"></a><h6>
+<a name="id861552"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ptsvx</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SPTSVX, DPTSVX, CPTSVX, and
+            ZPTSVX. <code class="computeroutput"><span class="identifier">ptsvx</span></code> uses the
+            factorization A = L<span class="bold"><strong>D*L</strong></span>*H to compute
+            the solution to a complex system of linear equations A*X = B, where A
+            is an N-by-N Hermitian positive definite tridiagonal matrix and X and
+            B are N-by-NRHS matrices.
+          </p>
+<p>
+            Error bounds on the solution and a condition estimate are also provided.
+          </p>
+<p>
+            Description <code class="literal">=</code><code class="literal">=</code><code class="literal">=</code>==
+          </p>
+<p>
+            The following steps are performed:
+          </p>
+<p>
+            1. If FACT = 'N', the matrix A is factored as A = L<span class="bold"><strong>D*L</strong></span><span class="bold"><strong>H, where L is a unit lower bidiagonal matrix and D is diagonal.
+            The factorization can also be regarded as having the form A = U</strong></span>*H*D*U.
+          </p>
+<p>
+            2. If the leading i-by-i principal minor is not positive definite, then
+            the routine returns with INFO = i. Otherwise, the factored form of A
+            is used to estimate the condition number of the matrix A. If the reciprocal
+            of the condition number is less than machine precision, INFO = N+1 is
+            returned as a warning, but the routine still goes on to solve for X and
+            compute error bounds as described below.
+          </p>
+<p>
+            3. The system of equations is solved for X using the factored form of
+            A.
+          </p>
+<p>
+            4. Iterative refinement is applied to improve the computed solution matrix
+            and calculate error bounds and backward error estimates for it.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorD</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorD</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.dispatching_of_ptsvx"></a><p class="title"><b>Table&#160;1.146.&#160;Dispatching of ptsvx</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ptsvx">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorD
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SPTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DPTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CPTSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZPTSVX
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.definition"></a><h6>
+<a name="id861964"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/ptsvx.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.parameters_or_requirements_on_types"></a><h6>
+<a name="id862006"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.complexity"></a><h6>
+<a name="id862093"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.example"></a><h6>
+<a name="id862119"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">ptsvx</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">ptsvx</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.notes"></a><h6>
+<a name="id862404"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.see_also"></a><h6>
+<a name="id862429"></a>
+            <a class="link" href="ptsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ptsvx.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sptsvx.f" target="_top">sptsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dptsvx.f" target="_top">dptsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cptsvx.f" target="_top">cptsvx.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zptsvx.f" target="_top">zptsvx.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ptsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="spsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

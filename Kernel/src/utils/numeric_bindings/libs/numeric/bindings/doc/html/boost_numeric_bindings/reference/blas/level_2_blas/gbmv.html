@@ -1,0 +1,299 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gbmv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="prev" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="next" href="gemv.html" title="gemv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../level_2_blas.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gemv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv"></a><a class="link" href="gbmv.html" title="gbmv">gbmv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.prototype"></a><h6>
+<a name="id761322"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.prototype">Prototype</a>
+          </h6>
+<p>
+            There are two prototypes of <code class="computeroutput"><span class="identifier">gbmv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gbmv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorY</span><span class="special">&amp;</span> <span class="identifier">y</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="identifier">gbmv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="identifier">alpha</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">VectorY</span><span class="special">&amp;</span> <span class="identifier">y</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.description"></a><h6>
+<a name="id761650"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gbmv</span></code> (short for generic,
+            banded, matrix-vector operation) provides a C++ interface to BLAS routines
+            SGBMV, DGBMV, CGBMV, and ZGBMV. <code class="computeroutput"><span class="identifier">gbmv</span></code>
+            performs one of the matrix-vector operations
+          </p>
+<p>
+            y := alpha*A*x + beta*y, or y := alpha*A'*x + beta*y, or
+          </p>
+<p>
+            y := alpha*conjg( A' )*x + beta*y,
+          </p>
+<p>
+            where alpha and beta are scalars, x and y are vectors and A is an m by
+            n band matrix, with kl sub-diagonals and ku super-diagonals.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.dispatching_of_gbmv_"></a><p class="title"><b>Table&#160;1.32.&#160;Dispatching of gbmv.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gbmv.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_sgbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasSgbmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dgbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_cgbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasCgbmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_zgbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines SGBMV, DGBMV, CGBMV, and ZGBMV have thirteen arguments,
+            whereas <code class="computeroutput"><span class="identifier">gbmv</span></code> requires
+            five arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.deduction_of_arguments_of_gbmv_"></a><p class="title"><b>Table&#160;1.33.&#160;Deduction of arguments of gbmv.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of gbmv.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.definition"></a><h6>
+<a name="id762117"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level2/gbmv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.parameters_or_requirements_on_types"></a><h6>
+<a name="id762157"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.complexity"></a><h6>
+<a name="id762244"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.example"></a><h6>
+<a name="id762269"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level2</span><span class="special">/</span><span class="identifier">gbmv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">gbmv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.notes"></a><h6>
+<a name="id762553"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.gbmv.see_also"></a><h6>
+<a name="id762577"></a>
+            <a class="link" href="gbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.gbmv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/sgbmv.f" target="_top">sgbmv.f</a>,
+                <a href="http://www.netlib.org/blas/dgbmv.f" target="_top">dgbmv.f</a>,
+                <a href="http://www.netlib.org/blas/cgbmv.f" target="_top">cgbmv.f</a>,
+                and <a href="http://www.netlib.org/blas/zgbmv.f" target="_top">zgbmv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../level_2_blas.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gemv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

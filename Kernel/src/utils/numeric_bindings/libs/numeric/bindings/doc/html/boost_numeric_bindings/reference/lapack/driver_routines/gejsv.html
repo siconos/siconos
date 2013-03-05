@@ -1,0 +1,204 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gejsv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="gbsvx.html" title="gbsvx">
+<link rel="next" href="gesv.html" title="gesv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gbsvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gesv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv"></a><a class="link" href="gejsv.html" title="gejsv">gejsv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.prototype"></a><h6>
+<a name="id841043"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gejsv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gejsv</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">joba</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobu</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobv</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobr</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobt</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobp</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span>
+        <span class="identifier">VectorSVA</span><span class="special">&amp;</span> <span class="identifier">sva</span><span class="special">,</span> <span class="identifier">MatrixU</span><span class="special">&amp;</span> <span class="identifier">u</span><span class="special">,</span> <span class="identifier">MatrixV</span><span class="special">&amp;</span> <span class="identifier">v</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.description"></a><h6>
+<a name="id841337"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gejsv</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGEJSV and DGEJSV. <code class="computeroutput"><span class="identifier">gejsv</span></code> computes the singular value decomposition
+            (SVD) of a real M-by-N matrix [A], where M &gt;= N. The SVD of [A] is
+            written as
+          </p>
+<p>
+            [A] = [U] * [SIGMA] * [V]^t,
+          </p>
+<p>
+            where [SIGMA] is an N-by-N (M-by-N) matrix which is zero except for its
+            N diagonal elements, [U] is an M-by-N (or M-by-M) orthonormal matrix,
+            and [V] is an N-by-N orthogonal matrix. The diagonal elements of [SIGMA]
+            are the singular values of [A]. The columns of [U] and [V] are the left
+            and the right singular vectors of [A], respectively. The matrices [U]
+            and [V] are computed and stored in the arrays U and V, respectively.
+            The diagonal of [SIGMA] is computed and stored in the array SVA.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.dispatching_of_gejsv"></a><p class="title"><b>Table&#160;1.128.&#160;Dispatching of gejsv</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gejsv">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGEJSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGEJSV
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.definition"></a><h6>
+<a name="id841594"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gejsv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.parameters_or_requirements_on_types"></a><h6>
+<a name="id841636"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.complexity"></a><h6>
+<a name="id841724"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.example"></a><h6>
+<a name="id841751"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gejsv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gejsv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.notes"></a><h6>
+<a name="id842035"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gejsv.see_also"></a><h6>
+<a name="id842060"></a>
+            <a class="link" href="gejsv.html#boost_numeric_bindings.reference.lapack.driver_routines.gejsv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgejsv.f" target="_top">sgejsv.f</a>
+                and <a href="http://www.netlib.org/lapack/double/dgejsv.f" target="_top">dgejsv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gbsvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gesv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

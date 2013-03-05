@@ -1,0 +1,233 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ungbr</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="ormbr.html" title="ormbr">
+<link rel="next" href="unmbr.html" title="unmbr">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ormbr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="unmbr.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr"></a><a class="link" href="ungbr.html" title="ungbr">ungbr</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.prototype"></a><h6>
+<a name="id943661"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">ungbr</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ungbr</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">vect</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">m</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">n</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">k</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">VectorTAU</span><span class="special">&amp;</span> <span class="identifier">tau</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.description"></a><h6>
+<a name="id943868"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ungbr</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SORGBR, DORGBR, CUNGBR, and
+            ZUNGBR. <code class="computeroutput"><span class="identifier">ungbr</span></code> generates
+            one of the complex unitary matrices Q or P<span class="bold"><strong>*H determined
+            by ZGEBRD when reducing a complex matrix A to bidiagonal form: A = Q
+            * B * P</strong></span><span class="bold"><strong>H. Q and P</strong></span>*H are defined
+            as products of elementary reflectors H(i) or G(i) respectively.
+          </p>
+<p>
+            If VECT = 'Q', A is assumed to have been an M-by-K matrix, and Q is of
+            order M: if m &gt;= k, Q = H(1) H(2) . . . H(k) and <code class="computeroutput"><span class="identifier">ungbr</span></code>
+            returns the first n columns of Q, where m &gt;= n &gt;= k; if m &lt;
+            k, Q = H(1) H(2) . . . H(m-1) and <code class="computeroutput"><span class="identifier">ungbr</span></code>
+            returns Q as an M-by-M matrix.
+          </p>
+<p>
+            If VECT = 'P', A is assumed to have been a K-by-N matrix, and P<span class="bold"><strong>*H is of order N: if k &lt; n, P</strong></span><span class="bold"><strong>H
+            = G(k) . . . G(2) G(1) and `ungbr` returns the first m rows of P</strong></span><span class="bold"><strong>H, where n &gt;= m &gt;= k; if k &gt;= n, P</strong></span><span class="bold"><strong>H = G(n-1) . . . G(2) G(1) and `ungbr` returns P</strong></span>*H
+            as an N-by-N matrix.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.dispatching_of_ungbr"></a><p class="title"><b>Table&#160;1.222.&#160;Dispatching of ungbr</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ungbr">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SORGBR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DORGBR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CUNGBR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZUNGBR
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.definition"></a><h6>
+<a name="id944282"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/ungbr.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.parameters_or_requirements_on_types"></a><h6>
+<a name="id944322"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.complexity"></a><h6>
+<a name="id944408"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.example"></a><h6>
+<a name="id944434"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">ungbr</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">ungbr</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.notes"></a><h6>
+<a name="id944718"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.ungbr.see_also"></a><h6>
+<a name="id944744"></a>
+            <a class="link" href="ungbr.html#boost_numeric_bindings.reference.lapack.computational_routines.ungbr.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sorgbr.f" target="_top">sorgbr.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dorgbr.f" target="_top">dorgbr.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cungbr.f" target="_top">cungbr.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zungbr.f" target="_top">zungbr.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ormbr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="unmbr.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

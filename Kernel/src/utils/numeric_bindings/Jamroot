@@ -1,0 +1,37 @@
+#==================================---------------------------------------------
+#   Copyright 2009 Thomas Klimpel
+#   Copyright 2009 Rutger ter Borg
+#
+#   Distributed under the Boost Software License, Version 1.0.
+#   (See accompanying file LICENSE_1_0.txt or copy at
+#   http://www.boost.org/LICENSE_1_0.txt)
+#----------------------------------------------===============================*/
+
+import os ;
+
+# Set the BOOST_ROOT environment variable on your command-line or in the 
+# environment to point at the root of your regular Boost installation.
+
+# get the BOOST_ROOT environment variable
+path-constant BOOST_ROOT : [ os.environ BOOST_ROOT ] ;
+
+# record the root of the directory structure
+path-constant TOP : . ;
+
+# we are using Boost
+use-project boost
+   : $(BOOST_ROOT)
+   ;
+
+# This project and anything using it needs these and Boost headers
+project numeric_bindings
+   : build-dir bin.v2
+   : usage-requirements
+        <include>.
+        <include>$(BOOST_ROOT)
+    : requirements
+        <include>.
+        <include>$(BOOST_ROOT)
+        # Disable auto-linking for all targets here.
+        <define>BOOST_ALL_NO_LIB=1
+   ;

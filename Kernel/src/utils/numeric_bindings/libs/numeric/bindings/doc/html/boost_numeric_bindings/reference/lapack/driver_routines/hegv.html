@@ -1,0 +1,220 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>hegv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="hbgvx.html" title="hbgvx">
+<link rel="next" href="hegvd.html" title="hegvd">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hbgvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hegvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv"></a><a class="link" href="hegv.html" title="hegv">hegv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.prototype"></a><h6>
+<a name="id820184"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">hegv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">hegv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">itype</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobz</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span>
+        <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.description"></a><h6>
+<a name="id820360"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">hegv</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SSYGV, DSYGV, CHEGV, and
+            ZHEGV. <code class="computeroutput"><span class="identifier">hegv</span></code> computes
+            all the eigenvalues, and optionally, the eigenvectors of a complex generalized
+            Hermitian-definite eigenproblem, of the form A*x<code class="literal">(lambda)*B*x,
+            A*Bx</code>(lambda)*x, or B*A*x=(lambda)*x. Here A and B are assumed
+            to be Hermitian and B is also positive definite.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.dispatching_of_hegv"></a><p class="title"><b>Table&#160;1.109.&#160;Dispatching of hegv</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of hegv">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSYGV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSYGV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CHEGV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZHEGV
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.definition"></a><h6>
+<a name="id820702"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/hegv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.parameters_or_requirements_on_types"></a><h6>
+<a name="id820742"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.complexity"></a><h6>
+<a name="id820829"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.example"></a><h6>
+<a name="id820855"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">hegv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">hegv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.notes"></a><h6>
+<a name="id821139"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hegv.see_also"></a><h6>
+<a name="id821163"></a>
+            <a class="link" href="hegv.html#boost_numeric_bindings.reference.lapack.driver_routines.hegv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/ssygv.f" target="_top">ssygv.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dsygv.f" target="_top">dsygv.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/chegv.f" target="_top">chegv.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zhegv.f" target="_top">zhegv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hbgvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hegvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

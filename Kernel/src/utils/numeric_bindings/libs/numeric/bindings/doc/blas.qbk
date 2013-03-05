@@ -1,0 +1,87 @@
+
+[section:blas BLAS]
+
+BLAS consists of three levels of routines: 
+
+* *level 1* routines involve scalar-vector and vector-vector operations, like computing an inner product,
+* *level 2* routines cover vector-matrix operations, and
+* *level 3* routines perform matrix-matrix operations.
+
+[table Level 1 BLAS
+    [         [BLAS] [Boost.Numeric_Bindings Equivalent]]
+    [         [xROTG]     [ [funcref blas::create_rotation] ] ]
+    [         [xROTMG]    [ [funcref blas::create_rotation] ] ]
+    [         [xROT]      [ [funcref blas::apply_rotation] ] ]
+    [         [xROTM]     [ [funcref blas::apply_rotation] ] ]
+    [         [xSWAP]     [ [funcref blas::swap] ] ]
+    [         [xSCAL]     [ [funcref blas::scale] ] ]
+    [         [xCOPY]     [ [funcref blas::copy] ] ]
+    [         [xAXPY]     [ [funcref blas::transform] ] ]
+    [         [xDOT]      [ [funcref blas::dot] ] ]
+    [         [xDOTU]     [ [funcref blas::dot] ] ]
+    [         [xDOTC]     [ [funcref blas::dot] ] ]
+    [         [xxDOT]     [ [funcref blas::dot] ] ]
+    [         [xNRM2]     [ [funcref blas::norm_2] ] ]
+    [         [xASUM]     [ [funcref blas::abs_sum] ] ] 
+    [         [IxAMAX]    [ [funcref blas::index_norm_inf] ] ]
+]
+
+[table Level 2 BLAS
+    [         [BLAS] [Boost.Numeric_Bindings Equivalent]]
+    [    [xGEMV]    [ [funcref blas::transform] ] ]
+    [    [xGBMV]    [ [funcref blas::transform] ] ]
+    [    [xHEMV]    [ [funcref blas::transform] ] ]
+    [    [xHPMV]    [ [funcref blas::transform] ] ]
+    [    [xSYMV]    [ [funcref blas::transform] ] ]
+    [    [xSBMV]    [ [funcref blas::transform] ] ]
+    [    [xTRMV]    [ [funcref blas::transform] ] ]
+    [    [xTBMV]    [ [funcref blas::transform] ] ]
+    [    [xTPMV]    [ [funcref blas::transform] ] ]
+    [    [xTRSV]    [ [funcref blas::forward_solve], [funcref blas::back_solve] ] ]
+    [    [xTBSV]    [ [funcref blas::forward_solve], [funcref blas::back_solve] ] ]
+    [    [xTPSV]    [ [funcref blas::forward_solve], [funcref blas::back_solve] ] ]
+    [    [xGER]     [ [funcref blas::rank_1_update] ] ]
+    [    [xGERU]    [ [funcref blas::rank_1_update] ] ]
+    [    [xGERC]    [ [funcref blas::rank_1_update] ] ]
+    [    [xHER]     [ [funcref blas::rank_1_update] ] ]
+    [    [xHPR]     [ [funcref blas::rank_1_update] ] ]
+    [    [xHER2]    [ [funcref blas::rank_2_update] ] ]
+    [    [xHPR2]    [ [funcref blas::rank_2_update] ] ]
+    [    [xSYR]     [ [funcref blas::rank_1_update] ] ]
+    [    [xSPR]     [ [funcref blas::rank_1_update] ] ]
+    [    [xSYR]     [ [funcref blas::rank_2_update] ] ]
+    [    [xSPR]     [ [funcref blas::rank_2_update] ] ]
+]
+
+[table Level 3 BLAS
+    [  [BLAS] [Boost.Numeric_Bindings Equivalent]]
+    [  [xGEMM]      [ [funcref blas::transform] ] ]
+    [  [xSYMM]      [ [funcref blas::transform] ] ]
+    [  [xHEMM]      [ [funcref blas::transform] ] ]
+    [  [xSYRK]      [ [funcref blas::rank_k_update] ] ]
+    [  [xHERK]      [ [funcref blas::rank_k_update] ] ]
+    [  [xSYR2K]     [ [funcref blas::rank_2k_update] ] ]
+    [  [xHER2K]     [ [funcref blas::rank_2k_update] ] ]
+    [  [xTRMM]      [ [funcref blas::transform] ] ]
+    [  [xTRSM]      [ [funcref blas::forward_solve], [funcref blas::back_solve] ] ]
+]
+
+
+[include blas/level1.qbk]
+[include blas/level2.qbk]
+[include blas/level3.qbk]
+
+[endsect]
+
+
+
+
+
+
+
+
+
+
+
+
+

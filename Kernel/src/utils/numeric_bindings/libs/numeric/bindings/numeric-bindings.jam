@@ -1,0 +1,167 @@
+# Copyright Thomas Klimpel 2008.
+# Use, modification and distribution are subject to the
+# Boost Software License, Version 1.0. (See accompanying file
+# LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+import feature : feature ;
+feature numbind
+        : user
+          gfortran     g77
+          clapack-gcc  clapack-msvc
+          acml-gcc     acml-msvc
+          mkl-gcc      mkl-msvc
+        : optional propagated ;
+
+feature matlib
+        : ublas glas mtl eigen
+        : optional propagated ;
+
+# Make this module a project
+import project ;
+project.initialize $(__name__) ;
+project numeric-bindings ;
+
+GLAS_INCLUDE ?= /usr/local/lib ;
+MTL_INCLUDE ?= /usr/local/lib ;
+EIGEN_INCLUDE ?= /usr/local/lib ;
+
+NUMERIC_LIB_PATH ?= /usr/lib ;
+NUMERIC_INCLUDE ?= /usr/local/lib ;
+SUITESPARSE_INCLUDE ?= $(NUMERIC_INCLUDE)/SuiteSparse ;
+
+FORTRAN_PATH ?= $(NUMERIC_LIB_PATH) ;
+
+ACML_DLL_PATH ?= /AMD/acml4.2.0/ifort32/lib ;
+ACML_FORTRAN_DLL ?= libifcoremd ;
+ACML_DLL ?= libacml_dll ;
+ACML_PATH ?= $(NUMERIC_LIB_PATH) ;
+ACML_LIB ?= acml ;
+
+MKL_PATH ?= $(NUMERIC_LIB_PATH) ;
+
+AMOS_PATH ?= $(NUMERIC_LIB_PATH) ;
+AMOS_LIB ?= amos ;
+
+ATLAS_INCLUDE ?= $(NUMERIC_INCLUDE)/ATLAS/include ;
+ATLAS_PATH ?= $(NUMERIC_LIB_PATH) ;
+ATLAS_LIB ?= atlas ;
+CBLAS_LIB ?= cblas ;
+LAPACK_ATLAS_LIB ?= lapack_atlas ;
+
+BLAS_PATH ?= $(NUMERIC_LIB_PATH) ;
+BLAS_LIB  ?= blas ;
+
+LAPACK_PATH ?= $(NUMERIC_LIB_PATH) ;
+LAPACK_LIB  ?= lapack ;
+
+MUMPS_INCLUDE ?= $(NUMERIC_LIB_PATH)/MUMPS_4.8.1/include ;
+MUMPS_PATH    ?= $(NUMERIC_LIB_PATH)/MUMPS_4.8.1/lib ;
+MUMPS_LIB     ?= mumps_common ;
+
+UMFPACK_INCLUDE ?= $(SUITESPARSE_INCLUDE)/UMFPACK/Include ;
+UFCONFIG_INCLUDE ?= $(SUITESPARSE_INCLUDE)/UFconfig ;
+AMD_INCLUDE ?= $(SUITESPARSE_INCLUDE)/AMD/Include ;
+UMFPACK_PATH ?= $(NUMERIC_LIB_PATH) ;
+UMFPACK_LIB ?= umfpack ;
+AMD_PATH ?= $(NUMERIC_LIB_PATH) ;
+AMD_LIB ?= amd ;
+
+alias test_matlib : :
+                  : : <define>TEST_MATLIB_UBLAS ;
+alias test_matlib : : <matlib>ublas
+                  : : <define>TEST_MATLIB_UBLAS ;
+alias test_matlib : : <matlib>glas
+                  : : <define>TEST_MATLIB_GLAS
+                      <include>$(GLAS_INCLUDE) ;
+alias test_matlib : : <matlib>mtl
+                  : : <define>TEST_MATLIB_MTL
+                      <include>$(MTL_INCLUDE) ;
+alias test_matlib : : <matlib>eigen
+                  : : <define>TEST_MATLIB_EIGEN
+                      <include>$(EIGEN_INCLUDE) ;
+
+lib acml_lib : : <name>$(ACML_LIB) <search>$(ACML_PATH)
+             : : <define>BIND_FORTRAN_NO_F2C_RETURN_CONVENTIONS ;
+#lib msvc_acml_fortran_lib : : <name>$(ACML_FORTRAN_DLL) <search>$(ACML_DLL_PATH) <toolset>msvc:<link>shared
+#             : : <define>BIND_FORTRAN_NO_F2C_RETURN_CONVENTIONS ;
+alias msvc_acml_fortran_lib ;
+lib msvc_acml_lib : : <name>$(ACML_DLL) <search>$(ACML_DLL_PATH)
+                      <toolset>msvc:<link>shared <use>msvc_acml_fortran_lib
+             : : <define>BIND_FORTRAN_UPPERCASE
+                 <define>BIND_FORTRAN_NO_F2C_RETURN_CONVENTIONS
+                 <library>msvc_acml_fortran_lib ;
+
+lib mkl_core_lib : : <name>mkl_core <search>$(MKL_PATH)
+                 : : <define>BIND_FORTRAN_NO_F2C_RETURN_CONVENTIONS ;
+lib mkl_c_lib : : <name>mkl_intel_lp64 <search>$(MKL_PATH) ;
+#lib mkl_c_lib : : <name>mkl_intel_ilp64 <search>$(MKL_PATH)
+#              : : <define>BIND_FORTRAN_INTEGER_8 ;
+lib mkl_seq_lib : : <name>mkl_sequential <search>$(MKL_PATH) ;
+
+
+lib gfortran_fortran_lib : : <name>gfortran <search>$(FORTRAN_PATH)
+                         : : <define>BIND_FORTRAN_NO_F2C_RETURN_CONVENTIONS
+#                             <define>BIND_FORTRAN_INTEGER_8
+;
+lib g77_fortran_lib : : <name>g2c <search>$(FORTRAN_PATH) ;
+lib msvc_fortran_lib : : <name>libf2c <search>$(FORTRAN_PATH)
+                : : <define>BIND_FORTRAN_LOWERCASE_UNDERSCORE
+                    <toolset>msvc:<linkflags>/NODEFAULTLIB:LIBCMT ;
+
+alias fortran_lib : gfortran_fortran_lib ;
+alias fortran_lib : gfortran_fortran_lib : <numbind>gfortran ;
+alias fortran_lib : g77_fortran_lib : <numbind>g77 ;
+alias fortran_lib : g77_fortran_lib : <numbind>clapack-gcc ;
+alias fortran_lib : msvc_fortran_lib : <numbind>clapack-msvc ;
+
+lib amos_lib : fortran_lib : <name>$(AMOS_LIB) <search>$(AMOS_PATH) ;
+
+lib atlas_lib : : <name>$(ATLAS_LIB) <search>$(ATLAS_PATH)
+              : : <include>$(ATLAS_INCLUDE) ;
+lib cblas_lib : : <name>$(CBLAS_LIB) <search>$(ATLAS_PATH)
+              : : <include>$(ATLAS_INCLUDE)
+                  <define>BOOST_NUMERIC_BINDINGS_BLAS_CBLAS ;
+lib lapack_atlas_lib : : <name>$(LAPACK_ATLAS_LIB) <search>$(ATLAS_PATH)
+                     : : <include>$(ATLAS_INCLUDE)
+                         <define>BOOST_NUMERIC_BINDINGS_LAPACK_CLAPACK ;
+
+lib f_blas_lib   : fortran_lib : <name>$(BLAS_LIB)   <search>$(BLAS_PATH) ;
+lib f_lapack_lib : fortran_lib : <name>$(LAPACK_LIB) <search>$(LAPACK_PATH) <use>blas_lib
+                 : : <library>blas_lib ;
+
+alias blas_lib   : f_blas_lib ;
+alias blas_lib   : f_blas_lib : <numbind>gfortran ;
+alias blas_lib   : f_blas_lib : <numbind>g77 ;
+alias blas_lib   : f_blas_lib : <numbind>clapack-gcc ;
+alias blas_lib   : acml_lib : <numbind>acml-gcc ;
+alias blas_lib   : msvc_acml_lib : <numbind>acml-msvc ;
+alias blas_lib   : mkl_core_lib mkl_c_lib mkl_seq_lib : <numbind>mkl-gcc ;
+alias lapack_lib : f_lapack_lib ;
+alias lapack_lib : f_lapack_lib : <numbind>gfortran ;
+alias lapack_lib : f_lapack_lib : <numbind>g77 ;
+alias lapack_lib : f_lapack_lib : <numbind>clapack-gcc ;
+alias lapack_lib : acml_lib : <use>blas_lib <numbind>acml-gcc
+                 : : <library>blas_lib ;
+alias lapack_lib : msvc_acml_lib : <use>blas_lib <numbind>acml-msvc
+                 : : <library>blas_lib ;
+alias lapack_lib : mkl_core_lib mkl_c_lib mkl_seq_lib : <numbind>mkl-gcc ;
+
+lib pthread ;
+lib mpiseq : : <search>$(MUMPS_PATH)/../libseq ;
+lib pord   : : <search>$(MUMPS_PATH) ;
+lib smumps : : <search>$(MUMPS_PATH) ;
+lib dmumps : : <search>$(MUMPS_PATH) ;
+lib cmumps : : <search>$(MUMPS_PATH) ;
+lib zmumps : : <search>$(MUMPS_PATH) ;
+lib mumps_lib   : smumps dmumps cmumps zmumps pord 
+                  fortran_lib mpiseq blas_lib pthread
+                : <name>$(MUMPS_LIB) <search>$(MUMPS_PATH)
+              : : <include>$(MUMPS_INCLUDE) ;
+
+lib amd_lib : : <name>$(AMD_LIB) <search>$(AMD_PATH)
+            : : <include>$(AMD_INCLUDE)
+                <include>$(UFCONFIG_INCLUDE) ;
+lib umfpack_lib : amd_lib blas_lib
+                : <name>$(UMFPACK_LIB) <search>$(UMFPACK_PATH)
+              : :  <include>$(UMFPACK_INCLUDE)
+                   <include>$(UFCONFIG_INCLUDE) ;

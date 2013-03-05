@@ -1,0 +1,11 @@
+$TEMPLATE[ptcon.all.N.trait]
+size,D
+$TEMPLATE[pteqr.all.N.trait]
+size,D
+$TEMPLATE[ptrfs.all.N.trait]
+size,D
+$TEMPLATE[pttrf.all.N.trait]
+size,D
+$TEMPLATE[pttrs.all.N.trait]
+size,D
+$TEMPLATE[end]

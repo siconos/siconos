@@ -1,0 +1,41 @@
+
+[section:lapack LAPACK]
+
+Here, the high-level LAPACK bindings will be described.
+
+LAPACK consists of three levels of routines: 
+
+* *driver* routines solve a complete problem, e.g., solving a system of linear equations, determining eigenvalues, 
+* *computational* routines solve a distinct computational task, such as a LU or QR decomposition.
+* *auxiliary* routines carry out underlying tasks such as the non-blocked versions of matrix-vector operations.
+
+Like with lapack, the bindings focus on the first two levels of routines: driver and computational.
+
+
+
+[table LAPACK driver routines
+
+    [[Fortran Subroutines] [Boost.Numeric_Bindings Equivalent] [Boost.Numeric_Bindings High-level Interface]]
+    [[SGESV, CGESV, DGESV, ZGESV] [lapack::gesv.hpp] [lapack::solve]]
+    [[xGBSV] [gbsv.hpp] [lapack::solve]]
+    [[NAME] [gtsv.hpp] [lapack::solve]]
+    [[NAME] [hesv.hpp] [lapack::solve]]
+    [[NAME] [hpsv.hpp] [lapack::solve]]
+    [[NAME] [posv.hpp] [lapack::solve]]
+    [[NAME] [ppsv.hpp] [lapack::solve]]
+    [[NAME] [pbsv.hpp] [lapack::solve]]
+    [[NAME] [ptsv.hpp] [lapack::solve]]
+    [[NAME] [sysv.hpp] [lapack::solve]]
+    [[NAME] [spsv.hpp] [lapack::solve]]
+]
+
+
+`lapack::solve( a, b );`
+
+[include lapack/driver.qbk]
+[include lapack/computational.qbk]
+[include lapack/auxiliary.qbk]
+
+[endsect]
+
+

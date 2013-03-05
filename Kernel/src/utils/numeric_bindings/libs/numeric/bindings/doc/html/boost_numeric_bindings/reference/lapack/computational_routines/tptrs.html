@@ -1,0 +1,224 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>tptrs</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="tptri.html" title="tptri">
+<link rel="next" href="trcon.html" title="trcon">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="tptri.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="trcon.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs"></a><a class="link" href="tptrs.html" title="tptrs">tptrs</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.prototype"></a><h6>
+<a name="id1030973"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">tptrs</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">tptrs</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.description"></a><h6>
+<a name="id1031086"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">tptrs</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines STPTRS, DTPTRS, CTPTRS, and
+            ZTPTRS. <code class="computeroutput"><span class="identifier">tptrs</span></code> solves
+            a triangular system of the form
+          </p>
+<p>
+            A * X = B, A<span class="bold"><strong>*T * X = B, or A</strong></span>*H * X =
+            B,
+          </p>
+<p>
+            where A is a triangular matrix of order N stored in packed format, and
+            B is an N-by-NRHS matrix. A check is made to verify that A is nonsingular.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.dispatching_of_tptrs"></a><p class="title"><b>Table&#160;1.303.&#160;Dispatching of tptrs</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of tptrs">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      STPTRS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DTPTRS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CTPTRS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZTPTRS
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.definition"></a><h6>
+<a name="id1031435"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/tptrs.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.parameters_or_requirements_on_types"></a><h6>
+<a name="id1031475"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.complexity"></a><h6>
+<a name="id1031563"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.example"></a><h6>
+<a name="id1031589"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">tptrs</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">tptrs</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.notes"></a><h6>
+<a name="id1031874"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tptrs.see_also"></a><h6>
+<a name="id1031900"></a>
+            <a class="link" href="tptrs.html#boost_numeric_bindings.reference.lapack.computational_routines.tptrs.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/stptrs.f" target="_top">stptrs.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dtptrs.f" target="_top">dtptrs.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/ctptrs.f" target="_top">ctptrs.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/ztptrs.f" target="_top">ztptrs.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="tptri.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="trcon.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Computational Routines</title>
+<link rel="stylesheet" href="../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../lapack.html" title="LAPACK">
+<link rel="prev" href="driver_routines/gelsy.html" title="gelsy">
+<link rel="next" href="computational_routines/hbgst.html" title="hbgst">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="driver_routines/gelsy.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../lapack.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="computational_routines/hbgst.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines"></a><a class="link" href="computational_routines.html" title="Computational Routines">Computational
+        Routines</a>
+</h4></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section"><a href="computational_routines/hbgst.html">hbgst</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hegst.html">hegst</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbstf.html">pbstf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sbgst.html">sbgst</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sygst.html">sygst</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ggqrf.html">ggqrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ggrqf.html">ggrqf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gelqf.html">gelqf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/geqlf.html">geqlf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/geqp3.html">geqp3</a></span></dt>
+<dt><span class="section"><a href="computational_routines/geqrf.html">geqrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gerqf.html">gerqf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orglq.html">orglq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orgql.html">orgql</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orgqr.html">orgqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orgrq.html">orgrq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormlq.html">ormlq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormql.html">ormql</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormqr.html">ormqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormrq.html">ormrq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormrz.html">ormrz</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tzrzf.html">tzrzf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unglq.html">unglq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ungql.html">ungql</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ungqr.html">ungqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ungrq.html">ungrq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmlq.html">unmlq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmql.html">unmql</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmqr.html">unmqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmrq.html">unmrq</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmrz.html">unmrz</a></span></dt>
+<dt><span class="section"><a href="computational_routines/bdsdc.html">bdsdc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/bdsqr.html">bdsqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbbrd.html">gbbrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gebrd.html">gebrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orgbr.html">orgbr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormbr.html">ormbr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ungbr.html">ungbr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmbr.html">unmbr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gebak.html">gebak</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gebal.html">gebal</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gehrd.html">gehrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hsein.html">hsein</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hseqr.html">hseqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orghr.html">orghr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormhr.html">ormhr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trevc.html">trevc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trexc.html">trexc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trsen.html">trsen</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trsna.html">trsna</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trsyl.html">trsyl</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unghr.html">unghr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmhr.html">unmhr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbcon.html">gbcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbequ.html">gbequ</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbrfs.html">gbrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbtrf.html">gbtrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gbtrs.html">gbtrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gecon.html">gecon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/geequ.html">geequ</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gerfs.html">gerfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/getrf.html">getrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/getri.html">getri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/getrs.html">getrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gtrfs.html">gtrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gttrs.html">gttrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hecon.html">hecon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/herfs.html">herfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hetrf.html">hetrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hetri.html">hetri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hetrs.html">hetrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hpcon.html">hpcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hprfs.html">hprfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hptrf.html">hptrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hptri.html">hptri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hptrs.html">hptrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbcon.html">pbcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbequ.html">pbequ</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbrfs.html">pbrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbtrf.html">pbtrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pbtrs.html">pbtrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pftrf.html">pftrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pftri.html">pftri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pftrs.html">pftrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pocon.html">pocon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/poequ.html">poequ</a></span></dt>
+<dt><span class="section"><a href="computational_routines/porfs.html">porfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/potrf.html">potrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/potri.html">potri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/potrs.html">potrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ppcon.html">ppcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ppequ.html">ppequ</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pprfs.html">pprfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pptrf.html">pptrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pptri.html">pptri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pptrs.html">pptrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pstrf.html">pstrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ptcon.html">ptcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ptrfs.html">ptrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pttrf.html">pttrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pttrs.html">pttrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/spcon.html">spcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sprfs.html">sprfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sptrf.html">sptrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sptri.html">sptri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sptrs.html">sptrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sycon.html">sycon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/syrfs.html">syrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sytrf.html">sytrf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sytri.html">sytri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sytrs.html">sytrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tbcon.html">tbcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tbrfs.html">tbrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tbtrs.html">tbtrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tftri.html">tftri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tpcon.html">tpcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tprfs.html">tprfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tptri.html">tptri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tptrs.html">tptrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trcon.html">trcon</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trrfs.html">trrfs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trtri.html">trtri</a></span></dt>
+<dt><span class="section"><a href="computational_routines/trtrs.html">trtrs</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hbtrd.html">hbtrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hetrd.html">hetrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hptrd.html">hptrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/opgtr.html">opgtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/opmtr.html">opmtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/orgtr.html">orgtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ormtr.html">ormtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/pteqr.html">pteqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sbtrd.html">sbtrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sptrd.html">sptrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/stebz.html">stebz</a></span></dt>
+<dt><span class="section"><a href="computational_routines/stedc.html">stedc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/stegr.html">stegr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/stein.html">stein</a></span></dt>
+<dt><span class="section"><a href="computational_routines/stemr.html">stemr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/steqr.html">steqr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sterf.html">sterf</a></span></dt>
+<dt><span class="section"><a href="computational_routines/sytrd.html">sytrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ungtr.html">ungtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/unmtr.html">unmtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/upgtr.html">upgtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/upmtr.html">upmtr</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ggbak.html">ggbak</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ggbal.html">ggbal</a></span></dt>
+<dt><span class="section"><a href="computational_routines/gghrd.html">gghrd</a></span></dt>
+<dt><span class="section"><a href="computational_routines/hgeqz.html">hgeqz</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgevc.html">tgevc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgexc.html">tgexc</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgsen.html">tgsen</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgsna.html">tgsna</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgsyl.html">tgsyl</a></span></dt>
+<dt><span class="section"><a href="computational_routines/ggsvp.html">ggsvp</a></span></dt>
+<dt><span class="section"><a href="computational_routines/tgsja.html">tgsja</a></span></dt>
+</dl></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="driver_routines/gelsy.html"><img src="../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../lapack.html"><img src="../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../index.html"><img src="../../../images/home.png" alt="Home"></a><a accesskey="n" href="computational_routines/hbgst.html"><img src="../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>stemr</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="stein.html" title="stein">
+<link rel="next" href="steqr.html" title="steqr">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="stein.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="steqr.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr"></a><a class="link" href="stemr.html" title="stemr">stemr</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.prototype"></a><h6>
+<a name="id1050860"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">stemr</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">stemr</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobz</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">range</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">n</span><span class="special">,</span>
+        <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span> <span class="identifier">VectorE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">il</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">iu</span><span class="special">,</span>
+        <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">m</span><span class="special">,</span> <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span><span class="special">,</span> <span class="identifier">MatrixZ</span><span class="special">&amp;</span> <span class="identifier">z</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">nzc</span><span class="special">,</span> <span class="identifier">VectorISUPPZ</span><span class="special">&amp;</span> <span class="identifier">isuppz</span><span class="special">,</span>
+        <span class="identifier">fortran_bool_t</span><span class="special">&amp;</span> <span class="identifier">tryrac</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.description"></a><h6>
+<a name="id1051260"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">stemr</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SSTEMR, DSTEMR, CSTEMR, and
+            ZSTEMR. <code class="computeroutput"><span class="identifier">stemr</span></code> computes
+            selected eigenvalues and, optionally, eigenvectors of a real symmetric
+            tridiagonal matrix T. Any such unreduced matrix has a well defined set
+            of pairwise different real eigenvalues, the corresponding real eigenvectors
+            are pairwise orthogonal.
+          </p>
+<p>
+            The spectrum may be computed either completely or partially by specifying
+            either an interval (VL,VU] or a range of indices IL:IU for the desired
+            eigenvalues.
+          </p>
+<p>
+            Depending on the number of desired eigenvalues, these are computed either
+            by bisection or the dqds algorithm. Numerically orthogonal eigenvectors
+            are computed by the use of various suitable L D L^T factorizations near
+            clusters of close eigenvalues (referred to as RRRs, Relatively Robust
+            Representations). An informal sketch of the algorithm follows.
+          </p>
+<p>
+            For each unreduced block (submatrix) of T, (a) Compute T - sigma I =
+            L D L^T, so that L and D define all the wanted eigenvalues to high relative
+            accuracy. This means that small relative changes in the entries of D
+            and L cause only small relative changes in the eigenvalues and eigenvectors.
+            The standard (unfactored) representation of the tridiagonal matrix T
+            does not have this property in general. (b) Compute the eigenvalues to
+            suitable accuracy. If the eigenvectors are desired, the algorithm attains
+            full accuracy of the computed eigenvalues only right before the corresponding
+            vectors have to be computed, see steps c) and d). (c) For each cluster
+            of close eigenvalues, select a new shift close to the cluster, find a
+            new factorization, and refine the shifted eigenvalues to suitable accuracy.
+            (d) For each eigenvalue with a large enough relative separation compute
+            the corresponding eigenvector by forming a rank revealing twisted factorization.
+            Go back to (c) for any clusters that remain.
+          </p>
+<p>
+            For more details, see: - Inderjit S. Dhillon and Beresford N. Parlett:
+            "Multiple representations to compute orthogonal eigenvectors of
+            symmetric tridiagonal matrices," Linear Algebra and its Applications,
+            387(1), pp. 1-28, August 2004. - Inderjit Dhillon and Beresford Parlett:
+            "Orthogonal Eigenvectors and Relative Gaps," SIAM Journal on
+            Matrix Analysis and Applications, Vol. 25, 2004. Also LAPACK Working
+            Note 154. - Inderjit Dhillon: "A new O(n^2) algorithm for the symmetric
+            tridiagonal eigenvalue/eigenvector problem", Computer Science Division
+            Technical Report No. UCB/CSD-97-971, UC Berkeley, May 1997.
+          </p>
+<p>
+            Further Details 1.<code class="computeroutput"><span class="identifier">stemr</span></code>
+            works only on machines which follow IEEE-754 floating-point standard
+            in their handling of infinities and NaNs. This permits the use of efficient
+            inner loops avoiding a check for zero divisors.
+          </p>
+<p>
+            2. LAPACK routines can be used to reduce a complex Hermitean matrix to
+            real symmetric tridiagonal form.
+          </p>
+<p>
+            (Any complex Hermitean tridiagonal matrix has real values on its diagonal
+            and potentially complex numbers on its off-diagonals. By applying a similarity
+            transform with an appropriate diagonal matrix diag(1,e^{i \phy<span class="underline">1}, ... , e^{i \phy</span>{n-1}}), the complex Hermitean
+            matrix can be transformed into a real symmetric matrix and complex arithmetic
+            can be entirely avoided.)
+          </p>
+<p>
+            While the eigenvectors of the real symmetric tridiagonal matrix are real,
+            the eigenvectors of original complex Hermitean matrix have complex entries
+            in general. Since LAPACK drivers overwrite the matrix data with the eigenvectors,
+            <code class="computeroutput"><span class="identifier">stemr</span></code> accepts complex
+            workspace to facilitate interoperability with ZUNMTR or ZUPMTR.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorD</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorD</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.dispatching_of_stemr"></a><p class="title"><b>Table&#160;1.322.&#160;Dispatching of stemr</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of stemr">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorD
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSTEMR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSTEMR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CSTEMR
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZSTEMR
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.definition"></a><h6>
+<a name="id1051706"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/stemr.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.parameters_or_requirements_on_types"></a><h6>
+<a name="id1051746"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.complexity"></a><h6>
+<a name="id1051834"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.example"></a><h6>
+<a name="id1051860"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">stemr</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">stemr</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.notes"></a><h6>
+<a name="id1052145"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stemr.see_also"></a><h6>
+<a name="id1052171"></a>
+            <a class="link" href="stemr.html#boost_numeric_bindings.reference.lapack.computational_routines.stemr.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sstemr.f" target="_top">sstemr.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dstemr.f" target="_top">dstemr.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cstemr.f" target="_top">cstemr.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zstemr.f" target="_top">zstemr.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="stein.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="steqr.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>tgsja</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="ggsvp.html" title="ggsvp">
+<link rel="next" href="../auxiliary_routines.html" title="Auxiliary Routines">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ggsvp.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="../auxiliary_routines.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsja"></a><a class="link" href="tgsja.html" title="tgsja">tgsja</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsja.prototype"></a><h6>
+<a name="id1072459"></a>
+            <a class="link" href="tgsja.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsja.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">tgsja</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">tgsja</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobu</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobv</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobq</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">k</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">l</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span>
+        <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorALPHA</span><span class="special">&amp;</span> <span class="identifier">alpha</span><span class="special">,</span>
+        <span class="identifier">VectorBETA</span><span class="special">&amp;</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">MatrixU</span><span class="special">&amp;</span> <span class="identifier">u</span><span class="special">,</span> <span class="identifier">MatrixV</span><span class="special">&amp;</span> <span class="identifier">v</span><span class="special">,</span> <span class="identifier">MatrixQ</span><span class="special">&amp;</span> <span class="identifier">q</span><span class="special">,</span>
+        <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">ncycle</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsja.description"></a><h6>
+<a name="id1072856"></a>
+            <a class="link" href="tgsja.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsja.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">tgsja</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines STGSJA, DTGSJA, CTGSJA, and
+            ZTGSJA. <code class="computeroutput"><span class="identifier">tgsja</span></code> computes
+            the generalized singular value decomposition (GSVD) of two complex upper
+            triangular (or trapezoidal) matrices A and B.
+          </p>
+<p>
+            On entry, it is assumed that matrices A and B have the following forms,
+            which may be obtained by the preprocessing subroutine ZGGSVP from a general
+            M-by-N matrix A and P-by-N matrix B:
+          </p>
+<p>
+            N-K-L K L A = K ( 0 A12 A13 ) if M-K-L &gt;= 0; L ( 0 0 A23 ) M-K-L (
+            0 0 0 )
+          </p>
+<p>
+            N-K-L K L A = K ( 0 A12 A13 ) if M-K-L &lt; 0; M-K ( 0 0 A23 )
+          </p>
+<p>
+            N-K-L K L B = L ( 0 0 B13 ) P-L ( 0 0 0 )
+          </p>
+<p>
+            where the K-by-K matrix A12 and L-by-L matrix B13 are nonsingular upper
+            triangular; A23 is L-by-L upper triangular if M-K-L &gt;= 0, otherwise
+            A23 is (M-K)-by-L upper trapezoidal.
+          </p>
+<p>
+            On exit,
+          </p>
+<p>
+            U'<span class="bold"><strong>A*Q = D1</strong></span>( 0 R ), V'<span class="bold"><strong>B*Q
+            = D2</strong></span>( 0 R ),
+          </p>
+<p>
+            where U, V and Q are unitary matrices, Z' denotes the conjugate transpose
+            of Z, R is a nonsingular upper triangular matrix, and D1 and D2 are 
+</p>
+<pre class="programlisting"><span class="identifier">diagonal</span><span class="char">''</span> <span class="identifier">matrices</span><span class="special">,</span> <span class="identifier">which</span> <span class="identifier">are</span> <span class="identifier">of</span> <span class="identifier">the</span> <span class="identifier">following</span>
+<span class="identifier">structures</span><span class="special">:</span>
+
+<span class="identifier">If</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span> <span class="special">&gt;=</span> <span class="number">0</span><span class="special">,</span>
+
+<span class="identifier">K</span> <span class="identifier">L</span>
+<span class="identifier">D1</span> <span class="special">=</span> <span class="identifier">K</span> <span class="special">(</span> <span class="identifier">I</span> <span class="number">0</span> <span class="special">)</span>
+<span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">C</span> <span class="special">)</span>
+<span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="special">)</span>
+
+<span class="identifier">K</span> <span class="identifier">L</span>
+<span class="identifier">D2</span> <span class="special">=</span> <span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">S</span> <span class="special">)</span>
+<span class="identifier">P</span><span class="special">-</span><span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="special">)</span>
+
+<span class="identifier">N</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span> <span class="identifier">K</span> <span class="identifier">L</span>
+<span class="special">(</span> <span class="number">0</span> <span class="identifier">R</span> <span class="special">)</span> <span class="special">=</span> <span class="identifier">K</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">R11</span> <span class="identifier">R12</span> <span class="special">)</span> <span class="identifier">K</span>
+<span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="identifier">R22</span> <span class="special">)</span> <span class="identifier">L</span>
+
+<span class="identifier">where</span>
+
+<span class="identifier">C</span> <span class="special">=</span> <span class="identifier">diag</span><span class="special">(</span> <span class="identifier">ALPHA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="number">1</span><span class="special">),</span> <span class="special">...</span> <span class="special">,</span> <span class="identifier">ALPHA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">)</span> <span class="special">),</span>
+<span class="identifier">S</span> <span class="special">=</span> <span class="identifier">diag</span><span class="special">(</span> <span class="identifier">BETA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="number">1</span><span class="special">),</span> <span class="special">...</span> <span class="special">,</span> <span class="identifier">BETA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">)</span> <span class="special">),</span>
+<span class="identifier">C</span><span class="special">**</span><span class="number">2</span> <span class="special">+</span> <span class="identifier">S</span><span class="special">**</span><span class="number">2</span> <span class="special">=</span> <span class="identifier">I</span><span class="special">.</span>
+
+<span class="identifier">R</span> <span class="identifier">is</span> <span class="identifier">stored</span> <span class="identifier">in</span> <span class="identifier">A</span><span class="special">(</span><span class="number">1</span><span class="special">:</span><span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">,</span><span class="identifier">N</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span><span class="special">+</span><span class="number">1</span><span class="special">:</span><span class="identifier">N</span><span class="special">)</span> <span class="identifier">on</span> <span class="identifier">exit</span><span class="special">.</span>
+
+<span class="identifier">If</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span> <span class="special">&lt;</span> <span class="number">0</span><span class="special">,</span>
+
+<span class="identifier">K</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">-</span><span class="identifier">M</span>
+<span class="identifier">D1</span> <span class="special">=</span> <span class="identifier">K</span> <span class="special">(</span> <span class="identifier">I</span> <span class="number">0</span> <span class="number">0</span> <span class="special">)</span>
+<span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">C</span> <span class="number">0</span> <span class="special">)</span>
+
+<span class="identifier">K</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">-</span><span class="identifier">M</span>
+<span class="identifier">D2</span> <span class="special">=</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">S</span> <span class="number">0</span> <span class="special">)</span>
+<span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">-</span><span class="identifier">M</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="identifier">I</span> <span class="special">)</span>
+<span class="identifier">P</span><span class="special">-</span><span class="identifier">L</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="special">)</span>
+
+<span class="identifier">N</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span> <span class="identifier">K</span> <span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">-</span><span class="identifier">M</span>
+<span class="special">(</span> <span class="number">0</span> <span class="identifier">R</span> <span class="special">)</span> <span class="special">=</span> <span class="identifier">K</span> <span class="special">(</span> <span class="number">0</span> <span class="identifier">R11</span> <span class="identifier">R12</span> <span class="identifier">R13</span> <span class="special">)</span>
+<span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="identifier">R22</span> <span class="identifier">R23</span> <span class="special">)</span>
+<span class="identifier">K</span><span class="special">+</span><span class="identifier">L</span><span class="special">-</span><span class="identifier">M</span> <span class="special">(</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="identifier">R33</span> <span class="special">)</span>
+
+<span class="identifier">where</span>
+<span class="identifier">C</span> <span class="special">=</span> <span class="identifier">diag</span><span class="special">(</span> <span class="identifier">ALPHA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="number">1</span><span class="special">),</span> <span class="special">...</span> <span class="special">,</span> <span class="identifier">ALPHA</span><span class="special">(</span><span class="identifier">M</span><span class="special">)</span> <span class="special">),</span>
+<span class="identifier">S</span> <span class="special">=</span> <span class="identifier">diag</span><span class="special">(</span> <span class="identifier">BETA</span><span class="special">(</span><span class="identifier">K</span><span class="special">+</span><span class="number">1</span><span class="special">),</span> <span class="special">...</span> <span class="special">,</span> <span class="identifier">BETA</span><span class="special">(</span><span class="identifier">M</span><span class="special">)</span> <span class="special">),</span>
+<span class="identifier">C</span><span class="special">**</span><span class="number">2</span> <span class="special">+</span> <span class="identifier">S</span><span class="special">**</span><span class="number">2</span> <span class="special">=</span> <span class="identifier">I</span><span class="special">.</span>
+
+<span class="identifier">R</span> <span class="special">=</span> <span class="special">(</span> <span class="identifier">R11</span> <span class="identifier">R12</span> <span class="identifier">R13</span> <span class="special">)</span> <span class="identifier">is</span> <span class="identifier">stored</span> <span class="identifier">in</span> <span class="identifier">A</span><span class="special">(</span><span class="number">1</span><span class="special">:</span><span class="identifier">M</span><span class="special">,</span> <span class="identifier">N</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span><span class="special">+</span><span class="number">1</span><span class="special">:</span><span class="identifier">N</span><span class="special">)</span> <span class="keyword">and</span> <span class="identifier">R33</span> <span class="identifier">is</span> <span class="identifier">stored</span>
+<span class="special">(</span> <span class="number">0</span> <span class="identifier">R22</span> <span class="identifier">R23</span> <span class="special">)</span>
+<span class="identifier">in</span> <span class="identifier">B</span><span class="special">(</span><span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span><span class="special">+</span><span class="number">1</span><span class="special">:</span><span class="identifier">L</span><span class="special">,</span><span class="identifier">N</span><span class="special">+</span><span class="identifier">M</span><span class="special">-</span><span class="identifier">K</span><span class="special">-</span><span class="identifier">L</span><span class="special">+</span><span class="number">1</span><span class="special">:</span><span class="identifier">N</span><span class="special">)</span> <span class="identifier">on</span> <span class="identifier">exit</span><span class="special">.</span>
+
+<span class="identifier">The</span> <span class="identifier">computation</span> <span class="identifier">of</span> <span class="identifier">the</span> <span class="identifier">unitary</span> <span class="identifier">transformation</span> <span class="identifier">matrices</span> <span class="identifier">U</span><span class="special">,</span> <span class="identifier">V</span> <span class="keyword">or</span> <span class="identifier">Q</span>
+<span class="identifier">is</span> <span class="identifier">optional</span><span class="special">.</span> <span class="identifier">These</span> <span class="identifier">matrices</span> <span class="identifier">may</span> <span class="identifier">either</span> <span class="identifier">be</span> <span class="identifier">formed</span> <span class="identifier">explicitly</span><span class="special">,</span> <span class="keyword">or</span> <span class="identifier">they</span>
+<span class="identifier">may</span> <span class="identifier">be</span> <span class="identifier">postmultiplied</span> <span class="identifier">into</span> <span class="identifier">input</span> <span class="identifier">matrices</span> <span class="identifier">U1</span><span class="special">,</span> <span class="identifier">V1</span><span class="special">,</span> <span class="keyword">or</span> <span class="identifier">Q1</span><span class="special">.</span>
+
+<span class="identifier">The</span> <span class="identifier">selection</span> <span class="identifier">of</span> <span class="identifier">the</span> <span class="identifier">LAPACK</span> <span class="identifier">routine</span> <span class="identifier">is</span> <span class="identifier">done</span> <span class="identifier">during</span> <span class="identifier">compile</span><span class="special">-</span><span class="identifier">time</span><span class="special">,</span> 
+<span class="keyword">and</span> <span class="identifier">is</span> <span class="identifier">determined</span> <span class="identifier">by</span> <span class="identifier">the</span> <span class="identifier">type</span> <span class="identifier">of</span> <span class="identifier">values</span> <span class="identifier">contained</span> <span class="identifier">in</span> <span class="identifier">type</span> <span class="error">`</span><span class="identifier">MatrixA</span><span class="error">`</span><span class="special">.</span>
+<span class="identifier">The</span> <span class="identifier">type</span> <span class="identifier">of</span> <span class="identifier">values</span> <span class="identifier">is</span> <span class="identifier">obtained</span> <span class="identifier">through</span> <span class="identifier">the</span> <span class="error">`</span><span class="identifier">value_type</span><span class="error">`</span> <span class="identifier">meta</span><span class="special">-</span><span class="identifier">function</span>
+ <span class="error">`</span><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span><span class="error">`</span><span class="special">.</span>
+<span class="identifier">The</span> <span class="identifier">dispatching</span> <span class="identifier">table</span> <span class="identifier">below</span> <span class="identifier">illustrates</span> <span class="identifier">to</span> <span class="identifier">which</span> <span class="identifier">specific</span> <span class="identifier">routine</span> 
+<span class="identifier">the</span> <span class="identifier">code</span> <span class="identifier">path</span> <span class="identifier">will</span> <span class="identifier">be</span> <span class="identifier">generated</span><span class="special">.</span> 
+
+<span class="special">[</span><span class="identifier">table</span> <span class="identifier">Dispatching</span> <span class="identifier">of</span> <span class="identifier">tgsja</span>
+<span class="special">[</span>  <span class="special">[</span> <span class="identifier">Value</span> <span class="identifier">type</span> <span class="identifier">of</span> <span class="identifier">MatrixA</span> <span class="special">]</span> <span class="special">[</span><span class="identifier">LAPACK</span> <span class="identifier">routine</span><span class="special">]</span> <span class="special">]</span>
+<span class="special">[</span>  <span class="special">[</span><span class="error">`</span><span class="keyword">float</span><span class="error">`</span><span class="special">][</span><span class="identifier">STGSJA</span><span class="special">]</span> <span class="special">]</span>
+<span class="special">[</span>  <span class="special">[</span><span class="error">`</span><span class="keyword">double</span><span class="error">`</span><span class="special">][</span><span class="identifier">DTGSJA</span><span class="special">]</span> <span class="special">]</span>
+<span class="special">[</span>  <span class="special">[</span><span class="error">`</span><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span><span class="error">`</span><span class="special">][</span><span class="identifier">CTGSJA</span><span class="special">]</span> <span class="special">]</span>
+<span class="special">[</span>  <span class="special">[</span><span class="error">`</span><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span><span class="error">`</span><span class="special">][</span><span class="identifier">ZTGSJA</span><span class="special">]</span> <span class="special">]</span>
+
+<span class="special">]</span>
+
+
+<span class="special">[</span><span class="identifier">heading</span> <span class="identifier">Definition</span><span class="special">]</span>
+<span class="identifier">Defined</span> <span class="identifier">in</span> <span class="identifier">header</span> <span class="special">[</span><span class="identifier">headerref</span> <span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">tgsja</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">].</span>
+
+
+<span class="special">[</span><span class="identifier">heading</span> <span class="identifier">Parameters</span> <span class="keyword">or</span> <span class="identifier">Requirements</span> <span class="identifier">on</span> <span class="identifier">Types</span><span class="special">]</span>
+
+<span class="special">[</span><span class="identifier">variablelist</span> <span class="identifier">Parameters</span>
+    <span class="special">[[</span><span class="identifier">MatrixA</span><span class="special">]</span> <span class="special">[</span><span class="identifier">The</span> <span class="identifier">definition</span> <span class="identifier">of</span> <span class="identifier">term</span> <span class="number">1</span><span class="special">]]</span>
+    <span class="special">[[</span><span class="identifier">MatrixB</span><span class="special">]</span> <span class="special">[</span><span class="identifier">The</span> <span class="identifier">definition</span> <span class="identifier">of</span> <span class="identifier">term</span> <span class="number">2</span><span class="special">]]</span>
+    <span class="special">[[</span><span class="identifier">MatrixC</span><span class="special">]</span> <span class="special">[</span>
+    <span class="identifier">The</span> <span class="identifier">definition</span> <span class="identifier">of</span> <span class="identifier">term</span> <span class="number">3.</span>
+
+    <span class="identifier">Definitions</span> <span class="identifier">may</span> <span class="identifier">contain</span> <span class="identifier">paragraphs</span><span class="special">.</span>
+    <span class="special">]]</span>
+<span class="special">]</span>
+
+
+<span class="special">[</span><span class="identifier">heading</span> <span class="identifier">Complexity</span><span class="special">]</span>
+
+
+<span class="special">[</span><span class="identifier">heading</span> <span class="identifier">Example</span><span class="special">]</span>
+</pre>
+<p>
+            #include &lt;boost/numeric/bindings/lapack/computational/tgsja.hpp&gt;
+            using namespace boost::numeric::bindings;
+          </p>
+<p>
+            lapack::tgsja( x, y, z );
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="keyword">this</span> <span class="identifier">will</span> <span class="identifier">output</span>
+
+</pre>
+<p>
+            [5] 0 1 2 3 4 5 <code class="computeroutput"></code>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsja.notes"></a><h6>
+<a name="id1076564"></a>
+            <a class="link" href="tgsja.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsja.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgsja.see_also"></a><h6>
+<a name="id1076589"></a>
+            <a class="link" href="tgsja.html#boost_numeric_bindings.reference.lapack.computational_routines.tgsja.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/stgsja.f" target="_top">stgsja.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dtgsja.f" target="_top">dtgsja.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/ctgsja.f" target="_top">ctgsja.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/ztgsja.f" target="_top">ztgsja.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ggsvp.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="../auxiliary_routines.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>latrz</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../auxiliary_routines.html" title="Auxiliary Routines">
+<link rel="prev" href="latrs.html" title="latrs">
+<link rel="next" href="../../../license.html" title="License">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="latrs.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="../../../license.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz"></a><a class="link" href="latrz.html" title="latrz">latrz</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.prototype"></a><h6>
+<a name="id1109789"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">latrz</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">latrz</span><span class="special">(</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">VectorTAU</span><span class="special">&amp;</span> <span class="identifier">tau</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.description"></a><h6>
+<a name="id1109896"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">latrz</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SLATRZ, DLATRZ, CLATRZ, and
+            ZLATRZ. <code class="computeroutput"><span class="identifier">latrz</span></code> factors
+            the M-by-(M+L) complex upper trapezoidal matrix [ A1 A2 ] = [ A(1:M,1:M)
+            A(1:M,N-L+1:N) ] as ( R 0 ) * Z by means of unitary transformations,
+            where Z is an (M+L)-by-(M+L) unitary matrix and, R and A1 are M-by-M
+            upper triangular matrices.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.dispatching_of_latrz"></a><p class="title"><b>Table&#160;1.370.&#160;Dispatching of latrz</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of latrz">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SLATRZ
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DLATRZ
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CLATRZ
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZLATRZ
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.definition"></a><h6>
+<a name="id1110230"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/auxiliary/latrz.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.parameters_or_requirements_on_types"></a><h6>
+<a name="id1110270"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.complexity"></a><h6>
+<a name="id1110356"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.example"></a><h6>
+<a name="id1110382"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">auxiliary</span><span class="special">/</span><span class="identifier">latrz</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">latrz</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.notes"></a><h6>
+<a name="id1110668"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.see_also"></a><h6>
+<a name="id1110694"></a>
+            <a class="link" href="latrz.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.latrz.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/slatrz.f" target="_top">slatrz.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dlatrz.f" target="_top">dlatrz.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/clatrz.f" target="_top">clatrz.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zlatrz.f" target="_top">zlatrz.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="latrs.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="../../../license.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

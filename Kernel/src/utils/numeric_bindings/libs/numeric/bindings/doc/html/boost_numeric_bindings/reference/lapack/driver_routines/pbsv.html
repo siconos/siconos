@@ -1,0 +1,226 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>pbsv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="iter_posv.html" title="iter_posv">
+<link rel="next" href="pbsvx.html" title="pbsvx">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="iter_posv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="pbsvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv"></a><a class="link" href="pbsv.html" title="pbsv">pbsv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.prototype"></a><h6>
+<a name="id853446"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">pbsv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">pbsv</span><span class="special">(</span> <span class="identifier">MatrixAB</span><span class="special">&amp;</span> <span class="identifier">ab</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.description"></a><h6>
+<a name="id853553"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">pbsv</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SPBSV, DPBSV, CPBSV, and
+            ZPBSV. <code class="computeroutput"><span class="identifier">pbsv</span></code> computes
+            the solution to a complex system of linear equations A * X = B, where
+            A is an N-by-N Hermitian positive definite band matrix and X and B are
+            N-by-NRHS matrices.
+          </p>
+<p>
+            The Cholesky decomposition is used to factor A as A = U<span class="bold"><strong>*H
+            * U, if UPLO = 'U', or A = L * L</strong></span>*H, if UPLO = 'L', where U
+            is an upper triangular band matrix, and L is a lower triangular band
+            matrix, with the same number of superdiagonals or subdiagonals as A.
+            The factored form of A is then used to solve the system of equations
+            A * X = B.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAB</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAB</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.dispatching_of_pbsv"></a><p class="title"><b>Table&#160;1.139.&#160;Dispatching of pbsv</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of pbsv">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAB
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SPBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DPBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CPBSV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZPBSV
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.definition"></a><h6>
+<a name="id853903"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/pbsv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.parameters_or_requirements_on_types"></a><h6>
+<a name="id853943"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.complexity"></a><h6>
+<a name="id854031"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.example"></a><h6>
+<a name="id854056"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">pbsv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">pbsv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.notes"></a><h6>
+<a name="id854340"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.pbsv.see_also"></a><h6>
+<a name="id854366"></a>
+            <a class="link" href="pbsv.html#boost_numeric_bindings.reference.lapack.driver_routines.pbsv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/spbsv.f" target="_top">spbsv.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dpbsv.f" target="_top">dpbsv.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cpbsv.f" target="_top">cpbsv.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zpbsv.f" target="_top">zpbsv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="iter_posv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="pbsvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

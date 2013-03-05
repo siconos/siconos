@@ -1,0 +1,247 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>tgevc</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="hgeqz.html" title="hgeqz">
+<link rel="next" href="tgexc.html" title="tgexc">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hgeqz.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="tgexc.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc"></a><a class="link" href="tgevc.html" title="tgevc">tgevc</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.prototype"></a><h6>
+<a name="id1064450"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">tgevc</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">tgevc</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Side</span> <span class="identifier">side</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">howmny</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorSELECT</span><span class="special">&amp;</span> <span class="identifier">select</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">MatrixS</span><span class="special">&amp;</span> <span class="identifier">s</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixP</span><span class="special">&amp;</span> <span class="identifier">p</span><span class="special">,</span> <span class="identifier">MatrixVL</span><span class="special">&amp;</span> <span class="identifier">vl</span><span class="special">,</span> <span class="identifier">MatrixVR</span><span class="special">&amp;</span> <span class="identifier">vr</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">mm</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">m</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.description"></a><h6>
+<a name="id1064738"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">tgevc</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines STGEVC, DTGEVC, CTGEVC, and
+            ZTGEVC. <code class="computeroutput"><span class="identifier">tgevc</span></code> computes
+            some or all of the right and/or left eigenvectors of a pair of complex
+            matrices (S,P), where S and P are upper triangular. Matrix pairs of this
+            type are produced by the generalized Schur factorization of a complex
+            matrix pair (A,B):
+          </p>
+<p>
+            A = Q<span class="bold"><strong>S*Z</strong></span>*H, B = Q<span class="bold"><strong>P*Z</strong></span>*H
+          </p>
+<p>
+            as computed by ZGGHRD + ZHGEQZ.
+          </p>
+<p>
+            The right eigenvector x and the left eigenvector y of (S,P) corresponding
+            to an eigenvalue w are defined by:
+          </p>
+<p>
+            S*x = w<span class="bold"><strong>P*x, (y</strong></span>*H)<span class="bold"><strong>S
+            = w</strong></span>(y**H)*P,
+          </p>
+<p>
+            where y**H denotes the conjugate tranpose of y. The eigenvalues are not
+            input to this routine, but are computed directly from the diagonal elements
+            of S and P.
+          </p>
+<p>
+            This routine returns the matrices X and/or Y of right and left eigenvectors
+            of (S,P), or the products Z*X and/or Q*Y, where Z and Q are input matrices.
+            If Q and Z are the unitary factors from the generalized Schur factorization
+            of a matrix pair (A,B), then Z*X and Q*Y are the matrices of right and
+            left eigenvectors of (A,B).
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorSELECT</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorSELECT</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.dispatching_of_tgevc"></a><p class="title"><b>Table&#160;1.334.&#160;Dispatching of tgevc</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of tgevc">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorSELECT
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      STGEVC
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DTGEVC
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CTGEVC
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZTGEVC
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.definition"></a><h6>
+<a name="id1065136"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/tgevc.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.parameters_or_requirements_on_types"></a><h6>
+<a name="id1065176"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.complexity"></a><h6>
+<a name="id1065263"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.example"></a><h6>
+<a name="id1065289"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">tgevc</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">tgevc</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.notes"></a><h6>
+<a name="id1065573"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.tgevc.see_also"></a><h6>
+<a name="id1065598"></a>
+            <a class="link" href="tgevc.html#boost_numeric_bindings.reference.lapack.computational_routines.tgevc.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/stgevc.f" target="_top">stgevc.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dtgevc.f" target="_top">dtgevc.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/ctgevc.f" target="_top">ctgevc.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/ztgevc.f" target="_top">ztgevc.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hgeqz.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="tgexc.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ppsvx</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="ppsv.html" title="ppsv">
+<link rel="next" href="ptsv.html" title="ptsv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ppsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ptsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx"></a><a class="link" href="ppsvx.html" title="ppsvx">ppsvx</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.prototype"></a><h6>
+<a name="id858978"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">ppsvx</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ppsvx</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">fact</span><span class="special">,</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span><span class="special">,</span> <span class="identifier">VectorAFP</span><span class="special">&amp;</span> <span class="identifier">afp</span><span class="special">,</span> <span class="keyword">char</span><span class="special">&amp;</span> <span class="identifier">equed</span><span class="special">,</span>
+        <span class="identifier">VectorS</span><span class="special">&amp;</span> <span class="identifier">s</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">MatrixX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorFERR</span><span class="special">&amp;</span> <span class="identifier">ferr</span><span class="special">,</span>
+        <span class="identifier">VectorBERR</span><span class="special">&amp;</span> <span class="identifier">berr</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.description"></a><h6>
+<a name="id859257"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ppsvx</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SPPSVX, DPPSVX, CPPSVX, and
+            ZPPSVX. <code class="computeroutput"><span class="identifier">ppsvx</span></code> uses the
+            Cholesky factorization A = U**H*U or A = L<span class="bold"><strong>L</strong></span>*H
+            to compute the solution to a complex system of linear equations A * X
+            = B, where A is an N-by-N Hermitian positive definite matrix stored in
+            packed format and X and B are N-by-NRHS matrices.
+          </p>
+<p>
+            Error bounds on the solution and a condition estimate are also provided.
+          </p>
+<p>
+            Description <code class="literal">=</code><code class="literal">=</code><code class="literal">=</code>==
+          </p>
+<p>
+            The following steps are performed:
+          </p>
+<p>
+            1. If FACT = 'E', real scaling factors are computed to equilibrate the
+            system: diag(S) * A * diag(S) * inv(diag(S)) * X = diag(S) * B Whether
+            or not the system will be equilibrated depends on the scaling of the
+            matrix A, but if equilibration is used, A is overwritten by diag(S)*A*diag(S)
+            and B by diag(S)*B.
+          </p>
+<p>
+            2. If FACT = 'N' or 'E', the Cholesky decomposition is used to factor
+            the matrix A (after equilibration if FACT = 'E') as A = U'* U , if UPLO
+            = 'U', or A = L * L', if UPLO = 'L', where U is an upper triangular matrix,
+            L is a lower triangular matrix, and ' indicates conjugate transpose.
+          </p>
+<p>
+            3. If the leading i-by-i principal minor is not positive definite, then
+            the routine returns with INFO = i. Otherwise, the factored form of A
+            is used to estimate the condition number of the matrix A. If the reciprocal
+            of the condition number is less than machine precision, INFO = N+1 is
+            returned as a warning, but the routine still goes on to solve for X and
+            compute error bounds as described below.
+          </p>
+<p>
+            4. The system of equations is solved for X using the factored form of
+            A.
+          </p>
+<p>
+            5. Iterative refinement is applied to improve the computed solution matrix
+            and calculate error bounds and backward error estimates for it.
+          </p>
+<p>
+            6. If equilibration was used, the matrix X is premultiplied by diag(S)
+            so that it solves the original system before equilibration.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.dispatching_of_ppsvx"></a><p class="title"><b>Table&#160;1.144.&#160;Dispatching of ppsvx</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ppsvx">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SPPSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DPPSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CPPSVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZPPSVX
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.definition"></a><h6>
+<a name="id859672"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/ppsvx.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.parameters_or_requirements_on_types"></a><h6>
+<a name="id859714"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.complexity"></a><h6>
+<a name="id859802"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.example"></a><h6>
+<a name="id859829"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">ppsvx</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">ppsvx</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.notes"></a><h6>
+<a name="id860113"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.see_also"></a><h6>
+<a name="id860138"></a>
+            <a class="link" href="ppsvx.html#boost_numeric_bindings.reference.lapack.driver_routines.ppsvx.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sppsvx.f" target="_top">sppsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dppsvx.f" target="_top">dppsvx.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cppsvx.f" target="_top">cppsvx.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zppsvx.f" target="_top">zppsvx.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ppsv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ptsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

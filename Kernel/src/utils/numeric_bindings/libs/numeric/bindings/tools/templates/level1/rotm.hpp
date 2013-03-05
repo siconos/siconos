@@ -1,0 +1,11 @@
+$TEMPLATE[rotm.all.remove_argument_value_type_prepend]
+X,Y,PARAM
+$TEMPLATE[rotm.all.cblas_alias]
+PARAM,P
+$TEMPLATE[rotm.all.N.trait]
+size,X
+$TEMPLATE[rotm.all.INCX.trait]
+stride,X
+$TEMPLATE[rotm.all.INCY.trait]
+stride,Y
+$TEMPLATE[end]

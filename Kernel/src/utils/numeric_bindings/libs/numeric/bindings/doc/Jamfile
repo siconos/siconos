@@ -1,0 +1,35 @@
+#==================================---------------------------------------------
+#   Copyright 2009 Numeric Bindings team
+#  
+#   Distributed under the Boost Software License, Version 1.0.
+#   (See accompanying file LICENSE_1_0.txt or copy at
+#   http://www.boost.org/LICENSE_1_0.txt)
+#----------------------------------------------===============================*/
+
+
+project numeric_bindings/doc ;
+
+import boostbook : boostbook ;
+using quickbook ;
+
+local loc = [ path.native [ path.pwd ] ] ;
+
+xml numeric_bindings_xml : numeric_bindings.qbk ;
+
+boostbook standalone
+    :
+      numeric_bindings_xml
+    :
+        <xsl:param>doc.standalone=true 
+        # formatting options
+        <xsl:param>chunk.first.sections=1
+        <xsl:param>chunk.section.depth=10
+        <xsl:param>toc.section.depth=4
+        <xsl:param>toc.max.depth=2
+        <xsl:param>generate.section.toc.level=4
+        <xsl:param>annotation.support=1
+    ;
+
+stage html : $(BOOST_ROOT)/doc/src/boostbook.css ;
+stage html/images : [ path.glob $(BOOST_ROOT)/doc/src/images : *.png ] ;
+

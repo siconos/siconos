@@ -1,0 +1,287 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>tbmv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="prev" href="syr.html" title="syr">
+<link rel="next" href="tbsv.html" title="tbsv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="syr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="tbsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv"></a><a class="link" href="tbmv.html" title="tbmv">tbmv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.prototype"></a><h6>
+<a name="id783320"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">tbmv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">tbmv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">k</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.description"></a><h6>
+<a name="id787724"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">tbmv</span></code> (short for triangular,
+            banded, matrix-vector operation) provides a C++ interface to BLAS routines
+            STBMV, DTBMV, CTBMV, and ZTBMV. <code class="computeroutput"><span class="identifier">tbmv</span></code>
+            performs one of the matrix-vector operations
+          </p>
+<p>
+            x := A*x, or x := A'*x, or x := conjg( A' )*x,
+          </p>
+<p>
+            where x is an n element vector and A is an n by n unit, or non-unit,
+            upper or lower triangular band matrix, with ( k + 1 ) diagonals.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.dispatching_of_tbmv_"></a><p class="title"><b>Table&#160;1.70.&#160;Dispatching of tbmv.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of tbmv.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      STBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_stbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasStbmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DTBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dtbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CTBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_ctbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasCtbmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZTBMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_ztbmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines STBMV, DTBMV, CTBMV, and ZTBMV have nine arguments,
+            whereas <code class="computeroutput"><span class="identifier">tbmv</span></code> requires
+            three arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.deduction_of_arguments_of_tbmv_"></a><p class="title"><b>Table&#160;1.71.&#160;Deduction of arguments of tbmv.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of tbmv.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.definition"></a><h6>
+<a name="id788193"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level2/tbmv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.parameters_or_requirements_on_types"></a><h6>
+<a name="id788232"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.complexity"></a><h6>
+<a name="id788319"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.example"></a><h6>
+<a name="id788345"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level2</span><span class="special">/</span><span class="identifier">tbmv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">tbmv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.notes"></a><h6>
+<a name="id788628"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.tbmv.see_also"></a><h6>
+<a name="id788653"></a>
+            <a class="link" href="tbmv.html#boost_numeric_bindings.reference.blas.level_2_blas.tbmv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/stbmv.f" target="_top">stbmv.f</a>,
+                <a href="http://www.netlib.org/blas/dtbmv.f" target="_top">dtbmv.f</a>,
+                <a href="http://www.netlib.org/blas/ctbmv.f" target="_top">ctbmv.f</a>,
+                and <a href="http://www.netlib.org/blas/ztbmv.f" target="_top">ztbmv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="syr.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="tbsv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

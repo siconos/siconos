@@ -1,0 +1,233 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gesvd</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="gesdd.html" title="gesdd">
+<link rel="next" href="hbev.html" title="hbev">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gesdd.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hbev.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd"></a><a class="link" href="gesvd.html" title="gesvd">gesvd</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.prototype"></a><h6>
+<a name="id874515"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gesvd</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gesvd</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobu</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvt</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">VectorS</span><span class="special">&amp;</span> <span class="identifier">s</span><span class="special">,</span>
+        <span class="identifier">MatrixU</span><span class="special">&amp;</span> <span class="identifier">u</span><span class="special">,</span> <span class="identifier">MatrixVT</span><span class="special">&amp;</span> <span class="identifier">vt</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.description"></a><h6>
+<a name="id874694"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gesvd</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGESVD, DGESVD, CGESVD, and
+            ZGESVD. <code class="computeroutput"><span class="identifier">gesvd</span></code> computes
+            the singular value decomposition (SVD) of a complex M-by-N matrix A,
+            optionally computing the left and/or right singular vectors. The SVD
+            is written
+          </p>
+<p>
+            A = U * SIGMA * conjugate-transpose(V)
+          </p>
+<p>
+            where SIGMA is an M-by-N matrix which is zero except for its min(m,n)
+            diagonal elements, U is an M-by-M unitary matrix, and V is an N-by-N
+            unitary matrix. The diagonal elements of SIGMA are the singular values
+            of A; they are real and non-negative, and are returned in descending
+            order. The first min(m,n) columns of U and V are the left and right singular
+            vectors of A.
+          </p>
+<p>
+            Note that the routine returns V**H, not V.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.dispatching_of_gesvd"></a><p class="title"><b>Table&#160;1.156.&#160;Dispatching of gesvd</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gesvd">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGESVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGESVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGESVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGESVD
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.definition"></a><h6>
+<a name="id875019"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gesvd.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.parameters_or_requirements_on_types"></a><h6>
+<a name="id875053"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.complexity"></a><h6>
+<a name="id875136"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.example"></a><h6>
+<a name="id875159"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gesvd</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gesvd</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.notes"></a><h6>
+<a name="id875417"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gesvd.see_also"></a><h6>
+<a name="id875439"></a>
+            <a class="link" href="gesvd.html#boost_numeric_bindings.reference.lapack.driver_routines.gesvd.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgesvd.f" target="_top">sgesvd.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgesvd.f" target="_top">dgesvd.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgesvd.f" target="_top">cgesvd.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgesvd.f" target="_top">zgesvd.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gesdd.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hbev.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

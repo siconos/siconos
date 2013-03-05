@@ -1,0 +1,244 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gels</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="syevx.html" title="syevx">
+<link rel="next" href="gelsd.html" title="gelsd">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="syevx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gelsd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels"></a><a class="link" href="gels.html" title="gels">gels</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.prototype"></a><h6>
+<a name="id901391"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">gels</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gels</span><span class="special">(</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.description"></a><h6>
+<a name="id901496"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gels</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGELS, DGELS, CGELS, and
+            ZGELS. <code class="computeroutput"><span class="identifier">gels</span></code> solves overdetermined
+            or underdetermined complex linear systems involving an M-by-N matrix
+            A, or its conjugate-transpose, using a QR or LQ factorization of A. It
+            is assumed that A has full rank.
+          </p>
+<p>
+            The following options are provided:
+          </p>
+<p>
+            1. If TRANS = 'N' and m &gt;= n: find the least squares solution of an
+            overdetermined system, i.e., solve the least squares problem minimize
+            || B - A*X ||.
+          </p>
+<p>
+            2. If TRANS = 'N' and m &lt; n: find the minimum norm solution of an
+            underdetermined system A * X = B.
+          </p>
+<p>
+            3. If TRANS = 'C' and m &gt;= n: find the minimum norm solution of an
+            undetermined system A**H * X = B.
+          </p>
+<p>
+            4. If TRANS = 'C' and m &lt; n: find the least squares solution of an
+            overdetermined system, i.e., solve the least squares problem minimize
+            || B - A**H * X ||.
+          </p>
+<p>
+            Several right hand side vectors b and solution vectors x can be handled
+            in a single call; they are stored as the columns of the M-by-NRHS right
+            hand side matrix B and the N-by-NRHS solution matrix X.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.dispatching_of_gels"></a><p class="title"><b>Table&#160;1.181.&#160;Dispatching of gels</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gels">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGELS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGELS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGELS
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGELS
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.definition"></a><h6>
+<a name="id901881"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gels.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.parameters_or_requirements_on_types"></a><h6>
+<a name="id901920"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.complexity"></a><h6>
+<a name="id902007"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.example"></a><h6>
+<a name="id902033"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gels</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gels</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.notes"></a><h6>
+<a name="id902316"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gels.see_also"></a><h6>
+<a name="id902340"></a>
+            <a class="link" href="gels.html#boost_numeric_bindings.reference.lapack.driver_routines.gels.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgels.f" target="_top">sgels.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgels.f" target="_top">dgels.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgels.f" target="_top">cgels.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgels.f" target="_top">zgels.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="syevx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="gelsd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

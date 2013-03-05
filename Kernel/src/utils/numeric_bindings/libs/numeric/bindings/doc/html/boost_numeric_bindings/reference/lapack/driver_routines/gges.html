@@ -1,0 +1,259 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>gges</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="gegv.html" title="gegv">
+<link rel="next" href="ggesx.html" title="ggesx">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gegv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggesx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges"></a><a class="link" href="gges.html" title="gges">gges</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.prototype"></a><h6>
+<a name="id808310"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.prototype">Prototype</a>
+          </h6>
+<p>
+            There are two prototypes of <code class="computeroutput"><span class="identifier">gges</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">gges</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvsl</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvsr</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">sort</span><span class="special">,</span>
+        <span class="identifier">external_fp</span> <span class="identifier">selctg</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">sdim</span><span class="special">,</span>
+        <span class="identifier">VectorALPHAR</span><span class="special">&amp;</span> <span class="identifier">alphar</span><span class="special">,</span> <span class="identifier">VectorALPHAI</span><span class="special">&amp;</span> <span class="identifier">alphai</span><span class="special">,</span> <span class="identifier">VectorBETA</span><span class="special">&amp;</span> <span class="identifier">beta</span><span class="special">,</span>
+        <span class="identifier">MatrixVSL</span><span class="special">&amp;</span> <span class="identifier">vsl</span><span class="special">,</span> <span class="identifier">MatrixVSR</span><span class="special">&amp;</span> <span class="identifier">vsr</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="identifier">gges</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvsl</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvsr</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">sort</span><span class="special">,</span>
+        <span class="identifier">external_fp</span> <span class="identifier">selctg</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">sdim</span><span class="special">,</span>
+        <span class="identifier">VectorALPHA</span><span class="special">&amp;</span> <span class="identifier">alpha</span><span class="special">,</span> <span class="identifier">VectorBETA</span><span class="special">&amp;</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">MatrixVSL</span><span class="special">&amp;</span> <span class="identifier">vsl</span><span class="special">,</span> <span class="identifier">MatrixVSR</span><span class="special">&amp;</span> <span class="identifier">vsr</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.description"></a><h6>
+<a name="id808912"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">gges</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGGES, DGGES, CGGES, and
+            ZGGES. <code class="computeroutput"><span class="identifier">gges</span></code> computes
+            for a pair of N-by-N complex nonsymmetric matrices (A,B), the generalized
+            eigenvalues, the generalized complex Schur form (S, T), and optionally
+            left and/or right Schur vectors (VSL and VSR). This gives the generalized
+            Schur factorization
+          </p>
+<p>
+            (A,B) = ( (VSL)<span class="bold"><strong>S</strong></span>(VSR)**H, (VSL)<span class="bold"><strong>T</strong></span>(VSR)**H )
+          </p>
+<p>
+            where (VSR)**H is the conjugate-transpose of VSR.
+          </p>
+<p>
+            Optionally, it also orders the eigenvalues so that a selected cluster
+            of eigenvalues appears in the leading diagonal blocks of the upper triangular
+            matrix S and the upper triangular matrix T. The leading columns of VSL
+            and VSR then form an unitary basis for the corresponding left and right
+            eigenspaces (deflating subspaces).
+          </p>
+<p>
+            (If only the generalized eigenvalues are needed, use the driver ZGGEV
+            instead, which is faster.)
+          </p>
+<p>
+            A generalized eigenvalue for a pair of matrices (A,B) is a scalar w or
+            a ratio alpha/beta = w, such that A - w*B is singular. It is usually
+            represented as the pair (alpha,beta), as there is a reasonable interpretation
+            for beta=0, and even for both being zero.
+          </p>
+<p>
+            A pair of matrices (S,T) is in generalized complex Schur form if S and
+            T are upper triangular and, in addition, the diagonal elements of T are
+            non-negative real numbers.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.dispatching_of_gges"></a><p class="title"><b>Table&#160;1.102.&#160;Dispatching of gges</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of gges">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGGES
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGGES
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGGES
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGGES
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.definition"></a><h6>
+<a name="id809285"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/gges.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.parameters_or_requirements_on_types"></a><h6>
+<a name="id809324"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.complexity"></a><h6>
+<a name="id809411"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.example"></a><h6>
+<a name="id809437"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">gges</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">gges</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.notes"></a><h6>
+<a name="id809721"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.gges.see_also"></a><h6>
+<a name="id809746"></a>
+            <a class="link" href="gges.html#boost_numeric_bindings.reference.lapack.driver_routines.gges.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sgges.f" target="_top">sgges.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dgges.f" target="_top">dgges.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cgges.f" target="_top">cgges.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zgges.f" target="_top">zgges.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="gegv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggesx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

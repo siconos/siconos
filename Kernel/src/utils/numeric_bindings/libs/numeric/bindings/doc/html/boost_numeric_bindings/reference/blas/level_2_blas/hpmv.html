@@ -1,0 +1,296 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>hpmv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="prev" href="her.html" title="her">
+<link rel="next" href="hpr2.html" title="hpr2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="her.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hpr2.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv"></a><a class="link" href="hpmv.html" title="hpmv">hpmv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.prototype"></a><h6>
+<a name="id772306"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.prototype">Prototype</a>
+          </h6>
+<p>
+            There are two prototypes of <code class="computeroutput"><span class="identifier">hpmv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">hpmv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorY</span><span class="special">&amp;</span> <span class="identifier">y</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="identifier">hpmv</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="identifier">alpha</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">VectorY</span><span class="special">&amp;</span> <span class="identifier">y</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.description"></a><h6>
+<a name="id772634"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">hpmv</span></code> (short for hermitian,
+            packed, matrix-vector operation) provides a C++ interface to BLAS routines
+            SSPMV, DSPMV, CHPMV, and ZHPMV. <code class="computeroutput"><span class="identifier">hpmv</span></code>
+            performs the matrix-vector operation
+          </p>
+<p>
+            y := alpha*A*x + beta*y,
+          </p>
+<p>
+            where alpha and beta are scalars, x and y are n element vectors and A
+            is an n by n hermitian matrix, supplied in packed form.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.dispatching_of_hpmv_"></a><p class="title"><b>Table&#160;1.50.&#160;Dispatching of hpmv.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of hpmv.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSPMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_sspmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasSspmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSPMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dspmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CHPMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_chpmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasChpmv
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZHPMV
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_zhpmv
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines SSPMV, DSPMV, CHPMV, and ZHPMV have nine arguments,
+            whereas <code class="computeroutput"><span class="identifier">hpmv</span></code> requires
+            five arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.deduction_of_arguments_of_hpmv_"></a><p class="title"><b>Table&#160;1.51.&#160;Deduction of arguments of hpmv.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of hpmv.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.definition"></a><h6>
+<a name="id773102"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level2/hpmv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.parameters_or_requirements_on_types"></a><h6>
+<a name="id773141"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.complexity"></a><h6>
+<a name="id773226"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.example"></a><h6>
+<a name="id773252"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level2</span><span class="special">/</span><span class="identifier">hpmv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">hpmv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.notes"></a><h6>
+<a name="id773536"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.hpmv.see_also"></a><h6>
+<a name="id773560"></a>
+            <a class="link" href="hpmv.html#boost_numeric_bindings.reference.blas.level_2_blas.hpmv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/sspmv.f" target="_top">sspmv.f</a>,
+                <a href="http://www.netlib.org/blas/dspmv.f" target="_top">dspmv.f</a>,
+                <a href="http://www.netlib.org/blas/chpmv.f" target="_top">chpmv.f</a>,
+                and <a href="http://www.netlib.org/blas/zhpmv.f" target="_top">zhpmv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="her.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hpr2.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

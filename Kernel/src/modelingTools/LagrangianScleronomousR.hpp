@@ -51,7 +51,7 @@ G0(q,z) = \nabla_q h(q,z)
 \f]
  *
  *  y (or its discrete approximation) is usually stored in y[0]
- *  \dot y (or its discrete approximation) is usually stored in y[1]
+ * \$f \dot y \$f (or its discrete approximation) is usually stored in y[1]
  *  higher level can used for storing higher levels of derivatives.
  *
  * G0 and h are connected to plug-in functions.\n

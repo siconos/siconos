@@ -27,9 +27,9 @@ IF(PIPOL_IMAGE MATCHES "lenny|ubuntu")
     "g++, gfortran, libatlas-base-dev, libatlas-headers")
 ENDIF(PIPOL_IMAGE MATCHES "lenny|ubuntu")  
 
-IF(APPLE)
+IF(FAT_BINARY)
   SET (CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
-ENDIF(APPLE)
+ENDIF()
 
 SICONOS_PROJECT(Numerics)
 

@@ -1,0 +1,229 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>hpgvd</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="hpgv.html" title="hpgv">
+<link rel="next" href="hpgvx.html" title="hpgvx">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hpgv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hpgvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd"></a><a class="link" href="hpgvd.html" title="hpgvd">hpgvd</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.prototype"></a><h6>
+<a name="id824824"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">hpgvd</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">hpgvd</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">itype</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobz</span><span class="special">,</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span><span class="special">,</span>
+        <span class="identifier">MatrixBP</span><span class="special">&amp;</span> <span class="identifier">bp</span><span class="special">,</span> <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span><span class="special">,</span> <span class="identifier">MatrixZ</span><span class="special">&amp;</span> <span class="identifier">z</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.description"></a><h6>
+<a name="id825023"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">hpgvd</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SSPGVD, DSPGVD, CHPGVD, and
+            ZHPGVD. <code class="computeroutput"><span class="identifier">hpgvd</span></code> computes
+            all the eigenvalues and, optionally, the eigenvectors of a complex generalized
+            Hermitian-definite eigenproblem, of the form A*x<code class="literal">(lambda)*B*x,
+            A*Bx</code>(lambda)*x, or B*A*x=(lambda)*x. Here A and B are assumed
+            to be Hermitian, stored in packed format, and B is also positive definite.
+            If eigenvectors are desired, it uses a divide and conquer algorithm.
+          </p>
+<p>
+            The divide and conquer algorithm makes very mild assumptions about floating
+            point arithmetic. It will work on machines with a guard digit in add/subtract,
+            or on those binary machines without guard digits which subtract like
+            the Cray X-MP, Cray Y-MP, Cray C-90, or Cray-2. It could conceivably
+            fail on hexadecimal or decimal machines without guard digits, but we
+            know of none.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.dispatching_of_hpgvd"></a><p class="title"><b>Table&#160;1.113.&#160;Dispatching of hpgvd</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of hpgvd">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSPGVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSPGVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CHPGVD
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZHPGVD
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.definition"></a><h6>
+<a name="id825377"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/hpgvd.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.parameters_or_requirements_on_types"></a><h6>
+<a name="id825416"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.complexity"></a><h6>
+<a name="id825503"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.example"></a><h6>
+<a name="id825530"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">hpgvd</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">hpgvd</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.notes"></a><h6>
+<a name="id825814"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.see_also"></a><h6>
+<a name="id825840"></a>
+            <a class="link" href="hpgvd.html#boost_numeric_bindings.reference.lapack.driver_routines.hpgvd.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sspgvd.f" target="_top">sspgvd.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dspgvd.f" target="_top">dspgvd.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/chpgvd.f" target="_top">chpgvd.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zhpgvd.f" target="_top">zhpgvd.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hpgv.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="hpgvx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

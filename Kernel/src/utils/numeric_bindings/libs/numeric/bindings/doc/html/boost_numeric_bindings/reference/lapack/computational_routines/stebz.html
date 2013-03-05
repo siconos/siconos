@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>stebz</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../computational_routines.html" title="Computational Routines">
+<link rel="prev" href="sptrd.html" title="sptrd">
+<link rel="next" href="stedc.html" title="stedc">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="sptrd.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="stedc.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz"></a><a class="link" href="stebz.html" title="stebz">stebz</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.prototype"></a><h6>
+<a name="id1046074"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">stebz</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">stebz</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">range</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">order</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">n</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">il</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">iu</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">VectorE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">m</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">nsplit</span><span class="special">,</span>
+        <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span><span class="special">,</span> <span class="identifier">VectorIBLOCK</span><span class="special">&amp;</span> <span class="identifier">iblock</span><span class="special">,</span> <span class="identifier">VectorISPLIT</span><span class="special">&amp;</span> <span class="identifier">isplit</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.description"></a><h6>
+<a name="id1046482"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">stebz</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SSTEBZ and DSTEBZ. <code class="computeroutput"><span class="identifier">stebz</span></code> computes the eigenvalues of a
+            symmetric tridiagonal matrix T. The user may ask for all eigenvalues,
+            all eigenvalues in the half-open interval (VL, VU], or the IL-th through
+            IU-th eigenvalues.
+          </p>
+<p>
+            To avoid overflow, the matrix must be scaled so that its largest element
+            is no greater than overflow<span class="bold"><strong>*(1/2) * underflow</strong></span>*(1/4)
+            in absolute value, and for greatest accuracy, it should not be much smaller
+            than that.
+          </p>
+<p>
+            See W. Kahan "Accurate Eigenvalues of a Symmetric Tridiagonal Matrix",
+            Report CS41, Computer Science Dept., Stanford University, July 21, 1966.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorD</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorD</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.dispatching_of_stebz"></a><p class="title"><b>Table&#160;1.318.&#160;Dispatching of stebz</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of stebz">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorD
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSTEBZ
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSTEBZ
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.definition"></a><h6>
+<a name="id1046745"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/computational/stebz.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.parameters_or_requirements_on_types"></a><h6>
+<a name="id1046784"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.complexity"></a><h6>
+<a name="id1046872"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.example"></a><h6>
+<a name="id1046898"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">computational</span><span class="special">/</span><span class="identifier">stebz</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">stebz</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.notes"></a><h6>
+<a name="id1047183"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.computational_routines.stebz.see_also"></a><h6>
+<a name="id1047209"></a>
+            <a class="link" href="stebz.html#boost_numeric_bindings.reference.lapack.computational_routines.stebz.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sstebz.f" target="_top">sstebz.f</a>
+                and <a href="http://www.netlib.org/lapack/double/dstebz.f" target="_top">dstebz.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="sptrd.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../computational_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="stedc.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

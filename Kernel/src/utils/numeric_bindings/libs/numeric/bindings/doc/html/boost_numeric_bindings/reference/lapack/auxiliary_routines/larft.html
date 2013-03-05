@@ -1,0 +1,239 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>larft</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../auxiliary_routines.html" title="Auxiliary Routines">
+<link rel="prev" href="larfg.html" title="larfg">
+<link rel="next" href="larfx.html" title="larfx">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="larfg.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="larfx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft"></a><a class="link" href="larft.html" title="larft">larft</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.prototype"></a><h6>
+<a name="id1080176"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">larft</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">larft</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">direct</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">storev</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">n</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">k</span><span class="special">,</span> <span class="identifier">MatrixV</span><span class="special">&amp;</span> <span class="identifier">v</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">VectorTAU</span><span class="special">&amp;</span> <span class="identifier">tau</span><span class="special">,</span>
+        <span class="identifier">MatrixT</span><span class="special">&amp;</span> <span class="identifier">t</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.description"></a><h6>
+<a name="id1080406"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">larft</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SLARFT, DLARFT, CLARFT, and
+            ZLARFT. <code class="computeroutput"><span class="identifier">larft</span></code> forms the
+            triangular factor T of a complex block reflector H of order n, which
+            is defined as a product of k elementary reflectors.
+          </p>
+<p>
+            If DIRECT = 'F', H = H(1) H(2) . . . H(k) and T is upper triangular;
+          </p>
+<p>
+            If DIRECT = 'B', H = H(k) . . . H(2) H(1) and T is lower triangular.
+          </p>
+<p>
+            If STOREV = 'C', the vector which defines the elementary reflector H(i)
+            is stored in the i-th column of the array V, and
+          </p>
+<p>
+            H = I - V * T * V'
+          </p>
+<p>
+            If STOREV = 'R', the vector which defines the elementary reflector H(i)
+            is stored in the i-th row of the array V, and
+          </p>
+<p>
+            H = I - V' * T * V
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixV</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixV</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.dispatching_of_larft"></a><p class="title"><b>Table&#160;1.343.&#160;Dispatching of larft</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of larft">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixV
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SLARFT
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DLARFT
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CLARFT
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZLARFT
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.definition"></a><h6>
+<a name="id1080770"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/auxiliary/larft.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.parameters_or_requirements_on_types"></a><h6>
+<a name="id1080810"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.complexity"></a><h6>
+<a name="id1080897"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.example"></a><h6>
+<a name="id1080923"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">auxiliary</span><span class="special">/</span><span class="identifier">larft</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">larft</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.notes"></a><h6>
+<a name="id1081209"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.see_also"></a><h6>
+<a name="id1081234"></a>
+            <a class="link" href="larft.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larft.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/slarft.f" target="_top">slarft.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dlarft.f" target="_top">dlarft.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/clarft.f" target="_top">clarft.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zlarft.f" target="_top">zlarft.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="larfg.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="larfx.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>larre</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../auxiliary_routines.html" title="Auxiliary Routines">
+<link rel="prev" href="larrb.html" title="larrb">
+<link rel="next" href="langb.html" title="langb">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="larrb.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="langb.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre"></a><a class="link" href="larre.html" title="larre">larre</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.prototype"></a><h6>
+<a name="id1085781"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">larre</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">larre</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">range</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">n</span><span class="special">,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span>
+        <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">il</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">int_t</span> <span class="identifier">iu</span><span class="special">,</span> <span class="identifier">VectorD</span><span class="special">&amp;</span> <span class="identifier">d</span><span class="special">,</span>
+        <span class="identifier">VectorE</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">,</span> <span class="identifier">VectorE2</span><span class="special">&amp;</span> <span class="identifier">e2</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span>
+        <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">nsplit</span><span class="special">,</span> <span class="identifier">VectorISPLIT</span><span class="special">&amp;</span> <span class="identifier">isplit</span><span class="special">,</span>
+        <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">m</span><span class="special">,</span> <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span><span class="special">,</span> <span class="identifier">VectorWERR</span><span class="special">&amp;</span> <span class="identifier">werr</span><span class="special">,</span> <span class="identifier">VectorWGAP</span><span class="special">&amp;</span> <span class="identifier">wgap</span><span class="special">,</span>
+        <span class="identifier">VectorIBLOCK</span><span class="special">&amp;</span> <span class="identifier">iblock</span><span class="special">,</span> <span class="identifier">VectorINDEXW</span><span class="special">&amp;</span> <span class="identifier">indexw</span><span class="special">,</span> <span class="identifier">VectorGERS</span><span class="special">&amp;</span> <span class="identifier">gers</span><span class="special">,</span>
+        <span class="identifier">Scalar</span> <span class="special">&gt;</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.description"></a><h6>
+<a name="id1086309"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">larre</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SLARRE and DLARRE. To find
+            the desired eigenvalues of a given real symmetric tridiagonal matrix
+            T, <code class="computeroutput"><span class="identifier">larre</span></code> sets any "small"
+            off-diagonal elements to zero, and for each unreduced block T_i, it finds
+            (a) a suitable shift at one end of the block's spectrum, (b) the base
+            representation, T_i - sigma_i I = L_i D_i L_i^T, and (c) eigenvalues
+            of each L_i D_i L_i^T. The representations and eigenvalues found are
+            then used by DSTEMR to compute the eigenvectors of T. The accuracy varies
+            depending on whether bisection is used to find a few eigenvalues or the
+            dqds algorithm (subroutine DLASQ2) to conpute all and then discard any
+            unwanted one. As an added benefit, <code class="computeroutput"><span class="identifier">larre</span></code>
+            also outputs the n Gerschgorin intervals for the matrices L_i D_i L_i^T.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorD</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorD</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.dispatching_of_larre"></a><p class="title"><b>Table&#160;1.348.&#160;Dispatching of larre</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of larre">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorD
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SLARRE
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DLARRE
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.definition"></a><h6>
+<a name="id1086571"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/auxiliary/larre.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.parameters_or_requirements_on_types"></a><h6>
+<a name="id1086611"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.complexity"></a><h6>
+<a name="id1086698"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.example"></a><h6>
+<a name="id1086724"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">auxiliary</span><span class="special">/</span><span class="identifier">larre</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">larre</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.notes"></a><h6>
+<a name="id1087009"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.see_also"></a><h6>
+<a name="id1087034"></a>
+            <a class="link" href="larre.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.larre.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/slarre.f" target="_top">slarre.f</a>
+                and <a href="http://www.netlib.org/lapack/double/dlarre.f" target="_top">dlarre.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="larrb.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="langb.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

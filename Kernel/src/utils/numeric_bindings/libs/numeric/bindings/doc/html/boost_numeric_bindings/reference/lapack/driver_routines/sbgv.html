@@ -1,0 +1,192 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>sbgv</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="hpgvx.html" title="hpgvx">
+<link rel="next" href="sbgvd.html" title="sbgvd">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hpgvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="sbgvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv"></a><a class="link" href="sbgv.html" title="sbgv">sbgv</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.prototype"></a><h6>
+<a name="id827198"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">sbgv</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">sbgv</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobz</span><span class="special">,</span> <span class="identifier">MatrixAB</span><span class="special">&amp;</span> <span class="identifier">ab</span><span class="special">,</span> <span class="identifier">MatrixBB</span><span class="special">&amp;</span> <span class="identifier">bb</span><span class="special">,</span> <span class="identifier">VectorW</span><span class="special">&amp;</span> <span class="identifier">w</span><span class="special">,</span>
+        <span class="identifier">MatrixZ</span><span class="special">&amp;</span> <span class="identifier">z</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.description"></a><h6>
+<a name="id827373"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">sbgv</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SSBGV and DSBGV. <code class="computeroutput"><span class="identifier">sbgv</span></code> computes all the eigenvalues,
+            and optionally, the eigenvectors of a real generalized symmetric-definite
+            banded eigenproblem, of the form A*x=(lambda)*B*x. Here A and B are assumed
+            to be symmetric and banded, and B is also positive definite.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAB</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAB</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.dispatching_of_sbgv"></a><p class="title"><b>Table&#160;1.115.&#160;Dispatching of sbgv</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of sbgv">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAB
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSBGV
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSBGV
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.definition"></a><h6>
+<a name="id827615"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/sbgv.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.parameters_or_requirements_on_types"></a><h6>
+<a name="id827656"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.complexity"></a><h6>
+<a name="id827743"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.example"></a><h6>
+<a name="id827769"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">sbgv</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">sbgv</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.notes"></a><h6>
+<a name="id828054"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.sbgv.see_also"></a><h6>
+<a name="id828079"></a>
+            <a class="link" href="sbgv.html#boost_numeric_bindings.reference.lapack.driver_routines.sbgv.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/ssbgv.f" target="_top">ssbgv.f</a>
+                and <a href="http://www.netlib.org/lapack/double/dsbgv.f" target="_top">dsbgv.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="hpgvx.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="sbgvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

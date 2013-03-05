@@ -1,0 +1,251 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>ggevx</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../driver_routines.html" title="Driver Routines">
+<link rel="prev" href="ggev.html" title="ggev">
+<link rel="next" href="ggsvd.html" title="ggsvd">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ggev.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggsvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx"></a><a class="link" href="ggevx.html" title="ggevx">ggevx</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.prototype"></a><h6>
+<a name="id812901"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.prototype">Prototype</a>
+          </h6>
+<p>
+            There are two prototypes of <code class="computeroutput"><span class="identifier">ggevx</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">ggevx</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">balanc</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvl</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvr</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">sense</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">VectorALPHAR</span><span class="special">&amp;</span> <span class="identifier">alphar</span><span class="special">,</span>
+        <span class="identifier">VectorALPHAI</span><span class="special">&amp;</span> <span class="identifier">alphai</span><span class="special">,</span> <span class="identifier">VectorBETA</span><span class="special">&amp;</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">MatrixVL</span><span class="special">&amp;</span> <span class="identifier">vl</span><span class="special">,</span> <span class="identifier">MatrixVR</span><span class="special">&amp;</span> <span class="identifier">vr</span><span class="special">,</span>
+        <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">ilo</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">ihi</span><span class="special">,</span> <span class="identifier">VectorLSCALE</span><span class="special">&amp;</span> <span class="identifier">lscale</span><span class="special">,</span>
+        <span class="identifier">VectorRSCALE</span><span class="special">&amp;</span> <span class="identifier">rscale</span><span class="special">,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorRCONDE</span><span class="special">&amp;</span> <span class="identifier">rconde</span><span class="special">,</span>
+        <span class="identifier">VectorRCONDV</span><span class="special">&amp;</span> <span class="identifier">rcondv</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="identifier">ggevx</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">balanc</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvl</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">jobvr</span><span class="special">,</span>
+        <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">sense</span><span class="special">,</span> <span class="identifier">MatrixA</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">,</span> <span class="identifier">MatrixB</span><span class="special">&amp;</span> <span class="identifier">b</span><span class="special">,</span> <span class="identifier">VectorALPHA</span><span class="special">&amp;</span> <span class="identifier">alpha</span><span class="special">,</span>
+        <span class="identifier">VectorBETA</span><span class="special">&amp;</span> <span class="identifier">beta</span><span class="special">,</span> <span class="identifier">MatrixVL</span><span class="special">&amp;</span> <span class="identifier">vl</span><span class="special">,</span> <span class="identifier">MatrixVR</span><span class="special">&amp;</span> <span class="identifier">vr</span><span class="special">,</span> <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">ilo</span><span class="special">,</span>
+        <span class="identifier">int_t</span><span class="special">&amp;</span> <span class="identifier">ihi</span><span class="special">,</span> <span class="identifier">VectorLSCALE</span><span class="special">&amp;</span> <span class="identifier">lscale</span><span class="special">,</span> <span class="identifier">VectorRSCALE</span><span class="special">&amp;</span> <span class="identifier">rscale</span><span class="special">,</span>
+        <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="identifier">VectorRCONDE</span><span class="special">&amp;</span> <span class="identifier">rconde</span><span class="special">,</span> <span class="identifier">VectorRCONDV</span><span class="special">&amp;</span> <span class="identifier">rcondv</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.description"></a><h6>
+<a name="id813793"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">ggevx</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines SGGEVX, DGGEVX, CGGEVX, and
+            ZGGEVX. <code class="computeroutput"><span class="identifier">ggevx</span></code> computes
+            for a pair of N-by-N complex nonsymmetric matrices (A,B) the generalized
+            eigenvalues, and optionally, the left and/or right generalized eigenvectors.
+          </p>
+<p>
+            Optionally, it also computes a balancing transformation to improve the
+            conditioning of the eigenvalues and eigenvectors (ILO, IHI, LSCALE, RSCALE,
+            ABNRM, and BBNRM), reciprocal condition numbers for the eigenvalues (RCONDE),
+            and reciprocal condition numbers for the right eigenvectors (RCONDV).
+          </p>
+<p>
+            A generalized eigenvalue for a pair of matrices (A,B) is a scalar lambda
+            or a ratio alpha/beta = lambda, such that A - lambda*B is singular. It
+            is usually represented as the pair (alpha,beta), as there is a reasonable
+            interpretation for beta=0, and even for both being zero.
+          </p>
+<p>
+            The right eigenvector v(j) corresponding to the eigenvalue lambda(j)
+            of (A,B) satisfies A * v(j) = lambda(j) * B * v(j) . The left eigenvector
+            u(j) corresponding to the eigenvalue lambda(j) of (A,B) satisfies u(j)<span class="bold"><strong>*H * A = lambda(j) * u(j)</strong></span><span class="bold"><strong>H
+            * B. where u(j)</strong></span>*H is the conjugate-transpose of u(j).
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixA</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixA</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.dispatching_of_ggevx"></a><p class="title"><b>Table&#160;1.105.&#160;Dispatching of ggevx</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of ggevx">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixA
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SGGEVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DGGEVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CGGEVX
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZGGEVX
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.definition"></a><h6>
+<a name="id814166"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/driver/ggevx.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.parameters_or_requirements_on_types"></a><h6>
+<a name="id814206"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.complexity"></a><h6>
+<a name="id814293"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.example"></a><h6>
+<a name="id814319"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">driver</span><span class="special">/</span><span class="identifier">ggevx</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">ggevx</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.notes"></a><h6>
+<a name="id814602"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.driver_routines.ggevx.see_also"></a><h6>
+<a name="id814628"></a>
+            <a class="link" href="ggevx.html#boost_numeric_bindings.reference.lapack.driver_routines.ggevx.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/single/sggevx.f" target="_top">sggevx.f</a>,
+                <a href="http://www.netlib.org/lapack/double/dggevx.f" target="_top">dggevx.f</a>,
+                <a href="http://www.netlib.org/lapack/complex/cggevx.f" target="_top">cggevx.f</a>,
+                and <a href="http://www.netlib.org/lapack/complex16/zggevx.f" target="_top">zggevx.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="ggev.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../driver_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="ggsvd.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

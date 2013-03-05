@@ -1,0 +1,239 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>spr</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../level_2_blas.html" title="Level 2 BLAS">
+<link rel="prev" href="spr2.html" title="spr2">
+<link rel="next" href="symv.html" title="symv">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="spr2.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="symv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr"></a><a class="link" href="spr.html" title="spr">spr</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.prototype"></a><h6>
+<a name="id779229"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">spr</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">spr</span><span class="special">(</span> <span class="keyword">const</span> <span class="identifier">Scalar</span> <span class="special">&gt;,</span> <span class="keyword">const</span> <span class="identifier">VectorX</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.description"></a><h6>
+<a name="id779359"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">spr</span></code> (short for symmetric,
+            packed, rank-1 update) provides a C++ interface to BLAS routines SSPR
+            and DSPR. <code class="computeroutput"><span class="identifier">spr</span></code> performs
+            the symmetric rank 1 operation
+          </p>
+<p>
+            A := alpha*x*x' + A,
+          </p>
+<p>
+            where alpha is a real scalar, x is an n element vector and A is an n
+            by n symmetric matrix, supplied in packed form.
+          </p>
+<p>
+            The selection of the BLAS routine is done during compile-time, and is
+            determined by the type of values contained in type <code class="computeroutput"><span class="identifier">VectorX</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">VectorX</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. Table X below illustrates to
+            which specific routine this dispatching will take place.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.dispatching_of_spr_"></a><p class="title"><b>Table&#160;1.62.&#160;Dispatching of spr.</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of spr.">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of VectorX
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      BLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CBLAS routine
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      CUBLAS routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">float</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      SSPR
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_sspr
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cublasSspr
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="keyword">double</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      DSPR
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      cblas_dspr
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      Unavailable
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            The original routines SSPR and DSPR have six arguments, whereas <code class="computeroutput"><span class="identifier">spr</span></code> requires three arguments.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.deduction_of_arguments_of_spr_"></a><p class="title"><b>Table&#160;1.63.&#160;Deduction of arguments of spr.</b></p>
+<div class="table-contents"><table class="table" summary="Deduction of arguments of spr.">
+<colgroup></colgroup>
+<tbody></tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.definition"></a><h6>
+<a name="id779698"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/blas/level2/spr.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.parameters_or_requirements_on_types"></a><h6>
+<a name="id779738"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.complexity"></a><h6>
+<a name="id779825"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.example"></a><h6>
+<a name="id779850"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">blas</span><span class="special">/</span><span class="identifier">level2</span><span class="special">/</span><span class="identifier">spr</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">blas</span><span class="special">::</span><span class="identifier">spr</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.notes"></a><h6>
+<a name="id780133"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.blas.level_2_blas.spr.see_also"></a><h6>
+<a name="id780158"></a>
+            <a class="link" href="spr.html#boost_numeric_bindings.reference.blas.level_2_blas.spr.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/blas/sspr.f" target="_top">sspr.f</a>
+                and <a href="http://www.netlib.org/blas/dspr.f" target="_top">dspr.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="spr2.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../level_2_blas.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="symv.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

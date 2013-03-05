@@ -1,0 +1,208 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>lanhp</title>
+<link rel="stylesheet" href="../../../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../../../../index.html" title="Chapter&#160;1.&#160;Boost.Numeric_Bindings">
+<link rel="up" href="../auxiliary_routines.html" title="Auxiliary Routines">
+<link rel="prev" href="lanhe.html" title="lanhe">
+<link rel="next" href="lanhs.html" title="lanhs">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr><td valign="top"></td></tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="lanhe.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="lanhs.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp"></a><a class="link" href="lanhp.html" title="lanhp">lanhp</a>
+</h5></div></div></div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.prototype"></a><h6>
+<a name="id1091216"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.prototype">Prototype</a>
+          </h6>
+<p>
+            There is one prototype of <code class="computeroutput"><span class="identifier">lanhp</span></code>
+            available, please see below. 
+</p>
+<pre class="programlisting"><span class="identifier">lanhp</span><span class="special">(</span> <span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">norm</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">MatrixAP</span><span class="special">&amp;</span> <span class="identifier">ap</span> <span class="special">);</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.description"></a><h6>
+<a name="id1091330"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.description">Description</a>
+          </h6>
+<p>
+            <code class="computeroutput"><span class="identifier">lanhp</span></code> (short for $FRIENDLY_NAME)
+            provides a C++ interface to LAPACK routines CLANHP and ZLANHP. <code class="computeroutput"><span class="identifier">lanhp</span></code> returns the value of the one
+            norm, or the Frobenius norm, or the infinity norm, or the element of
+            largest absolute value of a complex hermitian matrix A, supplied in packed
+            form.
+          </p>
+<p>
+            Description <code class="literal">=</code><code class="literal">=</code><code class="literal">=</code>==
+          </p>
+<p>
+            <code class="computeroutput"><span class="identifier">lanhp</span></code> returns the value
+          </p>
+<p>
+            <code class="computeroutput"><span class="identifier">lanhp</span></code> = ( max(abs(A(i,j))),
+            NORM = 'M' or 'm' ( ( norm1(A), NORM = '1', 'O' or 'o' ( ( normI(A),
+            NORM = 'I' or 'i' ( ( normF(A), NORM = 'F', 'f', 'E' or 'e'
+          </p>
+<p>
+            where norm1 denotes the one norm of a matrix (maximum column sum), normI
+            denotes the infinity norm of a matrix (maximum row sum) and normF denotes
+            the Frobenius norm of a matrix (square root of sum of squares). Note
+            that max(abs(A(i,j))) is not a consistent matrix norm.
+          </p>
+<p>
+            The selection of the LAPACK routine is done during compile-time, and
+            is determined by the type of values contained in type <code class="computeroutput"><span class="identifier">MatrixAP</span></code>.
+            The type of values is obtained through the <code class="computeroutput"><span class="identifier">value_type</span></code>
+            meta-function <code class="computeroutput"><span class="keyword">typename</span> <span class="identifier">value_type</span><span class="special">&lt;</span><span class="identifier">MatrixAP</span><span class="special">&gt;::</span><span class="identifier">type</span></code>. The dispatching table below illustrates
+            to which specific routine the code path will be generated.
+          </p>
+<div class="table">
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.dispatching_of_lanhp"></a><p class="title"><b>Table&#160;1.353.&#160;Dispatching of lanhp</b></p>
+<div class="table-contents"><table class="table" summary="Dispatching of lanhp">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                    <p>
+                      Value type of MatrixAP
+                    </p>
+                  </th>
+<th>
+                    <p>
+                      LAPACK routine
+                    </p>
+                  </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">float</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      CLANHP
+                    </p>
+                  </td>
+</tr>
+<tr>
+<td>
+                    <p>
+                      <code class="computeroutput"><span class="identifier">complex</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span></code>
+                    </p>
+                  </td>
+<td>
+                    <p>
+                      ZLANHP
+                    </p>
+                  </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.definition"></a><h6>
+<a name="id1091663"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.definition">Definition</a>
+          </h6>
+<p>
+            Defined in header <code class="computeroutput">boost/numeric/bindings/lapack/auxiliary/lanhp.hpp</code>.
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.parameters_or_requirements_on_types"></a><h6>
+<a name="id1091706"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.parameters_or_requirements_on_types">Parameters
+            or Requirements on Types</a>
+          </h6>
+<div class="variablelist">
+<p class="title"><b>Parameters</b></p>
+<dl>
+<dt><span class="term">MatrixA</span></dt>
+<dd><p>
+                  The definition of term 1
+                </p></dd>
+<dt><span class="term">MatrixB</span></dt>
+<dd><p>
+                  The definition of term 2
+                </p></dd>
+<dt><span class="term">MatrixC</span></dt>
+<dd>
+<p>
+                  The definition of term 3.
+                </p>
+<p>
+                  Definitions may contain paragraphs.
+                </p>
+</dd>
+</dl>
+</div>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.complexity"></a><h6>
+<a name="id1091792"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.complexity">Complexity</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.example"></a><h6>
+<a name="id1091819"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.example">Example</a>
+          </h6>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">numeric</span><span class="special">/</span><span class="identifier">bindings</span><span class="special">/</span><span class="identifier">lapack</span><span class="special">/</span><span class="identifier">auxiliary</span><span class="special">/</span><span class="identifier">lanhp</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">numeric</span><span class="special">::</span><span class="identifier">bindings</span><span class="special">;</span>
+
+<span class="identifier">lapack</span><span class="special">::</span><span class="identifier">lanhp</span><span class="special">(</span> <span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">z</span> <span class="special">);</span>
+
+</pre>
+<p>
+          </p>
+<p>
+            this will output
+          </p>
+<p>
+            
+</p>
+<pre class="programlisting"><span class="special">[</span><span class="number">5</span><span class="special">]</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>
+</pre>
+<p>
+          </p>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.notes"></a><h6>
+<a name="id1092105"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.notes">Notes</a>
+          </h6>
+<a name="boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.see_also"></a><h6>
+<a name="id1092130"></a>
+            <a class="link" href="lanhp.html#boost_numeric_bindings.reference.lapack.auxiliary_routines.lanhp.see_also">See
+            Also</a>
+          </h6>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+                Originating Fortran source files <a href="http://www.netlib.org/lapack/complex/clanhp.f" target="_top">clanhp.f</a>
+                and <a href="http://www.netlib.org/lapack/complex16/zlanhp.f" target="_top">zlanhp.f</a>
+                at Netlib.
+              </li></ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2002 -2009 Rutger ter Borg, Kre&#353;imir Fresl, Thomas Klimpel,
+      Toon Knapen, Karl Meerbergen<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="lanhe.html"><img src="../../../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../auxiliary_routines.html"><img src="../../../../images/up.png" alt="Up"></a><a accesskey="h" href="../../../../index.html"><img src="../../../../images/home.png" alt="Home"></a><a accesskey="n" href="lanhs.html"><img src="../../../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>
