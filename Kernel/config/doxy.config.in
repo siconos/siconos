@@ -733,7 +733,7 @@ EXCLUDE                = @CMAKE_SOURCE_DIR@/src/netlib/odepack/test \
                          @CMAKE_SOURCE_DIR@/src/NSSpack/test \
                          @CMAKE_SOURCE_DIR@/src/netlib/dftemplates \
                          @CMAKE_SOURCE_DIR@/src/netlib/dctemplates \
-                         @CMAKE_SOURCE_DIR@/src/utils/boost-bindings \
+                         @CMAKE_SOURCE_DIR@/src/utils/numeric_bindings \
                          @CMAKE_SOURCE_DIR@/src/utils/AtlasLocal
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 

@@ -19,7 +19,7 @@ SET(SiconosKernel_VERSION "${VERSION}")
 SET(SiconosKernel_DIRS
   .
   utils
-  utils/boost-bindings
+  utils/numeric_bindings
   utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
@@ -56,8 +56,8 @@ INSTALL(FILES ${ATLAS_HDRS}
   DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
 
 FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
-  FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp 
-    utils/boost-bindings/boost/numeric/bindings/${_D}/*.h)
+  FILE(GLOB BOOST_HDRS_${_D} utils/numeric_bindings/boost/numeric/bindings/${_D}/*.hpp 
+    utils/numeric_bindings/boost/numeric/bindings/${_D}/*.h)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 
     DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
 ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
