@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <assert.h>
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include "Interaction.hpp"
 #include "InteractionXML.hpp"

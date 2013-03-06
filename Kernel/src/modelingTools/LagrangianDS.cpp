@@ -20,8 +20,8 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
