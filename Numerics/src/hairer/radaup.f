@@ -1,0 +1,1386 @@
+      SUBROUTINE RADAUP(N,FCN,X,Y,XEND,H,
+     &                  RTOL,ATOL,ITOL,
+     &                  JAC ,IJAC,MLJAC,MUJAC,
+     &                  MAS ,IMAS,MLMAS,MUMAS,
+     &                  SOLOUT,IOUT,
+     &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
+C ----------------------------------------------------------
+C     NUMERICAL SOLUTION OF A STIFF (OR DIFFERENTIAL ALGEBRAIC)
+C     SYSTEM OF FIRST 0RDER ORDINARY DIFFERENTIAL EQUATIONS
+C                     M*Y'=F(X,Y).
+C     THE SYSTEM CAN BE (LINEARLY) IMPLICIT (MASS-MATRIX M .NE. I)
+C     OR EXPLICIT (M=I).
+C     THE METHOD USED IS AN IMPLICIT RUNGE-KUTTA METHOD (RADAU IIA)
+C     OF ORDER 5, 9 0R 13 WITH STEP SIZE CONTROL AND CONTINUOUS OUTPUT.
+C     C.F. SECTION IV.8
+C
+C     AUTHORS: E. HAIRER AND G. WANNER
+C              UNIVERSITE DE GENEVE, DEPT. DE MATHEMATIQUES
+C              CH-1211 GENEVE 24, SWITZERLAND
+C              E-MAIL:  Ernst.Hairer@math.unige.ch
+C                       Gerhard.Wanner@math.unige.ch
+C
+C     THIS CODE IS PART OF THE BOOK:
+C         E. HAIRER AND G. WANNER, SOLVING ORDINARY DIFFERENTIAL
+C         EQUATIONS II. STIFF AND DIFFERENTIAL-ALGEBRAIC PROBLEMS.
+C         SPRINGER SERIES IN COMPUTATIONAL MATHEMATICS 14,
+C         SPRINGER-VERLAG 1991, SECOND EDITION 1996.
+C
+C     VERSION OF JULY 9, 1996
+C
+C     INPUT PARAMETERS
+C     ----------------
+C     N           DIMENSION OF THE SYSTEM
+C
+C     FCN         NAME (EXTERNAL) OF SUBROUTINE COMPUTING THE
+C                 VALUE OF F(X,Y):
+C                    SUBROUTINE FCN(N,X,Y,F,RPAR,IPAR)
+C                    DOUBLE PRECISION X,Y(N),F(N)
+C                    F(1)=...   ETC.
+C                 RPAR, IPAR (SEE BELOW)
+C
+C     X           INITIAL X-VALUE
+C
+C     Y(N)        INITIAL VALUES FOR Y
+C
+C     XEND        FINAL X-VALUE (XEND-X MAY BE POSITIVE OR NEGATIVE)
+C
+C     H           INITIAL STEP SIZE GUESS;
+C                 FOR STIFF EQUATIONS WITH INITIAL TRANSIENT,
+C                 H=1.D0/(NORM OF F'), USUALLY 1.D-3 OR 1.D-5, IS GOOD.
+C                 THIS CHOICE IS NOT VERY IMPORTANT, THE STEP SIZE IS
+C                 QUICKLY ADAPTED. (IF H=0.D0, THE CODE PUTS H=1.D-6).
+C
+C     RTOL,ATOL   RELATIVE AND ABSOLUTE ERROR TOLERANCES. THEY
+C                 CAN BE BOTH SCALARS OR ELSE BOTH VECTORS OF LENGTH N.
+C
+C     ITOL        SWITCH FOR RTOL AND ATOL:
+C                   ITOL=0: BOTH RTOL AND ATOL ARE SCALARS.
+C                     THE CODE KEEPS, ROUGHLY, THE LOCAL ERROR OF
+C                     Y(I) BELOW RTOL*ABS(Y(I))+ATOL
+C                   ITOL=1: BOTH RTOL AND ATOL ARE VECTORS.
+C                     THE CODE KEEPS THE LOCAL ERROR OF Y(I) BELOW
+C                     RTOL(I)*ABS(Y(I))+ATOL(I).
+C
+C     JAC         NAME (EXTERNAL) OF THE SUBROUTINE WHICH COMPUTES
+C                 THE PARTIAL DERIVATIVES OF F(X,Y) WITH RESPECT TO Y
+C                 (THIS ROUTINE IS ONLY CALLED IF IJAC=1; SUPPLY
+C                 A DUMMY SUBROUTINE IN THE CASE IJAC=0).
+C                 FOR IJAC=1, THIS SUBROUTINE MUST HAVE THE FORM
+C                    SUBROUTINE JAC(N,X,Y,DFY,LDFY,RPAR,IPAR)
+C                    DOUBLE PRECISION X,Y(N),DFY(LDFY,N)
+C                    DFY(1,1)= ...
+C                 LDFY, THE COLUMN-LENGTH OF THE ARRAY, IS
+C                 FURNISHED BY THE CALLING PROGRAM.
+C                 IF (MLJAC.EQ.N) THE JACOBIAN IS SUPPOSED TO
+C                    BE FULL AND THE PARTIAL DERIVATIVES ARE
+C                    STORED IN DFY AS
+C                       DFY(I,J) = PARTIAL F(I) / PARTIAL Y(J)
+C                 ELSE, THE JACOBIAN IS TAKEN AS BANDED AND
+C                    THE PARTIAL DERIVATIVES ARE STORED
+C                    DIAGONAL-WISE AS
+C                       DFY(I-J+MUJAC+1,J) = PARTIAL F(I) / PARTIAL Y(J).
+C
+C     IJAC        SWITCH FOR THE COMPUTATION OF THE JACOBIAN:
+C                    IJAC=0: JACOBIAN IS COMPUTED INTERNALLY BY FINITE
+C                       DIFFERENCES, SUBROUTINE "JAC" IS NEVER CALLED.
+C                    IJAC=1: JACOBIAN IS SUPPLIED BY SUBROUTINE JAC.
+C
+C     MLJAC       SWITCH FOR THE BANDED STRUCTURE OF THE JACOBIAN:
+C                    MLJAC=N: JACOBIAN IS A FULL MATRIX. THE LINEAR
+C                       ALGEBRA IS DONE BY FULL-MATRIX GAUSS-ELIMINATION.
+C                    0<=MLJAC<N: MLJAC IS THE LOWER BANDWITH OF JACOBIAN
+C                       MATRIX (>= NUMBER OF NON-ZERO DIAGONALS BELOW
+C                       THE MAIN DIAGONAL).
+C
+C     MUJAC       UPPER BANDWITH OF JACOBIAN  MATRIX (>= NUMBER OF NON-
+C                 ZERO DIAGONALS ABOVE THE MAIN DIAGONAL).
+C                 NEED NOT BE DEFINED IF MLJAC=N.
+C
+C     ----   MAS,IMAS,MLMAS, AND MUMAS HAVE ANALOG MEANINGS      -----
+C     ----   FOR THE "MASS MATRIX" (THE MATRIX "M" OF SECTION IV.8): -
+C
+C     MAS         NAME (EXTERNAL) OF SUBROUTINE COMPUTING THE MASS-
+C                 MATRIX M.
+C                 IF IMAS=0, THIS MATRIX IS ASSUMED TO BE THE IDENTITY
+C                 MATRIX AND NEEDS NOT TO BE DEFINED;
+C                 SUPPLY A DUMMY SUBROUTINE IN THIS CASE.
+C                 IF IMAS=1, THE SUBROUTINE MAS IS OF THE FORM
+C                    SUBROUTINE MAS(N,AM,LMAS,RPAR,IPAR)
+C                    DOUBLE PRECISION AM(LMAS,N)
+C                    AM(1,1)= ....
+C                    IF (MLMAS.EQ.N) THE MASS-MATRIX IS STORED
+C                    AS FULL MATRIX LIKE
+C                         AM(I,J) = M(I,J)
+C                    ELSE, THE MATRIX IS TAKEN AS BANDED AND STORED
+C                    DIAGONAL-WISE AS
+C                         AM(I-J+MUMAS+1,J) = M(I,J).
+C
+C     IMAS       GIVES INFORMATION ON THE MASS-MATRIX:
+C                    IMAS=0: M IS SUPPOSED TO BE THE IDENTITY
+C                       MATRIX, MAS IS NEVER CALLED.
+C                    IMAS=1: MASS-MATRIX  IS SUPPLIED.
+C
+C     MLMAS       SWITCH FOR THE BANDED STRUCTURE OF THE MASS-MATRIX:
+C                    MLMAS=N: THE FULL MATRIX CASE. THE LINEAR
+C                       ALGEBRA IS DONE BY FULL-MATRIX GAUSS-ELIMINATION.
+C                    0<=MLMAS<N: MLMAS IS THE LOWER BANDWITH OF THE
+C                       MATRIX (>= NUMBER OF NON-ZERO DIAGONALS BELOW
+C                       THE MAIN DIAGONAL).
+C                 MLMAS IS SUPPOSED TO BE .LE. MLJAC.
+C
+C     MUMAS       UPPER BANDWITH OF MASS-MATRIX (>= NUMBER OF NON-
+C                 ZERO DIAGONALS ABOVE THE MAIN DIAGONAL).
+C                 NEED NOT BE DEFINED IF MLMAS=N.
+C                 MUMAS IS SUPPOSED TO BE .LE. MUJAC.
+C
+C     SOLOUT      NAME (EXTERNAL) OF SUBROUTINE PROVIDING THE
+C                 NUMERICAL SOLUTION DURING INTEGRATION.
+C                 IF IOUT=1, IT IS CALLED AFTER EVERY SUCCESSFUL STEP.
+C                 SUPPLY A DUMMY SUBROUTINE IF IOUT=0.
+C                 IT MUST HAVE THE FORM
+C                    SUBROUTINE SOLOUT (NR,XOLD,X,Y,CONT,LRC,N,
+C                                       RPAR,IPAR,IRTRN)
+C                    DOUBLE PRECISION X,Y(N),CONT(LRC)
+C                    ....
+C                 SOLOUT FURNISHES THE SOLUTION "Y" AT THE NR-TH
+C                    GRID-POINT "X" (THEREBY THE INITIAL VALUE IS
+C                    THE FIRST GRID-POINT).
+C                 "XOLD" IS THE PRECEEDING GRID-POINT.
+C                 "IRTRN" SERVES TO INTERRUPT THE INTEGRATION. IF IRTRN
+C                    IS SET <0, RADAU5 RETURNS TO THE CALLING PROGRAM.
+C
+C          -----  CONTINUOUS OUTPUT: -----
+C                 DURING CALLS TO "SOLOUT", A CONTINUOUS SOLUTION
+C                 FOR THE INTERVAL [XOLD,X] IS AVAILABLE THROUGH
+C                 THE FUNCTION
+C                        >>>   CONTRP(I,S,CONT,LRC)   <<<
+C                 WHICH PROVIDES AN APPROXIMATION TO THE I-TH
+C                 COMPONENT OF THE SOLUTION AT THE POINT S. THE VALUE
+C                 S SHOULD LIE IN THE INTERVAL [XOLD,X].
+C
+C     IOUT        SWITCH FOR CALLING THE SUBROUTINE SOLOUT:
+C                    IOUT=0: SUBROUTINE IS NEVER CALLED
+C                    IOUT=1: SUBROUTINE IS AVAILABLE FOR OUTPUT.
+C
+C     WORK        ARRAY OF WORKING SPACE OF LENGTH "LWORK".
+C                 WORK(1), WORK(2),.., WORK(20) SERVE AS PARAMETERS
+C                 FOR THE CODE. FOR STANDARD USE OF THE CODE
+C                 WORK(1),..,WORK(20) MUST BE SET TO ZERO BEFORE
+C                 CALLING. SEE BELOW FOR A MORE SOPHISTICATED USE.
+C                 WORK(8),..,WORK(LWORK) SERVE AS WORKING SPACE
+C                 FOR ALL VECTORS AND MATRICES.
+C                 "LWORK" MUST BE AT LEAST
+C                          N*(LJAC+LMAS+NS*LE+3*NS+3)+20
+C                 WHERE
+C                    NS=IWORK(11) (SEE BELOW)
+C                 AND
+C                    LJAC=N              IF MLJAC=N (FULL JACOBIAN)
+C                    LJAC=MLJAC+MUJAC+1  IF MLJAC<N (BANDED JAC.)
+C                 AND
+C                    LMAS=0              IF IMAS=0
+C                    LMAS=N              IF IMAS=1 AND MLMAS=N (FULL)
+C                    LMAS=MLMAS+MUMAS+1  IF MLMAS<N (BANDED MASS-M.)
+C                 AND
+C                    LE=N               IF MLJAC=N (FULL JACOBIAN)
+C                    LE=2*MLJAC+MUJAC+1 IF MLJAC<N (BANDED JAC.)
+C
+C                 IN THE USUAL CASE WHERE THE JACOBIAN IS FULL AND THE
+C                 MASS-MATRIX IS THE INDENTITY (IMAS=0), THE MINIMUM
+C                 STORAGE REQUIREMENT IS
+C                             LWORK = (NS+1)*N*N+(3*NS+3)*N+20.
+C                 IF IWORK(9)=M1>0 THEN "LWORK" MUST BE AT LEAST
+C                        N*(LJAC+3*NS+3)+(N-M1)*(LMAS+NS*LE)+20
+C                 WHERE IN THE DEFINITIONS OF LJAC, LMAS AND LE THE
+C                 NUMBER N CAN BE REPLACED BY N-M1.
+C
+C     LWORK       DECLARED LENGTH OF ARRAY "WORK".
+C
+C     IWORK       INTEGER WORKING SPACE OF LENGTH "LIWORK".
+C                 IWORK(1),IWORK(2),...,IWORK(20) SERVE AS PARAMETERS
+C                 FOR THE CODE. FOR STANDARD USE, SET IWORK(1),..,
+C                 IWORK(20) TO ZERO BEFORE CALLING.
+C                 IWORK(21),...,IWORK(LIWORK) SERVE AS WORKING AREA.
+C                 "LIWORK" MUST BE AT LEAST
+C                             (2+(NS-1)/2)*N+20.
+C
+C     LIWORK      DECLARED LENGTH OF ARRAY "IWORK".
+C
+C     RPAR, IPAR  REAL AND INTEGER PARAMETERS (OR PARAMETER ARRAYS) WHICH
+C                 CAN BE USED FOR COMMUNICATION BETWEEN YOUR CALLING
+C                 PROGRAM AND THE FCN, JAC, MAS, SOLOUT SUBROUTINES.
+C
+C ----------------------------------------------------------------------
+C
+C     SOPHISTICATED SETTING OF PARAMETERS
+C     -----------------------------------
+C              SEVERAL PARAMETERS OF THE CODE ARE TUNED TO MAKE IT WORK
+C              WELL. THEY MAY BE DEFINED BY SETTING WORK(1),...
+C              AS WELL AS IWORK(1),... DIFFERENT FROM ZERO.
+C              FOR ZERO INPUT, THE CODE CHOOSES DEFAULT VALUES:
+C
+C    IWORK(1)  IF IWORK(1).NE.0, THE CODE TRANSFORMS THE JACOBIAN
+C              MATRIX TO HESSENBERG FORM. THIS IS PARTICULARLY
+C              ADVANTAGEOUS FOR LARGE SYSTEMS WITH FULL JACOBIAN.
+C              IT DOES NOT WORK FOR BANDED JACOBIAN (MLJAC<N)
+C              AND NOT FOR IMPLICIT SYSTEMS (IMAS=1).
+C
+C    IWORK(2)  THIS IS THE MAXIMAL NUMBER OF ALLOWED STEPS.
+C              THE DEFAULT VALUE (FOR IWORK(2)=0) IS 100000.
+C
+C    IWORK(3)  THE MAXIMUM NUMBER OF NEWTON ITERATIONS FOR THE
+C              SOLUTION OF THE IMPLICIT SYSTEM IN EACH STEP.
+C              THE DEFAULT VALUE (FOR IWORK(3)=0) IS 7+(NS-3)*2.
+C              NS IS THE NUMBER OF STAGES (SEE IWORK(11)).
+C
+C    IWORK(4)  IF IWORK(4).EQ.0 THE EXTRAPOLATED COLLOCATION SOLUTION
+C              IS TAKEN AS STARTING VALUE FOR NEWTON'S METHOD.
+C              IF IWORK(4).NE.0 ZERO STARTING VALUES ARE USED.
+C              THE LATTER IS RECOMMENDED IF NEWTON'S METHOD HAS
+C              DIFFICULTIES WITH CONVERGENCE (THIS IS THE CASE WHEN
+C              NSTEP IS LARGER THAN NACCPT + NREJCT; SEE OUTPUT PARAM.).
+C              DEFAULT IS IWORK(4)=0.
+C
+C       THE FOLLOWING 3 PARAMETERS ARE IMPORTANT FOR
+C       DIFFERENTIAL-ALGEBRAIC SYSTEMS OF INDEX > 1.
+C       THE FUNCTION-SUBROUTINE SHOULD BE WRITTEN SUCH THAT
+C       THE INDEX 1,2,3 VARIABLES APPEAR IN THIS ORDER.
+C       IN ESTIMATING THE ERROR THE INDEX 2 VARIABLES ARE
+C       MULTIPLIED BY H, THE INDEX 3 VARIABLES BY H**2.
+C
+C    IWORK(5)  DIMENSION OF THE INDEX 1 VARIABLES (MUST BE > 0). FOR
+C              ODE'S THIS EQUALS THE DIMENSION OF THE SYSTEM.
+C              DEFAULT IWORK(5)=N.
+C
+C    IWORK(6)  DIMENSION OF THE INDEX 2 VARIABLES. DEFAULT IWORK(6)=0.
+C
+C    IWORK(7)  DIMENSION OF THE INDEX 3 VARIABLES. DEFAULT IWORK(7)=0.
+C
+C    IWORK(8)  SWITCH FOR STEP SIZE STRATEGY
+C              IF IWORK(8).EQ.1  MOD. PREDICTIVE CONTROLLER (GUSTAFSSON)
+C              IF IWORK(8).EQ.2  CLASSICAL STEP SIZE CONTROL
+C              THE DEFAULT VALUE (FOR IWORK(8)=0) IS IWORK(8)=1.
+C              THE CHOICE IWORK(8).EQ.1 SEEMS TO PRODUCE SAFER RESULTS;
+C              FOR SIMPLE PROBLEMS, THE CHOICE IWORK(8).EQ.2 PRODUCES
+C              OFTEN SLIGHTLY FASTER RUNS
+C
+C       IF THE DIFFERENTIAL SYSTEM HAS THE SPECIAL STRUCTURE THAT
+C            Y(I)' = Y(I+M2)   FOR  I=1,...,M1,
+C       WITH M1 A MULTIPLE OF M2, A SUBSTANTIAL GAIN IN COMPUTERTIME
+C       CAN BE ACHIEVED BY SETTING THE PARAMETERS IWORK(9) AND IWORK(10).
+C       E.G., FOR SECOND ORDER SYSTEMS P'=V, V'=G(P,V), WHERE P AND V ARE
+C       VECTORS OF DIMENSION N/2, ONE HAS TO PUT M1=M2=N/2.
+C       FOR M1>0 SOME OF THE INPUT PARAMETERS HAVE DIFFERENT MEANINGS:
+C       - JAC: ONLY THE ELEMENTS OF THE NON-TRIVIAL PART OF THE
+C              JACOBIAN HAVE TO BE STORED
+C              IF (MLJAC.EQ.N-M1) THE JACOBIAN IS SUPPOSED TO BE FULL
+C                 DFY(I,J) = PARTIAL F(I+M1) / PARTIAL Y(J)
+C                FOR I=1,N-M1 AND J=1,N.
+C              ELSE, THE JACOBIAN IS BANDED ( M1 = M2 * MM )
+C                 DFY(I-J+MUJAC+1,J+K*M2) = PARTIAL F(I+M1) / PARTIAL Y(J+K*M2)
+C                FOR I=1,MLJAC+MUJAC+1 AND J=1,M2 AND K=0,MM.
+C       - MLJAC: MLJAC=N-M1: IF THE NON-TRIVIAL PART OF THE JACOBIAN IS FULL
+C                0<=MLJAC<N-M1: IF THE (MM+1) SUBMATRICES (FOR K=0,MM)
+C                     PARTIAL F(I+M1) / PARTIAL Y(J+K*M2),  I,J=1,M2
+C                    ARE BANDED, MLJAC IS THE MAXIMAL LOWER BANDWIDTH
+C                    OF THESE MM+1 SUBMATRICES
+C       - MUJAC: MAXIMAL UPPER BANDWIDTH OF THESE MM+1 SUBMATRICES
+C                NEED NOT BE DEFINED IF MLJAC=N-M1
+C       - MAS: IF IMAS=0 THIS MATRIX IS ASSUMED TO BE THE IDENTITY AND
+C              NEED NOT BE DEFINED. SUPPLY A DUMMY SUBROUTINE IN THIS CASE.
+C              IT IS ASSUMED THAT ONLY THE ELEMENTS OF RIGHT LOWER BLOCK OF
+C              DIMENSION N-M1 DIFFER FROM THAT OF THE IDENTITY MATRIX.
+C              IF (MLMAS.EQ.N-M1) THIS SUBMATRIX IS SUPPOSED TO BE FULL
+C                 AM(I,J) = M(I+M1,J+M1)     FOR I=1,N-M1 AND J=1,N-M1.
+C              ELSE, THE MASS MATRIX IS BANDED
+C                 AM(I-J+MUMAS+1,J) = M(I+M1,J+M1)
+C       - MLMAS: MLMAS=N-M1: IF THE NON-TRIVIAL PART OF M IS FULL
+C                0<=MLMAS<N-M1: LOWER BANDWIDTH OF THE MASS MATRIX
+C       - MUMAS: UPPER BANDWIDTH OF THE MASS MATRIX
+C                NEED NOT BE DEFINED IF MLMAS=N-M1
+C
+C    IWORK(9)  THE VALUE OF M1.  DEFAULT M1=0.
+C
+C    IWORK(10) THE VALUE OF M2.  DEFAULT M2=M1.
+C
+C    IWORK(11) THE NUMBER OF STAGES NS.
+C              POSSIBLE VALUES ARE 3,5,7. DEFAULT NS=3.
+C
+C ----------
+C
+C    WORK(1)   UROUND, THE ROUNDING UNIT, DEFAULT 1.D-16.
+C
+C    WORK(2)   THE SAFETY FACTOR IN STEP SIZE PREDICTION,
+C              DEFAULT 0.9D0.
+C
+C    WORK(3)   DECIDES WHETHER THE JACOBIAN SHOULD BE RECOMPUTED;
+C              INCREASE WORK(3), TO 0.1 SAY, WHEN JACOBIAN EVALUATIONS
+C              ARE COSTLY. FOR SMALL SYSTEMS WORK(3) SHOULD BE SMALLER
+C              (0.001D0, SAY). NEGATIV WORK(3) FORCES THE CODE TO
+C              COMPUTE THE JACOBIAN AFTER EVERY ACCEPTED STEP.
+C              DEFAULT 0.001D0.
+C
+C    WORK(4)   STOPPING CRITERION FOR NEWTON'S METHOD, USUALLY CHOSEN <1.
+C              SMALLER VALUES OF WORK(4) MAKE THE CODE SLOWER, BUT SAFER.
+C              DEFAULT MIN(0.03D0,RTOL(1)**((NS-1)/(NS+1))
+C              WHERE NS IS THE NUMBER OF STAGES
+C
+C    WORK(5) AND WORK(6) : IF WORK(5) < HNEW/HOLD < WORK(6), THEN THE
+C              STEP SIZE IS NOT CHANGED. THIS SAVES, TOGETHER WITH A
+C              LARGE WORK(3), LU-DECOMPOSITIONS AND COMPUTING TIME FOR
+C              LARGE SYSTEMS. FOR SMALL SYSTEMS ONE MAY HAVE
+C              WORK(5)=1.D0, WORK(6)=1.2D0, FOR LARGE FULL SYSTEMS
+C              WORK(5)=0.99D0, WORK(6)=2.D0 MIGHT BE GOOD.
+C              DEFAULTS WORK(5)=1.D0, WORK(6)=1.2D0 .
+C
+C    WORK(7)   MAXIMAL STEP SIZE, DEFAULT XEND-X.
+C
+C    WORK(8), WORK(9)   PARAMETERS FOR STEP SIZE SELECTION
+C              THE NEW STEP SIZE IS CHOSEN SUBJECT TO THE RESTRICTION
+C                 WORK(8) <= HNEW/HOLD <= WORK(9)
+C              DEFAULT VALUES: WORK(8)=0.2D0, WORK(9)=8.D0
+C
+C-----------------------------------------------------------------------
+C
+C     OUTPUT PARAMETERS
+C     -----------------
+C     X           X-VALUE FOR WHICH THE SOLUTION HAS BEEN COMPUTED
+C                 (AFTER SUCCESSFUL RETURN X=XEND).
+C
+C     Y(N)        NUMERICAL SOLUTION AT X
+C
+C     H           PREDICTED STEP SIZE OF THE LAST ACCEPTED STEP
+C
+C     IDID        REPORTS ON SUCCESSFULNESS UPON RETURN:
+C                   IDID= 1  COMPUTATION SUCCESSFUL,
+C                   IDID= 2  COMPUT. SUCCESSFUL (INTERRUPTED BY SOLOUT)
+C                   IDID=-1  INPUT IS NOT CONSISTENT,
+C                   IDID=-2  LARGER NMAX IS NEEDED,
+C                   IDID=-3  STEP SIZE BECOMES TOO SMALL,
+C                   IDID=-4  MATRIX IS REPEATEDLY SINGULAR.
+C
+C   IWORK(14)  NFCN    NUMBER OF FUNCTION EVALUATIONS (THOSE FOR NUMERICAL
+C                      EVALUATION OF THE JACOBIAN ARE NOT COUNTED)
+C   IWORK(15)  NJAC    NUMBER OF JACOBIAN EVALUATIONS (EITHER ANALYTICALLY
+C                      OR NUMERICALLY)
+C   IWORK(16)  NSTEP   NUMBER OF COMPUTED STEPS
+C   IWORK(17)  NACCPT  NUMBER OF ACCEPTED STEPS
+C   IWORK(18)  NREJCT  NUMBER OF REJECTED STEPS (DUE TO ERROR TEST),
+C                      (STEP REJECTIONS IN THE FIRST STEP ARE NOT COUNTED)
+C   IWORK(19)  NDEC    NUMBER OF LU-DECOMPOSITIONS OF BOTH MATRICES
+C   IWORK(20)  NSOL    NUMBER OF FORWARD-BACKWARD SUBSTITUTIONS, OF BOTH
+C                      SYSTEMS; THE NSTEP FORWARD-BACKWARD SUBSTITUTIONS,
+C                      NEEDED FOR STEP SIZE SELECTION, ARE NOT COUNTED
+C-----------------------------------------------------------------------
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+C          DECLARATIONS
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
+      DIMENSION RPAR(*),IPAR(*)
+      LOGICAL IMPLCT,JBAND,ARRET,STARTN,PRED
+      EXTERNAL FCN,JAC,MAS,SOLOUT
+C *** *** *** *** *** *** ***
+C        SETTING THE PARAMETERS
+C *** *** *** *** *** *** ***
+       NFCN=0
+       NJAC=0
+       NSTEP=0
+       NACCPT=0
+       NREJCT=0
+       NDEC=0
+       NSOL=0
+       ARRET=.FALSE.
+C -------- NUMBER OF STAGES  NS
+      IF (IWORK(11).EQ.0) THEN
+         NS=3
+      ELSE
+         NS=IWORK(11)
+         IF (NS.LE.2.OR.NS.GE.8.OR.NS.EQ.4.OR.NS.EQ.6) THEN
+            WRITE(6,*)' CURIOUS INPUT IWORK(11)=',IWORK(11)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C -------- NMAX , THE MAXIMAL NUMBER OF STEPS -----
+      IF (IWORK(2).EQ.0) THEN
+         NMAX=100000
+      ELSE
+         NMAX=IWORK(2)
+         IF (NMAX.LE.0) THEN
+            WRITE(6,*)' WRONG INPUT IWORK(2)=',IWORK(2)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C -------- NIT    MAXIMAL NUMBER OF NEWTON ITERATIONS
+      IF (IWORK(3).EQ.0) THEN
+         NIT=7+(NS-3)*2
+      ELSE
+         NIT=IWORK(3)
+         IF (NIT.LE.0) THEN
+            WRITE(6,*)' CURIOUS INPUT IWORK(3)=',IWORK(3)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C -------- STARTN  SWITCH FOR STARTING VALUES OF NEWTON ITERATIONS
+      IF(IWORK(4).EQ.0)THEN
+         STARTN=.FALSE.
+      ELSE
+         STARTN=.TRUE.
+      END IF
+C -------- PARAMETER FOR DIFFERENTIAL-ALGEBRAIC COMPONENTS
+      NIND1=IWORK(5)
+      NIND2=IWORK(6)
+      NIND3=IWORK(7)
+      IF (NIND1.EQ.0) NIND1=N
+      IF (NIND1+NIND2+NIND3.NE.N) THEN
+       WRITE(6,*)' CURIOUS INPUT FOR IWORK(5,6,7)=',NIND1,NIND2,NIND3
+       ARRET=.TRUE.
+      END IF
+C -------- PRED   STEP SIZE CONTROL
+      IF(IWORK(8).LE.1)THEN
+         PRED=.TRUE.
+      ELSE
+         PRED=.FALSE.
+      END IF
+C -------- PARAMETER FOR SECOND ORDER EQUATIONS
+      M1=IWORK(9)
+      M2=IWORK(10)
+      NM1=N-M1
+      IF (M1.EQ.0) M2=N
+      IF (M2.EQ.0) M2=M1
+      IF (M1.LT.0.OR.M2.LT.0.OR.M1+M2.GT.N) THEN
+       WRITE(6,*)' CURIOUS INPUT FOR IWORK(9,10)=',M1,M2
+       ARRET=.TRUE.
+      END IF
+C -------- UROUND   SMALLEST NUMBER SATISFYING 1.0D0+UROUND>1.0D0
+      IF (WORK(1).EQ.0.0D0) THEN
+         UROUND=1.0D-16
+      ELSE
+         UROUND=WORK(1)
+         IF (UROUND.LE.1.0D-19.OR.UROUND.GE.1.0D0) THEN
+            WRITE(6,*)' COEFFICIENTS HAVE 20 DIGITS, UROUND=',WORK(1)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C --------- CHECK IF TOLERANCES ARE O.K.
+      EXPM=(NS+1.0D0)/(2.0D0*NS)
+      IF (ITOL.EQ.0) THEN
+          IF (ATOL(1).LE.0.D0.OR.RTOL(1).LE.10.D0*UROUND) THEN
+              WRITE (6,*) ' TOLERANCES ARE TOO SMALL'
+              ARRET=.TRUE.
+          ELSE
+              QUOT=ATOL(1)/RTOL(1)
+              RTOL(1)=0.1D0*RTOL(1)**EXPM
+              ATOL(1)=RTOL(1)*QUOT
+          END IF
+      ELSE
+          DO I=1,N
+          IF (ATOL(I).LE.0.D0.OR.RTOL(I).LE.10.D0*UROUND) THEN
+              WRITE (6,*) ' TOLERANCES(',I,') ARE TOO SMALL'
+              ARRET=.TRUE.
+          ELSE
+              QUOT=ATOL(I)/RTOL(I)
+              RTOL(I)=0.1D0*RTOL(I)**EXPM
+              ATOL(I)=RTOL(I)*QUOT
+          END IF
+          END DO
+      END IF
+C --------- SAFE     SAFETY FACTOR IN STEP SIZE PREDICTION
+      IF (WORK(2).EQ.0.0D0) THEN
+         SAFE=0.9D0
+      ELSE
+         SAFE=WORK(2)
+         IF (SAFE.LE.0.001D0.OR.SAFE.GE.1.0D0) THEN
+            WRITE(6,*)' CURIOUS INPUT FOR WORK(2)=',WORK(2)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C ------ THET     DECIDES WHETHER THE JACOBIAN SHOULD BE RECOMPUTED;
+      IF (WORK(3).EQ.0.D0) THEN
+         THET=0.001D0
+      ELSE
+         THET=WORK(3)
+         IF (THET.GE.1.0D0) THEN
+            WRITE(6,*)' CURIOUS INPUT FOR WORK(3)=',WORK(3)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C --- FNEWT   STOPPING CRIERION FOR NEWTON'S METHOD, USUALLY CHOSEN <1.
+      TOLST=RTOL(1)
+      EXPM=1.0D0/EXPM
+      IF (WORK(4).EQ.0.D0) THEN
+         FNEWT=MAX(10*UROUND/TOLST,MIN(0.03D0,TOLST**(EXPM-1.0D0)))
+      ELSE
+         FNEWT=WORK(4)
+         IF (FNEWT.LE.UROUND/TOLST) THEN
+            WRITE(6,*)' CURIOUS INPUT FOR WORK(4)=',WORK(4)
+            ARRET=.TRUE.
+         END IF
+      END IF
+C --- QUOT1 AND QUOT2: IF QUOT1 < HNEW/HOLD < QUOT2, STEP SIZE = CONST.
+      IF (WORK(5).EQ.0.D0) THEN
+         QUOT1=1.D0
+      ELSE
+         QUOT1=WORK(5)
+      END IF
+      IF (WORK(6).EQ.0.D0) THEN
+         QUOT2=1.2D0
+      ELSE
+         QUOT2=WORK(6)
+      END IF
+      IF (QUOT1.GT.1.0D0.OR.QUOT2.LT.1.0D0) THEN
+         WRITE(6,*)' CURIOUS INPUT FOR WORK(5,6)=',QUOT1,QUOT2
+         ARRET=.TRUE.
+      END IF
+C -------- MAXIMAL STEP SIZE
+      IF (WORK(7).EQ.0.D0) THEN
+         HMAX=XEND-X
+      ELSE
+         HMAX=WORK(7)
+      END IF
+C -------  FACL,FACR     PARAMETERS FOR STEP SIZE SELECTION
+      IF(WORK(8).EQ.0.D0)THEN
+         FACL=5.D0
+      ELSE
+         FACL=1.D0/WORK(8)
+      END IF
+      IF(WORK(9).EQ.0.D0)THEN
+         FACR=1.D0/8.0D0
+      ELSE
+         FACR=1.D0/WORK(9)
+      END IF
+      IF (FACL.LT.1.0D0.OR.FACR.GT.1.0D0) THEN
+            WRITE(6,*)' CURIOUS INPUT WORK(8,9)=',WORK(8),WORK(9)
+            ARRET=.TRUE.
+         END IF
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+C         COMPUTATION OF ARRAY ENTRIES
+C *** *** *** *** *** *** *** *** *** *** *** *** ***
+C ---- IMPLICIT, BANDED OR NOT ?
+      IMPLCT=IMAS.NE.0
+      JBAND=MLJAC.LT.NM1
+C -------- COMPUTATION OF THE ROW-DIMENSIONS OF THE 2-ARRAYS ---
+C -- JACOBIAN  AND  MATRICES E1, E2
+      IF (JBAND) THEN
+         LDJAC=MLJAC+MUJAC+1
+         LDE1=MLJAC+LDJAC
+      ELSE
+         MLJAC=NM1
+         MUJAC=NM1
+         LDJAC=NM1
+         LDE1=NM1
+      END IF
+C -- MASS MATRIX
+      IF (IMPLCT) THEN
+          IF (MLMAS.NE.NM1) THEN
+              LDMAS=MLMAS+MUMAS+1
+              IF (JBAND) THEN
+                 IJOB=4
+              ELSE
+                 IJOB=3
+              END IF
+          ELSE
+              LDMAS=NM1
+              IJOB=5
+          END IF
+C ------ BANDWITH OF "MAS" NOT SMALLER THAN BANDWITH OF "JAC"
+          IF (MLMAS.GT.MLJAC.OR.MUMAS.GT.MUJAC) THEN
+             WRITE (6,*) 'BANDWITH OF "MAS" NOT SMALLER THAN BANDWITH OF
+     & "JAC"'
+            ARRET=.TRUE.
+          END IF
+      ELSE
+          LDMAS=0
+          IF (JBAND) THEN
+             IJOB=2
+          ELSE
+             IJOB=1
+             IF (N.GT.2.AND.IWORK(1).NE.0) IJOB=7
+          END IF
+      END IF
+      LDMAS2=MAX(1,LDMAS)
+C ------ HESSENBERG OPTION ONLY FOR EXPLICIT EQU. WITH FULL JACOBIAN
+      IF ((IMPLCT.OR.JBAND).AND.IJOB.EQ.7) THEN
+         WRITE(6,*)' HESSENBERG OPTION ONLY FOR EXPLICIT EQUATIONS WITH
+     &FULL JACOBIAN'
+         ARRET=.TRUE.
+      END IF
+C ------- PREPARE THE ENTRY-POINTS FOR THE ARRAYS IN WORK -----
+      NNS=NS*N
+      NM1NS=NS*NM1
+      NMEE=(NS-1)*NM1
+      IEZZ=21
+      IEY0=IEZZ+NNS
+      IESCAL=IEY0+N
+      IEFF=IESCAL+N
+      IECON=IEFF+NNS
+      IEJAC=IECON+NNS+N
+      IEMAS=IEJAC+N*LDJAC
+      IEE1=IEMAS+NM1*LDMAS
+      IEE=IEE1+NM1*LDE1
+C ------ TOTAL STORAGE REQUIREMENT -----------
+      ISTORE=IEE+NMEE*LDE1-1
+      IF(ISTORE.GT.LWORK)THEN
+         WRITE(6,*)' INSUFFICIENT STORAGE FOR WORK, MIN. LWORK=',ISTORE
+         ARRET=.TRUE.
+      END IF
+C ------- ENTRY POINTS FOR INTEGER WORKSPACE -----
+      IEIP1=21
+      IEIP2=IEIP1+NM1
+      IEIPH=IEIP2+NM1*(NS-1)/2
+C --------- TOTAL REQUIREMENT ---------------
+      ISTORE=IEIPH+NM1-1
+      IF (ISTORE.GT.LIWORK) THEN
+         WRITE(6,*)' INSUFF. STORAGE FOR IWORK, MIN. LIWORK=',ISTORE
+         ARRET=.TRUE.
+      END IF
+C ------ WHEN A FAIL HAS OCCURED, WE RETURN WITH IDID=-1
+      IF (ARRET) THEN
+         IDID=-1
+         RETURN
+      END IF
+C -------- CALL TO CORE INTEGRATOR ------------
+      CALL RADCOP(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,
+     &   JAC,IJAC,MLJAC,MUJAC,MAS,MLMAS,MUMAS,SOLOUT,IOUT,IDID,
+     &   NMAX,UROUND,SAFE,THET,FNEWT,QUOT1,QUOT2,NIT,IJOB,STARTN,
+     &   NIND1,NIND2,NIND3,PRED,FACL,FACR,M1,M2,NM1,NS,NNS,NM1NS,
+     &   NMEE,IMPLCT,JBAND,LDJAC,LDE1,LDMAS2,WORK(IEZZ),WORK(IEY0),
+     &   WORK(IESCAL),WORK(IEFF),WORK(IEJAC),WORK(IEE1),WORK(IEE),
+     &   WORK(IEMAS),WORK(IECON),IWORK(IEIP1),IWORK(IEIP2),
+     &   IWORK(IEIPH),NFCN,NJAC,NSTEP,NACCPT,NREJCT,NDEC,NSOL,RPAR,IPAR)
+      IWORK(14)=NFCN
+      IWORK(15)=NJAC
+      IWORK(16)=NSTEP
+      IWORK(17)=NACCPT
+      IWORK(18)=NREJCT
+      IWORK(19)=NDEC
+      IWORK(20)=NSOL
+C -------- RESTORE TOLERANCES
+      IF (ITOL.EQ.0) THEN
+              QUOT=ATOL(1)/RTOL(1)
+              RTOL(1)=(10.0D0*RTOL(1))**EXPM
+              ATOL(1)=RTOL(1)*QUOT
+      ELSE
+          DO I=1,N
+              QUOT=ATOL(I)/RTOL(I)
+              RTOL(I)=(10.0D0*RTOL(I))**EXPM
+              ATOL(I)=RTOL(I)*QUOT
+          END DO
+      END IF
+C ----------- RETURN -----------
+      RETURN
+      END
+C
+C     END OF SUBROUTINE RADAUP
+C
+C ***********************************************************
+C
+      SUBROUTINE RADCOP(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,
+     &   JAC,IJAC,MLJAC,MUJAC,MAS,MLMAS,MUMAS,SOLOUT,IOUT,IDID,
+     &   NMAX,UROUND,SAFE,THET,FNEWT,QUOT1,QUOT2,NIT,IJOB,STARTN,
+     &   NIND1,NIND2,NIND3,PRED,FACL,FACR,M1,M2,NM1,NS,NNS,NM1NS,
+     &   NMEE,IMPLCT,BANDED,LDJAC,LDE1,LDMAS,ZZ,Y0,SCAL,FF,FJAC,
+     &   E1,EE2,FMAS,CONT,IP1,IP2,IPHES,
+     &   NFCN,NJAC,NSTEP,NACCPT,NREJCT,NDEC,NSOL,RPAR,IPAR)
+C ----------------------------------------------------------
+C     CORE INTEGRATOR FOR RADAU5
+C     PARAMETERS SAME AS IN RADAU5 WITH WORKSPACE ADDED
+C ----------------------------------------------------------
+C         DECLARATIONS
+C ----------------------------------------------------------
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      PARAMETER (NSDIM=7)
+C --- THIS PARAMETER HAS TO BE CHANGED IF NUMBER OF STAGES IS >=7
+      DIMENSION Y(N),ZZ(NNS),FF(NNS),Y0(N),SCAL(N)
+      DIMENSION FJAC(LDJAC,N),FMAS(LDMAS,NM1),CONT(NNS+N)
+      DIMENSION ATOL(1),RTOL(1),RPAR(*),IPAR(*)
+      DIMENSION E1(LDE1,NM1)
+      DIMENSION EE2(LDE1,NMEE)
+      DIMENSION TC(NSDIM,NSDIM),TIC(NSDIM,NSDIM)
+      DIMENSION ALPH(NSDIM),BETA(NSDIM),DD(NSDIM)
+      DIMENSION ALPHN(NSDIM),BETAN(NSDIM),STORE(NSDIM)
+      INTEGER IP1(NM1),IP2(NM1),IPHES(NM1)
+      COMMON/WEIGHT/NN,NSCON,XSOL,HSOL,C(0:NSDIM)
+      COMMON/LINAL/MLE,MUE,MBJAC,MBB,MDIAG,MDIFF,MBDIAG
+      LOGICAL REJECT,FIRST,IMPLCT,BANDED,CALJAC,STARTN,CALHES
+      LOGICAL INDEX1,INDEX2,INDEX3,LAST,PRED
+      EXTERNAL FCN
+C *** *** *** *** *** *** ***
+C  INITIALISATIONS
+C *** *** *** *** *** *** ***
+C -------- CHECK THE INDEX OF THE PROBLEM -----
+      INDEX1=NIND1.NE.0
+      INDEX2=NIND2.NE.0
+      INDEX3=NIND3.NE.0
+C ------- COMPUTE MASS MATRIX FOR IMPLICIT CASE ----------
+      IF (IMPLCT) CALL MAS(NM1,FMAS,LDMAS,RPAR,IPAR)
+C ---------- CONSTANTS ---------
+      NSCON=NS
+      NN=N
+      LRC=NNS+N
+      CALL COEFRA(NS,NSDIM,TC,TIC,C,DD,U1,ALPH,BETA)
+      IF (M1.GT.0) IJOB=IJOB+10
+      POSNEG=SIGN(1.D0,XEND-X)
+      HMAXN=MIN(ABS(HMAX),ABS(XEND-X))
+      IF (ABS(H).LE.10.D0*UROUND) H=1.0D-6
+      H=MIN(ABS(H),HMAXN)
+      H=SIGN(H,POSNEG)
+      HOLD=H
+      REJECT=.FALSE.
+      FIRST=.TRUE.
+      LAST=.FALSE.
+      IF ((X+H*1.0001D0-XEND)*POSNEG.GE.0.D0) THEN
+         H=XEND-X
+         LAST=.TRUE.
+      END IF
+      FACCON=1.D0
+      CFAC=SAFE*(1+2*NIT)
+      NSING=0
+      XOLD=X
+      IF (IOUT.NE.0) THEN
+          IRTRN=1
+          NRSOL=1
+          XOSOL=XOLD
+          XSOL=X
+          DO I=1,N
+             CONT(I)=Y(I)
+          END DO
+          NSOLU=N
+          HSOL=HOLD
+          CALL SOLOUT(NRSOL,XOSOL,XSOL,Y,CONT,LRC,NSOLU,
+     &                RPAR,IPAR,IRTRN)
+          IF (IRTRN.LT.0) GOTO 179
+      END IF
+      MLE=MLJAC
+      MUE=MUJAC
+      MBJAC=MLJAC+MUJAC+1
+      MBB=MLMAS+MUMAS+1
+      MDIAG=MLE+MUE+1
+      MDIFF=MLE+MUE-MUMAS
+      MBDIAG=MUMAS+1
+      IF (ITOL.EQ.0) THEN
+          DO I=1,N
+             SCAL(I)=ATOL(1)+RTOL(1)*ABS(Y(I))
+          END DO
+      ELSE
+          DO I=1,N
+             SCAL(I)=ATOL(I)+RTOL(I)*ABS(Y(I))
+          END DO
+      END IF
+      HHFAC=H
+      CALL FCN(N,X,Y,Y0,RPAR,IPAR)
+      NFCN=NFCN+1
+C --- BASIC INTEGRATION STEP
+  10  CONTINUE
+C *** *** *** *** *** *** ***
+C  COMPUTATION OF THE JACOBIAN
+C *** *** *** *** *** *** ***
+      NJAC=NJAC+1
+      IF (IJAC.EQ.0) THEN
+C --- COMPUTE JACOBIAN MATRIX NUMERICALLY
+         IF (BANDED) THEN
+C --- JACOBIAN IS BANDED
+            MUJACP=MUJAC+1
+            MD=MIN(MBJAC,M2)
+            DO MM=1,M1/M2+1
+               DO K=1,MD
+                  J=K+(MM-1)*M2
+ 12               FF(J)=Y(J)
+                  FF(J+N)=DSQRT(UROUND*MAX(1.D-5,ABS(Y(J))))
+                  Y(J)=Y(J)+FF(J+N)
+                  J=J+MD
+                  IF (J.LE.MM*M2) GOTO 12
+                  CALL FCN(N,X,Y,CONT,RPAR,IPAR)
+                  J=K+(MM-1)*M2
+                  J1=K
+                  LBEG=MAX(1,J1-MUJAC)+M1
+ 14               LEND=MIN(M2,J1+MLJAC)+M1
+                  Y(J)=FF(J)
+                  MUJACJ=MUJACP-J1-M1
+                  DO L=LBEG,LEND
+                     FJAC(L+MUJACJ,J)=(CONT(L)-Y0(L))/FF(J+N)
+                  END DO
+                  J=J+MD
+                  J1=J1+MD
+                  LBEG=LEND+1
+                  IF (J.LE.MM*M2) GOTO 14
+               END DO
+            END DO
+         ELSE
+C --- JACOBIAN IS FULL
+            DO I=1,N
+               YSAFE=Y(I)
+               DELT=DSQRT(UROUND*MAX(1.D-5,ABS(YSAFE)))
+               Y(I)=YSAFE+DELT
+               CALL FCN(N,X,Y,CONT,RPAR,IPAR)
+               DO J=M1+1,N
+                 FJAC(J-M1,I)=(CONT(J)-Y0(J))/DELT
+               END DO
+               Y(I)=YSAFE
+            END DO
+         END IF
+      ELSE
+C --- COMPUTE JACOBIAN MATRIX ANALYTICALLY
+         CALL JAC(N,X,Y,FJAC,LDJAC,RPAR,IPAR)
+      END IF
+      CALJAC=.TRUE.
+      CALHES=.TRUE.
+  20  CONTINUE
+C --- COMPUTE THE MATRICES E1 AND E2 AND THEIR DECOMPOSITIONS
+      FAC1=U1/H
+      CALL DECOMR(N,FJAC,LDJAC,FMAS,LDMAS,MLMAS,MUMAS,
+     &            M1,M2,NM1,FAC1,E1,LDE1,IP1,IER,IJOB,CALHES,IPHES)
+      IF (IER.NE.0) GOTO 78
+      DO K=1,(NS-1)/2
+         ALPHN(K)=ALPH(K)/H
+         BETAN(K)=BETA(K)/H
+         IAD=(K-1)*2*NM1+1
+         CALL DECOMC(N,FJAC,LDJAC,FMAS,LDMAS,MLMAS,MUMAS,
+     &         M1,M2,NM1,ALPHN(K),BETAN(K),EE2(1,IAD),EE2(1,IAD+NM1),
+     &         LDE1,IP2((K-1)*NM1+1),IER,IJOB)
+         IF (IER.NE.0) GOTO 78
+      END DO
+      NDEC=NDEC+1
+  30  CONTINUE
+      NSTEP=NSTEP+1
+      IF (NSTEP.GT.NMAX) GOTO 178
+      IF (0.1D0*ABS(H).LE.ABS(X)*UROUND) GOTO 177
+          IF (INDEX2) THEN
+             DO I=NIND1+1,NIND1+NIND2
+                SCAL(I)=SCAL(I)/HHFAC
+             END DO
+          END IF
+          IF (INDEX3) THEN
+             DO I=NIND1+NIND2+1,NIND1+NIND2+NIND3
+                SCAL(I)=SCAL(I)/(HHFAC*HHFAC)
+             END DO
+          END IF
+      XPH=X+H
+C *** *** *** *** *** *** ***
+C  STARTING VALUES FOR NEWTON ITERATION
+C *** *** *** *** *** *** ***
+      IF (FIRST.OR.STARTN) THEN
+         DO I=1,NNS
+            ZZ(I)=0.D0
+            FF(I)=0.D0
+         END DO
+      ELSE
+         HQUOT=H/HOLD
+         DO K=1,NS
+            CCQ=C(K)*HQUOT
+            DO I=1,N
+               VAL=CONT(I+NS*N)
+               DO L=NS-1,1,-1
+                  VAL=CONT(I+L*N)+(CCQ-C(NS-L)+1.D0)*VAL
+               END DO
+               ZZ(I+(K-1)*N)=CCQ*VAL
+            END DO
+         END DO
+         DO I=1,N
+            DO K=1,NS
+               SUM=0.D0
+               DO L=1,NS
+                  SUM=SUM+TIC(K,L)*ZZ(I+(L-1)*N)
+               END DO
+               FF(I+(K-1)*N)=SUM
+            END DO
+         END DO
+      END IF
+C *** *** *** *** *** *** ***
+C  LOOP FOR THE SIMPLIFIED NEWTON ITERATION
+C *** *** *** *** *** *** ***
+            NEWT=0
+            FACCON=MAX(FACCON,UROUND)**0.8D0
+            THETA=ABS(THET)
+  40        CONTINUE
+            IF (NEWT.GE.NIT) GOTO 78
+C ---     COMPUTE THE RIGHT-HAND SIDE
+            DO K=0,NS-1
+               IADD=K*N
+               DO I=1,N
+                  CONT(I)=Y(I)+ZZ(IADD+I)
+               END DO
+               CALL FCN(N,X+C(K+1)*H,CONT,ZZ(IADD+1),RPAR,IPAR)
+            END DO
+            NFCN=NFCN+NS
+C ---     SOLVE THE LINEAR SYSTEMS
+            DO I=1,N
+               DO K=1,NS
+                  STORE(K)=ZZ(I+(K-1)*N)
+               END DO
+               DO K=1,NS
+                  SUM=0.D0
+                  DO L=1,NS
+                     SUM=SUM+TIC(K,L)*STORE(L)
+                  END DO
+                  ZZ(I+(K-1)*N)=SUM
+               END DO
+            END DO
+        CALL SLVRAR(N,FJAC,LDJAC,MLJAC,MUJAC,FMAS,LDMAS,MLMAS,MUMAS,
+     &          M1,M2,NM1,FAC1,E1,LDE1,ZZ,FF,IP1,IPHES,IER,IJOB)
+        DO K=1,(NS-1)/2
+           IAD=(K-1)*2*NM1+1
+           CALL SLVRAI(N,FJAC,LDJAC,MLJAC,MUJAC,FMAS,LDMAS,MLMAS,MUMAS,
+     &       M1,M2,NM1,ALPHN(K),BETAN(K),EE2(1,IAD),EE2(1,IAD+NM1),LDE1,
+     &       ZZ(1+(2*K-1)*N),ZZ(1+2*K*N),FF(1+(2*K-1)*N),
+     &       FF(1+2*K*N),CONT,IP2((K-1)*NM1+1),IPHES,IER,IJOB)
+        END DO
+            NSOL=NSOL+1
+            NEWT=NEWT+1
+            DYNO=0.D0
+            DO I=1,N
+               DENOM=SCAL(I)
+               DO K=0,NS-1
+                  DYNO=DYNO+(ZZ(I+K*N)/DENOM)**2
+               END DO
+            END DO
+            DYNO=DSQRT(DYNO/NNS)
+C ---     BAD CONVERGENCE OR NUMBER OF ITERATIONS TO LARGE
+            IF (NEWT.GT.1.AND.NEWT.LT.NIT) THEN
+                THQ=DYNO/DYNOLD
+                IF (NEWT.EQ.2) THEN
+                   THETA=THQ
+                ELSE
+                   THETA=SQRT(THQ*THQOLD)
+                END IF
+                THQOLD=THQ
+                IF (THETA.LT.0.99D0) THEN
+                    FACCON=THETA/(1.0D0-THETA)
+                    DYTH=FACCON*DYNO*THETA**(NIT-1-NEWT)/FNEWT
+                    IF (DYTH.GE.1.0D0) THEN
+                         QNEWT=DMAX1(1.0D-4,DMIN1(20.0D0,DYTH))
+                         HHFAC=.8D0*QNEWT**(-1.0D0/(4.0D0+NIT-1-NEWT))
+                         H=HHFAC*H
+                         REJECT=.TRUE.
+                         LAST=.FALSE.
+                         IF (CALJAC) GOTO 20
+                         GOTO 10
+                    END IF
+                ELSE
+                    GOTO 78
+                END IF
+            END IF
+            DYNOLD=MAX(DYNO,UROUND)
+            DO I=1,NNS
+               FF(I)=FF(I)+ZZ(I)
+            END DO
+            DO I=1,N
+               DO K=1,NS
+                  SUM=0.D0
+                  DO L=1,NS
+                     SUM=SUM+TC(K,L)*FF(I+(L-1)*N)
+                  END DO
+                  ZZ(I+(K-1)*N)=SUM
+               END DO
+            END DO
+            IF (FACCON*DYNO.GT.FNEWT) GOTO 40
+C --- ERROR ESTIMATION
+      CALL ESTRAV (N,FJAC,LDJAC,MLJAC,MUJAC,FMAS,LDMAS,MLMAS,MUMAS,
+     &          H,DD,FCN,NFCN,Y0,Y,IJOB,X,M1,M2,NM1,NS,NNS,E1,LDE1,
+     &          ZZ,CONT,FF,IP1,IPHES,SCAL,ERR,
+     &          FIRST,REJECT,FAC1,RPAR,IPAR)
+C --- COMPUTATION OF HNEW
+C --- WE REQUIRE .2<=HNEW/H<=8.
+      FAC=MIN(SAFE,CFAC/(NEWT+2*NIT))
+      EXPO=1.D0/(NS+1.D0)
+      QUOT=MAX(FACR,MIN(FACL,ERR**EXPO/FAC))
+      HNEW=H/QUOT
+C *** *** *** *** *** *** ***
+C  IS THE ERROR SMALL ENOUGH ?
+C *** *** *** *** *** *** ***
+      IF (ERR.LT.1.D0) THEN
+C --- STEP IS ACCEPTED
+         FIRST=.FALSE.
+         NACCPT=NACCPT+1
+         IF (PRED) THEN
+C       --- PREDICTIVE CONTROLLER OF GUSTAFSSON
+            IF (NACCPT.GT.1) THEN
+               FACGUS=(HACC/H)*(ERR**2/ERRACC)**EXPO/SAFE
+               FACGUS=MAX(FACR,MIN(FACL,FACGUS))
+               QUOT=MAX(QUOT,FACGUS)
+               HNEW=H/QUOT
+            END IF
+            HACC=H
+            ERRACC=MAX(1.0D-2,ERR)
+         END IF
+         XOLD=X
+         HOLD=H
+         X=XPH
+C       --- COMPUTE FINITE DIFFERENCES FOR DENSE OUTPUT
+         DO I=1,N
+            Y(I)=Y(I)+ZZ(I+(NS-1)*N)
+            CONT(I+NS*N)=ZZ(I)/C(1)
+         END DO
+         DO K=1,NS-1
+            FACT=1.D0/(C(NS-K)-C(NS-K+1))
+            DO I=1,N
+               CONT(I+K*N)=(ZZ(I+(NS-K-1)*N)-ZZ(I+(NS-K)*N))*FACT
+            END DO
+         END DO
+         DO J=2,NS
+            DO K=NS,J,-1
+               FACT=1.D0/(C(NS-K)-C(NS-K+J))
+               DO I=1,N
+                  CONT(I+K*N)=(CONT(I+K*N)-CONT(I+(K-1)*N))*FACT
+               END DO
+            END DO
+         END DO
+C       --- UPDATE SCALING
+         IF (ITOL.EQ.0) THEN
+             DO I=1,N
+                SCAL(I)=ATOL(1)+RTOL(1)*ABS(Y(I))
+             END DO
+         ELSE
+             DO I=1,N
+                SCAL(I)=ATOL(I)+RTOL(I)*ABS(Y(I))
+             END DO
+         END IF
+         IF (IOUT.NE.0) THEN
+             NRSOL=NACCPT+1
+             XSOL=X
+             XOSOL=XOLD
+             DO I=1,N
+                CONT(I)=Y(I)
+             END DO
+             NSOLU=N
+             HSOL=HOLD
+             CALL SOLOUT(NRSOL,XOSOL,XSOL,Y,CONT,LRC,NSOLU,
+     &                   RPAR,IPAR,IRTRN)
+             IF (IRTRN.LT.0) GOTO 179
+         END IF
+         CALJAC=.FALSE.
+         IF (LAST) THEN
+            H=HOPT
+            IDID=1
+            RETURN
+         END IF
+         CALL FCN(N,X,Y,Y0,RPAR,IPAR)
+         NFCN=NFCN+1
+         HNEW=POSNEG*MIN(ABS(HNEW),HMAXN)
+         HOPT=HNEW
+         HOPT=MIN(H,HNEW)
+         IF (REJECT) HNEW=POSNEG*MIN(ABS(HNEW),ABS(H))
+         REJECT=.FALSE.
+         IF ((X+HNEW/QUOT1-XEND)*POSNEG.GE.0.D0) THEN
+            H=XEND-X
+            LAST=.TRUE.
+         ELSE
+            QT=HNEW/H
+            HHFAC=H
+            IF (THETA.LE.THET.AND.QT.GE.QUOT1.AND.QT.LE.QUOT2) GOTO 30
+            H=HNEW
+         END IF
+         HHFAC=H
+         IF (THETA.LE.THET) GOTO 20
+         GOTO 10
+      ELSE
+C --- STEP IS REJECTED
+         REJECT=.TRUE.
+         LAST=.FALSE.
+         IF (FIRST) THEN
+             H=H*0.1D0
+             HHFAC=0.1D0
+         ELSE
+             HHFAC=HNEW/H
+             H=HNEW
+         END IF
+         IF (NACCPT.GE.1) NREJCT=NREJCT+1
+         IF (CALJAC) GOTO 20
+         GOTO 10
+      END IF
+C --- UNEXPECTED STEP-REJECTION
+  78  CONTINUE
+      IF (IER.NE.0) THEN
+          NSING=NSING+1
+          IF (NSING.GE.5) GOTO 176
+      END IF
+      H=H*0.5D0
+      HHFAC=0.5D0
+      REJECT=.TRUE.
+      LAST=.FALSE.
+      IF (CALJAC) GOTO 20
+      GOTO 10
+C --- FAIL EXIT
+ 176  CONTINUE
+      WRITE(6,979)X
+      WRITE(6,*) ' MATRIX IS REPEATEDLY SINGULAR, IER=',IER
+      IDID=-4
+      RETURN
+ 177  CONTINUE
+      WRITE(6,979)X
+      WRITE(6,*) ' STEP SIZE T0O SMALL, H=',H
+      IDID=-3
+      RETURN
+ 178  CONTINUE
+      WRITE(6,979)X
+      WRITE(6,*) ' MORE THAN NMAX =',NMAX,'STEPS ARE NEEDED'
+      IDID=-2
+      RETURN
+C --- EXIT CAUSED BY SOLOUT
+ 179  CONTINUE
+      WRITE(6,979)X
+ 979  FORMAT(' EXIT OF RADAU5 AT X=',E18.4)
+      IDID=2
+      RETURN
+      END
+C
+C     END OF SUBROUTINE RADCOP
+C
+C ***********************************************************
+C
+      SUBROUTINE COEFRA(NS,NSDIM,TC,TIC,C,DD,U1,ALPH,BETA)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION TC(NSDIM,NS),TIC(NSDIM,NS),C(0:NS),DD(NS)
+      DIMENSION ALPH(NS),BETA(NS)
+      C(0)=0.D0
+      C(NS)=1.D0
+      GOTO (1,1,3,1,5,1,7) NS
+  1   CONTINUE
+      RETURN
+  3   CONTINUE
+      SQ6=DSQRT(6.D0)
+      C(1)=(4.D0-SQ6)/10.D0
+      C(2)=(4.D0+SQ6)/10.D0
+      DD(1)=-(13.D0+7.D0*SQ6)/3.D0
+      DD(2)=(-13.D0+7.D0*SQ6)/3.D0
+      DD(3)=-1.D0/3.D0
+      U1=(6.D0+81.D0**(1.D0/3.D0)-9.D0**(1.D0/3.D0))/30.D0
+      ALP=(12.D0-81.D0**(1.D0/3.D0)+9.D0**(1.D0/3.D0))/60.D0
+      BET=(81.D0**(1.D0/3.D0)+9.D0**(1.D0/3.D0))*DSQRT(3.D0)/60.D0
+      CNO=ALP**2+BET**2
+      U1=1.0D0/U1
+      ALPH(1)=ALP/CNO
+      BETA(1)=BET/CNO
+      TC(1,1)=  0.9123239487089294279155D-01
+      TC(1,2)= -0.1412552950209542084280D+00
+      TC(1,3)= -0.3002919410514742449186D-01
+      TC(2,1)=  0.2417179327071070189575D+00
+      TC(2,2)=  0.2041293522937999319960D+00
+      TC(2,3)=  0.3829421127572619377954D+00
+      TC(3,1)=  0.9660481826150929361906D+00
+      TC(3,2)=  0.1000000000000000000000D+01
+      TC(3,3)=  0.0000000000000000000000D+00
+      TIC(1,1)=  0.4325579890063155351024D+01
+      TIC(1,2)=  0.3391992518158098695428D+00
+      TIC(1,3)=  0.5417705399358748711865D+00
+      TIC(2,1)= -0.4178718591551904727346D+01
+      TIC(2,2)= -0.3276828207610623870825D+00
+      TIC(2,3)=  0.4766235545005504519601D+00
+      TIC(3,1)= -0.5028726349457868759512D+00
+      TIC(3,2)=  0.2571926949855605429187D+01
+      TIC(3,3)= -0.5960392048282249249688D+00
+      RETURN
+  5   CONTINUE
+      C(1)=  0.5710419611451768219312D-01
+      C(2)=  0.2768430136381238276800D+00
+      C(3)=  0.5835904323689168200567D+00
+      C(4)=  0.8602401356562194478479D+00
+      DD(1)= -0.2778093394406463730479D+02
+      DD(2)=  0.3641478498049213152712D+01
+      DD(3)= -0.1252547721169118720491D+01
+      DD(4)=  0.5920031671845428725662D+00
+      DD(5)= -0.2000000000000000000000D+00
+      U1=  0.6286704751729276645173D+01
+      ALPH(1)=  0.3655694325463572258243D+01
+      BETA(1)=  0.6543736899360077294021D+01
+      ALPH(2)=  0.5700953298671789419170D+01
+      BETA(2)=  0.3210265600308549888425D+01
+      TC(1,1)= -0.1251758622050104589014D-01
+      TC(1,2)= -0.1024204781790882707009D-01
+      TC(1,3)=  0.4767387729029572386318D-01
+      TC(1,4)= -0.1147851525522951470794D-01
+      TC(1,5)= -0.1401985889287541028108D-01
+      TC(2,1)= -0.1491670151895382429004D-02
+      TC(2,2)=  0.5017286451737105816299D-01
+      TC(2,3)= -0.9433181918161143698066D-01
+      TC(2,4)= -0.7668830749180162885157D-02
+      TC(2,5)=  0.2470857842651852681253D-01
+      TC(3,1)= -0.7298187638808714862266D-01
+      TC(3,2)= -0.2305395340434179467214D+00
+      TC(3,3)=  0.1027030453801258997922D+00
+      TC(3,4)=  0.1939846399882895091122D-01
+      TC(3,5)=  0.8180035370375117083639D-01
+      TC(4,1)= -0.3800914400035681041264D+00
+      TC(4,2)=  0.3778939022488612495439D+00
+      TC(4,3)=  0.4667441303324943592896D+00
+      TC(4,4)=  0.4076011712801990666217D+00
+      TC(4,5)=  0.1996824278868025259365D+00
+      TC(5,1)= -0.9219789736812104884883D+00
+      TC(5,2)=  0.1000000000000000000000D+01
+      TC(5,3)=  0.0000000000000000000000D+00
+      TC(5,4)=  0.1000000000000000000000D+01
+      TC(5,5)=  0.0000000000000000000000D+00
+      TIC(1,1)= -0.3004156772154440162771D+02
+      TIC(1,2)= -0.1386510785627141316518D+02
+      TIC(1,3)= -0.3480002774795185561828D+01
+      TIC(1,4)=  0.1032008797825263422771D+01
+      TIC(1,5)= -0.8043030450739899174753D+00
+      TIC(2,1)=  0.5344186437834911598895D+01
+      TIC(2,2)=  0.4593615567759161004454D+01
+      TIC(2,3)= -0.3036360323459424298646D+01
+      TIC(2,4)=  0.1050660190231458863860D+01
+      TIC(2,5)= -0.2727786118642962705386D+00
+      TIC(3,1)=  0.3748059807439804860051D+01
+      TIC(3,2)= -0.3984965736343884667252D+01
+      TIC(3,3)= -0.1044415641608018792942D+01
+      TIC(3,4)=  0.1184098568137948487231D+01
+      TIC(3,5)= -0.4499177701567803688988D+00
+      TIC(4,1)= -0.3304188021351900000806D+02
+      TIC(4,2)= -0.1737695347906356701945D+02
+      TIC(4,3)= -0.1721290632540055611515D+00
+      TIC(4,4)= -0.9916977798254264258817D-01
+      TIC(4,5)=  0.5312281158383066671849D+00
+      TIC(5,1)= -0.8611443979875291977700D+01
+      TIC(5,2)=  0.9699991409528808231336D+01
+      TIC(5,3)=  0.1914728639696874284851D+01
+      TIC(5,4)=  0.2418692006084940026427D+01
+      TIC(5,5)= -0.1047463487935337418694D+01
+      RETURN
+  7   CONTINUE
+      C(1)=  0.2931642715978489197205D-01
+      C(2)=  0.1480785996684842918500D+00
+      C(3)=  0.3369846902811542990971D+00
+      C(4)=  0.5586715187715501320814D+00
+      C(5)=  0.7692338620300545009169D+00
+      C(6)=  0.9269456713197411148519D+00
+      DD(1)= -0.5437443689412861451458D+02
+      DD(2)=  0.7000024004259186512041D+01
+      DD(3)= -0.2355661091987557192256D+01
+      DD(4)=  0.1132289066106134386384D+01
+      DD(5)= -0.6468913267673587118673D+00
+      DD(6)=  0.3875333853753523774248D+00
+      DD(7)= -0.1428571428571428571429D+00
+      U1=  0.8936832788405216337302D+01
+      ALPH(1)=  0.4378693561506806002523D+01
+      BETA(1)=  0.1016969328379501162732D+02
+      ALPH(2)=  0.7141055219187640105775D+01
+      BETA(2)=  0.6623045922639275970621D+01
+      ALPH(3)=  0.8511834825102945723051D+01
+      BETA(3)=  0.3281013624325058830036D+01
+      TC(1,1)= -0.2153754627310526422828D-02
+      TC(1,2)=  0.2156755135132077338691D-01
+      TC(1,3)=  0.8783567925144144407326D-02
+      TC(1,4)= -0.4055161452331023898198D-02
+      TC(1,5)=  0.4427232753268285479678D-02
+      TC(1,6)= -0.1238646187952874056377D-02
+      TC(1,7)= -0.2760617480543852499548D-02
+      TC(2,1)=  0.1600025077880428526831D-02
+      TC(2,2)= -0.3813164813441154669442D-01
+      TC(2,3)= -0.2152556059400687552385D-01
+      TC(2,4)=  0.8415568276559589237177D-02
+      TC(2,5)= -0.4031949570224549492304D-02
+      TC(2,6)= -0.6666635339396338181761D-04
+      TC(2,7)=  0.3185474825166209848748D-02
+      TC(3,1)= -0.4059107301947683091650D-02
+      TC(3,2)=  0.5739650893938171539757D-01
+      TC(3,3)=  0.5885052920842679105612D-01
+      TC(3,4)= -0.8560431061603432060177D-02
+      TC(3,5)= -0.6923212665023908924141D-02
+      TC(3,6)= -0.2352180982943338340535D-02
+      TC(3,7)=  0.4169077725297562691409D-03
+      TC(4,1)= -0.1575048807937684420346D-01
+      TC(4,2)= -0.3821469359696835048464D-01
+      TC(4,3)= -0.1657368112729438512412D+00
+      TC(4,4)= -0.3737124230238445741907D-01
+      TC(4,5)=  0.8239007298507719404499D-02
+      TC(4,6)=  0.3115071152346175252726D-02
+      TC(4,7)=  0.2511660491343882192836D-01
+      TC(5,1)= -0.1129776610242208076086D+00
+      TC(5,2)= -0.2491742124652636863308D+00
+      TC(5,3)=  0.2735633057986623212132D+00
+      TC(5,4)=  0.5366761379181770094279D-02
+      TC(5,5)=  0.1932111161012620144312D+00
+      TC(5,6)=  0.1017177324817151468081D+00
+      TC(5,7)=  0.9504502035604622821039D-01
+      TC(6,1)= -0.4583810431839315010281D+00
+      TC(6,2)=  0.5315846490836284292051D+00
+      TC(6,3)=  0.4863228366175728940567D+00
+      TC(6,4)=  0.5265742264584492629141D+00
+      TC(6,5)=  0.2755343949896258141929D+00
+      TC(6,6)=  0.5217519452747652852946D+00
+      TC(6,7)=  0.1280719446355438944141D+00
+      TC(7,1)= -0.8813915783538183763135D+00
+      TC(7,2)=  0.1000000000000000000000D+01
+      TC(7,3)=  0.0000000000000000000000D+00
+      TC(7,4)=  0.1000000000000000000000D+01
+      TC(7,5)=  0.0000000000000000000000D+00
+      TC(7,6)=  0.1000000000000000000000D+01
+      TC(7,7)=  0.0000000000000000000000D+00
+      TIC(1,1)= -0.2581319263199822292761D+03
+      TIC(1,2)= -0.1890737630813985089520D+03
+      TIC(1,3)= -0.4908731481793013119445D+02
+      TIC(1,4)= -0.4110647469661428418112D+01
+      TIC(1,5)= -0.4053447889315563304175D+01
+      TIC(1,6)=  0.3112755366607346076554D+01
+      TIC(1,7)= -0.1646774913558444650169D+01
+      TIC(2,1)= -0.3007390169451292131731D+01
+      TIC(2,2)= -0.1101586607876577132911D+02
+      TIC(2,3)=  0.1487799456131656281486D+01
+      TIC(2,4)=  0.2130388159559282459432D+01
+      TIC(2,5)= -0.1816141086817565624822D+01
+      TIC(2,6)=  0.1134325587895161100083D+01
+      TIC(2,7)= -0.4146990459433035319930D+00
+      TIC(3,1)= -0.8441963188321084681757D+01
+      TIC(3,2)= -0.6505252740575150028169D+00
+      TIC(3,3)=  0.6940670730369876478804D+01
+      TIC(3,4)= -0.3205047525597898431565D+01
+      TIC(3,5)=  0.1071280943546478589783D+01
+      TIC(3,6)= -0.3548507491216221879730D+00
+      TIC(3,7)=  0.9198549132786554154409D-01
+      TIC(4,1)=  0.7467833223502269977153D+02
+      TIC(4,2)=  0.8740858897990081640204D+02
+      TIC(4,3)=  0.4024158737379997877014D+01
+      TIC(4,4)= -0.3714806315158364186639D+01
+      TIC(4,5)= -0.3430093985982317350741D+01
+      TIC(4,6)=  0.2696604809765312378853D+01
+      TIC(4,7)= -0.9386927436075461933568D+00
+      TIC(5,1)=  0.5835652885190657724237D+02
+      TIC(5,2)= -0.1006877395780018096325D+02
+      TIC(5,3)= -0.3036638884256667120811D+02
+      TIC(5,4)= -0.1020020865184865985027D+01
+      TIC(5,5)= -0.1124175003784249621267D+00
+      TIC(5,6)=  0.1890640831000377622800D+01
+      TIC(5,7)= -0.9716486393831482282172D+00
+      TIC(6,1)= -0.2991862480282520966786D+03
+      TIC(6,2)= -0.2430407453687447911819D+03
+      TIC(6,3)= -0.4877710407803786921219D+02
+      TIC(6,4)= -0.2038671905741934405280D+01
+      TIC(6,5)=  0.1673560239861084944268D+01
+      TIC(6,6)= -0.1087374032057106164456D+01
+      TIC(6,7)=  0.9019382492960993738427D+00
+      TIC(7,1)= -0.9307650289743530591157D+02
+      TIC(7,2)=  0.2388163105628114427703D+02
+      TIC(7,3)=  0.3927888073081384382710D+02
+      TIC(7,4)=  0.1438891568549108006988D+02
+      TIC(7,5)= -0.3510438399399361221087D+01
+      TIC(7,6)=  0.4863284885566180701215D+01
+      TIC(7,7)= -0.2246482729591239916400D+01
+      RETURN
+      END
+C
+C     END OF SUBROUTINE COEFRA
+C
+C ***********************************************************
+C
+      DOUBLE PRECISION FUNCTION CONTRP(I,X,CONT,LRC)
+C ----------------------------------------------------------
+C     THIS FUNCTION CAN BE USED FOR CONINUOUS OUTPUT. IT PROVIDES AN
+C     APPROXIMATION TO THE I-TH COMPONENT OF THE SOLUTION AT X.
+C     IT GIVES THE VALUE OF THE COLLOCATION POLYNOMIAL, DEFINED FOR
+C     THE LAST SUCCESSFULLY COMPUTED STEP (BY RADAU5).
+C ----------------------------------------------------------
+      PARAMETER (NSDIM=7)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION CONT(LRC)
+      COMMON/WEIGHT/NN,NS,XSOL,HSOL,C(0:NSDIM)
+      S=(X-XSOL)/HSOL+1.D0
+      CONTRP=CONT(I+NS*NN)
+      DO K=NS-1,0,-1
+         CONTRP=CONT(I+K*NN)+(S-C(NS-K))*CONTRP
+      END DO
+      RETURN
+      END
+C
+C     END OF FUNCTION CONTRP
+C
+C ***********************************************************
