@@ -20,6 +20,7 @@
 #define __SiconosVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include <boost/numeric/ublas/vector_sparse.hpp>
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"

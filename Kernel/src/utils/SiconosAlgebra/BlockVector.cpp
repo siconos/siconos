@@ -20,6 +20,7 @@
 #include "BlockVector.hpp"
 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
+#include <boost/numeric/ublas/vector_sparse.hpp>
 #include <vector>
 
 #include "SiconosVector.hpp"

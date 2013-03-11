@@ -43,7 +43,7 @@
 
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
+//#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/array.hpp>
 //#include "SiconosConst.hpp"
 #include "Tools.hpp"
@@ -164,14 +164,5 @@ TYPEDEF_SPTR(DenseVect)
  */
 typedef ublas::compressed_vector<double> SparseVect;
 TYPEDEF_SPTR(SparseVect)
-
-/**  iterator for BlocksMat*/
-typedef BlocksMat::iterator1 BlockIterator1;
-/**  iterator for BlocksMat*/
-typedef BlocksMat::iterator2 BlockIterator2;
-/**  iterator for BlocksMat*/
-typedef BlocksMat::const_iterator1 ConstBlockIterator1;
-/**  iterator for BlocksMat*/
-typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 
 #endif

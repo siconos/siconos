@@ -19,6 +19,8 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosAlgebra.hpp"
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include "BlockMatrix.hpp"
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int newNum): dimRow(0), dimCol(0), num(newNum)
@@ -27,34 +29,6 @@ SiconosMatrix::SiconosMatrix(unsigned int newNum): dimRow(0), dimCol(0), num(new
 // Constructor with the dimensions and the type-number
 SiconosMatrix::SiconosMatrix(unsigned int newNum, unsigned int row, unsigned int col): dimRow(row), dimCol(col), num(newNum)
 {}
-
-BlockIterator1 SiconosMatrix::begin()
-{
-  SiconosMatrixException::selfThrow("SiconosMatrix::begin(): reserved to BlockMatrix");
-  BlockIterator1 it;
-  return it;
-}
-
-BlockIterator1 SiconosMatrix::end()
-{
-  SiconosMatrixException::selfThrow("SiconosMatrix::end(): reserved to BlockMatrix");
-  BlockIterator1 it;
-  return it;
-}
-
-ConstBlockIterator1 SiconosMatrix::begin() const
-{
-  SiconosMatrixException::selfThrow("SiconosMatrix::begin(): reserved to BlockMatrix");
-  ConstBlockIterator1 it;
-  return it;
-}
-
-ConstBlockIterator1 SiconosMatrix::end() const
-{
-  SiconosMatrixException::selfThrow("SiconosMatrix::end(): reserved to BlockMatrix");
-  ConstBlockIterator1 it;
-  return it;
-}
 
 const SP::Index SiconosMatrix::tabRow() const
 {
@@ -95,9 +69,10 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
   if (m.num == 0)// BlockMatrix
   {
+    BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
     BlocksMat::iterator2 it2;
-    for (it = m.begin(); it != m.end(); ++it)
+    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); ++it2)
         (**it2) *= s;
@@ -124,9 +99,10 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
   if (m.num == 0)// BlockMatrix
   {
+    BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
     BlocksMat::iterator2 it2;
-    for (it = m.begin(); it != m.end(); ++it)
+    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); ++it2)
         (**it2) /= s;

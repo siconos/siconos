@@ -181,26 +181,6 @@ public:
    */
   virtual const SP::Index tabCol() const ;
 
-  /** get an iterator pointing at the beginning of the block matrix
-  *  \return a BlockIterator1
-  */
-  virtual BlockIterator1 begin() ;
-
-  /** get an iterator pointing at the end of the block matrix
-  *  \return a BlockIterator1
-  */
-  virtual BlockIterator1 end() ;
-
-  /** get an iterator pointing at the beginning of the block matrix
-  *  \return a BlockIterator1
-  */
-  virtual ConstBlockIterator1 begin() const;
-
-  /** get an iterator pointing at the end of the block matrix
-  *  \return a BlockIterator1
-  */
-  virtual ConstBlockIterator1 end() const;
-
   /** get DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix

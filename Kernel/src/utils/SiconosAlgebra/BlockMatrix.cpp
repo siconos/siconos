@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "BlockMatrixIterators.hpp"
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -40,6 +41,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0)
   _tabCol.reset(new Index());
   if (m.isBlock())
   {
+    const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     unsigned int nbRows = m.getNumberOfBlocks(0);
     unsigned int nbCols = m.getNumberOfBlocks(1);
     _tabRow->reserve(nbRows);
@@ -49,11 +51,11 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0)
     _mat.reset(new BlocksMat(nbRows, nbCols, nbRows * nbCols));
 
     unsigned int i, j;
-    ConstBlockIterator1 it1;
-    ConstBlockIterator2 it2;
+    ConstBlocksIterator1 it1;
+    ConstBlocksIterator2 it2;
     bool firstLoop = true;
     // We scan all the blocks of m ...
-    for (it1 = m.begin(); it1 != m.end(); ++it1)
+    for (it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1)
     {
       dimRow += (*(it1.begin()))->size(0);
       _tabRow->push_back(dimRow);
@@ -104,11 +106,11 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0)
 
   unsigned int i, j;
   // We scan all the blocks of m ...
-  ConstBlockIterator1 it1;
-  ConstBlockIterator2 it2;
+  ConstBlocksIterator1 it1;
+  ConstBlocksIterator2 it2;
   bool firstLoop = true;
   // We scan all the blocks of m ...
-  for (it1 = m.begin(); it1 != m.end(); ++it1)
+  for (it1 = m._mat->begin1(); it1 != m._mat->end1(); ++it1)
   {
     dimRow += (*(it1.begin()))->size(0);
     _tabRow->push_back(dimRow);
@@ -145,9 +147,6 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 
   // _mat construction
   _mat.reset(new BlocksMat(row, col, row * col));
-
-  BlockIterator1 it1;
-  BlockIterator2 it2;
 
   unsigned int k = 0;
   bool firstRowLoop = true;
@@ -228,30 +227,6 @@ unsigned int BlockMatrix::getNumberOfBlocks(unsigned int dim) const
     return _tabRow->size();
   else
     return _tabCol->size();
-}
-
-// =================================================
-//   iterators to begin/end of the ublas _matrix
-// =================================================
-
-BlockIterator1 BlockMatrix::begin()
-{
-  return _mat->begin1();
-}
-
-BlockIterator1 BlockMatrix::end()
-{
-  return _mat->end1();
-}
-
-ConstBlockIterator1 BlockMatrix::begin() const
-{
-  return _mat->begin1();
-}
-
-ConstBlockIterator1 BlockMatrix::end() const
-{
-  return _mat->end1();
 }
 
 // =================================================
@@ -866,12 +841,13 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
   {
     if (isComparableTo(*this, m))
     {
+      const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
-      BlocksMat::iterator1 it1;
-      BlocksMat::iterator2 it2;
+      BlocksIterator1 it1;
+      BlocksIterator2 it2;
       // iterators through m
-      BlocksMat::const_iterator1 itM1 = m.begin();
-      BlocksMat::const_iterator2 itM2;
+      ConstBlocksIterator1 itM1 = mB._mat->begin1();
+      ConstBlocksIterator2 itM2;
 
       for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
       {
@@ -893,8 +869,8 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
   }
   else // if m is a SimpleMatrix
   {
-    BlockIterator1 it;
-    BlockIterator2 it2;
+    BlocksIterator1 it;
+    BlocksIterator2 it2;
     unsigned int posRow = 0;
     unsigned int posCol = 0;
     Index subDim(2);
@@ -936,12 +912,13 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
 
   if (isComparableTo(*this, m))
   {
+    const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     // iterators through this
-    BlocksMat::iterator1 it1;
-    BlocksMat::iterator2 it2;
+    BlocksIterator1 it1;
+    BlocksIterator2 it2;
     // iterators through m
-    BlocksMat::const_iterator1 itM1 = m.begin();
-    BlocksMat::const_iterator2 itM2;
+    ConstBlocksIterator1 itM1 = mB._mat->begin1();
+    ConstBlocksIterator2 itM2;
 
     for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
     {
@@ -996,11 +973,12 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
   {
     if (isComparableTo(m, *this))
     {
+      const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
       BlocksMat::iterator1 it1;
       BlocksMat::iterator2 it2;
       // iterators through m
-      BlocksMat::const_iterator1 itM1 = m.begin();
+      BlocksMat::const_iterator1 itM1 = mB._mat->begin1();
       BlocksMat::const_iterator2 itM2;
 
       for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
@@ -1052,11 +1030,12 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
   {
     if (isComparableTo(m, *this))
     {
+      const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
       BlocksMat::iterator1 it1;
       BlocksMat::iterator2 it2;
       // iterators through m
-      BlocksMat::const_iterator1 itM1 = m.begin();
+      BlocksMat::const_iterator1 itM1 = mB._mat->begin1();
       BlocksMat::const_iterator2 itM2;
 
       for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
@@ -1114,3 +1093,14 @@ void BlockMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
 }
+
+SP::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col)
+{
+  return (*_mat)(row, col);
+}
+
+SPC::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col) const
+{
+  return std11::shared_ptr<SiconosMatrix>((*_mat)(row, col));
+}
+

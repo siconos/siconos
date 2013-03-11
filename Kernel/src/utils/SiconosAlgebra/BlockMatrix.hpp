@@ -33,7 +33,7 @@
  *   \version 3.0.0.
  *   \date (Creation) 21/07/2006
  *
- *  A BlockMatrix is a boost::ublas::compressed_matrix of SiconosMatrix*.
+ *  A BlockMatrix is a boost::ublas::compressed_matrix of SP::SiconosMatrix.
  * The blocks positions are given by two Index objects, tabRow and tabCol.
  *
  * If block 1 is n1xm1, block2 n2xm2, block3 n3xm3 ..., then:\n
@@ -101,26 +101,6 @@ public:
    *  \return an unsigned int
    */
   unsigned int getNumberOfBlocks(unsigned int) const;
-
-  /** get an iterator pointing at the beginning of the block matrix
-   *  \return a BlockIterator1
-   */
-  BlockIterator1 begin() ;
-
-  /** get an iterator pointing at the end of the block matrix
-   *  \return a BlockIterator1
-   */
-  BlockIterator1 end() ;
-
-  /** get an iterator pointing at the beginning of the block matrix
-   *  \return a BlockIterator1
-   */
-  ConstBlockIterator1 begin() const;
-
-  /** get an iterator pointing at the end of the block matrix
-   *  \return a BlockIterator1
-   */
-  ConstBlockIterator1 end() const;
 
   /** get DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -323,19 +303,13 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
-  {
-    return (*_mat)(row, col);
-  };
+  SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0);
 
   /** get block at position row-col
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
-  {
-    return std11::shared_ptr<SiconosMatrix>((*_mat)(row, col));
-  };
+  SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get row index of current matrix and save it unsigned into vOut
    *  \param unsigned int: index of required line
@@ -423,6 +397,11 @@ public:
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
+
+  friend class SimpleMatrix;
+  friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool);
+  friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
+  friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 };
 
 //DEFINE_SPTR(BlockMatrix)

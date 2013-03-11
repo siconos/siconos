@@ -20,6 +20,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorException.hpp"
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/vector_sparse.hpp>
 #include<fstream>
 
 #include "SiconosAlgebra.hpp"

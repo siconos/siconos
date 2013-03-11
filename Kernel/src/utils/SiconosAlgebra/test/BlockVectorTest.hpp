@@ -19,6 +19,7 @@
 #ifndef __BlockVectorTest__
 #define __BlockVectorTest__
 
+#include <boost/numeric/ublas/vector_sparse.hpp>
 #include <cppunit/extensions/HelperMacros.h>
 #include "SiconosVector.hpp"
 #include <cmath>

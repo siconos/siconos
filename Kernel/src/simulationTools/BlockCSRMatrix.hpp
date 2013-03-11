@@ -172,10 +172,7 @@ public:
   };
 
   /** get total number of non-null blocks */
-  inline unsigned int getNbNonNullBlocks() const
-  {
-    return MBlockCSR->nnz();
-  };
+  unsigned int getNbNonNullBlocks() const;
 
   /** get the numerics-readable structure */
   inline SP::SparseBlockStructuredMatrix getNumericsMatSparse()
