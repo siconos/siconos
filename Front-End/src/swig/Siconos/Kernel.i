@@ -30,6 +30,8 @@
 %include start.i
 
 %{
+#include <SiconosAlgebra.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <SiconosKernel.hpp>
 #include <SiconosVisitor.hpp>
 #include "SiconosPointers.hpp"
