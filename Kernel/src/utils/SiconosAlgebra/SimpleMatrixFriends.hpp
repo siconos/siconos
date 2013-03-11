@@ -303,4 +303,17 @@ void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
  */
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool = true);
 
+void private_addprod(SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
+void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
+void private_addprod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, unsigned int, SP::SiconosVector);
+void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::SiconosVector, bool);
+void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::SiconosVector, bool);
+void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
+void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
+void private_prod(double, SPC::SiconosMatrix, unsigned int, SPC::SiconosVector, SP::SiconosVector, bool);
+void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
+void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
+void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+
 #endif
