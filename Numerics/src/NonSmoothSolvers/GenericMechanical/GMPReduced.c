@@ -1,6 +1,7 @@
 #include "NonSmoothDrivers.h"
 #include "pinv.h"
-#include "LA.h"
+#include "SiconosBlas.h"
+
 //#define GMP_DEBUG_REDUCED
 //#define GMP_DEBUG_GMPREDUCED_SOLVE
 
@@ -464,7 +465,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   double * pseduInvMe1 = (double *)malloc(Me_size * Me_size * sizeof(double));
   if (Mi_size == 0)
   {
-    DGEMV(LA_NOTRANS, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, pInProblem->q , 1, 0.0, reaction, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, pInProblem->q , 1, 0.0, reaction, 1);
     for (int i = 0; i < Me_size; i++)
       velocity[i] = 0.0;
 
@@ -499,17 +500,17 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   memcpy(reducedProb, Mi2, Mi_size * Mi_size * sizeof(double));
 
   double * Mi1pseduInvMe1 = (double *)malloc(Mi_size * Me_size * sizeof(double));
-  DGEMM(LA_NOTRANS, LA_NOTRANS, Mi_size, Me_size, Me_size, -1.0, Mi1, Mi_size, pseduInvMe1, Me_size, 0.0, Mi1pseduInvMe1, Mi_size);
+  cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans, Mi_size, Me_size, Me_size, -1.0, Mi1, Mi_size, pseduInvMe1, Me_size, 0.0, Mi1pseduInvMe1, Mi_size);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   printDenseMatrice("minusMi1pseduInvMe1", titi, Mi1pseduInvMe1, Mi_size, Me_size);
   fprintf(titi, "_minusMi1pseduInvMe1=-Mi1*Me1inv;\n");
 #endif
-  DGEMV(LA_NOTRANS, Mi_size, Me_size, 1.0, Mi1pseduInvMe1, Mi_size, Qe, 1, 1.0, Qi, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, Mi_size, Me_size, 1.0, Mi1pseduInvMe1, Mi_size, Qe, 1, 1.0, Qi, 1);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   printDenseMatrice("newQi", titi, Qi, Mi_size, 1);
   fprintf(titi, "_newQi=Qi+_minusMi1pseduInvMe1*Qe;\n");
 #endif
-  DGEMM(LA_NOTRANS, LA_NOTRANS, Mi_size, Mi_size, Me_size, 1.0, Mi1pseduInvMe1, Mi_size, Me2, Me_size, 1.0, reducedProb, Mi_size);
+  cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans, Mi_size, Mi_size, Me_size, 1.0, Mi1pseduInvMe1, Mi_size, Me2, Me_size, 1.0, reducedProb, Mi_size);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   printDenseMatrice("W", titi, reducedProb, Mi_size, Mi_size);
   fprintf(titi, "_W=Mi2+_minusMi1pseduInvMe1*Me2;\n");
@@ -571,8 +572,8 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   double * Re = (double*)malloc(Me_size * sizeof(double));
   double * Rbuf = (double*)malloc(Me_size * sizeof(double));
   memcpy(Rbuf, Qe, Me_size * sizeof(double));
-  DGEMV(LA_NOTRANS, Me_size, Mi_size, 1.0, Me2, Me_size, Rreduced, 1, 1.0, Rbuf, 1);
-  DGEMV(LA_NOTRANS, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, Rbuf, 1, 0.0, Re, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Mi_size, 1.0, Me2, Me_size, Rreduced, 1, 1.0, Rbuf, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, Rbuf, 1, 0.0, Re, 1);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   fprintf(titi, "_Re=-Me1inv*(Me2*Ri+Qe);\n");
   printDenseMatrice("Re", titi, Re, Me_size, 1);

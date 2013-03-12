@@ -17,9 +17,10 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "LA.h"
+
 #include "NumericsOptions.h" // for global options
 #include "FrictionContactProblem.h"
+#include "SiconosBlas.h"
 #include <math.h>
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
@@ -43,7 +44,7 @@ int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z ,
   if (! problem || ! z || ! w)
     numericsError("FrictionContact2D_compute_error", "null input for problem and/or z and/or w");
 
-  DCOPY(n, problem->q, 1, w, 1); // w <-q
+  cblas_dcopy(n, problem->q, 1, w, 1); // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
@@ -79,7 +80,7 @@ int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z ,
   }
 
   *error = sqrt(*error);
-  *error /= (DNRM2(n, problem->q, 1) + 1.0);
+  *error /= (cblas_dnrm2(n, problem->q, 1) + 1.0);
 
   if (*error > tolerance)
   {

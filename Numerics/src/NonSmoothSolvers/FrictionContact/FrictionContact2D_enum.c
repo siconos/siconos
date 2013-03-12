@@ -22,7 +22,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
+
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact2D_compute_error.h"
 #include "LCP_Solvers.h"

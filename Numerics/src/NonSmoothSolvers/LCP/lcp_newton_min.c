@@ -21,8 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LA.h"
 #include "LCP_Solvers.h"
+#include "SiconosLapack.h"
 
 void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
@@ -97,12 +97,12 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
   a1 = -1.;
   b1 = -1.;
   /* / q --> H*/
-  DCOPY(n , q , incx , H , incy);
+  cblas_dcopy(n , q , incx , H , incy);
   /* / -Mz-q --> H*/
-  DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , b1 , H , incy);
+  cblas_dgemv(CblasColMajor,CblasNoTrans , n , n , a1 , M , n , z , incx , b1 , H , incy);
   /* / w+H --> H*/
   alpha = 1.0;
-  DAXPY(n , alpha , w , incx , H , incy);     /* / c'est faux*/
+  cblas_daxpy(n , alpha , w , incx , H , incy);     /* / c'est faux*/
 
 
   for (i = n; i < m; i++)
@@ -142,7 +142,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
     /* / Computation of the element of the subgradient.*/
 
-    DCOPY(mm , JacH , incx , A , incy);
+    cblas_dcopy(mm , JacH , incx , A , incy);
     k = 1;
     DGESV(m , k , A , m , ipiv , H , m , &infoDGESV);
 
@@ -168,16 +168,16 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
     /* / iteration*/
     alpha = -1.0;
-    DAXPY(n , alpha , H , incx , z , incy);     /* /  z-H --> z*/
-    DAXPY(n , alpha , &H[n] , incx , w , incy);  /* /  w-H --> w*/
+    cblas_daxpy(n , alpha , H , incx , z , incy);     /* /  z-H --> z*/
+    cblas_daxpy(n , alpha , &H[n] , incx , w , incy);  /* /  w-H --> w*/
 
     /* / Construction of the RHS for the next iterate and for the error evalutaion*/
     a1 = 1.;
     b1 = 1.;
-    DCOPY(n , q , incx , H , incy);                                         /* / q --> H*/
-    DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , b1 , H , incy);  /* / Mz+q --> H*/
+    cblas_dcopy(n , q , incx , H , incy);                                         /* / q --> H*/
+    cblas_dgemv(CblasColMajor,CblasNoTrans , n , n , a1 , M , n , z , incx , b1 , H , incy);  /* / Mz+q --> H*/
     alpha = -1.0;
-    DAXPY(n , alpha , w , incx , H , incy);                               /* / w-Mz-q --> H*/
+    cblas_daxpy(n , alpha , w , incx , H , incy);                               /* / w-Mz-q --> H*/
 
     for (i = n; i < m; i++)
     {

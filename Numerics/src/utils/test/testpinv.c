@@ -1,7 +1,9 @@
-#include "SiconosNumerics.h"
 #include "pinv.h"
 #include "cond.h"
-
+#include <stdlib.h>
+#include <stdio.h>
+#include "NumericsMatrix.h"
+#include <string.h>
 int main(void)
 {
   int n = 4;

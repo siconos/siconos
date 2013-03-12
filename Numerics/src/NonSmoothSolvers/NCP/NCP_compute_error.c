@@ -20,8 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
+
 #include <math.h>
+#include "SiconosBlas.h"
 
 void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
 {
@@ -32,7 +33,7 @@ void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose,
 
   incx = 1;
   incy = 1;
-  DCOPY(n , q , incx , w , incy);
+  cblas_dcopy(n , q , incx , w , incy);
 
   a1 = 1.;
   b1 = 1.;
@@ -43,7 +44,7 @@ void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose,
 
   if (param == 1)
   {
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z ,
+    cblas_dgemv(CblasColMajor,CblasNoTrans , n , n , a1 , vec , n , z ,
           incx , b1 , w , incy);
   }
 
@@ -56,7 +57,7 @@ void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose,
   }
 
   incx  = 1;
-  normq = DNRM2(n , q , incx);
+  normq = cblas_dnrm2(n , q , incx);
 
   *err = error / normq;
 

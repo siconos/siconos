@@ -19,7 +19,8 @@
 #include "projectionOnCylinder.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+#include "SiconosBlas.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -88,10 +89,10 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
-      DCOPY(n , q , 1 , velocitytmp, 1);
+      cblas_dcopy(n , q , 1 , velocitytmp, 1);
       prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
       // projection for each contact
-      DAXPY(n, -1.0, velocitytmp, 1, reaction , 1);
+      cblas_daxpy(n, -1.0, velocitytmp, 1, reaction , 1);
       for (contact = 0 ; contact < nc ; ++contact)
         projectionOnCylinder(&reaction[ contact * nLocal],
                              options->dWork[contact]);
@@ -128,18 +129,18 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
     rho =  rhoinit;
 
 
-    DCOPY(n , q , 1 , velocitytmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
     prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
 
-    DAXPY(n, rho, velocitytmp, 1, reaction, 1);
+    cblas_daxpy(n, rho, velocitytmp, 1, reaction, 1);
 
     for (contact = 0 ; contact < nc ; ++contact)
       projectionOnCylinder(&reaction[contact * nLocal],
                            options->dWork[contact]);
-    DCOPY(n , q , 1 , velocitytmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
     prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
 
-    double oldcriterion = DDOT(n, reaction, 1, velocitytmp, 1);
+    double oldcriterion = cblas_ddot(n, reaction, 1, velocitytmp, 1);
 #ifdef VERBOSE_DEBUG
     printf("oldcriterion =%le \n", oldcriterion);
 #endif
@@ -149,11 +150,11 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
     {
       ++iter;
       // store the old reaction
-      DCOPY(n , reaction , 1 , reactionold , 1);
+      cblas_dcopy(n , reaction , 1 , reactionold , 1);
       // compute the direction
-      DCOPY(n , q , 1 , velocitytmp, 1);
+      cblas_dcopy(n , q , 1 , velocitytmp, 1);
       prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
-      DCOPY(n, velocitytmp, 1, direction, 1);
+      cblas_dcopy(n, velocitytmp, 1, direction, 1);
 
       // start line search
       j = 0;
@@ -168,8 +169,8 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
 
 
 
-        DCOPY(n , reactionold , 1 , reaction , 1);
-        DAXPY(n, rho, direction, 1, reaction , 1) ;
+        cblas_dcopy(n , reactionold , 1 , reaction , 1);
+        cblas_daxpy(n, rho, direction, 1, reaction , 1) ;
 #ifdef VERBOSE_DEBUG
         printf("LS iteration %i step 0 \n", j);
         printf("rho = %le \n", rho);
@@ -195,7 +196,7 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
           printf("\n");
         }
 #endif
-        DCOPY(n , q , 1 , velocitytmp, 1);
+        cblas_dcopy(n , q , 1 , velocitytmp, 1);
         prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
 
 #ifdef VERBOSE_DEBUG
@@ -209,7 +210,7 @@ void frictionContact3D_ProjectedGradientOnCylinder(FrictionContactProblem* probl
 #endif
 
 
-        newcriterion = DDOT(n, reaction, 1, velocitytmp, 1);
+        newcriterion = cblas_ddot(n, reaction, 1, velocitytmp, 1);
 
 #ifdef VERBOSE_DEBUG
         printf("LS iteration %i newcriterion =%le\n", j, newcriterion);

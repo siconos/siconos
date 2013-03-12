@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LA.h"
+#include "SiconosBlas.h"
 #include "FrictionContact2D_Solvers.h"
 
 void shuffle(int size, int * randnum) //size is the given range
@@ -276,20 +276,20 @@ void FrictionContact2D_nsgs(FrictionContactProblem* problem , double *reaction ,
     incx = 1;
     incy = 1;
 
-    DCOPY(n, q, incx, y, incy);
+    cblas_dcopy(n, q, incx, y, incy);
 
     alpha = 1.;
     beta  = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, vec, n, reaction, incx, beta, y, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, vec, n, reaction, incx, beta, y, incy);
 
 
 
     alpha = -1.;
-    DAXPY(n, alpha, velocity, incx, y, incy);
+    cblas_daxpy(n, alpha, velocity, incx, y, incy);
 
 
-    num1 = DDOT(n, y, incx, y, incy);
-    den1 = DDOT(n, q, incx, q, incy);
+    num1 = cblas_ddot(n, y, incx, y, incy);
+    den1 = cblas_ddot(n, q, incx, q, incy);
 
 
     normr = sqrt(num1 / den1);

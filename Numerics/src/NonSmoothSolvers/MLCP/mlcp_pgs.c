@@ -18,12 +18,12 @@
 */
 
 #include "MLCP_Solvers.h"
-#include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include "SiconosBlas.h"
 /*
  *
  * double *z : size n+m
@@ -168,22 +168,22 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
     if (pgsExplicit)
     {
       /*Use w like a buffer*/
-      DCOPY(n , w , incx , u , incy);  //w <- q
+      cblas_dcopy(n , w , incx , u , incy);  //w <- q
       Buf = w;
 
       for (i = 0 ; i < n ; ++i)
       {
         prev = Buf[i];
         Buf[i] = 0;
-        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , Buf , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
+        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] =  - (a[i] + cblas_ddot(n , &A[i] , incAx , Buf , incAy)   + cblas_ddot(m , &C[i] , incAx , v , incBy)) * diagA[i];
         Buf[i] = prev;
       }
       for (i = 0 ; i < m ; ++i)
       {
         v[i] = 0.0;
-        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + cblas_ddot(n , &D[i] , incBx , u , incAy)   + cblas_ddot(m , &B[i] , incBx , v , incBy)) * diagB[i];
 
         if (vi < 0) v[i] = 0.0;
         else v[i] = vi;
@@ -196,15 +196,15 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
       {
         u[i] = 0.0;
 
-        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
+        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] =  - (a[i] + cblas_ddot(n , &A[i] , incAx , u , incAy)   + cblas_ddot(m , &C[i] , incAx , v , incBy)) * diagA[i];
       }
 
       for (i = 0 ; i < m ; ++i)
       {
         v[i] = 0.0;
-        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + cblas_ddot(n , &D[i] , incBx , u , incAy)   + cblas_ddot(m , &B[i] , incBx , v , incBy)) * diagB[i];
 
         if (vi < 0) v[i] = 0.0;
         else v[i] = vi;

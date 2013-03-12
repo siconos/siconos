@@ -22,8 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LA.h"
 #include "LCP_Solvers.h"
+#include "SiconosLapack.h"
 
 void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
@@ -94,11 +94,11 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
     // Construction of the directional derivatives of Phi, JacPhi
     // q --> w
-    DCOPY(n , q , incx , w , incy);
+    cblas_dcopy(n , q , incx , w , incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    DGEMV(LA_TRANS , n , n , a1 , M , n , z , incx , b1 , w , incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n , n , a1 , M , n , z , incx , b1 , w , incy);
     for (i = 0; i < n; i++) printf("z[%i]=%e", i, z[i]);
     printf("\n");
     for (i = 0; i < n; i++) printf("w[%i]=%e", i, w[i]);
@@ -124,7 +124,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
     // M^T.beta --> mbeta
     a1 = 1.;
     b1 = 0.0;
-    DGEMV(LA_NOTRANS , n , n , a1 , M , n , beta , incx , b1 , mbeta  , incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n , n , a1 , M , n , beta , incx , b1 , mbeta  , incy);
     for (i = 0; i < n; i++) printf("mbeta[%i]=%e", i, mbeta[i]);
     printf("\n");
 
@@ -176,7 +176,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
     // Computation of the element of the subgradient.
 
-    DCOPY(n , JacPhi , incx , JacPhi_copy , incy);
+    cblas_dcopy(n , JacPhi , incx , JacPhi_copy , incy);
     k = 1;
     DGESV(m, k, JacPhi_copy, m, ipiv, beta, m, &infoDGESV);
 
@@ -197,16 +197,16 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
     // iteration
     alpha = -1.0;
-    DAXPY(n , alpha , beta , incx , z , incy);     //  z-beta --> z
+    cblas_daxpy(n , alpha , beta , incx , z , incy);     //  z-beta --> z
 
 
     // Construction of the RHS for the next iterate and for the error evaluation
     // q --> w
-    DCOPY(n , q , incx , w , incy);
+    cblas_dcopy(n , q , incx , w , incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    DGEMV(LA_TRANS , n , n , a1 , M , n , z , incx , b1 , w , incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n , n , a1 , M , n , z , incx , b1 , w , incy);
 
     for (i = 0; i < n; i++)
     {
@@ -219,7 +219,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
 
 
-    err = DNRM2(n , Phi , incx);
+    err = cblas_dnrm2(n , Phi , incx);
     err = 1 / 2 * err * err;
 
   }

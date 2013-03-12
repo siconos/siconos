@@ -20,7 +20,7 @@
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -90,8 +90,8 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
     /*   DGETRI(n,M->matrix0,n, ipiv,infoDGETRI ); */
     /*   assert(!infoDGETRI); */
     /*   double* qtmp = (double*)malloc(n*sizeof(double)); */
-    /*   DCOPY(n,  q, 1, qtmp, 1); */
-    /*   DGEMV(LA_NOTRANS, n, n, -1.0, M->matrix0 , n, qtmp,1,0.0,q, 1); */
+    /*   cblas_dcopy(n,  q, 1, qtmp, 1); */
+    /*   cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, -1.0, M->matrix0 , n, qtmp,1,0.0,q, 1); */
     /*   free(ipiv); */
     /*   free(qtmp); */
     double tolpinv = 1e-07;
@@ -129,7 +129,7 @@ void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *re
   {
     ++iter;
     /* Loop through the contact points */
-    //DCOPY( n , q , incx , velocity , incy );
+    //cblas_dcopy( n , q , incx , velocity , incy );
     for (contact = 0 ; contact < nc ; ++contact)
     {
 

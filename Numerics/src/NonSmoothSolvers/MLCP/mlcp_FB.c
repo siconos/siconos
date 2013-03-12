@@ -16,7 +16,6 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "LA.h"
 #include "NumericsConfig.h"
 #include "MLCP_Solvers.h"
 #include <stdio.h>
@@ -24,7 +23,7 @@
 #include <string.h>
 #include <math.h>
 
-
+#include "SiconosBlas.h"
 #include "NonSmoothNewtonNeighbour.h"
 #include "FischerBurmeister.h"
 
@@ -59,7 +58,7 @@ void computeFz(double* z)
   int incx = 1, incy = 1;
   int size = sN + sM;
   //F(z)=Mz+q
-  DCOPY(size , sProblem->q , incx , sFz , incy);
+  cblas_dcopy(size , sProblem->q , incx , sFz , incy);
   prodNumericsMatrix(size, size, 1.0, sProblem->M, z, 1.0, sFz);
 }
 

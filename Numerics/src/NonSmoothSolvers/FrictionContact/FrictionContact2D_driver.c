@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "LA.h"
+
 #include "NumericsOptions.h"
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"

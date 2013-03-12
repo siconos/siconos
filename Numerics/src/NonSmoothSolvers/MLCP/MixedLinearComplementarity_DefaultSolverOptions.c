@@ -21,7 +21,6 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "LA.h"
 #include "NumericsOptions.h"
 #include "MLCP_Solvers.h"
 #include "NonSmoothDrivers.h"

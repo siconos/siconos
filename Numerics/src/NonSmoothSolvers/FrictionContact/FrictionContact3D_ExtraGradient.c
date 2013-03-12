@@ -19,7 +19,8 @@
 #include "projectionOnCone.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+#include "SiconosBlas.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -76,8 +77,8 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
   {
     ++iter;
 
-    DCOPY(n , q , 1 , velocitytmp, 1);
-    DCOPY(n , reaction , 1 , reactiontmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
+    cblas_dcopy(n , reaction , 1 , reactiontmp, 1);
 
     prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
     // projection for each contact
@@ -90,7 +91,7 @@ void frictionContact3D_ExtraGradient(FrictionContactProblem* problem, double *re
       reactiontmp[pos + 2] -= rho * velocitytmp[pos + 2];
       projectionOnCone(&reactiontmp[pos], mu[contact]);
     }
-    DCOPY(n , q , 1 , velocitytmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
     prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
     // projection for each contact
     for (contact = 0 ; contact < nc ; ++contact)

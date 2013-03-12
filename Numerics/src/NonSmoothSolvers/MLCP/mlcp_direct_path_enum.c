@@ -28,7 +28,6 @@ dim(v)=nn
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include "MLCP_Solvers.h"
 #include <math.h>
 #include "mlcp_direct_path_enum.h"

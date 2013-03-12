@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "SparseBlockMatrix.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 #include <math.h>
 #include "misc.h"
 //#define DEBUG_MESSAGES 1
@@ -38,7 +38,7 @@ void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseB
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
   */
-  DSCAL(sizeY, beta, y, 1);
+  cblas_dscal(sizeY, beta, y, 1);
 
   for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
@@ -75,8 +75,8 @@ void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseB
       if (currentRowNumber != 0)
         posInY += A->blocksize0[currentRowNumber - 1];
       /* Computes y[] += currentBlock*x[] */
-      DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum],
-            nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
+      cblas_dgemv(CblasColMajor, CblasNoTrans, nbRows, nbColumns, alpha, A->block[blockNum],
+                  nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
     }
   }
 }
@@ -263,7 +263,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   assert(A->blocksize1);
   assert(B->blocksize0);
   assert(B->blocksize1);
-
+  
   assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
 
   /*     Check the compatibility of the number and the sizes of blocks */
@@ -412,7 +412,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
             /*        } */
 
             /*            printf("DGEMM call\n"); */
-            DGEMM(LA_NOTRANS, LA_NOTRANS, Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA], Ablocksize0, B->block[blockMap[blockNumBB]], Bblocksize0, beta, C->block[Cnbblocks], Ablocksize0);
+            cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA], Ablocksize0, B->block[blockMap[blockNumBB]], Bblocksize0, beta, C->block[Cnbblocks], Ablocksize0);
 
 
             /*           for (i=0;i<Ablocksize0;i++) */
@@ -490,7 +490,7 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
 
   /* Set y to 0, if required */
   if (init == 1)
-    DSCAL(sizeY, 0.0, y, 1);
+    cblas_dscal(sizeY, 0.0, y, 1);
 
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
@@ -514,7 +514,7 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
     if (colNumber != 0)
       posInX += A->blocksize0[colNumber - 1];
     /* Computes y[] += currentBlock*x[] */
-    DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
 
   }
 }
@@ -568,7 +568,7 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
 
   /* Set y to 0, if required */
   if (init == 1)
-    DSCAL(sizeY, 0.0, y, 1);
+    cblas_dscal(sizeY, 0.0, y, 1);
 
   /* Loop over all non-null blocks. Works whatever the ordering order
      of the block is, in A->block, but it requires a set to 0 of all y
@@ -594,7 +594,7 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
       if (colNumber != 0)
         posInX += A->blocksize0[colNumber - 1];
       /* Computes y[] += currentBlock*x[] */
-      DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
+      cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
     }
   }
 }

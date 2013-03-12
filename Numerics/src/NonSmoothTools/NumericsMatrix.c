@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "NumericsMatrix.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 #include "misc.h"
 
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
@@ -37,7 +37,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   /* double* storage */
   if (storage == 0)
   {
-    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
   }
   /* SparseBlock storage */
   else if (storage == 1)
@@ -68,8 +68,8 @@ void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const 
   /* double* storage */
   if ((astorage == 0) & (bstorage == 0) & (cstorage == 0))
   {
-    /*      DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
-    DGEMM(LA_NOTRANS, LA_NOTRANS, A->size0, B->size1, A->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, C->size0);
+    /*      cblas_dgemv(CblasColMajor,CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, A->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, C->size0);
   }
   /* SparseBlock storage */
   else if ((astorage == 1) & (bstorage == 1) & (cstorage == 1))
@@ -104,12 +104,12 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
     if (init == 0) /* y += subAx */
     {
       for (int row = 0; row < sizeY; row++)
-        y[row] += DDOT(sizeX, &mat[currentRowNumber + row], incx, x, incy);
+        y[row] += cblas_ddot(sizeX, &mat[currentRowNumber + row], incx, x, incy);
     }
     else
     {
       for (int row = 0; row < sizeY; row++)
-        y[row] = DDOT(sizeX, &mat[currentRowNumber + row], incx, x, incy);
+        y[row] = cblas_ddot(sizeX, &mat[currentRowNumber + row], incx, x, incy);
     }
 
   }
@@ -157,7 +157,7 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
     }
     for (int i = 0; i < sizeY; i++)
     {
-      y[i] += DDOT(A->size0 , MM + i , incx , x , incy);
+      y[i] += cblas_ddot(A->size0 , MM + i , incx , x , incy);
     }
     for (int i = 0; i < sizeY; i++)
     {

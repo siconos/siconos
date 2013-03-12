@@ -18,20 +18,21 @@
  */
 
 #include "SparseBlockMatrix.h"
-#include "LA.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "SiconosBlas.h"
 
 void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q , double *z , int verbose, double *w, double *err)
 {
   double error = 0;
   int incx = 1, incy = 1;
-  double normq = DNRM2(n , q , incx);
+  double normq = cblas_dnrm2(n , q , incx);
 
   /* w is initialized with q */
-  DCOPY(n , q , incx , w , incy);
+  cblas_dcopy(n , q , incx , w , incy);
 
   /* Computes w += Mz */
   prodSBM(n, n, 1.0, M, z, 1.0, w);

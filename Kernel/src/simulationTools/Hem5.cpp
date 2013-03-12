@@ -688,7 +688,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
     pointerToXL = &(*_lambdatmp)(0);
 
   // call HEM5 to integrate dynamical equation
-  F77NAME(hem5)(&(_intData[0]),
+  CNAME(hem5)(&(_intData[0]),
                 &(_intData[1]),
                 &(_intData[2]),
                 &(_intData[3]),

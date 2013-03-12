@@ -22,9 +22,9 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
+#include "SiconosBlas.h"
 
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
@@ -52,7 +52,7 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   if (verbose > 0)
   {
-    qs = DNRM2(n , q , 1);
+    qs = cblas_dnrm2(n , q , 1);
     printf("===== Starting of LCP solving with Projected Gauss Seidel algorithm.\n");
     printf("\n ||q||= %g \n", qs);
     printf("itermax = %d \n", itermax);
@@ -88,12 +88,12 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
     ++iter;
 
     /* Initialization of w with q */
-    DCOPY(n , q , 1 , w , 1);
+    cblas_dcopy(n , q , 1 , w , 1);
 
     for (i = 0 ; i < n ; ++i)
     {
       z[i] = 0.0;
-      zi = -(q[i] + DDOT(n , &M[i] , n , z , 1)) * diag[i];
+      zi = -(q[i] + cblas_ddot(n , &M[i] , n , z , 1)) * diag[i];
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
       /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/

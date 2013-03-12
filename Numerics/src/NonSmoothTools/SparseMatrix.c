@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "SparseMatrix.h"
-#include "LA.h"
 #include <math.h>
 
 //#define VERBOSE_DEBUG

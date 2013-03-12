@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
 #include "Relay_Solvers.h"
 

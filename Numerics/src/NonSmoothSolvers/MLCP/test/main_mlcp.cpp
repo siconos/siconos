@@ -50,7 +50,7 @@
 #include <string.h>
 #include "NonSmoothDrivers.h"
 #include <sys/time.h>
-#include "LA.h"
+
 /*only for debug functions*/
 #include "NonSmoothNewtonNeighbour.h"
 #include "MixedLinearComplementarityProblem.h"

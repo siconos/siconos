@@ -17,7 +17,7 @@
 // Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 //
 
-#include "blaslapack.h"
+#include "SiconosFortran.h"
 
 typedef void (*fprobpointer)(integer* IFCN,
                              integer* NQ,
@@ -49,7 +49,7 @@ typedef void (*soloutpointer)(integer* MODE,
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void F77NAME(hem5)(integer* NQ, integer* NV, integer* NU, integer* NL,
+  void CNAME(hem5)(integer* NQ, integer* NV, integer* NU, integer* NL,
                      fprobpointer FPROB,
                      doublereal* T,
                      doublereal* Q, doublereal* V, doublereal* U,  doublereal* A,  doublereal* RLAM,

@@ -41,7 +41,7 @@ is solved by a prediction on the non-zero z values and linear system solving or 
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "LA.h"
+
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
@@ -321,7 +321,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
   int incx = 1;
 
   /* Copy of z into a buffer for restart if predict failed */
-  DCOPY(sizeLCP, z , incx , bufz , incx);   /* Saving z on enter. */
+  cblas_dcopy(sizeLCP, z , incx , bufz , incx);   /* Saving z on enter. */
 
   /* Sets z and w to 0*/
   for (i = 0; i < sizeLCP; i++)
@@ -338,7 +338,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
       subq[i] = -q[indic[i]];
 
 
-    DGEMV(LA_NOTRANS, *sizesublcp , *sizesublcp , 1.0 , submatlcp , *sizesublcp , subq , incx , 0.0 , newz , incx);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, *sizesublcp , *sizesublcp , 1.0 , submatlcp , *sizesublcp , subq , incx , 0.0 , newz , incx);
 
     /* Copy of newz into z for i in indic */
     for (i = 0; i < *sizesublcp; i++)
@@ -357,7 +357,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
       subq[i] = q[indicop[i]];
 
     if (*sizesublcp != 0)
-      DGEMV(LA_NOTRANS, *sizesublcpop , *sizesublcp , 1.0, submatlcpop, *sizesublcpop, newz, incx, 1.0, subq, incx);
+      cblas_dgemv(CblasColMajor,CblasNoTrans, *sizesublcpop , *sizesublcp , 1.0, submatlcpop, *sizesublcpop, newz, incx, 1.0, subq, incx);
 
     /* Copy of subq=subw into w for indices in indicop */
     for (i = 0; i < *sizesublcpop; i++)
@@ -379,7 +379,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
     if ((zi > 0.0) && (wi > 0.0)) error += zi * wi;
   }
 
-  normq = DNRM2(sizeLCP, q, incx);
+  normq = cblas_dnrm2(sizeLCP, q, incx);
   error = error / normq;
 
   if (error > tol)
@@ -391,7 +391,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
 
   /* If failed, reset z to starting value (saved in bufz) */
   if (info < 0)
-    DCOPY(sizeLCP , bufz , incx, z, incx);
+    cblas_dcopy(sizeLCP , bufz , incx, z, incx);
 
   return info;
 

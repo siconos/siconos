@@ -21,7 +21,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
+#include "SiconosBlas.h"
 #include "LCP_Solvers.h"
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
@@ -56,7 +56,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   options->iparam[1] = 0;
   options->dparam[1] = 0.0;
 
-  qs = DNRM2(n , q , incx);
+  qs = cblas_dnrm2(n , q , incx);
 
   /*printf( " Norm: %g \n", qs );*/
 
@@ -94,18 +94,18 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   incx = 1;
   incy = 1;
 
-  DCOPY(n, q, incx, rr, incy);
+  cblas_dcopy(n, q, incx, rr, incy);
 
   a1 = -1.;
   b1 = -1.;
 
-  DGEMV(LA_NOTRANS, n, n, a1, M, n, z, incx, b1, rr, incy);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, a1, M, n, z, incx, b1, rr, incy);
 
   /* Initialization of gradients */
   /* rr -> p and rr -> w */
 
-  DCOPY(n, rr, incx, ww, incy);
-  DCOPY(n, rr, incx, pp, incy);
+  cblas_dcopy(n, rr, incx, ww, incy);
+  cblas_dcopy(n, rr, incx, pp, incy);
 
   iter = 0;
   err  = 1.0 ;
@@ -120,14 +120,14 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
     incx = 1;
     incy = 1;
 
-    DCOPY(n, pp, incx, Mp, incy);
+    cblas_dcopy(n, pp, incx, Mp, incy);
 
     a1 = 1.0;
     b1 = 0.0;
 
-    DGEMV(LA_NOTRANS, n, n, a1, M, n, Mp, incx, b1, w, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, a1, M, n, Mp, incx, b1, w, incy);
 
-    pMp = DDOT(n, pp, incx, w, incy);
+    pMp = cblas_ddot(n, pp, incx, w, incy);
 
     if (fabs(pMp) < DBL_EPSILON)
     {
@@ -151,7 +151,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
       return;
     }
 
-    rp  = DDOT(n, pp, incx, rr, incy);
+    rp  = cblas_ddot(n, pp, incx, rr, incy);
 
     alpha = rp / pMp;
 
@@ -161,7 +161,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
      *
      */
 
-    DAXPY(n, alpha, pp, incx, z, incy);
+    cblas_daxpy(n, alpha, pp, incx, z, incy);
 
     /* Iterate projection*/
 
@@ -180,13 +180,13 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* rr = -Wz + q */
 
-    DCOPY(n, rr, incx, w , incy);
-    DCOPY(n, q , incx, rr, incy);
+    cblas_dcopy(n, rr, incx, w , incy);
+    cblas_dcopy(n, q , incx, rr, incy);
 
     a1 = -1.;
     b1 = -1.;
 
-    DGEMV(LA_NOTRANS, n, n, a1, M, n, z, incx, b1, rr, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, a1, M, n, z, incx, b1, rr, incy);
 
     /* Gradients projection
      * rr --> ww
@@ -219,18 +219,18 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /*  beta = -w.Mp / pMp  */
 
-    rp = DDOT(n , ww, incx, w, incy);
+    rp = cblas_ddot(n , ww, incx, w, incy);
 
     beta = -rp / pMp;
 
-    DCOPY(n, ww, incx, pp, incy);
-    DAXPY(n, beta, zz, incx, pp, incy);
+    cblas_dcopy(n, ww, incx, pp, incy);
+    cblas_daxpy(n, beta, zz, incx, pp, incy);
 
     /* **** Criterium convergence **** */
 
     qs   = -1.0;
-    DAXPY(n, qs, rr, incx, w, incy);
-    num = DNRM2(n, w, incx);
+    cblas_daxpy(n, qs, rr, incx, w, incy);
+    num = cblas_dnrm2(n, w, incx);
     err = num * den;
 
   }
@@ -238,10 +238,10 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   options->iparam[1] = iter;
   options->dparam[1] = err;
 
-  DCOPY(n, rr, incx, w, incy);
+  cblas_dcopy(n, rr, incx, w, incy);
 
   qs   = -1.0;
-  DSCAL(n, qs, w, incx);
+  cblas_dscal(n, qs, w, incx);
 
 
   *info = 1;

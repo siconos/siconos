@@ -20,7 +20,7 @@
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -65,7 +65,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   double minusrho = -1.0 * rho;
 
   double * reactionold = (double *)malloc(n * sizeof(double));
-  DCOPY(n , reaction , 1 , reactionold , 1);
+  cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
 
   internalSolverPtr internalsolver;
@@ -81,9 +81,9 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
   {
     ++iter;
 
-    DCOPY(n , reaction , 1 , reactionold , 1);
+    cblas_dcopy(n , reaction , 1 , reactionold , 1);
     //Add proximal regularization on q
-    DAXPY(n, minusrho, reactionold, 1, problem->q , 1) ;
+    cblas_daxpy(n, minusrho, reactionold, 1, problem->q , 1) ;
     //Add proximal regularization on M
     if (M->storageType == 0)
     {
@@ -104,7 +104,7 @@ void frictionContact3D_proximal(FrictionContactProblem* problem, double *reactio
 
     /* **** Criterium convergence **** */
     //substract proximal regularization on q
-    DAXPY(n, rho, reactionold, 1, problem->q, 1) ;
+    cblas_daxpy(n, rho, reactionold, 1, problem->q, 1) ;
     //substract proximal regularization on M
     if (M->storageType == 0)
     {

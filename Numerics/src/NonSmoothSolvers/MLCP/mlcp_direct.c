@@ -35,11 +35,11 @@ dim(v)=nn
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include "MLCP_Solvers.h"
 #include <math.h>
 #include "mlcp_direct.h"
 #include "mlcp_tool.h"
+#include "SiconosLapack.h"
 
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;
@@ -276,16 +276,12 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
     return 0;
   }
 #ifdef DIRECT_SOLVER_USE_DGETRI
-  DGEMV(LA_NOTRANS, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
   solTest = sVBuf;
 #else
   for (lin = 0; lin < sNpM; lin++)
     sQ[lin] =  - problem->q[lin];
-#ifdef USE_MKL
-  DGETRS(CLA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
-#else
-  DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
-#endif
+  DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, &INFO);
   solTest = sQ;
 #endif
   if (INFO)

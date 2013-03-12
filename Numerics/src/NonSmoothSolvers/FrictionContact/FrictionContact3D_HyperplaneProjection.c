@@ -19,7 +19,8 @@
 #include "projectionOnCone.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+#include "SiconosBlas.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -91,8 +92,8 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
   {
     ++iter;
 
-    DCOPY(n , q , 1 , velocitytmp, 1);
-    DCOPY(n , reaction , 1 , reactiontmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
+    cblas_dcopy(n , reaction , 1 , reactiontmp, 1);
 
     prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
 
@@ -121,23 +122,23 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
     double lhs = NAN;
     double rhs;
     // z_k-y_k
-    DCOPY(n , reaction , 1 , reactiontmp3, 1);
-    DAXPY(n, -1.0, reactiontmp, 1, reactiontmp3, 1);
+    cblas_dcopy(n , reaction , 1 , reactiontmp3, 1);
+    cblas_daxpy(n, -1.0, reactiontmp, 1, reactiontmp3, 1);
 
 
     while (stopingcriteria && (i < lsitermax))
     {
       i++ ;
-      DCOPY(n , reactiontmp , 1 , reactiontmp2, 1);
+      cblas_dcopy(n , reactiontmp , 1 , reactiontmp2, 1);
       alpha = 1.0 / (pow(2.0, i));
 #ifdef VERBOSE_DEBUG
       printf("alpha = %f\n", alpha);
 #endif
-      DSCAL(n , alpha, reactiontmp2, 1);
+      cblas_dscal(n , alpha, reactiontmp2, 1);
       alpha  = 1.0 - alpha;
 
-      DAXPY(n, alpha, reaction, 1, reactiontmp2, 1);
-      DCOPY(n , q , 1 , velocitytmp, 1);
+      cblas_daxpy(n, alpha, reaction, 1, reactiontmp2, 1);
+      cblas_dcopy(n , q , 1 , velocitytmp, 1);
       prodNumericsMatrix(n, n, alpha, M, reactiontmp2, beta, velocitytmp);
       /* #ifdef VERBOSE_DEBUG */
       /*     for (contact = 0 ; contact < nc ; ++contact) */
@@ -146,8 +147,8 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
       /*       printf("\n"); */
       /*     } */
       /* #endif   */
-      lhs = DDOT(n, velocitytmp, 1, reactiontmp3, 1);
-      rhs = DNRM2(n, reactiontmp3, 1);
+      lhs = cblas_ddot(n, velocitytmp, 1, reactiontmp3, 1);
+      rhs = cblas_dnrm2(n, reactiontmp3, 1);
       rhs = sigma / rho * rhs * rhs;
       if (lhs >= rhs)  stopingcriteria = 0;
 #ifdef VERBOSE_DEBUG
@@ -160,12 +161,12 @@ void frictionContact3D_HyperplaneProjection(FrictionContactProblem* problem, dou
 #endif
     }
 
-    double nonorm = DNRM2(n, velocitytmp, 1);
+    double nonorm = cblas_dnrm2(n, velocitytmp, 1);
     double rhoequiv = lhs / (nonorm * nonorm);
 #ifdef VERBOSE_DEBUG
     printf("rho equiv = %f\n", rhoequiv);
 #endif
-    DAXPY(n, -rhoequiv, velocitytmp, 1, reaction  , 1);
+    cblas_daxpy(n, -rhoequiv, velocitytmp, 1, reaction  , 1);
 
 
     // projection for each contact

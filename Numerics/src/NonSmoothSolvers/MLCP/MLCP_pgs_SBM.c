@@ -25,7 +25,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <assert.h>
 
 void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
@@ -54,7 +54,7 @@ void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
      sum over all non-diagonal blocks, rowM being the current
      row of blocks of M
   */
-  DCOPY(local_problem->size, &q[pos], 1, local_problem->q, 1);
+  cblas_dcopy(local_problem->size, &q[pos], 1, local_problem->q, 1);
   rowProdNoDiagSBM(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
 
 }
@@ -151,7 +151,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
     /* Loop over the rows of blocks in blmat */
     localSolverNum = 0;
     pos = 0;
-    /*       DCOPY(problem->size,w,1,wBackup,1); */
+    /*       cblas_dcopy(problem->size,w,1,wBackup,1); */
     for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
       /* Local problem formalization */
@@ -206,10 +206,10 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
         localSolverNum++;
     }
 
-    /*       DCOPY(problem->size , problem->q , 1 , w , 1); */
+    /*       cblas_dcopy(problem->size , problem->q , 1 , w , 1); */
     /*       prod(problem->size,problem->size, 1.0, problem->M,z,1.0,w); */
-    /*       DAXPY(problem->size, -1.0, w,1,wBackup, 1); */
-    /*       num = DNRM2(problem->size,wBackup,1); */
+    /*       cblas_daxpy(problem->size, -1.0, w,1,wBackup, 1); */
+    /*       num = cblas_dnrm2(problem->size,wBackup,1); */
     /*       error = num*den; */
     /* Criterium convergence */
     hasNotConverged = mlcp_compute_error(problem, z, w, tolerance, &error);

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "LA.h"
+
 #include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +24,8 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "op3x3.h"
+#include "SiconosBlas.h"
+#include "SiconosBlas.h"
 
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
 
@@ -115,7 +117,7 @@ void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * lo
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-    /*     DCOPY(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
+    /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
 
   }
   else
@@ -191,8 +193,8 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
   {
     /* velocityLocal = M.reaction + qLocal */
     int incx = 1, incy = 1;
-    DCOPY(Fsize, qLocal, incx, velocityLocal, incy);
-    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
+    cblas_dcopy(Fsize, qLocal, incx, velocityLocal, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
     /*   velocityLocal[0] = MLocal[0]*reaction[0] + MLocal[Fsize]*reaction[1] + MLocal[2*Fsize]*reaction[2] + qLocal[0]; */
     /*   velocityLocal[1] = MLocal[1]*reaction[0] + MLocal[Fsize+1]*reaction[1] + MLocal[2*Fsize+1]*reaction[2] + qLocal[1]; */
     /*   velocityLocal[2] = MLocal[2]*reaction[0] + MLocal[Fsize+2]*reaction[1] + MLocal[2*Fsize+2]*reaction[2] + qLocal[2]; */
@@ -278,8 +280,8 @@ void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2D
   {
     /* velocityLocal = M.reaction + qLocal */
     int incx = 1, incy = 1;
-    DCOPY(Fsize, qLocal, incx, velocityLocal, incy);
-    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
+    cblas_dcopy(Fsize, qLocal, incx, velocityLocal, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
 
     an = 1. / MLocal[0];
     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
@@ -393,9 +395,9 @@ void computeFGlobal_AC(double* reaction, double* FGlobal)
 
     reactionLocal = &reaction[3 * contact];
     incx = 3;
-    velocityLocal[0] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[0];
-    velocityLocal[1] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[1];
-    velocityLocal[2] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[2];
+    velocityLocal[0] = cblas_ddot(3 , MLocal , incx , reactionLocal , 1) + qLocal[0];
+    velocityLocal[1] = cblas_ddot(3 , MLocal , incx , reactionLocal , 1) + qLocal[1];
+    velocityLocal[2] = cblas_ddot(3 , MLocal , incx , reactionLocal , 1) + qLocal[2];
     an = 1. / MLocal[0];
     alpha = MLocal[4] + MLocal[8];
     det = MLocal[4] * MLocal[8] - MLocal[7] + MLocal[5];
@@ -1298,7 +1300,7 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
 
   // Computation of q(t) and q'(t) for t =0
 
-  double q0 = 0.5 * DDOT(3 , F , 1 , F , 1);
+  double q0 = 0.5 * cblas_ddot(3 , F , 1 , F , 1);
 
   double tmp[3] = {0., 0., 0.};
 
@@ -1373,7 +1375,7 @@ int  LineSearchGP(FrictionContactProblem* localproblem,
 
     Function(tmp, velocity, mu, rho, F, NULL, NULL);
 
-    double q  = 0.5 * DDOT(3 , F , 1 , F , 1);
+    double q  = 0.5 * cblas_ddot(3 , F , 1 , F , 1);
 
     double slope = (q - q0) / alpha;
 

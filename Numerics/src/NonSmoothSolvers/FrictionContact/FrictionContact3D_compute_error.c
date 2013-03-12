@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "LA.h"
+
 #include "NumericsOptions.h" // for global options
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
@@ -25,6 +25,7 @@
 #include "FrictionContact3D_projection.h"
 #include "projectionOnCone.h"
 #include "projectionOnCylinder.h"
+#include "SiconosLapack.h"
 
 #include <math.h>
 #include <assert.h>
@@ -64,7 +65,7 @@ int FrictionContact3D_compute_error(
   int n = nc * 3;
   double *mu = problem->mu;
 
-  DCOPY(n , problem->q , incx , w , incy); // w <-q
+  cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
@@ -81,7 +82,7 @@ int FrictionContact3D_compute_error(
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = DNRM2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , incx);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
@@ -109,7 +110,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, do
   double *mu = problem->mu;
   double worktmp[3] = {0.0, 0.0, 0.0};
   double invmu = 0.0;
-  DCOPY(n , problem->q , incx , z , incy); // z <-q
+  cblas_dcopy(n , problem->q , incx , z , incy); // z <-q
 
   // Compute the current reaction
   prodNumericsMatrix(n, n, 1.0, problem->M, w, 1.0, z);
@@ -135,7 +136,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, do
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = DNRM2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , incx);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {
@@ -159,7 +160,7 @@ int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, doub
   int n = nc * 3;
   double worktmp[3];
   double R;
-  DCOPY(n , problem->q , incx , w , incy); // w <-q
+  cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
@@ -184,7 +185,7 @@ int FrictionContact3D_Tresca_compute_error(FrictionContactProblem* problem, doub
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = DNRM2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , incx);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)
   {

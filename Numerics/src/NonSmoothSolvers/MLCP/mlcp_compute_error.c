@@ -17,12 +17,13 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "LA.h"
 #include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "SiconosBlas.h"
+
 /*
  * (input) double *z : size n+m
  * (output)double *w : size n+m
@@ -50,7 +51,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
       numericsError("mlcp_compute_error", "null input for M");
 
     /* Computes w = Mz + q */
-    DCOPY(NbLines , problem->q , incx , w , incy);
+    cblas_dcopy(NbLines , problem->q , incx , w , incy);
     prodNumericsMatrix(problem->M->size1, problem->M->size0, 1.0, problem->M, z, 1.0, w);
 
   }
@@ -75,19 +76,19 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     double *D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    DCOPY(NbLines - m , a , incx , w , incy); //  we = w[0..n-1] <-- a
-    DGEMV(LA_NOTRANS , NbLines - m, n , 1.0 , A , NbLines - m , &z[0] , incx , 1.0 , w , incy); // we <-- A*u + we
-    DGEMV(LA_NOTRANS , NbLines - m, m , 1.0 , C , NbLines - m , &z[n] , incx , 1.0 , w , incy); // we <-- C*v + we
+    cblas_dcopy(NbLines - m , a , incx , w , incy); //  we = w[0..n-1] <-- a
+    cblas_dgemv(CblasColMajor,CblasNoTrans , NbLines - m, n , 1.0 , A , NbLines - m , &z[0] , incx , 1.0 , w , incy); // we <-- A*u + we
+    cblas_dgemv(CblasColMajor,CblasNoTrans , NbLines - m, m , 1.0 , C , NbLines - m , &z[n] , incx , 1.0 , w , incy); // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
     double * pwi = w + NbLines - m; // No copy!!
-    DCOPY(m , b , incx , pwi , incy); //  wi = w[n..m] <-- b
+    cblas_dcopy(m , b , incx , pwi , incy); //  wi = w[n..m] <-- b
     // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
     // The test is then more severe if we compute w because it checks that the linear equation is satisfied
     if (param == 1)
     {
-      DGEMV(LA_NOTRANS , m, n , 1.0 , D , m , &z[0] , incx , 1.0 , pwi , incy);   // wi <-- D*u+ wi
-      DGEMV(LA_NOTRANS , m , m , 1.0 , B , m , &z[n] , incx , 1.0 , pwi , incy);  // wi <-- B*v + wi
+      cblas_dgemv(CblasColMajor,CblasNoTrans , m, n , 1.0 , D , m , &z[0] , incx , 1.0 , pwi , incy);   // wi <-- D*u+ wi
+      cblas_dgemv(CblasColMajor,CblasNoTrans , m , m , 1.0 , B , m , &z[n] , incx , 1.0 , pwi , incy);  // wi <-- B*v + wi
     }
   }
 
@@ -106,8 +107,8 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     {
       if (!problem->blocksIsComp[numBlock])
       {
-        error_e += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
-        norm_e += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], q + problem->blocksRows[numBlock] , incx);
+        error_e += cblas_dnrm2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
+        norm_e += cblas_dnrm2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], q + problem->blocksRows[numBlock] , incx);
       }
       else
       {
@@ -123,7 +124,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
           if (wi < 0.0) error_i += -wi;
           if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
         }
-        norm_i += DNRM2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
+        norm_i += cblas_dnrm2(problem->blocksRows[numBlock + 1] - problem->blocksRows[numBlock], w + problem->blocksRows[numBlock] , incx);
       }
       numBlock++;
     }
@@ -132,7 +133,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   {
     printf("WARNING, DEPRECATED MLCP API\n");
     /* Error on equalities part */
-    error_e = DNRM2(NbLines - m , w , incx);;
+    error_e = cblas_dnrm2(NbLines - m , w , incx);;
 
     /* Checks complementarity (only for rows number n to size) */
     error_i = 0.;
@@ -152,8 +153,8 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
 
 
     /* Computes error */
-    norm_i += DNRM2(m , q + NbLines - m , incx);
-    norm_e += DNRM2(NbLines - m , q , incx);
+    norm_i += cblas_dnrm2(m , q + NbLines - m , incx);
+    norm_e += cblas_dnrm2(NbLines - m , q , incx);
   }
 
   if (error_i / norm_i >= error_e / norm_e)

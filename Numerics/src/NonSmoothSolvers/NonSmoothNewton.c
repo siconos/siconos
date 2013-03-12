@@ -18,7 +18,7 @@
  */
 #include "NonSmoothNewton.h"
 #include "NumericsOptions.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -48,20 +48,20 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
   double tmin = 1e-12;
 
   /* z1 = z0 + dir */
-  DAXPY(n , 1.0 , dir , incx , z , incy);
+  cblas_daxpy(n , 1.0 , dir , incx , z , incy);
 
   while (tk > tmin)
   {
     /* Computes merit function = 1/2*norm(phi(z_{k+1}))^2 */
     (*phi)(n, z, phiVector, 0);
-    merit =  DNRM2(n, phiVector , incx);
+    merit =  cblas_dnrm2(n, phiVector , incx);
     merit = 0.5 * merit * merit;
     merit_k = psi_k + sigma * tk * descentCondition;
     if (merit < merit_k) break;
     tk = tk * 0.5;
     /* Computes z_k+1 = z0 + tk.dir
     warning: (-tk) because we need to start from z0 at each step while z_k+1 is saved in place of z_k ...*/
-    DAXPY(n , -tk , dir , incx , z , incy);
+    cblas_daxpy(n , -tk , dir , incx , z , incy);
   }
   free(phiVector);
   if (tk <= tmin)
@@ -128,11 +128,11 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     (*phi)(n, z, phiVector, 0);
     (*jacobianPhi)(n, z, jacobianPhiMatrix, 1);
     /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    DGEMV(LA_TRANS, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
-    norm_jacobian_psi = DNRM2(n, jacobian_psi, 1);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
+    norm_jacobian_psi = cblas_dnrm2(n, jacobian_psi, 1);
 
     /* Computes norm2(phi) */
-    normPhi = DNRM2(n, phiVector, 1);
+    normPhi = cblas_dnrm2(n, phiVector, 1);
     /* Computes merit function */
     psi = 0.5 * normPhi * normPhi;
 
@@ -145,21 +145,21 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     Find a solution dk of jacobianPhiMatrix.d = -phiVector.
     dk is saved in phiVector.
     */
-    DSCAL(n , -1.0 , phiVector, incx);
+    cblas_dscal(n , -1.0 , phiVector, incx);
     DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, &infoDGESV);
 
     /* descentCondition = jacobian_psi.dk */
-    descentCondition = DDOT(n, jacobian_psi,  1,  phiVector, 1);
+    descentCondition = cblas_ddot(n, jacobian_psi,  1,  phiVector, 1);
 
     /* Criterion to be satisfied: error < -rho*norm(dk)^p */
-    criterion = DNRM2(n, phiVector, 1);
+    criterion = cblas_dnrm2(n, phiVector, 1);
     criterion = -rho * pow(criterion, p);
 
     if (infoDGESV != 0 || descentCondition > criterion)
     {
       /* dk = - jacobian_psi (remind that dk is saved in phiVector) */
-      DCOPY(n, jacobian_psi, 1, phiVector, 1);
-      DSCAL(n , -1.0 , phiVector, incx);
+      cblas_dcopy(n, jacobian_psi, 1, phiVector, 1);
+      cblas_dscal(n , -1.0 , phiVector, incx);
     }
 
     /* Step-3 Line search: computes z_k+1 */
@@ -254,11 +254,11 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     (*phi)(n, z, phiVector, 0);
     (*jacobianPhi)(n, z, jacobianPhiMatrix, 1);
     /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    DGEMV(LA_TRANS, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
-    norm_jacobian_psi = DNRM2(n, jacobian_psi, 1);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
+    norm_jacobian_psi = cblas_dnrm2(n, jacobian_psi, 1);
 
     /* Computes norm2(phi) */
-    normPhi = DNRM2(n, phiVector, 1);
+    normPhi = cblas_dnrm2(n, phiVector, 1);
     /* Computes merit function */
     psi = 0.5 * normPhi * normPhi;
 
@@ -271,12 +271,12 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     Find a solution dk of jacobianPhiMatrix.d = -phiVector.
     dk is saved in phiVector.
     */
-    DSCAL(n , -1.0 , phiVector, incx);
+    cblas_dscal(n , -1.0 , phiVector, incx);
     DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, &infoDGESV);
 
     double tk = -1;
 
-    DAXPY(n , tk , phiVector , 1 , z , 1);
+    cblas_daxpy(n , tk , phiVector , 1 , z , 1);
 
 
 

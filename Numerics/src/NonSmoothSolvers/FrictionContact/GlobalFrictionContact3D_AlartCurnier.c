@@ -25,7 +25,7 @@
 #include "GlobalFrictionContact3D_AlartCurnier.h"
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "GlobalFrictionContact3D_compute_error.h"
-#include "LA.h"
+
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #include "FrictionContact3D_localAlartCurnier.h"
 
 #include "GlobalFrictionContact3D_compute_error.h"
-
+#include "SiconosBlas.h"
 #ifdef WITH_MUMPS
 #include <mpi.h>
 #include <dmumps_c.h>
@@ -242,8 +242,8 @@ void ACPsi(GlobalFrictionContactProblem* problem,
   /* psi <-
        compute -problem->M * globalVelocity + problem->H * reaction + problem->q
      ... */
-  DSCAL(ACProblemSize, 0., psi, 1);
-  DCOPY(globalProblemSize, problem->q, 1, psi, 1);
+  cblas_dscal(ACProblemSize, 0., psi, 1);
+  cblas_dcopy(globalProblemSize, problem->q, 1, psi, 1);
   NM_aaxpy(1., problem->H, reaction, psi);
   NM_aaxpy(-1., problem->M, globalVelocity, psi);
 
@@ -251,8 +251,8 @@ void ACPsi(GlobalFrictionContactProblem* problem,
   /* psi + globalProblemSize <-
      compute -velocity + trans(problem->H) * globalVelocity + problem->b
    ... */
-  DAXPY(localProblemSize, -1., velocity, 1, psi + globalProblemSize, 1);
-  DAXPY(localProblemSize, 1, problem->b, 1, psi + globalProblemSize, 1);
+  cblas_daxpy(localProblemSize, -1., velocity, 1, psi + globalProblemSize, 1);
+  cblas_daxpy(localProblemSize, 1, problem->b, 1, psi + globalProblemSize, 1);
   NM_aatxpy(1., problem->H, globalVelocity, psi + globalProblemSize);
 
 
@@ -459,20 +459,20 @@ int _globalLineSearchSparseGP(
 
   // Computation of q(t) and q'(t) for t =0
 
-  double q0 = 0.5 * DDOT(ACProblemSize, psi, 1, psi, 1);
+  double q0 = 0.5 * cblas_ddot(ACProblemSize, psi, 1, psi, 1);
 
   //  tmp <- J * direction
-  DSCAL(ACProblemSize, 0., tmp, 1);
+  cblas_dscal(ACProblemSize, 0., tmp, 1);
   cs_gaxpy(J, direction, tmp);
 
-  double dqdt0 = DDOT(ACProblemSize, psi, 1, tmp, 1);
+  double dqdt0 = cblas_ddot(ACProblemSize, psi, 1, tmp, 1);
 
   for(unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+solution
-    DCOPY(ACProblemSize, solution, 1, tmp, 1);
-    DAXPY(ACProblemSize, alpha[0], direction, 1, tmp, 1);
+    cblas_dcopy(ACProblemSize, solution, 1, tmp, 1);
+    cblas_daxpy(ACProblemSize, alpha[0], direction, 1, tmp, 1);
 
     ACPsi(problem,
           tmp,  /* v */
@@ -480,7 +480,7 @@ int _globalLineSearchSparseGP(
           tmp+problem->M->size0, /* U */
           rho, psi);
 
-    double q  = 0.5 * DDOT(ACProblemSize, psi, 1, psi, 1);
+    double q  = 0.5 * cblas_ddot(ACProblemSize, psi, 1, psi, 1);
 
     assert(q >= 0);
 
@@ -802,7 +802,7 @@ void globalFrictionContact3D_AlartCurnier(
 
   /* update local velocity from global velocity */
   /* an assertion ? */
-  DCOPY(localProblemSize, problem->b, 1, velocity, 1);
+  cblas_dcopy(localProblemSize, problem->b, 1, velocity, 1);
   NM_aatxpy(1., problem->H, globalVelocity, velocity);
 
   while(iter++ < itermax)
@@ -822,8 +822,8 @@ void globalFrictionContact3D_AlartCurnier(
                         &A_, &B_, J, Astart);
 
     /* rhs = -psi */
-    DCOPY(ACProblemSize, psi, 1, rhs, 1);
-    DSCAL(ACProblemSize, -1., rhs, 1);
+    cblas_dcopy(ACProblemSize, psi, 1, rhs, 1);
+    cblas_dscal(ACProblemSize, -1., rhs, 1);
 
     /* get compress column storage for linear ops */
     SparseMatrix* Jcsc = cs_triplet(J);
@@ -901,11 +901,11 @@ void globalFrictionContact3D_AlartCurnier(
 
     if(!info_ls)
     {
-      DAXPY(ACProblemSize, alpha, rhs, 1, solution, 1);
+      cblas_daxpy(ACProblemSize, alpha, rhs, 1, solution, 1);
     }
     else
     {
-      DAXPY(ACProblemSize, 1, rhs, 1., solution, 1);
+      cblas_daxpy(ACProblemSize, 1, rhs, 1., solution, 1);
     }
 
     for(unsigned int e = 0 ; e < globalProblemSize; ++e)

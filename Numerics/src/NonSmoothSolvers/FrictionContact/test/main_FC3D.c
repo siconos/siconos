@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NonSmoothDrivers.h"
-#include "LA.h"
+
 #include <math.h>
 
 

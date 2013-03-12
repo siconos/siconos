@@ -21,7 +21,7 @@
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "GlobalFrictionContact3D_compute_error.h"
 #include "projectionOnCone.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 #include "SparseBlockMatrix.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -137,7 +137,7 @@ void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double 
     /* Solve the first part with the current reaction */
 
     /* qtmp <--q */
-    DCOPY(n, q, 1, qtmp, 1);
+    cblas_dcopy(n, q, 1, qtmp, 1);
 
     double alpha = 1.0;
     double beta = 1.0;
@@ -154,18 +154,14 @@ void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double 
     else if (M->storageType == 0)
     {
       int infoDGETRS = -1;
-      DCOPY(n, qtmp, 1, globalVelocity, 1);
+      cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
       assert(Global_MisLU);
-#ifdef USE_MKL
-      DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocity , n, infoDGETRS);
-#else
       DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
-#endif
       assert(!infoDGETRS);
     }
     /* Compute current local velocity */
     /*      velocity <--b */
-    DCOPY(m, b, 1, velocity, 1);
+    cblas_dcopy(m, b, 1, velocity, 1);
 
     if (H->storageType == 1)
     {
@@ -175,7 +171,7 @@ void globalFrictionContact3D_nsgs(GlobalFrictionContactProblem* problem, double 
     }
     else if (H->storageType == 0)
     {
-      DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
+      cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
     }
 
     /* Loop through the contact points */

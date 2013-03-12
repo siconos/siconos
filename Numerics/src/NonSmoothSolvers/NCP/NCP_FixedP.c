@@ -20,7 +20,7 @@
 #include "NCP_Path.h"
 #include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "NumericsOptions.h"
-#include "LA.h"
+#include "SiconosBlas.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 #include "math.h"
 #include "stdio.h"
@@ -61,7 +61,7 @@ int Fixe(int n, double* z, int* iparam, double* dparam)
     for (i = 0; i < n ; ++i)
       compute_Z_GlockerFixedP(i, www);
 
-    terminationCriterion = DNRM2(n, www, 1);
+    terminationCriterion = cblas_dnrm2(n, www, 1);
     //printf(" error = %14.7e\n", terminationCriterion);
     if (verbose > 0)
     {

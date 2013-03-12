@@ -1,0 +1,34 @@
+# - config file for Siconos@PROJECT_SHORT_NAME@ package
+# Written by F. Pérignon, 2013 march
+#
+# This file generates Siconos@PROJECT_SHORT_NAME@Config.cmake, that may be used by another cmake project
+# to retrieve all the configuration variables from Siconos@PROJECT_SHORT_NAME@
+#
+# It defines the following variables
+#
+# Siconos@PROJECT_SHORT_NAME@_INCLUDE_DIRS - include directories 
+# Siconos@PROJECT_SHORT_NAME@_EXTRA_INCLUDE_DIRS - path to extra headers needed for Siconos@PROJECT_SHORT_NAME@ (cblas.h ...)
+# Siconos@PROJECT_SHORT_NAME@_LIBRARY_DIRS - path to Siconos@PROJECT_SHORT_NAME@ library(ies)
+# Siconos@PROJECT_SHORT_NAME@_LIBRARIES  - libraries to link against to use Siconos@PROJECT_SHORT_NAME@
+# Siconos@PROJECT_SHORT_NAME@_USE_XXX - value of option "USE_XXX" 
+
+# Tell the user project where to find our headers and libraries
+set(Siconos@PROJECT_SHORT_NAME@_INCLUDE_DIRS "${}")
+set(Siconos@PROJECT_SHORT_NAME@_EXTRA_INCLUDE_DIRS "${CBLAS_INCLUDE_PATH}")
+set(Siconos@PROJECT_SHORT_NAME@_LIBRARY_DIRS "${${PROJECT_SHORT_NAME}_LIB_DIR}")
+set(Siconos@PROJECT_SHORT_NAME@_MODULE_DIR "${${PROJECT_SHORT_NAME}_INCLUDE_DIRS}/Modules")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${${PROJECT_SHORT_NAME}_CMAKE_DIR}/Siconos@PROJECT_SHORT_NAME@LibraryDepends.cmake")
+ 
+# These are IMPORTED targets created by Siconos@PROJECT_SHORT_NAME@LibraryDepends.cmake
+set(Siconos@PROJECT_SHORT_NAME@_LIBRARIES ${${PROJECT_NAME}_LINK_LIBRARIES})
+
+# Set all Siconos@PROJECT_SHORT_NAME@ options
+set(Siconos@PROJECT_SHORT_NAME@_BUILD_SHARED_LIBS @BUILD_SHARED_LIBS@)
+
+# Set var for compilers used by Siconos@PROJECT_SHORT_NAME@
+#set(Siconos@PROJECT_SHORT_NAME@_Fortran_COMPILER @CMAKE_Fortran_COMPILER@)
+
+# Fortran flags
+#set(Siconos@PROJECT_SHORT_NAME@_Fortran_FLAGS @CMAKE_Fortran_FLAGS@)

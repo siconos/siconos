@@ -22,9 +22,9 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
 #include "Relay_Solvers.h"
 #include <assert.h>
+#include "SiconosBlas.h"
 
 void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -81,12 +81,12 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
     ++iter;
 
     /* Initialization of w with q */
-    DCOPY(n , q , 1 , w , 1);
+    cblas_dcopy(n , q , 1 , w , 1);
 
     for (i = 0 ; i < n ; ++i)
     {
       z[i] = 0.0;
-      zi = -(q[i] + DDOT(n , &M[i] , n , z , 1)) * diag[i];
+      zi = -(q[i] + cblas_ddot(n , &M[i] , n , z , 1)) * diag[i];
       z[i] = zi;
       if (zi < a[i]) z[i] = a[i];
       else if (zi > b[i]) z[i] = b[i];

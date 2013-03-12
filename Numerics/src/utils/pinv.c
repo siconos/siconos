@@ -21,8 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "LA.h"
-#include "NumericsOptions.h"
+#include "SiconosLapack.h"
 
 #define NUMERICS_PINV_DEBUG
 /**
@@ -32,7 +31,7 @@
  */
 double pinv(double * A, int n, int m, double tolerance)
 {
-#ifdef COMPLETE_LAPACK_LIBRARIES
+//#ifdef COMPLETE_LAPACK_LIBRARIES
 
   int dimS = n;
   if (m < n) dimS = m;
@@ -52,19 +51,8 @@ double pinv(double * A, int n, int m, double tolerance)
   /*     }  */
 
   int InfoDGSVD = -1;
-#ifdef USE_MKL
   double superb[min(m, n) - 1];
-  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, 0, InfoDGSVD);
-#else
-  int LWORK = -1;
-  double * WORK = malloc(sizeof(*WORK));
-  assert(WORK);
-  DGESVD(&JOBU, &JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-  LWORK = (int)(WORK[0]);
-  WORK = realloc(WORK, LWORK * sizeof * WORK);
-  DGESVD(&JOBU, &JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-  free(WORK);
-#endif
+  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
 
   /*    printf("Matrix U:\n "); */
   /*     for (int i = 0; i< n; i++){ */
@@ -135,9 +123,8 @@ double pinv(double * A, int n, int m, double tolerance)
   /*  } */
   /*  printf("\n"); */
   /*     }  */
-  //DGEMM(LA_TRANS,LA_NOTRANS,m,n,m,1.0,VT,m,Utranstmp,m,0.0,A,m);
-  DGEMM(LA_TRANS, LA_NOTRANS, n, m, n, 1.0, VT, n, Utranstmp, n, 0.0, A, n);
-
+  //DGEMM(CblasTrans,CblasNoTrans,m,n,m,1.0,VT,m,Utranstmp,m,0.0,A,m);
+  cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans, n, m, n, 1.0, VT, n, Utranstmp, n, 0.0, A, n);
 #ifdef NUMERICS_PINV_DEBUG
   printf("\nApinv=[ \n");
   for (int i = 0; i < n ; i++)
@@ -148,7 +135,7 @@ double pinv(double * A, int n, int m, double tolerance)
     printf("];\n");
   }
   printf("];\n");
-#endif
+//#endif
   /*    printf("Matrix Pseudo-Inverse of A:\n "); */
   /*     for (int i = 0; i< m; i++){ */
   /*  for (int j = 0; j < n; j++){ */

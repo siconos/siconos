@@ -16,22 +16,11 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "blaslapack.h"
+#include "odepack.h"
 #include <stdio.h>
 
-
-
-#define F77NAME(x) x##_
-
-typedef void (*ptr_fex)(integer *, doublereal *, doublereal *, doublereal *);
-typedef void (*ptr_jex)(integer *, doublereal *, doublereal *, integer* , integer *,  doublereal *, integer *);
-
-
-extern "C" void F77NAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot);
-extern "C" void F77NAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd);
-
-extern "C" void F77NAME(dlsode)(ptr_fex, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, ptr_jex, integer * mf);
-
+extern "C" void CNAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot);
+extern "C" void CNAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd);
 
 int main(void)
 {
@@ -59,7 +48,6 @@ int main(void)
   integer   itask = 1;
   integer  istate = 1;
   doublereal  tout = tout1;
-  doublereal  ero = 0.0e0;
 
   integer mf ;
   doublereal hu;
@@ -81,11 +69,10 @@ int main(void)
       itask = 1;
       istate = 1;
       tout = tout1;
-      ero = 0.0e0;
 
       for (int i = 1; i <= nout; i++)
       {
-        F77NAME(dlsode)(F77NAME(f1), &neq, y, &t, &tout, &itol, &rtol, &atol, &itask, &istate, &iopt, rwork, &lrw, iwork, &liw, F77NAME(jac1), &mf);
+        CNAME(dlsode)(CNAME(f1), &neq, y, &t, &tout, &itol, &rtol, &atol, &itask, &istate, &iopt, rwork, &lrw, iwork, &liw, CNAME(jac1), &mf);
         hu = rwork[10];
         nqu = iwork[13];
         printf("%15.4e\t%16.4e\t%14.2e\t%5d\t%14.2e\n", t, y[0], y[1], (int)nqu, hu);

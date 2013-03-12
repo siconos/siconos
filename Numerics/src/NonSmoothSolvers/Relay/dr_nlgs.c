@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LA.h"
 #include "Relay_Solvers.h"
+#include "SiconosBlas.h"
 
 void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -116,18 +116,18 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
 
     /*              Convergence criterium              */
 
-    DCOPY(n, w, incx, wnum1, incy);
+    cblas_dcopy(n, w, incx, wnum1, incy);
 
     alpha = -1.;
-    DAXPY(n, alpha, q, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, q, incx, wnum1, incy);
 
     alpha = 1.;
     beta = -1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, vec, n, z, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, vec, n, z, incx, beta, wnum1, incy);
 
-    num = DDOT(n, wnum1, incx, wnum1, incy);
+    num = cblas_ddot(n, wnum1, incx, wnum1, incy);
 
-    den = DDOT(n, q, incx, q, incy);
+    den = cblas_ddot(n, q, incx, q, incy);
 
     err1 = sqrt(num) / sqrt(den);
     options->iparam[1] = iter1;

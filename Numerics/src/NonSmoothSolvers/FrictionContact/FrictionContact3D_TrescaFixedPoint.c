@@ -20,7 +20,7 @@
 
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

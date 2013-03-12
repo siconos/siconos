@@ -38,7 +38,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-#include "LA.h"
+
 
 int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
                               SparseBlockStructuredMatrixPred *blmatpred,
@@ -129,7 +129,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   incx = 1;
-  qs = DNRM2(n , q , incx);
+  qs = cblas_dnrm2(n , q , incx);
   den = 1.0 / qs;
 
   /* Initialization of z and w */
@@ -268,7 +268,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
         b1 = 1.;
         incx = 1;
         incy = 1;
-        DGEMV(LA_NOTRANS, rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] , incx , b1 , rhs , incy);
+        cblas_dgemv(CblasColMajor,CblasNoTrans, rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] , incx , b1 , rhs , incy);
       }
     }
 

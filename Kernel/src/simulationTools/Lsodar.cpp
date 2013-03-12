@@ -339,7 +339,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   _intData[4] = istate;
   // call LSODAR to integrate dynamical equation
-  F77NAME(dlsodar)(pointerToF,
+  CNAME(dlsodar)(pointerToF,
                    &(_intData[0]),
                    &(*_xtmp)(0),
                    &tinit_DR,

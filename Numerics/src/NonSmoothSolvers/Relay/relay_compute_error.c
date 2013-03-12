@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "LA.h"
+#include "SiconosBlas.h"
 #include "NumericsOptions.h" // for global options
 #include "RelayProblem.h"
 
@@ -41,23 +41,23 @@ int relay_compute_error(RelayProblem* problem, double *z , double *w, double tol
 
   /* Computes w = Mz + q */
   int n = problem->size;
-  DCOPY(n , problem->q , 1 , w , 1);  // w <-q
+  cblas_dcopy(n , problem->q , 1 , w , 1);  // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   double * ztmp = (double*)malloc(n * sizeof(double));
-  DCOPY(n , z , 1 , ztmp, 1);  // ztmp <-z
+  cblas_dcopy(n , z , 1 , ztmp, 1);  // ztmp <-z
 
   double rho = -1.0;
-  DAXPY(n, rho, w, 1, ztmp, 1);    //ztmp <- ztmp - rho w
+  cblas_daxpy(n, rho, w, 1, ztmp, 1);    //ztmp <- ztmp - rho w
 
   projectiononbox(ztmp , problem->lb, problem->ub, n);
-  DAXPY(n, -1, z, 1, ztmp, 1);    //ztmp <- ztmp -z
+  cblas_daxpy(n, -1, z, 1, ztmp, 1);    //ztmp <- ztmp -z
 
 
-  *error = DNRM2(n , ztmp , 1);
+  *error = cblas_dnrm2(n , ztmp , 1);
 
 
   /* Computes error */
-  double normq = DNRM2(n , problem->q , 1);
+  double normq = cblas_dnrm2(n , problem->q , 1);
   *error = *error / (normq + 1.0);
   free(ztmp);
   if (*error > tolerance)

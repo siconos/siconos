@@ -16,13 +16,12 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-
+#include "SiconosLapack.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
 #include "LCP_Solvers.h"
 
 void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
@@ -243,43 +242,38 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
     alpha = 1.;
     beta  = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, zc, incx, beta, wc, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, zc, incx, beta, wc, incy);
 
 
-    DCOPY(n, problem->q, incx, znum1, incy);
+    cblas_dcopy(n, problem->q, incx, znum1, incy);
 
 
     alpha = -1.;
-    DSCAL(n , alpha , znum1 , incx);
+    cblas_dscal(n , alpha , znum1 , incx);
 
     alpha = 1.;
-    DAXPY(n, alpha, wc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, znum1, incy);
     nrhs = 1;
-
-#ifdef USE_MKL
-    DTRTRS(LA_UP, CLA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-    DTRTRS(LA_UP, CLA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
-#else
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
-#endif
-    DCOPY(n, znum1, incx, z, incy);
+
+    cblas_dcopy(n, znum1, incx, z, incy);
 
 
 
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, wc, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, z, incx, beta, wc, incy);
 
-    DCOPY(n, wc, incx, w, incy);
+    cblas_dcopy(n, wc, incx, w, incy);
 
 
     /*         Local Stage                  */
 
-    DCOPY(n, w, incx, wt, incy);
+    cblas_dcopy(n, w, incx, wt, incy);
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, wt, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, z, incx, beta, wt, incy);
 
     for (i = 0; i < n; i++)
     {
@@ -300,19 +294,19 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
     /*        Convergence criterium                */
 
 
-    DCOPY(n, w, incx, wnum1, incy);
+    cblas_dcopy(n, w, incx, wnum1, incy);
     alpha = -1.;
-    DAXPY(n, alpha, wc, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, wnum1, incy);
 
 
-    DCOPY(n, z, incx, znum1, incy);
-    DAXPY(n, alpha, zc, incx, znum1, incy);
+    cblas_dcopy(n, z, incx, znum1, incy);
+    cblas_daxpy(n, alpha, zc, incx, znum1, incy);
 
 
 
     alpha = 1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
 
 
     /*   wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))   */
@@ -321,34 +315,34 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
     alpha = 1.;
     beta = 0.;
-    DGEMV(LA_TRANS, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
 
-    num11 = DDOT(n, wnum1, incx, kinvnum1, incy);
+    num11 = cblas_ddot(n, wnum1, incx, kinvnum1, incy);
 
 
 
 
-    DCOPY(n, z, incx, zz, incy);
-    DCOPY(n, w, incx, ww, incy);
+    cblas_dcopy(n, z, incx, zz, incy);
+    cblas_dcopy(n, w, incx, ww, incy);
 
     alpha = 1.;
-    DAXPY(n, alpha, wc, incx, ww, incy);
+    cblas_daxpy(n, alpha, wc, incx, ww, incy);
 
-    DAXPY(n, alpha, zc, incx, zz, incy);
+    cblas_daxpy(n, alpha, zc, incx, zz, incy);
 
     beta = 0.;
     alpha = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, zz, incx, beta, kzden1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, zz, incx, beta, kzden1, incy);
 
 
-    den22 = DDOT(n, zz, incx, kzden1, incy);
+    den22 = cblas_ddot(n, zz, incx, kzden1, incy);
 
     beta = 0.;
     alpha = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, kinv, n, ww, incx, beta, kinvwden1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, ww, incx, beta, kinvwden1, incy);
 
-    den11 = DDOT(n, ww, incx, kinvwden1, incy);
+    den11 = cblas_ddot(n, ww, incx, kinvwden1, incy);
 
 
 

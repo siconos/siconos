@@ -20,8 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <math.h>
 #include <float.h>
 #include "LCP_Solvers.h"
@@ -70,7 +69,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /*  qs = 0.;*/
   incx = 1;
-  qs = DNRM2(n , q , incx);
+  qs = cblas_dnrm2(n , q , incx);
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
   den = 1.0 / qs;
 
@@ -145,7 +144,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
       ziprev = z[i];
       z[i] = 0.0;
 
-      zi = -(q[i] - (rho * ziprev) + DDOT(n , &M[i] , incx , z , incy)) * diag[i];
+      zi = -(q[i] - (rho * ziprev) + cblas_ddot(n , &M[i] , incx , z , incy)) * diag[i];
 
       if (zi > 0) z[i] = zi;
 

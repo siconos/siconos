@@ -22,13 +22,14 @@
 #include <time.h>
 #include <float.h>
 #include <math.h>
-#include "LA.h"
+
 #include "NumericsOptions.h"
 #include "GenericMechanical_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_compute_error.h"
 #include "FrictionContact3D_unitary_enumerative.h"
 #include "GMPReduced.h"
+#include "SiconosBlas.h"
 /* #define GENERICMECHANICAL_DEBUG */
 /* #define GENERICMECHANICAL_DEBUG2 */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
@@ -93,7 +94,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     printDenseMatrice("diagBlock", 0, diagBlock, curSize, curSize);
     printDenseMatrice("Rlocal", 0, reaction + posInX, curSize, 1);
 #endif
-    DGEMV(LA_NOTRANS, curSize, curSize, 1.0, diagBlock, curSize, reaction + posInX, 1, 1.0, velocity + posInX, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, curSize, curSize, 1.0, diagBlock, curSize, reaction + posInX, 1, 1.0, velocity + posInX, 1);
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("velocity", 0, velocity + posInX, curSize, 1);
 #endif
@@ -144,7 +145,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       //LinearComplementarityProblem* lcpproblem = (LinearComplementarityProblem*) curProblem->problem;
 
       lcp_compute_error_only(curSize, reaction + posInX, velocity + posInX, &localError);
-      localError = localError / (1 + DNRM2(curSize , curProblem->q , 1));
+      localError = localError / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
@@ -157,7 +158,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
       localError = 0.;
       FrictionContact3D_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError);
-      localError = sqrt(localError) / (1 + DNRM2(curSize , curProblem->q , 1));
+      localError = sqrt(localError) / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR

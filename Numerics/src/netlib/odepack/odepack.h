@@ -16,8 +16,10 @@
 //
 // Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 //
+#ifndef ODEPACK_H
+#define ODEPACK_H
 
-#include "blaslapack.h"
+#include "SiconosFortran.h"
 
 typedef void (*fpointer)(integer *, doublereal *, doublereal *, doublereal *);
 typedef void (*gpointer)(integer *, doublereal *, doublereal*, integer *, doublereal *);
@@ -27,11 +29,13 @@ typedef void (*jacopointer)(integer *, doublereal *, doublereal *, integer* , in
 extern "C" {
 #endif
 
-  void F77NAME(DLSODE)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * mf);
+  void CNAME(dlsode)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * mf);
 
-  void F77NAME(dlsodar)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * jt, gpointer, integer* ng, integer * jroot);
+  void CNAME(dlsodar)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * jt, gpointer, integer* ng, integer * jroot);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 

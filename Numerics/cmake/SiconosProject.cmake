@@ -61,7 +61,6 @@ MACRO(SICONOS_PROJECT
   INCLUDE(GNUInstallDirs)
   ASSERT(CMAKE_INSTALL_LIBDIR)
 
-
   # PACKAGE PROJECT SETUP
   PROJECT(${PROJECT_PACKAGE_NAME})
 
@@ -200,19 +199,23 @@ MACRO(SICONOS_PROJECT
     INCLUDE(SiconosDoc)
   ENDIF(WITH_DOCUMENTATION)
 
-  # NumericsConfig.h/KernelConfig.h and include
-  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-#    IF(NOT CONFIG_H_GLOBAL_CONFIGURED)
-#      SET(CONFIG_H_GLOBAL_CONFIGURED 1 CACHE BOOL "${PROJECT_SHORT_NAME}Config.h global generation." )
-    CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
-#    ENDIF(NOT CONFIG_H_GLOBAL_CONFIGURED)
-    INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-
   # Top level install
   SET(CMAKE_INCLUDE_CURRENT_DIR ON)
   INSTALL(FILES AUTHORS ChangeLog COPYING INSTALL README 
     DESTINATION share/doc/siconos-${VERSION}/${_PROJECT_NAME})
+  
+
+  # To find XXXConfig.h
+  include_directories(${CMAKE_BINARY_DIR}) 
+  # Sources
+  IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
+    add_subdirectory(src)
+  ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
+
+  # NumericsConfig.h/KernelConfig.h generation
+  IF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+    CONFIGURE_FILE(config.h.cmake ${PROJECT_SHORT_NAME}Config.h)
+  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
 
   # man files
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
@@ -247,6 +250,16 @@ MACRO(SICONOS_PROJECT
   ENDIF(CMAKELISTS_FILES)
 
 
+#  configure_file(Config.cmake.in
+#    "${CMAKE_BINARY_DIR}/Siconos${PROJECT_SHORT_NAME}Config.cmake")
+#  configure_file(ConfigVersion.cmake.in
+#    "${CMAKE_BINARY_DIR}/Siconos${PROJECT_SHORT_NAME}ConfigVersion.cmake" @ONLY)
+#  install(FILES
+#    "${CMAKE_BINARY_DIR}/Siconos${PROJECT_SHORT_NAME}Config.cmake"
+#    "${CMAKE_BINARY_DIR}/Siconos${_PROJECT_NAME}ConfigVersion.cmake"
+#    DESTINATION share/${PROJECT_PACKAGE_NAME})
+
+
   # xml
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config/xmlschema)
     FILE(GLOB _SFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} config/xmlschema/*.xsd)
@@ -255,11 +268,6 @@ MACRO(SICONOS_PROJECT
       INSTALL(FILES ${_F} DESTINATION share/${PROJECT_PACKAGE_NAME})
     ENDFOREACH(_F ${_SFILES})
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config/xmlschema)
-  
-  # Sources
-  IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
-    add_subdirectory(src)
-  ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
   
   # Packaging
 

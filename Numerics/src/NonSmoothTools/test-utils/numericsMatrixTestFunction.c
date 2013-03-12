@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NumericsMatrix.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 #include <math.h>
 
 int test_BuildNumericsMatrix(NumericsMatrix** MM)
@@ -267,7 +267,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
   x2[2] = 0;
   x2[3] = 0;
   int incx = 1, incy = 1;
-  DGEMV(LA_NOTRANS, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
+  cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
 
   prodNumericsMatrix(n, n, alpha, M1, x, beta, y);
   double tol = 1e-12;
@@ -283,7 +283,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
     printf("Step 0 ( y = alpha*A*x + beta*y, double* storage) failed ...\n");
 
 
-  DGEMV(LA_NOTRANS, n, m, alpha, M3->matrix0, n, x2, incx, beta, yref2, incy);
+  cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, alpha, M3->matrix0, n, x2, incx, beta, yref2, incy);
 
   prodNumericsMatrix(m, n, alpha, M3, x2, beta, y2);
   for (i = 0; i < n; i++)
@@ -597,7 +597,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   double yref[4];
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++)
-    yref[i] = DDOT(n, &(M1->matrix0[min + i]), incx, x, incy);
+    yref[i] = cblas_ddot(n, &(M1->matrix0[min + i]), incx, x, incy);
 
   subRowProd(n, sizeY, min, M1, x, y, 1);
   double tol = 1e-12;
@@ -640,7 +640,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < sizeY; i++)
   {
     y[i] = 0.0;
-    yref[i] = DDOT(n, &(M1->matrix0[4 + i]), incx, x, incy);
+    yref[i] = cblas_ddot(n, &(M1->matrix0[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
   subRowProd(n, sizeY, pos, M2, x, y, 1);
@@ -650,7 +650,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
   for (i = 0; i < sizeY; i++)
-    yref[i] = DDOT(n, &(M1->matrix0[6 + i]), incx, x, incy);
+    yref[i] = cblas_ddot(n, &(M1->matrix0[6 + i]), incx, x, incy);
   subRowProd(n, sizeY, pos + 1, M2, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
@@ -704,7 +704,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   double yref[2];
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++)
-    yref[i] = DDOT(m, &(M3->matrix0[min + i]), incx, x, incy);
+    yref[i] = cblas_ddot(m, &(M3->matrix0[min + i]), incx, x, incy);
 
   subRowProd(sizeX, sizeY, min, M3, x, y, 1);
   double tol = 1e-12;
@@ -746,7 +746,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   for (i = 0; i < sizeY; i++)
   {
     y[i] = 0.0;
-    yref[i] = DDOT(m, &(M3->matrix0[4 + i]), incx, x, incy);
+    yref[i] = cblas_ddot(m, &(M3->matrix0[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
   subRowProd(sizeX, sizeY, pos, M4, x, y, 1);
@@ -756,7 +756,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
   for (i = 0; i < sizeY; i++)
-    yref[i] = DDOT(m, &(M3->matrix0[6 + i]), incx, x, incy);
+    yref[i] = cblas_ddot(m, &(M3->matrix0[6 + i]), incx, x, incy);
   subRowProd(sizeX, sizeY, pos + 1, M4, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
@@ -814,7 +814,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   /*   int incx=1,incy=1; */
 
   /*   for(i=0;i<sizeY;i++) */
-  /*     yref[i]=DDOT(n, &(M1->matrix0[min+i]), incx, x, incy); */
+  /*     yref[i]=cblas_ddot(n, &(M1->matrix0[min+i]), incx, x, incy); */
 
   /*   rowProdNoDiag(n,sizeY,min,M1,x,y,1); */
 
@@ -912,7 +912,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   double tol = 1e-12;
   int info = 0;
   /*   for(i=0;i<sizeY;i++) */
-  /*     yref[i]=DDOT(n, &(M3->matrix0[min+i]), incx, x, incy); */
+  /*     yref[i]=cblas_ddot(n, &(M3->matrix0[min+i]), incx, x, incy); */
 
   /*   rowProdNoDiag(n,sizeY,min,M3,x,y,1); */
   /*   for(i = 0; i< sizeY; i++) */

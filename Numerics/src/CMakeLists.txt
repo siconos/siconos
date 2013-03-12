@@ -3,6 +3,16 @@
 #
 PROJECT(SiconosNumerics C CXX Fortran)
 
+include(FortranCInterface)
+# Set module files directory (i.e. where .mod will be created)
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/Modules)
+# Define a Fortran interface file (FCMangle.hpp)
+FortranCInterface_VERIFY(CXX QUIET)
+FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FCMangle.h
+                            MACRO_NAMESPACE "myF2C"
+                            SYMBOL_NAMESPACE "myF2C"
+                            )
+
 #
 # VERSION defined in top-level CMakeLists.txt
 #
@@ -19,9 +29,13 @@ SET(SiconosNumerics_VERSION "${VERSION}")
 SET(SiconosNumerics_DIRS
   ..
   .
-  hairer/
+  hairer
   netlib/odepack
   netlib/dftemplates
+  utils
+  utils/BlasLapackInterfaces
+  NonSmoothTools
+  NonSmoothTools/test-utils
   NonSmoothSolvers
   NonSmoothSolvers/LCP
   NonSmoothSolvers/LCP/test-utils
@@ -38,10 +52,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/MCP
   NonSmoothSolvers/GenericMechanical
   NonSmoothSolvers/GenericMechanical/test-utils
-  NonSmoothTools
-  NonSmoothTools/test-utils
-  utils)
-
+)
 #
 # Unstable sources
 #
@@ -55,19 +66,19 @@ SET(SiconosNumerics_INSTALL_INCLUDE_DIR include/Siconos/Numerics)
 
 # NumericsConfig.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/NumericsConfig.h DESTINATION include/Siconos/Numerics)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/FCMangle.h DESTINATION include/Siconos/Numerics)
 
 #
 # compilation setup 
 #
-# we should remove BlasLapack stuff
-# Atlas is not required
+include(BlasLapackSetup)
 
-if(USE_MKL)
-  compile_with(MKL REQUIRED)
-else()
-  COMPILE_WITH(LAPACK REQUIRED COMPLETE)
-  COMPILE_WITH(BLAS REQUIRED)
-endif()
+include_directories(${BLAS_INCLUDE_DIRS})
+include_directories(${LAPACK_INCLUDE_DIRS})
+include_directories(src/utils/test)
+
+print_var(LAPACK_INCLUDE_DIRS)
+print_var(BLAS_INCLUDE_DIRS)
 
 COMPILE_WITH(PathFerris)
 COMPILE_WITH(MlcpSimplex)
@@ -124,7 +135,7 @@ ENDIF()
 # CXX may be needed with MlcpSimplex
 SET(SiconosNumerics_LINKER_LANGUAGE C)
 IF(MLCPSIMPLEX_FOUND) 
-SET(SiconosNumerics_LINKER_LANGUAGE CXX)
+  SET(SiconosNumerics_LINKER_LANGUAGE CXX)
 ENDIF(MLCPSIMPLEX_FOUND)
 
 LIBRARY_PROJECT_SETUP()
@@ -158,6 +169,17 @@ IF(WITH_TESTING)
   NEW_TEST(dr_radaup dr_radaup.f)
   NEW_TEST(dr_rodas dr_rodas.f)
   NEW_TEST(dr_seulex dr_seulex.f)
+  END_TEST()
+  
+  BEGIN_TEST(utils/test)
+  #  NEW_TEST(pinvtest testpinv.c)
+  NEW_TEST(test_op3x3 test_op3x3.c)
+  NEW_TEST(test_timers_interf test_timers_interf.c)
+  NEW_TEST(test_cblas test_cblas.c)
+  NEW_TEST(test_dgesv test_dgesv.c)
+  NEW_TEST(test_gesvd test_gesvd.c)
+  NEW_TEST(test_dgels test_dgels.c)
+  NEW_TEST(test_dpotrf test_dpotrf.c)
   END_TEST()
 
   BEGIN_TEST(NonSmoothTools/test) 
@@ -526,12 +548,6 @@ ENDIF(MUMPS_FOUND)
   #NEW_TEST(GMP_FAILED GenericMechanical_test1.c)
   #END_TEST()
   
-  BEGIN_TEST(utils/test)
-  #NEW_TEST(pinvtest testpinv.c)
-  NEW_TEST(test_op3x3 test_op3x3.c)
-  NEW_TEST(test_timers_interf test_timers_interf.c)
-  END_TEST()
-
 ENDIF(WITH_TESTING)
 
 IF(MSVC)
@@ -553,3 +569,8 @@ ENDIF(PRINT_VAR)
 FEATURE_SUMMARY(WHAT ALL)
 
 WRITE_NOTES()
+
+
+
+message(STATUS "BLAS Vendor  : ${BLA_VENDOR} --- LIB: ${BLAS_LIBRARIES}")
+message(STATUS "LAPACK ${BLA_VENDOR} ${LAPACK_LIBRARIES}")

@@ -21,9 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
 #include <float.h>
+#include "SiconosBlas.h"
 #define EPSDIAG DBL_EPSILON
 /*
  *
@@ -161,16 +161,16 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
     {
       uiprev = u[i];
       u[i] = 0.0;
-      //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] = -(a[i]   - (rho * uiprev) + DDOT(n , &A[i] , incAx , u , incy)   + DDOT(m , &C[i] , incAx , v , incy)) * diagA[i];
+      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      u[i] = -(a[i]   - (rho * uiprev) + cblas_ddot(n , &A[i] , incAx , u , incy)   + cblas_ddot(m , &C[i] , incAx , v , incy)) * diagA[i];
     }
 
     for (i = 0 ; i < m ; ++i)
     {
       viprev = v[i];
       v[i] = 0.0;
-      //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] - (rho * viprev) + DDOT(n , &D[i] , incBx , u , incy)   + DDOT(m , &B[i] , incBx , v , incy)) * diagB[i];
+      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      vi = -(b[i] - (rho * viprev) + cblas_ddot(n , &D[i] , incBx , u , incy)   + cblas_ddot(m , &B[i] , incBx , v , incy)) * diagB[i];
       if (vi < 0) v[i] = 0.0;
       else v[i] = vi;
     }

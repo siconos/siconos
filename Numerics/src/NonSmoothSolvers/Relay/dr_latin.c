@@ -22,8 +22,8 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
 #include "Relay_Solvers.h"
+#include "SiconosLapack.h"
 
 void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -192,39 +192,37 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
 
     alpha = 1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, zc, incx, beta, wc, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, zc, incx, beta, wc, incy);
 
-    DCOPY(n, qq, incx, znum1, incy);
+    cblas_dcopy(n, qq, incx, znum1, incy);
 
 
     alpha = -1.;
-    DSCAL(n, alpha, znum1, incx);
+    cblas_dscal(n, alpha, znum1, incx);
 
     alpha = 1.;
-    DAXPY(n, alpha, wc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
-
-
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info2);
 
-    DCOPY(n, znum1, incx, z, incy);
+    cblas_dcopy(n, znum1, incx, z, incy);
 
-    DCOPY(n, wc, incx, w, incy);
+    cblas_dcopy(n, wc, incx, w, incy);
 
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, w, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, z, incx, beta, w, incy);
 
     /*     Local stage (z,w)->(zc,wc)         */
 
 
-    DCOPY(n, w, incx, zt, incy);
+    cblas_dcopy(n, w, incx, zt, incy);
 
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, zt, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, z, incx, beta, zt, incy);
 
     for (i = 0; i < n; i++)
     {
@@ -247,62 +245,62 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
       }
     }
 
-    DCOPY(n, wc, incx, wnum1, incy);
+    cblas_dcopy(n, wc, incx, wnum1, incy);
 
     alpha = -1.;
-    DAXPY(n, alpha, zt, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, zt, incx, wnum1, incy);
 
-    DCOPY(n, wnum1, incx, zt, incy);
+    cblas_dcopy(n, wnum1, incx, zt, incy);
 
     alpha = 1.;
     beta = 0.;
-    DGEMV(LA_TRANS, n, n, alpha, kinv, n, zt, incx, beta, zc, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, zt, incx, beta, zc, incy);
 
     /*            Convergence criterium          */
 
-    DCOPY(n, w, incx, wnum1, incy);
+    cblas_dcopy(n, w, incx, wnum1, incy);
 
     alpha = -1.;
-    DAXPY(n, alpha, wc, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, wnum1, incy);
 
-    DCOPY(n, z, incx, znum1, incy);
+    cblas_dcopy(n, z, incx, znum1, incy);
 
-    DAXPY(n, alpha, zc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, zc, incx, znum1, incy);
 
     alpha = 1.;
     beta = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
 
     /*       num1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))  */
 
     num11 = 0.;
     alpha = 1.;
     beta = 0.;
-    DGEMV(LA_TRANS, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
-    num11 = DDOT(n, wnum1, incx, kinvnum1, incy);
+    num11 = cblas_ddot(n, wnum1, incx, kinvnum1, incy);
 
-    DCOPY(n, w, incx, wnum1, incy);
+    cblas_dcopy(n, w, incx, wnum1, incy);
 
     alpha = 1.;
-    DAXPY(n, alpha, wc, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, wnum1, incy);
 
-    DCOPY(n, z, incx, znum1, incy);
+    cblas_dcopy(n, z, incx, znum1, incy);
 
-    DAXPY(n, alpha, zc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, zc, incx, znum1, incy);
 
     beta = 0.;
     alpha = 1.;
-    DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, kinvnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, znum1, incx, beta, kinvnum1, incy);
 
-    den22 = DDOT(n, znum1, incx, kinvnum1, incy);
+    den22 = cblas_ddot(n, znum1, incx, kinvnum1, incy);
 
     beta = 0.;
     alpha = 1.;
 
-    DGEMV(LA_TRANS, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
-    den11 = DDOT(n, wnum1, incx, kinvnum1, incy);
+    den11 = cblas_ddot(n, wnum1, incx, kinvnum1, incy);
 
     err0 = num11 / (den11 + den22);
     err1 = sqrt(err0);

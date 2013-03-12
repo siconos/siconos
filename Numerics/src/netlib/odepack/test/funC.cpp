@@ -17,12 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <stdio.h>
-#include "blaslapack.h"
+#include "odepack.h"
 
-#define F77NAME(x) x##_
-
-
-extern "C" void F77NAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot)
+extern "C" void CNAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot)
 {
   /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
    * output parameter : xdot (pointer to Xdot vector)
@@ -42,7 +39,7 @@ extern "C" void F77NAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, d
 
 }
 
-extern "C"void F77NAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
+extern "C"void CNAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)

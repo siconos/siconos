@@ -22,7 +22,7 @@
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D2NCP_Glocker.h"
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <stdlib.h>
 #include <stdio.h>
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
@@ -47,7 +47,7 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
-  DCOPY(sizeF , FGlocker , 1, FVector , 1);
+  cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
   FGlocker = NULL;
 }
 

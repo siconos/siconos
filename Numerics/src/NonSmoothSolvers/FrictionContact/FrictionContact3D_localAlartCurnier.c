@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-#include "LA.h"
+
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "FrictionContact3D_Solvers.h"
@@ -29,6 +29,7 @@
 #include <math.h>
 #include <assert.h>
 #include "Friction_cst.h"
+#include "SiconosLapack.h"
 
 void frictionContact3D_globalAlartCurnierFunction(
   unsigned int problemSize,
@@ -185,34 +186,34 @@ int globalLineSearchGP(
 
   // Computation of q(t) and q'(t) for t =0
 
-  double q0 = 0.5 * DDOT(problemSize, F, 1, F, 1);
+  double q0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
   // useless (already computed)
   computeAWpB(problemSize, A, W, B, AWpB);
 
   //  tmp <- AWpB * direction
-  DGEMV(LA_NOTRANS, problemSize, problemSize, 1., AWpB, problemSize, direction, 1, 0., tmp, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1., AWpB, problemSize, direction, 1, 0., tmp, 1);
 
-  double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
+  double dqdt0 = cblas_ddot(problemSize, F, 1, tmp, 1);
 
 
   for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+reaction
-    DCOPY(problemSize, reaction, 1, tmp, 1);
-    DAXPY(problemSize, alpha[0], direction, 1, tmp, 1);
+    cblas_dcopy(problemSize, reaction, 1, tmp, 1);
+    cblas_daxpy(problemSize, alpha[0], direction, 1, tmp, 1);
 
     // velocity <- W*tmp + qfree
-    DCOPY(problemSize, qfree, 1, velocity, 1);
-    DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
+    cblas_dcopy(problemSize, qfree, 1, velocity, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
           W, problemSize, tmp, 1, 1., velocity, 1);
 
     frictionContact3D_globalAlartCurnierFunction(problemSize, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
-    double q  = 0.5 * DDOT(problemSize, F, 1, F, 1);
+    double q  = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
     assert(q >= 0);
 
@@ -339,21 +340,21 @@ void frictionContact3D_globalAlartCurnier(
 
   double w;
 
-  int LWORK = 0;
-  double *WORK = NULL;
-  // iparam[2] != 0 => use of DGELS
-  if (options->iparam[2])
-  {
-    int dgelsinfo = 0;
+  /* int LWORK = 0; */
+  /* double *WORK = NULL; */
+  /* // iparam[2] != 0 => use of DGELS */
+  /* if (options->iparam[2]) */
+  /* { */
+  /*   int dgelsinfo = 0; */
 
-    DGELS(problemSize, problemSize,
-          1, AWpB, problemSize,
-          F, problemSize, &w, -1, &dgelsinfo);
+  /*   DGELS(problemSize, problemSize, */
+  /*         1, AWpB, problemSize, */
+  /*         F, problemSize, &w, -1, &dgelsinfo); */
 
-    LWORK = (int) w;
+  /*   LWORK = (int) w; */
 
-    WORK = (double *) malloc(w * sizeof(double));
-  }
+  /*   WORK = (double *) malloc(w * sizeof(double)); */
+  /* } */
 
   for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
 
@@ -362,8 +363,8 @@ void frictionContact3D_globalAlartCurnier(
   // velocity <- M*reaction + qfree
 
 
-  DCOPY(problemSize, problem->q, 1, velocity, 1);
-  DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
+  cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
         problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
 
 
@@ -381,20 +382,20 @@ void frictionContact3D_globalAlartCurnier(
 
     int info2 = 0;
 
-    DCOPY(problemSize, F, 1, tmp1, 1);
-    DSCAL(problemSize, -1., tmp1, 1);
+    cblas_dcopy(problemSize, F, 1, tmp1, 1);
+    cblas_dscal(problemSize, -1., tmp1, 1);
 
     if (options->iparam[2])
     {
-      assert(WORK);
-      DGELS(problemSize, problemSize, 1, AWpB, problemSize,
-            tmp1, problemSize, WORK, LWORK, &info2);
+      //assert(WORK);
+      DGELS(LA_NOTRANS,problemSize, problemSize, 1, AWpB, problemSize,
+            tmp1, problemSize, &info2);
     }
     else
     {
 
 #ifndef NDEBUG
-      DCOPY(problemSize * problemSize, AWpB, 1, AWpB_, 1);
+      cblas_dcopy(problemSize * problemSize, AWpB, 1, AWpB_, 1);
 #endif
 
       // tmp1 <- sol (AWpB * tmp1 = -F)
@@ -402,10 +403,10 @@ void frictionContact3D_globalAlartCurnier(
             tmp1, problemSize, &info2);
 
 #ifndef NDEBUG
-      DCOPY(problemSize, F, 1, tmp2, 1);
-      DGEMV(LA_NOTRANS, problemSize, problemSize, 1., AWpB_,
+      cblas_dcopy(problemSize, F, 1, tmp2, 1);
+      cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1., AWpB_,
             problemSize, tmp1, 1, 1., tmp2, 1);
-      assert(DDOT(problemSize, tmp2, 1, tmp2, 1) < 1e-10);
+      assert(cblas_ddot(problemSize, tmp2, 1, tmp2, 1) < 1e-10);
 #endif
 
     }
@@ -422,14 +423,14 @@ void frictionContact3D_globalAlartCurnier(
                                      problem->M->matrix0, problem->q, AWpB, tmp1, tmp2, &alpha, 100);
 
     if (!info_ls)
-      DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
+      cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
     else
-      DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
+      cblas_daxpy(problemSize, 1, tmp1, 1., reaction, 1);
 
 
     // velocity <- M*reaction + qfree
-    DCOPY(problemSize, problem->q, 1, velocity, 1);
-    DGEMV(LA_NOTRANS, problemSize, problemSize, 1.,
+    cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, problemSize, problemSize, 1.,
           problem->M->matrix0, problemSize, reaction, 1, 1., velocity, 1);
 
     options->dparam[1] = INFINITY;
@@ -447,8 +448,8 @@ void frictionContact3D_globalAlartCurnier(
                                       tolerance, options, &(options->dparam[1]));
 
 
-      assert((DNRM2(problemSize, F, 1)
-              / (1 + DNRM2(problemSize, problem->q, 1)))
+      assert((cblas_dnrm2(problemSize, F, 1)
+              / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
              <= (10 * options->dparam[1] + 1e-15));
 
     }
@@ -497,8 +498,8 @@ void frictionContact3D_globalAlartCurnier(
     assert(buffer);
     free(buffer);
 
-    if (WORK)
-      free(WORK);
+    /* if (WORK) */
+    /*   free(WORK); */
 
   }
   else
@@ -658,30 +659,30 @@ int globalLineSearchSparseGP(
 
   // Computation of q(t) and q'(t) for t =0
 
-  double q0 = 0.5 * DDOT(problemSize, F, 1, F, 1);
+  double q0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
   //  tmp <- AWpB * direction
-  DSCAL(problemSize, 0., tmp, 1);
+  cblas_dscal(problemSize, 0., tmp, 1);
   prodSBM(problemSize, problemSize, 1., blockAWpB, direction, 1, tmp);
 
-  double dqdt0 = DDOT(problemSize, F, 1, tmp, 1);
+  double dqdt0 = cblas_ddot(problemSize, F, 1, tmp, 1);
 
   for (unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+reaction
-    DCOPY(problemSize, reaction, 1, tmp, 1);
-    DAXPY(problemSize, alpha[0], direction, 1, tmp, 1);
+    cblas_dcopy(problemSize, reaction, 1, tmp, 1);
+    cblas_daxpy(problemSize, alpha[0], direction, 1, tmp, 1);
 
     // velocity <- W*tmp + qfree
-    DCOPY(problemSize, qfree, 1, velocity, 1);
+    cblas_dcopy(problemSize, qfree, 1, velocity, 1);
     prodSBM(problemSize, problemSize, 1., W, tmp, 1., velocity);
 
     frictionContact3D_globalAlartCurnierFunction(problemSize, tmp,
         velocity, mu, rho, F,
         NULL, NULL);
 
-    double q  = 0.5 * DDOT(problemSize, F, 1, F, 1); 
+    double q  = 0.5 * cblas_ddot(problemSize, F, 1, F, 1); 
 
     assert(q >= 0);
 
@@ -873,7 +874,7 @@ void frictionContact3D_sparseGlobalAlartCurnier(
   copySBM(problem->M->matrix1, blockAWpB, 1);
 
   // velocity <- M*reaction + qfree
-  DCOPY(problemSize, problem->q, 1, velocity, 1);
+  cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
   prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
 
   while (iter++ < itermax)
@@ -887,8 +888,8 @@ void frictionContact3D_sparseGlobalAlartCurnier(
     // AW + B
     computeSparseAWpB(problemSize, A, problem->M->matrix1, B, blockAWpB, nzmax, nz, irn, jcn, AWpB);
 
-    DCOPY(problemSize, F, 1, tmp1, 1);
-    DSCAL(problemSize, -1., tmp1, 1);
+    cblas_dcopy(problemSize, F, 1, tmp1, 1);
+    cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
     mumps_id->n = problemSize;
@@ -924,13 +925,13 @@ void frictionContact3D_sparseGlobalAlartCurnier(
                                            problem->M->matrix1, problem->q, blockAWpB, tmp1, tmp2, &alpha, 100);
 
     if (!info_ls)
-      DAXPY(problemSize, alpha, tmp1, 1, reaction, 1);
+      cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
     else
-      DAXPY(problemSize, 1, tmp1, 1., reaction, 1);
+      cblas_daxpy(problemSize, 1, tmp1, 1., reaction, 1);
 
 
     // velocity <- M*reaction + qfree
-    DCOPY(problemSize, problem->q, 1, velocity, 1);
+    cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     prodSBM(problemSize, problemSize, 1., problem->M->matrix1, reaction, 1., velocity);
 
 
@@ -950,8 +951,8 @@ void frictionContact3D_sparseGlobalAlartCurnier(
                                       tolerance, options, &(options->dparam[1]));
 
 
-      assert((DNRM2(problemSize, F, 1)
-              / (1 + DNRM2(problemSize, problem->q, 1)))
+      assert((cblas_dnrm2(problemSize, F, 1)
+              / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
              <= (10 * options->dparam[1] + 1e-15));
 
 

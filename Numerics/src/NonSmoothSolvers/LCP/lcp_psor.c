@@ -22,8 +22,9 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
 #include "LCP_Solvers.h"
+#include "SiconosBlas.h"
+
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
@@ -59,7 +60,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /* Check for non trivial case */
 
-  qs = DNRM2(n , q , incx);
+  qs = cblas_dnrm2(n , q , incx);
 
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
@@ -84,7 +85,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
     ww[i] = 0.;
   }
 
-  DCOPY(n , q , incx , w , incy);
+  cblas_dcopy(n , q , incx , w , incy);
   /* Intialization of w and z */
   /*if(initmethod == 0) {*/
   /* dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );*/
@@ -121,15 +122,15 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   qs   = -1.0;
 
-  DCOPY(n , q , incx , w , incy);
+  cblas_dcopy(n , q , incx , w , incy);
 
   while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
-    DCOPY(n , w , incx , ww , incy);   /* w --> ww */
-    DCOPY(n , q , incx , w , incy);    /* q --> w */
+    cblas_dcopy(n , w , incx , ww , incy);   /* w --> ww */
+    cblas_dcopy(n , q , incx , w , incy);    /* q --> w */
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -141,7 +142,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*       if( zi < 0 ) z[i] = 0.0;  */
       /*       else z[i] = zi; */
 
-      z[i] = fmax(0.0, -(q[i] + DDOT(n , &M[i] , incxn , z , incy)) * diag[i]);
+      z[i] = fmax(0.0, -(q[i] + cblas_ddot(n , &M[i] , incxn , z , incy)) * diag[i]);
 
     }
 

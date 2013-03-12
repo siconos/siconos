@@ -19,10 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
 #include "LCP_Solvers.h"
-
+#include "SiconosLapack.h"
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
 static unsigned long  int sNbCase = 0;
@@ -139,7 +138,7 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
     LWORK = -1;
     int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
+    //DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;
     LWORK = (int) dgelsSize;
   }
@@ -219,7 +218,6 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     /*       printCurrentSystem(); */
     if (useDGELS)
     {
-      double * DgelsWork = options->dWork + 3 * (problem->size) + (problem->size) * (problem->size);
       /* if (verbose) */
       /*   { */
       /*     printf("call dgels on ||AX-B||\n"); */
@@ -229,8 +227,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*     displayMat(sQ,sSize,1,0); */
       /*   } */
 
-      DGELS(sSize, sSize, NRHS, sM, sSize, sQ, sSize, DgelsWork, LWORK,
-            &LAinfo);
+      DGELS(LA_NOTRANS,sSize, sSize, NRHS, sM, sSize, sQ, sSize,&LAinfo);
       if (verbose)
       {
         printf("Solution of dgels (info=%i)\n", LAinfo);

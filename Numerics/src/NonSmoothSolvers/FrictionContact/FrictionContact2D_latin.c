@@ -22,9 +22,9 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
-#include "FrictionContact2D_Solvers.h"
 
+#include "FrictionContact2D_Solvers.h"
+#include "SiconosLapack.h"
 void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
@@ -315,28 +315,28 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
     alpha  = 1.;
     beta   = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, zc, incx, beta, wc, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, zc, incx, beta, wc, incy);
 
-    DCOPY(n, qq, incx, znum1, incy);
+    cblas_dcopy(n, qq, incx, znum1, incy);
 
     alpha = -1.;
-    DSCAL(n , alpha , znum1 , incx);
+    cblas_dscal(n , alpha , znum1 , incx);
 
     alpha = 1.;
-    DAXPY(n, alpha, wc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info77);
 
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, &info77);
 
-    DCOPY(n, znum1, incx, reaction, incy);
+    cblas_dcopy(n, znum1, incx, reaction, incy);
 
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, reaction, incx, beta, wc, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, reaction, incx, beta, wc, incy);
 
-    DCOPY(n, wc, incx, velocity, incy);
+    cblas_dcopy(n, wc, incx, velocity, incy);
 
 
 
@@ -447,49 +447,49 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
 
 
-    DCOPY(n, reaction, incx, znum1, incy);
+    cblas_dcopy(n, reaction, incx, znum1, incy);
 
     alpha = -1.;
-    DAXPY(n, alpha, zc, incx, znum1, incy);
+    cblas_daxpy(n, alpha, zc, incx, znum1, incy);
 
-    DCOPY(n, velocity, incx, wnum1, incy);
+    cblas_dcopy(n, velocity, incx, wnum1, incy);
 
-    DAXPY(n, alpha, wc, incx, wnum1, incy);
+    cblas_daxpy(n, alpha, wc, incx, wnum1, incy);
 
     alpha  = 1.;
     beta   = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kf, n, wnum1, incx, beta, znum1, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kf, n, wnum1, incx, beta, znum1, incy);
 
     num11  = 0.;
     alpha  = 1.;
     beta = 0.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
 
-    num11 = DDOT(n, wnum1, incx, znum1, incy);
+    num11 = cblas_ddot(n, wnum1, incx, znum1, incy);
 
-    DCOPY(n, reaction, incx, znum1, incy);
-
-    alpha  = 1.;
-    beta   = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kf, n, velocity, incx, beta, znum1, incy);
-
-    alpha  = 1.;
-    beta   = 0.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
-
-    den11  = DDOT(n, wnum1, incx, znum1, incy);
-
-    DCOPY(n, zc, incx, znum1, incy);
+    cblas_dcopy(n, reaction, incx, znum1, incy);
 
     alpha  = 1.;
     beta   = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kf, n, wc, incx, beta, znum1, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kf, n, velocity, incx, beta, znum1, incy);
 
     alpha  = 1.;
     beta   = 0.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
 
-    den22  = DDOT(n, znum1, incx, wnum1, incy);
+    den11  = cblas_ddot(n, wnum1, incx, znum1, incy);
+
+    cblas_dcopy(n, zc, incx, znum1, incy);
+
+    alpha  = 1.;
+    beta   = 1.;
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kf, n, wc, incx, beta, znum1, incy);
+
+    alpha  = 1.;
+    beta   = 0.;
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
+
+    den22  = cblas_ddot(n, znum1, incx, wnum1, incy);
 
     err0   = num11 / (den11 + den22);
 

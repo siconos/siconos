@@ -17,11 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#include "LA.h"
+
 #include "NumericsOptions.h" // for global options
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "projectionOnCone.h"
+#include "SiconosLapack.h"
 #include <math.h>
 #include <assert.h>
 extern int *Global_ipiv;
@@ -46,7 +47,7 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
 
   double* qtmp = (double*)malloc(n * sizeof(double));
   double* globalVelocitytmp = (double*)malloc(n * sizeof(double));
-  DCOPY(n, q, 1, qtmp, 1);
+  cblas_dcopy(n, q, 1, qtmp, 1);
 
   double alpha = 1.0;
   double beta = 1.0;
@@ -66,22 +67,18 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   else if (M->storageType == 0)
   {
     int infoDGETRS = -1;
-    DCOPY(n, qtmp, 1, globalVelocitytmp, 1);
+    cblas_dcopy(n, qtmp, 1, globalVelocitytmp, 1);
     assert(Global_MisLU);
-#ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, infoDGETRS);
-#else
     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, globalVelocitytmp , n, &infoDGETRS);
-#endif
     assert(!infoDGETRS);
   }
 
-  DAXPY(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
-  *error =   DNRM2(n , globalVelocitytmp , 1);
+  cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
+  *error =   cblas_dnrm2(n , globalVelocitytmp , 1);
   free(qtmp);
   free(globalVelocitytmp);
 
-  DCOPY(m, problem->b, 1, velocity, 1);
+  cblas_dcopy(m, problem->b, 1, velocity, 1);
   if (H->storageType == 1)
   {
     beta = 1.0;
@@ -93,7 +90,7 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   }
   else if (H->storageType == 0)
   {
-    DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, globalVelocity , 1, 1.0, velocity, 1);
   }
 
 
@@ -116,7 +113,7 @@ int GlobalFrictionContact3D_compute_error(GlobalFrictionContactProblem* problem,
   /*   *error = sqrt(*error); */
 
   /* Computes error */
-  double normq = DNRM2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , incx);
   *error = *error / (normq + 1.0);
 
   if (*error > tolerance)

@@ -20,7 +20,8 @@
 #include "NCP_Path.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
-#include "LA.h"
+#include "SiconosBlas.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "Friction_cst.h"
@@ -50,7 +51,7 @@ int F_GlockerPath(int sizeF, double* reaction, double* FVector)
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
-  DCOPY(sizeF , FGlocker , 1, FVector , 1);
+  cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
   FGlocker = NULL;
   return 1;
 }

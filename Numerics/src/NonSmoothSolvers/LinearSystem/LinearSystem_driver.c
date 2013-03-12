@@ -23,7 +23,7 @@
 #include <math.h>
 #include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
-#include "LA.h"
+#include "SiconosLapack.h"
 static int LWORK = 0;
 int SICONOS_LS_0 = 0;
 //#define LINEARSYSTEM_DEBUG
@@ -41,8 +41,8 @@ double LinearSystem_computeError(LinearSystemProblem* problem, double *z)
   int n = problem->size;
   double * res = (double*)malloc(n * sizeof(double));
   memcpy(res, pQ, n * sizeof(double));
-  DGEMV(LA_NOTRANS, n, n, 1.0, pM, n, z, 1, 1.0, res, 1);
-  error = DNRM2(n, res, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, 1.0, pM, n, z, 1, 1.0, res, 1);
+  error = cblas_dnrm2(n, res, 1);
   free(res);
   return error;
 
@@ -88,9 +88,8 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 
   printf("LinearSystem : solveLeastSquareProblem LWORK is :%d\n", LWORK);
 
-  double * dgelsWork = Maux + n2;
 
-  DGELS(n, n, 1, Maux, n, z, n, dgelsWork, LWORK, &LAinfo);
+  DGELS(LA_NOTRANS,n, n, 1, Maux, n, z, n, &LAinfo);
   if (LAinfo)
   {
     printf("LinearSystem_driver: DGELS  failed:\n");
@@ -127,7 +126,7 @@ int LinearSystem_getNbDwork(LinearSystemProblem* problem, SolverOptions* options
     LWORK = -1;
     int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, &info);
+    //DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;
     LWORK = (int) dgelsSize;
   }

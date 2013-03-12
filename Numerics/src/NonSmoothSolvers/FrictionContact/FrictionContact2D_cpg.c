@@ -18,8 +18,9 @@
  */
 
 #include "FrictionContact2D_Solvers.h"
-#include "LA.h"
+
 #include <math.h>
+#include "SiconosBlas.h"
 
 void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
@@ -87,12 +88,12 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
 
 
 
-  DCOPY(n, problem->q, incx, r, incy);
+  cblas_dcopy(n, problem->q, incx, r, incy);
 
   alphaf = -1.;
   betaf  = -1.;
 
-  DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
 
 
 
@@ -141,20 +142,20 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
       statusi[i] = stat[i];
 
 
-    DCOPY(n, r, incx, v, incy);
+    cblas_dcopy(n, r, incx, v, incy);
 
     if (iter == 0)
     {
-      DCOPY(n, r, incx, w, incy);
+      cblas_dcopy(n, r, incx, w, incy);
 
-      DCOPY(n, w, incx, p, incy);
+      cblas_dcopy(n, w, incx, p, incy);
     }
 
     alphaf = 1.0;
     betaf  = 0.0;
-    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, p, incx, betaf, Ap, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alphaf, vec, n, p, incx, betaf, Ap, incy);
 
-    pAp    = DDOT(n, p, incx, Ap, incy);
+    pAp    = cblas_ddot(n, p, incx, Ap, incy);
 
     /*}
     else
@@ -189,39 +190,39 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
 
     /*} */
 
-    rp     = DDOT(n, r, incx, p, incy);
+    rp     = cblas_ddot(n, r, incx, p, incy);
 
     alpha  = rp / pAp;
 
-    DCOPY(n, reaction, incx, xi, incy);
+    cblas_dcopy(n, reaction, incx, xi, incy);
 
     alphaf = alpha;
-    DAXPY(n, alphaf, p, incx, xi, incy);
+    cblas_daxpy(n, alphaf, p, incx, xi, incy);
 
     FrictionContact2D_projc(xi, &n, statusi, p, fric, reaction, stat);
 
 
     /*         r(:)=b(:)-matmul(A,x)          */
 
-    DCOPY(n, problem->q, incx, r, incy);
+    cblas_dcopy(n, problem->q, incx, r, incy);
 
     alphaf = -1.;
     betaf  = -1.;
-    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
 
     FrictionContact2D_projf(statusi, &n, r, fric, w);
 
     FrictionContact2D_projf(statusi, &n, p, fric, z);
 
 
-    wAp    = DDOT(n, w, incx, Ap, incy);
+    wAp    = cblas_ddot(n, w, incx, Ap, incy);
 
     beta   = - wAp / pAp;
 
-    DCOPY(n, w, incx, p, incy);
+    cblas_dcopy(n, w, incx, p, incy);
 
     alphaf  = beta;
-    DAXPY(n, alphaf, z, incx, p, incy);
+    cblas_daxpy(n, alphaf, z, incx, p, incy);
 
 
     /*  alphaf  = 1.;
@@ -230,14 +231,14 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
 
     pAp     = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
-    DCOPY(n, r, incx, xi, incy);
+    cblas_dcopy(n, r, incx, xi, incy);
 
     alphaf  = -1.;
-    DAXPY(n, alphaf, v, incx, xi, incy);
+    cblas_daxpy(n, alphaf, v, incx, xi, incy);
 
-    num     = DDOT(n, xi, incx, xi, incy);
+    num     = cblas_ddot(n, xi, incx, xi, incy);
 
-    den     = DDOT(n, v, incx, v, incy);
+    den     = cblas_ddot(n, v, incx, v, incy);
 
     normr   = sqrt(num / den);
 
@@ -276,9 +277,9 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
 
 
   alpha = -1.;
-  DSCAL(n , alpha , r , incx);
+  cblas_dscal(n , alpha , r , incx);
 
-  DCOPY(n, r, incx, velocity, incy);
+  cblas_dcopy(n, r, incx, velocity, incy);
 
 
 

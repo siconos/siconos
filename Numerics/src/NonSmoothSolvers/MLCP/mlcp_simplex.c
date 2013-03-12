@@ -29,7 +29,6 @@ dim(v)=nn
 #include <stdlib.h>
 #include <string.h>
 #include "NumericsConfig.h"
-#include "LA.h"
 #include "MLCP_Solvers.h"
 #include <math.h>
 

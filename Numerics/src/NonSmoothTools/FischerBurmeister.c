@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -47,7 +47,7 @@ void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* j
   }
 
   /* jacobianPhiMatrix is initialized with jacobianF */
-  DCOPY(size * size, jacobianF, 1, jacobianPhiMatrix, 1);
+  cblas_dcopy(size * size, jacobianF, 1, jacobianPhiMatrix, 1);
 
   double ri, ai, bi;
   int i;
@@ -67,7 +67,7 @@ void jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* j
     /* jacobianPhiMatrix_ij = delta_ij*ai + bi * jacobianF_ij
        delta_ij being the Kronecker symbol
     */
-    DSCAL(size, bi, &jacobianPhiMatrix[i], size);
+    cblas_dscal(size, bi, &jacobianPhiMatrix[i], size);
     jacobianPhiMatrix[i * size + i] += ai;
   }
 }
@@ -104,7 +104,7 @@ void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double
   }
 
   /* jacobianPhiMatrix is initialized with jacobianF */
-  DCOPY((sizeEq + sizeIneq) * (sizeEq + sizeIneq), jacobianF, 1, jacobianPhiMatrix, 1);
+  cblas_dcopy((sizeEq + sizeIneq) * (sizeEq + sizeIneq), jacobianF, 1, jacobianPhiMatrix, 1);
 
   double ri, ai, bi;
   int i;
@@ -124,9 +124,9 @@ void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double
     /* jacobianPhiMatrix_ij = delta_ij*ai + bi * jacobianF_ij
        delta_ij being the Kronecker symbol
     */
-    /*        DSCAL(size, bi, &jacobianPhiMatrix[i], size);*/
+    /*        cblas_dscal(size, bi, &jacobianPhiMatrix[i], size);*/
 
-    DSCAL(sizeEq + sizeIneq, bi, &jacobianPhiMatrix[i], sizeEq + sizeIneq);
+    cblas_dscal(sizeEq + sizeIneq, bi, &jacobianPhiMatrix[i], sizeEq + sizeIneq);
     jacobianPhiMatrix[i * (sizeEq + sizeIneq) + i] += ai;
   }
 }

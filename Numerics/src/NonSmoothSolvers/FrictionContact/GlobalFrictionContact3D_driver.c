@@ -164,7 +164,7 @@ int globalFrictionContact3D_driver(GlobalFrictionContactProblem* problem, double
 int checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
 {
   /* norm of vector q */
-  /*   double qs = DNRM2( n , q , 1 ); */
+  /*   double qs = cblas_dnrm2( n , q , 1 ); */
   /*   int i; */
   int info = -1;
   /*   if( qs <= DBL_EPSILON )  */

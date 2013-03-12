@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NumericsMatrix.h"
-#include "LA.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
 #include "SparseMatrix.h"

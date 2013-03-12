@@ -1,6 +1,6 @@
 #define _BSD_SOURCE
 
-#include "LA.h"
+
 #include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>

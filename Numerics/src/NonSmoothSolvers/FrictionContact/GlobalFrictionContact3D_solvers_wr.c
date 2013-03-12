@@ -23,7 +23,7 @@
 #include <float.h>
 #include <assert.h>
 
-#include "LA.h"
+#include "SiconosLapack.h"
 #include "NumericsOptions.h"
 #include "GlobalFrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
@@ -76,17 +76,14 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     double *Htmp = (double*)malloc(nm * sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
-    DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
+    cblas_dcopy(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
     Global_MisLU = 0; /*  Assume that M is not already LU */
     DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
     assert(!infoDGETRF);
     Global_MisLU = 1;
-#ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, infoDGETRS);
-#else
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, &infoDGETRS);
-#endif
+
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
@@ -109,30 +106,26 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
 
 
-    DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
-    /*     DGEMM(LA_TRANS,LA_NOTRANS,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
+    cblas_dgemm(CblasColMajor,CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
+    /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
 
     // compute localq = H^T M^(-1) q +b
 
     //Copy localq <- b
     localproblem->q = (double*)malloc(m * sizeof(double));
-    DCOPY(m, problem->b , 1, localproblem->q, 1);
+    cblas_dcopy(m, problem->b , 1, localproblem->q, 1);
 
     double* qtmp = (double*)malloc(n * sizeof(double));
-    DCOPY(n,  problem->q, 1, qtmp, 1);
+    cblas_dcopy(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
 
     assert(Global_MisLU);
-#ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, infoDGETRS);
-#else
     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, &infoDGETRS);
-#endif
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
 
-    DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
     // Copy mu
     localproblem->mu = problem->mu;
 
@@ -294,7 +287,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     localproblem->q = (double*)malloc(m * sizeof(double));
     //Copy q<- b
-    DCOPY(m, problem->b  , 1, localproblem->q, 1);
+    cblas_dcopy(m, problem->b  , 1, localproblem->q, 1);
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) qtmp[i] = 0.0;
@@ -331,18 +324,15 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     /* Compute globalVelocity   <- H reaction + q*/
 
     /* globalVelocity <- problem->q */
-    DCOPY(n,  problem->q , 1, globalVelocity, 1);
+    cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
     /* globalVelocity <-  H*reaction + globalVelocity*/
-    DGEMV(LA_NOTRANS, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
     assert(Global_ipiv);
     assert(Global_MisLU);
     int infoDGETRS = 0;
-#ifdef USE_MKL
-    DGETRS(CLA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, infoDGETRS);
-#else
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
-#endif
+
     assert(!infoDGETRS);
 
     free(Global_ipiv);
@@ -361,7 +351,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     double alpha = 1.0;
     double beta = 1.0;
 
-    DCOPY(n,  problem->q , 1, qtmp, 1);
+    cblas_dcopy(n,  problem->q , 1, qtmp, 1);
     prodSBM(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
     /* Compute global velocity = M^(-1) qtmp*/
 

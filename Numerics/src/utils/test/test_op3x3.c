@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <LA.h>
+#include "SiconosLapack.h"
 #include <assert.h>
 
 #define TIMER_FFTW_CYCLE
@@ -65,7 +65,8 @@ int main()
 
   START_TIMER(t1);
   for (i = 0; i < 1000000; ++i)
-    DAXPY(9, 1., a, 1, b, 1);
+    cblas_daxpy(9, 1., a, 1, b, 1);
+//    DAXPY(9, 1., a, 1, b, 1);
   STOP_TIMER(t1);
   PRINT_ELAPSED(t1);
 
@@ -94,7 +95,9 @@ int main()
   START_TIMER(t3);
   for (i = 0; i < 1000000; ++i)
   {
-    DGEMM(LA_NOTRANS, LA_NOTRANS, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
+    //DGEMM(CblasNoTrans, CblasNoTrans, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
+    cblas_dgemm (CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 3, 3, 1.0, a, 3, b, 3, 1.0, c, 3);
+     
   }
   STOP_TIMER(t3);
   PRINT_ELAPSED(t3);
@@ -171,6 +174,7 @@ int main()
   {
     cpy3(v, x);
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
+    printf("info is ...%i \n ", info);
     v[0] += 0.0001;
   }
   STOP_TIMER(t6);
@@ -262,7 +266,7 @@ int main()
     cpy3(B + 3 * i, x);
 
     cpy3x3(A + 9 * i, a);
-
+    
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
 
     if (! info)

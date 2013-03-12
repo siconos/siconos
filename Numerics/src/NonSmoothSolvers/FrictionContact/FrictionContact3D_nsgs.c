@@ -23,7 +23,7 @@
 #include "FrictionContact3D_unitary_enumerative.h"
 #include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"
-#include "LA.h"
+#include "SiconosBlas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -212,9 +212,9 @@ void frictionContact3D_nsgs_computeqLocal(FrictionContactProblem * problem, Fric
   {
     double * MM = problem->M->matrix0;
     int incx = n, incy = 1;
-    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
-    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
-    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
+    qLocal[0] += cblas_ddot(n , &MM[in] , incx , reaction , incy);
+    qLocal[1] += cblas_ddot(n , &MM[it] , incx , reaction , incy);
+    qLocal[2] += cblas_ddot(n , &MM[is] , incx , reaction , incy);
   }
   else if (problem->M->storageType == 1)
   {
@@ -350,7 +350,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
       double reactionold[3];
       ++iter;
       /* Loop through the contact points */
-      //DCOPY( n , q , incx , velocity , incy );
+      //cblas_dcopy( n , q , incx , velocity , incy );
       error = 0.0;
 
       for (contact = 0 ; contact < nc ; ++contact)
@@ -397,7 +397,7 @@ void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, d
     {
       ++iter;
       /* Loop through the contact points */
-      //DCOPY( n , q , incx , velocity , incy );
+      //cblas_dcopy( n , q , incx , velocity , incy );
       for (contact = 0 ; contact < nc ; ++contact)
       {
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);

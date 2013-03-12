@@ -19,10 +19,12 @@
 #include "projectionOnCone.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "LA.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "SiconosBlas.h"
+
 
 
 void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -87,8 +89,8 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
   {
     ++iter;
 
-    DCOPY(n , q , 1 , velocitytmp, 1);
-    if (isVariable)   DCOPY(n , reaction , 1 , work1tmp, 1);
+    cblas_dcopy(n , q , 1 , velocitytmp, 1);
+    if (isVariable)   cblas_dcopy(n , reaction , 1 , work1tmp, 1);
     beta = 1.0;
     prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
     // projection for each contact
@@ -105,15 +107,15 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double
     // Compute new rho if variable
     if (isVariable)
     {
-      DCOPY(n , work1tmp , 1 , direction , 1);
-      DSCAL(n, -1.0, direction, 1);
-      DAXPY(n, 1.0, reaction, 1, direction , 1) ;  // warning compyte -d and not d
+      cblas_dcopy(n , work1tmp , 1 , direction , 1);
+      cblas_dscal(n, -1.0, direction, 1);
+      cblas_daxpy(n, 1.0, reaction, 1, direction , 1) ;  // warning compyte -d and not d
       beta = 0.0;
-      double alpha1 = DNRM2(n, direction, 1);
+      double alpha1 = cblas_dnrm2(n, direction, 1);
       /*    prodNumericsMatrix(n,n, alpha, M, direction, beta,work1tmp ); */
-      /*    double alpha2=DDOT(n,direction,1,work1tmp,1); */
+      /*    double alpha2=cblas_ddot(n,direction,1,work1tmp,1); */
       prodNumericsMatrix(n, n, alpha, M, work2tmp, beta, work2tmp);
-      double alpha3 = DDOT(n, direction, 1, work2tmp, 1);
+      double alpha3 = cblas_ddot(n, direction, 1, work2tmp, 1);
 
       /*    if (alpha2 < 1e-7*alpha1) */
       /*        rho= rhomax; */

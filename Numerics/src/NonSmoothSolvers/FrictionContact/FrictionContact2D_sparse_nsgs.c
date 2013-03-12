@@ -26,7 +26,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-#include "LA.h"
+
 #include "FrictionContact2D_compute_error.h"
 
 

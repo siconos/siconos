@@ -22,7 +22,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LA.h"
+
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include <assert.h>

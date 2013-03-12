@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "LA.h"
+
 #include "NumericsOptions.h"
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"

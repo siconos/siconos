@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "LA.h"
+
 #include "NumericsOptions.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"

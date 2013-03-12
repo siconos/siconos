@@ -27,12 +27,13 @@
 
 */
 
-#include "LA.h"
+
 #include "FrictionContact3D_Solvers.h"
 #include "NumericsOptions.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "SiconosBlas.h"
 
 /*Static variables */
 
@@ -74,7 +75,7 @@ static double mu_i = 0.0;
 static double e3[2];
 static double IpInv[4];
 static double IpInvTranspose[4];
-static double I[4];
+static double Igloc[4];
 # define PI 3.14159265358979323846 /* pi */
 
 void computeE(unsigned int i, double* e)
@@ -183,7 +184,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-    /*     DCOPY(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
+    /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }
   else
     numericsError("FrictionContact3D2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
@@ -224,10 +225,10 @@ void NCPGlocker_initialize(FrictionContactProblem* problem, FrictionContactProbl
   IpInvTranspose[3] =  1.;
 
   /* I = IpInv * IpInvTranspose */
-  I[0] = 4.0 / 3;
-  I[1] = 2.0 / 3;
-  I[2] = 2.0 / 3;
-  I[3] = 4.0 / 3;
+  Igloc[0] = 4.0 / 3;
+  Igloc[1] = 2.0 / 3;
+  Igloc[2] = 2.0 / 3;
+  Igloc[3] = 4.0 / 3;
 
 }
 
@@ -297,7 +298,7 @@ void computeJacobianGGlocker()
   /* row 1 */
 
   // === jacobianFGlocker = MGlocker + jacobian_r g(r) ===
-  DCOPY(Gsize * Gsize, MGlocker, 1, jacobianFGlocker, 1);
+  cblas_dcopy(Gsize * Gsize, MGlocker, 1, jacobianFGlocker, 1);
 
   double muR0 = 4.*mu_i * reactionGlocker[0];
   jacobianFGlocker[1]  -= 4.*mu_i * reactionGlocker[4];
@@ -344,7 +345,7 @@ void computeFGlocker(double** FOut, int up2Date)
   /* At this point, FGlocker = gGlocker + qGlocker */
   /* and jacobianFGlocker contains MGlocker */
   /* F = M.reaction + g(reaction) + q */
-  DGEMV(LA_NOTRANS, Gsize, Gsize, 1.0, MGlocker, Gsize, reactionGlocker, 1, 1.0, FGlocker, 1);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, Gsize, Gsize, 1.0, MGlocker, Gsize, reactionGlocker, 1, 1.0, FGlocker, 1);
   *FOut = FGlocker; /* pointer link */
 }
 

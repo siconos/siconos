@@ -16,8 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-
-#include "LA.h"
+#include "SiconosBlas.h"
 #include "NumericsOptions.h" // for global options
 #include "LinearComplementarityProblem.h"
 void lcp_compute_error_only(int n, double *z , double *w, double * error)
@@ -49,9 +48,9 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int n = problem->size;
-  DCOPY(n , problem->q , incx , w , incy);  // w <-q
+  cblas_dcopy(n , problem->q , incx , w , incy);  // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
-  double normq = DNRM2(n , problem->q , incx);
+  double normq = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
   *error = *error / (normq + 1.0);
   if (*error > tolerance)

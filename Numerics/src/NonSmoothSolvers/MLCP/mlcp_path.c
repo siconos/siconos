@@ -16,7 +16,6 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
-#include "LA.h"
 #include "NumericsConfig.h"
 #include "MLCP_Solvers.h"
 #include <stdio.h>

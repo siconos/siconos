@@ -21,11 +21,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "LA.h"
+#include "SiconosLapack.h"
 
 double cond(double * A, int n, int m)
 {
-#ifdef COMPLETE_LAPACK_LIBRARIES
+//#ifdef COMPLETE_LAPACK_LIBRARIES
   int dimS = n;
   if (m < n) dimS = m;
   double * S =  malloc(dimS * sizeof(*S));
@@ -41,21 +41,21 @@ double cond(double * A, int n, int m)
   memcpy(Atmp, A, size);
 
   int InfoDGSVD = -1;
-#ifdef USE_MKL
-  double superb[min(m, n) - 1];
-  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, 0, InfoDGSVD);
 
-#else
-  int LWORK = -1;
-  double * WORK;
-  WORK = malloc(sizeof(*WORK));
-  assert(WORK);
-  DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-  LWORK = (int)(WORK[0]);
-  WORK = realloc(WORK, LWORK * sizeof * WORK);
-  DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-  free(WORK);
-#endif
+  double superb[min(m, n) - 1];
+  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
+
+/* #else */
+/*   int LWORK = -1; */
+/*   double * WORK; */
+/*   WORK = malloc(sizeof(*WORK)); */
+/*   assert(WORK); */
+/*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
+/*   LWORK = (int)(WORK[0]); */
+/*   WORK = realloc(WORK, LWORK * sizeof * WORK); */
+/*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
+/*   free(WORK); */
+/* #endif */
 
   printf("SVD of A :\n ");
   printf("[\t ");
@@ -72,9 +72,9 @@ double cond(double * A, int n, int m)
   free(S);
 
   return conditioning;
-#else
-  fprintf(stderr, "Numerics. cond.c dgesvd not found\n");
-  return 0.0;
-#endif
+/* #else */
+/*   fprintf(stderr, "Numerics. cond.c dgesvd not found\n"); */
+/*   return 0.0; */
+/* #endif */
 
 }

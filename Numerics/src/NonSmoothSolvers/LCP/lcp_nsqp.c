@@ -124,7 +124,7 @@ void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *
   /* / call ql0001_*/
   /*   F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu, */
   /*    z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol); */
-  F77NAME(ql0001)(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
+  CNAME(ql0001)(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
                   z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
 
   /* /    printf("tol = %10.4e\n",*tol);

@@ -28,13 +28,12 @@ dim(v)=nn
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include "MLCP_Solvers.h"
 #include "mlcp_tool.h"
 #include <math.h>
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
-
+#include "SiconosLapack.h"
 //#ifdef HAVE_DGELS
 //#define ENUM_USE_DGELS
 //#endif
@@ -154,12 +153,12 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
   if (options->iparam[4])
   {
     LWORK = -1;
-    int info = 0;
+    //int info = 0;
     double dgelsSize = 0;
-    DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
+    //DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     LWORK = (int) dgelsSize;
   }
-  return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
+  return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0); 
 }
 
 /*
@@ -238,8 +237,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       printCurrentSystem();
     if (useDGELS)
     {
-      DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-            &LAinfo);
+      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl, &LAinfo);
       if (verbose)
       {
         printf("Solution of dgels\n");
@@ -271,7 +269,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
         if (sMl > npm)
         {
-          rest = DNRM2(sMl - npm, sQ + npm, 1);
+          rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
           if (rest > tol || isnan(rest) || isinf(rest))
           {
@@ -409,8 +407,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
       printCurrentSystem();
     if (useDGELS)
     {
-      DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
-            &LAinfo);
+      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl,&LAinfo);
       if (verbose)
       {
         printf("Solution of dgels\n");
@@ -442,7 +439,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
 
         if (sMl > npm)
         {
-          rest = DNRM2(sMl - npm, sQ + npm, 1);
+          rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
           if (rest > tol || isnan(rest) || isinf(rest))
           {
@@ -510,7 +507,7 @@ int mlcp_enum_alloc_working_memory(MixedLinearComplementarityProblem* problem, S
   if (options->iWork || options->dWork)
     return 0;
   options->iWork = (int *) malloc(mlcp_enum_getNbIWork(problem, options) * sizeof(int));
-  options->dWork = (double *) malloc(mlcp_enum_getNbDWork(problem, options) * sizeof(double));
+  options->dWork = (double *) malloc(mlcp_enum_getNbDWork(problem, options) * sizeof(double)); 
   return 1;
 }
 void mlcp_enum_free_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
