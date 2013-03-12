@@ -1,13 +1,31 @@
-# - Try to find Blas (including cblas) and a complete Lapack implementation.
+# - Try to find Blas (cblas) and a complete Lapack implementation.
 # Once done, this will define
 #
-#  BLAS_FOUND - system has FFTW
-#  BLAS_INCLUDE_DIRS - the directories  which contains (c)blas headers.
-#  BLAS_LIBRARIES - link these to use blas.
-#  
-#  The same for Lapack. 
+#  HAS_CBLAS - system has CBLAS
+#  BLAS_INCLUDE_DIRS - The directories  which contain cblas headers.
+#  BLAS_LIBRARIES - Link these to use cblas.
 #
-# Set BLAS_DIR=where_blas_is_installed if it's not in a "classic" place or if you want a specific version
+# Depending on the implementation of cblas, another var is set :
+# - HAS_MKL_CBLAS for mkl intel
+# - HAS_OpenBLAS for openblas (ex-goto)
+# - HAS_ACCELERATE for apple accelerate framework
+# - HAS_ATLAS_CBLAS for atlas cblas. 
+# 
+#  For Lapack, we set the following :
+#  LAPACK_INCLUDE_DIRS  - The directories which contain lapack headers.
+#  LAPACK_LIBRARIES - Link these to use lapack.
+# Depending on the implementation of cblas, another var is set :
+#  - HAS_MKL_LAPACKE for lapacke in mkl intel
+#  - HAS_ATLAS_LAPACK for (uncomplete) lapack from atlas
+#  - HAS_LAPACKE for any lapack distribution based on lapacke. See http://www.netlib.org/lapack/lapacke.html.
+#
+# User-defined options :
+# - USE_MKL to force mkl intel
+# - USE_ATLAS to force atlas
+# - USE_APPLE_FRAMEWORK to force apple framework
+# - USE_OpenBLAS to force openblas
+# 
+# To find a specific (local) blas and/or lapack, set LD_LIBRARY_PATH (or equivalent) properly. 
 #
 # 
 # inspired from http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
@@ -24,10 +42,6 @@
 ## and if FuncName symbol is present in file Header. 
 # If both are true, result is true.
 function(check_lapack_has_function genericName FuncName Header result)
-#  message(STATUS "func name : ${FuncName}")
-#  message(STATUS "header name : ${Header}")
-#  message(STATUS "result name : ${result}")
-#  message(STATUS "genericName name : ${genericName}")
   
   check_function_exists(${FuncName} TEST_FUNC)
   check_symbol_exists(${FuncName} ${Header} TEST_HEAD)
@@ -38,19 +52,21 @@ function(check_lapack_has_function genericName FuncName Header result)
     
 endfunction()
 
-# === Blas ===
+#==================
+#    CBlas
+#==================
+# We set BLA_VENDOR = Generic as a default value to avoid BLA_VENDOR=All
+if(NOT BLA_VENDOR)
+  set(BLA_VENDOR Generic)
+endif()
+
 set(WITH_CBLAS 1)
-#if(USE_MKL)
-#  set(BLA_VENDOR Intel10_64lp_seq)
-#endif()
+
 if(USE_MKL)
   set(BLA_VENDOR Intel10_64lp_seq)
-  #set(BLA_F95 1)
   unset(WITH_CBLAS)
 elseif(USE_ATLAS)
   set(BLA_VENDOR ATLAS)
-elseif(USE_GOTO)
-  set(BLA_VENDOR Goto)
 elseif(USE_OpenBLAS)
   set(BLA_VENDOR OpenBLAS)
 elseif(USE_APPLE_FRAMEWORK)
@@ -78,6 +94,7 @@ if(BLAS_LIBRARIES MATCHES "mkl.*")
     set(BLAS_FOUND 1)
     set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+    set(BLA_VENDOR Intel10_64lp_seq)
   endif()
 ## --- Apple framework blas ---
 elseif(BLAS_LIBRARIES MATCHES "Accelerate.*")
@@ -94,6 +111,7 @@ elseif(BLAS_LIBRARIES MATCHES "Accelerate.*")
     set(BLAS_FOUND 1)
     set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+    set(BLA_VENDOR Apple)
   endif()
 
 ## --- Atlas blas ---
@@ -108,6 +126,7 @@ elseif(BLAS_LIBRARIES MATCHES "atlas.*")
     set(BLAS_FOUND 1)
     set(HAS_ATLAS_CBLAS 1 CACHE BOOL "Blas  comes from Atlas framework ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+    set(BLA_VENDOR ATLAS)
   endif()
 
 ## --- OpenBlas (ex-Goto) ---
@@ -122,7 +141,25 @@ elseif(BLAS_LIBRARIES MATCHES "openblas.*")
     set(BLAS_FOUND 1)
     set(HAS_OpenBLAS 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+    set(BLA_VENDOR OpenBLAS)
   endif()
+## - default case ##
+else()
+ find_path(BLAS_INCLUDE_DIRS
+    NAMES cblas.h
+    PATHS ${BLAS_DIR}/..
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH
+    )
+ find_path(BLAS_INCLUDE_DIRS
+    NAMES cblas.h
+    )
+  if(BLAS_INCLUDE_DIRS)
+    set(BLAS_FOUND 1)
+    set(HAS_GenericCBLAS 1 CACHE BOOL "Blas is available from an unknown version.")
+    set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+  endif()
+  
 endif()
 
 include_directories(${BLAS_INCLUDE_DIRS})
@@ -133,17 +170,19 @@ message(STATUS "Blas linker flags : ${BLAS_LINKER_FLAGS}")
 message(STATUS "Blas found : ${BLAS_FOUND}")
 message(STATUS "Blas Vendor : ${BLA_VENDOR}")
 
-# === Lapack ===
+#==================
+#    Lapack
+#==================
 
 # Warning FP : if Blas has been found in ATLAS (i.e. BLA_VENDOR==ATLAS from now on)
 # FindLAPACK won't necessary look into atlas directories to find liblapack. Any available 
 # lapack will be ok. 
 find_package(LAPACK REQUIRED)
 
+# Apple framework 
 if(HAS_ACCELERATE)
-  # if blas commes from accelerate, no need to check lapack headers,
-  # they are the same. 
-  #set(LAPACK_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS})
+  # Note that if blas commes from accelerate, the path to lapack headers
+  #  is the same as the one for blas headers.
   find_path(LAPACK_INCLUDE_DIRS
     NAMES clapack.h
     PATHS ${BLAS_INCLUDE_DIRS}
@@ -154,12 +193,13 @@ if(HAS_ACCELERATE)
   set(LAPACK_PREFIX)
 
 else()
-  #set(LAPACK_FOUND 1)
+  # Get location of blas header as hint to check for lapack headers.
   list(GET LAPACK_LIBRARIES 0 LAPACK_LIB)
   get_filename_component(LAPACK_DIR ${LAPACK_LIB} PATH)
   set(LAPACK_DIR ${LAPACK_DIR}/..)
 
   unset(LAPACK_FOUND)
+  # mkl intel 
   if(HAS_MKL_CBLAS)
     message(STATUS "Try to find lapack headers in mkl ...")
     find_path(LAPACK_INCLUDE_DIRS
@@ -179,12 +219,6 @@ else()
   # we can have openblas and lapack from atlas
   elseif(HAS_ATLAS_CBLAS OR (LAPACK_LIBRARIES MATCHES ".*atlas.*"))
     message("Try to find lapack headers in atlas ...")
-#    find_path(LAPACK_INCLUDE_DIRS
-#      NAMES lapacke.h
-#      PATHS ${LAPACK_DIR}
-#      PATH_SUFFIXES include include/atlas
-#      NO_DEFAULT_PATH
-#      )
     find_path(LAPACK_INCLUDE_DIRS
       NAMES clapack.h
       PATHS ${LAPACK_DIR}
@@ -227,6 +261,8 @@ message(STATUS "Lapack found : ${LAPACK_FOUND}")
 # === Check for lapack functions ===
 # We check only the functions that are known to be un-implemented
 # in some lapack libraries (namely atlas ...)
+# This is probably a temporary check since it's likely
+# we will stop atlas checking for lapack? 
 
 set(CMAKE_REQUIRED_LIBRARIES ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 set(CMAKE_REQUIRED_INCLUDES ${BLAS_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIRS})
