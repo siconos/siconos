@@ -40,8 +40,6 @@ BOOST_TYPEOF_REGISTER_TYPE(_SolverOptions);
 
 BOOST_TYPEOF_REGISTER_TYPE(LinearComplementarityProblem);
 
-\
-
 template <class Archive>
 void siconos_io(Archive& ar, InteractionsSet& v, unsigned int)
 {

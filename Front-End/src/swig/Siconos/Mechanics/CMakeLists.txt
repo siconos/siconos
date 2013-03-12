@@ -4,7 +4,12 @@ SET_SOURCE_FILES_PROPERTIES(joints.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(bodies.i 
   PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-I${CMAKE_CURRENT_BINARY_DIR}/..;-Wall")
 
+SET_SOURCE_FILES_PROPERTIES(joints.i 
+  PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-I${CMAKE_CURRENT_BINARY_DIR}/..;-Wall")
+
 SWIG_ADD_MODULE(bodies python bodies.i)
+SWIG_ADD_MODULE(joints python joints.i)
+
 SET(bodies_generated_file_fullname ${swig_generated_file_fullname})
 MESSAGE(STATUS "bodies generated files ${swig_generated_file_fullname}")
 ADD_DEPENDENCIES(${SWIG_MODULE_bodies_REAL_NAME} ${SWIG_MODULE_Kernel_REAL_NAME})

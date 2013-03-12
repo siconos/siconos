@@ -17,7 +17,7 @@
 
 %include pyRegister.i
 
-PY_REGISTER(Disk)
+PY_REGISTER(Disk);
 PY_REGISTER(Circle);
 PY_REGISTER(DiskDiskR);
 PY_REGISTER(DiskPlanR);

@@ -6,12 +6,7 @@
 
 %{
 #include <SiconosKernel.hpp>
-#include <KneeJointR.hpp>
-#include <PivotJointR.hpp>
-#include <PrismaticJointR.hpp>
 %}
-
-%include FrontEndConfig.h;
 
 // common declarations
 

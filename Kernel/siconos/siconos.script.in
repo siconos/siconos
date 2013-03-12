@@ -232,7 +232,7 @@ if test ! -d ${SICONOS_BUILD_DIR}; then
 fi
 
 cd ${SICONOS_BUILD_DIR} || { 
-    $myname: Cannot change directory to ${SICONOS_BUILD_DIR}
+    echo $myname: Cannot change directory to ${SICONOS_BUILD_DIR} >&2
     exit 1
 }
 
