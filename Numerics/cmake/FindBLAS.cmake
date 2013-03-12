@@ -40,6 +40,26 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+#
+# first, try PkgConfig, if BLA_VENDOR was not specified
+#
+if(NOT BLA_VENDOR)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(PC_BLAS blas)
+endif(NOT BLA_VENDOR)
+if(PC_BLAS_FOUND)
+  foreach(PC_LIB ${PC_BLAS_LIBRARIES})
+    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_BLAS_LIBRARY_DIRS} )
+    if (NOT ${PC_LIB}_LIBRARY)
+      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_BLAS_LIBRARY_DIRS}")
+    endif (NOT ${PC_LIB}_LIBRARY)
+    list(APPEND BLAS_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+  endforeach(PC_LIB)
+  find_package_handle_standard_args(BLAS DEFAULT_MSG BLAS_LIBRARIES)
+  mark_as_advanced(BLAS_LIBRARIES)
+else(PC_BLAS_FOUND)
+message(STATUS "No PkgConfig configuration for BLAS found; starting more extensive search.")
+
 include(CheckFunctionExists)
 include(CheckFortranFunctionExists)
 
@@ -624,3 +644,6 @@ else(BLA_F95)
 endif(BLA_F95)
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+
+endif(PC_BLAS_FOUND)
+

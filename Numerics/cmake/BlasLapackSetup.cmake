@@ -176,7 +176,8 @@ else()
       set(LAPACK_SUFFIX)
       set(LAPACK_PREFIX "LAPACKE_")
     endif()
-  elseif(HAS_ATLAS_CBLAS)
+  # we can have openblas and lapack from atlas
+  elseif(HAS_ATLAS_CBLAS OR (LAPACK_LIBRARIES MATCHES ".*atlas.*"))
     message("Try to find lapack headers in atlas ...")
 #    find_path(LAPACK_INCLUDE_DIRS
 #      NAMES lapacke.h

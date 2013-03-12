@@ -36,7 +36,23 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-
+#
+# first, try PkgConfig
+#
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PC_LAPACK lapack)
+if(PC_LAPACK_FOUND)
+  foreach(PC_LIB ${PC_LAPACK_LIBRARIES})
+    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_LAPACK_LIBRARY_DIRS} )
+    if (NOT ${PC_LIB}_LIBRARY)
+      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_LAPACK_LIBRARY_DIRS}")
+    endif (NOT ${PC_LIB}_LIBRARY)
+    list(APPEND LAPACK_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+  endforeach(PC_LIB)
+  find_package_handle_standard_args(LAPACK DEFAULT_MSG LAPACK_LIBRARIES)
+  mark_as_advanced(LAPACK_LIBRARIES)
+else(PC_LAPACK_FOUND)
+message(STATUS "No PkgConfig configuration for LAPACK found; starting more extensive search.")
 
 set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
@@ -366,3 +382,5 @@ else()
 endif()
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+
+endif(PC_LAPACK_FOUND)
