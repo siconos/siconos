@@ -77,9 +77,6 @@ include_directories(${BLAS_INCLUDE_DIRS})
 include_directories(${LAPACK_INCLUDE_DIRS})
 include_directories(src/utils/test)
 
-print_var(LAPACK_INCLUDE_DIRS)
-print_var(BLAS_INCLUDE_DIRS)
-
 COMPILE_WITH(PathFerris)
 COMPILE_WITH(MlcpSimplex)
 COMPILE_WITH(Pthread)

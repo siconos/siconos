@@ -1,6 +1,7 @@
+#ifndef NUMERICSCONFIG_H
+#define NUMERICSCONFIG_H
 #define WITH_CMAKE
 
-#cmakedefine HAVE_XERBLA
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
@@ -30,3 +31,4 @@
 #cmakedefine HAS_LAPACK_DGESVD
 #cmakedefine HAS_LAPACK_DTRTRS
 #cmakedefine HAS_LAPACK_DGELS
+#endif
