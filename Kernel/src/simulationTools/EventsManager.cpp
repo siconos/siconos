@@ -128,8 +128,15 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
     if (mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0) // the two are too close
     {
       sim.timeDiscretisation()->increment();
-      ev.setTime(sim.getTkp1());
-      insertEv(_events[j]);
+#if __cplusplus >= 201103L
+      if (!::isnan(sim.getTkp1()))
+#else
+        if (!isnan(sim.getTkp1()))
+#endif
+        {
+          ev.setTime(sim.getTkp1());
+          insertEv(_events[j]);
+        }
       _events.erase(_events.begin()+j);
       break;
     }
