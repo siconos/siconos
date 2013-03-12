@@ -111,8 +111,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
   const mpz_t *t1 = _eNonSmooth->getTimeOfEvent();
   unsigned int pos;
   pos = insertEv(_eNonSmooth);
-
-  // looking for a TD event close to the NS
+  // looking for a TD event close to the NS one.
   mpz_t delta_time;
   mpz_init(delta_time); // initialize delta_time
   for (unsigned int j = 1; j < _events.size(); j++)
@@ -120,14 +119,15 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
     if (j == pos)
       continue;
     Event& ev = *_events[j];
-    if (ev.getType() != TD_EVENT)
+    if (ev.getType() != TD_EVENT) // current event is not of type TD
       continue;
-    mpz_sub(delta_time, *ev.getTimeOfEvent(), *t1); // gap between the NSE and TDE
-    if (mpz_cmp_ui(delta_time, 0) < 0)
+    mpz_sub(delta_time, *ev.getTimeOfEvent(), *t1); // gap between the NS and TD events
+    if (mpz_cmp_ui(delta_time, 0) < 0) // ok
       continue;
     if (mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0) // the two are too close
     {
       sim.timeDiscretisation()->increment();
+      // reschedule the TD event only if its time instant is less than T
 #if __cplusplus >= 201103L
       if (!::isnan(sim.getTkp1()))
 #else
@@ -137,6 +137,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
           ev.setTime(sim.getTkp1());
           insertEv(_events[j]);
         }
+      // delete the TD event (that has to be done in all cases)
       _events.erase(_events.begin()+j);
       break;
     }
@@ -164,9 +165,12 @@ void EventsManager::update(Simulation& sim)
   // reschedule an TD event if needed
   if (event0Type == TD_EVENT)
   {
-
+    // this checks whether the next time instant is less than T or not
+    // it is isn't then tkp1 is a NaN, in which case we don't reschedule the event
+    // and the simulation will stop
+    // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectivly
+    // run until T
     double tkp1 = sim.getTkp1();
-
 #if __cplusplus >= 201103L
     if (!::isnan(tkp1))
 #else
