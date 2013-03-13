@@ -53,7 +53,7 @@ function(check_lapack_has_function genericName FuncName Header result)
 endfunction()
 
 #==================
-#    CBlas
+#    CBlas and Lapack
 #==================
 # We set BLA_VENDOR = Generic as a default value to avoid BLA_VENDOR=All
 if(NOT BLA_VENDOR)
@@ -63,21 +63,34 @@ endif()
 set(WITH_CBLAS 1)
 
 if(USE_MKL)
+ if(NOT BLA_VENDOR)
   set(BLA_VENDOR Intel10_64lp_seq)
+ endif()
   unset(WITH_CBLAS)
 elseif(USE_ATLAS)
   set(BLA_VENDOR ATLAS)
+  if(NOT LAPACK_VENDOR)
+    set(LAPACK_VENDOR "Generic")
+  endif()
 elseif(USE_OpenBLAS)
   set(BLA_VENDOR OpenBLAS)
+  if(NOT LAPACKE_VENDOR)
+    set(LAPACKE_VENDOR "Generic")
+  endif()
 elseif(USE_APPLE_FRAMEWORK)
   set(BLA_VENDOR Apple)
+  # TODO: LAPACK or LAPACKE
 endif()
 
-compile_with(BLAS REQUIRED)
+## this finds both BLAS and LAPACK
+find_package(LAPACK REQUIRED)
 
+#==================
+#    CBlas
+#==================
 list(GET BLAS_LIBRARIES 0 BLAS_LIB)
 get_filename_component(BLAS_DIR ${BLAS_LIB} PATH)
-set(BLAS_DIR ${BLAS_DIR})
+set(BLAS_DIR ${BLAS_DIR}/..)
 
 unset(BLAS_FOUND)
 ## --- mkl blas ---
@@ -94,7 +107,6 @@ if(BLAS_LIBRARIES MATCHES "mkl.*")
     set(BLAS_FOUND 1)
     set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
-    set(BLA_VENDOR Intel10_64lp_seq)
   endif()
 ## --- Apple framework blas ---
 elseif(BLAS_LIBRARIES MATCHES "Accelerate.*")
@@ -111,14 +123,13 @@ elseif(BLAS_LIBRARIES MATCHES "Accelerate.*")
     set(BLAS_FOUND 1)
     set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
-    set(BLA_VENDOR Apple)
   endif()
 
 ## --- Atlas blas ---
 elseif(BLAS_LIBRARIES MATCHES "atlas.*")
   find_path(BLAS_INCLUDE_DIRS
     NAMES cblas.h
-    PATHS ${BLAS_DIR}/..
+    PATHS ${BLAS_DIR}
     PATH_SUFFIXES include
     NO_DEFAULT_PATH
     )
@@ -126,28 +137,26 @@ elseif(BLAS_LIBRARIES MATCHES "atlas.*")
     set(BLAS_FOUND 1)
     set(HAS_ATLAS_CBLAS 1 CACHE BOOL "Blas  comes from Atlas framework ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
-    set(BLA_VENDOR ATLAS)
   endif()
 
 ## --- OpenBlas (ex-Goto) ---
 elseif(BLAS_LIBRARIES MATCHES "openblas.*")
   find_path(BLAS_INCLUDE_DIRS
     NAMES cblas.h
-    PATHS ${BLAS_DIR}/..
-    PATH_SUFFIXES include
+    PATHS ${BLAS_DIR}
+    PATH_SUFFIXES include/openblas include
     NO_DEFAULT_PATH
     )
   if(BLAS_INCLUDE_DIRS)
     set(BLAS_FOUND 1)
     set(HAS_OpenBLAS 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
     set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
-    set(BLA_VENDOR OpenBLAS)
   endif()
 ## - default case ##
 else()
  find_path(BLAS_INCLUDE_DIRS
     NAMES cblas.h
-    PATHS ${BLAS_DIR}/..
+    PATHS ${BLAS_DIR}
     PATH_SUFFIXES include
     NO_DEFAULT_PATH
     )
@@ -163,6 +172,7 @@ else()
 endif()
 
 include_directories(${BLAS_INCLUDE_DIRS})
+remember_link_libraries("${BLAS_LIBRARIES}")
 
 message(STATUS "Blas Libraries : ${BLAS_LIBRARIES}")
 message(STATUS "Blas include : ${BLAS_INCLUDE_DIRS}")
@@ -174,10 +184,6 @@ message(STATUS "Blas Vendor : ${BLA_VENDOR}")
 #    Lapack
 #==================
 
-# Warning FP : if Blas has been found in ATLAS (i.e. BLA_VENDOR==ATLAS from now on)
-# FindLAPACK won't necessary look into atlas directories to find liblapack. Any available 
-# lapack will be ok. 
-find_package(LAPACK REQUIRED)
 
 # Apple framework 
 if(HAS_ACCELERATE)
@@ -204,7 +210,7 @@ else()
     message(STATUS "Try to find lapack headers in mkl ...")
     find_path(LAPACK_INCLUDE_DIRS
       NAMES mkl_lapacke.h
-      PATHS ${LAPACK_DIR}
+      PATHS ${LAPACK_DIR}/..
       PATH_SUFFIXES include
       NO_DEFAULT_PATH
       )
@@ -217,7 +223,7 @@ else()
       set(LAPACK_PREFIX "LAPACKE_")
     endif()
   # we can have openblas and lapack from atlas
-  elseif(HAS_ATLAS_CBLAS OR (LAPACK_LIBRARIES MATCHES ".*atlas.*"))
+  elseif(HAS_ATLAS_CBLAS)
     message("Try to find lapack headers in atlas ...")
     find_path(LAPACK_INCLUDE_DIRS
       NAMES clapack.h
@@ -249,8 +255,8 @@ else()
   endif()
 endif()
 
-include_directories(${LAPACK_INCLUDE_DIRS})
-remember_link_libraries(${LAPACK_LIBRARIES})
+include_directories("${LAPACK_INCLUDE_DIRS}")
+remember_link_libraries("${LAPACK_LIBRARIES}")
 
 message(STATUS "Lapack Libraries : ${LAPACK_LIBRARIES}")
 message(STATUS "Lapack include : ${LAPACK_INCLUDE_DIRS}")

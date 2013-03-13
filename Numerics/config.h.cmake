@@ -20,7 +20,7 @@
 #cmakedefine HAS_MKL_CBLAS
 #cmakedefine HAS_ACCELERATE // includes also lapack from Accelerate
 #cmakedefine HAS_ATLAS_CBLAS 
-#cmakedefine HAS_OpenBlas // includes also lapacke from lapack/netlib
+#cmakedefine HAS_OpenBLAS // it *MAY* also includes lapacke or lapack from netlib
 #cmakedefine HAS_GenericCBLAS
 
 // Which Lapack? 

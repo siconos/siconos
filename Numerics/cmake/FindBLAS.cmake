@@ -43,10 +43,10 @@
 #
 # first, try PkgConfig, if BLA_VENDOR was not specified
 #
-if(NOT BLA_VENDOR)
+if(NOT BLA_VENDOR OR (BLA_VENDOR MATCHES "Generic"))
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(PC_BLAS blas)
-endif(NOT BLA_VENDOR)
+endif()
 if(PC_BLAS_FOUND)
   foreach(PC_LIB ${PC_BLAS_LIBRARIES})
     find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_BLAS_LIBRARY_DIRS} )
@@ -126,13 +126,14 @@ foreach(_library ${_list})
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
       endif ()
     endif ()
+    # TODO : merge the 2 ? -- xhub 
     find_library(${_prefix}_${_library}_LIBRARY
       NAMES ${_library}
       PATHS ENV LD_LIBRARY_PATH DYLD_LIBRARY_PATH
       )
     find_library(${_prefix}_${_library}_LIBRARY
       NAMES ${_library}
-      PATHS ${_libdir}
+      PATHS ENV LD_LIBRARY_PATH DYLD_LIBRARY_PATH ${_libdir}
       )
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
@@ -487,6 +488,19 @@ if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   )
  endif()
 endif ()
+
+if (BLA_VENDOR STREQUAL "Eigen" OR BLA_VENDOR STREQUAL "All")
+  if(NOT BLAS_LIBRARIES)
+    check_fortran_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "eigen_blas"
+      ""
+      )
+  endif(NOT BLAS_LIBRARIES)
+ endif (BLA_VENDOR STREQUAL "Eigen" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in intel mkl 10 library? (em64t 64bit)
 if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")

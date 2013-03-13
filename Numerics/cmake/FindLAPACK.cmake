@@ -39,8 +39,28 @@
 #
 # first, try PkgConfig
 #
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(PC_LAPACK lapack)
+if(NOT BLA_VENDOR OR (BLA_VENDOR MATCHES "Generic"))
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(PC_BLAS blas)
+  pkg_check_modules(PC_LAPACK lapack)
+elseif(LAPACK_VENDOR MATCHES "Generic")
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(PC_LAPACK lapack)
+elseif(LAPACKE_VENDOR MATCHES "Generic")
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(PC_LAPACK lapacke)
+endif()
+if(PC_BLAS_FOUND)
+  foreach(PC_LIB ${PC_BLAS_LIBRARIES})
+    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_BLAS_LIBRARY_DIRS} )
+    if (NOT ${PC_LIB}_LIBRARY)
+      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_BLAS_LIBRARY_DIRS}")
+    endif (NOT ${PC_LIB}_LIBRARY)
+    list(APPEND BLAS_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+  endforeach(PC_LIB)
+  find_package_handle_standard_args(BLAS DEFAULT_MSG BLAS_LIBRARIES)
+  mark_as_advanced(BLAS_LIBRARIES)
+endif(PC_BLAS_FOUND)
 if(PC_LAPACK_FOUND)
   foreach(PC_LIB ${PC_LAPACK_LIBRARIES})
     find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_LAPACK_LIBRARY_DIRS} )
@@ -51,7 +71,27 @@ if(PC_LAPACK_FOUND)
   endforeach(PC_LIB)
   find_package_handle_standard_args(LAPACK DEFAULT_MSG LAPACK_LIBRARIES)
   mark_as_advanced(LAPACK_LIBRARIES)
-else(PC_LAPACK_FOUND)
+  if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+    find_package(BLAS)
+  else()
+    find_package(BLAS REQUIRED)
+  endif()
+elseif(PC_LAPACKE_FOUND)
+ foreach(PC_LIB ${PC_LAPACKE_LIBRARIES})
+  find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_LAPACKE_LIBRARY_DIRS} )
+    if (NOT ${PC_LIB}_LIBRARY)
+     message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_LAPACKE_LIBRARY_DIRS}")
+    endif (NOT ${PC_LIB}_LIBRARY)
+    list(APPEND LAPACKE_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+  endforeach(PC_LIB)
+  find_package_handle_standard_args(LAPACKE DEFAULT_MSG LAPACKE_LIBRARIES)
+  mark_as_advanced(LAPACKE_LIBRARIES)
+  if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+    find_package(BLAS)
+  else()
+    find_package(BLAS REQUIRED)
+  endif()
+else()
 message(STATUS "No PkgConfig configuration for LAPACK found; starting more extensive search.")
 
 set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -106,7 +146,7 @@ foreach(_library ${_list})
         set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
       endif ()
     else ()
-			if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # for ubuntu's libblas3gf and liblapack3gf packages
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
       endif ()
@@ -118,7 +158,7 @@ foreach(_library ${_list})
       )
     find_library(${_prefix}_${_library}_LIBRARY
       NAMES ${_library}
-      PATHS ${_libdir}
+      PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH ${_libdir}
       )
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
@@ -158,12 +198,11 @@ set(LAPACK_LINKER_FLAGS)
 set(LAPACK_LIBRARIES)
 set(LAPACK95_LIBRARIES)
 
-### We suppose that Blas has been found.
-#if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-#  find_package(BLAS)
-#else()
-#  find_package(BLAS REQUIRED)
-#endif()
+if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+  find_package(BLAS)
+else()
+  find_package(BLAS REQUIRED)
+endif()
 
 if(BLAS_FOUND)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
@@ -178,14 +217,14 @@ if(BLAS_FOUND)
   if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
     if(NOT LAPACK_LIBRARIES)
       check_lapack_libraries(
-	LAPACK_LIBRARIES
-	LAPACK
-	cheev
-	""
-	"goto2"
-	"${BLAS_LIBRARIES}"
-	""
-	)
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "goto2"
+        "${BLAS_LIBRARIES}"
+        ""
+        )
     endif()
   endif ()
   # Modif Franck : add OpenBLAS
