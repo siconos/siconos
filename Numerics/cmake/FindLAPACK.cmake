@@ -336,6 +336,10 @@ if(NOT LAPACK_FOUND)
 	    NAMES ${LAPACKE_HEADER}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
+	  if(LAPACK_INCLUDE_DIRS)
+	    set(HAS_LAPACKE 1 CACHE BOOL "Lapacke interface is available.")
+	  endif()
+
 	endif() # if lapacke.h not needed or not found search for clapack.h ...
 	if(NOT LAPACK_INCLUDE_DIRS)
 	  find_path(LAPACK_INCLUDE_DIRS
@@ -358,6 +362,9 @@ if(NOT LAPACK_FOUND)
 	    NAMES ${LAPACKE_HEADER}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
+	  if(LAPACK_INCLUDE_DIRS)
+	    set(HAS_LAPACKE 1 CACHE BOOL "Lapacke interface is available.")
+	  endif()
 	endif()
 	# if lapacke.h not needed or not found search for clapack.h ...
 	if(NOT LAPACK_INCLUDE_DIRS)
@@ -380,22 +387,36 @@ if(NOT LAPACK_FOUND)
      
     if(WITH_LAPACK STREQUAL "mkl")
       set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
-   
+      set(LAPACK_SUFFIX)
+      set(LAPACK_PREFIX "LAPACKE_")
+
     elseif(WITH_LAPACK STREQUAL "accelerate")
       set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
-      
+      set(LAPACK_SUFFIX "_")
+      set(LAPACK_PREFIX)
+
     elseif(WITH_LAPACK STREQUAL "atlas")
       set(HAS_ATLAS_LAPACK 1 CACHE BOOL "Blas  comes from Atlas framework ")
+      set(LAPACK_SUFFIX)
+      set(LAPACK_PREFIX "clapack_")
 
     elseif(WITH_LAPACK STREQUAL "openblas")
       set(HAS_OpenBLAS_LAPACK 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
-      
+      set(LAPACK_SUFFIX)
+      if(HAS_LAPACKE)
+	set(LAPACK_PREFIX "LAPACKE_")
+      else()
+	set(LAPACK_PREFIX "clapack_")
+      endif()
     else()
       set(HAS_GenericCLAPACK 1 CACHE BOOL "Blas is available from an unknown version.")
-
+      if(HAS_LAPACKE)
+	set(LAPACK_PREFIX "LAPACKE_")
+      else()
+	set(LAPACK_PREFIX "clapack_")
+      endif()
     endif()
   endif()
-
 
   if(NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
     message(FATAL_ERROR "Cannot find a library with LAPACK API. Please specify library location using LAPACK_DIR option or set your environment variables properly.")
@@ -408,5 +429,63 @@ if(NOT LAPACK_FOUND)
     endif(LAPACK_FOUND)
   endif(NOT LAPACK_FIND_QUIETLY)
   
+  # === Extra Checks for lapack functions ===
+  # We check only the functions that are known to be un-implemented
+  # in some lapack libraries (namely atlas ...)
+  # This is probably a temporary check since it's likely
+  # we will stop atlas checking for lapack? 
+  ## Check if FuncName is available in lapack lib (i.e in one of LAPACK_LIBRARIES)
+  ## and if FuncName symbol is present in file Header. 
+  # If both are true, result is true.
+  function(check_lapack_has_function genericName FuncName Header result)
+    
+    check_function_exists(${FuncName} TEST_FUNC)
+    check_symbol_exists(${FuncName} ${Header} TEST_HEAD)
+    
+    if(TEST_HEAD AND TEST_FUNC)
+      set(${result} 1 CACHE BOOL "${genericName} is available in lapack.")
+    endif()
+    
+  endfunction()
+  
+  
+  set(CMAKE_REQUIRED_LIBRARIES ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+  set(CMAKE_REQUIRED_INCLUDES ${BLAS_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIRS})
+  ## dgesvd ##
+  unset(HAS_LAPACK_DGESVD)
+  set(GENERIC_NAME "DGESVD")
+  set(FUNC_NAME "${LAPACK_PREFIX}dgesvd${LAPACK_SUFFIX}")
+  if(HAS_LAPACKE)
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DGESVD)
+  else()
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DGESVD)
+  endif()
+  ## dgels ##
+  unset(HAS_LAPACK_DGELS)
+  set(GENERIC_NAME "DGELS")
+  set(FUNC_NAME "${LAPACK_PREFIX}dgels${LAPACK_SUFFIX}")
+  if(HAS_LAPACKE)
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DGELS)
+  else()
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DGELS)
+  endif()
+
+  ## dtrtrs ##
+  unset(HAS_LAPACK_DTRTRS)
+  set(GENERIC_NAME "DTRTRS")
+  set(FUNC_NAME "${LAPACK_PREFIX}dtrtrs${LAPACK_SUFFIX}")
+  if(HAS_LAPACKE)
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DTRTRS)
+  else()
+    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DTRTRS)
+  endif()
+
+
+
+
+
 endif()
+
+
+
 

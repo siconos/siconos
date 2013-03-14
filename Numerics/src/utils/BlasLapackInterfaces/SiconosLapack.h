@@ -70,11 +70,11 @@ extern "C"
 #include "SiconosAppleLapack.h"
 
 // --- Atlas ---
-#elif defined(HAS_ATLAS_LAPACK)
+#elif defined(HAS_ATLAS_LAPACK) 
 #include "SiconosAtlasLapack.h"
 
 // --- Intel MKL, OpenBlas and netlib lapacke --- 
-#else // if defined(HAS_MKL_LAPACKE) 
+#else // if defined(HAS_LAPACKE) or if defined(HAS_MKL_LAPACKE) 
 #include "SiconosLapacke.h"
 #endif
 
