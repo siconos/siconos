@@ -27,6 +27,7 @@
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_ATLAS_LAPACK
 #cmakedefine HAS_LAPACKE
+#cmakedefine HAS_OpenBLAS_LAPACK
 
 // Which functions are defined in lapack? 
 #cmakedefine HAS_LAPACK_DGESVD

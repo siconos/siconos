@@ -388,7 +388,7 @@ if(NOT LAPACK_FOUND)
       set(HAS_ATLAS_LAPACK 1 CACHE BOOL "Blas  comes from Atlas framework ")
 
     elseif(WITH_LAPACK STREQUAL "openblas")
-      set(HAS_OpenBlas_LAPACK 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
+      set(HAS_OpenBLAS_LAPACK 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
       
     else()
       set(HAS_GenericCLAPACK 1 CACHE BOOL "Blas is available from an unknown version.")
