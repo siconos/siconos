@@ -145,9 +145,9 @@ if(NOT LAPACK_FOUND)
   ## First of all, we need blas ## 
   if(NOT BLAS_FOUND)
     if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-      find_package(BLAS)
+      compile_with(BLAS)
     else()
-      find_package(BLAS REQUIRED)
+      compile_with(BLAS REQUIRED)
     endif()
   endif()
   

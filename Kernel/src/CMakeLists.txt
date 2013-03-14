@@ -121,12 +121,12 @@ IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   ENDFOREACH()
 ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 
-find_package(LAPACK REQUIRED)
+compile_with(LAPACK REQUIRED)
 
 include_directories(${BLAS_INCLUDE_DIRS})
 include_directories(${LAPACK_INCLUDE_DIRS})
-remember_link_libraries(${BLAS_LIBRARIES})
-remember_link_libraries(${LAPACK_LIBRARIES})
+#remember_link_libraries(${BLAS_LIBRARIES})
+#remember_link_libraries(${LAPACK_LIBRARIES})
 
 COMPILE_WITH(GMP REQUIRED)
 
