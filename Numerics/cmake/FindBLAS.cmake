@@ -1,660 +1,385 @@
 # - Find BLAS library
-# This module finds an installed fortran library that implements the BLAS
-# linear-algebra interface (see http://www.netlib.org/blas/).
-# The list of libraries searched for is taken
-# from the autoconf macro file, acx_blas.m4 (distributed at
-# http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
+# This module finds an installed library that implements the BLAS 
+# with its C interface (cblas) and the classical fortran interface.
+# 
 #
 # This module sets the following variables:
 #  BLAS_FOUND - set to true if a library implementing the BLAS interface
 #    is found
-#  BLAS_LINKER_FLAGS - uncached list of required linker flags (excluding -l
-#    and -L).
 #  BLAS_LIBRARIES - uncached list of libraries (using full path name) to
 #    link against to use BLAS
-#  BLAS95_LIBRARIES - uncached list of libraries (using full path name)
-#    to link against to use BLAS95 interface
-#  BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
-#    is found
-#  BLA_STATIC  if set on this determines what kind of linkage we do (static)
-#  BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#     all the possibilities
-#  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
-##########
-### List of vendors (BLA_VENDOR) valid in this module
-##  Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
-##  Intel10_64lp_seq (intel mkl v10 64 bit,sequential code, lp64 model),
-##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic
-# C/CXX should be enabled to use Intel mkl
-
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
+#  BLAS_INCLUDE_DIRS - location of blas headers found by cmake
+#  BLAS_LIBRARY_DIR - location of the first blas lib found by cmake.
+#  BLAS_HEADERS - name(s) of the header(s) required for cblas.
 #
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# To find a specific blas set : 
+#  WITH_BLAS  if set checks only a specific implementation of blas which may be : mkl, openblas, atlas, accelerate, veclib, generic. 
+# Or : 
+#  BLAS_DIR if set, cmake uses this path (absolute) to find a blas implementation in BLAS_DIR/include and/or BLAS_DIR/lib 
+# 
+# If neither WITH_BLAS nor BLAS_DIR is set, all implementation are searched in this order : mkl, openblas, accelerate, veclib, atlas, generic. 
+# If available, pkg-config system is used to give hints to cmake search process.
 #
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+if(NOT BLAS_FOUND)
+  
+  include(CheckFunctionExists)
+  include(CheckFortranFunctionExists)
+  find_package(PkgConfig)
 
-#
-# first, try PkgConfig, if BLA_VENDOR was not specified
-#
-if(NOT BLA_VENDOR OR (BLA_VENDOR MATCHES "Generic"))
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(PC_BLAS blas)
-endif()
-if(PC_BLAS_FOUND)
-  foreach(PC_LIB ${PC_BLAS_LIBRARIES})
-    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_BLAS_LIBRARY_DIRS} )
-    if (NOT ${PC_LIB}_LIBRARY)
-      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_BLAS_LIBRARY_DIRS}")
-    endif (NOT ${PC_LIB}_LIBRARY)
-    list(APPEND BLAS_LIBRARIES ${${PC_LIB}_LIBRARY}) 
-  endforeach(PC_LIB)
-  find_package_handle_standard_args(BLAS DEFAULT_MSG BLAS_LIBRARIES)
-  mark_as_advanced(BLAS_LIBRARIES)
-else(PC_BLAS_FOUND)
-message(STATUS "No PkgConfig configuration for BLAS found; starting more extensive search.")
 
-include(CheckFunctionExists)
-include(CheckFortranFunctionExists)
-
-set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-
-# Check the language being used
-get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
-if( _LANGUAGES_ MATCHES Fortran )
-  set( _CHECK_FORTRAN TRUE )
-elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
-  set( _CHECK_FORTRAN FALSE )
-else()
-  if(BLAS_FIND_REQUIRED)
-    message(FATAL_ERROR "FindBLAS requires Fortran, C, or C++ to be enabled.")
+  # Check the language being used
+  # If only C/C++, we check for cblas_... functions.
+  # If Fortran and C, we check also the fortran interface.
+  get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
+  if( _LANGUAGES_ MATCHES Fortran )
+    set( _CHECK_FORTRAN TRUE )
+  elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
+    set( _CHECK_FORTRAN FALSE )
   else()
-    message(STATUS "Looking for BLAS... - NOT found (Unsupported languages)")
-    return()
+    if(BLAS_FIND_REQUIRED)
+      message(FATAL_ERROR "FindBLAS requires Fortran, C, or C++ to be enabled.")
+    else()
+      message(STATUS "Looking for BLAS... - NOT found (Unsupported languages)")
+      return()
+    endif()
   endif()
-endif()
-
-macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
-# This macro checks for the existence of the combination of fortran libraries
-# given by _list.  If the combination is found, this macro checks (using the
-# Check_Fortran_Function_Exists macro) whether can link against that library
-# combination using the name of a routine given by _name using the linker
-# flags given by _flags.  If the combination of libraries is found and passes
-# the link test, LIBRARIES is set to the list of complete library paths that
-# have been found.  Otherwise, LIBRARIES is set to FALSE.
-
-# N.B. _prefix is the prefix applied to the names of all cached variables that
-# are generated internally and marked advanced by this macro.
-
-set(_libdir ${ARGN})
-
-set(_libraries_work TRUE)
-set(${LIBRARIES})
-set(_combined_name)
-if (NOT _libdir)
-  if (WIN32)
-    set(_libdir ENV LIB)
-  elseif (APPLE)
-    set(_libdir ENV DYLD_LIBRARY_PATH)
-  else ()
-    set(_libdir ENV LD_LIBRARY_PATH)
-  endif ()
-endif ()
-
-foreach(_library ${_list})
-  set(_combined_name ${_combined_name}_${_library})
-
-  if(_libraries_work)
-    if (BLA_STATIC)
+  
+  macro(check_blas_Libraries LIBRARIES _prefix _name _flags _list _thread)
+    # This macro checks for the existence of the combination of libraries
+    # given by _list.  If the combination is found, this macro checks (using the
+    # Check_Fortran_Function_Exists and/or Check_function_exists macros) whether
+    # we can link against that library
+    # combination using the name of a routine given by _name using the linker
+    # flags given by _flags.  If the combination of libraries is found and passes
+    # the link test, LIBRARIES is set to the list of complete library paths that
+    # have been found.  Otherwise, LIBRARIES is set to FALSE.
+    
+    # N.B. _prefix is the prefix applied to the names of all cached variables that
+    # are generated internally and marked advanced by this macro.
+    
+    set(_libdir ${ARGN})
+    
+    set(_libraries_work TRUE)
+    set(${LIBRARIES})
+    set(_combined_name)
+    
+    ## If no extra argument was given to the macro, default search path is
+    ## filled with environment variables.
+    if (NOT _libdir)
       if (WIN32)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      endif ()
-      if (APPLE)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	set(_libdir LIB)
+      elseif (APPLE)
+	set(_libdir ENV DYLD_LIBRARY_PATH)
       else ()
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      endif ()
-    else ()
-      if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        # for ubuntu's libblas3gf and liblapack3gf packages
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+	set(_libdir ENV LD_LIBRARY_PATH)
       endif ()
     endif ()
-    # TODO : merge the 2 ? -- xhub 
-    find_library(${_prefix}_${_library}_LIBRARY
-      NAMES ${_library}
-      PATHS ENV LD_LIBRARY_PATH DYLD_LIBRARY_PATH
-      )
-    find_library(${_prefix}_${_library}_LIBRARY
-      NAMES ${_library}
-      PATHS ENV LD_LIBRARY_PATH DYLD_LIBRARY_PATH ${_libdir}
-      )
-    mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-    set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-    set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
-  endif()
-endforeach()
-if(_libraries_work)
-  # Test this combination of libraries.
-  set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
-#  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (_CHECK_FORTRAN)
-    check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
+    foreach(_library ${_list})
+      set(_combined_name ${_combined_name}_${_library})
+      
+      if(_libraries_work)
+	if (BLA_STATIC)
+	  if (WIN32)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  endif ()
+	  if (APPLE)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  else ()
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  endif ()
+	else ()
+	  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            # for ubuntu's libblas3gf and liblapack3gf packages
+            set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+	  endif ()
+	endif ()
+	
+	# HINTS are checked before PATHS, that's why we call
+	# find_library twice, to give priority to LD_LIBRARY_PATH or user-defined paths
+	# over pkg-config process.
+	find_library(${_prefix}_${_library}_LIBRARY
+	  NAMES ${_library}
+	  PATHS ${_libdir}
+	  NO_DEFAULT_PATH
+	  )
+	pkg_check_modules(PC_LIBRARY QUIET ${_library})
+	PRINT_VAR(PC_LIBRARY_LIBDIR)
+	PRINT_VAR(PC_LIBRARY_LIBRARY_DIRS)
+	find_library(${_prefix}_${_library}_LIBRARY
+	  NAMES ${_library}
+	  HINTS ${PC_LIBRARY_LIBDIR} ${PC_LIBRARY_LIBRARY_DIRS} 
+	  )
+	PRINT_VAR(${_prefix}_${_library}_LIBRARY)
+	mark_as_advanced(${_prefix}_${_library}_LIBRARY)
+	set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
+	set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+      endif()
+    endforeach()
+    if(_libraries_work)
+      # Test this combination of libraries.
+      set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
+      #else()
+      ## First we check cblas interface
+      check_function_exists("cblas_${_name}" ${_prefix}${_combined_name}_WORKS)
+      # and then, if required, fortran interface
+      if (_CHECK_FORTRAN)
+	check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS_F)
+	if(NOT ${${_prefix}${_combined_name}_WORKS_F})
+	  set(${_prefix}${_combined_name}_WORKS FALSE)
+	endif()
+      endif()
+      set(CMAKE_REQUIRED_LIBRARIES)
+      mark_as_advanced(${_prefix}${_combined_name}_WORKS)
+      set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
+    endif()
+    if(NOT _libraries_work)
+      set(${LIBRARIES} FALSE)
+    endif()
+  endmacro()
+  
+
+  #### Start Blas search process ####
+  set(WITH_BLAS "" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]")
+  set(BLAS_DIR "" CACHE PATH "Blas implementation location.")
+  
+  if(BLAS_DIR) 
+    set(CMAKE_PREFIX_PATH ${BLAS_DIR})
+    string(TOLOWER ${BLAS_DIR} lowerblasdir)
   else()
-    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+    set(lowerblasdir)
   endif()
-  set(CMAKE_REQUIRED_LIBRARIES)
-  mark_as_advanced(${_prefix}${_combined_name}_WORKS)
-  set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
-endif()
-if(NOT _libraries_work)
-  set(${LIBRARIES} FALSE)
-endif()
-#message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
-endmacro()
-
-set(BLAS_LINKER_FLAGS)
-set(BLAS_LIBRARIES)
-set(BLAS95_LIBRARIES)
-if ($ENV{BLA_VENDOR} MATCHES ".+")
-  set(BLA_VENDOR $ENV{BLA_VENDOR})
-else ()
-  if(NOT BLA_VENDOR)
-    set(BLA_VENDOR "All")
+  
+  
+  if(BLAS_DIR MATCHES "mkl.*")
+    set(WITH_BLAS "mkl" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+    set(INTEL_MKL_DIR ${BLAS_DIR})
+    set(INTEL_COMPILER_DIR "${BLAS_DIR}/..")
+  elseif(lowerblasdir MATCHES "atlas.*") 
+    set(WITH_BLAS "atlas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+  elseif(lowerblasdir MATCHES "openblas.*")
+    set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+  elseif(lowerblasdir MATCHES "accelerate.framework.*")
+    set(WITH_BLAS "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+  elseif(lowerblasdir MATCHES "veclib.framework.*")
+    set(WITH_BLAS "veclib" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+  #elseif(BLAS_DIR STREQUAL "") # if blas_dir is not given or corresponds to one of the previous tests, 
+    # we set a generic vendor.
+   # set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
   endif()
-endif ()
+  
+  PRINT_VAR(BLA_VENDOR)
+  PRINT_VAR(BLAS_DIR)
+  PRINT_VAR(WITH_BLAS)
+  set(BLAS_LIBRARIES)
+  ## Intel MKL ## 
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "mkl")))
+    message(STATUS "Try to find blas in intel/mkl ...")
+    find_package(MKL)
+    if(MKL_FOUND)
+      set(WITH_BLAS "mkl" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      #set(BLA_VENDOR "mkl")
+      set(BLAS_LIBRARIES ${MKL_LIBRARIES})
+      set(BLAS_INCLUDE_DIR ${MKL_INCLUDE_DIR})
+      set(BLAS_VERSION ${MKL_VERSION})
+      set(BLAS_HEADERS mkl_cblas.h)
+    endif(MKL_FOUND)
+  endif()
 
-if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    # gotoblas (http://www.tacc.utexas.edu/tacc-projects/gotoblas2)
-    check_fortran_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "goto2"
-      ""
-      )
-  endif(NOT BLAS_LIBRARIES)
-endif (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
-## Modif Franck : add OpenBlas 
-if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+  ## OpenBLAS ##
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "openblas")))
+    message(STATUS "Try to find blas in openblas ...")
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
       "openblas"
-      ""
-      )
-  endif(NOT BLAS_LIBRARIES)
-endif (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
-
-if (BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  dgemm
-  ""
-  "cblas;f77blas;atlas"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
-if (BLA_VENDOR STREQUAL "PhiPACK" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "sgemm;dgemm;blas"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in Alpha CXML library?
-if (BLA_VENDOR STREQUAL "CXML" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "cxml"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in Alpha DXML library? (now called CXML, see above)
-if (BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "dxml"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in Sun Performance library?
-if (BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  "-xlic_lib=sunperf"
-  "sunperf;sunmath"
-  ""
-  )
-  if(BLAS_LIBRARIES)
-    set(BLAS_LINKER_FLAGS "-xlic_lib=sunperf")
+      "")
+    if(BLAS_LIBRARIES)
+      set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      #set(BLA_VENDOR "openblas")
+      set(BLAS_HEADERS cblas.h)
+      set(CMAKE_FIND_FRAMEWORK "Last")
+    endif(BLAS_LIBRARIES)
   endif()
- endif()
-endif ()
-
-# BLAS in SCSL library?  (SGI/Cray Scientific Library)
-if (BLA_VENDOR STREQUAL "SCSL" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "scsl"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in SGIMATH library?
-if (BLA_VENDOR STREQUAL "SGIMATH" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "complib.sgimath"
-  ""
-  )
- endif()
-endif ()
-
-# BLAS in IBM ESSL library? (requires generic BLAS lib, too)
-if (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "essl;blas"
-  ""
-  )
- endif()
-endif ()
-
-#BLAS in acml library?
-if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
- if( ((BLA_VENDOR STREQUAL "ACML") AND (NOT BLAS_ACML_LIB_DIRS)) OR
-     ((BLA_VENDOR STREQUAL "ACML_MP") AND (NOT BLAS_ACML_MP_LIB_DIRS)) OR
-     ((BLA_VENDOR STREQUAL "ACML_GPU") AND (NOT BLAS_ACML_GPU_LIB_DIRS))
-   )
-   # try to find acml in "standard" paths
-   if( WIN32 )
-    file( GLOB _ACML_ROOT "C:/AMD/acml*/ACML-EULA.txt" )
-   else()
-    file( GLOB _ACML_ROOT "/opt/acml*/ACML-EULA.txt" )
-   endif()
-   if( WIN32 )
-    file( GLOB _ACML_GPU_ROOT "C:/AMD/acml*/GPGPUexamples" )
-   else()
-    file( GLOB _ACML_GPU_ROOT "/opt/acml*/GPGPUexamples" )
-   endif()
-   list(GET _ACML_ROOT 0 _ACML_ROOT)
-   list(GET _ACML_GPU_ROOT 0 _ACML_GPU_ROOT)
-   if( _ACML_ROOT )
-    get_filename_component( _ACML_ROOT ${_ACML_ROOT} PATH )
-    if( SIZEOF_INTEGER EQUAL 8 )
-     set( _ACML_PATH_SUFFIX "_int64" )
-    else()
-    set( _ACML_PATH_SUFFIX "" )
-   endif()
-   if( CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" )
-    set( _ACML_COMPILER32 "ifort32" )
-    set( _ACML_COMPILER64 "ifort64" )
-   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "SunPro" )
-    set( _ACML_COMPILER32 "sun32" )
-    set( _ACML_COMPILER64 "sun64" )
-   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "PGI" )
-    set( _ACML_COMPILER32 "pgi32" )
-    if( WIN32 )
-     set( _ACML_COMPILER64 "win64" )
-    else()
-     set( _ACML_COMPILER64 "pgi64" )
-    endif()
-   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "Open64" )
-    # 32 bit builds not supported on Open64 but for code simplicity
-    # We'll just use the same directory twice
-    set( _ACML_COMPILER32 "open64_64" )
-    set( _ACML_COMPILER64 "open64_64" )
-   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "NAG" )
-    set( _ACML_COMPILER32 "nag32" )
-    set( _ACML_COMPILER64 "nag64" )
-   else()
-    set( _ACML_COMPILER32 "gfortran32" )
-    set( _ACML_COMPILER64 "gfortran64" )
-   endif()
-
-   if( BLA_VENDOR STREQUAL "ACML_MP" )
-    set(_ACML_MP_LIB_DIRS
-     "${_ACML_ROOT}/${_ACML_COMPILER32}_mp${_ACML_PATH_SUFFIX}/lib"
-     "${_ACML_ROOT}/${_ACML_COMPILER64}_mp${_ACML_PATH_SUFFIX}/lib" )
-   else()
-    set(_ACML_LIB_DIRS
-     "${_ACML_ROOT}/${_ACML_COMPILER32}${_ACML_PATH_SUFFIX}/lib"
-     "${_ACML_ROOT}/${_ACML_COMPILER64}${_ACML_PATH_SUFFIX}/lib" )
-   endif()
-  endif()
- elseif(BLAS_${BLA_VENDOR}_LIB_DIRS)
-   set(_${BLA_VENDOR}_LIB_DIRS ${BLAS_${BLA_VENDOR}_LIB_DIRS})
- endif()
-
- if( BLA_VENDOR STREQUAL "ACML_MP" )
-  foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS})
-   check_fortran_libraries (
-     BLAS_LIBRARIES
-     BLAS
-     sgemm
-     "" "acml_mp;acml_mv" "" ${BLAS_ACML_MP_LIB_DIRS}
-   )
-   if( BLAS_LIBRARIES )
-    break()
-   endif()
-  endforeach()
- elseif( BLA_VENDOR STREQUAL "ACML_GPU" )
-  foreach( BLAS_ACML_GPU_LIB_DIRS ${_ACML_GPU_LIB_DIRS})
-   check_fortran_libraries (
-     BLAS_LIBRARIES
-     BLAS
-     sgemm
-     "" "acml;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS}
-   )
-   if( BLAS_LIBRARIES )
-    break()
-   endif()
-  endforeach()
- else()
-  foreach( BLAS_ACML_LIB_DIRS ${_ACML_LIB_DIRS} )
-   check_fortran_libraries (
-     BLAS_LIBRARIES
-     BLAS
-     sgemm
-     "" "acml;acml_mv" "" ${BLAS_ACML_LIB_DIRS}
-   )
-   if( BLAS_LIBRARIES )
-    break()
-   endif()
-  endforeach()
- endif()
-
- # Either acml or acml_mp should be in LD_LIBRARY_PATH but not both
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "acml;acml_mv"
-  ""
-  )
- endif()
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "acml_mp;acml_mv"
-  ""
-  )
- endif()
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "acml;acml_mv;CALBLAS"
-  ""
-  )
- endif()
-endif () # ACML
-
-# Apple BLAS library?
-if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
-if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  dgemm
-  ""
-  "Accelerate"
-  ""
-  )
- endif()
-endif ()
-
-if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
- if ( NOT BLAS_LIBRARIES )
-    check_fortran_libraries(
-    BLAS_LIBRARIES
-    BLAS
-    dgemm
-    ""
-    "vecLib"
-    ""
-    )
- endif ()
-endif ()
-# Generic BLAS library?
-if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
- if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  sgemm
-  ""
-  "cblas;blas"
-  ""
-  )
- endif()
-endif ()
-
-if (BLA_VENDOR STREQUAL "Eigen" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+  
+  ## Apple Framework ## 
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "accelerate")))
+    message(STATUS "Try to find blas in Accelerate framework ...")
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "eigen_blas"
+      "Accelerate"
+      "")
+    if (BLAS_LIBRARIES)
+      set(WITH_BLAS "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      #set(BLAS_VENDOR "accelerate")
+      set(BLAS_HEADERS cblas.h Accelerate.h)
+    endif (BLAS_LIBRARIES)
+  endif()
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "veclib")))
+    message(STATUS "Try to find blas in VecLib framework ...")
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
       ""
-      )
-  endif(NOT BLAS_LIBRARIES)
- endif (BLA_VENDOR STREQUAL "Eigen" OR BLA_VENDOR STREQUAL "All")
-
-#BLAS in intel mkl 10 library? (em64t 64bit)
-if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
- if (NOT WIN32)
-  set(LM "-lm")
- endif ()
- if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
-  if(BLAS_FIND_QUIETLY OR NOT BLAS_FIND_REQUIRED)
-    find_package(Threads)
-  else()
-    find_package(Threads REQUIRED)
+      "vecLib"
+      "")
+    if (BLAS_LIBRARIES)
+      set(WITH_BLAS "veclib" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(BLAS_HEADERS cblas.h vecLib.h)
+    endif (BLAS_LIBRARIES)
+  endif()
+  
+  ## Atlas ## 
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "atlas")))
+    message(STATUS "Try to find blas in atlas ...")
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "f77blas;atlas"
+      "")
+    if (BLAS_LIBRARIES)
+      set(WITH_BLAS "atlas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(BLAS_HEADERS cblas.h)
+      set(BLAS_INCLUDE_SUFFIXES atlas)
+    endif (BLAS_LIBRARIES)
   endif()
 
-  set(BLAS_SEARCH_LIBS "")
-
-  if(BLA_F95)
-    set(BLAS_mkl_SEARCH_SYMBOL SGEMM)
-    set(_LIBRARIES BLAS95_LIBRARIES)
-    if (WIN32)
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_blas95 mkl_intel_c mkl_intel_thread mkl_core libguide40")
-    else ()
-      if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_blas95 mkl_intel mkl_intel_thread mkl_core guide")
-      endif ()
-      if (BLA_VENDOR STREQUAL "Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
-        # old version
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_blas95 mkl_intel_lp64 mkl_intel_thread mkl_core guide")
-
-        # mkl >= 10.3
-        if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
-          list(APPEND BLAS_SEARCH_LIBS
-            "mkl_blas95_lp64 mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
-        else ()
-          list(APPEND BLAS_SEARCH_LIBS
-            "mkl_blas95_lp64 mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
-        endif ()
-      endif ()
-    endif ()
-    if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_blas95_lp64 mkl_intel_lp64 mkl_sequential mkl_core")
-    endif ()
-  else ()
-    set(BLAS_mkl_SEARCH_SYMBOL sgemm)
-    set(_LIBRARIES BLAS_LIBRARIES)
-    if (WIN32)
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_c_dll mkl_intel_thread_dll mkl_core_dll libguide40")
-    else ()
-      if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_intel mkl_intel_thread mkl_core guide")
-      endif ()
-      if (BLA_VENDOR STREQUAL "Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
-
-        # old version
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_intel_lp64 mkl_intel_thread mkl_core guide")
-
-        # mkl >= 10.3
-        if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
-          list(APPEND BLAS_SEARCH_LIBS
-            "mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
-        else ()
-          list(APPEND BLAS_SEARCH_LIBS
-            "mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
-        endif ()
-      endif ()
-
-      #older vesions of intel mkl libs
-      if (BLA_VENDOR STREQUAL "Intel" OR BLA_VENDOR STREQUAL "All")
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl")
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_ia32")
-        list(APPEND BLAS_SEARCH_LIBS
-          "mkl_em64t")
-      endif ()
-    endif ()
-    if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_intel_lp64 mkl_sequential mkl_core")
-    endif ()
-  endif ()
-
-  foreach (IT ${BLAS_SEARCH_LIBS})
-    string(REPLACE " " ";" SEARCH_LIBS ${IT})
-    if (${_LIBRARIES})
-    else ()
-      check_fortran_libraries(
-        ${_LIBRARIES}
-        BLAS
-        ${BLAS_mkl_SEARCH_SYMBOL}
-        ""
-        "${SEARCH_LIBS}"
-        "${CMAKE_THREAD_LIBS_INIT};${LM}"
-        )
-    endif ()
-  endforeach ()
-
- endif ()
-endif ()
-
-
-if(BLA_F95)
- if(BLAS95_LIBRARIES)
-    set(BLAS95_FOUND TRUE)
-  else()
-    set(BLAS95_FOUND FALSE)
+  ## Generic BLAS library? ##
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "generic")))
+    message(STATUS "Try to find a generic blas ...")
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "blas"
+      "")
+    if (BLAS_LIBRARIES)
+      set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(BLAS_HEADERS cblas.h)
+    endif (BLAS_LIBRARIES)
   endif()
-
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS95_FOUND)
-      message(STATUS "A library with BLAS95 API found.")
-    else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS95 API not found. Please specify library location.")
-      else()
-        message(STATUS
-        "A library with BLAS95 API not found. Please specify library location.")
-      endif()
-    endif()
+  ## Generic BLAS library (if cblas not found in blas) ##
+  if((NOT BLAS_LIBRARIES)
+      AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "generic")))
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "f77blas;cblas"
+      "")
+    if (BLAS_LIBRARIES)
+      set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(BLAS_HEADERS cblas.h)
+    endif (BLAS_LIBRARIES)
   endif()
-  set(BLAS_FOUND TRUE)
-  set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
-else()
   if(BLAS_LIBRARIES)
     set(BLAS_FOUND TRUE)
-  else()
+  else(BLAS_LIBRARIES)
     set(BLAS_FOUND FALSE)
+  endif(BLAS_LIBRARIES)
+  
+  ## Now the headers ...
+  if(BLAS_FOUND)
+    unset(BLAS_FOUND CACHE)
+    # Get an hint for the location of blas headers : probably BLAS_LIBRARIES/../include or BLAS_DIR if given
+    list(GET BLAS_LIBRARIES 0 BLAS_LIB)
+    get_filename_component(_bdir ${BLAS_LIB} PATH)
+    set(BLAS_LIBRARY_DIR ${_bdir} CACHE PATH "Blas libraries location." FORCE)
+    
+    if(NOT BLAS_DIR)
+      get_filename_component(_bdir ${BLAS_LIBRARY_DIR} PATH)
+      set(BLAS_DIR ${_bdir} CACHE PATH "Blas implementation location." FORCE)
+    endif()
+    
+    PRINT_VAR(BLAS_LIBRARY_DIR)
+    PRINT_VAR(BLAS_DIR)
+    
+    set(BLAS_INC_DIR ${BLAS_DIR}/include)
+    set(CMAKE_INCLUDE_PATH ${BLAS_INC_DIR})
+    set(CMAKE_PREFIX_PATH ${BLAS_DIR})
+    ## Note Franck : it seems that find_path process does not work as expected on Macosx : it does not respect the search sequence described
+    # in cmake doc (i.e. CMAKE_PREFIX, then HINTS, PATHS ... ) and always turn to find apple framework cblas if
+    # NO_DEFAULT_PATH is not set. 
+    if(APPLE) # First check in HINTS, no default, then global search.
+      foreach(_file ${BLAS_HEADERS})
+	unset(_dir CACHE)
+	PRINT_VAR(_file)
+	find_path(_dir
+	  NAMES ${_file}
+	  HINTS ${BLAS_DIR} ${BLAS_INC_DIR}
+	  PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	  NO_DEFAULT_PATH
+	  )
+	find_path(_dir 
+	  NAMES ${_file}
+	  PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	  )
+	PRINT_VAR(_dir)
+	list(APPEND BLAS_INCLUDE_DIRS ${_dir})
+      endforeach()
+      unset(_dir CACHE)
+      set(BLAS_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS} CACHE STRING "Blas headers location." FORCE)
+    else() # The case which is supposed to always work
+      find_path(BLAS_INCLUDE_DIRS 
+	NAMES ${BLAS_HEADERS}
+	PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	)
+    endif()
+    PRINT_VAR(BLAS_DIR)
+    PRINT_VAR(CMAKE_INCLUDE_PATH)
+    PRINT_VAR(BLAS_INCLUDE_DIRS)
+    if(BLAS_INCLUDE_DIRS)
+      set(BLAS_FOUND 1)
+    endif()
+    
   endif()
 
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS_FOUND)
-      message(STATUS "A library with BLAS API found.")
+  if(BLAS_FOUND) # NumericsConfig.h setup
+    set(HAS_CBLAS 1 CACHE BOOL "A CBlas implementation is available.")
+
+    if(WITH_BLAS STREQUAL "mkl")
+      set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
+   
+    elseif(WITH_BLAS STREQUAL "accelerate")
+      set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
+      
+    elseif(WITH_BLAS STREQUAL "atlas")
+      set(HAS_ATLAS_CBLAS 1 CACHE BOOL "Blas  comes from Atlas framework ")
+
+    elseif(WITH_BLAS STREQUAL "openblas")
+      set(HAS_OpenBLAS 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
+      
     else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS API not found. Please specify library location."
-        )
-      else()
-        message(STATUS
-        "A library with BLAS API not found. Please specify library location."
-        )
-      endif()
+      set(HAS_GenericCBLAS 1 CACHE BOOL "Blas is available from an unknown version.")
+
     endif()
   endif()
+
+  if(NOT BLAS_FOUND AND BLAS_FIND_REQUIRED)
+    message(FATAL_ERROR "Cannot find a library with BLAS API. Please specify library location using BLAS_DIR option or set your environment variables properly.")
+  endif (NOT BLAS_FOUND AND BLAS_FIND_REQUIRED)
+  if(NOT BLAS_FIND_QUIETLY)
+    if(BLAS_FOUND)
+      message(STATUS "Found a library with BLAS API (${BLA_VENDOR}).")
+    else(BLAS_FOUND)
+      message(STATUS "Cannot find a library with BLAS API. Maybe you can try again using BLAS_DIR option or set your environment variables properly.")
+    endif(BLAS_FOUND)
+  endif(NOT BLAS_FIND_QUIETLY)
+  
 endif()
-
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
-
-endif(PC_BLAS_FOUND)
 

@@ -71,10 +71,13 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/FCMangle.h DESTINATION include/Siconos/Numeric
 #
 # compilation setup 
 #
-include(BlasLapackSetup)
+find_package(LAPACK REQUIRED)
 
 include_directories(${BLAS_INCLUDE_DIRS})
 include_directories(${LAPACK_INCLUDE_DIRS})
+remember_link_libraries(${BLAS_LIBRARIES})
+remember_link_libraries(${LAPACK_LIBRARIES})
+
 include_directories(src/utils/test)
 
 COMPILE_WITH(PathFerris)

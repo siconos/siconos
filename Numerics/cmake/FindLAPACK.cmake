@@ -1,235 +1,209 @@
 # - Find LAPACK library
-# This module finds an installed fortran library that implements the LAPACK
-# linear-algebra interface (see http://www.netlib.org/lapack/).
-#
-# The approach follows that taken for the autoconf macro file, acx_lapack.m4
-# (distributed at http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
+# This module finds an installed library that implements the LAPACK 
+# with its C interface (cblas) and the classical fortran interface.
+# 
 #
 # This module sets the following variables:
 #  LAPACK_FOUND - set to true if a library implementing the LAPACK interface
 #    is found
-#  LAPACK_LINKER_FLAGS - uncached list of required linker flags (excluding -l
-#    and -L).
 #  LAPACK_LIBRARIES - uncached list of libraries (using full path name) to
 #    link against to use LAPACK
-#  LAPACK95_LIBRARIES - uncached list of libraries (using full path name) to
-#    link against to use LAPACK95
-#  LAPACK95_FOUND - set to true if a library implementing the LAPACK f95
-#    interface is found
-#  BLA_STATIC  if set on this determines what kind of linkage we do (static)
-#  BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#     all the possibilities
-#  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
-### List of vendors (BLA_VENDOR) valid in this module
-##  Intel(mkl), ACML,Apple, NAS, Generic
+#  LAPACK_INCLUDE_DIRS - location of blas headers found by cmake
+#  LAPACK_LIBRARY_DIR - location of the first blas lib found by cmake.
+#  LAPACKE_HEADER - name of the header required for lapacke.
+#  CLAPACK_HEADER - name of the header required for clapack. 
+#  We first look for lapacke header (if it may be available in lapack implem) and then, if not found, for CLAPACK_HEADER.
+#
+# To find a specific blas set : 
+#  WITH_LAPACK  if set checks only a specific implementation of blas which may be : mkl, openblas, atlas, accelerate, veclib, generic. 
+# Or : 
+#  LAPACK_DIR if set, cmake uses this path (absolute) to find a blas implementation in LAPACK_DIR/include and/or LAPACK_DIR/lib 
+# 
+# If neither WITH_LAPACK nor LAPACK_DIR is set, all implementation are searched in this order : mkl, openblas, accelerate, veclib, atlas, generic. 
+# If available, pkg-config system is used to give hints to cmake search process.
+#
+if(NOT LAPACK_FOUND)
+  
+  include(CheckFunctionExists)
+  include(CheckFortranFunctionExists)
+  find_package(PkgConfig)
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
-#
-# first, try PkgConfig
-#
-if(NOT BLA_VENDOR OR (BLA_VENDOR MATCHES "Generic"))
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(PC_BLAS blas)
-  pkg_check_modules(PC_LAPACK lapack)
-elseif(LAPACK_VENDOR MATCHES "Generic")
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(PC_LAPACK lapack)
-elseif(LAPACKE_VENDOR MATCHES "Generic")
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(PC_LAPACK lapacke)
-endif()
-if(PC_BLAS_FOUND)
-  foreach(PC_LIB ${PC_BLAS_LIBRARIES})
-    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_BLAS_LIBRARY_DIRS} )
-    if (NOT ${PC_LIB}_LIBRARY)
-      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_BLAS_LIBRARY_DIRS}")
-    endif (NOT ${PC_LIB}_LIBRARY)
-    list(APPEND BLAS_LIBRARIES ${${PC_LIB}_LIBRARY}) 
-  endforeach(PC_LIB)
-  find_package_handle_standard_args(BLAS DEFAULT_MSG BLAS_LIBRARIES)
-  mark_as_advanced(BLAS_LIBRARIES)
-endif(PC_BLAS_FOUND)
-if(PC_LAPACK_FOUND)
-  foreach(PC_LIB ${PC_LAPACK_LIBRARIES})
-    find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_LAPACK_LIBRARY_DIRS} )
-    if (NOT ${PC_LIB}_LIBRARY)
-      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_LAPACK_LIBRARY_DIRS}")
-    endif (NOT ${PC_LIB}_LIBRARY)
-    list(APPEND LAPACK_LIBRARIES ${${PC_LIB}_LIBRARY}) 
-  endforeach(PC_LIB)
-  find_package_handle_standard_args(LAPACK DEFAULT_MSG LAPACK_LIBRARIES)
-  mark_as_advanced(LAPACK_LIBRARIES)
-  if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-    find_package(BLAS)
+  # Check the language being used
+  # If only C/C++, we check for cblas_... functions.
+  # If Fortran and C, we check also the fortran interface.
+  get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
+  if( _LANGUAGES_ MATCHES Fortran )
+    set( _CHECK_FORTRAN TRUE )
+  elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
+    set( _CHECK_FORTRAN FALSE )
   else()
-    find_package(BLAS REQUIRED)
+    if(BLAS_FIND_REQUIRED)
+      message(FATAL_ERROR "FindLAPACK requires Fortran, C, or C++ to be enabled.")
+    else()
+      message(STATUS "Looking for LAPACK... - NOT found (Unsupported languages)")
+      return()
+    endif()
   endif()
-elseif(PC_LAPACKE_FOUND)
- foreach(PC_LIB ${PC_LAPACKE_LIBRARIES})
-  find_library(${PC_LIB}_LIBRARY NAMES ${PC_LIB} HINTS ${PC_LAPACKE_LIBRARY_DIRS} )
-    if (NOT ${PC_LIB}_LIBRARY)
-     message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_LAPACKE_LIBRARY_DIRS}")
-    endif (NOT ${PC_LIB}_LIBRARY)
-    list(APPEND LAPACKE_LIBRARIES ${${PC_LIB}_LIBRARY}) 
-  endforeach(PC_LIB)
-  find_package_handle_standard_args(LAPACKE DEFAULT_MSG LAPACKE_LIBRARIES)
-  mark_as_advanced(LAPACKE_LIBRARIES)
-  if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-    find_package(BLAS)
-  else()
-    find_package(BLAS REQUIRED)
-  endif()
-else()
-message(STATUS "No PkgConfig configuration for LAPACK found; starting more extensive search.")
-
-set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-
-get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-if (NOT _LANGUAGES_ MATCHES Fortran)
-include(CheckFunctionExists)
-else ()
-include(CheckFortranFunctionExists)
-endif ()
-
-set(LAPACK_FOUND FALSE)
-set(LAPACK95_FOUND FALSE)
-
-# TODO: move this stuff to separate module
-
-macro(Check_Lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads)
-# This macro checks for the existence of the combination of fortran libraries
-# given by _list.  If the combination is found, this macro checks (using the
-# Check_Fortran_Function_Exists macro) whether can link against that library
-# combination using the name of a routine given by _name using the linker
-# flags given by _flags.  If the combination of libraries is found and passes
-# the link test, LIBRARIES is set to the list of complete library paths that
-# have been found.  Otherwise, LIBRARIES is set to FALSE.
-
-# N.B. _prefix is the prefix applied to the names of all cached variables that
-# are generated internally and marked advanced by this macro.
-
-set(_libraries_work TRUE)
-set(${LIBRARIES})
-set(_combined_name)
-if (NOT _libdir)
-  if (WIN32)
-    set(_libdir ENV LIB)
-  elseif (APPLE)
-    set(_libdir ENV DYLD_LIBRARY_PATH)
-  else ()
-    set(_libdir ENV LD_LIBRARY_PATH)
-  endif ()
-endif ()
-foreach(_library ${_list})
-  set(_combined_name ${_combined_name}_${_library})
-
-  if(_libraries_work)
-    if (BLA_STATIC)
+  
+  macro(check_lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads)
+    # This macro checks for the existence of the combination of fortran libraries
+    # given by _list.  If the combination is found, this macro checks (using the
+    # Check_Fortran_Function_Exists macro) whether can link against that library
+    # combination using the name of a routine given by _name using the linker
+    # flags given by _flags.  If the combination of libraries is found and passes
+    # the link test, LIBRARIES is set to the list of complete library paths that
+    # have been found.  Otherwise, LIBRARIES is set to FALSE.
+    
+    # N.B. _prefix is the prefix applied to the names of all cached variables that
+    # are generated internally and marked advanced by this macro.
+    set(_libdir ${ARGN})
+    
+    set(_libraries_work TRUE)
+    set(${LIBRARIES})
+    set(_combined_name)
+    
+    ## If no extra argument was given to the macro, default search path is
+    ## filled with environment variables.
+    if (NOT _libdir)
       if (WIN32)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      endif ()
-      if (APPLE)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	set(_libdir LIB)
+      elseif (APPLE)
+	set(_libdir ENV DYLD_LIBRARY_PATH)
       else ()
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      endif ()
-    else ()
-      if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        # for ubuntu's libblas3gf and liblapack3gf packages
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+	set(_libdir ENV LD_LIBRARY_PATH)
       endif ()
     endif ()
-    find_library(${_prefix}_${_library}_LIBRARY
-      NAMES ${_library}
-      PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
-      NO_DEFAULT_PATH
-      )
-    find_library(${_prefix}_${_library}_LIBRARY
-      NAMES ${_library}
-      PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH ${_libdir}
-      )
-    mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-    set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-    set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
-  endif()
-endforeach()
-
-if(_libraries_work)
-  # Test this combination of libraries.
-  if(UNIX AND BLA_STATIC)
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} ${_blas} "-Wl,--end-group" ${_threads})
-  else()
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
-  endif()
-#  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (NOT _LANGUAGES_ MATCHES Fortran)
-    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
-  else ()
-    check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
-  endif ()
-  set(CMAKE_REQUIRED_LIBRARIES)
-  mark_as_advanced(${_prefix}${_combined_name}_WORKS)
-  set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
-  #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
-endif()
-
- if(_libraries_work)
-   set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threads})
- else()
-    set(${LIBRARIES} FALSE)
- endif()
-
-endmacro()
-
-
-set(LAPACK_LINKER_FLAGS)
-set(LAPACK_LIBRARIES)
-set(LAPACK95_LIBRARIES)
-
-if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-  find_package(BLAS)
-else()
-  find_package(BLAS REQUIRED)
-endif()
-
-if(BLAS_FOUND)
-  set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
-  if ($ENV{BLA_VENDOR} MATCHES ".+")
-    set(BLA_VENDOR $ENV{BLA_VENDOR})
-  else ()
-    if(NOT BLA_VENDOR)
-      set(BLA_VENDOR "All")
+    foreach(_library ${_list})
+      set(_combined_name ${_combined_name}_${_library})
+      
+      if(_libraries_work)
+	if (BLA_STATIC)
+	  if (WIN32)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  endif ()
+	  if (APPLE)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  else ()
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+	  endif ()
+	else ()
+	  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            # for ubuntu's libblas3gf and liblapack3gf packages
+            set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+	  endif ()
+	endif ()
+	
+	# HINTS are checked before PATHS, that's why we call
+	# find_library twice, to give priority to LD_LIBRARY_PATH or user-defined paths
+	# over pkg-config process.
+	find_library(${_prefix}_${_library}_LIBRARY
+	  NAMES ${_library}
+	  PATHS ${_libdir}
+	  NO_DEFAULT_PATH
+	  )
+	pkg_check_modules(PC_LIBRARY QUIET ${_library})
+	PRINT_VAR(PC_LIBRARY_LIBDIR)
+	PRINT_VAR(PC_LIBRARY_LIBRARY_DIRS)
+	find_library(${_prefix}_${_library}_LIBRARY
+	  NAMES ${_library}
+	  HINTS ${PC_LIBRARY_LIBDIR} ${PC_LIBRARY_LIBRARY_DIRS} 
+	  )
+	PRINT_VAR(${_prefix}_${_library}_LIBRARY)
+	mark_as_advanced(${_prefix}_${_library}_LIBRARY)
+	set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
+	set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+      endif()
+    endforeach()
+    if(_libraries_work)
+      # Test this combination of libraries.
+      if(UNIX AND BLA_STATIC)
+	set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} ${_blas} "-Wl,--end-group" ${_threads})
+      else()
+	set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
+      endif()
+      ## First we check c interface
+      check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+      # and then, if required, fortran interface
+      if (_CHECK_FORTRAN)
+	check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS_F)
+	if(NOT ${${_prefix}${_combined_name}_WORKS_F})
+	  set(${_prefix}${_combined_name}_WORKS FALSE)
+	endif()
+      endif()
+      set(CMAKE_REQUIRED_LIBRARIES)
+      mark_as_advanced(${_prefix}${_combined_name}_WORKS)
+      set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
     endif()
-  endif ()
+    if(_libraries_work)
+      set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threads})
+    else()
+      set(${LIBRARIES} FALSE)
+    endif()
+  endmacro()
   
-  if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "goto2"
-        "${BLAS_LIBRARIES}"
-        ""
-        )
+  ## First of all, we need blas ## 
+  if(NOT BLAS_FOUND)
+    if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+      find_package(BLAS)
+    else()
+      find_package(BLAS REQUIRED)
     endif()
-  endif ()
-  # Modif Franck : add OpenBLAS
-  if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
+  endif()
+  
+  if(BLAS_FOUND)
+    #### Start Blas search process ####
+    set(WITH_LAPACK "" CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]")
+    set(LAPACK_DIR "" CACHE PATH "lapack implementation location.")
+    
+    ## We first check the blas implementation ##
+    # MKL Intel  - Everything is already determined during blas search. 
+    if(WITH_BLAS STREQUAL "mkl")
+      set(WITH_LAPACK "mkl" CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(LAPACK_DIR ${BLAS_DIR} CACHE PATH "lapack implementation location." FORCE)
+      set(LAPACKE_HEADER mkl_lapacke.h)
+      set(LAPACK_LIBRARIES ${MKL_LAPACK_LIBRARIES})
+      set(LAPACK_INCLUDE_DIR ${MKL_INCLUDE_DIR})
+      set(LAPACK_VERSION ${MKL_VERSION})
+      set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
+      
+     ## Appel accelerate or veclib 
+    elseif(WITH_BLAS STREQUAL "accelerate")
+      set(WITH_LAPACK "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(LAPACK_DIR ${BLAS_DIR} CACHE PATH "lapack implementation location." FORCE)
+      set(CLAPACK_HEADER clapack.h)
+      set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
+
+    elseif(WITH_BLAS STREQUAL "veclib")
+      set(WITH_LAPACK "veclib" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+      set(LAPACK_DIR ${BLAS_DIR} CACHE PATH "lapack implementation location." FORCE)
+      set(CLAPACK_HEADER clapack.h)
+      set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
+      
+    else() ## Other blas implementations
+      # if nothing set by user for lapack implementation, we copy blas one's. 
+      if((NOT WITH_LAPACK) AND (NOT LAPACK_DIR))
+	set(WITH_LAPACK ${WITH_BLAS} CACHE STRING "Lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(LAPACK_DIR ${BLAS_DIR} CACHE PATH "lapack implementation location." FORCE )
+      elseif((NOT WITH_LAPACK) AND LAPACK_DIR)
+	set(CMAKE_PREFIX_PATH ${LAPACK_DIR})
+	string(TOLOWER ${LAPACK_DIR} lowerlapdir)
+	if(lowerblasdir MATCHES "atlas.*") 
+	  set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	elseif(lowerblasdir MATCHES "openblas.*")
+	  set(WITH_LAPACK "openblas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	endif()
+      endif()
+	
+    endif()
+
+    ## Now we search and check lapack libraries and headers. 
+    ## MKL : already done thanks to blas
+    
+    ## OpenBLAS ##
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "openblas")))
+      message(STATUS "Try to find lapack in openblas ...")
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACK
@@ -237,22 +211,18 @@ if(BLAS_FOUND)
 	""
 	"openblas"
 	"${BLAS_LIBRARIES}"
-	""
-	)
+	"")
+      if(LAPACK_LIBRARIES)
+	set(WITH_LAPACK "openblas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(LAPACKE_HEADER lapacke.h)
+	set(CLAPACK_HEADER clapack.h)
+      endif(LAPACK_LIBRARIES)
     endif()
-  endif ()
-  
-  
-  #acml lapack
-  if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
-    if (BLAS_LIBRARIES MATCHES ".+acml.+")
-      set (LAPACK_LIBRARIES ${BLAS_LIBRARIES})
-    endif ()
-  endif ()
-  
-  # Apple LAPACK library?
-  if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
+    
+    ## Apple Framework ## 
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "accelerate")))
+      message(STATUS "Try to find lapack in Accelerate framework ...")
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACK
@@ -260,12 +230,15 @@ if(BLAS_FOUND)
 	""
 	"Accelerate"
 	"${BLAS_LIBRARIES}"
-	""
-	)
+  	"")
+      if (LAPACK_LIBRARIES)
+	set(WITH_LAPACK "accelerate" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(CLAPACK_HEADER clapack.h)
+      endif (LAPACK_LIBRARIES)
     endif()
-  endif ()
-  if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
-    if ( NOT LAPACK_LIBRARIES )
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "veclib")))
+      message(STATUS "Try to find lapack in VecLib framework ...")
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACK
@@ -273,15 +246,17 @@ if(BLAS_FOUND)
 	""
 	"vecLib"
 	"${BLAS_LIBRARIES}"
-	""
-	)
-    endif ()
-  endif ()
-  # Generic LAPACK library?
-  if (BLA_VENDOR STREQUAL "Generic" OR
-      BLA_VENDOR STREQUAL "ATLAS" OR
-      BLA_VENDOR STREQUAL "All")
-    if ( NOT LAPACK_LIBRARIES )
+	"")
+      if (LAPACK_LIBRARIES)
+	set(WITH_LAPACK "veclib" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(CLAPACK_HEADER clapack.h)
+      endif (LAPACK_LIBRARIES)
+    endif()
+    
+    ## Atlas ## 
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "atlas")))
+      message(STATUS "Try to find lapack in atlas ...")
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACK
@@ -289,137 +264,149 @@ if(BLAS_FOUND)
 	""
 	"lapack"
 	"${BLAS_LIBRARIES}"
+	"")
+      if (LAPACK_LIBRARIES)
+	set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(CLAPACK_HEADER clapack.h)
+	set(LAPACK_INCLUDE_SUFFIXES atlas)
+      endif (LAPACK_LIBRARIES)
+    endif()
+    
+    ## Generic LAPACK library ##
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "generic")))
+      message(STATUS "Try to find a generic lapack ...")
+      check_lapack_libraries(
+	LAPACK_LIBRARIES
+	LAPACK
+	cheev
 	""
-	)
-    endif ()
-  endif ()
-  #intel lapack
-  if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
-    if (NOT WIN32)
-      set(LM "-lm")
-    endif ()
-    if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
-      if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-	find_PACKAGE(Threads)
-      else()
-	find_package(Threads REQUIRED)
+	"lapack"
+	"${BLAS_LIBRARIES}"
+	"")
+      if (LAPACK_LIBRARIES)
+	set(WITH_LAPACK "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
+	set(LAPACKE_HEADER lapacke.h)
+	set(CLAPACK_HEADER clapack.h)
+	set(LAPACK_INCLUDE_SUFFIXES atlas) # For debian or ubuntu ...
+      endif (LAPACK_LIBRARIES)
+    endif()
+    
+    if(LAPACK_LIBRARIES)
+      set(LAPACK_FOUND TRUE)
+    else(LAPACK_LIBRARIES)
+      set(LAPACK_FOUND FALSE)
+    endif(LAPACK_LIBRARIES)
+    
+    ## Now the headers ...
+    if(LAPACK_FOUND)
+      set(LAPACK_FOUND 0)
+      if(NOT LAPACK_LIBRARY_DIR)
+	# Get an hint for the location of lapack headers : probably LAPACK_LIBRARIES/../include or LAPACK_DIR if given
+	list(GET LAPACK_LIBRARIES 0 LAPACK_LIB)
+	get_filename_component(_bdir ${LAPACK_LIB} PATH)
+	set(LAPACK_LIBRARY_DIR ${_bdir} CACHE PATH "Lapack libraries location." FORCE)
       endif()
-      if (BLA_F95)
-	if(NOT LAPACK95_LIBRARIES)
-          # old
-          check_lapack_libraries(
-            LAPACK95_LIBRARIES
-            LAPACK
-            cheev
-            ""
-            "mkl_lapack95"
-            "${BLAS95_LIBRARIES}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
-            )
-	endif()
-	if(NOT LAPACK95_LIBRARIES)
-          # new >= 10.3
-          check_lapack_libraries(
-            LAPACK95_LIBRARIES
-            LAPACK
-            CHEEV
-            ""
-            "mkl_intel_lp64"
-            "${BLAS95_LIBRARIES}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
-            )
-	endif()
-      else()
-	if(NOT LAPACK_LIBRARIES)
-          # old
-          check_lapack_libraries(
-            LAPACK_LIBRARIES
-            LAPACK
-            cheev
-            ""
-            "mkl_lapack"
-            "${BLAS_LIBRARIES}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
-            )
-	endif()
-	if(NOT LAPACK_LIBRARIES)
-          # new >= 10.3
-          check_lapack_libraries(
-            LAPACK_LIBRARIES
-            LAPACK
-            cheev
-            ""
-            "mkl_gf_lp64"
-            "${BLAS_LIBRARIES}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
-            )
-	endif()
-	if(NOT LAPACK_LIBRARIES)
-          # Modif Franck
-          check_lapack_libraries(
-            LAPACK_LIBRARIES
-            LAPACK
-            cheev
-            ""
-            "mkl_rt"
-            "${BLAS_LIBRARIES}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
-            )
-	endif()
+      
+      if(NOT LAPACK_DIR)
+	get_filename_component(_bdir ${LAPACK_LIBRARY_DIR} PATH)
+	set(LAPACK_DIR ${_bdir} CACHE PATH "Lapack implementation location." FORCE)
       endif()
-    endif ()
-  endif()
-else()
-  message(STATUS "LAPACK requires BLAS")
-endif()
+      
+      PRINT_VAR(LAPACK_LIBRARY_DIR)
+      PRINT_VAR(LAPACK_DIR)
+       
+      set(LAPACK_INC_DIR ${LAPACK_DIR}/include)
+      set(CMAKE_INCLUDE_PATH ${LAPACK_INC_DIR})
+      set(CMAKE_PREFIX_PATH ${LAPACK_DIR})
+      PRINT_VAR(LAPACK_INC_DIR)
 
-if(BLA_F95)
-  if(LAPACK95_LIBRARIES)
-    set(LAPACK95_FOUND TRUE)
-  else()
-    set(LAPACK95_FOUND FALSE)
-  endif()
-  if(NOT LAPACK_FIND_QUIETLY)
-    if(LAPACK95_FOUND)
-      message(STATUS "A library with LAPACK95 API found.")
-    else()
-      if(LAPACK_FIND_REQUIRED)
-	message(FATAL_ERROR
-	  "A required library with LAPACK95 API not found. Please specify library location."
-	  )
-      else()
-	message(STATUS
-	  "A library with LAPACK95 API not found. Please specify library location."
-	  )
+      ## Note Franck : it seems that find_path process does not work as expected on Macosx : it does not respect the search sequence described
+      # in cmake doc (i.e. CMAKE_PREFIX, then HINTS, PATHS ... ) and always turn to find apple framework cblas if
+      # NO_DEFAULT_PATH is not set. 
+      if(APPLE) # First check in HINTS, no default, then global search.
+	if(LAPACKE_HEADER)
+	  find_path(LAPACK_INCLUDE_DIRS
+	    NAMES ${LAPACKE_HEADER}
+	    HINTS ${LAPACK_DIR} ${LAPACK_INC_DIR}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    NO_DEFAULT_PATH
+	    )
+	  find_path(LAPACK_INCLUDE_DIRS
+	    NAMES ${LAPACKE_HEADER}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    )
+	endif() # if lapacke.h not needed or not found search for clapack.h ...
+	if(NOT LAPACK_INCLUDE_DIRS)
+	  find_path(LAPACK_INCLUDE_DIRS
+	    NAMES ${CLAPACK_HEADER}
+	    HINTS ${LAPACK_DIR} ${LAPACK_INC_DIR}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    NO_DEFAULT_PATH
+	    )
+	  find_path(LAPACK_INCLUDE_DIRS
+	    NAMES ${CLAPACK_HEADER}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    )
+	endif()
+
+	#set(LAPACK_INCLUDE_DIRS ${_dir} CACHE STRING "Lapack header location." FORCE)
+	
+      else() # The case which is supposed to always work
+	if(LAPACKE_HEADER)
+	  find_path(LAPACK_INCLUDE_DIRS 
+	    NAMES ${LAPACKE_HEADER}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    )
+	endif()
+	# if lapacke.h not needed or not found search for clapack.h ...
+	if(NOT LAPACK_INCLUDE_DIRS)
+	  find_path(LAPACK_INCLUDE_DIRS 
+	    NAMES ${CLAPACK_HEADER}
+	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	    )
+	endif()
       endif()
+      PRINT_VAR(LAPACK_DIR)
+      PRINT_VAR(LAPACK_INCLUDE_DIRS)
+      if(LAPACK_INCLUDE_DIRS)
+	set(LAPACK_FOUND 1)
+      endif()
+      
     endif()
   endif()
-  set(LAPACK_FOUND "${LAPACK95_FOUND}")
-  set(LAPACK_LIBRARIES "${LAPACK95_LIBRARIES}")
-else()
-  if(LAPACK_LIBRARIES)
-    set(LAPACK_FOUND TRUE)
-  else()
-    set(LAPACK_FOUND FALSE)
+
+   if(LAPACK_FOUND) # NumericsConfig.h setup
+     
+    if(WITH_LAPACK STREQUAL "mkl")
+      set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
+   
+    elseif(WITH_LAPACK STREQUAL "accelerate")
+      set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
+      
+    elseif(WITH_LAPACK STREQUAL "atlas")
+      set(HAS_ATLAS_LAPACK 1 CACHE BOOL "Blas  comes from Atlas framework ")
+
+    elseif(WITH_LAPACK STREQUAL "openblas")
+      set(HAS_OpenBlas_LAPACK 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
+      
+    else()
+      set(HAS_GenericCLAPACK 1 CACHE BOOL "Blas is available from an unknown version.")
+
+    endif()
   endif()
-  
+
+
+  if(NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
+    message(FATAL_ERROR "Cannot find a library with LAPACK API. Please specify library location using LAPACK_DIR option or set your environment variables properly.")
+  endif (NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
   if(NOT LAPACK_FIND_QUIETLY)
     if(LAPACK_FOUND)
-      message(STATUS "A library with LAPACK API found.")
-    else()
-      if(LAPACK_FIND_REQUIRED)
-	message(FATAL_ERROR
-	  "A required library with LAPACK API not found. Please specify library location."
-	  )
-      else()
-	message(STATUS
-	  "A library with LAPACK API not found. Please specify library location."
-	  )
-      endif()
-    endif()
-  endif()
+      message(STATUS "Found a library with LAPACK API (${BLA_VENDOR}).")
+    else(LAPACK_FOUND)
+      message(STATUS "Cannot find a library with LAPACK API. Maybe you can try again using LAPACK_DIR option or set your environment variables properly.")
+    endif(LAPACK_FOUND)
+  endif(NOT LAPACK_FIND_QUIETLY)
+  
 endif()
 
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
-
-endif(PC_LAPACK_FOUND)
