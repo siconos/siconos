@@ -14,7 +14,7 @@ INCLUDE(FindPackageHandleStandardArgs)
 include(LibFindMacros)
 
 # Use pkg-config to get hints about paths
-libfind_pkg_check_modules(GMP_PKGCONF gmp)
+pkg_check_modules(GMP_PKGCONF QUIET gmp)
 
 # First search library and header in GMP_DIR, if given
 if(GMP_DIR)
