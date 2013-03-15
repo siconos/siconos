@@ -86,6 +86,9 @@ protected:
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
   SP::PluggedObject _pluginJachx;
+  /** Plug-in to compute \f$ \nabla_z h(..)\f$
+   */
+  SP::PluggedObject _pluginJachz;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
   SP::PluggedObject _pluginJachlambda;
@@ -216,6 +219,13 @@ public:
    *  \param functionName the function name to use in this plugin
    */
   virtual void setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName);
+
+  /** To set a plug-in function to compute  \f$ \nabla_z h(..)\f$
+   *  \param pluginPath the complete path to the plugin
+   *  \param functionName the function name to use in this plugin
+   */
+  virtual void setComputeJachzFunction(const std::string& pluginPath, const std::string& functionName);
+
   /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f$
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin

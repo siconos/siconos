@@ -93,9 +93,17 @@ void FirstOrderType1R::initialize(Interaction& inter)
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
+  unsigned int sizeZ = inter.data(z)->size();
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
+  if (!_jachx)
+    _jachx.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (!_jachz)
+    _jachz.reset(new SimpleMatrix(sizeY, sizeZ));
+  if (!_jacglambda)
+    _jacglambda.reset(new SimpleMatrix(sizeDS, sizeY));
+
   if (_jachx->size(0) == 0) // if the matrix dim are null
     _jachx->resize(sizeY, sizeDS);
   else
@@ -164,6 +172,21 @@ void FirstOrderType1R::computeJachx(const double time, Interaction& inter)
   unsigned int sizeY = inter.getSizeOfY();
 
   ((Type1Ptr)(_pluginJachx->fPtr))(workX.size(), &(workX)(0), sizeY, &(*(_jachx))(0, 0), workZ.size(), &(workZ)(0));
+
+  // Rebuilt z from Tmp
+  *inter.data(z) = workZ;
+}
+
+void FirstOrderType1R::computeJachz(const double time, Interaction& inter)
+{
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SiconosVector workX = *inter.data(x);
+  SiconosVector workZ = *inter.data(z);
+
+  unsigned int sizeZ = inter.data(z)->size();
+
+  if(_pluginJachz && _pluginJachz->fPtr)
+    ((Type1Ptr)(_pluginJachz->fPtr))(workX.size(), &(workX)(0), sizeZ, &(*(_jachz))(0, 0), workZ.size(), &(workZ)(0));
 
   // Rebuilt z from Tmp
   *inter.data(z) = workZ;

@@ -32,6 +32,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "FirstOrderType2R.hpp"
+#include "FirstOrderType1R.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -1391,6 +1392,38 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       coord[3] = C->size(1);
       coord[5] = C->size(1);
       subprod(*C, *Xq, *Yp, coord, false);
+
+    }
+
+    if (_useGammaForRelation)
+    {
+      RuntimeException::selfThrow("Moreau::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+    }
+    H_alpha = inter->Halpha();
+    assert(H_alpha);
+    *Yp += *H_alpha;
+  }
+
+  else if (relationType == FirstOrder && relationSubType == Type1R)
+  {
+    FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
+    C = rel.C();
+    F = rel.F();
+    assert(Xfree);
+    assert(Xq);
+
+    if (F)
+    {
+      coord[3] = F->size(1);
+      coord[5] = F->size(1);
+      subprod(*F, *inter->dataZ(), *Yp, coord, true);
+
+    }
+    if (C)
+    {
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
+      subprod(*C, *Xfree, *Yp, coord, false);
 
     }
 

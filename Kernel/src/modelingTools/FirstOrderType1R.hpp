@@ -99,6 +99,12 @@ public:
   */
   void computeJachx(const double time, Interaction& inter);
 
+  /** default function to compute \f$\nabla_z h\f$
+  *  \param time not used
+  *  \param inter Interaction linked with this relation
+  */
+  void computeJachz(const double time, Interaction& inter);
+
   /** default function to compute jacobianG according to lambda
   *  \param double : current time
   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .

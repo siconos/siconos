@@ -44,6 +44,7 @@ void Relation::zeroPlugin()
 {
   _pluginh.reset(new PluggedObject());
   _pluginJachx.reset(new PluggedObject());
+  _pluginJachz.reset(new PluggedObject());
   _pluginJachlambda.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
   _pluginJacLg.reset(new PluggedObject());
@@ -109,6 +110,10 @@ void Relation::setComputeJachxFunction(const std::string& pluginPath, const std:
   _pluginJachx->setComputeFunction(pluginPath, functionName);
 }
 
+void Relation::setComputeJachzFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  _pluginJachz->setComputeFunction(pluginPath, functionName);
+}
 void Relation::setComputegFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluging->setComputeFunction(pluginPath, functionName);

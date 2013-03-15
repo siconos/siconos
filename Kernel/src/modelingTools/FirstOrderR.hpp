@@ -89,6 +89,7 @@ protected:
   FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType): Relation(relxml, RELATION::FirstOrder, newType) {}
 
   SP::SiconosMatrix _jachx;
+  SP::SiconosMatrix _jachz;
   SP::SiconosMatrix _jacglambda;
 
 public:
@@ -171,10 +172,12 @@ public:
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
   */
   virtual void computeJachx(const double time, Interaction& inter);
+  virtual void computeJachz(const double time, Interaction& inter);
   virtual void computeJachlambda(const double time, Interaction& inter);
   virtual void computeJach(const double time, Interaction& inter)
   {
     computeJachx(time, inter);
+    computeJachz(time, inter);
     computeJachlambda(time, inter);
   }
 
@@ -203,6 +206,15 @@ public:
   inline SP::SiconosMatrix C() const
   {
     return _jachx;
+  }
+  /**
+  * return a SP on the F matrix.
+  * The matrix F in the linear case, else it returns Jacobian of the output with respect to z.
+  *
+  */
+  inline SP::SiconosMatrix F() const
+  {
+    return _jachz;
   }
   /**
   * return a SP on the D matrix.

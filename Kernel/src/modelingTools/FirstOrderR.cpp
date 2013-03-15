@@ -33,7 +33,10 @@ void FirstOrderR::computeJachx(const double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
 }
-void FirstOrderR::computeJachlambda(const double time, Interaction& inter)
+void FirstOrderR::computeJachz(const double time, Interaction& inter)
+{
+  //RuntimeException::selfThrow("FirstOrderR::computeJachx, not (yet) implemented or forbidden for relations of type "+subType);
+}void FirstOrderR::computeJachlambda(const double time, Interaction& inter)
 {
   //RuntimeException::selfThrow("FirstOrderR::computeJachlambda, not (yet) implemented or forbidden for relations of type "+subType);
 }
