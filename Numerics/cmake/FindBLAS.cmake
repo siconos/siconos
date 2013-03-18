@@ -267,7 +267,7 @@ if(NOT BLAS_FOUND)
       ""
       "blas"
       "")
-    if (BLAS_LIBRARIES)
+    if(NOT BLAS_LIBRARIES)
       set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h)
     endif (BLAS_LIBRARIES)
@@ -282,7 +282,8 @@ if(NOT BLAS_FOUND)
       ""
       "f77blas;cblas"
       "")
-    if (BLAS_LIBRARIES)
+    
+    if(BLAS_LIBRARIES)
       set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h)
     endif (BLAS_LIBRARIES)
