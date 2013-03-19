@@ -100,6 +100,7 @@ if(NOT LAPACK_FOUND)
 	find_library(${_prefix}_${_library}_LIBRARY
 	  NAMES ${_library}
 	  PATHS ${_libdir}
+          PATH_SUFFIXES atlas
 	  NO_DEFAULT_PATH
 	  )
 	pkg_check_modules(PC_LIBRARY QUIET ${_library})
@@ -108,6 +109,7 @@ if(NOT LAPACK_FOUND)
 	find_library(${_prefix}_${_library}_LIBRARY
 	  NAMES ${_library}
 	  HINTS ${PC_LIBRARY_LIBDIR} ${PC_LIBRARY_LIBRARY_DIRS} 
+          PATH_SUFFIXES atlas
 	  )
 	PRINT_VAR(${_prefix}_${_library}_LIBRARY)
 	mark_as_advanced(${_prefix}_${_library}_LIBRARY)

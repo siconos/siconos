@@ -100,6 +100,7 @@ if(NOT BLAS_FOUND)
 	find_library(${_prefix}_${_library}_LIBRARY
 	  NAMES ${_library}
 	  PATHS ${_libdir}
+          PATH_SUFFIXES atlas
 	  NO_DEFAULT_PATH
 	  )
 	pkg_check_modules(PC_LIBRARY QUIET ${_library})
@@ -108,6 +109,7 @@ if(NOT BLAS_FOUND)
 	find_library(${_prefix}_${_library}_LIBRARY
 	  NAMES ${_library}
 	  HINTS ${PC_LIBRARY_LIBDIR} ${PC_LIBRARY_LIBRARY_DIRS} 
+          PATH_SUFFIXES atlas
 	  )
 	PRINT_VAR(${_prefix}_${_library}_LIBRARY)
 	mark_as_advanced(${_prefix}_${_library}_LIBRARY)
@@ -247,7 +249,7 @@ if(NOT BLAS_FOUND)
       BLAS
       sgemm
       ""
-      "f77blas;atlas"
+      "cblas;atlas;f77blas"
       "")
     if (BLAS_LIBRARIES)
       set(WITH_BLAS "atlas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
@@ -275,6 +277,7 @@ if(NOT BLAS_FOUND)
   ## Generic BLAS library (if cblas not found in blas) ##
   if((NOT BLAS_LIBRARIES)
       AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "generic")))
+    message(STATUS "Try to find a generic blas (bis) ...")
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
