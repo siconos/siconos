@@ -352,6 +352,9 @@ if(NOT LAPACK_FOUND)
 	    NAMES ${CLAPACK_HEADER}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
+	  if(LAPACK_INCLUDE_DIRS)
+	    set(HAS_CLAPACK 1 CACHE BOOL "clapack interface is available.")
+	  endif()
 	endif()
 
 	#set(LAPACK_INCLUDE_DIRS ${_dir} CACHE STRING "Lapack header location." FORCE)
@@ -372,6 +375,10 @@ if(NOT LAPACK_FOUND)
 	    NAMES ${CLAPACK_HEADER}
 	    PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
 	    )
+	  if(LAPACK_INCLUDE_DIRS)
+	    set(HAS_CLAPACK 1 CACHE BOOL "clapack interface is available.")
+	  endif()
+
 	endif()
       endif()
       PRINT_VAR(LAPACK_DIR)

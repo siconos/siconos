@@ -29,7 +29,7 @@
 #define FCAST(T,X) (T *) (& X)
 #define FCASTP(T,X) (T *) X
 
-#include <Accelerate.h> // Already included in SiconosBlas.h
+#include <clapack.h> 
 #define LAPACK_NAME(N) N##_
 
 #define LA_TRANS 'T'

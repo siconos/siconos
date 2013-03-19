@@ -26,7 +26,8 @@
 // Which Lapack? 
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_ATLAS_LAPACK
-#cmakedefine HAS_LAPACKE
+#cmakedefine HAS_LAPACKE // lapacke.h has been found
+#cmakedefine HAS_CLAPACK  // clapack.h has been found
 #cmakedefine HAS_OpenBLAS_LAPACK
 
 // Which functions are defined in lapack? 
