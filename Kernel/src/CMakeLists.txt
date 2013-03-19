@@ -61,10 +61,10 @@ FOREACH(_D blas;lapack;traits;traits/detail;umfpack;std)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 
     DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
 ENDFOREACH()
-FILE(GLOB BOOST_HDRS_${_D} utils/numeric_bindings/boost/numeric/bindings/*.hpp 
-    utils/numeric_bindings/boost/numeric/bindings/${_D}/*.h)
-INSTALL(FILES ${BOOST_HDRS_${_D}} 
-  DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
+FILE(GLOB BOOST_HDRS utils/numeric_bindings/boost/numeric/bindings/*.hpp) 
+
+INSTALL(FILES ${BOOST_HDRS} 
+  DESTINATION include/Siconos/Kernel/boost/numeric/bindings/)
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)

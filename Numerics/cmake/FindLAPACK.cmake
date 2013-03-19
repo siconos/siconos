@@ -168,7 +168,7 @@ if(NOT LAPACK_FOUND)
       set(LAPACK_INCLUDE_DIR ${MKL_INCLUDE_DIR})
       set(LAPACK_VERSION ${MKL_VERSION})
       set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
-      
+      PRINT_VAR(MKL_LAPACK_LIBRARIES)
      ## Appel accelerate or veclib 
     elseif(WITH_BLAS STREQUAL "accelerate")
       set(WITH_LAPACK "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)

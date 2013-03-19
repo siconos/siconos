@@ -203,6 +203,10 @@ IF (MKL_LIBRARIES)
 ENDIF (MKL_LIBRARIES)
 
 # Other libraries
+
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} $ENV{DYLD_LIBRARY_PATH})
+
+
 IF (MKL_LIBRARIES)
   FOREACH(mkl64 ${mkl64s} "_core" "")
     FOREACH(mkls ${mklseq} "")
@@ -225,6 +229,9 @@ IF (MKL_LIBRARIES)
     ENDFOREACH(mkls)
   ENDFOREACH(mkl64)
 ENDIF (MKL_LIBRARIES)
+
+#if(MKL_LAPACK)
+#set(LAPACK_LIBRARY_DIR ${_bdir} CACHE PATH "Lapack libraries location." FORCE)
 
 # LibIRC: intel compiler always links this; 
 # gcc does not; but mkl kernels sometimes need it.
