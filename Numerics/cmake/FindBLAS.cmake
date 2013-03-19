@@ -44,7 +44,7 @@ if(NOT BLAS_FOUND)
     endif()
   endif()
   
-  macro(check_blas_Libraries LIBRARIES _prefix _name _flags _list _thread)
+  macro(check_blas_Libraries LIBRARIES INCLUDE_DIRS _prefix _name _flags _list _thread)
     # This macro checks for the existence of the combination of libraries
     # given by _list.  If the combination is found, this macro checks (using the
     # Check_Fortran_Function_Exists and/or Check_function_exists macros) whether
@@ -61,6 +61,7 @@ if(NOT BLAS_FOUND)
     
     set(_libraries_work TRUE)
     set(${LIBRARIES})
+    set(${INCLUDE_DIRS})
     set(_combined_name)
     
     ## If no extra argument was given to the macro, default search path is
@@ -103,20 +104,36 @@ if(NOT BLAS_FOUND)
           PATH_SUFFIXES atlas
 	  NO_DEFAULT_PATH
 	  )
-	pkg_check_modules(PC_LIBRARY QUIET ${_library})
-	PRINT_VAR(PC_LIBRARY_LIBDIR)
-	PRINT_VAR(PC_LIBRARY_LIBRARY_DIRS)
 	find_library(${_prefix}_${_library}_LIBRARY
 	  NAMES ${_library}
-	  HINTS ${PC_LIBRARY_LIBDIR} ${PC_LIBRARY_LIBRARY_DIRS} 
           PATH_SUFFIXES atlas
 	  )
-	PRINT_VAR(${_prefix}_${_library}_LIBRARY)
-	mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-	set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-	set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+	if(${_prefix}_${_library}_LIBRARY)
+	  set(${_prefix}_${_library}_LIBRARIES ${${_prefix}_${_library}_LIBRARY})
+	else()
+	  pkg_check_modules(PC_${_library} QUIET ${_library})
+	  PRINT_VAR(PC_${_library}_LIBDIR)
+	  PRINT_VAR(PC_${_library}_LIBRARY_DIRS)
+	  foreach(PC_LIB ${PC_${_library}_LIBRARIES})
+	    find_library(${PC_LIB}_LIBRARY
+	      NAMES ${PC_LIB}
+	      HINTS ${PC_${_library}_LIBRARY_DIRS} 
+	      )
+	    if (NOT ${PC_LIB}_LIBRARY)
+	      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_${_library}_LIBRARY_DIRS}")
+	    endif (NOT ${PC_LIB}_LIBRARY)
+	    list(APPEND ${_prefix}_${_library}_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+	  endforeach(PC_LIB)
+	endif()
+	PRINT_VAR(${_prefix}_${_library}_LIBRARIES)
+	set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PC_${_library}_INCLUDE_DIRS})
+	PRINT_VAR(PC_${INCLUDE_DIRS}_INCLUDE_DIRS)
+	mark_as_advanced(${_prefix}_${_library}_LIBRARIES)
+	set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARIES})
+	set(_libraries_work ${${_prefix}_${_library}_LIBRARIES})
       endif()
     endforeach()
+    PRINT_VAR(${LIBRARIES})
     if(_libraries_work)
       # Test this combination of libraries.
       set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
@@ -185,6 +202,9 @@ if(NOT BLAS_FOUND)
       set(BLAS_INCLUDE_DIR ${MKL_INCLUDE_DIR})
       set(BLAS_VERSION ${MKL_VERSION})
       set(BLAS_HEADERS mkl_cblas.h)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif(MKL_FOUND)
   endif()
 
@@ -194,6 +214,7 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find blas in openblas ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
@@ -204,6 +225,9 @@ if(NOT BLAS_FOUND)
       #set(BLA_VENDOR "openblas")
       set(BLAS_HEADERS cblas.h)
       set(CMAKE_FIND_FRAMEWORK "Last")
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif(BLAS_LIBRARIES)
   endif()
   
@@ -213,6 +237,7 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find blas in Accelerate framework ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
@@ -222,6 +247,9 @@ if(NOT BLAS_FOUND)
       set(WITH_BLAS "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       #set(BLAS_VENDOR "accelerate")
       set(BLAS_HEADERS cblas.h Accelerate.h)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif (BLAS_LIBRARIES)
   endif()
   if((NOT BLAS_LIBRARIES)
@@ -229,6 +257,7 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find blas in VecLib framework ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
@@ -237,6 +266,9 @@ if(NOT BLAS_FOUND)
     if (BLAS_LIBRARIES)
       set(WITH_BLAS "veclib" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h vecLib.h)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif (BLAS_LIBRARIES)
   endif()
   
@@ -246,6 +278,7 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find blas in atlas ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
@@ -255,6 +288,9 @@ if(NOT BLAS_FOUND)
       set(WITH_BLAS "atlas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h)
       set(BLAS_INCLUDE_SUFFIXES atlas)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif (BLAS_LIBRARIES)
   endif()
 
@@ -264,6 +300,7 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find a generic blas ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
@@ -272,6 +309,9 @@ if(NOT BLAS_FOUND)
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif()
   endif()
   ## Generic BLAS library (if cblas not found in blas) ##
@@ -280,15 +320,19 @@ if(NOT BLAS_FOUND)
     message(STATUS "Try to find a generic blas (bis) ...")
     check_blas_libraries(
       BLAS_LIBRARIES
+      BLAS_INCLUDE_DIRS
       BLAS
       sgemm
       ""
-      "f77blas;cblas"
+      "blas;cblas"
       "")
     
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/veclib/generic]" FORCE)
       set(BLAS_HEADERS cblas.h)
+    else()
+      set(BLAS_LIBRARIES)
+      set(BLAS_INCLUDE_DIRS)
     endif()
   endif()
   if(BLAS_LIBRARIES)
@@ -326,12 +370,12 @@ if(NOT BLAS_FOUND)
 	find_path(_dir
 	  NAMES ${_file}
 	  HINTS ${BLAS_DIR} ${BLAS_INC_DIR}
-	  PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	  PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
 	  NO_DEFAULT_PATH
 	  )
 	find_path(_dir 
 	  NAMES ${_file}
-	  PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	  PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
 	  )
 	PRINT_VAR(_dir)
 	list(APPEND BLAS_INCLUDE_DIRS ${_dir})
@@ -341,7 +385,7 @@ if(NOT BLAS_FOUND)
     else() # The case which is supposed to always work
       find_path(BLAS_INCLUDE_DIRS 
 	NAMES ${BLAS_HEADERS}
-	PATH_SUFFIXES ${LAPACK_INCLUDE_SUFFIXES}
+	PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
 	)
     endif()
     PRINT_VAR(BLAS_DIR)
