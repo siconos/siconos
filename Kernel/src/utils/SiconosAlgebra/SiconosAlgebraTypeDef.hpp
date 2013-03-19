@@ -39,24 +39,10 @@
 #define BOOST_ALL_NO_LIB
 #endif
 
-#include "KernelConfig.h"
-
 #include <limits>
 #include <boost/numeric/ublas/fwd.hpp>
-//#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/array.hpp>
-//#include "SiconosConst.hpp"
 #include "Tools.hpp"
-//#include <deque>
-
-
-#if defined(HAVE_ATLAS)
-#include <boost/numeric/bindings/atlas/cblas_enum.hpp>
-#else
-extern "C" {
-#include <cblas.h>
-}
-#endif
 
 #include "SiconosPointers.hpp"
 #include "SiconosVisitor.hpp"

@@ -354,7 +354,7 @@ void Hem5::fprob(integer* IFCN,
       F[ii] = _forcesWork->getValue(ii) ;
     }
   }
-  if ((ifcn == 4)) // compute G (constraints)
+  if (ifcn == 4) // compute G (constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2
@@ -399,9 +399,9 @@ void Hem5::fprob(integer* IFCN,
     }
   }
 
-  if ((ifcn == 0) ) // compute UDOT
+  if (ifcn == 0) // compute UDOT
   {
-    for (int ii ; ii < (int)*NU ; ii++)
+    for (int ii = 0; ii < (int)*NU ; ii++)
     {
       assert(0);
     }

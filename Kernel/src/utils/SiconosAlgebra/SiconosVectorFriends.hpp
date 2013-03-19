@@ -94,7 +94,7 @@ SiconosVector operator - (const SiconosVector&, const SiconosVector&);
 */
 void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-/** computes y = a*x + b*y with atlas axpy.
+/** computes y = a*x + b*y with blas axpy.
     \param a, a double.
     \param x, a SiconosVector , IN.
     \param b, a double.
@@ -102,7 +102,7 @@ void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
 */
 void axpby(double, const SiconosVector&, double, SiconosVector&);
 
-/** computes y = a*x + y with atlas axpy.
+/** computes y = a*x + y with blas axpy.
     \param a, a double.
     \param x, a SiconosVector , IN.
     \param y, a SiconosVector , IN-OUT.

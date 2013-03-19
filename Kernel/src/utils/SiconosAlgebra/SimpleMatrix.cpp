@@ -16,15 +16,10 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-
-//#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-
+#include "KernelConfig.h"
 #include <boost/numeric/ublas/io.hpp>
-//#include <boost/numeric/ublas/operation.hpp>
-//#include <boost/numeric/ublas/vector_proxy.hpp>
-//#include <boost/numeric/ublas/operation_sparse.hpp>
+#include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 
 #include "ioMatrix.hpp"
 #include "BlockVector.hpp"

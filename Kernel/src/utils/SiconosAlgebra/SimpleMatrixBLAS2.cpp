@@ -18,24 +18,25 @@
  */
 
 #include "KernelConfig.h"
+#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/trans.hpp>
+#include <boost/numeric/bindings/blas/level2.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
 
-#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+// Note Franck : sounds useless. It seems it's defined in bindings
+// (to be checked, especially on windows)
 
-#if defined(HAVE_ATLAS)
-#define SB_IS_ATLAS
-#include <boost/numeric/bindings/atlas/cblas2.hpp>
-namespace siconosBindings = boost::numeric::bindings::atlas;
-#else
-#define SB_IS_BLAS
-#include <boost/numeric/bindings/blas/blas2.hpp>
-namespace siconosBindings = boost::numeric::bindings::blas;
-#endif
+// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+namespace siconosBindings = boost::numeric::bindings;
 
 // for ublas::axpy_prod, ...
 #include <boost/numeric/ublas/operation.hpp>
 
 // for matrix stuff like value_type
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+//#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -784,7 +785,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
   }
 }
 
-void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
+void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
 {
   if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
@@ -795,7 +796,7 @@ void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const 
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  siconosBindings::gemv(transA, a, *A.dense(), *x.dense(), b, *y.dense());
+  siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), *x.dense(), b, *y.dense());
 }
 
 void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
@@ -808,19 +809,5 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  siconosBindings::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
+  siconosBindings::blas::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
 }
-
-void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
-{
-  if (A.isBlock())
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
-  if (numA != 1 || numX != 1 || numY != 1)
-    SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
-
-  siconosBindings::gemv(*A.dense(), *x.dense(), *y.dense());
-}
-

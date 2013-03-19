@@ -19,22 +19,17 @@
 
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
-#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
+//#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 
 #include "KernelConfig.h"
 
 #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-
-#if defined(HAVE_ATLAS)
-#include <boost/numeric/bindings/atlas/cblas1.hpp>
-#define SB_IS_ATLAS
-namespace siconosBindings = boost::numeric::bindings::atlas;
-#else
-#include <boost/numeric/bindings/blas/blas1.hpp>
-#define SB_IS_BLAS
+#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include <boost/numeric/bindings/blas.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
 namespace siconosBindings = boost::numeric::bindings::blas;
-#endif
 
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
@@ -278,16 +273,8 @@ void SiconosVector::fill(double value)
       (vect.Sparse)->push_back(i, value);
   }
   else
-  {
-    // only atlas provides set functions
-    // they are called catlas_*set for a reason
-#if defined(SB_IS_ATLAS)
     siconosBindings::set(value, *vect.Dense);
-#else
-    for (unsigned int i = 0; i < (vect.Dense)->size(); ++i)
-      (*vect.Dense)(i) = value;
-#endif
-  }
+  
 
 }
 

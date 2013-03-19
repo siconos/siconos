@@ -29,7 +29,7 @@
 #ifndef SiconosAlgebra
 #define SiconosAlgebra
 
-#include "KernelConfig.h"
+//#include "KernelConfig.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/triangular.hpp>

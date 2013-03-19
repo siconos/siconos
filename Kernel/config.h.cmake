@@ -22,5 +22,15 @@
 #cmakedefine HAS_LAPACK_DTRTRS
 #cmakedefine HAS_LAPACK_DGELS
 
+
+// Some definitions required for boost numeric_bindings
+#if defined(HAS_CBLAS)
+#define BOOST_NUMERIC_BINDINGS_BLAS_CBLAS
+#endif
+
+#if defined(HAS_MKL_CBLAS)
+#define BOOST_NUMERIC_BINDINGS_BLAS_MKL
+#endif
+
 #endif /*KERNELCONFIG_H*/
 

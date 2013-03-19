@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "SimpleMatrixTest.hpp"
 #include "SiconosAlgebra.hpp"
@@ -3291,27 +3292,17 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
 void SimpleMatrixTest::testGemv()
 {
   cout << "--> Test: gemv" << endl;
-
+  
   SP::SiconosVector y(new SiconosVector(size, 1.0));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
 
   SP::SiconosVector backUp(new SiconosVector(*y));
-
-  gemv(*A, *x, *y);
-  double sum;
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0.0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv: ", fabs((*y)(i) - sum) < tol, true);
-  }
-
+  
   double a = 2.3;
   double b = 1.5;
-  *y = *backUp;
+  double sum;
   gemv(a, *A, *x, b, *y);
-
+  
   for (unsigned int i = 0; i < size; ++i)
   {
     sum = b * (*backUp)(i);
@@ -3321,22 +3312,13 @@ void SimpleMatrixTest::testGemv()
   }
 
   *y = *backUp;
-  gemv(CblasNoTrans, a, *A, *x, b, *y);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = b * (*backUp)(i);
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += a * (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv: ", fabs((*y)(i) - sum) < tol, true);
-  }
-  *y = *backUp;
-  gemv(CblasTrans, a, *A, *x, b, *y);
+  gemvtranspose(a, *A, *x, b, *y);
   for (unsigned int i = 0; i < size; ++i)
   {
     sum = b * (*backUp)(i);
     for (unsigned int j = 0; j < A->size(0); ++j)
       sum += a * (*A)(j, i) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv: ", fabs((*y)(i) - sum) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv (trans): ", fabs((*y)(i) - sum) < tol, true);
   }
   cout << "-->  test gemv ended with success." << endl;
 }
@@ -3350,22 +3332,12 @@ void SimpleMatrixTest::testGemm()
   *C = *A;
   SP::SiconosMatrix backUp(new SimpleMatrix(*C));
 
-  gemm(*A, *B, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
-
-  *C = *backUp;
   gemm(a, *A, *B, b, *C);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(*A->dense(), *B->dense()) - b**backUp->dense()) < tol, true);
-
-
-  *C = *backUp;
-  gemm(CblasNoTrans, CblasNoTrans, a, *A, *B, b, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(*A->dense(), *B->dense()) - b**backUp->dense()) < tol, true);
 
   *C = *backUp;
-  gemm(CblasTrans, CblasTrans, a, *A, *B, b, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true);
+  gemmtranspose(a, *A, *B, b, *C);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm (trans): ", norm_inf(*C->dense() - a * prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true);
   cout << "-->  test gemm ended with success." << endl;
 }
 

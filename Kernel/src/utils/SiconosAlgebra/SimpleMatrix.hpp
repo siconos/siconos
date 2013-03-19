@@ -46,10 +46,9 @@ TYPEDEF_SPTR(VInt)
  *
  * Notes:
  *  - to handle with sparse matrices see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
- *  - See SandBox/Algebra for comparison between ublas, atlas and Siconos perf.
- *  - Different way to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or ublas-bindings atlas.
+ *  - See SandBox/Algebra for comparison between ublas (direct call) and Siconos perf.
+ *  - Different way to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or boost numeric bindings.
  *   See SandBox/Algebra/TestOperators to know which the most performant op. on your system.
- *   Usually, atlas bindings are to be prefered, but limited to dense objects.
  *   axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
  *
  *  See also Siconos Algebra's page in Users Guide, \ref UMsiconosAlgebra.
@@ -672,17 +671,13 @@ public:
 
   friend void axpy_prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
 
-  friend void gemv(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
-
-  friend void gemv(CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
+  friend void gemvtranspose(double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
 
   friend void gemv(double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
 
-  friend void gemm(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
+  friend void gemmtranspose(double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
 
   friend void gemm(double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
-
-  friend void gemm(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
   friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool);
 

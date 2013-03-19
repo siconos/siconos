@@ -235,65 +235,45 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   */
 void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init);
 
-/** prod(A, x, y) computes y = A*x, using atlas::gemv - Reserved to dense matrices and vectors.
-  \param A a SiconosMatrix
-  \param x a SiconosVector
-  \param[in,out] y a SiconosVector
-  */
-void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y);
-
-/** gemv(transA, a, A, x, b, y) computes y = a*op(A)*x + b*y
-  with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-  This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
-  \param transA a CBLAS_TRANSPOSE, op for A
-  \param a a double
-  \param A a SiconosMatrix
-  \param x a SiconosVector
-  \param b a double
-  \param[in,out] y a SiconosVector
-  */
-void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y);
+/** gemvtranspose(a, A, x, b, y) computes y = a*transpose(A)*x + b*y
+    This function wrapped blas gemv through boost bindings. Reserved to dense matrices and vectors.
+    \param a a double
+    \param A a SiconosMatrix
+    \param x a SiconosVector
+    \param b a double
+    \param[in,out] y a SiconosVector
+*/
+void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y);
 
 /** gemv(a, A, x, b, y) computes y = a*A*x+ b*y
-  This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
-  \param a a double
-  \param A a SiconosMatrix
-  \param x a SiconosVector
-  \param b a double
-  \param[in,out] y a SiconosVector
-  */
+    This function wrapped blas gemv through boost bindings. Reserved to dense matrices and vectors.
+    \param a a double
+    \param A a SiconosMatrix
+    \param x a SiconosVector
+    \param b a double
+    \param[in,out] y a SiconosVector
+*/
 void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y);
 
-/** gemm(transA, transB, a, A, B, b, C) computes C = a*op(A)*op(B) + b*C
-  with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-  This function encapsulates atlas::gemm. Reserved to dense matrices.
-  \param transA a CBLAS_TRANSPOSE, op for A
-  \param transB a CBLAS_TRANSPOSE, op for B
-  \param a a double
-  \param A a SiconosMatrix
-  \param B a SiconosMatrix
-  \param b a double
-  \param[in,out] C a SiconosMatrix
-  */
-void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C);
+/** gemmtranspose(a, A, B, b, C) computes C = a*transpose(A)*transpose(B) + b*C
+    This function wrapped blas gemm through boost bindings. Reserved to dense matrices and vectors.
+    \param a a double
+    \param A a SiconosMatrix
+    \param B a SiconosMatrix
+    \param b a double
+    \param[in,out] C a SiconosMatrix
+*/
+void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C);
 
 /** gemm(a, A, B, b, C) computes C = a*A*B+ b*C
-  This function encapsulates atlas::gemm. Reserved to dense matrices.
-  \param a a double
-  \param A a SiconosMatrix
-  \param B a SiconosMatrix
-  \param b a double
-  \param[in,out] C a SiconosMatrix
-  */
+    This function wrapped blas gemm through boost bindings. Reserved to dense matrices and vectors.
+    \param a a double
+    \param A a SiconosMatrix
+    \param B a SiconosMatrix
+    \param b a double
+    \param[in,out] C a SiconosMatrix
+*/
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C);
-
-/** gemm(A, B, C) computes C = A*B
-  This function encapsulates atlas::gemm. Reserved to dense matrices.
-  \param A a SiconosMatrix
-  \param B a SiconosMatrix
-  \param[in,out] C a SiconosMatrix
-  */
-void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /** multiplication of a matrix by a scalar, B = a*A (init = true) or B += a*A (init = false)
  *  \param a a double

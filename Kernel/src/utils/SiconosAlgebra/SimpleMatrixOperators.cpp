@@ -326,7 +326,6 @@ SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
     SiconosMatrixException::selfThrow("SimpleMatrix::operator = DenseMat failed. Inconsistent sizes.");
 
   noalias(*(mat.Dense)) = m;
-  //atlas::copy(m, *(mat.Dense));
 
   resetLU();
   return *this;

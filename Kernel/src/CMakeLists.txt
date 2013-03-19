@@ -19,7 +19,7 @@ SET(SiconosKernel_VERSION "${VERSION}")
 SET(SiconosKernel_DIRS
   .
   utils
-  utils/boost-bindings
+  utils/numeric_bindings/
   utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
@@ -51,16 +51,20 @@ SET(SiconosKernel_Unstable_SRCS
 SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
 
 # Atlas and boost headers
-FILE(GLOB ATLAS_HDRS utils/AtlasLocal/atlas/*.h)
-INSTALL(FILES ${ATLAS_HDRS} 
-  DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
+#FILE(GLOB ATLAS_HDRS utils/AtlasLocal/atlas/*.h)
+#INSTALL(FILES ${ATLAS_HDRS} 
+#  DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
 
-FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
-  FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp 
-    utils/boost-bindings/boost/numeric/bindings/${_D}/*.h)
+FOREACH(_D blas;lapack;traits;traits/detail;umfpack;std)
+  FILE(GLOB BOOST_HDRS_${_D} utils/numeric_bindings/boost/numeric/bindings/${_D}/*.hpp 
+    utils/numeric_bindings/boost/numeric/bindings/${_D}/*.h)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 
     DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
-ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
+ENDFOREACH()
+FILE(GLOB BOOST_HDRS_${_D} utils/numeric_bindings/boost/numeric/bindings/*.hpp 
+    utils/numeric_bindings/boost/numeric/bindings/${_D}/*.h)
+INSTALL(FILES ${BOOST_HDRS_${_D}} 
+  DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)

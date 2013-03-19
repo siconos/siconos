@@ -20,28 +20,30 @@
 
 
 #include "KernelConfig.h"
+#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/trans.hpp>
+#include <boost/numeric/bindings/blas/level3.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
+
+// Note Franck : sounds useless. It seems it's defined in bindings
+// (to be checked, especially on windows)
+
+// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 
 // needed for blas3
 #include <assert.h>
 
-#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-
-#if defined(HAVE_ATLAS)
-#define SB_IS_ATLAS
-#include <boost/numeric/bindings/atlas/cblas3.hpp>
-namespace siconosBindings = boost::numeric::bindings::atlas;
-#else
-#define SB_IS_BLAS
-#include <boost/numeric/bindings/blas/blas3.hpp>
-namespace siconosBindings = boost::numeric::bindings::blas;
-#endif
+namespace siconosBindings = boost::numeric::bindings;
 
 // for ublas::axpy_prod, ...
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
 
 // require for matrix stuff like value_type
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+//#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 
 #include "SimpleMatrix.hpp"
 #include "BlockMatrixIterators.hpp"
@@ -84,7 +86,7 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
       if (numA == 1)
       {
         DenseMat p(A.size(0), B.size(1));
-        siconosBindings::gemm(*A.dense(), *B.dense(), p);
+        siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, p);
         //      return (DenseMat)(prod(*A.dense(),*B.dense()));
         return p;
       }
@@ -247,7 +249,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
         case 1:
           if (numB == 1)
             //*C.dense() = prod(*A.dense(),*B.dense());
-            siconosBindings::gemm(*A.dense(), *B.dense(), *C.dense());
+            siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, *C.dense());
           else if (numB == 2)
             *C.dense()  = prod(*A.dense(), *B.triang());
           else if (numB == 3)
@@ -788,7 +790,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   }
 }
 
-void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
+void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
   if (A.isBlock() || B.isBlock() || C.isBlock())
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
@@ -798,7 +800,7 @@ void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, 
   if (numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
-  siconosBindings::gemm(transA, transB, a, *A.dense(), *B.dense(), b, *C.dense());
+  siconosBindings::blas::gemm(a, siconosBindings::trans(*A.dense()), siconosBindings::trans(*B.dense()), b, *C.dense());
   C.resetLU();
 }
 
@@ -812,7 +814,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
 
   if (numA == 1 && numB == 1 && numC == 1)
-    siconosBindings::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
+    siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
   else if (numA == 1 && numB == 1 && numC != 1)
   {
     // To be improved ...
@@ -836,7 +838,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     else
       tmpC = C.dense();
 
-    siconosBindings::gemm(a, *tmpA, *tmpB, b, *tmpC);
+    siconosBindings::blas::gemm(a, *tmpA, *tmpB, b, *tmpC);
     if (numC != 1)
     {
       noalias(*C.dense()) = *tmpC;
@@ -848,20 +850,6 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
     if (numB != 1)
       delete tmpB;
   }
-  C.resetLU();
-}
-
-void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
-{
-  if (A.isBlock() || B.isBlock() || C.isBlock())
-    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
-  if (numA != 1 || numB != 1 || numC != 1)
-    SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
-
-  siconosBindings::gemm(*A.dense(), *B.dense(), *C.dense());
   C.resetLU();
 }
 

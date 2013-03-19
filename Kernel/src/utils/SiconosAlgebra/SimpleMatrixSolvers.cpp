@@ -18,27 +18,22 @@
  */
 
 #include "KernelConfig.h"
-
-#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-
-#ifndef FRAMEWORK_BLAS
-#define OUTSIDE_FRAMEWORK_BLAS
-#endif
-
-//#undef HAVE_ATLAS
-#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
-#include <boost/numeric/bindings/atlas/clapack.hpp>
-namespace lapack = boost::numeric::bindings::atlas;
-#else
-#include <boost/numeric/bindings/lapack/lapack.hpp>
-namespace lapack = boost::numeric::bindings::lapack;
-#endif
-
-//#include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/operation.hpp>
-//#include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
+
+//#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/trans.hpp>
+#include <boost/numeric/bindings/blas.hpp>
+#include <boost/numeric/bindings/lapack.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
+
+namespace lapack = boost::numeric::bindings::lapack;
+
 
 #include "SiconosVector.hpp"
 #include "cholesky.hpp"
@@ -253,10 +248,10 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(Siconos Matrix &B) failed. Not yet implemented for M being a BlockMatrix.");
   int info = 0;
 #ifdef USE_OPTIMAL_WORKSPACE
-  info += lapack::gels('N', *mat.Dense, *(B.dense()), lapack::optimal_workspace());
+  info += lapack::gels(*mat.Dense, *(B.dense()), lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-  info += lapack::gels('N', *mat.Dense, *(B.dense()), lapack::minimal_workspace());
+  info += lapack::gels(*mat.Dense, *(B.dense()), lapack::minimal_workspace());
 #endif
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
@@ -275,10 +270,10 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
   int info = 0;
 
 #ifdef USE_OPTIMAL_WORKSPACE
-  info += lapack::gels('N', *mat.Dense, tmpB, lapack::optimal_workspace());
+  info += lapack::gels(*mat.Dense, tmpB, lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-  info += lapack::gels('N', *mat.Dense, tmpB, lapack::minimal_workspace());
+  info += lapack::gels(*mat.Dense, tmpB, lapack::minimal_workspace());
 #endif
   if (info != 0)
   {
