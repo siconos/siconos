@@ -55,7 +55,7 @@ SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
 #INSTALL(FILES ${ATLAS_HDRS} 
 #  DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
 
-FOREACH(_D blas;lapack;traits;traits/detail;umfpack;std)
+FOREACH(_D blas;lapack;traits;traits/detail;umfpack;std;ublas;ublas/detail;detail)
   FILE(GLOB BOOST_HDRS_${_D} utils/numeric_bindings/boost/numeric/bindings/${_D}/*.hpp 
     utils/numeric_bindings/boost/numeric/bindings/${_D}/*.h)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 

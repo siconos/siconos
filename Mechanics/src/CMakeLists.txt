@@ -67,13 +67,12 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
-COMPILE_WITH(SiconosNumerics REQUIRED)
-COMPILE_WITH(SiconosKernel REQUIRED)
-
-include(BlasLapackSetup)
-
+compile_with(LAPACK REQUIRED)
 include_directories(${BLAS_INCLUDE_DIRS})
 include_directories(${LAPACK_INCLUDE_DIRS})
+
+COMPILE_WITH(SiconosNumerics REQUIRED)
+COMPILE_WITH(SiconosKernel REQUIRED)
 
 COMPILE_WITH(Boost REQUIRED)
 

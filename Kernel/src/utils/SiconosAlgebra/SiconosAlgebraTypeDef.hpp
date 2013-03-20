@@ -43,6 +43,8 @@
 #include <boost/numeric/ublas/fwd.hpp>
 #include <boost/array.hpp>
 #include "Tools.hpp"
+#include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 
 #include "SiconosPointers.hpp"
 #include "SiconosVisitor.hpp"
