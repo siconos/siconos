@@ -136,7 +136,7 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
   if (options->iparam[4])
   {
     LWORK = -1;
-    int info = 0;
+    //int info = 0;
     double dgelsSize = 0;
     //DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;

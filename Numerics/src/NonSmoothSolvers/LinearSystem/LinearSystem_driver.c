@@ -124,7 +124,7 @@ int LinearSystem_getNbDwork(LinearSystemProblem* problem, SolverOptions* options
   if (options && options->iparam[4])
   {
     LWORK = -1;
-    int info = 0;
+    //int info = 0;
     double dgelsSize = 0;
     //DGELS(problem->size, problem->size , 1, 0, problem->size, 0, problem->size, &dgelsSize, LWORK, &info);
     aux += (int) dgelsSize;
