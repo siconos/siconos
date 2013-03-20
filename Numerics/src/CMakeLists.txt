@@ -7,12 +7,15 @@ include(FortranCInterface)
 # Set module files directory (i.e. where .mod will be created)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/Modules)
 # Define a Fortran interface file (FCMangle.hpp)
-FortranCInterface_VERIFY(CXX QUIET)
-FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FCMangle.h
-                            MACRO_NAMESPACE "myF2C"
-                            SYMBOL_NAMESPACE "myF2C"
-                            )
-
+#FortranCInterface_VERIFY(QUIET)
+if(NOT FortranCInterface_VERIFIED_C)
+  configure_file(../DefaultMangle.h.in ${CMAKE_BINARY_DIR}/FCMangle.h)
+else()
+  FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FCMangle.h
+    MACRO_NAMESPACE "myF2C" 
+    SYMBOL_NAMESPACE "myF2C"
+    )
+endif()
 #
 # VERSION defined in top-level CMakeLists.txt
 #
