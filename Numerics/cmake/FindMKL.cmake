@@ -204,26 +204,35 @@ ENDIF (MKL_LIBRARIES)
 
 # Other libraries
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} $ENV{DYLD_LIBRARY_PATH})
+
+## Set env var to help find library process. 
+
+if (WIN32)
+  set(_libdir LIB)
+elseif (APPLE)
+  set(_libdir ENV DYLD_LIBRARY_PATH)
+else ()
+  set(_libdir ENV LD_LIBRARY_PATH)
+endif ()
 
 
 IF (MKL_LIBRARIES)
   FOREACH(mkl64 ${mkl64s} "_core" "")
     FOREACH(mkls ${mklseq} "")
       IF (NOT MKL_LAPACK_LIBRARIES)
-        FIND_LIBRARY(MKL_LAPACK_LIBRARIES NAMES "mkl_rt${mkl64}${mkls}")
+        FIND_LIBRARY(MKL_LAPACK_LIBRARIES NAMES "mkl_rt${mkl64}${mkls}" PATHS ${_libdir})
         MARK_AS_ADVANCED(MKL_LAPACK_LIBRARIES)
       ENDIF (NOT MKL_LAPACK_LIBRARIES)
       IF (NOT MKL_SCALAPACK_LIBRARIES)
-        FIND_LIBRARY(MKL_SCALAPACK_LIBRARIES NAMES "mkl_scalapack${mkl64}${mkls}") 
+        FIND_LIBRARY(MKL_SCALAPACK_LIBRARIES NAMES "mkl_scalapack${mkl64}${mkls}" PATHS ${_libdir}) 
         MARK_AS_ADVANCED(MKL_SCALAPACK_LIBRARIES)
       ENDIF (NOT MKL_SCALAPACK_LIBRARIES)
       IF (NOT MKL_SOLVER_LIBRARIES)
-        FIND_LIBRARY(MKL_SOLVER_LIBRARIES NAMES "mkl_solver${mkl64}${mkls}")
+        FIND_LIBRARY(MKL_SOLVER_LIBRARIES NAMES "mkl_solver${mkl64}${mkls}" PATHS ${_libdir})
         MARK_AS_ADVANCED(MKL_SOLVER_LIBRARIES)
       ENDIF (NOT MKL_SOLVER_LIBRARIES)
       IF (NOT MKL_CDFT_LIBRARIES)
-        FIND_LIBRARY(MKL_CDFT_LIBRARIES NAMES "mkl_cdft${mkl64}${mkls}")
+        FIND_LIBRARY(MKL_CDFT_LIBRARIES NAMES "mkl_cdft${mkl64}${mkls}" PATHS ${_libdir})
         MARK_AS_ADVANCED(MKL_CDFT_LIBRARIES)
       ENDIF (NOT MKL_CDFT_LIBRARIES)
     ENDFOREACH(mkls)
