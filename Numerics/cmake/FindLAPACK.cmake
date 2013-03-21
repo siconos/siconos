@@ -1,3 +1,4 @@
+
 # - Find LAPACK library
 # This module finds an installed library that implements the LAPACK 
 # with its C interface (cblas) and the classical fortran interface.
@@ -38,7 +39,7 @@ if(NOT LAPACK_FOUND)
   elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
     set( _CHECK_FORTRAN FALSE )
   else()
-    if(BLAS_FIND_REQUIRED)
+    if(LAPACK_FIND_REQUIRED)
       message(FATAL_ERROR "FindLAPACK requires Fortran, C, or C++ to be enabled.")
     else()
       message(STATUS "Looking for LAPACK... - NOT found (Unsupported languages)")
@@ -143,13 +144,13 @@ if(NOT LAPACK_FOUND)
       endif()
       ## First we check c interface
       if(${_prefix} STREQUAL "LAPACKE")
-        check_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
+        check_function_exists("LAPACKE_${_name}" ${_prefix}${_combined_name}_WORKS)
       else()
 	check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
       endif()
       # and then, if required, fortran interface
       if (_CHECK_FORTRAN)
-	check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS_F)
+	check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS_F)
 	if(NOT ${${_prefix}${_combined_name}_WORKS_F})
 	  set(${_prefix}${_combined_name}_WORKS FALSE)
 	endif()
@@ -168,9 +169,9 @@ if(NOT LAPACK_FOUND)
   ## First of all, we need blas ## 
   if(NOT BLAS_FOUND)
     if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-      compile_with(BLAS)
+      message(STATUS "Warning : BLAS not found on your system. Lapack will not be searched.")
     else()
-      compile_with(BLAS REQUIRED)
+      message(FATAL_ERROR "You need to find BLAS before any attempt to find LAPACK.")
     endif()
   endif()
   
@@ -228,6 +229,7 @@ if(NOT LAPACK_FOUND)
     if((NOT LAPACK_LIBRARIES)
 	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "openblas")))
       message(STATUS "Try to find lapack in openblas ...")
+      
       check_lapack_libraries(
 	LAPACK_LIBRARIES
 	LAPACK
@@ -241,10 +243,10 @@ if(NOT LAPACK_FOUND)
 	set(LAPACKE_HEADER lapacke.h)
 	set(CLAPACK_HEADER clapack.h)
       else()
-	set(WITH_LAPACK FALSE)
+	set(WITH_LAPACK "" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       endif(LAPACK_LIBRARIES)
     endif()
-    
+
     ## Apple Framework ## 
     if((NOT LAPACK_LIBRARIES)
 	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "accelerate")))
@@ -263,6 +265,24 @@ if(NOT LAPACK_FOUND)
       endif (LAPACK_LIBRARIES)
     endif()
     
+    ## Generic LAPACKE library ##
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "generic")))
+      message(STATUS "Try to find a generic lapacke ...")
+      check_lapack_libraries(
+	LAPACK_LIBRARIES
+	LAPACKE
+	cheev
+	""
+	"lapacke;lapack"
+	"${BLAS_LIBRARIES}"
+	"")
+      if (LAPACK_LIBRARIES)
+	set(WITH_LAPACK "generic" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+	set(LAPACKE_HEADER lapacke.h)
+      endif()
+    endif()
+
     ## Atlas ## 
     if((NOT LAPACK_LIBRARIES)
 	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "atlas")))
@@ -272,7 +292,7 @@ if(NOT LAPACK_FOUND)
 	LAPACK
 	cheev
 	""
-	"lapack"
+	"lapack_atlas;lapack"
 	"${BLAS_LIBRARIES}"
 	"")
       if (LAPACK_LIBRARIES)
@@ -280,25 +300,8 @@ if(NOT LAPACK_FOUND)
 	set(CLAPACK_HEADER clapack.h)
 	set(LAPACK_INCLUDE_SUFFIXES atlas)
       else()
-	set(WITH_LAPACK FALSE)
-      endif (LAPACK_LIBRARIES)
-    endif()
-    
-    ## Generic LAPACKE library ##
-    if((NOT LAPACK_LIBRARIES)
-	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "generic")))
-      message(STATUS "Try to find a generic lapacke ...")
-      check_lapack_libraries(
-	LAPACKE_LIBRARIES
-	LAPACKE
-	LAPACKE_cheev
-	""
-	"lapacke"
-	"${BLAS_LIBRARIES}"
-	"")
-      if (LAPACKE_LIBRARIES)
-	set(LAPACKE_HEADER lapacke.h)
-      endif (LAPACKE_LIBRARIES)
+	set(WITH_LAPACK "" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+      endif()
     endif()
 
     ## Generic LAPACK library ##
@@ -323,13 +326,13 @@ if(NOT LAPACK_FOUND)
     
     if(LAPACK_LIBRARIES)
       set(LAPACK_FOUND TRUE)
-    else(LAPACK_LIBRARIES)
+    else()
       set(LAPACK_FOUND FALSE)
-    endif(LAPACK_LIBRARIES)
+    endif()
     
     ## Now the headers ...
     if(LAPACK_FOUND)
-      set(LAPACK_FOUND 0)
+      unset(LAPACK_FOUND CACHE)
       message(STATUS "Lapack libraries have been found : ${LAPACK_LIBRARIES}. We now turn to headers.")
 
       if(NOT LAPACK_LIBRARY_DIR)
@@ -453,18 +456,12 @@ if(NOT LAPACK_FOUND)
     endif()
   endif()
 
-  if(NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
-    message(FATAL_ERROR "Cannot find a library with LAPACK API. Please specify library location using LAPACK_DIR option or set your environment variables properly.")
-  endif (NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
-  if(NOT LAPACK_FIND_QUIETLY)
-    if(LAPACK_FOUND)
-      message(STATUS "Found a library with LAPACK API (${BLA_VENDOR}).")
-    else(LAPACK_FOUND)
-      message(STATUS "Cannot find a library with LAPACK API. Maybe you can try again using LAPACK_DIR option or set your environment variables properly.")
-    endif(LAPACK_FOUND)
-  endif(NOT LAPACK_FIND_QUIETLY)
-  
-  # === Extra Checks for lapack functions ===
+  if(HAS_LAPACKE)
+    set(LAPACK_HEADER ${LAPACKE_HEADER} CACHE STRING "Lapack header name.")
+  else()
+    set(LAPACK_HEADER ${CLAPACK_HEADER} CACHE STRING "Lapack header name.")
+  endif()    
+    # === Extra Checks for lapack functions ===
   # We check only the functions that are known to be un-implemented
   # in some lapack libraries (namely atlas ...)
   # This is probably a temporary check since it's likely
@@ -490,35 +487,33 @@ if(NOT LAPACK_FOUND)
   unset(HAS_LAPACK_DGESVD)
   set(GENERIC_NAME "DGESVD")
   set(FUNC_NAME "${LAPACK_PREFIX}dgesvd${LAPACK_SUFFIX}")
-  if(HAS_LAPACKE)
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DGESVD)
-  else()
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DGESVD)
-  endif()
+  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGESVD)
+
   ## dgels ##
   unset(HAS_LAPACK_DGELS)
   set(GENERIC_NAME "DGELS")
   set(FUNC_NAME "${LAPACK_PREFIX}dgels${LAPACK_SUFFIX}")
-  if(HAS_LAPACKE)
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DGELS)
-  else()
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DGELS)
-  endif()
+  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DGELS)
 
   ## dtrtrs ##
   unset(HAS_LAPACK_DTRTRS)
   set(GENERIC_NAME "DTRTRS")
   set(FUNC_NAME "${LAPACK_PREFIX}dtrtrs${LAPACK_SUFFIX}")
-  if(HAS_LAPACKE)
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACKE_HEADER} HAS_LAPACK_DTRTRS)
-  else()
-    check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${CLAPACK_HEADER} HAS_LAPACK_DTRTRS)
-  endif()
+  check_lapack_has_function(${GENERIC_NAME} ${FUNC_NAME} ${LAPACK_HEADER} HAS_LAPACK_DTRTRS)
 
+  ## Final settings ...
+  set(LAPACK_LIBRARIES ${LAPACK_LIBRARIES} CACHE INTERNAL "Lapack libraries.")
 
-
-
-
+  if(NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
+    message(FATAL_ERROR "Cannot find a library with LAPACK API. Please specify library location using LAPACK_DIR option or set your environment variables properly.")
+  endif (NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
+  if(NOT LAPACK_FIND_QUIETLY)
+    if(LAPACK_FOUND)
+      message(STATUS "Found a library with LAPACK API (${WITH_LAPACK}). Libraries : ${LAPACK_LIBRARIES}. Header : ${LAPACK_INCLUDE_DIRS}/${LAPACK_HEADER}.")
+    else(LAPACK_FOUND)
+      message(STATUS "Cannot find a library with LAPACK API. Maybe you can try again using LAPACK_DIR option or set your environment variables properly.")
+    endif(LAPACK_FOUND)
+  endif(NOT LAPACK_FIND_QUIETLY)
 endif()
 
 

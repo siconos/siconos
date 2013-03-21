@@ -125,12 +125,8 @@ IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
   ENDFOREACH()
 ENDIF(CROSSCOMPILING_LINUX_TO_WINDOWS)
 
+compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
-
-include_directories(${BLAS_INCLUDE_DIRS})
-include_directories(${LAPACK_INCLUDE_DIRS})
-#remember_link_libraries(${BLAS_LIBRARIES})
-#remember_link_libraries(${LAPACK_LIBRARIES})
 
 COMPILE_WITH(GMP REQUIRED)
 
@@ -322,6 +318,8 @@ MESSAGE(STATUS " Code Sources are in : ${CMAKE_SOURCE_DIR}")
 MESSAGE(STATUS " The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 MESSAGE(STATUS " The Numerics library used is : ${SiconosNumerics_LIBRARIES}")
 MESSAGE(STATUS " The Numerics headers are located in : ${SiconosNumerics_INCLUDE_DIRS}")
+message(STATUS " Blas is ${WITH_BLAS}. Libraries : ${BLAS_LIBRARIES}. Header : ${BLAS_INCLUDE_DIRS}/${BLAS_HEADER}.")
+message(STATUS " Lapack is ${WITH_LAPACK}. Libraries : ${LAPACK_LIBRARIES}. Header : ${LAPACK_INCLUDE_DIRS}/${LAPACK_HEADER}.")
 MESSAGE(STATUS " To get more information about dependencies, config or else, ")
 MESSAGE(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
 MESSAGE(STATUS "=================================================================================================\n")

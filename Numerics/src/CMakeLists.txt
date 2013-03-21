@@ -74,14 +74,10 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/FCMangle.h DESTINATION include/Siconos/Numeric
 #
 # compilation setup 
 #
+
+compile_with(BLAS REQUIRED)
 compile_with(LAPACK REQUIRED)
 
-include_directories(${BLAS_INCLUDE_DIRS})
-include_directories(${LAPACK_INCLUDE_DIRS})
-remember_link_libraries(${BLAS_LIBRARIES})
-remember_link_libraries(${LAPACK_LIBRARIES})
-
-PRINT_VAR(${PROJECT_NAME}_SHARED_LIB_LINK)
 include_directories(src/utils/test)
 
 COMPILE_WITH(PathFerris)
@@ -573,8 +569,3 @@ ENDIF(PRINT_VAR)
 FEATURE_SUMMARY(WHAT ALL)
 
 WRITE_NOTES()
-
-
-
-message(STATUS "BLAS Vendor  : ${BLA_VENDOR} --- LIB: ${BLAS_LIBRARIES}")
-message(STATUS "LAPACK ${BLA_VENDOR} ${LAPACK_LIBRARIES}")

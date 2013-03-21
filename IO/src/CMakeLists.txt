@@ -60,8 +60,8 @@ IF(WITH_VTK)
     SET(SiconosIO_LINK_LIBRARIES "${SiconosIO_LINK_LIBRARIES};vtkIO;vtkCommon;vtkGraphics;vtkRendering")
   ENDIF()
 ENDIF()
-
-COMPILE_WITH(LAPACK)
+compile_with(BLAS REQUIRED)
+compile_with(LAPACK REQUIRED)
 
 FIND_PACKAGE(Boost 1.47 COMPONENTS serialization REQUIRED)
 
