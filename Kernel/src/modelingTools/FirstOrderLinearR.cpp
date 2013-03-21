@@ -119,17 +119,18 @@ void FirstOrderLinearR::initialize(Interaction& inter)
 {
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
-  // Update data member (links to DS variables)
-  if (!_jachx)
-    RuntimeException::selfThrow("FirstOrderLinearR::initialize() C is null and is a required input.");
-  if (!_jacglambda)
-    RuntimeException::selfThrow("FirstOrderLinearR::initialize() B is null and is a required input.");
-
-  // Check if various operators sizes are consistent.
-  // Reference: interaction.
+  // get interesting size
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeX = inter.getSizeOfDS();
   unsigned int sizeZ = inter.getSizez();
+  // Update data member (links to DS variables)
+  if (!_jachx)
+    _jachx.reset(new SimpleMatrix(sizeY, sizeX));
+  if (!_jacglambda)
+    _jacglambda.reset(new SimpleMatrix(sizeX, sizeY));
+
+  // Check if various operators sizes are consistent.
+  // Reference: interaction.
 
   // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
