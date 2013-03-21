@@ -9,34 +9,11 @@
 #define LDU M
 #define LDVT N
 
-void testfunc(char a)
-{
-  printf("val a : %c\n",a);
-  int tutu;
-  
-  tutu = (int)a;
-  
-  printf("val tutu %d\n", tutu);
-  printf("Cbals T...%d\n",CblasTrans);
-  printf("Cbals N...%d\n",CblasNoTrans);
-  printf("LAT ...%d\n",LA_TRANS);
-  printf("LANOT ...%d\n",LA_NOTRANS);
-}
-void testfunc2(char* a)
-{
-  printf("val a2 : %c\n",*a);
-  
-}
-
-
-
 /* Main program */
 int main() {
         /* Locals */
         int m = M, n = N, lda = LDA, ldu = LDU, ldvt = LDVT, info = 0;
         double superb[min(M,N)-1];
-        
-        testfunc(LA_TRANS);
         
         /* Local arrays */
         double s[N], u[LDU*M], vt[LDVT*N];
@@ -60,8 +37,8 @@ int main() {
         }
         
         double singularValues[N] = {27.47, 22.64, 8.56, 5.99, 2.01};
-        /* for (int i = 0; i<N;++i) */
-        /*   if(abs(s[i]- singularValues[i])>1e-8) exit(1); */
+        for (int i = 0; i<N;++i)
+          if(abs(s[i]- singularValues[i])>1e-8) exit(1);
         double LeftSingularVectors[LDU*M] =
           { -0.59 , -0.40, -0.03, -0.43, -0.47, 0.29,
             0.26, 0.24, -0.6, 0.24, -0.35, 0.58,
@@ -69,8 +46,8 @@ int main() {
             0.31, -0.75, 0.23, 0.33, 0.16, 0.38,
             0.23, -0.36, -0.31, 0.16, -0.52, -0.65            
           };
-        /* for (int i = 0; i<LDU*M;++i) */
-        /*   if(abs(u[i]- LeftSingularVectors[i])>1e-8) exit(1); */
+        for (int i = 0; i<LDU*M;++i)
+          if(abs(u[i]- LeftSingularVectors[i])>1e-8) exit(1);
         double RightSingularVectors[LDVT*N] =
           { -0.25, 0.81, -0.26, 0.4, -0.22,
             -0.4, 0.36, 0.7, -0.45, 0.14, 
@@ -78,8 +55,8 @@ int main() {
             -0.37, -0.37, 0.39, 0.43, -0.63, 
             -0.41, -0.1, -0.49, -0.62, -0.44
           };
-        /* for (int i = 0; i<LDVT*N;++i) */
-        /*   if(abs(vt[i]- RightSingularVectors[i])>1e-8) exit(1); */
+        for (int i = 0; i<LDVT*N;++i)
+          if(abs(vt[i]- RightSingularVectors[i])>1e-8) exit(1);
         
         /* Print singular values */
         print_matrix( "Singular values", 1, n, s, 1 );

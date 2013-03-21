@@ -49,7 +49,6 @@
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
   __CLPK_integer lwork = -1;                                            \
   __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));  \
-  printf("JOBUJOBA in wrap  %c , %c \n",*A1,*A2);                       \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   lwork = (__CLPK_integer)work[0];                                      \
   work = realloc(work,lwork*sizeof(*work));                             \
@@ -88,7 +87,6 @@
   
 // --- DPOTRF ---
 #define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)                                 \
-  printf("param of dpot ...%c\n", *A1);                                \
   F(A1,A2,A3,A4,INFO);                                                  \
   
 // --- DGETRF ---

@@ -338,24 +338,6 @@ void frictionContact3D_globalAlartCurnier(
   double *AWpB_ = (double *) ipiv + problemSize;
 #endif
 
-  double w;
-
-  /* int LWORK = 0; */
-  /* double *WORK = NULL; */
-  /* // iparam[2] != 0 => use of DGELS */
-  /* if (options->iparam[2]) */
-  /* { */
-  /*   int dgelsinfo = 0; */
-
-  /*   DGELS(problemSize, problemSize, */
-  /*         1, AWpB, problemSize, */
-  /*         F, problemSize, &w, -1, &dgelsinfo); */
-
-  /*   LWORK = (int) w; */
-
-  /*   WORK = (double *) malloc(w * sizeof(double)); */
-  /* } */
-
   for (unsigned int i = 0; i < problemSize; ++i) rho[i] = 1.;
 
   info[0] = 1;
@@ -387,7 +369,6 @@ void frictionContact3D_globalAlartCurnier(
 
     if (options->iparam[2])
     {
-      //assert(WORK);
       DGELS(LA_NOTRANS,problemSize, problemSize, 1, AWpB, problemSize,
             tmp1, problemSize, &info2);
     }
@@ -497,10 +478,6 @@ void frictionContact3D_globalAlartCurnier(
   {
     assert(buffer);
     free(buffer);
-
-    /* if (WORK) */
-    /*   free(WORK); */
-
   }
   else
   {

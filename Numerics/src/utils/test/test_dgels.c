@@ -49,7 +49,7 @@ int main() {
         for(int i=0;i<LDB*NRHS;++i)
         {
           printf(" %f, %f ", Sol[i], b[i]);
-          // if(fabs(Sol[i]-b[i])>tol) exit(1);
+          if(fabs(Sol[i]-b[i])>tol) exit(1);
         }
         /* Print residual sum of squares for the solution */
         print_vector_norm( "Residual sum of squares for the solution", m-n, nrhs,

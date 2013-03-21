@@ -648,7 +648,6 @@ void globalFrictionContact3D_AlartCurnier(
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
-  int nzmax = options->iparam[3];
 
 #ifdef WITH_MUMPS
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*)(long) options->dparam[7];
@@ -678,7 +677,7 @@ void globalFrictionContact3D_AlartCurnier(
 #endif
 
   assert(itermax > 0);
-  assert(nzmax > 0);
+  assert(options->iparam[3] > 0);
 
   double tolerance = options->dparam[0];
   assert(tolerance > 0);

@@ -180,7 +180,6 @@ extern "C"
     int C_N = N;
     int C_LDA = LDA;
     int C_INFO = *INFO;
-    printf("param of dpot ...%c\n", UPLO);
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), UPLO, INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -215,7 +214,6 @@ extern "C"
     int C_LDU = LDU;
     int C_LDVT = LDVT;
     int C_INFO = *INFO;
-    printf("JOBUJOBA %c , %c\n",JOBU,JOBVT);
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -263,7 +261,6 @@ extern "C"
     int C_N = N;
     int C_LDA = LDA;
     int C_INFO = *INFO;
-    printf("param of dpot ...%c\n", UPLO);
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), CHAR(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }

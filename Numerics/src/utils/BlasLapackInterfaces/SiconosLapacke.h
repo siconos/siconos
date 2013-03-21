@@ -52,7 +52,6 @@
 // --- DGESVD ---
 #if defined(HAS_LAPACK_DGESVD)
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
-  printf("JOBUJOBA in wrap %c , %c\n",A1,A2);                           \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)
 #else
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
