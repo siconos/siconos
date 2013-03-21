@@ -110,6 +110,7 @@ if(NOT BLAS_FOUND)
 
 	## If search fails, we try with pkg-config
 	if(NOT ${_prefix}_${_library}_LIBRARIES)
+	  set(${_prefix}_${_library}_LIBRARIES "")
 	  message(STATUS "Try to find ${_library} using pkg-config")
 	  pkg_check_modules(PC_${_library} QUIET ${_library})
 	  PRINT_VAR(PC_${_library}_LIBDIR)
