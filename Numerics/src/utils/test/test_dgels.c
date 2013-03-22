@@ -40,17 +40,6 @@ int main() {
         /* Print least squares solution */
         print_matrix( "Least squares solution", n, nrhs, b, ldb );
 
-        double Sol[LDB*NRHS] = {
-          -0.45, -0.85, 0.71, 0.13, 0.25,
-          -0.90,  0.63,0.14};
-        double tol = 1e-3;
-       print_matrix( "Least squares solution", n, nrhs, Sol, ldb );
-        
-        for(int i=0;i<LDB*NRHS;++i)
-        {
-          printf(" %f, %f ", Sol[i], b[i]);
-          if(fabs(Sol[i]-b[i])>tol) exit(1);
-        }
         /* Print residual sum of squares for the solution */
         print_vector_norm( "Residual sum of squares for the solution", m-n, nrhs,
                         &b[n], ldb );

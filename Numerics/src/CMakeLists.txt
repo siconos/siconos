@@ -177,8 +177,12 @@ IF(WITH_TESTING)
   NEW_TEST(test_timers_interf test_timers_interf.c)
   NEW_TEST(test_cblas test_cblas.c)
   NEW_TEST(test_dgesv test_dgesv.c)
-  NEW_TEST(test_gesvd test_gesvd.c)
-  NEW_TEST(test_dgels test_dgels.c)
+  if(HAS_LAPACK_DGESVD)
+    NEW_TEST(test_gesvd test_gesvd.c)
+  endif()
+  if(HAS_LAPACK_DGELS)
+    NEW_TEST(test_dgels test_dgels.c)
+  endif()
   NEW_TEST(test_dpotrf test_dpotrf.c)
   END_TEST()
 
@@ -486,9 +490,9 @@ ENDIF(MUMPS_FOUND)
 
   SET(GFC3D_test6_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(GFC3D_test6 GlobalFrictionContact3D_test6.c)
-
+  
   NEW_TEST(GFC3D_test7 GlobalFrictionContact3D_test7.c)
-
+  
   NEW_TEST(GFC3D_test10 GlobalFrictionContact3D_test10.c)
   NEW_TEST(GFC3D_test11 GlobalFrictionContact3D_test11.c)
   NEW_TEST(GFC3D_test12 GlobalFrictionContact3D_test12.c)
@@ -496,7 +500,7 @@ ENDIF(MUMPS_FOUND)
   NEW_TEST(GFC3D_test14 GlobalFrictionContact3D_test14.c)
   NEW_TEST(GFC3D_test14bis GlobalFrictionContact3D_test14bis.c)
   NEW_TEST(GFC3D_test15 GlobalFrictionContact3D_test15.c)
- NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
+  NEW_TEST(GFC3D_test16 GlobalFrictionContact3D_test16.c)
 
   
   ## Alart Curnier functions
@@ -518,7 +522,7 @@ ENDIF(MUMPS_FOUND)
   SET(test-GMP-REDUCED0_3D_QUARTIC-GMP6_PROPERTIES WILL_FAIL TRUE)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP6.dat)
   
-  IF(COMPLETE_LAPACK_LIBRARIES)
+  IF(HAS_LAPACK_DGESVD)
     NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP0.dat 0 0 0 0 0 1)
     NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP1.dat 0 0 0 0 0 1)
     NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP2.dat 0 0 0 0 0 1)
@@ -527,7 +531,7 @@ ENDIF(MUMPS_FOUND)
     NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP5.dat 0 0 0 0 0 1)
 #    SET(test-GMP-REDUCED1_3D_QUARTIC-GMP6_PROPERTIES WILL_FAIL TRUE)
     NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP6.dat 0 0 0 0 0 1)
-  ENDIF(COMPLETE_LAPACK_LIBRARIES)
+  endif()
   
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP0.dat 0 0 0 0 0 2)
   NEW_GMP_TEST(SICONOS_FRICTION_3D_QUARTIC GMP1.dat 0 0 0 0 0 2)
