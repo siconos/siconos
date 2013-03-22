@@ -368,7 +368,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
 int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem, FILE* MLCPfile)
 {
   int n = 0, m = 0, NbLines = 0;
-  int i, j,  n2, m2, isol;
+  int i, j,  m2;
   char val[128];
 
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
@@ -379,9 +379,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   nread = fscanf(MLCPfile , "%d" , &m);
   nread = fscanf(MLCPfile , "%d" , &NbLines);
 
-  n2 = n * n;
   m2 = m * m;
-  isol = 1;
 
   vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
 

@@ -52,17 +52,15 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   double *u = &z[0];
   double *v = &z[n];
 
-  int incx, incy, incAx, incAy, incBx, incBy;
+  int incy, incAx, incBx;
   int i, iter;
   int itermax, verbose;
-  int incxn;
   double err, vi, viprev, uiprev;
   double tol, omega, rho;
   double *diagA, *diagB;
   verbose = 0;
-  incx = 1;
   incy = 1;
-  incxn = n;
+
   /* Recup input */
 
   itermax = options->iparam[0];
@@ -84,7 +82,6 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
 
 
-  incx = 1;
   incy = 1;
 
   /* Preparation of the diagonal of the inverse matrix */
@@ -139,12 +136,9 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   iter = 0;
   err  = 1.;
 
-  incx = 1;
   incy = 1;
   incAx = n;
-  incAy = 1;
   incBx = m;
-  incBy = 1;
 
   mlcp_compute_error(problem, z, w, tol, &err);
 
@@ -153,7 +147,6 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   {
 
     ++iter;
-    incx = 1;
     incy = 1;
 
 

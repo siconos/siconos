@@ -213,9 +213,9 @@ if(NOT LAPACK_FOUND)
 	set(CMAKE_PREFIX_PATH ${LAPACK_DIR})
 	string(TOLOWER ${LAPACK_DIR} lowerlapdir)
 	## We use LAPACK_DIR to set WITH_LAPACK, if possible. 
-	if(lowerblasdir MATCHES "atlas.*") 
+	if(lowerlapdir MATCHES "atlas.*") 
 	  set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
-	elseif(lowerblasdir MATCHES "openblas.*")
+	elseif(lowerlapdir MATCHES "openblas.*")
 	  set(WITH_LAPACK "openblas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
 	endif()
       endif()
@@ -422,7 +422,11 @@ if(NOT LAPACK_FOUND)
   endif()
 
    if(LAPACK_FOUND) # NumericsConfig.h setup
-     
+     ## If lapack was found as "generic" but is part of atlas. 
+     if(LAPACK_LIBRARIES MATCHES "atlas.*") 
+       set(WITH_LAPACK "atlas" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+     endif()
+ 
     if(WITH_LAPACK STREQUAL "mkl")
       set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
       set(LAPACK_SUFFIX)
