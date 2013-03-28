@@ -38,10 +38,10 @@ void BulletR::computeh(const double time, Interaction& inter)
 {
   DEBUG_PRINT("start of computeh\n");
 
-  btCollisionObject* obA =
-    static_cast<btCollisionObject*>(_contactManifold->getBody0());
-  btCollisionObject* obB =
-    static_cast<btCollisionObject*>(_contactManifold->getBody1());
+  const btCollisionObject* obA =
+    static_cast<const btCollisionObject*>(_contactManifold->getBody0());
+  const btCollisionObject* obB =
+    static_cast<const btCollisionObject*>(_contactManifold->getBody1());
 
   _contactManifold->refreshContactPoints(obA->getWorldTransform(), obB->getWorldTransform());
 
