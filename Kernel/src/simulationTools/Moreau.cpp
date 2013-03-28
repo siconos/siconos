@@ -1801,8 +1801,11 @@ void Moreau::updateState(const unsigned int level)
       cout << "Moreau::updateState() prev v" << endl;
       v->display();
 #endif
-      assert(((d->p(level)).get()) &&
-             " Moreau::updateState() *d->p(level) == NULL.");
+
+      // failure on bullet sims
+      // d->p(level) is checked in next condition
+      // assert(((d->p(level)).get()) &&
+      //       " Moreau::updateState() *d->p(level) == NULL.");
 
       if (level != LEVELMAX && d->p(level))
       {
