@@ -1,6 +1,6 @@
 #!/bin/sh
 
-siconos -j 2 -DWITH_BULLET `pkg-config bullet --cflags` `pkg-config bullet --lib` -lglut QGLBullet.cpp
+siconos -j 2 -DWITH_BULLET -DBT_USE_DOUBLE_PRECISION=1 `pkg-config bullet --cflags` `pkg-config bullet --lib` -lglut QGLBullet.cpp
 
 
 # Mac Os X (Snow Leopard)

@@ -35,7 +35,7 @@ void BulletViewer::init()
 
   // shapeDrawer
   _shapeDrawer.enableTexture(true);
-  _transparency = 1.f;
+  _transparency = 1.;
 
   // help screen
   help();
@@ -126,7 +126,7 @@ void BulletViewer::drawQGLShape(const QGLShape& fig)
   aabbMin -= btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
   aabbMax += btVector3(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 
-  _shapeDrawer.drawOpenGL(_transparency, m, co->getCollisionShape(), _colors[ds->number() % _colors.size()], 2, aabbMin, aabbMax);
+  _shapeDrawer.drawOpenGL((btScalar*) &_transparency, (const btCollisionShape*) co->getCollisionShape(), (const btVector3&) _colors[ds->number() % _colors.size()], 2, (const btVector3&) aabbMin, (const btVector3&) aabbMax);
 
   unsigned int numManifolds =
     cow->getDispatcher()->getNumManifolds();
@@ -310,7 +310,9 @@ void BulletViewer::draw()
 
     btVector3 color = btVector3(0.81f, 0.81f, 0.81f);
 
-    _shapeDrawer.drawOpenGL(1.f, m, co->getCollisionShape(), color, 0, aabbMin, aabbMax);
+    btScalar transp = 1.;
+
+    _shapeDrawer.drawOpenGL(&transp, (const btCollisionShape*) co->getCollisionShape(), (const btVector3&) color, 0, (const btVector3&) aabbMin, (const btVector3&) aabbMax);
 
     //    ask<ForCollisionWorld>(*Siconos_->spaceFilter())
     //     ->debugDrawObject((*iso)->getWorldTransform(),
