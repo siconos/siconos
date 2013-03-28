@@ -114,9 +114,6 @@ if(NOT LAPACK_FOUND)
 	  set(${_prefix}_${_library}_LIBRARIES "")
 	  message(STATUS "Try to find ${_library} using pkg-config")
 	  pkg_check_modules(PC_${_library} QUIET ${_library})
-	  PRINT_VAR(PC_${_library}_LIBDIR)
-	  PRINT_VAR(PC_${_library}_LIBRARY_DIRS)
-	  PRINT_VAR(PC_${_library}_LIBRARIES)
 	  foreach(PC_LIB ${PC_${_library}_LIBRARIES})
 	    find_library(${PC_LIB}_LIBRARY
 	      NAMES ${PC_LIB}
@@ -191,9 +188,7 @@ if(NOT LAPACK_FOUND)
       set(LAPACK_INCLUDE_DIR ${MKL_INCLUDE_DIR})
       set(LAPACK_VERSION ${MKL_VERSION})
       set(LAPACK_LIBRARY_DIR ${BLAS_LIBRARY_DIR} CACHE PATH "Lapack libraries location." FORCE)
-      PRINT_VAR(MKL_LAPACK_LIBRARIES) ## This must have been found during FindBLAS process ...
       set(LAPACK_LIBRARIES ${MKL_LAPACK_LIBRARIES})
-      PRINT_VAR(LAPACK_LIBRARIES)
       ## Apple accelerate 
     elseif(WITH_BLAS STREQUAL "accelerate")
       set(WITH_LAPACK "accelerate" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
@@ -412,8 +407,6 @@ if(NOT LAPACK_FOUND)
 
 	endif()
       endif()
-      PRINT_VAR(LAPACK_DIR)
-      PRINT_VAR(LAPACK_INCLUDE_DIRS)
       if(LAPACK_INCLUDE_DIRS)
 	set(LAPACK_FOUND 1)
       endif()
