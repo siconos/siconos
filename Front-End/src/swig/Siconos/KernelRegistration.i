@@ -2,6 +2,10 @@
 // You have to PY_REGISTER base classe before derivated classes
 #undef PY_REGISTER
 #define KERNEL_REGISTRATION()                                           \
+  PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                          \
+  PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
+  PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                          \
+  PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
   PY_REGISTER(NonSmoothLaw);                                            \
   PY_REGISTER(NewtonImpactNSL);                                         \
   PY_REGISTER(NewtonImpactFrictionNSL);                                 \
@@ -66,10 +70,6 @@
   PY_REGISTER(EventsManager);                                           \
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
-  PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);                          \
-  PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);                           \
-  PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);                          \
-  PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);                            \
   PY_REGISTER(InteractionsSet);                                         \
   PY_REGISTER(BoundaryCondition);                                       \
   PY_REGISTER_SICONOS_MECHANICS_MAYBE();                                \

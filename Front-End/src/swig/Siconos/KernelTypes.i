@@ -77,8 +77,11 @@
 (TYPE)
 {
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (std11::shared_ptr<SiconosVector>)
-  int res = SWIG_ConvertPtr($input, 0, SWIGTYPE, 0);
+  TYPE * ptr;
+
+  int res = SWIG_ConvertPtr($input, (void **) (&ptr), SWIGTYPE, 0);
   int state = SWIG_CheckState(res);
+  if (SWIG_IsNewObj(res)) { delete ptr; };
   $1 = is_array($input) || PySequence_Check($input) || state;
 }
 %enddef
