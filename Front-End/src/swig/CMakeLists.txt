@@ -22,7 +22,7 @@ FIND_PACKAGE(PythonInterp)
 
 # on ubuntu precise with cmake >= 2.8.8 pythonlibs find python 3.0
 # before python 2.7 (in Release but not in Debug ...)
-SET(Python_ADDITIONAL_VERSIONS "2.6;2.7")
+#SET(Python_ADDITIONAL_VERSIONS "2.6;2.7")
 
 FIND_PACKAGE(PythonLibs)
 
@@ -68,7 +68,7 @@ COMPILE_WITH(LibXml2 REQUIRED)
 COMPILE_WITH(GMP REQUIRED)
 
 COMPILE_WITH(BLAS REQUIRED)
-COMPILE_WITH(LAPACK REQUIRED COMPLETE)
+COMPILE_WITH(LAPACK REQUIRED)
 
 # contact detection
 IF(WITH_BULLET)
