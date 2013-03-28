@@ -643,15 +643,6 @@ TYPECHECK(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_SimpleM
 TYPEMAP_VECTOR(std11::shared_ptr<SiconosVector>, SWIGTYPE_p_std11__shared_ptrT_SiconosVector_t);
 TYPEMAP_MATRIX(std11::shared_ptr<SiconosMatrix>, SWIGTYPE_p_std11__shared_ptrT_SiconosMatrix_t);
 TYPEMAP_MATRIX(std11::shared_ptr<SimpleMatrix>, SWIGTYPE_p_std11__shared_ptrT_SimpleMatrix_t);  
-// needed?
-// from C++ to python 
-%template() std11::shared_ptr<SiconosVector>;
-%template() std11::shared_ptr<BlockVector>;
-%template() std11::shared_ptr<SiconosMatrix>;
-%template() std11::shared_ptr<SimpleMatrix>;
-%template() std11::shared_ptr<std::vector<unsigned int> >;
-
-
 
 %apply (std11::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
 
