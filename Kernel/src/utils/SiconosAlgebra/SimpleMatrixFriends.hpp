@@ -55,14 +55,6 @@ const SimpleMatrix operator * (const SiconosMatrix& A, double a);
  */
 SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B);
 
-/**
- *Default comparator
- *\param A a SimpleMatrix
- *\param B a SimpleMatrix
- * return true if A != B
- */
-bool operator!= (const SimpleMatrix& A, const SimpleMatrix& B);
-
 /** operator += add B to A
  *  \param[in,out] A a SP::SiconosMatrix
  *  \param B a SP::SiconosMatrix
@@ -125,6 +117,13 @@ void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
  * \return a boolean
  */
 bool operator == (const SiconosMatrix& A, const SiconosMatrix& B);
+
+/**: A!=B when (A-B).normInf()>tolerance
+ * \param A a SiconosMatrix
+ * \param B a SiconosMatrix
+ * \return a boolean
+ */
+bool operator != (const SiconosMatrix& A, const SiconosMatrix& B);
 
 /** compute the power of the matrix (!)
  * \param A a SimpleMatrix

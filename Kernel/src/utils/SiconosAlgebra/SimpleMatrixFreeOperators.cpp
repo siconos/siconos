@@ -460,4 +460,10 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   return (norm < tolerance);
 }
 
+bool operator != (const SiconosMatrix &m, const SiconosMatrix &x)
+{
+  double norm = (m - x).normInf();
+  return (norm > tolerance);
+}
+
 

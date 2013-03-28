@@ -622,11 +622,6 @@ public:
 
   friend  SP::SimpleMatrix operator * (const SP::SimpleMatrix, const SP::SimpleMatrix);
 
-  friend bool operator!= (const SimpleMatrix&, const SimpleMatrix&)
-  {
-    return true;
-  };
-
   friend  void operator +=(SP::SiconosMatrix, SP::SimpleMatrix);
 
   friend  SimpleMatrix operator * (double , const SiconosMatrix&);
@@ -644,6 +639,8 @@ public:
   friend void sub(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
   friend bool operator == (const SiconosMatrix&, const SiconosMatrix&);
+
+  friend bool operator!= (const SiconosMatrix&, const SiconosMatrix&);
 
   friend const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
 
