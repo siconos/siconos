@@ -71,9 +71,7 @@
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
   PY_REGISTER(InteractionsSet);                                         \
-  PY_REGISTER(BoundaryCondition);                                       \
-  PY_REGISTER_SICONOS_MECHANICS_MAYBE();                                \
-  PY_REGISTER_BULLET_MAYBE();
+  PY_REGISTER(BoundaryCondition);
 
 #ifdef HAVE_SICONOS_MECHANICS
 #define PY_REGISTER_SICONOS_MECHANICS_MAYBE()                           \

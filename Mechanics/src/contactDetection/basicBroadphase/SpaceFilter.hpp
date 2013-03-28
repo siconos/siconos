@@ -49,7 +49,6 @@
 #include "SphereLDSPlanR.hpp"
 #include "SphereNEDS.hpp"
 #include "SphereNEDSPlanR.hpp"
-#include "ExternalBody.hpp"
 
 //#ifndef __GCCXML__
 //#include <tr1/unordered_set>
@@ -324,5 +323,7 @@ public:
    */
   ACCEPT_STD_VISITORS();
 };
+
+TYPEDEF_SPTR(SpaceFilter);
 
 #endif /* SpaceFilter_hpp */

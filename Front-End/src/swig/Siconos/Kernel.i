@@ -199,36 +199,8 @@ typedef __mpz_struct mpz_t[1];
 %include KernelRegistration.i
 %include pyRegister.i
 
-%define PY_REGISTER_BULLET_COLLISION_DETECTION(X) 
-TYPEDEF_SPTR(X);
-PY_REGISTER_WITHOUT_DIRECTOR(X)
-%enddef
-
-%define PY_REGISTER_BULLET_LINEAR_MATH(X)
-TYPEDEF_SPTR(X);
-PY_REGISTER_WITHOUT_DIRECTOR(X)
-%enddef
-
- 
 
 // ignores
-
-// Bullet
-// (mostly because not defined in <name>.h)
-%ignore btCapsuleShapeX;
-%ignore btCapsuleShapeZ;
-%ignore btConeShapeX;
-%ignore btConeShapeZ;
-%ignore btCylinderShapeX;
-%ignore btCylinderShapeZ;
-%ignore btConvexInternalAabbCachingShape;
-%ignore btPolyhedralConvexAabbCachingShape;
-%ignore btBU_Simplex1to4;
-%ignore m_vertices1;
-
-%ignore btVector4;
-
-
 
 // createSPtr*
 %ignore nullDeleter;
@@ -334,16 +306,6 @@ PY_REGISTER_WITHOUT_DIRECTOR(X)
 
 // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
-
-#undef PY_REGISTER_BULLET_COLLISION_DETECTION
-%define PY_REGISTER_BULLET_COLLISION_DETECTION(X)
-%include "BulletCollision/CollisionShapes/X.h";
-%enddef
-
-#undef PY_REGISTER_BULLET_LINEAR_MATH
-%define PY_REGISTER_BULLET_LINEAR_MATH(X)
-%include "LinearMath/X.h";
-%enddef
 
 %shared_ptr(_SolverOptions);
 TYPEDEF_SPTR(_SolverOptions);

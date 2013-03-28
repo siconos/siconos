@@ -1,5 +1,7 @@
 #include "SpaceFilter.hpp"
 
+#include "ExternalBody.hpp"
+
 #include <cmath>
 //#define DEBUG_MESSAGES 1
 #include "debug.h"

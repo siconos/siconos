@@ -26,7 +26,7 @@
 
 #include <LagrangianDS.hpp>
 
-DEFINE_SPTR(SpaceFilter)
+#include "SpaceFilter.hpp"
 
 class ExternalBody :
   public LagrangianDS,

@@ -4,6 +4,8 @@
 
 %include start.i
 
+%include path.i
+
 %include handleException.i
 
 %include sharedPointers.i
