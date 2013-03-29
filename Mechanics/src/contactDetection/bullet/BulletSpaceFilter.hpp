@@ -77,6 +77,18 @@ public:
     return _staticShapes;
   };
 
+  void addStaticObject(SP::btCollisionObject co) 
+  {
+    _staticObjects->push_back(co);
+  };
+
+  void addStaticShape(SP::btCollisionShape cs) 
+  {
+    _staticShapes->push_back(cs);
+  }
+
+
+
   void buildInteractions(double);
 
   ACCEPT_STD_VISITORS();

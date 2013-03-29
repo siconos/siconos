@@ -201,8 +201,6 @@ typedef __mpz_struct mpz_t[1];
 
 
 // ignores
-
-// createSPtr*
 %ignore nullDeleter;
 
 // defined in SiconosVector.cpp
