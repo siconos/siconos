@@ -28,7 +28,7 @@ double cond(double * A, int n, int m)
 //#ifdef COMPLETE_LAPACK_LIBRARIES
   int dimS = n;
   if (m < n) dimS = m;
-  double * S =  malloc(dimS * sizeof(*S));
+  double * S =  (double *)malloc(dimS * sizeof(*S));
 
   char JOBU = 'N';
   int LDU = 1;
@@ -42,7 +42,7 @@ double cond(double * A, int n, int m)
 
   int InfoDGSVD = -1;
 
-  double superb[min(m, n) - 1];
+  double * superb =  (double *)malloc((min(m, n) - 1)* sizeof(double));
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
 
 /* #else */
@@ -68,6 +68,7 @@ double cond(double * A, int n, int m)
 
   double conditioning = S[0] / S[dimS - 1];
 
+  free(superb);
   free(Atmp);
   free(S);
 

@@ -35,13 +35,13 @@ double pinv(double * A, int n, int m, double tolerance)
 
   int dimS = n;
   if (m < n) dimS = m;
-  double * S =  malloc(dimS * sizeof(*S));
+  double * S =  (double*)malloc(dimS * sizeof(*S));
   char JOBU = 'A';
   int LDU = n;
-  double *U = malloc(n * n * sizeof(double));
+  double *U = (double*)malloc(n * n * sizeof(double));
   char JOBVT = 'A'  ;
   int LDVT = m;
-  double *VT = malloc(m * m * sizeof(double));
+  double *VT = (double*)malloc(m * m * sizeof(double));
   /*    printf("Matrix A:\n "); */
   /*     for (int i = 0; i< n; i++){ */
   /*  for (int j = 0; j < m; j++){ */
@@ -51,7 +51,7 @@ double pinv(double * A, int n, int m, double tolerance)
   /*     }  */
 
   int InfoDGSVD = -1;
-  double superb[min(m, n) - 1];
+  double * superb = (double*)malloc((min(m, n) - 1)*sizeof(double));
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
 
   /*    printf("Matrix U:\n "); */
@@ -166,6 +166,7 @@ double pinv(double * A, int n, int m, double tolerance)
   free(VT);
   free(Utranstmp);
   free(S);
+  free(superb);
   return conditioning;
 #else
   numericsError("pinv", "DGESVD not found");
