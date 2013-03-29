@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+#include "KernelConfig.h"
 
 #include "SiconosVectorTest.hpp"
 #include "SiconosAlgebra.hpp"

@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
+#include "KernelConfig.h"
 
 #include "BlockVectorTest.hpp"
 #include "BlockVector.hpp"

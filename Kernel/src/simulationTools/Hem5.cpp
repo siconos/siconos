@@ -295,7 +295,7 @@ void Hem5::fprob(integer* IFCN,
 
   int ifcn = (int)(*IFCN);
 
-  if ((ifcn ==1) or (ifcn>=7)) // compute Mass AM
+  if ((ifcn == 1) || (ifcn >= 7)) // compute Mass AM
   {
     unsigned int pos=0;
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -327,7 +327,7 @@ void Hem5::fprob(integer* IFCN,
         );
     }
   }
-  if ((ifcn ==1) or (ifcn == 5) or (ifcn == 7) or (ifcn==8)) // compute F
+  if ((ifcn ==1) || (ifcn == 5) || (ifcn == 7) || (ifcn==8)) // compute F
   {
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
@@ -369,7 +369,7 @@ void Hem5::fprob(integer* IFCN,
 
   }
 
-  if ((ifcn == 6) or (ifcn >= 10) ) // compute GP ( Jacobian of the constraints)
+  if ((ifcn == 6) || (ifcn >= 10) ) // compute GP ( Jacobian of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -381,13 +381,13 @@ void Hem5::fprob(integer* IFCN,
     }
   }
 
-  if ((ifcn == 5) or (ifcn == 7) ) // compute GPP ( Hessian of the constraints)
+  if ((ifcn == 5) || (ifcn == 7) ) // compute GPP ( Hessian of the constraints)
   {
     //RuntimeException::selfThrow("Hem5::fprob(), G_qq is not available");
     std::cout << "Hem5::fprob(), G_qq is not available " << std::endl;
   }
 
-  if ((ifcn == 3) or (ifcn == 6) or (ifcn >= 10) ) // compute GT (partial time derivative of the constraints)
+  if ((ifcn == 3) || (ifcn == 6) || (ifcn >= 10) ) // compute GT (partial time derivative of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -407,7 +407,7 @@ void Hem5::fprob(integer* IFCN,
     }
   }
 
-  if ((ifcn == 1) or (ifcn == 2) or (ifcn == 10) ) // compute QDOT
+  if ((ifcn == 1) || (ifcn == 2) || (ifcn == 10) ) // compute QDOT
   {
     unsigned int pos=0;
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)

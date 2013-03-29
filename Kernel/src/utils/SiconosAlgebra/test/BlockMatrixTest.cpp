@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
+
+#include "KernelConfig.h"
+
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockMatrixTest.hpp"
 #include "SimpleMatrix.hpp"

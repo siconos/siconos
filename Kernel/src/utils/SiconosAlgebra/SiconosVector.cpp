@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+#include "KernelConfig.h"
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 
-#include "KernelConfig.h"
 
 #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
