@@ -48,7 +48,6 @@ velocity_init = 0
 
 box = btConvexHullShape()
 box.addPoint(btVector3(-1.0, 1.0, -1.0))
-box.addPoint(btVector3(-1.0, 1.0, -1.0))
 box.addPoint(btVector3(-1.0, -1.0, -1.0))
 box.addPoint(btVector3(-1.0, -1.0, 1.0))
 box.addPoint(btVector3(-1.0, 1.0, 1.0))
@@ -173,7 +172,6 @@ while(simulation.hasNextEvent()):
                              norm(index1.vertices()[2].lambda_(1)) + \
                              norm(index1.vertices()[3].lambda_(1))
 
-
     k += 1
     simulation.nextStep()
 
@@ -185,8 +183,7 @@ from numpy.linalg import norm
 
 ref = getMatrix(SimpleMatrix("result.ref"))
 
-# to be done...
-print norm(dataPlot - ref)
+print "norm(dataPlot - ref) = {0}".format(norm(dataPlot - ref))
 if (norm(dataPlot - ref) > 1e-12):
     print("Warning. The result is rather different from the reference file.")
 

@@ -76,7 +76,6 @@ int main()
     SP::btCollisionShape box(new btConvexHullShape());
     {
       std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
       std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, -1.0));
       std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, 1.0));
       std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, 1.0));
