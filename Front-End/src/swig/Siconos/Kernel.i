@@ -121,6 +121,18 @@ namespace std
 #define INSTALL_GRAPH_PROPERTIES(X,Y)
 
 
+%include <boost/config.hpp>
+%include <boost/version.hpp>
+%include <boost/graph/graph_utility.hpp>
+%include <boost/graph/graph_traits.hpp>
+%import undirected_graph.hpp
+
+#define ADJLIST_PARAMS \
+    typename OEL, typename VL, typename D, typename VP, typename EP, \
+    typename GP, typename EL
+#define ADJLIST adjacency_list<OEL,VL,D,VP,EP,GP,EL>
+%include adjacency_list.hpp
+
 %include "SiconosGraph.hpp"
 
 
@@ -145,6 +157,11 @@ TYPEDEF_SPTR(DynamicalSystemsGraph);
 TYPEDEF_SPTR(InteractionsGraph);
 %feature("director") InteractionsGraph;
 %shared_ptr(InteractionsGraph);
+
+%template (itpl) boost::graph_traits< SiconosGraph< std11::shared_ptr< Interaction >,std11::shared_ptr< DynamicalSystem >,InteractionProperties,SystemProperties,GraphProperties >::graph_t >;
+
+//%shared_ptr(boost::graph_traits< SiconosGraph< std11::shared_ptr< Interaction >,std11::shared_ptr< DynamicalSystem >,InteractionProperties,SystemProperties,GraphProperties >::graph_t >::vertex_iterator);
+
 
 // must be specified after %shared_ptr, if ever needed
 %template(_DynamicalSystemsGraph) SiconosGraph<
@@ -269,9 +286,72 @@ typedef __mpz_struct mpz_t[1];
     return v;
   };
 
+ 
 %}
 
+%extend SiconosGraph<std11::shared_ptr<Interaction>, 
+                     std11::shared_ptr<DynamicalSystem>, 
+                     InteractionProperties, SystemProperties, 
+                     GraphProperties >
+{
+  const std::vector<SP::Interaction> vertices()
+  {
+    std::vector<SP::Interaction> r;
+    InteractionsGraph::VIterator ui, uiend;
+    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+    {
+      r.push_back($self->bundle(*ui));
+    };
+    return r;
+  };
 
+
+  const std::vector<SP::DynamicalSystem> edges()
+  {
+    std::vector<SP::DynamicalSystem> r;
+    InteractionsGraph::EIterator ui, uiend;
+    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+    {
+      r.push_back($self->bundle(*ui));
+    };
+    return r;
+  };
+
+}
+
+
+%extend SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
+                     std11::shared_ptr<Interaction>, 
+                     SystemProperties, InteractionProperties, 
+                     GraphProperties >
+{
+  const std::vector<SP::DynamicalSystem> vertices()
+  {
+    std::vector<SP::DynamicalSystem> r;
+    DynamicalSystemsGraph::VIterator ui, uiend;
+    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
+    {
+      r.push_back($self->bundle(*ui));
+    };
+    return r;
+  };
+
+
+  const std::vector<SP::Interaction> edges()
+  {
+    std::vector<SP::Interaction> r;
+    InteractionsGraph::EIterator ui, uiend;
+    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
+    {
+      r.push_back($self->bundle(*ui));
+    };
+    return r;
+  };
+
+}
+
+
+%template (ig_vertices) std::vector<std11::shared_ptr<Interaction> >;
 
 
 // needed templates

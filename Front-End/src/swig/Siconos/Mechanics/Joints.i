@@ -1,6 +1,6 @@
 
 // SWIG interface for Siconos Mechanics/joints
-%module(directors="1", allprotected="1") joints
+%module(directors="1", allprotected="1") Joints
 
 %include start.i
 

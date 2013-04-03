@@ -23,13 +23,14 @@ from Siconos.Kernel import \
      Model, Moreau, TimeDiscretisation,\
      FrictionContact, NewtonImpactFrictionNSL
 
-from Siconos.Mechanics.contactDetection import \
+from Siconos.Mechanics.ContactDetection import \
     btConvexHullShape, btVector3, btCollisionObject, \
     btBoxShape, btMatrix3x3, \
     BulletSpaceFilter, \
     BulletWeightedShape, BulletDS, BulletTimeStepping
 
-from numpy import empty
+from numpy import zeros
+from numpy.linalg import norm
 
 t0 = 0       # start time
 T = 20       # end time
@@ -65,7 +66,7 @@ body = BulletDS(box1,
                 [0, 0, velocity_init, 0., 0., 0.])
 
 # set external forces
-weight = [0, 0, - box1.mass() * g ]
+weight = [0, 0, - box1.mass() * g]
 body.setFExtPtr(weight)
 
 #
@@ -100,6 +101,12 @@ timedisc = TimeDiscretisation(t0, h)
 # (3) one step non smooth problem
 osnspb = FrictionContact(3)
 
+osnspb.numericsSolverOptions().iparam[0] = 1000
+osnspb.numericsSolverOptions().dparam[0] = 1e-5
+osnspb.setMaxSize(16384)
+osnspb.setMStorageType(1)
+osnspb.setNumericsVerboseMode(False)
+
 # keep previous solution
 osnspb.setKeepLambdaAndYState(True)
 
@@ -130,7 +137,7 @@ bouncingBox.initialize(simulation)
 # ->saved in a matrix dataPlot
 
 N = (T - t0) / h
-dataPlot = empty((N, 7))
+dataPlot = zeros((N, 4))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -160,10 +167,12 @@ while(simulation.hasNextEvent()):
 
     if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
         index1 = simulation.indexSet(1)
-        if (index1.size() > 0):
-            # output reaction forces here
-            # to be done
-            pass
+        if (index1.size() == 4):
+            dataPlot[k, 3] = norm(index1.vertices()[0].lambda_(1)) + \
+                             norm(index1.vertices()[1].lambda_(1)) + \
+                             norm(index1.vertices()[2].lambda_(1)) + \
+                             norm(index1.vertices()[3].lambda_(1))
+
 
     k += 1
     simulation.nextStep()
@@ -177,6 +186,7 @@ from numpy.linalg import norm
 ref = getMatrix(SimpleMatrix("result.ref"))
 
 # to be done...
+print norm(dataPlot - ref)
 if (norm(dataPlot - ref) > 1e-12):
     print("Warning. The result is rather different from the reference file.")
 
@@ -187,16 +197,16 @@ if (norm(dataPlot - ref) > 1e-12):
 
 from matplotlib.pyplot import subplot, title, plot, grid, show
 
-subplot(211)
+subplot(511)
 title('position')
 plot(dataPlot[0:k, 0], dataPlot[0:k, 1])
 grid()
-subplot(212)
+subplot(513)
 title('velocity')
 plot(dataPlot[0:k, 0], dataPlot[0:k, 2])
 grid()
-#subplot(414)
-#plot(dataPlot[:, 0], dataPlot[:, 4])
-#title('lambda')
-#grid()
+subplot(515)
+plot(dataPlot[0:k, 0], dataPlot[0:k, 3])
+title('lambda')
+grid()
 show()

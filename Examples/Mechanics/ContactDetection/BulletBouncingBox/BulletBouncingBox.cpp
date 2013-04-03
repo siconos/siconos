@@ -179,7 +179,7 @@ int main()
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 7;
+    unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
     dataPlot.zero();
 
@@ -236,14 +236,13 @@ int main()
           {
             InteractionsGraph::VIterator iur = index1->begin();
 
-            dataPlot(k, 3) = index1->bundle(*iur)->
-                             lambda(1)->norm2();
-            dataPlot(k, 4) = index1->bundle(*++iur)->
-                             lambda(1)->norm2();
-            dataPlot(k, 5) = index1->bundle(*++iur)->
-                             lambda(1)->norm2();
-            dataPlot(k, 6) = index1->bundle(*++iur)->
-                             lambda(1)->norm2();
+            // different version of bullet may not gives the same
+            // contact points! So we only keep the summation.
+            dataPlot(k, 3) = 
+              index1->bundle(*iur)-> lambda(1)->norm2() +
+              index1->bundle(*++iur)->lambda(1)->norm2() +
+              index1->bundle(*++iur)->lambda(1)->norm2() +
+              index1->bundle(*++iur)->lambda(1)->norm2();
           }
         }
       }

@@ -60,4 +60,44 @@ graphLayoutInt(SP::DynamicalSystemsGraph dsg)
   return r;
 };
 
+/* access to edges & vertices from python */
+struct graphAccess  
+{
+  std11::shared_ptr<_InteractionsGraph> graph;
+  std::vector<SP::Interaction> vertices;
+  std::vector<SP::DynamicalSystem> edges;
+  
+  void update()
+  {
+    vertices.clear();
+    edges.clear();
+    InteractionsGraph::VIterator ui, uiend;
+    for (boost::tie(ui,uiend) = graph->vertices(); ui != uiend; ++ui)
+    {
+      vertices.push_back(graph->bundle(*ui));
+    };
+    
+    InteractionsGraph::EIterator ei, eiend;
+    for (boost::tie(ei,eiend) = graph->edges(); ei != eiend; ++ei)
+    {
+      edges.push_back(graph->bundle(*ei));
+    };
+    
+    
+  };
+  
+  graphAccess(std11::shared_ptr<_InteractionsGraph> ig) : graph(ig)
+  {
+    update();
+  };
+  
+  ~graphAccess()
+  {
+    std::vector<SP::Interaction>().swap(vertices);
+    std::vector<SP::DynamicalSystem>().swap(edges);
+  }
+  
+};
+
+
 #endif

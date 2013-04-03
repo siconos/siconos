@@ -16,6 +16,7 @@
 %rename  (__copy__) TYPE ## ::operator=;
 %feature("director") TYPE;
 %ignore STD11::enable_shared_from_this<TYPE>;
+%shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %typemap(directorin) TYPE& ()
 {
@@ -45,6 +46,7 @@
 %rename  (__ne__) TYPE ## ::operator!=;
 %rename  (__copy__) TYPE ## ::operator=;
 %ignore STD11::enable_shared_from_this<TYPE>;
+%shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 %include TYPE.hpp

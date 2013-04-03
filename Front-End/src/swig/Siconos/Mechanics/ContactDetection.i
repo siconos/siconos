@@ -1,4 +1,4 @@
-%module(directors="1", allprotected="1") contactDetection
+%module(directors="1", allprotected="1") ContactDetection
 
 %include start.i
 
@@ -108,8 +108,6 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btCollisionShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexInternalShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvex2dShape);
-
-
 PY_REGISTER_BULLET_COLLISION_DETECTION(btPolyhedralConvexShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexHullShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexPointCloudShape);
