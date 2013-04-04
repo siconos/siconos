@@ -214,6 +214,15 @@ public:
     return _numerics_solver_options;
   };
 
+  /** To get the NumericsOptions structure
+   *  \return , the numerics structure used to save solver parameters
+   */
+  inline SP::NumericsOptions numericsOptions() const
+  {
+    return _numerics_options;
+  };
+
+
   /** to get the id of the OneStepNSProblem
    *  \return string
    */

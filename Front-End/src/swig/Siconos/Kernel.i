@@ -109,10 +109,12 @@ namespace std
 
 // note : deleteSolverOptions is call by ~LCP(), ~FrictionContact(), etc.
 %shared_ptr(_SolverOptions);
+%shared_ptr(NumericsOptions);
 %shared_ptr(NumericsMatrix);
 %shared_ptr(SparseMatrix);
 %shared_ptr(SparseBlockStructuredMatrix);
 
+%include NumericsOptions.h
 %include solverOptions.i
 
 %include NumericsMatrix.h
@@ -121,6 +123,7 @@ namespace std
 %include NumericsMatrix.h
 
  // segfaults...
+ // we cannot share data struct
  //%import Numerics.i
 
 %include "SiconosVisitables.hpp"
