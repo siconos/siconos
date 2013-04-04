@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0;         // initial computation time
     double T = 0.2;       // final computation time
-    double h = 1e-4;       // time step : do not decrease, because of strong penetrations
+    double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
     double l1 = 0.1530;
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-    while (s->hasNextEvent())
+    while ((s->hasNextEvent()) && (k<= 10))
     {
       //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();

@@ -151,42 +151,58 @@ public:
   /** destructor
   */
   virtual ~LagrangianScleronomousR() {};
+
   /** to get the non-linear part of the relative acceleration */
   inline SP::SiconosVector Nonlinearh2dot()
   {
     return _NLh2dot;
   };
-
-  /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param: double, current time
-  */
+  /** Compute y = h(q,z) using plug-in mechanism with the data vector of the interaction
+   * should be used as less as possible to avoid side--effects
+   * prefer computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * \param time  current time
+   * \param inter interaction that owns the relation
+   */
   virtual void computeh(const double time, Interaction& inter);
 
+
+  /** to compute y = h(q,z) using plug-in mechanism
+  * \param inter interaction that owns the relation
+  * \param q the BlockVector of coordinates
+  * \param z the BlockVector of parameters
+  */
+  virtual void computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+
+
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param: double, current time
+  * \param double, current time
+  * \param inter interaction that owns the relation
   */
   virtual void computeJachq(const double time, Interaction& inter);
 
   /** to compute the non-linear part of relative accelation using plug-in mechanism
-  * \param: double, current time
-  * \return: SiconosVector, non linear part
+  * \param time double, current time
+  * \param inter interaction that owns the relation
+  * \return SiconosVector, non linear part ?
   */
   void computeNonLinearH2dot(const double time, Interaction& inter);
 
   /** to compute the derivative of H Jacobian with respect to time using plug-in mechanism
-  *\param: double, current time
+  * \param time the current time
   */
   virtual void computeJachqDot(const double time, Interaction& inter);
 
   /** to compute output
-  *  \param double : current time
-  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  * \param time the current time
+  * \param inter interaction that owns the relation
+  * \param unsigned int: number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(const double time, Interaction& inter, unsigned int = 0);
 
   /** to compute p
-  *  \param double : current time
-  *  \param unsigned int: "derivative" order of lambda used to compute input
+  * \param time the current time
+  * \param inter interaction that owns the relation
+  * \param unsigned int: "derivative" order of lambda used to compute input
   */
   void computeInput(const double time, Interaction& inter, unsigned int = 0);
 

@@ -66,8 +66,16 @@ void LagrangianR::initialize(Interaction& inter)
 
 void LagrangianR::computeh(const double time, Interaction& inter)
 {
-  RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
+  RuntimeException::selfThrow("LagrangianR::computeh(const double time, Interaction& inter): not yet implemented (or useless) for Lagrangian relation of type " + _subType);
 }
+
+void LagrangianR::computeh(const double time, Interaction& inter,
+                           SP::BlockVector q, SP::BlockVector v, SP::BlockVector z)
+{
+  RuntimeException::selfThrow(
+    "LagrangianR::computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);: not yet implemented (or useless) for Lagrangian relation of type " + _subType);
+}
+
 
 void LagrangianR::saveRelationToXML() const
 {

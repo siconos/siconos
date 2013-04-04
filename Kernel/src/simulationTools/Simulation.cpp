@@ -42,7 +42,9 @@
 #include "Relay.hpp"
 
 // for Debug
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+
+#define DEBUG_MESSAGES
 #include <debug.h>
 
 using namespace std;
@@ -423,6 +425,7 @@ void Simulation::updateOutput(unsigned int level)
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
 
+  DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) starts for level = %i\n", level);
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
   InteractionsIterator it;
@@ -434,6 +437,8 @@ void Simulation::updateOutput(unsigned int level)
     assert((*it)->upperLevelForOutput() >= level);
     (*it)->computeOutput(time , level);
   }
+  DEBUG_PRINTF("Simulation::updateOutput(unsigned int level) ends for level = %i\n", level);
+
 }
 
 void Simulation::run()

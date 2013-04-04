@@ -27,7 +27,7 @@
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
   */
-
+#define WITH_INTERACTIONS
 #include "SiconosKernel.hpp"
 
 using namespace std;
@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
 
     // parameters according to Table 1
     unsigned int nDof = 3; // degrees of freedom for robot arm
-    double t0 = 0;         // initial computation time
-    double T = 0.14;       // final computation time
+    double t0 = 0.0;         // initial computation time
+    double T = 0.2;       // final computation time
     double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     double l2 = 0.3060;
     double a = 0.05;
     double b = 0.025;
-    double c = 0.;//0.001;
+    double c = 0.001;
 
     // contact parameters
     double e1 = 0.4;
@@ -66,8 +66,16 @@ int main(int argc, char* argv[])
     SP::SiconosVector v0(new SiconosVector(nDof));
     q0->zero();
     v0->zero();
-    (*v0)(0) = 0.;//150.;
-    (*v0)(1) = 0.;//-75.;
+    (*v0)(0) = 150.;
+    (*v0)(1) = -75.;
+
+    // t0 = 7e-5;
+    // (*q0)(0)=  1.129178e-02;
+    // (*q0)(1)= -5.777764e-03;
+    // (*q0)(2)=  0.000000e+00;
+
+    // (*v0)(0) = 1.971606e+02 ;
+    // (*v0)(1) = -1.064301e+02;
 
     // -------------------------
     // --- Dynamical systems ---
@@ -120,13 +128,21 @@ int main(int argc, char* argv[])
     // ----------------
     SP::D1MinusLinear OSI(new D1MinusLinear(slider));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+#ifdef WITH_INTERACTIONS
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
+#endif
 
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+#ifdef WITH_INTERACTIONS
+   SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
+#else
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 0));
+    s->insertIntegrator(OSI);
+#endif
+
 
     // =========================== End of model definition ===========================
 
@@ -139,38 +155,82 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 13;
+    unsigned int outputSize = 27;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
 
-    dataPlot(0, 0) = sliderWithClearance->t0();
-    dataPlot(0, 1) = (*q)(0) / (2.*M_PI); // crank revolution
-    dataPlot(0, 2) = (*q)(1);
-    dataPlot(0, 3) = (*q)(2);
-    dataPlot(0, 4) = (*v)(0);
-    dataPlot(0, 5) = (*v)(1);
-    dataPlot(0, 6) = (*v)(2);
-    dataPlot(0, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
-    dataPlot(0, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
-    dataPlot(0, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
-    dataPlot(0, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
-    dataPlot(0, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
-    dataPlot(0, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized
+    int k =0;
+    dataPlot(k, 0) = sliderWithClearance->t0();
+    dataPlot(k, 1) = (*q)(0) / (2.*M_PI); // crank revolution
+    dataPlot(k, 2) = (*q)(1);
+    dataPlot(k, 3) = (*q)(2);
+    dataPlot(k, 4) = (*v)(0);
+    dataPlot(k, 5) = (*v)(1);
+    dataPlot(k, 6) = (*v)(2);
+    std::cout << "(*q)(0)= " << (*q)(0)<< std::endl;
+    std::cout << "(*q)(1)= " << (*q)(1)<< std::endl;
+
+
+    dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
+    dataPlot(k, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
+    dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 3 (normalized)
+    dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 4 (normalized)
+
+
+    dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
+    dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
+
+#ifndef WITH_INTERACTIONS
+    relation1->computeOutput(sliderWithClearance->t0(), *inter1, 1 );
+    relation2->computeOutput(sliderWithClearance->t0(), *inter2, 1 );
+    relation3->computeOutput(sliderWithClearance->t0(), *inter3, 1 );
+    relation4->computeOutput(sliderWithClearance->t0(), *inter4, 1 );
+    relation1->computeOutput(sliderWithClearance->t0(), *inter1, 0 );
+    relation2->computeOutput(sliderWithClearance->t0(), *inter2, 0 );
+    relation3->computeOutput(sliderWithClearance->t0(), *inter3, 0 );
+    relation4->computeOutput(sliderWithClearance->t0(), *inter4, 0 );
+#endif
+
+    dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
+    dataPlot(k, 14) = (*inter2->y(0))(0) ; // g2
+    dataPlot(k, 15) = (*inter3->y(0))(0) ; // g3
+    dataPlot(k, 16) = (*inter4->y(0))(0) ; // g4
+    dataPlot(k, 17) = (*inter1->y(1))(0) ; // dot g1
+    dataPlot(k, 18) = (*inter2->y(1))(0) ; // dot g2
+    dataPlot(k, 19) = (*inter3->y(1))(0) ; // dot g3
+    dataPlot(k, 20) = (*inter4->y(1))(0) ; // dot g4
+    dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // lambda1
+    dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
+    dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
+    dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
+    dataPlot(k, 25) = 0;
+    dataPlot(k, 26) = 0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 
     // ==== Simulation loop - Writing without explicit event handling =====
-    int k = 1;
+    k++;
     boost::progress_display show_progress(N);
 
     boost::timer time;
     time.restart();
 
-    while (s->hasNextEvent())
+
+    while ((s->hasNextEvent()) && (k <= 10))
+//    while ((s->hasNextEvent()))
     {
+
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"Iteration k = " << k <<std::endl;
+      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+
+
       s->advanceToEvent();
 
       // --- Get values to be plotted ---
@@ -183,10 +243,31 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*v)(2);
       dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
       dataPlot(k, 8) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 2 (normalized)
-      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 3 (normalized)
-      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (-c); // y corner 4 (normalized)
+      dataPlot(k, 9) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 3 (normalized)
+      dataPlot(k, 10) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) + a * sin((*q)(2)) - b * cos((*q)(2)) + b) / (c); // y corner 4 (normalized)
       dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
       dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
+      dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
+      dataPlot(k, 14) = (*inter2->y(0))(0) ; // g2
+      dataPlot(k, 15) = (*inter3->y(0))(0) ; // g3
+      dataPlot(k, 16) = (*inter4->y(0))(0) ; // g4
+      dataPlot(k, 17) = (*inter1->y(1))(0) ; // dot g1
+      dataPlot(k, 18) = (*inter2->y(1))(0) ; // dot g2
+      dataPlot(k, 19) = (*inter3->y(1))(0) ; // dot g3
+      dataPlot(k, 20) = (*inter4->y(1))(0) ; // dot g4
+      dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // lambda1
+      dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
+      dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
+      dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
+      dataPlot(k, 25) = 0;
+      dataPlot(k, 26) = 0;
+
+
+      std::cout <<" q->display()" <<  std::endl;
+      q->display();
+      std::cout <<" v->display()" <<  std::endl;
+      v->display();
+
 
       s->processEvents();
       ++show_progress;

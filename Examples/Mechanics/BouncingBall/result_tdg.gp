@@ -1,4 +1,4 @@
-set term X11
+#set term X11
 !tail -n 100000 result.dat > result-gp.dat
 !tail -n 100000 result_tdg.dat > result_tdg-gp.dat
 plot\

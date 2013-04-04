@@ -167,10 +167,24 @@ public:
   */
   void initialize(Interaction& inter);
 
-  /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param: double, current time
-  */
+  /** to compute y = h(t,q,v,z) using plug-in mechanism
+   * should be used as less as possible to avoid side--effects
+   * prefer computeh(const double time, Interaction& inter,
+                     SP::BlockVector q, SP::BlockVector v, SP::BlockVector z)
+   * \param time  current time
+   * \param inter interaction that owns the relation
+   */
   virtual void computeh(const double time, Interaction& inter);
+
+  /** to compute y = h(t,q,v,z) using plug-in mechanism
+  * \param time current time
+  * \param inter interaction that owns the relation
+  * \param q the BlockVector of coordinates
+  * \param v the BlockVector of velocities
+  * \param z the BlockVector of parameters
+  */
+  void computeh(const double time, Interaction& inter,
+                        SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
 
   /** default function to compute jacobianH
   *  \param double : current time

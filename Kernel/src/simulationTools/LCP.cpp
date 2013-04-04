@@ -18,7 +18,8 @@
  */
 #include "LCP.hpp"
 
-//#define DEBUG_MESSAGES 1
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES 1
 #include "debug.h"
 
 using namespace std;
@@ -52,7 +53,9 @@ LCP::LCP(const int newNewNumericsSolverId , const std::string& newId):
 int LCP::compute(double time)
 {
   // --- Prepare data for LCP computing ---
+
   preCompute(time);
+
 
   int info = 0;
   // --- Call Numerics driver ---
@@ -61,7 +64,11 @@ int LCP::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
-   DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
+  DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
+  DEBUG_PRINTF("_levelMin = %i\n", _levelMin);
+
+  DEBUG_EXPR(display(););
+
 
   if (_sizeOutput != 0)
   {

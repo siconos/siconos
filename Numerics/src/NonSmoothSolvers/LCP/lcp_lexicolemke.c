@@ -174,6 +174,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
         {
           for (jc = 1 ; jc < dim + 1 ; ++jc)
           {
+            assert(block >=0 && "lcp_lexicolemke: block <0");
             dblock = A[block][jc] / pivot - A[ic][jc] / zb;
             if (dblock < 0) break;
             else if (dblock > 0)

@@ -24,6 +24,12 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#include "debug.h"
+
+
+
 using namespace std;
 using namespace RELATION;
 
@@ -87,6 +93,48 @@ void LagrangianScleronomousR::zeroPlugin()
 
 void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
 {
+
+  DEBUG_PRINT("LagrangianScleronomousR::computeh(const double time, Interaction& inter)\n");
+  DEBUG_PRINTF("time = %f\n", time);
+  DEBUG_PRINTF("inter.data(q0) with q0 = %i is used\n", q0);
+  DEBUG_EXPR((inter.data(q0))->display(););
+  DEBUG_PRINTF("inter.data(q1) with q1 = %i is used\n", q1);
+  DEBUG_EXPR((inter.data(q1))->display(););
+  DEBUG_PRINTF("inter.data(q2) with q2 = %i is used\n", q2);
+  DEBUG_EXPR((inter.data(q2))->display(););
+  DEBUG_EXPR(std::cout << inter.data(q0) << std::endl;);
+
+  DEBUG_PRINTF("inter.data(z) with z = %i is used\n", z);
+  DEBUG_EXPR(inter.dynamicalSystem(0)->display());
+
+
+
+  computeh(inter, inter.data(q0),inter.data(z));
+
+  // if (_pluginh)
+  // {
+  //   // arg= time. Unused in this function but required for interface.
+  //   if (_pluginh->fPtr)
+  //   {
+  //     // get vector y of the current interaction
+  //     SiconosVector& y = *inter.y(0);
+
+  //     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  //     SiconosVector workQ = *inter.data(q0);
+  //     SiconosVector workZ = *inter.data(z);
+
+  //     ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
+
+  //     // Copy data that might have been changed in the plug-in call.
+  //     *inter.data(z) = workZ;
+  //   }
+  // }
+  // else nothing
+}
+
+void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z )
+{
+  DEBUG_PRINT(" LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)\n");
   if (_pluginh)
   {
     // arg= time. Unused in this function but required for interface.
@@ -96,18 +144,25 @@ void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
       SiconosVector& y = *inter.y(0);
 
       // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-      SiconosVector workQ = *inter.data(q0);
-      SiconosVector workZ = *inter.data(z);
+      SiconosVector workQ = *q;
+      SiconosVector workZ = *z;
 
       ((FPtr3)(_pluginh->fPtr))(workQ.size(), &(workQ(0)) , y.size(), &(y(0)), workZ.size(), &(workZ(0)));
 
       // Copy data that might have been changed in the plug-in call.
-      *inter.data(z) = workZ;
+      *z = workZ;
+
+      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(z->display());
+      DEBUG_EXPR(y.display());
+
+
+
+
     }
   }
   // else nothing
 }
-
 void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter)
 {
   if (_pluginJachq)
@@ -155,6 +210,9 @@ void  LagrangianScleronomousR::computeNonLinearH2dot(const double time, Interact
 
 void LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
+
+  DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
+
   if (derivativeNumber == 0)
     computeh(time, inter);
   else
@@ -177,12 +235,15 @@ void LagrangianScleronomousR::computeOutput(const double time, Interaction& inte
 
 void LagrangianScleronomousR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
+  DEBUG_PRINT("void LagrangianScleronomousR::computeInput(const double time, Interaction& inter, unsigned int level)\n");
+  DEBUG_PRINTF("level = %i\n", level);
+
   computeJachq(time, inter);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *inter.data(p0 + level), false);
-
+  DEBUG_EXPR(inter.data(p0 + level)->display(););
 }
 const std::string LagrangianScleronomousR::getJachqName() const
 {

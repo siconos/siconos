@@ -17,8 +17,9 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include <assert.h>
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include "Interaction.hpp"
 #include "InteractionXML.hpp"
@@ -32,7 +33,8 @@
 #include "DynamicalSystem.hpp"
 
 
-
+#include "FirstOrderR.hpp"
+#include "LagrangianR.hpp"
 #include "NewtonEulerR.hpp" // ??
 #include "NewtonEulerDS.hpp" // ??
 
@@ -355,43 +357,46 @@ void Interaction::initData()
 void Interaction::initDataFirstOrder()
 {
   // Get the DS concerned by the interaction of this relation
-  _data[free].reset(new BlockVector());
-  _data[x].reset(new BlockVector()); // displacements
-  _data[xq].reset(new BlockVector());
-  _data[deltax].reset(new BlockVector()); // displacements
-  _data[z].reset(new BlockVector());
-  _data[r].reset(new BlockVector());
-  _data[residu_r].reset(new BlockVector());
-  _data[ds_xp].reset(new BlockVector());
-  _data[g_alpha].reset(new BlockVector());
+  _data[FirstOrderR::free].reset(new BlockVector());
+  _data[FirstOrderR::x].reset(new BlockVector()); // displacements
+  _data[FirstOrderR::xq].reset(new BlockVector());
+  _data[FirstOrderR::deltax].reset(new BlockVector()); // displacements
+  _data[FirstOrderR::z].reset(new BlockVector());
+  _data[FirstOrderR::r].reset(new BlockVector());
+  _data[FirstOrderR::residu_r].reset(new BlockVector());
+  _data[FirstOrderR::ds_xp].reset(new BlockVector());
+  _data[FirstOrderR::g_alpha].reset(new BlockVector());
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
-    _data[free]->insertPtr(ds.workFree());
-    _data[x]->insertPtr(ds.x());
-    _data[xq]->insertPtr(ds.xq());
-    _data[deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
-    _data[z]->insertPtr(ds.z());
-    _data[r]->insertPtr(ds.r());
-    _data[residu_r]->insertPtr(ds.residur());
-    _data[ds_xp]->insertPtr(ds.xp());
-    _data[g_alpha]->insertPtr(ds.gAlpha());
+    _data[FirstOrderR::free]->insertPtr(ds.workFree());
+    _data[FirstOrderR::x]->insertPtr(ds.x());
+    _data[FirstOrderR::xq]->insertPtr(ds.xq());
+    _data[FirstOrderR::deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
+    _data[FirstOrderR::z]->insertPtr(ds.z());
+    _data[FirstOrderR::r]->insertPtr(ds.r());
+    _data[FirstOrderR::residu_r]->insertPtr(ds.residur());
+    _data[FirstOrderR::ds_xp]->insertPtr(ds.xp());
+    _data[FirstOrderR::g_alpha]->insertPtr(ds.gAlpha());
 
   }
 }
 
 void Interaction::initDataLagrangian()
 {
-  _data[free].reset(new BlockVector());
-  _data[q0].reset(new BlockVector()); // displacement
-  _data[q1].reset(new BlockVector()); // velocity
-  _data[q2].reset(new BlockVector()); // acceleration
-  _data[z].reset(new BlockVector()); // z vector
-  _data[p0].reset(new BlockVector());
-  _data[p1].reset(new BlockVector());
-  _data[p2].reset(new BlockVector());
+
+  DEBUG_PRINT("Interaction::initDataLagrangian()\n");
+
+  _data[LagrangianR::free].reset(new BlockVector());
+  _data[LagrangianR::q0].reset(new BlockVector()); // displacement
+  _data[LagrangianR::q1].reset(new BlockVector()); // velocity
+  _data[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  _data[LagrangianR::z].reset(new BlockVector()); // z vector
+  _data[LagrangianR::p0].reset(new BlockVector());
+  _data[LagrangianR::p1].reset(new BlockVector());
+  _data[LagrangianR::p2].reset(new BlockVector());
 
   SP::LagrangianDS lds;
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -404,19 +409,25 @@ void Interaction::initDataLagrangian()
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[free]->insertPtr(lds->workFree());
-    _data[q0]->insertPtr(lds->q());
-    _data[q1]->insertPtr(lds->velocity());
-    _data[q2]->insertPtr(lds->acceleration());
-    _data[z]->insertPtr(lds->z());
+    _data[LagrangianR::free]->insertPtr(lds->workFree());
+    _data[LagrangianR::q0]->insertPtr(lds->q());
+
+    DEBUG_PRINTF("_data[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
+    DEBUG_EXPR(_data[LagrangianR::q0]->display());
+    DEBUG_EXPR(lds->q()->display());
+    DEBUG_EXPR(std::cout << _data[LagrangianR::q0] << std::endl;);
+
+    _data[LagrangianR::q1]->insertPtr(lds->velocity());
+    _data[LagrangianR::q2]->insertPtr(lds->acceleration());
+    _data[LagrangianR::z]->insertPtr(lds->z());
 
     // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
     for (unsigned int k = _lowerLevelForInput;
          k < _upperLevelForInput + 1; k++)
     {
       assert(lds->p(k));
-      assert(_data[p0 + k]);
-      _data[p0 + k]->insertPtr(lds->p(k));
+      assert(_data[LagrangianR::p0 + k]);
+      _data[LagrangianR::p0 + k]->insertPtr(lds->p(k));
     }
   }
 }
@@ -424,16 +435,16 @@ void Interaction::initDataLagrangian()
 void Interaction::initDataNewtonEuler()
 {
   DSIterator it;
-  _data[free].reset(new BlockVector());
-  _data[q0].reset(new BlockVector()); // displacement
-  _data[velo].reset(new BlockVector()); // velocity
-  _data[deltaq].reset(new BlockVector());
-  _data[q1].reset(new BlockVector()); // qdot
-  //  data[q2].reset(new BlockVector()); // acceleration
-  _data[z].reset(new BlockVector()); // z vector
-  _data[p0].reset(new BlockVector());
-  _data[p1].reset(new BlockVector());
-  _data[p2].reset(new BlockVector());
+  _data[NewtonEulerR::free].reset(new BlockVector());
+  _data[NewtonEulerR::q0].reset(new BlockVector()); // displacement
+  _data[NewtonEulerR::velo].reset(new BlockVector()); // velocity
+  _data[NewtonEulerR::deltaq].reset(new BlockVector());
+  _data[NewtonEulerR::q1].reset(new BlockVector()); // qdot
+  //  data[NewtonEulerR::q2].reset(new BlockVector()); // acceleration
+  _data[NewtonEulerR::z].reset(new BlockVector()); // z vector
+  _data[NewtonEulerR::p0].reset(new BlockVector());
+  _data[NewtonEulerR::p1].reset(new BlockVector());
+  _data[NewtonEulerR::p2].reset(new BlockVector());
   SP::NewtonEulerDS lds;
   unsigned int sizeForAllxInDs = 0;
   for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -444,20 +455,20 @@ void Interaction::initDataNewtonEuler()
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[free]->insertPtr(lds->workFree());
-    _data[q0]->insertPtr(lds->q());
-    _data[velo]->insertPtr(lds->velocity());
-    _data[deltaq]->insertPtr(lds->deltaq());
-    _data[q1]->insertPtr(lds->dotq());
-    //    data[q2]->insertPtr( lds->acceleration());
+    _data[NewtonEulerR::free]->insertPtr(lds->workFree());
+    _data[NewtonEulerR::q0]->insertPtr(lds->q());
+    _data[NewtonEulerR::velo]->insertPtr(lds->velocity());
+    _data[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
+    _data[NewtonEulerR::q1]->insertPtr(lds->dotq());
+    //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
     if (lds->p(0))
-      _data[p0]->insertPtr(lds->p(0));
+      _data[NewtonEulerR::p0]->insertPtr(lds->p(0));
     if (lds->p(1))
-      _data[p1]->insertPtr(lds->p(1));
+      _data[NewtonEulerR::p1]->insertPtr(lds->p(1));
     if (lds->p(2))
-      _data[p2]->insertPtr(lds->p(2));
+      _data[NewtonEulerR::p2]->insertPtr(lds->p(2));
 
-    _data[z]->insertPtr(lds->z());
+    _data[NewtonEulerR::z]->insertPtr(lds->z());
     sizeForAllxInDs += lds->p(1)->size();
   }
 }
@@ -473,13 +484,13 @@ void Interaction::LinkDataFromMemory(unsigned int memoryLevel)
 void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
 {
 
-  _data[q0].reset(new BlockVector()); // displacement
-  _data[q1].reset(new BlockVector()); // velocity
-  _data[q2].reset(new BlockVector()); // acceleration
-  _data[z].reset(new BlockVector()); // z vector
-  _data[p0].reset(new BlockVector());
-  _data[p1].reset(new BlockVector());
-  _data[p2].reset(new BlockVector());
+  _data[LagrangianR::q0].reset(new BlockVector()); // displacement
+  _data[LagrangianR::q1].reset(new BlockVector()); // velocity
+  _data[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  _data[LagrangianR::z].reset(new BlockVector()); // z vector
+  _data[LagrangianR::p0].reset(new BlockVector());
+  _data[LagrangianR::p1].reset(new BlockVector());
+  _data[LagrangianR::p2].reset(new BlockVector());
 
   SP::LagrangianDS lds;
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -491,8 +502,8 @@ void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
-    _data[q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
+    _data[LagrangianR::q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
+    _data[LagrangianR::q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
 
 
     // Do nothing for the remaining of data since there are no Memory
@@ -1091,8 +1102,8 @@ void Interaction::computeResiduY(const double time)
 void Interaction::computeResiduR(const double time)
 {
   //Residu_r = r_alpha_k+1 - g_alpha;
-  *_data[residu_r] = *_data[r];
-  *_data[residu_r] -= *_data[g_alpha];
+  *_data[FirstOrderR::residu_r] = *_data[FirstOrderR::r];
+  *_data[FirstOrderR::residu_r] -= *_data[FirstOrderR::g_alpha];
 
   // std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
   // std::cout<< "_data[r] = " << std::endl ;
@@ -1103,4 +1114,47 @@ void Interaction::computeResiduR(const double time)
   // _data[residu_r]->display();
 
   //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
+}
+SP::BlockVector  Interaction::dataFree() const
+{
+  return _data[FirstOrderR::free];
+}
+SP::BlockVector  Interaction::dataX() const
+{
+  return _data[FirstOrderR::x];
+}
+SP::BlockVector  Interaction::dataXq() const
+{
+  return _data[FirstOrderR::xq];
+}
+SP::BlockVector  Interaction::dataZ() const
+{
+  return _data[FirstOrderR::z];
+}
+SP::BlockVector  Interaction::dataQ1() const
+{
+  return _data[LagrangianR::q1];
+}
+
+SP::BlockVector Interaction::residuR() const
+{
+  return _data[FirstOrderR::residu_r];
+}
+
+
+void  Interaction::setDataXFromVelocity()
+{
+  assert(_data[FirstOrderR::x]);
+  // this method is strange
+  _data[FirstOrderR::x].reset(new BlockVector());
+
+  ConstDSIterator itDS;
+  for (itDS = dynamicalSystemsBegin();
+       itDS != dynamicalSystemsEnd();
+       ++itDS)
+  {
+    assert(Type::value(**itDS) == Type::LagrangianDS ||
+           Type::value(**itDS) == Type::LagrangianLinearTIDS);
+    _data[FirstOrderR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+  }
 }

@@ -24,6 +24,8 @@
 //#include "Interaction.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -114,10 +116,16 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
-  DEBUG_PRINT("\nINDEXSETS BEFORE UPDATE\n");
-  DEBUG_EXPR(indexSet0->display());
-  DEBUG_EXPR(indexSet1->display());
-  DEBUG_EXPR(indexSet2->display());
+  DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level = %i\n",i);
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+
+  // DEBUG_EXPR(indexSet0->display());
+  // DEBUG_PRINT("\n");
+  // DEBUG_EXPR(indexSet1->display());
+  // DEBUG_PRINT("\n");
+  // DEBUG_EXPR(indexSet2->display());
 
   InteractionsGraph::VIterator uipend, uip;
 
@@ -185,10 +193,15 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
   }
 
-  DEBUG_PRINT("\nINDEXSETS AFTER UPDATE\n");
-  DEBUG_EXPR(indexSet0->display());
-  DEBUG_EXPR(indexSet1->display());
-  DEBUG_EXPR(indexSet2->display());
+  DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("TimeSteppingD1MinusLinear::updateIndexSet(unsigned int i). update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  // DEBUG_EXPR(indexSet0->display());
+  // DEBUG_PRINT("\n");
+  // DEBUG_EXPR(indexSet1->display());
+  // DEBUG_PRINT("\n");
+  // DEBUG_EXPR(indexSet2->display());
 }
 
 void TimeSteppingD1Minus::update(unsigned int levelInput)

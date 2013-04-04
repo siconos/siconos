@@ -219,15 +219,40 @@ public:
   */
   void setComputehDotFunction(const std::string& , const std::string&);
   //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
-  /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param: double, current time
-  */
+
+
+  /** Compute y = h(t,q,z) using plug-in mechanism with the data vector of the interaction
+   * should be used as less as possible to avoid side--effects
+   * prefer computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * \param time  current time
+   * \param inter interaction that owns the relation
+   */
   virtual void computeh(const double time, Interaction& inter);
 
-  /** to compute hDot using plug-in mechanism
-  * \param: double, current time
+  /** to compute y = h(t,q,z) using plug-in mechanism
+  * \param time current time
+  * \param inter interaction that owns the relation
+  * \param q the BlockVector of coordinates
+  * \param z the BlockVector of parameters
   */
+  virtual void computeh(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
+
+  /** to compute hDot using plug-in mechanism
+   * using plug-in mechanism with the data vector of the interaction
+   * should be used as less as possible to avoid side--effects
+   * prefer computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * \param time  current time
+   * \param inter interaction that owns the relation
+   */
   virtual void computehDot(const double time, Interaction& inter);
+
+ /** to compute hDot using plug-in mechanism
+  * \param time current time
+  * \param inter interaction that owns the relation
+  * \param q the BlockVector of coordinates
+  * \param z the BlockVector of parameters
+  */
+  virtual void computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
   * \param: double, current time

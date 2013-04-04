@@ -24,6 +24,10 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 using namespace std;
 using namespace RELATION;
 
@@ -112,39 +116,58 @@ const std::string LagrangianRheonomousR::gethDotName() const
     return _pluginhDot->getPluginName();
   return "unamed";
 }
+
 void LagrangianRheonomousR::computeh(const double time, Interaction& inter)
 {
-  if (_pluginh->fPtr)
+
+  DEBUG_PRINT(" LagrangianRheonomousR::computeh(const double time, Interaction& inter)");
+  computeh(time, inter, inter.data(q0),inter.data(z));
+}
+
+void LagrangianRheonomousR::computeh(const double time,Interaction& inter,
+                                     SP::BlockVector q, SP::BlockVector z )
+{
+  DEBUG_PRINT(" LagrangianRheonomousR::computeh(const double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
+  if (_pluginh)
   {
-    // get vector y of the current interaction
-    SiconosVector& y = *inter.y(0);
+    // arg= time. Unused in this function but required for interface.
+    if (_pluginh->fPtr)
+    {
+      // get vector y of the current interaction
+      SiconosVector& y = *inter.y(0);
 
-    // Warning: temporary method to have contiguous values in
-    // memory, copy of block to simple.
-    SiconosVector workQ = *inter.data(q0);
-    SiconosVector workZ = *inter.data(z);
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      SiconosVector workQ = *q;
+      SiconosVector workZ = *z;
+      ((FPtr4)(_pluginh->fPtr))(workQ.size(), &(workQ)(0), time, y.size(),  &(y)(0), workZ.size(), &(workZ)(0));
 
-    ((FPtr4)(_pluginh->fPtr))(workQ.size(), &(workQ)(0), time, y.size(),  &(y)(0), workZ.size(), &(workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *inter.data(z) = workZ;
+      // Copy data that might have been changed in the plug-in call.
+      *z = workZ;
+    }
   }
   // else nothing
 }
 
+
 void LagrangianRheonomousR::computehDot(const double time, Interaction& inter)
+{
+  computehDot(time, inter, inter.data(q0), inter.data(z));
+}
+
+
+ void LagrangianRheonomousR::computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   if (_pluginhDot->fPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
-    SiconosVector workQ = *inter.data(q0);
-    SiconosVector workZ = *inter.data(z);
+    SiconosVector workQ = *q;
+    SiconosVector workZ = *z;
 
     ((FPtr4)(_pluginhDot->fPtr))(workQ.size(), &(workQ)(0), time, _hDot->size(),  &(*_hDot)(0), workZ.size(), &(workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *inter.data(z) = workZ;
+    *z = workZ;
   }
   // else nothing
 }

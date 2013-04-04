@@ -33,11 +33,10 @@
 #include "SimpleMatrix.hpp"
 
 class SiconosMatrix;
-
 /** D1MinusLinear Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.3.0.
+ *  \version 3.6.0.
  *  \date (Creation) September 01, 2011
  *
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
@@ -52,6 +51,18 @@ class SiconosMatrix;
  *
  *  - updateState(): computes x(q,v), the complete dynamical systems
  *    states.
+ *
+ * \f[
+ * \begin{cases}
+ * v_{k,0} = \mbox{vold} \\
+ * q_{k,0} = \mbox{qold} \\
+ * F^+_{k} = \mbox{F(told,qold,vold)} \\
+ * v_{k,1} = v_{k,0} + h M^{-1}_k (P^+_{2,k}+F^+_{k}) \\[2mm]
+ * q_{k,1} = q_{k,0} + \frac{h}{2} (v_{k,0} + v_{k,1})  \\[2mm]
+ * F^-_{k+1} = F(t^{-}_{k+1},q_{k,1},v_{k,1}) \\[2mm]
+ * R_{free} = - \frac{h}{2}  M^{-1}_k (P^+_{2,k}+F^+_{k}) -  \frac{h}{2}  M^{-1}_{k+1} (P^-_{2,k+1}+F^-_{k+1}) \\[2mm]
+ * \end{cases}
+ * \f]
  */
 class D1MinusLinear : public OneStepIntegrator
 {
@@ -117,6 +128,20 @@ public:
    *  \post{ds->velocity contains new velocity}
    */
   virtual void updateState(const unsigned int level);
+
+
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   */
+  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   */
+  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+
+
+
 
   /** displays the data of the D1MinusLinear's integrator */
   virtual void display()

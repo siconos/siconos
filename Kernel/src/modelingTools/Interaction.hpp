@@ -86,10 +86,12 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-  enum DataNamesFirstOrder {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
+  //enum DataNamesFirstOrder {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
   // Why not using FirstOrderR::free
+  // enum DataNames {free, z, q0, q1, q2, p0, p1, p2, sizeDataNames};
+
   //  enum DataNamesLagrangian {z,q0,q1,q2,p0,p1,p2,sizeDataNames};
-  enum DataNamesNewtonEuler {free2, z2, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames2};
+  //enum DataNamesNewtonEuler {free2, z2, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames2};
 
   /**initialization flag */
   bool _initialized;
@@ -186,7 +188,7 @@ private:
 
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
-  typedef std11::array<SP::BlockVector, 10> dataR;
+  typedef std11::array<SP::BlockVector, 15> dataR;
   dataR _data;
 
   /** Work vectors to save pointers to state-related data of the
@@ -832,44 +834,18 @@ public:
     return _workYp;
   }
 
-  inline void setDataXFromVelocity()
-  {
-    assert(_data[x]);
-    // this method is strange
-    _data[x].reset(new BlockVector());
-
-    ConstDSIterator itDS;
-    for (itDS = dynamicalSystemsBegin();
-         itDS != dynamicalSystemsEnd();
-         ++itDS)
-    {
-      assert(Type::value(**itDS) == Type::LagrangianDS ||
-             Type::value(**itDS) == Type::LagrangianLinearTIDS);
-      _data[x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
-    }
-  };
+  void setDataXFromVelocity();
 
 
-  inline SP::BlockVector dataFree() const
-  {
-    return _data[free];
-  }
-  inline SP::BlockVector dataX() const
-  {
-    return _data[x];
-  }
-  inline SP::BlockVector dataXq() const
-  {
-    return _data[xq];
-  }
-  inline SP::BlockVector dataZ() const
-  {
-    return _data[z];
-  }
-  inline SP::BlockVector dataQ1() const
-  {
-    return _data[q1];
-  }
+
+  // THe following accessor should suppressed
+   SP::BlockVector dataFree() const;
+   SP::BlockVector dataX() const;
+   SP::BlockVector dataXq() const;
+   SP::BlockVector dataZ() const;
+   SP::BlockVector dataQ1() const;
+
+
   /** Access to an element of data
    * \warning this function returns a BlockVector, which should be used with parsimoniousness!
    * \param indx the index
@@ -976,12 +952,11 @@ public:
   {
     return _Residuy;
   }
-  inline SP::BlockVector residuR() const
-  {
-    return _data[residu_r];
-  }
+
+  SP::BlockVector residuR() const;
+
   /*
-   * Compute the residuY.
+   *  Compute the residuY.
    *
    *
    */

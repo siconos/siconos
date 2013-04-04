@@ -34,8 +34,8 @@
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -603,10 +603,9 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
 
 
-
 double Moreau::computeResidu()
 {
-  DEBUG_PRINT("Moreau::computeResidu(), start");
+  DEBUG_PRINT("Moreau::computeResidu(), start\n");
   // This function is used to compute the residu for each "Moreau-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -618,6 +617,11 @@ double Moreau::computeResidu()
   double t = simulationLink->nextTime(); // End of the time step
   double told = simulationLink->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
+
+  DEBUG_PRINTF("nextTime %f\n", t);
+  DEBUG_PRINTF("startingTime %f\n", told);
+  DEBUG_PRINTF("time step size %f\n", h);
+
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -752,7 +756,6 @@ double Moreau::computeResidu()
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-
       SP::SiconosVector q = d->q();
 
 
@@ -760,6 +763,10 @@ double Moreau::computeResidu()
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       //residuFree->zero();
+      DEBUG_EXPR(residuFree->display());
+      DEBUG_EXPR(qold->display());
+      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(M->display());
 
 
       //   std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
@@ -818,6 +825,9 @@ double Moreau::computeResidu()
       *(d->workFree()) = *residuFree; // copy residuFree in Workfree
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
+
+      DEBUG_EXPR(d->workFree()->display());
+
       if (d->p(1))
         *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
@@ -1892,10 +1902,10 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #else
   assert(!isnan(y));
 #endif
-#ifdef DEBUG_MESSAGES
+  DEBUG_EXPR(
   if (y <= 0)
     DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
-#endif
+    );
   return (y <= 0.0);
 }
 
@@ -1918,10 +1928,11 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #else
   assert(!isnan(y));
 #endif
-#ifdef DEBUG_MESSAGES
-  if (y > 0)
+
+  DEBUG_EXPR(
+    if (y > 0)
     DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
-#endif
+    );
   return (y > 0.0);
 }
 

@@ -41,6 +41,10 @@
 using namespace std;
 using namespace RELATION;
 //#define LINEAROSNS_DEBUG
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
 {
 }
@@ -525,7 +529,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
 void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
 {
-
+  DEBUG_PRINT("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
   SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
   OSI::TYPES  osiType = Osi->getType();
@@ -557,10 +561,9 @@ void LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)
     Osi->computeFreeOutput(inter , this);
     setBlock(*inter->yp(), _q, sizeY , 0, pos);
     //
-#ifdef LINEAROSNS_DEBUG
-    cout << "_q vector: ";
-    _q->display();
-#endif
+
+    DEBUG_EXPR(_q->display());
+
 
 
   }
