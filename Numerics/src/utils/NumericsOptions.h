@@ -30,15 +30,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define OUTPUT_ON_ERROR 4
+
 /** Structure used to set general options of Numerics functions,
   * structures and so on.
   *
   *  \param verboseMode (0: off, 1: on)
- */
+  *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file) 
+                        with OUTPUT_ON_ERROR flag : only on solver error
+  *  \param counter     a counter for file numeration
+  */
 
 typedef struct
 {
   int verboseMode;
+  int outputMode;
+  int counter;
 } NumericsOptions;
 
 
@@ -71,6 +78,10 @@ extern "C"
      \param output message
   */
   void numericsWarning(char* functionName, char* message);
+
+
+  /* set default values for NumericsOptions */
+  void setDefaultNumericsOptions(NumericsOptions* opt);
 
 #ifdef __cplusplus
 }

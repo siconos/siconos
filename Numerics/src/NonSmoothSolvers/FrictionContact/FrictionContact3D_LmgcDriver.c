@@ -38,6 +38,7 @@ int frictionContact3D_LmgcDriver(double *reaction,
   /* frictionContact_display(FC); */
 
   NumericsOptions numerics_options;
+  setDefaultNumericsOptions(&numerics_options);
 
   numerics_options.verboseMode = verbose; // turn verbose mode to off by default
 

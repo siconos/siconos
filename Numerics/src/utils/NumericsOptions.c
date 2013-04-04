@@ -51,3 +51,10 @@ void numericsWarning(char * functionName, char* message)
   fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
 }
+
+void setDefaultNumericsOptions(NumericsOptions* opts)
+{
+  opts->verboseMode = 0;
+  opts->outputMode = 0;
+  opts->counter = 0;
+}

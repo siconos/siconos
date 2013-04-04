@@ -35,6 +35,7 @@ int relay_test_function(FILE * f, int  solverId)
 
 
   NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
 
 

@@ -137,6 +137,7 @@ int globalFrictionContact3D_LmgcDriver(double *reaction,
   problem.mu = mu;
 
   NumericsOptions numerics_options; 
+  setDefaultNumericsOptions(&numerics_options);
   numerics_options.verboseMode = verbose;
 
   SolverOptions numerics_solver_options;

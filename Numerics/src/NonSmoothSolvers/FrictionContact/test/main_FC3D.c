@@ -39,6 +39,7 @@ int test_Series_nsgs(FrictionContactProblem* problem,
   // Numerics and Solver Options
 
   NumericsOptions numerics_options;
+  setDefaultNumericsOptions(&numerics_options);
   numerics_options.verboseMode = 1; // turn verbose mode to off by default
 
 

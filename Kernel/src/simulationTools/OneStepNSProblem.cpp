@@ -63,6 +63,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
@@ -93,6 +94,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
@@ -107,6 +109,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
@@ -122,6 +125,7 @@ OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSol
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
@@ -135,6 +139,7 @@ OneStepNSProblem::OneStepNSProblem(const int newNumericsSolverId):
 
   // Numerics general options
   _numerics_options.reset(new NumericsOptions());
+  setDefaultNumericsOptions(&*_numerics_options);
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);

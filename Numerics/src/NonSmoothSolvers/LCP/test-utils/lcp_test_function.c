@@ -197,6 +197,7 @@ int lcp_test_function(FILE * f, int solverId)
   fclose(foutput);
 
   NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
   SolverOptions * options ;
   options = (SolverOptions *) malloc(sizeof(*options));
@@ -277,6 +278,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
 
   NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));

@@ -35,6 +35,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
 
   NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 2; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;

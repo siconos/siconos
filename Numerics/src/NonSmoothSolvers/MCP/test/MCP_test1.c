@@ -79,6 +79,7 @@ int main(void)
 
 
   NumericsOptions global_options;
+  setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
 
 
