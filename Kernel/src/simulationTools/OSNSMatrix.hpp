@@ -143,10 +143,10 @@ protected:
   SP::BlockCSRMatrix M2;
 
   /** Private copy constructor => no copy nor pass by value */
-  OSNSMatrix(const OSNSMatrix&);
+  OSNSMatrix(const OSNSMatrix&) {};
 
   /** Private assignment -> forbidden */
-  OSNSMatrix& operator=(const OSNSMatrix&);
+  OSNSMatrix& operator=(const OSNSMatrix&) {};
 
   /** To update dim and interactionBlocksPositions for a new set of
       Interaction
@@ -204,13 +204,6 @@ public:
       \param storage type
   */
   OSNSMatrix(SP::DynamicalSystemsSet, SP::InteractionsGraph, MapOfDSMapOfInteractionMatrices&, int);
-
-  /** Constructor from DynamicalSystemsSet and indexSet and map
-      \param InteractionsGraph* the index set of the active constraints
-      \param MapOfMapOfInteractionMatrices the list of matrices linked to a couple of SP::Interaction
-      \param storage type
-  */
-  OSNSMatrix(SP::InteractionsGraph, SP::DynamicalSystemsSet , MapOfInteractionMapOfDSMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and maps of Blocks
       \param InteractionsGraph* the index set of the active constraints

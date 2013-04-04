@@ -44,9 +44,6 @@
 // mandatory !
 %rename (lambda_) lambda;
 
-// common declarations with Numerics
-%include solverParams.i
-
  // common declarations with upper modules : Mechanics, IO, ...
 %include handleException.i
 
@@ -108,6 +105,23 @@ namespace std
 %feature("notabstract") TimeStepping;
 %feature("notabstract") EventDriven;
 
+// common declarations with Numerics
+
+// note : deleteSolverOptions is call by ~LCP(), ~FrictionContact(), etc.
+%shared_ptr(_SolverOptions);
+%shared_ptr(NumericsMatrix);
+%shared_ptr(SparseMatrix);
+%shared_ptr(SparseBlockStructuredMatrix);
+
+%include solverOptions.i
+
+%include NumericsMatrix.h
+%include SparseMatrix.h
+%include SparseBlockMatrix.h
+%include NumericsMatrix.h
+
+ // segfaults...
+ //%import Numerics.i
 
 %include "SiconosVisitables.hpp"
 
@@ -312,17 +326,10 @@ typedef __mpz_struct mpz_t[1];
 %template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
 
 
+%ignore OSNSMatrix::updateSizeAndPositions;
+
 // registered classes in KernelRegistration.i
 KERNEL_REGISTRATION();
-
-%shared_ptr(_SolverOptions);
-TYPEDEF_SPTR(_SolverOptions);
-
-// note : deleteSolverOptions is call by ~LCP(), ~FrictionContact(), etc.
-
-%include "SolverOptions.h"
-
- //KERNEL_REGISTRATION();
 
 %fragment("StdSequenceTraits");
 

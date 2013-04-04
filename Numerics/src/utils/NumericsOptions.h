@@ -21,7 +21,8 @@
 #define NumericsOptions_H
 
 /*!\file NumericsOptions.h
-  \brief General options for Numerics functions, structures and so on (mainly used to send information from Kernel to Numerics).
+  \brief General options for Numerics functions, structures and so on 
+         (mainly used to send information from Kernel to Numerics).
   \author Franck Perignon
 */
 
@@ -29,9 +30,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-/** Structure used to set general options of Numerics functions, structures and so on.
-    \param verbose mode (0: off, 1: on)
-*/
+/** Structure used to set general options of Numerics functions,
+  * structures and so on.
+  *
+  *  \param verboseMode (0: off, 1: on)
+ */
+
 typedef struct
 {
   int verboseMode;

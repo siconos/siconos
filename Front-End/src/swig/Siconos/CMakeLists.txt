@@ -112,7 +112,7 @@ IF(DOXYGEN_FOUND)
     KernelTypes.i
     KernelBullet.i
     KernelRegistration.i
-    solverParams.i
+    solverOptions.i
     handleException.i
     start.i
     end.i
@@ -122,7 +122,7 @@ IF(DOXYGEN_FOUND)
   SET(SWIG_MODULE_Numerics_EXTRA_DEPS
     KernelTypes.i
     KernelRegistration.i
-    solverParams.i
+    solverOptions.i
     start.i
     end.i
     numpy.i

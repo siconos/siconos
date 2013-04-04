@@ -71,4 +71,5 @@
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
   PY_REGISTER(InteractionsSet);                                         \
-  PY_REGISTER(BoundaryCondition);
+  PY_REGISTER(BoundaryCondition);                                       \
+  PY_REGISTER(OSNSMatrix);

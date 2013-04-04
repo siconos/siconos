@@ -201,4 +201,9 @@ static int convert_darray(PyObject *input, double *ptr) {
   $result = PyArray_SimpleNewFromData(1,this_dparam_dim,NPY_DOUBLE,pdparam);
  }
 
+%{
+#include "SolverOptions.h"
+%}
+
+%include "SolverOptions.h"
 

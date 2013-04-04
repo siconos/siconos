@@ -241,49 +241,52 @@ void printSolverOptions(SolverOptions* options)
 void recursive_deleteSolverOptions(SolverOptions* op)
 {
 
-  for (int i = 0; i < op->numberOfInternalSolvers; i++)
-    recursive_deleteSolverOptions(&(op->internalSolvers[i]));
+  if (op)
+  {
+    for (int i = 0; i < op->numberOfInternalSolvers; i++)
+      recursive_deleteSolverOptions(&(op->internalSolvers[i]));
 
-  if (op->numberOfInternalSolvers && op->internalSolvers)
-    free(op->internalSolvers);
-  op->internalSolvers = 0;
-  if (op->iparam)
-    free(op->iparam);
-  op->iparam = 0;
-  if (op->dparam)
-    free(op->dparam);
-  op->dparam = 0;
-  if (op->iWork)
-    free(op->iWork);
-  op->iWork = 0;
-  if (op->dWork)
-    free(op->dWork);
-  op->dWork = 0;
+    if (op->numberOfInternalSolvers && op->internalSolvers)
+      free(op->internalSolvers);
+    op->internalSolvers = 0;
+    if (op->iparam)
+      free(op->iparam);
+    op->iparam = 0;
+    if (op->dparam)
+      free(op->dparam);
+    op->dparam = 0;
+    if (op->iWork)
+      free(op->iWork);
+    op->iWork = 0;
+    if (op->dWork)
+      free(op->dWork);
+    op->dWork = 0;
+  }
 }
 
 
 void deleteSolverOptions(SolverOptions* op)
 {
-  for (int i = 0; i < op->numberOfInternalSolvers; i++)
-    recursive_deleteSolverOptions(&(op->internalSolvers[i]));
-  if (op->numberOfInternalSolvers && op->internalSolvers)
-    free(op->internalSolvers);
-  op->internalSolvers = NULL;
-  if (op->iparam != NULL)
-    free(op->iparam);
-  op->iparam = NULL;
-  if (op->dparam != NULL)
-    free(op->dparam);
-  op->dparam = NULL;
-  if (op->iWork != NULL)
+  if(op)
+  {
+    for (int i = 0; i < op->numberOfInternalSolvers; i++)
+      recursive_deleteSolverOptions(&(op->internalSolvers[i]));
+    if (op->numberOfInternalSolvers && op->internalSolvers)
+      free(op->internalSolvers);
+    op->internalSolvers = NULL;
+    if (op->iparam != NULL)
+      free(op->iparam);
+    op->iparam = NULL;
+    if (op->dparam != NULL)
+      free(op->dparam);
+    op->dparam = NULL;
+    if (op->iWork != NULL)
     free(op->iWork);
-  op->iWork = NULL;
-  if (op->dWork != NULL)
-    free(op->dWork);
-  op->dWork = NULL;
-
-
-
+    op->iWork = NULL;
+    if (op->dWork != NULL)
+      free(op->dWork);
+    op->dWork = NULL;
+  }
 }
 
 
