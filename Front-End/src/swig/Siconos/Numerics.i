@@ -1275,7 +1275,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 %extend SolverOptions
 {
 
-  SolverOptions* makeSolverOptions(FrictionContactProblem* fcp, FRICTION_SOLVER id)
+  SolverOptions(FRICTION_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
