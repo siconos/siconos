@@ -18,9 +18,8 @@
 %include pyRegister.i
 
 %fragment("NumPy_Fragments");
-PY_REGISTER(SpaceFilter);                                             
-
-PY_REGISTER(SiconosBodies);
+PY_FULL_REGISTER(SpaceFilter);                                             
+PY_FULL_REGISTER(SiconosBodies);
 // yes, undefined private copy constructors
 %feature("notabstract") BulletTimeStepping;
 
@@ -145,12 +144,14 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btTriangleInfoMap);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 
 %include "BulletSiconos.hpp"
-PY_REGISTER(BulletR);
-PY_REGISTER(BulletDS);
-PY_REGISTER(BulletSpaceFilter);
-PY_REGISTER(BulletTimeStepping);
-PY_REGISTER(BulletTimeSteppingProjectOnConstraints);
-PY_REGISTER(BulletWeightedShape);
-PY_REGISTER(BulletFrom1DLocalFrameR);
+PY_FULL_REGISTER(BulletR);
+PY_FULL_REGISTER(BulletDS);
+PY_FULL_REGISTER(BulletSpaceFilter);
+PY_FULL_REGISTER(BulletTimeStepping);
+PY_FULL_REGISTER(BulletTimeSteppingProjectOnConstraints);
+PY_FULL_REGISTER(BulletWeightedShape);
+PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
+
+
 
 #endif

@@ -18,6 +18,6 @@
 
 %include pyRegister.i
 
-PY_REGISTER(KneeJointR);
-PY_REGISTER(PivotJointR);
-PY_REGISTER(PrismaticJointR);
+PY_FULL_REGISTER(KneeJointR);
+PY_FULL_REGISTER(PivotJointR);
+PY_FULL_REGISTER(PrismaticJointR);
