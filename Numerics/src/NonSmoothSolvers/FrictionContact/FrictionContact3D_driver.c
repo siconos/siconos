@@ -50,6 +50,11 @@ char * SICONOS_FRICTION_3D_PROX_STR = "F3D_PROX";
 char * SICONOS_FRICTION_3D_QUARTIC_STR = "F3D_QUARTIC";
 char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
+void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
+                                    double* velocity, double* reaction, 
+                                    NumericsOptions *nopts, int after_solve, 
+                                    int info);
+
 int frictionContact3D_driver(FrictionContactProblem* problem, 
                              double *reaction, double *velocity, 
                              SolverOptions* options, 
@@ -62,7 +67,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     setNumericsOptions(global_options);
   
   snOutputFrictionContactProblem(problem, reaction, velocity, global_options, 
-                                 0);
+                                 0, 0);
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
@@ -186,7 +191,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   }
 
   snOutputFrictionContactProblem(problem, reaction, velocity, global_options, 
-                                 1);
+                                 1, info);
 
   return info;
 
@@ -222,7 +227,7 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
 }
 
 #include <stdarg.h>
-int snPrint(int level, NumericsOptions* nopts, const char *fmt, ...)
+void snPrint(int level, NumericsOptions* nopts, const char *fmt, ...)
 {
   if (nopts && nopts->verboseMode >= level)
   {
@@ -235,29 +240,35 @@ int snPrint(int level, NumericsOptions* nopts, const char *fmt, ...)
 }
 
 
+#ifdef WITH_FCLIB
+#include "fclib_interface.h"
+#endif
+
 void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
                                     double* velocity, double* reaction, 
-                                    NumericsOptions *nopts, int after_solve)
+                                    NumericsOptions *nopts, int after_solve, 
+                                    int info)
 {
 
   int outputFile = -1;
 
   if (nopts && nopts->outputMode & OUTPUT_ON_ERROR)
   {
-    if (after_solve)
+    if (after_solve && info)
     {
       outputFile = nopts->outputMode & (OUTPUT_ON_ERROR - 1);
-    }
+    } /* else no output */
+  }
+  else
+  {
+    outputFile = nopts->outputMode;
   }
 
   if (outputFile == 1)
   {
-    int nc = problem->numberOfContacts;
-
     char fname[256];
-    sprintf(fname, "FrictionContactProblem%.5d.c", nopts->counter++);
-    
-    snPrint(1, nopts, "Dump of FrictionContactProblem%.5d.c", nopts->counter);
+    sprintf(fname, "%s%.5d.c", nopts->fileName, nopts->counter++);
+    snPrint(1, nopts, "dump of %s (not implemented!) \n", fname);
 
 /*    FILE * file = fopen(fname, "w");*/
     
@@ -267,8 +278,8 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
   else if (outputFile == 2)
   {
     char fname[256];
-    sprintf(fname, "FrictionContactProblem%.5d.dat", nopts->counter++);
-    snPrint(1, nopts, "Dump of FrictionContactProblem%.5d.dat", nopts->counter);
+    sprintf(fname, "%s%.5d.dat", nopts->fileName, nopts->counter++);
+    snPrint(1, nopts, "dump of %s\n", fname);
 
     FILE * foutput  =  fopen(fname, "w");
     frictionContact_printInFile(problem, foutput);
@@ -278,32 +289,23 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
   {
 #ifdef WITH_FCLIB
     char fname[256];
-    sprintf(fname, "FrictionContactProblem%.5d.hdf5", nopts->counter++);
-    snPrint(1, nopts, "Dump of FrictionContactProblem%.5d.hdf5", nopts->counter);
+    
+    sprintf(fname, "%s%.5d.hdf5", nopts->fileName, nopts->counter++);
+    snPrint(1, nopts, "dump of %s\n", fname);
 
     FILE * foutput  =  fopen(fname, "w");
-    int n = 100;
-    char * title = (char *)malloc(n * sizeof(char *));
-    strcpy(title, "FrictionContact hdf5 dump ");
-    char * description = (char *)malloc(n * sizeof(char *));
-
-    strcat(description, "Rewriting in hdf5 through siconos of  ");
-    strcat(description, fname);
-    strcat(description, " in FCLIB format");
-    char * math_info = (char *)malloc(n * sizeof(char *));
-    strcpy(math_info,  "unknown");
 
     frictionContact_fclib_write(problem,
-                                title,
-                                description,
-                                math_info,
+                                nopts->title,
+                                nopts->description,
+                                nopts->math_info,
                                 fname);
 
 
 
     fclose(foutput);
 #else
-    printf("Fclib is not available ...\n");
+    snPrint(0, nopts, "fclib is not available, you must configure Siconos/Numerics with cmake [...] -DWITH_FCLIB=1\n");
 #endif
   }
 }

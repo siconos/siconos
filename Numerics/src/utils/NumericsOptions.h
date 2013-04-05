@@ -37,16 +37,26 @@
   *
   *  \param verboseMode (0: off, 1: on)
   *  \param outputMode  (0: none, 1: c file, 2: dat file, 3: fclib file) 
-                        with OUTPUT_ON_ERROR flag : only on solver error
+  *                      with OUTPUT_ON_ERROR flag : only on solver error
+  *  \param fileName    output filename
+
+  *  \param description experience description
   *  \param counter     a counter for file numeration
   */
 
+/* note : swig is ok with char[n] (wrapper checks string length) */
 typedef struct
 {
   int verboseMode;
   int outputMode;
+  char fileName[256];   
+  char title[256];
+  char description[1024];
+  char math_info[1024];
   int counter;
 } NumericsOptions;
+
+
 
 
 /* Verbose mode */
