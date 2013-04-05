@@ -66,7 +66,6 @@ int LCP::compute(double time)
   // - the global options for Numerics (verbose mode ...)
   DEBUG_PRINTF("LCP : sizeOutput=%d\n", _sizeOutput);
   DEBUG_PRINTF("_levelMin = %i\n", _levelMin);
-
   DEBUG_EXPR(display(););
 
 

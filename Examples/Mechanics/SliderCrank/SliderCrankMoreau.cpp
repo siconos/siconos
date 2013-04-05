@@ -29,7 +29,7 @@
   */
 
 #include "SiconosKernel.hpp"
-
+//#define WITH_FRICTION
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
     // --- Interactions---
     // -------------------
     // -- corner 1 --
+#ifdef WITH_FRICTION
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eN1, eT1, mu1, 2));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
     SP::Interaction inter1(new Interaction(2, nslaw1, relation1, 1));
@@ -108,6 +109,27 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw4(new NewtonImpactFrictionNSL(eN4, eT4, mu4, 2));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
     SP::Interaction inter4(new Interaction(2, nslaw4, relation4, 4));
+#else
+    // -- corner 1 --
+    SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(eN1));
+    SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
+    SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
+
+    // -- corner 2 --
+    SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(eN2));
+    SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
+    SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
+
+    // -- corner 3 --
+    SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(eN3));
+    SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
+    SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
+
+    // -- corner 4 --
+    SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(eN4));
+    SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
+    SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
+#endif
 
     // -------------
     // --- Model ---
@@ -124,7 +146,11 @@ int main(int argc, char* argv[])
     // ----------------
     SP::Moreau OSI(new Moreau(slider, 0.5, 0.0));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+#ifdef WITH_FRICTION
     SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
+#else
+    SP::OneStepNSProblem impact(new LCP(SICONOS_LCP_LEMKE));
+#endif
     impact->numericsSolverOptions()->dparam[0] = 1e-08;
     impact->numericsSolverOptions()->iparam[0] = 100;
     impact->numericsSolverOptions()->iparam[2] = 1; // random
@@ -191,9 +217,19 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-    //  while ((s->hasNextEvent()) && (k<= 1000))
+//    while ((s->hasNextEvent()) && (k<= 275))
     while ((s->hasNextEvent()))
     {
+
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"Iteration k = " << k <<std::endl;
+      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+
+
+
       //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();
       impact->setNumericsVerboseMode(0);

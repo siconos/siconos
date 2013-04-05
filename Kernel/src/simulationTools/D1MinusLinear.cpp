@@ -23,8 +23,8 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "NewtonImpactNSL.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;

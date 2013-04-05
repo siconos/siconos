@@ -29,6 +29,11 @@
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "ZeroOrderHold.hpp"
+
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 //#define OSNS_DEBUG
 using namespace std;
 OneStepNSProblem::OneStepNSProblem():
@@ -602,7 +607,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
 {
   // === OSI = MOREAU : gets W matrices ===
   // === OSI = LSODAR : gets M matrices of each DS concerned by the Interaction ===
-
+  DEBUG_PRINT("OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centralInteractionBlocks) starts");
   SP::OneStepIntegrator Osi;
   OSI::TYPES osiType; // type of the current one step integrator
   Type::Siconos dsType; // type of the current Dynamical System
@@ -613,6 +618,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     osiType = Osi->getType();
     unsigned int itN = (*itDS)->number();
     dsType = Type::value(**itDS);
+
     if (osiType == OSI::MOREAU
         || osiType == OSI::MOREAUPROJECTONCONSTRAINTSOSI
         || osiType == OSI::SCHATZMANPAOLI)
@@ -650,8 +656,16 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     }
     else if (osiType == OSI::D1MINUSLINEAR)
     {
+
+      DEBUG_PRINT("OneStepNSProblem::getOSIMaps  for osiType   OSI::D1MINUSLINEAR" );
+
       if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for D1MinusLinear integrator with dynamical system of type " + dsType);
+
+      (std11::static_pointer_cast<LagrangianDS>(*itDS))->computeMass();
+      (std11::static_pointer_cast<LagrangianDS>(*itDS))->mass()->resetLU();
+
+      DEBUG_EXPR(((std11::static_pointer_cast<LagrangianDS>(*itDS))->mass())->display(););
 
       centralInteractionBlocks[itN].reset(new SimpleMatrix(*((std11::static_pointer_cast<LagrangianDS>(*itDS))->mass())));
     }

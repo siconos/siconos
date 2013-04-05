@@ -25,8 +25,8 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -158,7 +158,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
-    DEBUG_EXPR(inter->dynamicalSystem(0)->display());
 
     if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {

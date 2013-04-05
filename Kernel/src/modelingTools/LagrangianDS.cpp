@@ -582,13 +582,19 @@ void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
 void LagrangianDS::computeMass()
 {
   if (_pluginMass->fPtr)
+  {
     ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+  _mass->resetLU();
+  }
 }
 
 void LagrangianDS::computeMass(SP::SiconosVector q2)
 {
   if (_pluginMass->fPtr)
+  {
     ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+    _mass->resetLU();
+  }
 }
 
 void LagrangianDS::computeFInt(double time)
