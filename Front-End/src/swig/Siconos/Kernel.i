@@ -101,7 +101,7 @@ namespace std
 // note: this means something may be wrong in .hpp headers => use -Wall to
 // detect it
 
-// swig does not see the using Simulation::update ?
+// yes, undefined private copy constructors
 %feature("notabstract") TimeStepping;
 %feature("notabstract") EventDriven;
 

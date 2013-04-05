@@ -748,7 +748,7 @@
   Py_DECREF(_TEMP##VAR)
 
 
-%typemap(in) (const SparseBlockStructuredMatrix* const A, SparseMatrix *outSparseMat)
+%typemap(in) (const SparseBlockStructuredMatrix* const A, cs_sparse *outSparseMat)
 {
   void *swig_arp;
   int swig_res = SWIG_ConvertPtr($input,&swig_arp,SWIGTYPE_p_SparseBlockStructuredMatrix, 0 | 0);
@@ -756,7 +756,7 @@
   if (SWIG_IsOK(swig_res))
   {
     $1 = (SparseBlockStructuredMatrix*) swig_arp;
-    $2 = (SparseMatrix*) malloc(sizeof(SparseMatrix));
+    $2 = (cs_sparse*) malloc(sizeof(cs_sparse));
     if(!$2) SWIG_fail;
 
     SBMtoSparseInitMemory($1,$2);
@@ -766,10 +766,10 @@
 }
 
 
-%typemap(argout) (SparseMatrix *outSparseMat)
+%typemap(argout) (cs_sparse *outSparseMat)
 {
 
-  SparseMatrix *M=$1;
+  cs_sparse *M=$1;
 
   /* get sys.modules dict */
   PyObject* sys_mod_dict = PyImport_GetModuleDict();
@@ -825,7 +825,7 @@
 
 }
 
-%typemap(in) (SparseMatrix* M) 
+%typemap(in) (cs_sparse* M) 
   (PyObject *shape_ = NULL,
    PyObject *nnz_ = NULL,
    PyObject *data_ = NULL,
@@ -837,11 +837,11 @@
    PyArrayObject *array_data_ = NULL,
    PyArrayObject *array_indices_ = NULL,
    PyArrayObject *array_indptr_ = NULL,
-   SparseMatrix *M = NULL)
+   cs_sparse *M = NULL)
 {
   try
   {
-    M = (SparseMatrix *) malloc(sizeof(SparseMatrix));      
+    M = (cs_sparse *) malloc(sizeof(cs_sparse));      
     if(!M) SWIG_fail;
 
     PyObject *obj = $input;
@@ -898,7 +898,7 @@
   }
 }
 
-%typemap(freearg) (SparseMatrix* M)
+%typemap(freearg) (cs_sparse* M)
 {
 
   Py_XDECREF(shape_$argnum);
@@ -927,17 +927,17 @@
   }
 }
 
-%apply (SparseMatrix *M) {(const SparseMatrix const * m)};
+%apply (cs_sparse *M) {(const cs_sparse const * m)};
 
-%apply (SparseMatrix *M) {(SparseMatrix const * m)};
+%apply (cs_sparse *M) {(cs_sparse const * m)};
 
-%apply (SparseMatrix *M) {(const SparseMatrix * m)};
+%apply (cs_sparse *M) {(const cs_sparse * m)};
 
-%apply (SparseMatrix *M) {(SparseMatrix * m)};
+%apply (cs_sparse *M) {(cs_sparse * m)};
 
-%apply (SparseMatrix *M) {(const SparseMatrix const *sparseMat)};
+%apply (cs_sparse *M) {(const cs_sparse const *sparseMat)};
 
-%apply (SparseMatrix *M) {(SparseMatrix *sparseMat)};
+%apply (cs_sparse *M) {(cs_sparse *sparseMat)};
 
 
 %inline
@@ -973,10 +973,7 @@
 // generated docstrings from doxygen xml output
 %include Numerics-docstrings.i
  
- // Matrices
-%include "SparseMatrix.h"
-%include "SparseBlockMatrix.h"
-%include "NumericsMatrix.h"
+%fragment("NumPy_Fragments");
 
 // LCP
 %include "LinearComplementarityProblem.h"
@@ -1774,6 +1771,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 };
 
 
+ // Matrices
+%include "SparseMatrix.h"
+%include "SparseBlockMatrix.h"
+%include "NumericsMatrix.h"
+
 // some extensions but numpy arrays should be used instead 
 %extend NumericsMatrix
 {
@@ -1868,7 +1870,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
   %fragment("NumPy_Fragments");
 
   // from a scipy.sparse csr
-  SparseMatrix(PyObject *obj)
+  cs_sparse(PyObject *obj)
   {
 
     PyObject *shape,*nnz,*data,*indices,*indptr;
@@ -1876,12 +1878,12 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     int is_new_object2=0;
     int is_new_object3=0;
     PyArrayObject *array_data, *array_indices, *array_indptr;
-    SparseMatrix* M;
+    cs_sparse* M;
 
     try
     {
 
-      M = (SparseMatrix *) malloc(sizeof(SparseMatrix));      
+      M = (cs_sparse *) malloc(sizeof(cs_sparse));      
       
       GET_ATTR(obj,shape);
       GET_ATTR(obj,nnz);
@@ -1984,4 +1986,5 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
     freeSparse($self);
   }
 }
+
 

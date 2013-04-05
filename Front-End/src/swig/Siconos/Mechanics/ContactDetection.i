@@ -21,7 +21,8 @@
 PY_REGISTER(SpaceFilter);                                             
 
 PY_REGISTER(SiconosBodies);
-
+// yes, undefined private copy constructors
+%feature("notabstract") BulletTimeStepping;
 
 
 #ifdef WITH_BULLET

@@ -142,12 +142,6 @@ protected:
       (storageType = 1) */
   SP::BlockCSRMatrix M2;
 
-  /** Private copy constructor => no copy nor pass by value */
-  OSNSMatrix(const OSNSMatrix&) {};
-
-  /** Private assignment -> forbidden */
-  OSNSMatrix& operator=(const OSNSMatrix&) {};
-
   /** To update dim and interactionBlocksPositions for a new set of
       Interaction
       \param InteractionsGraph* the index set of
@@ -166,6 +160,13 @@ protected:
       \param InteractionsGraph* the index set of the active constraints
   */
   void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::InteractionsGraph);
+
+private:
+  /** Private copy constructor => no copy nor pass by value */
+  OSNSMatrix(const OSNSMatrix&);
+
+  /** Private assignment -> forbidden */
+  OSNSMatrix& operator=(const OSNSMatrix&);
 
 public:
 
