@@ -121,6 +121,7 @@ IF(DOXYGEN_FOUND)
     start.i
     end.i
     numpy.i
+    pyRegister.i
     Kernel-docstrings.i)
   
   SET(SWIG_MODULE_Numerics_EXTRA_DEPS
@@ -130,6 +131,7 @@ IF(DOXYGEN_FOUND)
     start.i
     end.i
     numpy.i
+    pyRegister.i
     Numerics-docstrings.i)
 ENDIF()
 

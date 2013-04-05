@@ -261,7 +261,7 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
   \param inter Interaction: the interaction that owns this relation
   */
-  void initialize(Interaction & inter);
+  virtual void initialize(Interaction & inter);
 
   /** default function to compute h
   *  \param double : current time

@@ -160,9 +160,6 @@ namespace std
 typedef struct
 {} __mpz_struct;
 typedef __mpz_struct mpz_t[1];
-%include KernelRegistration.i
-%include pyRegister.i
-
 
 // ignores
 %ignore nullDeleter;
@@ -332,7 +329,14 @@ typedef __mpz_struct mpz_t[1];
 %ignore OSNSMatrix::updateSizeAndPositions;
 
 // registered classes in KernelRegistration.i
+
+%include KernelRegistration.i
+%include pyRegister.i
 KERNEL_REGISTRATION();
+
+%include pyInclude.i
+
+KERNEL_REGISTRATION()
 
 %fragment("StdSequenceTraits");
 

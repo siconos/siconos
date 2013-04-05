@@ -37,6 +37,7 @@
   PY_REGISTER(FirstOrderLinearTIR);                                     \
   PY_REGISTER(FirstOrderType1R);                                        \
   PY_REGISTER(FirstOrderType2R);                                        \
+  PY_REGISTER(Interaction);                                             \
   PY_REGISTER_WITHOUT_DIRECTOR(Actuator)                                \
   PY_REGISTER_WITHOUT_DIRECTOR(Sensor)                                  \
   PY_REGISTER(ControlSensor)                                            \
@@ -50,7 +51,6 @@
   PY_REGISTER(ControlManager)                                           \
   PY_REGISTER(ControlDynamicalSystem)                                   \
   PY_REGISTER(ControlFirstOrderLinearDS)                                \
-  PY_REGISTER(Interaction);                                             \
   PY_REGISTER(TimeDiscretisation);                                      \
   PY_REGISTER(OneStepNSProblem);                                        \
   PY_REGISTER(OneStepIntegrator);                                       \
