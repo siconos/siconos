@@ -1035,7 +1035,21 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
   Xq = inter->dataXq();
   Yp = inter->yp();
 
-  Xfree = inter->dataFree();
+
+  if (relationType == FirstOrder)
+  {
+    Xfree = inter->data(FirstOrderR::free);
+  }
+  else if  (relationType == NewtonEuler)
+  {
+    Xfree = inter->data(NewtonEulerR::free);
+  }
+  else if  (relationType == Lagrangian)
+  {
+    Xfree = inter->data(LagrangianR::free);
+  }
+
+  assert(Xfree);
 
   assert(Xfree);
 

@@ -120,6 +120,14 @@ public:
     return vect.end();
   } ;
 
+  /** get a pointer on vect, ie all the vectors of the object
+   * \return a VectorOfVectors
+   */
+  inline const VectorOfVectors * getAllVectPtr() const
+  {
+    return &vect;
+  }
+
   /** get vect, ie all the vectors of the object
    * \return a VectorOfVectors
    */

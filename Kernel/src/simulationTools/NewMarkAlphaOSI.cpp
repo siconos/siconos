@@ -335,7 +335,23 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
   // get the size of the interaction
   unsigned int sizeY = inter->getNonSmoothLawSize();
   // get pointer to delta q_free of Dynamical Systems concerned with the interaction
-  SP::BlockVector q_free = inter->dataFree();
+
+  SP::BlockVector q_free;
+  if  (relationType == Lagrangian)
+  {
+    q_free = inter->data(LagrangianR::free);
+  }
+  // else if (relationType == FirstOrder)
+  // {
+  //   q_free = inter->data(FirstOrderR::free);
+  // }
+  // else if  (relationType == NewtonEuler)
+  // {
+  //   q_free = inter->data(NewtonEulerR::free);
+  // }
+  assert(q_free);
+
+
   // get pointer to y_free vector
   SP::SiconosVector y_free = inter->yp();
   assert(q_free && "In NewMarkAlphaOSI::computeFreeOutput: pointer q_free has not initialized yet");

@@ -95,20 +95,6 @@ void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
 {
 
   DEBUG_PRINT("LagrangianScleronomousR::computeh(const double time, Interaction& inter)\n");
-  DEBUG_PRINTF("time = %f\n", time);
-  DEBUG_PRINTF("inter.data(q0) with q0 = %i is used\n", q0);
-  DEBUG_EXPR((inter.data(q0))->display(););
-  DEBUG_PRINTF("inter.data(q1) with q1 = %i is used\n", q1);
-  DEBUG_EXPR((inter.data(q1))->display(););
-  DEBUG_PRINTF("inter.data(q2) with q2 = %i is used\n", q2);
-  DEBUG_EXPR((inter.data(q2))->display(););
-  DEBUG_EXPR(std::cout << inter.data(q0) << std::endl;);
-
-  DEBUG_PRINTF("inter.data(z) with z = %i is used\n", z);
-  DEBUG_EXPR(inter.dynamicalSystem(0)->display());
-
-
-
   computeh(inter, inter.data(q0),inter.data(z));
 
   // if (_pluginh)

@@ -191,7 +191,8 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-    while ((s->hasNextEvent()) && (k<= 10))
+    //  while ((s->hasNextEvent()) && (k<= 1000))
+    while ((s->hasNextEvent()))
     {
       //std::cout << "=============== Step k ="<< k<< std::endl;
       s->advanceToEvent();

@@ -692,8 +692,14 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
   SP::SiconosVector Yp = inter->yp();
 
   SP::BlockVector Xfree;
-  Xfree = inter->dataFree();
-
+  if  (relationType == Lagrangian)
+  {
+    Xfree = inter->data(LagrangianR::free);
+  }
+  // else if  (relationType == NewtonEuler)
+  // {
+  //   Xfree = inter->data(NewtonEulerR::free);
+  // }
   assert(Xfree);
 
   SP::Relation rel = inter->relation();

@@ -27,7 +27,6 @@
   see Flores/Leine/Glocker : Modeling and analysis of planar rigid multibody systems with
   translational clearance joints based on the non-smooth dynamics approach
   */
-#define WITH_INTERACTIONS
 #include "SiconosKernel.hpp"
 
 using namespace std;
@@ -128,20 +127,14 @@ int main(int argc, char* argv[])
     // ----------------
     SP::D1MinusLinear OSI(new D1MinusLinear(slider));
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-#ifdef WITH_INTERACTIONS
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
-#endif
 
-#ifdef WITH_INTERACTIONS
-   SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-#else
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 0));
-    s->insertIntegrator(OSI);
-#endif
+
 
 
     // =========================== End of model definition ===========================
@@ -182,17 +175,6 @@ int main(int argc, char* argv[])
     dataPlot(k, 11) = (l1 * cos((*q)(0)) + l2 * cos((*q)(1)) - l2) / l1; // x slider (normalized)
     dataPlot(k, 12) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1))) / c; // y slider (normalized)
 
-#ifndef WITH_INTERACTIONS
-    relation1->computeOutput(sliderWithClearance->t0(), *inter1, 1 );
-    relation2->computeOutput(sliderWithClearance->t0(), *inter2, 1 );
-    relation3->computeOutput(sliderWithClearance->t0(), *inter3, 1 );
-    relation4->computeOutput(sliderWithClearance->t0(), *inter4, 1 );
-    relation1->computeOutput(sliderWithClearance->t0(), *inter1, 0 );
-    relation2->computeOutput(sliderWithClearance->t0(), *inter2, 0 );
-    relation3->computeOutput(sliderWithClearance->t0(), *inter3, 0 );
-    relation4->computeOutput(sliderWithClearance->t0(), *inter4, 0 );
-#endif
-
     dataPlot(k, 13) = (*inter1->y(0))(0) ; // g1
     dataPlot(k, 14) = (*inter2->y(0))(0) ; // g2
     dataPlot(k, 15) = (*inter3->y(0))(0) ; // g3
@@ -219,8 +201,8 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-    while ((s->hasNextEvent()) && (k <= 10))
-//    while ((s->hasNextEvent()))
+//    while ((s->hasNextEvent()) && (k <= 1000))
+    while ((s->hasNextEvent()))
     {
 
       std::cout <<"=====================================================" <<std::endl;

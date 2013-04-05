@@ -24,6 +24,7 @@
 //#include "Interaction.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianR.hpp"
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
 #include "debug.h"
@@ -67,15 +68,40 @@ void TimeSteppingD1Minus::initOSNS()
 
 void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
 {
-
-
+  DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) starts\n");
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
-    inter->setDataXFromVelocity();
+    DEBUG_EXPR(
+      std::cout
+      <<"inter->data(LagrangianR::x) with LagrangianR::x = "
+      << LagrangianR::x << " : "
+      <<inter->data(LagrangianR::x) << std::endl;
+      );
+
+
+    // if (inter->data(LagrangianR::x))
+    // {
+    //   DEBUG_PRINT("(inter->data(LagrangianR::x)).reset(new BlockVector());");
+    //   (inter->data(LagrangianR::x)).reset(new BlockVector());
+    // }
+
+    assert(inter->data(LagrangianR::x));
+
+    ConstDSIterator itDS;
+    for (itDS = inter->dynamicalSystemsBegin();
+         itDS != inter->dynamicalSystemsEnd();
+         ++itDS)
+    {
+      assert(Type::value(**itDS) == Type::LagrangianDS ||
+             Type::value(**itDS) == Type::LagrangianLinearTIDS);
+      inter->data(LagrangianR::x)->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+    }
+    //inter->setDataXFromVelocity();
   }
   else
     RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);
+  DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) ends\n");
 
 }
 
@@ -132,6 +158,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
+    DEBUG_EXPR(inter->dynamicalSystem(0)->display());
 
     if (i == 1) // ACTIVE FOR IMPACT CALCULATIONS? Contacts which have been closing in the last time step
     {
@@ -148,7 +175,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       {
         if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
         {
-          // if Interaction has not been active in the previous calculation and now becomes active
+          // if Interaction has not been active in the previous calculation and xnow becomes active
           indexSet1->copy_vertex(inter, *indexSet0);
           topo->setHasChanged(true);
         }

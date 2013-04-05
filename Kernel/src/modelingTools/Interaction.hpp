@@ -834,16 +834,16 @@ public:
     return _workYp;
   }
 
-  void setDataXFromVelocity();
 
 
 
   // THe following accessor should suppressed
-   SP::BlockVector dataFree() const;
-   SP::BlockVector dataX() const;
+  //   SP::BlockVector dataFree() const;
+  //   SP::BlockVector dataX() const;
    SP::BlockVector dataXq() const;
    SP::BlockVector dataZ() const;
    SP::BlockVector dataQ1() const;
+  //void setDataXFromVelocity();
 
 
   /** Access to an element of data

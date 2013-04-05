@@ -856,12 +856,21 @@ void Hem5::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
   {
-    Xfree  = inter->dataFree();
+    if  (relationType == Lagrangian)
+    {
+      Xfree = inter->data(LagrangianR::free);
+    }
+    // else if  (relationType == NewtonEuler)
+    // {
+    //   Xfree = inter->data(NewtonEulerR::free);
+    // }
+    assert(Xfree);
     //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
+
     Xfree = inter->dataQ1();
     //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();

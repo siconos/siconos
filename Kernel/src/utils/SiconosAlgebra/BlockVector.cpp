@@ -6,7 +6,7 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the impliedq warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -26,6 +26,12 @@
 #include "SiconosVector.hpp"
 
 #include "SiconosAlgebra.hpp"
+
+
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 
 // =================================================
 //                CONSTRUCTORS
@@ -147,7 +153,10 @@ void BlockVector::display() const
   VectorOfVectors::const_iterator it;
   std::cout << "=======> Block Vector Display (" << _tabIndex->size() << " block(s)): " << std::endl;
   for (it = vect.begin(); it != vect.end(); ++it)
+  {
+    DEBUG_EXPR(std::cout <<"(*it)" << (*it) << std::endl;);
     (*it)->display();
+  }
 }
 
 

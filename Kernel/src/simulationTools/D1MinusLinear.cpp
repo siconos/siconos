@@ -497,11 +497,25 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   // define Xfree for velocity and acceleration level
   if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
-    Xfree = inter->dataX();
+    //Xfree = inter->dataX();
+    if  (relationType == Lagrangian)
+    {
+      Xfree = inter->data(LagrangianR::x);
+    }
   }
   else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
-    Xfree  = inter->dataFree();
+
+    if  (relationType == Lagrangian)
+    {
+      Xfree = inter->data(LagrangianR::free);
+    }
+    // else if  (relationType == NewtonEuler)
+    // {
+    //   Xfree = inter->data(NewtonEulerR::free);
+    // }
+
+    assert(Xfree);
   }
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");

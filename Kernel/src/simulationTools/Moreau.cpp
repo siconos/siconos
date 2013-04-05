@@ -1367,11 +1367,26 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   SP::SiconosVector H_alpha;
 
 
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a Moreau scheme is used.
+  /** \todo VA. All of these values should be stored in a node in the interactionGraph
+   * corrseponding to the Interaction
+   * when a Moreau scheme is used.
+   */
+
   Xq = inter->dataXq();
   Yp = inter->yp();
 
-  Xfree = inter->dataFree();
+  if (relationType == FirstOrder)
+  {
+    Xfree = inter->data(FirstOrderR::free);
+  }
+  else if  (relationType == NewtonEuler)
+  {
+    Xfree = inter->data(NewtonEulerR::free);
+  }
+  else if  (relationType == Lagrangian)
+  {
+    Xfree = inter->data(LagrangianR::free);
+  }
 
   assert(Xfree);
 
@@ -1382,6 +1397,8 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 
   if (relationType == FirstOrder && relationSubType == Type2R)
   {
+
+
     SP::SiconosVector lambda;
     lambda = inter->lambda(0);
     FirstOrderType2R& rel = *std11::static_pointer_cast<FirstOrderType2R>(mainInteraction->relation());

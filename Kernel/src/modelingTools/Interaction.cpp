@@ -397,6 +397,8 @@ void Interaction::initDataLagrangian()
   _data[LagrangianR::p0].reset(new BlockVector());
   _data[LagrangianR::p1].reset(new BlockVector());
   _data[LagrangianR::p2].reset(new BlockVector());
+  _data[LagrangianR::x].reset(new BlockVector());
+
 
   SP::LagrangianDS lds;
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -1115,14 +1117,15 @@ void Interaction::computeResiduR(const double time)
 
   //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
 }
-SP::BlockVector  Interaction::dataFree() const
-{
-  return _data[FirstOrderR::free];
-}
-SP::BlockVector  Interaction::dataX() const
-{
-  return _data[FirstOrderR::x];
-}
+// SP::BlockVector  Interaction::dataFree() const
+// {
+//   return _data[FirstOrderR::free];
+// }
+// SP::BlockVector  Interaction::dataX() const
+// {
+//   return _data[FirstOrderR::x];
+// }
+
 SP::BlockVector  Interaction::dataXq() const
 {
   return _data[FirstOrderR::xq];
@@ -1142,19 +1145,19 @@ SP::BlockVector Interaction::residuR() const
 }
 
 
-void  Interaction::setDataXFromVelocity()
-{
-  assert(_data[FirstOrderR::x]);
-  // this method is strange
-  _data[FirstOrderR::x].reset(new BlockVector());
+// void  Interaction::setDataXFromVelocity()
+// {
+//   assert(_data[LagrangianR::x]);
+//   // this method is strange
+//   _data[Lagrangian::x].reset(new BlockVector());
 
-  ConstDSIterator itDS;
-  for (itDS = dynamicalSystemsBegin();
-       itDS != dynamicalSystemsEnd();
-       ++itDS)
-  {
-    assert(Type::value(**itDS) == Type::LagrangianDS ||
-           Type::value(**itDS) == Type::LagrangianLinearTIDS);
-    _data[FirstOrderR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
-  }
-}
+//   ConstDSIterator itDS;
+//   for (itDS = dynamicalSystemsBegin();
+//        itDS != dynamicalSystemsEnd();
+//        ++itDS)
+//   {
+//     assert(Type::value(**itDS) == Type::LagrangianDS ||
+//            Type::value(**itDS) == Type::LagrangianLinearTIDS);
+//     _data[LagrangianR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+//   }
+// }
