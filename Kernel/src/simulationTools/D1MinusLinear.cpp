@@ -413,9 +413,9 @@ double D1MinusLinear::computeResidu()
 
       DEBUG_EXPR(d->p(2)->display());
     }
-    d->computeMass();
-    M->resetLU();
-    *residuFree = prod(*M, *residuFree);
+    // d->computeMass();
+    // M->resetLU();
+    // *residuFree = prod(*M, *residuFree);
     /**
      * \f[
      * \begin{cases}
@@ -454,9 +454,9 @@ void D1MinusLinear::computeFreeState()
     SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
     (*vfree) = *(d->residuFree());
     DEBUG_EXPR(d->residuFree()->display());
-    d->computeMass();
-    M->resetLU();
-    M->PLUForwardBackwardInPlace(*vfree);
+    // d->computeMass();
+    // M->resetLU();
+    // M->PLUForwardBackwardInPlace(*vfree);
     // DEBUG_EXPR(M->display());
 
     *vfree *= -1.;
