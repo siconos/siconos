@@ -40,10 +40,9 @@
 
 using namespace std;
 using namespace RELATION;
-#define LINEAROSNS_DEBUG
-#define DEBUG_STDOUT
-
-#define DEBUG_MESSAGES
+// #define LINEAROSNS_DEBUG
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)

@@ -18,8 +18,8 @@
  */
 #include "LCP.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES 1
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
 #include "debug.h"
 
 using namespace std;

@@ -30,8 +30,8 @@
 #include "NewtonEulerDS.hpp"
 #include "ZeroOrderHold.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 //#define OSNS_DEBUG

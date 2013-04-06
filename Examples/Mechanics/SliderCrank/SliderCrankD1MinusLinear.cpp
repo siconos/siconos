@@ -162,8 +162,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
     dataPlot(k, 6) = (*v)(2);
-    std::cout << "(*q)(0)= " << (*q)(0)<< std::endl;
-    std::cout << "(*q)(1)= " << (*q)(1)<< std::endl;
+    // std::cout << "(*q)(0)= " << (*q)(0)<< std::endl;
+    // std::cout << "(*q)(1)= " << (*q)(1)<< std::endl;
 
 
     dataPlot(k, 7) = (l1 * sin((*q)(0)) + l2 * sin((*q)(1)) - a * sin((*q)(2)) + b * cos((*q)(2)) - b) / c; // y corner 1 (normalized)
@@ -205,12 +205,12 @@ int main(int argc, char* argv[])
     while ((s->hasNextEvent()))
     {
 
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"Iteration k = " << k <<std::endl;
-      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"Iteration k = " << k <<std::endl;
+      // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
 
 
       s->advanceToEvent();
@@ -245,10 +245,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 26) = 0;
 
 
-      std::cout <<" q->display()" <<  std::endl;
-      q->display();
-      std::cout <<" v->display()" <<  std::endl;
-      v->display();
+      // std::cout <<" q->display()" <<  std::endl;
+      // q->display();
+      // std::cout <<" v->display()" <<  std::endl;
+      // v->display();
 
 
       s->processEvents();
