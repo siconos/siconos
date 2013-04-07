@@ -55,6 +55,10 @@ int main(int argc, char* argv[])
     double e2 = 0.4;
     double e3 = 0.4;
     double e4 = 0.4;
+    e1 = 0.1;
+    e2 = 0.1;
+    e3 = 0.1;
+    e4 = 0.1;
     //double mu1 = 0.01;
     //double mu2 = 0.01;
     //double mu3 = 0.01;
@@ -201,16 +205,16 @@ int main(int argc, char* argv[])
     time.restart();
 
 
-//    while ((s->hasNextEvent()) && (k <= 275))
+//    while ((s->hasNextEvent()) && (k <= 3000))
     while ((s->hasNextEvent()))
     {
 
-      // std::cout <<"=====================================================" <<std::endl;
-      // std::cout <<"=====================================================" <<std::endl;
-      // std::cout <<"=====================================================" <<std::endl;
-      // std::cout <<"Iteration k = " << k <<std::endl;
-      // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
-      // std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
+      std::cout <<"Iteration k = " << k <<std::endl;
+      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      std::cout <<"=====================================================" <<std::endl;
 
 
       s->advanceToEvent();

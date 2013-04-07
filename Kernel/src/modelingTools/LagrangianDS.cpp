@@ -350,8 +350,11 @@ bool LagrangianDS::checkDynamicalSystem()
 
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
+  unsigned int steps =1 ; // to be corrected for other cases
   if (!_p[level])
     _p[level].reset(new SiconosVector(_ndof));
+  if (!_pMemory[level])
+    _pMemory[level].reset(new SiconosMemory(steps));
 }
 
 void LagrangianDS::initForces()
@@ -927,6 +930,7 @@ void LagrangianDS::initMemory(unsigned int steps)
   {
     _qMemory.reset(new SiconosMemory(steps));
     _velocityMemory.reset(new SiconosMemory(steps));
+    // _pMemory.reset(new SiconosMemory(steps));
     //swapInMemory();
   }
 }
@@ -937,7 +941,18 @@ void LagrangianDS::swapInMemory()
   _qMemory->swap(_q[0]);
   _velocityMemory->swap(_q[1]);
   // initialization of the reaction force due to the non smooth law
-  // _p[1]->zero();
+  if (_p[0]){
+    assert(_pMemory[0]);
+    _pMemory[0]->swap(_p[0]);
+  }
+  if (_p[1]){
+    assert(_pMemory[1]);
+    _pMemory[0]->swap(_p[1]);
+  }
+  if (_p[2]){
+    assert(_pMemory[2]);
+    _pMemory[0]->swap(_p[2]);
+  }
 }
 
 LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)

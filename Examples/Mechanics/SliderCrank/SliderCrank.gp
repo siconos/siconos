@@ -14,6 +14,7 @@ set grid
 #scheme =  "Moreau"
 #scheme  = "Moreau-ProjectOnConstraints"
 scheme = "Moreau-CombinedProjection"
+scheme = "D1MinusLinear"
 
 timestep= "1e-5"
 model= "-SliderCrank-Lagrangian-"

@@ -56,6 +56,10 @@ int main(int argc, char* argv[])
     double eN2 = 0.4;
     double eN3 = 0.4;
     double eN4 = 0.4;
+    eN1 = 0.1;
+    eN2 = 0.1;
+    eN3 = 0.1;
+    eN4 = 0.1;
     double eT1 = 0.;
     double eT2 = 0.;
     double eT3 = 0.;
@@ -217,8 +221,8 @@ int main(int argc, char* argv[])
     time.restart();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 
-//    while ((s->hasNextEvent()) && (k<= 275))
-    while ((s->hasNextEvent()))
+    while ((s->hasNextEvent()) && (k<= 3000))
+//    while ((s->hasNextEvent()))
     {
 
       std::cout <<"=====================================================" <<std::endl;

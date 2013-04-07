@@ -43,22 +43,25 @@ class DynamicalSystem;
 
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
-/**  An Interaction describes the non-smooth interactions between some
- *  Dynamical Systems.
+/**  An Interaction describes the non-smooth interactions 
+ *  several Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 29, 2004
  *
  * An interaction represents the "link" between a set of Dynamical
- * Systems (var: involvedDS) that interact through some relations
- * (between state variables (x,R) and local variables (y,lambda))
- * completed by a non-smooth law.
+ * Systems (stored in involvedDS).
+ * The state variables and inputs of the DynamicalSystem (x,R) 
+ * are related to the interaction variables (y,lambda) thanks to the 
+ * interaction with the help of the relation
+ * The interaction completed by a non-smooth law that describes the type 
+ * of law between y and lambda.
  *
  * Thus, the interaction main members are:
  *
  * - a set of Dynamical Systems (from 1 to ...) that interacts, named
-     involvedDS.
+ *    involvedDS.
  *
  * - relation: a pointer to a Relation object that determines the type
  *   of relation and so the way it is computed. Warning: there is only
@@ -66,7 +69,7 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *   interaction) but there can be several "relations", in the sense
  *   of constraints equations between (y,lambda) and (x,r).
  *
- * - nslaw: the non smooth law
+ * - nslaw: the nonsmooth law
  *
  * - the local variable y  (its size is interactionSize).
  *   STL vectors are used and y[i] usually represents the
@@ -74,11 +77,9 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *
  * - the local variable lambda  (its size is interactionSize).
  *   STL vectors are used and lambda[i] represents various level
- *   of multiplier involved in the nonsmooth law and usd by the OSI
+ *   of multiplier involved in the nonsmooth law with y[i]
  *
- *   y is a container of SiconosVector.
- *
- *
+ *   y (resp, lambda) is a container of SiconosVector.
  *
  */
 class Interaction : public std11::enable_shared_from_this<Interaction >
@@ -87,13 +88,7 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-  //enum DataNamesFirstOrder {free, z, x, xq, r, deltax, g_alpha, residu_r, ds_xp, sizeDataNames};
-  // Why not using FirstOrderR::free
-  // enum DataNames {free, z, q0, q1, q2, p0, p1, p2, sizeDataNames};
-
-  //  enum DataNamesLagrangian {z,q0,q1,q2,p0,p1,p2,sizeDataNames};
-  //enum DataNamesNewtonEuler {free2, z2, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames2};
-
+ 
   /**initialization flag */
   bool _initialized;
 
@@ -190,7 +185,7 @@ private:
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
   typedef std11::array<SP::BlockVector, 15> dataR;
-  dataR _data;
+  dataR _workspace;
 
   /** Work vectors to save pointers to state-related data of the
       dynamical systems involved in the Interaction.*/
@@ -854,7 +849,7 @@ public:
    */
   inline SP::BlockVector data(unsigned int indx) const
   {
-    return _data[indx];
+    return _workspace[indx];
   }
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).

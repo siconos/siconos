@@ -34,8 +34,8 @@
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 

@@ -130,6 +130,10 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  *
  *
  */
+
+
+typedef std::vector<SP::SiconosMemory> VectorOfMemories;
+
 class LagrangianDS : public DynamicalSystem
 {
 public:
@@ -164,15 +168,21 @@ protected:
   SP::SiconosMemory _velocityMemory;
 
   SP::BlockMatrix _jacxRhs;
-  /** "Reaction" due to the non smooth law - The index corresponds to the kinematic
-     * level of the corresponding constraints. It mainly depends on what the simulation
-     * part want to store, but some rules have to be followed. For instance :
-     *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
-     *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
-     *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
-     * in position
-     */
+
+  /** "Reaction", generalized forces or imuplses due to the non smooth law
+   * The index corresponds to the kinematic
+   * level of the corresponding constraints. It mainly depends on what the simulation
+   * part want to store, but some rules have to be followed. For instance :
+   *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
+   *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
+   *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
+   * in position
+   */
   std::vector<SP::SiconosVector> _p;
+
+  /** memory of previous generalized forces due to constraints */
+  VectorOfMemories _pMemory;
+
 
   /** mass of the system */
   SP::SiconosMatrix _mass;

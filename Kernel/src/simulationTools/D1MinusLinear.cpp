@@ -164,14 +164,17 @@ double D1MinusLinear::computeResidu()
     DEBUG_EXPR(workFree->display());
   }
 
-  // solve a LCP at acceleration level
+  /** solve a LCP at acceleration level for lambda^+_{k} for the old sets of indices.
+   *    
+   * \warning V.A. 07/04/2013
+   * the value should already be stored in lambdaMemory by swaping
+   * at the right moment and d->p(2) has just to be recomputed from these values ?
+   * It is better than recomputed thevalue by solving an LCP
+   **/
 
   // DEBUG_EXPR(std::cout<< "allOSNS->empty()   " << std::boolalpha << allOSNS->empty() << std::endl << std::endl);
   // DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
-
-
-
-
+  
   if (!allOSNS->empty())
   {
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
@@ -192,6 +195,11 @@ double D1MinusLinear::computeResidu()
 
     if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions()->isEmpty()))
     {
+      /** \warning V.A. 07/04/2013
+       * Are we sure that all the data are synchronized ? 
+       * Jacobians of constraints, Mass, and q vector with the old free velocity, sets of indices ?
+       * may be better to store this value from the previous timestep.
+       */
       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
       simulationLink->updateInput(2);
     }
@@ -615,29 +623,61 @@ void D1MinusLinear::updateState(const unsigned int level)
 bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert((i == 1) || (i==2));
-  double h = simulationLink->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+  // double h = simulationLink->timeStep();
+  
+  double y ;   
+  double yOld ; 
+  SP::Relation r = inter->relation();
+  RELATION::TYPES relationType = r->getType();
+  SP::LagrangianDS lds;
+  if  (relationType == Lagrangian)
+  {
 
-  double gamma = 1.0 / 2.0;
-  // if (_useGamma)
-  // {
-  //   gamma = _gamma;
-  // }
-  DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
+    // compute yold
+    SP::BlockVector qold(new BlockVector());
+    SP::BlockVector vold(new BlockVector());
+    SP::BlockVector zold(new BlockVector());
+    SP::BlockVector q(new BlockVector());
+    SP::BlockVector v(new BlockVector());
+    SP::BlockVector z(new BlockVector());
 
+    for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+    {
+      // check dynamical system type
+      assert((Type::value(**it) == Type::LagrangianLinearTIDS ||
+              Type::value(**it) == Type::LagrangianDS));
+      
+      // convert vDS systems into LagrangianDS and put them in vLDS
+      lds = std11::static_pointer_cast<LagrangianDS> (*it);
+      
+      qold->insertPtr(lds->qMemory()->getSiconosVector(0));
+      vold->insertPtr(lds->velocityMemory()->getSiconosVector(0));
+      /** \warning Warning the value of z of not stored. */
+      zold->insertPtr(lds->z());
+      q->insertPtr(lds->q());
+      v->insertPtr(lds->velocity());
+      z->insertPtr(lds->z());
+    }
+    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(*inter,qold,zold);
+    yOld = (inter->y(0))->getValue(0);
+    // Compute current y (we assume that q stores q_{k,1} and v stores v_{k,1})
+    // If not sure we have to store it into a new date in Interaction.
+    std11::static_pointer_cast<LagrangianScleronomousR>(r)->computeh(*inter,q,z);
+    y = (inter->y(0))->getValue(0);  
+  }
+  
+  DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
   assert(!isnan(y));
 #endif
-
+  
   DEBUG_EXPR(
-    if (y <= 0)
-      DEBUG_PRINT("D1MinusLinear::addInteractionInIndexSet ACTIVATE.\n");
+    if ((yOld >0.0) && (y <= y))
+      DEBUG_PRINT("D1MinusLinear::addInteractionInIndexSet contact are closing ((yOld >0.0) && (y <= y)).\n");
     );
-  return (y <= 0.0);
+  return ((yOld >0.0) && (y <= y));
 }
 
 

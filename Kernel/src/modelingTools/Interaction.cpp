@@ -358,29 +358,29 @@ void Interaction::initData()
 void Interaction::initDataFirstOrder()
 {
   // Get the DS concerned by the interaction of this relation
-  _data[FirstOrderR::free].reset(new BlockVector());
-  _data[FirstOrderR::x].reset(new BlockVector()); // displacements
-  _data[FirstOrderR::xq].reset(new BlockVector());
-  _data[FirstOrderR::deltax].reset(new BlockVector()); // displacements
-  _data[FirstOrderR::z].reset(new BlockVector());
-  _data[FirstOrderR::r].reset(new BlockVector());
-  _data[FirstOrderR::residu_r].reset(new BlockVector());
-  _data[FirstOrderR::ds_xp].reset(new BlockVector());
-  _data[FirstOrderR::g_alpha].reset(new BlockVector());
+  _workspace[FirstOrderR::free].reset(new BlockVector());
+  _workspace[FirstOrderR::x].reset(new BlockVector()); // displacements
+  _workspace[FirstOrderR::xq].reset(new BlockVector());
+  _workspace[FirstOrderR::deltax].reset(new BlockVector()); // displacements
+  _workspace[FirstOrderR::z].reset(new BlockVector());
+  _workspace[FirstOrderR::r].reset(new BlockVector());
+  _workspace[FirstOrderR::residu_r].reset(new BlockVector());
+  _workspace[FirstOrderR::ds_xp].reset(new BlockVector());
+  _workspace[FirstOrderR::g_alpha].reset(new BlockVector());
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
-    _data[FirstOrderR::free]->insertPtr(ds.workFree());
-    _data[FirstOrderR::x]->insertPtr(ds.x());
-    _data[FirstOrderR::xq]->insertPtr(ds.xq());
-    _data[FirstOrderR::deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
-    _data[FirstOrderR::z]->insertPtr(ds.z());
-    _data[FirstOrderR::r]->insertPtr(ds.r());
-    _data[FirstOrderR::residu_r]->insertPtr(ds.residur());
-    _data[FirstOrderR::ds_xp]->insertPtr(ds.xp());
-    _data[FirstOrderR::g_alpha]->insertPtr(ds.gAlpha());
+    _workspace[FirstOrderR::free]->insertPtr(ds.workFree());
+    _workspace[FirstOrderR::x]->insertPtr(ds.x());
+    _workspace[FirstOrderR::xq]->insertPtr(ds.xq());
+    _workspace[FirstOrderR::deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
+    _workspace[FirstOrderR::z]->insertPtr(ds.z());
+    _workspace[FirstOrderR::r]->insertPtr(ds.r());
+    _workspace[FirstOrderR::residu_r]->insertPtr(ds.residur());
+    _workspace[FirstOrderR::ds_xp]->insertPtr(ds.xp());
+    _workspace[FirstOrderR::g_alpha]->insertPtr(ds.gAlpha());
 
   }
 }
@@ -390,15 +390,15 @@ void Interaction::initDataLagrangian()
 
   DEBUG_PRINT("Interaction::initDataLagrangian()\n");
 
-  _data[LagrangianR::free].reset(new BlockVector());
-  _data[LagrangianR::q0].reset(new BlockVector()); // displacement
-  _data[LagrangianR::q1].reset(new BlockVector()); // velocity
-  _data[LagrangianR::q2].reset(new BlockVector()); // acceleration
-  _data[LagrangianR::z].reset(new BlockVector()); // z vector
-  _data[LagrangianR::p0].reset(new BlockVector());
-  _data[LagrangianR::p1].reset(new BlockVector());
-  _data[LagrangianR::p2].reset(new BlockVector());
-  _data[LagrangianR::x].reset(new BlockVector());
+  _workspace[LagrangianR::free].reset(new BlockVector());
+  _workspace[LagrangianR::q0].reset(new BlockVector()); // displacement
+  _workspace[LagrangianR::q1].reset(new BlockVector()); // velocity
+  _workspace[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  _workspace[LagrangianR::z].reset(new BlockVector()); // z vector
+  _workspace[LagrangianR::p0].reset(new BlockVector());
+  _workspace[LagrangianR::p1].reset(new BlockVector());
+  _workspace[LagrangianR::p2].reset(new BlockVector());
+  _workspace[LagrangianR::x].reset(new BlockVector());
 
 
   SP::LagrangianDS lds;
@@ -412,25 +412,25 @@ void Interaction::initDataLagrangian()
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[LagrangianR::free]->insertPtr(lds->workFree());
-    _data[LagrangianR::q0]->insertPtr(lds->q());
+    _workspace[LagrangianR::free]->insertPtr(lds->workFree());
+    _workspace[LagrangianR::q0]->insertPtr(lds->q());
 
-    DEBUG_PRINTF("_data[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
-    DEBUG_EXPR(_data[LagrangianR::q0]->display());
+    DEBUG_PRINTF("_workspace[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
+    DEBUG_EXPR(_workspace[LagrangianR::q0]->display());
     DEBUG_EXPR(lds->q()->display());
-    DEBUG_EXPR(std::cout << _data[LagrangianR::q0] << std::endl;);
+    DEBUG_EXPR(std::cout << _workspace[LagrangianR::q0] << std::endl;);
 
-    _data[LagrangianR::q1]->insertPtr(lds->velocity());
-    _data[LagrangianR::q2]->insertPtr(lds->acceleration());
-    _data[LagrangianR::z]->insertPtr(lds->z());
+    _workspace[LagrangianR::q1]->insertPtr(lds->velocity());
+    _workspace[LagrangianR::q2]->insertPtr(lds->acceleration());
+    _workspace[LagrangianR::z]->insertPtr(lds->z());
 
     // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
     for (unsigned int k = _lowerLevelForInput;
          k < _upperLevelForInput + 1; k++)
     {
       assert(lds->p(k));
-      assert(_data[LagrangianR::p0 + k]);
-      _data[LagrangianR::p0 + k]->insertPtr(lds->p(k));
+      assert(_workspace[LagrangianR::p0 + k]);
+      _workspace[LagrangianR::p0 + k]->insertPtr(lds->p(k));
     }
   }
 }
@@ -438,16 +438,16 @@ void Interaction::initDataLagrangian()
 void Interaction::initDataNewtonEuler()
 {
   DSIterator it;
-  _data[NewtonEulerR::free].reset(new BlockVector());
-  _data[NewtonEulerR::q0].reset(new BlockVector()); // displacement
-  _data[NewtonEulerR::velo].reset(new BlockVector()); // velocity
-  _data[NewtonEulerR::deltaq].reset(new BlockVector());
-  _data[NewtonEulerR::q1].reset(new BlockVector()); // qdot
+  _workspace[NewtonEulerR::free].reset(new BlockVector());
+  _workspace[NewtonEulerR::q0].reset(new BlockVector()); // displacement
+  _workspace[NewtonEulerR::velo].reset(new BlockVector()); // velocity
+  _workspace[NewtonEulerR::deltaq].reset(new BlockVector());
+  _workspace[NewtonEulerR::q1].reset(new BlockVector()); // qdot
   //  data[NewtonEulerR::q2].reset(new BlockVector()); // acceleration
-  _data[NewtonEulerR::z].reset(new BlockVector()); // z vector
-  _data[NewtonEulerR::p0].reset(new BlockVector());
-  _data[NewtonEulerR::p1].reset(new BlockVector());
-  _data[NewtonEulerR::p2].reset(new BlockVector());
+  _workspace[NewtonEulerR::z].reset(new BlockVector()); // z vector
+  _workspace[NewtonEulerR::p0].reset(new BlockVector());
+  _workspace[NewtonEulerR::p1].reset(new BlockVector());
+  _workspace[NewtonEulerR::p2].reset(new BlockVector());
   SP::NewtonEulerDS lds;
   unsigned int sizeForAllxInDs = 0;
   for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -458,20 +458,20 @@ void Interaction::initDataNewtonEuler()
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[NewtonEulerR::free]->insertPtr(lds->workFree());
-    _data[NewtonEulerR::q0]->insertPtr(lds->q());
-    _data[NewtonEulerR::velo]->insertPtr(lds->velocity());
-    _data[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
-    _data[NewtonEulerR::q1]->insertPtr(lds->dotq());
+    _workspace[NewtonEulerR::free]->insertPtr(lds->workFree());
+    _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
+    _workspace[NewtonEulerR::velo]->insertPtr(lds->velocity());
+    _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
+    _workspace[NewtonEulerR::q1]->insertPtr(lds->dotq());
     //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
     if (lds->p(0))
-      _data[NewtonEulerR::p0]->insertPtr(lds->p(0));
+      _workspace[NewtonEulerR::p0]->insertPtr(lds->p(0));
     if (lds->p(1))
-      _data[NewtonEulerR::p1]->insertPtr(lds->p(1));
+      _workspace[NewtonEulerR::p1]->insertPtr(lds->p(1));
     if (lds->p(2))
-      _data[NewtonEulerR::p2]->insertPtr(lds->p(2));
+      _workspace[NewtonEulerR::p2]->insertPtr(lds->p(2));
 
-    _data[NewtonEulerR::z]->insertPtr(lds->z());
+    _workspace[NewtonEulerR::z]->insertPtr(lds->z());
     sizeForAllxInDs += lds->p(1)->size();
   }
 }
@@ -487,13 +487,13 @@ void Interaction::LinkDataFromMemory(unsigned int memoryLevel)
 void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
 {
 
-  _data[LagrangianR::q0].reset(new BlockVector()); // displacement
-  _data[LagrangianR::q1].reset(new BlockVector()); // velocity
-  _data[LagrangianR::q2].reset(new BlockVector()); // acceleration
-  _data[LagrangianR::z].reset(new BlockVector()); // z vector
-  _data[LagrangianR::p0].reset(new BlockVector());
-  _data[LagrangianR::p1].reset(new BlockVector());
-  _data[LagrangianR::p2].reset(new BlockVector());
+  _workspace[LagrangianR::q0].reset(new BlockVector()); // displacement
+  _workspace[LagrangianR::q1].reset(new BlockVector()); // velocity
+  _workspace[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  _workspace[LagrangianR::z].reset(new BlockVector()); // z vector
+  _workspace[LagrangianR::p0].reset(new BlockVector());
+  _workspace[LagrangianR::p1].reset(new BlockVector());
+  _workspace[LagrangianR::p2].reset(new BlockVector());
 
   SP::LagrangianDS lds;
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -505,8 +505,8 @@ void Interaction::LinkDataFromMemoryLagrangian(unsigned int memoryLevel)
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _data[LagrangianR::q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
-    _data[LagrangianR::q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
+    _workspace[LagrangianR::q0]->insertPtr(lds->qMemory()->getSiconosVector(memoryLevel));
+    _workspace[LagrangianR::q1]->insertPtr(lds->velocityMemory()->getSiconosVector(memoryLevel));
 
 
     // Do nothing for the remaining of data since there are no Memory
@@ -1105,52 +1105,52 @@ void Interaction::computeResiduY(const double time)
 void Interaction::computeResiduR(const double time)
 {
   //Residu_r = r_alpha_k+1 - g_alpha;
-  *_data[FirstOrderR::residu_r] = *_data[FirstOrderR::r];
-  *_data[FirstOrderR::residu_r] -= *_data[FirstOrderR::g_alpha];
+  *_workspace[FirstOrderR::residu_r] = *_workspace[FirstOrderR::r];
+  *_workspace[FirstOrderR::residu_r] -= *_workspace[FirstOrderR::g_alpha];
 
   // std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
-  // std::cout<< "_data[r] = " << std::endl ;
-  // _data[r]->display();
-  // std::cout<< "_data[g_alpha] = " << std::endl ;
-  // _data[g_alpha]->display();
-  // std::cout<< "_data[residu_r] = " << std::endl ;
-  // _data[residu_r]->display();
+  // std::cout<< "_workspace[r] = " << std::endl ;
+  // _workspace[r]->display();
+  // std::cout<< "_workspace[g_alpha] = " << std::endl ;
+  // _workspace[g_alpha]->display();
+  // std::cout<< "_workspace[residu_r] = " << std::endl ;
+  // _workspace[residu_r]->display();
 
   //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
 }
 // SP::BlockVector  Interaction::dataFree() const
 // {
-//   return _data[FirstOrderR::free];
+//   return _workspace[FirstOrderR::free];
 // }
 // SP::BlockVector  Interaction::dataX() const
 // {
-//   return _data[FirstOrderR::x];
+//   return _workspace[FirstOrderR::x];
 // }
 
 SP::BlockVector  Interaction::dataXq() const
 {
-  return _data[FirstOrderR::xq];
+  return _workspace[FirstOrderR::xq];
 }
 SP::BlockVector  Interaction::dataZ() const
 {
-  return _data[FirstOrderR::z];
+  return _workspace[FirstOrderR::z];
 }
 SP::BlockVector  Interaction::dataQ1() const
 {
-  return _data[LagrangianR::q1];
+  return _workspace[LagrangianR::q1];
 }
 
 SP::BlockVector Interaction::residuR() const
 {
-  return _data[FirstOrderR::residu_r];
+  return _workspace[FirstOrderR::residu_r];
 }
 
 
 // void  Interaction::setDataXFromVelocity()
 // {
-//   assert(_data[LagrangianR::x]);
+//   assert(_workspace[LagrangianR::x]);
 //   // this method is strange
-//   _data[Lagrangian::x].reset(new BlockVector());
+//   _workspace[Lagrangian::x].reset(new BlockVector());
 
 //   ConstDSIterator itDS;
 //   for (itDS = dynamicalSystemsBegin();
@@ -1159,6 +1159,6 @@ SP::BlockVector Interaction::residuR() const
 //   {
 //     assert(Type::value(**itDS) == Type::LagrangianDS ||
 //            Type::value(**itDS) == Type::LagrangianLinearTIDS);
-//     _data[LagrangianR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+//     _workspace[LagrangianR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
 //   }
 // }

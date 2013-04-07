@@ -25,8 +25,8 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -72,12 +72,12 @@ void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
-    DEBUG_EXPR(
-      std::cout
-      <<"inter->data(LagrangianR::x) with LagrangianR::x = "
-      << LagrangianR::x << " : "
-      <<inter->data(LagrangianR::x) << std::endl;
-      );
+    // DEBUG_EXPR(
+    //   std::cout
+    //   <<"inter->data(LagrangianR::x) with LagrangianR::x = "
+    //   << LagrangianR::x << " : "
+    //   <<inter->data(LagrangianR::x) << std::endl;
+    //   );
 
 
     // if (inter->data(LagrangianR::x))
@@ -116,6 +116,7 @@ TimeSteppingD1Minus::~TimeSteppingD1Minus()
 
 void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 {
+  DEBUG_PRINTF("\nTimeSteppingD1Minus::updateIndexSet(unsigned int i) for i = %i\n", i);
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
