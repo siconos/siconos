@@ -164,9 +164,12 @@ double D1MinusLinear::computeResidu()
     DEBUG_EXPR(workFree->display());
     SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
     std::cout << "workFreeFree" << workFreeFree<< std::endl;
-    if (workFreeFree)
-      workFreeFree.reset(new SiconosVector(*workFree));
-    DEBUG_EXPR(workFreeFree->display());
+    if (! d->workspace(DynamicalSystem::free_tdg) )
+    {
+      d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+    }
+    d->addWorkVector(workFree,DynamicalSystem::free_tdg);
+    DEBUG_EXPR( d->workspace(DynamicalSystem::free_tdg)->display());
  }
 
   /** solve a LCP at acceleration level for lambda^+_{k} for the old sets of indices.

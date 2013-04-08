@@ -20,8 +20,8 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -90,6 +90,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _pMemory[0].reset(new SiconosMemory(steps));
   _pMemory[1].reset(new SiconosMemory(steps));
   _pMemory[2].reset(new SiconosMemory(steps));
+
 }
 
 // -- Default constructor --
@@ -939,6 +940,7 @@ void LagrangianDS::display() const
 // --- Functions for memory handling ---
 void LagrangianDS::initMemory(unsigned int steps)
 {
+  DEBUG_PRINTF("LagrangianDS::initMemory(unsigned int steps) with steps = %i", steps);
   DynamicalSystem::initMemory(steps);
   if (steps == 0)
     cout << "Warning : LagragianDS::initMemory with size equal to zero" << endl;
@@ -946,6 +948,9 @@ void LagrangianDS::initMemory(unsigned int steps)
   {
     _qMemory.reset(new SiconosMemory(steps));
     _velocityMemory.reset(new SiconosMemory(steps));
+    _pMemory[0].reset(new SiconosMemory(steps));
+    _pMemory[1].reset(new SiconosMemory(steps));
+    _pMemory[2].reset(new SiconosMemory(steps));
     // _pMemory.reset(new SiconosMemory(steps));
     //swapInMemory();
   }
@@ -961,11 +966,11 @@ void LagrangianDS::swapInMemory()
     _pMemory[0]->swap(_p[0]);
   }
   if (_p[1] && _pMemory[1]){
-    _pMemory[0]->swap(_p[1]);
+    _pMemory[1]->swap(_p[1]);
   }
   if (_p[2] && _pMemory[2]){
 
-    _pMemory[0]->swap(_p[2]);
+    _pMemory[2]->swap(_p[2]);
   }
 }
 
