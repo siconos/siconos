@@ -223,6 +223,12 @@ public:
     _precision = newPrecision;
   };
 
+  /** Get the Relay problem associated with the controller. This is useful to
+   * gain access to the data given to the Relay solver in Numerics
+   * \return a reference to the Relay problem
+   */
+  inline const Relay& relay() { return * _OSNSPB_SMC; };
+
   inline SiconosVector& ueq() { return *_ueq; };
   inline SiconosVector& us() { return *_us; };
 

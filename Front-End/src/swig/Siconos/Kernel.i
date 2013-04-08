@@ -143,8 +143,11 @@ namespace std
       // matrix is sparse : return opaque pointer
       $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
     }
-    else
-      SWIG_fail;
+    else // failing silently does not seem a good option
+    {
+      Py_INCREF(Py_None);
+      $result = Py_None;
+    }
   }
 }
 %include NumericsMatrix.h
