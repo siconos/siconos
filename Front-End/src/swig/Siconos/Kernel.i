@@ -117,10 +117,39 @@ namespace std
 %include NumericsOptions.h
 %include solverOptions.i
 
+// access NumericsMatrix cf Numerics.i
+%typemap(out) (std11::shared_ptr<NumericsMatrix>) {
+  npy_intp dims[2];
+
+  if (!$1) 
+  {
+    Py_INCREF(Py_None);
+    $result = Py_None;
+  }
+  else
+  {
+    dims[0] = $1->size0;
+    dims[1] = $1->size1;
+    
+    if ($1->matrix0)
+    {
+      PyObject *obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, $1->matrix0);
+      PyArrayObject *array = (PyArrayObject*) obj;
+      if (!array || !require_fortran(array)) SWIG_fail;
+      $result = obj;
+    }
+    else if($1->matrix1)
+    {
+      // matrix is sparse : return opaque pointer
+      $result = SWIG_NewPointerObj(SWIG_as_voidptr($1->matrix1), SWIGTYPE_p_SparseBlockStructuredMatrix, 0);
+    }
+    else
+      SWIG_fail;
+  }
+}
 %include NumericsMatrix.h
 %include SparseMatrix.h
 %include SparseBlockMatrix.h
-%include NumericsMatrix.h
 
  // segfaults...
  // we cannot share data struct
