@@ -161,9 +161,9 @@ void CommonSMC::computeUeq()
   ZeroOrderHold& zoh = *std11::static_pointer_cast<ZeroOrderHold>(_integratorSMC);
   zoh.updateMatrices(*_DS_SMC);
 
-  // tmpN = \Psi_k\Pi_B A
+  // tmpN = B^{*})CB)^{-1}CA
   axpy_prod(zoh.getPsi(*_DS_SMC), *quasiProjB_A, *tmpN, true);
-  // W = I + \theta\Psi_k \Pi_B A
+  // W = I + \theta B^{*})CB)^{-1}CA
   scal(_thetaSMC, *tmpN, *tmpW, false);
   // compute e^{Ah}x_k
   prod(zoh.getPhi(*_DS_SMC), *xTk, *xTk);

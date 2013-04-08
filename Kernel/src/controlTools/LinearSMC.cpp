@@ -56,7 +56,8 @@ LinearSMC::~LinearSMC()
 void LinearSMC::actuate()
 {
 
-  computeUeq();
+  if (!_noUeq)
+    computeUeq();
 
     *(_DS_SMC->x()) = *(_sensor->y()); // XXX this is sooo wrong
     prod(*_B, *_ueq, *(_DS_SMC->b()));

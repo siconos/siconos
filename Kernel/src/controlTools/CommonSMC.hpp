@@ -68,6 +68,9 @@ protected:
   /** boolean to determined if the controller has been correctly initialized */
   bool _initDone;
 
+  /** Do not use the state-continuous equivaluent control \f$u^{eq}\f$ */
+  bool _noUeq;
+
   /** current \f$\Delta t\f$ (or timeStep) */
   double _curDeltaT;
 
@@ -226,6 +229,11 @@ public:
   inline void setTheta(const double& newTheta) { _thetaSMC = newTheta; };
 
   void computeUeq();
+
+  /** Disable (or enable) the use of the state-continuous control \f$u^{eq}\f$
+   * \param b disable the use of Ueq if true
+   */
+  inline void noUeq(const bool b) { _noUeq = b; };
 };
 DEFINE_SPTR(CommonSMC)
 #endif

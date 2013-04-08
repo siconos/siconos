@@ -252,6 +252,16 @@ public:
     return _PsiMap[ds.number()];
   };
 
+  /** get \f$\int_{t_k}^{t_{k+1}}\!\Phi(t_{k+1}, \tau)\mathrm{d}\tau\f$ corresponding to DynamicalSystem ds
+   * \param ds the DynamicalSystem
+   * \return pointer to a SiconosMatrix
+   */
+  inline SP::SimpleMatrix intPhi(const DynamicalSystem& ds)
+  {
+    assert(_IntegralPhiMap[ds.number()] &&
+        "ZeroOrderHold::intPhi(ds): _IntegralPhiMap[ds.number()] == NULL.");
+    return _IntegralPhiMap[ds.number()];
+  };
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the ZeroOrderHold integrator */
