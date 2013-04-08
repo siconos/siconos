@@ -85,6 +85,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _n = ds.getN();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
+  _workspace.resize(sizeWorkV);
   _workspace[freeresidu].reset(new SiconosVector(*(ds.workspace(freeresidu))));
   _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
@@ -120,7 +121,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   if (ds.workspace(local_buffer))
     _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(local_buffer))));
   if (ds.workspace(free))
-    _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(free))));
+    _workspace[free].reset(new SiconosVector(*(ds.workspace(free))));
   //  _workspace[sizeWorkV].reset(new SiconosVector(*(ds.workspace(sizeWorkV))));
   // XXX See how to implement the copy of _workMatrix
 
