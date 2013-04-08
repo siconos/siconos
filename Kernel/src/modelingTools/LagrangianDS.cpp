@@ -79,11 +79,17 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   //   mXfree.reset(new SiconosVector(getDim()));
   //   r.reset(new SiconosVector(getDim()));
 
-  // set allocation flags: true for required input, false for others
+  /** \todo lazy Memory allocation */ 
   _p.resize(3);
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
   _p[2].reset(new SiconosVector(_ndof));
+  /** \todo lazy memory allocation */
+  _pMemory.resize(3);
+  unsigned int steps=1;
+  _pMemory[0].reset(new SiconosMemory(steps));
+  _pMemory[1].reset(new SiconosMemory(steps));
+  _pMemory[2].reset(new SiconosMemory(steps));
 }
 
 // -- Default constructor --
@@ -271,6 +277,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
   _p[2].reset(new SiconosVector(_ndof));
+  _pMemory.resize(3);
+    /** \todo lazy memory allocation */
+  unsigned int steps=1;
+  _pMemory[0].reset(new SiconosMemory(steps));
+  _pMemory[1].reset(new SiconosMemory(steps));
+  _pMemory[2].reset(new SiconosMemory(steps));
 }
 
 // From a set of data - Mass loaded from a plugin
@@ -297,6 +309,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
   _p[2].reset(new SiconosVector(_ndof));
+  _pMemory.resize(3);
+  /** \todo lazy memory allocation */
+  unsigned int steps=1;
+  _pMemory[0].reset(new SiconosMemory(steps));
+  _pMemory[1].reset(new SiconosMemory(steps));
+  _pMemory[2].reset(new SiconosMemory(steps));
 }
 
 // Destructor
@@ -351,6 +369,8 @@ bool LagrangianDS::checkDynamicalSystem()
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
   unsigned int steps =1 ; // to be corrected for other cases
+
+  
   if (!_p[level])
     _p[level].reset(new SiconosVector(_ndof));
   if (!_pMemory[level])
@@ -941,16 +961,14 @@ void LagrangianDS::swapInMemory()
   _qMemory->swap(_q[0]);
   _velocityMemory->swap(_q[1]);
   // initialization of the reaction force due to the non smooth law
-  if (_p[0]){
-    assert(_pMemory[0]);
+  if (_p[0] && _pMemory[0] ){
     _pMemory[0]->swap(_p[0]);
   }
-  if (_p[1]){
-    assert(_pMemory[1]);
+  if (_p[1] && _pMemory[1]){
     _pMemory[0]->swap(_p[1]);
   }
-  if (_p[2]){
-    assert(_pMemory[2]);
+  if (_p[2] && _pMemory[2]){
+
     _pMemory[0]->swap(_p[2]);
   }
 }
