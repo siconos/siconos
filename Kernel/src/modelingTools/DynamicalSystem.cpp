@@ -32,7 +32,7 @@ DynamicalSystem::DynamicalSystem():
   zeroPlugin();
   _normRef = 1;
   _x.resize(2);
-  _workV.resize(sizeWorkV);
+  _workspace.resize(sizeWorkV);
 }
 
 // From XML file
@@ -62,7 +62,7 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
     _z.reset(new SiconosVector(_dsxml->getz()));
 
   if (_dsxml->hasStepsInMemory()) _stepsInMemory = _dsxml->getStepsInMemory();
-  _workV.resize(sizeWorkV);
+  _workspace.resize(sizeWorkV);
 }
 
 // From a minimum set of data
@@ -72,8 +72,8 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   zeroPlugin();
   _normRef = 1;
   _x.resize(2);
-  _workV.resize(sizeWorkV);
-  _residuFree.reset(new SiconosVector(getDim()));
+  _workspace.resize(sizeWorkV);
+  _workspace[freeresidu].reset(new SiconosVector(getDim()));
   _r.reset(new SiconosVector(getDim()));
 }
 
@@ -85,7 +85,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _n = ds.getN();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
-  _residuFree.reset(new SiconosVector(*(ds.residuFree())));
+  _workspace[freeresidu].reset(new SiconosVector(*(ds.workspace(freeresidu))));
   _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
   _x[0].reset(new SiconosVector(*(ds.x())));
@@ -115,14 +115,16 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
   _stepsInMemory = ds.getStepsInMemory();
 
-  _workV.resize(sizeWorkV);
+  _workspace.resize(sizeWorkV);
 
-  if (ds.getWorkVector(local_buffer))
-    _workV[local_buffer].reset(new SiconosVector(*(ds.getWorkVector(local_buffer))));
-  //  _workV[sizeWorkV].reset(new SiconosVector(*(ds.getWorkVector(sizeWorkV))));
+  if (ds.workspace(local_buffer))
+    _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(local_buffer))));
+  if (ds.workspace(free))
+    _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(free))));
+  //  _workspace[sizeWorkV].reset(new SiconosVector(*(ds.workspace(sizeWorkV))));
   // XXX See how to implement the copy of _workMatrix
 
-  _workFree.reset(new SiconosVector(*(ds.workFree())));
+//  _workFree.reset(new SiconosVector(*(ds.workspace(DynamicalSystem::free))));
 }
 
 bool DynamicalSystem::checkDynamicalSystem()

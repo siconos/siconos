@@ -73,7 +73,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _residuFree.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(getDim()));
   //   _xp.reset(new SiconosVector(getDim()));
   //   _xq.reset(new SiconosVector(getDim()));
   //   mXfree.reset(new SiconosVector(getDim()));
@@ -141,7 +141,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     _q[1].reset(new SiconosVector(*_velocity0));
 
   _q[2].reset(new SiconosVector(_ndof));
-  _residuFree.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(getDim()));
   _p.resize(3);
   // Memories
   if (lgptr->hasQMemory())   // qMemory
@@ -270,7 +270,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _residuFree.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(getDim()));
 
 
   _p.resize(3);
@@ -300,7 +300,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _residuFree.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(getDim()));
 
   // Mass
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
@@ -465,13 +465,9 @@ void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
   if (_pluginJacqDotFInt->fPtr && !_jacobianFIntqDot)
     _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
 
-
-
-
-
-  //
-  if (!_workFree)
-    _workFree.reset(new SiconosVector(getDim()));
+  // This allocation should be done by OSI
+  if (!_workspace[free])
+    _workspace[free].reset(new SiconosVector(getDim()));
   // Memory allocation for fL and its jacobians.
   initForces();
 

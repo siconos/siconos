@@ -638,7 +638,7 @@ double Moreau::computeResidu()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    SP::SiconosVector residuFree = ds->residuFree();
+    SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS)
     {
@@ -701,9 +701,9 @@ double Moreau::computeResidu()
       }
       //      cout<<"Moreau: residu free"<<endl;
       //      (*residuFree).display();
-      (*(d->workFree())) = *residuFree;
-      scal(-h, *d->r(), (*d->workFree()), false); // residu = residu - h*r
-      normResidu = d->workFree()->norm2();
+      (*(d->workspace(DynamicalSystem::free))) = *residuFree;
+      scal(-h, *d->r(), (*d->workspace(DynamicalSystem::free)), false); // residu = residu - h*r
+      normResidu = d->workspace(DynamicalSystem::free)->norm2();
       //    cout<<"Moreau: residu "<<endl;
       //    (workX[d])->display();
       //    cout<<"Moreau: norm residu :"<<normResidu<<endl;
@@ -729,7 +729,7 @@ double Moreau::computeResidu()
         residuFree->zero();
 
       // x value at told
-      SP::SiconosVector xBuffer = d->getWorkVector(DynamicalSystem::local_buffer);
+      SP::SiconosVector xBuffer = d->workspace(DynamicalSystem::local_buffer);
       *xBuffer = *(d->xMemory()->getSiconosVector(0));
       //    cout<<"Moreau TIDS::computeResidu: x_k"<<endl;
       //    xBuffer->display();
@@ -822,17 +822,17 @@ double Moreau::computeResidu()
         }
       }
 
-      *(d->workFree()) = *residuFree; // copy residuFree in Workfree
+      *(d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
 
-      DEBUG_EXPR(d->workFree()->display());
+      DEBUG_EXPR(d->workspace(DynamicalSystem::free)->display());
 
       if (d->p(1))
-        *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
+        *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
       //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
-      //      d->workFree()->display();
-      normResidu = d->workFree()->norm2();
+      //      d->workspace(DynamicalSystem::free)->display();
+      normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -968,19 +968,19 @@ double Moreau::computeResidu()
       //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
       //       realresiduFree->display();
 
-      (* d->workFree()) = *residuFree; // copy residuFree in Workfree
+      (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(1))
-        *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
+        *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
 
       //     std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      //      d->workFree()->display();
+      //      d->workspace(DynamicalSystem::free)->display();
 
       //      *realresiduFree-= *d->p(1);
       //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
       //      realresiduFree->display();
 
 
-      //     normResidu = d->workFree()->norm2();
+      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
 
@@ -1016,12 +1016,12 @@ double Moreau::computeResidu()
         coef = -h * _thetaFL;
         scal(coef, *d->forces(), *residuFree, false);
       }
-      *(d->workFree()) = *residuFree;
+      *(d->workspace(DynamicalSystem::free)) = *residuFree;
       //cout<<"Moreau::computeResidu :\n";
       // residuFree->display();
       if (d->p(1))
-        *(d->workFree()) -= *d->p(1);
-      normResidu = d->workFree()->norm2();
+        *(d->workspace(DynamicalSystem::free)) -= *d->p(1);
+      normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
     else
       RuntimeException::selfThrow("Moreau::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -1082,8 +1082,8 @@ void Moreau::computeFreeState()
       // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
       //
       // xFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector xfree = d->workFree();//workX[d];
-      *xfree = *(d->residuFree());
+      SP::SiconosVector xfree = d->workspace(DynamicalSystem::free);//workX[d];
+      *xfree = *(d->workspace(DynamicalSystem::freeresidu));
 
       if (_useGamma)
       {
@@ -1176,8 +1176,8 @@ void Moreau::computeFreeState()
       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector vfree = d->workFree();//workX[d];
-      (*vfree) = *(d->residuFree());
+      SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
+      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
@@ -1219,8 +1219,8 @@ void Moreau::computeFreeState()
 
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector vfree = d->workFree();//workX[d];
-      (*vfree) = *(d->residuFree());
+      SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
+      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
 
       W->PLUForwardBackwardInPlace(*vfree);
       *vfree *= -1.0;
@@ -1252,9 +1252,9 @@ void Moreau::computeFreeState()
       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector vfree = d->workFree();//workX[d];
-      (*vfree) = *(d->residuFree());
-      //*(d->vPredictor())=*(d->residuFree());
+      SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
+      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
+      //*(d->vPredictor())=*(d->workspace(DynamicalSystem::freeresidu));
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
@@ -1699,17 +1699,17 @@ void Moreau::updateState(const unsigned int level)
 
         W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
 
-        *x += *(fonlds->workFree()); //*workX[ds]; // x+=xfree
+        *x += *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x+=xfree
       }
       else
       {
-        *x = *(fonlds->workFree()); //*workX[ds]; // x=xfree
+        *x = *(fonlds->workspace(DynamicalSystem::free)); //*workX[ds]; // x=xfree
       }
 
       if (baux)
       {
         ds->subWorkVector(x, DynamicalSystem::local_buffer);
-        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1751,11 +1751,11 @@ void Moreau::updateState(const unsigned int level)
             v->setValue(*itindex, 0.0);
         W->PLUForwardBackwardInPlace(*v);
 
-        *v +=  * ds->workFree();
+        *v +=  * ds->workspace(DynamicalSystem::free);
       }
       else
       {
-        *v =  * ds->workFree();
+        *v =  * ds->workspace(DynamicalSystem::free);
       }
 
 
@@ -1809,7 +1809,7 @@ void Moreau::updateState(const unsigned int level)
       if (baux)
       {
         ds->subWorkVector(q, DynamicalSystem::local_buffer);
-        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1845,14 +1845,14 @@ void Moreau::updateState(const unsigned int level)
         cout << "Moreau::updatestate hWB lambda" << endl;
         v->display();
 #endif
-        *v +=  * ds->workFree();
+        *v +=  * ds->workspace(DynamicalSystem::free);
       }
       else
-        *v =  * ds->workFree();
+        *v =  * ds->workspace(DynamicalSystem::free);
 
 #ifdef MOREAU_NE_DEBUG
       cout << "Moreau::updatestate work free" << endl;
-      ds->workFree()->display();
+      ds->workspace(DynamicalSystem::free)->display();
       cout << "Moreau::updatestate new v" << endl;
       v->display();
 #endif

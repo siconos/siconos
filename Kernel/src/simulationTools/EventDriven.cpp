@@ -377,7 +377,7 @@ void EventDriven::initOSIs()
         if ((Type::value(**itds) == Type::LagrangianDS) || (Type::value(**itds) == Type::LagrangianLinearTIDS))
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(*itds);
-          *(d->getWorkVector(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
+          *(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
           // Allocate the memory to stock coefficients of the polynomial for the dense output
           d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, (*itds)->getDim(), (osi_NewMark->getOrderDenseOutput() + 1));
         }

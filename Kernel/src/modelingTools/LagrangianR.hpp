@@ -97,7 +97,7 @@ public:
   /** destructor
   */
   virtual ~LagrangianR() {};
-
+  
   // -- Jach --
 
   /** get matrix Jach[index]
@@ -186,6 +186,10 @@ public:
   void computeh(const double time, Interaction& inter,
                         SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
 
+  // void computeh(const double time, Interaction& inter,
+  //               SP::BlockVector q, SP::BlockVector v, 
+  //               SP::BLockVector lambda, SP::BlockVector z
+  //               SP::SiconosVector y);
   /** default function to compute jacobianH
   *  \param double : current time
   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)

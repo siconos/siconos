@@ -234,7 +234,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
-        SP::SiconosVector qtmp = neds->getWorkVector(DynamicalSystem::qtmp);
+        SP::SiconosVector qtmp = neds->workspace(DynamicalSystem::qtmp);
 #ifdef TSPROJ_DEBUG
         std ::cout << "qtmp before  update " << std::endl;
         qtmp->display();
@@ -261,7 +261,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qtmp = d->getWorkVector(DynamicalSystem::qtmp);
+        SP::SiconosVector qtmp = d->workspace(DynamicalSystem::qtmp);
 
         if (d->p(0))
         {

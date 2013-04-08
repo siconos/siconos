@@ -529,7 +529,7 @@ double ZeroOrderHold::computeResidu()
   {
     DynamicalSystem& ds = **it; // the considered dynamical system
     dsType = Type::value(ds); // Its type
-    SiconosVector& residuFree = *ds.residuFree();
+    SiconosVector& residuFree = *ds.workspace(DynamicalSystem::freeresidu);
     // 1 - First Order Linear Systems
     if (dsType == Type::FirstOrderLinearDS)
     {
@@ -577,7 +577,7 @@ void ZeroOrderHold::computeFreeState()
     if (dsType == Type::FirstOrderLinearTIDS)
     {
       FirstOrderLinearTIDS& d = static_cast<FirstOrderLinearTIDS&>(ds);
-      SiconosVector& xfree = *d.workFree();//workX[d];
+      SiconosVector& xfree = *d.workspace(DynamicalSystem::free);//workX[d];
       SiconosMatrix& Phi = *_PhiMap[dsN]; // Phi is constant
       prod(Phi, *d.x(), xfree); // done
       if (d.b())
@@ -591,7 +591,7 @@ void ZeroOrderHold::computeFreeState()
     else if (dsType == Type::FirstOrderLinearDS)
     {
       FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(ds);
-      SiconosVector& xfree = *(d.workFree());
+      SiconosVector& xfree = *(d.workspace(DynamicalSystem::free));
 
       SiconosMatrix& Phi = *_PhiMap[dsN];
       prod(Phi, *d.x(), xfree);
@@ -836,7 +836,7 @@ void ZeroOrderHold::updateState(const unsigned int level)
       SiconosVector& x = *d.x();
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
-      x = *d.workFree(); // x = xfree = Phi*xold
+      x = *d.workspace(DynamicalSystem::free); // x = xfree = Phi*xold
       if (level != LEVELMAX)
       {
         if (_PsiMap[(*it)->number()])

@@ -278,7 +278,7 @@ void TimeSteppingD1Minus::advanceToEvent()
   // calculate residu without nonsmooth event with OSI
   // * calculate position q_{k+1} in ds->q()
   // * calculate velocity v_{k+1}^- and not free velocity in ds->velocity()
-  // * calculate free residu in ds->freeResidu()
+  // * calculate free residu in ds->free()
   computeResidu();
 
   // calculate state without nonsmooth event with OSI

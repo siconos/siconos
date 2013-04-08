@@ -85,7 +85,7 @@ void Moreau2::computeFreeState()
 
       SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearDS>(ds);
 
-      SP::SiconosVector ffree = d->workFree();
+      SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
 
       // x value at told
       //SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
@@ -130,7 +130,7 @@ void Moreau2::computeFreeState()
 
       SP::FirstOrderLinearDS d = std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       M = d->M();
-      SP::SiconosVector ffree = d->workFree();
+      SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
       // x value at told
       SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
 
@@ -168,7 +168,7 @@ void Moreau2::computeFreeState()
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector ffree = d->workFree();
+      SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
@@ -219,7 +219,7 @@ void Moreau2::computeFreeState()
 
       // --- ResiduFree computation ---
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector ffree = d->workFree();
+      SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
 
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1

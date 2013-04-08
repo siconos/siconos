@@ -212,8 +212,8 @@ double NewMarkAlphaOSI::computeResidu()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    SP::SiconosVector _residuFree = ds->residuFree();
-    _residuFree->zero();
+    SP::SiconosVector _workspace[DynamicalSystem::freeresidu] = ds->workspace(DynamicalSystem::freeresidu);
+    _workspace[DynamicalSystem::freeresidu]->zero();
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // -- Convert the DS into a Lagrangian one.
@@ -227,7 +227,7 @@ double NewMarkAlphaOSI::computeResidu()
       // get the reaction force p
       SP::SiconosVector p = d->p(2);
       // Compute free residual
-      prod(*M, *a, *_residuFree, true); // _residuFree = M*a
+      prod(*M, *a, *_workspace[DynamicalSystem::freeresidu], true); // _workspace[freeresidu] = M*a
       // For LagrangianDS (non linear Lagrangian DS)
       if (dsType == Type::LagrangianDS)
       {
@@ -241,7 +241,7 @@ double NewMarkAlphaOSI::computeResidu()
       // For LagrangianLinearTIDS
       if (dsType == Type::LagrangianLinearTIDS)
       {
-        // We need to add F_int = Cv + Kq to _residuFree
+        // We need to add F_int = Cv + Kq to _workspace[freeresidu]
         SP::LagrangianLinearTIDS dtids = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
         SP::SiconosMatrix K = dtids->K();
         SP::SiconosMatrix C = dtids->C();
@@ -251,15 +251,15 @@ double NewMarkAlphaOSI::computeResidu()
           dtids->computeFExt(t);
         }
         if (K)
-          prod(*K, *q, *_residuFree, false); // _residuFree = M*a + C*v + K*q
+          prod(*K, *q, *_workspace[DynamicalSystem::freeresidu], false); // _workspace[DynamicalSystem::freeresidu] = M*a + C*v + K*q
         if (C)
-          prod(*C, *v, *_residuFree, false); // _residuFree = M*a + C*v
+          prod(*C, *v, *_workspace[DynamicalSystem::freeresidu], false); // _workspace[DynamicalSystem::freeresidu] = M*a + C*v
       }
 
-      *_residuFree -= *F;            // _residuFree = _residuFree - F
+      *_workspace[DynamicalSystem::freeresidu] -= *F;            // _workspace[DynamicalSystem::freeresidu] = _workspace[freeresidu] - F
       // Compute residual
-      _residu.reset(new SiconosVector(*_residuFree)); // _residu = _residuFree
-      *_residu -= *p;                                 // _residu = _residuFree - p
+      _residu.reset(new SiconosVector(*_workspace[DynamicalSystem::freeresidu])); // _residu = _workspace[DynamicalSystem::freeresidu]
+      *_residu -= *p;                                 // _residu = _workspace[freeresidu] - p
       // Compute Euclidean norm of the residual
       normResidu = _residu->norm2();
       // Take maximum value of norm over all DS
@@ -271,7 +271,7 @@ double NewMarkAlphaOSI::computeResidu()
 #ifdef DEBUG_NEWMARK
       cout.precision(15);
       cout << "Residu Free: ";
-      _residuFree->display();
+      _workspace[freeresidu]->display();
       cout << "Residu: ";
       _residu->display();
       cout << "ResiduMax: " << maxResidu << endl;
@@ -300,13 +300,13 @@ void NewMarkAlphaOSI::computeFreeState()
     dsType = Type::value(*ds); // Its type
     // Get iteration matrix W, make sure that W was updated before
     W = WMap[ds->number()]; // Its W matrix of iteration.
-    SP::SiconosVector _qfree = ds->workFree(); // q_free
-    SP::SiconosVector _residuFree = ds->residuFree();
+    SP::SiconosVector _qfree = ds->workspace(DynamicalSystem::free); // q_free
+    SP::SiconosVector _workspace[DynamicalSystem::freeresidu] = ds->workspace(DynamicalSystem::freeresidu);
     // -- Convert the DS into a Lagrangian one.
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-      *_qfree = *(_residuFree);
+      *_qfree = *(_workspace[DynamicalSystem::freeresidu]);
       W->PLUForwardBackwardInPlace(*_qfree); //_qfree = (W^-1)*R_free
       *_qfree *= -1.0; //_qfree = -(W^-1)*R_free
       //
@@ -489,9 +489,9 @@ void NewMarkAlphaOSI::prediction()
       _q = d->q();                // generalized coordinate
       _dotq = d->velocity();      // generalized velocity
       _ddotq = d->acceleration(); // generalized acceleration
-      _a = d->getWorkVector(DynamicalSystem::acce_like); // acceleration-like
+      _a = d->workspace(DynamicalSystem::acce_like); // acceleration-like
       // Save the acceleration before the prediction
-      *(d->getWorkVector(DynamicalSystem::acce_memory)) = *(_ddotq);
+      *(d->workspace(DynamicalSystem::acce_memory)) = *(_ddotq);
       //
 #ifdef DEBUG_NEWMARK
       cout.precision(15);
@@ -547,7 +547,7 @@ void NewMarkAlphaOSI::correction()
   {
     SP::DynamicalSystem ds = *itDS;
     SP::SimpleMatrix W = WMap[ds->number()]; // Iteration matrix W_{n+1,k} computed at kth iteration
-    SP::SiconosVector _r = ds->residuFree(); // Free residu r_{n+1,k}
+    SP::SiconosVector _r = ds->workspace(DynamicalSystem::freeresidu); // Free residu r_{n+1,k}
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -561,7 +561,7 @@ void NewMarkAlphaOSI::correction()
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) += (beta_prime / pow(h, 2.0)) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      *(d->getWorkVector(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / pow(h, 2.0)) * (*delta_q));
+      *(d->workspace(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / pow(h, 2.0)) * (*delta_q));
       //
 #ifdef DEBUG_NEWMARK
       cout.precision(15);
@@ -573,7 +573,7 @@ void NewMarkAlphaOSI::correction()
       cout << "Acceleration ddotq : ";
       d->acceleration()->display();
       cout << "Acceleration-like a : ";
-      d->getWorkVector(DynamicalSystem::acce_like)->display();
+      d->workspace(DynamicalSystem::acce_like)->display();
 #endif
     }
     else
@@ -625,7 +625,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
     q_n = d->qMemory()->getSiconosVector(0); // q_n
     dotq_n = d->velocityMemory()->getSiconosVector(0); // dotq_n
-    ddotq_n = d->getWorkVector(DynamicalSystem::acce_memory); // ddotq_n
+    ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
     q_np1 = d->q(); // q_{n+1}
     dotq_np1 = d->velocity(); // dotq_{n+1}
     ddotq_np1 = d->acceleration(); // ddotq_{n+1}

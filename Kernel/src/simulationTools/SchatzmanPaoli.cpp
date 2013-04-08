@@ -531,7 +531,7 @@ double SchatzmanPaoli::computeResidu()
   {
     ds = *it; // the considered dynamical system
     dsType = Type::value(*ds); // Its type
-    SP::SiconosVector residuFree = ds->residuFree();
+    SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
 
     // 1 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
@@ -607,14 +607,14 @@ double SchatzmanPaoli::computeResidu()
       //         }
       //       }
 
-      //       *(d->workFree())=*residuFree; // copy residuFree in Workfree
+      //       *(d->workspace(DynamicalSystem::free))=*residuFree; // copy residuFree in Workfree
       // //      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residufree :"  << std::endl;
       // //      residuFree->display();
       //       if (d->p(1))
-      //         *(d->workFree()) -= *d->p(1); // Compute Residu in Workfree Notation !!
+      //         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
       // //      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residu :"  << std::endl;
-      // //      d->workFree()->display();
-      //         normResidu = d->workFree()->norm2();
+      // //      d->workspace(DynamicalSystem::free)->display();
+      //         normResidu = d->workspace(DynamicalSystem::free)->norm2();
       RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
     // 2 - Lagrangian Linear Systems
@@ -709,9 +709,9 @@ double SchatzmanPaoli::computeResidu()
       // residuFree->display();
 
 
-      (* d->workFree()) = *residuFree; // copy residuFree in Workfree
+      (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(0))
-        *(d->workFree()) -= *d->p(0); // Compute Residu in Workfree Notation !!
+        *(d->workspace(DynamicalSystem::free)) -= *d->p(0); // Compute Residu in Workfree Notation !!
 
       // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
       //  if (d->p(0))
@@ -719,11 +719,11 @@ double SchatzmanPaoli::computeResidu()
       //  else
       //    std::cout << " p(0) :"  << std::endl;
       // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      // d->workFree()->display();
+      // d->workspace(DynamicalSystem::free)->display();
 
 
 
-      //     normResidu = d->workFree()->norm2();
+      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
 
@@ -759,12 +759,12 @@ double SchatzmanPaoli::computeResidu()
       //       coef = -h*_thetaFL;
       //       scal(coef, *d->forces(), *residuFree, false);
       //     }
-      //     *(d->workFree())=*residuFree;
+      //     *(d->workspace(DynamicalSystem::free))=*residuFree;
       //     //cout<<"SchatzmanPaoli::computeResidu :\n";
       //     // residuFree->display();
       //     if ( d->p(1) )
-      //     *(d->workFree()) -= *d->p(1);
-      //     normResidu = d->workFree()->norm2();
+      //     *(d->workspace(DynamicalSystem::free)) -= *d->p(1);
+      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
     }
     else
@@ -829,8 +829,8 @@ void SchatzmanPaoli::computeFreeState()
       //       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       //       //
       //       // vFree pointer is used to compute and save ResiduFree in this first step.
-      //       SP::SiconosVector vfree = d->workFree();//workX[d];
-      //       (*vfree)=*(d->residuFree());
+      //       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
+      //       (*vfree)=*(d->workspace(DynamicalSystem::freeresidu));
 
       //       // -- Update W --
       //       // Note: during computeW, mass and jacobians of fL will be computed/
@@ -872,8 +872,8 @@ void SchatzmanPaoli::computeFreeState()
 
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector qfree = d->workFree();//workX[d];
-      (*qfree) = *(d->residuFree());
+      SP::SiconosVector qfree = d->workspace(DynamicalSystem::free);//workX[d];
+      (*qfree) = *(d->workspace(DynamicalSystem::freeresidu));
 
       W->PLUForwardBackwardInPlace(*qfree);
       *qfree *= -1.0;
@@ -906,9 +906,9 @@ void SchatzmanPaoli::computeFreeState()
       // // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
       // //
       // // vFree pointer is used to compute and save ResiduFree in this first step.
-      // SP::SiconosVector vfree = d->workFree();//workX[d];
-      // (*vfree)=*(d->residuFree());
-      // //*(d->vPredictor())=*(d->residuFree());
+      // SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
+      // (*vfree)=*(d->workspace(DynamicalSystem::freeresidu));
+      // //*(d->vPredictor())=*(d->workspace(DynamicalSystem::freeresidu));
 
       // // -- Update W --
       // // Note: during computeW, mass and jacobians of fL will be computed/
@@ -1085,10 +1085,10 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
       else
       {
         subprod(*C, *Xfree, *Yp, coord, true);
-        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,true);
+        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workspace(DynamicalSystem::free),*Yp,coord,true);
         //        if (mainInteraction->dynamicalSystems()->size() == 2)
         //        {
-        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workFree(),*Yp,coord,false);
+        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workspace(DynamicalSystem::free),*Yp,coord,false);
         //        }
       }
 
@@ -1163,11 +1163,11 @@ void SchatzmanPaoli::updateState(const unsigned int level)
         //        itindex != d->boundaryConditions()->velocityIndices()->end();
         //        ++itindex)
         //     v->setValue(*itindex, 0.0);
-        *q +=  * ds->workFree();
+        *q +=  * ds->workspace(DynamicalSystem::free);
 
       }
       else
-        *q =  * ds->workFree();
+        *q =  * ds->workspace(DynamicalSystem::free);
 
 
 
@@ -1208,7 +1208,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       if (baux)
       {
         ds->subWorkVector(q, DynamicalSystem::local_buffer);
-        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1235,11 +1235,11 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       v->display();
       // #endif
 
-      //       *v +=  * ds->workFree();
+      //       *v +=  * ds->workspace(DynamicalSystem::free);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       cout<<"SchatzmanPaoli::updatestate work free"<<endl;
-      //       ds->workFree()->display();
+      //       ds->workspace(DynamicalSystem::free)->display();
       //       cout<<"SchatzmanPaoli::updatestate new v"<<endl;
       //       v->display();
       // #endif

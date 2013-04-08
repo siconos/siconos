@@ -71,8 +71,8 @@ protected:
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
-
-  /** default constructor */
+  bool _isThereImpactInTheTimeStep ;
+  /** Default constructor */
   D1MinusLinear() {};
 
 public:
@@ -91,7 +91,7 @@ public:
   virtual ~D1MinusLinear() {};
 
   /** initialization of the D1MinusLinear integrator; for linear time
-   *  invariant systems, we compute time invariant operator
+c   *  invariant systems, we compute time invariant operator
    */
   virtual void initialize();
 

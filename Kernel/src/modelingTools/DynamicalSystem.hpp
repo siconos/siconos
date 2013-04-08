@@ -150,7 +150,7 @@ public:
   /** List of indices used to save tmp work vectors
    * The last value is the size of the present list, so you HAVE to leave it at the end position.
    */
-  enum WorkNames {local_buffer, qtmp, acce_memory, acce_like, sizeWorkV};
+  enum WorkNames {local_buffer, freeresidu, free, qtmp, acce_memory, acce_like, free_tdg, sizeWorkV};
 
 private:
   /** serialization hooks
@@ -175,8 +175,8 @@ protected:
   /** initial state of the system */
   SP::SiconosVector _x0;
 
-  /** ResiduFree  */
-  SP::SiconosVector _residuFree;
+  // /** ResiduFree  */
+  // SP::SiconosVector _workspace[freeresidu];
 
   /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
    * (multiplier, force, ...)
@@ -204,9 +204,6 @@ protected:
       system. */
   SP::SiconosVector _z;
   SP::SiconosVector _g;
-
-
-
 
 
   /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
@@ -240,7 +237,7 @@ protected:
   unsigned int _stepsInMemory;
 
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
-  VectorOfVectors _workV;
+  VectorOfVectors _workspace;
 
   /** A container of matrices to save temporary values (zeroMatrix, idMatrix, inverse of Mass or any tmp work matrix ...)
    * No get-set functions at the time. Only used as a protected member.*/
@@ -258,7 +255,7 @@ protected:
 
 protected:
   /** a vector reserved to compute the freeState.*/
-  SP::SiconosVector _workFree;
+//  SP::SiconosVector _workFree;
 
 public:
 
@@ -401,10 +398,10 @@ public:
   /** get Residu,
     *  \return pointer on a SiconosVector
     */
-  inline SP::SiconosVector residuFree() const
-  {
-    return _residuFree;
-  }
+  // inline SP::SiconosVector workspace(DynamicalSystem::freeresidu) const
+  // {
+  //   return _workspace[freeresidu];
+  // }
 
   /** set the value of x0 to newValue
    *  \param SiconosVector newValue
@@ -641,17 +638,17 @@ public:
   /** get the vector of temporary saved vector
    *  \return a VectorOfVectors (map that links string to vectors)
    */
-  inline VectorOfVectors getWorkVector() const
+  inline VectorOfVectors workspace() const
   {
-    return _workV;
+    return _workspace;
   }
 
   /** get a temporary saved vector, ref by id
    *  \return a SP::SiconosVector
    */
-  inline SP::SiconosVector getWorkVector(const WorkNames& id) const
+  inline SP::SiconosVector workspace(const WorkNames& id) const
   {
-    return _workV[id];
+    return _workspace[id];
   }
 
   /** set WorkVector
@@ -659,7 +656,7 @@ public:
    */
   inline void setWorkVector(const VectorOfVectors& newVect)
   {
-    _workV = newVect;
+    _workspace = newVect;
   }
 
   /** to add a temporary vector
@@ -668,7 +665,7 @@ public:
    */
   inline void addWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
-    *_workV[id] = *newVal;
+    *_workspace[id] = *newVal;
   }
   /** sub a vector to a temporary one
    *  \param a SP::SiconosVector
@@ -676,7 +673,7 @@ public:
    */
   inline void subWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
-    *_workV[id] -= *newVal;
+    *_workspace[id] -= *newVal;
   }
 
   /** to allocate memory for a new vector in tmp map
@@ -685,15 +682,15 @@ public:
    */
   inline void allocateWorkVector(const WorkNames& id, int size)
   {
-    _workV[id].reset(new SiconosVector(size));
+    _workspace[id].reset(new SiconosVector(size));
   }
 
-  /** to get the free vector.
-   */
-  inline SP::SiconosVector workFree() const
-  {
-    return _workFree;
-  };
+  // /** to get the free vector.
+  //  */
+  // inline SP::SiconosVector workspace(DynamicalSystem::free) const
+  // {
+  //   return _workFree;
+  // };
 
   //@}
 

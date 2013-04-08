@@ -60,7 +60,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
   _v.reset(new SiconosVector(_n));
 
   _dotq.reset(new SiconosVector(_qDim));
-  _residuFree.reset(new SiconosVector(_n));
+  _workspace[freeresidu].reset(new SiconosVector(_n));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
@@ -90,7 +90,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _v.reset(new SiconosVector(_n));
   (*_q) = (*_q0);
   _dotq.reset(new SiconosVector(_qDim));
-  _residuFree.reset(new SiconosVector(_n));
+  _workspace[freeresidu].reset(new SiconosVector(_n));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _jacobianvFL.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
@@ -236,8 +236,8 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 
   //
-  if (!_workFree)
-    _workFree.reset(new SiconosVector(getDim()));
+  if (!_workspace[free])
+    _workspace[free].reset(new SiconosVector(getDim()));
   // Memory allocation for fL and its jacobians.
 
   // Set links to variables of top-class DynamicalSystem.

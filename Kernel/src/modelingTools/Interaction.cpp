@@ -372,10 +372,10 @@ void Interaction::initDataFirstOrder()
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     FirstOrderNonLinearDS& ds = static_cast<FirstOrderNonLinearDS&>(**it);
-    _workspace[FirstOrderR::free]->insertPtr(ds.workFree());
+    _workspace[FirstOrderR::free]->insertPtr(ds.workspace(DynamicalSystem::free));
     _workspace[FirstOrderR::x]->insertPtr(ds.x());
     _workspace[FirstOrderR::xq]->insertPtr(ds.xq());
-    _workspace[FirstOrderR::deltax]->insertPtr(ds.getWorkVector(DynamicalSystem::local_buffer));
+    _workspace[FirstOrderR::deltax]->insertPtr(ds.workspace(DynamicalSystem::local_buffer));
     _workspace[FirstOrderR::z]->insertPtr(ds.z());
     _workspace[FirstOrderR::r]->insertPtr(ds.r());
     _workspace[FirstOrderR::residu_r]->insertPtr(ds.residur());
@@ -412,7 +412,7 @@ void Interaction::initDataLagrangian()
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[LagrangianR::free]->insertPtr(lds->workFree());
+    _workspace[FirstOrderR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[LagrangianR::q0]->insertPtr(lds->q());
 
     DEBUG_PRINTF("_workspace[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
@@ -458,7 +458,7 @@ void Interaction::initDataNewtonEuler()
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[NewtonEulerR::free]->insertPtr(lds->workFree());
+    _workspace[FirstOrderR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
     _workspace[NewtonEulerR::velo]->insertPtr(lds->velocity());
     _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());

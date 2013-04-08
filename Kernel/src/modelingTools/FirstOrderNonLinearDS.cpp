@@ -45,7 +45,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _residur.reset(new SiconosVector(_n));
   _xp.reset(new SiconosVector(getDim()));
   _xq.reset(new SiconosVector(getDim()));
-  _workFree.reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
 
   // == r ==
@@ -73,7 +73,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0):
   _residur.reset(new SiconosVector(_n));
   _xp.reset(new SiconosVector(getDim()));
   _xq.reset(new SiconosVector(getDim()));
-  _workFree.reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
 
   // == r ==
@@ -192,7 +192,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   _residur.reset(new SiconosVector(_n));
   _xp.reset(new SiconosVector(getDim()));
   _xq.reset(new SiconosVector(getDim()));
-  _workFree.reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(getDim()));
   _r.reset(new SiconosVector(getDim()));
   _fold.reset(new SiconosVector(getDim()));
 

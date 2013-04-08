@@ -153,8 +153,8 @@ void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
     _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
   }
 
-  if (!_workFree)
-    _workFree.reset(new SiconosVector(getDim()));
+  if (!_workspace[free])
+    _workspace[free].reset(new SiconosVector(getDim()));
 
   // If z has not been set, we initialize it with a null vector of
   // size 1, since z is required in plug-in functions call.
@@ -232,18 +232,17 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
 
-
-  _workFree->zero();
+  _workspace[free]->zero();
   computeForces(time, _q[0], _q[1]);
-  *_workFree = *_forces;
-  // Then we search for _workFree, such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workFree);
+  *_workspace[free] = *_forces;
+  // Then we search for _workspace[free], such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
+  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
 
   //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
   //   std::cout << " q[2] " << std::endl ;
   //   _q[2]->display();
-  //   std::cout << " _workFree " << std::endl ;
-  //   _workFree->display();
+  //   std::cout << " _workspace[free] " << std::endl ;
+  //   _workspace[free]->display();
 
 }
 void LagrangianLinearTIDS::computeForces(double time)

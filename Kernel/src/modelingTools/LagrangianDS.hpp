@@ -536,6 +536,14 @@ public:
    */
   void setPPtr(SP::SiconosVector newPtr, unsigned int level);
 
+  /** get all the values of the state vector p stored in memory
+   *  \return a memory
+   */
+  inline SP::SiconosMemory pMemory(unsigned int level) const
+  {
+    return _pMemory[level];
+  }
+
   // -- Mass --
 
   /** get mass

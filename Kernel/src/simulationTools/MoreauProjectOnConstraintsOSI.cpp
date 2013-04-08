@@ -140,7 +140,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //     {
 
   //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-  //       SP::SiconosVector vfree = d->workFree();
+  //       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);
   //       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
   //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
   //       SP::SiconosVector q = d->q();
@@ -162,7 +162,7 @@ void MoreauProjectOnConstraintsOSI::computeFreeState()
   //     else if (dsType == Type::NewtonEulerDS)
   //     {
   //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-  //       SP::SiconosVector vfree = d->workFree();
+  //       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);
   //       SP::SiconosMatrix T = d->T();
   //       SP::SiconosVector dotq = d->dotq();
   //       prod(*T,*vfree,*dotq,true);
