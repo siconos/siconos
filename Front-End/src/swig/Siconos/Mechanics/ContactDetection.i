@@ -14,6 +14,7 @@
 %include KernelTypes.i
 %{
 #include <SiconosKernel.hpp>
+#include <boost/typeof/typeof.hpp>
 %}
 
 %import Kernel.i
@@ -21,6 +22,7 @@
 %include pyRegister.i
 
 %fragment("NumPy_Fragments");
+
 PY_FULL_REGISTER(SpaceFilter);                                             
 PY_FULL_REGISTER(SiconosBodies);
 // yes, undefined private copy constructors
