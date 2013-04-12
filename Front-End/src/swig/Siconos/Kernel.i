@@ -265,84 +265,28 @@ typedef __mpz_struct mpz_t[1];
  
 %}
 
-%extend SiconosGraph<std11::shared_ptr<Interaction>, 
-                     std11::shared_ptr<DynamicalSystem>, 
-                     InteractionProperties, SystemProperties, 
-                     GraphProperties >
-{
-  const std::vector<SP::Interaction> vertices()
-  {
-    std::vector<SP::Interaction> r;
-    InteractionsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-    {
-      r.push_back($self->bundle(*ui));
-    };
-    return r;
-  };
 
-
-  const std::vector<SP::DynamicalSystem> edges()
-  {
-    std::vector<SP::DynamicalSystem> r;
-    InteractionsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-    {
-      r.push_back($self->bundle(*ui));
-    };
-    return r;
-  };
-
-}
-
-
-%extend SiconosGraph<std11::shared_ptr<DynamicalSystem>, 
-                     std11::shared_ptr<Interaction>, 
-                     SystemProperties, InteractionProperties, 
-                     GraphProperties >
-{
-  const std::vector<SP::DynamicalSystem> vertices()
-  {
-    std::vector<SP::DynamicalSystem> r;
-    DynamicalSystemsGraph::VIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui)
-    {
-      r.push_back($self->bundle(*ui));
-    };
-    return r;
-  };
-
-
-  const std::vector<SP::Interaction> edges()
-  {
-    std::vector<SP::Interaction> r;
-    InteractionsGraph::EIterator ui, uiend;
-    for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui)
-    {
-      r.push_back($self->bundle(*ui));
-    };
-    return r;
-  };
-
-}
-
-
-%template (ig_vertices) std::vector<std11::shared_ptr<Interaction> >;
 
 
 // needed templates
 
 %template (InteractionsSet) SiconosSet<Interaction,double*>;
 
-%template (dsi) std::pair<unsigned int, unsigned int >;
+//namespace std {
 
-%template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, 
-                          std11::shared_ptr<DynamicalSystem> >;
+  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, 
+                                         std11::shared_ptr<DynamicalSystem> > >;
 
-%template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>, 
-                                       std11::shared_ptr<DynamicalSystem> > >;
+  %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
-%template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
+
+  %template (dsi) std::pair<unsigned int, unsigned int >;
+
+  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>, 
+                            std11::shared_ptr<DynamicalSystem> >;
+
+//}
+
 
 %template(unsignedintv) std11::shared_ptr<std::vector<unsigned int> >;
 
@@ -356,6 +300,7 @@ typedef __mpz_struct mpz_t[1];
 // suppress warning
 %ignore  STD11::enable_shared_from_this< Hashed >;
 %template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
+
 
 
 %ignore OSNSMatrix::updateSizeAndPositions;

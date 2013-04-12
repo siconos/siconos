@@ -122,6 +122,7 @@ IF(DOXYGEN_FOUND)
     end.i
     numpy.i
     pyRegister.i
+    graph.i
     Kernel-docstrings.i)
   
   SET(SWIG_MODULE_Numerics_EXTRA_DEPS

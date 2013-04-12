@@ -1,3 +1,4 @@
+// -*- c++ -*-
 %module(directors="1", allprotected="1") ContactDetection
 
 %include start.i
@@ -7,6 +8,8 @@
 %include handleException.i
 
 %include sharedPointers.i
+
+%include stl.i
 
 %include KernelTypes.i
 %{
@@ -82,7 +85,10 @@ PY_FULL_REGISTER(SiconosBodies);
 
 PY_REGISTER_BULLET_LINEAR_MATH(btVector3);
 PY_REGISTER_BULLET_LINEAR_MATH(btMatrix3x3);
+PY_REGISTER_BULLET_LINEAR_MATH(btQuadWord);
+PY_REGISTER_BULLET_LINEAR_MATH(btQuaternion);
 PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
+
 
 %{
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -102,7 +108,10 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 %shared_ptr(btCollisionWorld);
 %include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
+%shared_ptr(std::vector< std11::shared_ptr<btCollisionObject> >);
+%template (collisionObjects) std::vector< std11::shared_ptr< btCollisionObject > >;
 
+//%shared_ptr(std::vector< std11::shared_ptr<btCollisionShape> >);
 
 PY_REGISTER_BULLET_COLLISION_DETECTION(btCollisionShape);
 PY_REGISTER_BULLET_COLLISION_DETECTION(btConvexShape);
@@ -152,6 +161,22 @@ PY_FULL_REGISTER(BulletTimeSteppingProjectOnConstraints);
 PY_FULL_REGISTER(BulletWeightedShape);
 PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
+%inline
+{
+  SP::BulletDS cast_BulletDS(SP::DynamicalSystem ds)
+  {
+    return std11::static_pointer_cast<BulletDS>(ds);
+  };
+}
 
+%extend btCollisionObject
+{
+
+  size_t __hash__()
+  {
+    return (size_t) $self;
+  };
+
+}
 
 #endif
