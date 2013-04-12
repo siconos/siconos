@@ -20,8 +20,8 @@
 #include "LagrangianDSXML.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -86,10 +86,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[2].reset(new SiconosVector(_ndof));
   /** \todo lazy memory allocation */
   _pMemory.resize(3);
-  unsigned int steps=1;
-  _pMemory[0].reset(new SiconosMemory(steps));
-  _pMemory[1].reset(new SiconosMemory(steps));
-  _pMemory[2].reset(new SiconosMemory(steps));
+  // unsigned int steps=1;
+
+
+  // _pMemory[0].reset(new SiconosMemory(steps));
+  // _pMemory[1].reset(new SiconosMemory(steps));
+  // _pMemory[2].reset(new SiconosMemory(steps));
 
 }
 
@@ -280,10 +282,10 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[2].reset(new SiconosVector(_ndof));
   _pMemory.resize(3);
     /** \todo lazy memory allocation */
-  unsigned int steps=1;
-  _pMemory[0].reset(new SiconosMemory(steps));
-  _pMemory[1].reset(new SiconosMemory(steps));
-  _pMemory[2].reset(new SiconosMemory(steps));
+  //unsigned int steps=1;
+  // _pMemory[0].reset(new SiconosMemory(steps));
+  // _pMemory[1].reset(new SiconosMemory(steps));
+  // _pMemory[2].reset(new SiconosMemory(steps));
 }
 
 // From a set of data - Mass loaded from a plugin
@@ -312,10 +314,10 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[2].reset(new SiconosVector(_ndof));
   _pMemory.resize(3);
   /** \todo lazy memory allocation */
-  unsigned int steps=1;
-  _pMemory[0].reset(new SiconosMemory(steps));
-  _pMemory[1].reset(new SiconosMemory(steps));
-  _pMemory[2].reset(new SiconosMemory(steps));
+  //unsigned int steps=1;
+  // _pMemory[0].reset(new SiconosMemory(steps));
+  // _pMemory[1].reset(new SiconosMemory(steps));
+  // _pMemory[2].reset(new SiconosMemory(steps));
 }
 
 // Destructor
@@ -370,8 +372,6 @@ bool LagrangianDS::checkDynamicalSystem()
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
   unsigned int steps =1 ; // to be corrected for other cases
-
-  
   if (!_p[level])
     _p[level].reset(new SiconosVector(_ndof));
   if (!_pMemory[level])
@@ -948,9 +948,10 @@ void LagrangianDS::initMemory(unsigned int steps)
   {
     _qMemory.reset(new SiconosMemory(steps));
     _velocityMemory.reset(new SiconosMemory(steps));
-    _pMemory[0].reset(new SiconosMemory(steps));
-    _pMemory[1].reset(new SiconosMemory(steps));
-    _pMemory[2].reset(new SiconosMemory(steps));
+    _pMemory.resize(3);
+    // _pMemory[0].reset(new SiconosMemory(steps));
+    // _pMemory[1].reset(new SiconosMemory(steps));
+    // _pMemory[2].reset(new SiconosMemory(steps));
     // _pMemory.reset(new SiconosMemory(steps));
     //swapInMemory();
   }

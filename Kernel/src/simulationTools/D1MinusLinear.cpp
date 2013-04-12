@@ -322,7 +322,7 @@ double D1MinusLinear::computeResidu()
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
       // type of the current DS
-      Type::Siconos dsType = Type::value(**it);
+      //Type::Siconos dsType = Type::value(**it);
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
       SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
       SP::SiconosVector v = d->velocity();
