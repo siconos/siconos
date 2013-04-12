@@ -143,6 +143,7 @@ typedef struct _SolverOptions
   int * iWork;
   int numberOfInternalSolvers;
   struct _SolverOptions * internalSolvers;
+  NumericsOptions * numericsOptions;
 } SolverOptions;
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE

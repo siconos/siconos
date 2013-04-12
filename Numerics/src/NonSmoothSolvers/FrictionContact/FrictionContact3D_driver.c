@@ -52,8 +52,10 @@ char * SICONOS_FRICTION_3D_QUARTIC_NU_STR = "F3D_QUARTIC_NU";
 
 void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
                                     double* velocity, double* reaction, 
-                                    NumericsOptions *nopts, int after_solve, 
+                                    SolverOptions *opts, int after_solve, 
                                     int info);
+
+void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
 int frictionContact3D_driver(FrictionContactProblem* problem, 
                              double *reaction, double *velocity, 
@@ -64,9 +66,12 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     numericsError("FrictionContact3D_driver", "null input for solver and/or global options");
   /* Set global options */
   if (global_options)
+  {
     setNumericsOptions(global_options);
-  
-  snOutputFrictionContactProblem(problem, reaction, velocity, global_options, 
+    options->numericsOptions = global_options;
+  }
+
+  snOutputFrictionContactProblem(problem, reaction, velocity, options, 
                                  0, 0);
 
   /* If the options for solver have not been set, read default values in .opt file */
@@ -99,63 +104,63 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
     /* Non Smooth Gauss Seidel (NSGS) */
   case SICONOS_FRICTION_3D_NSGS:
   {
-    if (verbose == 1)
-      printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options,
+             " ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
     break;
   }
   case SICONOS_FRICTION_3D_NSGSV:
   {
-    if (verbose == 1)
-      printf(" ========================== Call NSGSV solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options,
+             " ========================== Call NSGSV solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs_velocity(problem, reaction , velocity , &info , options);
     break;
   }
   /* Proximal point algorithm */
   case SICONOS_FRICTION_3D_PROX:
   {
-    if (verbose == 1)
-      printf(" ========================== Call PROX (Proximal Point) solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options,
+             " ========================== Call PROX (Proximal Point) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_proximal(problem, reaction , velocity , &info , options);
     break;
   }
   /* Tresca Fixed point algorithm */
   case SICONOS_FRICTION_3D_TFP:
   {
-    if (verbose == 1)
-      printf(" ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+             " ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_TrescaFixedPoint(problem, reaction , velocity , &info , options);
     break;
   }
   /* De Saxce Fixed point algorithm */
   case SICONOS_FRICTION_3D_DSFP:
   {
-    if (verbose == 1)
-      printf(" ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
     break;
   }
   /* Extra Gradient algorithm */
   case SICONOS_FRICTION_3D_EG:
   {
-    if (verbose == 1)
-      printf(" ========================== Call ExtraGradient (EG) solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call ExtraGradient (EG) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_ExtraGradient(problem, reaction , velocity , &info , options);
     break;
   }
   /* Hyperplane Projection algorithm */
   case SICONOS_FRICTION_3D_HP:
   {
-    if (verbose == 1)
-      printf(" ========================== Call Hyperplane Projection (HP) solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call Hyperplane Projection (HP) solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_HyperplaneProjection(problem, reaction , velocity , &info , options);
     break;
   }
   /* Global Alart Curnier */
   case SICONOS_FRICTION_3D_LOCALAC:
   {
-    if (verbose == 1)
-      printf(" ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call Global Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
     if (problem->M->matrix0)
     {
       frictionContact3D_globalAlartCurnier(problem, reaction , velocity , &info , options);
@@ -169,16 +174,16 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   case SICONOS_FRICTION_3D_QUARTIC_NU:
   case SICONOS_FRICTION_3D_QUARTIC:
   {
-    if (verbose == 1)
-      printf(" ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_unitary_enumerative(problem, reaction , velocity , &info , options);
     break;
   }
   case SICONOS_FRICTION_3D_AlartCurnierNewton:
   case SICONOS_FRICTION_3D_DampedAlartCurnierNewton:
   {
-    if (verbose == 1)
-      printf(" ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
+    snPrintf(1, options, 
+            " ========================== Call Quartic solver for Friction-Contact 3D problem ==========================\n");
     info = frictionContact3D_Newton_solve(problem, reaction , options);
     break;
   }
@@ -190,7 +195,7 @@ int frictionContact3D_driver(FrictionContactProblem* problem,
   }
   }
 
-  snOutputFrictionContactProblem(problem, reaction, velocity, global_options, 
+  snOutputFrictionContactProblem(problem, reaction, velocity, options, 
                                  1, info);
 
   return info;
@@ -227,13 +232,18 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
 }
 
 #include <stdarg.h>
-void snPrint(int level, NumericsOptions* nopts, const char *fmt, ...)
+void snPrintf(int level, SolverOptions* opts, const char *fmt, ...)
 {
+  assert(opts);
+  assert(opts->numericsOptions);
+
+  NumericsOptions* nopts = opts->numericsOptions;
+
   if (nopts && nopts->verboseMode >= level)
   {
     va_list args;
     va_start(args,fmt);
-    printf("Siconos/Numerics:");
+    printf("Siconos/Numerics: ");
     vprintf(fmt,args);
     va_end(args);
   }
@@ -246,9 +256,14 @@ void snPrint(int level, NumericsOptions* nopts, const char *fmt, ...)
 
 void snOutputFrictionContactProblem(FrictionContactProblem* problem, 
                                     double* velocity, double* reaction, 
-                                    NumericsOptions *nopts, int after_solve, 
+                                    SolverOptions *opts, int after_solve, 
                                     int info)
 {
+
+  assert(opts);
+  assert(opts->numericsOptions);
+
+  NumericsOptions *nopts = opts->numericsOptions;
 
   int outputFile = -1;
 
@@ -268,7 +283,7 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
   {
     char fname[256];
     sprintf(fname, "%s%.5d.c", nopts->fileName, nopts->counter++);
-    snPrint(1, nopts, "dump of %s (not implemented!) \n", fname);
+    snPrintf(1, opts, "dump of %s (not implemented!) \n", fname);
 
 /*    FILE * file = fopen(fname, "w");*/
     
@@ -279,7 +294,7 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
   {
     char fname[256];
     sprintf(fname, "%s%.5d.dat", nopts->fileName, nopts->counter++);
-    snPrint(1, nopts, "dump of %s\n", fname);
+    snPrintf(1, opts, "dump of %s\n", fname);
 
     FILE * foutput  =  fopen(fname, "w");
     frictionContact_printInFile(problem, foutput);
@@ -291,7 +306,7 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
     char fname[256];
     
     sprintf(fname, "%s%.5d.hdf5", nopts->fileName, nopts->counter++);
-    snPrint(1, nopts, "dump of %s\n", fname);
+    snPrintf(1, opts, "dump of %s\n", fname);
 
     FILE * foutput  =  fopen(fname, "w");
 
@@ -305,7 +320,7 @@ void snOutputFrictionContactProblem(FrictionContactProblem* problem,
 
     fclose(foutput);
 #else
-    snPrint(0, nopts, "fclib is not available, you must configure Siconos/Numerics with cmake [...] -DWITH_FCLIB=1\n");
+    snPrintf(0, opts, "fclib is not available, you must configure Siconos/Numerics with cmake [...] -DWITH_FCLIB=1\n");
 #endif
   }
 }
