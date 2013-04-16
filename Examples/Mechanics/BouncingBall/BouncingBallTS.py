@@ -141,7 +141,6 @@ while(s.hasNextEvent()):
 
     k += 1
     s.nextStep()
-    print s.nextTime()
 
 #
 # comparison with the reference file
