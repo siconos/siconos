@@ -1706,6 +1706,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 %include "FrictionContactProblem.h"
 %include "FrictionContact3D_Solvers.h"
+%include "FrictionContact2D_Solvers.h"
 %include "Friction_cst.h"
 %include "FrictionContact3D_AlartCurnier.h"
 %include "FrictionContact3D_localAlartCurnier.h"
