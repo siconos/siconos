@@ -15,14 +15,11 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   ENDIF()
 ENDIF()
 
-FIND_PACKAGE(SWIG 2.0.7 REQUIRED)
-INCLUDE(${SWIG_USE_FILE})
-
 FIND_PACKAGE(PythonInterp)
 
 # on ubuntu precise with cmake >= 2.8.8 pythonlibs find python 3.0
 # before python 2.7 (in Release but not in Debug ...)
-#SET(Python_ADDITIONAL_VERSIONS "2.6;2.7")
+SET(Python_ADDITIONAL_VERSIONS "2.7;2.6")
 
 FIND_PACKAGE(PythonLibs)
 
@@ -40,6 +37,11 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 COMPILE_WITH(Python_Numpy REQUIRED)
+
+
+FIND_PACKAGE(SWIG 2.0.7 REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
+
 
 # Numerics + Kernel 
 COMPILE_WITH(SiconosNumerics REQUIRED)

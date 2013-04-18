@@ -30,11 +30,12 @@ IF(WITH_MECHANISMS)
     message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
     include_directories(${OpenCASCADE_INCLUDE_DIR})
   ENDIF()
-
+  add_subdirectory(mechanisms)
   SET(SiconosMechanics_DIRS ${SiconosMechanics_DIRS}
     mechanisms/CADMBTB
     mechanisms/MBTB
-    mechanisms/TIMERMBTB)
+    mechanisms/TIMERMBTB
+    mechanisms/frontEnd)
 
 ENDIF(WITH_MECHANISMS)
 
