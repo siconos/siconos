@@ -10,6 +10,10 @@
 # SiconosMechanics_LIBRARY_DIRECTORY before FIND_PACKAGE(SiconosMechanics)
 INCLUDE(FindPackageHandleStandardArgs)
 
+IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
+ENDIF()
+
 IF(SiconosMechanics_LIBRARY_DIRECTORY)
   MESSAGE(STATUS "Looking for Mechanics library in ${SiconosMechanics_LIBRARY_DIRECTORY}")
   FIND_LIBRARY(SiconosMechanics_LIBRARY SiconosMechanics PATHS "${SiconosMechanics_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
@@ -17,7 +21,7 @@ IF(SiconosMechanics_LIBRARY_DIRECTORY)
     MESSAGE(STATUS "Found : ${SiconosMechanics_LIBRARY}")
   ENDIF(SiconosMechanics_LIBRARY)
 ELSE(SiconosMechanics_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(SiconosMechanics_LIBRARY SiconosMechanics)
+  FIND_LIBRARY(SiconosMechanics_LIBRARY SiconosMechanics ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
 ENDIF(SiconosMechanics_LIBRARY_DIRECTORY)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SiconosMechanics
@@ -33,7 +37,7 @@ IF(SiconosMechanics_LIBRARY)
    FIND_PATH(SiconosMechanics_INCLUDE_DIRS SpaceFilter.hpp
     HINTS ${SiconosMechanics_LIBRARY_DIRS_DIR} ${SiconosMechanics_LIBRARY_DIRS_DIR_DIR} 
     ENV PATH
-    PATH_SUFFIXES Siconos/Mechanics)
+    PATH_SUFFIXES include/Siconos/Mechanics)
 
   IF(NOT SiconosMechanics_INCLUDE_DIRS)
     IF(SiconosMechanics_FIND_REQUIRED)

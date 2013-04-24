@@ -49,7 +49,7 @@ void Spheres::init()
 
   double t0 = 0;                   // initial computation time
 
-  double T = 0.02;
+  double T = std::numeric_limits<double>::infinity();
 
   double h = 0.01;                // time step
   double g = 9.81;
@@ -117,7 +117,7 @@ void Spheres::init()
 
 
       SP::LagrangianDS body;
-      body.reset(new SphereLDS(R, m, boost::shared_ptr<SiconosVector>(qTmp), boost::shared_ptr<SiconosVector>(vTmp)));
+      body.reset(new SphereLDS(R, m, std11::shared_ptr<SiconosVector>(qTmp), std11::shared_ptr<SiconosVector>(vTmp)));
 
       // -- Set external forces (weight) --
       SP::SiconosVector FExt;

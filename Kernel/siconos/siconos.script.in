@@ -301,6 +301,7 @@ if test ! "$make_args" = "clean"; then
             -DLINKER_DIRECTORIES=$linker_directories \
             -DLINKER_LIBRARIES=$linker_libraries \
             -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
+            -DCMAKE_INSTALL_PREFIX=$KERNEL_PREFIX \
             $extra_defs; then
             echo "$myname: $exe build configuration failed" >&2
             exit 1

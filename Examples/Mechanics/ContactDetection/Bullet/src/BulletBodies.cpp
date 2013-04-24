@@ -21,7 +21,7 @@ void BulletBodies::init()
 
   double t0 = 0;                   // initial computation time
 
-  double T = 9999999;
+  double T = std::numeric_limits<double>::infinity();;
 
   double h = 0.005;
 

@@ -63,7 +63,7 @@
 
 #include "SiconosBodies.hpp"
 
-class Disks : public SiconosBodies, public boost::enable_shared_from_this<Disks>
+class Disks : public SiconosBodies, public std11::enable_shared_from_this<Disks>
 {
   void init();
   void compute();

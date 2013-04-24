@@ -27,7 +27,7 @@
 // Siconos
 #include <SiconosKernel.hpp>
 
-#include <Siconos/IO/SiconosRestart.hpp>
+//#include <Siconos/IO/SiconosRestart.hpp>
 //#include <Siconos/IO/SiconosVTKOutput.hpp>
 #include "Spheres.hpp"
 
@@ -53,7 +53,7 @@ void Spheres::init()
 
   double t0 = 0;                   // initial computation time
 
-  double T = 0.02;
+  double T = std::numeric_limits<double>::infinity();
 
   double h = 0.005;                // time step
   double g = 9.81;
