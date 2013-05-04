@@ -39,7 +39,7 @@ The software is based on 3 main components :
 </ul>
 </li>
 <li>Siconos/Front-end (API Python) Mainly an auto-generated SWIG interface of the API C++ which a special support for data structure.</li>
-<ul>
+</ul>
 
 
 */
