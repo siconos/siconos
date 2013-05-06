@@ -122,7 +122,6 @@ Simulation::~Simulation()
   _allNSProblems->clear();
   _allOSI->clear();
   _osiMap.clear();
-  _interactionOsiMap.clear();
 
   _allNSProblems->clear();
   // -> see shared ressources for this
@@ -163,13 +162,6 @@ SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
   return it->second;
 }
 
-SP::OneStepIntegrator Simulation::integratorOfInteraction(SP::Interaction inter) const
-{
-  InteractionOSIConstIterator it = _interactionOsiMap.find(inter);
-  if (it == _interactionOsiMap.end())
-    RuntimeException::selfThrow("Simulation::integratorOfInteraction(inter), inter not found in the integrator set.");
-  return it->second;
-}
 
 void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
 {
@@ -186,15 +178,6 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
     // integrator
     RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
   _osiMap[ds] = osi;
-}
-
-void Simulation::addInteractionInOSIMap(SP::Interaction inter, SP::OneStepIntegrator  osi)
-{
-  if (_interactionOsiMap.find(inter) != _interactionOsiMap.end())
-    // in the map with another
-    // integrator
-    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
-  _interactionOsiMap[inter] = osi;
 }
 
 SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
@@ -958,12 +941,14 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
    * we assume that the osi(s) are consistent for one interaction
    */
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
-  SP::OneStepIntegrator Osi =  integratorOfDS(ds);
-  addInteractionInOSIMap(inter, Osi);
+  SP::OneStepIntegrator osi =  integratorOfDS(ds);
+  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
+    topology()->indexSet(0);
+  indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
 
   std11::shared_ptr<SetupLevels> setupLevels;
   setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
-  Osi->accept(*(setupLevels.get()));
+  osi->accept(*(setupLevels.get()));
 
   if (!init) // We are not computing the levels at the initialization
   {

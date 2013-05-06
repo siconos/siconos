@@ -108,9 +108,6 @@ protected:
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
   DSOSIMap _osiMap;
 
-  /** Map to link all Interactions and their OneStepIntegrator*/
-  InteractionOSIMap _interactionOsiMap;
-
   /** index sets vector (indexSets[0] is the set where y[0]=0,
       indexSets[1] where y[0] = 0 and y[1]=0 and so on */
   //std::vector<InteractionsGraph> indexSets;
@@ -360,11 +357,6 @@ public:
    */
   SP::OneStepIntegrator integratorOfDS(SP::DynamicalSystem) const ;
 
-  /** get the integrator of "inter"
-   * \param a pointer to Interaction ("inter")
-   */
-  SP::OneStepIntegrator integratorOfInteraction(SP::Interaction) const ;
-
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
    */
@@ -383,13 +375,6 @@ public:
    *  \param a pointer to a OneStepIntegrator.
    */
   void addInOSIMap(SP::DynamicalSystem, SP::OneStepIntegrator);
-
-  /** register a Interaction and its OSI into the osiMap.
-      \param a pointer to an Interaction.
-   *  \param a pointer to a OneStepIntegrator.
-   */
-  void addInteractionInOSIMap(SP::Interaction , SP::OneStepIntegrator);
-
 
   /** get a pointer to indexSets[i]
    *  \return a InteractionsSet

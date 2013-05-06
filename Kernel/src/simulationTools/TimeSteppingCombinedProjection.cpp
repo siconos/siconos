@@ -833,7 +833,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
           bool activate = true;
           if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
-            SP::OneStepIntegrator Osi = integratorOfInteraction(inter0);
+            SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
             activate = Osi->addInteractionInIndexSet(inter0, i);
           }
           if (activate)
@@ -898,7 +898,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
       bool activate = true;
       if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::OneStepIntegrator Osi = integratorOfInteraction(inter1);
+        SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
         activate = Osi->addInteractionInIndexSet(inter1, i);
       }
       if (activate)

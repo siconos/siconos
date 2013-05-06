@@ -148,6 +148,7 @@ struct InteractionProperties
   SP::SiconosMatrix block;    // diagonal block
   SP::DynamicalSystem source;
   SP::DynamicalSystem target;
+  SP::OneStepIntegrator osi;
   bool forControl;            // true if the relation is used to control the DS
 
   ACCEPT_SERIALIZATION(InteractionProperties);
@@ -258,16 +259,6 @@ typedef DSOSIMap::iterator DSOSIIterator;
 
 /** Const Iterator through a DSOSIMap. */
 typedef DSOSIMap::const_iterator DSOSIConstIterator;
-
-
-/** A map that links Interaction and their OneStepIntegrator. */
-typedef std::map<SP::Interaction, SP::OneStepIntegrator> InteractionOSIMap;
-
-/** Iterator through a InteractionOSIMap. */
-typedef InteractionOSIMap::iterator InteractionOSIIterator;
-
-/** Const Iterator through a DSOSIMap. */
-typedef InteractionOSIMap::const_iterator InteractionOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 
