@@ -63,9 +63,8 @@ input_headers = dict()
 
 input_headers['Kernel'] = ["SiconosKernel.hpp"]
 
-input_headers['Mechanics'] = ["Circle.hpp",
-                              "CircleCircleR.hpp", "CircularDS.hpp",
-                              "Disk.hpp", "DiskDiskR.hpp",
+input_headers['Mechanics'] = ["SpaceFilter.hpp", "ExternalBody.hpp",
+                              "Disk.hpp", "Circle.hpp", "DiskDiskR.hpp",
                               "DiskMovingPlanR.hpp",
                               "DiskPlanR.hpp", "SphereLDS.hpp",
                               "SphereLDSPlanR.hpp",
@@ -73,7 +72,8 @@ input_headers['Mechanics'] = ["Circle.hpp",
                               "SphereNEDSPlanR.hpp",
                               "SphereNEDSSphereNEDSR.hpp",
                               "SiconosBodies.hpp",
-                              "SpaceFilter.hpp", "ExternalBody.hpp"]
+                              "CircleCircleR.hpp", "CircularDS.hpp",
+                              ]
 
 
 config = parser.config_t(include_paths=include_paths)
@@ -87,7 +87,7 @@ def is_serializable(c):
 
 
 def unwanted(s):
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err', s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SimpleVector|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5', s)
     # note _err -> boost::circular_buffer issue with serialization
     return m != None
 

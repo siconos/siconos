@@ -81,11 +81,48 @@ SET(SiconosIO_LINK_LIBRARIES ${_LL})
 
 SET(SiconosIO_LINKER_LANGUAGE CXX)
 
+# header generation
+ADD_CUSTOM_COMMAND(
+  OUTPUT SiconosKernelGenerated.hpp
+  DEPENDS ${SiconosKernel_INCLUDE_DIRS}/SiconosKernel.hpp
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py --target=Kernel
+  -I${SiconosNumerics_INCLUDE_DIRS} -I${SiconosKernel_INCLUDE_DIRS}
+  -I${LIBXML2_INCLUDE_DIR})
+
+IF(SiconosMechanics_FOUND)
+  ADD_CUSTOM_COMMAND(
+    OUTPUT SiconosMechanicsGenerated.hpp
+    DEPENDS ${SiconosMechanics_INCLUDE_DIRS}/SpaceFilter.hpp
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py --target=Mechanics
+    -I${SiconosNumerics_INCLUDE_DIRS} -I${SiconosKernel_INCLUDE_DIRS} -I${SiconosMechanics_INCLUDE_DIRS}
+    -I${LIBXML2_INCLUDE_DIR})
+ENDIF()
+
+# set library target
 LIBRARY_PROJECT_SETUP()
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/test/result.ref test/result.ref COPYONLY)
+# add dependencies for header generation
+IF(SiconosMechanics_FOUND)
+  ADD_CUSTOM_TARGET(SerializersGeneration ALL
+    DEPENDS 
+    SiconosKernelGenerated.hpp 
+    SiconosMechanicsGenerated.hpp)
+ELSE()
+  ADD_CUSTOM_TARGET(SerializersGeneration ALL
+    DEPENDS SiconosKernelGenerated.hpp)
+ENDIF()
 
+IF(BUILD_SHARED_LIBS)
+  ADD_DEPENDENCIES(SiconosIO_shared SerializersGeneration)
+ENDIF()
+IF(BUILD_STATIC_LIBS)
+  ADD_DEPENDENCIES(SiconosIO_static SerializersGeneration)
+ENDIF()
+
+# tests
 IF(WITH_TESTING)
+
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/test/result.ref test/result.ref COPYONLY)
 
   ENABLE_TESTING()
 
@@ -99,6 +136,9 @@ IF(WITH_TESTING)
   SET(TEST_MAIN test/TestMain.cpp)
 
   BEGIN_TEST(test)
+
+  SET(TEST_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
   NEW_TEST(ioTests BasicTest.cpp KernelTest.cpp)
   END_TEST(test)
 
