@@ -381,12 +381,14 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 void LagrangianDS::initForces()
 {
   DEBUG_PRINT("LagrangianDS::initForces() is called\n");
-
   _forces.reset(new SiconosVector(_ndof));
-
   _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
   _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
 }
+
+
+
+
 
 void LagrangianDS::initRhs(double time)
 {

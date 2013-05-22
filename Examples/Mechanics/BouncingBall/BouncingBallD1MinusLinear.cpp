@@ -129,19 +129,23 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(Nplot + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector p2 = ball->p(2);
+    SP::SiconosVector lambda2 = inter->lambda(2);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 5) = (*p2)(0);
+    dataPlot(0, 6) = (*lambda2)(0);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -164,7 +168,9 @@ int main(int argc, char* argv[])
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*v)(0);
         dataPlot(k, 3) = (*p)(0);
-        dataPlot(k, 4) = (*lambda)(0);
+        dataPlot(k, 4) = (*lambda)(0);  
+        dataPlot(k, 5) = (*p2)(0);
+        dataPlot(k, 6) = (*lambda2)(0);
         k++;
       }
 
