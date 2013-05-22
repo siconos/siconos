@@ -70,7 +70,7 @@ void D1MinusLinear::initialize()
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
     d->computeMass();
   }
-}
+ }
 
 double D1MinusLinear::computeResidu()
 {
@@ -94,7 +94,7 @@ double D1MinusLinear::computeResidu()
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
 
-  DEBUG_PRINT("\nLEFT SIDE\n");
+  DEBUG_PRINT("\nEVALUATE LEFT HAND SIDE\n");
   /** Step 1-  solve a LCP at acceleration level for lambda^+_{k} for the last set indices
    * if index2 is empty we skip this step   
    *    
@@ -185,9 +185,7 @@ double D1MinusLinear::computeResidu()
    **/
     
     
-    
-  // -- LEFT SIDE --
-  // calculate acceleration without contact force
+  DEBUG_PRINT("\n PREDICT RIGHT HAND SIDE\n");
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // type of the current DS
@@ -252,10 +250,8 @@ double D1MinusLinear::computeResidu()
     DEBUG_PRINT("workFreeFree contains right limit acceleration at t^+_k without contact force :\n");
     DEBUG_EXPR(workFreeFree->display());
      
- }
+  }
 
-  DEBUG_PRINT("\nADVANCE TO RIGHT SIDE\n");
-  // ADVANCE TO RIGHT
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     // type of the current DS
@@ -304,46 +300,43 @@ double D1MinusLinear::computeResidu()
      * \end{cases}
      * \f]
      **/
-
-
-    DEBUG_EXPR(q->display());
   }
-
-  DEBUG_PRINT("\nRIGHT SIDE\n");
+  
+  DEBUG_PRINT("\n DECIDE STRATEGY\n");
   /** Decide of the strategy impact or smooth multiplier */
   _isThereImpactInTheTimeStep = false;
   if (!allOSNS->empty())
-  {
-    // Maurice Bremond: indices must be recomputed
-    // as we deal with dynamic graphs, vertices and edges are stored
-    // in lists for fast add/remove during updateIndexSet(i)
-    // we need indices of list elements to build the OSNS Matrix so we
-    // need an update if graph has changed
-    // this should be done in updateIndexSet(i) for all integrators only
-    // if a graph has changed
+  {     
+
+    for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
+    {
+      simulationLink->updateOutput(level);
+    }
     simulationLink->updateIndexSets();
+    
     SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
     SP::InteractionsGraph indexSet0 = topo->indexSet(0);
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
     SP::InteractionsGraph indexSet2 = topo->indexSet(2);
      
-    if (indexSet1->size() > 1)
+    if (indexSet1->size() > 0)
     {
       _isThereImpactInTheTimeStep = true;
-      DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 1. _isThereImpactInTheTimeStep = true;");
+      DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 0. _isThereImpactInTheTimeStep = true;\n");
     }
     else
     {
       _isThereImpactInTheTimeStep = false;
-      DEBUG_PRINT("There is no  impact in the step. indexSet1->size() = 0. _isThereImpactInTheTimeStep = false;");
+      DEBUG_PRINT("There is no  impact in the step. indexSet1->size() = 0. _isThereImpactInTheTimeStep = false;\n");
     }
   }
+  
 
   // We recompute the residu if _isThereImpactInTheTimeStep = true;
   if (_isThereImpactInTheTimeStep)
   {
     
-    DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 1.  _isThereImpactInTheTimeStep = true");
+    DEBUG_PRINT("There is an impact in the step. indexSet1->size() > 0.  _isThereImpactInTheTimeStep = true\n");
 
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
@@ -384,12 +377,13 @@ double D1MinusLinear::computeResidu()
       
       M->PLUForwardBackwardInPlace(*workFreeFree); // contains right (left limit) acceleration without contact force
       *residuFree -= 0.5 * h**workFreeFree;
+      DEBUG_EXPR(residuFree->display());
     }
     
   }
   else
   {
-    
+    DEBUG_PRINT("There is no  impact in the step. indexSet1->size() = 0. _isThereImpactInTheTimeStep = false;\n");
     // -- RIGHT SIDE --
     // calculate acceleration without contact force
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -431,11 +425,11 @@ double D1MinusLinear::computeResidu()
     // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
     if (!allOSNS->empty() && !_isThereImpactInTheTimeStep)
     {
-      for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
-      {
-        simulationLink->updateOutput(level);
-      }
-      simulationLink->updateIndexSets();
+      // for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
+      // {
+      //   simulationLink->updateOutput(level);
+      // }
+      // simulationLink->updateIndexSets();
       for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
       {
         (*it)->computeJach(t);
@@ -668,8 +662,7 @@ void D1MinusLinear::updateState(const unsigned int level)
       M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
       *v += *dummy; // add free velocity
       DEBUG_PRINT("\nRIGHT IMPULSE\n");
-      DEBUG_PRINTF("%f\n", (*(d->p(1)))(0));
-      //DEBUG_EXPR(throw(1));
+      DEBUG_EXPR(d->p(1)->display());
     }
     DEBUG_EXPR(d->q()->display());
     DEBUG_EXPR(d->velocity()->display());
@@ -682,6 +675,7 @@ void D1MinusLinear::updateState(const unsigned int level)
 
 bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
+  DEBUG_PRINT("D1MinusLinear::addInteractionInIndexSet.\n");
   assert((i == 1) || (i==2));
   // double h = simulationLink->timeStep();
   
@@ -727,6 +721,7 @@ bool D1MinusLinear::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   }
   
   DEBUG_PRINTF("D1MinusLinear::addInteractionInIndexSet of level = %i yOld=%e, y=%e \n", i,  yOld, y);
+  
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else

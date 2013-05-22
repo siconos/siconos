@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 7;
-    SimpleMatrix dataPlot(Nplot + 1, outputSize);
+    SimpleMatrix dataPlot(N + 10, outputSize);
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
@@ -160,10 +160,12 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       s->advanceToEvent();
-
+      ball->display();
       // --- Get values to be plotted ---
-      if (fmod(s->nextTime(), hplot) < h)
+      //  if (fmod(s->nextTime(), hplot) < h)
       {
+ 
+        //std::cout << "k=" << k <<std::endl;
         dataPlot(k, 0) =  s->nextTime();
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*v)(0);

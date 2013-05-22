@@ -95,10 +95,10 @@ public:
   /** step from current event to next event of EventsManager */
   virtual void advanceToEvent();
 
-  /** compute r thanks to lambda[level] for all Interactions
-   *  \param unsigned int: lambda level
-   */
-  virtual void updateInput(unsigned int);
+  // /** compute r thanks to lambda[level] for all Interactions
+  //  *  \param unsigned int: lambda level
+  //  */
+  // virtual void updateInput(unsigned int);
 
   /** compute residu */
   void computeResidu();

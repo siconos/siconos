@@ -156,7 +156,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
   InteractionsGraph::VIterator uipend, uip;
 
-  for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL
+  for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
 
@@ -185,7 +185,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         indexSet1->remove_vertex(inter);
         topo->setHasChanged(true);
         impactOccuredLastTimeStep = true;
-        inter->lambda(1)->zero(); // impuls is zero
+        inter->lambda(1)->zero(); // impulse is zero
       }
     }
     else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
@@ -320,38 +320,42 @@ void TimeSteppingD1Minus::advanceToEvent()
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
 
-void TimeSteppingD1Minus::updateInput(unsigned int level)
-{
-  //  assert(level>=0);
+// void TimeSteppingD1Minus::updateInput(unsigned int level)
+// {
+//   //  assert(level>=0);
 
-  double time = model()->currentTime();
-  SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
-  InteractionsIterator it;
+//   double time = model()->currentTime();
+//   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
+//   InteractionsIterator it;
 
-  // set dynamical systems non-smooth part to zero.
-  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
-  {
-    for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS != (*itOSI)->dynamicalSystems()->end(); ++itDS)
-    {
-      Type::Siconos dsType = Type::value(**itDS);
-      if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-        RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
-      else
-      {
-        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
-        if (d->p(level)) d->p(level)->zero();
-      }
-    }
-  }
+//   // // set dynamical systems non-smooth part to zero.
+//   // for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
+//   // {
+//   //   for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS != (*itOSI)->dynamicalSystems()->end(); ++itDS)
+//   //   {
+//   //     Type::Siconos dsType = Type::value(**itDS);
+//   //     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+//   //       RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
+//   //     else
+//   //     {
+//   //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+//   //       if (d->p(level)) d->p(level)->zero();
+//   //     }
+//   //   }
+//   // }
+  
+//   // Set dynamical systems non-smooth part to zero.
+//   reset(level);
 
-  // we compute input using lambda(level).
-  for (it = topology->interactions()->begin(); it != topology->interactions()->end(); it++)
-  {
-    assert((*it)->lowerLevelForInput() <= level);
-    assert((*it)->upperLevelForInput() >= level);
-    (*it)->computeInput(time, level);
-  }
-}
+
+//   // we compute input using lambda(level).
+//   for (it = topology->interactions()->begin(); it != topology->interactions()->end(); it++)
+//   {
+//     assert((*it)->lowerLevelForInput() <= level);
+//     assert((*it)->upperLevelForInput() >= level);
+//     (*it)->computeInput(time, level);
+//   }
+// }
 
 void TimeSteppingD1Minus::computeResidu()
 {
