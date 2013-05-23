@@ -412,7 +412,7 @@ void Interaction::initDataLagrangian()
     lds = std11::static_pointer_cast<LagrangianDS> (*it);
 
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[FirstOrderR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
+    _workspace[LagrangianR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[LagrangianR::q0]->insertPtr(lds->q());
 
     DEBUG_PRINTF("_workspace[LagrangianR::q0]->insertPtr(lds->q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
@@ -458,7 +458,7 @@ void Interaction::initDataNewtonEuler()
     // convert vDS systems into NewtonEulerDS and put them in vLDS
     lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    _workspace[FirstOrderR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
+    _workspace[NewtonEulerR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
     _workspace[NewtonEulerR::velo]->insertPtr(lds->velocity());
     _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());

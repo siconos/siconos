@@ -148,6 +148,7 @@ double D1MinusLinear::computeResidu()
          * Jacobians of constraints, Mass, and q vector with the old free velocity, sets of indices ?
          */
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
+        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display();
         simulationLink->updateInput(2);
       }
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -203,7 +204,6 @@ double D1MinusLinear::computeResidu()
     SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
     SP::SiconosMatrix Mold = d->mass();
 
-    std::cout << "workFree" << workFree<< std::endl;
     DEBUG_EXPR(workFree->display());
     DEBUG_EXPR(qold->display());
     DEBUG_EXPR(vold->display());
@@ -214,10 +214,8 @@ double D1MinusLinear::computeResidu()
       d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
     }
     SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
-    std::cout << "workFreeFree" << workFreeFree<< std::endl;
     DEBUG_EXPR(workFreeFree->display());
   
-   
     // Lagrangian Nonlinear Systems
     if ((dsType == Type::LagrangianDS) or dsType == Type::LagrangianLinearTIDS)
     {
@@ -423,7 +421,7 @@ double D1MinusLinear::computeResidu()
     }
 
     // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
-    if (!allOSNS->empty() && !_isThereImpactInTheTimeStep)
+    if (!allOSNS->empty())
     {
       // for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
       // {
@@ -446,7 +444,8 @@ double D1MinusLinear::computeResidu()
       
       if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
       {
-        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
+        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);  
+        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display();
         simulationLink->updateInput(2);
       }
     }
@@ -468,11 +467,13 @@ double D1MinusLinear::computeResidu()
         
         // get right state from memory
         SP::SiconosMatrix M = d->mass();
-        DEBUG_EXPR(M->display());
+        DEBUG_EXPR(M->display());   
+        DEBUG_EXPR(d->p(2)->display());
         SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
+        
         M->PLUForwardBackwardInPlace(*dummy);
         *residuFree -= 0.5 * h**dummy;
-        DEBUG_EXPR(d->p(2)->display());
+  
       }
 
       /**
@@ -535,6 +536,10 @@ void D1MinusLinear::computeFreeState()
 
 void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp)
 {
+
+  DEBUG_PRINT("D1MinusLinear::computeFreeOutput starts\n");
+
+
   SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
 
   // get relation and non smooth law information
@@ -576,7 +581,8 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     // {
     //   Xfree = inter->data(NewtonEulerR::free);
     // }
-
+    DEBUG_PRINT("Xfree = inter->data(LagrangianR::free);\n");
+    DEBUG_EXPR(Xfree->display());
     assert(Xfree);
   }
   else
@@ -627,7 +633,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
       else
         RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput is only implemented  at velocity level for LagrangianRheonomousR.");
     }
-    if (relationSubType == ScleronomousR) // acceleration term involving Hesse matrix of Relation with respect to degree is added
+    if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
     {
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
@@ -642,7 +648,9 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     }
   }
   else
-    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType); 
+  DEBUG_PRINT("D1MinusLinear::computeFreeOutput ends\n");
+
 }
 
 void D1MinusLinear::updateState(const unsigned int level)

@@ -72,22 +72,8 @@ void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
   RELATION::TYPES pbType = inter->relation()->getType();
   if (pbType == Lagrangian)
   {
-    // DEBUG_EXPR(
-    //   std::cout
-    //   <<"inter->data(LagrangianR::x) with LagrangianR::x = "
-    //   << LagrangianR::x << " : "
-    //   <<inter->data(LagrangianR::x) << std::endl;
-    //   );
-
-
-    // if (inter->data(LagrangianR::x))
-    // {
-    //   DEBUG_PRINT("(inter->data(LagrangianR::x)).reset(new BlockVector());");
-    //   (inter->data(LagrangianR::x)).reset(new BlockVector());
-    // }
-
     assert(inter->data(LagrangianR::x));
-
+    
     ConstDSIterator itDS;
     for (itDS = inter->dynamicalSystemsBegin();
          itDS != inter->dynamicalSystemsEnd();
@@ -193,8 +179,13 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
 
       double y = (*(inter->y(0)))(0); // current position
-
+      double yOld = (*(inter->yOld(0)))(0); // old position
+      double yDot = (*(inter->y(1)))(0); // current position
+  
+     
       DEBUG_PRINTF("y= %f\n", y);
+      DEBUG_PRINTF("yOld= %f\n", yOld);
+      DEBUG_PRINTF("yDot= %f\n", yDot);
 
       if (indexSet2->is_vertex(inter))
       {
@@ -208,7 +199,8 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       }
       else
       {
-        if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
+        //     if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
+        if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS ))
         {
           // if Interaction has is active but has not become active recently
           indexSet2->copy_vertex(inter, *indexSet0);

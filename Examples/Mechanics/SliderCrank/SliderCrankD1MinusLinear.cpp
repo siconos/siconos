@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0.0;         // initial computation time
     double T = 0.2;       // final computation time
+    T=0.00375;
     double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
@@ -152,7 +153,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 27;
+    unsigned int outputSize = 31;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
@@ -193,6 +194,10 @@ int main(int argc, char* argv[])
     dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
     dataPlot(k, 25) = 0;
     dataPlot(k, 26) = 0;
+    dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1
+    dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1
+    dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda3
+    dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda4
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -247,7 +252,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
       dataPlot(k, 25) = 0;
       dataPlot(k, 26) = 0;
-
+      dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1
+      dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1
+      dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda3
+      dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda4
 
       // std::cout <<" q->display()" <<  std::endl;
       // q->display();
