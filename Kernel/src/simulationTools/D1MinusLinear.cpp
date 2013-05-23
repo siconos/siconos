@@ -23,8 +23,8 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "NewtonImpactNSL.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -103,26 +103,90 @@ double D1MinusLinear::computeResidu()
   DEBUG_EXPR(std::cout<< "allOSNS->empty()   " << std::boolalpha << allOSNS->empty() << std::endl << std::endl);
   DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
   
+// -- LEFT SIDE --
+  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  {
+    // type of the current DS
+    Type::Siconos dsType = Type::value(**it);
+    if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
+    {
+      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+    }
+
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+    SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
+    
+    workFree->zero();
+    
+    // get left state from memory
+    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+    SP::SiconosMatrix Mold = d->mass();
+
+    DEBUG_EXPR(workFree->display());
+    DEBUG_EXPR(qold->display());
+    DEBUG_EXPR(vold->display());
+    DEBUG_EXPR(Mold->display());
+   
+    if (! d->workspace(DynamicalSystem::free_tdg) )
+    {
+      d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+    }
+    SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
+    workFreeFree->zero();
+    DEBUG_EXPR(workFreeFree->display());
+  
+    // Lagrangian Nonlinear Systems
+    if ((dsType == Type::LagrangianDS) or dsType == Type::LagrangianLinearTIDS)
+    {
+      if (d->forces())
+      {
+        d->computeForces(told, qold, vold);
+        DEBUG_EXPR(d->forces()->display());
+        
+        *workFree += *(d->forces());
+      }
+    }
+    else
+    {
+      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+    }
+    
+    Mold->PLUForwardBackwardInPlace(*workFree); // contains left (right limit) acceleration without contact force   
+    d->addWorkVector(workFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
+
+    DEBUG_PRINT("workFree contains right limit acceleration at  t^+_k with contact force :\n");
+    DEBUG_EXPR(workFree->display());
+    DEBUG_PRINT("workFreeFree contains right limit acceleration at t^+_k without contact force :\n");
+    DEBUG_EXPR(workFreeFree->display());
+     
+  }
+
+
+
+
+
   
   if (!allOSNS->empty())
   {
     if (indexSet2->size() >0)
     {
-      for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-       { 
-         Type::Siconos dsType = Type::value(**it);
-         if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
-         {
-           RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-         }
+      // for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+      //  { 
+      //    Type::Siconos dsType = Type::value(**it);
+      //    if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
+      //    {
+      //      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      //    }
         
-         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
-         // get left state from memory
-         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-         SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
-         d->computeMass();
-         d->computeForces(told, qold, vold);
-       }
+      //    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+      //    // get left state from memory
+      //    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      //    SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      //    d->computeMass();
+      //    M->resetLU();
+      //    d->computeForces(told, qold, vold);
+      //  }
 
       for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
       {
@@ -148,37 +212,42 @@ double D1MinusLinear::computeResidu()
          * Jacobians of constraints, Mass, and q vector with the old free velocity, sets of indices ?
          */
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
-        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display();
         simulationLink->updateInput(2);
       }
+      
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       { 
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
         SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
-        workFree->zero();
-        *workFree  += *(d->p(2));
+        
+        SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
+        SP::SiconosMatrix Mold = d->mass();
+        Mold->PLUForwardBackwardInPlace(*dummy);
+        *workFree  += *(dummy);
+        
         DEBUG_EXPR(d->p(2)->display());
+        
       }
     }
-    else
-    {
-      for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-       { 
-         Type::Siconos dsType = Type::value(**it);
-         if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
-         {
-           RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-         }
+    // else
+    // {
+    //   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+    //    { 
+    //      Type::Siconos dsType = Type::value(**it);
+    //      if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
+    //      {
+    //        RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+    //      }
          
-         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
-         SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
-         workFree->zero();
-         if (d->p(2))
-         {
-           d->p(2)->zero();  
-         }
-       }
-    }
+    //      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+    //      SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
+    //      workFree->zero();
+    //      if (d->p(2))
+    //      {
+    //        d->p(2)->zero();  
+    //      }
+    //    }
+    // }
   }
   
   /** Step 2 -  compute v_{k,1}
@@ -187,68 +256,11 @@ double D1MinusLinear::computeResidu()
     
     
   DEBUG_PRINT("\n PREDICT RIGHT HAND SIDE\n");
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    // type of the current DS
-    Type::Siconos dsType = Type::value(**it);
-    if ((dsType != Type::LagrangianDS) and (dsType != Type::LagrangianLinearTIDS ))
-    {
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-    }
 
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
-    SP::SiconosVector workFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
 
-    // get left state from memory
-    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-    SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
-    SP::SiconosMatrix Mold = d->mass();
 
-    DEBUG_EXPR(workFree->display());
-    DEBUG_EXPR(qold->display());
-    DEBUG_EXPR(vold->display());
-    DEBUG_EXPR(Mold->display());
-   
-    if (! d->workspace(DynamicalSystem::free_tdg) )
-    {
-      d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
-    }
-    SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
-    DEBUG_EXPR(workFreeFree->display());
   
-    // Lagrangian Nonlinear Systems
-    if ((dsType == Type::LagrangianDS) or dsType == Type::LagrangianLinearTIDS)
-    {
-      if (d->forces())
-      {
-        d->computeForces(told, qold, vold);
-        DEBUG_EXPR(d->forces()->display());
-        
-        d->addWorkVector(d->forces(),DynamicalSystem::free_tdg);
-        DEBUG_EXPR( d->workspace(DynamicalSystem::free_tdg)->display());
-  
-        *workFree += *(d->forces());
-      }
-      else
-      {
-        SP::SiconosVector tmp(new SiconosVector(d->getDim(),0.0));
-        d->addWorkVector(tmp,DynamicalSystem::free_tdg);
-      }
-    }
-    else
-    {
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-    }
-    
-    Mold->PLUForwardBackwardInPlace(*workFree); // contains left (right limit) acceleration with contact force
-    Mold->PLUForwardBackwardInPlace(*workFreeFree); // contains left (right limit) acceleration without contact force
-    
-    DEBUG_PRINT("workFree contains right limit acceleration at  t^+_k with contact force :\n");
-    DEBUG_EXPR(workFree->display());
-    DEBUG_PRINT("workFreeFree contains right limit acceleration at t^+_k without contact force :\n");
-    DEBUG_EXPR(workFreeFree->display());
-     
-  }
+
 
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -291,8 +303,9 @@ double D1MinusLinear::computeResidu()
      * v_{k,0} = \mbox{\tt vold} \\
      * q_{k,0} = qold \\
      * F_{k,+} = F(told,qol,vold) \\
-     * R_{freefree} = -h/2 * M^{-1}_k (F^+_{k})  \mbox{stored in workFreeFree} \ \
-     * R_{free} = -h/2 * M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in workFree} \\
+     * Work_{freefree} =  M^{-1}_k (F^+_{k})  \mbox{stored in workFreeFree} \\
+     * Work_{free} =  M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in workFree} \\
+     * R_{free} = -h/2 * M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in ResiduFree} \\
      * v_{k,1} = v_{k,0} + h * M^{-1}_k (P^+_{2,k}+F^+_{k})  \mbox{stored in v} \\
      * q_{k,1} = q_{k,0} + \frac{h}{2} (v_{k,0} + v_{k,1}) \mbox{stored in q} \\
      * \end{cases}
@@ -349,13 +362,11 @@ double D1MinusLinear::computeResidu()
 
       SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
 
-
-
-      residuFree->zero();
+      //residuFree->zero();
       v->zero();
       SP::SiconosVector workFreeFree = d->workspace(DynamicalSystem::free_tdg);
       assert(workFreeFree);
-      *residuFree -= 0.5 * h**workFreeFree;
+      *residuFree = 0.5 * h**workFreeFree;
       workFreeFree->zero();
       // Lagrangian Nonlinear Systems
       if (dsType == Type::LagrangianDS or dsType == Type::LagrangianLinearTIDS)
@@ -445,7 +456,6 @@ double D1MinusLinear::computeResidu()
       if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);  
-        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display();
         simulationLink->updateInput(2);
       }
     }
@@ -635,11 +645,18 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
     }
     if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
     {
+      
+      DEBUG_PRINT("D1MinusLinear::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
+      DEBUG_EXPR(Yp->display(););
+
       if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
         std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
         subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
       }
+      DEBUG_EXPR(Yp->display(););
+
+
     }
     if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
     {

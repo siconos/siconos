@@ -25,8 +25,8 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -187,9 +187,13 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       DEBUG_PRINTF("yOld= %f\n", yOld);
       DEBUG_PRINTF("yDot= %f\n", yDot);
 
+
+      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS ) <<std::endl;);
+      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS ) <<std::endl;);
+
       if (indexSet2->is_vertex(inter))
       {
-        if (y > DEFAULT_TOL_D1MINUS)
+        if ((y > DEFAULT_TOL_D1MINUS ) || (yDot > DEFAULT_TOL_D1MINUS ))
         {
           // if Interaction has been active in the previous calculation and now becomes in-active
           indexSet2->remove_vertex(inter);

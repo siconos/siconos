@@ -24,8 +24,8 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
 #include "debug.h"
 
 
@@ -187,11 +187,15 @@ void LagrangianScleronomousR::computeJachqDot(const double time, Interaction& in
 
 void  LagrangianScleronomousR::computeNonLinearH2dot(const double time, Interaction& inter)
 {
+  DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
   LagrangianScleronomousR::computeJachqDot(time, inter);
   _NLh2dot.reset(new SiconosVector(_jachqDot->size(0)));
   SiconosVector workQdot = *inter.data(q1);
+  DEBUG_EXPR(workQdot.display(););
+  DEBUG_EXPR(_jachqDot->display(););
   prod(*_jachqDot, workQdot, *_NLh2dot);
+  DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot ends");
 }
 
 void LagrangianScleronomousR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)

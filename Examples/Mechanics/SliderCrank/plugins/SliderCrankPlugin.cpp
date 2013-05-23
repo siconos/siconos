@@ -182,6 +182,31 @@ extern "C" void W1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
     RuntimeException::selfThrow("W1 - not implemented!");
 }
 
+extern "C" void W1dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+{
+  int sizeOfY = 1;
+  // Jacobian of g1 (columnwise)
+  if (sizeOfY == 1)
+  {
+    S2[0] = l1 * sin(q[0]) * qdot[0];
+    S2[1] = l2 * sin(q[1]) * qdot[1];
+    S2[2] = (- a * sin(q[2]) + b * cos(q[2]))*qdot[2];
+  }
+//   // else if (sizeOfY == 2)
+//   // {
+//   //   W[0] = -l1 * cos(q[0]);
+//   //   W[1] = -l1 * sin(q[0]);
+
+//   //   W[2] = -l2 * cos(q[1]);
+//   //   W[3] = -l2 * sin(q[1]);
+
+//   //   W[4] = a * cos(q[2]) + b * sin(q[2]);
+//   //   W[5] = a * sin(q[2]) - b * cos(q[2]);
+//   }
+//   else
+//     RuntimeException::selfThrow("W1 - not implemented!");
+}
+
 extern "C" void g2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d - (l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) + b * cos(q[2])); // normal
@@ -211,6 +236,30 @@ extern "C" void W2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   }
   else
     RuntimeException::selfThrow("W2 - not implemented!");
+}
+extern "C" void W2dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+{
+  int sizeOfY = 1;
+  // Jacobian of g1 (columnwise)
+  if (sizeOfY == 1)
+  {
+    S2[0] = l1 * sin(q[0]) * qdot[0];
+    S2[1] = l2 * sin(q[1]) * qdot[1];
+    S2[2] = (- a * sin(q[2]) + b * cos(q[2]))*qdot[2];
+  }
+//   // else if (sizeOfY == 2)
+//   // {
+//   //   W[0] = -l1 * cos(q[0]);
+//   //   W[1] = -l1 * sin(q[0]);
+
+//   //   W[2] = -l2 * cos(q[1]);
+//   //   W[3] = -l2 * sin(q[1]);
+
+//   //   W[4] = a * cos(q[2]) + b * sin(q[2]);
+//   //   W[5] = a * sin(q[2]) - b * cos(q[2]);
+//   }
+//   else
+//     RuntimeException::selfThrow("W1 - not implemented!");
 }
 
 extern "C" void g3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
@@ -243,7 +292,30 @@ extern "C" void W3(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   else
     RuntimeException::selfThrow("W3 - not implemented!");
 }
+extern "C" void W3dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+{
+  int sizeOfY = 1;
+  // Jacobian of g1 (columnwise)
+  if (sizeOfY == 1)
+  {
+    S2[0] = - l1 * sin(q[0]) * qdot[0];
+    S2[1] = - l2 * sin(q[1]) * qdot[1];
+    S2[2] = ( a * sin(q[2]) + b * cos(q[2]))*qdot[2];
+  }
+//   // else if (sizeOfY == 2)
+//   // {
+//   //   W[0] = -l1 * cos(q[0]);
+//   //   W[1] = -l1 * sin(q[0]);
 
+//   //   W[2] = -l2 * cos(q[1]);
+//   //   W[3] = -l2 * sin(q[1]);
+
+//   //   W[4] = a * cos(q[2]) + b * sin(q[2]);
+//   //   W[5] = a * sin(q[2]) - b * cos(q[2]);
+//   }
+//   else
+//     RuntimeException::selfThrow("W1 - not implemented!");
+}
 extern "C" void g4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* g, unsigned int sizeZ, double* z)
 {
   g[0] = 0.5 * d + l1 * sin(q[0]) + l2 * sin(q[1]) + a * sin(q[2]) - b * cos(q[2]); // normal
@@ -273,4 +345,28 @@ extern "C" void W4(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   }
   else
     RuntimeException::selfThrow("W4 - not implemented!");
+}
+extern "C" void W4dot(unsigned int sizeOfq, const double* q, unsigned int sizeOfqdot, const double* qdot, double* S2, unsigned int sizeOfZ, double* z)
+{
+  int sizeOfY = 1;
+  // Jacobian of g1 (columnwise)
+  if (sizeOfY == 1)
+  {
+    S2[0] = - l1 * sin(q[0]) * qdot[0];
+    S2[1] = - l2 * sin(q[1]) * qdot[1];
+    S2[2] = ( a * sin(q[2]) + b * cos(q[2]))*qdot[2];
+  }
+//   // else if (sizeOfY == 2)
+//   // {
+//   //   W[0] = -l1 * cos(q[0]);
+//   //   W[1] = -l1 * sin(q[0]);
+
+//   //   W[2] = -l2 * cos(q[1]);
+//   //   W[3] = -l2 * sin(q[1]);
+
+//   //   W[4] = a * cos(q[2]) + b * sin(q[2]);
+//   //   W[5] = a * sin(q[2]) - b * cos(q[2]);
+//   }
+//   else
+//     RuntimeException::selfThrow("W1 - not implemented!");
 }

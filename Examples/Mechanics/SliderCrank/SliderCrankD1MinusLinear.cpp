@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3; // degrees of freedom for robot arm
     double t0 = 0.0;         // initial computation time
     double T = 0.2;       // final computation time
-    T=0.00375;
+    //T=0.00375;
     double h = 1e-5;       // time step : do not decrease, because of strong penetrations
 
     // geometrical characteristics
@@ -99,22 +99,22 @@ int main(int argc, char* argv[])
     // -------------------
     // -- corner 1 --
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
-    SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
+    SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1", "SliderCrankPlugin:W1dot"));
     SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
 
     // -- corner 2 --
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
-    SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
+    SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2", "SliderCrankPlugin:W2dot"));
     SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
 
     // -- corner 3 --
     SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(e3));
-    SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
+    SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3", "SliderCrankPlugin:W3dot"));
     SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
 
     // -- corner 4 --
     SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(e4));
-    SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
+    SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4", "SliderCrankPlugin:W4dot"));
     SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
 
     // -------------
@@ -214,12 +214,12 @@ int main(int argc, char* argv[])
     while ((s->hasNextEvent()))
     {
 
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
-      std::cout <<"Iteration k = " << k <<std::endl;
-      std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
-      std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
+      // std::cout <<"Iteration k = " << k <<std::endl;
+      // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
+      // std::cout <<"=====================================================" <<std::endl;
 
 
       s->advanceToEvent();
