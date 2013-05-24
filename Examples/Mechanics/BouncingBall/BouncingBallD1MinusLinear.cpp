@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       s->advanceToEvent();
-      ball->display();
+      // ball->display();
       // --- Get values to be plotted ---
       //  if (fmod(s->nextTime(), hplot) < h)
       {
@@ -187,15 +187,15 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result_tdg.dat", "ascii", dataPlot, "noDim");
-    //SimpleMatrix dataPlotRef(dataPlot);
-    //dataPlotRef.zero();
-    //ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("result_tdg.ref", "ascii", dataPlotRef);
 
-    //if((dataPlot-dataPlotRef).normInf() > 1e-8)
-    //{
-    //  std::cout << "Warning. The results are rather different from the reference file." << std::endl;
-    //  return 1;
-    //}
+    if((dataPlot-dataPlotRef).normInf() > 1e-8)
+    {
+      std::cout << "Warning. The results are rather different from the reference file." << std::endl;
+      return 1;
+    }
   }
 
   catch (SiconosException e)
