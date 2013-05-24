@@ -153,11 +153,14 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 31;
+    unsigned int outputSize = 35;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
+    
+    SP::SiconosVector lambda1old = (inter1->lambdaMemory(1))->getSiconosVector(0);
+    (*lambda1old)(0);
 
     int k =0;
     dataPlot(k, 0) = sliderWithClearance->t0();
@@ -189,15 +192,32 @@ int main(int argc, char* argv[])
     dataPlot(k, 19) = (*inter3->y(1))(0) ; // dot g3
     dataPlot(k, 20) = (*inter4->y(1))(0) ; // dot g4
     dataPlot(k, 21) = (*inter1->lambda(1))(0) ; // lambda1
-    dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda1
+    dataPlot(k, 22) = (*inter2->lambda(1))(0) ; // lambda2
     dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
     dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
     dataPlot(k, 25) = 0;
     dataPlot(k, 26) = 0;
-    dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1
-    dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1
-    dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda3
-    dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda4
+    dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1_{k+1}^-
+    dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1_{k+1}^-
+    dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
+    dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
+    
+    
+    
+    dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1_k^+
+    dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda2_k^+
+    dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda3_k^+
+    dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
+    
+    
+    dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
+    dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
+    dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
+    dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1old
+
+
+
+
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -252,10 +272,22 @@ int main(int argc, char* argv[])
       dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
       dataPlot(k, 25) = 0;
       dataPlot(k, 26) = 0;
-      dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1
-      dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1
-      dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda3
-      dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda4
+      dataPlot(k, 27) = (*inter1->lambda(2))(0) ; // lambda1_{k+1}^-
+      dataPlot(k, 28) = (*inter2->lambda(2))(0) ; // lambda1_{k+1}^-
+      dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
+      dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
+
+
+    
+      dataPlot(k, 31) = ( *((inter1->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda1_k^+
+      dataPlot(k, 32) = ( *((inter2->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda2_k^+
+      dataPlot(k, 33) = ( *((inter3->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda3_k^+
+      dataPlot(k, 34) = ( *((inter4->lambdaMemory(2))->getSiconosVector(0) )) (0) ; // lambda4_k^+
+
+      // std::cout << "dataPlot(k, 27)" << dataPlot(k, 27)  << std::endl;      
+      // std::cout << "dataPlot(k, 31)" << dataPlot(k, 31)  << std::endl;
+      
+
 
       // std::cout <<" q->display()" <<  std::endl;
       // q->display();

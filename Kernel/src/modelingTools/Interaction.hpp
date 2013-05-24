@@ -151,8 +151,12 @@ private:
    * y[0] is y, y[1] is yDot and so on
    */
   VectorOfVectors _y;
-
-  /** previous value of Newton iteration for y */
+  
+  /** previous value of Newton iteration for y
+   * \warning : VA 24/05/2013 this has to be put into the workspace vector
+   *   or we have to use the _yMemory storage
+   */
+  
   VectorOfVectors _yOld;
 
   /** value of the previous time-step */
@@ -161,13 +165,19 @@ private:
   /** memory of previous coordinates of the system */
   VectorOfMemories _yMemory;
 
+  /** memory of previous coordinates of the system */
+  VectorOfMemories _lambdaMemory;
+
   /** Size (depth) of the Memory*/
   unsigned int _steps;
 
   /** result of the computeInput function */
   VectorOfVectors _lambda;
 
-  /** previous step values for _lambda */
+  /** previous step values for _lambda
+   * \warning : VA 24/05/2013 this has to be put into the workspace vector
+   *   or we have to use the _yMemory storage
+   */
   VectorOfVectors _lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
@@ -594,6 +604,18 @@ public:
     return _yMemory[level];
   }
 
+ /** get all the values of the multiplier lambda stored in memory
+  *  \return a memory
+  */
+  inline SP::SiconosMemory lambdaMemory(unsigned int level) const
+  {
+    return _lambdaMemory[level];
+  }
+
+
+  
+
+
   // -- _lambda --
 
   /** get vector of input derivatives
@@ -801,11 +823,11 @@ public:
 
   /**   put values of y into yOld, the same for _lambda
   */
-  void swapInMemory();
+  void swapInOldVariables();
 
   /** Must be call to fill _y_k. (after convergence of the Newton iterations)
    */
-  void swapTimeStepInMemory();
+  void swapInMemory();
   /** print the data to the screen
   */
   void display() const;

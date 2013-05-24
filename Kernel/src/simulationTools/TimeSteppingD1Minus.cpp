@@ -179,7 +179,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       DEBUG_PRINT("\nUPDATE INDEXSET 2\n");
 
       double y = (*(inter->y(0)))(0); // current position
-      double yOld = (*(inter->yOld(0)))(0); // old position
+      //double yOld = (*(inter->yOld(0)))(0); // old position
       double yDot = (*(inter->y(1)))(0); // current position
   
      

@@ -584,12 +584,12 @@ void   TimeStepping::prepareNewtonIteration()
     }
   }
 }
-void TimeStepping::saveYandLambdaInMemory()
+void TimeStepping::saveYandLambdaInOldVariables()
 {
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
   for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    (*itOsns)->saveInMemory();
+    (*itOsns)->saveInOldVariables();
 
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
@@ -623,7 +623,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     //_isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
-      saveYandLambdaInMemory();
+      saveYandLambdaInOldVariables();
   }
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -662,7 +662,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       if (!_isNewtonConverge && !info)
       {
         if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
-          saveYandLambdaInMemory();
+          saveYandLambdaInOldVariables();
       }
     }
     if (!_isNewtonConverge)

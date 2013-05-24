@@ -236,7 +236,6 @@ void Interaction::initialize(double t0)
       RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
     }
 
-
     initData();
     initializeMemory();
     _relation->initialize(*this);
@@ -298,10 +297,12 @@ void Interaction::initializeMemory()
   _y.resize(_upperLevelForOutput + 1) ;
   _yOld.resize(_upperLevelForOutput + 1);
   _y_k.resize(_upperLevelForOutput + 1);
+
   _lambda.resize(_upperLevelForInput + 1);
   _lambdaOld.resize(_upperLevelForInput + 1);
 
   _yMemory.resize(_upperLevelForOutput + 1);
+  _lambdaMemory.resize(_upperLevelForInput + 1);
 
 
 
@@ -334,6 +335,7 @@ void Interaction::initializeMemory()
     _lambda[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();
+    _lambdaMemory[i].reset(new SiconosMemory(_steps));
   }
 
 }
@@ -753,7 +755,7 @@ void Interaction::computeSizeOfDS()
   }
 }
 
-void Interaction::swapInMemory()
+void Interaction::swapInOldVariables()
 {
   // i corresponds to the derivative number and j the relation number.
   for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
@@ -772,17 +774,19 @@ void Interaction::swapInMemory()
   }
 }
 
-void Interaction::swapTimeStepInMemory()
+void Interaction::swapInMemory()
 {
   // i corresponds to the derivative number and j the relation number.
-  for (unsigned int i = 0; i < _y.size() ; i++)
+  for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
-
     *(_y_k[i]) = *(_y[i]) ;
-
     _yMemory[i]->swap(_y[i]);
   }
-
+  
+  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
+  {
+    _lambdaMemory[i]->swap(_lambda[i]);
+  }
 
 }
 

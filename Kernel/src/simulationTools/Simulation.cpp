@@ -337,8 +337,8 @@ void Simulation::saveInMemory()
     OSNSIterator itOsns;
     for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
+      (*itOsns)->saveInOldVariables();
       (*itOsns)->saveInMemory();
-      (*itOsns)->saveTimeStepInMemory();
     }
   }
 }
@@ -712,7 +712,8 @@ struct Simulation::SetupLevels : public SiconosVisitor
 
     _interaction->setLowerLevelForInput(lowerLevelForInput);
     _interaction->setUpperLevelForInput(upperLevelForInput);
-    _interaction->setSteps(1);
+
+    _interaction->setSteps(2); // Two evaluations of lambda(2) are made for each time--step
   };
 
 

@@ -207,11 +207,8 @@ double D1MinusLinear::computeResidu()
       if (!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions()->isEmpty())) // it should be equivalent to indexSet2
       { 
         DEBUG_PRINT("We compute lambda^+_{k} \n");
-        /** \warning V.A. 07/04/2013
-         * Are we sure that all the data are synchronized ? 
-         * Jacobians of constraints, Mass, and q vector with the old free velocity, sets of indices ?
-         */
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
+        (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
         simulationLink->updateInput(2);
       }
       

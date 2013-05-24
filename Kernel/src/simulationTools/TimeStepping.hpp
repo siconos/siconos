@@ -221,7 +221,7 @@ public:
   bool newtonCheckConvergence(double);
 
   /*save y_k^p, the current Newton iteration*/
-  void saveYandLambdaInMemory();
+  void saveYandLambdaInOldVariables();
 
   /** run the simulation, from t0 to T
    * with default parameters if any setting has been done

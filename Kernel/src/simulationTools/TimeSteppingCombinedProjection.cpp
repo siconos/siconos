@@ -286,7 +286,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       (*it)->computeOutput(0);
       (*it)->computeOutput(1);
-      //  (*it)->swapTimeStepInMemory();
+      //  (*it)->swapInMemory();
 
       level = 0;
 

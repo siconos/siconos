@@ -583,17 +583,17 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
 }
 
+void OneStepNSProblem::saveInOldVariables()
+{
+  assert(_OSNSInteractions);
+  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
+           std11::bind(&Interaction::swapInOldVariables, _1));
+}
 void OneStepNSProblem::saveInMemory()
 {
   assert(_OSNSInteractions);
   for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
            std11::bind(&Interaction::swapInMemory, _1));
-}
-void OneStepNSProblem::saveTimeStepInMemory()
-{
-  assert(_OSNSInteractions);
-  for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
-           std11::bind(&Interaction::swapTimeStepInMemory, _1));
 }
 
 void OneStepNSProblem::saveNSProblemToXML()

@@ -547,7 +547,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
-      saveYandLambdaInMemory();
+      saveYandLambdaInOldVariables();
   }
 
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -586,7 +586,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       if (!isNewtonConverge && !info)
       {
         if (!_allNSProblems->empty() &&  !allInteractions->isEmpty())
-          saveYandLambdaInMemory();
+          saveYandLambdaInOldVariables();
       }
     }
     if (!isNewtonConverge)

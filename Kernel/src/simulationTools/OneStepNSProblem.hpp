@@ -463,11 +463,11 @@ public:
 
   /** save Interactions states in Memory, called to save the current state of the Newton iteration.
    */
-  virtual void saveInMemory();
+  virtual void saveInOldVariables();
 
   /** save y_k, called by TimeDiscretisation::process.
    */
-  virtual void saveTimeStepInMemory();
+  virtual void saveInMemory();
   /** prepare data of the osns for solving
    *  param double : current time
    */
