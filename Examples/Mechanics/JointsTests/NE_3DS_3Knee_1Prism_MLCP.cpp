@@ -18,9 +18,9 @@
  */
 
 /*!\file NE....cpp
-  \brief \ref EMNE_MULTIBIDY - C++ input file, Time-Stepping version - O.B.
+  \brief \ref EMNE_MULTIBODY - C++ input file, Time-Stepping version - O.B.
 
-  A multiby example.
+  A multibody example.
   Direct description of the model without XML input.
   Simulation with a Time-Stepping scheme.
 */
@@ -28,7 +28,61 @@
 #include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include <boost/math/quaternion.hpp>
 using namespace std;
+
+/* Given a position of a point in the Inertial Frame and the configuration vector q of a solid
+ * returns a position in the spatial frame.
+ */
+void fromInertialToSpatialFrame(double *positionInInertialFrame, double *positionInSpatialFrame, SP::SiconosVector  q  )
+{
+double q0 = q->getValue(3);
+double q1 = q->getValue(4);
+double q2 = q->getValue(5);
+double q3 = q->getValue(6);
+
+::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+::boost::math::quaternion<double>    quatpos(0, positionInInertialFrame[0], positionInInertialFrame[1], positionInInertialFrame[2]);
+::boost::math::quaternion<double>    quatBuff;
+
+//perform the rotation
+quatBuff = quatQ * quatpos * quatcQ;
+
+positionInSpatialFrame[0] = quatBuff.R_component_2()+q->getValue(0);
+positionInSpatialFrame[1] = quatBuff.R_component_3()+q->getValue(1);
+positionInSpatialFrame[2] = quatBuff.R_component_4()+q->getValue(2);
+
+}
+void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
+{
+  double positionInInertialFrame[3];
+  double positionInSpatialFrame[3];
+  // Output the position of the tip of beam1
+  positionInInertialFrame[0]=length/2;
+  positionInInertialFrame[1]=0.0;
+  positionInInertialFrame[2]=0.0;
+  
+  fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
+  traj[0] = positionInSpatialFrame[0];
+  traj[1] = positionInSpatialFrame[1];
+  traj[2] = positionInSpatialFrame[2];
+  
+  
+  // std::cout <<  "positionInSpatialFrame[0]" <<  positionInSpatialFrame[0]<<std::endl;
+  // std::cout <<  "positionInSpatialFrame[1]" <<  positionInSpatialFrame[1]<<std::endl;
+  // std::cout <<  "positionInSpatialFrame[2]" <<  positionInSpatialFrame[2]<<std::endl;
+  
+  positionInInertialFrame[0]=-length/2;
+  fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
+  traj[3]= positionInSpatialFrame[0];
+  traj[4] = positionInSpatialFrame[1];
+  traj[5] = positionInSpatialFrame[2];
+}
+
+
+
+
 
 int main(int argc, char* argv[])
 {
@@ -52,9 +106,7 @@ int main(int argc, char* argv[])
     double theta = 1.0;              // theta for Moreau integrator
     double g = 9.81; // Gravity
     double m = 1.;
-    double wx = 0.0;
-    double wz = 0.0;
-    double wy = 0.0;
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -84,19 +136,25 @@ int main(int argc, char* argv[])
     v10->zero();
     I1->eye();
     I1->setValue(0, 0, 0.1);
+    // Initial position of the center of gravity CG1
     (*q10)(0) = 0.5 * L1 / sqrt(2);
     (*q10)(1) = 0;
     (*q10)(2) = -0.5 * L1 / sqrt(2);
+    // Initial orientation (a quaternion that gives the rotation w.r.t the spatial frame)
+    // angle of the rotation Pi/4
     double angle = M_PI / 4;
     SiconosVector V1(3);
     V1.zero();
+    // vector of the rotation (Y-axis)
     V1.setValue(0, 0);
     V1.setValue(1, 1);
     V1.setValue(2, 0);
+    // construction of the quaternion
     q10->setValue(3, cos(angle / 2));
     q10->setValue(4, V1.getValue(0)*sin(angle / 2));
     q10->setValue(5, V1.getValue(1)*sin(angle / 2));
     q10->setValue(6, V1.getValue(2)*sin(angle / 2));
+    
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
     allDS1.insert(beam1);
@@ -190,13 +248,15 @@ int main(int argc, char* argv[])
 
 
     // Interactions
+
+
     //
-    SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
-    H1->zero();
-    SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
-    SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
-    H2->zero();
-    H3->zero();
+    // SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::_sNbEqualities, qDim));
+    // H1->zero();
+    // SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
+    // SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::_sNbEqualities, 2 * qDim));
+    // H2->zero();
+    // H3->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
     SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
     SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::_sNbEqualities));
@@ -204,34 +264,47 @@ int main(int argc, char* argv[])
     //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::_sNbEqualities());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
-
+    // Building the first knee joint for beam1
+    // input  - the concerned DS : beam1
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-    SP::SiconosVector G20(new SiconosVector(3));
+    
+    
+    // Building the second knee joint for beam1 and beam2
+    // input  - the first concerned DS : beam1
+    // input  - the second concerned DS : beam2
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
     P->zero();
     P->setValue(0, L1 / 2);
     SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
+    
+    // Building the third knee joint for beam2 and beam3
+    // input  - the first concerned DS : beam2
+    // input  - the second concerned DS : beam3
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
     P->zero();
     P->setValue(0, -L1 / 2);
     SP::NewtonEulerR relation3(new KneeJointR(beam2, beam3, P));
 
-
-    //relation Prismatic
-
-    SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
-    H4->zero();
+    // Building the prismatic joint for beam3
+    // input  - the first concerned DS : beam3
+    //        - an axis in the spatial frame (absolute frame)
+    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::_sNbEqualities, qDim));
+    // H4->zero();
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::_sNbEqualities));
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
     SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
     allDS4.insert(beam3);
-
-    relation1->setJachq(H1);
-    relation2->setJachq(H2);
-    relation3->setJachq(H3);
-    relation4->setJachq(H4);
-
+    
+    
+    // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
+    // relation2->setJachq(H2);
+    // relation3->setJachq(H3);
+    // relation4->setJachq(H4);
+    
     SP::Interaction inter1(new Interaction("axis-beam1", allDS1, 0, KneeJointR::_sNbEqualities, nslaw1, relation1));
     allInteractions.insert(inter1);
     SP::Interaction inter2(new Interaction("axis-beam2", allDS2, 1, KneeJointR::_sNbEqualities, nslaw2, relation2));
@@ -304,6 +377,9 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 15 + 7;
     SimpleMatrix dataPlot(N, outputSize);
+    SimpleMatrix beam1Plot(2,3*N);
+    SimpleMatrix beam2Plot(2,3*N);
+    SimpleMatrix beam3Plot(2,3*N);
 
     SP::SiconosVector q1 = beam1->q();
     SP::SiconosVector q2 = beam2->q();
@@ -331,10 +407,11 @@ int main(int argc, char* argv[])
     SP::SiconosVector yAux(new SiconosVector(3));
     yAux->setValue(0, 1);
     SP::SimpleMatrix Jaux(new SimpleMatrix(3, 3));
-    int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
+    double beamTipTrajectories[6];
+    
     for (k = 0; k < N; k++)
     {
       // solve ...
@@ -344,6 +421,7 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
+      
       dataPlot(k, 1) = (*q1)(0);
       dataPlot(k, 2) = (*q1)(1);
       dataPlot(k, 3) = (*q1)(2);
@@ -351,6 +429,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 5) = (*q1)(4);
       dataPlot(k, 6) = (*q1)(5);
       dataPlot(k, 7) = (*q1)(6);
+
       dataPlot(k, 8) = (*q2)(0);
       dataPlot(k, 9) = (*q2)(1);
       dataPlot(k, 10) = (*q2)(2);
@@ -358,6 +437,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 12) = (*q2)(4);
       dataPlot(k, 13) = (*q2)(5);
       dataPlot(k, 14) = (*q2)(6);
+      
       dataPlot(k, 15) = (*q3)(0);
       dataPlot(k, 16) = (*q3)(1);
       dataPlot(k, 17) = (*q3)(2);
@@ -365,9 +445,34 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
-      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
+    
+      tipTrajectories(q1,beamTipTrajectories,L1);
+      beam1Plot(0,3*k) = beamTipTrajectories[0];
+      beam1Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam1Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam1Plot(1,3*k) = beamTipTrajectories[3];
+      beam1Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam1Plot(1,3*k+2) = beamTipTrajectories[5];
 
-      for (int jj = 0; jj < outputSize; jj++)
+      tipTrajectories(q2,beamTipTrajectories,L2);
+      beam2Plot(0,3*k) = beamTipTrajectories[0];
+      beam2Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam2Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam2Plot(1,3*k) = beamTipTrajectories[3];
+      beam2Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam2Plot(1,3*k+2) = beamTipTrajectories[5];
+
+      tipTrajectories(q3,beamTipTrajectories,L3);
+      beam3Plot(0,3*k) = beamTipTrajectories[0];
+      beam3Plot(0,3*k+1) = beamTipTrajectories[1];
+      beam3Plot(0,3*k+2) = beamTipTrajectories[2];
+      beam3Plot(1,3*k) = beamTipTrajectories[3];
+      beam3Plot(1,3*k+1) = beamTipTrajectories[4];
+      beam3Plot(1,3*k+2) = beamTipTrajectories[5];
+      
+      //printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
+
+      for (unsigned int jj = 0; jj < outputSize; jj++)
       {
         if ((k || jj))
           fprintf(pFile, ",");
@@ -383,7 +488,10 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();

@@ -545,7 +545,10 @@ void NewtonEulerDS::updateMObjToAbs()
   ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
   ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
   ::boost::math::quaternion<double>    quatBuff;
-  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf, chapter Gradiant computaion, case oif NewtonEuler with quaternion*/
+  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
+   * Chapter gradient computation, case of NewtonEuler formulation
+   * with quaternion
+   */
   quatBuff = quatcQ * quatx * quatQ;
   _MObjToAbs->setValue(0, 0, quatBuff.R_component_2());
   _MObjToAbs->setValue(0, 1, quatBuff.R_component_3());

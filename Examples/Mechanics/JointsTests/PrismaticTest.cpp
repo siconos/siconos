@@ -17,11 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*!\file BouncingBallTS.cpp
-  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version - V. Acary, F. Perignon.
+/*!\file PrismaticTest.cpp
+  \brief \ref 
 
-  A Ball bouncing on the ground.
-  Direct description of the model without XML input.
   Simulation with a Time-Stepping scheme.
 */
 
