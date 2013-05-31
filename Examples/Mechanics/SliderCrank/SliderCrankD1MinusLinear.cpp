@@ -306,7 +306,21 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("SliderCrankD1MinusLinear.ref", "ascii", dataPlot);
+    ioMatrix::write("result.dat", "ascii", dataPlot);
+
+
+    // Comparison with a reference file
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("SliderCrankD1MinusLinear.ref", "ascii", dataPlotRef);
+
+    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    {
+      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+      return 1;
+    }
+
+
   }
 
   catch (SiconosException e)

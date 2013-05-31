@@ -92,8 +92,50 @@ void NewtonEulerR::saveRelationToXML() const
   RuntimeException::selfThrow("NewtonEulerR1::saveRelationToXML - not yet implemented.");
 }
 
+
+void NewtonEulerR::computeDotJachq(const double time, Interaction& inter)
+{
+  if (_plugindotjacqh)
+  {
+    if (_plugindotjacqh->fPtr)
+    {
+      // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+      SiconosVector workQ = *inter.data(q0);
+      SiconosVector workZ = *inter.data(z);
+      SiconosVector workQdot = *inter.data(q1);
+      if (! _jachqDot)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeDS = inter.getSizeOfDS();
+        _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+      }
+      ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *inter.data(z) = workZ;
+    }
+  }
+}
+
+void  NewtonEulerR::computedotjacqhXqdot(const double time, Interaction& inter)
+{
+  DEBUG_PRINT("NewtonEulerR::computeNonLinearH2dot starts");
+  // Compute the H Jacobian dot
+  NewtonEulerR::computeDotJachq(time, inter);
+  _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
+  SiconosVector workQdot = *inter.data(q1);
+  DEBUG_EXPR(workQdot.display(););
+  DEBUG_EXPR(_dotjachq->display(););
+  prod(*_dotjachq, workQdot, *_dotjacqhXqdot);
+  DEBUG_PRINT("NewtonEulerR::computeNonLinearH2dot ends");
+}
+
+
+
 void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
+
+  /*\warning : implemented for the bouncing ball !!!!*/
+
   DEBUG_PRINT("NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) starts\n");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber );
  
@@ -133,12 +175,12 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
 */
 void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
+ /*\warning : implemented for the bouncing ball !!!!*/
 
   DEBUG_PRINT("NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level) starts\n");
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level );
   DEBUG_EXPR(printf("interaction %p\n",&inter););
   DEBUG_EXPR(inter.display(););
-  /*implemented for the bouncing ball*/
   
   // computeJachq(t);
   // get lambda of the concerned interaction

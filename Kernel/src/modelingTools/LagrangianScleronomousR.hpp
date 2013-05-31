@@ -114,7 +114,7 @@ protected:
   SP::PluggedObject _plugindotjacqh;
 
   /** Product of  the time--derivative of Jacobian with the velocity qdot */
-  SP::SiconosVector _dotjacqhXqdot;;
+  SP::SiconosVector _dotjacqhXqdot;
   /** basic constructor
       \param the sub-type of the relation
   */

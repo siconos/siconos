@@ -84,11 +84,11 @@ protected:
 
   /**The time-derivative of Jacobian of the constraints with respect
      to the generalized coordinates  \f$ q\f$
-   * i.e. \f[\frac{d}{dt} \nabla^T_{\dot q} h(t,q,\dot q,\ldots).\f]
+   * i.e. \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
    * This value is useful to compute the second-order
    * time--derivative of the constraints with respect to time.
    */
-  SP::SiconosMatrix _dotJachq;
+  SP::SiconosMatrix _dotjachq;
 
   SP::SiconosMatrix _jacglambda;
 
@@ -140,10 +140,18 @@ public:
   {
     _jachq = newJachq;
   }
-  inline SP::SiconosMatrix jacQDotH() const
+  inline SP::SiconosMatrix jachqDot() const
   {
     return _jachqDot;
   }
+  inline SP::SiconosMatrix dotJachq() const
+  {
+    return _dotjachq;
+  }
+  inline SP::SiconosVector dotjacqhXqdot()
+  {
+    return _dotjacqhXqdot;
+  };
   inline SP::SiconosMatrix jachlambda() const
   {
     return _jachlambda;
@@ -174,6 +182,14 @@ public:
   {
     _jachq = newPtr ;
   }
+    /** Plugin object for the time--derivative of Jacobian i.e.
+   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+   * stored in _dotjachq
+   */
+  SP::PluggedObject _plugindotjacqh;
+
+  /** Product of  the time--derivative of Jacobian with the velocity qdot */
+  SP::SiconosVector _dotjacqhXqdot;
 
   /** initialize the relation (check sizes, memory allocation ...)
   \param SP to Interaction: the interaction that owns this relation
@@ -205,10 +221,8 @@ public:
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(const double time, Interaction& inter)
-  {
-    ;
-  }
+  virtual void computeDotJachq(const double time, Interaction& inter);
+
 
   virtual void computeJacglambda(const double time, Interaction& inter)
   {
@@ -234,7 +248,9 @@ public:
     computeDotJachq(time, inter);
     computeJachlambda(time, inter);
     computeJachqT(inter);
+    computedotjacqhXqdot(time, inter);
   }
+
   /* compute all the G Jacobian */
   virtual void computeJacg(const double time, Interaction& inter)
   {
@@ -243,6 +259,11 @@ public:
     computeJacglambda(time, inter);
   }
 
+  /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
+   * \param time double, current time
+   * \param inter interaction that owns the relation
+   */
+  void computedotjacqhXqdot(const double time, Interaction& inter);
 
   /** to compute output
   *  \param double : current time
