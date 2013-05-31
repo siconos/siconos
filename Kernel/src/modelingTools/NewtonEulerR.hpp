@@ -146,10 +146,12 @@ public:
   }
   inline SP::SiconosMatrix dotJachq() const
   {
+    assert(_dotjachq);
     return _dotjachq;
   }
   inline SP::SiconosVector dotjacqhXqdot()
   {
+    assert(_dotjacqhXqdot);
     return _dotjacqhXqdot;
   };
   inline SP::SiconosMatrix jachlambda() const

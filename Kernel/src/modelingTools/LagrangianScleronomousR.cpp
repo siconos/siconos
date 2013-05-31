@@ -182,7 +182,7 @@ void LagrangianScleronomousR::computeDotJachq(const double time, Interaction& in
 
 
       // get vector _jachqDo of the current interaction
-      if (! _jachqDot)
+      if (! _dotjachq)
       {
         unsigned int sizeY = inter.getSizeOfY();
         unsigned int sizeDS = inter.getSizeOfDS();

@@ -27,12 +27,15 @@
 using namespace std;
 
 //#define NER_DEBUG
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 void NewtonEulerR::initComponents(Interaction& inter)
 {
+
+  DEBUG_PRINT("NewtonEulerR::initComponents(Interaction& inter) starts\n");
+
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
@@ -57,14 +60,21 @@ void NewtonEulerR::initComponents(Interaction& inter)
              ("NewtonEuler::initComponents inconsistent sizes between _jachq matrix and the interaction." && false));
     }
   }
-#ifdef NER_DEBUG
-  std::cout << "NewtonEulerR::initComponents() _jachq" << std::endl;
-  _jachq->display();
-#endif
+
+  DEBUG_EXPR(_jachq->display());
 
   if (! _jachqT)
     _jachqT.reset(new SimpleMatrix(ySize, xSize));
 
+
+
+  //_jachqT.reset(new SimpleMatrix(ySize, xSize));
+
+
+  DEBUG_EXPR(_jachqT->display());
+
+
+  DEBUG_PRINT("NewtonEulerR::initComponents(Interaction& inter) ends\n");
 }
 
 void NewtonEulerR::initialize(Interaction& inter)
@@ -103,11 +113,10 @@ void NewtonEulerR::computeDotJachq(const double time, Interaction& inter)
       SiconosVector workQ = *inter.data(q0);
       SiconosVector workZ = *inter.data(z);
       SiconosVector workQdot = *inter.data(q1);
-      if (! _jachqDot)
+      if (! _dotjachq)
       {
         unsigned int sizeY = inter.getSizeOfY();
-        unsigned int sizeDS = inter.getSizeOfDS();
-        _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+        _dotjachq.reset(new SimpleMatrix(sizeY, 7));
       }
       ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -118,15 +127,25 @@ void NewtonEulerR::computeDotJachq(const double time, Interaction& inter)
 
 void  NewtonEulerR::computedotjacqhXqdot(const double time, Interaction& inter)
 {
-  DEBUG_PRINT("NewtonEulerR::computeNonLinearH2dot starts");
+  DEBUG_PRINT("NewtonEulerR::computedotjacqhXqdot starts\n");
   // Compute the H Jacobian dot
   NewtonEulerR::computeDotJachq(time, inter);
+  if (! _dotjachq) // lazy initialization
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        _dotjachq.reset(new SimpleMatrix(sizeY, 7));
+      }
   _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
   SiconosVector workQdot = *inter.data(q1);
   DEBUG_EXPR(workQdot.display(););
   DEBUG_EXPR(_dotjachq->display(););
+
+
+
+
+
   prod(*_dotjachq, workQdot, *_dotjacqhXqdot);
-  DEBUG_PRINT("NewtonEulerR::computeNonLinearH2dot ends");
+  DEBUG_PRINT("NewtonEulerR::computedotjacqhXqdot ends");
 }
 
 
@@ -156,6 +175,10 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
     
     if (derivativeNumber == 1)
     {
+      assert(_jachqT);
+      assert(inter.data(velocity));
+      _jachqT->display();
+
       prod(*_jachqT, *inter.data(velocity), y);
     }
     else if(derivativeNumber == 2)
