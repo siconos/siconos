@@ -73,7 +73,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
 // constructor from a data used for EventDriven scheme
-LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq, const std::string& computeJachqdot):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq, const std::string& computeDotJachq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
@@ -81,14 +81,16 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, co
 
   _pluginJachq->setComputeFunction(strcomputeJachq);
 
-  _pluginjqhdot->setComputeFunction(computeJachqdot);
+  _plugindotjacqh->setComputeFunction(computeDotJachq);
 }
+
+
 
 void LagrangianScleronomousR::zeroPlugin()
 {
   LagrangianR::zeroPlugin();
   _pluginJachq.reset(new PluggedObject());
-  _pluginjqhdot.reset(new PluggedObject());
+  _plugindotjacqh.reset(new PluggedObject());
 }
 
 void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
@@ -167,34 +169,53 @@ void LagrangianScleronomousR::computeJachq(const double time, Interaction& inter
   }
 }
 
-void LagrangianScleronomousR::computeJachqDot(const double time, Interaction& inter)
+void LagrangianScleronomousR::computeDotJachq(const double time, Interaction& inter)
 {
-  if (_pluginjqhdot)
+  if (_plugindotjacqh)
   {
-    if (_pluginjqhdot->fPtr)
+    if (_plugindotjacqh->fPtr)
     {
       // Warning: temporary method to have contiguous values in memory, copy of block to simple.
       SiconosVector workQ = *inter.data(q0);
       SiconosVector workZ = *inter.data(z);
       SiconosVector workQdot = *inter.data(q1);
+
+
       // get vector _jachqDo of the current interaction
-      ((FPtr2)(_pluginjqhdot->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_jachqDot)(0, 0), workZ.size(), &(workZ)(0));
+      if (! _jachqDot)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeDS = inter.getSizeOfDS();
+        _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+      }
+      // else
+      // {
+      //   if (_dotjachq->size(0) == 0) // if the matrix dimension are null
+      //     _dotjachq->resize(sizeY, sizeDS);
+      //   else
+      //   {
+      //     if ((_dotjachq->size(1) != sizeDS && _dotjachq->size(0) != sizeY))
+      //       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
+      //   }
+      // }
+
+      ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *inter.data(z) = workZ;
     }
   }
 }
 
-void  LagrangianScleronomousR::computeNonLinearH2dot(const double time, Interaction& inter)
+void  LagrangianScleronomousR::computedotjacqhXqdot(const double time, Interaction& inter)
 {
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
-  LagrangianScleronomousR::computeJachqDot(time, inter);
-  _NLh2dot.reset(new SiconosVector(_jachqDot->size(0)));
+  LagrangianScleronomousR::computeDotJachq(time, inter);
+  _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
   SiconosVector workQdot = *inter.data(q1);
   DEBUG_EXPR(workQdot.display(););
-  DEBUG_EXPR(_jachqDot->display(););
-  prod(*_jachqDot, workQdot, *_NLh2dot);
+  DEBUG_EXPR(_dotjachq->display(););
+  prod(*_dotjachq, workQdot, *_dotjacqhXqdot);
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot ends");
 }
 
@@ -214,9 +235,9 @@ void LagrangianScleronomousR::computeOutput(const double time, Interaction& inte
       prod(*_jachq, *inter.data(q1), y);
     else if (derivativeNumber == 2)
     {
-      computeJachqDot(time, inter);
+      computeDotJachq(time, inter);
       prod(*_jachq, *inter.data(q2), y);
-      prod(*_jachqDot, *inter.data(q1), y, false);
+      prod(*_dotjachq, *inter.data(q1), y, false);
     }
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");

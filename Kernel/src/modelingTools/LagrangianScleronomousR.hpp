@@ -23,38 +23,46 @@
 #define LagrangianScleronomousR_H
 
 #include "LagrangianR.hpp"
-
-/** Lagrangian (Non Linear) Relations, Scleronomous and Holonomic.
+/** Scleronomic Lagrangian (Non Linear) Relations
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date Apr 27, 2004
  *
- * Relation with:
- *
+ * Scleronomic Relation (constraint) :
  * \f[
  * y = h(q,z) \\
  * \f]
  *
  * \f[
- * \dot y = G0(q,z)\dot q \\
+ * \dot y = \nabla^\top_q h(q,z) \dot q \\
+ * \f]
+ * or more generally
+ * \f[
+ * \dot y = H(q,z) \dot q \\
  * \f]
  *
+ * and by duality
+ *
  * \f[
- * p = G0^t(q,z)\lambda
+ * p = \nabla_q h(q,z)\lambda
+ * \f]
+ * or more generally
+ * \f[
+ * p = H^\top(q,z)\lambda
  * \f]
  *
  * with
  *
-\f[
-G0(q,z) = \nabla_q h(q,z)
-\f]
+ * \f[
+ * H^\top(q,z) = \nabla_q h(q,z) is the pure Lagrangian setting
+ * \f]
  *
- *  y (or its discrete approximation) is usually stored in y[0]
- * \$f \dot y \$f (or its discrete approximation) is usually stored in y[1]
- *  higher level can used for storing higher levels of derivatives.
+ *  y (or its discrete approximation) is stored in y[0]
+ * \$f \dot y \$f (or its discrete approximation) is  stored in y[1]
+ *  higher level y[i] can be used for storing higher levels of derivatives.
  *
- * G0 and h are connected to plug-in functions.\n
+ * Jacobians and h are connected to plug-in functions.\n
  * The plugin function to compute h(q,z) needs the following parameters:\n
  * --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n
  * --> q : pointer to the first element of q \n
@@ -67,11 +75,10 @@ G0(q,z) = \nabla_q h(q,z)
  *--> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction  \n
  *--> q : pointer to the first element of q  \n
  *--> sizeY : size of vector y (ie of the intercation) \n
- *--> [in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
+ *--> [in,out] H : pointer to the first element of H (sizeY X sizeDS matrix)\n
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
  * Its signature must be "void plugin(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"\n
-
  *
  */
 class LagrangianScleronomousR : public LagrangianR
@@ -100,14 +107,16 @@ protected:
   * @param sizeZ : size of vector z
   * @param[in,out] z: pointer to z vector(s) from DS.
   */
-  /** Plugin object for Jacobian of h */
-  /** Plugin object for the non linear part of the relative acceleration (derivative of Jacobian of H with
-  *respect to the time multiplied by the relative velocity */
-  SP::PluggedObject _pluginjqhdot;
-  /** Non-linear part of the relative acceleration */
-  SP::SiconosVector _NLh2dot;
+  /** Plugin object for the time--derivative of Jacobian i.e.
+   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+   * stored in _dotjachq
+   */
+  SP::PluggedObject _plugindotjacqh;
+
+  /** Product of  the time--derivative of Jacobian with the velocity qdot */
+  SP::SiconosVector _dotjacqhXqdot;;
   /** basic constructor
-  \param the sub-type of the relation
+      \param the sub-type of the relation
   */
   LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
@@ -152,10 +161,10 @@ public:
   */
   virtual ~LagrangianScleronomousR() {};
 
-  /** to get the non-linear part of the relative acceleration */
-  inline SP::SiconosVector Nonlinearh2dot()
+  /**return the product of  the time--derivative of Jacobian with the velocity qdot */
+  inline SP::SiconosVector dotjacqhXqdot()
   {
-    return _NLh2dot;
+    return _dotjacqhXqdot;
   };
   /** Compute y = h(q,z) using plug-in mechanism with the data vector of the interaction
    * should be used as less as possible to avoid side--effects
@@ -180,17 +189,45 @@ public:
   */
   virtual void computeJachq(const double time, Interaction& inter);
 
-  /** to compute the non-linear part of relative accelation using plug-in mechanism
-  * \param time double, current time
-  * \param inter interaction that owns the relation
-  * \return SiconosVector, non linear part ?
-  */
-  void computeNonLinearH2dot(const double time, Interaction& inter);
+  /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
+   * \param time double, current time
+   * \param inter interaction that owns the relation
+   */
+  void computedotjacqhXqdot(const double time, Interaction& inter);
 
-  /** to compute the derivative of H Jacobian with respect to time using plug-in mechanism
+
+  void computeJachqDot(const double time, Interaction& inter)
+  {
+    /* \warning. This method should never be called, since we are only considering
+     * scleronomic constraint
+     */
+    assert(0) ;
+  }
+
+  /* compute all the H Jacobian */
+  void computeJach(const double time, Interaction& inter)
+  {
+    computeJachq(time, inter);
+    // computeJachqDot(time, inter);
+    computeDotJachq(time, inter);
+    // computeJachlambda(time, inter);
+    // computehDot(time,inter);
+  }
+  /* compute all the G Jacobian */
+  void computeJacg(const double time, Interaction& inter)
+  {
+    computeJacgq(time, inter);
+    // computeJacgqDot(time, inter);
+    // computeJacglambda(time, inter);
+  }
+
+
+
+
+  /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
   * \param time the current time
   */
-  virtual void computeJachqDot(const double time, Interaction& inter);
+  virtual void computeDotJachq(const double time, Interaction& inter);
 
   /** to compute output
   * \param time the current time

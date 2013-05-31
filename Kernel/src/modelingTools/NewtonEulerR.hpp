@@ -70,9 +70,26 @@ protected:
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
   /** Jacobian matrices of H */
+  /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
+
+  /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
+   *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
+   */
   SP::SimpleMatrix _jachq;
-  //proj_with_q SP::SimpleMatrix _jachqProj;
+
+  /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
+   *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
+   */
   SP::SiconosMatrix _jachqDot;
+
+  /**The time-derivative of Jacobian of the constraints with respect
+     to the generalized coordinates  \f$ q\f$
+   * i.e. \f[\frac{d}{dt} \nabla^T_{\dot q} h(t,q,\dot q,\ldots).\f]
+   * This value is useful to compute the second-order
+   * time--derivative of the constraints with respect to time.
+   */
+  SP::SiconosMatrix _dotJachq;
+
   SP::SiconosMatrix _jacglambda;
 
   /**vector e*/
@@ -183,8 +200,16 @@ public:
   }
   virtual void computeJachqDot(const double time, Interaction& inter)
   {
+    /* \warning. This method should never be called, since we are only considering
+     * holonomic NewtonEulerR up to now
+     */
+    assert(0) ;
+  }
+  virtual void computeDotJachq(const double time, Interaction& inter)
+  {
     ;
   }
+
   virtual void computeJacglambda(const double time, Interaction& inter)
   {
     ;
@@ -205,7 +230,8 @@ public:
   virtual void computeJach(const double time, Interaction& inter)
   {
     computeJachq(time, inter);
-    computeJachqDot(time, inter);
+    //computeJachqDot(time, inter);
+    computeDotJachq(time, inter);
     computeJachlambda(time, inter);
     computeJachqT(inter);
   }

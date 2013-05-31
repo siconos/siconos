@@ -864,8 +864,8 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
 
       if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), *Yp, xcoord, false);
       }
       DEBUG_EXPR(Yp->display(););
     }
@@ -895,8 +895,15 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
-      // std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
+      // obtain the velocity
+      Xfree = inter->data(NewtonEulerR::velocity);
+      // Get the time--derivative of the Jacobian of the constraints \dot{Jachq}
+      //std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
+      // Compute \dot{Jachq}.v
+
       // subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+
+
     }
     DEBUG_EXPR(Yp->display(););
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)  // impact terms are added

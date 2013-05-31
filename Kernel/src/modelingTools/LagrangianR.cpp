@@ -43,19 +43,23 @@ void LagrangianR::initComponents(Interaction& inter)
       assert((_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) &&
              "LagrangianR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
-  // Added by Son Nguyen (8/12/2010)
-  if (! _jachqDot)
-    _jachqDot.reset(new SimpleMatrix(sizeY, sizeDS));
-  else
-  {
-    if (_jachqDot->size(0) == 0) // if the matrix dimension are null
-      _jachqDot->resize(sizeY, sizeDS);
-    else
-    {
-      if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
-        RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
-    }
-  }
+  // Added by Son Nguyen (8/12/2010) --> VA try to replace by a lazy initialization
+  // if (! _jachqDot)
+  //   _jachqDot.reset(new SimpleMatrix(sizeY, sizeDS));
+  // else
+  // {
+  //   if (_jachqDot->size(0) == 0) // if the matrix dimension are null
+  //     _jachqDot->resize(sizeY, sizeDS);
+  //   else
+  //   {
+  //     if ((_jachqDot->size(1) != sizeDS && _jachqDot->size(0) != sizeY))
+  //       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
+  //   }
+  // }
+
+
+
+
 }
 
 void LagrangianR::initialize(Interaction& inter)

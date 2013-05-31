@@ -30,24 +30,6 @@ class RelationXML;
 class SimpleMatrix;
 class SiconosVector;
 
-/** Lagrangian (Non Linear) Relation (generic interface)
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * Relations for Lagrangian Dynamical Systems. This class is only an interface for specific (Linear, Scleronomous ...)
- * Lagrangian Relations (see derived classes).
- *
- *  Class name = type+subType.
- *
- * If y = h(...), all the gradients of h are handled by G object.
- * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
- *
- * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
- *
- */
-
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
 
@@ -60,6 +42,45 @@ typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*
 /**Pointer to function - Plug-in utilities*/
 typedef void (*FPtr5bis)(unsigned int, const double*, unsigned int, const double*, unsigned int, double*, unsigned int, double*);
 
+/** Lagrangian (Non Linear) Relation (generic interface)
+ *
+ * \author SICONOS Development Team - copyright INRIA
+ *  \version 3.0.0.
+ *  \date Apr 27, 2004
+ *
+ * Relations for Lagrangian Dynamical Systems.
+ * This class is only an interface for specific (Linear, scleronomic, rheomomic  ...)
+ * Lagrangian Relations (see derived classes).
+ *
+ *  Class name = type+subType.
+ *
+ * If \f$y = h(t,q,\dot q,\ldots)\f$ describes the constraint (the relation) , all the gradients of h
+ * are handled by the following SiconosMatrix and SiconosVector objects.
+ *
+ * <ul>
+ * <li> The Jacobian of the constraints with respect to the coodinates  \f$q\f$
+ * i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]  is stored in  SP::SiconosMatrix _jachq .
+ *
+ * This Jacobian is mainly used for Newton linearization and to compute the time-derivative of the constraint \f$y = h(q,\ldots)\f$ that is
+ *  \f[\dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots\f]
+ * This object can also store
+ * more general linearized part of the gap function. If \f$y=h(q)\f$ models a gap function, then the time--derivative
+ * can be generically  written as
+ * \f[\dot y (t) = H(q,\ldots) \dot q  +\ldots. \f]
+ * The matrix \f$H(q,\ldots) \f$ is also stored in   SP::SiconosMatrix _jachq </li>
+ *
+ * <li> The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
+ *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f] is stored in  SP::SiconosMatrix _jachqDot </li>
+ *
+ * <li>The time-derivative of Jacobian of the constraints with respect to the generalized coordinates  \f$ q\f$
+ *  i.e. \f[\frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots).\f]. This value is useful to compute the second-order
+ * time--derivative of the constraints with respect to time.</li>
+ *
+ * </ul>
+ *
+ * In corresponding derived classes, h and Jacobians are connected to plug-in functions (user-defined).
+ *
+ */
 class LagrangianR : public Relation
 {
 public:
@@ -71,9 +92,26 @@ protected:
   */
   ACCEPT_SERIALIZATION(LagrangianR);
 
-  /** Jacobian matrices of H */
+  /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
+
+  /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
+   *  i.e. \f[\nabla^\top_q h(t,q,\dot q,\ldots)\f]
+   */
   SP::SiconosMatrix _jachq;
+
+  /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
+   *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f]
+   */
   SP::SiconosMatrix _jachqDot;
+
+  /**The time-derivative of Jacobian of the constraints with respect
+     to the generalized coordinates  \f$ q\f$
+   * i.e. \f[\frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots).\f]
+   * This value is useful to compute the second-order
+   * time--derivative of the constraints with respect to time.
+   */
+  SP::SiconosMatrix _dotjachq;
+
   SP::PluggedObject _pluginJachq;
 
   /** basic constructor
@@ -112,9 +150,13 @@ public:
   {
     return _jachq;
   }
-  inline SP::SiconosMatrix jacQDotH() const
+  inline SP::SiconosMatrix jachqDot() const
   {
     return _jachqDot;
+  }
+  inline SP::SiconosMatrix dotJachq() const
+  {
+    return _dotjachq;
   }
   inline SP::SiconosMatrix jachlambda() const
   {
@@ -207,6 +249,23 @@ public:
   {
     ;
   }
+  virtual void computeDotJachq(const double time, Interaction& inter)
+  {
+    ;
+  }
+
+  /** to compute hDot using plug-in mechanism
+   * using plug-in mechanism with the data vector of the interaction
+   * should be used as less as possible to avoid side--effects
+   * prefer computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+   * \param time  current time
+   * \param inter interaction that owns the relation
+   */
+  virtual void computehDot(const double time, Interaction& inter)
+  {
+    ;
+  }
+
   void computeJacglambda(const double time, Interaction& inter)
   {
     ;
@@ -224,7 +283,9 @@ public:
   {
     computeJachq(time, inter);
     computeJachqDot(time, inter);
+    computeDotJachq(time, inter);
     computeJachlambda(time, inter);
+    computehDot(time,inter);
   }
   /* compute all the G Jacobian */
   virtual void computeJacg(const double time, Interaction& inter)

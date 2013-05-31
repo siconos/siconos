@@ -37,11 +37,16 @@
  * \f]
  *
  * \f[
- *  \dot y = G0(q,t,z)\dot q + \frac{\partial h}{\partial t}(q,t,z)
+ *  \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
  * \f]
+ * or more generally
+ * \f[
+ *  \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
+ * \f]
+ * and by duality
  *
  * \f[
- * p = G0^t(q,t,z)\lambda
+ * p = H^\top(q,t,z)\lambda
  * \f]
  *
  * with
@@ -55,7 +60,7 @@
  *
  *
  *
- * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are
+ * h, H and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are
  * connected to user-defined functions.\n G0 and h are connected to
  * plug-in functions.\n
  *
@@ -75,7 +80,7 @@
  *--> q : pointer to the first element of q  \n
  *--> time : current time \n
  *--> sizeY : size of vector y (ie of the intercation) \n
- *--> [in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
+ *--> [in,out] H : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
  * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
@@ -88,7 +93,6 @@
  * --> sizeZ : size of vector z \n
  * -->[in,out] z: pointer to z vector(s) from DS.\n
  * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
-
  *
  */
 class LagrangianRheonomousR : public LagrangianR
@@ -259,6 +263,32 @@ public:
   * \param: unsigned int
   */
   virtual void computeJachq(const double time, Interaction& inter);
+
+  void computeJachqDot(const double time, Interaction& inter)
+  {
+    /* \warning. This method should never be called, since we are only considering
+     * rheonomic constraint
+     */
+    assert(0) ;
+  }
+
+  /* compute all the H Jacobian */
+  void computeJach(const double time, Interaction& inter)
+  {
+    computeJachq(time, inter);
+    // computeJachqDot(time, inter);
+    computeDotJachq(time, inter);
+    // computeJachlambda(time, inter);
+    computehDot(time,inter);
+  }
+  /* compute all the G Jacobian */
+  void computeJacg(const double time, Interaction& inter)
+  {
+    computeJacgq(time, inter);
+    // computeJacgqDot(time, inter);
+    // computeJacglambda(time, inter);
+  }
+
 
   /** to compute output
   *  \param double : current time

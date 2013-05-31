@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("SliderCrankD1MinusLinear.ref", "ascii", dataPlot);
   }
 
   catch (SiconosException e)

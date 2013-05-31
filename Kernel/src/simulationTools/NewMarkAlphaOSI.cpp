@@ -392,8 +392,8 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
         xcoord[6] = 0;
         xcoord[7] = sizeY;
         SP::LagrangianScleronomousR _SclerR = std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation());
-        _SclerR->computeNonLinearH2dot(t, *inter);
-        subprod(*ID, *(_SclerR->Nonlinearh2dot()), *y_free, xcoord, false); // y += NonLinearPart
+        _SclerR->computedotjacqhXqdot(t, *inter);
+        subprod(*ID, *(_SclerR->dotjacqhXqdot()), *y_free, xcoord, false); // y += NonLinearPart
       }
       else if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp) // LCP at position level
       {
