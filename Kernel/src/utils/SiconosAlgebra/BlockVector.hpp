@@ -302,6 +302,12 @@ public:
   bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 
   double norm2() const;
+
+  /** compute the infinite norm of the vector
+   *  \return a double
+   */
+  double normInf() const;
+
   BlockVector& operator += (const SiconosVector& vIn);
   BlockVector& operator -= (const SiconosVector& vIn);
 

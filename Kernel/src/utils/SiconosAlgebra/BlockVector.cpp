@@ -497,6 +497,18 @@ double BlockVector::norm2() const
   return sqrt(d);
 }
 
+double BlockVector::normInf() const
+{
+  double d = 0;
+  VectorOfVectors::const_iterator it;
+  for (it = vect.begin(); it != vect.end(); ++it)
+  {
+    assert(*it);
+    d = fmax((*it)->normInf(), d);
+  }
+  return d;
+}
+
 BlockVector& BlockVector::operator =(const SiconosVector& vIn)
 {
   setBlock(vIn, _sizeV, 0, 0);
