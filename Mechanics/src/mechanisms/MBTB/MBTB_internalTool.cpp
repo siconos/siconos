@@ -256,7 +256,7 @@ void _MBTB_displayStep()
       //    (sDS[numDS]->M())->display();
       //    (sDS[numDS]->velocity())->display();
       SiconosVector res(6);
-      prod(*(sDS[numDS]->massMatrix()),*(sDS[numDS]->velocity()),res);
+      prod(*(sDS[numDS]->mass()),*(sDS[numDS]->velocity()),res);
       double ec=0.0;
       for(int i=0; i<6; i++)
         ec+=res.getValue(i)*sDS[numDS]->velocity()->getValue(i);
@@ -417,7 +417,7 @@ void _MBTB_printStep(FILE *fp)
     //    (sDS[numDS]->M())->display();
     //    (sDS[numDS]->velocity())->display();
     SiconosVector res(6);
-    prod(*(sDS[numDS]->massMatrix()),*(sDS[numDS]->velocity()),res);
+    prod(*(sDS[numDS]->mass()),*(sDS[numDS]->velocity()),res);
     double ec=0.0;
     for(int i=0; i<6; i++)
       ec+=res.getValue(i)*sDS[numDS]->velocity()->getValue(i);

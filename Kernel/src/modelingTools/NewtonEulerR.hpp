@@ -62,7 +62,7 @@ class NewtonEulerR : public Relation
 {
 public:
 
-  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, velo, deltaq, sizeDataNames};
+  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, velocity, deltaq, sizeDataNames};
 
 protected:
   /** serialization hooks
@@ -197,8 +197,10 @@ public:
   {
     ;
   }
+
   /*default implementation consists in multiplying jachq and T*/
   virtual void computeJachqT(Interaction& inter);
+
   /* compute all the H Jacobian */
   virtual void computeJach(const double time, Interaction& inter)
   {

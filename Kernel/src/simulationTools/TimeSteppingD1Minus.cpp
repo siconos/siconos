@@ -25,8 +25,10 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -37,13 +39,13 @@ void TimeSteppingD1Minus::initOSNS()
   // initialize OSNS for InteractionsGraph from Topology
   assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
   SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0);
+  // SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    initializeInteraction(indexSet0->bundle(*ui));
-  }
+  // InteractionsGraph::VIterator ui, uiend;
+  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // {
+  //   initializeInteraction(indexSet0->bundle(*ui));
+  // }
 
   // there is at least one OSNP
   if (!_allNSProblems->empty())
@@ -66,30 +68,42 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
-{
-  DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) starts\n");
-  RELATION::TYPES pbType = inter->relation()->getType();
-  if (pbType == Lagrangian)
-  {
-    assert(inter->data(LagrangianR::x));
+// void TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter)
+// {
+//   DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) starts\n");
+//   // RELATION::TYPES pbType = inter->relation()->getType();
+  
+//   // if (pbType == Lagrangian)
+//   // {
+//   //   assert(inter->data(LagrangianR::velocity));
     
-    ConstDSIterator itDS;
-    for (itDS = inter->dynamicalSystemsBegin();
-         itDS != inter->dynamicalSystemsEnd();
-         ++itDS)
-    {
-      assert(Type::value(**itDS) == Type::LagrangianDS ||
-             Type::value(**itDS) == Type::LagrangianLinearTIDS);
-      inter->data(LagrangianR::x)->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
-    }
-    //inter->setDataXFromVelocity();
-  }
-  else
-    RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);
-  DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) ends\n");
+//   //   ConstDSIterator itDS;
+//   //   for (itDS = inter->dynamicalSystemsBegin();
+//   //        itDS != inter->dynamicalSystemsEnd();
+//   //        ++itDS)
+//   //   {
+//   //     assert(Type::value(**itDS) == Type::LagrangianDS ||
+//   //            Type::value(**itDS) == Type::LagrangianLinearTIDS);
+//   //     inter->data(LagrangianR::velocity)->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+//   //   }
+//   // }
+//   // else if (pbType == NewtonEuler)
+//   // {
+//   //   assert(inter->data(NewtonEulerR::velocity));
+//   //   ConstDSIterator itDS;
+//   //   for (itDS = inter->dynamicalSystemsBegin();
+//   //        itDS != inter->dynamicalSystemsEnd();
+//   //        ++itDS)
+//   //   {
+//   //     assert(Type::value(**itDS) == Type::NewtonEulerDS);
+//   //     inter->data(NewtonEulerR::velocity)->insertPtr(std11::static_pointer_cast<NewtonEulerDS>(*itDS)->velocity());
+//   //   }
+//   // }
+//   // else
+//   //   RuntimeException::selfThrow("TimeSteppingD1Minus::initializeInteractions - not implemented for Relation of type " + pbType);
+//   DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) ends\n");
 
-}
+// }
 
 TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td), impactOccuredLastTimeStep(false)
 {
@@ -184,7 +198,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   
      
       DEBUG_PRINTF("y= %f\n", y);
-      DEBUG_PRINTF("yOld= %f\n", yOld);
       DEBUG_PRINTF("yDot= %f\n", yDot);
 
 

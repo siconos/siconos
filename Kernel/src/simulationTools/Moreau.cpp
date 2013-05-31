@@ -588,7 +588,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     double thetaFL = _theta;
     *(d->luW()) = *(d->jacobianvFL());
     scal(h * thetaFL, *(d->jacobianvFL()), *(d->luW()), true);
-    *(d->luW()) += *(d->massMatrix());
+    *(d->luW()) += *(d->mass());
 
     //cout<<"Moreau::computeW luW before LUFact\n";
     //d->luW()->display();
@@ -999,7 +999,7 @@ double Moreau::computeResidu()
       SP::SiconosVector q = d->q();
 
 
-      SP::SiconosMatrix massMatrix = d->massMatrix();
+      SP::SiconosMatrix massMatrix = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*massMatrix, (*v - *vold), *residuFree); // residuFree = M(v - vold)
       if (d->forces())  // if fL exists
@@ -1474,7 +1474,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       assert(Yp);
       assert(Xfree);
       // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interactionfor each ds of the
+      // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
       subprod(*CT, *Xfree, *Yp, coord, true);
@@ -1535,7 +1535,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // For the relation of type LagrangianScleronomousR
       if (relationSubType == ScleronomousR)
       {
-
+        
       }
     }
     if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))

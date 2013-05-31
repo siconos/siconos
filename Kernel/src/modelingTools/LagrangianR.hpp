@@ -64,7 +64,7 @@ class LagrangianR : public Relation
 {
 public:
 
-  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, x, sizeDataNames};
+  enum DataNames {free, z, q0, q1, q2, p0, p1, p2, sizeDataNames};
 
 protected:
   /** serialization hooks

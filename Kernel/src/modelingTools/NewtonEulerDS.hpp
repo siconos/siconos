@@ -527,7 +527,7 @@ public:
   virtual void updateT();
   virtual void normalizeq();
 
-  inline SP::SimpleMatrix massMatrix()
+  inline SP::SimpleMatrix mass()
   {
     return _massMatrix;
   }

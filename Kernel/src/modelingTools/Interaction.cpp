@@ -400,7 +400,7 @@ void Interaction::initDataLagrangian()
   _workspace[LagrangianR::p0].reset(new BlockVector());
   _workspace[LagrangianR::p1].reset(new BlockVector());
   _workspace[LagrangianR::p2].reset(new BlockVector());
-  _workspace[LagrangianR::x].reset(new BlockVector());
+
 
 
   SP::LagrangianDS lds;
@@ -442,7 +442,7 @@ void Interaction::initDataNewtonEuler()
   DSIterator it;
   _workspace[NewtonEulerR::free].reset(new BlockVector());
   _workspace[NewtonEulerR::q0].reset(new BlockVector()); // displacement
-  _workspace[NewtonEulerR::velo].reset(new BlockVector()); // velocity
+  _workspace[NewtonEulerR::velocity].reset(new BlockVector()); // velocity
   _workspace[NewtonEulerR::deltaq].reset(new BlockVector());
   _workspace[NewtonEulerR::q1].reset(new BlockVector()); // qdot
   //  data[NewtonEulerR::q2].reset(new BlockVector()); // acceleration
@@ -462,7 +462,7 @@ void Interaction::initDataNewtonEuler()
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     _workspace[NewtonEulerR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
-    _workspace[NewtonEulerR::velo]->insertPtr(lds->velocity());
+    _workspace[NewtonEulerR::velocity]->insertPtr(lds->velocity());
     _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
     _workspace[NewtonEulerR::q1]->insertPtr(lds->dotq());
     //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
@@ -1152,7 +1152,7 @@ SP::BlockVector Interaction::residuR() const
 
 // void  Interaction::setDataXFromVelocity()
 // {
-//   assert(_workspace[LagrangianR::x]);
+//   assert(_workspace[LagrangianR::velocity]);
 //   // this method is strange
 //   _workspace[Lagrangian::x].reset(new BlockVector());
 
@@ -1163,6 +1163,6 @@ SP::BlockVector Interaction::residuR() const
 //   {
 //     assert(Type::value(**itDS) == Type::LagrangianDS ||
 //            Type::value(**itDS) == Type::LagrangianLinearTIDS);
-//     _workspace[LagrangianR::x]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
+//     _workspace[LagrangianR::velocity]->insertPtr(std11::static_pointer_cast<LagrangianDS>(*itDS)->velocity());
 //   }
 // }

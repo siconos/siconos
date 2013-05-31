@@ -1,7 +1,7 @@
-#set label 1 sprintf("Siconos ED. gamma = 0.19444 t=%f",i*20*5e-3)  at first 1.75 , first 1.8
+set label 1 sprintf("Siconos NewtonEulerDS simulation.")  at first 1.75 , first 1.8
 #outfile = sprintf('frame%1.jpg',i)
 #set output  outfile
-plot resultfile1 u 3*i+1:3*i+3 w lp,  resultfile2 u 3*i+1:3*i+3 w lp,  resultfile3 u 3*i+1:3*i+3 w lp 
+plot resultfile1 u 3*i+1:3*i+3 w lp t 'beam1',  resultfile2 u 3*i+1:3*i+3 w lp t 'beam2',  resultfile3 u 3*i+1:3*i+3 w lp t 'beam3' 
 i=i+every
-print i
+print "iteration = ", i, " output in animated gif file : ", outputfile
 if (i < n) reread

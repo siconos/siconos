@@ -27,7 +27,9 @@
 using namespace std;
 
 //#define NER_DEBUG
-
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
 
 void NewtonEulerR::initComponents(Interaction& inter)
 {
@@ -92,23 +94,37 @@ void NewtonEulerR::saveRelationToXML() const
 
 void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber)
 {
-
+  DEBUG_PRINT("NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) starts\n");
+  DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber );
+ 
   if (derivativeNumber == 0)
   {
     computeh(time, inter);
   }
   else
   {
+    /* \warning V.A. 30/05/3013
+     *  This part is not very clear :
+     *  computeJachq should compute Jachq
+     *  but we use instead _jachqT which is not updated in this method !!
+     */
     computeJachq(time, inter);
 
     SiconosVector& y = *inter.y(derivativeNumber);
+    
     if (derivativeNumber == 1)
     {
-      prod(*_jachqT, *inter.data(velo), y);
+      prod(*_jachqT, *inter.data(velocity), y);
     }
-    else //if(derivativeNumber == 2)
+    else if(derivativeNumber == 2)
+    {
+      std::cout << "Warning: we attempt to call NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) for derivativeNumber=2" << std::endl;
+    }
+    else
       RuntimeException::selfThrow("NewtonEulerR::computeOutput(time,index), index out of range or not yet implemented.");
   }
+  DEBUG_PRINT("NewtonEulerR::computeOutput  ends\n");
+
 }
 
 /** to compute p
@@ -117,39 +133,28 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
 */
 void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
+
+  DEBUG_PRINT("NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level) starts\n");
+  DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level );
+  DEBUG_EXPR(printf("interaction %p\n",&inter););
+  DEBUG_EXPR(inter.display(););
   /*implemented for the bouncing ball*/
-
-
+  
   // computeJachq(t);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
-#ifdef NER_DEBUG
-  printf("\n");
-  printf("\n");
-  printf("\n");
-  printf("\n");
-  printf("NewtonEulerR::computeInput start for level %i:", level);
-  printf("interaction %p\n",&inter);
-  inter.display();
+  
+  DEBUG_EXPR(lambda.display(););
+  DEBUG_EXPR( inter.data(p0 + level)->display(););
 
-
-
-
-  std::cout << "lambda( "  << level << ")" << std::endl;
-  lambda.display();
-  std::cout << "data[p0+level] before " << std::endl;
-  inter.data(p0 + level)->display();
-#endif
-
-
-
-
-  if (level == 1) /* \warning : we assume that ContactForce is given by lambda[1] */
+  if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
     prod(lambda, *_jachqT, *_contactForce, true);
 #ifdef NER_DEBUG
-    printf("NewtonEulerR::computeInput contact force :");
-    _contactForce->display();
+    {
+      printf("NewtonEulerR::computeInput contact force :");
+      _contactForce->display();
+    }
 #endif
 
     /*data is a pointer of memory associated to a dynamical system*/
@@ -157,26 +162,55 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
     prod(lambda, *_jachqT, *inter.data(p0 + level), false);
 
 #ifdef NER_DEBUG
-    std::cout << "_jachqT" << std::endl;
-    _jachqT->display();
-    std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
-    std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
-    if (inter.data(p0 + level)->getNumberOfBlocks() > 1)
-      std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
-    inter.data(p0 + level)->display();
+    {
+      std::cout << "_jachqT" << std::endl;
+      _jachqT->display();
+      std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
+      std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
+      if (inter.data(p0 + level)->getNumberOfBlocks() > 1)
+        std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
+      inter.data(p0 + level)->display();
 
 
-    SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
-    prod(lambda, *_jachqT, *buffer, true);
-    std::cout << "added part to p" << buffer <<  std::endl;
-    buffer->display();
+      SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
+      prod(lambda, *_jachqT, *buffer, true);
+      std::cout << "added part to p" << buffer <<  std::endl;
+      buffer->display();
 
-    printf("NewtonEulerR::computeInput end for level %i:", level);
-    printf("\n");
+      printf("NewtonEulerR::computeInput end for level %i:", level);
+      printf("\n");
+    }
 #endif
+  }
 
+  else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
+  {
+    prod(lambda, *_jachqT, *_contactForce, true);
+    DEBUG_EXPR(_contactForce->display(););
 
+    /*data is a pointer of memory associated to a dynamical system*/
+    /** false because it consists in doing a sum*/
+    assert(inter.data(p0 + level));
+    prod(lambda, *_jachqT, *inter.data(p0 + level), false);
 
+#ifdef NER_DEBUG
+    {
+      DEBUG_EXPR(_jachqT->display(););
+      // std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
+      // std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
+      // if (inter.data(p0 + level)->getNumberOfBlocks() > 1)
+      //   std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
+      DEBUG_EXPR(inter.data(p0 + level)->display(););
+      
+      SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
+      prod(lambda, *_jachqT, *buffer, true);
+      std::cout << "added part to p   " << buffer <<  std::endl;
+      buffer->display();
+
+      printf("NewtonEulerR::computeInput end for level %i:", level);
+      printf("\n");
+    }
+#endif
   }
   else if (level == 0)
   {
@@ -203,6 +237,7 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
   }
   else
     RuntimeException::selfThrow("NewtonEulerR::computeInput(double t, unsigned int level) - not yet implemented for level > 1");
+  DEBUG_PRINT("NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level) ends\n");
 }
 /*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
 void NewtonEulerR::computeJachqT(Interaction& inter)
