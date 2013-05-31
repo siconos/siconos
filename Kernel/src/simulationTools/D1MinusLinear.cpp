@@ -580,6 +580,8 @@ double D1MinusLinear::computeResidu()
       //   simulationLink->updateOutput(level);
       // }
       // simulationLink->updateIndexSets();
+      DEBUG_PRINT("We compute lambda^-_{k+1} \n");
+
       for(InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
       {
         (*it)->computeJach(t);
@@ -597,6 +599,7 @@ double D1MinusLinear::computeResidu()
       if(!((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->interactions())->isEmpty())
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
+        DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
         simulationLink->updateInput(2);
       }
     }
@@ -873,7 +876,7 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   else if(relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-
+    DEBUG_EXPR(CT->display());
     if(CT)
     {
       coord[3] = CT->size(1);

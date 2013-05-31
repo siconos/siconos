@@ -25,7 +25,8 @@ outputfile="animatedbeams_D1MinusLinear.gif"
 
 set output outputfile
 n=1000    #n frames
+n=50
 i=0
-every=5
+every=1
 
 load "animbeam.gp"

@@ -34,12 +34,11 @@
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-//#define MOREAU_NE_DEBUG
 using namespace std;
 using namespace RELATION;
 // --- xml constructor ---
@@ -1820,14 +1819,10 @@ void Moreau::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-#ifdef MOREAU_NE_DEBUG
-
-      cout << "Moreau::updateState() " << endl;
-      d->display();
-
-      cout << "Moreau::updateState() prev v" << endl;
-      v->display();
-#endif
+      DEBUG_PRINT( "Moreau::updateState()\n ")
+      DEBUG_EXPR(d->display());
+      DEBUG_PRINT( "Moreau::updateState() prev v\n")
+      DEBUG_EXPR(v->display());
 
       // failure on bullet sims
       // d->p(level) is checked in next condition
@@ -1841,21 +1836,19 @@ void Moreau::updateState(const unsigned int level)
         *v = *d->p(level); // v = p
         d->luW()->PLUForwardBackwardInPlace(*v);
 
-#ifdef MOREAU_NE_DEBUG
-        cout << "Moreau::updatestate hWB lambda" << endl;
-        v->display();
-#endif
+        DEBUG_EXPR(d->p(level)->display());
+        DEBUG_PRINT("Moreau::updatestate hWB lambda\n");
+        DEBUG_EXPR(v->display());
         *v +=  * ds->workspace(DynamicalSystem::free);
       }
       else
         *v =  * ds->workspace(DynamicalSystem::free);
 
-#ifdef MOREAU_NE_DEBUG
-      cout << "Moreau::updatestate work free" << endl;
-      ds->workspace(DynamicalSystem::free)->display();
-      cout << "Moreau::updatestate new v" << endl;
-      v->display();
-#endif
+      DEBUG_PRINT("Moreau::updatestate work free\n");
+      DEBUG_EXPR(ds->workspace(DynamicalSystem::free)->display());
+      DEBUG_PRINT("Moreau::updatestate new v\n");
+      DEBUG_EXPR(v->display());
+
       //compute q
       //first step consists in computing  \dot q.
       //second step consists in updating q.
@@ -1863,13 +1856,10 @@ void Moreau::updateState(const unsigned int level)
       SP::SiconosMatrix T = d->T();
       SP::SiconosVector dotq = d->dotq();
       prod(*T, *v, *dotq, true);
-      //  cout<<"Moreau::updateState v"<<endl;
-      //  v->display();
-      //  cout<<"Moreau::updateState dotq"<<endl;
-      //  dotq->display();
 
-
-
+      DEBUG_PRINT("Moreau::updateState v\n");
+      DEBUG_EXPR(v->display());
+      DEBUG_EXPR(dotq->display());
 
       SP::SiconosVector q = d->q();
 
@@ -1882,10 +1872,8 @@ void Moreau::updateState(const unsigned int level)
       coeff = h * (1 - _theta);
       scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
-#ifdef MOREAU_NE_DEBUG
-      cout << "new q before normalizing" << endl;
-      q->display();
-#endif
+      DEBUG_PRINT("new q before normalizing\n");
+      DEBUG_EXPR(q->display());
 
       //q[3:6] must be normalized
       d->normalizeq();
