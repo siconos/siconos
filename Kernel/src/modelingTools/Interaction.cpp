@@ -463,7 +463,7 @@ void Interaction::initDataNewtonEuler()
     _workspace[NewtonEulerR::free]->insertPtr(lds->workspace(DynamicalSystem::free));
     _workspace[NewtonEulerR::q0]->insertPtr(lds->q());
     _workspace[NewtonEulerR::velocity]->insertPtr(lds->velocity());
-    _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
+    //  _workspace[NewtonEulerR::deltaq]->insertPtr(lds->deltaq());
     _workspace[NewtonEulerR::q1]->insertPtr(lds->dotq());
     //    data[NewtonEulerR::q2]->insertPtr( lds->acceleration());
     if (lds->p(0))

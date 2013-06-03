@@ -371,7 +371,12 @@ double D1MinusLinear::computeResidu()
       *q = *qold;
 
       scal(0.5 * h, *dotqold + *dotq, *q, false);
+      DEBUG_PRINT("new q before normalizing\n");
       DEBUG_EXPR(q->display());
+      //q[3:6] must be normalized
+      d->normalizeq();
+      DEBUG_PRINT("new q after normalizing\n");
+
 
     }
     else
@@ -748,6 +753,69 @@ void D1MinusLinear::computeFreeState()
 
 }
 
+void D1MinusLinear::updateState(const unsigned int level)
+{
+  DEBUG_PRINTF("\n D1MinusLinear::updateState(const unsigned int level) start for level = %i\n",level);
+
+  for(DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  {
+    // type of the current DS
+    Type::Siconos dsType = Type::value(**it);
+    /* \warning the following conditional statement should be removed with a MechanicalDS class */
+    if((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
+    {
+
+      // Lagrangian Systems
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+      SP::SiconosMatrix M = d->mass();
+      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
+
+      if(d->p(1))
+      {
+        SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
+        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+        *v += *dummy; // add free velocity
+        DEBUG_PRINT("\nRIGHT IMPULSE\n");
+        DEBUG_EXPR(d->p(1)->display());
+      }
+      DEBUG_EXPR(d->q()->display());
+      DEBUG_EXPR(d->velocity()->display());
+    }
+    else if(dsType == Type::NewtonEulerDS)
+    {
+      // NewtonEuler Systems
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
+      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
+      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
+      if(d->p(1))
+      {
+
+        // Update the velocity
+        SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
+        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+        *v += *dummy; // add free velocity
+
+        // update \f$ \dot q \f$
+        SP::SiconosMatrix T = d->T();
+        SP::SiconosVector dotq = d->dotq();
+        prod(*T, *v, *dotq, true);
+
+        DEBUG_PRINT("\nRIGHT IMPULSE\n");
+        DEBUG_EXPR(d->p(1)->display());
+      }
+      DEBUG_EXPR(d->q()->display());
+      DEBUG_EXPR(d->velocity()->display());
+    }
+    else
+      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+
+  }
+
+    DEBUG_PRINT("\n D1MinusLinear::updateState(const unsigned int level) end\n");
+
+}
+
+
 void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp)
 {
 
@@ -916,60 +984,6 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
   else
     RuntimeException::selfThrow("D1MinusLinear::computeFreeOutput - not implemented for Relation of type " + relationType);
   DEBUG_PRINT("D1MinusLinear::computeFreeOutput ends\n");
-
-}
-
-void D1MinusLinear::updateState(const unsigned int level)
-{
-  DEBUG_PRINTF("\n D1MinusLinear::updateState(const unsigned int level) start for level = %i\n",level);
-
-  for(DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    // type of the current DS
-    Type::Siconos dsType = Type::value(**it);
-    /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if((dsType == Type::LagrangianDS) or (dsType == Type::LagrangianLinearTIDS))
-    {
-      
-      // Lagrangian Systems
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
-      SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
-      
-      if(d->p(1))
-      {
-        SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
-        *v += *dummy; // add free velocity
-        DEBUG_PRINT("\nRIGHT IMPULSE\n");
-        DEBUG_EXPR(d->p(1)->display());
-      }
-      DEBUG_EXPR(d->q()->display());
-      DEBUG_EXPR(d->velocity()->display());
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      // NewtonEuler Systems
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
-      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
-      if(d->p(1))
-      {
-        SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
-        *v += *dummy; // add free velocity
-        DEBUG_PRINT("\nRIGHT IMPULSE\n");
-        DEBUG_EXPR(d->p(1)->display());
-      }
-      DEBUG_EXPR(d->q()->display());
-      DEBUG_EXPR(d->velocity()->display());
-    }
-    else
-      RuntimeException::selfThrow("D1MinusLinear::computeResidu - not yet implemented for Dynamical system type: " + dsType);
-
-  }
-    
-    DEBUG_PRINT("\n D1MinusLinear::updateState(const unsigned int level) end\n");
 
 }
 

@@ -1877,6 +1877,9 @@ void Moreau::updateState(const unsigned int level)
 
       //q[3:6] must be normalized
       d->normalizeq();
+      /* \warning VA 02/06/2013.
+       * What is the reason of doing the following computation ?
+       */
       dotq->setValue(3, (q->getValue(3) - qold->getValue(3)) / h);
       dotq->setValue(4, (q->getValue(4) - qold->getValue(4)) / h);
       dotq->setValue(5, (q->getValue(5) - qold->getValue(5)) / h);

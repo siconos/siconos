@@ -17,22 +17,47 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-/*! \file NewtonEulerDS.hpp
-  \brief NewtonEulerDS class - Second Order Non Linear Dynamical Systems.
+/** \file NewtonEulerDS.hpp
+ */
 
-  For more details, see the DevNotes.pdf, chapter NewtonEuler.
-*/
 #ifndef NEWTONEULERNLDS_H
 #define NEWTONEULERNLDS_H
 
 #include "DynamicalSystem.hpp"
-
 class DynamicalSystem;
+
 /** Pointer to function for plug-in. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
 typedef void (*Fext)(double , double*, double*, double*);
-/** NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
+
+
+/** \class NewtonEulerDS
+ *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
+ *   NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
  *
+ * The equations of motion in the Newton-Euler formalism can be stated as
+ * \f{equation}
+ * \label{eq:NewtonEuler}
+ * \left\{\begin{array}{rcl}
+ *   M \dot v &=& F_{ext}(q, v, \Omega, R), \\
+ *   I \dot \Omega + \Omega \wedge I\Omega &=&  M_{ext}(q,v, \Omega, R), \\
+ *   v &=& T(q) \dot q , \\
+ *   \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
+ * \end{array}\right.
+ * \f}
+ * with
+ * <ul>
+ * <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
+ * reference (world frame) </li>
+ * <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
+ * <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, \textit{i.e} \f$ R\in SO^+(3)\f$  </li>
+ * <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \RR\f$ the scalar mass  </li>
+ * <li> \f$I\f$ constant inertia matrix </li>
+ * <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and torques  </li>
+ * </ul>
+ *
+ *
+ * In the current implementation, \f$R\f$ is parametrized by a unit quaternion.
  *
  */
 class NewtonEulerDS : public DynamicalSystem
@@ -46,54 +71,77 @@ protected:
 
   // -- MEMBERS --
 
-  /** _v contains the speed of the Newton Euler system:
-      _v[0:2] : velocity of the mass center.
-      _v[3:5] : Omega, angular velocity in the referencial attached to the object.
-  */
+  /** _v contains the velocity of the Newton Euler dynamical system.
+   *  _v[0:2] : \f$v_G \in \RR^3 \f$ velocity of the center of mass in
+   * the inertial frame of reference (world frame).
+   *  _v[3:5] : \f$\Omega\in\RR^3\f$ angular velocity expressed in the body-fixed frame
+   */
   SP::SiconosVector _v;
+
+  /** Initial velocity */
   SP::SiconosVector _v0;
 
-
-  /** _vMemory: to acces at previous step */
+  /** Memory vectors that stores the values within the time--step */
   SP::SiconosMemory _vMemory;
   SP::SiconosMemory _qMemory;
   SP::SiconosMemory _forcesMemory;
   SP::SiconosMemory _dotqMemory;
 
-
-  /** _q dimension, is not necessary _n. In our case, _qDim = 7. _n =6*/
+  /** _q dimension, is not necessary _n. In our case, _qDim = 7 and  _n =6*/
   unsigned int _qDim;
 
-  /** _q contains the representation of the system, in current implementation:
-      _q[0:2] : the coordinates of the center of mass.
-      _q[3:6] : a quaternion representing the orientation of the solid.
-  */
+  /** _q contains the representation of the system
+   * In the current implementation, we have
+   *   _q[0:2] : the coordinates of the center of mass expressed
+   *      in the inertial frame of reference (world frame)
+   *   _q[3:6] : an unit quaternion representing the orientation of the solid.
+   *      This unit quaternion encodes the rotation mapping from the inertial frame of reference
+   *      to the body-fixed frame
+   */
   SP::SiconosVector _q;
-  SP::SiconosVector _deltaq;
+
+  //SP::SiconosVector _deltaq;
+
+  /** Initial position */
   SP::SiconosVector _q0;
-  /** The time derivative of q*/
+
+  /** The time derivative of \f$q\f$, \f$\dot q\f$*/
   SP::SiconosVector _dotq;
-  /*Matrix converting the object coordinates in the absolute coordinates.*/
+
+  /* the rotation matrix that converts a vector in body coordinates (in the body fixed frame)
+   * in the absolute coordinates in the inertial frame of reference.
+   */
   SP::SimpleMatrix _MObjToAbs;
 
-  /** Inertial matrix*/
+  /** Inertial matrix
+   */
   SP::SiconosMatrix _I;
-  /** mass of the system */
+
+  /** Scalar mass of the system
+   */
   double _mass;
 
 
   /** used for concatenate _I and _mass.I_3 */
   SP::SimpleMatrix _massMatrix;
 
+  /** Contains the LU factorization of the Mass (or the iteration matrix.).
+   */
   SP::SimpleMatrix _luW;
 
-  /** Matrix depending of the meaning of x.*/
+  /** Matrix depending on the parametrization of the orientation
+   * \f$v = T(q) \dot q\f$
+   */
   SP::SimpleMatrix _T;
 
+  /** Time derivative of T.
+   *
+   * \f$\dot v = \dot T(q) \dot q + T(q) \ddot q\f$
+   */
+  SP::SimpleMatrix _Tdot;
 
   /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
   std::vector<SP::SiconosVector> _p;
-
 
   /** external moment of the forces */
   SP::SiconosVector _mExt;
@@ -104,7 +152,10 @@ protected:
   /** Plugin to compute moments of external forces */
   SP::PluggedObject _pluginMExt;
 
-  /*The following code is commented because the jacobian of m/fext are not yet integrated in the numerical scheme.*/
+  /** The following code is commented because the jacobian of _mExt and _fExt
+   *  are not yet used by the numerical scheme.
+   *  Will be needed by a fully implicit scheme for instance.
+   */
   /** jacobian_q */
   //  SP::SiconosMatrix _jacobianqmExt;
   /** jacobian_{qDot} */
@@ -245,10 +296,10 @@ public:
   {
     return _q;
   }
-  inline SP::SiconosVector deltaq() const
-  {
-    return _deltaq;
-  }
+  // inline SP::SiconosVector deltaq() const
+  // {
+  //   return _deltaq;
+  // }
 
 
   // -- q0 --
@@ -289,8 +340,6 @@ public:
     return _v;
   }
 
-
-
   // -- velocity0 --
 
   /** get velocity0
@@ -300,8 +349,6 @@ public:
   {
     return _v0;
   }
-
-
 
   // Velocity memory
 
@@ -525,6 +572,12 @@ public:
 
 
   virtual void updateT();
+  virtual void updateT(SP::SiconosVector q);
+
+  virtual void updateTdot();
+  virtual void updateTdot(SP::SiconosVector dotq);
+
+
   virtual void normalizeq();
 
   inline SP::SimpleMatrix mass()
@@ -539,6 +592,11 @@ public:
   {
     return _T;
   }
+  inline SP::SimpleMatrix Tdot()
+  {
+    assert(_Tdot);
+    return _Tdot;
+  }
   inline SP::SiconosMemory fLMemory()
   {
     return _forcesMemory;
@@ -551,7 +609,7 @@ public:
   {
     return _dotq;
   }
-  /*get the matrix converting the object coordinates in the absolute coordinates.*/
+  /** get the matrix converting the object coordinates in the absolute coordinates.*/
   SP::SimpleMatrix MObjToAbs()
   {
     return _MObjToAbs;

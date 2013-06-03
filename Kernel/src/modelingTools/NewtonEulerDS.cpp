@@ -56,7 +56,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6)
 
   // Current state
   _q.reset(new SiconosVector(_qDim));
-  _deltaq.reset(new SiconosVector(_qDim));
+  // _deltaq.reset(new SiconosVector(_qDim));
   _v.reset(new SiconosVector(_n));
 
   _dotq.reset(new SiconosVector(_qDim));
@@ -86,7 +86,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
 
   // Current state
   _q.reset(new SiconosVector(_qDim));
-  _deltaq.reset(new SiconosVector(_qDim));
+  // _deltaq.reset(new SiconosVector(_qDim));
   _v.reset(new SiconosVector(_n));
   (*_q) = (*_q0);
   _dotq.reset(new SiconosVector(_qDim));
@@ -504,10 +504,16 @@ void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 
 void NewtonEulerDS::updateT()
 {
-  double q0 = _q->getValue(3) / 2.0;
-  double q1 = _q->getValue(4) / 2.0;
-  double q2 = _q->getValue(5) / 2.0;
-  double q3 = _q->getValue(6) / 2.0;
+  updateT(_q);
+}
+
+
+void NewtonEulerDS::updateT(SP::SiconosVector q)
+{
+  double q0 = q->getValue(3) / 2.0;
+  double q1 = q->getValue(4) / 2.0;
+  double q2 = q->getValue(5) / 2.0;
+  double q3 = q->getValue(6) / 2.0;
   _T->setValue(3, 3, -q1);
   _T->setValue(3, 4, -q2);
   _T->setValue(3, 5, -q3);
@@ -522,6 +528,43 @@ void NewtonEulerDS::updateT()
   _T->setValue(6, 5, q0);
 
 }
+
+void NewtonEulerDS::updateTdot()
+{
+  updateTdot(_dotq);
+}
+
+void NewtonEulerDS::updateTdot(SP::SiconosVector dotq)
+{
+
+  if (!_Tdot)
+  {
+    _T.reset(new SimpleMatrix(_qDim, _n));
+    _Tdot->zero();
+  }
+
+  double q0 = dotq->getValue(3) / 2.0;
+  double q1 = dotq->getValue(4) / 2.0;
+  double q2 = dotq->getValue(5) / 2.0;
+  double q3 = dotq->getValue(6) / 2.0;
+  _Tdot->setValue(3, 3, -q1);
+  _Tdot->setValue(3, 4, -q2);
+  _Tdot->setValue(3, 5, -q3);
+  _Tdot->setValue(4, 3, q0);
+  _Tdot->setValue(4, 4, -q3);
+  _Tdot->setValue(4, 5, q2);
+  _Tdot->setValue(5, 3, q3);
+  _Tdot->setValue(5, 4, q0);
+  _Tdot->setValue(5, 5, -q1);
+  _Tdot->setValue(6, 3, -q2);
+  _Tdot->setValue(6, 4, q1);
+  _Tdot->setValue(6, 5, q0);
+
+}
+
+
+
+
 void NewtonEulerDS::normalizeq()
 {
   double normq = sqrt(_q->getValue(3) * _q->getValue(3) + _q->getValue(4) * _q->getValue(4) + _q->getValue(5) * _q->getValue(5) + _q->getValue(6) * _q->getValue(6));
