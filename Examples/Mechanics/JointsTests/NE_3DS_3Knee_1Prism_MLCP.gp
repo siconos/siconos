@@ -16,17 +16,16 @@ i=0
 plot resultfile1 u 3*i+1:3*i+3 w lp t 'beam1',  resultfile2 u 3*i+1:3*i+3 w lp t 'beam2',  resultfile3 u 3*i+1:3*i+3 w lp t 'beam3' 
 set term gif animate
 
-
-
-
 outputfile="animatedbeams.gif"
 outputfile="animatedbeams_D1MinusLinear.gif"
 
-
+set size square
+set xrange [-0.1:3]
+set yrange [-3:0.1]
 set output outputfile
 n=1000    #n frames
-n=50
+n=500
 i=0
-every=1
+every=5
 
 load "animbeam.gp"

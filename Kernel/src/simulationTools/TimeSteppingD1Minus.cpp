@@ -155,7 +155,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // DEBUG_EXPR(indexSet2->display());
 
   InteractionsGraph::VIterator uipend, uip;
-
+  bool forecastImpact = false;
   for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
   {
     SP::Interaction inter = indexSet0->bundle(*uip);
@@ -170,22 +170,27 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
 
       DEBUG_PRINTF("y= %f\n", y);
       DEBUG_PRINTF("yOld= %f\n", yOld);
-
-      if (!indexSet1->is_vertex(inter))
+      if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL) /* We activate Equality constraints
+                                                                                * only if there is an impact.
+                                                                                * we add them at the end */
       {
-        if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
+        if (!indexSet1->is_vertex(inter))
         {
-          // if Interaction has not been active in the previous calculation and xnow becomes active
-          indexSet1->copy_vertex(inter, *indexSet0);
-          topo->setHasChanged(true);
+          if (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS)
+          {
+            // if Interaction has not been active in the previous calculation and xnow becomes active
+            indexSet1->copy_vertex(inter, *indexSet0);
+            forecastImpact=true;
+            topo->setHasChanged(true);
+          }
         }
-      }
-      else
-      {
-        indexSet1->remove_vertex(inter);
-        topo->setHasChanged(true);
-        impactOccuredLastTimeStep = true;
-        inter->lambda(1)->zero(); // impulse is zero
+        else
+        {
+          indexSet1->remove_vertex(inter);
+          topo->setHasChanged(true);
+          impactOccuredLastTimeStep = true;
+          inter->lambda(1)->zero(); // impulse is zero
+        }
       }
     }
     else if (i == 2) // ACTIVE FOR CONTACT CALCULATIONS? Contacts which are closed but have not been closing in the last time step
@@ -246,6 +251,49 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     }
     else
       RuntimeException::selfThrow("TimeSteppingD1Minus::updateIndexSet, IndexSet[i > 2] does not exist.");
+  }
+
+  if (i==1)
+  {
+    if (forecastImpact) // we add equality constraints
+    {
+      for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
+      {
+        SP::Interaction inter = indexSet0->bundle(*uip);
+        if (!indexSet1->is_vertex(inter))
+        {
+          if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL) /* We activate Equality constraintsonly if there is an impact.
+                                                                                    * we add them a */
+          {
+            indexSet1->copy_vertex(inter, *indexSet0);
+            topo->setHasChanged(true);
+          }
+        }
+      }
+    }
+    else
+    {
+      for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip) // loop over ALL verices in indexSet0
+      {
+        SP::Interaction inter = indexSet0->bundle(*uip);
+
+
+
+        if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL) /* We activate Equality constraintsonly if there is an impact.
+                                                                                  * we add them a */
+        {
+          if (indexSet1->is_vertex(inter))
+          {
+            indexSet1->remove_vertex(inter);
+            topo->setHasChanged(true);
+            impactOccuredLastTimeStep = true;
+            inter->lambda(1)->zero(); // impulse is zero
+          }
+
+        }
+
+      }
+    }
   }
 
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);

@@ -252,8 +252,8 @@ public:
   virtual void computeJach(const double time, Interaction& inter)
   {
     computeJachq(time, inter);
-    //computeJachqDot(time, inter);
-    computeDotJachq(time, inter);
+    //computeJachqDot(time, inter); // This is not needed here
+    //computeDotJachq(time, inter);
     computeJachlambda(time, inter);
     computeJachqT(inter);
   }

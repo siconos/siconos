@@ -16,33 +16,45 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file NewtonEulerR.hpp
-
-*/
+/** \file NewtonEulerR.hpp
+ */
 #ifndef KneeJointRELATION_H
 #define KneeJointRELATION_H
 
 #include "SiconosKernel.hpp"
-
+/** \class KneeJointR
+ *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
+ *
+ */
 class KneeJointR : public NewtonEulerR
 {
 public:
   static int _sNbEqualities;
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(KneeJointR);
 
-  /*coodinate of the Knee point in the frame of d1*/
+  /** Coordinate of the knee point in the body frame of the first dynamical system _d1
+   */
   SP::SiconosVector _P0;
 
+  /** Pointers on the concerned dynamical systems*/
   SP::NewtonEulerDS _d1;
   SP::NewtonEulerDS _d2;
-  /*absolut coodinate G1P0 when d1 is located in q=(0,0,0,1,0,0,0). ie P0 in the frame of the object d1.*/
+
+  /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
+   * i.e. P0 in the body frame of d1.
+   * These values are computed when the constructor is called.
+   */
   double _G1P0x;
   double _G1P0y;
   double _G1P0z;
-  /*absolut coodinate G2P0 when d2 is located in q=(0,0,0,1,0,0,0). ie P0 in the frame of the object d2.*/
+
+  /** Absolute coodinates of the vector G2P0 when d2 is located in q=(0,0,0,1,0,0,0)
+   *  i.e. P0 in the body frame of d2.
+   * These values are computed when the constructor is called.
+   */
   double _G2P0x;
   double _G2P0y;
   double _G2P0z;
@@ -66,15 +78,25 @@ public:
   virtual ~KneeJointR() {};
 
   virtual void computeJachq(const double time, Interaction& inter);
+
   virtual void computeh(const double time, Interaction& inter);
+
+  virtual void computeDotJachq(const double time, Interaction& inter);
+
 protected:
 
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
+  /** \warning, the following function should also depend on q */
+  virtual void DotJd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void DotJd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 public:
   double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 };
+
+
+
 TYPEDEF_SPTR(KneeJointR)
 #endif // BEAMRELATION_H

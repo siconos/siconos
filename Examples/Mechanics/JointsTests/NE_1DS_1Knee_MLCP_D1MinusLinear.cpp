@@ -98,8 +98,8 @@ int main(int argc, char* argv[])
     unsigned int nDim = 6;
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
-    double h = 0.01;                // time step
-    int N = 1000;
+    double h = 0.001;                // time step
+    int N = 10000;
     double L1 = 1.0;
     double L2 = 1.0;
     double L3 = 1.0;

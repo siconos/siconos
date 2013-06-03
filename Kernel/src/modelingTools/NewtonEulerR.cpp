@@ -116,7 +116,10 @@ void NewtonEulerR::computeDotJachq(const double time, Interaction& inter)
       if (! _dotjachq)
       {
         unsigned int sizeY = inter.getSizeOfY();
-        _dotjachq.reset(new SimpleMatrix(sizeY, 7));
+        unsigned int xSize = inter.getSizeOfDS();
+        unsigned int qSize = 7 * (xSize / 6);
+
+        _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
       }
       ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -130,11 +133,14 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(const double time, Int
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
 
   // Compute the time derivative of the Jacobian
-  NewtonEulerR::computeDotJachq(time, inter);
+  computeDotJachq(time, inter);
   if (! _dotjachq) // lazy initialization
       {
         unsigned int sizeY = inter.getSizeOfY();
-        _dotjachq.reset(new SimpleMatrix(sizeY, 7));
+        unsigned int xSize = inter.getSizeOfDS();
+        unsigned int qSize = 7 * (xSize / 6);
+
+        _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
       }
   // Compute the product of the time derivative of the Jacobian with qdot
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
@@ -144,6 +150,9 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(const double time, Int
   DEBUG_EXPR(_dotjachq->display(););
 
   prod(1.0,*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
+
+
+  DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
 
   // Compute the product of jachq and Tdot --> jachqTdot
 
@@ -196,7 +205,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(const double time, Int
   SiconosVector workVelocity = *inter.data(velocity);
   DEBUG_EXPR(workVelocity.display(););
   prod(1.0, *jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
-
+  DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 
 }
@@ -236,6 +245,7 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
     }
     else if(derivativeNumber == 2)
     {
+
       std::cout << "Warning: we attempt to call NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) for derivativeNumber=2" << std::endl;
     }
     else
