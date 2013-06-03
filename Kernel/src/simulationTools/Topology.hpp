@@ -124,13 +124,13 @@ private:
    */
   void removeInteractionFromIndexSet(SP::Interaction inter);
 
+ public:
+
+  // --- CONSTRUCTORS/DESTRUCTOR ---
+
   /** default constructor
   */
   Topology();
-
-public:
-
-  // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** constructor from InteractionSet
   * \param a SP::InteractionSet

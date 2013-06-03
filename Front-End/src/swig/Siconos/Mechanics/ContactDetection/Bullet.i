@@ -1,5 +1,6 @@
 // -*- c++ -*-
-%module(directors="1", allprotected="1") ContactDetection
+// SWIG interface for Siconos Mechanics/ContactDetection/Bullet
+%module(directors="1", allprotected="1") Bullet
 
 %include start.i
 
@@ -12,6 +13,7 @@
 %include stl.i
 
 %include KernelTypes.i
+
 %{
 #include <SiconosKernel.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -23,13 +25,8 @@
 
 %fragment("NumPy_Fragments");
 
-PY_FULL_REGISTER(SpaceFilter);                                             
-PY_FULL_REGISTER(SiconosBodies);
-// yes, undefined private copy constructors
+// due to undefined private copy constructors
 %feature("notabstract") BulletTimeStepping;
-
-
-#ifdef WITH_BULLET
 
 // do not wrap visitor visit : this lead to a huge amount of wrapper
 // code generation and this fail at compile time on shared_ptr freearg
@@ -181,4 +178,3 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
 }
 
-#endif

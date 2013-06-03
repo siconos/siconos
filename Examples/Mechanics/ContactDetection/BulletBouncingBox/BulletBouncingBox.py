@@ -20,10 +20,10 @@
 #
 
 from Siconos.Kernel import \
-     Model, Moreau, TimeDiscretisation,\
-     FrictionContact, NewtonImpactFrictionNSL
+    Model, Moreau, TimeDiscretisation, \
+    FrictionContact, NewtonImpactFrictionNSL
 
-from Siconos.Mechanics.ContactDetection import \
+from Siconos.Mechanics.ContactDetection.Bullet import \
     btConvexHullShape, btVector3, btCollisionObject, \
     btBoxShape, btMatrix3x3, \
     BulletSpaceFilter, \
