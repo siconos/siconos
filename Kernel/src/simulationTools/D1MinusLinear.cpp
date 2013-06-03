@@ -375,7 +375,10 @@ double D1MinusLinear::computeResidu()
       DEBUG_EXPR(q->display());
       //q[3:6] must be normalized
       d->normalizeq();
+      d->updateT();
       DEBUG_PRINT("new q after normalizing\n");
+      DEBUG_EXPR(q->display());
+
 
 
     }
@@ -958,18 +961,38 @@ void D1MinusLinear::computeFreeOutput(SP::Interaction inter, OneStepNSProblem* o
       subprod(*CT, *Xfree, *Yp, coord, true);
     }
 
-    DEBUG_PRINT("D1MinusLinear::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
-    DEBUG_EXPR(Yp->display(););
+
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
-      // obtain the velocity
-      Xfree = inter->data(NewtonEulerR::velocity);
-      // Get the time--derivative of the Jacobian of the constraints \dot{Jachq}
-      //std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeNonLinearH2dot(simulation()->getTkp1(), *inter);
-      // Compute \dot{Jachq}.v
+      // in Yp corrections have to be added
+      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+      ID->eye();
 
-      // subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->Nonlinearh2dot()), *Yp, xcoord, false);
+      Index xcoord(8);
+      xcoord[0] = 0;
+      xcoord[1] = sizeY;
+      xcoord[2] = 0;
+      xcoord[3] = sizeY;
+      xcoord[4] = 0;
+      xcoord[5] = sizeY;
+      xcoord[6] = 0;
+      xcoord[7] = sizeY;
+
+      DEBUG_PRINT("D1MinusLinear::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
+      DEBUG_EXPR(Yp->display(););
+
+      /** Compute additional terms of the second order time derivative of constraints
+       *
+       * \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+       *
+       */
+      std11::static_pointer_cast<NewtonEulerR>(inter->relation())->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter);
+
+      DEBUG_EXPR((std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms())->display());
+
+      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), *Yp, xcoord, false);
+      DEBUG_EXPR(Yp->display(););
 
 
     }

@@ -442,6 +442,9 @@ void NewtonEulerDS::display() const
   cout << "- v0 " << endl;
   if (_v0) _v0->display();
   else cout << "-> NULL" << endl;
+  cout << "- dotq " << endl;
+  if (_dotq) _dotq->display();
+  else cout << "-> NULL" << endl;
   cout << "- p[0] " << endl;
   if (_p[0]) _p[0]->display();
   else cout << "-> NULL" << endl;
@@ -539,7 +542,7 @@ void NewtonEulerDS::updateTdot(SP::SiconosVector dotq)
 
   if (!_Tdot)
   {
-    _T.reset(new SimpleMatrix(_qDim, _n));
+    _Tdot.reset(new SimpleMatrix(_qDim, _n));
     _Tdot->zero();
   }
 

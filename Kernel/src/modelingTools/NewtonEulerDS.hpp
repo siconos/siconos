@@ -41,7 +41,7 @@ typedef void (*Fext)(double , double*, double*, double*);
  * \left\{\begin{array}{rcl}
  *   M \dot v &=& F_{ext}(q, v, \Omega, R), \\
  *   I \dot \Omega + \Omega \wedge I\Omega &=&  M_{ext}(q,v, \Omega, R), \\
- *   v &=& T(q) \dot q , \\
+ *   \dot q &=& T(q) v, \\
  *   \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
  * \end{array}\right.
  * \f}

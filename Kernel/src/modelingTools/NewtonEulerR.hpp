@@ -149,11 +149,13 @@ public:
     assert(_dotjachq);
     return _dotjachq;
   }
-  inline SP::SiconosVector dotjacqhXqdot()
+
+  inline SP::SiconosVector secondOrderTimeDerivativeTerms()
   {
-    assert(_dotjacqhXqdot);
-    return _dotjacqhXqdot;
+    assert(_secondOrderTimeDerivativeTerms);
+    return _secondOrderTimeDerivativeTerms;
   };
+
   inline SP::SiconosMatrix jachlambda() const
   {
     return _jachlambda;
@@ -190,8 +192,12 @@ public:
    */
   SP::PluggedObject _plugindotjacqh;
 
-  /** Product of  the time--derivative of Jacobian with the velocity qdot */
-  SP::SiconosVector _dotjacqhXqdot;
+  /**  the additional  terms of the second order time derivative of y
+   *
+   *    \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+   *
+   */
+  SP::SiconosVector _secondOrderTimeDerivativeTerms;
 
   /** initialize the relation (check sizes, memory allocation ...)
   \param SP to Interaction: the interaction that owns this relation
@@ -250,7 +256,6 @@ public:
     computeDotJachq(time, inter);
     computeJachlambda(time, inter);
     computeJachqT(inter);
-    computedotjacqhXqdot(time, inter);
   }
 
   /* compute all the G Jacobian */
@@ -261,11 +266,14 @@ public:
     computeJacglambda(time, inter);
   }
 
-  /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
+  /** To compute the terms of the second order time derivative of y
+   *
+   *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+   *
    * \param time double, current time
    * \param inter interaction that owns the relation
    */
-  void computedotjacqhXqdot(const double time, Interaction& inter);
+  void computeSecondOrderTimeDerivativeTerms(const double time, Interaction& inter);
 
   /** to compute output
   *  \param double : current time

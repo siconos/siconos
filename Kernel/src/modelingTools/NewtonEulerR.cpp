@@ -125,27 +125,80 @@ void NewtonEulerR::computeDotJachq(const double time, Interaction& inter)
   }
 }
 
-void  NewtonEulerR::computedotjacqhXqdot(const double time, Interaction& inter)
+void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(const double time, Interaction& inter)
 {
-  DEBUG_PRINT("NewtonEulerR::computedotjacqhXqdot starts\n");
-  // Compute the H Jacobian dot
+  DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
+
+  // Compute the time derivative of the Jacobian
   NewtonEulerR::computeDotJachq(time, inter);
   if (! _dotjachq) // lazy initialization
       {
         unsigned int sizeY = inter.getSizeOfY();
         _dotjachq.reset(new SimpleMatrix(sizeY, 7));
       }
-  _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
-  SiconosVector workQdot = *inter.data(q1);
+  // Compute the product of the time derivative of the Jacobian with qdot
+  _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
+
+  SiconosVector workQdot = *inter.data(q1); // we assume that qdot is up to date !
   DEBUG_EXPR(workQdot.display(););
   DEBUG_EXPR(_dotjachq->display(););
 
+  prod(1.0,*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
 
+  // Compute the product of jachq and Tdot --> jachqTdot
 
+  unsigned int k = 0;
+  DSIterator itDS;
+  unsigned int ySize = inter.getSizeOfY();
+  unsigned int xSize = inter.getSizeOfDS();
+  SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
+  SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
+  Index dimIndex(2);
+  Index startIndex(4);
+  itDS = inter.dynamicalSystemsBegin();
 
+  SP::SimpleMatrix jachqTdot(new SimpleMatrix(ySize, xSize));
 
-  prod(*_dotjachq, workQdot, *_dotjacqhXqdot);
-  DEBUG_PRINT("NewtonEulerR::computedotjacqhXqdot ends");
+  while (itDS != inter.dynamicalSystemsEnd())
+  {
+    startIndex[0] = 0;
+    startIndex[1] = 7 * k / 6;
+    startIndex[2] = 0;
+    startIndex[3] = 0;
+    dimIndex[0] = ySize;
+    dimIndex[1] = 7;
+    setBlock(_jachq, auxBloc, dimIndex, startIndex);
+
+    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (*itDS);
+    d.updateTdot();
+    SiconosMatrix& Tdot = *d.Tdot();
+
+    DEBUG_EXPR(d.display());
+    DEBUG_EXPR((d.Tdot())->display());
+
+    prod(*auxBloc, Tdot, *auxBloc2);
+
+    startIndex[0] = 0;
+    startIndex[1] = 0;
+    startIndex[2] = 0;
+    startIndex[3] = k;
+    dimIndex[0] = ySize;
+    dimIndex[1] = 6;
+
+    setBlock(auxBloc2, jachqTdot, dimIndex, startIndex);
+    DEBUG_EXPR(jachqTdot->display());
+
+    k += (*itDS)->getDim();
+    itDS++;
+  }
+
+  // compute the product of jachqTdot and v
+  SiconosVector workVelocity = *inter.data(velocity);
+  DEBUG_EXPR(workVelocity.display(););
+  prod(1.0, *jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
+
+  DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
+
 }
 
 
@@ -309,6 +362,11 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
 
 void NewtonEulerR::computeJachqT(Interaction& inter)
 {
+
+  DEBUG_PRINT("NewtonEulerR::computeJachqT(Interaction& inter) starts \n");
+  DEBUG_PRINTF("with inter =  %p\n",&inter);
+  DEBUG_EXPR(inter.display());
+
   unsigned int k = 0;
   DSIterator itDS;
   unsigned int ySize = inter.getSizeOfY();
@@ -317,16 +375,6 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
   Index dimIndex(2);
   Index startIndex(4);
   itDS = inter.dynamicalSystemsBegin();
-
-#ifdef NER_DEBUG
-  printf("\n");
-  printf("\n");
-  printf("\n");
-  printf("\n");
-  printf("NewtonEulerR::computeJachqT start");
-  printf("interaction %p\n",&inter);
-  inter.display();
-#endif
 
   while (itDS != inter.dynamicalSystemsEnd())
   {
@@ -339,17 +387,10 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
 
     NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (*itDS);
-#ifdef NER_DEBUG
-    printf("ds %p\n",&d);
-    d.display();
-#endif
-
     SiconosMatrix& T = *d.T();
 
-#ifdef NER_DEBUG
-    printf("ds.T() %p\n",&d);
-    (d.T())->display();
-#endif
+    DEBUG_EXPR(d.display());
+    DEBUG_EXPR((d.T())->display());
 
     prod(*auxBloc, T, *auxBloc2);
 
@@ -361,7 +402,13 @@ void NewtonEulerR::computeJachqT(Interaction& inter)
     dimIndex[1] = 6;
 
     setBlock(auxBloc2, _jachqT, dimIndex, startIndex);
+    DEBUG_EXPR(_jachqT->display());
+
     k += (*itDS)->getDim();
     itDS++;
   }
+
+  DEBUG_PRINT("NewtonEulerR::computeJachqT(Interaction& inter) ends \n")
+
+
 }
