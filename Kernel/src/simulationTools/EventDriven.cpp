@@ -38,7 +38,7 @@
 
 #include <debug.h>
 
-
+using namespace std;
 using namespace RELATION;
 
 // --- XML constructor ---
@@ -56,7 +56,7 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
   {
     SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
     SP::OneStepNSProblemXML osnsXML;
-    std::string type;
+    string type;
     // For EventDriven, two OSNSPb are required, "acceleration" and
     // "impact"
     _numberOfOneStepNSproblems = 2;
@@ -168,18 +168,10 @@ void EventDriven::updateIndexSet(unsigned int i)
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
       double y = inter->getYRef(0); // output to define the IndexSets at this Interaction
-      /*
-         if (i == 1)
-         {
-         std::cout << "Id of Interaction: " << inter->number() <<std::endl;
-         std::cout << "Output of level 0 at this Interaction: " << y <<std::endl;
-         std::cout <<std::endl;
-         }
-         */
       if (y < -TOL_ED) // y[0] < 0
       {
         inter->display();
-        std::cout << "y = " << y << " < -TOL_ED =  "   << -TOL_ED  <<std::endl;
+        cout << "y = " << y << " < -TOL_ED =  "   << -TOL_ED  <<endl;
         RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
       }
       // 1 - If the Interaction is not yet in the set
@@ -295,6 +287,7 @@ void EventDriven::initOSNS()
   assert(model()->nonSmoothDynamicalSystem()->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
+  // Note that interactions set may be empty.
   InteractionsGraph::VIterator ui, uiend;
   SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
@@ -311,24 +304,17 @@ void EventDriven::initOSNS()
   updateIndexSets();
   initOSIRhs();
 
-  if (!_allNSProblems->empty()) // ie if some Interactions have been
-    // declared and a Non smooth problem built.
+  if (!_allNSProblems->empty()) // ie if at least a non smooth problem has been built.
   {
     OSI::TYPES  osiType = (*_allOSI->begin())->getType();
     if (osiType == OSI::LSODAR) //EventDriven associated with Lsodar OSI
-    {
-      // === OneStepNSProblem initialization. === First check that
-      // there are 2 osns: one "impact" and one "acceleration"
-      // if(_allNSProblems->size()!=2)
-      //   RuntimeException::selfThrow
-      //     (" EventDriven::initialize, \n an EventDriven simulation associated with Lsodar must have two non smooth problem.\n Here, there are "
-      //      +_allNSProblems->size());
+    {      
     }
     else if (osiType == OSI::NEWMARKALPHAOSI) // EventDrivent asscociated with NewMarkAlpha
     {
       if (_allNSProblems->size() != 3)
         RuntimeException::selfThrow
-        (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problem.\n Here, there are "
+        (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
          + _allNSProblems->size());
       // Initialize OSNSP at position level
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setLevels(2, 2);
@@ -336,7 +322,7 @@ void EventDriven::initOSNS()
     }
     else
     {
-      RuntimeException::selfThrow(" EventDriven::initialize, this OneStepIntegrator has not implemented yet.");
+      RuntimeException::selfThrow(" EventDriven::initialize, OSI not yet implemented.");
     }
 
     if (!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) // ie if the impact problem does not
@@ -355,11 +341,14 @@ void EventDriven::initOSNS()
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(shared_from_this());
     //
     // Detect NonSmoothEvent at the beginning of the simulation
-    SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    if (indexSet1->size() != 0) // There is one non-smooth event to be added
+    if( topo->indexSetsSize() > 1)
     {
-      _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
-    };
+      SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+      if (indexSet1->size() != 0) // There is one non-smooth event to be added
+      {
+        _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
+      };
+    }
   }
 }
 
@@ -439,8 +428,6 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
 
 void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-  // std::cout << "EventDriven::computef -------------------------> start" <<std::endl;
-
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
@@ -463,7 +450,6 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     inter->computeJach(t);
   }
 
-
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty())
   {
@@ -476,6 +462,7 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     // Compute the right-hand side ( xdot = f + r in DS) for all the
     //ds, with the new value of input.  lsodar->computeRhs(t);
   }
+
   // update the DS of the OSI.
   lsodar.computeRhs(t);
   //  for the DS state, ie the ones computed by lsodar (x above)
@@ -504,9 +491,6 @@ void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
         xdot[i++] = xtmp2(j);
     }
   }
-
-  // std::cout << "EventDriven::computef -------------------------> stop" <<std::endl;
-
 }
 
 void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
@@ -702,7 +686,7 @@ void EventDriven::update(unsigned int levelInput)
   // Warning: index sets are not updated in this function !!
 }
 
-void EventDriven::advanceToEvent()
+void EventDriven::endlndEvent()
 {
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();
@@ -724,15 +708,15 @@ void EventDriven::advanceToEvent()
     _minConstraint = detectEvents();
     //
 #ifdef DEBUG_MESSAGES
-    std::cout << "========== EventDriven::advanceToEvent =============" <<std::endl;
-    std::cout.precision(15);
-    std::cout << "Istate: " << _istate <<std::endl;
-    std::cout << "Maximum value of constraint functions: " << _minConstraint <<std::endl;
+    cout << "========== EventDriven::advanceToEvent =============" <<endl;
+    cout.precision(15);
+    cout << "Istate: " << _istate <<endl;
+    cout << "Maximum value of constraint functions: " << _minConstraint <<endl;
 #endif
     //
     if (_istate != 2) //some events occur
     {
-      std::cout << "In EventDriven::advanceToEvent, some events are detected!!!" <<std::endl;
+      cout << "In EventDriven::advanceToEvent, some events are detected!!!" <<endl;
       if (std::abs(_minConstraint) < TOL_ED) // events occur at the end of the integration step
       {
         isNewEventOccur = true;
@@ -743,7 +727,7 @@ void EventDriven::advanceToEvent()
         LocalizeFirstEvent();
       }
       // add new event to the list to be handled
-      std::cout << "A new event occurs at time: " << _tout <<std::endl;
+      cout << "A new event occurs at time: " << _tout <<endl;
       _eventsManager->scheduleNonSmoothEvent(*this, _tout);
       model()->setCurrentTime(_tout);
     }
@@ -773,24 +757,24 @@ void EventDriven::advanceToEvent()
 
       (*it)->resetNonSmoothPart();
       //====================================================================================
-      //     std::cout << " Start of Lsodar integration" << std::endl;
+      //     cout << " Start of Lsodar integration" << endl;
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
 
-      //  std::cout << " End of Lsodar integration" << std::endl;
+      //  cout << " End of Lsodar integration" << endl;
       // SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
       // SA::integer iwork = lsodar->getIwork();
       // SA::doublereal rwork = lsodar->getRwork();
-      //  std::cout << "Number of steps used: " << iwork[10] <<std::endl;
-      //  std::cout << "Method order last used: " << iwork[13] <<std::endl;
-      //  std::cout << "Step size last used: " << rwork[10] <<std::endl;
+      //  cout << "Number of steps used: " << iwork[10] <<endl;
+      //  cout << "Method order last used: " << iwork[13] <<endl;
+      //  cout << "Step size last used: " << rwork[10] <<endl;
       // return a flag (_istate) telling if _tend has been  reached or not.
       //====================================================================================
 
       if (_printStat)
       {
-        statOut << " =================> Results after advanceToEvent <================= " <<std::endl;
-        statOut << " Starting time: " << _tinit <<std::endl;
-        statOut << " _istate " << _istate <<std::endl;
+        statOut << " =================> Results after advanceToEvent <================= " <<endl;
+        statOut << " Starting time: " << _tinit <<endl;
+        statOut << " _istate " << _istate <<endl;
       }
       if (_istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
       {
@@ -798,15 +782,15 @@ void EventDriven::advanceToEvent()
         // Add an event into the events manager list
         _eventsManager->scheduleNonSmoothEvent(*this, _tout);
         if (_printStat)
-          statOut << " -----------> New non-smooth event at time " << _tout <<std::endl;
+          statOut << " -----------> New non-smooth event at time " << _tout <<endl;
       }
       // if(_printStat)
       //   {
       //     SP::Lsodar lsodar = std11::static_pointer_cast<Lsodar>(*it);
-      //     statOut << "Results at time " << _tout << ":" <<std::endl;
+      //     statOut << "Results at time " << _tout << ":" <<endl;
       //     SA::integer iwork = lsodar->getIwork();
       //     SA::doublereal Rwork = lsodar->getRwork();
-      //     statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." <<std::endl;
+      //     statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." <<endl;
       //   }
     }
     // Set model time to _tout
@@ -879,7 +863,7 @@ double EventDriven::computeResiduConstraints()
         }
         //
 #ifdef DEBUG_MESSAGES
-        std::cout << "Contraint residu: " << _y <<std::endl;
+        cout << "Contraint residu: " << _y <<endl;
 #endif
         //
       }
@@ -891,7 +875,7 @@ double EventDriven::computeResiduConstraints()
   }
   //
 #ifdef DEBUG_MESSAGES
-  std::cout << "Maximum constraint residu: " << _maxResiduGap <<std::endl;
+  cout << "Maximum constraint residu: " << _maxResiduGap <<endl;
 #endif
   //
   return _maxResiduGap;
@@ -1015,8 +999,8 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     _isNewtonConverge = newtonCheckConvergence(_newtonTolerance);
     //
 #ifdef DEBUG_MESSAGES
-    std::cout << "Iteration: " << _newtonNbSteps <<std::endl;
-    std::cout << "Convergence: " << _isNewtonConverge <<std::endl;
+    cout << "Iteration: " << _newtonNbSteps <<endl;
+    cout << "Convergence: " << _isNewtonConverge <<endl;
 #endif
     //
     if (_isNewtonConverge)
@@ -1025,7 +1009,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     }
     if (_newtonNbSteps >  maxStep)
     {
-      std::cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep <<std::endl;
+      cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep <<endl;
     }
     // If no convergence, proceed iteration
     SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -1034,7 +1018,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
       info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
       if (info != 0)
       {
-        std::cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<std::endl;
+        cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<endl;
       }
     }
     // Correction of the state of all Dynamical Systems
@@ -1057,7 +1041,7 @@ double EventDriven::detectEvents(bool _IsUpdateIstate)
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   //
 #ifdef DEBUG_MESSAGES
-  std::cout << "======== In EventDriven::detectEvents =========" <<std::endl;
+  cout << "======== In EventDriven::detectEvents =========" <<endl;
 #endif
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -1112,12 +1096,12 @@ double EventDriven::detectEvents(bool _IsUpdateIstate)
     }
     //
 #ifdef DEBUG_MESSAGES
-    std::cout.precision(15);
-    std::cout << "Contact number: " << inter->number() <<std::endl;
-    std::cout << "Contact gap: " << (*y)(0) <<std::endl;
-    std::cout << "Contact force: " << (*lambda)(0) <<std::endl;
-    std::cout << "Is contact is closed: " << _IsContactClosed <<std::endl;
-    std::cout << "Is contact is opened: " << _IsContactOpened <<std::endl;
+    cout.precision(15);
+    cout << "Contact number: " << inter->number() <<endl;
+    cout << "Contact gap: " << (*y)(0) <<endl;
+    cout << "Contact force: " << (*lambda)(0) <<endl;
+    cout << "Is contact is closed: " << _IsContactClosed <<endl;
+    cout << "Is contact is opened: " << _IsContactOpened <<endl;
 #endif
     //
   }

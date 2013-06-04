@@ -264,10 +264,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     for_each(allInteractions->begin(), allInteractions->end(),
              std11::bind(&Interaction::initialize, _1, _tinit));
-
-    // Initialize OneStepNSProblem: in derived classes specific functions.
-    initOSNS();
   }
+  // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  // Warning FP : must be done in any case, even if the interactions set
+  // is empty.
+  initOSNS();
+  
   // Process events at time _tinit. Useful to save values in memories
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of

@@ -136,13 +136,13 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector lambda = inter->lambda(1);
+    //SP::SiconosVector lambda = inter->lambda(1);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
+    //dataPlot(0, 4) = (*lambda)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-      dataPlot(k, 4) = (*lambda)(0);
+      //dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
       ++show_progress;
       k++;

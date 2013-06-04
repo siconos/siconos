@@ -235,8 +235,6 @@ void Lsodar::initialize()
 
   // 2 - Ng, number of constraints:
   _intData[1] = std11::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
-  //_intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
-
   // 3 - Itol, itask, iopt
   _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.

@@ -125,15 +125,9 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
     const bool& isBVP):
   _BVP(isBVP), _mIsLinear(true)
 {
-
-  //   if( listOfInteractions.isEmpty())
-  //     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
-
   // === "copy" listOfDS/listOfInteractions in allDSLocal/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.
 
-  //allDSLocal.reset(new DynamicalSystemsSet());
-  //allInteractions.reset(new InteractionsSet());
   InteractionsIterator itInter;
   DSIterator itDS;
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
