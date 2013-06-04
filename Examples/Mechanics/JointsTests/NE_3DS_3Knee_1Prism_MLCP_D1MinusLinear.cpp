@@ -502,7 +502,7 @@ int main(int argc, char* argv[])
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
+    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear.ref", "ascii", dataPlotRef);
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
       (dataPlot - dataPlotRef).display();

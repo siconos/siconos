@@ -232,6 +232,7 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
      *  but we use instead _jachqT which is not updated in this method !!
      */
     computeJachq(time, inter);
+    DEBUG_EXPR(_jachq->display(););
 
     SiconosVector& y = *inter.y(derivativeNumber);
     
@@ -240,7 +241,6 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
       assert(_jachqT);
       assert(inter.data(velocity));
       DEBUG_EXPR(_jachqT->display(););
-
       prod(*_jachqT, *inter.data(velocity), y);
     }
     else if(derivativeNumber == 2)
