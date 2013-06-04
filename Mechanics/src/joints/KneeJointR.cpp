@@ -23,8 +23,8 @@
 #include "KneeJointR.hpp"
 #include <boost/math/quaternion.hpp>
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 int KneeJointR::_sNbEqualities = 3;

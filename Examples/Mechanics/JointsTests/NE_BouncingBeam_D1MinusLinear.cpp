@@ -98,12 +98,12 @@ int main(int argc, char* argv[])
     unsigned int nDim = 6;
     double t0 = 0;                   // initial computation time
     double T = 10.0;                  // final computation time
-    double h = 0.01;                // time step
+    double h = 0.001;                // time step
     int N = 1000;
     double L1 = 1.0;
-    double L2 = 1.0;
+    //double L2 = 1.0;
     double L3 = 1.0;
-    double theta = 1.0;              // theta for Moreau integrator
+    //double theta = 1.0;              // theta for Moreau integrator
     double g = 9.81; // Gravity
     double m = 1.;
 
@@ -167,10 +167,10 @@ int main(int argc, char* argv[])
 
 
     // Interaction with the floor
-    double e = 0.9;
+    double e = 0.1;
     SP::SimpleMatrix H(new SimpleMatrix(1, qDim));
     SP::SiconosVector eR(new SiconosVector(1));
-    eR->setValue(0, 2.3);
+    eR->setValue(0, 2.0);
     H->zero();
     (*H)(0, 2) = 1.0;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
@@ -262,6 +262,8 @@ int main(int argc, char* argv[])
     SP::SiconosVector q3 = bouncingbeam->q();
     SP::SiconosVector y= interFloor->y(0);
     SP::SiconosVector ydot= interFloor->y(1);
+    SP::SiconosVector lambda= interFloor->lambda(2);
+    SP::SiconosVector lambda1= interFloor->lambda(1);
     std::cout << "computeH0\n";
     relation0->computeh(0., *interFloor);
     //    std::cout<<"computeH4\n";
@@ -301,8 +303,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*q3)(5);
       dataPlot(k, 7) = (*q3)(6);
 
-      dataPlot(k, 8) = y->norm2();
-      dataPlot(k, 9) = ydot->norm2();
+      dataPlot(k, 8) = y->getValue(0);
+      dataPlot(k, 9) = ydot->getValue(0);
+      dataPlot(k, 10) = (*lambda)(0);
+      dataPlot(k, 11) = (*lambda1)(0);
 
 
 

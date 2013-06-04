@@ -27,8 +27,8 @@
 using namespace std;
 
 //#define NER_DEBUG
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 void NewtonEulerR::initComponents(Interaction& inter)
@@ -239,7 +239,7 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
     {
       assert(_jachqT);
       assert(inter.data(velocity));
-      _jachqT->display();
+      DEBUG_EXPR(_jachqT->display(););
 
       prod(*_jachqT, *inter.data(velocity), y);
     }

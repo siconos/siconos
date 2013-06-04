@@ -27,8 +27,8 @@
 #include "LagrangianR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;

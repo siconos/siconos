@@ -177,7 +177,6 @@ int main(int argc, char* argv[])
     // input  - the concerned DS : beam1
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
-
     SP::Interaction inter1(new Interaction("axis-beam1", allDS1, 0, KneeJointR::_sNbEqualities, nslaw1, relation1));
     allInteractions.insert(inter1);
 

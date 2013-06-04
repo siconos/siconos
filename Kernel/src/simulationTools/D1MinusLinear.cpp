@@ -27,8 +27,8 @@
 #include "NewtonImpactNSL.hpp"
 
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace std;
@@ -687,7 +687,7 @@ double D1MinusLinear::computeResidu()
 
   } // No impact
 
-  DEBUG_PRINT("D1MinusLinear::computeResidu(), end\n");
+  DEBUG_PRINT("D1MinusLinear::computeResidu() ends\n");
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
 
