@@ -149,8 +149,8 @@ public:
   inline void setCPtr(SP_PluggedMatrix newPtr) {Jach[0] = newPtr;}
   */
   /** set a specified function to compute the matrix C
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
+  *  \param std::string : the complete path to the plugin
+  *  \param std::string : the function name to use in this plugin
   */
 
 
@@ -183,8 +183,8 @@ public:
   */
 
   /** set a specified function to compute the matrix D
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
+  *  \param std::string : the complete path to the plugin
+  *  \param std::string : the function name to use in this plugin
   */
   void setComputeDFunction(const std::string& pluginPath, const std::string& functionName)
   {
@@ -209,8 +209,8 @@ public:
   }
 
   /** set a specified function to compute the matrix F
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
+  *  \param std::string : the complete path to the plugin
+  *  \param std::string : the function name to use in this plugin
   void setComputeFFunction(const std::string& , const std::string& );
   */
 
@@ -229,8 +229,8 @@ public:
   }
 
   //   /** set a specified function to compute the matrix B
-  //    *  \param string : the complete path to the plugin
-  //    *  \param string : the function name to use in this plugin
+  //    *  \param std::string : the complete path to the plugin
+  //    *  \param std::string : the function name to use in this plugin
   //    */
   void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
   {

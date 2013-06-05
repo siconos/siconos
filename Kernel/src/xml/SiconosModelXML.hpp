@@ -115,7 +115,7 @@ public:
   SiconosModelXML();
 
   /** Build an SiconosModelXML object from a Siconos XML data file
-  *   \param siconosModelXMLFilePath : the path string of the Siconos XML data file
+  *   \param siconosModelXMLFilePath : the path std::string of the Siconos XML data file
   *   \exception XMLException : exception may be the XML file does not exist ; XML schema has wrong syntax  or the XML file does not respect it ; etc.
   */
   SiconosModelXML(const std::string& siconosModelXMLFilePath);
@@ -134,7 +134,7 @@ public:
   }
 
   /** Gets the title of the model
-  *   \return string
+  *   \return std::string
   */
   inline const std::string  title()
   {
@@ -142,7 +142,7 @@ public:
   }
 
   /** Gets the author of the model
-  *   \return string
+  *   \return std::string
   */
   inline const std::string  author()
   {
@@ -150,7 +150,7 @@ public:
   }
 
   /** Gets the Description of the model
-  *   \return string
+  *   \return std::string
   */
   inline const std::string  description()
   {
@@ -158,7 +158,7 @@ public:
   }
 
   /** Gets the date of the model
-  *   \return string
+  *   \return std::string
   */
   inline const std::string  date()
   {
@@ -166,7 +166,7 @@ public:
   }
 
   /** Gets the XML Schema of the model
-  *   \return string
+  *   \return std::string
   */
   inline const std::string  getXMLSchema()
   {
@@ -174,7 +174,7 @@ public:
   }
 
   /** allows to save the title of the DynamicalSystemXML
-  *   \param string : The string s of the DynamicalSystemXML
+  *   \param std::string : The std::string s of the DynamicalSystemXML
   */
   inline void setTitle(const std::string&  s)
   {
@@ -184,7 +184,7 @@ public:
   }
 
   /** allows to save the author of the DynamicalSystemXML
-  *   \param string : The string s of the DynamicalSystemXML
+  *   \param std::string : The std::string s of the DynamicalSystemXML
   */
   inline void setAuthor(const std::string&  s)
   {
@@ -194,7 +194,7 @@ public:
   }
 
   /** allows to save the Description of the DynamicalSystemXML
-  *   \param string : The string s of the DynamicalSystemXML
+  *   \param std::string : The std::string s of the DynamicalSystemXML
   */
   inline void setDescription(const std::string&  s)
   {
@@ -204,7 +204,7 @@ public:
   }
 
   /** allows to save the date of the DynamicalSystemXML
-  *   \param string : The string s of the DynamicalSystemXML
+  *   \param std::string : The std::string s of the DynamicalSystemXML
   */
   inline void setDate(const std::string&  s)
   {
@@ -214,7 +214,7 @@ public:
   }
 
   /** allows to save the xml schema of the DynamicalSystemXML
-  *   \param string : The string s of the DynamicalSystemXML
+  *   \param std::string : The std::string s of the DynamicalSystemXML
   */
   inline void setXMLSchema(const std::string&  s)
   {
@@ -357,7 +357,7 @@ public:
   }
 
   /** Saves the Siconos Model creating a Siconos XML data file
-  *   \param siconosModelXMLFilePath the path string of the Siconos XML data file to save
+  *   \param siconosModelXMLFilePath the path std::string of the Siconos XML data file to save
   */
   void saveSiconosModelInXMLFile(const char *siconosModelXMLFilePath);
 
@@ -381,8 +381,8 @@ public:
   void loadModel(SP::Model);
 
   /**
-  *  \param string :
-  *  \param string :
+  *  \param std::string :
+  *  \param std::string :
   *  \return int :
   */
   int validateXmlFile(const std::string&  xmlFile, const std::string&  xmlSchema);

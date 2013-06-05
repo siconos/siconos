@@ -25,7 +25,7 @@
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 
-using namespace std;
+
 
 class SimpleMatrixTest : public CppUnit::TestFixture
 {
@@ -159,7 +159,7 @@ private:
   SP::SiconosMatrix SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb, Cb2;
   SPC::SiconosMatrix A, B, Ab, Bb;
   SP::SimpleMatrix SimM;
-  string fic1, fic2;
+  std::string fic1, fic2;
   SP::SiconosVector vect1, vect2, vect3;
   SP::DenseMat  D;
   SP::TriangMat T, T2;

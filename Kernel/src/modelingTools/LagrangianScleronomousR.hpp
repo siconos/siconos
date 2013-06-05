@@ -23,7 +23,8 @@
 #define LagrangianScleronomousR_H
 
 #include "LagrangianR.hpp"
-/** Scleronomic Lagrangian (Non Linear) Relations
+/** \class LagrangianScleronomousR
+ * \brief   Scleronomic Lagrangian (Non Linear) Relations
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -35,11 +36,11 @@
  * \f]
  *
  * \f[
- * \dot y = \nabla^\top_q h(q,z) \dot q \\
+ * \dot y = \nabla^\top_q h(q,z) \dot q
  * \f]
  * or more generally
  * \f[
- * \dot y = H(q,z) \dot q \\
+ * \dot y = H(q,z) \dot q
  * \f]
  *
  * and by duality
@@ -59,7 +60,7 @@
  * \f]
  *
  *  y (or its discrete approximation) is stored in y[0]
- * \$f \dot y \$f (or its discrete approximation) is  stored in y[1]
+ * \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
  *  higher level y[i] can be used for storing higher levels of derivatives.
  *
  * Jacobians and h are connected to plug-in functions.\n
@@ -133,27 +134,27 @@ public:
   LagrangianScleronomousR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param string : the name of the plugin to compute h(q,z).\n
+  *  \param std::string : the name of the plugin to compute h(q,z).\n
   * The signature  of the plugged function must be:
   *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
-  *  \param string : the name of the plugin to compute jacobian h according to q.\n
+  *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
   *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
-  *  \exception RuntimeException
+  *
   */
   LagrangianScleronomousR(const std::string&, const std::string&);
 
   /** constructor from a set of data used for EventDriven Scheme
-  *  \param string : the name of the plugin to compute h(q,z).\n
+  *  \param std::string : the name of the plugin to compute h(q,z).\n
   * The signature  of the plugged function must be:
   *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
-  *  \param string : the name of the plugin to compute jacobian h according to q.\n
+  *  \param std::string : the name of the plugin to compute jacobian h according to q.\n
   * The signature  of the plugged function must be:
   *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
-  * \param string: the name of the plugin to compute the derivative of H Jacobian with respect to time
+  * \param std::string: the name of the plugin to compute the derivative of H Jacobian with respect to time
   * The signature of the plugged function must be:
   * "void pluginS0(unsigned int, const double*,unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
-  *\exception RuntimeException
+  *
   */
   LagrangianScleronomousR(const std::string&, const std::string&, const std::string&);
 

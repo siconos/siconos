@@ -129,91 +129,91 @@ void SimpleMatrixTest::tearDown()
 
 void SimpleMatrixTest::testConstructor0() // constructor with TYP and dim
 {
-  cout << "====================================" << endl;
-  cout << "=== Simple Matrix tests start ...=== " << endl;
-  cout << "====================================" << endl;
-  cout << "--> Test: constructor 0." << endl;
+  std::cout << "====================================" <<std::endl;
+  std::cout << "=== Simple Matrix tests start ...=== " <<std::endl;
+  std::cout << "====================================" <<std::endl;
+  std::cout << "--> Test: constructor 0." <<std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(2, 3));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->normInf() < tol, true);
-  cout << "--> Constructor 0 test ended with success." << endl;
+  std::cout << "--> Constructor 0 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor1() // Copy constructor, from a SimpleMatrix
 {
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(*SimM));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test == *SimM, true);
-  cout << "--> Constructor 1 (copy) test ended with success." << endl;
+  std::cout << "--> Constructor 1 (copy) test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor2() // Copy constructor, from a SiconosMatrix
 {
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   SP::SimpleMatrix  test(new SimpleMatrix(*SicM));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test == *SicM, true);
-  cout << "--> Constructor 2 (copy) test ended with success." << endl;
+  std::cout << "--> Constructor 2 (copy) test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor3() // Copy constructor, from a BlockMatrix
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(*Ab));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *test == *Ab, true);
-  cout << "--> Constructor 3 (copy) test ended with success." << endl;
+  std::cout << "--> Constructor 3 (copy) test ended with success." <<std::endl;
 }
 
 // void SimpleMatrixTest::testConstructor3()
 // {
-//   cout << "--> Test: constructor 3." << endl;
+//   std::cout << "--> Test: constructor 3." <<std::endl;
 //   SP::SimpleMatrix test(new SimpleMatrix(Siconos::SPARSE);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->getNum() == 4, true);
-//   cout << "--> Constructor 3 test ended with success." << endl;
+//   std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 // }
 
 void SimpleMatrixTest::testConstructor4()
 {
-  cout << "--> Test: constructor 4." << endl;
+  std::cout << "--> Test: constructor 4." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*D));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", norm_inf(test->getDense() - *D) == 0, true);
-  cout << "--> Constructor 4 test ended with success." << endl;
+  std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor5()
 {
-  cout << "--> Test: constructor 5." << endl;
+  std::cout << "--> Test: constructor 5." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*T));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test->getNum() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", norm_inf(test->getTriang() - *T) == 0, true);
-  cout << "--> Constructor 5 test ended with success." << endl;
+  std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor6()
 {
-  cout << "--> Test: constructor 6." << endl;
+  std::cout << "--> Test: constructor 6." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*S));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", test->getNum() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(test->getSym() - *S) == 0, true);
-  cout << "--> Constructor 6 test ended with success." << endl;
+  std::cout << "--> Constructor 6 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor7()
 {
-  cout << "--> Test: constructor 7." << endl;
+  std::cout << "--> Test: constructor 7." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*SP));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", test->getNum() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", norm_inf(test->getSparse() - *SP) == 0, true);
-  cout << "--> Constructor 7 test ended with success." << endl;
+  std::cout << "--> Constructor 7 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor8()
 {
-  cout << "--> Test: constructor 8." << endl;
-  cout << "--> Constructor 8 test ended with success." << endl;
+  std::cout << "--> Test: constructor 8." <<std::endl;
+  std::cout << "--> Constructor 8 test ended with success." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*Band));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", test->getNum() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", norm_inf(test->getBanded() - *Band) == 0, true);
@@ -221,7 +221,7 @@ void SimpleMatrixTest::testConstructor8()
 
 void SimpleMatrixTest::testConstructor9() // constructor with TYP and dim and input value
 {
-  cout << "--> Test: constructor 9." << endl;
+  std::cout << "--> Test: constructor 9." <<std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(2, 3, 4.5));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->getNum() == 1, true);
@@ -232,21 +232,21 @@ void SimpleMatrixTest::testConstructor9() // constructor with TYP and dim and in
     {
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", (*test)(i, j) == 4.5, true);
     }
-  cout << "--> Constructor 9 test ended with success." << endl;
+  std::cout << "--> Constructor 9 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor10()
 {
-  cout << "--> Test: constructor 10." << endl;
+  std::cout << "--> Test: constructor 10." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(fic1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor10 : ", *test == *SicM, true);
-  cout << "--> Constructor 10 test ended with success." << endl;
+  std::cout << "--> Constructor 10 test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testConstructor11()
 {
-  cout << "--> Test: constructor 11." << endl;
-  cout << "--> Constructor 11 test ended with success." << endl;
+  std::cout << "--> Test: constructor 11." <<std::endl;
+  std::cout << "--> Constructor 11 test ended with success." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*Z));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->getNum() == 6, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->normInf() == 0, true);
@@ -254,8 +254,8 @@ void SimpleMatrixTest::testConstructor11()
 
 void SimpleMatrixTest::testConstructor12()
 {
-  cout << "--> Test: constructor 12." << endl;
-  cout << "--> Constructor 12 test ended with success." << endl;
+  std::cout << "--> Test: constructor 12." <<std::endl;
+  std::cout << "--> Constructor 12 test ended with success." <<std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*I));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->getNum() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
@@ -265,7 +265,7 @@ void SimpleMatrixTest::testConstructor12()
 
 void SimpleMatrixTest::testZero()
 {
-  cout << "--> Test: zero." << endl;
+  std::cout << "--> Test: zero." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*SimM));
   tmp->zero();
   unsigned int n1 = tmp->size(0);
@@ -273,12 +273,12 @@ void SimpleMatrixTest::testZero()
   for (unsigned int i = 0; i < n1; ++i)
     for (unsigned int j = 0; j < n2; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*tmp)(i, j) == 0, true);
-  cout << "--> zero test ended with success." << endl;
+  std::cout << "--> zero test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testEye()
 {
-  cout << "--> Test: eye." << endl;
+  std::cout << "--> Test: eye." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*SimM));
   tmp->eye();
   unsigned int n1 = tmp->size(0);
@@ -289,12 +289,12 @@ void SimpleMatrixTest::testEye()
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testEye : ", (*tmp)(i, j) == 0, true);
       else
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testEye : ", (*tmp)(i, j) == 1, true);
-  cout << "--> eye test ended with success." << endl;
+  std::cout << "--> eye test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testResize()
 {
-  cout << "--> Test: resize." << endl;
+  std::cout << "--> Test: resize." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*SicM));
   tmp->resize(3, 4);
   unsigned int n1 = SicM->size(0);
@@ -327,20 +327,20 @@ void SimpleMatrixTest::testResize()
   //   for(unsigned int i = 0; i<1; ++i)
   //     for(unsigned int j=0;j<2;++j)
   //       CPPUNIT_ASSERT_EQUAL_MESSAGE("testResize : ", (*tmp)(i,j) == 0 , true);
-  cout << "--> resize test ended with success." << endl;
+  std::cout << "--> resize test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testNormInf()
 {
-  cout << "--> Test: normInf." << endl;
+  std::cout << "--> Test: normInf." <<std::endl;
   double n = SicM->normInf();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNormInf: ", n == 7 , true);
-  cout << "--> normInf test ended with success." << endl;
+  std::cout << "--> normInf test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testSetBlock()
 {
-  cout << "--> Test: testSetBlock." << endl;
+  std::cout << "--> Test: testSetBlock." <<std::endl;
 
   // Copy of a sub-block of a Simple into a Simple
   SP::SiconosMatrix MIn(new SimpleMatrix(10, 10));
@@ -382,12 +382,12 @@ void SimpleMatrixTest::testSetBlock()
     for (unsigned int j = subPos[3] ; j < subPos[3] + subDim[1]; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock: ", fabs((*MOut)(i, j) - (*Ab)(i, j)) < tol , true);
 
-  cout << "-->  setBlock test ended with success." << endl;
+  std::cout << "-->  setBlock test ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testSetBlock2()
 {
-  cout << "--> Test: testSetBlock2." << endl;
+  std::cout << "--> Test: testSetBlock2." <<std::endl;
   // Copy of a Simple into a sub-block of Simple
   SP::SimpleMatrix MOut(new SimpleMatrix(10, 10));
 
@@ -411,13 +411,13 @@ void SimpleMatrixTest::testSetBlock2()
     for (unsigned int j = 3 ; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock2: ", fabs((*MOut)(i, j) - (*MIn)(i - 2, j - 3)) < tol , true);
 
-  cout << "-->  setBlock2 test ended with success." << endl;
+  std::cout << "-->  setBlock2 test ended with success." <<std::endl;
 }
 
 
 void SimpleMatrixTest::testGetSetRowCol()
 {
-  cout << "--> Test: get, set Row and Col." << endl;
+  std::cout << "--> Test: get, set Row and Col." <<std::endl;
 
   SP::SiconosVector vIn(new SiconosVector(10, 1.2));
   SP::BlockVector vBIn(new BlockVector());
@@ -455,12 +455,12 @@ void SimpleMatrixTest::testGetSetRowCol()
   for (unsigned int i = 0; i < C->size(0); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - (*vIn)(i)) < tol, true);
 
-  cout << "--> get, set Row and Col tests ended with success." << endl;
+  std::cout << "--> get, set Row and Col tests ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testTrans()
 {
-  cout << "--> Test: trans." << endl;
+  std::cout << "--> Test: trans." <<std::endl;
 
   // Transpose in place ...
   SP::SimpleMatrix ref(new SimpleMatrix(*D));
@@ -513,13 +513,13 @@ void SimpleMatrixTest::testTrans()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(i,j) , true);
   //       else
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(j,i) , true);
-  cout << "-->  test trans ended with success." << endl;
+  std::cout << "-->  test trans ended with success." <<std::endl;
 }
 
 
 void SimpleMatrixTest::testAssignment0()
 {
-  cout << "--> Test: assignment0." << endl;
+  std::cout << "--> Test: assignment0." <<std::endl;
 
   // Simple = Simple
 
@@ -603,23 +603,23 @@ void SimpleMatrixTest::testAssignment0()
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
 
-  cout << "-->  test assignment0 ended with success." << endl;
+  std::cout << "-->  test assignment0 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testAssignment1()
 {
-  cout << "--> Test: assignment1." << endl;
+  std::cout << "--> Test: assignment1." <<std::endl;
 
   // Simple = Siconos(Block)
 
   *C = *Ab;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment1: ", (*C) == (*Ab) , true);
-  cout << "-->  test assignment1 ended with success." << endl;
+  std::cout << "-->  test assignment1 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testAssignment2()
 {
-  cout << "--> Test: assignment2." << endl;
+  std::cout << "--> Test: assignment2." <<std::endl;
 
   // Simple = Siconos(Simple)
 
@@ -703,12 +703,12 @@ void SimpleMatrixTest::testAssignment2()
   ref.reset(new SimpleMatrix(*I2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  cout << "-->  test assignment2 ended with success." << endl;
+  std::cout << "-->  test assignment2 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators1()
 {
-  cout << "--> Test: operators1." << endl;
+  std::cout << "--> Test: operators1." <<std::endl;
   //+=, -=, *=, /=
 
   SP::SiconosMatrix tmp(new SimpleMatrix(*D));
@@ -759,12 +759,12 @@ void SimpleMatrixTest::testOperators1()
     for (unsigned int j = 0 ; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*C)(i, j) - (*Ab)(i, j)) < tol , true);
 
-  cout << "-->  test operators1 ended with success." << endl;
+  std::cout << "-->  test operators1 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators2()
 {
-  cout << "--> Test: operators2." << endl;
+  std::cout << "--> Test: operators2." <<std::endl;
   // +=, -=, *=, /= triangular
   SP::SiconosMatrix tmp(new SimpleMatrix(*T));
   SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
@@ -799,12 +799,12 @@ void SimpleMatrixTest::testOperators2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getTriang() - *T) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 2 , true);
 
-  cout << "-->  test operators2 ended with success." << endl;
+  std::cout << "-->  test operators2 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators3()
 {
-  cout << "--> Test: operators3." << endl;
+  std::cout << "--> Test: operators3." <<std::endl;
   // +=, -=, *=, /= Symmetric
   SP::SiconosMatrix tmp(new SimpleMatrix(*S));
   SP::SiconosMatrix tmp2(new SimpleMatrix(*S));
@@ -839,12 +839,12 @@ void SimpleMatrixTest::testOperators3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getSym() - *S) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 3 , true);
 
-  cout << "-->  test operators3 ended with success." << endl;
+  std::cout << "-->  test operators3 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators4()
 {
-  cout << "--> Test: operators4." << endl;
+  std::cout << "--> Test: operators4." <<std::endl;
   // +=, -=, *=, /= sparse
   SP::SiconosMatrix tmp(new SimpleMatrix(*SP));
   SP::SiconosMatrix tmp2(new SimpleMatrix(*SP));
@@ -927,12 +927,12 @@ void SimpleMatrixTest::testOperators4()
     for (unsigned int j = 0; j < tmp->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP)(i, j)) < tol , true);
 
-  cout << "-->  test operators4 ended with success." << endl;
+  std::cout << "-->  test operators4 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators5()
 {
-  cout << "--> Test: operators5." << endl;
+  std::cout << "--> Test: operators5." <<std::endl;
   // +=, -=, *=, /= banded
   SP::SiconosMatrix tmp(new SimpleMatrix(*Band));
   SP::SiconosMatrix tmp2(new SimpleMatrix(*Band));
@@ -967,12 +967,12 @@ void SimpleMatrixTest::testOperators5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getBanded() - *Band) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 5 , true);
 
-  cout << "-->  test operators5 ended with success." << endl;
+  std::cout << "-->  test operators5 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators6()
 {
-  cout << "--> Test: operator6." << endl;
+  std::cout << "--> Test: operator6." <<std::endl;
 
   // ============= C = A + B =============
 
@@ -1107,12 +1107,12 @@ void SimpleMatrixTest::testOperators6()
     for (unsigned int j = 0 ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6: ", fabs((*Cb)(i, j) - (*Ab)(i, j) + (*Bb)(i, j)) < tol, true);
   Cb->zero();
-  cout << "-->  test operators6 ended with success." << endl;
+  std::cout << "-->  test operators6 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators6Bis()
 {
-  cout << "--> Test: operator6Bis." << endl;
+  std::cout << "--> Test: operator6Bis." <<std::endl;
 
   // ============= C = A + B =============
 
@@ -1247,12 +1247,12 @@ void SimpleMatrixTest::testOperators6Bis()
     for (unsigned int j = 0 ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) + (*Bb)(i, j)) < tol, true);
   Cb->zero();
-  cout << "-->  test operators6Bis ended with success." << endl;
+  std::cout << "-->  test operators6Bis ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators6Ter()
 {
-  cout << "--> Test: operator6Ter." << endl;
+  std::cout << "--> Test: operator6Ter." <<std::endl;
 
   // +, - , prod for non-dense matrices.
 
@@ -1320,12 +1320,12 @@ void SimpleMatrixTest::testOperators6Ter()
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res)(i, j) == 0, true);
 
-  cout << "-->  test operators6Ter6 ended with success." << endl;
+  std::cout << "-->  test operators6Ter6 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators7()
 {
-  cout << "--> Test: operator7." << endl;
+  std::cout << "--> Test: operator7." <<std::endl;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*D));
   tmp1->resize(4, 4);
   SP::SiconosMatrix tmp2(new SimpleMatrix(*T2));
@@ -1850,14 +1850,14 @@ void SimpleMatrixTest::testOperators7()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*res)(i, j) + (*tmp7)(i, j)) < tol, true);
   }
 
-  cout << "-->  test operators7 ended with success." << endl;
+  std::cout << "-->  test operators7 ended with success." <<std::endl;
 }
 
 
 
 void SimpleMatrixTest::testOperators8()
 {
-  cout << "--> Test: operator8." << endl;
+  std::cout << "--> Test: operator8." <<std::endl;
 
   // Simple = Simple * Simple
   *C = prod(*A, *B);
@@ -1947,12 +1947,12 @@ void SimpleMatrixTest::testOperators8()
   *res = prod(*tmp5, *tmp3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
-  cout << "-->  test operators8 ended with success." << endl;
+  std::cout << "-->  test operators8 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators8Bis()
 {
-  cout << "--> Test: operator8Bis." << endl;
+  std::cout << "--> Test: operator8Bis." <<std::endl;
   // Simple = Simple * Simple
   prod(*A, *B, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
@@ -2042,12 +2042,12 @@ void SimpleMatrixTest::testOperators8Bis()
   prod(*tmp5, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
-  cout << "-->  test operators8Bis ended with success." << endl;
+  std::cout << "-->  test operators8Bis ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators8Ter()
 {
-  cout << "--> Test: operator8Ter." << endl;
+  std::cout << "--> Test: operator8Ter." <<std::endl;
   // Simple = Simple * Simple
   axpy_prod(*A, *B, *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
@@ -2075,12 +2075,12 @@ void SimpleMatrixTest::testOperators8Ter()
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j) - (*backUp)(i, j)) < tol, true);
 
-  cout << "-->  test operators8Ter ended with success." << endl;
+  std::cout << "-->  test operators8Ter ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators8_4() // C += A*B
 {
-  cout << "--> Test: operator8_4." << endl;
+  std::cout << "--> Test: operator8_4." <<std::endl;
   // Simple = Simple * Simple
   C->zero();
   prod(*A, *B, *C, false);
@@ -2096,14 +2096,14 @@ void SimpleMatrixTest::testOperators8_4() // C += A*B
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - 2 * (*tmp)(i, j)) < tol, true);
-  cout << "-->  test operators8_4 ended with success." << endl;
+  std::cout << "-->  test operators8_4 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators8_5()
 {
   // == Test subprod ==
 
-  cout << "--> Test: operator8_5." << endl;
+  std::cout << "--> Test: operator8_5." <<std::endl;
   Index coord(8);
   SP::SiconosVector x1(new SiconosVector(2));
   SP::SiconosVector x2(new SiconosVector(3));
@@ -2240,14 +2240,14 @@ void SimpleMatrixTest::testOperators8_5()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
   }
 
-  cout << "-->  test operators8_5 ended with success." << endl;
+  std::cout << "-->  test operators8_5 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators8_6()
 {
   // == Test subprod, with += ==
 
-  cout << "--> Test: operator8_6." << endl;
+  std::cout << "--> Test: operator8_6." <<std::endl;
   Index coord(8);
   SP::SiconosVector x1(new SiconosVector(2));
   SP::SiconosVector x2(new SiconosVector(3));
@@ -2394,12 +2394,12 @@ void SimpleMatrixTest::testOperators8_6()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
   }
 
-  cout << "-->  test operators8_6 ended with success." << endl;
+  std::cout << "-->  test operators8_6 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators9()
 {
-  cout << "--> Test: operator9." << endl;
+  std::cout << "--> Test: operator9." <<std::endl;
 
   // C = a*A or A/a
 
@@ -2514,12 +2514,12 @@ void SimpleMatrixTest::testOperators9()
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*Cb)(i, j) - (*A)(i, j) / a1) < tol, true);
-  cout << "-->  test operators9 ended with success." << endl;
+  std::cout << "-->  test operators9 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators9Bis()
 {
-  cout << "--> Test: operator9Bis." << endl;
+  std::cout << "--> Test: operator9Bis." <<std::endl;
 
   // C = a*A or A/a
 
@@ -2568,12 +2568,12 @@ void SimpleMatrixTest::testOperators9Bis()
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Bis: ", fabs((*Cb)(i, j) - (*A)(i, j) / a) < tol, true);
-  cout << "-->  test operators9Bis ended with success." << endl;
+  std::cout << "-->  test operators9Bis ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators9Ter()
 {
-  cout << "--> Test: operator9Ter." << endl;
+  std::cout << "--> Test: operator9Ter." <<std::endl;
 
   // C += a*A or A/a
 
@@ -2610,12 +2610,12 @@ void SimpleMatrixTest::testOperators9Ter()
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Ter: ", fabs((*Cb)(i, j) - 2 * a * (*A)(i, j)) < tol, true);
 
-  cout << "-->  test operators9Ter ended with success." << endl;
+  std::cout << "-->  test operators9Ter ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators10()
 {
-  cout << "--> Test: operator10." << endl;
+  std::cout << "--> Test: operator10." <<std::endl;
   double m = 2.2;
   int i = 3;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*T));
@@ -2632,12 +2632,12 @@ void SimpleMatrixTest::testOperators10()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / i) < tol, true);
-  cout << "-->  test operators10 ended with success." << endl;
+  std::cout << "-->  test operators10 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators11()
 {
-  cout << "--> Test: operator11." << endl;
+  std::cout << "--> Test: operator11." <<std::endl;
   double m = 2.2;
   int i = 3;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*S));
@@ -2654,12 +2654,12 @@ void SimpleMatrixTest::testOperators11()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / i) < tol, true);
-  cout << "-->  test operator11 ended with success." << endl;
+  std::cout << "-->  test operator11 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators12()
 {
-  cout << "--> Test: operator12." << endl;
+  std::cout << "--> Test: operator12." <<std::endl;
   double m = 2.2;
   int i = 3;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*SP));
@@ -2676,12 +2676,12 @@ void SimpleMatrixTest::testOperators12()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / i) < tol, true);
-  cout << "-->  test operators12 ended with success." << endl;
+  std::cout << "-->  test operators12 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testOperators13()
 {
-  cout << "--> Test: operator13." << endl;
+  std::cout << "--> Test: operator13." <<std::endl;
   //   double m = 2.2;
   //   int i = 3;
   //   SP::SiconosMatrix tmp1(new SimpleMatrix(*Band);
@@ -2698,12 +2698,12 @@ void SimpleMatrixTest::testOperators13()
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()- tmp1->getBanded()/m)<tol, true);
   //   *res = *tmp1 / i;
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()- tmp1->getBanded()/i)<tol, true);
-  cout << "-->  test operators13 ended with success." << endl;
+  std::cout << "-->  test operators13 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testPow()
 {
-  cout << "--> Test: pow." << endl;
+  std::cout << "--> Test: pow." <<std::endl;
   // Dense
   SP::SiconosMatrix tmp1(new SimpleMatrix(*D));
   SP::SiconosMatrix res(new SimpleMatrix(2, 2));
@@ -2729,12 +2729,12 @@ void SimpleMatrixTest::testPow()
   res.reset(new SimpleMatrix(4, 4));
   *res = pow(*tmp5, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp5, prod(*tmp5, *tmp5)), true);
-  cout << "-->  test pow ended with success." << endl;
+  std::cout << "-->  test pow ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProd() // y = A*x
 {
-  cout << "--> Test: prod. mat-vect" << endl;
+  std::cout << "--> Test: prod. mat-vect" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -2835,12 +2835,12 @@ void SimpleMatrixTest::testProd() // y = A*x
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   *res = prod(*tmp5, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  cout << "-->  test prod ended with success." << endl;
+  std::cout << "-->  test prod ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProdBis()
 {
-  cout << "--> Test: prod. mat-vect (bis)" << endl;
+  std::cout << "--> Test: prod. mat-vect (bis)" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -2940,12 +2940,12 @@ void SimpleMatrixTest::testProdBis()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  cout << "-->  test prodBis ended with success." << endl;
+  std::cout << "-->  test prodBis ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProdTer()
 {
-  cout << "--> Test: prod. mat-vect (ter)" << endl;
+  std::cout << "--> Test: prod. mat-vect (ter)" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -3089,12 +3089,12 @@ void SimpleMatrixTest::testProdTer()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  cout << "-->  test prodTer ended with success." << endl;
+  std::cout << "-->  test prodTer ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProd4() // y += A*x
 {
-  cout << "--> Test: prod. mat-vect (4)" << endl;
+  std::cout << "--> Test: prod. mat-vect (4)" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -3154,12 +3154,12 @@ void SimpleMatrixTest::testProd4() // y += A*x
   //      sum += 2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  cout << "-->  test prod4 ended with success." << endl;
+  std::cout << "-->  test prod4 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProd5() // y += a*A*x
 {
-  cout << "--> Test: prod. mat-vect (5)" << endl;
+  std::cout << "--> Test: prod. mat-vect (5)" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -3219,12 +3219,12 @@ void SimpleMatrixTest::testProd5() // y += a*A*x
   //      sum += a*2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  cout << "-->  test prod5 ended with success." << endl;
+  std::cout << "-->  test prod5 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testProd6() // y += trans(A)*x
 {
-  cout << "--> Test: prod. mat-vect (6)" << endl;
+  std::cout << "--> Test: prod. mat-vect (6)" <<std::endl;
 
   SP::SiconosVector y(new SiconosVector(size));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -3287,12 +3287,12 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
   //      sum += 2*(*tmp)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  cout << "-->  test prod6 ended with success." << endl;
+  std::cout << "-->  test prod6 ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testGemv()
 {
-  cout << "--> Test: gemv" << endl;
+  std::cout << "--> Test: gemv" <<std::endl;
   
   SP::SiconosVector y(new SiconosVector(size, 1.0));
   SP::SiconosVector x(new SiconosVector(size, 4.3));
@@ -3321,12 +3321,12 @@ void SimpleMatrixTest::testGemv()
       sum += a * (*A)(j, i) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv (trans): ", fabs((*y)(i) - sum) < tol, true);
   }
-  cout << "-->  test gemv ended with success." << endl;
+  std::cout << "-->  test gemv ended with success." <<std::endl;
 }
 
 void SimpleMatrixTest::testGemm()
 {
-  cout << "--> Test: gemm." << endl;
+  std::cout << "--> Test: gemm." <<std::endl;
 
   double a = 2.3;
   double b = 1.5;
@@ -3339,14 +3339,14 @@ void SimpleMatrixTest::testGemm()
   *C = *backUp;
   gemmtranspose(a, *A, *B, b, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm (trans): ", norm_inf(*C->dense() - a * prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true);
-  cout << "-->  test gemm ended with success." << endl;
+  std::cout << "-->  test gemm ended with success." <<std::endl;
 }
 
 
 
 void SimpleMatrixTest::End()
 {
-  cout << "======================================" << endl;
-  cout << " ===== End of SimpleMatrix Tests ===== " << endl;
-  cout << "======================================" << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << " ===== End of SimpleMatrix Tests ===== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
 }

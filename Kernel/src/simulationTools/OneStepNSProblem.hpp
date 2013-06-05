@@ -180,7 +180,7 @@ private:
 public:
   OneStepNSProblem(const int newNumericsSolverId);
   /** depressed xml constructor
-   *  \param string: problem type
+   *  \param std::string: problem type
    *  \param SP::OneStepNSProblemXML : the XML linked-object
    */
   OneStepNSProblem(const std::string&, SP::OneStepNSProblemXML);
@@ -189,14 +189,14 @@ public:
    */
   OneStepNSProblem(SP::OneStepNSProblemXML);
   /** deressed constructor from data
-   *  \param string: problem type
-   *  \param string : id
+   *  \param std::string: problem type
+   *  \param std::string : id
    *  \param int : solver identifier
    */
   OneStepNSProblem(const std::string&, const std::string&, const int);
   /**  constructor from data
-   *  \param string : id
-   *  \param string : solver identifier
+   *  \param std::string : id
+   *  \param std::string : solver identifier
    */
   OneStepNSProblem(const std::string&, const int);
   /** destructor
@@ -224,7 +224,7 @@ public:
 
 
   /** to get the id of the OneStepNSProblem
-   *  \return string
+   *  \return std::string
    */
   inline std::string getId() const
   {
@@ -232,7 +232,7 @@ public:
   }
 
   /** set the id of the OneStepNSProblem
-   *  \param: string
+   *  \param: std::string
    */
   inline void setId(const std::string& newVal)
   {

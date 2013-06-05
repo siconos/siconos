@@ -81,8 +81,8 @@ public:
   */
   void setD(const SiconosMatrix & D);
 
-    /** Set the D matrix
-   * \param D the new D matrix
+  /** Set the D matrix
+  * \param D the new D matrix
   */
   inline void setDPtr(SP::SiconosMatrix D)
   {

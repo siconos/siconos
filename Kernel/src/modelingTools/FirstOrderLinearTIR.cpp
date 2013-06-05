@@ -20,7 +20,7 @@
 #include "LinearRXML.hpp"
 #include "Interaction.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // xml constructor
@@ -164,23 +164,23 @@ void FirstOrderLinearTIR::computeInput(const double time, Interaction & inter, u
 
 void FirstOrderLinearTIR::display() const
 {
-  cout << " ===== Linear Time Invariant relation display ===== " << endl;
-  cout << "| C " << endl;
+  std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
+  std::cout << "| C " <<std::endl;
   if (_jachx) _jachx->display();
-  else cout << "->NULL" << endl;
-  cout << "| D " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| D " <<std::endl;
   if (_jachlambda) _jachlambda->display();
-  else cout << "->NULL" << endl;
-  cout << "| F " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| F " <<std::endl;
   if (_F) _F->display();
-  else cout << "->NULL" << endl;
-  cout << "| e " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| e " <<std::endl;
   if (_e) _e->display();
-  else cout << "->NULL" << endl;
-  cout << "| B " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| B " <<std::endl;
   if (_jacglambda) _jacglambda->display();
-  else cout << "->NULL" << endl;
-  cout << " ================================================== " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << " ================================================== " <<std::endl;
 }
 
 void FirstOrderLinearTIR::saveRelationToXML() const

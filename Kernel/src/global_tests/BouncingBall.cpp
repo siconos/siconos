@@ -27,7 +27,7 @@
 
 #include "GlobalTests.hpp"
 #include "SiconosKernel.hpp"
-using namespace std;
+
 
 bool BouncingBall()
 {
@@ -35,8 +35,8 @@ bool BouncingBall()
   bool res = false;
   try
   {
-    cout << " **************************************" << endl;
-    cout << " ******** Start Bouncing Ball *********" << endl << endl << endl;
+    std::cout << " **************************************" <<std::endl;
+    std::cout << " ******** Start Bouncing Ball *********" <<std::endl <<std::endl <<std::endl;
     // --- Model loading from xml file ---
     SP::Model bouncingBall(new Model("./Ball.xml"));
     // --- Get and initialize the simulation ---
@@ -83,26 +83,26 @@ bool BouncingBall()
 
     if (norm < tol)
     {
-      cout << " ******** Bouncing Ball global test ended with success ********" << endl;
+      std::cout << " ******** Bouncing Ball global test ended with success ********" <<std::endl;
       res = true;
     }
     else
     {
-      cout << " ******** Bouncing Ball global test failed, results differ from those of reference file. ********" << endl;
+      std::cout << " ******** Bouncing Ball global test failed, results differ from those of reference file. ********" <<std::endl;
       res = false;
     }
 
-    cout << endl << endl;
+    std::cout <<std::endl <<std::endl;
   }
 
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/BouncingBall\'" << endl;
+    std::cout << "Exception caught in \'sample/BouncingBall\'" <<std::endl;
   }
 
   return res;

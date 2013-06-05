@@ -46,7 +46,7 @@
 //#define DEBUG_MESSAGES
 #include <debug.h>
 
-using namespace std;
+
 
 
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
@@ -91,7 +91,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // === OneStepIntegrators ===
   SetOfOSIXML OSIXMLList = _simulationxml->getOneStepIntegratorsXML();
   SetOfOSIXMLIt it;
-  string typeOfOSI;
+  std::string typeOfOSI;
   _allOSI.reset(new OSISet());
   for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
   {
@@ -294,14 +294,14 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // If _printStat is true, open output file.
   if (_printStat)
   {
-    statOut.open("simulationStat.dat", ios::out | ios::trunc);
+    statOut.open("simulationStat.dat", std::ios::out | std::ios::trunc);
     if (!statOut.is_open())
       SiconosVectorException::selfThrow("writing error : Fail to open file simulationStat.dat ");
-    statOut << "============================================" << endl;
-    statOut << " Siconos Simulation of type " << typeName() << "." << endl;
-    statOut << endl;
-    statOut << "The tolerance parameter is equal to: " << _tolerance << endl;
-    statOut << endl << endl;
+    statOut << "============================================" <<std::endl;
+    statOut << " Siconos Simulation of type " << typeName() << "." <<std::endl;
+    statOut <<std::endl;
+    statOut << "The tolerance parameter is equal to: " << _tolerance <<std::endl;
+    statOut <<std::endl <<std::endl;
   }
 }
 
@@ -311,7 +311,7 @@ void Simulation::reset()
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
-  //std::cout << "     Simulation::reset()"  <<std::endl;
+  // std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
 void Simulation::reset(unsigned int level)
@@ -320,7 +320,7 @@ void Simulation::reset(unsigned int level)
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart(level);
-  //std::cout << "     Simulation::reset()"  <<std::endl;
+  // std::cout << "     Simulation::reset()"  <<std::endl;
 }
 
 
@@ -426,14 +426,14 @@ void Simulation::updateOutput(unsigned int level)
 void Simulation::run()
 {
   unsigned int count = 0; // events counter.
-  cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" << endl;
+  std::cout << " ==== Start of " << typeName() << " simulation - This may take a while ... ====" <<std::endl;
   while (hasNextEvent())
   {
     advanceToEvent();
     processEvents();
     count++;
   }
-  cout << "===== End of " << typeName() << "simulation. " << count << " events have been processed. ==== " << endl;
+  std::cout << "===== End of " << typeName() << "simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
 void Simulation::processEvents()
@@ -443,7 +443,7 @@ void Simulation::processEvents()
   if (_eventsManager->hasNextEvent())
   {
     // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
-    if(Type::value(*this) != Type::EventDriven)
+    if (Type::value(*this) != Type::EventDriven)
     {
       updateIndexSets();
     }
@@ -944,7 +944,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
   SP::OneStepIntegrator osi =  integratorOfDS(ds);
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
-    topology()->indexSet(0);
+                                    topology()->indexSet(0);
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
 
   std11::shared_ptr<SetupLevels> setupLevels;

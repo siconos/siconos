@@ -69,7 +69,7 @@ public:
   /** Basic constructor
    * \param newMemoryNode a xmlNodePtr
    * \param newParentNode a xmlNodePtr (optional)
-   * \param name a string (optional)
+   * \param name a std::string (optional)
    */
   SiconosMemoryXML(xmlNodePtr newMemoryNode, xmlNodePtr newParentNode = NULL, const std::string& name = "default");
 

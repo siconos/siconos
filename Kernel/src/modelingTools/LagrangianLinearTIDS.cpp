@@ -21,7 +21,7 @@
 #include "BlockMatrix.hpp"
 #include "debug.h"
 
-using namespace std;
+
 
 // --- Constructor from an xml file---
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): LagrangianDS(dsxml)
@@ -30,7 +30,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
 
   // If FInt or NNL is given: ignored.
   if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
-    cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, FInt or NNL input will be ignored in xml file." << endl;
+    std::cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, FInt or NNL input will be ignored in xml file." <<std::endl;
 
   // K and C
 
@@ -45,7 +45,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
 
   if (lltidsxml->hasFExt())
   {
-    string plugin = lltidsxml->getFExtPlugin();
+    std::string plugin = lltidsxml->getFExtPlugin();
     setComputeFExtFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
     _fExt.reset(new SiconosVector(_ndof));
   }
@@ -103,7 +103,7 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
     output = false;
   }
 
-  if (!output) cout << "LagrangianLinearTIDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  if (!output) std::cout << "LagrangianLinearTIDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
   return output;
 }
 
@@ -207,17 +207,17 @@ void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
 void LagrangianLinearTIDS::display() const
 {
   LagrangianDS::display();
-  cout << "===== Lagrangian Linear Time Invariant System display ===== " << endl;
-  cout << "- Mass Matrix M : " << endl;
+  std::cout << "===== Lagrangian Linear Time Invariant System display ===== " <<std::endl;
+  std::cout << "- Mass Matrix M : " <<std::endl;
   if (_mass) _mass->display();
-  else cout << "-> NULL" << endl;
-  cout << "- Stiffness Matrix K : " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- Stiffness Matrix K : " <<std::endl;
   if (_K) _K->display();
-  else cout << "-> NULL" << endl;
-  cout << "- Viscosity Matrix C : " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- Viscosity Matrix C : " <<std::endl;
   if (_C) _C->display();
-  else cout << "-> NULL" << endl;
-  cout << "=========================================================== " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "=========================================================== " <<std::endl;
 }
 
 void LagrangianLinearTIDS::computeRhs(double time, bool)
@@ -227,8 +227,8 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
 
   // second argument is useless but present because of top-class function overloading.
   *_q[2] = *_p[2]; // Warning: p update is done in Interactions/Relations
-  //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
-  //   std::cout << " p[2] " << std::endl ;
+  //    std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
+  //    std::cout << " p[2] " << std::endl ;
   //  _p[2]->display();
   *_q[2] += *_forces;
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
@@ -240,10 +240,10 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   // Then we search for _workspace[free], such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
 
-  //   std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
-  //   std::cout << " q[2] " << std::endl ;
+  //    std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
+  //    std::cout << " q[2] " << std::endl ;
   //   _q[2]->display();
-  //   std::cout << " _workspace[free] " << std::endl ;
+  //    std::cout << " _workspace[free] " << std::endl ;
   //   _workspace[free]->display();
 
 }

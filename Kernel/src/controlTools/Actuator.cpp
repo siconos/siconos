@@ -28,7 +28,7 @@
 #include "Simulation.hpp"
 #include <iostream>
 
-using namespace std;
+
 
 Actuator::Actuator(): _type(0), _id("none")
 {
@@ -103,14 +103,14 @@ void Actuator::initialize(SP::Model m)
 
 void Actuator::display() const
 {
-  cout << "=====> Actuator of type " << _type << ", named " << _id ;
-  cout << "The associated Sensors are: " << endl;
+  std::cout << "=====> Actuator of type " << _type << ", named " << _id ;
+  std::cout << "The associated Sensors are: " <<std::endl;
   for (SensorsIterator itS = _allSensors->begin(); itS != _allSensors->end(); ++itS)
     (*itS)->display();
 
-  cout << "The associated DynamicalSystems are: " << endl;
+  std::cout << "The associated DynamicalSystems are: " <<std::endl;
   for (DSIterator itDS = _allDS->begin(); itDS != _allDS->end(); ++itDS)
-    cout << " - Numbers : " << (*itDS)->number()  << endl;
-  cout << "======" << endl;
-  cout << endl;
+    std::cout << " - Numbers : " << (*itDS)->number()  <<std::endl;
+  std::cout << "======" <<std::endl;
+  std::cout <<std::endl;
 }

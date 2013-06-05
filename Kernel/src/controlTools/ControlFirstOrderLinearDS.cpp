@@ -23,7 +23,7 @@
 
 #include "SiconosVector.hpp"
 
-using namespace std;
+
 
 ControlFirstOrderLinearDS::ControlFirstOrderLinearDS(double t0, double T, double h,
     SP::SiconosVector x0, SP::SiconosMatrix A):

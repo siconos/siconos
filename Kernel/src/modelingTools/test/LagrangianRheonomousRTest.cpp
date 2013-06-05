@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianRheonomousRTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -64,16 +64,16 @@ void LagrangianRheonomousRTest::tearDown()
 // xml constructor (scleronomic case)
 void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
 {
-  cout << "==============================================" << endl;
-  cout << "=== LagrangianRheonomousR tests start ...=== " << endl;
-  cout << "==============================================" << endl;
+  std::cout << "==============================================" <<std::endl;
+  std::cout << "=== LagrangianRheonomousR tests start ...=== " <<std::endl;
+  std::cout << "==============================================" <<std::endl;
   SP::LagrangianRheonomousR R1(new LagrangianRheonomousR(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1b : ", R1->getSubType() == RELATION::RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1c : ", R1->gethName() == "TestPlugin:hRheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->getJachqName() == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->gethDotName() == "TestPlugin:hDot", true);
-  cout << " xml Constructor (1) LagrangianRheonomousR ok" << endl;
+  std::cout << " xml Constructor (1) LagrangianRheonomousR ok" <<std::endl;
 }
 
 // data constructor:
@@ -85,13 +85,13 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3c : ", R1->gethName() == "TestPlugin:hRheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->getJachqName() == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->gethDotName() == "TestPlugin:hDot", true);
-  cout << " data Constructor LagrangianRheonomousR ok" << endl;
+  std::cout << " data Constructor LagrangianRheonomousR ok" <<std::endl;
 }
 
 
 void LagrangianRheonomousRTest::End()
 {
-  cout << "=================================================" << endl;
-  cout << " ===== End of LagrangianRheonomousR tests ===== " << endl;
-  cout << "=================================================" << endl;
+  std::cout << "=================================================" <<std::endl;
+  std::cout << " ===== End of LagrangianRheonomousR tests ===== " <<std::endl;
+  std::cout << "=================================================" <<std::endl;
 }

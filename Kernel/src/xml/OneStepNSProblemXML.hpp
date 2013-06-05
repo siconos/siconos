@@ -108,7 +108,7 @@ public:
   virtual ~OneStepNSProblemXML() {};
 
   /** Return the type of the OneStepNSProblem
-   *   \return a string
+   *   \return a std::string
    */
   inline std::string  getNSProblemType() const
   {
@@ -173,7 +173,7 @@ public:
   void updateOneStepNSProblemXML(xmlNodePtr , SP::OneStepNSProblem);
 
   /** Return the id of the OneStepNSProblem (attribute of the root node)
-   *   \return a string
+   *   \return a std::string
    */
   inline std::string getId() const
   {
@@ -188,7 +188,7 @@ public:
   }
 
   /** Return the  NumericsSolverName of the OneStepNSProblem (attribute of the root node)
-   *   \return a string
+   *   \return a std::string
    */
   inline std::string getNumericsSolverName() const
   {

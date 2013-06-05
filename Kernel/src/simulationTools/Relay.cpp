@@ -26,7 +26,7 @@
 #include "RelayNSL.hpp"
 
 
-using namespace std;
+
 using namespace RELATION;
 
 
@@ -57,7 +57,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   void visit(const RelayNSL& nslaw)
   {
 
-    // cout << "Relay::_BoundsNSLEffect visit"  << endl;
+    // std::cout << "Relay::_BoundsNSLEffect visit"  <<std::endl;
     for (unsigned int i = 0; i <  _inter->getNonSmoothLawSize(); i++)
     {
       (*(_parent->lb()))(_pos + i) =
@@ -86,7 +86,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
 void Relay::initialize(SP::Simulation sim)
 {
   LinearOSNS::initialize(sim);
-  //cout << "Relay::initialize" << endl;
+  //cout << "Relay::initialize" <<std::endl;
 
 
   // initialize memory for _lb and _ub
@@ -116,7 +116,7 @@ int Relay::compute(double time)
 
   SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
 
-  //cout << " _sizeOutput =" <<_sizeOutput << endl;
+  //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
   if (_lb->size() != _sizeOutput)
   {
     _lb->resize(_sizeOutput, false);
@@ -179,7 +179,7 @@ int Relay::compute(double time)
 
     if (info != 0)
     {
-      cout << "Warning : Problem in Relay resolution" << endl;
+      std::cout << "Warning : Problem in Relay resolution" <<std::endl;
     }
 
     // --- Recovering of the desired variables from Relay output ---
@@ -192,7 +192,7 @@ int Relay::compute(double time)
 
 void Relay::display() const
 {
-  cout << "======= Relay of size " << _sizeOutput << " with: " << endl;
+  std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
   LinearOSNS::display();
 }
 

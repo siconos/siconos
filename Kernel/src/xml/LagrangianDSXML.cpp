@@ -21,7 +21,7 @@
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 
-using namespace std;
+
 
 LagrangianDSXML::LagrangianDSXML() :
   DynamicalSystemXML(), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),

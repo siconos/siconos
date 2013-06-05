@@ -34,7 +34,7 @@
 typedef std::deque<bool> AllocationFlags;
 
 
-/** A function to convert any type to string*/
+/** A function to convert any type to std::string*/
 template <class T> std::string toString(const T& obj)
 {
   static std::ostringstream o;
@@ -143,10 +143,10 @@ std11::shared_ptr<S> setOfGraph(std11::shared_ptr<G> g)
 \param last, any iterator, end of the sequence
 \param char*, optional message on top of output, default ""
 \param char*, separator between sequence elements, default new line
-\param ostream, output destination, default cout
+\param ostream, output destination, default std::cout
 */
 template<typename Iter>
-void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", std::ostream& os = std::cout)
+void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", std::ostream& os =  std::cout)
 {
   if (nm != 0 && *nm != '\0')
     os << nm << ": " << sep;

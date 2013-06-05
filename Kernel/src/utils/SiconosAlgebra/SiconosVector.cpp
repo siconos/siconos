@@ -274,7 +274,7 @@ void SiconosVector::fill(double value)
   }
   else
     siconosBindings::set(value, *vect.Dense);
-  
+
 
 }
 
@@ -335,7 +335,7 @@ void SiconosVector::display()const
 }
 
 //============================
-// Convert vector to a string
+// Convert vector to a std::string
 //============================
 
 const std::string SiconosVector::toString() const
@@ -347,9 +347,9 @@ const std::string SiconosVector::toString() const
   else
     sstr << *vect.Sparse;
   sstr >> s;
-  s = s.substr(4, s.size() - 5); // Remove "[size](" at the beginning of the string
+  s = s.substr(4, s.size() - 5); // Remove "[size](" at the beginning of the std::string
   std::string::size_type pos;
-  while ((pos = s.find(",")) != std::string::npos) // Replace "," by " " in the string
+  while ((pos = s.find(",")) != std::string::npos) // Replace "," by " " in the std::string
     s[pos] = ' ';
   return s;
 }

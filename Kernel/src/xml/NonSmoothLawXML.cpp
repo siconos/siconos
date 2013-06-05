@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NonSmoothLawXML.hpp"
-using namespace std;
+
 
 NonSmoothLawXML::NonSmoothLawXML(): rootNode(NULL), sizeNode(NULL)
 {}

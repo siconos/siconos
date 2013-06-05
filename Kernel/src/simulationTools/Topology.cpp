@@ -197,8 +197,8 @@ Topology::addInteractionInIndexSet(SP::Interaction inter)
           assert(_IG[0]->bundle(ig_new_ve) == inter);
           assert(_IG[0]->is_vertex(inter));
           assert(_DSG[0]->is_edge(dsgv, dsgv, inter));
-          return std::pair<DynamicalSystemsGraph::EDescriptor, 
-                           InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
+          return std::pair<DynamicalSystemsGraph::EDescriptor,
+                 InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
         }
       }
       else
@@ -229,15 +229,15 @@ Topology::addInteractionInIndexSet(SP::Interaction inter)
             assert(_IG[0]->bundle(ig_new_ve) == inter);
             assert(_IG[0]->is_vertex(inter));
             assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
-            return std::pair<DynamicalSystemsGraph::EDescriptor, 
-                             InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
+            return std::pair<DynamicalSystemsGraph::EDescriptor,
+                   InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
           }
         }
     }
   }
 
   // note: only one or two ds => only one vertex in IG
-  
+
 
 }
 
@@ -301,19 +301,19 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   _DSG[0]->add_vertex(ds);
 }
 
-std::pair<DynamicalSystemsGraph::EDescriptor, 
-            InteractionsGraph::VDescriptor> 
-Topology::insertInteraction(SP::Interaction inter)
+std::pair<DynamicalSystemsGraph::EDescriptor,
+    InteractionsGraph::VDescriptor>
+    Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 
   _allInteractions->insert(inter);
-  
 
-  std::pair<DynamicalSystemsGraph::EDescriptor, 
-            InteractionsGraph::VDescriptor> descriptors = 
-    addInteractionInIndexSet(inter);
+
+  std::pair<DynamicalSystemsGraph::EDescriptor,
+      InteractionsGraph::VDescriptor> descriptors =
+        addInteractionInIndexSet(inter);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 

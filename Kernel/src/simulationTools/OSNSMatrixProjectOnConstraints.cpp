@@ -23,7 +23,7 @@
 #include "NewtonEulerR.hpp"
 #include "LagrangianR.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 using namespace Siconos;
 //#define OSNSMPROJ_DEBUG

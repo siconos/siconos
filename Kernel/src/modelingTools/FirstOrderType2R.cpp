@@ -21,7 +21,7 @@
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
-using namespace std;
+
 #define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
 
@@ -38,7 +38,7 @@ FirstOrderType2R::FirstOrderType2R(SP::RelationXML FORxml):
   RuntimeException::selfThrow("FirstOrderR::FirstOrderType2R xml constructor not implemented.");
 }
 
-FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& computeIn):
+FirstOrderType2R::FirstOrderType2R(const std::string& computeOut, const std::string& computeIn):
   FirstOrderR(RELATION::Type2R)
 {
   // Size vector of pointers to functions.
@@ -48,7 +48,7 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
-FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& computeIn, const string& computeJX, const string& computeJL):
+FirstOrderType2R::FirstOrderType2R(const std::string& computeOut, const std::string& computeIn, const std::string& computeJX, const std::string& computeJL):
   FirstOrderR(RELATION::Type2R)
 {
   // Size vector of pointers to functions.
@@ -180,14 +180,14 @@ void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsig
   SiconosVector lambda = *inter.lambda(level);
   lambda -= *(inter.lambdaOld(level));
 
-  //  cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
+  //  std::cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
   //  inter.lambdaOld(level)->display();
   //  lambda->display();
   //  _lambda->display();
-  //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
+  //  std::cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
   //  _workX->display();
   prod(*B(), lambda, *inter.data(g_alpha), false);
-  //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
+  //  std::cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
 
   *inter.data(r) += *inter.data(g_alpha);
@@ -197,7 +197,7 @@ void FirstOrderType2R::computeInput(const double time, Interaction& inter, unsig
   computeg(time, inter);
 
 
-  //  cout<<"next g_alpha"<<endl;
+  //  std::cout<<"next g_alpha"<<endl;
   //  data[g_alpha]->display();
 
 

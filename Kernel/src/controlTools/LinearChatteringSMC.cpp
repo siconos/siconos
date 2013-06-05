@@ -25,7 +25,7 @@
 
 #include "LinearChatteringSMC.hpp"
 
-using namespace std;
+
 using namespace ActuatorFactory;
 
 LinearChatteringSMC::LinearChatteringSMC(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_CHATTERING_SMC, t, ds)

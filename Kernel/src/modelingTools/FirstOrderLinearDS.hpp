@@ -120,8 +120,8 @@ public:
 
   /** constructor from a set of data
    *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param string: plugin for A
-   *  \param string: plugin for b
+   *  \param std::string: plugin for A
+   *  \param std::string: plugin for b
    */
   FirstOrderLinearDS(SP::SiconosVector, const std::string&, const std::string&);
   FirstOrderLinearDS(const SiconosVector&, const std::string&, const std::string&);
@@ -254,8 +254,8 @@ public:
   // --- plugins related functions
 
   /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputeAFunction(const std::string& , const std::string&);
@@ -266,8 +266,8 @@ public:
   void setComputeAFunction(LDSPtrFunction fct);
 
   /** set a specified function to compute the vector b
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputebFunction(const std::string& , const std::string&);

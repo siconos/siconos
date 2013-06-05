@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NonSmoothDynamicalSystemTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -60,10 +60,10 @@ void NonSmoothDynamicalSystemTest::tearDown()
 // xml constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
 {
-  cout << "====================================================" << endl;
-  cout << " ===== NonSmoothDynamicalSystem tests start ...===== " << endl;
-  cout << "====================================================" << endl;
-  cout << "------- Xml Constructor test -------" << endl;
+  std::cout << "====================================================" <<std::endl;
+  std::cout << " ===== NonSmoothDynamicalSystem tests start ...===== " <<std::endl;
+  std::cout << "====================================================" <<std::endl;
+  std::cout << "------- Xml Constructor test -------" <<std::endl;
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->dynamicalSystem(0)->number() == 3, true);
@@ -71,12 +71,12 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemD : ", nsds->getInteractionVectorSize() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemF : ", nsds->isBVP() == false, true);
-  cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" << endl;
+  std::cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" <<std::endl;
 }
 // copy constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 {
-  cout << "------- Copy Constructor test -------" << endl;
+  std::cout << "------- Copy Constructor test -------" <<std::endl;
   SP::NonSmoothDynamicalSystem  nsds1(new NonSmoothDynamicalSystem(tmpxml));
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(*nsds1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2A : ", nsds->getDSVectorSize() == 2, true);
@@ -85,7 +85,7 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2F : ", nsds->isBVP() == false, true);
-  cout << "------- Constructor copy NonSmoothDynamicalSystem ok -------" << endl;
+  std::cout << "------- Constructor copy NonSmoothDynamicalSystem ok -------" <<std::endl;
 }
 
 
@@ -105,7 +105,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemB: ", nsds->dynamicalSystem(0)->number() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testinsertDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testinsertDynamicalSystemC : ", nsds->dynamicalSystem(2)->number() == 23, true);
-  cout << "------- test insertDynamicalSystem ok -------" << endl;
+  std::cout << "------- test insertDynamicalSystem ok -------" <<std::endl;
 }
 
 // insertInteraction
@@ -122,12 +122,12 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(1)->number() == 12, true);
-  cout << " ------- test insertInteractiontest ok -------" << endl;
+  std::cout << " ------- test insertInteractiontest ok -------" <<std::endl;
 }
 
 void NonSmoothDynamicalSystemTest::End()
 {
-  cout << "===================================================" << endl;
-  cout << " ===== End of NonSmoothDynamicalSystem tests ===== " << endl;
-  cout << "===================================================" << endl;
+  std::cout << "===================================================" <<std::endl;
+  std::cout << " ===== End of NonSmoothDynamicalSystem tests ===== " <<std::endl;
+  std::cout << "===================================================" <<std::endl;
 }

@@ -37,7 +37,7 @@
 
 #include <debug.h>
 
-using namespace std;
+
 using namespace RELATION;
 
 /** Pointer to function, used to set the behavior of simulation when
@@ -92,7 +92,7 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
       RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
     SP::OneStepNSProblemXML osnsXML = *(OSNSList.begin());
     // OneStepNSProblem - Memory allocation/construction
-    string type = osnsXML->getNSProblemType();
+    std::string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
       (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY].reset(new LCP(osnsXML));
@@ -451,7 +451,7 @@ void TimeStepping::computeOneStep()
 
 void TimeStepping::computeInitialResidu()
 {
-  //  cout<<"BEGIN computeInitialResidu"<<endl;
+  //  std::cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
 
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
@@ -483,7 +483,7 @@ void TimeStepping::computeInitialResidu()
       (*it)->computeResiduY(tkp1);
     }
 
-  //  cout<<"END computeInitialResidu"<<endl;
+  //  std::cout<<"END computeInitialResidu"<<endl;
 }
 
 void TimeStepping::run()
@@ -491,7 +491,7 @@ void TimeStepping::run()
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of
   // events manager.
-  cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
+  std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
   while (_eventsManager->hasNextEvent())
   {
 
@@ -509,7 +509,7 @@ void TimeStepping::run()
     processEvents();
     count++;
   }
-  cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
+  std::cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
 void TimeStepping::advanceToEvent()
@@ -541,7 +541,7 @@ void TimeStepping::advanceToEvent()
 /*discretisation of the Interactions */
 void   TimeStepping::prepareNewtonIteration()
 {
-  //  cout << "update the operators" <<endl ;
+  //  std::cout << "update the operators" <<endl ;
 
 
   for (OSIIterator itosi = _allOSI->begin();
@@ -635,7 +635,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       prepareNewtonIteration();
       computeFreeState();
       if (info)
-        cout << "New Newton loop because of nonsmooth solver failed\n" << endl;
+        std::cout << "New Newton loop because of nonsmooth solver failed\n" <<std::endl;
 
       // if there is not any Interaction at
       // the beginning of the simulation _allNSProblems may not be
@@ -649,7 +649,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
       //if(info)
-      //  cout<<"info!"<<endl;
+      //  std::cout<<"info!"<<endl;
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutput)
         DefaultCheckSolverOutput(info);
@@ -667,13 +667,13 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     }
     if (!_isNewtonConverge)
     {
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
       if (info)
-        cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." << endl ;
+        std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
     }
     else
     {
-      //      cout << "TimeStepping::newtonSolve succeed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+      //      std::cout << "TimeStepping::newtonSolve succeed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
     }
   }
   else
@@ -727,7 +727,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
       if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
       if (residu > criterion)
       {
-        //      cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;
+        //      std::cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;
         checkConvergence = false;
         //break;
       }
@@ -752,7 +752,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
         //break;
       }
       //else
-      //  cout<<"residuR ="<<residu<<"<"<<criterion<<endl;
+      //  std::cout<<"residuR ="<<residu<<"<"<<criterion<<endl;
     }
 
   }
@@ -774,11 +774,11 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   {
     std::cout << "TimeStepping::DefaultCheckSolverOutput:" << std::endl;
     std::cout << "Non smooth solver warning/error: output message from solver is equal to " << info << std::endl;
-    //       cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
+    //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
+    //      std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
     /*      if(info == 1)
-            cout <<" reach max iterations number with solver " << solverName << endl;
+            std::cout <<" reach max iterations number with solver " << solverName <<std::endl;
             else if (info == 2)
             {
             if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
@@ -789,7 +789,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
             RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
             }
             else if (info == 3 && solverName == "CPG")
-            cout << "pWp null in solver CPG" << endl;
+            std::cout << "pWp null in solver CPG" <<std::endl;
             else if (info == 3 && solverName == "Latin")
             RuntimeException::selfThrow("Null diagonal term with solver Latin");
             else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))

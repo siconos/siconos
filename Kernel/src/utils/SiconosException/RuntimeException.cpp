@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "RuntimeException.hpp"
-using namespace std;
+
 
 RuntimeException::RuntimeException():
   SiconosException("Runtime Exception") {}
 
-RuntimeException::RuntimeException(const string& report):
+RuntimeException::RuntimeException(const std::string& report):
   SiconosException("Runtime Exception : " + report) {}
 
 RuntimeException::~RuntimeException() {}
@@ -32,7 +32,7 @@ void RuntimeException::selfThrow()
   throw RuntimeException();
 }
 
-void RuntimeException::selfThrow(const string& report)
+void RuntimeException::selfThrow(const std::string& report)
 {
   throw RuntimeException(report);
 }

@@ -109,7 +109,7 @@ public:
     else if (xmlHasProp(vectorNode, (xmlChar *)SDTT_VECTORPLUGIN.c_str()))
       XMLException::selfThrow("SiconosDOMTreeTools - getVector using a plug-in, not yet implemented");
 
-    else // if attribute vectorSize is present => read from a string
+    else // if attribute vectorSize is present => read from a std::string
     {
       xmlChar* tmp = xmlNodeGetContent(vectorNode);
       std::string vOut = (char*)tmp;
@@ -152,7 +152,7 @@ public:
   /** Return the int value of the attribute attributeName of the node node
   *   \param node : the node who contents the attribute you want
   *   \param attributeName : the attribute of the node you want to have the int value
-  *   \return The string value of the attribute attributeName contents in the node node
+  *   \return The std::string value of the attribute attributeName contents in the node node
   */
   static std::string getStringAttributeValue(const xmlNodePtr node, const std::string& attributeName);
 
@@ -177,9 +177,9 @@ public:
     return value;
   }
 
-  /** Return the string content of the node node
-  *   \param node : the node you want the string content
-  *   \return The string value of the content of the node node
+  /** Return the std::string content of the node node
+  *   \param node : the node you want the std::string content
+  *   \return The std::string value of the content of the node node
   */
   static std::string getStringContentValue(const xmlNodePtr  node);
 
@@ -232,10 +232,10 @@ public:
   //    */
   //    static void setMemoryValue( xmlNodePtr  memoryNode, const SiconosMemory & memory);
 
-  /** Set a string value at a node attribute
+  /** Set a std::string value at a node attribute
   *   \param node : the concern node
-  *   \param attributeName : the concern attribute you want to set a string value
-  *   \param value : the string value to set
+  *   \param attributeName : the concern attribute you want to set a std::string value
+  *   \param value : the std::string value to set
   */
   static void setStringAttributeValue(const xmlNodePtr  node, const std::string attributeName, const std::string value);
 
@@ -272,9 +272,9 @@ public:
   */
   static void setDoubleContentValue(const xmlNodePtr  node, const double value);
 
-  /** Set a string content at a node
-  *   \param node : the node you want to set the string content
-  *   \param value : the string value to set
+  /** Set a std::string content at a node
+  *   \param node : the node you want to set the std::string content
+  *   \param value : the std::string value to set
   */
   static void setStringContentValue(const xmlNodePtr  node, const std::string value);
 
@@ -288,7 +288,7 @@ public:
 
   /** creates a new node in the DOM tree to save a SiconosMatrix
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this SiconosMatrix
+  *  \param std::string : the name of the balise of this SiconosMatrix
   *  \param SiconosMatrix : the SiconosMatrix to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -296,7 +296,7 @@ public:
 
   /** creates a new node in the DOM tree to save a SiconosVector
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this SiconosVector
+  *  \param std::string : the name of the balise of this SiconosVector
   *  \param SiconosVector& : the SiconosVector to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -304,7 +304,7 @@ public:
 
   /** creates a new node in the DOM tree to save a SiconosVector
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this SiconosVector
+  *  \param std::string : the name of the balise of this SiconosVector
   *  \param vector<int> : the vector of int to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -312,23 +312,23 @@ public:
 
   //     /** creates a new node in the DOM tree to save a SiconosVector
   //     *  \param xmlNode : the root node of the XML object calling this function
-  //     *  \param string : the name of the balise of this vector
+  //     *  \param std::string : the name of the balise of this vector
   //     *  \param vector<SiconosVector*> : the vector to save in the XML file
   //     *  \return xmlNodePtr  : the node created
   //     */
-  //    static xmlNodePtr  createVectorMemoryNode(xmlNodePtr , const string, vector<SiconosVector*> );
+  //    static xmlNodePtr  createVectorMemoryNode(xmlNodePtr , const std::string, vector<SiconosVector*> );
 
   //     /** creates a new node in the DOM tree to save a SiconosMemory
   //     *  \param xmlNode : the root node of the XML object calling this function
-  //     *  \param string : the name of the balise of this SiconosMemory
+  //     *  \param std::string : the name of the balise of this SiconosMemory
   //     *  \param SiconosMemory* : the SiconosMemory to save in the XML file
   //     *  \return xmlNodePtr  : the node created
   //     */
-  //    static xmlNodePtr  createSiconosMemoryNode(xmlNodePtr , const string, SiconosMemory* );
+  //    static xmlNodePtr  createSiconosMemoryNode(xmlNodePtr , const std::string, SiconosMemory* );
 
   /** creates a new node in the DOM tree to save a double value
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this double value
+  *  \param std::string : the name of the balise of this double value
   *  \param double : the double value to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -336,7 +336,7 @@ public:
 
   /** creates a new node in the DOM tree to save an integer value
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this integer value
+  *  \param std::string : the name of the balise of this integer value
   *  \param integer : the integer value to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -344,38 +344,38 @@ public:
 
   /** creates a new node in the DOM tree to save a boolean value
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this boolean value
+  *  \param std::string : the name of the balise of this boolean value
   *  \param bool : the boolean value to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
   static xmlNodePtr  createBooleanNode(xmlNodePtr , const std::string, const bool);
 
-  /** creates a new node in the DOM tree to save a string
+  /** creates a new node in the DOM tree to save a std::string
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this string
-  *  \param string : the string to save in the XML file
+  *  \param std::string : the name of the balise of this std::string
+  *  \param std::string : the std::string to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
   static xmlNodePtr  createStringNode(xmlNodePtr , const std::string, const std::string);
 
-  /** creates a new node in the DOM tree to save a string
+  /** creates a new node in the DOM tree to save a std::string
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this string
+  *  \param std::string : the name of the balise of this std::string
   *  \return xmlNodePtr  : the node created
   */
   static xmlNodePtr  createSingleNode(xmlNodePtr , const std::string);
 
-  /** creates a new attribute in the DOM tree to save a string
+  /** creates a new attribute in the DOM tree to save a std::string
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the balise of this string
-  *  \param string : the string to save in the XML file
+  *  \param std::string : the name of the balise of this std::string
+  *  \param std::string : the std::string to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
   static void createStringAttribute(xmlNodePtr , const std::string, const std::string);
 
   /** adds an attribute to a node in the DOM tree to save a boolean value
   *  \param xmlNode : the root node of the XML object calling this function
-  *  \param string : the name of the attribute of this boolean value
+  *  \param std::string : the name of the attribute of this boolean value
   *  \param bool : the boolean value to save in the XML file
   *  \return xmlNodePtr  : the node created
   */
@@ -398,14 +398,14 @@ public:
 
   /** Find the first node with name followNodeName since the startNode node
   *   \param const xmlNodePtr  node : the node you want to begin search
-  *   \param const string followNodeName : the name of the node you search
+  *   \param const std::string followNodeName : the name of the node you search
   *   \return the first xmlNode or NULL if not found
   */
   static xmlNodePtr  findFollowNode(const xmlNodePtr  node, const std::string& followNodeName);
 
   /** Find the first node with name followNodeName since the startNode node
   *   \param const xmlNodePtr  node : the node you want to begin search
-  *   \param const string followNodeName : the name of the node you search
+  *   \param const std::string followNodeName : the name of the node you search
   *   \return the first xmlNode or NULL if not found
   */
   static xmlNodePtr  findFollowNode(const xmlNodePtr  node);
@@ -418,18 +418,18 @@ public:
 
 private :
 
-  /** get a string and convert its content (separate by spaces) into a vector of T
-  *   \param the string to convert
+  /** get a std::string and convert its content (separate by spaces) into a vector of T
+  *   \param the std::string to convert
   *   \param a vector<T>, in-out parameter
   */
   template<class T> static void string2Vector(const std::string& strIn, std::vector<T>& vOut)
   {
     std::string strOut = strIn;
 
-    // Remove all '\n' and '\t' in the string
+    // Remove all '\n' and '\t' in the std::string
     strOut.erase(std::remove(strOut.begin(), strOut.end(), '\n'), strOut.end());
     strOut.erase(std::remove(strOut.begin(), strOut.end(), '\t'), strOut.end());
-    // Remove spaces at the beginning of the string
+    // Remove spaces at the beginning of the std::string
     //strOut = strOut.substr( strOut.find_first_not_of(' ') );
 
     std::istringstream iss(strOut);

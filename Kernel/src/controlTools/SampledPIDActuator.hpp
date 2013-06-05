@@ -89,7 +89,7 @@ public:
    * \f{array} c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
    * c_2 &= -1 - \frac{2K_D}{\Delta t} \\
    * c_3 &= \frac{K_D}{\Delta t} \\
-   * \f{array}
+   * \f}
    */
   void actuate();
 
@@ -99,7 +99,7 @@ public:
   void setK(const SiconosVector& newValue);
 
   /** Set _K to pointer newPtr
-   * \param newPtr SP::SiconosVector f$ [K_P, K_I, K_D] \f$
+   * \param newPtr SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
    */
   void setKPtr(SP::SiconosVector newPtr);
 

@@ -18,7 +18,7 @@
 */
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactNSLXML.hpp"
-using namespace std;
+
 
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)
 {}
@@ -48,9 +48,9 @@ bool NewtonImpactNSL::isVerified() const
 
 void NewtonImpactNSL::display() const
 {
-  cout << "===============================================================================" << endl;
-  cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e << endl;
-  cout << "===============================================================================" << endl;
+  std::cout << "===============================================================================" <<std::endl;
+  std::cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e <<std::endl;
+  std::cout << "===============================================================================" <<std::endl;
 }
 
 void NewtonImpactNSL::saveNonSmoothLawToXML()

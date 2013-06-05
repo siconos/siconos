@@ -86,7 +86,7 @@ protected:
   OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** constructor from a minimum set of data
-   *  \param string, integrator type/name
+   *  \param std::string, integrator type/name
    *  \param DynamicalSystemsSet : a set of DynamicalSystem to be integrated
    */
   OneStepIntegrator(const OSI::TYPES&, const DynamicalSystemsSet&);
@@ -113,7 +113,7 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the type of the OneStepIntegrator
-   *  \return string : the type of the OneStepIntegrator
+   *  \return std::string : the type of the OneStepIntegrator
    */
   inline OSI::TYPES getType() const
   {
@@ -121,7 +121,7 @@ public:
   }
 
   /** set the type of the OneStepIntegrator
-   *  \return string : the type of the OneStepIntegrator
+   *  \return std::string : the type of the OneStepIntegrator
    */
   inline void setType(const OSI::TYPES& newType)
   {

@@ -20,7 +20,6 @@
 #include "FirstOrderLinearDSXML.hpp"
 //#include "Plugin.hpp"
 
-using namespace std;
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 
 // --- Constructors ---
@@ -39,7 +38,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
   if (foldsxml->hasF() || foldsxml->hasJacobianfx())
     RuntimeException::selfThrow("FirstOrderLinearDS - xml constructor, you give a f or its jacobian as a plug-in for a FirstOrderLinearDS -> set rather A and b plug-in.");
 
-  string plugin;
+  std::string plugin;
   // A
   if (foldsxml->hasA())
   {
@@ -70,7 +69,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML)
 }
 
 // From a minimum set of data, A and b connected to a plug-in
-FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& APlugin, const string& bPlugin):
+FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin):
   FirstOrderNonLinearDS(newX0)
 {
 
@@ -157,7 +156,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
 bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
 {
   bool output = DynamicalSystem::checkDynamicalSystem();
-  if (!output) cout << "FirstOrderLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  if (!output)  std::cout << "FirstOrderLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << std::endl;
   return output;
 }
 
@@ -203,7 +202,7 @@ void FirstOrderLinearDS::setB(const Plugged_Vector_FTime& newValue)
     *b = newValue;
 }
 */
-void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
+void FirstOrderLinearDS::setComputeAFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginA->setComputeFunction(pluginPath, functionName);
   //   Plugin::setFunction(&_APtr, pluginPath, functionName);
@@ -215,7 +214,7 @@ void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
   _pluginA->setComputeFunction((void*)fct);
   //  _APtr=fct;
 }
-void FirstOrderLinearDS::setComputebFunction(const string& pluginPath, const string& functionName)
+void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, const std::string& functionName)
 {
   //  Plugin::setFunction(&_bPtr, pluginPath, functionName);
   _pluginb->setComputeFunction(pluginPath, functionName);
@@ -294,8 +293,8 @@ void FirstOrderLinearDS::computeJacobianRhsx(const double time, const bool)
 
 void FirstOrderLinearDS::display() const
 {
-  cout << "=== Linear system display, " << _number << endl;
-  cout << "=============================" << endl;
+  std::cout << "=== Linear system display, " << _number << std::endl;
+  std::cout << "=============================" << std::endl;
 }
 
 void FirstOrderLinearDS::saveSpecificDataToXML()

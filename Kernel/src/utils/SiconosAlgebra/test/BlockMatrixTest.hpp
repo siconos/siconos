@@ -23,7 +23,7 @@
 #include "SiconosPointers.hpp"
 #include "BlockMatrix.hpp"
 
-using namespace std;
+
 
 class BlockMatrixTest : public CppUnit::TestFixture
 {

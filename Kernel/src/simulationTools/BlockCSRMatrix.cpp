@@ -22,7 +22,7 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockCSRMatrix.hpp"
 
-using namespace std;
+
 
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():
@@ -233,20 +233,20 @@ void BlockCSRMatrix::convert()
 // Display data
 void BlockCSRMatrix::display() const
 {
-  cout << "----- Sparse Block Matrix with "
-       << nr << " blocks in a row/col and "
-       << MBlockCSR->nnz()
-       << " non-null blocks" << endl;
-  cout << "filled1:" << MBlockCSR->filled1() << endl;
-  cout << "filled2:" << MBlockCSR->filled2() << endl;
-  cout << "index1_data:\n";
+  std::cout << "----- Sparse Block Matrix with "
+            << nr << " blocks in a row/col and "
+            << MBlockCSR->nnz()
+            << " non-null blocks" <<std::endl;
+  std::cout << "filled1:" << MBlockCSR->filled1() <<std::endl;
+  std::cout << "filled2:" << MBlockCSR->filled2() <<std::endl;
+  std::cout << "index1_data:\n";
   print(MBlockCSR->index1_data().begin(), MBlockCSR->index1_data().end());
-  cout << endl;
-  cout << "index2_data:\n";
+  std::cout <<std::endl;
+  std::cout << "index2_data:\n";
   print(MBlockCSR->index2_data().begin(), MBlockCSR->index2_data().end());
-  cout << endl;
-  cout << "Sum of sizes of the diagonal blocks:"
-       << endl;
+  std::cout <<std::endl;
+  std::cout << "Sum of sizes of the diagonal blocks:"
+            <<std::endl;
   print(diagSizes->begin(), diagSizes->end());
 }
 

@@ -26,7 +26,7 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-using namespace std;
+
 //using namespace RELATION;
 
 

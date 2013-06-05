@@ -79,7 +79,7 @@ public:
   }
 
   /** return the A plug-in name of the FirstOrderLinearDSXML
-  *   \return a string
+  *   \return a std::string
   */
   inline const std::string getAPlugin() const
   {
@@ -94,12 +94,12 @@ public:
   void setA(const SiconosMatrix& m);
 
   /** to save the A plugin
-  *   \param a string (name of the plug-in)
+  *   \param a std::string (name of the plug-in)
   */
   void setAPlugin(const std::string& plugin);
 
   /** Return the b plug-in name of the FirstOrderLinearDSXML
-  *   \return a string
+  *   \return a std::string
   */
   inline const std::string getBPlugin() const
   {
@@ -125,7 +125,7 @@ public:
   void setB(const SiconosVector& v);
 
   /** to save the B plugin
-  *   \param a string (name of the plug-in)
+  *   \param a std::string (name of the plug-in)
   */
   void setBPlugin(const std::string& plugin);
 

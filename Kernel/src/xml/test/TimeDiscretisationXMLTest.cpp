@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "TimeDiscretisationXMLTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -39,7 +39,7 @@ void TimeDiscretisationXMLTest::setUp()
   }
   catch (SiconosException e)
   {
-    cout << "Error in TimeDiscretisationXMLTest : " << e.report() << endl;
+    std::cout << "Error in TimeDiscretisationXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 
@@ -57,21 +57,21 @@ void TimeDiscretisationXMLTest::tearDown()
 void TimeDiscretisationXMLTest::testIsConstant()
 {
   CPPUNIT_ASSERT_MESSAGE("test isConstant", td.isConstant());
-  cout << "TimeDiscretisationXMLTest >>> testIsConstant ................................. OK\n ";
+  std::cout << "TimeDiscretisationXMLTest >>> testIsConstant ................................. OK\n ";
 }
 
 void TimeDiscretisationXMLTest::testH()
 {
   CPPUNIT_ASSERT_MESSAGE("test H value", td.geth() == 0.1);
 
-  cout << "TimeDiscretisationXMLTest >>> testH ................................. OK\n ";
+  std::cout << "TimeDiscretisationXMLTest >>> testH ................................. OK\n ";
 }
 
 void TimeDiscretisationXMLTest::testgetN()
 {
   CPPUNIT_ASSERT_MESSAGE("test H value", td.getN() == 1);
 
-  cout << "TimeDiscretisationXMLTest >>> testGetN .............................. OK\n ";
+  std::cout << "TimeDiscretisationXMLTest >>> testGetN .............................. OK\n ";
 }
 
 void TimeDiscretisationXMLTest::testGetTk()
@@ -85,7 +85,7 @@ void TimeDiscretisationXMLTest::testGetTk()
 
   CPPUNIT_ASSERT_MESSAGE("test tk value", td.getTk() == vectorRef);
 
-  cout << "TimeDiscretisationXMLTest >>> testGetTk ............................. OK\n ";
+  std::cout << "TimeDiscretisationXMLTest >>> testGetTk ............................. OK\n ";
 }
 
 void TimeDiscretisationXMLTest::testGetHminHmax()
@@ -93,7 +93,7 @@ void TimeDiscretisationXMLTest::testGetHminHmax()
   CPPUNIT_ASSERT_MESSAGE("test HMin value", td.gethMin() == 0);
   CPPUNIT_ASSERT_MESSAGE("test HMin value", td.gethMax() == 5);
 
-  cout << "TimeDiscretisationXMLTest >>> testGetHminHmax ....................... OK\n ";
+  std::cout << "TimeDiscretisationXMLTest >>> testGetHminHmax ....................... OK\n ";
 }
 
 

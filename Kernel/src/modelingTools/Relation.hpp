@@ -122,15 +122,15 @@ protected:
   SP::RelationXML _relationxml;
 
   /** basic constructor
-   *  \param a string that gives the type of the relation
-   *  \param a string that gives the subtype of the relation
+   *  \param a std::string that gives the type of the relation
+   *  \param a std::string that gives the subtype of the relation
    */
   Relation(RELATION::TYPES, RELATION::SUBTYPES);
 
   /** xml constructor
    *  \param RelationXML* : the XML object corresponding
-   *  \param a string that gives the type of the relation
-   *  \param a string that gives the subtype of the relation
+   *  \param a std::string that gives the type of the relation
+   *  \param a std::string that gives the subtype of the relation
    */
   Relation(SP::RelationXML, RELATION::TYPES, RELATION::SUBTYPES);
 
@@ -189,22 +189,22 @@ public:
   }
 
   /** To get the name of h plugin
-   *  \return a string
+   *  \return a std::string
    */
   const std::string gethName() const ;
 
   /** To get the name of g plugin
-   *  \return a string
+   *  \return a std::string
    */
   const std::string getgName() const;
 
   /** To get the name of Jach[i] plugin
-   *  \return a string
+   *  \return a std::string
    */
   virtual const std::string getJachxName() const ;
 
   /** To get the name of Jacg[i] plugin
-   *  \return a string
+   *  \return a std::string
    */
   virtual const std::string getJacgName(unsigned int) const;
 

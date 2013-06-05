@@ -24,7 +24,7 @@
 #include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 
-using namespace std;
+
 using namespace SensorFactory;
 
 LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, t, ds)
@@ -35,7 +35,7 @@ LinearSensor::LinearSensor(SP::TimeDiscretisation t, SP::DynamicalSystem ds, SP:
 
 LinearSensor::~LinearSensor()
 {
-  cout << "LinearSensor destructor called" << endl;
+  std::cout << "LinearSensor destructor called" <<std::endl;
 }
 
 void LinearSensor::initialize(SP::Model m)

@@ -23,7 +23,7 @@
 #include "SimulationXML.hpp"
 #include "NonSmoothDynamicalSystemXML.hpp"
 
-using namespace std;
+
 
 SiconosModelXML::SiconosModelXML():
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
@@ -57,7 +57,7 @@ SiconosModelXML::SiconosModelXML(const std::string& siconosModelXMLFilePath):
     doc = xmlParseFile(siconosModelXMLFilePath.c_str());
 
     if (!doc)  // check if parsing is ok
-      XMLException::selfThrow("SiconosModelXML - Document " + (string)siconosModelXMLFilePath + " not parsed successfully.");
+      XMLException::selfThrow("SiconosModelXML - Document " + (std::string)siconosModelXMLFilePath + " not parsed successfully.");
 
     //===== Retrieve the document's root element =====
     xmlNode *newRootNode = xmlDocGetRootElement(doc);
@@ -91,9 +91,9 @@ SiconosModelXML::SiconosModelXML(const std::string& siconosModelXMLFilePath):
       xmlSchemaFile = XML_SCHEMA;
     }
 
-    string schemaFile = xmlSchemaFile; //getenv("SICONOSPATH") + (string)"/share/SICONOS/";
+    std::string schemaFile = xmlSchemaFile; //getenv("SICONOSPATH") + (string)"/share/SICONOS/";
 
-    cout << " **** The xml schema used is: " << schemaFile << " **** " << endl;
+    std::cout << " **** The xml schema used is: " << schemaFile << " **** " <<std::endl;
 
     //=====Load Schema=====
     std::ifstream givenXMLSchema(schemaFile.c_str());
@@ -122,11 +122,11 @@ SiconosModelXML::SiconosModelXML(const std::string& siconosModelXMLFilePath):
     xmlSchemaFree(schema);
 
     if (xmlValid == 0)
-      cout << "SiconosModelXML - Your XML input file, " << siconosModelXMLFilePath << ", is valid with respect to the schema of reference." << endl;
+      std::cout << "SiconosModelXML - Your XML input file, " << siconosModelXMLFilePath << ", is valid with respect to the schema of reference." <<std::endl;
     else if (xmlValid == -1)
-      XMLException::selfThrow("SiconosModelXML - Internal or API error to verify your XML model file : " + (string)siconosModelXMLFilePath + ".");
+      XMLException::selfThrow("SiconosModelXML - Internal or API error to verify your XML model file : " + (std::string)siconosModelXMLFilePath + ".");
     else //positive error code number returned
-      XMLException::selfThrow("SiconosModelXML - Your XML inout file " + (string)siconosModelXMLFilePath + " does not respect the Siconos schema.");
+      XMLException::selfThrow("SiconosModelXML - Your XML inout file " + (std::string)siconosModelXMLFilePath + " does not respect the Siconos schema.");
 
     //===== read model-nodes values in xml files ====
     loadModel(rootNode);
@@ -207,7 +207,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
     simulationXML.reset(new SimulationXML(node));
   else
   {
-    cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << SIMULATION_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;
+    std::cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << SIMULATION_TAG << " found. This may not be a problem since this tag is optional ./!\\" <<std::endl;
     timeNode = node;
     simulationXML.reset();
   }
@@ -284,10 +284,10 @@ void SiconosModelXML::loadTime(xmlNode *timeNode)
 bool SiconosModelXML::checkSiconosDOMTree()
 {
   bool res = false;
-  string schemaFile = getenv("SICONOSPATH") + xmlSchemaFile;
+  std::string schemaFile = getenv("SICONOSPATH") + xmlSchemaFile;
 
   if (!doc)
-    cout << "Warning: no DOM tree has been initialized yet." << endl;
+    std::cout << "Warning: no DOM tree has been initialized yet." <<std::endl;
   else
   {
     //=====Load Schema=====//
@@ -320,11 +320,11 @@ bool SiconosModelXML::checkSiconosDOMTree()
     else //positive error code number returned
     {
       saveSiconosModelInXMLFile("invalidDOMtree.xml");
-      cout << "Invalid DOM tree saved in \"invalidDOMtree.xml\" file." << endl;
+      std::cout << "Invalid DOM tree saved in \"invalidDOMtree.xml\" file." <<std::endl;
       XMLException::selfThrow("SiconosModelXML - The DOM tree in memory doesn't respect the XML schema.");
     }
   }
-  cout << "<< SiconosModelXML::checkSiconosDOMTree()" << endl;
+  std::cout << "<< SiconosModelXML::checkSiconosDOMTree()" <<std::endl;
   return res;
 }
 
@@ -342,15 +342,15 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   return res;
 }
 
-int SiconosModelXML::validateXmlFile(const string& xmlFile, const string& xmlSchema)
+int SiconosModelXML::validateXmlFile(const std::string& xmlFile, const std::string& xmlSchema)
 {
   int res = 0;
-  string schemaXML;
+  std::string schemaXML;
 
   if (xmlSchema == "")
   {
     schemaXML = XML_SCHEMA;//DEFAULT_XMLSCHEMA;DEFAULT_XMLSCHEMA;
-    cout << "/!\\No XML Schema file has been given !\n# Generic schema will be used" << endl;
+    std::cout << "/!\\No XML Schema file has been given !\n# Generic schema will be used" <<std::endl;
   }
   else schemaXML = xmlSchema;
 
@@ -381,7 +381,7 @@ int SiconosModelXML::validateXmlFile(const string& xmlFile, const string& xmlSch
 
   if (xmlValid == 0)
   {
-    cout << "SiconosModelXML - Your XML model file : " << xmlFile << " is valid with respect to the schema" << endl;
+    std::cout << "SiconosModelXML - Your XML model file : " << xmlFile << " is valid with respect to the schema" <<std::endl;
     res = 1;
   }
   else if (xmlValid == -1)

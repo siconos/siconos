@@ -42,10 +42,10 @@ void MultipleImpactNSL::setElasCoeff(double _newElasCoef)
 //
 void MultipleImpactNSL::display() const
 {
-  cout << "===============================MultipleImpactNSL====================================" << endl;
-  cout << "Value of the energytical restitution coefficient at contact is :" << _ResCof << endl;
-  cout << "Value of the stiffness at contact is :"  << _Stiff << endl;
-  cout << "====================================================================================" << endl;
+  std::cout << "===============================MultipleImpactNSL====================================" <<std::endl;
+  std::cout << "Value of the energytical restitution coefficient at contact is :" << _ResCof <<std::endl;
+  std::cout << "Value of the stiffness at contact is :"  << _Stiff <<std::endl;
+  std::cout << "====================================================================================" <<std::endl;
 }
 bool MultipleImpactNSL::isVerified() const
 {

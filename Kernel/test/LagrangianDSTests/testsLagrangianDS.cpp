@@ -26,7 +26,7 @@
 #include <iostream>
 #include <cmath>
 
-using namespace std;
+
 
 int main(int argc, char* argv[])
 {
@@ -46,11 +46,11 @@ int main(int argc, char* argv[])
     (*v0)(2) = 6;
 
     // constructor from min set of data
-    cout << "======== Test 1 ============= " << endl;
+    std::cout << "======== Test 1 ============= " <<std::endl;
     SP::LagrangianDS lds1(new LagrangianDS(1, size, *q0, *v0));
     lds1->display();
 
-    cout << "======== Test 2 ============= " << endl;
+    std::cout << "======== Test 2 ============= " <<std::endl;
     // constructor from a set of data, M from a plugin.
     lds1.reset(new LagrangianDS(1, size, *q0, *v0, "LagPlugin:computeMass"));
     lds1->computeMass(2);
@@ -58,13 +58,13 @@ int main(int argc, char* argv[])
     lds1->computeMass(2, v0);
     lds1->mass()->display();
 
-    cout << "======== Test 3 ============= " << endl;
+    std::cout << "======== Test 3 ============= " <<std::endl;
     // constructor from a set of data, Mass a given matrix.
     SP::SiconosMatrix A(new SiconosMatrix("mat.dat", true));
     lds1.reset(new LagrangianDS(1, size, *q0, *v0, *A));
     lds1->mass()->display();
 
-    cout << "======== Test 4 ============= " << endl;
+    std::cout << "======== Test 4 ============= " <<std::endl;
     // getter/setter
     // by "value" :
     lds1.reset(new LagrangianDS(1, size, *q0, *v0));
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     lds1->setJacobianQNLInertiaVelocity(*A);
     lds1->getJacobianQNLInertiaVelocity().display();
 
-    cout << "======== Test 5 ============= " << endl;
+    std::cout << "======== Test 5 ============= " <<std::endl;
     // getter/setter
     // by pointer :
     SP::SiconosMatrix B(new SiconosMatrix("matB.dat", true));
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     lds1->jacobianQNLInertiaq()->display();
     lds1->jacobianQNLInertiaVelocity()->display();
 
-    cout << "======== Test 6 ============= " << endl;
+    std::cout << "======== Test 6 ============= " <<std::endl;
     // Plugin
     lds1.reset(new LagrangianDS(1, size, *q0, *v0));
     lds1->setComputeMassFunction("LagPlugin.so", "computeMass");
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector u2(new SiconosVector(1));
     (*u2)(0) = 34;
 
-    cout << "======== Test 6 ============= " << endl;
+    std::cout << "======== Test 6 ============= " <<std::endl;
     // xml constructor
     // parse xml file:
     xmlDocPtr doc;
@@ -195,11 +195,11 @@ int main(int argc, char* argv[])
 
     // look for LagrangianDS node
     node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
     node = SiconosDOMTreeTools::findNodeChild(node, "DS_Definition");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
     node = SiconosDOMTreeTools::findNodeChild(node, "LagrangianDS");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
 
     // xml constructor
     SP::LagrangianDSXML tmpxml(new LagrangianDSXML(node, false));
@@ -238,10 +238,10 @@ int main(int argc, char* argv[])
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/BouncingBall\'" << endl;
+    std::cout << "Exception caught in \'sample/BouncingBall\'" <<std::endl;
   }
 }

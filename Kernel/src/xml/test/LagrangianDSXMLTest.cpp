@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianDSXMLTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -49,7 +49,7 @@ void LagrangianDSXMLTest::setUp()
   }
   catch (SiconosException e)
   {
-    cout << "Error in LagrangianDSXMLTest : " << e.report() << endl;
+    std::cout << "Error in LagrangianDSXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 
@@ -67,7 +67,7 @@ void LagrangianDSXMLTest::tearDown()
 void LagrangianDSXMLTest::testGetNdof()
 {
   CPPUNIT_ASSERT_MESSAGE("testGetNdof : ", ds.getNdof() == 3);
-  cout << "LagrangianDSXMLTest >>> testGetNdof ............................... OK\n ";
+  std::cout << "LagrangianDSXMLTest >>> testGetNdof ............................... OK\n ";
 }
 
 void LagrangianDSXMLTest::testGetQVelocity()
@@ -76,20 +76,20 @@ void LagrangianDSXMLTest::testGetQVelocity()
   CPPUNIT_ASSERT_MESSAGE("testGetQ0 : ", ds.getQ0() == vectorRef);
   CPPUNIT_ASSERT_MESSAGE("testGetVelocity : ", ds.getVelocity() == vectorRef);
   CPPUNIT_ASSERT_MESSAGE("testGetVelocity0 : ", ds.getVelocity0() == vectorRef);
-  cout << "LagrangianDSXMLTest >>> testGetQVelocity .......................... OK\n ";
+  std::cout << "LagrangianDSXMLTest >>> testGetQVelocity .......................... OK\n ";
 }
 
 
 void LagrangianDSXMLTest::testGetMemory()
 {
-  cout << "LagrangianDSXMLTest >>> testGetMemory ***** MUST BE REIMPLEMENTED WITH THE NEW OBJECT SICONOSMEMORY !\n ";
+  std::cout << "LagrangianDSXMLTest >>> testGetMemory ***** MUST BE REIMPLEMENTED WITH THE NEW OBJECT SICONOSMEMORY !\n ";
 }
 
 void LagrangianDSXMLTest::testGetMass()
 {
   SiconosMatrix matrixRef("matrix.dat", true);
   CPPUNIT_ASSERT_MESSAGE("test isMPlugin : ", ds.getMMatrix() == matrixRef);
-  cout << "LagrangianDSXMLTest >>> testGetMass ............................... OK\n ";
+  std::cout << "LagrangianDSXMLTest >>> testGetMass ............................... OK\n ";
 }
 
 void LagrangianDSXMLTest::testIsPlugin()
@@ -103,7 +103,7 @@ void LagrangianDSXMLTest::testIsPlugin()
   CPPUNIT_ASSERT_MESSAGE("test isJacobianQNLInertiaqPlugin : ", ds.isJacobianQNLInertiaqPlugin());
   CPPUNIT_ASSERT_MESSAGE("test isJacobianQNLInertiaVelocityPlugin : ", ds.isJacobianQNLInertiaVelocityPlugin());
 
-  cout << "LagrangianDSXMLTest >>> testIsPlugin .............................. OK\n ";
+  std::cout << "LagrangianDSXMLTest >>> testIsPlugin .............................. OK\n ";
 }
 
 

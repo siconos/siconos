@@ -243,7 +243,7 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** copy the data of the NonSmoothDynamicalSystem to the XML tree
-   *  \exception RuntimeException
+   *
    */
   void saveNSDSToXML();
 
@@ -282,7 +282,7 @@ public:
    * \param isControlInteraction true if the Interaction is used for
    * control purposes
    **/
-  void setControlProperty(const InteractionsGraph::VDescriptor& vd, 
+  void setControlProperty(const InteractionsGraph::VDescriptor& vd,
                           const DynamicalSystemsGraph::EDescriptor& ed,
                           const bool isControlInteraction);
 };

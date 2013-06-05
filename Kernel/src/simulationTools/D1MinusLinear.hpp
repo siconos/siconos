@@ -91,7 +91,7 @@ public:
   virtual ~D1MinusLinear() {};
 
   /** initialization of the D1MinusLinear integrator; for linear time
-c   *  invariant systems, we compute time invariant operator
+  c   *  invariant systems, we compute time invariant operator
    */
   virtual void initialize();
 

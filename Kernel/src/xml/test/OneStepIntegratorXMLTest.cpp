@@ -34,11 +34,11 @@ void OneStepIntegratorXMLTest::setUp()
     modelXML = new SiconosModelXML("OneStepI.xml");
     strategyXML = modelXML->getStrategyXML();
     oneStepIs = strategyXML->getOneStepIntegratorXML();
-    cout << "%%% setup : size == " << oneStepIs.size() << endl;
+    std::cout << "%%% setup : size == " << oneStepIs.size() <<std::endl;
   }
   catch (SiconosException e)
   {
-    cout << "Error in OneStepIntegratorXMLTest : " << e.report() << endl;
+    std::cout << "Error in OneStepIntegratorXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 }
@@ -51,7 +51,7 @@ void OneStepIntegratorXMLTest::tearDown()
 void OneStepIntegratorXMLTest::testNbOneStepIntegrator()
 {
   CPPUNIT_ASSERT_MESSAGE("testNbOneStepIntegrator ", oneStepIs.size() == 3);
-  cout << "OneStepIntegratorXMLTest >>> testNbOneStepIntegrator ................ OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testNbOneStepIntegrator ................ OK\n ";
 }
 
 void OneStepIntegratorXMLTest::testGetR()
@@ -60,7 +60,7 @@ void OneStepIntegratorXMLTest::testGetR()
   //  CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 1", oneStepIs[0]->getR() == 55);
   CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 2", oneStepIs[1]->getR() == 0);
   CPPUNIT_ASSERT_MESSAGE("testGetR : OneStepIntegator 3", oneStepIs[2]->getR() == -55);
-  cout << "OneStepIntegratorXMLTest >>> testGetR ............................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testGetR ............................... OK\n ";
 }
 
 
@@ -76,7 +76,7 @@ void OneStepIntegratorXMLTest::testGetDSConcerned()
   CPPUNIT_ASSERT_MESSAGE("testGetDSConcerned : OneStepIntegator 3 :size", oneStepIs[2]->getDSConcerned().size() == 1);
   CPPUNIT_ASSERT_MESSAGE("testGetDSConcerned : OneStepIntegator 3", oneStepIs[2]->getDSConcerned().at(0) == 1);
 
-  cout << "OneStepIntegratorXMLTest >>> testGetDSConcerned ..................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testGetDSConcerned ..................... OK\n ";
 }
 
 
@@ -87,7 +87,7 @@ void OneStepIntegratorXMLTest::testGetType()
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 2 : Adams", oneStepIs[1]->getType() == "Adams");
   CPPUNIT_ASSERT_MESSAGE("testGetType : OneStepIntegator 3 : Lsodar", oneStepIs[2]->getType() == "LSODAR");
 
-  cout << "OneStepIntegratorXMLTest >>> testGetType ............................ OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testGetType ............................ OK\n ";
 }
 
 void OneStepIntegratorXMLTest::testAdamsXML()
@@ -97,7 +97,7 @@ void OneStepIntegratorXMLTest::testAdamsXML()
   CPPUNIT_ASSERT_MESSAGE("testAdamsXML type ", adams->getType() == "Adams");
   CPPUNIT_ASSERT_MESSAGE("testAdamsXML R", adams->getR() == 0);
 
-  cout << "OneStepIntegratorXMLTest >>> testAdamsXML ........................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testAdamsXML ........................... OK\n ";
 }
 
 void OneStepIntegratorXMLTest::testMoreauXML()
@@ -107,7 +107,7 @@ void OneStepIntegratorXMLTest::testMoreauXML()
   CPPUNIT_ASSERT_MESSAGE("testMoreauXML type ", moreau->getType() == "Moreau");
   //CPPUNIT_ASSERT_MESSAGE("testMoreauXML R", moreau->getR() == 55);
 
-  cout << "OneStepIntegratorXMLTest >>> testMoreauXML .......................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testMoreauXML .......................... OK\n ";
 }
 
 void OneStepIntegratorXMLTest::testLsodarXML()
@@ -117,5 +117,5 @@ void OneStepIntegratorXMLTest::testLsodarXML()
   CPPUNIT_ASSERT_MESSAGE("testLsodarXML type ", lsodar->getType() == "LSODAR");
   CPPUNIT_ASSERT_MESSAGE("testLsodarXML R", lsodar->getR() == -55);
 
-  cout << "OneStepIntegratorXMLTest >>> testLsodarXML .......................... OK\n ";
+  std::cout << "OneStepIntegratorXMLTest >>> testLsodarXML .......................... OK\n ";
 }

@@ -298,8 +298,7 @@ public:
   virtual void display() const;
 
   /** copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+    */
   void saveNSProblemToXML();
 
   /** set if if _w and _z vectors are initialized with

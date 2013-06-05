@@ -43,7 +43,7 @@ void InteractionXMLTest::setUp()
   }
   catch (SiconosException e)
   {
-    cout << "Error in setup of InteractionXMLTest : " << e.report() << endl;
+    std::cout << "Error in setup of InteractionXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 
@@ -61,20 +61,20 @@ void InteractionXMLTest::tearDown()
 void InteractionXMLTest::testGetNumber()
 {
   CPPUNIT_ASSERT_MESSAGE("testGetNumber ", interaction.number() == 120);
-  cout << "InteractionXMLTest >>> testGetNumber ................................ OK\n ";
+  std::cout << "InteractionXMLTest >>> testGetNumber ................................ OK\n ";
 }
 
 void InteractionXMLTest::testGetId()
 {
   CPPUNIT_ASSERT_MESSAGE("testGetId ", interaction.getId() == "Interaction1");
-  cout << "InteractionXMLTest >>> testGetId .................................... OK\n ";
+  std::cout << "InteractionXMLTest >>> testGetId .................................... OK\n ";
 }
 
 void InteractionXMLTest::testHasYLambda()
 {
   CPPUNIT_ASSERT_MESSAGE("testHasYLambda : HasY ", interaction.hasY() == false);
   CPPUNIT_ASSERT_MESSAGE("testHasYLambda : HasLambda ", interaction.hasLambda() == false);
-  cout << "InteractionXMLTest >>> testHasYLambda ............................... OK\n ";
+  std::cout << "InteractionXMLTest >>> testHasYLambda ............................... OK\n ";
 }
 
 void InteractionXMLTest::testGetDSConcerned()
@@ -88,7 +88,7 @@ void InteractionXMLTest::testGetDSConcerned()
   CPPUNIT_ASSERT_MESSAGE("testGetDSConcerned : v.at(0).at(1) ", v.at(0).at(1) == 2);
   CPPUNIT_ASSERT_MESSAGE("testGetDSConcerned : v.at(1).at(0) ", v.at(1).at(0) == 1);
   CPPUNIT_ASSERT_MESSAGE("testGetDSConcerned : v.at(1).at(1) ", v.at(1).at(1) == 3);
-  cout << "InteractionXMLTest >>> testGetDSConcerned ........................... OK\n ";
+  std::cout << "InteractionXMLTest >>> testGetDSConcerned ........................... OK\n ";
 }
 
 

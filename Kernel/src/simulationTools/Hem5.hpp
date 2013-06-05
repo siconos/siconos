@@ -211,7 +211,7 @@ public:
   /** set the minimum and maximum step sizes
    *\param double (maximul step size)
    */
-  void setMaxStepSize(doublereal );
+  void setMaxStepSize(doublereal);
 
   /** update _intData
    */

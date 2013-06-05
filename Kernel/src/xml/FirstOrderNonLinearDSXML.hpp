@@ -122,7 +122,7 @@ public:
   }
 
   /** Return the name of the M plug-in
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getMPlugin() const
   {
@@ -147,13 +147,13 @@ public:
   void setMMatrix(const SiconosMatrix&v);
 
   /** to save the Jacobianfx plugin of the LagrangianDSXML
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setMPlugin(const std::string& plugin);
 
   // === f ===
   /** Return the name of the f plug-in
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getFPlugin() const
   {
@@ -178,13 +178,13 @@ public:
   void setFVector(const SiconosVector&v);
 
   /** to save the F plugin
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setFPlugin(const std::string& plugin);
 
   // === Jacobianfx ===
   /** Return the name of the jacobianfx plug-in
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getJacobianfxPlugin() const
   {
@@ -209,7 +209,7 @@ public:
   void setJacobianfxMatrix(const SiconosMatrix&v);
 
   /** to save the Jacobianfx plugin of the LagrangianDSXML
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setJacobianfxPlugin(const std::string& plugin);
 

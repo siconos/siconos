@@ -36,19 +36,19 @@
 
 #include "MainTest.hpp"
 
-using namespace std;
+
 
 int main(int argc, char* argv[])
 {
   try
   {
-    cout << endl;
-    cout << endl;
-    cout << " ===================================================" << endl;
-    cout << " ========= Global tests for Siconos-Kernel =========" << endl;
-    cout << " ===================================================" << endl;
-    cout << endl;
-    cout << endl;
+    std::cout <<std::endl;
+    std::cout <<std::endl;
+    std::cout << " ===================================================" <<std::endl;
+    std::cout << " ========= Global tests for Siconos-Kernel =========" <<std::endl;
+    std::cout << " ===================================================" <<std::endl;
+    std::cout <<std::endl;
+    std::cout <<std::endl;
 
     string logFile = "GlobalTests.log";
 
@@ -67,12 +67,12 @@ int main(int argc, char* argv[])
     // Print results
     GTest->print();
 
-    cout << " ===================================================" << endl;
-    cout << " ============== End of global testing ==============" << endl;
-    cout << " The number of tests run is: " << GTest->getNumberOfTests() << endl;
-    cout << " Among them, " << GTest->getNumberOfFailedTests() << " has failed." << endl;
-    cout << " See "  << logFile << " for details." << endl;
-    cout << " ===================================================" << endl;
+    std::cout << " ===================================================" <<std::endl;
+    std::cout << " ============== End of global testing ==============" <<std::endl;
+    std::cout << " The number of tests run is: " << GTest->getNumberOfTests() <<std::endl;
+    std::cout << " Among them, " << GTest->getNumberOfFailedTests() << " has failed." <<std::endl;
+    std::cout << " See "  << logFile << " for details." <<std::endl;
+    std::cout << " ===================================================" <<std::endl;
 
     if (GTest->getNumberOfFailedTests() != 0)
       return 1;
@@ -83,10 +83,10 @@ int main(int argc, char* argv[])
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/BouncingBall\'" << endl;
+    std::cout << "Exception caught in \'sample/BouncingBall\'" <<std::endl;
   }
 }

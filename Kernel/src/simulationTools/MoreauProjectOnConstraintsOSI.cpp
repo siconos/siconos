@@ -25,7 +25,7 @@
 #define FIRSTWAY_ACTIVATION
 //#define SECONDWAY_ACTIVATION
 //#define QFREE_ACTIVATION
-using namespace std;
+
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
@@ -221,7 +221,7 @@ bool MoreauProjectOnConstraintsOSI::addInteractionInIndexSet(SP::Interaction int
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
 #ifdef DEBUG_MESSAGES
   if (y <= _activateYPosThreshold)
@@ -252,7 +252,7 @@ bool MoreauProjectOnConstraintsOSI::removeInteractionInIndexSet(SP::Interaction 
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
 #ifdef DEBUG_MESSAGES
   if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)

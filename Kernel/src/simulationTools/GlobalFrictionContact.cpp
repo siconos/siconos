@@ -28,7 +28,7 @@
 #include "Moreau.hpp" // Numerics Header
 #include "LagrangianDS.hpp"
 #include "NewtonImpactNSL.hpp"
-using namespace std;
+
 
 // xml constructor
 GlobalFrictionContact::GlobalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
@@ -49,7 +49,7 @@ GlobalFrictionContact::GlobalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 // Optional: newNumericsSolverName
 GlobalFrictionContact::GlobalFrictionContact(int dimPb,
     const int newNumericsSolverId,
-    const string& newId):
+    const std::string& newId):
   LinearOSNS(newNumericsSolverId, "GlobalFrictionContact", newId), _contactProblemDim(dimPb)
 {}
 
@@ -164,15 +164,15 @@ void GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
 
   DSIterator itDS;
   SP::OneStepIntegrator  Osi;
-  string osiType; // type of the current one step integrator
-  string dsType; // type of the current Dynamical System;
+  std::string osiType; // type of the current one step integrator
+  std::string dsType; // type of the current Dynamical System;
 
   Osi = simulation->integratorOfDS(DS); // get OneStepIntegrator of current dynamical system
   osiType = Osi->getType();
   if (osiType == MOREAU || osiType == MOREAU2)
   {
     DSBlocks[DS] = (std11::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
-    //       cout << "GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
+    //       std::cout << "GlobalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " <<std::endl;
     //       DSBlocks[DS]->display();
   }
   else if (osiType == LSODAR) // Warning: LagrangianDS only at the time !!!
@@ -223,7 +223,7 @@ void GlobalFrictionContact::computeq(const double time)
 void GlobalFrictionContact::computeqBlockDS(SP::DynamicalSystem DS, unsigned int pos)
 {
   SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
-  string osiType = Osi->getType();
+  std::string osiType = Osi->getType();
   unsigned int sizeDS;
   if (osiType == MOREAU2)
   {
@@ -240,12 +240,12 @@ void GlobalFrictionContact::computeTildeLocalVelocityBlock(SP::Interaction inter
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->getRelationType();
   RELATION::SUBTYPES relationSubType = inter->getRelationSubType();
-  string nslawType = inter->getNonSmoothLawType();
+  std::string nslawType = inter->getNonSmoothLawType();
 
-  string simulationType = simulation->getType();
+  std::string simulationType = simulation->getType();
 
   SP::DynamicalSystem ds = *(inter->dynamicalSystemsBegin());
-  string osiType = simulation->integratorOfDS(ds)->getType();
+  std::string osiType = simulation->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = inter->getNonSmoothLawSize();
   Index coord(8);
@@ -435,7 +435,7 @@ int GlobalFrictionContact::compute(double time)
     //    q->display();
 
     //    pfc_3D_nsgs(numerics_problem.numberOfContacts, numerics_problem.M->matrix0, numerics_problem.q , z->getArray() , w->getArray(), mu->data(), &info2, iparam2 , dparam2 );
-    //    cout << " ... " << info2 << " " << dparam2[1] << endl;
+    //    std::cout << " ... " << info2 << " " << dparam2[1] <<std::endl;
     //    z->display();
     //    w->display();
 
@@ -444,7 +444,7 @@ int GlobalFrictionContact::compute(double time)
     //       M->display();
     //       q->display();
     //      info = (*primalFrictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->numericsSolverOptions(), numerics_options);
-    //  cout << " step 2 "<< info << endl;
+    //  std::cout << " step 2 "<< info <<std::endl;
     //  _z->display();
     //  velocity->display();
     // --- Recovering of the desired variables from LCP output ---
@@ -493,8 +493,8 @@ void GlobalFrictionContact::postCompute()
   DSIterator itDS;
   unsigned int sizeDS;
   SP::OneStepIntegrator  Osi;
-  string osiType; // type of the current one step integrator
-  string dsType; // type of the current Dynamical System
+  std::string osiType; // type of the current one step integrator
+  std::string dsType; // type of the current Dynamical System
   //   for(itDS = allDS->begin(); itDS!=  allDS->end(); ++itDS)
   //     {
   //       dsType = (*itDS) -> getType();
@@ -513,25 +513,25 @@ void GlobalFrictionContact::postCompute()
 
 void GlobalFrictionContact::display() const
 {
-  cout << "===== " << _contactProblemDim << "D Primal Friction Contact Problem " << endl;
-  cout << "size (_sizeOutput) " << _sizeOutput << endl;
-  cout << "and  size (_sizeLocalOutput) " << _sizeLocalOutput << "(ie " << _sizeLocalOutput / _contactProblemDim << " contacts)." << endl;
-  cout << " - Matrix M  : " << endl;
+  std::cout << "===== " << _contactProblemDim << "D Primal Friction Contact Problem " <<std::endl;
+  std::cout << "size (_sizeOutput) " << _sizeOutput <<std::endl;
+  std::cout << "and  size (_sizeLocalOutput) " << _sizeLocalOutput << "(ie " << _sizeLocalOutput / _contactProblemDim << " contacts)." <<std::endl;
+  std::cout << " - Matrix M  : " <<std::endl;
   if (M) M->display();
-  else cout << "-> NULL" << endl;
-  cout << " - Matrix H : " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " - Matrix H : " <<std::endl;
   if (H) H->display();
-  else cout << "-> NULL" << endl;
-  cout << " - Vector q : " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " - Vector q : " <<std::endl;
   if (q) q->display();
-  else cout << "-> NULL" << endl;
-  cout << " - Vector _tildeLocalVelocity : " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " - Vector _tildeLocalVelocity : " <<std::endl;
   if (_tildeLocalVelocity) _tildeLocalVelocity->display();
-  else cout << "-> NULL" << endl;
-  cout << " Friction coefficients: " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " Friction coefficients: " <<std::endl;
   if (_mu) print(_mu->begin(), _mu->end());
-  else cout << "-> NULL" << endl;
-  cout << "============================================================" << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "============================================================" <<std::endl;
 }
 
 GlobalFrictionContact* GlobalFrictionContact::convert(OneStepNSProblem* osnsp)

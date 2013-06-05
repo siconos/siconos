@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosSharedLibraryException.hpp"
-using namespace std;
+
 
 SiconosSharedLibraryException::SiconosSharedLibraryException() :
   SiconosException("Shared Library Exception") {}
 
-SiconosSharedLibraryException::SiconosSharedLibraryException(const string & report) :
+SiconosSharedLibraryException::SiconosSharedLibraryException(const std::string & report) :
   SiconosException("Shared Library Exception : " + report) {}
 
 SiconosSharedLibraryException::~SiconosSharedLibraryException() {}
@@ -33,7 +33,7 @@ void SiconosSharedLibraryException::selfThrow()
 }
 
 
-void SiconosSharedLibraryException::selfThrow(const string& report)
+void SiconosSharedLibraryException::selfThrow(const std::string& report)
 {
   throw SiconosSharedLibraryException(report);
 }

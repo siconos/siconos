@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearDSXML.hpp"
-using namespace std;
+
 
 FirstOrderLinearDSXML::FirstOrderLinearDSXML() :
   FirstOrderNonLinearDSXML(), ANode(NULL), bNode(NULL)

@@ -19,7 +19,7 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearDSXML.hpp"
 
-using namespace std;
+
 // --- Constructors ---
 
 // From xml file
@@ -99,19 +99,19 @@ void FirstOrderLinearTIDS::computeJacobianRhsx(const double time, const bool)
 
 void FirstOrderLinearTIDS::display() const
 {
-  cout << "===> Linear Time-invariant First Order System display, " << _number << ")." << endl;
-  cout << "- A " << endl;
+  std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")." <<std::endl;
+  std::cout << "- A " <<std::endl;
   if (_A) _A->display();
-  else cout << "-> NULL" << endl;
-  cout << "- b " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- b " <<std::endl;
   if (_b) _b->display();
-  else cout << "-> NULL" << endl;
+  else std::cout << "-> NULL" <<std::endl;
 
-  cout << "- M: " << endl;
+  std::cout << "- M: " <<std::endl;
   if (_M) _M->display();
-  else cout << "-> NULL" << endl;
+  else std::cout << "-> NULL" <<std::endl;
 
-  cout << "============================================" << endl;
+  std::cout << "============================================" <<std::endl;
 }
 
 FirstOrderLinearTIDS* FirstOrderLinearTIDS::convert(DynamicalSystem* ds)

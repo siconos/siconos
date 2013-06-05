@@ -226,7 +226,7 @@ public:
   // --- XML Functions ---
 
   /** saves the TimeDiscretisation to the XML tree
-   *  \exception RuntimeException
+   *
    */
   void saveTimeDiscretisationToXML();
 };

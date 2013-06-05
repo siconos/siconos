@@ -18,7 +18,7 @@
  */
 #include "Equality.hpp"
 #include "Simulation.hpp"
-using namespace std;
+
 using namespace RELATION;
 
 int Equality::compute(double time)
@@ -84,7 +84,7 @@ void Equality::updateM()
 
 void Equality::display() const
 {
-  cout << "======= EQUALITY of size " << _sizeOutput << " with: " << endl;
+  std::cout << "======= EQUALITY of size " << _sizeOutput << " with: " <<std::endl;
   LinearOSNS::display();
 }
 

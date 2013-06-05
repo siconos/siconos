@@ -360,7 +360,6 @@ public:
   virtual void updateState(const unsigned int level);
 
   /** copy the matrix W of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
    */
   void saveWToXML();
 

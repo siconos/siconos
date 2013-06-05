@@ -31,7 +31,7 @@
 class MLCPProjectOnConstraints;
 
 
-using namespace std;
+
 //#define TSPROJ_DEBUG
 //#define TSPROJ_WITHOUT_PROJECTION
 
@@ -156,7 +156,7 @@ void TimeSteppingCombinedProjection::initOSNS()
   //osnspb_pos->accept(simulationEffectOnOSNSP);
   if (Type::value(*osnspb_pos) ==     Type::MLCPProjectOnConstraints)
   {
-    //std::cout << "Type::name(*osnspb_pos) "<< Type::name(*osnspb_pos) <<std::endl;
+    // std::cout << "Type::name(*osnspb_pos) "<< Type::name(*osnspb_pos) <<std::endl;
     MLCPProjectOnConstraints * toto = static_cast<MLCPProjectOnConstraints*>(osnspb_pos.get());
     bool tutu = (bool)_doCombinedProjOnEquality;
     toto -> setDoProjOnEquality(tutu);
@@ -260,20 +260,20 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   {
     _nbIndexSetsIteration++ ;
 #ifdef TSPROJ_DEBUG
-    cout << "==================================================== :\n";
-    cout << "TimeSteppingCombinedProjection::advanceToEvent begin :\n";
-    cout << "==================================================== :\n";
-    cout << "_nbIndexSetsIteration =" << _nbIndexSetsIteration << "  :\n";
+    std::cout << "==================================================== :\n";
+    std::cout << "TimeSteppingCombinedProjection::advanceToEvent begin :\n";
+    std::cout << "==================================================== :\n";
+    std::cout << "_nbIndexSetsIteration =" << _nbIndexSetsIteration << "  :\n";
     SP::InteractionsGraph indexSet0 = topo->indexSet(0);
-    cout << "indexSet0->size() " << indexSet0->size()   << endl;
+    std::cout << "indexSet0->size() " << indexSet0->size()   <<std::endl;
 
 
     if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-      cout << "indexSet1->size() " << indexSet1->size()   << endl;
-      cout << "indexSet2->size() " << indexSet2->size()   << endl;
+      std::cout << "indexSet1->size() " << indexSet1->size()   <<std::endl;
+      std::cout << "indexSet2->size() " << indexSet2->size()   <<std::endl;
     }
 
 
@@ -321,15 +321,15 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     /** First step, Solve the standard velocity formulation.*/
 #ifdef TSPROJ_DEBUG
-    cout << "TimeStepping::newtonSolve begin :\n";
+    std::cout << "TimeStepping::newtonSolve begin :\n";
 #endif
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
     _cumulatedNewtonNbSteps += getNewtonNbSteps();
 #ifdef TSPROJ_DEBUG
-    cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
-    cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
-    cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
-    cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
+    std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
+    std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
+    std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
+    std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
     for (it = topo->interactions()->begin();
          it != topo->interactions()->end(); it++)
     {
@@ -384,7 +384,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #else
     /** Second step, Perform the projection on constraints.*/
 #ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingCombinedProjection::newtonSolve begin projection:\n";
+    std::cout << "TimeSteppingCombinedProjection::newtonSolve begin projection:\n";
 #endif
     SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
@@ -478,14 +478,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       info = 0;
 #ifdef TSPROJ_DEBUG
-      cout << "TimeSteppingCombinedProjection compute OSNSP." << endl ;
+      std::cout << "TimeSteppingCombinedProjection compute OSNSP." <<std::endl ;
 #endif
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
 
       if (info)
       {
-        cout << " TimeSteppingCombinedProjection::advanceToEvent() project on constraints. solver failed." << endl ;
+        std::cout << " TimeSteppingCombinedProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
         return;
       }
 
@@ -565,7 +565,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       }
 
 
-      cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+      std::cout << "TimeSteppingCombinedProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
 #endif
 
       //cout<<"during projection before normalizing of q:\n";
@@ -578,7 +578,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     _nbCumulatedProjectionIteration += _nbProjectionIteration ;
     if (_nbProjectionIteration == _projectionMaxIteration)
     {
-      cout << "TimeSteppingCombinedProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  << endl ;
+      std::cout << "TimeSteppingCombinedProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
       printf("              max criteria equality =  %e.\n", _maxViolationEquality);
       printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     }
@@ -586,7 +586,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #endif // TSPROJ_WITHOUT_PROJECTION   
 
 #ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingCombinedProjection::newtonSolve end projection:\n";
+    std::cout << "TimeSteppingCombinedProjection::newtonSolve end projection:\n";
 #endif
 
     if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
@@ -603,8 +603,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     {
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-      cout << "indexSet1->size() " << indexSet1->size()   << endl;
-      cout << "indexSet2->size() " << indexSet2->size()   << endl;
+      std::cout << "indexSet1->size() " << indexSet1->size()   <<std::endl;
+      std::cout << "indexSet2->size() " << indexSet2->size()   <<std::endl;
     }
 
     level = 0;
@@ -638,7 +638,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
   }// end  while (!_isIndexSetsStable)
 #ifdef TSPROJ_DEBUG
-  cout << "TimeSteppingCombinedProjection::indexset stable end : Number of iterations=" << _nbIndexSetsIteration << "\n";
+  std::cout << "TimeSteppingCombinedProjection::indexset stable end : Number of iterations=" << _nbIndexSetsIteration << "\n";
 #endif
   return;
 }

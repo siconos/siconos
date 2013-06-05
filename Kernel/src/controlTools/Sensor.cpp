@@ -24,7 +24,7 @@
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
 #include <iostream>
-using namespace std;
+
 
 Sensor::Sensor(): _type(0), _id("none")
 {}
@@ -47,11 +47,11 @@ void Sensor::initialize(SP::Model m)
 
 void Sensor::display() const
 {
-  cout << "=====> Sensor of type " << _type << ", named " << _id ;
+  std::cout << "=====> Sensor of type " << _type << ", named " << _id ;
   if (_DS)
-    cout << " and linked to the DynamicalSystem number " << _DS->number() << "." << endl;
+    std::cout << " and linked to the DynamicalSystem number " << _DS->number() << "." <<std::endl;
   else
-    cout << " and not linked to a DynamicalSystem." << endl;
-  cout << "======" << endl ;
-  cout << endl;
+    std::cout << " and not linked to a DynamicalSystem." <<std::endl;
+  std::cout << "======" <<std::endl ;
+  std::cout <<std::endl;
 }

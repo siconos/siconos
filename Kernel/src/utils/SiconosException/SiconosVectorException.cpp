@@ -17,13 +17,13 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosVectorException.hpp"
-using namespace std;
+
 
 SiconosVectorException::SiconosVectorException() :
   SiconosException("Siconos Vector Exception") {}
 
 
-SiconosVectorException::SiconosVectorException(const string& report) :
+SiconosVectorException::SiconosVectorException(const std::string& report) :
   SiconosException("Siconos Vector Exception : " + report) {}
 
 
@@ -36,7 +36,7 @@ void SiconosVectorException::selfThrow()
 }
 
 
-void SiconosVectorException::selfThrow(const string& report)
+void SiconosVectorException::selfThrow(const std::string& report)
 {
   throw SiconosVectorException(report);
 }

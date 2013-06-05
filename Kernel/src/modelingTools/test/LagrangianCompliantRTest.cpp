@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianCompliantRTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -64,22 +64,22 @@ void LagrangianCompliantRTest::tearDown()
 // xml constructor (scleronomic case)
 void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
 {
-  cout << "==============================================" << endl;
-  cout << "=== LagrangianCompliantR tests start ...=== " << endl;
-  cout << "==============================================" << endl;
+  std::cout << "==============================================" <<std::endl;
+  std::cout << "=== LagrangianCompliantR tests start ...=== " <<std::endl;
+  std::cout << "==============================================" <<std::endl;
   SP::LagrangianCompliantR R1(new LagrangianCompliantR(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1b : ", R1->getSubType() == RELATION::CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1c : ", R1->gethName() == "TestPlugin:hCompl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
-  cout << " xml Constructor (1) LagrangianCompliantR ok" << endl;
+  std::cout << " xml Constructor (1) LagrangianCompliantR ok" <<std::endl;
 }
 
 // data constructor:
 void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
 {
-  std::vector<string> names;
+  std::vector<std::string> names;
   names.push_back("TestPlugin:G0Compl");
   names.push_back("TestPlugin:G1Compl");
 
@@ -89,13 +89,13 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3c : ", R1->gethName() == "TestPlugin:hCompl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
-  cout << " data Constructor LagrangianCompliantR ok" << endl;
+  std::cout << " data Constructor LagrangianCompliantR ok" <<std::endl;
 }
 
 
 void LagrangianCompliantRTest::End()
 {
-  cout << "==============================================" << endl;
-  cout << " ===== End of LagrangianCompliantR tests ===== " << endl;
-  cout << "==============================================" << endl;
+  std::cout << "==============================================" <<std::endl;
+  std::cout << " ===== End of LagrangianCompliantR tests ===== " <<std::endl;
+  std::cout << "==============================================" <<std::endl;
 }

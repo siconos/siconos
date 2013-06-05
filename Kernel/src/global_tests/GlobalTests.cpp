@@ -19,7 +19,7 @@
 
 #include "GlobalTests.hpp"
 
-using namespace std;
+
 
 GlobalTest::GlobalTest(const std::string& logName): numberOfFailedTests(0)
 {
@@ -29,20 +29,20 @@ GlobalTest::GlobalTest(const std::string& logName): numberOfFailedTests(0)
 GlobalTest::~GlobalTest()
 {
   out.close();
-  set<FunctionTest*>::iterator it;
+  std::set<FunctionTest*>::iterator it;
   for (it = testsList.begin(); it != testsList.end(); ++it)
     if ((*it)) delete(*it);
   testsList.clear();
 }
 
-void GlobalTest::addTest(const string& name, func f)
+void GlobalTest::addTest(const std::string& name, func f)
 {
-  cout << "Add a new test: " << name << endl << endl;
+  std::cout << "Add a new test: " << name <<std::endl <<std::endl;
   testsList.insert(new FunctionTest(name, f));
 }
 void GlobalTest::run()
 {
-  set<FunctionTest*>::iterator it;
+  std::set<FunctionTest*>::iterator it;
   for (it = testsList.begin(); it != testsList.end(); ++it)
   {
     (*it)->run();
@@ -52,18 +52,18 @@ void GlobalTest::run()
 
 void GlobalTest::print()
 {
-  out << " ======== This is a log file that contains global tests results and comments ======== " << endl;
+  out << " ======== This is a log file that contains global tests results and comments ======== " <<std::endl;
 
-  out << "Number of test function run: " << testsList.size() << endl;
-  out << "Number of failed tests: " << numberOfFailedTests << endl;
+  out << "Number of test function run: " << testsList.size() <<std::endl;
+  out << "Number of failed tests: " << numberOfFailedTests <<std::endl;
 
-  out << "The following tests failed: " << endl;
-  set<FunctionTest*>::iterator it;
+  out << "The following tests failed: " <<std::endl;
+  std::set<FunctionTest*>::iterator it;
   for (it = testsList.begin(); it != testsList.end(); ++it)
   {
-    if ((*it)->hasFailed()) out  << "  - " << (*it)->getName() << endl;
+    if ((*it)->hasFailed()) out  << "  - " << (*it)->getName() <<std::endl;
   }
-  out << "======================================================================================= " << endl;
+  out << "======================================================================================= " <<std::endl;
 
 }
 

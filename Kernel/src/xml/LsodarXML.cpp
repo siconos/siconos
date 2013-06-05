@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LsodarXML.hpp"
-using namespace std;
+
 
 LsodarXML::LsodarXML() : OneStepIntegratorXML()
 {}

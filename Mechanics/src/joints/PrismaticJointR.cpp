@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel  Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
 /*! \file NewtonEulerR.hpp
 
@@ -27,26 +27,26 @@
 int PrismaticJointR::_sNbEqualities = 5;
 
 
-/*axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axe): NewtonEulerR()
+/**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis): NewtonEulerR()
 {
-  _axe0 = axe;
+  _axis0 = axis;
   _d1 = d1;
   _d2 = d2;
   computeFromInitialPosition();
 }
-/*axe is the axis of the prismatic joint, in the absolute frame.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d2, SP::SiconosVector axe): NewtonEulerR()
+/*axis is the axis of the prismatic joint, in the absolute frame.*/
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d2, SP::SiconosVector axis): NewtonEulerR()
 {
   //    _d1=NULL;
-  _axe0 = axe;
+  _axis0 = axis;
   _d2 = d2;
   computeFromInitialPosition();
 }
 void PrismaticJointR::displayInitialPosition()
 {
   std::cout << "Prismatic axis :\n";
-  _axe0->display();
+  _axis0->display();
   std::cout << "V1 :" << _V1x << " " << _V1y << " " << _V1z << "\n";
   std::cout << "V2 :" << _V2x << " " << _V2y << " " << _V2z << "\n";
   std::cout << "G10G20d1 :" << _G10G20d1x << " " << _G10G20d1y << " " << _G10G20d1z << "\n";
@@ -55,12 +55,12 @@ void PrismaticJointR::displayInitialPosition()
 }
 void PrismaticJointR::computeFromInitialPosition()
 {
-  computeV1V2FromAxe();
+  computeV1V2FromAxis();
   SP::SiconosVector q1;
   SP::SiconosVector q2;
   q2 = _d2->q0();
 
-  if (_d1)
+  if(_d1)
   {
     q1 = _d1->q0();
   }
@@ -86,37 +86,37 @@ void PrismaticJointR::computeFromInitialPosition()
   //  displayInitialPosition();
 }
 
-void PrismaticJointR::computeV1V2FromAxe()
+void PrismaticJointR::computeV1V2FromAxis()
 {
   _V1.reset(new SiconosVector(3));
   _V2.reset(new SiconosVector(3));
   _V1->zero();
   _V2->zero();
   //build _V1
-  if (_axe0->getValue(0) > _axe0->getValue(1))
-    if (_axe0->getValue(0) > _axe0->getValue(2))
+  if(_axis0->getValue(0) > _axis0->getValue(1))
+    if(_axis0->getValue(0) > _axis0->getValue(2))
     {
-      _V1->setValue(1, -_axe0->getValue(0));
-      _V1->setValue(0, _axe0->getValue(1));
+      _V1->setValue(1, -_axis0->getValue(0));
+      _V1->setValue(0, _axis0->getValue(1));
     }
     else
     {
-      _V1->setValue(1, -_axe0->getValue(2));
-      _V1->setValue(2, _axe0->getValue(1));
+      _V1->setValue(1, -_axis0->getValue(2));
+      _V1->setValue(2, _axis0->getValue(1));
     }
-  else if (_axe0->getValue(2) > _axe0->getValue(1))
+  else if(_axis0->getValue(2) > _axis0->getValue(1))
   {
-    _V1->setValue(1, -_axe0->getValue(2));
-    _V1->setValue(2, _axe0->getValue(1));
+    _V1->setValue(1, -_axis0->getValue(2));
+    _V1->setValue(2, _axis0->getValue(1));
   }
   else
   {
-    _V1->setValue(1, -_axe0->getValue(0));
-    _V1->setValue(0, _axe0->getValue(1));
+    _V1->setValue(1, -_axis0->getValue(0));
+    _V1->setValue(0, _axis0->getValue(1));
   }
   double aux = 1 / _V1->norm2();
   scal(aux, *_V1, *_V1);
-  cross_product(*_axe0, *_V1, *_V2);
+  cross_product(*_axis0, *_V1, *_V2);
   _V1x = _V1->getValue(0);
   _V1y = _V1->getValue(1);
   _V1z = _V1->getValue(2);
@@ -147,7 +147,7 @@ void PrismaticJointR::computeJachq(const double time, Interaction& inter)
   double q11 = 0;
   double q12 = 0;
   double q13 = 0;
-  if (_d1)
+  if(_d1)
   {
     SP::SiconosVector x1 = _d1->q();
     X1 = x1->getValue(0);
@@ -186,7 +186,7 @@ void PrismaticJointR::computeh(const double time, Interaction& inter)
   double q11 = 0;
   double q12 = 0;
   double q13 = 0;
-  if (_d1)
+  if(_d1)
   {
     SP::SiconosVector x1 = _d1->q();
     X1 = x1->getValue(0);
@@ -204,7 +204,7 @@ void PrismaticJointR::computeh(const double time, Interaction& inter)
   y.setValue(3, H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   y.setValue(4, H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   double norm = 0;
-  for (int ii = 0; ii < 5; ii++)
+  for(int ii = 0; ii < 5; ii++)
     norm += y.getValue(ii) * y.getValue(ii);
   //std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 
@@ -760,5 +760,18 @@ void PrismaticJointR::Jd2(double X1, double Y1, double Z1, double q10, double q1
 
 
 
+void PrismaticJointR::computeDotJachq(const double time, Interaction& inter)
+{
+}
 
 
+
+void PrismaticJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
+                               double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23)
+{
+}
+
+void PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
+                             double X2, double Y2, double Z2, double qdot20, double qdot21, double qdot22, double qdot23)
+{
+}

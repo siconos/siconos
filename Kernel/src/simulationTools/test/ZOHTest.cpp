@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "ZOHTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -56,10 +56,10 @@ void ZOHTest::tearDown()
 
 void ZOHTest::testMatrixExp0()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Compute matrix exponential of the identity matrix -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Compute matrix exponential of the identity matrix -------" <<std::endl;
   _A->eye();
   init();
   _sim->computeOneStep();
@@ -72,16 +72,16 @@ void ZOHTest::testMatrixExp0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(1) == _n, true);
   double diff = (*tmpM - Phi).normInf();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", diff < _tol, true);
-  cout << "------- First computation ok, error = " << diff << " -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- First computation ok, error = " << diff << " -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void ZOHTest::testMatrixExp1()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Compute matrix exponential of a upper triangular matrix -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Compute matrix exponential of a upper triangular matrix -------" <<std::endl;
   _A->zero();
   (*_A)(0, 1) = 1;
   init();
@@ -94,16 +94,16 @@ void ZOHTest::testMatrixExp1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (*tmpM - Phi).normInf() < _tol, true);
-  cout << "------- Second computation ok, error = " << (*tmpM - Phi).normInf() << " -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- Second computation ok, error = " << (*tmpM - Phi).normInf() << " -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void ZOHTest::testMatrixIntegration1()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Integrate an oscillator -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Integrate an oscillator -------" <<std::endl;
   _A->zero();
   (*_A)(0, 1) = 1;
   (*_A)(1, 0) = -1;
@@ -126,7 +126,7 @@ void ZOHTest::testMatrixIntegration1()
     _sim->nextStep();
   }
   dataPlot.display();
-  cout << endl << endl;
+  std::cout <<std::endl <<std::endl;
   dataPlot.resize(k, 3);
   ioMatrix::write("testMatrixIntegration1.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
@@ -135,16 +135,16 @@ void ZOHTest::testMatrixIntegration1()
   //magic line to compute the following:
   // python -c "import numpy as np; t = np.linspace(0, 9.9, 100); np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" && sed -i "1i100 3" testMatrixIntegration1.ref
   ioMatrix::read("testMatrixIntegration1.ref", "ascii", dataPlotRef);
-  cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
+  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration2()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Integrate x \\in -sgn(x)  -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Integrate x \\in -sgn(x)  -------" <<std::endl;
   _A->zero();
   _x0->zero();
   (*_x0)(0) = 1;
@@ -192,23 +192,23 @@ void ZOHTest::testMatrixIntegration2()
     _sim->nextStep();
   }
   dataPlot.display();
-  cout << endl << endl;
+  std::cout <<std::endl <<std::endl;
   dataPlot.resize(k, 5);
   ioMatrix::write("testMatrixIntegration2.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration2.ref", "ascii", dataPlotRef);
-  cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
+  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration3()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Integrate Orlov's controller  -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Integrate Orlov's controller  -------" <<std::endl;
   _h = .001;
   _A->zero();
   (*_A)(0, 1) = 1;
@@ -265,23 +265,23 @@ void ZOHTest::testMatrixIntegration3()
     _sim->nextStep();
   }
   dataPlot.display();
-  cout << endl << endl;
+  std::cout <<std::endl <<std::endl;
   dataPlot.resize(k, 7);
   ioMatrix::write("testMatrixIntegration3.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration3.ref", "ascii", dataPlotRef);
-  cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
+  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration4()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== ZOH tests start ... ===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Integrate Orlov's controller  -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== ZOH tests start ... ===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Integrate Orlov's controller  -------" <<std::endl;
   _h = .001;
   _A->zero();
   (*_A)(0, 1) = 1;
@@ -338,13 +338,13 @@ void ZOHTest::testMatrixIntegration4()
     _sim->nextStep();
   }
   dataPlot.display();
-  cout << endl << endl;
+  std::cout <<std::endl <<std::endl;
   dataPlot.resize(k, 7);
   ioMatrix::write("testMatrixIntegration4.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
   SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration4.ref", "ascii", dataPlotRef);
-  cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" << endl;
+  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", (dataPlot - dataPlotRef).normInf() < _tol, true);
 }

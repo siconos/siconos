@@ -24,11 +24,12 @@
 
 #include "LagrangianR.hpp"
 
-/** Lagrangian (Non Linear) Relation, Rheonomous and Holonomic.
+/** \class LagrangianRheonomousR
+ *  \brief  Lagrangian (Non Linear) Relation, Rheonomous and Holonomic.
  *
  * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date February 28, 2007
+ * \version 3.0.0.
+ * \date February 28, 2007
  *
  *  This class provides tools to describe non linear relation of the type:
  *
@@ -55,7 +56,7 @@
  * \f]
  *
  *  y (or its discrete approximation) is usually stored in y[0]
- *  \$f\dot y \$f(or its discrete approximation) is usually stored in y[1]
+ *  \f$\dot y \f$(or its discrete approximation) is usually stored in y[1]
  *  higher level can used for storing higher levels of derivatives.
  *
  *
@@ -163,11 +164,11 @@ public:
   LagrangianRheonomousR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param string : the name of the plugin to compute h.\n
+  *  \param std::string : the name of the plugin to compute h.\n
   * Its signature must be "void userPluginH(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param string : the name of the plugin to compute hDot. \n
+  *  \param std::string : the name of the plugin to compute hDot. \n
   * Its signature must be "void userPluginHDot(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
-  *  \param string : the name of the plugin  to compute jacobian h according to q.\n
+  *  \param std::string : the name of the plugin  to compute jacobian h according to q.\n
   * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
   */
   LagrangianRheonomousR(const std::string&, const std::string&, const std::string&);
@@ -207,7 +208,7 @@ public:
   inline void setHDot(SPPVT2 newPtr) {hDot = newPtr ;}
   */
   /** To get the name of hDot plugin
-  *  \return a string
+  *  \return a std::string
   */
   const std::string gethDotName() const ;
 
@@ -218,8 +219,8 @@ public:
   */
 
   /** to set a specified function to compute function hDot
-  *  \param string : the complete path to the plugin
-  *  \param string : the name of the function to use in this plugin
+  *  \param std::string : the complete path to the plugin
+  *  \param std::string : the name of the function to use in this plugin
   */
   void setComputehDotFunction(const std::string& , const std::string&);
   //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
@@ -250,12 +251,12 @@ public:
    */
   virtual void computehDot(const double time, Interaction& inter);
 
- /** to compute hDot using plug-in mechanism
-  * \param time current time
-  * \param inter interaction that owns the relation
-  * \param q the BlockVector of coordinates
-  * \param z the BlockVector of parameters
-  */
+  /** to compute hDot using plug-in mechanism
+   * \param time current time
+   * \param inter interaction that owns the relation
+   * \param q the BlockVector of coordinates
+   * \param z the BlockVector of parameters
+   */
   virtual void computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed

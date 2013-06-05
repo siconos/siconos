@@ -33,7 +33,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
@@ -212,9 +212,9 @@ void SchatzmanPaoli::initialize()
       SP::SiconosVector v0  = d->velocity0();
       SP::SiconosVector velocity  = d->velocity();
 
-      // std::cout << " q0 = " << std::endl;
+      //  std::cout << " q0 = " << std::endl;
       // q0->display();
-      // std::cout << " v0 = " << std::endl;
+      //  std::cout << " v0 = " << std::endl;
       // v0->display();
       // We first swap the initial value contained in q and v after initialization.
 
@@ -232,11 +232,11 @@ void SchatzmanPaoli::initialize()
       // SP::SiconosVector qprev = d->qMemory()->getSiconosVector(0);
       // SP::SiconosVector qprev2 = d->qMemory()->getSiconosVector(1);
       // SP::SiconosVector vprev = d->velocityMemory()->getSiconosVector(0);
-      // std::cout << " qprev = " << std::endl;
+      //  std::cout << " qprev = " << std::endl;
       // qprev->display();
-      // std::cout << " qprev2 = " << std::endl;
+      //  std::cout << " qprev2 = " << std::endl;
       // qprev2->display();
-      // std::cout << " vprev = " << std::endl;
+      //  std::cout << " vprev = " << std::endl;
       // vprev->display();
 
 
@@ -554,7 +554,7 @@ double SchatzmanPaoli::computeResidu()
       //       //residuFree->zero();
 
 
-      //       //   std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
+      //       //    std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
 
       //       prod(*M, (*v-*vold), *residuFree); // residuFree = M(v - vold)
 
@@ -608,11 +608,11 @@ double SchatzmanPaoli::computeResidu()
       //       }
 
       //       *(d->workspace(DynamicalSystem::free))=*residuFree; // copy residuFree in Workfree
-      // //      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      // //       std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residufree :"  << std::endl;
       // //      residuFree->display();
       //       if (d->p(1))
       //         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
-      // //      std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residu :"  << std::endl;
+      // //       std::cout << "SchatzmanPaoli::ComputeResidu LagrangianDS residu :"  << std::endl;
       // //      d->workspace(DynamicalSystem::free)->display();
       //         normResidu = d->workspace(DynamicalSystem::free)->norm2();
       RuntimeException::selfThrow("SchatzmanPaoli::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -634,11 +634,11 @@ double SchatzmanPaoli::computeResidu()
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
-      // std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::computeResidu - q_k_1 =" <<std::endl;
       // q_k_1->display();
-      // std::cout << "SchatzmanPaoli::computeResidu - q_k =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::computeResidu - q_k =" <<std::endl;
       // q_k->display();
-      // std::cout << "SchatzmanPaoli::computeResidu - v_k =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::computeResidu - v_k =" <<std::endl;
       // v_k->display();
 
       // --- ResiduFree computation Equation (1) ---
@@ -705,7 +705,7 @@ double SchatzmanPaoli::computeResidu()
       // }
 
 
-      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
       // residuFree->display();
 
 
@@ -713,12 +713,12 @@ double SchatzmanPaoli::computeResidu()
       if (d->p(0))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(0); // Compute Residu in Workfree Notation !!
 
-      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
+      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
       //  if (d->p(0))
       //    d->p(0)->display();
       //  else
-      //    std::cout << " p(0) :"  << std::endl;
-      // std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //     std::cout << " p(0) :"  << std::endl;
+      //  std::cout << "SchatzmanPaoli::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       // d->workspace(DynamicalSystem::free)->display();
 
 
@@ -917,10 +917,10 @@ void SchatzmanPaoli::computeFreeState()
       // // -- vfree =  v - W^{-1} ResiduFree --
       // // At this point vfree = residuFree
       // // -> Solve WX = vfree and set vfree = X
-      // //   cout<<"SchatzmanPaoli::computeFreeState residu free"<<endl;
+      // //   std::cout<<"SchatzmanPaoli::computeFreeState residu free"<<endl;
       // //   vfree->display();
       // d->luW()->PLUForwardBackwardInPlace(*vfree);
-      // //   cout<<"SchatzmanPaoli::computeFreeState -WRfree"<<endl;
+      // //   std::cout<<"SchatzmanPaoli::computeFreeState -WRfree"<<endl;
       // //   vfree->display();
       // //   scal(h,*vfree,*vfree);
       // // -> compute real vfree
@@ -967,7 +967,7 @@ struct SchatzmanPaoli::_NSLEffectOnFreeOutput : public SiconosVisitor
     y_k_1 = _inter->yMemory(_osnsp->levelMin())->getSiconosVector(1);
 
 
-    // std::cout << "y_k_1 " << std::endl;
+    //  std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
     subscal(e, *y_k_1, *(_inter->yp()), subCoord, false);
   }
@@ -1040,11 +1040,11 @@ void SchatzmanPaoli::computeFreeOutput(SP::Interaction inter, OneStepNSProblem *
   {
     Xfree = inter->data(FirstOrderR::free);
   }
-  else if  (relationType == NewtonEuler)
+  else if (relationType == NewtonEuler)
   {
     Xfree = inter->data(NewtonEulerR::free);
   }
-  else if  (relationType == Lagrangian)
+  else if (relationType == Lagrangian)
   {
     Xfree = inter->data(LagrangianR::free);
   }
@@ -1176,13 +1176,13 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       SP::SiconosVector v = d->velocity();
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
 
-      // std::cout << "SchatzmanPaoli::updateState - q_k_1 =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::updateState - q_k_1 =" <<std::endl;
       // q_k_1->display();
-      // std::cout << "SchatzmanPaoli::updateState - q =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::updateState - q =" <<std::endl;
       // q->display();
 
       *v = 1.0 / (2.0 * h) * (*q - *q_k_1);
-      // std::cout << "SchatzmanPaoli::updateState - v =" <<std::endl;
+      //  std::cout << "SchatzmanPaoli::updateState - v =" <<std::endl;
       // v->display();
 
       // int bc=0;
@@ -1221,7 +1221,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       //       SP::SiconosVector v = d->velocity();
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       cout<<"SchatzmanPaoli::updatestate prev v"<<endl;
+      //       std::cout<<"SchatzmanPaoli::updatestate prev v"<<endl;
       //       v->display();
       // #endif
 
@@ -1231,16 +1231,16 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       d->luW()->PLUForwardBackwardInPlace(*v);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       cout<<"SchatzmanPaoli::updatestate hWB lambda"<<endl;
+      //       std::cout<<"SchatzmanPaoli::updatestate hWB lambda"<<endl;
       //       v->display();
       // #endif
 
       //       *v +=  * ds->workspace(DynamicalSystem::free);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       cout<<"SchatzmanPaoli::updatestate work free"<<endl;
+      //       std::cout<<"SchatzmanPaoli::updatestate work free"<<endl;
       //       ds->workspace(DynamicalSystem::free)->display();
-      //       cout<<"SchatzmanPaoli::updatestate new v"<<endl;
+      //       std::cout<<"SchatzmanPaoli::updatestate new v"<<endl;
       //       v->display();
       // #endif
       //       //compute q
@@ -1250,9 +1250,9 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       SP::SiconosMatrix T = d->T();
       //       SP::SiconosVector dotq = d->dotq();
       //       prod(*T,*v,*dotq,true);
-      //       // cout<<"SchatzmanPaoli::updateState v"<<endl;
+      //       // std::cout<<"SchatzmanPaoli::updateState v"<<endl;
       //       // v->display();
-      //       // cout<<"SchatzmanPaoli::updateState dotq"<<endl;
+      //       // std::cout<<"SchatzmanPaoli::updateState dotq"<<endl;
       //       // dotq->display();
 
 
@@ -1270,7 +1270,7 @@ void SchatzmanPaoli::updateState(const unsigned int level)
       //       scal(coeff,*dotqold,*q,false); // q += h(1-theta)*vold
       //       *q += *qold;
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
-      //       cout<<"new q before normalizing"<<endl;
+      //       std::cout<<"new q before normalizing"<<endl;
       //       q->display();
       // #endif
 
@@ -1292,17 +1292,17 @@ void SchatzmanPaoli::display()
 {
   OneStepIntegrator::display();
 
-  cout << "====== SchatzmanPaoli OSI display ======" << endl;
+  std::cout << "====== SchatzmanPaoli OSI display ======" <<std::endl;
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    cout << "--------------------------------" << endl;
-    cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
+    std::cout << "--------------------------------" <<std::endl;
+    std::cout << "--> W of dynamical system number " << (*it)->number() << ": " <<std::endl;
     if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
-    else cout << "-> NULL" << endl;
-    cout << "--> and corresponding theta is: " << _theta << endl;
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
-  cout << "================================" << endl;
+  std::cout << "================================" <<std::endl;
 }
 
 

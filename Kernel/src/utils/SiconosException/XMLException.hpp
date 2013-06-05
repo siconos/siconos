@@ -55,7 +55,6 @@ public:
   ~XMLException();
 
   /** static function which throw a XMLException
-   * \exception XMLException
    */
   static void selfThrow() ;
 

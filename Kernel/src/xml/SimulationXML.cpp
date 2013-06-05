@@ -31,7 +31,7 @@
 #include "QPXML.hpp"
 #include "FrictionContactXML.hpp"
 
-using namespace std;
+
 
 SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimulationNode)
 {
@@ -52,7 +52,7 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
       if (!OSINode)  // At least one OSI must be described in the xml file.
         XMLException::selfThrow("SimulationXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
 
-      string typeOSI; // OneStepIntegrator type
+      std::string typeOSI; // OneStepIntegrator type
       while (OSINode)
       {
         typeOSI = (char*)OSINode->name;
@@ -72,14 +72,14 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
     else
       XMLException::selfThrow("SimulationXML - ERROR : tag " + ONESTEPINTEGRATOR_DEFINITION_TAG + " not found.");
   }
-  else cout << "SimulationXML - Constructor : the Simulation is not defined -> the LMGC90 tag is used." << endl;
+  else std::cout << "SimulationXML - Constructor : the Simulation is not defined -> the LMGC90 tag is used." <<std::endl;
 
   // === OneStepNSProblem data loading ===
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)))
   {
     xmlNodePtr OSNSPBNode = SiconosDOMTreeTools::findNodeChild(node);
 
-    string typeOSNS; // OneStepNSPb type
+    std::string typeOSNS; // OneStepNSPb type
     while (OSNSPBNode)
     {
       typeOSNS = (char*)OSNSPBNode->name;
@@ -114,7 +114,7 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   XMLException::selfThrow("SimulationXML saveSimulation2XML, not yet implemented");
 
   //   rootNode = node;
-  //   string type, tmp;
+  //   std::string type, tmp;
   //   xmlNodePtr integratorDefinitionNode;
   //   OneStepIntegratorXML* osixml;
   //   SP::OneStepNSProblemXML  osnspbxml;

@@ -24,7 +24,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 
@@ -184,8 +184,8 @@ int FrictionContact::compute(double time)
 
 void FrictionContact::display() const
 {
-  cout << "===== " << _contactProblemDim << "D Friction Contact Problem " << endl;
-  cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." << endl;
+  std::cout << "===== " << _contactProblemDim << "D Friction Contact Problem " <<std::endl;
+  std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." <<std::endl;
   LinearOSNS::display();
 }
 

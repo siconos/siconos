@@ -28,7 +28,7 @@
 
 #include "SiconosAlgebra.hpp"
 
-using std::cout;
+using  std::cout;
 using std::endl;
 
 // =================================================

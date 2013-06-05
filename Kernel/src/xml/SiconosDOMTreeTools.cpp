@@ -23,7 +23,7 @@
 #include "SimpleMatrix.hpp"
 #include "RuntimeException.hpp"
 
-using namespace std;
+
 
 SiconosVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
 {
@@ -45,15 +45,15 @@ SiconosVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vector
 
     //Content
     xmlChar* tmp = xmlNodeGetContent((xmlNodePtr)vectorNode);
-    string vectorContent = (char *)tmp;
-    vector<double> tmpV;
+    std::string vectorContent = (char *)tmp;
+    std::vector<double> tmpV;
     string2Vector(vectorContent, tmpV);
     SiconosVector v(tmpV);
     xmlFree(tmp);
 
     if (v.size() != size)
     {
-      string s("size given in attribute and real size of the loaded vector are different in tag ");
+      std::string s("size given in attribute and real size of the loaded vector are different in tag ");
       XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue : " + s + (char*)vectorNode->name);
     }
     return v;
@@ -86,7 +86,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
     {
       if (getSiconosRowMatrixValue(node, matrixColSize).size() != matrixColSize)
       {
-        string s("A row in the matrix has not the right size in tag ");
+        std::string s("A row in the matrix has not the right size in tag ");
         XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue : " + s + (char*)node->name);
       }
       *v = getSiconosRowMatrixValue(node, matrixColSize);
@@ -99,7 +99,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
 }
 
 
-bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
+bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const std::string& attributeName)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     return true;
@@ -107,20 +107,20 @@ bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string&
     return false;
 }
 
-string SiconosDOMTreeTools::getStringAttributeValue(const xmlNodePtr node, const string& attributeName)
+std::string SiconosDOMTreeTools::getStringAttributeValue(const xmlNodePtr node, const std::string& attributeName)
 {
   if (!xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     XMLException::selfThrow("SiconosDOMTreeTools - getStringAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
   xmlChar* tmp = xmlGetProp((xmlNodePtr)node, (xmlChar *)(attributeName.c_str()));
-  string vOut = (char*)tmp;
+  std::string vOut = (char*)tmp;
   xmlFree(tmp);
   return vOut;
 }
 
-string SiconosDOMTreeTools::getStringContentValue(const xmlNodePtr node)
+std::string SiconosDOMTreeTools::getStringContentValue(const xmlNodePtr node)
 {
   xmlChar* tmp = xmlNodeGetContent((xmlNodePtr)node);
-  string vOut = (char*)tmp;
+  std::string vOut = (char*)tmp;
   xmlFree(tmp);
   return vOut;
 }
@@ -132,7 +132,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
    */
   if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
-    string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
+    std::string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
     ioVector::write(file, FILE_STORAGE, v);
   }
   else
@@ -141,7 +141,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
     //Size
     unsigned int size = getAttributeValue<unsigned int>(siconosVectorNode, SDTT_VECTORSIZE);
 
-    string vectorName = (char*)siconosVectorNode->name;
+    std::string vectorName = (char*)siconosVectorNode->name;
     if (size != v.size())
       XMLException::selfThrow("SiconosDOMTreeTools - setSiconosVectorNodeValue : the size of the " + vectorName +
                               " vector you want to save is different of the size defined the Kernel\ncheck the size of your DynamicalSystem");
@@ -158,7 +158,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
    */
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
-    string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
+    std::string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
     ioMatrix::write(file, FILE_STORAGE, matrix);
   }
   else
@@ -169,7 +169,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
     //rowSize
     unsigned int matrixRowSize = getAttributeValue<unsigned int>(siconosMatrixNode, SDTT_MATRIXROWSIZE);
 
-    string matrixName = (char*)siconosMatrixNode->name;
+    std::string matrixName = (char*)siconosMatrixNode->name;
 
     if (matrixColSize != matrix.size(1))
       XMLException::selfThrow("SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix col size you want to save is different of the col size defined for it in xml");
@@ -191,7 +191,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
   }
 }
 
-void SiconosDOMTreeTools::setStringAttributeValue(const xmlNodePtr  node, const string attributeName, const string value)
+void SiconosDOMTreeTools::setStringAttributeValue(const xmlNodePtr  node, const std::string attributeName, const std::string value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *)(value.c_str()));
@@ -200,12 +200,12 @@ void SiconosDOMTreeTools::setStringAttributeValue(const xmlNodePtr  node, const 
 }
 
 
-void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNodePtr  node, const string attributeName, const int value)
+void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNodePtr  node, const std::string attributeName, const int value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
-    string stringValue;
-    stringstream sstr;
+    std::string stringValue;
+    std::stringstream sstr;
     sstr << value;
     sstr >> stringValue;
     xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
@@ -214,12 +214,12 @@ void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNodePtr  node, const
     XMLException::selfThrow("SiconosDOMTreeTools - setIntegerAttributeValue : the attribute " + attributeName + "doesn't exist in tag " + (char*)node->name);
 }
 
-void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNodePtr  node, const string attributeName, const double value)
+void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNodePtr  node, const std::string attributeName, const double value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
-    string stringValue;
-    stringstream sstr;
+    std::string stringValue;
+    std::stringstream sstr;
     sstr << value;
     sstr >> stringValue;
     xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
@@ -229,11 +229,11 @@ void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNodePtr  node, const 
 }
 
 
-void SiconosDOMTreeTools::setBooleanAttributeValue(const xmlNodePtr  node, const string attributeName, const bool value)
+void SiconosDOMTreeTools::setBooleanAttributeValue(const xmlNodePtr  node, const std::string attributeName, const bool value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
-    string stringValue = "false";
+    std::string stringValue = "false";
     if (value) stringValue = "true";
     xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
   }
@@ -242,7 +242,7 @@ void SiconosDOMTreeTools::setBooleanAttributeValue(const xmlNodePtr  node, const
 }
 
 
-void SiconosDOMTreeTools::setStringContentValue(const xmlNodePtr  node, const string value)
+void SiconosDOMTreeTools::setStringContentValue(const xmlNodePtr  node, const std::string value)
 {
   xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)value.c_str());
 }
@@ -250,8 +250,8 @@ void SiconosDOMTreeTools::setStringContentValue(const xmlNodePtr  node, const st
 
 void SiconosDOMTreeTools::setIntegerContentValue(const xmlNodePtr  node, const int value)
 {
-  string stringValue;
-  stringstream sstr;
+  std::string stringValue;
+  std::stringstream sstr;
 
   sstr << value;
   sstr >> stringValue;
@@ -261,8 +261,8 @@ void SiconosDOMTreeTools::setIntegerContentValue(const xmlNodePtr  node, const i
 
 void SiconosDOMTreeTools::setDoubleContentValue(const xmlNodePtr  node, const double value)
 {
-  string stringValue;
-  stringstream sstr;
+  std::string stringValue;
+  std::stringstream sstr;
 
   sstr << value;
   sstr >> stringValue;
@@ -270,10 +270,10 @@ void SiconosDOMTreeTools::setDoubleContentValue(const xmlNodePtr  node, const do
 }
 
 
-void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNodePtr  vectorNode, const vector<int> v)
+void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNodePtr  vectorNode, const std::vector<int> v)
 {
   char element[100];
-  string vectorContent = "";
+  std::string vectorContent = "";
   unsigned int i = 0;
 
   while (i < v.size())
@@ -293,7 +293,7 @@ void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNodePtr  vectorNode,
 
 // -----------------
 
-xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const string& name, const SiconosMatrix& matrix)
+xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const std::string& name, const SiconosMatrix& matrix)
 {
   /*
    * \todo if the SiconosMatrix is too big, the SiconosMatrix must be saved in an extern file and only the name of this file must be written in the XML file
@@ -302,8 +302,8 @@ xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const stri
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
   //  node = xmlNewChild(rootNode, NULL, BAD_CAST name.c_str(), NULL);
 
-  string col, row;
-  stringstream sstr, sstr2;
+  std::string col, row;
+  std::stringstream sstr, sstr2;
 
   sstr << matrix.size(1);
   sstr >> col;
@@ -329,7 +329,7 @@ xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const stri
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const string& name, const  SiconosVector& v)
+xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const std::string& name, const  SiconosVector& v)
 {
   xmlNodePtr node;
 
@@ -337,8 +337,8 @@ xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const st
   {
     node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
-    string size;
-    stringstream sstr;
+    std::string size;
+    std::stringstream sstr;
 
     sstr << v.size();
     sstr >> size;
@@ -352,7 +352,7 @@ xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const st
   else
   {
     node = xmlNewNode(NULL, BAD_CAST name.c_str());
-    string file = name + ".dat"; // \todo : add a time stamp to make this file unique
+    std::string file = name + ".dat"; // \todo : add a time stamp to make this file unique
     xmlNewProp(node, (xmlChar *)SDTT_VECTORFILE.c_str(), (xmlChar*) file.c_str());
 
     setSiconosVectorNodeValue(node, v);
@@ -363,7 +363,7 @@ xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const st
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createVectorIntNode(xmlNodePtr  rootNode, const string name, vector<int> v)
+xmlNodePtr  SiconosDOMTreeTools::createVectorIntNode(xmlNodePtr  rootNode, const std::string name, std::vector<int> v)
 {
   xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
@@ -375,10 +375,10 @@ xmlNodePtr  SiconosDOMTreeTools::createVectorIntNode(xmlNodePtr  rootNode, const
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createDoubleNode(xmlNodePtr  rootNode, const string name, const double d)
+xmlNodePtr  SiconosDOMTreeTools::createDoubleNode(xmlNodePtr  rootNode, const std::string name, const double d)
 {
-  string stringValue;
-  stringstream sstr;
+  std::string stringValue;
+  std::stringstream sstr;
 
   sstr << d;
   sstr >> stringValue;
@@ -391,10 +391,10 @@ xmlNodePtr  SiconosDOMTreeTools::createDoubleNode(xmlNodePtr  rootNode, const st
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createIntegerNode(xmlNodePtr  rootNode, const string name, const int i)
+xmlNodePtr  SiconosDOMTreeTools::createIntegerNode(xmlNodePtr  rootNode, const std::string name, const int i)
 {
-  string stringValue;
-  stringstream sstr;
+  std::string stringValue;
+  std::stringstream sstr;
 
   sstr << i;
   sstr >> stringValue;
@@ -407,9 +407,9 @@ xmlNodePtr  SiconosDOMTreeTools::createIntegerNode(xmlNodePtr  rootNode, const s
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createBooleanNode(xmlNodePtr  rootNode, const string name, const bool b)
+xmlNodePtr  SiconosDOMTreeTools::createBooleanNode(xmlNodePtr  rootNode, const std::string name, const bool b)
 {
-  string stringValue;
+  std::string stringValue;
 
   xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
@@ -422,20 +422,20 @@ xmlNodePtr  SiconosDOMTreeTools::createBooleanNode(xmlNodePtr  rootNode, const s
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createStringNode(xmlNodePtr  rootNode, const string name, const string s)
+xmlNodePtr  SiconosDOMTreeTools::createStringNode(xmlNodePtr  rootNode, const std::string name, const std::string s)
 {
   xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
-  //  string str = "\"" + s + "\"";
-  string str = s;
+  //  std::string str = "\"" + s + "\"";
+  std::string str = s;
   xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)str.c_str());
 
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-xmlNodePtr  SiconosDOMTreeTools::createSingleNode(xmlNodePtr  rootNode, const string name)
+xmlNodePtr  SiconosDOMTreeTools::createSingleNode(xmlNodePtr  rootNode, const std::string name)
 {
   xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
@@ -444,14 +444,14 @@ xmlNodePtr  SiconosDOMTreeTools::createSingleNode(xmlNodePtr  rootNode, const st
   return node;
 }
 
-void SiconosDOMTreeTools::createStringAttribute(xmlNodePtr  node, const string name, const string s)
+void SiconosDOMTreeTools::createStringAttribute(xmlNodePtr  node, const std::string name, const std::string s)
 {
   xmlNewProp(node, (xmlChar*)(name.c_str()), (xmlChar*)s.c_str());
 }
 
-void SiconosDOMTreeTools::createBooleanAttribute(xmlNodePtr  node, const string s, const bool b)
+void SiconosDOMTreeTools::createBooleanAttribute(xmlNodePtr  node, const std::string s, const bool b)
 {
-  string stringValue;
+  std::string stringValue;
   if (b) stringValue = "true";
   else    stringValue = "false";
   xmlNewProp(node, (xmlChar*)(s.c_str()), (xmlChar*)stringValue.c_str());
@@ -459,7 +459,7 @@ void SiconosDOMTreeTools::createBooleanAttribute(xmlNodePtr  node, const string 
 
 // -----------------
 
-xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node, const string& childNodeName)
+xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node, const std::string& childNodeName)
 {
   xmlNodePtr childNode = NULL;
 
@@ -492,7 +492,7 @@ xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node)
 }
 
 
-xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node, const string& followNodeName)
+xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node, const std::string& followNodeName)
 {
   xmlNodePtr  n = (xmlNodePtr)node->next;
   while (n)
@@ -536,8 +536,8 @@ SiconosVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNodePtr  si
     //The row is precised in the XML DOM Tree
     //Content
     xmlChar * tmp =  xmlNodeGetContent((xmlNodePtr) siconosMatrixRowNode);
-    string vectorContent = (char *)tmp;
-    vector<double> tmpV;
+    std::string vectorContent = (char *)tmp;
+    std::vector<double> tmpV;
     string2Vector(vectorContent, tmpV);
     SiconosVector v(tmpV);
     xmlFree(tmp);
@@ -552,7 +552,7 @@ void SiconosDOMTreeTools::setSiconosRowMatrixValue(const xmlNodePtr  siconosMatr
 
   char element[100];
   unsigned int i = 0;
-  string vectorContent = "";
+  std::string vectorContent = "";
   while (i < v.size())
   {
     strcpy(element, "");

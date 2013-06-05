@@ -20,7 +20,7 @@
 #include "SensorFactory.hpp"
 #include "RuntimeException.hpp"
 
-using namespace std;
+
 
 namespace SensorFactory
 {
@@ -43,13 +43,13 @@ SP::Sensor Registry::instantiate(int name, SP::TimeDiscretisation t, SP::Dynamic
   if (it == factory_map.end())
     RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + name);
 
-  // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
+  // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
   return (it->second)(t, ds) ;  // run our factory
 }
 
 Registration::Registration(int name, object_creator creator)
 {
-  //  cout << endl << "Registration of " << name << endl << endl ;
+  //  std::cout <<std::endl << "Registration of " << name <<std::endl <<std::endl ;
   // Add creator into the factory of Sensors
   Registry::get().add(name, creator) ;
 }

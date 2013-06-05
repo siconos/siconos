@@ -21,7 +21,7 @@
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 //#define MLCP_DEBUG
 // xml constructor
@@ -207,7 +207,7 @@ int MLCP::compute(double time)
     }
     catch (...)
     {
-      cout << "exception catched" << endl;
+      std::cout << "exception catched" <<std::endl;
       info = 1;
     }
 
@@ -231,8 +231,8 @@ int MLCP::compute(double time)
 
 void MLCP::display() const
 {
-  cout << "======= MLCP of size " << _sizeOutput << " with: " << endl;
-  cout << "======= m " << _m << " _n " << _n << endl;
+  std::cout << "======= MLCP of size " << _sizeOutput << " with: " <<std::endl;
+  std::cout << "======= m " << _m << " _n " << _n <<std::endl;
   LinearOSNS::display();
 }
 

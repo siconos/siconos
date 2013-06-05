@@ -21,7 +21,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianR.hpp"
-using namespace std;
+
 using namespace RELATION;
 //#define DEBUG_NEWMARK
 
@@ -179,8 +179,8 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
       scal(-1.0, *K, *W, false);
     //
 #ifdef DEBUG_NEWMARK
-    cout.precision(15);
-    cout << "Iteration matrix W: ";
+    std::cout.precision(15);
+    std::cout << "Iteration matrix W: ";
     W->display();
 #endif
   }
@@ -269,12 +269,12 @@ double NewMarkAlphaOSI::computeResidu()
       }
       //
 #ifdef DEBUG_NEWMARK
-      cout.precision(15);
-      cout << "Residu Free: ";
+      std::cout.precision(15);
+      std::cout << "Residu Free: ";
       freeR->display();
-      cout << "Residu: ";
+      std::cout << "Residu: ";
       _residu->display();
-      cout << "ResiduMax: " << maxResidu << endl;
+      std::cout << "ResiduMax: " << maxResidu <<std::endl;
 #endif
     }
     else
@@ -311,7 +311,7 @@ void NewMarkAlphaOSI::computeFreeState()
       *_qfree *= -1.0; //_qfree = -(W^-1)*R_free
       //
 #ifdef DEBUG_NEWMARK
-      cout << "delta q_free: " << endl;
+      std::cout << "delta q_free: " <<std::endl;
       _qfree->display();
 #endif
     }
@@ -337,7 +337,7 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
   // get pointer to delta q_free of Dynamical Systems concerned with the interaction
 
   SP::BlockVector q_free;
-  if  (relationType == Lagrangian)
+  if (relationType == Lagrangian)
   {
     q_free = inter->data(LagrangianR::free);
   }
@@ -420,7 +420,7 @@ void NewMarkAlphaOSI::computeFreeOutput(SP::Interaction inter, OneStepNSProblem 
       }
     }
 #ifdef DEBUG_NEWMARK
-    cout << "Free output y_free: ";
+    std::cout << "Free output y_free: ";
     y_free->display();
 #endif
   }
@@ -494,15 +494,15 @@ void NewMarkAlphaOSI::prediction()
       *(d->workspace(DynamicalSystem::acce_memory)) = *(_ddotq);
       //
 #ifdef DEBUG_NEWMARK
-      cout.precision(15);
-      cout << "Before prediction" << endl;
-      cout << "Position q: ";
+      std::cout.precision(15);
+      std::cout << "Before prediction" <<std::endl;
+      std::cout << "Position q: ";
       _q->display();
-      cout << "Velocity dotq: ";
+      std::cout << "Velocity dotq: ";
       _dotq->display();
-      cout << "Acceleration ddotq: ";
+      std::cout << "Acceleration ddotq: ";
       _ddotq->display();
-      cout << "Acceleration-like a: ";
+      std::cout << "Acceleration-like a: ";
       _a->display();
 #endif
       //
@@ -514,15 +514,15 @@ void NewMarkAlphaOSI::prediction()
       _ddotq->zero();
       // Display message for debug
 #ifdef DEBUG_NEWMARK
-      cout.precision(15);
-      cout << "After prediction" << endl;
-      cout << "Position q: ";
+      std::cout.precision(15);
+      std::cout << "After prediction" <<std::endl;
+      std::cout << "Position q: ";
       _q->display();
-      cout << "Velocity dotq: ";
+      std::cout << "Velocity dotq: ";
       _dotq->display();
-      cout << "Acceleration ddotq: ";
+      std::cout << "Acceleration ddotq: ";
       _ddotq->display();
-      cout << "Acceleration-like a: ";
+      std::cout << "Acceleration-like a: ";
       _a->display();
 #endif
     }
@@ -564,15 +564,15 @@ void NewMarkAlphaOSI::correction()
       *(d->workspace(DynamicalSystem::acce_like)) += ((1 - alpha_f) / (1 - alpha_m)) * ((beta_prime / pow(h, 2.0)) * (*delta_q));
       //
 #ifdef DEBUG_NEWMARK
-      cout.precision(15);
-      cout << "After correction" << endl;
-      cout << "Position q : ";
+      std::cout.precision(15);
+      std::cout << "After correction" <<std::endl;
+      std::cout << "Position q : ";
       d->q()->display();
-      cout << "Velocity dotq : ";
+      std::cout << "Velocity dotq : ";
       d->velocity()->display();
-      cout << "Acceleration ddotq : ";
+      std::cout << "Acceleration ddotq : ";
       d->acceleration()->display();
-      cout << "Acceleration-like a : ";
+      std::cout << "Acceleration-like a : ";
       d->workspace(DynamicalSystem::acce_like)->display();
 #endif
     }
@@ -637,50 +637,50 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     //a0 = q_n
     (*_vec) = (*q_n);
     _CoeffsDense->setCol(0, (*_vec));
-    cout << "a0: ";
+    std::cout << "a0: ";
     _vec->display();
     //a1 = h*dotq_n
     (*_vec) = h * (*dotq_n);
     _CoeffsDense->setCol(1, (*_vec));
-    cout << "a1: ";
+    std::cout << "a1: ";
     _vec->display();
     //a2 = 0.5*h^2*ddotq_n
     (*_vec) = (0.5 * std::pow(h, 2)) * (*ddotq_n);
     _CoeffsDense->setCol(2, (*_vec));
-    cout << "a2: ";
+    std::cout << "a2: ";
     _vec->display();
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * std::pow(h, 2)) * (*ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(3, (*_vec));
-    cout << "a3: ";
+    std::cout << "a3: ";
     _vec->display();
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
     (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * std::pow(h, 2)) * (*ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - (std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(4, (*_vec));
-    cout << "a4: ";
+    std::cout << "a4: ";
     _vec->display();
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * std::pow(h, 2)) * (*ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * std::pow(h, 2)) * (*ddotq_np1);
     _CoeffsDense->setCol(5, (*_vec));
-    cout << "a5: ";
+    std::cout << "a5: ";
     _vec->display();
     //
 #ifdef DEBUG_NEWMARK
-    cout << "==================== In NewMarkAlphaOSI::computeCoefsDenseOutput ================" << endl;
-    cout << "DS number: " << ds->number() << endl;
-    cout << "q_n: ";
+    std::cout << "==================== In NewMarkAlphaOSI::computeCoefsDenseOutput ================" <<std::endl;
+    std::cout << "DS number: " << ds->number() <<std::endl;
+    std::cout << "q_n: ";
     q_n->display();
-    cout << "dotq_n: ";
+    std::cout << "dotq_n: ";
     dotq_n->display();
-    cout << "ddotq_n: ";
+    std::cout << "ddotq_n: ";
     ddotq_n->display();
-    cout << "q_n+1: ";
+    std::cout << "q_n+1: ";
     q_np1->display();
-    cout << "dotq_n+1: ";
+    std::cout << "dotq_n+1: ";
     dotq_np1->display();
-    cout << "ddotq_n+1: ";
+    std::cout << "ddotq_n+1: ";
     ddotq_np1->display();
-    cout << "Dense output coefficient matrix: " << endl;
+    std::cout << "Dense output coefficient matrix: " <<std::endl;
     _CoeffsDense->display();
 #endif
   }

@@ -8,7 +8,7 @@
 #include "ioMatrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/progress.hpp>
-using namespace std;
+
 //Default constructor
 OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
 {
@@ -27,7 +27,7 @@ OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
   NameFile = "DataMultipleImpact.dat";
 }
 //------------------------------ -------------------------------------------------------------
-OSNSMultipleImpact::OSNSMultipleImpact(string newTypeLaw, double newDelP = 1.0e-5): LinearOSNS()
+OSNSMultipleImpact::OSNSMultipleImpact(std::string newTypeLaw, double newDelP = 1.0e-5): LinearOSNS()
 {
   TypeCompLaw = newTypeLaw;
   DeltaP = newDelP;
@@ -300,11 +300,11 @@ void OSNSMultipleImpact::BuildParaContact()
     (*ElasCoefContact)(pos) = Mulnslaw->ElasCof();
   }
   /*
-    cout << " Restitution coefficients: " << endl;
+    std::cout << " Restitution coefficients: " <<std::endl;
     ResContact->display();
-    cout << "Stiffnesses: " << endl;
+    std::cout << "Stiffnesses: " <<std::endl;
     Kcontact->display();
-    cout << "Elasticity coeffients at contacts: " << endl;
+    std::cout << "Elasticity coeffients at contacts: " <<std::endl;
     ElasCoefContact->display();
   */
 
@@ -436,11 +436,11 @@ void OSNSMultipleImpact::InitializeInput()
     setBlock(*impulse0, TolImpulseContact, impulse0->size(), 0, pos_inter);
   };
   /*
-    cout << "Initial relative velocity at contacts" << endl;
+    std::cout << "Initial relative velocity at contacts" <<std::endl;
     VelContact->display();
-    cout<< "Initial energy at contacts" << endl;
+    std::cout<< "Initial energy at contacts" <<std::endl;
     EnerContact->display();
-    cout << "Impulse at contact" << endl;
+    std::cout << "Impulse at contact" <<std::endl;
     TolImpulseContact->display();
   */
 
@@ -479,9 +479,9 @@ void OSNSMultipleImpact::PrimConVelocity()
     RuntimeException::selfThrow("OSNSMultipleImpact::PrimConVelocity, the velocity at the primary contact must be negative !!");
   }
   /*
-    cout << "Primary contact according to relative velocity: " << IdPrimaContact << endl;
-    cout << "Relative velocity at the primary contact: " << VelAtPrimaCon << endl;
-    cout << "Potential energy at the primary contact: " << EnerAtPrimaCon << endl;
+    std::cout << "Primary contact according to relative velocity: " << IdPrimaContact <<std::endl;
+    std::cout << "Relative velocity at the primary contact: " << VelAtPrimaCon <<std::endl;
+    std::cout << "Potential energy at the primary contact: " << EnerAtPrimaCon <<std::endl;
   */
 }
 //=======================================================================================
@@ -494,9 +494,9 @@ void OSNSMultipleImpact::PrimConEnergy()
     RuntimeException::selfThrow("OSNSMultipleImpact::PrimConEnergy the potential energy at the primary contact must be positive !!");
   }
   /*
-    cout << "Primary contact according to potenial energy: " << IdPrimaContact << endl;
-    cout << "Relative velocity at the primary contact: " << VelAtPrimaCon << endl;
-    cout << "Potential energy at the primary contact: " << EnerAtPrimaCon << endl;
+    std::cout << "Primary contact according to potenial energy: " << IdPrimaContact <<std::endl;
+    std::cout << "Relative velocity at the primary contact: " << VelAtPrimaCon <<std::endl;
+    std::cout << "Potential energy at the primary contact: " << EnerAtPrimaCon <<std::endl;
   */
 
 }
@@ -568,7 +568,7 @@ bool OSNSMultipleImpact::IsMulImpactTerminate()
   //     };
   //   return var;
   //
-  //cout << "Is the multiple impacts is terminated: " << _IsImpactEnd << endl;
+  //cout << "Is the multiple impacts is terminated: " << _IsImpactEnd <<std::endl;
   //
 }
 //=======================================================================================
@@ -585,8 +585,8 @@ void OSNSMultipleImpact::SelectPrimaContact()
     IsPrimaConEnergy = true;
   }
   //
-  // cout << "The primary contact is :" << IdPrimaContact << endl;
-  // cout << "Is the primary contact is selected according to the potential energy: " << IsPrimaConEnergy << endl;
+  // std::cout << "The primary contact is :" << IdPrimaContact <<std::endl;
+  // std::cout << "Is the primary contact is selected according to the potential energy: " << IsPrimaConEnergy <<std::endl;
 }
 //=======================================================================================
 void OSNSMultipleImpact::ComputeDistriVector()
@@ -645,10 +645,10 @@ void OSNSMultipleImpact::ComputeDistriVector()
           _vel = (*VelContact)(i);
           ratio_ener = (std::pow(std::fabs(_vel * DeltaP), (_mu / (_mu + 1.0)))) / (std::pow(EnerAtPrimaCon, (mu_prima / (mu_prima + 1.0))));
           //
-          // cout << "_ratio_m: " << _ratio_mu << endl;
-          // cout << "Stiff: " << _stiff << endl;
-          // cout << "ratio_stiff: " << ratio_stiff << endl;
-          // cout << "energy ratio: " << ratio_ener << endl;
+          // std::cout << "_ratio_m: " << _ratio_mu <<std::endl;
+          // std::cout << "Stiff: " << _stiff <<std::endl;
+          // std::cout << "ratio_stiff: " << ratio_stiff <<std::endl;
+          // std::cout << "energy ratio: " << ratio_ener <<std::endl;
 
           //
           (*DistriVector)(i) = std::pow((_ratio_mu * ratio_stiff * ratio_ener), (1.0 + _mu));
@@ -708,9 +708,9 @@ void OSNSMultipleImpact::ComputeVelContact()
   (*VelContact) = (*VelContact) + prod(*(_M->defaultMatrix()), *DelImpulseContact); // compute the relative velocity at the end of the step
   //
   /*
-    cout << "Relative velocity at contacts at the beginning of step:" << endl;
+    std::cout << "Relative velocity at contacts at the beginning of step:" <<std::endl;
     OldVelContact->display();
-    cout << "Relative velocity at contacts at the end of step:" << endl;
+    std::cout << "Relative velocity at contacts at the end of step:" <<std::endl;
     VelContact->display();
   */
   //
@@ -773,9 +773,9 @@ void OSNSMultipleImpact::ComputeEnerContact()
   }
   /*
 
-    cout << "Potential energy at contacts at the end of step:" << endl;
+    std::cout << "Potential energy at contacts at the end of step:" <<std::endl;
     EnerContact->display();
-    cout << "Work done during the compression phase at contacts" << endl;
+    std::cout << "Work done during the compression phase at contacts" <<std::endl;
     WcContact->display();
 
   */
@@ -872,16 +872,16 @@ void OSNSMultipleImpact::ComputeImpact()
   unsigned int point_save = 0;
   unsigned int _counterstepsave = 0;
   // Show computation progress
-  //cout << "*********** Impact computation progress *************" << endl;
+  //cout << "*********** Impact computation progress *************" <<std::endl;
   //boost::progress_display show_progress(NstepMax);
   /*
-     cout << "----------Before multiple impacts computation---------------" << endl;
-     cout << "Velocity at contacts: ";
+     std::cout << "----------Before multiple impacts computation---------------" <<std::endl;
+     std::cout << "Velocity at contacts: ";
      VelContact->display();
-     cout << "Impulse at contact: ";
+     std::cout << "Impulse at contact: ";
      TolImpulseContact->display();
   */
-  //cout << "-------------------Multiple impacts computation starts:-----------------------" << endl;
+  //cout << "-------------------Multiple impacts computation starts:-----------------------" <<std::endl;
   // First save at the beginning of impact computation
   if ((YesSaveData) && (Step_min_save == 1))
   {
@@ -891,9 +891,9 @@ void OSNSMultipleImpact::ComputeImpact()
   //
   while (1 != 0)
   {
-    // cout << "==================Step==================:  " << number_step << endl;
-    // cout << "Impulse variable: " << Impulse_variable << endl;
-    // cout << "Time_variable: " << Time_variable << endl;
+    // std::cout << "==================Step==================:  " << number_step <<std::endl;
+    // std::cout << "Impulse variable: " << Impulse_variable <<std::endl;
+    // std::cout << "Time_variable: " << Time_variable <<std::endl;
 
     //Step 1: check the state at contacts
     CheckStateContact();
@@ -938,30 +938,30 @@ void OSNSMultipleImpact::ComputeImpact()
     if (number_step > NstepMax)
     {
       RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps perfomed exceeds the maximal number of steps allowed!!!");
-      //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " << endl;
+      //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " <<std::endl;
       break;
     }
-    // cout << "Distribution vector: ";
+    // std::cout << "Distribution vector: ";
     // DistriVector->display();
-    // cout << "Incremental Impulse: ";
+    // std::cout << "Incremental Impulse: ";
     // DelImpulseContact->display();
-    // cout << "Impulse at contact: ";
+    // std::cout << "Impulse at contact: ";
     // TolImpulseContact->display();
-    // cout << "Velocity at contacts: ";
+    // std::cout << "Velocity at contacts: ";
     // VelContact->display();
-    // cout << "Potential energy at contacts: ";
+    // std::cout << "Potential energy at contacts: ";
     // EnerContact->display();
 
   }
 
   //
-  // cout << "*****************Impact computation is terminated******************" << endl;
-  // cout << "Number of integration steps: " << number_step << endl;
-  // cout << "Velocity at contacts: ";
+  // std::cout << "*****************Impact computation is terminated******************" <<std::endl;
+  // std::cout << "Number of integration steps: " << number_step <<std::endl;
+  // std::cout << "Velocity at contacts: ";
   // VelContact->display();
-  // cout << "Impulse at contact: ";
+  // std::cout << "Impulse at contact: ";
   // TolImpulseContact->display();
-  // cout << "Duration of the multiple impacts process: " << Time_variable << " s" << endl;
+  // std::cout << "Duration of the multiple impacts process: " << Time_variable << " s" <<std::endl;
 
   // Close the stream file
   if (YesSaveData)
@@ -1026,12 +1026,12 @@ int OSNSMultipleImpact::compute(double time)
 //========================================================================================
 void OSNSMultipleImpact::display() const
 {
-  cout << "<<<<<<<<<<<<<<<<< Information about the multiple impact >>>>>>>>>>>>>>>>>>>>>" << endl;
-  cout << "Type of the contact compliance law: " << TypeCompLaw << endl;
-  cout << "Number of contacts involved into impacts: " << Ncontact << endl;
-  cout << "Step size used: " << DeltaP << endl;
-  cout << "Primary impulse at the end of impact: " << Impulse_variable << endl;
-  cout << "Duration of the multiple impacs process: " << Time_variable << endl;
+  std::cout << "<<<<<<<<<<<<<<<<< Information about the multiple impact >>>>>>>>>>>>>>>>>>>>>" <<std::endl;
+  std::cout << "Type of the contact compliance law: " << TypeCompLaw <<std::endl;
+  std::cout << "Number of contacts involved into impacts: " << Ncontact <<std::endl;
+  std::cout << "Step size used: " << DeltaP <<std::endl;
+  std::cout << "Primary impulse at the end of impact: " << Impulse_variable <<std::endl;
+  std::cout << "Duration of the multiple impacs process: " << Time_variable <<std::endl;
   // Display post-impact velocities
   SP::DynamicalSystemsGraph DSG0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VIterator ui, uiend;
@@ -1039,10 +1039,10 @@ void OSNSMultipleImpact::display() const
   {
     SP::DynamicalSystem ds = DSG0->bundle(*ui);
     SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
-    cout << "DS number: " << ds->number() << endl;
-    cout << "Pre-impact velocity: ";
+    std::cout << "DS number: " << ds->number() <<std::endl;
+    std::cout << "Pre-impact velocity: ";
     (lag_ds->velocityMemory()->getSiconosVector(1))->display();
-    cout << "Post-impact velocity: ";
+    std::cout << "Post-impact velocity: ";
     (lag_ds->velocity())->display();
   }
   // Display impulses at contact points
@@ -1051,7 +1051,7 @@ void OSNSMultipleImpact::display() const
   for (std11::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
   {
     SP::Interaction inter = IndexSet0->bundle(*vi);
-    cout << "Impulse at contact point " << inter->number() << ":";
+    std::cout << "Impulse at contact point " << inter->number() << ":";
     (inter->lambda(1))->display();
   }
 };

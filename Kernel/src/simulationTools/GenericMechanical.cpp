@@ -24,7 +24,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 //#define GMP_DEBUG
@@ -169,7 +169,7 @@ int GenericMechanical::compute(double time)
 
 void GenericMechanical::display() const
 {
-  cout << "===== " << "Generic mechanical Problem " << endl;
+  std::cout << "===== " << "Generic mechanical Problem " <<std::endl;
   LinearOSNS::display();
 }
 

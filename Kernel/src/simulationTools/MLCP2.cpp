@@ -25,10 +25,10 @@
 #include "FirstOrderLinearR.hpp"
 #include "Topology.hpp"
 
-using namespace std;
+
 
 // Constructor from a set of data
-MLCP2::MLCP2(const string& newNumericsSolverName, const string& newId):
+MLCP2::MLCP2(const std::string& newNumericsSolverName, const std::string& newId):
   MLCP(newNumericsSolverName, newId)
 {
   mFirstCall = true;
@@ -187,7 +187,7 @@ void MLCP2::computeq(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  string simulationType = simulation->getType();
+  std::string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a SP::Interaction.

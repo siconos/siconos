@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "OSNSMatrixTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -47,21 +47,21 @@ void OSNSMatrixTest::tearDown()
 // Default constructor
 void OSNSMatrixTest::testBuildOSNSMatrix0()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== OSNSMatrix tests start ...===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Default constructor test -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== OSNSMatrix tests start ...===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Default constructor test -------" <<std::endl;
   SP::OSNSMatrix  M = new OSNSMatrix();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->size() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->getStorageType() == 0, true);
-  cout << "------- Default constructor OSNSMatrix ok -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- Default constructor OSNSMatrix ok -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 // Basic constructor
 void OSNSMatrixTest::testBuildOSNSMatrix1()
 {
-  cout << "------- Constructor with dim. test -------" << endl;
+  std::cout << "------- Constructor with dim. test -------" <<std::endl;
   SP::OSNSMatrix  M(new OSNSMatrix(n));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getStorageType() == 0, true);
@@ -69,13 +69,13 @@ void OSNSMatrixTest::testBuildOSNSMatrix1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(0) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(1) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->normInf() < tol , true);
-  cout << "------- Constructor(dim) ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- Constructor(dim) ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::testBuildOSNSMatrix2()
 {
-  cout << "------- Constructor with index set and list of blocks -------" << endl;
+  std::cout << "------- Constructor with index set and list of blocks -------" <<std::endl;
 
   SP::OSNSMatrix  M(new OSNSMatrix(indexSet, blocks));
 
@@ -112,13 +112,13 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
-  cout << "------- Constructor(indexSet,blocks) ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- Constructor(indexSet,blocks) ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::testFill()
 {
-  cout << "------- fill function test -------" << endl;
+  std::cout << "------- fill function test -------" <<std::endl;
   // Start from empty matrix and fill it
   SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
@@ -173,13 +173,13 @@ void OSNSMatrixTest::testFill()
     pos += (*it)->getNonSmoothLawSize();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
-  cout << "------- fill function test ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- fill function test ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::testConvert()
 {
-  cout << "------- convert function test -------" << endl;
+  std::cout << "------- convert function test -------" <<std::endl;
   // Start from empty matrix and fill it
   SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
@@ -213,13 +213,13 @@ void OSNSMatrixTest::testConvert()
   for (unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", fabs(mRef[k] - m1[k]) < tol, true);
 
-  cout << "------- convert function test ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- convert function test ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::testFill2()
 {
-  cout << "------- fill2 function test (sparse storage) -------" << endl;
+  std::cout << "------- fill2 function test (sparse storage) -------" <<std::endl;
   // Start from empty matrix and fill it
   SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
@@ -276,13 +276,13 @@ void OSNSMatrixTest::testFill2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
-  cout << "------- fill2 function test ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- fill2 function test ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::testConvert2()
 {
-  cout << "------- convert2 function test -------" << endl;
+  std::cout << "------- convert2 function test -------" <<std::endl;
   // Start from empty matrix and fill it
   SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
@@ -316,13 +316,13 @@ void OSNSMatrixTest::testConvert2()
   for (unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", fabs(mRef[k] - m1[k]) < tol, true);
 
-  cout << "------- convert2 function test ended with success -------" << endl;
-  cout << endl << endl;
+  std::cout << "------- convert2 function test ended with success -------" <<std::endl;
+  std::cout <<std::endl <<std::endl;
 }
 
 void OSNSMatrixTest::End()
 {
-  cout << "==========================================" << endl;
-  cout << " ===== End of OSNSMatrix tests ===== " << endl;
-  cout << "==========================================" << endl;
+  std::cout << "==========================================" <<std::endl;
+  std::cout << " ===== End of OSNSMatrix tests ===== " <<std::endl;
+  std::cout << "==========================================" <<std::endl;
 }

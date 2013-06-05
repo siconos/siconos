@@ -20,7 +20,7 @@
 #include "Sensor.hpp"
 #include "EventFactory.hpp"
 #include "TimeDiscretisation.hpp"
-using namespace std;
+
 using namespace EventFactory;
 
 void SensorEvent::process(Simulation& sim)

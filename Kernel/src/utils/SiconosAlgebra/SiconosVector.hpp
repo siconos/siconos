@@ -243,7 +243,7 @@ public:
    */
   void fill(double);
 
-  /** put data of the vector into a string
+  /** put data of the vector into a std::string
    */
   const std::string toString() const;
 

@@ -20,7 +20,7 @@
 #include "OneStepNSProblemXML.hpp"
 
 
-using namespace std;
+
 
 OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
   rootNode(oneStepNSProblemXMLNode), dimNode(NULL), interactionsConcernedNode(NULL), numericsSolverNameNode(NULL)
@@ -72,7 +72,7 @@ void OneStepNSProblemXML::setAllInteractions(const bool& all)
 }
 
 
-void OneStepNSProblemXML::getInteractionsNumbers(vector<int>& inNumbers)
+void OneStepNSProblemXML::getInteractionsNumbers(std::vector<int>& inNumbers)
 {
   if (!hasAllInteractions())
     SiconosDOMTreeTools::getVector(interactionsConcernedNode, inNumbers);

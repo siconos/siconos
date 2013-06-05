@@ -62,7 +62,7 @@ using namespace Siconos;
 const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 {
   // To compute y = A * x
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
@@ -115,7 +115,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
 {
   // To compute y = a*A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += a*A*x if init = false.
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -301,7 +301,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 {
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   if (A.size(0) != x.size())
     SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
@@ -491,7 +491,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
 {
   // To compute y = A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += A*x if init = false.
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -681,8 +681,8 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
 void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
 {
   // To compute y = A * x ( init = true) or y += A * x (init = false) using ublas::axpy_prod
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
- 
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
 
@@ -794,8 +794,8 @@ void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, dou
 {
   if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
- 
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
@@ -809,7 +809,7 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
 {
   if (A.isBlock())
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();

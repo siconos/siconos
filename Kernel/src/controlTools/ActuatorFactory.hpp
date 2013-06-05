@@ -63,7 +63,7 @@ template<class SubType> SP::Actuator factory(SP::TimeDiscretisation t, SP::Dynam
  *
  *     Actuator * yourActuator = regActuator.instantiate(sensorType, timeD, ds);
  *
- * With sensorType a string, the name of the class of your Actuator
+ * With sensorType a std::string, the name of the class of your Actuator
  * (expl: "ActuatorPosition"), timeD a SP::TimeDiscretisation and ds a SP::DynamicalSystem.
  *
  */
@@ -72,7 +72,7 @@ class Registry
 
 private :
 
-  /** map that links a string, the type of the class, to a pointer
+  /** map that links a std::string, the type of the class, to a pointer
       to function, used to build the object. */
   MapFactory factory_map;
 

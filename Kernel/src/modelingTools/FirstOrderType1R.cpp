@@ -21,7 +21,7 @@
 #include "Interaction.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
-using namespace std;
+
 
 // xml constructor
 FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
@@ -65,7 +65,7 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   }
 }
 
-FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn):
+FirstOrderType1R::FirstOrderType1R(const std::string& computeOut, const std::string& computeIn):
   FirstOrderR(RELATION::Type1R)
 {
   // Size vector of pointers to functions.
@@ -75,7 +75,7 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
-FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn, const string& computeJX, const string& computeJL):
+FirstOrderType1R::FirstOrderType1R(const std::string& computeOut, const std::string& computeIn, const std::string& computeJX, const std::string& computeJL):
   FirstOrderR(RELATION::Type1R)
 {
   // Size vector of pointers to functions.
@@ -185,7 +185,7 @@ void FirstOrderType1R::computeJachz(const double time, Interaction& inter)
 
   unsigned int sizeZ = inter.data(z)->size();
 
-  if(_pluginJachz && _pluginJachz->fPtr)
+  if (_pluginJachz && _pluginJachz->fPtr)
     ((Type1Ptr)(_pluginJachz->fPtr))(workX.size(), &(workX)(0), sizeZ, &(*(_jachz))(0, 0), workZ.size(), &(workZ)(0));
 
   // Rebuilt z from Tmp

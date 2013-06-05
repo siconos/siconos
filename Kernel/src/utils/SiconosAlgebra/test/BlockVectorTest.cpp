@@ -25,7 +25,7 @@
 
 #include "SiconosAlgebra.hpp"
 
-using namespace std;
+
 using namespace boost::numeric::ublas;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BlockVectorTest);
@@ -56,10 +56,10 @@ void BlockVectorTest::tearDown()
 // Copy from a std vector
 void BlockVectorTest::testConstructor1()
 {
-  cout << "==================================" << endl;
-  cout << "=== BlockVector tests start ...=== " << endl;
-  cout << "==================================" << endl;
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "==================================" <<std::endl;
+  std::cout << "=== BlockVector tests start ...=== " <<std::endl;
+  std::cout << "==================================" <<std::endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::SiconosVector  w(new SiconosVector(3, 2));
   //  SP::BlockVector  v(new BlockVector(1, w->size())); // Copy from a Simple
 
@@ -76,12 +76,12 @@ void BlockVectorTest::testConstructor1()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->isBlock(), false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->getNum() == 1, true);
-  //  cout << "--> Constructor 1 test ended with success." << endl;
+  //  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::testConstructor2()
 {
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   SP::SiconosVector  w(new SiconosVector(3, 2));
   // SP::SiconosVector  z(new SiconosVector(5,3,Siconos::SPARSE);  Problem if z sparse:
   // " Assertion failed in file /usr/include/boost/numeric/ublas/vector_sparse.hpp at line 1253:
@@ -136,12 +136,12 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->getNum() == 1, true);
-  cout << "--> Constructor 2 test ended with success." << endl;
+  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::testConstructor3()
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::SiconosVector  w(new SiconosVector(3, 2));
   SP::SiconosVector  z(new SiconosVector(5, 3, Siconos::SPARSE));
   SP::BlockVector  v(new BlockVector(w, z));
@@ -159,13 +159,13 @@ void BlockVectorTest::testConstructor3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", ww == w, true);
   ww = v->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", ww == z, true);
-  cout << "--> Constructor 3 test ended with success." << endl;
+  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 
 // with number of blocks and their (common) size.
 void BlockVectorTest::testConstructor4()
 {
-  cout << "--> Test: constructor 4." << endl;
+  std::cout << "--> Test: constructor 4." <<std::endl;
   SP::BlockVector  v(new BlockVector(3, 4));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNumberOfBlocks() == 3, true);
@@ -176,24 +176,24 @@ void BlockVectorTest::testConstructor4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[0] == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[1] == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[2] == 12, true);
-  cout << "--> Constructor 4 test ended with success." << endl;
+  std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
 
 // zero
 void BlockVectorTest::testZero()
 {
-  cout << "--> Test: zero." << endl;
+  std::cout << "--> Test: zero." <<std::endl;
   SP::BlockVector v(new BlockVector(*ref));
   v->zero();
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
-  cout << "--> zero test ended with success." << endl;
+  std::cout << "--> zero test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::testFill()
 {
-  cout << "--> Test: fill." << endl;
+  std::cout << "--> Test: fill." <<std::endl;
   SP::BlockVector v(new BlockVector(*ref));
   SP::SiconosVector  z(new SiconosVector(5, 3));
   v->insertPtr(z);
@@ -202,12 +202,12 @@ void BlockVectorTest::testFill()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*v)(i) == 4.3, true);
   for (unsigned int i = 0; i < 5; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*z)(i) == 4.3, true);
-  cout << "--> fill test ended with success." << endl;
+  std::cout << "--> fill test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::testNorm()
 {
-  //  cout << "--> Test: norm." << endl;
+  //  std::cout << "--> Test: norm." <<std::endl;
   //  SP::SiconosVector w(new SiconosVector(3));
   //  SP::SiconosVector z(new SiconosVector(5));
   //
@@ -229,7 +229,7 @@ void BlockVectorTest::testNorm()
   //
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", n2-sqrt(69)<std::numeric_limits<double>::epsilon(), true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", ni==5, true);
-  cout << "--> norm test ended with success." << endl;
+  std::cout << "--> norm test ended with success." <<std::endl;
 }
 
 // OPERATORS
@@ -237,7 +237,7 @@ void BlockVectorTest::testNorm()
 // =
 void BlockVectorTest::testAssignment()
 {
-  cout << "--> Test: assignment." << endl;
+  std::cout << "--> Test: assignment." <<std::endl;
   SP::SiconosVector  w0(new SiconosVector(3, 2));
   SP::SiconosVector  z0(new SiconosVector(5, 3));
   SP::SiconosVector  w1(new SiconosVector(3, 4));
@@ -277,13 +277,13 @@ void BlockVectorTest::testAssignment()
   *v = *w2; // assign a simple to a block.
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == 7, true);
-  cout << "--> assignment test ended with success." << endl;
+  std::cout << "--> assignment test ended with success." <<std::endl;
 }
 
 // +=
 void BlockVectorTest::testOperators1()
 {
-  cout << "--> Test: operators1." << endl;
+  std::cout << "--> Test: operators1." <<std::endl;
   unsigned int size1 = 3;
   unsigned int size2 = 2;
   SP::SiconosVector  x(new SiconosVector(size1 + size2));
@@ -309,13 +309,13 @@ void BlockVectorTest::testOperators1()
   *v += *xB;
   for (unsigned int i = 0; i < size1 + size2; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators1: ", fabs((*v)(i) - 4 - (*xB)(i)) < tol, true);
-  cout << "--> operators1 test ended with success." << endl;
+  std::cout << "--> operators1 test ended with success." <<std::endl;
 }
 
 // -=
 void BlockVectorTest::testOperators2()
 {
-  cout << "--> Test: operators2." << endl;
+  std::cout << "--> Test: operators2." <<std::endl;
   unsigned int size1 = 3;
   unsigned int size2 = 2;
   SP::SiconosVector  x(new SiconosVector(size1 + size2));
@@ -343,13 +343,13 @@ void BlockVectorTest::testOperators2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators2: ", fabs((*v)(i) - 4 + (*xB)(i)) < tol, true);
 
 
-  cout << "--> operators2 test ended with success." << endl;
+  std::cout << "--> operators2 test ended with success." <<std::endl;
 }
 
 // *
 void BlockVectorTest::testOperators3()
 {
-  cout << "--> Test: operators3." << endl;
+  std::cout << "--> Test: operators3." <<std::endl;
   SP::BlockVector v(new BlockVector(2, 3));
   v->fill(4);
   double multD = 2.3;
@@ -359,13 +359,13 @@ void BlockVectorTest::testOperators3()
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", (*v)(i) == multD * multI * 4, true);
 
-  cout << "--> operators3 test ended with success." << endl;
+  std::cout << "--> operators3 test ended with success." <<std::endl;
 }
 
 // /=
 void BlockVectorTest::testOperators4()
 {
-  cout << "--> Test: operators4." << endl;
+  std::cout << "--> Test: operators4." <<std::endl;
   SP::BlockVector v(new BlockVector(2, 3));
   v->fill(4);
   double multD = 2.3;
@@ -375,12 +375,12 @@ void BlockVectorTest::testOperators4()
   double res = 4.0 / multD / multI;
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators4: ", (*v)(i) == res, true);
-  cout << "--> operators4 test ended with success." << endl;
+  std::cout << "--> operators4 test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::testInsert()
 {
-  cout << "--> Test: insert." << endl;
+  std::cout << "--> Test: insert." <<std::endl;
   unsigned int size1 = 3, size2 = 2, size = size1 + size2;
   SP::SiconosVector  tmp1(new SiconosVector(size1));
   SP::SiconosVector  tmp2(new SiconosVector(size2));
@@ -404,14 +404,14 @@ void BlockVectorTest::testInsert()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->size() == (14 + size), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->vector(3) == y , true);
 
-  cout << "--> insert test ended with success." << endl;
+  std::cout << "--> insert test ended with success." <<std::endl;
 }
 
 void BlockVectorTest::End()
 {
-  cout << "======================================" << endl;
-  cout << " ===== End of BlockVector Tests ===== " << endl;
-  cout << "======================================" << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << " ===== End of BlockVector Tests ===== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
 }
 
 

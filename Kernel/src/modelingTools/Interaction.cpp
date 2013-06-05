@@ -39,7 +39,7 @@
 #include "NewtonEulerR.hpp" // ??
 #include "NewtonEulerDS.hpp" // ??
 
-using namespace std;
+
 using namespace RELATION;
 
 // --- CONSTRUCTORS ---
@@ -59,7 +59,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
   _interactionSize = _interactionxml->getSize();
 
   // --- Non smooth law ---
-  string NslawType = _interactionxml->getNonSmoothLawXML()->getType();
+  std::string NslawType = _interactionxml->getNonSmoothLawXML()->getType();
   // ComplementarityConditionNSL
   if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
   {
@@ -99,11 +99,11 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
       std::vector<int> dsNumbers;
       _interactionxml->getDSNumbers(dsNumbers);
       // get corresponding DS and insert them into the involvedDS set.
-      for (vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
+      for (std::vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
         _involvedDS->insert(nsdsSet->getPtr(*it));
     }
   }
-  else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
+  else std::cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" <<std::endl;
 
   // --- Relation ---
   RELATION::TYPES relationType = _interactionxml->getRelationXML()->getType();
@@ -161,7 +161,7 @@ Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
   _involvedDS->insert(ds); // Warning: insert pointer to DS!!
 
 }
-Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
+Interaction::Interaction(const std::string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _initialized(false), _id(newId), _number(newNumber), _interactionSize(nInter),
   _sizeOfDS(0), _sizeZ(0), _y(2), _nslaw(newNSL),  _relation(newRel)
@@ -182,7 +182,7 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
     _involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
 }
 
-Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
+Interaction::Interaction(const std::string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   _initialized(false) , _id(newId), _number(newNumber), _interactionSize(nInter),  _sizeOfDS(0), _sizeZ(0),
   _y(2),  _nslaw(newNSL), _relation(newRel)
@@ -782,7 +782,7 @@ void Interaction::swapInMemory()
     *(_y_k[i]) = *(_y[i]) ;
     _yMemory[i]->swap(_y[i]);
   }
-  
+
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
     _lambdaMemory[i]->swap(_lambda[i]);
@@ -792,49 +792,49 @@ void Interaction::swapInMemory()
 
 void Interaction::display() const
 {
-  cout << "======= Interaction display =======" << endl;
+  std::cout << "======= Interaction display =======" <<std::endl;
 
   if (_initialized)
-    cout << "The interaction is initialized" << endl;
+    std::cout << "The interaction is initialized" <<std::endl;
   else
-    cout << "The interaction is not initialized" << endl;
-  cout << "| id : " << _id << endl;
-  cout << "| number : " << _number << endl;
-  cout << "| relativeDegree : " << _relativeDegree << endl;
-  cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
-  cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
-  cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
-  cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
-  cout << "| interactionSize : " << _interactionSize << endl;
-  cout << "|  _sizeOfDS : " << _sizeOfDS << endl;
-  cout << "|  _sizeZ: " << _sizeZ << endl;
+    std::cout << "The interaction is not initialized" <<std::endl;
+  std::cout << "| id : " << _id <<std::endl;
+  std::cout << "| number : " << _number <<std::endl;
+  std::cout << "| relativeDegree : " << _relativeDegree <<std::endl;
+  std::cout << "| lowerLevelForOutput : " << _lowerLevelForOutput <<std::endl;
+  std::cout << "| upperLevelForOutput : " << _upperLevelForOutput <<std::endl;
+  std::cout << "| lowerLevelForInput : " << _lowerLevelForInput <<std::endl;
+  std::cout << "| upperLevelForInput : " << _upperLevelForInput <<std::endl;
+  std::cout << "| interactionSize : " << _interactionSize <<std::endl;
+  std::cout << "|  _sizeOfDS : " << _sizeOfDS <<std::endl;
+  std::cout << "|  _sizeZ: " << _sizeZ <<std::endl;
 
-  cout << "| involved DS :" << endl;
-  cout << _involvedDS << endl;
+  std::cout << "| involved DS :" <<std::endl;
+  std::cout << _involvedDS <<std::endl;
   _relation->display();
   if (_initialized)
   {
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      cout << "| y[" << i  << "] : " << endl;
+      std::cout << "| y[" << i  << "] : " <<std::endl;
       if (_y[i]) _y[i]->display();
-      else cout << "->NULL" << endl;
+      else std::cout << "->NULL" <<std::endl;
     }
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      cout << "| yOld[" << i  << "] : " << endl;
+      std::cout << "| yOld[" << i  << "] : " <<std::endl;
       if (_yOld[i]) _yOld[i]->display();
-      else cout << "->NULL" << endl;
+      else std::cout << "->NULL" <<std::endl;
     }
     for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
     {
-      cout << "| lambda[" << i  << "] : " << endl;
+      std::cout << "| lambda[" << i  << "] : " <<std::endl;
       if (_lambda[i]) _lambda[i]->display();
-      else cout << "->NULL" << endl;
+      else std::cout << "->NULL" <<std::endl;
     }
 
   }
-  cout << "===================================" << endl;
+  std::cout << "===================================" <<std::endl;
 }
 
 void Interaction::computeOutput(double time, unsigned int level)
@@ -1112,12 +1112,12 @@ void Interaction::computeResiduR(const double time)
   *_workspace[FirstOrderR::residu_r] = *_workspace[FirstOrderR::r];
   *_workspace[FirstOrderR::residu_r] -= *_workspace[FirstOrderR::g_alpha];
 
-  // std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
-  // std::cout<< "_workspace[r] = " << std::endl ;
+  //  std::cout<< "Interaction::computeResiduR(const double time)" << std::endl;
+  //  std::cout<< "_workspace[r] = " << std::endl ;
   // _workspace[r]->display();
-  // std::cout<< "_workspace[g_alpha] = " << std::endl ;
+  //  std::cout<< "_workspace[g_alpha] = " << std::endl ;
   // _workspace[g_alpha]->display();
-  // std::cout<< "_workspace[residu_r] = " << std::endl ;
+  //  std::cout<< "_workspace[residu_r] = " << std::endl ;
   // _workspace[residu_r]->display();
 
   //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");

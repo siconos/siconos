@@ -51,7 +51,7 @@ public:
   PluggedObject();
 
   /** Constructor with the plugin name
-   * \param name a string of the form "fileName:functionName", without an extension for pluginFile
+   * \param name a std::string of the form "fileName:functionName", without an extension for pluginFile
    */
   PluggedObject(const std::string& name);
 
@@ -79,7 +79,7 @@ public:
   void setComputeFunction(const std::string& pluginPath, const std::string& functionName);
 
   /* Connect a function to fPtr
-   * \param plugin a string of the form "fileName:functionName,  without an extension for pluginFile"
+   * \param plugin a std::string of the form "fileName:functionName,  without an extension for pluginFile"
    */
   void setComputeFunction(const std::string& plugin);
 
@@ -106,7 +106,7 @@ public:
   };
 
   /** Set the name of the plugin function
-      \param name a string of the form "pluginFile:functionName", without extension for pluginFile
+      \param name a std::string of the form "pluginFile:functionName", without extension for pluginFile
   */
   inline void setPluginName(const std::string& name)
   {

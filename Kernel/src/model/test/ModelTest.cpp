@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "ModelTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -37,10 +37,10 @@ void ModelTest::tearDown()
 
 void ModelTest::testBuildModel0()
 {
-  cout << "=============================" << endl;
-  cout << "=== Model tests start ...=== " << endl;
-  cout << "=============================" << endl;
-  cout << "--> Test: constructor 0." << endl;
+  std::cout << "=============================" <<std::endl;
+  std::cout << "=== Model tests start ...=== " <<std::endl;
+  std::cout << "=============================" <<std::endl;
+  std::cout << "--> Test: constructor 0." <<std::endl;
   SP::Model M(new Model(t0));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->t0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->finalT() == -1, true);
@@ -53,12 +53,12 @@ void ModelTest::testBuildModel0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->description() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->date() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getXmlSchema() == "none", true);
-  cout << "--> Constructor 0 test ended with success." << endl;
+  std::cout << "--> Constructor 0 test ended with success." <<std::endl;
 }
 
 void ModelTest::testBuildModel1()
 {
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::Model M(new Model(t0, T));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->t0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->finalT() == T, true);
@@ -71,12 +71,12 @@ void ModelTest::testBuildModel1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->description() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->date() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "none", true);
-  cout << "--> Constructor 1 test ended with success." << endl;
+  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
 void ModelTest::testBuildModel2()
 {
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   SP::Model M(new Model(t0, T, "myModel", "SiconosTeam", "Description", "Today", "XMLschema"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->t0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->finalT() == T, true);
@@ -89,13 +89,13 @@ void ModelTest::testBuildModel2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->description() == "Description", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->date() == "Today", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "XMLschema", true);
-  cout << "--> Constructor 2 test ended with success." << endl;
+  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
 // xml constructor
 void ModelTest::testBuildModel3()
 {
-  cout << "--> Test: constructor xml." << endl;
+  std::cout << "--> Test: constructor xml." <<std::endl;
   std::string xmlFile = "ModelXml_test.xml" ;
 
   SP::Model M(new Model(xmlFile));
@@ -110,6 +110,6 @@ void ModelTest::testBuildModel3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->description() == "Description", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->date() == "Today", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "../../../config/xmlschema/SiconosModelSchema-V1.2.xsd", true);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 

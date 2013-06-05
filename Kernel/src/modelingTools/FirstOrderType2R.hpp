@@ -64,16 +64,16 @@ public:
 
   FirstOrderType2R();
   /** data constructor
-  *  \param a string with computeOutput function name.
-  *  \param a string with computeInput function name.
+  *  \param a std::string with computeOutput function name.
+  *  \param a std::string with computeInput function name.
   */
   FirstOrderType2R(const std::string&, const std::string&);
 
   /** data constructor
-  *  \param a string with computeOutput function name.
-  *  \param a string with computeInput function name.
-  *  \param a string: name of the function to compute the jacobian of h according to x
-  *  \param a string: name of the function to compute the jacobian of g according to lambda
+  *  \param a std::string with computeOutput function name.
+  *  \param a std::string with computeInput function name.
+  *  \param a std::string: name of the function to compute the jacobian of h according to x
+  *  \param a std::string: name of the function to compute the jacobian of g according to lambda
   */
   FirstOrderType2R(const std::string&, const std::string&, const std::string&, const std::string&);
 

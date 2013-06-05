@@ -91,7 +91,7 @@ public:
   LagrangianCompliantR(SP::RelationXML);
 
   /** constructor from a set of data
-  *  \param string : the name of the plugin to computeh
+  *  \param std::string : the name of the plugin to computeh
   *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
   */
   LagrangianCompliantR(const std::string&, const std::vector<std::string>&);

@@ -18,7 +18,7 @@
 */
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactFrictionNSLXML.hpp"
-using namespace std;
+
 
 // Default (private)
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
@@ -61,11 +61,11 @@ bool NewtonImpactFrictionNSL::isVerified() const
 
 void NewtonImpactFrictionNSL::display() const
 {
-  cout << "=== Newton impact-friction non-smooth law data display ===" << endl;
-  cout << " Normal Newton coefficient of restitution: " << _en << endl;
-  cout << " Tangential Newton coefficient of restitution: " << _et << endl;
-  cout << "Friction coefficient: " << _mu << endl;
-  cout << "==========================================================" << endl;
+  std::cout << "=== Newton impact-friction non-smooth law data display ===" <<std::endl;
+  std::cout << " Normal Newton coefficient of restitution: " << _en <<std::endl;
+  std::cout << " Tangential Newton coefficient of restitution: " << _et <<std::endl;
+  std::cout << "Friction coefficient: " << _mu <<std::endl;
+  std::cout << "==========================================================" <<std::endl;
 }
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()

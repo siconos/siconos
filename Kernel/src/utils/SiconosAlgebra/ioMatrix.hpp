@@ -41,7 +41,7 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m
 
 /** Specialization to write a SiconosMatrix
     \param[in] SiconosMatrix the matrix to be read
-    \param[in] string type of output:
+    \param[in] std::string type of output:
     - "boost": boost way:
     [row,col] ((a00,a01,...),(a10,...),...
     - "python"(default):

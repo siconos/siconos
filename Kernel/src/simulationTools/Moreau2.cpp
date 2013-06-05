@@ -25,7 +25,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // --- constructor from a minimum set of data ---

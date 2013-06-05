@@ -19,7 +19,7 @@
 //$id$
 
 #include "SiconosMemoryXMLTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -39,7 +39,7 @@ void SiconosMemoryXMLTest::setUp()
   }
   catch (SiconosException e)
   {
-    cout << "Error in SiconosMemoryXMLTest : " << e.report() << endl;
+    std::cout << "Error in SiconosMemoryXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 
@@ -59,12 +59,12 @@ void SiconosMemoryXMLTest::testHasMemory()
   this->smxml = new SiconosMemoryXML(SiconosDOMTreeTools::findNodeChild(this->root, "test1"));
   CPPUNIT_ASSERT_MESSAGE("test hasMemory == true", this->smxml->hasMemory() == true);
   delete smxml;
-  cout << "SiconosMemoryXMLTest::testHasMemory - test1 .........................OK" << endl;
+  std::cout << "SiconosMemoryXMLTest::testHasMemory - test1 .........................OK" <<std::endl;
 
 
   this->smxml = new SiconosMemoryXML(SiconosDOMTreeTools::findNodeChild(this->root, "test2"));
   CPPUNIT_ASSERT_MESSAGE("test hasMemory == false", this->smxml->hasMemory() == false);
   delete smxml;
-  cout << "SiconosMemoryXMLTest::testHasMemory - test2 .........................OK" << endl;
+  std::cout << "SiconosMemoryXMLTest::testHasMemory - test2 .........................OK" <<std::endl;
 }
 

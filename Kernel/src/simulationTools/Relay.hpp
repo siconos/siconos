@@ -109,7 +109,7 @@ public:
   /** constructor from data
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param String: id of the problem (default = "unamed")
+   *  \param std::string: id of the problem (default = "unamed")
    */
   Relay(const int newNumericsSolverId = SICONOS_RELAY_LEMKE, const std::string& newId = "unamed_relay");
 

@@ -19,7 +19,7 @@
 #include "DynamicalSystem.hpp"
 #include "DynamicalSystemXML.hpp"
 
-using namespace std;
+
 
 unsigned int DynamicalSystem::count = 0;
 
@@ -326,7 +326,7 @@ void DynamicalSystem::initMemory(unsigned int steps)
 {
 
   if (steps == 0)
-    cout << "Warning : initMemory with size equal to zero" << endl;
+    std::cout << "Warning : initMemory with size equal to zero" << std::endl;
   else
   {
     _stepsInMemory = steps;
@@ -335,7 +335,7 @@ void DynamicalSystem::initMemory(unsigned int steps)
 
 }
 
-void DynamicalSystem::setComputegFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputegFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluging->setComputeFunction(pluginPath, functionName);
 }
@@ -345,15 +345,15 @@ void DynamicalSystem::setComputegFunction(FPtr6 fct)
   _pluging->setComputeFunction((void *)fct);
 }
 
-void DynamicalSystem::setComputeJacobianXGFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeJacobianXGFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJacgx->setComputeFunction(pluginPath, functionName);
 }
-void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeJacobianDotXGFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJacxDotG->setComputeFunction(pluginPath, functionName);
 }
-// void DynamicalSystem::setComputeJacobianZGFunction( const string& pluginPath, const string& functionName){
+// void DynamicalSystem::setComputeJacobianZGFunction( const std::string& pluginPath, const std::string& functionName){
 //   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
 // }
 

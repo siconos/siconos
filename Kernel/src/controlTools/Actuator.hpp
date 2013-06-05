@@ -156,7 +156,7 @@ public:
   };
 
   /** get id of the Actuator
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getId() const
   {

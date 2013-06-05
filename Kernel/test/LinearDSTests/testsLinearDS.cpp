@@ -27,7 +27,7 @@
 #include <iostream>
 #include <cmath>
 
-using namespace std;
+
 
 int main(int argc, char* argv[])
 {
@@ -135,11 +135,11 @@ int main(int argc, char* argv[])
 
     // look for FirstOrderLinearDS node
     node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
     node = SiconosDOMTreeTools::findNodeChild(node, "DS_Definition");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
     node = SiconosDOMTreeTools::findNodeChild(node, "FirstOrderLinearDS");
-    cout << node->name << endl;
+    std::cout << node->name <<std::endl;
 
     // xml constructor
     SP::FirstOrderLinearDSXML tmpxml(new FirstOrderLinearDSXML(node, false));
@@ -155,10 +155,10 @@ int main(int argc, char* argv[])
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/BouncingBall\'" << endl;
+    std::cout << "Exception caught in \'sample/BouncingBall\'" <<std::endl;
   }
 }

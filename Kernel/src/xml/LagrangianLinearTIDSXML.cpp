@@ -19,13 +19,13 @@
 #include "LagrangianLinearTIDSXML.hpp"
 #include "SiconosVector.hpp"
 
-using namespace std;
+
 
 LagrangianLinearTIDSXML::LagrangianLinearTIDSXML():
   LagrangianDSXML(), KNode(NULL), CNode(NULL)
 {}
 
-LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNodePtr DSNode, bool isBVP):
+LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * DSNode, bool isBVP):
   LagrangianDSXML(DSNode, isBVP), KNode(NULL), CNode(NULL)
 {
   xmlNodePtr node;

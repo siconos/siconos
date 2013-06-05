@@ -95,7 +95,7 @@ void CommonSMC::initialize(SP::Model m)
     // OneStepNsProblem
     _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
     _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
-    //    cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] << endl;
+    //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
     _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
     // Finally we can initialize everything ...
     _SMC->initialize(_simulationSMC);
@@ -225,5 +225,5 @@ void CommonSMC::setSaturationMatrixPtr(SP::SiconosMatrix newPtr)
 
 void CommonSMC::setB(const SiconosMatrix& B)
 {
-    _B.reset(new SimpleMatrix(B));
+  _B.reset(new SimpleMatrix(B));
 }

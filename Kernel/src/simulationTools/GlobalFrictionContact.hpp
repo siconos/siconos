@@ -115,8 +115,8 @@ public:
 
   /** constructor from data
    *  \param int dim (2D or 3D) of the friction-contact problem
-   *  \param string numericsSolvername
-   *  \param string id of the problem (optional)
+   *  \param std::string numericsSolvername
+   *  \param std::string id of the problem (optional)
    */
   GlobalFrictionContact(int dimPb,
                         const int newNumericsSolverId =

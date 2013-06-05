@@ -58,7 +58,7 @@ template<class SubType> SP::Sensor factory(SP::TimeDiscretisation t, SP::Dynamic
  * Use:
  *     SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
  *     SP::Sensor yourSensor = regSensor.instantiate(sensorType, timeD, myDS);
- * With sensorType a string, the name of the class of your Sensor (expl: "SensorPosition"), timeD a SP::TimeDiscretisation and
+ * With sensorType a std::string, the name of the class of your Sensor (expl: "SensorPosition"), timeD a SP::TimeDiscretisation and
  * myDS a SP::DynamicalSystem.
  *
  */
@@ -67,7 +67,7 @@ class Registry
 
 private :
 
-  /** map that links a string, the type of the class, to a pointer
+  /** map that links a std::string, the type of the class, to a pointer
       to function, used to build the object. */
   MapFactory factory_map;
 

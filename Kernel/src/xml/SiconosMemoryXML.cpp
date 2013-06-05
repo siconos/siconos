@@ -19,9 +19,9 @@
 #include "SiconosMemoryXML.hpp"
 #include "SiconosVector.hpp"
 
-using namespace std;
 
-SiconosMemoryXML::SiconosMemoryXML(xmlNodePtr newMemoryNode, xmlNodePtr newParentNode, const string& name):
+
+SiconosMemoryXML::SiconosMemoryXML(xmlNodePtr newMemoryNode, xmlNodePtr newParentNode, const std::string& name):
   _memoryNode(newMemoryNode), _parentNode(newParentNode)
 {
   /*
@@ -70,8 +70,8 @@ void SiconosMemoryXML::setVectorMemoryValue(const MemoryContainer& memory)
 {
   xmlNodePtr oldNode = SiconosDOMTreeTools::findNodeChild(_memoryNode, SM_MEMORY);
   xmlNodePtr node; /* oldNode is the node before node */
-  string stringValue;
-  stringstream sstr;
+  std::string stringValue;
+  std::stringstream sstr;
   node = oldNode;
 
   unsigned int i = 0;

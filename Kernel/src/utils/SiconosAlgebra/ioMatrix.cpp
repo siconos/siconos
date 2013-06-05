@@ -67,8 +67,8 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosMatrix& m
 
   DenseMat::iterator1 it;
   DenseMat::iterator2 it2;
-  //   std::cout.precision(15);
-  //   std::cout.setf(std::ios::scientific);
+  //    std::cout.precision(15);
+  //    std::cout.setf(std::ios::scientific);
 
   for (unsigned int i = 0; i < s1; i++)
   {

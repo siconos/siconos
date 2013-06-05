@@ -19,7 +19,7 @@
 #include "Relation.hpp"
 #include "Interaction.hpp"
 
-using namespace std;
+
 
 // Default constructor
 Relation::Relation(RELATION::TYPES newType,
@@ -87,10 +87,10 @@ const std::string Relation::getJacgName(unsigned int) const
 
 void Relation::display() const
 {
-  cout << "=====> Relation of type "
-       << _relationType
-       << " and subtype "
-       << _subType << endl;
+  std::cout << "=====> Relation of type "
+            << _relationType
+            << " and subtype "
+            << _subType <<std::endl;
 }
 
 void Relation::computeg(const double time, Interaction& inter)

@@ -43,7 +43,7 @@ class DynamicalSystem;
 
 typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
-/**  An Interaction describes the non-smooth interactions 
+/**  An Interaction describes the non-smooth interactions
  *  several Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -52,10 +52,10 @@ typedef std::vector<SP::SiconosMemory> VectorOfMemories;
  *
  * An interaction represents the "link" between a set of Dynamical
  * Systems (stored in involvedDS).
- * The state variables and inputs of the DynamicalSystem (x,R) 
- * are related to the interaction variables (y,lambda) thanks to the 
+ * The state variables and inputs of the DynamicalSystem (x,R)
+ * are related to the interaction variables (y,lambda) thanks to the
  * interaction with the help of the relation
- * The interaction completed by a non-smooth law that describes the type 
+ * The interaction completed by a non-smooth law that describes the type
  * of law between y and lambda.
  *
  * Thus, the interaction main members are:
@@ -88,7 +88,7 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
- 
+
   /**initialization flag */
   bool _initialized;
 
@@ -151,12 +151,12 @@ private:
    * y[0] is y, y[1] is yDot and so on
    */
   VectorOfVectors _y;
-  
+
   /** previous value of Newton iteration for y
    * \warning : VA 24/05/2013 this has to be put into the workspace vector
    *   or we have to use the _yMemory storage
    */
-  
+
   VectorOfVectors _yOld;
 
   /** value of the previous time-step */
@@ -237,7 +237,7 @@ public:
    */
   Interaction(SP::DynamicalSystem, int, int, SP::NonSmoothLaw, SP::Relation);
   /** constructor with a set of data (only one DS in the Interaction)
-   *  \param string: the id of this Interaction
+   *  \param std::string: the id of this Interaction
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
@@ -256,7 +256,7 @@ public:
   Interaction(DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
 
   /** constructor with a set of data
-   *  \param string: the id of this Interaction
+   *  \param std::string: the id of this Interaction
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : size of the interaction (interactionSize), i.e, the size of the input and output
@@ -298,7 +298,7 @@ public:
   // === GETTERS/SETTERS ===
 
   /** get the id of this Interaction
-  *  \return the string, id of this Interaction
+  *  \return the std::string, id of this Interaction
   */
   inline const std::string  getId() const
   {
@@ -314,7 +314,7 @@ public:
   }
 
   /** set the id of this Interaction
-   *  \param the string  to set the id
+   *  \param the std::string  to set the id
    */
   inline void setId(const std::string& newId)
   {
@@ -604,16 +604,16 @@ public:
     return _yMemory[level];
   }
 
- /** get all the values of the multiplier lambda stored in memory
-  *  \return a memory
-  */
+  /** get all the values of the multiplier lambda stored in memory
+   *  \return a memory
+   */
   inline SP::SiconosMemory lambdaMemory(unsigned int level) const
   {
     return _lambdaMemory[level];
   }
 
 
-  
+
 
 
   // -- _lambda --
@@ -858,9 +858,9 @@ public:
   // THe following accessor should suppressed
   //   SP::BlockVector dataFree() const;
   //   SP::BlockVector dataX() const;
-   SP::BlockVector dataXq() const;
-   SP::BlockVector dataZ() const;
-   SP::BlockVector dataQ1() const;
+  SP::BlockVector dataXq() const;
+  SP::BlockVector dataZ() const;
+  SP::BlockVector dataQ1() const;
   //void setDataXFromVelocity();
 
 
@@ -936,7 +936,6 @@ public:
   }
 
   /** copy the data of the Interaction to the XML tree
-  *  \exception RuntimeException
   */
   void saveInteractionToXML();
 

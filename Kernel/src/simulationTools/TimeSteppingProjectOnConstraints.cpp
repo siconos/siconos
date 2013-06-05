@@ -24,7 +24,7 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OneStepIntegrator.hpp"
-using namespace std;
+
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 //#define TSPROJ_DEBUG
 //#define CORRECTIONSVELOCITIES
@@ -93,15 +93,15 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 {
   /** First step, Solve the standard velocity formulation.*/
 #ifdef TSPROJ_DEBUG
-  cout << "TimeStepping::newtonSolve begin :\n";
+  std::cout << "TimeStepping::newtonSolve begin :\n";
 #endif
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
 #ifdef TSPROJ_DEBUG
-  cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
-  cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
-  cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
-  cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
+  std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbSteps() << "\n";
+  std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
+  std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
+  std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
 #endif
 
   if (!_doProj)
@@ -113,7 +113,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
   /** Second step, Perform the projection on constraints.*/
 #ifdef TSPROJ_DEBUG
-  cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
+  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve begin projection:\n";
 #endif
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
@@ -196,13 +196,13 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     updateInput(0);
     info = 0;
 #ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingProjectOnConstraint compute OSNSP." << endl ;
+    std::cout << "TimeSteppingProjectOnConstraint compute OSNSP." <<std::endl ;
 #endif
     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
     if (info)
     {
-      cout << " TimeSteppingProjectOnConstraints::advanceToEvent() project on constraints. solver failed." << endl ;
+      std::cout << " TimeSteppingProjectOnConstraints::advanceToEvent() project on constraints. solver failed." <<std::endl ;
       return;
     }
     updateInput(0);
@@ -283,7 +283,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
     //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
 #ifdef TSPROJ_DEBUG
-    cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
+    std::cout << "TimeSteppingProjectOnConstraints::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
     std ::cout << "After update state in position" << std::endl;
     std ::cout << "lamda(1) in IndexSet1" << std::endl;
     for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
@@ -320,7 +320,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   }// end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
   if (_nbProjectionIteration == _projectionMaxIteration)
   {
-    cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  << endl ;
+    std::cout << "TimeSteppingProjectOnConstraints::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
     printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
     RuntimeException::selfThrow("youyou");
@@ -329,7 +329,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
 
 
 #ifdef TSPROJ_DEBUG
-  cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
+  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
 #endif
 
   return;
@@ -373,9 +373,9 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));
   // #ifdef TSPROJ_DEBUG
-  //       cout<<"TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
+  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve deltaQ :\n";
   //       neds->deltaq()->display();
-  //       cout<<"TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
+  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve Fext :\n";
   //       FextNorm->display();
   // #endif
 
@@ -425,7 +425,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //       neds->velocity()->setValue(1,neds->velocity()->getValue(1)+(VkcFNorm - VkFNorm)*FextNorm->getValue(1));
   //       neds->velocity()->setValue(2,neds->velocity()->getValue(2)+(VkcFNorm - VkFNorm)*FextNorm->getValue(2));
   // #ifdef TSPROJ_DEBUG
-  //       cout<<"TimeSteppingProjectOnConstraints::newtonSolve velocity updated\n";
+  //       std::cout<<"TimeSteppingProjectOnConstraints::newtonSolve velocity updated\n";
   //       printf("VELOCITY2 ");
   //       neds->velocity()->display();
   // #endif
@@ -443,7 +443,7 @@ void TimeSteppingProjectOnConstraints::advanceToEvent()
   //   }
   //#endif
 #ifdef TSPROJ_DEBUG
-  cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
+  std::cout << "TimeSteppingProjectOnConstraints::newtonSolve end projection:\n";
 #endif
 
 }
@@ -560,7 +560,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       // updateOutput(0);
       // updateIndexSets();
       if (info)
-        cout << "new loop because of info\n" << endl;
+        std::cout << "new loop because of info\n" <<std::endl;
 
       // if there is not any Interaction at
       // the beginning of the simulation _allNSProblems may not be
@@ -574,7 +574,7 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
       if (info)
-        cout << "info!" << endl;
+        std::cout << "info!" <<std::endl;
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutputProjectOnConstraints)
         DefaultCheckSolverOutput(info);
@@ -590,11 +590,11 @@ void TimeSteppingProjectOnConstraints::newtonSolve(double criterion, unsigned in
       }
     }
     if (!isNewtonConverge)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." << endl ;
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
     else if (info)
-      cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." << endl ;
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
     //    else
-    //      cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
+    //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbSteps<<"maxStep="<<maxStep<<endl;
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);

@@ -30,7 +30,7 @@
 
 
 
-using namespace std;
+
 using namespace RELATION;
 
 // xml constructor
@@ -56,7 +56,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 }
 
 // constructor from a set of data
-LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const std::string& strcomputeJachq):
+LagrangianScleronomousR::LagrangianScleronomousR(const std::string& computeh, const std::string& strcomputeJachq):
   LagrangianR(ScleronomousR)
 {
   zeroPlugin();
@@ -120,7 +120,7 @@ void LagrangianScleronomousR::computeh(const double time, Interaction& inter)
   // else nothing
 }
 
-void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z )
+void LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   DEBUG_PRINT(" LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)\n");
   if (_pluginh)

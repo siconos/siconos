@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianLinearTIRTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -73,76 +73,76 @@ void LagrangianLinearTIRTest::tearDown()
 // xml constructor
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR0()
 {
-  cout << "==========================================" << endl;
-  cout << "==== LagrangianLinearTIR tests start ...====" << endl;
-  cout << "==========================================" << endl;
+  std::cout << "==========================================" <<std::endl;
+  std::cout << "==== LagrangianLinearTIR tests start ...====" <<std::endl;
+  std::cout << "==========================================" <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR0 : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR0 : ", folr->getSubType() == RELATION::LinearTIR, true);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 // data constructor (1)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
 {
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1d : ", folr->getSubType() == RELATION::LinearTIR, true);
-  cout << "--> Constructor 1 test ended with success." << endl;
+  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
 // data constructor (5)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
 {
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, D, F, e));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2g : ", folr->getSubType() == RELATION::LinearTIR, true);
-  cout << "--> Constructor 2 test ended with success." << endl;
+  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
 // data constructor (5)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, e));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3f : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3g : ", folr->getSubType() == RELATION::LinearTIR, true);
-  cout << "--> Constructor 3 test ended with success." << endl;
+  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 
 // data constructor (4)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
 {
-  cout << "--> Test: constructor 4." << endl;
+  std::cout << "--> Test: constructor 4." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR4c : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR4d : ", folr->getSubType() == RELATION::LinearTIR, true);
-  cout << "--> Constructor 4 test ended with success." << endl;
+  std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
 // // data constructor (5)
 // void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR5()
 // {
-//   cout << "--> Test: constructor 5: obsolet" << endl;
+//   std::cout << "--> Test: constructor 5: obsolet" <<std::endl;
 // //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*D,*F,*e));
 // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType()==RELATION::Lagrangian, true);
 // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType()==RELATION::LinearTIR, true);
-//    cout << "--> Constructor 5 test ended with success." << endl;
+//    std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 // }
 
 // // data constructor (6)
 // void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR6()
 // {
-//   cout << "--> Test: constructor 6: obsolet" << endl;
+//   std::cout << "--> Test: constructor 6: obsolet" <<std::endl;
 // //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*e));
 // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType()==RELATION::Lagrangian, true);
 // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType()==RELATION::LinearTIR, true);
-//   cout << "--> Constructor 5 test ended with success." << endl;
+//   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 // }
 
 // set C as a matrix and then plug it
@@ -151,13 +151,13 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
 // setCPtr
 void LagrangianLinearTIRTest::testSetCPtr()
 {
-  cout << "--> Test: setCPtr." << endl;
+  std::cout << "--> Test: setCPtr." <<std::endl;
   SP::SiconosMatrix tmp(new SimpleMatrix(*C));
   tmp->zero();
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*tmp));
   folr->setCPtr(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
-  cout << "--> setCPtr test ended with success." << endl;
+  std::cout << "--> setCPtr test ended with success." <<std::endl;
 }
 
 // set D
@@ -165,11 +165,11 @@ void LagrangianLinearTIRTest::testSetCPtr()
 // setDPtr
 void LagrangianLinearTIRTest::testSetDPtr()
 {
-  cout << "--> Test: setDPtr." << endl;
+  std::cout << "--> Test: setDPtr." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
-  cout << "--> setDPtr test ended with success." << endl;
+  std::cout << "--> setDPtr test ended with success." <<std::endl;
 }
 
 // set F
@@ -177,11 +177,11 @@ void LagrangianLinearTIRTest::testSetDPtr()
 // setFPtr
 void LagrangianLinearTIRTest::testSetFPtr()
 {
-  cout << "--> Test: setFPtr." << endl;
+  std::cout << "--> Test: setFPtr." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setFPtr(F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->F() == F, true);
-  cout << "--> setFPtr test ended with success." << endl;
+  std::cout << "--> setFPtr test ended with success." <<std::endl;
 }
 
 // set E
@@ -189,29 +189,29 @@ void LagrangianLinearTIRTest::testSetFPtr()
 // setEPtr
 void LagrangianLinearTIRTest::testSetEPtr()
 {
-  cout << "--> Test: setEPtr." << endl;
+  std::cout << "--> Test: setEPtr." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setEPtr(e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
-  cout << "--> setEPtr test ended with success." << endl;
+  std::cout << "--> setEPtr test ended with success." <<std::endl;
 }
 
 
 
 void LagrangianLinearTIRTest::testGetJacPtr()
 {
-  cout << "--> Test: jac." << endl;
+  std::cout << "--> Test: jac." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda() == D, true);
 
-  cout << "--> setBPtr test ended with success." << endl;
+  std::cout << "--> setBPtr test ended with success." <<std::endl;
 }
 
 void LagrangianLinearTIRTest::End()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== End of LagrangianLinearTIR Tests ===== " << endl;
-  cout << "=========================================== " << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== End of LagrangianLinearTIR Tests ===== " <<std::endl;
+  std::cout << "=========================================== " <<std::endl;
 }

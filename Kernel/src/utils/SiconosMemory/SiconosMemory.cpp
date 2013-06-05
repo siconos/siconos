@@ -21,7 +21,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosMemoryXML.hpp"
 
-using namespace std;
+
 
 // --- CONSTRUCTORS ---
 
@@ -141,16 +141,16 @@ void SiconosMemory::swap(SP::SiconosVector v)
 
 void SiconosMemory::display() const
 {
-  cout << " ====== Memory vector display ======= " << endl;
-  cout << "| _maxSize : " << _maxSize << endl;
-  cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory << endl;
-  cout << "| vectorMemory size : " << _vectorMemory->size() << endl;
+  std::cout << " ====== Memory vector display ======= " <<std::endl;
+  std::cout << "| _maxSize : " << _maxSize <<std::endl;
+  std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory <<std::endl;
+  std::cout << "| vectorMemory size : " << _vectorMemory->size() <<std::endl;
   for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
   {
-    cout << "vector number " << i << ": adress = " << (*_vectorMemory)[i] << " | " << endl; ;
+    std::cout << "vector number " << i << ": adress = " << (*_vectorMemory)[i] << " | " <<std::endl; ;
     (*_vectorMemory)[i]->display();
   }
-  cout << " ===================================== " << endl;
+  std::cout << " ===================================== " <<std::endl;
 }
 
 void SiconosMemory::saveMemorySizeToXML()

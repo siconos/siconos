@@ -35,7 +35,7 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-using namespace std;
+
 using namespace RELATION;
 // --- constructor from a set of data ---
 //ZeroOrderHold::ZeroOrderHold():
@@ -188,7 +188,7 @@ void ZeroOrderHold::initialize()
               {
                 computePsiTI(d, rel);
                 _isPsiConst[d.number()] = true;
-               }
+              }
             }
           }
         }
@@ -319,12 +319,12 @@ void ZeroOrderHold::initIntegrators(const DynamicalSystem& ds, const bool withIn
     foldsPhi.zeroPlugin();
     if (cfolds.getPluginA()->isPlugged())
       foldsPhi.setPluginA(cfolds.getPluginA());
-     _DSIntegralPhiMap[dsN].reset(new FirstOrderLinearDS(cfolds));
+    _DSIntegralPhiMap[dsN].reset(new FirstOrderLinearDS(cfolds));
     FirstOrderLinearDS& foldsIntegralPhi = static_cast<FirstOrderLinearDS&>(*_DSIntegralPhiMap[dsN]);
     foldsIntegralPhi.zeroPlugin();
     if (cfolds.getPluginA()->isPlugged())
       foldsIntegralPhi.setPluginA(cfolds.getPluginA());
-   if (withInteraction)
+    if (withInteraction)
     {
       _DSPsiMap[dsN].reset(new FirstOrderLinearDS(cfolds));
       FirstOrderLinearDS& foldsPsi = static_cast<FirstOrderLinearDS&>(*_DSPsiMap[dsN]);
@@ -696,11 +696,11 @@ void ZeroOrderHold::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * 
   {
     Xfree = inter->data(FirstOrderR::free);
   }
-  else if  (relationType == NewtonEuler)
+  else if (relationType == NewtonEuler)
   {
     Xfree = inter->data(NewtonEulerR::free);
   }
-  else if  (relationType == Lagrangian)
+  else if (relationType == Lagrangian)
   {
     Xfree = inter->data(LagrangianR::free);
   }
@@ -877,7 +877,7 @@ bool ZeroOrderHold::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
   if (y <= 0)
   {
@@ -899,7 +899,7 @@ bool ZeroOrderHold::removeInteractionInIndexSet(SP::Interaction inter, unsigned 
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
   if (y > 0)
   {
@@ -912,21 +912,21 @@ void ZeroOrderHold::display()
 {
   OneStepIntegrator::display();
 
-  cout << "====== ZOH OSI display ======" << endl;
+  std::cout << "====== ZOH OSI display ======" <<std::endl;
   DSIterator it;
   int itN;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    cout << "--------------------------------" << endl;
+    std::cout << "--------------------------------" <<std::endl;
     itN = (*it)->number();
-    cout << "--> Phi of dynamical system number " << itN << ": " << endl;
+    std::cout << "--> Phi of dynamical system number " << itN << ": " <<std::endl;
     if (_PhiMap[itN]) _PhiMap[itN]->display();
-    else cout << "-> NULL" << endl;
-    cout << "--> Psi of dynamical system number " << itN << ": " << endl;
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "--> Psi of dynamical system number " << itN << ": " <<std::endl;
     if (_PsiMap[itN]) _PsiMap[itN]->display();
-    else cout << "-> NULL" << endl;
+    else std::cout << "-> NULL" <<std::endl;
   }
-  cout << "================================" << endl;
+  std::cout << "================================" <<std::endl;
 }
 
 ZeroOrderHold* ZeroOrderHold::convert(OneStepIntegrator* osi)

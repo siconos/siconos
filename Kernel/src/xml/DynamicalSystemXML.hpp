@@ -74,7 +74,7 @@ public:
   }
 
   /** Return the type of the DynamicalSystem
-   *   \return a string
+   *   \return a std::string
    */
   Type::Siconos getType() const;
 

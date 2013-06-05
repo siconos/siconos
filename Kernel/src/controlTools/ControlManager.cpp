@@ -26,7 +26,7 @@
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 
-using namespace std;
+
 
 ControlManager::ControlManager(SP::Model m): _model(m)
 {
@@ -110,12 +110,12 @@ void ControlManager::addAndRecordActuatorPtr(SP::Actuator act)
 
 void ControlManager::display() const
 {
-  cout << "=========> ControlManager " ;
+  std::cout << "=========> ControlManager " ;
   if (model())
-    cout << "linked to model named: " << model()->title() << "." << endl;
+    std::cout << "linked to model named: " << model()->title() << "." <<std::endl;
   else
-    cout << "not linked to a model." << endl;
-  cout << "It handles the following objects: " << endl;
+    std::cout << "not linked to a model." <<std::endl;
+  std::cout << "It handles the following objects: " <<std::endl;
   SensorsIterator itS;
   for (itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
     (*itS)->display();
@@ -123,6 +123,6 @@ void ControlManager::display() const
   ActuatorsIterator itA;
   for (itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
     (*itA)->display();
-  cout << "==========" << endl;
-  cout << endl;
+  std::cout << "==========" <<std::endl;
+  std::cout <<std::endl;
 }

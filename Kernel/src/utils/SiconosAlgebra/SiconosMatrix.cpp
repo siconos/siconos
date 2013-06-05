@@ -67,7 +67,7 @@ bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
 
 SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
-  if (m.num == 0)// BlockMatrix
+  if (m.num == 0) // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -97,7 +97,7 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 
 SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
-  if (m.num == 0)// BlockMatrix
+  if (m.num == 0) // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;

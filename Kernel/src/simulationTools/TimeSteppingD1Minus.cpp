@@ -31,7 +31,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-using namespace std;
+
 using namespace RELATION;
 
 void TimeSteppingD1Minus::initOSNS()
@@ -72,11 +72,11 @@ void TimeSteppingD1Minus::initOSNS()
 // {
 //   DEBUG_PRINT("TimeSteppingD1Minus::initializeInteraction(SP::Interaction inter) starts\n");
 //   // RELATION::TYPES pbType = inter->relation()->getType();
-  
+
 //   // if (pbType == Lagrangian)
 //   // {
 //   //   assert(inter->data(LagrangianR::velocity));
-    
+
 //   //   ConstDSIterator itDS;
 //   //   for (itDS = inter->dynamicalSystemsBegin();
 //   //        itDS != inter->dynamicalSystemsEnd();
@@ -200,20 +200,20 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
       double y = (*(inter->y(0)))(0); // current position
       //double yOld = (*(inter->yOld(0)))(0); // old position
       double yDot = (*(inter->y(1)))(0); // current position
-  
-     
+
+
       DEBUG_PRINTF("y= %f\n", y);
       DEBUG_PRINTF("yDot= %f\n", yDot);
 
-      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS ) <<std::endl;);
-      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS ) <<std::endl;);
+      DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) <<std::endl;);
+      DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
 
       if (indexSet2->is_vertex(inter))
       {
         if (Type::value(*(inter->nonSmoothLaw())) != Type::EqualityConditionNSL) /* Equality constraints must always be
                                                                                   * activated et the acceleration level*/
         {
-          if ((y > DEFAULT_TOL_D1MINUS ) || (yDot > DEFAULT_TOL_D1MINUS ))
+          if ((y > DEFAULT_TOL_D1MINUS) || (yDot > DEFAULT_TOL_D1MINUS))
 
           {
             // if Interaction has been active in the previous calculation and now becomes in-active
@@ -230,7 +230,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
                                                                                   * activated et the acceleration level*/
         {
           //     if (y <= DEFAULT_TOL_D1MINUS && !indexSet1->is_vertex(inter) && !impactOccuredLastTimeStep)
-          if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS ))
+          if ((y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS))
           {
             activate=true;
           }
@@ -328,7 +328,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
 void TimeSteppingD1Minus::run()
 {
   unsigned int count = 0;
-  cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" << endl;
+  std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
   while (_eventsManager->hasNextEvent())
   {
     advanceToEvent();
@@ -336,7 +336,7 @@ void TimeSteppingD1Minus::run()
     processEvents();
     count++;
   }
-  cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " << endl;
+  std::cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
 void TimeSteppingD1Minus::advanceToEvent()
@@ -419,7 +419,7 @@ void TimeSteppingD1Minus::advanceToEvent()
 //   //     }
 //   //   }
 //   // }
-  
+
 //   // Set dynamical systems non-smooth part to zero.
 //   reset(level);
 

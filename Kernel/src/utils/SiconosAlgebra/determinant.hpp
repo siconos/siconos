@@ -37,8 +37,8 @@ double determinant(ublas::matrix_expression<matrix_T> const& mat_r)
 {
   double det = 1.0;
 
-  matrix_T mLu(mat_r() );
-  ublas::permutation_matrix<std::size_t> pivots(mat_r().size1() );
+  matrix_T mLu(mat_r());
+  ublas::permutation_matrix<std::size_t> pivots(mat_r().size1());
 
   int is_singular = lu_factorize(mLu, pivots);
 

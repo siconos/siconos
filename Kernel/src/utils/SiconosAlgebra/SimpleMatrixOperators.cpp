@@ -32,7 +32,7 @@ using namespace Siconos;
 //                CONSTRUCTORS
 // =================================================
 
-using std::cout;
+using  std::cout;
 using std::endl;
 
 double& SimpleMatrix::operator()(unsigned int row, unsigned int col)

@@ -19,7 +19,7 @@
 
 #include "BoundaryCondition.hpp"
 
-using namespace std;
+
 
 // BoundaryCondition::BoundaryCondition()
 // _velocityIndices(NULL)

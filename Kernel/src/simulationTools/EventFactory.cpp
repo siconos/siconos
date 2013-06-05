@@ -21,7 +21,7 @@
 #include "RuntimeException.hpp"
 #include <iostream>
 
-using namespace std;
+
 
 namespace EventFactory
 {
@@ -49,7 +49,7 @@ SP::Event Registry::instantiate(double time, int name)
 
 Registration::Registration(int name, object_creator creator)
 {
-  //cout << endl << "Registration of " << name << endl << endl ;
+  //cout <<std::endl << "Registration of " << name <<std::endl <<std::endl ;
   Registry::get().add(name, creator) ;
 }
 

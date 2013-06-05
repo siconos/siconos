@@ -20,7 +20,7 @@
 #include "QP.hpp"
 #include "QPXML.hpp"
 
-using namespace std;
+
 
 QP::QP(SP::OneStepNSProblemXML osnspbxml):
   OneStepNSProblem("QP", osnspbxml)

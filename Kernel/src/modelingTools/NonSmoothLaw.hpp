@@ -128,12 +128,12 @@ public:
   }
 
   /** copy the data of the NonSmoothLaw to the XML tree
-  *  \exception RuntimeException
+  *
   */
   virtual void saveNonSmoothLawToXML() = 0;
 
   /** display the data of the NonSmoothLaw on the standard output
-  *  \exception RuntimeException
+  *
   */
   virtual void display() const = 0;
 

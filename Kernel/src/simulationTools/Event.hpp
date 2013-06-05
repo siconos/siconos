@@ -162,7 +162,7 @@ public:
   };
 
   /** set a new type for the present event
-   *  \param a string
+   *  \param a std::string
    */
   inline void setType(int newType)
   {

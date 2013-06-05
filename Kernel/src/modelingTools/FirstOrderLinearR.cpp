@@ -20,7 +20,7 @@
 #include "LinearRXML.hpp"
 #include "Interaction.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 
@@ -39,7 +39,7 @@ FirstOrderLinearR::FirstOrderLinearR(SP::RelationXML relxml):
 }
 
 // Constructor with C and B plug-in names
-FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
+FirstOrderLinearR::FirstOrderLinearR(const std::string& CName, const std::string& BName):
   FirstOrderR(LinearR)
 {
   // Warning: we cannot allocate memory for C/D matrix since no interaction
@@ -54,7 +54,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
 }
 
 // Constructor from a complete set of data (plugin)
-FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName): FirstOrderR(LinearR)
+FirstOrderLinearR::FirstOrderLinearR(const std::string& CName, const std::string& DName, const std::string& FName, const std::string& EName, const std::string& BName): FirstOrderR(LinearR)
 {
   _pluginJachx->setComputeFunction(CName);
   _pluginJachlambda->setComputeFunction(DName);
@@ -292,23 +292,23 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
 
 void FirstOrderLinearR::display() const
 {
-  cout << " ===== Linear Time Invariant relation display ===== " << endl;
-  cout << "| C " << endl;
+  std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
+  std::cout << "| C " <<std::endl;
   if (_jachx) _jachx->display();
-  else cout << "->NULL" << endl;
-  cout << "| D " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| D " <<std::endl;
   if (_jachlambda) _jachlambda->display();
-  else cout << "->NULL" << endl;
-  cout << "| F " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| F " <<std::endl;
   if (_F) _F->display();
-  else cout << "->NULL" << endl;
-  cout << "| e " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| e " <<std::endl;
   if (_e) _e->display();
-  else cout << "->NULL" << endl;
-  cout << "| B " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << "| B " <<std::endl;
   if (_jacglambda) _jacglambda->display();
-  else cout << "->NULL" << endl;
-  cout << " ================================================== " << endl;
+  else std::cout << "->NULL" <<std::endl;
+  std::cout << " ================================================== " <<std::endl;
 }
 
 void FirstOrderLinearR::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)

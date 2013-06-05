@@ -41,7 +41,7 @@ bool read(const std::string& fileName, const std::string& Mode, SiconosVector& m
 
 /** Write a SiconosVector to a file
     \param[in] SiconosVector the vector to be read
-    \param[in] string type of output:
+    \param[in] std::string type of output:
     Type of Output for write function:
     - "boost": boost way: \n
     [row] (a0, a1,..)

@@ -19,7 +19,7 @@
 #include "Event.hpp"
 #include "RuntimeException.hpp"
 #include <cmath>
-using namespace std;
+
 
 double Event::tick = DEFAULT_TICK;
 
@@ -36,12 +36,12 @@ Event::~Event()
 
 void Event::display() const
 {
-  cout << "===== Event data display =====" << endl;
-  cout << " - Type: " << type << endl;
-  cout << " - time (mpz_t format, double format): (";
+  std::cout << "===== Event data display =====" <<std::endl;
+  std::cout << " - Type: " << type <<std::endl;
+  std::cout << " - time (mpz_t format, double format): (";
   mpz_out_str(stdout, 10, timeOfEvent);
-  cout << ", " << dTime << ")" << endl;
-  cout << "===== End of Event display =====" << endl;
+  std::cout << ", " << dTime << ")" <<std::endl;
+  std::cout << "===== End of Event display =====" <<std::endl;
 }
 
 void Event::update()

@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
-using namespace std;
+
 
 void LagrangianR::initComponents(Interaction& inter)
 {

@@ -59,8 +59,8 @@ void LinearSMC::actuate()
   if (!_noUeq)
     computeUeq();
 
-    *(_DS_SMC->x()) = *(_sensor->y()); // XXX this is sooo wrong
-    prod(*_B, *_ueq, *(_DS_SMC->b()));
+  *(_DS_SMC->x()) = *(_sensor->y()); // XXX this is sooo wrong
+  prod(*_B, *_ueq, *(_DS_SMC->b()));
   _simulationSMC->computeOneStep();
 //  if (_indx > 0)
   {

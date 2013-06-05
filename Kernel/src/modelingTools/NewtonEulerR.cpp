@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 
-using namespace std;
+
 
 //#define NER_DEBUG
 //#define DEBUG_STDOUT
@@ -135,13 +135,13 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(const double time, Int
   // Compute the time derivative of the Jacobian
   computeDotJachq(time, inter);
   if (! _dotjachq) // lazy initialization
-      {
-        unsigned int sizeY = inter.getSizeOfY();
-        unsigned int xSize = inter.getSizeOfDS();
-        unsigned int qSize = 7 * (xSize / 6);
+  {
+    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int xSize = inter.getSizeOfDS();
+    unsigned int qSize = 7 * (xSize / 6);
 
-        _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
-      }
+    _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
+  }
   // Compute the product of the time derivative of the Jacobian with qdot
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
 
@@ -218,8 +218,8 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
   /*\warning : implemented for the bouncing ball !!!!*/
 
   DEBUG_PRINT("NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) starts\n");
-  DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber );
- 
+  DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
+
   if (derivativeNumber == 0)
   {
     computeh(time, inter);
@@ -235,7 +235,7 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
     DEBUG_EXPR(_jachq->display(););
 
     SiconosVector& y = *inter.y(derivativeNumber);
-    
+
     if (derivativeNumber == 1)
     {
       assert(_jachqT);
@@ -243,7 +243,7 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
       DEBUG_EXPR(_jachqT->display(););
       prod(*_jachqT, *inter.data(velocity), y);
     }
-    else if(derivativeNumber == 2)
+    else if (derivativeNumber == 2)
     {
 
       std::cout << "Warning: we attempt to call NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned int derivativeNumber) for derivativeNumber=2" << std::endl;
@@ -261,19 +261,19 @@ void NewtonEulerR::computeOutput(const double time, Interaction& inter, unsigned
 */
 void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level)
 {
- /*\warning : implemented for the bouncing ball !!!!*/
+  /*\warning : implemented for the bouncing ball !!!!*/
 
   DEBUG_PRINT("NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned int level) starts\n");
-  DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level );
+  DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n",&inter););
   DEBUG_EXPR(inter.display(););
-  
+
   // computeJachq(t);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
-  
+
   DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR( inter.data(p0 + level)->display(););
+  DEBUG_EXPR(inter.data(p0 + level)->display(););
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
@@ -324,12 +324,12 @@ void NewtonEulerR::computeInput(const double time, Interaction& inter, unsigned 
 #ifdef NER_DEBUG
     {
       DEBUG_EXPR(_jachqT->display(););
-      // std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
-      // std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
+      //  std::cout << "data[p0+level]" << inter.data(p0 + level) <<  std::endl;
+      //  std::cout << "data[p0+level]->vector(0)" << inter.data(p0 + level)->vector(0) <<  std::endl;
       // if (inter.data(p0 + level)->getNumberOfBlocks() > 1)
-      //   std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
+      //    std::cout << "data[p0+level]->vector(1)" << inter.data(p0 + level)->vector(1) <<  std::endl;
       DEBUG_EXPR(inter.data(p0 + level)->display(););
-      
+
       SP::SiconosVector buffer(new SiconosVector(inter.data(p0 + level)->size()));
       prod(lambda, *_jachqT, *buffer, true);
       std::cout << "added part to p   " << buffer <<  std::endl;

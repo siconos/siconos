@@ -20,7 +20,7 @@
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
 #include <boost/math/quaternion.hpp>
-using namespace std;
+
 
 //#define DEBUG_MESSAGES
 #include <debug.h>
@@ -159,7 +159,7 @@ bool NewtonEulerDS::checkDynamicalSystem()
   //     }
 
 
-  if (!output) cout << "NewtonEulerDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  if (!output) std::cout << "NewtonEulerDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
   return output;
 }
 
@@ -429,32 +429,32 @@ void NewtonEulerDS::saveSpecificDataToXML()
 
 void NewtonEulerDS::display() const
 {
-  cout << "=====> NewtonEuler System display (number: " << _number << ")." << endl;
-  cout << "- _n : " << _n << endl;
-  cout << "- q " << endl;
+  std::cout << "=====> NewtonEuler System display (number: " << _number << ")." <<std::endl;
+  std::cout << "- _n : " << _n <<std::endl;
+  std::cout << "- q " <<std::endl;
   if (_q) _q->display();
-  else cout << "-> NULL" << endl;
-  cout << "- q0 " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- q0 " <<std::endl;
   if (_q0) _q0->display();
-  cout << "- v " << endl;
+  std::cout << "- v " <<std::endl;
   if (_v) _v->display();
-  else cout << "-> NULL" << endl;
-  cout << "- v0 " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- v0 " <<std::endl;
   if (_v0) _v0->display();
-  else cout << "-> NULL" << endl;
-  cout << "- dotq " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- dotq " <<std::endl;
   if (_dotq) _dotq->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[0] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[0] " <<std::endl;
   if (_p[0]) _p[0]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[1] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[1] " <<std::endl;
   if (_p[1]) _p[1]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[2] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[2] " <<std::endl;
   if (_p[2]) _p[2]->display();
-  else cout << "-> NULL" << endl;
-  cout << "===================================== " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "===================================== " <<std::endl;
 }
 
 // --- Functions for memory handling ---
@@ -463,7 +463,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
   DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
-    cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
+    std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
   {
     _qMemory.reset(new SiconosMemory(steps));

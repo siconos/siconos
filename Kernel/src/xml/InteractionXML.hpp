@@ -114,7 +114,7 @@ public:
   };
 
   /** Return the id of the Interaction (rootNode attribute)
-  *   \return a string
+  *   \return a std::string
   */
   inline const std::string getId() const
   {
@@ -124,7 +124,7 @@ public:
   }
 
   /** to save the id of the Interaction (rootNode attribute)
-  *   \param a string
+  *   \param a std::string
   */
   inline void setId(const std::string  newId)
   {

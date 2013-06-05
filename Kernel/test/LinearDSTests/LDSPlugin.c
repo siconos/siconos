@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include<iostream>
-//using namespace std;
+
 
 // ===== Linear DS  ====
 

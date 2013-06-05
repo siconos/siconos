@@ -55,7 +55,6 @@ public:
   ~SiconosMatrixException();
 
   /** static function which throw a SiconosMatrixException
-   * \exception SiconosMatrixException
    */
   static void selfThrow()  ;
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosKernel.hpp"
-using namespace std;
+
 
 bool BallBowl()
 {
@@ -26,8 +26,8 @@ bool BallBowl()
   try
   {
 
-    cout << " **************************************" << endl;
-    cout << " ******** Start Ball in a Bowl *********" << endl << endl << endl;
+    std::cout << " **************************************" <<std::endl;
+    std::cout << " ******** Start Ball in a Bowl *********" <<std::endl <<std::endl <<std::endl;
     // --- Model loading from xml file ---
     SP::Model bouncingBall(new Model("./BallBowl.xml"));
     bouncingBall->initialize();
@@ -56,7 +56,7 @@ bool BallBowl()
     dataPlot(k, 4) = (*v)(1);
     dataPlot(k, 5) = (*p)(0);
 
-    cout << "Computation ... " << endl;
+    std::cout << "Computation ... " <<std::endl;
     // --- Time loop  ---
     while (s->hasNextEvent())
     {
@@ -83,29 +83,29 @@ bool BallBowl()
     }
     double tol = 1e-7;
     double norm = (dataPlot - (*dataRef)).normInf() ;
-    cout << endl << endl;
+    std::cout <<std::endl <<std::endl;
     if (norm < tol)
     {
-      cout << " ******** BallBowl global test ended with success ********" << endl;
+      std::cout << " ******** BallBowl global test ended with success ********" <<std::endl;
       res = true;
     }
     else
     {
-      cout << " ******** BallBowl global test failed, results differ from those of reference file. ********" << endl;
+      std::cout << " ******** BallBowl global test failed, results differ from those of reference file. ********" <<std::endl;
       res = false;
     }
 
-    cout << endl << endl;
+    std::cout <<std::endl <<std::endl;
   }
 
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/BouncingBall\'" << endl;
+    std::cout << "Exception caught in \'sample/BouncingBall\'" <<std::endl;
   }
 
   return res;

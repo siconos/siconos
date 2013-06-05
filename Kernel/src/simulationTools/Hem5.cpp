@@ -30,7 +30,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 #define DEBUG_STDOUT
@@ -113,7 +113,7 @@ Hem5::Hem5(SP::DynamicalSystem ds):
 }
 
 Hem5::Hem5(DynamicalSystemsSet& newDS):
-OneStepIntegrator(OSI::LSODAR, newDS)
+  OneStepIntegrator(OSI::LSODAR, newDS)
 {
   _intData.resize(9);
   for (int i = 0; i < 9; i++) _intData[i] = 0;
@@ -123,14 +123,14 @@ OneStepIntegrator(OSI::LSODAR, newDS)
 void Hem5::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   _intData[4] = newItol; // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
-                         //           dimension NQ + NV + NU (ITOL=1)
+  //           dimension NQ + NV + NU (ITOL=1)
   rtol = newRtol;
   atol = newAtol;
 }
 void Hem5::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
   _intData[4] = newItol; // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
-                         //           dimension NQ + NV + NU (ITOL=1)
+  //           dimension NQ + NV + NU (ITOL=1)
   rtol[0] = newRtol; // rtol
   atol[0] = newRtol;  // atol
 }
@@ -163,13 +163,13 @@ void Hem5::updateIntData()
 
   // 3 - Itol, itask, iopt
   _intData[4] = 0; // ITOL indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
-                   //  dimension NQ + NV + NU (ITOL=1)
+  //  dimension NQ + NV + NU (ITOL=1)
   _intData[5] = 0; // IOUT selects the dense output formula
 
   // this computation has to be redone every time _indData[3] is recompyuted.
 
 
-   // IWK(14)  MODE (=0: FULL LINEAR ALGEBRA WITH DEC, =1: IDEM WITH FL,
+  // IWK(14)  MODE (=0: FULL LINEAR ALGEBRA WITH DEC, =1: IDEM WITH FL,
   //                      =2: FULL LINEAR ALGEBRA WITH DGETRF, =3: FL
   //                      =4: SPARSE, =5: IDEM WITH FL)
   int MODE = 0;
@@ -185,10 +185,10 @@ void Hem5::updateIntData()
   int NMRC = (int)_intData[1]; // NMRC : size of a block of M
   int NBLK = 1;                // NBLK : number of block of M
 
-  if (MODE <=3 )
+  if (MODE <=3)
   {
-    LL = 8 * ( (int)_intData[1] * (int)_intData[3]  )
-       + 4 * ( (int)_intData[1] + (int)_intData[3]  )*( (int)_intData[1] + (int)_intData[3]);
+    LL = 8 * ((int)_intData[1] * (int)_intData[3])
+         + 4 * ((int)_intData[1] + (int)_intData[3])*((int)_intData[1] + (int)_intData[3]);
     LDG = _intData[3];
     LDF = _intData[3];
     NZA = LDG + std::max(LDG,LDF) + NMRC*NMRC*NBLK;
@@ -201,8 +201,8 @@ void Hem5::updateIntData()
   }
 
   // 5 - LWK length of real array rwork
-  _intData[6] = 19 + 27*(int)_intData[0] + 28 * (int)_intData[1] + 27 *  (int)_intData[2]
-    + 5*((int)_intData[1] + (int)_intData[3]) + 4*NZA + 2*IXS + LL;
+  _intData[6] = 19 + 27*(int)_intData[0] + 28 * (int)_intData[1] + 27 * (int)_intData[2]
+                + 5*((int)_intData[1] + (int)_intData[3]) + 4*NZA + 2*IXS + LL;
 
   // 6 - LIWK length of integer array iwork
   _intData[7] = 95 + 2*((int)_intData[1]+(int)_intData[3]) + 2*IS + 12*LDG + 4 * LDF + 4 *NZA;
@@ -215,7 +215,7 @@ void Hem5::updateData()
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
   unsigned int sizeTol = _intData[0]; // size of rtol, atol ...
-                                      // If itol (_intData[4]) = 0 => scalar else, vector of size neq (_intData[0]).
+  // If itol (_intData[4]) = 0 => scalar else, vector of size neq (_intData[0]).
   //  if(_intData[0]==1) sizeTol = 1;
   //  else sizeTol = _intData[0];
 
@@ -321,10 +321,10 @@ void Hem5::fprob(integer* IFCN,
       }
       DEBUG_EXPR(
         for (int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
-        {
-          std::cout << AM[kk] << std::endl;
-        }
-        );
+    {
+      std::cout << AM[kk] << std::endl;
+      }
+      );
     }
   }
   if ((ifcn ==1) || (ifcn == 5) || (ifcn == 7) || (ifcn==8)) // compute F
@@ -369,7 +369,7 @@ void Hem5::fprob(integer* IFCN,
 
   }
 
-  if ((ifcn == 6) || (ifcn >= 10) ) // compute GP ( Jacobian of the constraints)
+  if ((ifcn == 6) || (ifcn >= 10))  // compute GP ( Jacobian of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -381,13 +381,13 @@ void Hem5::fprob(integer* IFCN,
     }
   }
 
-  if ((ifcn == 5) || (ifcn == 7) ) // compute GPP ( Hessian of the constraints)
+  if ((ifcn == 5) || (ifcn == 7))  // compute GPP ( Hessian of the constraints)
   {
     //RuntimeException::selfThrow("Hem5::fprob(), G_qq is not available");
     std::cout << "Hem5::fprob(), G_qq is not available " << std::endl;
   }
 
-  if ((ifcn == 3) || (ifcn == 6) || (ifcn >= 10) ) // compute GT (partial time derivative of the constraints)
+  if ((ifcn == 3) || (ifcn == 6) || (ifcn >= 10))  // compute GT (partial time derivative of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -407,7 +407,7 @@ void Hem5::fprob(integer* IFCN,
     }
   }
 
-  if ((ifcn == 1) || (ifcn == 2) || (ifcn == 10) ) // compute QDOT
+  if ((ifcn == 1) || (ifcn == 2) || (ifcn == 10))  // compute QDOT
   {
     unsigned int pos=0;
     for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
@@ -436,10 +436,10 @@ void Hem5::fprob(integer* IFCN,
     }
     DEBUG_EXPR(
       for (int kk =0 ; kk < (int)(*NV); kk ++)
-      {
-        std::cout << QDOT[kk] << std::endl;
-      }
-      );
+  {
+    std::cout << QDOT[kk] << std::endl;
+    }
+    );
   }
 
   DEBUG_PRINTF("END : Hem5::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
@@ -489,7 +489,7 @@ void Hem5::initialize()
     }
     else
     {
-    RuntimeException::selfThrow("Hem5::initialize(), Only integration of Lagrangian DS is allowed");
+      RuntimeException::selfThrow("Hem5::initialize(), Only integration of Lagrangian DS is allowed");
     }
   }
 
@@ -543,7 +543,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 {
 
   DEBUG_PRINT("Hem5::integrate(double& tinit, double& tend, double& tout, int& idid) with \n");
-  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, idid = %i\n", tinit, tend,  tout, idid );
+  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, idid = %i\n", tinit, tend,  tout, idid);
 
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
   doublereal tinit_DR = tinit;       // current (starting) time
@@ -576,7 +576,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
     _vtmp.reset(new SiconosVector(_vWork->size()));
   }
   else
-     _vtmp->resize((int)_intData[1],true);
+    _vtmp->resize((int)_intData[1],true);
 
 
   _utmp.reset(new SiconosVector(1));
@@ -605,32 +605,32 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
   rwork[0] = MACHINE_PREC ; // WK(1)   UROUND, THE ROUNDING UNIT, DEFAULT 1.D-16.
 
   rwork[1] = 0.0 ;          // WK(2)   THE SAFETY FACTOR IN STEP SIZE PREDICTION,
-                            //         DEFAULT 0.85D0.
+  //         DEFAULT 0.85D0.
   rwork[2] = 0.0 ; // WK(3), WK(4)   PARAMETERS FOR STEP SIZE SELECTION
   rwork[3] = 0.0 ; //                THE NEW STEP SIZE IS CHOSEN SUBJECT TO THE RESTRICTION
-                   //                WK(3) <= HNEW/HOLD <= WK(4).
-                   //                DEFAULT VALUES: WK(3)=0.2D0, WK(4)=10.D0
+  //                WK(3) <= HNEW/HOLD <= WK(4).
+  //                DEFAULT VALUES: WK(3)=0.2D0, WK(4)=10.D0
   rwork[5] = 0.0 ; // WK(6)   MAXIMAL STEP SIZE, DEFAULT TEND-T.
 
   rwork[6] = 0.0 ; // WK(7) = BETA, DEFAULT 0.D0
   rwork[7] = 0.0 ; // WK(8) = ALPHA, DEFAULT 1/5
 
   iwork[10] = 0 ; // IWK(11)  THIS IS THE MAXIMAL NUMBER OF ALLOWED STEPS.
-                  //          THE DEFAULT VALUE (FOR IWK(11)=0) IS 100000.
+  //          THE DEFAULT VALUE (FOR IWK(11)=0) IS 100000.
   iwork[11] = 0 ; // IWK(12)  SWITCH FOR A PROJECTION TO ENSURE CONSISTENT INITIAL VALUE
-                  //          FOR IWK(12)=1 AN INITIAL PROJECTION IS PERFORMED.
-                  //          NO PROJECTION IS DONE IF IWK(12)=0.
-                  //          THE DEFAULT VALUE FOR IWK(12) IS 0.
+  //          FOR IWK(12)=1 AN INITIAL PROJECTION IS PERFORMED.
+  //          NO PROJECTION IS DONE IF IWK(12)=0.
+  //          THE DEFAULT VALUE FOR IWK(12) IS 0.
 
   iwork[12] = 0 ; // IWK(13)  FOR IWK(13).GT.0 IT IS THE NUMBER OF STEPS BETWEEN
-                  //          TWO PROJECTIONS ON THE MANIFOLD  DEFINED BY 0 = g(q,t).
-                  //          FOR IWK(13).LE.0 NO PROECTION IS PERFORMED.
-                  //          THE DEFAULT VALUE FOR IWK(13) IS 0.
+  //          TWO PROJECTIONS ON THE MANIFOLD  DEFINED BY 0 = g(q,t).
+  //          FOR IWK(13).LE.0 NO PROECTION IS PERFORMED.
+  //          THE DEFAULT VALUE FOR IWK(13) IS 0.
 
 
   iwork[13] = _intData[8] ; // IWK(14)  MODE (=0: FULL LINEAR ALGEBRA WITH DEC, =1: IDEM WITH FL,
-                     //                =2: FULL LINEAR ALGEBRA WITH DGETRF, =3: FL
-                     //                =4: SPARSE, =5: IDEM WITH FL)
+  //                =2: FULL LINEAR ALGEBRA WITH DGETRF, =3: FL
+  //                =4: SPARSE, =5: IDEM WITH FL)
 
   iwork[14] = 1    ; // IWK(15)  IACC (=1: COMPUTE THE ACCELERATION)
 
@@ -647,7 +647,7 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 // C    IPAR(8) = IWK(28) = IO
 // C    IPAR(9) = FLAG TO INDICATE IF UMDFAC HAS BEEN CALLED AT LEAST ONCE
 
-  DEBUG_EXPR( iwork[26] =2;printf("\n"));
+  DEBUG_EXPR(iwork[26] =2; printf("\n"));
 
   // Set atol and rtol values ...
   rtol[0] = HEM5_RTOL_DEFAULT ; // rtol
@@ -689,48 +689,48 @@ void Hem5::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   // call HEM5 to integrate dynamical equation
   CNAME(hem5)(&(_intData[0]),
-                &(_intData[1]),
-                &(_intData[2]),
-                &(_intData[3]),
-                pointerToFPROB,
-                &tinit_DR,
-                &(*_qtmp)(0),
-                &(*_vtmp)(0),
-                pointerToU,
-                &(*_atmp)(0),
-                pointerToXL,
-                &tend_DR,
-                &_timeStep,
-                rtol.get(),
-                atol.get(),
-                &(_intData[4]),
-                pointerToSOLOUT,
-                &(_intData[5]),
-                rwork.get(),
-                &(_intData[6]),
-                iwork.get(),
-                &(_intData[7]),
-                &_idid);
+              &(_intData[1]),
+              &(_intData[2]),
+              &(_intData[3]),
+              pointerToFPROB,
+              &tinit_DR,
+              &(*_qtmp)(0),
+              &(*_vtmp)(0),
+              pointerToU,
+              &(*_atmp)(0),
+              pointerToXL,
+              &tend_DR,
+              &_timeStep,
+              rtol.get(),
+              atol.get(),
+              &(_intData[4]),
+              pointerToSOLOUT,
+              &(_intData[5]),
+              rwork.get(),
+              &(_intData[6]),
+              iwork.get(),
+              &(_intData[7]),
+              &_idid);
 
   // === Post ===
   if (_idid < 0) // if istate < 0 => LSODAR failed
   {
-    cout << "Hem5::integrate(...) failed - idid = " << _idid << endl;
-    cout << " -1 means input is not consistent" << endl;
-    cout << " -2 means larger NMAX needed." << endl;
-    cout << " -3 means step size becomes too small." << endl;
-    cout << " -4 means matrix is singular" << endl;
-    cout << " -5 means initial projection: no convergence" << endl;
+    std::cout << "Hem5::integrate(...) failed - idid = " << _idid <<std::endl;
+    std::cout << " -1 means input is not consistent" <<std::endl;
+    std::cout << " -2 means larger NMAX needed." <<std::endl;
+    std::cout << " -3 means step size becomes too small." <<std::endl;
+    std::cout << " -4 means matrix is singular" <<std::endl;
+    std::cout << " -5 means initial projection: no convergence" <<std::endl;
     RuntimeException::selfThrow("Hem5::integrate(), integration failed");
   }
 
-  DEBUG_EXPR_WE(  cout << "HEM5 Statitics : " << endl;
-                  cout << "NSTEP = " << iwork[30] << endl;
-                  cout << "NACCPT = " << iwork[31] << endl;
-                  cout << "NREJCT = " << iwork[32] << endl;
-                  cout << "NFCN = " << iwork[33] << endl;
-                  cout << "NDEC = " << iwork[34] << endl;
-                  cout << "NSOL = " << iwork[35] << endl; );
+  DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : " <<std::endl;
+                std::cout << "NSTEP = " << iwork[30] <<std::endl;
+                std::cout << "NACCPT = " << iwork[31] <<std::endl;
+                std::cout << "NREJCT = " << iwork[32] <<std::endl;
+                std::cout << "NFCN = " << iwork[33] <<std::endl;
+                std::cout << "NDEC = " << iwork[34] <<std::endl;
+                std::cout << "NSOL = " << iwork[35] <<std::endl;);
   *_qWork = *_qtmp;
   *_vWork = *_vtmp;
   *_aWork = *_atmp;
@@ -856,7 +856,7 @@ void Hem5::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
   {
-    if  (relationType == Lagrangian)
+    if (relationType == Lagrangian)
     {
       Xfree = inter->data(LagrangianR::free);
     }
@@ -865,14 +865,14 @@ void Hem5::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     //   Xfree = inter->data(NewtonEulerR::free);
     // }
     assert(Xfree);
-    //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+    //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
 
     Xfree = inter->dataQ1();
-    //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+    //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
   }
@@ -945,10 +945,10 @@ void Hem5::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 void Hem5::display()
 {
   OneStepIntegrator::display();
-  cout << " --- > Hem5 specific values: " << endl;
-  cout << "Number of equations: " << _intData[0] << endl;
-  cout << "Number of constraints: " << _intData[1] << endl;
-  cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" << endl;
-  cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] << endl;
-  cout << "====================================" << endl;
+  std::cout << " --- > Hem5 specific values: " <<std::endl;
+  std::cout << "Number of equations: " << _intData[0] <<std::endl;
+  std::cout << "Number of constraints: " << _intData[1] <<std::endl;
+  std::cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" <<std::endl;
+  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] <<std::endl;
+  std::cout << "====================================" <<std::endl;
 }

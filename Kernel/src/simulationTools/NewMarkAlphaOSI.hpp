@@ -23,7 +23,7 @@
 #define NEWMARKALPHAOSI_H
 
 #include "OneStepIntegrator.hpp"
-using namespace std;
+
 /**  NewMarkAlpha Scheme Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA

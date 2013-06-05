@@ -25,7 +25,7 @@
 #include "debug.h"
 #include <iostream>
 
-using namespace std;
+
 
 // Private function to set linked with members of Dynamical top class
 void LagrangianDS::connectToDS()
@@ -79,7 +79,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   //   mXfree.reset(new SiconosVector(getDim()));
   //   r.reset(new SiconosVector(getDim()));
 
-  /** \todo lazy Memory allocation */ 
+  /** \todo lazy Memory allocation */
   _p.resize(3);
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
@@ -153,7 +153,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   if (lgptr->hasVelocityMemory())   // velocityMemory
     _velocityMemory.reset(new SiconosMemory(lgptr->getVelocityMemoryXML()));
 
-  string plugin;
+  std::string plugin;
   // mass
   if (lgptr->isMassPlugin()) // if mass is plugged
   {
@@ -180,7 +180,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   // _fExt
   if (lgptr->hasFExt())  // if _fExt is given
   {
-    if (lgptr->isFExtPlugin())// if _fExt is plugged
+    if (lgptr->isFExtPlugin()) // if _fExt is plugged
     {
       plugin = lgptr->getFExtPlugin();
       setComputeFExtFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -190,9 +190,9 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   }
 
   // NNL
-  if (lgptr ->hasNNL())// if NNL is given
+  if (lgptr ->hasNNL()) // if NNL is given
   {
-    if (lgptr->isNNLPlugin())// if NNL is plugged
+    if (lgptr->isNNLPlugin()) // if NNL is plugged
     {
       plugin = lgptr->getNNLPlugin();
       setComputeNNLFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -202,9 +202,9 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   }
 
   // jacobian q of fInt
-  if (lgptr ->hasJacobianFInt(0))// if given
+  if (lgptr ->hasJacobianFInt(0)) // if given
   {
-    if (lgptr->isJacobianFIntPlugin(0))// if is plugged
+    if (lgptr->isJacobianFIntPlugin(0)) // if is plugged
     {
       plugin = lgptr->getJacobianFIntPlugin(0);
       setComputeJacobianFIntqFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -214,9 +214,9 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   }
 
   // jacobian qdot of fInt
-  if (lgptr ->hasJacobianFInt(1))// if given
+  if (lgptr ->hasJacobianFInt(1)) // if given
   {
-    if (lgptr->isJacobianFIntPlugin(1))// if is plugged
+    if (lgptr->isJacobianFIntPlugin(1)) // if is plugged
     {
       plugin = lgptr->getJacobianFIntPlugin(1);
       setComputeJacobianFIntqDotFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -229,7 +229,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   // Jacobian q of NNL
   if (lgptr -> hasJacobianNNL(0)) // if given
   {
-    if (lgptr->isJacobianNNLPlugin(0))// if is plugged
+    if (lgptr->isJacobianNNLPlugin(0)) // if is plugged
     {
       plugin = lgptr->getJacobianNNLPlugin(0);
       setComputeJacobianNNLqFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -240,7 +240,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   // Jacobian qdot of NNL
   if (lgptr -> hasJacobianNNL(1)) // if given
   {
-    if (lgptr->isJacobianNNLPlugin(1))// if is plugged
+    if (lgptr->isJacobianNNLPlugin(1)) // if is plugged
     {
       plugin = lgptr->getJacobianNNLPlugin(1);
       setComputeJacobianNNLqDotFunction(SSLH::getPluginName(plugin), SSLH::getPluginFunctionName(plugin));
@@ -281,7 +281,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _p[1].reset(new SiconosVector(_ndof));
   _p[2].reset(new SiconosVector(_ndof));
   _pMemory.resize(3);
-    /** \todo lazy memory allocation */
+  /** \todo lazy memory allocation */
   //unsigned int steps=1;
   // _pMemory[0].reset(new SiconosMemory(steps));
   // _pMemory[1].reset(new SiconosMemory(steps));
@@ -290,7 +290,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const string& massName):
+LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const std::string& massName):
   DynamicalSystem(), _ndof(newQ0->size())
 {
   zeroPlugin();
@@ -365,7 +365,7 @@ bool LagrangianDS::checkDynamicalSystem()
     output = false;
   }
 
-  if (!output) cout << "LagrangianDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  if (!output) std::cout << "LagrangianDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
   return output;
 }
 
@@ -606,7 +606,7 @@ void LagrangianDS::computeMass()
   if (_pluginMass->fPtr)
   {
     ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-  _mass->resetLU();
+    _mass->resetLU();
   }
 }
 
@@ -795,7 +795,7 @@ void LagrangianDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosV
       *_forces += *_fExt;
 
     if (_NNL)
-        *_forces -= *_NNL;
+      *_forces -= *_NNL;
   }
 }
 
@@ -876,7 +876,7 @@ void LagrangianDS::saveSpecificDataToXML()
     {
       if (_fInt->size() > 0)
         lgptr->setFIntVector(*_fInt);
-      else cout << "Warning : FInt can't be saved, the FInt vector is not defined." << endl;
+      else std::cout << "Warning : FInt can't be saved, the FInt vector is not defined." <<std::endl;
     }
   }
   else
@@ -914,29 +914,29 @@ void LagrangianDS::saveSpecificDataToXML()
 
 void LagrangianDS::display() const
 {
-  cout << "=====> Lagrangian System display (number: " << _number << ")." << endl;
-  cout << "- _ndof : " << _ndof << endl;
-  cout << "- q " << endl;
+  std::cout << "=====> Lagrangian System display (number: " << _number << ")." <<std::endl;
+  std::cout << "- _ndof : " << _ndof <<std::endl;
+  std::cout << "- q " <<std::endl;
   if (_q[0]) _q[0]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- q0 " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- q0 " <<std::endl;
   if (_q0) _q0->display();
-  cout << "- v " << endl;
+  std::cout << "- v " <<std::endl;
   if (_q[1]) _q[1]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- v0 " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- v0 " <<std::endl;
   if (_velocity0) _velocity0->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[0] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[0] " <<std::endl;
   if (_p[0]) _p[0]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[1] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[1] " <<std::endl;
   if (_p[1]) _p[1]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- p[2] " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- p[2] " <<std::endl;
   if (_p[2]) _p[2]->display();
-  else cout << "-> NULL" << endl;
-  cout << "===================================== " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "===================================== " <<std::endl;
 }
 
 // --- Functions for memory handling ---
@@ -945,7 +945,7 @@ void LagrangianDS::initMemory(unsigned int steps)
   DEBUG_PRINTF("LagrangianDS::initMemory(unsigned int steps) with steps = %i", steps);
   DynamicalSystem::initMemory(steps);
   if (steps == 0)
-    cout << "Warning : LagragianDS::initMemory with size equal to zero" << endl;
+    std::cout << "Warning : LagragianDS::initMemory with size equal to zero" <<std::endl;
   else
   {
     _qMemory.reset(new SiconosMemory(steps));
@@ -965,13 +965,16 @@ void LagrangianDS::swapInMemory()
   _qMemory->swap(_q[0]);
   _velocityMemory->swap(_q[1]);
   // initialization of the reaction force due to the non smooth law
-  if (_p[0] && _pMemory[0] ){
+  if (_p[0] && _pMemory[0])
+  {
     _pMemory[0]->swap(_p[0]);
   }
-  if (_p[1] && _pMemory[1]){
+  if (_p[1] && _pMemory[1])
+  {
     _pMemory[1]->swap(_p[1]);
   }
-  if (_p[2] && _pMemory[2]){
+  if (_p[2] && _pMemory[2])
+  {
 
     _pMemory[2]->swap(_p[2]);
   }

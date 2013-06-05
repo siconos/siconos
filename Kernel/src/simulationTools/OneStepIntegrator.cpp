@@ -24,7 +24,7 @@
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-using namespace std;
+
 
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
   integratorType(id), _sizeMem(1)
@@ -54,10 +54,10 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegrator
     else
     {
       // get list of ds numbers implicate in the OSI
-      vector<int> dsNumbers;
+      std::vector<int> dsNumbers;
       osixml->getDSNumbers(dsNumbers);
       // get corresponding ds and insert them into the set.
-      for (vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
+      for (std::vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
         OSIDynamicalSystems->insert(dsList->getPtr(*it));
     }
   }
@@ -72,10 +72,10 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegrator
     else
     {
       // get list of interactions numbers implicate in the OSI
-      vector<int> interactionsNumbers;
+      std::vector<int> interactionsNumbers;
       osixml->getInteractionsNumbers(interactionsNumbers);
       // get corresponding interactions and insert them into the set.
-      for (vector<int>::iterator it = interactionsNumbers.begin(); it != interactionsNumbers.end(); ++it)
+      for (std::vector<int>::iterator it = interactionsNumbers.begin(); it != interactionsNumbers.end(); ++it)
         OSIInteractions->insert(interactionsList->getPtr(*it));
     }
   }
@@ -145,10 +145,10 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 
 void OneStepIntegrator::display()
 {
-  cout << "==== OneStepIntegrator display =====" << endl;
-  cout << "| integratorType : " << integratorType << endl;
-  cout << "| _sizeMem: " << _sizeMem << endl;
-  cout << "====================================" << endl;
+  std::cout << "==== OneStepIntegrator display =====" <<std::endl;
+  std::cout << "| integratorType : " << integratorType <<std::endl;
+  std::cout << "| _sizeMem: " << _sizeMem <<std::endl;
+  std::cout << "====================================" <<std::endl;
 }
 
 void OneStepIntegrator::saveIntegratorToXML()

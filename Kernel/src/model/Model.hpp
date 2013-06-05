@@ -34,7 +34,8 @@
 class Simulation;
 DEFINE_SPTR(SiconosModelXML)
 
-/** Model: object that links the NonSmoothDynamicalSystem with a
+/** \class Model
+ * \brief  Model: object that links the NonSmoothDynamicalSystem with a
  * Simulation.
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -88,24 +89,26 @@ public:
 
   /** create the Model from an xml file
    *  \param char * : the input XML file (optional parameter)
-   *  \exception RuntimeException
+   *  \
    */
   Model(const std::string& xmlFile);
 
   /** create the Model from a set of data
    *  \param double : the value for t0
    *  \param double : the value for T (optional parameter)
-   *  \param string : the title of the Model (optional parameter)
-   *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional
+   *  \param std::string : the title of the Model (optional parameter)
+   *  \param std::string : the author of the Model (optional parameter)
+   *  \param std::string : the description of the Model (optional
    *                  parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
+   *  \param std::string : the date of the Model (optional parameter)
+   *  \param std::string : the xml schema of the Model (optional parameter)
    */
-  Model(double, double = -1, const std::string& = "none",
-        const std::string& = "nobody", const std::string& = "none",
-        const std::string& = "none", const std::string& = "none");
-
+  // Model(double, double = -1, const std::string& = "none",
+  //       const std::string& = "nobody", const std::string& = "none",
+  //       const std::string& = "none", const std::string& = "none");
+  Model(double newT0, double newT =-1, const std::string& newTitle = "none",
+        const std::string& newAuthor = "nobody", const std::string& newDescription = "none",
+        const std::string& newDate = "none", const std::string& newSchema = "none");
   /** build the model from init/final times and a list of DS and
    *   Interactions
    *   \param double : the value for t0
@@ -207,7 +210,7 @@ public:
   void setSiconosModelXMLPtr(SP::SiconosModelXML newPtr);
 
   /** get the title of the simulation
-   *  \return string : the title
+   *  \return std::string : the title
    */
   inline const std::string  title() const
   {
@@ -215,7 +218,7 @@ public:
   }
 
   /** set the title of the simulation
-   *  \param string : the title
+   *  \param std::string : the title
    */
   inline void setTitle(const std::string & s)
   {
@@ -223,7 +226,7 @@ public:
   }
 
   /** get the author of the simulation
-   *  \return string : the author
+   *  \return std::string : the author
    */
   inline const std::string  author() const
   {
@@ -231,7 +234,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param string : the author
+   *  \param std::string : the author
    */
   inline void setAuthor(const std::string & s)
   {
@@ -239,7 +242,7 @@ public:
   }
 
   /** allows to get the description of the simulation
-   *  \return string : the description
+   *  \return std::string : the description
    */
   inline const std::string  description() const
   {
@@ -247,7 +250,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param string : the author
+   *  \param std::string : the author
    */
   inline void setDescription(const std::string & s)
   {
@@ -255,7 +258,7 @@ public:
   }
 
   /** allows to get the date of the simulation
-   *  \return string : the date
+   *  \return std::string : the date
    */
   inline const std::string  date() const
   {
@@ -263,7 +266,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param string : the author
+   *  \param std::string : the author
    */
   inline void setDate(const std::string & s)
   {
@@ -271,7 +274,7 @@ public:
   }
 
   /** allows to get the xmlSchema of the simulation
-   *  \return string : the xmlSchema
+   *  \return std::string : the xmlSchema
    */
   inline const std::string  getXmlSchema() const
   {
@@ -279,7 +282,7 @@ public:
   }
 
   /** set the author of the simulation
-   *  \param string : the author
+   *  \param std::string : the author
    */
   inline void setXmlSchema(const std::string & s)
   {
@@ -304,30 +307,27 @@ public:
   void saveToDOMTree();
 
   /** copy the data of the plateform to the XML DOM tree
-   *  \exception RuntimeException
    */
   void savePlatformToXML();
 
   /** check if the DOM tree respect the XML schema
    *  return bool : true if the DOM tree respect the XML schema
-   *  \exception RuntimeException
    */
   bool checkXMLDOMTree();
 
   /** check if the XML objects of XML managment exist
-   *  \exception RuntimeException
    */
   void checkXMLPlatform();
 
   /** check if the Model is complete. That's to say if the objects of
       the platform are coherent and if data of the XML are coherent
-   *  \exception RuntimeException
+   *
    */
   void checkModelCoherency();
 
   /** checks if the xmlFile given respects the xmlSchema given
-   *  \param string : the xml input file to check
-   *  \param string : the xml schema
+   *  \param std::string : the xml input file to check
+   *  \param std::string : the xml schema
    *  \return int : 1 if the xml file respects the schema
    */
   int xmlSchemaValidated(std::string  xmlFile, std::string  xmlSchema = "");

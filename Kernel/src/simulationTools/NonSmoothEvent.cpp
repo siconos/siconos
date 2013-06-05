@@ -22,7 +22,7 @@
 #include "OneStepIntegrator.hpp"
 #include "LagrangianDS.hpp"
 
-using namespace std;
+
 using namespace EventFactory;
 
 // Default constructor
@@ -87,18 +87,18 @@ void NonSmoothEvent::process(Simulation& simulation)
 
     /*
     // Display the variable after processing NSEvent
-    cout<< "-------After processing NS events---------" << endl;
+    std::cout<< "-------After processing NS events---------" <<std::endl;
     for (std11::tie(ui, uiend)=indexSet0->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet0->bundle(*ui);
-        cout << "Velocity at this Interaction: " << (*inter->y(1))(0) << endl;
+        std::cout << "Velocity at this Interaction: " << (*inter->y(1))(0) <<std::endl;
       }
 
     for (std11::tie(vi, viend) = dsG->vertices(); vi != viend; ++vi)
       {
         SP::DynamicalSystem ds = dsG->bundle(*vi);
         SP::LagrangianDS Lag_ds = std11::static_pointer_cast<LagrangianDS>(ds);
-        cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) << endl;
+        std::cout << "Velocity of DS: " << (*Lag_ds->velocity())(0) <<std::endl;
       }
     //
     */

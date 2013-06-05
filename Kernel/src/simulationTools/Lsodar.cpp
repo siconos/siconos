@@ -30,7 +30,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 //#define DEBUG_STDOUT
@@ -212,7 +212,7 @@ void Lsodar::initialize()
   OneStepIntegrator::initialize();
   _xWork.reset(new BlockVector());
   DSIterator itDS;
-  string type;
+  std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
@@ -258,7 +258,7 @@ void Lsodar::initialize()
 
 
   // 5 - lrw, size of rwork
-  _intData[6] = 22 + _intData[0] * max(16, (int)_intData[0] + 9) + 3 * _intData[1];
+  _intData[6] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
 
   // 6 - liw, size of iwork
   _intData[7] = 20 + _intData[0];
@@ -309,7 +309,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 {
 
   DEBUG_PRINT("Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
-  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, istate );
+  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, istate);
 
   // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
@@ -340,39 +340,39 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   _intData[4] = istate;
   // call LSODAR to integrate dynamical equation
   CNAME(dlsodar)(pointerToF,
-                   &(_intData[0]),
-                   &(*_xtmp)(0),
-                   &tinit_DR,
-                   &tend_DR,
-                   &(_intData[2]),
-                   rtol.get(),
-                   atol.get(),
-                   &(_intData[3]),
-                   &(_intData[4]),
-                   &(_intData[5]),
-                   rwork.get(),
-                   &(_intData[6]),
-                   iwork.get(),
-                   &(_intData[7]),
-                   pointerToJacobianF,
-                   &(_intData[8]),
-                   pointerToG, &
-                   (_intData[1]),
-                   jroot.get());
+                 &(_intData[0]),
+                 &(*_xtmp)(0),
+                 &tinit_DR,
+                 &tend_DR,
+                 &(_intData[2]),
+                 rtol.get(),
+                 atol.get(),
+                 &(_intData[3]),
+                 &(_intData[4]),
+                 &(_intData[5]),
+                 rwork.get(),
+                 &(_intData[6]),
+                 iwork.get(),
+                 &(_intData[7]),
+                 pointerToJacobianF,
+                 &(_intData[8]),
+                 pointerToG, &
+                 (_intData[1]),
+                 jroot.get());
 
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
   if (_intData[4] < 0) // if istate < 0 => LSODAR failed
   {
-    cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] << endl;
-    cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" << endl;
-    cout << " -2 means excess accuracy requested (tolerances too small)." << endl;
-    cout << " -3 means illegal input detected (see printed message)." << endl;
-    cout << " -4 means repeated error test failures (check all inputs)." << endl;
-    cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." << endl;
-    cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" << endl;
-    cout << " -7 means work space insufficient to finish (see messages)." << endl;
+    std::cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] <<std::endl;
+    std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" <<std::endl;
+    std::cout << " -2 means excess accuracy requested (tolerances too small)." <<std::endl;
+    std::cout << " -3 means illegal input detected (see printed message)." <<std::endl;
+    std::cout << " -4 means repeated error test failures (check all inputs)." <<std::endl;
+    std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." <<std::endl;
+    std::cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" <<std::endl;
+    std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
     RuntimeException::selfThrow("Lsodar, integration failed");
   }
 
@@ -384,7 +384,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   if (istate == 3)
   {
-    //      std:: cout << "ok\n";
+    //      std:: std::cout << "ok\n";
     assert(true);
   }
 
@@ -485,7 +485,7 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
   {
-    if  (relationType == Lagrangian)
+    if (relationType == Lagrangian)
     {
       Xfree = inter->data(LagrangianR::free);
     }
@@ -494,13 +494,13 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
     //   Xfree = inter->data(NewtonEulerR::free);
     // }
     assert(Xfree);
-    //       std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+    //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   }
   else  if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     Xfree = inter->dataQ1();
-    //       std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+    //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
 
   }
@@ -573,12 +573,12 @@ void Lsodar::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
 void Lsodar::display()
 {
   OneStepIntegrator::display();
-  cout << " --- > Lsodar specific values: " << endl;
-  cout << "Number of equations: " << _intData[0] << endl;
-  cout << "Number of constraints: " << _intData[1] << endl;
-  cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" << endl;
-  cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] << endl;
-  cout << "====================================" << endl;
+  std::cout << " --- > Lsodar specific values: " <<std::endl;
+  std::cout << "Number of equations: " << _intData[0] <<std::endl;
+  std::cout << "Number of constraints: " << _intData[1] <<std::endl;
+  std::cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" <<std::endl;
+  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] <<std::endl;
+  std::cout << "====================================" <<std::endl;
 }
 
 

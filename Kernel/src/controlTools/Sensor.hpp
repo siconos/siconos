@@ -30,13 +30,13 @@
 
 #include "ControlTypeDef.hpp"
 
-/** A map that links a string to a pointer to SiconosVector. */
+/** A map that links a std::string to a pointer to SiconosVector. */
 //typedef std::map<std::string, SP::SiconosVector> VectorMap;
 
-/** An iterator through a map that links a string to a pointer to SiconosVector. */
+/** An iterator through a map that links a std::string to a pointer to SiconosVector. */
 //typedef VectorMap::iterator VectorMapIterator;
 
-/** A const iterator through a map that links a string to a pointer to SiconosVector. */
+/** A const iterator through a map that links a std::string to a pointer to SiconosVector. */
 //typedef VectorMap::const_iterator VectorMapConstIterator;
 
 /** The object used to store data in the Sensor. To each Event corresponds a Data */
@@ -89,7 +89,7 @@
 
    The data are saved in a DataSet object named data, a map which
    associate to each Event another map.  This second map links a
-   string, used to identify the data, and a SiconosVector.  As an
+   std::string, used to identify the data, and a SiconosVector.  As an
    example consider the case where you need to save the state vector x
    of a DynamicalSystem, then you can define a Data object, with
    "myDS_X" as an id and yourDS->x() as the SiconosVector. For
@@ -155,7 +155,7 @@ public:
   };
 
   /** get id of the Sensor
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getId() const
   {

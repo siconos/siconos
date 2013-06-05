@@ -18,7 +18,7 @@
  */
 #include "RelationXML.hpp"
 #include "SimpleMatrix.hpp"
-using namespace std;
+
 using namespace RELATION;
 
 RelationXML::RelationXML(xmlNodePtr relationNode): rootNode(relationNode), hNode(NULL), gNode(NULL), hDotNode(NULL)
@@ -118,7 +118,7 @@ RELATION::SUBTYPES RelationXML::getSubType() const
 
 unsigned int RelationXML::getNumberOfJacobians(unsigned int index) const
 {
-  string input;
+  std::string input;
   if (index == 0)
     input = "jacobianH";
   else
@@ -131,7 +131,7 @@ unsigned int RelationXML::getNumberOfJacobians(unsigned int index) const
     return SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
 }
 
-void RelationXML::setHPlugin(const string&  plugin)
+void RelationXML::setHPlugin(const std::string&  plugin)
 {
   if (!hNode)
   {
@@ -141,14 +141,14 @@ void RelationXML::setHPlugin(const string&  plugin)
   else SiconosDOMTreeTools::setStringAttributeValue(hNode, "plugin", plugin);
 }
 
-string RelationXML::gethPlugin() const
+std::string RelationXML::gethPlugin() const
 {
   if (!isHPlugin())
     XMLException::selfThrow("RelationXML - getComputehPlugin : h is not calculated from a plugin");
   return  SiconosDOMTreeTools::getStringAttributeValue(hNode, "plugin");
 }
 
-void RelationXML::setGPlugin(const string&  plugin)
+void RelationXML::setGPlugin(const std::string&  plugin)
 {
   if (!gNode)
   {
@@ -158,7 +158,7 @@ void RelationXML::setGPlugin(const string&  plugin)
   else SiconosDOMTreeTools::setStringAttributeValue(gNode, "plugin", plugin);
 }
 
-string RelationXML::getgPlugin() const
+std::string RelationXML::getgPlugin() const
 {
   if (!isGPlugin())
     XMLException::selfThrow("RelationXML - getComputegPlugin : g is not calculated from a plugin");
@@ -173,7 +173,7 @@ void RelationXML::setHDotVector(const SiconosVector&v)
     SiconosDOMTreeTools::setSiconosVectorNodeValue(hDotNode, v);
 }
 
-void RelationXML::setHDotPlugin(const string& plugin)
+void RelationXML::setHDotPlugin(const std::string& plugin)
 {
   if (! hDotNode)
   {
@@ -189,7 +189,7 @@ void RelationXML::setJacobianHPlugin(const std::string&, unsigned int)
   XMLException::selfThrow("RelationXML -  setJacobianHPlugin: not yet implemented.");
 }
 
-string RelationXML::getJacobianHPlugin(unsigned int index) const
+std::string RelationXML::getJacobianHPlugin(unsigned int index) const
 {
   if (index >= jacobianHNode.size())
     XMLException::selfThrow("RelationXML - getJacobianHPlugin(index), index out of range");
@@ -214,7 +214,7 @@ void RelationXML::setJacobianGPlugin(const std::string&, unsigned int)
   XMLException::selfThrow("RelationXML -  setJacobianGPlugin: not yet implemented.");
 }
 
-string RelationXML::getJacobianGPlugin(unsigned int index) const
+std::string RelationXML::getJacobianGPlugin(unsigned int index) const
 {
   if (index >= jacobianGNode.size())
     XMLException::selfThrow("RelationXML - getJacobianGPlugin(index), index out of range");

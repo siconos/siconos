@@ -44,7 +44,7 @@ public:
   RuntimeException();
 
   /** constructor with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    */
   RuntimeException(const std::string& report);
 
@@ -53,13 +53,13 @@ public:
   ~RuntimeException();
 
   /** static function which throw a RuntimeException
-   * \exception RuntimeException
+   *
    */
   static void selfThrow() ;
 
   /** static function which throw a RuntimeException with a report
-   * \param string report : exception description
-   * \exception RuntimeException
+   * \param std::string report : exception description
+   *
    */
   static void selfThrow(const std::string& report) ;
 

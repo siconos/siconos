@@ -227,19 +227,34 @@ public:
    * gain access to the data given to the Relay solver in Numerics
    * \return a reference to the Relay problem
    */
-  inline const Relay& relay() { return * _OSNSPB_SMC; };
+  inline const Relay& relay()
+  {
+    return * _OSNSPB_SMC;
+  };
 
-  inline SiconosVector& ueq() { return *_ueq; };
-  inline SiconosVector& us() { return *_us; };
+  inline SiconosVector& ueq()
+  {
+    return *_ueq;
+  };
+  inline SiconosVector& us()
+  {
+    return *_us;
+  };
 
-  inline void setTheta(const double& newTheta) { _thetaSMC = newTheta; };
+  inline void setTheta(const double& newTheta)
+  {
+    _thetaSMC = newTheta;
+  };
 
   void computeUeq();
 
   /** Disable (or enable) the use of the state-continuous control \f$u^{eq}\f$
    * \param b disable the use of Ueq if true
    */
-  inline void noUeq(const bool b) { _noUeq = b; };
+  inline void noUeq(const bool b)
+  {
+    _noUeq = b;
+  };
 };
 DEFINE_SPTR(CommonSMC)
 #endif

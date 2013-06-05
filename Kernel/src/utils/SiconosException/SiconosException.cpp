@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosException.hpp"
-using namespace std;
+
 
 SiconosException::SiconosException(): reportMsg("Siconos Exception")
 {}
 
-SiconosException::SiconosException(const string& report): reportMsg(report)
+SiconosException::SiconosException(const std::string& report): reportMsg(report)
 {}
 
 SiconosException::~SiconosException() {}

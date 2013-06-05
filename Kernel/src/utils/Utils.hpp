@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 /*! \file Utils.hpp
-Include files related to utils directory
-*/
+ *Include files related to utils directory
+ */
 
 
 #include "BlockMatrix.hpp"

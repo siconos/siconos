@@ -9,7 +9,7 @@
 #include "LinearOSNS.hpp"
 #include<fstream>
 #include <string>
-using namespace std;
+
 using namespace RELATION;
 
 const double DEFAULT_TOL_IMPACT = MACHINE_PREC;
@@ -121,7 +121,7 @@ public:
   //Constructor from data (step size is required here)
   //1st parameter: the type of the compliance law
   //3rd parameter: step size estimated
-  OSNSMultipleImpact(string, double);
+  OSNSMultipleImpact(std::string, double);
   //Destructor
   ~OSNSMultipleImpact();
   //To get the type of the compliance law at contact

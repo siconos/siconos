@@ -259,7 +259,7 @@ public:
   inline SP::SimpleMatrix intPhi(const DynamicalSystem& ds)
   {
     assert(_IntegralPhiMap[ds.number()] &&
-        "ZeroOrderHold::intPhi(ds): _IntegralPhiMap[ds.number()] == NULL.");
+           "ZeroOrderHold::intPhi(ds): _IntegralPhiMap[ds.number()] == NULL.");
     return _IntegralPhiMap[ds.number()];
   };
   // --- OTHER FUNCTIONS ---

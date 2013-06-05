@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "XMLException.hpp"
-using namespace std;
+
 
 XMLException::XMLException():
   SiconosException("XML Exception") {}
 
-XMLException::XMLException(const string& report):
+XMLException::XMLException(const std::string& report):
   SiconosException("XML Exception : " + report) {}
 
 XMLException::~XMLException() {}
@@ -32,7 +32,7 @@ void XMLException::selfThrow()
   throw XMLException();
 }
 
-void XMLException::selfThrow(const string& report)
+void XMLException::selfThrow(const std::string& report)
 {
   throw XMLException(report);
 }

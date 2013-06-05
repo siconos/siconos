@@ -25,7 +25,7 @@
 #include "TimeDiscretisation.hpp"
 #include "ControlSensor.hpp"
 
-using namespace std;
+
 using namespace ActuatorFactory;
 
 SampledPIDActuator::SampledPIDActuator(SP::TimeDiscretisation t, SP::DynamicalSystem ds): Actuator(SAMPLED_PID_ACTUATOR, t, ds)

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderNonLinearDSTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -74,10 +74,10 @@ void FirstOrderNonLinearDSTest::tearDown()
 // xml constructor (1), without plugin
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
 {
-  cout << "======================================" << endl;
-  cout << "=== FirstOrderNonLinearDS tests start ...=== " << endl;
-  cout << "======================================" << endl;
-  cout << "--> Test: constructor xml." << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "=== FirstOrderNonLinearDS tests start ...=== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "--> Test: constructor xml." <<std::endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getStepsInMemory() == 2, true);
@@ -87,14 +87,14 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->F()->isPlugged(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianfx()->isPlugged(), false);
 
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 
 // xml constructor (2), with plugins
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
 {
-  cout << "--> Test: constructor xml 2." << endl;
+  std::cout << "--> Test: constructor xml 2." <<std::endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(tmpxml2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
@@ -105,14 +105,14 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianfx() == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
-  cout << "--> Constructor xml 2 test ended with success." << endl;
+  std::cout << "--> Constructor xml 2 test ended with success." <<std::endl;
 }
 
 
 // constructor from data
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*x0, "TestPlugin:computeF", "TestPlugin:computeJacobianfx"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
@@ -124,93 +124,93 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianfx() == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
-  cout << "--> Constructor 3 test ended with success." << endl;
+  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 
 // setX0
 void FirstOrderNonLinearDSTest::testSetX0()
 {
-  cout << "--> Test: setX0." << endl;
+  std::cout << "--> Test: setX0." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setX0(*x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX0 : ", ds1->getX0() == *x0, true);
-  cout << "--> setX0 test ended with success." << endl;
+  std::cout << "--> setX0 test ended with success." <<std::endl;
 }
 
 // setX0Ptr
 void FirstOrderNonLinearDSTest::testSetX0Ptr()
 {
-  cout << "--> Test: setX0Ptr." << endl;
+  std::cout << "--> Test: setX0Ptr." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setX0Ptr(x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX0Ptr : ", ds1->getX0() == *x0, true);
-  cout << "--> setX0Ptr test ended with success." << endl;
+  std::cout << "--> setX0Ptr test ended with success." <<std::endl;
 }
 
 // setX
 void FirstOrderNonLinearDSTest::testSetx()
 {
-  cout << "--> Test: setX." << endl;
+  std::cout << "--> Test: setX." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setX(*x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX : ", ds1->getx() == *x0, true);
-  cout << "--> setX test ended with success." << endl;
+  std::cout << "--> setX test ended with success." <<std::endl;
 }
 
 // setXPtr
 void FirstOrderNonLinearDSTest::testSetXPtr()
 {
-  cout << "--> Test: setXPtr." << endl;
+  std::cout << "--> Test: setXPtr." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setXPtr(x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXPtr : ", ds1->getx() == *x0, true);
-  cout << "--> setXPtr test ended with success." << endl;
+  std::cout << "--> setXPtr test ended with success." <<std::endl;
 }
 
 // setR
 void FirstOrderNonLinearDSTest::testSetR()
 {
-  cout << "--> Test: setR." << endl;
+  std::cout << "--> Test: setR." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setR(*x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetR : ", ds1->getR() == *x0, true);
-  cout << "--> setR test ended with success." << endl;
+  std::cout << "--> setR test ended with success." <<std::endl;
 }
 
 // setRPtr
 void FirstOrderNonLinearDSTest::testSetRPtr()
 {
-  cout << "--> Test: setRPtr." << endl;
+  std::cout << "--> Test: setRPtr." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setRPtr(x0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetRPtr : ", ds1->getR() == *x0, true);
-  cout << "--> setRPtr test ended with success." << endl;
+  std::cout << "--> setRPtr test ended with success." <<std::endl;
 }
 
 // set JacobianX
 void FirstOrderNonLinearDSTest::testSetJacobianfx()
 {
-  cout << "--> Test: setJacobianfx." << endl;
+  std::cout << "--> Test: setJacobianfx." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setJacobianfx(*J0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianX : ", ds1->getJacobianfx() == *J0, true);
-  cout << "--> setJacobianfx test ended with success." << endl;
+  std::cout << "--> setJacobianfx test ended with success." <<std::endl;
 }
 
 // setJacobianXPtr
 void FirstOrderNonLinearDSTest::testSetJacobianfxPtr()
 {
-  cout << "--> Test: setJacobianfxPtr." << endl;
+  std::cout << "--> Test: setJacobianfxPtr." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setJacobianfxPtr(J0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianfxPtr : ", ds1->getJacobianfx() == *J0, true);
-  cout << "--> setJacobianfxPtr test ended with success." << endl;
+  std::cout << "--> setJacobianfxPtr test ended with success." <<std::endl;
 }
 
 // init
 void FirstOrderNonLinearDSTest::testInitMemory()
 {
-  cout << "--> Test: initMemory." << endl;
+  std::cout << "--> Test: initMemory." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->initMemory(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory()->getMemorySize() == 2, true);
@@ -218,14 +218,14 @@ void FirstOrderNonLinearDSTest::testInitMemory()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory()->getNbVectorsInMemory() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory()->getNbVectorsInMemory() == 0, true);
-  cout << "--> initMemory test ended with success." << endl;
+  std::cout << "--> initMemory test ended with success." <<std::endl;
 }
 
 
 // swap
 void FirstOrderNonLinearDSTest::testSwap()
 {
-  cout << "--> Test: swap." << endl;
+  std::cout << "--> Test: swap." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setX(*x0);
   ds1->setR(*x0);
@@ -233,7 +233,7 @@ void FirstOrderNonLinearDSTest::testSwap()
   ds1->swapInMemory();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *((ds1->xMemory()->getVectorMemory())[0]) == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *((ds1->rMemory()->getVectorMemory())[0]) == *x0, true);
-  cout << "--> swap test ended with success." << endl;
+  std::cout << "--> swap test ended with success." <<std::endl;
 }
 
 
@@ -241,7 +241,7 @@ void FirstOrderNonLinearDSTest::testSwap()
 
 void FirstOrderNonLinearDSTest::End()
 {
-  cout << "===============================================" << endl;
-  cout << " ===== End of FirstOrderNonLinearDS tests =====" << endl;
-  cout << "===============================================" << endl;
+  std::cout << "===============================================" <<std::endl;
+  std::cout << " ===== End of FirstOrderNonLinearDS tests =====" <<std::endl;
+  std::cout << "===============================================" <<std::endl;
 }

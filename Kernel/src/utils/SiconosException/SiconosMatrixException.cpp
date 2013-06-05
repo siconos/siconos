@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosMatrixException.hpp"
-using namespace std;
+
 
 SiconosMatrixException::SiconosMatrixException() :
   SiconosException("Siconos Matrix Exception") {}
 
-SiconosMatrixException::SiconosMatrixException(const string& report) :
+SiconosMatrixException::SiconosMatrixException(const std::string& report) :
   SiconosException("Siconos Matrix Exception : " + report) {}
 
 SiconosMatrixException::~SiconosMatrixException() {}
@@ -32,7 +32,7 @@ void SiconosMatrixException::selfThrow()
   throw SiconosMatrixException();
 }
 
-void SiconosMatrixException::selfThrow(const string& report)
+void SiconosMatrixException::selfThrow(const std::string& report)
 {
   throw SiconosMatrixException(report);
 }

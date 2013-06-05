@@ -96,7 +96,7 @@ protected:
   SP::SiconosVector _e;
   /*Used for the projection formulation*/
 
-  /**vector of contact forces, ie: _contactForce = B \lambda. Useful for the end user.*/
+  /**vector of contact forces, ie: _contactForce = B lambda. Useful for the end user.*/
   SP::SiconosVector _contactForce;
 
   /**updated in computeJachqT:
@@ -111,7 +111,7 @@ protected:
 
   /** constructor from xml file
   *  \param relationXML
-  *  \param string: relation subType
+  *  \param std::string: relation subType
   */
   NewtonEulerR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::NewtonEuler, newSubType) {}
 
@@ -186,10 +186,10 @@ public:
   {
     _jachq = newPtr ;
   }
-    /** Plugin object for the time--derivative of Jacobian i.e.
-   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
-   * stored in _dotjachq
-   */
+  /** Plugin object for the time--derivative of Jacobian i.e.
+  * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+  * stored in _dotjachq
+  */
   SP::PluggedObject _plugindotjacqh;
 
   /**  the additional  terms of the second order time derivative of y

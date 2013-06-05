@@ -24,7 +24,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -233,11 +233,11 @@ SP::DynamicalSystem NonSmoothDynamicalSystem::dynamicalSystemNumber(int nb) cons
 
 void NonSmoothDynamicalSystem::display() const
 {
-  cout << " ===== Non Smooth Dynamical System display ===== " << endl;
-  cout << "---> isBVP = " << _BVP << endl;
+  std::cout << " ===== Non Smooth Dynamical System display ===== " <<std::endl;
+  std::cout << "---> isBVP = " << _BVP <<std::endl;
   dynamicalSystems()->begin();
   _topology->interactions()->display();
-  cout << "===================================================" << endl;
+  std::cout << "===================================================" <<std::endl;
 }
 
 #include <limits>
@@ -261,7 +261,7 @@ void NonSmoothDynamicalSystem::clear()
 }
 
 void NonSmoothDynamicalSystem::setControlProperty(
-  const InteractionsGraph::VDescriptor& vd, 
+  const InteractionsGraph::VDescriptor& vd,
   const DynamicalSystemsGraph::EDescriptor& ed,
   const bool isControlInteraction)
 {
@@ -272,9 +272,9 @@ void NonSmoothDynamicalSystem::setControlProperty(
 }
 void NonSmoothDynamicalSystem::insertInteraction(SP::Interaction inter, const int isControlInteraction)
 {
-  std::pair<DynamicalSystemsGraph::EDescriptor, 
-            InteractionsGraph::VDescriptor> descrs = 
-    _topology->insertInteraction(inter);
+  std::pair<DynamicalSystemsGraph::EDescriptor,
+      InteractionsGraph::VDescriptor> descrs =
+        _topology->insertInteraction(inter);
   if (isControlInteraction == 1)
     setControlProperty(descrs.second, descrs.first, true);
 }

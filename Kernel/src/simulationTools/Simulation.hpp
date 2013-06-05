@@ -231,7 +231,7 @@ public:
   virtual std::string typeName() = 0;
 
   /** get the name of the Simulation
-   *  \return string : the name of the Simulation
+   *  \return std::string : the name of the Simulation
    */
   inline const std::string name() const
   {
@@ -422,7 +422,7 @@ public:
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
-   *  \param a string, the name of the osns
+   *  \param a std::string, the name of the osns
    *  \return a pointer to OneStepNSProblem
    */
   SP::OneStepNSProblem oneStepNSProblem(int);
@@ -444,7 +444,7 @@ public:
   //bool hasOneStepNSProblem(SP::OneStepNSProblem) const ;
 
   /** check if a OneStepNSProblem named id is already in the map
-   *  \param a string ("id")
+   *  \param a std::string ("id")
    *  \return a bool
    */
   //bool hasOneStepNSProblem(const std::string&) const ;
@@ -552,7 +552,7 @@ public:
   void saveInMemory();
 
   /** computes a one step NS problem
-   *  \param a string, the id of the OneStepNSProblem to be computed
+   *  \param a std::string, the id of the OneStepNSProblem to be computed
    *  \return an int, information about the solver convergence.
    */
   int computeOneStepNSProblem(int);
@@ -638,7 +638,7 @@ public:
   // --- XML RELATED FUNCTIONS ---
 
   /** copys the data of the Simulation to the XML tree
-   *  \exception RuntimeException
+   *
    */
   virtual void saveSimulationToXML();
 
@@ -681,7 +681,10 @@ public:
    * \warning this should be called only from the Model, to synchronise the 2 values
    * \param T the new final time
    */
-  inline void updateT(const double& T) { _T = T; };
+  inline void updateT(const double& T)
+  {
+    _T = T;
+  };
 
   /** visitors hook
    */

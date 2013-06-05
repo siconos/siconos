@@ -251,29 +251,29 @@ lu_substitute(A, piv, x);
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
- /* Matrix inversion routine.
+/* Matrix inversion routine.
 Uses lu_factorize and lu_substitute in uBLAS to invert a matrix */
 template<class T, class U, class V>
 bool InvertMatrix(const ublas::matrix<T, U, V>& input, ublas::matrix<T, U, V>& inverse)
 {
- using namespace boost::numeric::ublas;
- typedef permutation_matrix<std::size_t> pmatrix;
- // create a working copy of the input
- matrix<T, U, V> A(input);
- // create a permutation matrix for the LU-factorization
- pmatrix pm(A.size1());
+  using namespace boost::numeric::ublas;
+  typedef permutation_matrix<std::size_t> pmatrix;
+// create a working copy of the input
+  matrix<T, U, V> A(input);
+// create a permutation matrix for the LU-factorization
+  pmatrix pm(A.size1());
 
- // perform LU-factorization
- int res = lu_factorize(A,pm);
-       if( res != 0 ) return false;
+// perform LU-factorization
+  int res = lu_factorize(A,pm);
+  if (res != 0) return false;
 
- // create identity matrix of "inverse"
- inverse.assign(ublas::identity_matrix<T>(A.size1()));
+// create identity matrix of "inverse"
+  inverse.assign(ublas::identity_matrix<T>(A.size1()));
 
- // backsubstitute to get the inverse
- lu_substitute(A, pm, inverse);
+// backsubstitute to get the inverse
+  lu_substitute(A, pm, inverse);
 
- return true;
+  return true;
 }
 
 #endif //INVERT_MATRIX_HPP

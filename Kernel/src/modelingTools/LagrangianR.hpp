@@ -121,7 +121,7 @@ protected:
 
   /** constructor from xml file
   *  \param relationXML
-  *  \param string: relation subType
+  *  \param std::string: relation subType
   */
   LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::Lagrangian, newSubType) {}
 
@@ -135,7 +135,7 @@ public:
   /** destructor
   */
   virtual ~LagrangianR() {};
-  
+
   // -- Jach --
 
   /** get matrix Jach[index]
@@ -185,7 +185,7 @@ public:
   }
 
   /** To get the name of Jach[i] plugin
-  *  \return a string
+  *  \return a std::string
   const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
   */
 
@@ -226,10 +226,10 @@ public:
   * \param z the BlockVector of parameters
   */
   void computeh(const double time, Interaction& inter,
-                        SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
+                SP::BlockVector q, SP::BlockVector v, SP::BlockVector z);
 
   // void computeh(const double time, Interaction& inter,
-  //               SP::BlockVector q, SP::BlockVector v, 
+  //               SP::BlockVector q, SP::BlockVector v,
   //               SP::BLockVector lambda, SP::BlockVector z
   //               SP::SiconosVector y);
   /** default function to compute jacobianH

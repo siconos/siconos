@@ -26,7 +26,7 @@
 #include "LagrangianLinearTIDSXML.hpp"
 #include "FirstOrderLinearDSXML.hpp"
 
-using namespace std;
+
 
 
 NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(): rootNode(NULL)
@@ -57,7 +57,7 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNod
         }
       }
     }
-    else cout << "NonSmoothDynamicalSystemXML -Constructor: the Non Smooth Dynamical System is not defined -> the LMGC90 tag is used." << endl;
+    else std::cout << "NonSmoothDynamicalSystemXML -Constructor: the Non Smooth Dynamical System is not defined -> the LMGC90 tag is used." <<std::endl;
   }
 }
 
@@ -74,7 +74,7 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 {
   xmlNodePtr node;
 
-  string type; //Type of DS
+  std::string type; //Type of DS
   bool isbvp = isBVP();
 
   // rootDSNode = "DS_Definition". We look for its children node (DynamicalSystem and derived classes) and for
@@ -107,8 +107,8 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystem nsds)
 {
   XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML not implemented.");
-  //   string type;
-  //   string tmp;
+  //   std::string type;
+  //   std::string tmp;
   //   xmlNodePtr  node, ecDsioNode;
   //   xmlNodePtr  dsDefinitionNode;
   //   xmlNodePtr  interactionDefinitionNode, ecDefinitionNode;
@@ -221,7 +221,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        }
   //    }
   //        else
-  //    cout<<"## /!\\ the DynamicalSystem : "<<nsds->dynamicalSystem(i)->getType()<<" number "<<nsds->dynamicalSystem(i)->getNumber()<<
+  //    std::cout<<"## /!\\ the DynamicalSystem : "<<nsds->dynamicalSystem(i)->getType()<<" number "<<nsds->dynamicalSystem(i)->getNumber()<<
   //      ", has already an XML object."<<endl;
   //      }
   //  }

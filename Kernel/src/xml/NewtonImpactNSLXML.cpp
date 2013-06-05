@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NewtonImpactNSLXML.hpp"
-using namespace std;
+
 
 NewtonImpactNSLXML::NewtonImpactNSLXML()
 {

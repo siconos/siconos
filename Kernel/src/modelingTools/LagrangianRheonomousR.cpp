@@ -28,7 +28,7 @@
 #define DEBUG_MESSAGES
 #include "debug.h"
 
-using namespace std;
+
 using namespace RELATION;
 
 // xml constructor
@@ -60,7 +60,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
 }
 
 // constructor from a set of data
-LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const string& computehDot, const string& strcomputeJachq):
+LagrangianRheonomousR::LagrangianRheonomousR(const std::string& computeh, const std::string& computehDot, const std::string& strcomputeJachq):
   LagrangianR(RheonomousR)
 {
   zeroPlugin();
@@ -90,11 +90,11 @@ void LagrangianRheonomousR::initComponents(Interaction& inter)
     _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
   }
 }
-// void LagrangianRheonomousR::setComputehFunction(const string& pluginPath, const string& functionName){
+// void LagrangianRheonomousR::setComputehFunction(const std::string& pluginPath, const std::string& functionName){
 //   Plugin::setFunction(&hPtr, pluginPath, functionName);
 // }
 
-void LagrangianRheonomousR::setComputehDotFunction(const string& pluginPath, const string& functionName)
+void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginhDot->setComputeFunction(pluginPath, functionName);
 }
@@ -125,7 +125,7 @@ void LagrangianRheonomousR::computeh(const double time, Interaction& inter)
 }
 
 void LagrangianRheonomousR::computeh(const double time,Interaction& inter,
-                                     SP::BlockVector q, SP::BlockVector z )
+                                     SP::BlockVector q, SP::BlockVector z)
 {
   DEBUG_PRINT(" LagrangianRheonomousR::computeh(const double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
   if (_pluginh)
@@ -155,7 +155,7 @@ void LagrangianRheonomousR::computehDot(const double time, Interaction& inter)
 }
 
 
- void LagrangianRheonomousR::computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
+void LagrangianRheonomousR::computehDot(const double time, Interaction& inter, SP::BlockVector q, SP::BlockVector z)
 {
   if (_pluginhDot->fPtr)
   {

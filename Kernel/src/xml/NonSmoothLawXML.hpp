@@ -68,7 +68,7 @@ public:
   virtual ~NonSmoothLawXML();
 
   /** get the type of non smooth law
-  *   \return a string
+  *   \return a std::string
   */
   inline const std::string getType() const
   {

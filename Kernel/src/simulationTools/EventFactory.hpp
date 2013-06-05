@@ -61,7 +61,7 @@ class Registry
 
 private :
 
-  /** map that links a string, the type of the class, to a pointer to function, used to build the object. */
+  /** map that links a std::string, the type of the class, to a pointer to function, used to build the object. */
   MapFactory factory_map;
 
 public :

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "QPXML.hpp"
-using namespace std;
+
 
 QPXML::QPXML() : OneStepNSProblemXML(), QNode(NULL), pNode(NULL)
 {}

@@ -136,22 +136,34 @@ public:
   /** get the current event
    *  \return a pointer to Event
    */
-  inline SP::Event currentEvent() const { return _events[0]; };
+  inline SP::Event currentEvent() const
+  {
+    return _events[0];
+  };
 
   /** get the next event to be processed.
    *  \return a pointer to Event
    */
-  inline SP::Event nextEvent() const { return _events[1]; };
+  inline SP::Event nextEvent() const
+  {
+    return _events[1];
+  };
 
-  /** return all the events 
+  /** return all the events
    * \return a reference to the events set
    */
-  inline EventsContainer& events() { return _events; };
+  inline EventsContainer& events()
+  {
+    return _events;
+  };
 
   /** check if there are some unprocessed events
    *  \return true if there are unprocessed events
    */
-  inline bool hasNextEvent() const { return _events.size() > 1; };
+  inline bool hasNextEvent() const
+  {
+    return _events.size() > 1;
+  };
 
   /** get the time of current event, in double format
    *  \return the time of the last processed events

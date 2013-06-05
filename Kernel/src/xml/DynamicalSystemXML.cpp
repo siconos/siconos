@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "DynamicalSystemXML.hpp"
-using namespace std;
+
 
 DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
   rootNode(DSNode), stepsInMemoryNode(NULL), zNode(NULL)

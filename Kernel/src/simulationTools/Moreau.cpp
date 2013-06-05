@@ -39,7 +39,7 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-using namespace std;
+
 using namespace RELATION;
 // --- xml constructor ---
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
@@ -62,7 +62,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   if (!moreauXml->hasThetaList())
     RuntimeException::selfThrow("Moreau::xml constructor - theta list is missing in xml input file.");
 
-  vector<double> thetaXml;     // list of theta values
+  std::vector<double> thetaXml;     // list of theta values
   // thetaXml[i] will correspond to the ds number i in the xml list. If "all" attribute is true in ds,
   // then theta values are sorted so to correspond to growing ds numbers order.
 
@@ -91,11 +91,11 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   else
   {
     // get list of ds numbers implicated in the OSI
-    vector<int> dsNumbers;
+    std::vector<int> dsNumbers;
     osiXML->getDSNumbers(dsNumbers);
     //unsigned int i= 0;
     // get corresponding ds and insert them into the set.
-    vector<int>::iterator it;
+    std::vector<int>::iterator it;
     SP::DynamicalSystem ds;
     for_each(dsList->begin(), dsList->end(), std11::bind(&DynamicalSystem::number, _1));
     for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
@@ -475,7 +475,7 @@ void Moreau::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
     int columnindex = 0;
 
-    vector<unsigned int>::iterator itindex;
+    std::vector<unsigned int>::iterator itindex;
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
@@ -661,9 +661,9 @@ double Moreau::computeResidu()
 
       *residuFree = *x;
       *residuFree -= *xold;
-      //       cout<<"Moreau: x"<<endl;
+      //       std::cout<<"Moreau: x"<<endl;
       //       (x)->display();
-      //       cout<<"Moreau: xold"<<endl;
+      //       std::cout<<"Moreau: xold"<<endl;
       //       (xold)->display();
 
 
@@ -688,29 +688,29 @@ double Moreau::computeResidu()
           // residuFree += coef * f_i
           scal(coef, *d->fold(), *residuFree, false);
         }
-        //          cout<<"Moreau: fold"<<endl;
+        //          std::cout<<"Moreau: fold"<<endl;
         //          (*d->fold()).display();
         // computes f(ti+1, x_k,i+1) = f(t,x)
         d->computef(t);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
-        //          cout<<"Moreau: f"<<endl;
+        //          std::cout<<"Moreau: f"<<endl;
         //          (*d->f()).display();
         scal(coef, *d->f(), *residuFree, false);
       }
-      //      cout<<"Moreau: residu free"<<endl;
+      //      std::cout<<"Moreau: residu free"<<endl;
       //      (*residuFree).display();
       (*(d->workspace(DynamicalSystem::free))) = *residuFree;
       scal(-h, *d->r(), (*d->workspace(DynamicalSystem::free)), false); // residu = residu - h*r
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
-      //    cout<<"Moreau: residu "<<endl;
+      //    std::cout<<"Moreau: residu "<<endl;
       //    (workX[d])->display();
-      //    cout<<"Moreau: norm residu :"<<normResidu<<endl;
+      //    std::cout<<"Moreau: norm residu :"<<normResidu<<endl;
 
 
       //(*d->residur())=(*d->r()) -(*d->gAlpha());
 
-      //      cout<<"Moreau Type::FirstOrderNonLinearDS: residu r"<<endl;
+      //      std::cout<<"Moreau Type::FirstOrderNonLinearDS: residu r"<<endl;
       //      (*d->residur()).display();
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
@@ -730,7 +730,7 @@ double Moreau::computeResidu()
       // x value at told
       SP::SiconosVector xBuffer = d->workspace(DynamicalSystem::local_buffer);
       *xBuffer = *(d->xMemory()->getSiconosVector(0));
-      //    cout<<"Moreau TIDS::computeResidu: x_k"<<endl;
+      //    std::cout<<"Moreau TIDS::computeResidu: x_k"<<endl;
       //    xBuffer->display();
 
       SP::SiconosMatrix A = d->A();
@@ -768,7 +768,7 @@ double Moreau::computeResidu()
       DEBUG_EXPR(M->display());
 
 
-      //   std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
+      //    std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
 
       prod(*M, (*v - *vold), *residuFree); // residuFree = M(v - vold)
 
@@ -802,7 +802,7 @@ double Moreau::computeResidu()
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
-        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+        for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
@@ -822,14 +822,14 @@ double Moreau::computeResidu()
       }
 
       *(d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
-      //      std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
+      //       std::cout << "Moreau::ComputeResidu LagrangianDS residufree :"  << std::endl;
       //      residuFree->display();
 
       DEBUG_EXPR(d->workspace(DynamicalSystem::free)->display());
 
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
-      //      std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
+      //       std::cout << "Moreau::ComputeResidu LagrangianDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
       normResidu = d->workspace(DynamicalSystem::free)->norm2();
     }
@@ -941,7 +941,7 @@ double Moreau::computeResidu()
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
-        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+        for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
@@ -961,21 +961,21 @@ double Moreau::computeResidu()
       }
 
 
-      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
+      //        std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
       //       residuFree->display();
 
-      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
+      //        std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresiduFree :"  << std::endl;
       //       realresiduFree->display();
 
       (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
       if (d->p(1))
         *(d->workspace(DynamicalSystem::free)) -= *d->p(1); // Compute Residu in Workfree Notation !!
 
-      //     std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
+      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
       //      d->workspace(DynamicalSystem::free)->display();
 
       //      *realresiduFree-= *d->p(1);
-      //      std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
+      //       std::cout << "Moreau::ComputeResidu LagrangianLinearTIDS realresidu :"  << std::endl;
       //      realresiduFree->display();
 
 
@@ -1105,40 +1105,40 @@ void Moreau::computeFreeState()
       // -> compute real xfree
       *xfree *= -1.0;
       *xfree += *x;
-      //    cout<<" moreau::computefreestate xfree"<<endl;
+      //    std::cout<<" moreau::computefreestate xfree"<<endl;
       //    xfree->display();
 
       //       if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear())
       //       {
       SP::SiconosVector xp = d->xp();
-      //      cout<<"before moreau::computefreestate xp"<<endl;
+      //      std::cout<<"before moreau::computefreestate xp"<<endl;
       //      xp->display();
       W->PLUForwardBackwardInPlace(*xp);
       scal(h, *xp, *xp);
       *xp += *xfree;
-      //      cout<<"after moreau::computefreestate xp"<<endl;
+      //      std::cout<<"after moreau::computefreestate xp"<<endl;
       //      xp->display();
       SP::SiconosVector xq = d->xq();
       *xq = *xp;
       *xq -= *x;
 
-      //         std::cout <<boolalpha << _useGamma << std::endl;
-      //         std::cout <<boolalpha << _useGammaForRelation << std::endl;
-      //         std::cout <<_gamma << std::endl;
+      //          std::cout <<boolalpha << _useGamma << std::endl;
+      //          std::cout <<boolalpha << _useGammaForRelation << std::endl;
+      //          std::cout <<_gamma << std::endl;
 
       if (_useGammaForRelation)
       {
         *xq = *xfree;
-        //           std::cout << "xq before" << std::endl;
+        //            std::cout << "xq before" << std::endl;
         //           xq->display();
 
         scal(_gamma, *xq, *xq);
         SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-        //           std::cout << "xold" << std::endl;
+        //            std::cout << "xold" << std::endl;
         //           xold->display();
 
         scal(1.0 - _gamma, *xold, *xq, false);
-        //          std::cout << "xq after" << std::endl;
+        //           std::cout << "xq after" << std::endl;
         //           xq->display();
 
       }
@@ -1262,10 +1262,10 @@ void Moreau::computeFreeState()
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
-      //    cout<<"Moreau::computeFreeState residu free"<<endl;
+      //    std::cout<<"Moreau::computeFreeState residu free"<<endl;
       //    vfree->display();
       d->luW()->PLUForwardBackwardInPlace(*vfree);
-      //    cout<<"Moreau::computeFreeState -WRfree"<<endl;
+      //    std::cout<<"Moreau::computeFreeState -WRfree"<<endl;
       //    vfree->display();
       //    scal(h,*vfree,*vfree);
       // -> compute real vfree
@@ -1378,11 +1378,11 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
   {
     Xfree = inter->data(FirstOrderR::free);
   }
-  else if  (relationType == NewtonEuler)
+  else if (relationType == NewtonEuler)
   {
     Xfree = inter->data(NewtonEulerR::free);
   }
-  else if  (relationType == Lagrangian)
+  else if (relationType == Lagrangian)
   {
     Xfree = inter->data(LagrangianR::free);
   }
@@ -1534,7 +1534,7 @@ void Moreau::computeFreeOutput(SP::Interaction inter, OneStepNSProblem * osnsp)
       // For the relation of type LagrangianScleronomousR
       if (relationSubType == ScleronomousR)
       {
-        
+
       }
     }
     if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
@@ -1680,8 +1680,8 @@ void Moreau::updateState(const unsigned int level)
         if (baux)
           ds->addWorkVector(x, DynamicalSystem::local_buffer);
 
-        //       std::cout <<boolalpha << _useGamma << std::endl;
-        //       std::cout <<_gamma << std::endl;
+        //        std::cout <<boolalpha << _useGamma << std::endl;
+        //        std::cout <<_gamma << std::endl;
         if (_useGamma)
         {
           //SP::SiconosVector rold =d->rMemory()->getSiconosVector(0);
@@ -1722,7 +1722,7 @@ void Moreau::updateState(const unsigned int level)
       //    W->PLUForwardBackwardInPlace(*x); // x = W^{-1} *r
       //    scal(h,*x,*x); // x = h*W^{-1}*r
       //    *x +=*(fonlds->xfree());//*workX[ds]; // x+=xfree
-      //    //    cout<<"X alpha+1"<<endl;
+      //    //    std::cout<<"X alpha+1"<<endl;
       //    //    x->display();
     }
     // 3 - Lagrangian Systems
@@ -1743,7 +1743,7 @@ void Moreau::updateState(const unsigned int level)
                " Moreau::updateState() *d->p(level) == NULL.");
         *v = *d->p(level); // v = p
         if (d->boundaryConditions())
-          for (vector<unsigned int>::iterator
+          for (std::vector<unsigned int>::iterator
                itindex = d->boundaryConditions()->velocityIndices()->begin() ;
                itindex != d->boundaryConditions()->velocityIndices()->end();
                ++itindex)
@@ -1763,7 +1763,7 @@ void Moreau::updateState(const unsigned int level)
 
       if (d->boundaryConditions())
       {
-        for (vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
+        for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
@@ -1819,9 +1819,9 @@ void Moreau::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->velocity();
-      DEBUG_PRINT( "Moreau::updateState()\n ")
+      DEBUG_PRINT("Moreau::updateState()\n ")
       DEBUG_EXPR(d->display());
-      DEBUG_PRINT( "Moreau::updateState() prev v\n")
+      DEBUG_PRINT("Moreau::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 
       // failure on bullet sims
@@ -1908,12 +1908,12 @@ bool Moreau::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
   DEBUG_EXPR(
-  if (y <= 0)
+    if (y <= 0)
     DEBUG_PRINT("Moreau::addInteractionInIndexSet ACTIVATE.\n");
-    );
+  );
   return (y <= 0.0);
 }
 
@@ -1934,13 +1934,13 @@ bool Moreau::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 #if __cplusplus >= 201103L
   assert(!::isnan(y));
 #else
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #endif
 
   DEBUG_EXPR(
     if (y > 0)
     DEBUG_PRINT("Moreau::removeInteractionInIndexSet DEACTIVATE.\n");
-    );
+  );
   return (y > 0.0);
 }
 
@@ -1950,17 +1950,17 @@ void Moreau::display()
 {
   OneStepIntegrator::display();
 
-  cout << "====== Moreau OSI display ======" << endl;
+  std::cout << "====== Moreau OSI display ======" <<std::endl;
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
-    cout << "--------------------------------" << endl;
-    cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
+    std::cout << "--------------------------------" <<std::endl;
+    std::cout << "--> W of dynamical system number " << (*it)->number() << ": " <<std::endl;
     if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
-    else cout << "-> NULL" << endl;
-    cout << "--> and corresponding theta is: " << _theta << endl;
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
-  cout << "================================" << endl;
+  std::cout << "================================" <<std::endl;
 }
 
 void Moreau::saveWToXML()

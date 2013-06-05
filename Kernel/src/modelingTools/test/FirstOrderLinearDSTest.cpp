@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "FirstOrderLinearDSTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -76,10 +76,10 @@ void FirstOrderLinearDSTest::tearDown()
 // xml constructor (1), without plugin
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
 {
-  cout << "======================================" << endl;
-  cout << "=== FirstOrderLinearDS tests start ...=== " << endl;
-  cout << "======================================" << endl;
-  cout << "--> Test: constructor xml." << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "=== FirstOrderLinearDS tests start ...=== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "--> Test: constructor xml." <<std::endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->number() == 13, true);
@@ -90,13 +90,13 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1G : ", *(ds->A()) == *A0, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1H : ", ds->A()->isPlugged(),false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1I : ", ds->b()->isPlugged(),false);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 // xml constructor (2), with plugins
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 {
-  cout << "--> Test: constructor xml 2." << endl;
+  std::cout << "--> Test: constructor xml 2." <<std::endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2B : ", ds->number() == 2, true);
@@ -127,14 +127,14 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", (*(ds->rhs())) == prod(*(ds->A()), 2 * *x0) + * (ds->b()) , true);
 
-  cout << "--> Constructor xml 2 test ended with success." << endl;
+  std::cout << "--> Constructor xml 2 test ended with success." <<std::endl;
 }
 
 
 // constructor from data
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
@@ -159,55 +159,55 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   ds->computeRhs(time);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", *(ds->rhs()) == (2 * prod(*A0 , *x0) + * (ds->b())), true);
-  cout << "--> Constructor 3 test ended with success." << endl;
+  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 
 // setA
 // void FirstOrderLinearDSTest::testSetA()
 // {
-//   cout << "--> Test: setA." << endl;
+//   std::cout << "--> Test: setA." <<std::endl;
 //   SP::FirstOrderLinearDS ds1(new FirstOrderLinearDS(tmpxml2));
 //   ds1->setA(*A0p);
 //   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAa : ", ds1->getA()==*A0, true);
-//   cout << "--> setA test ended with success." << endl;
+//   std::cout << "--> setA test ended with success." <<std::endl;
 // }
 
 // setAPtr
 void FirstOrderLinearDSTest::testSetAPtr()
 {
-  cout << "--> Test: setAPtr." << endl;
+  std::cout << "--> Test: setAPtr." <<std::endl;
   SP::FirstOrderLinearDS ds1(new FirstOrderLinearDS(tmpxml2));
   ds1->setAPtr(A0p);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->A() == A0p, true);
-  cout << "--> setAPtr test ended with success." << endl;
+  std::cout << "--> setAPtr test ended with success." <<std::endl;
 }
 
 
 // setB
 // void FirstOrderLinearDSTest::testSetB()
 // {
-//   cout << "--> Test: setB." << endl;
+//   std::cout << "--> Test: setB." <<std::endl;
 //   SP::FirstOrderLinearDS ds1(new FirstOrderLinearDS(tmpxml2));
 //   ds1->setB(*b0);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetB : ", ds1->getB()==*b0, true);
-//   cout << "--> setB test ended with success." << endl;
+//   std::cout << "--> setB test ended with success." <<std::endl;
 // }
 
 // setBPtr
 void FirstOrderLinearDSTest::testSetBPtr()
 {
-  cout << "--> Test: setBPtr." << endl;
+  std::cout << "--> Test: setBPtr." <<std::endl;
   FirstOrderLinearDS* ds1(new FirstOrderLinearDS(tmpxml2));
   ds1->setb(b0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", ds1->b() == b0, true);
-  cout << "--> setBPtr test ended with success." << endl;
+  std::cout << "--> setBPtr test ended with success." <<std::endl;
 }
 
 // plugins: plugins loading is already in testBuildFirstOrderLinearDS2
 
 void FirstOrderLinearDSTest::End()
 {
-  cout << "============================================" << endl;
-  cout << " ===== End of FirstOrderLinearDS tests =====" << endl;
-  cout << "============================================" << endl;
+  std::cout << "============================================" <<std::endl;
+  std::cout << " ===== End of FirstOrderLinearDS tests =====" <<std::endl;
+  std::cout << "============================================" <<std::endl;
 }

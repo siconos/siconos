@@ -53,8 +53,8 @@ protected:
 public :
 
   /** constructor
-   *  \param string: input/output file name
-   *  \param string: ascii or binary
+   *  \param std::string: input/output file name
+   *  \param std::string: ascii or binary
    */
   ioObject(const std::string& file, const std::string& m): FileName(file), Mode(m) {}
 
@@ -75,7 +75,7 @@ public :
 
   /** write the matrix A in the file "Filename"
    *  \param a SiconosMatrix
-   *  \param a string: type of output - See on top of file for details
+   *  \param a std::string: type of output - See on top of file for details
    *  \exception SiconosMatrixException
    *  \return true if no error
    */

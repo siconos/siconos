@@ -19,14 +19,14 @@
 #include "SiconosSharedLibrary.hpp"
 #include "SiconosSharedLibraryException.hpp"
 
-using namespace std;
+
 
 namespace SiconosSharedLibrary
 {
 
 std::vector<PluginHandle> isPlugged;
 
-PluginHandle loadPlugin(const string& pluginPath)
+PluginHandle loadPlugin(const std::string& pluginPath)
 {
   PluginHandle HandleRes;
 #ifdef _WIN32
@@ -34,7 +34,7 @@ PluginHandle loadPlugin(const string& pluginPath)
   if (!HandleRes)
   {
     DWORD err = GetLastError();
-    cout << "Error returned : " << err << endl;
+    std::cout << "Error returned : " << err <<std::endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
   }
 #endif
@@ -42,7 +42,7 @@ PluginHandle loadPlugin(const string& pluginPath)
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
   if (!HandleRes)
   {
-    cout << "dlerror() :" << dlerror() << endl;
+    std::cout << "dlerror() :" << dlerror() <<std::endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
   }
 #endif
@@ -50,7 +50,7 @@ PluginHandle loadPlugin(const string& pluginPath)
   return HandleRes;
 }
 
-void * getProcAddress(PluginHandle plugin, const string& procedure)
+void * getProcAddress(PluginHandle plugin, const std::string& procedure)
 {
 #ifdef _WIN32
   return (void*) GetProcAddress(plugin, procedure.c_str());
@@ -75,7 +75,7 @@ void closePlugin(PluginHandle plugin)
 
 void closeAllPlugins()
 {
-  vector<PluginHandle>::iterator iter;
+  std::vector<PluginHandle>::iterator iter;
   for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
   {
 #ifdef _WIN32

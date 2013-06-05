@@ -69,7 +69,6 @@ public:
   inline void display()const {};
 
   /** copy the data of the NonSmoothLaw to the XML tree
-  *  \exception RuntimeException
   */
   inline void saveNonSmoothLawToXML() {};
 

@@ -18,7 +18,7 @@
 */
 
 #include "RelayNSLXML.hpp"
-using namespace std;
+
 
 RelayNSLXML::RelayNSLXML(): CNode(NULL), DNode(NULL)
 {}

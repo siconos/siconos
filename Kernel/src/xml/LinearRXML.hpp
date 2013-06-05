@@ -78,9 +78,9 @@ private:
 public:
 
   /** Build a LinearRXML object from a DOM tree describing a Relation with LTI type
-   *   \param xml pointer to relation data.
+   *   \param LRelationNode  pointer to relation data.
    */
-  LinearRXML(xmlNodePtr);
+  LinearRXML(xmlNode * LRelationNode);
 
   /** Destructor*/
   ~LinearRXML();
@@ -213,7 +213,7 @@ public:
   void setB(const SiconosMatrix&);
 
   /** return the name of the plug-in used for C
-   * \return a string
+   * \return a std::string
    */
   inline const std::string getCPlugin() const
   {
@@ -223,7 +223,7 @@ public:
   }
 
   /** return the name of the plug-in used for D
-   * \return a string
+   * \return a std::string
    */
   inline const std::string getDPlugin() const
   {
@@ -233,7 +233,7 @@ public:
   }
 
   /** return the name of the plug-in used for F
-   * \return a string
+   * \return a std::string
    */
   inline const std::string getFPlugin() const
   {
@@ -243,7 +243,7 @@ public:
   }
 
   /** return the name of the plug-in used for e
-   *   \return a string
+   *   \return a std::string
    */
   inline const std::string getEPlugin() const
   {
@@ -253,7 +253,7 @@ public:
   }
 
   /** return the name of the plug-in used for B
-   * \return a string
+   * \return a std::string
    */
   inline const std::string getBPlugin() const
   {
@@ -263,27 +263,27 @@ public:
   }
 
   /** to save the plug-in for C.
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setCPlugin(const std::string&);
 
   /** to save the plug-in for D.
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setDPlugin(const std::string&);
 
   /** to save the plug-in for F.
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setFPlugin(const std::string&);
 
   /** to save the plug-in for e.
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setEPlugin(const std::string&);
 
   /** to save the plug-in for B.
-   *   \param a string (name of the plug-in)
+   *   \param a std::string (name of the plug-in)
    */
   void setBPlugin(const std::string&);
 

@@ -26,7 +26,7 @@
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
 
-using namespace std;
+
 
 ControlDynamicalSystem::ControlDynamicalSystem(double t0, double T, double h):
   _t0(t0), _T(T), _h(h), _theta(0.5)

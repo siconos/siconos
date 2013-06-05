@@ -21,7 +21,7 @@
 //#include "Plugin.hpp"
 #include "PluginTypes.hpp"
 
-using namespace std;
+
 
 // ===== CONSTRUCTORS =====
 
@@ -114,7 +114,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 
   _r.reset(new SiconosVector(_n));
 
-  string plugin;
+  std::string plugin;
 
   // f and jacobianfx are required for DynamicalSystem but not for derived class.
   // Then we can not set exception if they are not given.
@@ -172,7 +172,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 }
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const string& fPlugin, const string& jacobianfxPlugin):
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin):
   DynamicalSystem(newX0.size())
 {
   zeroPlugin();
@@ -264,7 +264,7 @@ bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
   DynamicalSystem::checkDynamicalSystem();
   bool output = DynamicalSystem::checkDynamicalSystem();
-  if (!output) cout << "FirstOrderNonLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  if (!output) std::cout << "FirstOrderNonLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
   return output;
 }
 
@@ -382,7 +382,7 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
   DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
-    cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
+    std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
     _rMemory.reset(new SiconosMemory(steps));
 }
@@ -396,7 +396,7 @@ void FirstOrderNonLinearDS::swapInMemory()
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
-void FirstOrderNonLinearDS::setComputeMFunction(const string& pluginPath, const string& functionName)
+void FirstOrderNonLinearDS::setComputeMFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginM->setComputeFunction(pluginPath, functionName);
 }
@@ -405,7 +405,7 @@ void FirstOrderNonLinearDS::setComputeMFunction(FPtr1 fct)
 {
   _pluginM->setComputeFunction((void *)fct);
 }
-void FirstOrderNonLinearDS::setComputeFFunction(const string& pluginPath, const string& functionName)
+void FirstOrderNonLinearDS::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginf->setComputeFunction(pluginPath, functionName);
 }
@@ -415,7 +415,7 @@ void FirstOrderNonLinearDS::setComputeFFunction(FPtr1 fct)
   _pluginf->setComputeFunction((void *)fct);
 }
 
-void FirstOrderNonLinearDS::setComputeJacobianfxFunction(const string& pluginPath, const string& functionName)
+void FirstOrderNonLinearDS::setComputeJacobianfxFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJacxf->setComputeFunction(pluginPath, functionName);
 }
@@ -536,18 +536,18 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
 
 void FirstOrderNonLinearDS::display() const
 {
-  cout << " =====> First Order Non Linear DS (number: " << _number << ")." << endl;
-  cout << "- n (size) : " << _n << endl;
-  cout << "- x " << endl;
+  std::cout << " =====> First Order Non Linear DS (number: " << _number << ")." <<std::endl;
+  std::cout << "- n (size) : " << _n <<std::endl;
+  std::cout << "- x " <<std::endl;
   if (_x[0]) _x[0]->display();
-  else cout << "-> NULL" << endl;
-  cout << "- x0 " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x0 " <<std::endl;
   if (_x0) _x0->display();
-  else cout << "-> NULL" << endl;
-  cout << "- M: " << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- M: " <<std::endl;
   if (_M) _M->display();
-  else cout << "-> NULL" << endl;
-  cout << " ============================================" << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " ============================================" <<std::endl;
 }
 
 void FirstOrderNonLinearDS::resetAllNonSmoothPart()

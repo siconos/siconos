@@ -22,7 +22,7 @@
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 
-using namespace std;
+
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML():
   DynamicalSystemXML(), x0Node(NULL), xNode(NULL), MNode(NULL),

@@ -28,7 +28,7 @@
 #include "EventDriven.hpp"
 #include "Topology.hpp"
 
-using namespace std;
+
 
 
 // --- CONSTRUCTORS ---
@@ -82,9 +82,9 @@ Model::Model(const std::string& xmlFile):
 }
 
 // --- From a minimum set of data ---
-Model::Model(double newT0, double newT, const string& newTitle,
-             const string& newAuthor, const string& newDescription,
-             const string& newDate, const string& newSchema):
+Model::Model(double newT0, double newT, const std::string& newTitle,
+             const std::string& newAuthor, const std::string& newDescription,
+             const std::string& newDate, const std::string& newSchema):
   _t(newT0), _t0(newT0), _T(-1), _title(newTitle),
   _author(newAuthor), _description(newDescription), _date(newDate), _xmlSchema(newSchema)
 {
@@ -161,19 +161,19 @@ void Model::initialize(SP::Simulation simulation)
 // --- XML RELATED FUNCTIONS ---
 void Model::saveToXMLFile(char* xmlFile)
 {
-  cout << "## Model->checkXMLPlatform()" << endl;
+  std::cout << "## Model->checkXMLPlatform()" <<std::endl;
   //   the first operation to do is to check the XML objects
   checkXMLPlatform();
 
-  cout << "## Model->savePlatformToXML()" << endl;
+  std::cout << "## Model->savePlatformToXML()" <<std::endl;
   //   copy the values of the platform to the DOM tree
   savePlatformToXML();
 
-  cout << "## Model->checkXMLDOMTree()" << endl;
+  std::cout << "## Model->checkXMLDOMTree()" <<std::endl;
   //   verifies that the DOM tree respects the XML schema
   checkXMLDOMTree();
 
-  cout << "## Model->saveSiconosModelInXMLFile()" << endl;
+  std::cout << "## Model->saveSiconosModelInXMLFile()" <<std::endl;
   //   saves in a file the DOM tree
   _modelxml->saveSiconosModelInXMLFile(xmlFile);
 }
@@ -213,7 +213,7 @@ void Model::savePlatformToXML()
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Simulation");
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object SimulationXML does not exist");
-    cout << "Model::saveToXML - Warning : No Simulation is defined" << endl;
+    std::cout << "Model::saveToXML - Warning : No Simulation is defined" <<std::endl;
 }
 
 bool Model::checkXMLDOMTree()
@@ -222,7 +222,7 @@ bool Model::checkXMLDOMTree()
   if (_modelxml)
     res = _modelxml->checkSiconosDOMTree();
 
-  cout << " # checkModelCoherency()" << endl;
+  std::cout << " # checkModelCoherency()" <<std::endl;
   checkModelCoherency();
   return res;
 }
@@ -296,15 +296,15 @@ void Model::checkModelCoherency()
   // NonSmoothDynamicalSystem is BVP for example
 
   if (_modelxml->checkSiconosDOMTreeCoherency() == true)
-    cout << "Data of the XML DOM tree are coherent." << endl;
+    std::cout << "Data of the XML DOM tree are coherent." <<std::endl;
   else
-    cout << "Warning : Data of the XML DOM tree are not coherent." << endl;
+    std::cout << "Warning : Data of the XML DOM tree are not coherent." <<std::endl;
 }
 
-int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)
+int Model::xmlSchemaValidated(std::string xmlFile, std::string xmlSchema)
 {
   int res;
-  cout << "int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)" << endl;
+  std::cout << "int Model::xmlSchemaValidated(std::string xmlFile, std::string xmlSchema)" <<std::endl;
   res = _modelxml->validateXmlFile(xmlFile, xmlSchema);
   return res;
 }
@@ -314,18 +314,18 @@ int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)
 
 void Model::display() const
 {
-  cout << " =========> Model named " << _title << ", written by " << _author << " (" << _date << ")." << endl;
-  cout << " ----- Description: " << _description << endl;
-  cout << " ----- xml schema: " << _xmlSchema << endl;
-  cout << endl;
-  cout << " Time runs from " << _t0 << " to " << _T << endl;
-  cout << " Current time is " << _t << endl;
-  cout << endl;
-  if (!_nsds) cout << "No NSDS linked to the Model" << endl;
-  if (_strat) cout << "The simulation (name: " << _strat->name() << ") is a " << Type::name(*_strat) << "." << endl;
-  else cout << "No simulation attached to this model." << endl;
-  cout << endl;
-  cout << " ============================" << endl;
+  std::cout << " =========> Model named " << _title << ", written by " << _author << " (" << _date << ")." <<std::endl;
+  std::cout << " ----- Description: " << _description <<std::endl;
+  std::cout << " ----- xml schema: " << _xmlSchema <<std::endl;
+  std::cout <<std::endl;
+  std::cout << " Time runs from " << _t0 << " to " << _T <<std::endl;
+  std::cout << " Current time is " << _t <<std::endl;
+  std::cout <<std::endl;
+  if (!_nsds) std::cout << "No NSDS linked to the Model" <<std::endl;
+  if (_strat) std::cout << "The simulation (name: " << _strat->name() << ") is a " << Type::name(*_strat) << "." <<std::endl;
+  else std::cout << "No simulation attached to this model." <<std::endl;
+  std::cout <<std::endl;
+  std::cout << " ============================" <<std::endl;
 }
 
 void Model::setT(const double& newValue)

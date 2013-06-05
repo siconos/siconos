@@ -224,7 +224,7 @@ public:
   }
 
   /** allows to save the NNL plugin of the LagrangianDSXML
-   *   \param string : the string which contains the name and the location of the plugin
+   *   \param std::string : the std::string which contains the name and the location of the plugin
    */
   inline void setNNLPlugin(const std::string& plugin)
   {
@@ -285,7 +285,7 @@ public:
   }
 
   /** allows to save the FExt plugin of the LagrangianDSXML
-   *   \param string : the string which contains the name and the location of the plugin
+   *   \param std::string : the std::string which contains the name and the location of the plugin
    */
   inline void setFIntPlugin(const std::string& plugin)
   {
@@ -330,7 +330,7 @@ public:
   }
 
   /** allows to save the FExt plugin of the LagrangianDSXML
-   *   \param string : the string which contains the name and the location of the plugin
+   *   \param std::string : the std::string which contains the name and the location of the plugin
    */
   inline void setFExtPlugin(const std::string& plugin)
   {
@@ -347,7 +347,7 @@ public:
 
   /** Return the JacobianFInt Plug-in name
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \return a string
+   *  \return a std::string
    */
   inline const std::string getJacobianFIntPlugin(unsigned int i) const
   {
@@ -370,7 +370,7 @@ public:
 
   /** To save the jacobianFInt plug-in
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \param string : the string which contains the name and the location of the plugin
+   *  \param std::string : the std::string which contains the name and the location of the plugin
    */
   inline void setJacobianFIntPlugin(unsigned int i, const std::string& plugin)
   {
@@ -398,7 +398,7 @@ public:
 
   /** Get the Jacobian NNL Plug-in name.
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \return a string.
+   *  \return a std::string.
    */
   inline const std::string getJacobianNNLPlugin(unsigned int i) const
   {
@@ -421,7 +421,7 @@ public:
 
   /** To set the jacobian NNL plug-in name.
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \param a string which contains the name and the location of the plug-in.
+   *  \param a std::string which contains the name and the location of the plug-in.
    */
   inline void setJacobianNNLPlugin(unsigned int i, const std::string& plugin)
   {
@@ -471,7 +471,7 @@ public:
   }
 
   /** To save the Mass plugin of the LagrangianDSXML
-   *   \param string : the string which contains the name and the location of the plugin
+   *   \param std::string : the std::string which contains the name and the location of the plugin
    */
   inline void setMassPlugin(const std::string& plugin)
   {

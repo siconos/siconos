@@ -27,7 +27,7 @@
 #include "Lsodar.hpp"
 #include "ControlSensor.hpp"
 
-using namespace std;
+
 using namespace ActuatorFactory;
 
 LinearSMCOT2::LinearSMCOT2(SP::TimeDiscretisation t, SP::DynamicalSystem ds): CommonSMC(LINEAR_SMC_OT2, t, ds)
@@ -151,8 +151,8 @@ void LinearSMCOT2::actuate()
   double uEqP;
   // We need to project
   // TODO this should work in more than 1D
-  uEqP = min(uEq, 2.0);
-  uEqP = max(uEqP, -2.0);
+  uEqP = std::min(uEq, 2.0);
+  uEqP = std::max(uEqP, -2.0);
   (*_u)(_nDim - 1) = uEqP;
   _indx++;
   *_Xhat = *_X;

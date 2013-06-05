@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "SiconosMemoryException.hpp"
-using namespace std;
+
 
 SiconosMemoryException::SiconosMemoryException() :
   SiconosException("Siconos Memory Exception  (saved values of previous states of simulation)") {}
 
-SiconosMemoryException::SiconosMemoryException(const string& report) :
+SiconosMemoryException::SiconosMemoryException(const std::string& report) :
   SiconosException("Siconos Memory Exception (saved values of previous states of simulation): " + report) {}
 
 SiconosMemoryException::~SiconosMemoryException() {}
@@ -33,7 +33,7 @@ void SiconosMemoryException::selfThrow()
 }
 
 
-void SiconosMemoryException::selfThrow(const string& report)
+void SiconosMemoryException::selfThrow(const std::string& report)
 {
   throw SiconosMemoryException(report);
 }

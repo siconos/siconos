@@ -143,6 +143,7 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
      \dot x = rhs(...) \f$.
 
  */
+
 class DynamicalSystem
 {
 
@@ -189,7 +190,8 @@ protected:
   /** used by the relative convergence criteron*/
   double _normRef;
 
-  /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
+  /** state of the system,
+   *  \f$  x \in R^{n}\f$ - With x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors _x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x =
@@ -636,7 +638,7 @@ public:
   // ===== WORK VECTOR =====
 
   /** get the vector of temporary saved vector
-   *  \return a VectorOfVectors (map that links string to vectors)
+   *  \return a VectorOfVectors (map that links std::string to vectors)
    */
   inline VectorOfVectors workspace() const
   {
@@ -661,7 +663,7 @@ public:
 
   /** to add a temporary vector
    *  \param a SP::SiconosVector
-   *  \param a string id
+   *  \param a std::string id
    */
   inline void addWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
@@ -669,7 +671,7 @@ public:
   }
   /** sub a vector to a temporary one
    *  \param a SP::SiconosVector
-   *  \param a string id
+   *  \param a std::string id
    */
   inline void subWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
@@ -740,8 +742,8 @@ public:
   /*! @name Plugins management  */
   //@{
   /** to set a specified function to compute g
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param string functionName : the function name to use in this library
+   *  \param std::string pluginPath : the complete path to the plugin
+   *  \param std::string functionName : the function name to use in this library
    */
   void setComputegFunction(const std::string&  pluginPath, const std::string& functionName);
 
@@ -751,8 +753,8 @@ public:
   void setComputegFunction(FPtr6 fct);
 
   /** to set a specified function to compute jacobianG
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
+   *  \param std::string pluginPath : the complete path to the plugin
+   *  \param the std::string functionName : function name to use in this library
    */
   void setComputeJacobianXGFunction(const std::string&  pluginPath, const std::string&  functionName);
   void setComputeJacobianDotXGFunction(const std::string&  pluginPath, const std::string&  functionName);

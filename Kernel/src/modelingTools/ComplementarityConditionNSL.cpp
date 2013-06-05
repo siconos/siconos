@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "ComplementarityConditionNSL.hpp"
-using namespace std;
+
 
 ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)
 {}

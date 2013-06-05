@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel  Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
 /*! \file KneeJointR.cpp
 
@@ -48,7 +48,7 @@ void KneeJointR::checkInitPos()
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if (_d2)
+  if(_d2)
   {
     SP::SiconosVector x2 = _d2->q0();
     printf("checkInitPos x2:\n");
@@ -139,7 +139,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutR
 
   ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
 
-  if (absolutRef)
+  if(absolutRef)
   {
     /*quadBuff contains the vector _G1P0 if the object has no orientation.*/
     ::boost::math::quaternion<double>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
@@ -453,7 +453,7 @@ void KneeJointR::computeJachq(const double time, Interaction& inter)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if (_d2)
+  if(_d2)
   {
     SP::SiconosVector x2 = _d2->q();
     X2 = x2->getValue(0);
@@ -475,40 +475,40 @@ void KneeJointR::DotJd1(double Xdot1, double Ydot1, double Zdot1,
                         double qdot10, double qdot11, double qdot12, double qdot13)
 {
 
-      double t1 = _G1P0y*qdot10;
-      double t2 = _G1P0x*qdot10;
-      double t4 = -t1+t2+_G1P0z*qdot12;
-      double t7 = _G1P0z*qdot10;
-      double t8 = _G1P0x*qdot11+_G1P0y*qdot12+t7;
-      double t11 = t7-_G1P0x*qdot12+_G1P0y*qdot11;
-      double t13 = -t2+_G1P0z*qdot11-t1;
-      //double t17 = -_G2P0x*qdot20+_G2P0y*qdot23-_G2P0z*qdot22;
-      //double t21 = -_G2P0x*qdot21-_G2P0y*qdot22-_G2P0z*qdot23;
-      //double t25 = -_G2P0z*qdot20+_G2P0x*qdot22-_G2P0y*qdot21;
-      //double t29 = _G2P0y*qdot20-_G2P0z*qdot21+_G2P0x*qdot23;
-      _dotjachq->setValue(0,0, 0.0);
-      _dotjachq->setValue(0,1, 0.0);
-      _dotjachq->setValue(0,2, 0.0);
-      _dotjachq->setValue(0,3, 2.0*t4);
-      _dotjachq->setValue(0,4, 2.0*t8);
-      _dotjachq->setValue(0,5, 2.0*t11);
-      _dotjachq->setValue(0,6, 2.0*t13);
+  double t1 = _G1P0y*qdot10;
+  double t2 = _G1P0x*qdot10;
+  double t4 = -t1+t2+_G1P0z*qdot12;
+  double t7 = _G1P0z*qdot10;
+  double t8 = _G1P0x*qdot11+_G1P0y*qdot12+t7;
+  double t11 = t7-_G1P0x*qdot12+_G1P0y*qdot11;
+  double t13 = -t2+_G1P0z*qdot11-t1;
+  //double t17 = -_G2P0x*qdot20+_G2P0y*qdot23-_G2P0z*qdot22;
+  //double t21 = -_G2P0x*qdot21-_G2P0y*qdot22-_G2P0z*qdot23;
+  //double t25 = -_G2P0z*qdot20+_G2P0x*qdot22-_G2P0y*qdot21;
+  //double t29 = _G2P0y*qdot20-_G2P0z*qdot21+_G2P0x*qdot23;
+  _dotjachq->setValue(0,0, 0.0);
+  _dotjachq->setValue(0,1, 0.0);
+  _dotjachq->setValue(0,2, 0.0);
+  _dotjachq->setValue(0,3, 2.0*t4);
+  _dotjachq->setValue(0,4, 2.0*t8);
+  _dotjachq->setValue(0,5, 2.0*t11);
+  _dotjachq->setValue(0,6, 2.0*t13);
 
-      _dotjachq->setValue(1,0, 0.0);
-      _dotjachq->setValue(1,1, 0.0);
-      _dotjachq->setValue(1,2, 0.0);
-      _dotjachq->setValue(1,3, -2.0*t13);
-      _dotjachq->setValue(1,4, -2.0*t11);
-      _dotjachq->setValue(1,5, 2.0*t8);
-      _dotjachq->setValue(1,6, 2.0*t4);
+  _dotjachq->setValue(1,0, 0.0);
+  _dotjachq->setValue(1,1, 0.0);
+  _dotjachq->setValue(1,2, 0.0);
+  _dotjachq->setValue(1,3, -2.0*t13);
+  _dotjachq->setValue(1,4, -2.0*t11);
+  _dotjachq->setValue(1,5, 2.0*t8);
+  _dotjachq->setValue(1,6, 2.0*t4);
 
-      _dotjachq->setValue(2,0, 0.0);
-      _dotjachq->setValue(2,1, 0.0);
-      _dotjachq->setValue(2,2, 0.0);
-      _dotjachq->setValue(2,3, 2.0*t11);
-      _dotjachq->setValue(2,4, -2.0*t13);
-      _dotjachq->setValue(2,5, -2.0*t4);
-      _dotjachq->setValue(2,6, 2.0*t8);
+  _dotjachq->setValue(2,0, 0.0);
+  _dotjachq->setValue(2,1, 0.0);
+  _dotjachq->setValue(2,2, 0.0);
+  _dotjachq->setValue(2,3, 2.0*t11);
+  _dotjachq->setValue(2,4, -2.0*t13);
+  _dotjachq->setValue(2,5, -2.0*t4);
+  _dotjachq->setValue(2,6, 2.0*t8);
 
 
 }
@@ -519,65 +519,65 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
                           double Xdot2, double Ydot2, double Zdot2,
                           double qdot20, double qdot21, double qdot22, double qdot23)
 {
-      double t1 = _G1P0y*qdot10;
-      double t2 = _G1P0x*qdot10;
-      double t4 = -t1+t2+_G1P0z*qdot12;
-      double t7 = _G1P0z*qdot10;
-      double t8 = _G1P0x*qdot11+_G1P0y*qdot12+t7;
-      double t11 = t7-_G1P0x*qdot12+_G1P0y*qdot11;
-      double t13 = -t2+_G1P0z*qdot11-t1;
-      double t17 = -_G2P0x*qdot20+_G2P0y*qdot23-_G2P0z*qdot22;
-      double t21 = -_G2P0x*qdot21-_G2P0y*qdot22-_G2P0z*qdot23;
-      double t25 = -_G2P0z*qdot20+_G2P0x*qdot22-_G2P0y*qdot21;
-      double t29 = _G2P0y*qdot20-_G2P0z*qdot21+_G2P0x*qdot23;
-      _dotjachq->setValue(0,0, 0.0);
-      _dotjachq->setValue(0,1, 0.0);
-      _dotjachq->setValue(0,2, 0.0);
-      _dotjachq->setValue(0,3, 2.0*t4);
-      _dotjachq->setValue(0,4, 2.0*t8);
-      _dotjachq->setValue(0,5, 2.0*t11);
-      _dotjachq->setValue(0,6, 2.0*t13);
-      _dotjachq->setValue(0,7, 0.0);
-      _dotjachq->setValue(0,8, 0.0);
-      _dotjachq->setValue(0,9, 0.0);
-      _dotjachq->setValue(0,10, 2.0*t17);
-      _dotjachq->setValue(0,11, 2.0*t21);
-      _dotjachq->setValue(0,12, 2.0*t25);
-      _dotjachq->setValue(0,13, 2.0*t29);
-      _dotjachq->setValue(1,0, 0.0);
-      _dotjachq->setValue(1,1, 0.0);
-      _dotjachq->setValue(1,2, 0.0);
-      _dotjachq->setValue(1,3, -2.0*t13);
-      _dotjachq->setValue(1,4, -2.0*t11);
-      _dotjachq->setValue(1,5, 2.0*t8);
-      _dotjachq->setValue(1,6, 2.0*t4);
-      _dotjachq->setValue(1,7, 0.0);
-      _dotjachq->setValue(1,8, 0.0);
-      _dotjachq->setValue(1,9, 0.0);
-      _dotjachq->setValue(1,10, -2.0*t29);
-      _dotjachq->setValue(1,11, -2.0*t25);
-      _dotjachq->setValue(1,12, 2.0*t21);
-      _dotjachq->setValue(1,13, 2.0*t17);
-      _dotjachq->setValue(2,0, 0.0);
-      _dotjachq->setValue(2,1, 0.0);
-      _dotjachq->setValue(2,2, 0.0);
-      _dotjachq->setValue(2,3, 2.0*t11);
-      _dotjachq->setValue(2,4, -2.0*t13);
-      _dotjachq->setValue(2,5, -2.0*t4);
-      _dotjachq->setValue(2,6, 2.0*t8);
-      _dotjachq->setValue(2,7, 0.0);
-      _dotjachq->setValue(2,8, 0.0);
-      _dotjachq->setValue(2,9, 0.0);
-      _dotjachq->setValue(2,10, 2.0*t25);
-      _dotjachq->setValue(2,11, -2.0*t29);
-      _dotjachq->setValue(2,12, -2.0*t17);
-      _dotjachq->setValue(2,13, 2.0*t21);
+  double t1 = _G1P0y*qdot10;
+  double t2 = _G1P0x*qdot10;
+  double t4 = -t1+t2+_G1P0z*qdot12;
+  double t7 = _G1P0z*qdot10;
+  double t8 = _G1P0x*qdot11+_G1P0y*qdot12+t7;
+  double t11 = t7-_G1P0x*qdot12+_G1P0y*qdot11;
+  double t13 = -t2+_G1P0z*qdot11-t1;
+  double t17 = -_G2P0x*qdot20+_G2P0y*qdot23-_G2P0z*qdot22;
+  double t21 = -_G2P0x*qdot21-_G2P0y*qdot22-_G2P0z*qdot23;
+  double t25 = -_G2P0z*qdot20+_G2P0x*qdot22-_G2P0y*qdot21;
+  double t29 = _G2P0y*qdot20-_G2P0z*qdot21+_G2P0x*qdot23;
+  _dotjachq->setValue(0,0, 0.0);
+  _dotjachq->setValue(0,1, 0.0);
+  _dotjachq->setValue(0,2, 0.0);
+  _dotjachq->setValue(0,3, 2.0*t4);
+  _dotjachq->setValue(0,4, 2.0*t8);
+  _dotjachq->setValue(0,5, 2.0*t11);
+  _dotjachq->setValue(0,6, 2.0*t13);
+  _dotjachq->setValue(0,7, 0.0);
+  _dotjachq->setValue(0,8, 0.0);
+  _dotjachq->setValue(0,9, 0.0);
+  _dotjachq->setValue(0,10, 2.0*t17);
+  _dotjachq->setValue(0,11, 2.0*t21);
+  _dotjachq->setValue(0,12, 2.0*t25);
+  _dotjachq->setValue(0,13, 2.0*t29);
+  _dotjachq->setValue(1,0, 0.0);
+  _dotjachq->setValue(1,1, 0.0);
+  _dotjachq->setValue(1,2, 0.0);
+  _dotjachq->setValue(1,3, -2.0*t13);
+  _dotjachq->setValue(1,4, -2.0*t11);
+  _dotjachq->setValue(1,5, 2.0*t8);
+  _dotjachq->setValue(1,6, 2.0*t4);
+  _dotjachq->setValue(1,7, 0.0);
+  _dotjachq->setValue(1,8, 0.0);
+  _dotjachq->setValue(1,9, 0.0);
+  _dotjachq->setValue(1,10, -2.0*t29);
+  _dotjachq->setValue(1,11, -2.0*t25);
+  _dotjachq->setValue(1,12, 2.0*t21);
+  _dotjachq->setValue(1,13, 2.0*t17);
+  _dotjachq->setValue(2,0, 0.0);
+  _dotjachq->setValue(2,1, 0.0);
+  _dotjachq->setValue(2,2, 0.0);
+  _dotjachq->setValue(2,3, 2.0*t11);
+  _dotjachq->setValue(2,4, -2.0*t13);
+  _dotjachq->setValue(2,5, -2.0*t4);
+  _dotjachq->setValue(2,6, 2.0*t8);
+  _dotjachq->setValue(2,7, 0.0);
+  _dotjachq->setValue(2,8, 0.0);
+  _dotjachq->setValue(2,9, 0.0);
+  _dotjachq->setValue(2,10, 2.0*t25);
+  _dotjachq->setValue(2,11, -2.0*t29);
+  _dotjachq->setValue(2,12, -2.0*t17);
+  _dotjachq->setValue(2,13, 2.0*t21);
 
 }
 void KneeJointR::computeDotJachq(const double time, Interaction& inter)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(const double time, Interaction& inter) starts \n");
-  if (! _dotjachq)
+  if(! _dotjachq)
   {
     unsigned int sizeY = inter.getSizeOfY();
     unsigned int xSize = inter.getSizeOfDS();
@@ -604,7 +604,7 @@ void KneeJointR::computeDotJachq(const double time, Interaction& inter)
   double qdot22 = 0;
   double qdot23 = 0;
 
-  if (_d2)
+  if(_d2)
   {
     SP::SiconosVector x2 = _d2->dotq();
     Xdot2 = x2->getValue(0);
@@ -725,7 +725,7 @@ void KneeJointR::computeh(const double time, Interaction& inter)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if (_d2)
+  if(_d2)
   {
     SP::SiconosVector x2 = _d2->q();
     X2 = x2->getValue(0);

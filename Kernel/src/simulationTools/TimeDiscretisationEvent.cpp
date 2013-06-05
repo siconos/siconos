@@ -19,7 +19,7 @@
 #include "TimeDiscretisationEvent.hpp"
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
-using namespace std;
+
 using namespace EventFactory;
 
 // Default constructor

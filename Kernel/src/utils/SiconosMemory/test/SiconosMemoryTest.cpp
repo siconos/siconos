@@ -20,7 +20,7 @@
 #include "SiconosVector.hpp"
 #include "BlockVector.hpp"
 
-using std::cout;
+using  std::cout;
 using std::endl;
 
 // test suite registration
@@ -72,22 +72,22 @@ void SiconosMemoryTest::tearDown()
 // Constructor: data=memorySize
 void SiconosMemoryTest::testBuildMemory1()
 {
-  cout << "=====================================" << endl;
-  cout << "===  SiconosMemory tests start ...=== " << endl;
-  cout << "=====================================" << endl;
+  std::cout << "=====================================" <<std::endl;
+  std::cout << "===  SiconosMemory tests start ...=== " <<std::endl;
+  std::cout << "=====================================" <<std::endl;
 
-  cout << "--> Test: constructor 0." << endl;
+  std::cout << "--> Test: constructor 0." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(4));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : memorysize OK", tmp1->getMemorySize() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->vectorMemory()->size() == 0, true);
-  cout << "-->  testBuildMemory1 ended with success." << endl;
+  std::cout << "-->  testBuildMemory1 ended with success." <<std::endl;
 }
 
 // Constructor: copy of a std::vector of siconos vectors
 void SiconosMemoryTest::testBuildMemory2()
 {
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(*V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
@@ -97,14 +97,14 @@ void SiconosMemoryTest::testBuildMemory2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp2->getMemorySize() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : nbVectorsInMemory OK", tmp2->nbVectorsInMemory() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : size vector OK", tmp2->vectorMemory()->size() == 2, true);
-  cout << "-->  testBuildMemory2 ended with success." << endl;
+  std::cout << "-->  testBuildMemory2 ended with success." <<std::endl;
 }
 
 // Constructor: copy of a std::vector of siconos vectors + memory size
 
 void SiconosMemoryTest::testBuildMemory3()
 {
-  cout << "--> Test: constructor 1." << endl;
+  std::cout << "--> Test: constructor 1." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(2, *V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
@@ -114,13 +114,13 @@ void SiconosMemoryTest::testBuildMemory3()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp2->getMemorySize() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : nbVectorsInMemory OK", tmp2->nbVectorsInMemory() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : size vector OK", tmp2->vectorMemory()->size() == 2, true);
-  cout << "-->  testBuildMemory3 ended with success." << endl;
+  std::cout << "-->  testBuildMemory3 ended with success." <<std::endl;
 }
 
 // setVectorMemory
 void SiconosMemoryTest::testSetVectorMemory()
 {
-  cout << "--> Test: setVectorMemory." << endl;
+  std::cout << "--> Test: setVectorMemory." <<std::endl;
   //  SP::SiconosMemory tmp1(new SiconosMemory(*V1));
   //
   //  tmp1->setVectorMemory(*V2);
@@ -128,27 +128,27 @@ void SiconosMemoryTest::testSetVectorMemory()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : memorysize OK", tmp1->getMemorySize() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : _nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->vectorMemory()->size() == 2, true);
-  cout << "-->  setVectorMemory test ended with success." << endl;
+  std::cout << "-->  setVectorMemory test ended with success." <<std::endl;
 
 }
 
 // getSiconosVector
 void SiconosMemoryTest::testGetSiconosVector()
 {
-  cout << "--> Test: getSiconosVector." << endl;
+  std::cout << "--> Test: getSiconosVector." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(*V1));
   SP::SiconosVector tmp = tmp1->getSiconosVector(0);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : *v1 size OK", tmp->size() == (*V1)[0]->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : v1 values OK", *tmp == *((*V1)[0]), true);
-  cout << "-->  getSiconosVector test ended with success." << endl;
+  std::cout << "-->  getSiconosVector test ended with success." <<std::endl;
 }
 
 // swap
 
 void SiconosMemoryTest::testSwap()
 {
-  cout << "--> Test: swap." << endl;
+  std::cout << "--> Test: swap." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(2));
   tmp1->swap(((*V1)[0]));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *((*V1)[0]), true);
@@ -161,14 +161,14 @@ void SiconosMemoryTest::testSwap()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *((*V1)[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *((*V1)[1]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : _nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
-  cout << "-->  swap test ended with success." << endl;
+  std::cout << "-->  swap test ended with success." <<std::endl;
 }
 
 void SiconosMemoryTest::End()
 {
-  //   cout <<"======================================" << endl;
-  //   cout <<" ===== End of SiconosMemory Tests ===== " << endl;
-  //   cout <<"======================================" << endl;
+  //   std::cout <<"======================================" <<std::endl;
+  //   std::cout <<" ===== End of SiconosMemory Tests ===== " <<std::endl;
+  //   std::cout <<"======================================" <<std::endl;
 }
 
 

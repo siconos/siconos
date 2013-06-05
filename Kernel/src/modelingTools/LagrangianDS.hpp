@@ -347,7 +347,7 @@ public:
   /** constructor from a minimum set of data
    *  \param SiconosVector : initial coordinates of this DynamicalSystem
    *  \param SiconosVector : initial velocity of this DynamicalSystem
-   *  \param string: plugin path to compute mass matrix
+   *  \param std::string: plugin path to compute mass matrix
    */
   LagrangianDS(SP::SiconosVector , SP::SiconosVector, const std::string&);
 
@@ -737,8 +737,8 @@ public:
   // --- PLUGINS RELATED FUNCTIONS ---
 
   /** allow to set a specified function to compute the mass
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
@@ -756,8 +756,8 @@ public:
   }
 
   /** allow to set a specified function to compute FInt
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
@@ -776,8 +776,8 @@ public:
   }
 
   /** allow to set a specified function to compute Fext
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
@@ -796,8 +796,8 @@ public:
   }
 
   /** allow to set a specified function to compute the inertia
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeNNLFunction(const std::string& pluginPath, const std::string&  functionName);
 
@@ -807,13 +807,13 @@ public:
   void setComputeNNLFunction(FPtr5 fct);
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName);
   /** allow to set a specified function to compute the jacobian following qDot of the internal forces w.r.t.
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName);
 
@@ -827,14 +827,14 @@ public:
   void setComputeJacobianFIntqDotFunction(FPtr6 fct);
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the the external forces
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLqFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute the jacobian w.r.t qDot of the the external strength
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLqDotFunction(const std::string&  pluginPath, const std::string&  functionName);
 

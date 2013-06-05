@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // xml constructor
@@ -46,7 +46,7 @@ LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(L
 }
 
 // constructor from a set of data
-LagrangianCompliantR::LagrangianCompliantR(const string& computeh, const std::vector<string> & computeg): LagrangianR(CompliantR)
+LagrangianCompliantR::LagrangianCompliantR(const std::string& computeh, const std::vector<std::string> & computeg): LagrangianR(CompliantR)
 {
   zeroPlugin();
   setComputehFunction(SSLH::getPluginName(computeh), SSLH::getPluginFunctionName(computeh));

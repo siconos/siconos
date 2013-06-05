@@ -23,7 +23,7 @@
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-using namespace std;
+
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
@@ -131,12 +131,12 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
 #if __cplusplus >= 201103L
       if (!::isnan(sim.getTkp1()))
 #else
-        if (!isnan(sim.getTkp1()))
+      if (!std::isnan(sim.getTkp1()))
 #endif
-        {
-          ev.setTime(sim.getTkp1());
-          insertEv(_events[j]);
-        }
+      {
+        ev.setTime(sim.getTkp1());
+        insertEv(_events[j]);
+      }
       // delete the TD event (that has to be done in all cases)
       _events.erase(_events.begin()+j);
       break;
@@ -174,7 +174,7 @@ void EventsManager::update(Simulation& sim)
 #if __cplusplus >= 201103L
     if (!::isnan(tkp1))
 #else
-    if (!isnan(tkp1))
+    if (!std::isnan(tkp1))
 #endif
     {
       _events[0]->setTime(tkp1);
@@ -201,8 +201,8 @@ unsigned int EventsManager::insertEv(SP::Event e)
   bool inserted = false;
   unsigned int pos = 0;
   // Find a place for the event in the vector
-  for(EventsContainer::iterator it = _events.begin();
-      it != _events.end(); ++it)
+  for (EventsContainer::iterator it = _events.begin();
+       it != _events.end(); ++it)
   {
     Event& ev = **it;
     const mpz_t *t2 = ev.getTimeOfEvent();
@@ -226,9 +226,9 @@ unsigned int EventsManager::insertEv(SP::Event e)
 
 void EventsManager::display() const
 {
-  cout << "=== EventsManager data display ===" << endl;
-  cout << " - The number of unprocessed events (including current one) is: " << _events.size() << endl;
+  std::cout << "=== EventsManager data display ===" <<std::endl;
+  std::cout << " - The number of unprocessed events (including current one) is: " << _events.size() <<std::endl;
   for (EventsContainer::const_iterator it = _events.begin(); it != _events.end(); ++it)
     (*it)->display();
-  cout << "===== End of EventsManager display =====" << endl;
+  std::cout << "===== End of EventsManager display =====" <<std::endl;
 }

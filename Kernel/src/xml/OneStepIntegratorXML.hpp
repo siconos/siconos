@@ -93,7 +93,7 @@ public:
   }
 
   /** Return the type of the OneStepIntegratorXML
-   *   \return a string
+   *   \return a std::string
    */
   inline const std::string getType() const
   {

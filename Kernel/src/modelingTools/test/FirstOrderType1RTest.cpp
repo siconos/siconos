@@ -23,7 +23,7 @@
 #include "FirstOrderType1RTest.hpp"
 #include "SSLH.hpp"
 
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -44,10 +44,10 @@ void FirstOrderType1RTest::tearDown()
 // data constructor
 void FirstOrderType1RTest::testBuildFirstOrderType1R1()
 {
-  cout << "======================================" << endl;
-  cout << "=== FirstOrderType1R tests start ...== " << endl;
-  cout << "======================================" << endl;
-  cout << "--> Test: constructor 1 " << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "=== FirstOrderType1R tests start ...== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << "--> Test: constructor 1 " <<std::endl;
 
   SP::FirstOrderType1R R1(new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1"));
 
@@ -60,12 +60,12 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
   R1->setComputeJacglambdaFunction(plugin, "Jg0T1");
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
-  cout << "--> Constructor1 test ended with success." << endl;
+  std::cout << "--> Constructor1 test ended with success." <<std::endl;
 }
 
 void FirstOrderType1RTest::testBuildFirstOrderType1R2()
 {
-  cout << "--> Test: constructor data (2)." << endl;
+  std::cout << "--> Test: constructor data (2)." <<std::endl;
   SP::FirstOrderType1R R2(new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1", "TestPlugin:Jh0T1", "TestPlugin:Jg0T1"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ", R2->getType() == RELATION::FirstOrder, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ", R2->getSubType() == RELATION::Type1R, true);
@@ -73,13 +73,13 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getgName()=="TestPlugin:gT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
-  cout << "--> Constructor2 test ended with success." << endl;
+  std::cout << "--> Constructor2 test ended with success." <<std::endl;
 }
 
 // xml constructor
 void FirstOrderType1RTest::testBuildFirstOrderType1R3()
 {
-  cout << "--> Test: constructor xml ." << endl;
+  std::cout << "--> Test: constructor xml ." <<std::endl;
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;
@@ -93,20 +93,20 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
     xmlFreeDoc(doc);
   }
   // get rootNode
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 
   if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
   {
     XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
     xmlFreeDoc(doc);
   }
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 
   // look for NSDS, Interaction and relation node
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   SP::NonSmoothDynamicalSystemXML nsdsxml(new NonSmoothDynamicalSystemXML(nodetmp));
   nsds.reset(new NonSmoothDynamicalSystem(nsdsxml));
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
@@ -122,12 +122,12 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3d : ", R1->getgName()=="TestPlugin:gT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 void FirstOrderType1RTest::End()
 {
-  cout << "==========================================" << endl;
-  cout << " ===== End of FirstOrderType1R Tests ===== " << endl;
-  cout << "==========================================" << endl;
+  std::cout << "==========================================" <<std::endl;
+  std::cout << " ===== End of FirstOrderType1R Tests ===== " <<std::endl;
+  std::cout << "==========================================" <<std::endl;
 }

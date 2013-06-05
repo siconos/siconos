@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "MoreauXML.hpp"
-using namespace std;
+
 
 MoreauXML::MoreauXML(): OneStepIntegratorXML(), thetaNode(NULL), WNode(NULL)
 {}
 
-MoreauXML::MoreauXML(xmlNodePtr MoreauNode):
+MoreauXML::MoreauXML(xmlNode * MoreauNode):
   OneStepIntegratorXML(MoreauNode), thetaNode(NULL), WNode(NULL)
 {
   xmlNodePtr node;
@@ -35,7 +35,7 @@ MoreauXML::MoreauXML(xmlNodePtr MoreauNode):
 MoreauXML::~MoreauXML()
 {}
 
-void MoreauXML::getTheta(vector<double>& values) const
+void MoreauXML::getTheta(std::vector<double>& values) const
 {
   if (hasThetaList())
     SiconosDOMTreeTools::getVector(thetaNode, values);
@@ -43,7 +43,7 @@ void MoreauXML::getTheta(vector<double>& values) const
     XMLException::selfThrow("MoreauXML::getTheta - No list of theta in xml tag.");
 }
 
-void MoreauXML::setTheta(const vector<double>& v)
+void MoreauXML::setTheta(const std::vector<double>& v)
 {
   XMLException::selfThrow("OneStepIntegratorXML::setTheta - not yet implemented.");
   //   if( !hasTheta()) // create the node if it does not exist

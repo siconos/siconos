@@ -22,7 +22,7 @@
 // #define DEBUG_MESSAGES 1
 #include "debug.h"
 
-using namespace std;
+
 using namespace RELATION;
 
 LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml) :
@@ -71,7 +71,7 @@ int LCP::compute(double time)
 
   if (_sizeOutput != 0)
   {
- 
+
     // The LCP in Numerics format
     _numerics_problem->M = &*_M->getNumericsMatrix();
     _numerics_problem->q = _q->getArray();
@@ -109,7 +109,7 @@ int LCP::compute(double time)
 
 void LCP::display() const
 {
-  cout << "======= LCP of size " << _sizeOutput << " with: " << endl;
+  std::cout << "======= LCP of size " << _sizeOutput << " with: " <<std::endl;
   LinearOSNS::display();
 }
 

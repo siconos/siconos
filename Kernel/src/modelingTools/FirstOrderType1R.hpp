@@ -61,16 +61,16 @@ public:
   FirstOrderType1R(SP::RelationXML);
 
   /** data constructor
-  *  \param a string with computeOutput function name.
-  *  \param a string with computeInput function name.
+  *  \param a std::string with computeOutput function name.
+  *  \param a std::string with computeInput function name.
   */
   FirstOrderType1R(const std::string&, const std::string&);
 
   /** data constructor
-  *  \param a string with computeOutput function name.
-  *  \param a string with computeInput function name.
-  *  \param a string: name of the function to compute the jacobian of h according to x
-  *  \param a string: name of the function to compute the jacobian of g according to lambda
+  *  \param a std::string with computeOutput function name.
+  *  \param a std::string with computeInput function name.
+  *  \param a std::string: name of the function to compute the jacobian of h according to x
+  *  \param a std::string: name of the function to compute the jacobian of g according to lambda
   */
   FirstOrderType1R(const std::string&, const std::string&, const std::string&, const std::string&);
 

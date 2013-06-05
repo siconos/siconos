@@ -21,7 +21,7 @@ y/* Siconos-Kernel, Copyright INRIA 2005-2012.
 #include "SiconosDataC.hpp"
 #include "SiconosApiC.hpp"
 
-using namespace std;
+
 
 DataC GLOB_DATA;
 
@@ -41,12 +41,12 @@ extern "C" int sicLoadModel(char ModelXmlFile[])
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicLoadModel" << endl;
+    std::cout << "Exception caught in sicLoadModel" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -67,22 +67,22 @@ extern "C" int sicInitSimulation()
 
     Simulation *s = GLOB_DATA.simulation();
 
-    cout << "-->" << GLOB_DATA.simulation() << endl;
+    std::cout << "-->" << GLOB_DATA.simulation() <<std::endl;
     //GLOB_DATA.simulation()->initialize();
     s->initialize();
-    cout << "END" << endl;
+    std::cout << "END" <<std::endl;
 
     GLOB_DATA.setStatus(DATAC_INIT);
 
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicInitSimulation" << endl;
+    std::cout << "Exception caught in sicInitSimulation" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -100,12 +100,12 @@ extern "C" int sicTimeGetH(double *H)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicTimeGetH" << endl;
+    std::cout << "Exception caught in sicTimeGetH" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -123,12 +123,12 @@ extern "C" int  sicTimeGetN(int *N)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicTimeGetNl" << endl;
+    std::cout << "Exception caught in sicTimeGetNl" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -146,12 +146,12 @@ extern "C" int sicSTNextStep()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTNextStep" << endl;
+    std::cout << "Exception caught in sicSTNextStep" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -170,12 +170,12 @@ extern "C" int sicSTSaveInMemory()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTSaveInMemory" << endl;
+    std::cout << "Exception caught in sicSTSaveInMemory" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -192,12 +192,12 @@ extern "C" int sicSTComputeOneStep()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTComputeOneStep" << endl;
+    std::cout << "Exception caught in sicSTComputeOneStep" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -217,12 +217,12 @@ extern "C" int sicSTnewtonSolve(double criterion, int maxIter)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTnewtonSolve" << endl;
+    std::cout << "Exception caught in sicSTnewtonSolve" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -241,12 +241,12 @@ extern "C" int sicSTupdateState()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTupdateState" << endl;
+    std::cout << "Exception caught in sicSTupdateState" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -260,19 +260,19 @@ extern "C" int sicAdvanceToEvent()
   try
   {
 
-    cout << "sicAdvanceToEvent APIC" << endl;
-    cout << "TYPE " << ((EventDriven*)GLOB_DATA.simulation())->getType() << endl;
-    cout << "OK" << endl;
+    std::cout << "sicAdvanceToEvent APIC" <<std::endl;
+    std::cout << "TYPE " << ((EventDriven*)GLOB_DATA.simulation())->getType() <<std::endl;
+    std::cout << "OK" <<std::endl;
     ((EventDriven*) GLOB_DATA.simulation())->advanceToEvent();
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicAdvanceToEvent" << endl;
+    std::cout << "Exception caught in sicAdvanceToEvent" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -290,12 +290,12 @@ extern "C" int sicProcessEvents()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicProcessEvents" << endl;
+    std::cout << "Exception caught in sicProcessEvents" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -314,12 +314,12 @@ extern "C" int sicHasNextEvent(int *hasnextevent)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicProcessEvents" << endl;
+    std::cout << "Exception caught in sicProcessEvents" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -329,7 +329,7 @@ extern "C" int sicHasNextEvent(int *hasnextevent)
 extern "C" int sicGetTypeEvent(char *type)
 {
   int ret = SIC_OK;
-  string typeSring;
+  std::string typeSring;
 
   try
   {
@@ -338,12 +338,12 @@ extern "C" int sicGetTypeEvent(char *type)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicProcessEvents" << endl;
+    std::cout << "Exception caught in sicProcessEvents" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -355,7 +355,7 @@ extern "C" int sicGetTypeEvent(char *type)
 extern "C" void sicDebug(int *ret)
 {
   // GLOB_SIMULATION->update();
-  cout << "--- Debug" << endl;
+  std::cout << "--- Debug" <<std::endl;
 
   // LagrangianDS* ball1 = static_cast<LagrangianDS*> (GLOB_MODEL->nonSmoothDynamicalSystem()->dynamicalSystem(0));
 
@@ -399,12 +399,12 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     ret = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicModelgetQ" << endl;
+    std::cout << "Exception caught in sicModelgetQ" <<std::endl;
     ret = SIC_ERROR;
   }
 
@@ -451,12 +451,12 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicLagrangianLinearTIDS" << endl;
+    std::cout << "Exception caught in sicLagrangianLinearTIDS" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -501,12 +501,12 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicLagrangianLinearDS" << endl;
+    std::cout << "Exception caught in sicLagrangianLinearDS" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -539,12 +539,12 @@ extern "C" int sicSetComputeMassFunction(int nIdDs, char *libname, char *func)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeMassFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeMassFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -576,12 +576,12 @@ extern "C" int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeNNLFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeNNLFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -613,12 +613,12 @@ extern "C" int sicSetComputeJacobianNNLqFunction(int nIdDs, char *libname, char 
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeJacobianNNLqFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeJacobianNNLqFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -650,12 +650,12 @@ extern "C" int  sicSetComputeJacobianNNLVelocityFunction(int nIdDs, char *libnam
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in  sicSetComputeJacobianNNLVelocityFunction" << endl;
+    std::cout << "Exception caught in  sicSetComputeJacobianNNLVelocityFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -687,12 +687,12 @@ extern "C" int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeFIntFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeFIntFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -724,12 +724,12 @@ extern "C" int sicSetComputeJacobianFIntqFunction(int nIdDs, char *libname, char
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeJacobianFIntqFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeJacobianFIntqFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -761,12 +761,12 @@ extern "C" int sicSetComputeJacobianFintVelocityFunction(int nIdDs, char *libnam
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSetComputeJacobianFintVelocityFunction" << endl;
+    std::cout << "Exception caught in sicSetComputeJacobianFintVelocityFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -802,12 +802,12 @@ extern "C" int  sicSetFExt(int nIdDs, double *tFext)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in  setComputeFExtFunction" << endl;
+    std::cout << "Exception caught in  setComputeFExtFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -839,12 +839,12 @@ extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     st = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in  setComputeFExtFunction" << endl;
+    std::cout << "Exception caught in  setComputeFExtFunction" <<std::endl;
     st = SIC_ERROR;
   }
 
@@ -896,12 +896,12 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int idLaw, int idRe
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicInteraction" << endl;
+    std::cout << "Exception caught in sicInteraction" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -942,12 +942,12 @@ extern "C" int sicLagrangianLinearTIR(int nDof, int nRel, double *H, double *b)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicLagrangianLinearTIR" << endl;
+    std::cout << "Exception caught in sicLagrangianLinearTIR" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -981,9 +981,9 @@ extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *func
     interaction->setRelationPtr(relation);
   }
   catch(SiconosException e)
-    {cout << e.report() << endl;nId=SIC_ERROR;}
+    {cout << e.report() <<std::endl;nId=SIC_ERROR;}
   catch(...)
-    {cout << "Exception caught in sicLagrangianLinearTIR" << endl;nId=SIC_ERROR;}
+    {cout << "Exception caught in sicLagrangianLinearTIR" <<std::endl;nId=SIC_ERROR;}
 
   return nId;
 }
@@ -1004,12 +1004,12 @@ extern "C" int sicNewtonImpactNSL(double e)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicNewtonImpactNSL" << endl;
+    std::cout << "Exception caught in sicNewtonImpactNSL" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1034,12 +1034,12 @@ extern "C" int sicNonSmoothDynamicalSystem(int isBVP)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicNonSmoothDynamicalSystem" << endl;
+    std::cout << "Exception caught in sicNonSmoothDynamicalSystem" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1080,12 +1080,12 @@ extern "C" int sicModel(double t0, double T)
 
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicInteraction" << endl;
+    std::cout << "Exception caught in sicInteraction" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1110,12 +1110,12 @@ extern "C" int sicTimeDiscretisation(double h)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicTimeDiscretisation" << endl;
+    std::cout << "Exception caught in sicTimeDiscretisation" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1141,12 +1141,12 @@ extern "C" int sicSimulationTimeStepping(int idTime)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicSimulationTimeStepping" << endl;
+    std::cout << "Exception caught in sicSimulationTimeStepping" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1185,12 +1185,12 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicOneStepIntegratorMoreau" << endl;
+    std::cout << "Exception caught in sicOneStepIntegratorMoreau" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1229,12 +1229,12 @@ extern "C" int sicOneStepIntegratorLsodar()
   }
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicOneStepIntegratorLsodar" << endl;
+    std::cout << "Exception caught in sicOneStepIntegratorLsodar" <<std::endl;
     nId = SIC_ERROR;
   }
 
@@ -1260,12 +1260,12 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
 
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
     nId = SIC_ERROR;
   }
   catch (...)
   {
-    cout << "Exception caught in sicOneStepNSProblemLCP" << endl;
+    std::cout << "Exception caught in sicOneStepNSProblemLCP" <<std::endl;
     nId = SIC_ERROR;
   }
 

@@ -57,10 +57,10 @@ private:
 public:
 
   /** Build a LagrangianLinearTIDSXML object from a DOM tree describing a LagrangianLinearTIDS
-   *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
+   *   \param DSNode : the LagrangianLinearTIDS DOM tree
    *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
    */
-  LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
+  LagrangianLinearTIDSXML(xmlNode * DSNode, bool isBVP);
 
   /** Destructor */
   ~LagrangianLinearTIDSXML();

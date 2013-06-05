@@ -35,7 +35,7 @@
 #include "debug.h"
 
 //#define OSNS_DEBUG
-using namespace std;
+
 OneStepNSProblem::OneStepNSProblem():
   _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
@@ -45,7 +45,7 @@ OneStepNSProblem::OneStepNSProblem():
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
-OneStepNSProblem::OneStepNSProblem(const string& pbType,
+OneStepNSProblem::OneStepNSProblem(const std::string& pbType,
                                    SP::OneStepNSProblemXML osnspbxml):
 /*_nspbType(pbType),*/ _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
   _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
@@ -108,7 +108,7 @@ OneStepNSProblem::OneStepNSProblem(SP::OneStepNSProblemXML osnspbxml):
 
 }
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const int newNumericsSolverId):
+OneStepNSProblem::OneStepNSProblem(const std::string& pbType, const std::string& newId, const int newNumericsSolverId):
   _numerics_solver_id(newNumericsSolverId),/*_nspbType(pbType),*/ _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
@@ -124,7 +124,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
   printf("OneStepNSProblem::OneStepNSProblem 2: Depressed inertface, first parameter ignored, removed it.\n");
 }
 
-OneStepNSProblem::OneStepNSProblem(const string& newId, const int newNumericsSolverId):
+OneStepNSProblem::OneStepNSProblem(const std::string& newId, const int newNumericsSolverId):
   _numerics_solver_id(newNumericsSolverId), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0), _hasBeenUpdated(false)
 {
 
@@ -656,7 +656,7 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
     }
     else if (osiType == OSI::D1MINUSLINEAR)
     {
-      DEBUG_PRINT("OneStepNSProblem::getOSIMaps  for osiType   OSI::D1MINUSLINEAR" );
+      DEBUG_PRINT("OneStepNSProblem::getOSIMaps  for osiType   OSI::D1MINUSLINEAR");
       /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
       if (dsType == Type::LagrangianDS or dsType == Type::LagrangianLinearTIDS)
       {
@@ -691,8 +691,8 @@ void OneStepNSProblem::getOSIMaps(SP::Interaction inter, MapOfDSMatrices& centra
 
 void OneStepNSProblem::printStat()
 {
-  cout << " CPU time for solving : " << _CPUtime / (double)CLOCKS_PER_SEC << endl;
-  cout << " Number of iterations done: " << _nbIter << endl;
+  std::cout << " CPU time for solving : " << _CPUtime / (double)CLOCKS_PER_SEC <<std::endl;
+  std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
 
 void OneStepNSProblem::clear()

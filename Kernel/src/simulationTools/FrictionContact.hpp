@@ -100,7 +100,7 @@ public:
    *  \param int dim (2D or 3D) of the friction-contact problem
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param string id of the problem (optional)
+   *  \param std::string id of the problem (optional)
    */
   FrictionContact(int dimPb, const int newNumericsSolverId = SICONOS_FRICTION_3D_NSGS ,
                   const std::string& newId = "unamed_friction_contact_problem");

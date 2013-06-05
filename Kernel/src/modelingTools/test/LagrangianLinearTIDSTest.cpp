@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianLinearTIDSTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -81,10 +81,10 @@ void LagrangianLinearTIDSTest::tearDown()
 // xml constructor (1), without plugin
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
 {
-  cout << "===========================================" << endl;
-  cout << "=== LagrangianLinearTIDS tests start ...===" << endl;
-  cout << "===========================================" << endl;
-  cout << "--> Test: constructor xml." << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "=== LagrangianLinearTIDS tests start ...===" <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "--> Test: constructor xml." <<std::endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(tmpxml1))
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1A : ", Type::value(*ds) == Type::LagrangianLinearTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->number() == 13, true);
@@ -97,23 +97,23 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1I : ", ds->getMass() == *mass, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1J : ", ds->getK() == *K, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1K : ", ds->getC() == *C, true);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 
 // Mass, K, C
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
 {
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass, *K, *C));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", Type::value(*ds) == Type::LagrangianLinearTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->number() == 8, true);
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getNdof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2E : ", ds->getQ0() == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2F : ", ds->getVelocity0() == *velocity0, true);
-  cout << "--> Test: constructor 2." << endl;
+  std::cout << "--> Test: constructor 2." <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2G : ", ds->getQ() == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2H : ", ds->getVelocity() == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getMass() == *mass, true);
@@ -129,13 +129,13 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   (*x01)(1) = 1;
   (*x01)(2) = 2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getFExt() == time* *x01, true);
-  cout << "--> Constructor 2 test ended with success." << endl;
+  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
 // only  Mass
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
 {
-  cout << "--> Test: constructor 3." << endl;
+  std::cout << "--> Test: constructor 3." <<std::endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", Type::value(*ds) == Type::LagrangianLinearTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->number() == 8, true);
@@ -160,12 +160,12 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   (*x01)(2) = 2;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getFExt() == time* *x01, true);
-  cout << "--> Constructor 3 test ended with success." << endl;
+  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 
 void LagrangianLinearTIDSTest::testcomputeDS()
 {
-  cout << "-->Test: computeDS." << endl;
+  std::cout << "-->Test: computeDS." <<std::endl;
   SP::DynamicalSystem ds(new LagrangianLinearTIDS(tmpxml1));
   SP::LagrangianLinearTIDS copy = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
@@ -177,13 +177,13 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(*mass, *(vf->vectorPtr(1))) == (copy->getFExt() - prod(*K, *(copy->q())) - prod(*C, *(copy->getVelocity()))) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->block(1, 0))) == (-1.0 * *K) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->block(1, 1))) == (-1.0 * *C) , true);
-  cout << "--> computeDS test ended with success." << endl;
+  std::cout << "--> computeDS test ended with success." <<std::endl;
 
 
 }
 void LagrangianLinearTIDSTest::End()
 {
-  cout << "==============================================" << endl;
-  cout << " ===== End of LagrangianLinearTIDS tests =====" << endl;
-  cout << "==============================================" << endl;
+  std::cout << "==============================================" <<std::endl;
+  std::cout << " ===== End of LagrangianLinearTIDS tests =====" <<std::endl;
+  std::cout << "==============================================" <<std::endl;
 }

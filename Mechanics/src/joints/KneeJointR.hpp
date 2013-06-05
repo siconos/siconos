@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel  Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
 /** \file NewtonEulerR.hpp
  */
@@ -29,6 +29,8 @@
 class KneeJointR : public NewtonEulerR
 {
 public:
+  /** Number of equalities that defines the jiont
+   */
   static int _sNbEqualities;
 protected:
   /** serialization hooks
@@ -39,8 +41,9 @@ protected:
    */
   SP::SiconosVector _P0;
 
-  /** Pointers on the concerned dynamical systems*/
+  /** Pointers on the first concerned dynamical system*/
   SP::NewtonEulerDS _d1;
+  /** Pointers on the second concerned dynamical system*/
   SP::NewtonEulerDS _d2;
 
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
@@ -85,18 +88,26 @@ public:
 
 protected:
 
-  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
+                     double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
+
   /** \warning, the following function should also depend on q */
-  virtual void DotJd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  virtual void DotJd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
-public:
-  double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
+                        double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
+  virtual void DotJd1(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13);
+
+
+//public:
+  double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13,
+            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
+            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
+            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 };
 
 
 
 TYPEDEF_SPTR(KneeJointR)
-#endif // BEAMRELATION_H
+#endif // KneeJointRELATION_H

@@ -21,7 +21,7 @@
 #include "Actuator.hpp"
 #include "TimeDiscretisation.hpp"
 
-using namespace std;
+
 using namespace EventFactory;
 
 void ActuatorEvent::process(Simulation& sim)

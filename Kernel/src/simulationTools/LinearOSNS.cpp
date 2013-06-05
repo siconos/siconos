@@ -38,7 +38,7 @@
 #include "LagrangianLinearTIDS.hpp"
 
 
-using namespace std;
+
 using namespace RELATION;
 //#define LINEAROSNS_DEBUG
 //#define DEBUG_STDOUT
@@ -50,7 +50,7 @@ LinearOSNS::LinearOSNS(): _MStorageType(0), _keepLambdaAndYState(false)
 }
 // xml constructor
 LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
-                       const string & name) :
+                       const std::string & name) :
   OneStepNSProblem(onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(false)
 {
   // Read storage type if given (optional , default = dense)
@@ -59,8 +59,8 @@ LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
 }
 
 // Constructor from a set of data
-LinearOSNS::LinearOSNS(const int numericsSolverId,  const string& name,
-                       const string& newId):
+LinearOSNS::LinearOSNS(const int numericsSolverId,  const std::string& name,
+                       const std::string& newId):
   OneStepNSProblem(newId, numericsSolverId), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
@@ -191,14 +191,14 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
 
     // IFDEF LINEAROSNS_DEBUG
-    //   COUT<<"\NLINEAROSNS::COMPUTEDIAGONALINTERACTIONBLOCK"<<ENDL;
-    //   STD::COUT << "LEVELMIN()" << LEVELMIN()<<STD::ENDL;
-    //   STD::COUT << "INDEXSET :"<< INDEXSET << STD::ENDL;
-    //   STD::COUT << "VD :"<< VD << STD::ENDL;
+    //   STD::COUT<<"\NLINEAROSNS::COMPUTEDIAGONALINTERACTIONBLOCK"<<ENDL;
+    //    STD::COUT << "LEVELMIN()" << LEVELMIN()<<STD::ENDL;
+    //    STD::COUT << "INDEXSET :"<< INDEXSET << STD::ENDL;
+    //    STD::COUT << "VD :"<< VD << STD::ENDL;
     //   INDEXSET->DISPLAY();
-    //   STD::COUT << "DS1 :" << STD::ENDL;
+    //    STD::COUT << "DS1 :" << STD::ENDL;
     //   DS1->DISPLAY();
-    //   STD::COUT << "DS2 :" << STD::ENDL;
+    //    STD::COUT << "DS2 :" << STD::ENDL;
     //   DS2->DISPLAY();
     // #ENDIF
 
@@ -326,7 +326,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
         if (d->boundaryConditions())
         {
-          for (vector<unsigned int>::iterator itindex =
+          for (std::vector<unsigned int>::iterator itindex =
                  d->boundaryConditions()->velocityIndices()->begin() ;
                itindex != d->boundaryConditions()->velocityIndices()->end();
                ++itindex)
@@ -341,9 +341,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       // (inter1 == inter2)
 #ifdef LINEAROSNS_DEBUG
-      cout << "leftInteractionBlock: ";
+      std::cout << "leftInteractionBlock: ";
       leftInteractionBlock->display();
-      cout << "centralInteractionBlocks: ";
+      std::cout << "centralInteractionBlocks: ";
       centralInteractionBlocks[ds->number()]->display();
 #endif
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
@@ -495,7 +495,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
       if (d->boundaryConditions())
       {
-        for (vector<unsigned int>::iterator itindex =
+        for (std::vector<unsigned int>::iterator itindex =
                d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
@@ -630,7 +630,7 @@ void LinearOSNS::preCompute(double time)
                           ->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
-  //  std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
+  //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
   if (_levelMin == LEVELMAX)
@@ -646,7 +646,7 @@ void LinearOSNS::preCompute(double time)
     //    _M->fill(indexSet);
     _M->fill(indexSet, !_hasBeenUpdated);
 #ifdef LINEAROSNS_DEBUG
-    cout << "M matrix: ";
+    std::cout << "M matrix: ";
     _M->display();
 #endif
     //      updateOSNSMatrix();
@@ -731,7 +731,7 @@ void LinearOSNS::postCompute()
     // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
 #ifdef LINEAROSNS_DEBUG
-    cout << "Contact force: ";
+    std::cout << "Contact force: ";
     lambda->display();
 #endif
   }
@@ -740,19 +740,19 @@ void LinearOSNS::postCompute()
 
 void LinearOSNS::display() const
 {
-  cout << "_M  ";
+  std::cout << "_M  ";
   if (_M) _M->display();
-  else cout << "-> NULL" << endl;
-  cout << endl << " q : " ;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout <<std::endl << " q : " ;
   if (_q) _q->display();
-  else cout << "-> NULL" << endl;
-  cout << "w  ";
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "w  ";
   if (_w) _w->display();
-  else cout << "-> NULL" << endl;
-  cout << endl << "z : " ;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout <<std::endl << "z : " ;
   if (_z) _z->display();
-  else cout << "-> NULL" << endl;
-  cout << "==========================" << endl;
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "==========================" <<std::endl;
 }
 
 void LinearOSNS::saveNSProblemToXML()

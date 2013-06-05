@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "RelayNSLXMLTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -49,7 +49,7 @@ void RelayNSLXMLTest::testGetC()
   double c = RNonSmoothLaw.getC();
 
   CPPUNIT_ASSERT_MESSAGE("testGetC : c", c == 0.054);
-  cout << "RelayNSLXMLTest >>> testGetC ...................................... OK\n ";
+  std::cout << "RelayNSLXMLTest >>> testGetC ...................................... OK\n ";
 }
 
 void RelayNSLXMLTest::testGetD()
@@ -57,7 +57,7 @@ void RelayNSLXMLTest::testGetD()
   double d = RNonSmoothLaw.getD();
 
   CPPUNIT_ASSERT_MESSAGE("testGetD : d", d == 0.064);
-  cout << "RelayNSLXMLTest >>> testGetD ...................................... OK\n ";
+  std::cout << "RelayNSLXMLTest >>> testGetD ...................................... OK\n ";
 }
 
 

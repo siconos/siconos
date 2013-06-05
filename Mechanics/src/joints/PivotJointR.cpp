@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel  Copyright INRIA 2005-2012.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
 /*! \file PivotJointR.cpp
 
@@ -208,7 +208,7 @@ void PivotJointR::computeh(const double time, Interaction& inter)
   SP::NewtonEulerDS lds;
   it = inter.dynamicalSystemsBegin();
   lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
-  if (lds != _d1)
+  if(lds != _d1)
   {
     printf("PivotJointR::computeh order of DS1 wrong.");
     exit(1);
@@ -224,12 +224,12 @@ void PivotJointR::computeh(const double time, Interaction& inter)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if (_d2)
+  if(_d2)
   {
     /*check order of ds:*/
     it++;
     lds = std11::static_pointer_cast<NewtonEulerDS> (*it);
-    if (lds != _d2)
+    if(lds != _d2)
     {
       printf("PivotJointR::computeh order of DS2 wrong.");
       exit(1);

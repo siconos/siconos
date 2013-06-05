@@ -139,12 +139,12 @@ public:
   }
 
   /** To get the name of Jach[i] plugin
-  *  \return a string
+  *  \return a std::string
   const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
   */
 
   /** To get the name of Jacg[i] plugin
-  *  \return a string
+  *  \return a std::string
   const std::string getJacgName(unsigned int i) const {return Jacg[i]->getPluginName();}
   */
 

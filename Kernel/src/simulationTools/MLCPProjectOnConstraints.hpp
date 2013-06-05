@@ -62,7 +62,7 @@ public:
   /** constructor from data
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
-   *  \param String: id of the problem (default = "unamed")
+   *  \param std::string: id of the problem (default = "unamed")
    */
   MLCPProjectOnConstraints(const int newNewNumericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 

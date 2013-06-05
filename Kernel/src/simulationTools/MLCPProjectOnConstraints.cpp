@@ -27,7 +27,7 @@
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "LagrangianLinearTIDS.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 using namespace Siconos;
 //#define MLCPPROJ_DEBUG
@@ -54,8 +54,8 @@ MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int newNumericsSolverId
 
 void MLCPProjectOnConstraints::display() const
 {
-  cout << "======= MLCPProjectOnConstraints of size " << _sizeOutput << " with: " << endl;
-  cout << "======= m " << _m << " _n " << _n << endl;
+  std::cout << "======= MLCPProjectOnConstraints of size " << _sizeOutput << " with: " <<std::endl;
+  std::cout << "======= m " << _m << " _n " << _n <<std::endl;
   LinearOSNS::display();
 }
 void MLCPProjectOnConstraints::updateInteractionBlocks()
@@ -385,7 +385,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
   SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
 
   bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
-  //  cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
+  //  std::cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
 
 
   if (indexSet->properties().symmetric)
@@ -414,11 +414,11 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
                 (_M)->computeSizeForProjection(inter);
 
         // #ifdef MLCPPROJ_DEBUG
-        //       cout<<"\nMLCPProjectOnConstraints::updateInteractionBlocks()"<<endl;
-        //       std::cout << "indexSet :"<< indexSet << std::endl;
+        //       std::cout<<"\nMLCPProjectOnConstraints::updateInteractionBlocks()"<<endl;
+        //        std::cout << "indexSet :"<< indexSet << std::endl;
         //       indexSet->display();
-        //       std::cout << "vi :"<< *vi << std::endl;
-        //       std::cout << "indexSet->blockProj[*vi]: before"<< indexSet->blockProj[*vi] << std::endl;
+        //        std::cout << "vi :"<< *vi << std::endl;
+        //        std::cout << "indexSet->blockProj[*vi]: before"<< indexSet->blockProj[*vi] << std::endl;
         // #endif
 
         if (! indexSet->blockProj[*vi])
@@ -426,7 +426,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
           indexSet->blockProj[*vi].reset(new SimpleMatrix(sizeY, sizeY));
         }
         // #ifdef MLCPPROJ_DEBUG
-        //       std::cout << "indexSet->blockProj[*vi]: after"<< indexSet->blockProj[*vi] << std::endl;
+        //        std::cout << "indexSet->blockProj[*vi]: after"<< indexSet->blockProj[*vi] << std::endl;
         // #endif
 
         computeDiagonalInteractionBlock(*vi);
@@ -524,27 +524,27 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 
 #ifdef MLCPPROJ_DEBUG
-  cout << "\nMLCPProjectOnConstraints::computeDiagonalInteractionBlock" << endl;
+  std::cout << "\nMLCPProjectOnConstraints::computeDiagonalInteractionBlock" <<std::endl;
   std::cout << "levelMin()" << levelMin() << std::endl;
-  //  std::cout << "indexSet :"<< indexSet << std::endl;
-  //  std::cout << "vd :"<< vd << std::endl;
+  //   std::cout << "indexSet :"<< indexSet << std::endl;
+  //   std::cout << "vd :"<< vd << std::endl;
   //  indexSet->display();
-  // std::cout << "DS1 :" << std::endl;
+  //  std::cout << "DS1 :" << std::endl;
   // DS1->display();
-  // std::cout << "DS2 :" << std::endl;
+  //  std::cout << "DS2 :" << std::endl;
   // DS2->display();
 #endif
   assert(indexSet->blockProj[vd]);
   SP::SiconosMatrix currentInteractionBlock = indexSet->blockProj[vd];
 
 #ifdef MLCPPROJ_DEBUG
-  //    std::cout<<"MLCPProjectOnConstraints::computeDiagonalInteractionBlock  "<<std::endl;
+  //     std::cout<<"MLCPProjectOnConstraints::computeDiagonalInteractionBlock  "<<std::endl;
   //    currentInteractionBlock->display();
   std::cout << "sizeY " << sizeY  << std::endl;
   std::cout <<  "blockProj " <<  indexSet->blockProj[vd].get() << " of edge " << vd << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter->getId() <<  std::endl;
-  //std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+  // std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
   //inter1->display();
-  //std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+  // std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
   //inter2->display();
 
 #endif
@@ -609,7 +609,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       if (lds->boundaryConditions()) // V.A. Should we do that ?
       {
-        for (vector<unsigned int>::iterator itindex =
+        for (std::vector<unsigned int>::iterator itindex =
                lds->boundaryConditions()->velocityIndices()->begin() ;
              itindex != lds->boundaryConditions()->velocityIndices()->end();
              ++itindex)
@@ -623,10 +623,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       // (inter1 == inter2)
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       //
-      //        cout<<"LinearOSNS : leftUBlock\n";
+      //        std::cout<<"LinearOSNS : leftUBlock\n";
       //        work->display();
       work->trans();
-      //        cout<<"LinearOSNS::computeInteractionBlock leftInteractionBlock"<<endl;
+      //        std::cout<<"LinearOSNS::computeInteractionBlock leftInteractionBlock"<<endl;
       //        leftInteractionBlock->display();
 
 
@@ -663,10 +663,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
       inter->getLeftInteractionBlockForDS(ds, leftInteractionBlock);
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
-      cout << "LinearOSNS : leftUBlock\n";
+      std::cout << "LinearOSNS : leftUBlock\n";
       work->display();
       work->trans();
-      cout << "LinearOSNS::computeInteractionBlock workT2" << endl;
+      std::cout << "LinearOSNS::computeInteractionBlock workT2" <<std::endl;
       workT2->display();
       workT2->PLUForwardBackwardInPlace(*work);
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
@@ -700,7 +700,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
         inter->getLeftInteractionBlockForDSProjectOnConstraints(ds, leftInteractionBlock);
         // #ifdef MLCPPROJ_DEBUG
-        //         std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case leftInteractionBlock : " << std::endl;
+        //          std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case leftInteractionBlock : " << std::endl;
         //         leftInteractionBlock->display();
         // #endif
 
@@ -710,7 +710,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         work->trans();
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         // #ifdef MLCPPROJ_DEBUG
-        //         std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case currentInteractionBlock : "<< std::endl;
+        //          std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - NewtonEuler case currentInteractionBlock : "<< std::endl;
         //         currentInteractionBlock->display();
         // #endif
 
@@ -795,9 +795,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       std::cout << "sizeY1 " << sizeY1  << std::endl;
       std::cout << "sizeY2 " << sizeY2  << std::endl;
       std::cout <<  "upper_blockProj " <<  indexSet->upper_blockProj[ed].get() << " of edge " << ed << " of size " << currentInteractionBlock->size(0) << " x " << currentInteractionBlock->size(0) << " for interaction " << inter1->getId() << " and interaction " <<  inter2->getId() <<  std::endl;
-      //std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
+      // std::cout<<"inter1->display() "<< inter1->getId()<< std::endl;
       //inter1->display();
-      //std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
+      // std::cout<<"inter2->display() "<< inter2->getId()<< std::endl;
       //inter2->display();
 
 #endif
@@ -878,7 +878,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
           if (d->boundaryConditions()) // V.A. Should we do that ?
           {
-            for (vector<unsigned int>::iterator itindex =
+            for (std::vector<unsigned int>::iterator itindex =
                    d->boundaryConditions()->velocityIndices()->begin() ;
                  itindex != d->boundaryConditions()->velocityIndices()->end();
                  ++itindex)
@@ -1052,7 +1052,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       SP::SiconosVector tmp(new SiconosVector(*(lr->q())));
       prod(*aux, *aBuff, *(tmp), false);
       //prod(*aux,*lambda,*(lr->q()),false);
-      std:: cout << " tmp =  tmp + J^T * lambda" << std::endl;
+      std:: std::cout << " tmp =  tmp + J^T * lambda" << std::endl;
       tmp->display();
 #endif
 
@@ -1070,14 +1070,14 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       // aux->trans();
 
       // SP::SiconosVector tmp (new SiconosVector(*(lr->q())));
-      // std:: cout << " tmp ="<<std::endl;
+      // std:: std::cout << " tmp ="<<std::endl;
       // tmp->display();
-      // std:: cout << " lr->q() ="<<std::endl;
+      // std:: std::cout << " lr->q() ="<<std::endl;
       // lr->q()->display();
 
       // //prod(*aux,*lambda,*(lr->q()),false);
       // prod(*aux,*aBuff,*(tmp),false);
-      // std:: cout << " tmp =  tmp + J * lambda"<<std::endl;
+      // std:: std::cout << " tmp =  tmp + J * lambda"<<std::endl;
       // tmp->display();
 
 
@@ -1096,7 +1096,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //   SP::SiconosVector q = d->q();
 
       //   *q +=  *d->p(0);
-      //   std::cout << " q=" << std::endl;
+      //    std::cout << " q=" << std::endl;
       //   q->display();
       //   itDS++;
       // }
@@ -1190,9 +1190,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
           _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + equalitySize1;
           _numerics_problem.blocksIsComp[_curBlock] = 0;
           // #ifdef MLCPPROJ_DEBUG
-          //       std::cout << "_curBlock : " << _curBlock <<std::endl;
-          //       std::cout << "_numerics_problem.blocksRows["<<_curBlock+1 <<" ] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
-          //       std::cout << "_numerics_problem.blocksIsComp["<<_curBlock <<" ] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+          //        std::cout << "_curBlock : " << _curBlock <<std::endl;
+          //        std::cout << "_numerics_problem.blocksRows["<<_curBlock+1 <<" ] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
+          //        std::cout << "_numerics_problem.blocksIsComp["<<_curBlock <<" ] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
           // #endif
 
           _curBlock++;
@@ -1203,9 +1203,9 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
           _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + inequalitySize1;
           _numerics_problem.blocksIsComp[_curBlock] = 1;
           // #ifdef MLCPPROJ_DEBUG
-          //       std::cout << "_curBlock : " << _curBlock <<std::endl;
-          //       std::cout << "_numerics_problem.blocksRows["<<_curBlock+1<< "] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
-          //       std::cout << "_numerics_problem.blocksIsComp["<<_curBlock<< "] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+          //        std::cout << "_curBlock : " << _curBlock <<std::endl;
+          //        std::cout << "_numerics_problem.blocksRows["<<_curBlock+1<< "] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
+          //        std::cout << "_numerics_problem.blocksIsComp["<<_curBlock<< "] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
           // #endif
 
           _curBlock++;
@@ -1213,7 +1213,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         }
       }
       // #ifdef MLCPPROJ_DEBUG
-      //   std::cout << "_m : " << _m <<std::endl;
-      //   std::cout << "_n : " << _n <<std::endl;
+      //    std::cout << "_m : " << _m <<std::endl;
+      //    std::cout << "_n : " << _n <<std::endl;
       // #endif
     }

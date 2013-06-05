@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LinearTIRXMLTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -39,7 +39,7 @@ void LinearTIRXMLTest::setUp()
   }
   catch (SiconosException e)
   {
-    cout << "Error in LinearTIRXMLTest : " << e.report() << endl;
+     std::cout << "Error in LinearTIRXMLTest : " << e.report() <<std::endl;
     exit(0);
   }
 
@@ -64,11 +64,11 @@ void LinearTIRXMLTest::testGetC()
     CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m.size(0)", m.size(0) == 2);
     CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m.size(0)", m.size(1) == 3);
     CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m", m(0, 2) == 3);
-    cout << "LinearTIRXMLTest >>> testGetC ..................................... OK\n ";
+    std::cout << "LinearTIRXMLTest >>> testGetC ..................................... OK\n ";
   }
   catch (SiconosException e)
   {
-    cout << "LinearTIRXMLTest >>> testGetC .................................... failed!\n" << e.report() << endl;
+    std::cout << "LinearTIRXMLTest >>> testGetC .................................... failed!\n" << e.report() <<std::endl;
     exit(0);
   }
 }
@@ -81,7 +81,7 @@ void LinearTIRXMLTest::testGetD()
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m.size(0)", m.size(0) == 2);
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m.size(0)", m.size(1) == 3);
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : m", m(0, 2) == 3);
-  cout << "LinearTIRXMLTest >>> testGetD ..................................... OK\n ";
+  std::cout << "LinearTIRXMLTest >>> testGetD ..................................... OK\n ";
 }
 
 void LinearTIRXMLTest::testGeta()
@@ -93,7 +93,7 @@ void LinearTIRXMLTest::testGeta()
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : a(0)", a(0) == 0.0);
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : a(1)", a(1) == 5.555);
   CPPUNIT_ASSERT_MESSAGE("testGetSiconosMatrixValue : a(2)", a(2) == -5.555);
-  cout << "LinearTIRXMLTest >>> testGetA ..................................... OK\n ";
+  std::cout << "LinearTIRXMLTest >>> testGetA ..................................... OK\n ";
 }
 
 void LinearTIRXMLTest::testIfAttributeNotPresent()

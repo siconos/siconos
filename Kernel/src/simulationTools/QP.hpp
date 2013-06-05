@@ -145,17 +145,17 @@ public:
   int compute(double);
 
   /** copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
+   *
    */
   void saveNSProblemToXML();
 
   /** copy the matrix Q of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
+   *
    */
   void saveQToXML();
 
   /** copy the vector p of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
+   *
    */
   void savePToXML();
 

@@ -594,10 +594,10 @@ public:
    */
   void SolveByLeastSquares(SiconosMatrix& B);
 
- /** solves a system of linear equations A * X = B  (A=this)
-      with a general N-by-N matrix A using the Least squares method
-   *  \param[in,out] B as input: the RHS vector b - as output: the vector x
-   */
+  /** solves a system of linear equations A * X = B  (A=this)
+       with a general N-by-N matrix A using the Least squares method
+    *  \param[in,out] B as input: the RHS vector b - as output: the vector x
+    */
   void SolveByLeastSquares(SiconosVector& B);
 
   /** set to false all LU indicators. Useful in case of

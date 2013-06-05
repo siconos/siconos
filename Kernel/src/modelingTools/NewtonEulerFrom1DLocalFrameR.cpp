@@ -22,7 +22,7 @@
 #include <boost/math/quaternion.hpp>
 #include "NewtonEulerDS.hpp"
 //#define NERI_DEBUG
-using namespace std;
+
 
 //#define NEFC3D_DEBUG
 /*

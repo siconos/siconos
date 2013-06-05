@@ -28,7 +28,7 @@
 #include "NewtonImpactFrictionNSLXML.hpp"
 
 #include "NonSmoothLaw.hpp"
-using namespace std;
+
 
 
 InteractionXML::InteractionXML():
@@ -39,8 +39,8 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
   rootNode(interactionNode), sizeNode(NULL), yNode(NULL), lambdaNode(NULL), DSConcernedNode(NULL),  relationNode(NULL), nsLawNode(NULL)
 {
   xmlNodePtr node, node2;
-  string type;
-  string subType;
+  std::string type;
+  std::string subType;
   // size (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "size")))
     sizeNode = node;
@@ -126,7 +126,7 @@ void InteractionXML::setLambda(const SiconosVector& v)
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(lambdaNode, v);
 }
 
-void InteractionXML::getDSNumbers(vector<int>& dsNumbers)
+void InteractionXML::getDSNumbers(std::vector<int>& dsNumbers)
 {
   if (!hasAllDS())
     SiconosDOMTreeTools::getVector(DSConcernedNode, dsNumbers);
@@ -146,8 +146,8 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
 {
   XMLException::selfThrow("InteractionXML::loadInteraction - not implemented.");
 
-  //   string type;
-  //   string tmp;
+  //   std::string type;
+  //   std::string tmp;
   //   xmlNodePtr  node;
   //   RelationXML* newRelationXml;
   //   NonSmoothLawXML* nslxml;

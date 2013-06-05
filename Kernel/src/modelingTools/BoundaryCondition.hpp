@@ -42,15 +42,15 @@ class BoundaryCondition
 {
 public:
 
-  /** \fn BoundaryCondition(std::vector<unsigned int> * newVelocityIndices);
+  /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices);
    *  \brief Basic constructor
    *  \param the indices of the velocity subjected to prescribed velocities
    */
 
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
-  /** \fn BoundaryCondition(std::vector<unsigned int> *
-   * newVelocityIndices, SP::SiconosVector newVelocityValues);
+  /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
+   *                 SP::SiconosVector newVelocityValues);
    *  \brief Constructor with constant prescribed values
    *  \param the indices of the velocity subjected to prescribed velocities
    *  \param the values of the prescribed velocities
@@ -88,8 +88,8 @@ public:
   };
 
   /** allow to set a specified function to compute prescribedVelocity
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+   *  \param std::string : the complete path to the plugin
+   *  \param std::string : the name of the function to use in this plugin
    */
   void setComputePrescribedVelocityFunction(const std::string&  pluginPath, const std::string& functionName)
   {

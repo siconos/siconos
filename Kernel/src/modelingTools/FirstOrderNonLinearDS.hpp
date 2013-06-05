@@ -166,9 +166,9 @@ public:
 
   /** constructor from a set of data
    *  \param SiconosVector : initial state of this DynamicalSystem
-   *  \param string : plugin name for f of this DynamicalSystem
-   *  \param string : plugin name for jacobianfx of this DynamicalSystem
-   *  \exception RuntimeException
+   *  \param std::string : plugin name for f of this DynamicalSystem
+   *  \param std::string : plugin name for jacobianfx of this DynamicalSystem
+   *  \
    */
   FirstOrderNonLinearDS(const SiconosVector&, const std::string&, const std::string&);
 
@@ -370,8 +370,8 @@ public:
   // --- setters for functions to compute plugins ---
 
   /** to set a specified function to compute M
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
+   *  \param std::string pluginPath : the complete path to the plugin
+   *  \param the std::string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
   void setComputeMFunction(const std::string&  pluginPath, const std::string&  functionName);
@@ -382,8 +382,8 @@ public:
   void setComputeMFunction(FPtr1 fct);
 
   /** to set a specified function to compute f(x,t)
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param string functionName : the function name to use in this library
+   *  \param std::string pluginPath : the complete path to the plugin
+   *  \param std::string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
   void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
@@ -394,8 +394,8 @@ public:
   void setComputeFFunction(FPtr1 fct);
 
   /** to set a specified function to compute jacobianfx
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
+   *  \param std::string pluginPath : the complete path to the plugin
+   *  \param the std::string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
   void setComputeJacobianfxFunction(const std::string&  pluginPath, const std::string&  functionName);
@@ -432,7 +432,7 @@ public:
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
+   *
    */
   virtual void computeJacobianfx(double, bool  = false);
 
@@ -447,14 +447,14 @@ public:
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
+   *
    */
   void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
+   *
    */
   void computeJacobianRhsx(double, bool  = false);
 

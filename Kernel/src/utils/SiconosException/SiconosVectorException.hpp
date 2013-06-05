@@ -55,7 +55,6 @@ public:
   ~SiconosVectorException();
 
   /** static function which throw a SiconosVectorException
-   * \exception SiconosVectorException
    */
   static void selfThrow()  ;
 

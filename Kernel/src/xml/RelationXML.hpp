@@ -102,7 +102,7 @@ public:
   RELATION::TYPES getType() const ;
 
   /** Returns the sub-type of the Relation
-   *  \return a string.
+   *  \return a std::string.
    */
   RELATION::SUBTYPES getSubType() const;
 
@@ -123,12 +123,12 @@ public:
   // ================== h ==================
 
   /** To set the name of the plug-in function used to compute h.
-   *   \param a string.
+   *   \param a std::string.
    */
   void setHPlugin(const std::string&);
 
   /** To get the name of the plug-in function used to compute h.
-   *   \return a string.
+   *   \return a std::string.
    */
   std::string gethPlugin() const ;
 
@@ -164,7 +164,7 @@ public:
   };
 
   /** Return hDot plug-in name, if it exists
-   *   \return a string
+   *   \return a std::string
    */
   inline std::string gethDotPlugin() const
   {
@@ -184,7 +184,7 @@ public:
   }
 
   /** to save the hDot plug-in name
-   *   \param a string
+   *   \param a std::string
    */
   void setHDotPlugin(const std::string&);
 
@@ -196,12 +196,12 @@ public:
   // ================== g ==================
 
   /** To set the name of the plug-in function used to compute g.
-   *   \param a string.
+   *   \param a std::string.
    */
   void setGPlugin(const std::string&);
 
   /** To get the name of the plug-in function used to compute g.
-   *   \return a string.
+   *   \return a std::string.
    */
   std::string getgPlugin() const ;
 
@@ -223,14 +223,14 @@ public:
   // ================== jacobianH ==================
 
   /** To set the name of the plug-in function used to compute jacobianH.
-   *   \param a string.
+   *   \param a std::string.
    * \param index of jacobian
    */
   void setJacobianHPlugin(const std::string&, unsigned int);
 
   /** To get the name of the plug-in function used to compute jacobianH.
       \param index of jacobian
-      *   \return a string.
+      *   \return a std::string.
       */
   std::string getJacobianHPlugin(unsigned int) const ;
 
@@ -259,14 +259,14 @@ public:
   // ================== jacobianG ==================
 
   /** To set the name of the plug-in function used to compute jacobianG.
-   *   \param a string.
+   *   \param a std::string.
    *   \param index of jacobian, default = 0
    */
   void setJacobianGPlugin(const std::string&, unsigned int = 0);
 
   /** To get the name of the plug-in function used to compute jacobianG.
    * \param index of jacobian, default = 0
-   *   \return a string.
+   *   \return a std::string.
    */
   std::string getJacobianGPlugin(unsigned int = 0) const ;
 

@@ -65,7 +65,7 @@ public:
    */
   ~GlobalTest();
 
-  /** \fn bool hasFailed()
+  /**\fn   inline unsigned int getNumberOfTests() const
    * \brief return the total number of tests
    */
   inline unsigned int getNumberOfTests() const
@@ -73,7 +73,7 @@ public:
     return testsList.size();
   }  ;
 
-  /** \fn bool hasFailed()
+  /** \fn   inline unsigned int getNumberOfFailedTests() const
    * \brief return the number of tests that failed
    */
   inline unsigned int getNumberOfFailedTests() const

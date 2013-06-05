@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "NewtonImpactFrictionNSLXML.hpp"
-using namespace std;
+
 
 NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML():
   NonSmoothLawXML(), enNode(NULL), etNode(NULL), muNode(NULL)

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianDSTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -87,10 +87,10 @@ void LagrangianDSTest::tearDown()
 // xml constructor (1), without plugin
 void LagrangianDSTest::testBuildLagrangianDS1()
 {
-  cout << "===================================" << endl;
-  cout << "=== LagrangianDS tests start ...=== " << endl;
-  cout << "===================================" << endl;
-  cout << "--> Test: constructor xml." << endl;
+  std::cout << "===================================" <<std::endl;
+  std::cout << "=== LagrangianDS tests start ...=== " <<std::endl;
+  std::cout << "===================================" <<std::endl;
+  std::cout << "--> Test: constructor xml." <<std::endl;
   SP::LagrangianDS ds(new LagrangianDS(tmpxml1));
   SimpleMatrix M(3, 3);
   M.eye();
@@ -103,14 +103,14 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1E : ", ds->getQ() == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1F : ", ds->getVelocity() == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1F : ", ds->getMass() == M, true);
-  cout << "--> Constructor xml test ended with success." << endl;
+  std::cout << "--> Constructor xml test ended with success." <<std::endl;
 }
 
 
 // xml constructor (2), with plugins
 void LagrangianDSTest::testBuildLagrangianDS2()
 {
-  cout << "--> Test: constructor xml 2." << endl;
+  std::cout << "--> Test: constructor xml 2." <<std::endl;
   SP::LagrangianDS ds(new LagrangianDS(tmpxml2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->number() == 8, true);
@@ -150,13 +150,13 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianFInt(1) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianNNL(0) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2P : ", ds->getJacobianNNL(1) == M, true);
-  cout << "--> Constructor xml 2 test ended with success." << endl;
+  std::cout << "--> Constructor xml 2 test ended with success." <<std::endl;
 }
 
 // xml constructor (3)
 void LagrangianDSTest::testBuildLagrangianDS3()
 {
-  cout << "--> Test: constructor xml 3." << endl;
+  std::cout << "--> Test: constructor xml 3." <<std::endl;
   SP::LagrangianDS ds(new LagrangianDS(tmpxml3));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", Type::value(*ds) == Type::LagrangianDS, true);
 
@@ -190,13 +190,13 @@ void LagrangianDSTest::testBuildLagrangianDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3T : ", isPl["jacobianNNLq"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3T : ", isPl["jacobianNNLVelocity"], false);
 
-  cout << "--> Constructor xml 3 test ended with success." << endl;
+  std::cout << "--> Constructor xml 3 test ended with success." <<std::endl;
 }
 
 // constructor from data
 void LagrangianDSTest::testBuildLagrangianDS4()
 {
-  cout << "--> Test: constructor 4." << endl;
+  std::cout << "--> Test: constructor 4." <<std::endl;
 
   SP::LagrangianDS ds(new LagrangianDS(13, *q0, *velocity0, (*mass)));
   double time = 1.5;
@@ -215,14 +215,14 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianFIntVelocity"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianNNLq"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianNNLVelocity"], false);
-  cout << "--> Constructor 4 test ended with success." << endl;
+  std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
 // constructor from data
 void LagrangianDSTest::testBuildLagrangianDS5()
 {
-  cout << "--> Test: constructor 5." << endl;
-  string plugin = "TestPlugin:computeMass";
+  std::cout << "--> Test: constructor 5." <<std::endl;
+  std::string plugin = "TestPlugin:computeMass";
   SP::DynamicalSystem ds(new LagrangianDS(13, *q0, *velocity0, plugin));
   double time = 1.5;
   ds->initialize("TimeStepping", time);
@@ -241,20 +241,20 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianFIntVelocity"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianNNLq"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianNNLVelocity"], false);
-  cout << "--> Constructor 5 test ended with success." << endl;
+  std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 }
 
 void LagrangianDSTest::testcomputeDS()
 {
-  cout << "-->Test: computeDS." << endl;
+  std::cout << "-->Test: computeDS." <<std::endl;
   DynamicalSystem * ds(new LagrangianDS(tmpxml2));
   SP::LagrangianDS copy =  std11::static_pointer_cast<LagrangianDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
   ds->computeRhs(time);
-  cout << "-->Test: computeDS." << endl;
+  std::cout << "-->Test: computeDS." <<std::endl;
   ds->computeJacobianRhsx(time);
-  cout << "-->Test: computeDS." << endl;
+  std::cout << "-->Test: computeDS." <<std::endl;
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
   M(1, 1) = 2;
@@ -267,13 +267,13 @@ void LagrangianDSTest::testcomputeDS()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->block(1, 0))) == (copy->getJacobianFL(0)) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true);
-  cout << "--> computeDS test ended with success." << endl;
+  std::cout << "--> computeDS test ended with success." <<std::endl;
 
 
 }
 void LagrangianDSTest::End()
 {
-  cout << "======================================" << endl;
-  cout << " ===== End of LagrangianDS tests ===== " << endl;
-  cout << "======================================" << endl;
+  std::cout << "======================================" <<std::endl;
+  std::cout << " ===== End of LagrangianDS tests ===== " <<std::endl;
+  std::cout << "======================================" <<std::endl;
 }

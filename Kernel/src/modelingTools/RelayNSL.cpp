@@ -19,7 +19,7 @@
 
 #include "RelayNSL.hpp"
 #include "RelayNSLXML.hpp"
-using namespace std;
+
 
 // Default (private)
 RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)
@@ -56,13 +56,13 @@ bool RelayNSL::isVerified(void) const
 
 void RelayNSL::display() const
 {
-  cout << "------------------------------------" << endl;
-  cout << "____ data of the RelayNSL" << endl;
-  cout << "| nSLawSize : " << _size << endl;
-  cout << "| lb : " << _lb << endl;
-  cout << "| ub : " << _ub << endl;
-  cout << "____________________________" << endl;
-  cout << "------------------------------------" << endl;
+  std::cout << "------------------------------------" <<std::endl;
+  std::cout << "____ data of the RelayNSL" <<std::endl;
+  std::cout << "| nSLawSize : " << _size <<std::endl;
+  std::cout << "| lb : " << _lb <<std::endl;
+  std::cout << "| ub : " << _ub <<std::endl;
+  std::cout << "____________________________" <<std::endl;
+  std::cout << "------------------------------------" <<std::endl;
 }
 
 void RelayNSL::saveNonSmoothLawToXML()

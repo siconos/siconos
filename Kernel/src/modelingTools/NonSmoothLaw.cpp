@@ -19,7 +19,7 @@
 
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothLawXML.hpp"
-using namespace std;
+
 
 // Constructors
 // warning -> this is an abstract class, so constructors are usefull only for

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "OneStepIntegratorXML.hpp"
-using namespace std;
+
 
 OneStepIntegratorXML::OneStepIntegratorXML():
   rootNode(NULL), DSConcernedNode(NULL), interactionsConcernedNode(NULL)
@@ -36,7 +36,7 @@ OneStepIntegratorXML::OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode):
     interactionsConcernedNode = node;
 }
 
-void OneStepIntegratorXML::getDSNumbers(vector<int>& dsNumbers)
+void OneStepIntegratorXML::getDSNumbers(std::vector<int>& dsNumbers)
 {
   if (!hasAllDS())
     SiconosDOMTreeTools::getVector(DSConcernedNode, dsNumbers);
@@ -44,7 +44,7 @@ void OneStepIntegratorXML::getDSNumbers(vector<int>& dsNumbers)
     XMLException::selfThrow("OneStepIntegratorXML::getDSNumbers - The list of dynamical systems is missing.");
 }
 
-void OneStepIntegratorXML::getInteractionsNumbers(vector<int>& inNumbers)
+void OneStepIntegratorXML::getInteractionsNumbers(std::vector<int>& inNumbers)
 {
   if (!hasAllInteractions())
     SiconosDOMTreeTools::getVector(interactionsConcernedNode, inNumbers);

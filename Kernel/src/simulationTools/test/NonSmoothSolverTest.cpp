@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "NonSmoothSolverTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -44,10 +44,10 @@ void NonSmoothSolverTest::tearDown()
 // Default constructor
 void NonSmoothSolverTest::testBuildNonSmoothSolver0()
 {
-  cout << "===========================================" << endl;
-  cout << " ===== NonSmoothSolver tests start ...===== " << endl;
-  cout << "===========================================" << endl;
-  cout << "------- Default constructor test -------" << endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << " ===== NonSmoothSolver tests start ...===== " <<std::endl;
+  std::cout << "===========================================" <<std::endl;
+  std::cout << "------- Default constructor test -------" <<std::endl;
   SP::NonSmoothSolver NSS(new NonSmoothSolver());
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
@@ -60,13 +60,13 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverG : ", opt->nbParam == (int)NB_PARAM, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", !i1, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", !d1, false);
-  cout << "------- Default constructor NonSmoothSolver ok -------" << endl;
+  std::cout << "------- Default constructor NonSmoothSolver ok -------" <<std::endl;
 }
 
 // Basic constructor
 void NonSmoothSolverTest::testBuildNonSmoothSolver1()
 {
-  cout << "------- Basic constructor test -------" << endl;
+  std::cout << "------- Basic constructor test -------" <<std::endl;
   SP::NonSmoothSolver NSS(new NonSmoothSolver("NSGS", iparam, dparam));
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
@@ -89,13 +89,13 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  cout << "------- Basic Constructor NonSmoothSolver ok -------" << endl;
+  std::cout << "------- Basic Constructor NonSmoothSolver ok -------" <<std::endl;
 }
 
 // Copy constructor
 void NonSmoothSolverTest::testBuildNonSmoothSolver2()
 {
-  cout << "------- Copy constructor test -------" << endl;
+  std::cout << "------- Copy constructor test -------" <<std::endl;
   SP::NonSmoothSolver NSS0(new NonSmoothSolver("NSGS", iparam, dparam));
   SP::NonSmoothSolver NSS(new NonSmoothSolver(*NSS0));
 
@@ -120,13 +120,13 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  cout << "------- Constructor copy NonSmoothSolver ok -------" << endl;
+  std::cout << "------- Constructor copy NonSmoothSolver ok -------" <<std::endl;
 }
 
 // XML constructor
 void NonSmoothSolverTest::testBuildNonSmoothSolver3()
 {
-  cout << "------- XML constructor test -------" << endl;
+  std::cout << "------- XML constructor test -------" <<std::endl;
 
   // parse xml file:
   xmlDocPtr doc = xmlParseFile("NonSmoothSolverTest.xml");
@@ -172,12 +172,12 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  cout << "------- XML Constructor NonSmoothSolver ok -------" << endl;
+  std::cout << "------- XML Constructor NonSmoothSolver ok -------" <<std::endl;
 }
 
 void NonSmoothSolverTest::End()
 {
-  cout << "==========================================" << endl;
-  cout << " ===== End of NonSmoothSolver tests ===== " << endl;
-  cout << "==========================================" << endl;
+  std::cout << "==========================================" <<std::endl;
+  std::cout << " ===== End of NonSmoothSolver tests ===== " <<std::endl;
+  std::cout << "==========================================" <<std::endl;
 }

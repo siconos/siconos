@@ -19,10 +19,10 @@
 
 #include "FunctionTest.hpp"
 
-using namespace std;
 
 
-FunctionTest::FunctionTest(const string& newName, func f):
+
+FunctionTest::FunctionTest(const std::string& newName, func f):
   name(newName), isOk(false), fp(NULL)
 {
   fp = f;

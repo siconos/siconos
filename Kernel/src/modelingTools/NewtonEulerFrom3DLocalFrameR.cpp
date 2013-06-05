@@ -21,7 +21,7 @@
 #include "NewtonEulerFrom3DLocalFrameR.hpp"
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
-using namespace std;
+
 //#define NEFC3D_DEBUG
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'

@@ -55,11 +55,11 @@ void LinearsystemDSXMLTest::testGetAB()
   //  }
   //  catch(SiconosException e)
   //  {
-  //    cout << "LinearsystemDSXMLTest error : "<<e.report() <<endl;
+  //    std::cout << "LinearsystemDSXMLTest error : "<<e.report() <<endl;
   //    exit(0);
   //  }
 
-  cout << " LinearsystemDSXMLTest >>> testGetAB ................................ OK\n ";
+  std::cout << " LinearsystemDSXMLTest >>> testGetAB ................................ OK\n ";
 }
 
 void LinearsystemDSXMLTest::testGetUF()
@@ -71,5 +71,5 @@ void LinearsystemDSXMLTest::testGetUF()
   b = lsdsxml.getBVector();
   CPPUNIT_ASSERT_MESSAGE("testGetUF : U == vectorRef", U == vectorRef);
   CPPUNIT_ASSERT_MESSAGE("testGetUF : b == vectorRef", b == vectorRef);
-  cout << " LinearsystemDSXMLTest >>> testGetUF ................................ OK\n ";
+  std::cout << " LinearsystemDSXMLTest >>> testGetUF ................................ OK\n ";
 }

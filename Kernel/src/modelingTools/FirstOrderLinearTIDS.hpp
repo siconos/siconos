@@ -118,14 +118,14 @@ public:
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
+   *
    */
   void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
+   *
    */
   void computeJacobianRhsx(double, bool  = false);
 

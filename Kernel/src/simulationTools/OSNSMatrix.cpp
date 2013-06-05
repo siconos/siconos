@@ -20,7 +20,7 @@
 #include "OSNSMatrix.hpp"
 #include "Tools.hpp"
 //#define OSNSM_DEBUG
-using namespace std;
+
 
 void OSNSMatrix::updateSizeAndPositions(unsigned int& dim,
                                         SP::InteractionsGraph indexSet)
@@ -564,16 +564,16 @@ void OSNSMatrix::display() const
 {
   if (storageType == 0)
   {
-    cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" << endl;
+    std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
     if (! M1)
-      cout << " matrix = NULL pointer" << endl;
+      std::cout << " matrix = NULL pointer" <<std::endl;
     else M1->display();
   }
   else
   {
-    cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" << endl;
+    std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" <<std::endl;
     if (! M2)
-      cout << " matrix = NULL pointer" << endl;
+      std::cout << " matrix = NULL pointer" <<std::endl;
     else M2->display();
   }
 }

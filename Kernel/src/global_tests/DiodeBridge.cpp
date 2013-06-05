@@ -47,11 +47,11 @@
 
 #include "SiconosKernel.hpp"
 
-using namespace std;
+
 bool DiodeBridge()
 {
-  cout << " **************************************" << endl;
-  cout << " ******** Start diode bridge *********" << endl << endl << endl;
+  std::cout << " **************************************" <<std::endl;
+  std::cout << " ******** Start diode bridge *********" <<std::endl <<std::endl <<std::endl;
 
   double t0 = 0.0;
   double T = 5.0e-3;        // Total simulation time
@@ -60,7 +60,7 @@ bool DiodeBridge()
   double Cvalue = 1e-6;   // capacitance
   double Rvalue = 1e3;    // resistance
   double Vinit = 10.0;    // initial voltage
-  string Modeltitle = "DiodeBridge";
+  std::string Modeltitle = "DiodeBridge";
 
   bool res = false;
 
@@ -210,29 +210,29 @@ bool DiodeBridge()
 
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;
-    cout << endl << endl ;
+    std::cout <<std::endl <<std::endl ;
     if (norm < tol)
     {
-      cout << " ******** DiodeBridge test ended with success ********" << endl;
+      std::cout << " ******** DiodeBridge test ended with success ********" <<std::endl;
       res = true;
     }
     else
     {
-      cout << " ******** DiodeBridge test failed, results differ from those of reference file. ********" << endl;
+      std::cout << " ******** DiodeBridge test failed, results differ from those of reference file. ********" <<std::endl;
       res = false;
     }
 
-    cout << endl << endl;
+    std::cout <<std::endl <<std::endl;
   }
 
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << e.report() << endl;
+    std::cout << e.report() <<std::endl;
   }
   catch (...)
   {
-    cout << "Exception caught " << endl;
+    std::cout << "Exception caught " <<std::endl;
   }
 
   return res;

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include "LagrangianScleronomousRTest.hpp"
-using namespace std;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -64,15 +64,15 @@ void LagrangianScleronomousRTest::tearDown()
 // xml constructor (scleronomic case)
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
 {
-  cout << "==============================================" << endl;
-  cout << "=== LagrangianScleronomousR tests start ...=== " << endl;
-  cout << "==============================================" << endl;
+  std::cout << "==============================================" <<std::endl;
+  std::cout << "=== LagrangianScleronomousR tests start ...=== " <<std::endl;
+  std::cout << "==============================================" <<std::endl;
   SP::LagrangianScleronomousR R1(new LagrangianScleronomousR(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == RELATION::ScleronomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->gethName() == "TestPlugin:hSclero", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getJachqName() == "TestPlugin:G0Sclero", true);
-  cout << " xml Constructor (1) LagrangianScleronomousR ok" << endl;
+  std::cout << " xml Constructor (1) LagrangianScleronomousR ok" <<std::endl;
 }
 
 // data constructor:
@@ -83,13 +83,13 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == RELATION::ScleronomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->gethName() == "TestPlugin:hSclero", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getJachqName() == "TestPlugin:G0Sclero", true);
-  cout << " data Constructor LagrangianScleronomousR ok" << endl;
+  std::cout << " data Constructor LagrangianScleronomousR ok" <<std::endl;
 }
 
 
 void LagrangianScleronomousRTest::End()
 {
-  cout << "=================================================" << endl;
-  cout << " ===== End of LagrangianScleronomousR tests ===== " << endl;
-  cout << "=================================================" << endl;
+  std::cout << "=================================================" <<std::endl;
+  std::cout << " ===== End of LagrangianScleronomousR tests ===== " <<std::endl;
+  std::cout << "=================================================" <<std::endl;
 }

@@ -22,7 +22,7 @@
 //
 #include "LagrangianDS.hpp"
 
-using namespace std;
+
 using namespace RELATION;
 
 // Xml constructor
@@ -170,26 +170,26 @@ LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)
 void LagrangianLinearTIR::display() const
 {
   LagrangianR::display();
-  cout << "===== Lagrangian Linear Relation display ===== " << endl;
-  cout << " C: " << endl;
+  std::cout << "===== Lagrangian Linear Relation display ===== " <<std::endl;
+  std::cout << " C: " <<std::endl;
   if (_jachq)
     _jachq->display();
   else
-    cout << " -> NULL " << endl;
-  cout << " e: " << endl;
+    std::cout << " -> NULL " <<std::endl;
+  std::cout << " e: " <<std::endl;
   if (_e)
     _e->display();
   else
-    cout << " -> NULL " << endl;
-  cout << " D: " << endl;
+    std::cout << " -> NULL " <<std::endl;
+  std::cout << " D: " <<std::endl;
   if (_jachlambda)
     _jachlambda->display();
   else
-    cout << " -> NULL " << endl;
-  cout << " F: " << endl;
+    std::cout << " -> NULL " <<std::endl;
+  std::cout << " F: " <<std::endl;
   if (_F)
     _F->display();
   else
-    cout << " -> NULL " << endl;
-  cout << "===================================== " << endl;
+    std::cout << " -> NULL " <<std::endl;
+  std::cout << "===================================== " <<std::endl;
 }

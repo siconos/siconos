@@ -20,7 +20,7 @@
 #include "RuntimeException.hpp"
 #include "Tools.hpp"
 #include <cmath>
-using namespace std;
+
 
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
@@ -134,7 +134,7 @@ void TimeDiscretisation::setCurrentTimeStep(double newH)
   _h = newH;
   if (_tdCase == 1)
   {
-    cout << "TimeDiscretisation::setCurrentTimeStep(newH) Warning: you change the time step whereas the Time Discretisation was built with a complete tk vector. This will result in a change in all future time steps: from now on, h = newH until next call to this function. " << endl;
+    std::cout << "TimeDiscretisation::setCurrentTimeStep(newH) Warning: you change the time step whereas the Time Discretisation was built with a complete tk vector. This will result in a change in all future time steps: from now on, h = newH until next call to this function. " <<std::endl;
     _tdCase = 2;
     _tk[0] = _tk[_k];
     _pos = 0;
@@ -171,9 +171,9 @@ void TimeDiscretisation::increment()
 // --- Other functions ---
 void TimeDiscretisation::display() const
 {
-  cout << "====> Time Disretisation :" << endl;
-  cout << " current time step starts from " << _tk[_pos] << " and ends at " << _tk[_pos + 1] << endl;
-  cout << "====" << endl;
+  std::cout << "====> Time Disretisation :" <<std::endl;
+  std::cout << " current time step starts from " << _tk[_pos] << " and ends at " << _tk[_pos + 1] <<std::endl;
+  std::cout << "====" <<std::endl;
 }
 
 // --- XML functions ---

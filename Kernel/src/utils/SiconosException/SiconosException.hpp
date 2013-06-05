@@ -45,7 +45,7 @@ public:
   SiconosException();
 
   /** constructor with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    */
   SiconosException(const std::string&);
 
@@ -54,7 +54,7 @@ public:
   virtual ~SiconosException();
 
   /** return the report of the exception
-   * \return string report : exception description
+   * \return std::string report : exception description
    */
   inline std::string report() const
   {
