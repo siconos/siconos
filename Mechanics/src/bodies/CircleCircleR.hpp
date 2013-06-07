@@ -18,15 +18,18 @@
  *
  */
 
-/*! \file CircleCircleR.hpp
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
-*/
+/** \file CircleCircleR.hpp
+ *
+ */
 
 #ifndef CircleCircleR_h
 #define CircleCircleR_h
 
 #include "CircularR.hpp"
 
+/** \class CircleCircleR
+ *  \brief Two disks relation - Inherits from LagrangianScleronomousR
+ */
 class CircleCircleR : public CircularR, public std11::enable_shared_from_this<CircleCircleR>
 {
 private:

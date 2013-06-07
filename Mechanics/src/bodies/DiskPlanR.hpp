@@ -19,9 +19,8 @@
  */
 
 
-/*! \file DiskPlanR.hpp
-  \brief disk - plan relation - Inherits from LagrangianScleronomousR
-*/
+/** \file DiskPlanR.hpp
+ */
 
 #ifndef DiskPlanR_h
 #define DiskPlanR_h
@@ -29,15 +28,19 @@
 #include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
 
+
+/** \class DiskPlanR
+ *  \brief disk - plan relation - Inherits from LagrangianScleronomousR
+ */
 class DiskPlanR : public LagrangianScleronomousR, public std11::enable_shared_from_this<DiskPlanR>
 {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(DiskPlanR);
 
   double r, A, B, C, sqrA2pB2,
-         AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
+    AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
   bool finite;
 
   void init(double, double, double, double, double, double, double);

@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY siconos-team@lists.gforge.inria.fr
  */
 /*! \file NewtonEulerR.hpp
-
 */
 #ifndef PivotJointRELATION_H
 #define PivotJointRELATION_H
@@ -25,7 +24,10 @@
 #include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 
-
+/** \class PivotJointR
+ * \brief This class implements a pivots joint between one or two Newton/Euler Dynamical system. - Inherits from KneeJointR
+ *
+ */
 class PivotJointR : public KneeJointR
 {
 public:

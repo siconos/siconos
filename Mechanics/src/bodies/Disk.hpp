@@ -15,16 +15,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-*/
+ */
 
-/*! \file Disk.hpp
-  \brief Definition of a 2D disk - Inherits from LagrangianDS
-*/
+/** \file Disk.hpp
+ */
 
 #ifndef Disk_H
 #define Disk_H
 
 #include "CircularDS.hpp"
+/** \class Disk
+ *  \brief Definition of a 2D disk - Inherits from LagrangianDS
+ */
 
 class Disk : public CircularDS, public std11::enable_shared_from_this<Disk>
 {

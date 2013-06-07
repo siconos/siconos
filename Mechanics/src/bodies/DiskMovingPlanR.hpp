@@ -20,8 +20,10 @@
 
 
 /*! \file DiskMovingPlanR.hpp
-  \brief disk - moving plan relation - Inherits from LagrangianRheonomousR
-*/
+ */
+/** \class DiskMovingPlanR
+ *  \brief disk - moving plan relation - Inherits from LagrangianRheonomousR
+ */
 
 #ifndef DiskMovingPlanR_h
 #define DiskMovingPlanR_h
@@ -32,6 +34,8 @@ typedef double(*FTime)(const double);
 
 #define COMPUTE(X) \
   { if (_##X##Function->fPtr) _##X=((FTime)(_##X##Function->fPtr))(t); else _##X=0.; }
+
+
 
 class DiskMovingPlanR : public LagrangianRheonomousR,
   public std11::enable_shared_from_this<DiskMovingPlanR>

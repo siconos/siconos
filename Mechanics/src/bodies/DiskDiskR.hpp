@@ -19,14 +19,17 @@
  */
 
 /*! \file DiskDiskR.hpp
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
-*/
-
+ */
 #ifndef DiskDiskR_h
 #define DiskDiskR_h
 
+
 #include "CircularR.hpp"
 
+
+/** \class DiskDiskR
+ *  \brief Two disks relation - Inherits from LagrangianScleronomousR
+ */
 class DiskDiskR : public CircularR, public std11::enable_shared_from_this<DiskDiskR>
 {
 private:

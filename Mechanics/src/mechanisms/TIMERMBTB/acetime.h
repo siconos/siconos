@@ -13,6 +13,10 @@ using namespace std;
 // Class aceTime
 // 
 // 
+
+/** \class aceTime
+    \brief simple timer utilities
+ */
 class aceTime {
 public:
   aceTime();

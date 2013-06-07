@@ -18,15 +18,17 @@
  *
  */
 
-/*! \file CircleCircleR.hpp
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
-*/
-
+/** \file CircleCircleR.hpp
+ */
 #ifndef CircularR_h
 #define CircularR_h
 
 #include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
+
+/**  \class CircularR
+ *   \brief Two circle relation - Inherits from LagrangianScleronomousR
+ */
 
 class CircularR : public LagrangianScleronomousR
 {

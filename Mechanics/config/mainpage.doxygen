@@ -12,5 +12,6 @@ sources (.h and .cpp) thanks to doxygen tools.
 You can also find other tools and documents (installation guide, tutorial ...) \n
 on \ref siconosHomePage "Siconos Home Page" (see tabs list on top of this page).\n 
 
+\subpage MBTB
 
 */

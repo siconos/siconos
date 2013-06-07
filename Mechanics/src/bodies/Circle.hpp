@@ -18,7 +18,9 @@
 */
 
 /*! \file Circle.hpp
-  \brief Definition of a 2D Circle - Inherits from CircularDS
+ */
+/** \class Circle
+ * \brief Definition of a 2D Circle - Inherits from CircularDS
 */
 
 #ifndef Circle_H
