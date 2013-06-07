@@ -78,14 +78,14 @@ protected:
 public:
 
   /** constructor from one dynamical system
-   *  \param DynamicalSystem to be integrated
+   *  \param newDS DynamicalSystem to be integrated
    */
-  D1MinusLinear(SP::DynamicalSystem);
+  D1MinusLinear(SP::DynamicalSystem newDS);
 
   /** constructor from a list of dynamical systems
-   *  \param list of DynamicalSystems to be integrated
+   *  \param newDSset list of DynamicalSystems to be integrated
    */
-  D1MinusLinear(DynamicalSystemsSet&);
+  D1MinusLinear(DynamicalSystemsSet& newDSset);
 
   /** destructor */
   virtual ~D1MinusLinear() {};
@@ -107,18 +107,18 @@ public:
   virtual void computeFreeState();
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param pointer to Interaction
-   * \param pointer to OneStepNSProblem
+   * \param inter pointer to Interaction
+   * \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutput(SP::Interaction inter, OneStepNSProblem* osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param initial time
-   *  \param end time
-   *  \param real end time
-   *  \param useless flag (for D1MinusLinear, used in Lsodar)
+   *  \param ti initial time
+   *  \param tf end time
+   *  \param t real end time
+   *  \param flag useless flag (for D1MinusLinear, used in Lsodar)
    */
-  virtual void integrate(double&, double&, double&, int&)
+  virtual void integrate(double& ti, double& tf, double& t , int& flag)
   {
     RuntimeException::selfThrow("D1MinusLinear::integrate - not implemented!");
   }
@@ -156,13 +156,13 @@ public:
   }
 
   /** insert a dynamical system in this Integrator
-   *  \param pointer to DynamicalSystem
+   *  \param ds pointer to DynamicalSystem
    */
   virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** encapsulates an operation of dynamic casting
    *  needed by Python interface
-   *  \param integrator which must be converted
+   *  \param osi integrator which must be converted
    *  \return pointer to the integrator if it is of the right type, NULL otherwise
    */
   static D1MinusLinear* convert(OneStepIntegrator* osi);

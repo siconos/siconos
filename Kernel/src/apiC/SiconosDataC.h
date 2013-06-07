@@ -67,9 +67,7 @@ protected:
 public:
 
   /** default constructor - no parameters
-  *  \param
-  *  \param
-  */
+   */
 
   DataC();
 

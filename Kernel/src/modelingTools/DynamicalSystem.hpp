@@ -265,13 +265,12 @@ public:
   //@{
 
   /** xml constructor
-   *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
+   *  \param dsXML DynamicalSystemXML* : the XML object for this DynamicalSystem
    */
   DynamicalSystem(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
-   *  \param type of the system
-   *  \param int : size of the system (n)
+   *  \param newN int : size of the system (n)
    */
   DynamicalSystem(unsigned int newN);
 
@@ -324,7 +323,7 @@ public:
   }
 
   /** allows to set the value of n
-   *  \param an integer to set the value of n
+   *  \param newN an integer to set the value of n
    */
   inline void setN(unsigned int newN)
   {
@@ -386,14 +385,14 @@ public:
   }
 
   /** set the value of r to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector 
    */
-  void setR(const SiconosVector&);
+  void setR(const SiconosVector& newValue );
 
   /** set R to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr SP::SiconosVector newPtr
    */
-  void setRPtr(SP::SiconosVector);
+  void setRPtr(SP::SiconosVector newPtr);
 
   // --- Residu ---
 
@@ -406,22 +405,22 @@ public:
   // }
 
   /** set the value of x0 to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector newValue
    */
-  void setX0(const SiconosVector&);
+  void setX0(const SiconosVector& newValue);
 
   /** set x0 to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr SP::SiconosVector newPtr
    */
-  void setX0Ptr(SP::SiconosVector);
+  void setX0Ptr(SP::SiconosVector newPtr);
 
   // --- X ---
 
   /** get the value of \f$ x \f$, the state of the DynamicalSystem
-   *  \return SiconosVector
+   * \return SiconosVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
-
+  
   inline const SiconosVector getx() const
   {
     return *(_x[0]);
@@ -436,14 +435,14 @@ public:
   }
 
   /** set the value of \f$ x \f$ (ie (*x)[0]) to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector 
    */
-  void setX(const SiconosVector&);
+  void setX(const SiconosVector& newValue);
 
   /** set \f$ x \f$ (ie (*x)[0]) to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr SP::SiconosVector 
    */
-  void setXPtr(SP::SiconosVector);
+  void setXPtr(SP::SiconosVector newPtr);
 
   // ---  Rhs ---
 
@@ -465,14 +464,14 @@ public:
   }
 
   /** set the value of the right-hand side, \f$ \dot x \f$, to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector newValue
    */
-  void setRhs(const SiconosVector&);
+  void setRhs(const SiconosVector& newValue);
 
   /** set right-hand side, \f$ \dot x \f$, to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr SP::SiconosVector newPtr
    */
-  void setRhsPtr(SP::SiconosVector);
+  void setRhsPtr(SP::SiconosVector newPtr);
 
   // --- JacobianRhsx ---
 
@@ -493,12 +492,12 @@ public:
   }
 
   /** set the value of JacobianRhsx to newValue
-   *  \param SiconosMatrix newValue
+   *  \param newValue SiconosMatrix newValue
    */
-  void setJacobianRhsx(const SiconosMatrix&);
+  void setJacobianRhsx(const SiconosMatrix& newValue);
 
   /** set JacobianRhsx to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+   *  \param newPtr SP::SiconosMatrix  
    */
   void setJacobianRhsxPtr(SP::SiconosMatrix newPtr);
 
@@ -522,14 +521,14 @@ public:
   }
 
   /** set the value of \f$ z \f$ to newValue
-   *  \param SiconosVector newValue
+   *  \param newValue SiconosVector 
    */
-  void setz(const SiconosVector&);
+  void setz(const SiconosVector& newValue) ;
 
   /** set \f$ z \f$ to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param newPtr SP::SiconosVector 
    */
-  void setzPtr(SP::SiconosVector);
+  void setzPtr(SP::SiconosVector newPtr);
 
   // --- g ---
   /** get the value of g
@@ -552,7 +551,7 @@ public:
   */
 
   /** set g to pointer newPtr
-   *  \param a SP to plugged vector
+   *  \param newPtr a SP to plugged vector
    */
   inline void setGPtr(SP::SiconosVector newPtr)
   {
@@ -610,7 +609,7 @@ public:
   }
 
   /** set the value of stepsInMemory
-   *  \param int steps : the value to set stepsInMemory
+   *  \param steps  the value to set stepsInMemory
    */
   inline void setStepsInMemory(int steps)
   {
@@ -628,7 +627,7 @@ public:
   }
 
   /** set the DynamicalSystemXML of the DynamicalSystem
-   *  \param DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
+   *  \param newDsxml DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
    */
   inline void setDynamicalSystemXMLPtr(SP::DynamicalSystemXML newDsxml)
   {
@@ -654,7 +653,7 @@ public:
   }
 
   /** set WorkVector
-   *  \param a VectorOfVectors
+   *  \param newVect a VectorOfVectors
    */
   inline void setWorkVector(const VectorOfVectors& newVect)
   {
@@ -662,16 +661,16 @@ public:
   }
 
   /** to add a temporary vector
-   *  \param a SP::SiconosVector
-   *  \param a std::string id
+   *  \param newVal a SP::SiconosVector
+   *  \param id a std::string id
    */
   inline void addWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
     *_workspace[id] = *newVal;
   }
   /** sub a vector to a temporary one
-   *  \param a SP::SiconosVector
-   *  \param a std::string id
+   *  \param newVal a SP::SiconosVector
+   *  \param id a std::string id
    */
   inline void subWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
@@ -705,16 +704,17 @@ public:
   }
 
   /** Initialization function for the rhs and its jacobian (including
-   *  memory allocation).  \param time of initialization
+   *  memory allocation). 
+   * \param time of initialization
    */
-  virtual void initRhs(double) = 0 ;
+  virtual void initRhs(double time) = 0 ;
 
   /** dynamical system initialization function except for _r :
    *  mainly set memory and compute value for initial state values.
    *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
+   *  \param size the size of the memory, default size = 1.
    */
-  virtual void initialize(double = 0, unsigned int = 1) = 0;
+  virtual void initialize(double time = 0, unsigned int size = 1) = 0;
 
   /** dynamical system initialization function for NonSmoothInput _r
    *  \param level of _r.
@@ -722,16 +722,16 @@ public:
   virtual void initializeNonSmoothInput(unsigned int level) = 0;
 
   /** dynamical system update: mainly call compute for all time or state depending functions
-   *  \param current time
+   *  \param time  current time
    */
-  void update(double);
+  void update(double time);
 
   /*! @name Memory vectors management  */
   //@{
   /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset all to zero.
-   *  \param the size of the SiconosMemory (i)
+   *  \param steps the size of the SiconosMemory (i)
    */
-  virtual void initMemory(unsigned int);
+  virtual void initMemory(unsigned int steps);
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,
@@ -742,35 +742,46 @@ public:
   /*! @name Plugins management  */
   //@{
   /** to set a specified function to compute g
-   *  \param std::string pluginPath : the complete path to the plugin
-   *  \param std::string functionName : the function name to use in this library
+   *  \param  pluginPath std::string pluginPath : the complete path to the plugin
+   *  \param functionName std::string functionName : the function name to use in this library
    */
   void setComputegFunction(const std::string&  pluginPath, const std::string& functionName);
 
   /** set a specified function to compute g
-   *  \param a pointer on the plugin function
+   *  \param fct a pointer on the plugin function
    */
   void setComputegFunction(FPtr6 fct);
 
   /** to set a specified function to compute jacobianG
-   *  \param std::string pluginPath : the complete path to the plugin
-   *  \param the std::string functionName : function name to use in this library
+   *  \param pluginPath std::string  : the complete path to the plugin
+   *  \param functionName the std::string functionName : function name to use in this library
    */
   void setComputeJacobianXGFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  
+ /** to set a specified function to compute jacobianDotXG
+   *  \param pluginPath std::string  : the complete path to the plugin
+   *  \param functionName the std::string functionName : function name to use in this library
+   */
   void setComputeJacobianDotXGFunction(const std::string&  pluginPath, const std::string&  functionName);
   //  void setComputeJacobianZGFunction( const std::string&  pluginPath, const std::string&  functionName);
-
+  
   /** set a specified function to compute jacobianG
-   *  \param a pointer on the plugin function
+   *  \param newPtr a pointer on the plugin function
    */
-  virtual void setComputeJacobianXGFunction(FPtr6) {};
-  virtual void setComputeJacobianDotXGFunction(FPtr6) {};
-  //  void setComputeJacobianZGFunction( FPtr6);
-
+  virtual void setComputeJacobianXGFunction(FPtr6 newPtr) {};
+  
+  /** set a specified function to compute jacobianG
+   *  \param newPtr a pointer on the plugin function
+   */
+  virtual void setComputeJacobianDotXGFunction(FPtr6 newPtr) {};
+  
+  /**  void setComputeJacobianZGFunction( FPtr6); */
+  
   /** Default function to compute g
-   *  \param double, the current time
+   *  \param time double, the current time
    */
-  void computeg(double);
+  void computeg(double time);
 
   /** default function to compute the gradient of g
    *  \param double time : the current time
@@ -778,11 +789,10 @@ public:
   //  void computeJacobianXG(double);
   //  void computeJacobianDotXG(double);
 
-  /**
-   *default function to update the plugins functions using a new time:
-   * \param double time : the current time
+  /**default function to update the plugins functions using a new time:
+   * \param time  the current time
    */
-  virtual void updatePlugins(double)
+  virtual void updatePlugins(double time)
   {
     ;
   }
@@ -793,16 +803,16 @@ public:
   /*! @name Right-hand side computation */
   //@{
   /** Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time  (double)  current time
+   *  \param isDSup (bool)  flag to avoid recomputation of operators
    */
-  virtual void computeRhs(double, bool  = false) = 0;
+  virtual void computeRhs(double time, bool isDSup = false) = 0;
 
   /** Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \param time  (double)  current time
+   *  \param isDSup (bool)  flag to avoid recomputation of operators
    */
-  virtual void computeJacobianRhsx(double, bool  = false) = 0;
+  virtual void computeJacobianRhsx(double time , bool isDSup = false) = 0;
 
   //@}
 
@@ -833,6 +843,7 @@ public:
   virtual void resetAllNonSmoothPart() = 0;
 
   /** set R to zero for a given level
+   * \param level
    */
   virtual void resetNonSmoothPart(unsigned int level) = 0;
 

@@ -169,9 +169,9 @@ public:
   };
 
   /** set the DynamicalSystem list of this Integrator
-   *  \param a DynamicalSystemsSet
+   *  \param newSet a DynamicalSystemsSet
    */
-  void setDynamicalSystems(const DynamicalSystemsSet&);
+  void setDynamicalSystems(const DynamicalSystemsSet& newSet);
 
   /** insert a dynamical system in this Integrator
    *  \param a SP::DynamicalSystem
@@ -187,9 +187,9 @@ public:
   };
 
   /** set the Interaction list of this Integrator
-   *  \param an InteractionsSet
+   *  \param newSet an InteractionsSet
    */
-  void setInteractions(const InteractionsSet&);
+  void setInteractions(const InteractionsSet& newSet);
 
   /** get _sizeMem value
    *  \return an unsigned int
@@ -200,7 +200,7 @@ public:
   };
 
   /** set _sizeMem
-   *  \param an unsigned int
+   *  \param newValue an unsigned int
    */
   inline void setSizeMem(unsigned int newValue)
   {
@@ -216,7 +216,7 @@ public:
   }
 
   /** set the Simulation of the OneStepIntegrator
-   *  \param a pointer to Simulation
+   *  \param newS a pointer to Simulation
    */
   inline void setSimulationPtr(SP::Simulation newS)
   {
@@ -232,7 +232,7 @@ public:
   }
 
   /** set the OneStepIntegratorXML of the OneStepIntegrator
-   *  \param OneStepIntegratorXML* : the pointer to set the OneStepIntegratorXML
+   *  \param newIntegratorXml OneStepIntegratorXML* : the pointer to set the OneStepIntegratorXML
    */
   inline void setOneStepIntegratorXMLPtr(SP::OneStepIntegratorXML newIntegratorXml)
   {

@@ -71,7 +71,7 @@ D1MinusLinear::D1MinusLinear(SP::DynamicalSystem newDS) :
   OSIDynamicalSystems->insert(newDS);
 }
 
-D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDS): OneStepIntegrator(OSI::D1MINUSLINEAR, newDS) {}
+D1MinusLinear::D1MinusLinear(DynamicalSystemsSet& newDSset): OneStepIntegrator(OSI::D1MINUSLINEAR, newDS) {}
 
 void D1MinusLinear::initialize()
 {
