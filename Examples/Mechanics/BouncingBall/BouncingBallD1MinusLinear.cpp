@@ -193,6 +193,7 @@ int main(int argc, char* argv[])
 
     if((dataPlot-dataPlotRef).normInf() > 1e-8)
     {
+      std::cout<< "(dataPlot-dataPlotRef).normInf()"<< (dataPlot-dataPlotRef).normInf() <<std::endl;
       std::cout << "Warning. The results are rather different from the reference file." << std::endl;
       return 1;
     }
