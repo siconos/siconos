@@ -21,6 +21,8 @@
 
 %import Kernel.i
 
+%import Base.i
+
 %include pyRegister.i
 
 %fragment("NumPy_Fragments");
