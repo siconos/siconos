@@ -52,6 +52,8 @@ protected:
   SP::btVector3 _worldAabbMin;
   SP::btVector3 _worldAabbMax;
   SP::BulletBroadPhase _broadphase;
+  bool _dynamicCollisionsObjectsInserted;
+  bool _staticCollisionsObjectsInserted;
 
 public:
   BulletSpaceFilter(SP::Model model, SP::NonSmoothLaw nslaw,

@@ -61,7 +61,9 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
                                      SP::btVector3 aabbMax) :
   SpaceFilter(),
   _worldAabbMin(aabbMin),
-  _worldAabbMax(aabbMax)
+  _worldAabbMax(aabbMax),
+  _dynamicCollisionsObjectsInserted(false),
+  _staticCollisionsObjectsInserted(false)
 {
 
   _model = model;
@@ -84,14 +86,6 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
   _collisionWorld->getDispatchInfo().m_useContinuous = false;
 
-  DynamicalSystemsGraph& dsg = *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
-  std11::tie(dsi, dsiend) = dsg.vertices();
-  for (; dsi != dsiend; ++dsi)
-  {
-    _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
-  }
-
   //gContactBreakingThreshold = 10.;
 
   gContactProcessedCallback = &contactProcess;
@@ -102,6 +96,30 @@ BulletSpaceFilter::BulletSpaceFilter(SP::Model model,
 
 void BulletSpaceFilter::buildInteractions(double time)
 {
+
+  if (not _dynamicCollisionsObjectsInserted)
+  {
+    DynamicalSystemsGraph& dsg = *(_model->nonSmoothDynamicalSystem()->dynamicalSystems());
+    DynamicalSystemsGraph::VIterator dsi, dsiend;
+    std11::tie(dsi, dsiend) = dsg.vertices();
+    for (; dsi != dsiend; ++dsi)
+    {
+      _collisionWorld->addCollisionObject(&*(ask<ForCollisionObject>(*(dsg.bundle(*dsi)))));
+    }
+    
+    _dynamicCollisionsObjectsInserted = true;
+  }
+
+  if (not _staticCollisionsObjectsInserted)
+  {
+    for(std::vector<SP::btCollisionObject>::iterator 
+          ic = _staticObjects->begin(); ic != _staticObjects->end(); ++ic)
+    {
+      _collisionWorld->addCollisionObject((*ic).get());
+    }
+
+    _staticCollisionsObjectsInserted = true;
+  }
 
   DEBUG_PRINT("-----start build interaction\n");
 

@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
-%module(directors="1", allprotected="1") Bullet
+%module(directors="1", allprotected="1") BulletWrap
 
 %include start.i
 
@@ -21,7 +21,7 @@
 
 %import Kernel.i
 
-%import Base.i
+%import ../Base.i
 
 %include pyRegister.i
 

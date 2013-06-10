@@ -3,7 +3,7 @@ MACRO(MECHANICS_ADD_MODULE _mod _dest)
   SET_SOURCE_FILES_PROPERTIES(${_mod}.i PROPERTIES CPLUSPLUS ON)
 
   SET_SOURCE_FILES_PROPERTIES(${_mod}.i 
-    PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-Wall;${SWIG_DEFS}")
+    PROPERTIES SWIG_FLAGS "-dirprot;-I${CMAKE_SOURCE_DIR}/src/swig/Siconos;-I${CMAKE_BINARY_DIR}/src/swig/Siconos;-I${CMAKE_BINARY_DIR}/src/swig/Siconos/ContacDetection;-Wall;${SWIG_DEFS}")
 
   SWIG_ADD_MODULE(${_mod} python ${_mod}.i)
   
